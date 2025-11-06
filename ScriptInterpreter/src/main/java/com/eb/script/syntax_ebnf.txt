@@ -1,0 +1,215 @@
+
+ScriptInterpreter Language – Syntax (EBNF-ish)
+=============================================
+This grammar is reconstructed from Parser.java / Token.java in the attached project.
+
+LEXICAL
+-------
+keywords   = "var" | "print" | "call" | "return" | "if" | "then" | "else" | "while" | "do" | "break" | "exit" | "continue" | "null" | "true" | "false" ;
+datatypes = "byte" | "int" | "integer" | "long" | "float" | "double" | "string" | "date" | "bool" | "boolean" | "json" | "any" ;
+operators  = "+" | "-" | "*" | "/" | "^" | "=" | "!" | ">" | "<" | ">=" | "<=" | "==" | "!=" | "and" | "or" ;
+separators = ":" | "," | "." | ";" | "(" | ")" | "[" | "]" | "{" | "}" ;
+identifier = letter ( letter | digit | "_" )* ;
+
+PROGRAM
+-------
+program      = statement* ;
+
+STATEMENTS
+----------
+statement    = varDecl
+             | ifStmt
+             | whileStmt
+             | doWhileStmt
+             | breakStmt
+             | continueStmt
+             | block
+             | namedBlock                  (*  name { ... }                     *)
+             | namedBlockWithReturn        (*  name return Type { ... }         *)
+             | namedBlockWithParams        (*  name (paramDefList?) [return T] { ... }  *)
+             | callStmt
+             | returnStmt
+             | printStmt
+             | assignmentStmt
+             | comment                     (*  // ...  — ignored by parser      *)
+             ;
+
+block        = "{" blockStatement* "}" ;
+blockStatement = statement ;                    (* unrestricted; nests blocks   *)
+
+namedBlock   = identifier "{" blockStatement* "}" ;
+
+namedBlockWithReturn
+             = identifier "return" typeName "{" blockStatement* "}" ;
+
+namedBlockWithParams
+             = identifier "(" paramDefList? ")" ("return" typeName)? "{" blockStatement* "}" ;
+
+paramDefList = paramDef ( "," paramDef )* ;
+paramDef     = identifier ":" typeName ("=" expression)? ;
+
+callStmt     = "call" qualifiedName ( "(" callArgList? ")" )? ";" ;
+returnStmt   = "return" expression ";" ;
+printStmt    = "print"  expression ";" ;
+breakStmt    = ("break"|"exit") ";" ;
+continueStmt = "continue" ";" ;
+
+assignmentStmt
+             = lvalue "=" expression ";" ;
+
+lvalue       = identifier ( indexSuffix )* ;
+indexSuffix  = "[" indexList? "]" ;
+indexList    = expression ( "," expression )* ;
+
+CONTROL FLOW
+------------
+ifStmt       = "if" ( "(" expression ")" | expression "then" ) thenBranch elsePart? ;
+thenBranch   = block | statement ;
+elsePart     = "else" ( ifStmt | block | statement ) ;
+
+whileStmt    = "while" ( "(" expression ")" | expression ["then"] ) block ;
+
+doWhileStmt  = "do" block "while" "(" expression ")" ";" ;
+
+DECLARATIONS
+------------
+varDecl      = "var" identifier ( ":" typeName ( arrayDims )? )? ( "=" varInitializer )? ";" ;
+
+arrayDims    = "[" ( "*" | ( expression ( "," expression )* ) )? "]" ;
+
+varInitializer
+             = ( arrayLiteral | expression )
+               (* JSON special-case: if typeName is json and initializer starts with '{' or '[',
+                  the parser slices the exact text segment and feeds it to Json.parse(). *)
+             ;
+
+qualifiedName = identifier ( "." identifier )* ;
+
+typeName     = datatypes | identifier ;       (* allows user-defined aliasing via Token map *)
+
+PARAMETER PASSING
+-----------------
+callArgList  = callArg ( "," callArg )* ;
+callArg      = ( identifier "=" )? expression ;   (* supports named and positional parameters *)
+
+ARRAYS & MEMBERS
+----------------
+arrayLiteral = ( "[" | "{" ) ( ( arrayLiteral | expression ) ( "," ( arrayLiteral | expression ) )* )? ( "]" | "}" ) ;
+postfix      = primary ( indexSuffix )* ( "." "length" )* ;
+
+EXPRESSIONS
+-----------
+expression   = logicalOr ;
+logicalOr    = logicalAnd ( "or"  logicalAnd )* ;
+logicalAnd   = relation  ( "and" relation  )* ;
+
+(* In the published Parser.java, the method that handles comparison operators is stubbed/commented.
+   The intended shape is shown below; actual behavior may accept fewer operators in this snapshot. *)
+
+relation     = addition ( ( "==" | "!=" | ">" | ">=" | "<" | "<=" ) addition )? ;
+addition     = multiplication ( ( "+" | "-" ) multiplication )* ;
+multiplication = unary ( ( "*" | "/" ) unary )* ;
+unary        = ( "+" | "-" | "!" ) unary | exponentiation ;
+exponentiation = postfix ( "^" exponentiation )? ;   (* right-associative *)
+primary      = literal
+             | identifier
+             | "(" expression ")"
+             | callAsExpression
+             | arrayLiteral
+             ;
+
+callAsExpression
+             = "call" qualifiedName ( "(" callArgList? ")" )? ;
+callAsExpression
+             = "#"qualifiedName ( "(" callArgList? ")" )? ;
+
+
+(* SQL statements *)
+sqlStatement    ::= connectStmt
+                  | cursorStmt
+                  | selectStmt ";" ;
+
+(* Cursor must have a name and must use assignment to a SELECT *)
+cursorStmt      ::= "cursor" identifier "=" selectStmt ";" ;
+
+
+openCursorStmt  ::= "open"  identifier "(" openArgList? ")" ";" ;
+closeCursorStmt ::= "close" identifier ";" ;
+
+(* Connection spec left flexible *)
+
+useConnBlock  ::= "use" identifier "{" statement* "}" ;
+connectStmt       ::= "connect" identifier "=" connectionSpec ";" ;
+closeConnStmt     ::= "close" "connection" identifier ";" ;
+(* Connection spec you pass to the runtime:
+   - a plain connection string (e.g., DSN/JDBC URL),
+   - a JSON object with options,
+   - or an existing identifier (e.g., a var holding JSON). *)
+connectionSpec    ::= stringLiteral
+                    | jsonLiteral
+                    | identifier ;
+
+(* Where it appears among other statements *)
+statement         ::= ... | connectStmt | cursorStmt | openCursorStmt | closeCursorStmt | ... ;
+
+(* SELECT core *)
+selectBody        ::= selectList
+                      "from" tableRefList
+                      [ whereClause ]
+                      [ groupByClause [ havingClause ] ]
+                      [ orderByClause ] ;
+
+selectList        ::= "*" | projection { "," projection } ;
+projection        ::= valueExpr [ alias ] ;
+alias             ::= ( "as" identifier ) | identifier ;  (* 'as' is parsed as an identifier *)
+
+tableRefList      ::= tableRef { "," tableRef } ;
+tableRef          ::= identifier [ alias ] ;
+
+whereClause       ::= "where" booleanExpr ;
+
+groupByClause     ::= "group" "by" groupList ;
+groupList         ::= valueExpr { "," valueExpr } ;
+
+havingClause      ::= "having" booleanExpr ;
+
+orderByClause     ::= "order" "by" orderSpec { "," orderSpec } ;
+orderSpec         ::= valueExpr [ orderDirection ] ;
+orderDirection    ::= "asc" | "desc" ;     (* these are identifiers in your lexer *)
+
+(* Expressions inside SELECT:
+   You can either:
+   - (A) parse a minimal expression subset here, or
+   - (B) re-use/call your existing host language expression parser if appropriate, or
+   - (C) accept them as raw SQL tokens until clause boundaries.
+
+   Below we leave them abstract so you can plug in your chosen strategy. *)
+valueExpr       ::= /* implementation-defined expression */
+booleanExpr     ::= /* implementation-defined boolean expression */
+
+(* Lexical atoms from your language/lexer *)
+identifier      ::= /* your IDENTIFIER token */;
+stringLiteral   ::= /* your STRING token */;
+numericLiteral  ::= /* INTEGER | LONG | FLOAT | DOUBLE */;
+jsonLiteral     ::= /* as in your language (Map/List/etc.) */;
+
+
+literal      = integer | long | float | double | string | date | boolean | null ;
+
+(* Properties *)
+lengthExpr   = postfix "." "length" ;   (* already captured in postfix above *)
+
+COMMENTS
+--------
+lineComment  = "//" .* ("\n"|EOF) ;       (* Parser ignores these via the COMMENT token *)
+
+NOTES
+-----
+• Property access currently recognizes only .length as a special form.
+• Indexing supports multi-dimensional forms: a[i], a[i,j], and repeated suffixes a[i][j].
+• Named blocks are function-like; built-ins are resolved during a post-parse pass.
+• JSON literals for variables of type 'json' are captured verbatim from the source and parsed via Json.parse().
+• Operator support in this snapshot:
+  – '+' '-' (left-assoc), '*' '/' (intended left-assoc), '^' (right-assoc), '!' unary
+  – 'and' 'or' boolean connectives
+  – Relational operators are present in tokens but the dedicated method in Parser.java is commented/stubbed.

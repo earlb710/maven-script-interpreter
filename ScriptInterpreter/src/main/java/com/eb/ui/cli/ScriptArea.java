@@ -1,0 +1,143 @@
+package com.eb.ui.cli;
+
+import com.eb.util.MarkupTokenizer;
+import com.eb.util.Util;
+import java.util.List;
+import org.fxmisc.richtext.LineNumberFactory;
+import org.fxmisc.richtext.StyleClassedTextArea;
+
+/**
+ *
+ * @author Earl Bosch
+ */
+public class ScriptArea extends StyleClassedTextArea {
+
+    private boolean showLineNumbers = true; // default: on
+
+    public ScriptArea() {
+        setParagraphGraphicFactory(LineNumberFactory.get(this)); // initial state ON
+    }
+
+    /**
+     * Toggle line numbers on/off.
+     */
+    public void setShowLineNumbers(boolean show) {
+        this.showLineNumbers = show;
+        if (show) {
+            setParagraphGraphicFactory(LineNumberFactory.get(this));
+        } else {
+            setParagraphGraphicFactory(null);
+        }
+    }
+
+    /**
+     * Current state for line numbers.
+     */
+    public boolean isShowLineNumbers() {
+        return showLineNumbers;
+    }
+
+    /**
+     * Convenience toggle.
+     */
+    public void toggleLineNumbers() {
+        setShowLineNumbers(!showLineNumbers);
+    }
+
+    public void print(String line) {
+        Util.runOnFx(() -> {
+            var segments = MarkupTokenizer.tokenize(line);
+            if (segments.isEmpty()) {
+                return;
+            }
+            for (var seg : segments) {
+                if (seg.styles == null || seg.styles.isEmpty()) {
+                    printStyled(seg.text, "info");
+                } else {
+                    printStyled(seg.text, seg.styles);
+                }
+            }
+        });
+    }
+
+    public void println(String line) {
+        Util.runOnFx(() -> {
+            var segments = MarkupTokenizer.tokenize(line);
+            if (segments.isEmpty()) {
+                this.appendText("\n");
+                return;
+            }
+            for (var seg : segments) {
+                if (seg.styles == null || seg.styles.isEmpty()) {
+                    printStyled(seg.text, "info");
+                } else {
+                    printStyled(seg.text, seg.styles);
+                }
+            }
+            this.appendText("\n");
+        });
+    }
+
+    public void printlnInfo(String s) {
+        printStyled(s + "\n", "info");
+    }
+
+    public void printlnWarn(String s) {
+        printStyled(s + "\n", "warn");
+    }
+
+    public void printlnError(String s) {
+        printStyled(s + "\n", "error");
+    }
+
+    public void printlnOk(String s) {
+        printStyled(s + "\n", "ok");
+    }
+
+    public void printStyled(String text, String... styleClasses) {
+        printStyled(text, java.util.Arrays.asList(styleClasses));
+    }
+
+    public void printStyled(String text, List<String> styleClasses) {
+        Util.runOnFx(() -> {
+            int start = this.getLength();
+            this.appendText(text);
+            int end = start + text.length() + 1; // +1 to include trailing newline added by callers
+
+            if (styleClasses == null || styleClasses.isEmpty()) {
+                this.setStyleClass(start, end, "info");
+            } else if (styleClasses.size() == 1) {
+                String s = styleClasses.get(0);
+                if (s.length() == 1) {
+                    styleClasses.add("info");
+                    this.setStyle(start, end, styleClasses);
+                } else {
+                    this.setStyleClass(start, end, s);
+                }
+            } else {
+                this.setStyle(start, end, styleClasses); // multi-class API
+            }
+
+            this.moveTo(this.getLength());
+            this.requestFollowCaret();
+        });
+    }
+
+    public void addStyleToRange(int start, int endExclusive, String styleClass) {
+        for (int i = Math.max(0, start); i < Math.min(getLength(), endExclusive); i++) {
+            var curr = new java.util.ArrayList<>(getStyleOfChar(i)); // preserve existing
+            if (!curr.contains(styleClass)) {
+                curr.add(styleClass);
+            }
+            setStyle(i, i + 1, curr);
+        }
+    }
+
+    public void removeStyleFromRange(int start, int endExclusive, String styleClass) {
+        for (int i = Math.max(0, start); i < Math.min(getLength(), endExclusive); i++) {
+            var curr = new java.util.ArrayList<>(getStyleOfChar(i));
+            curr.removeIf(c -> c.equals(styleClass));
+            setStyle(i, i + 1, curr);
+        }
+    }
+}
