@@ -1267,12 +1267,21 @@ public class Parser {
     }
 
     private ParseError error(EbsToken token, String message) {
-        message = "[line " + token.line + "] Parse error at '" + token.literal + "': " + message;
+        if (token.type == EbsTokenType.EOF) {
+            message = "[line " + token.line + "] Parse error, end of file reached : " + message;
+        } else {
+            message = "[line " + token.line + "] Parse error at " + token.type.name() + " (" + token.literal + "): " + message;
+        }
         return new ParseError(message);
     }
 
     private ParseError error(EbsToken token, Exception ex) {
-        String message = "[line " + token.line + "] Parse error at '" + token.literal + "': " + Util.formatExceptionWith2Origin(ex);
+        String message = Util.formatExceptionWith2Origin(ex);
+        if (token.type == EbsTokenType.EOF) {
+            message = "[line " + token.line + "] Parse error end of file reached : " + message;
+        } else {
+            message = "[line " + token.line + "] Parse error at " + token.type.name() + " (" + token.literal + "): " + message;
+        }
         return new ParseError(message);
     }
 

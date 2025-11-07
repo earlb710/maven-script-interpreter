@@ -229,10 +229,10 @@ public final class Console {
             handler.submit(lines);
             inputArea.clear();
         } catch (ParseError | InterpreterError ex) {
-            printlnWarn("Submitted block : " + (block.length() > 80 ? block.substring(0, 78) + "…" : block));
+            printlnWarn("Submitted : " + (block.length() > 80 ? block.substring(0, 78) + "…" : block));
             printlnError(Util.formatExceptionWithOrigin(ex));
         } catch (Exception ex) {
-            printlnWarn("Submitted block : " + (block.length() > 80 ? block.substring(0, 78) + "…" : block));
+            printlnWarn("Submitted : " + (block.length() > 80 ? block.substring(0, 78) + "…" : block));
             printlnError(Util.formatExceptionWith2Origin(ex));
         }
     }
