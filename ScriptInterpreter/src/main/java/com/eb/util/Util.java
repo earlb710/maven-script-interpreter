@@ -353,7 +353,7 @@ public class Util {
         return ret.toString();
     }
 
-    public static String stringify(Object... values) {
+    public static <E extends Object> String stringify(E... values) {
         StringBuilder ret = new StringBuilder();
         for (Object value : values) {
             if (!ret.isEmpty()) {
