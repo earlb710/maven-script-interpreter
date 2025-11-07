@@ -59,9 +59,9 @@ public class AiChatModelSetupDialog extends Stage {
     public AiChatModelSetupDialog() {
         setTitle("AI Chat Model Setup");
         setAlwaysOnTop(true);
-        initModality(Modality.WINDOW_MODAL);
         loadPreferencesIntoSystemProps();
-        //initModality(Modality.APPLICATION_MODAL);
+        initModality(Modality.WINDOW_MODAL);
+//        initModality(Modality.APPLICATION_MODAL);
 
         // --- Create fields ---
         txtApiKey = new PasswordField();
@@ -129,21 +129,21 @@ public class AiChatModelSetupDialog extends Stage {
         // Buttons
         Button btnSave = new Button("Save");
         Button btnTest = new Button("Test…");
-        Button btnCancel = new Button("Cancel");
+        Button btnClose = new Button("Close");
         btnSave.setDefaultButton(true);
-        btnCancel.setCancelButton(true);
+        btnClose.setCancelButton(true);
 
         GridPane buttons = new GridPane();
         buttons.setHgap(10);
         buttons.add(btnSave, 0, 0);
         buttons.add(btnTest, 1, 0);
-        buttons.add(btnCancel, 2, 0);
+        buttons.add(btnClose, 2, 0);
         grid.add(buttons, 1, row);
 
         // Actions
         btnSave.setOnAction(e -> onSave());
-        btnCancel.setOnAction(e -> close());
-        btnTest.setOnAction(e -> onTest(btnSave, btnTest, btnCancel)); // pass references to disable/enable
+        btnClose.setOnAction(e -> close());
+        btnTest.setOnAction(e -> onTest(btnSave, btnTest, btnClose)); // pass references to disable/enable
 
         setScene(new Scene(grid));
         sizeToScene();
@@ -192,7 +192,6 @@ public class AiChatModelSetupDialog extends Stage {
         persistToPreferences(apiKey, chatModel, chatUrl, embModel, embUrl, timeout);
 
         showAlert(Alert.AlertType.INFORMATION, "Saved", "AI settings saved to System properties.");
-        close();
     }
 
     // --- Test button handler ---
@@ -311,7 +310,8 @@ public class AiChatModelSetupDialog extends Stage {
         Alert a = new Alert(type, msg, ButtonType.OK);
         a.setHeaderText(null);
         a.setTitle(title);
-        a.initOwner(getOwner());
+        a.initOwner(this);
+//        a.initModality(Modality.APPLICATION_MODAL);
         a.initModality(Modality.WINDOW_MODAL);
         a.showAndWait();
     }
@@ -370,7 +370,7 @@ public class AiChatModelSetupDialog extends Stage {
         Alert a = new Alert(Alert.AlertType.ERROR);
         a.setTitle(title);
         a.setHeaderText(null);
-        a.initOwner(getOwner());
+        a.initOwner(this);
         a.initModality(Modality.WINDOW_MODAL);
 
         // Use the dialog pane's expandable area so it behaves like the standard "Show Details" UI,

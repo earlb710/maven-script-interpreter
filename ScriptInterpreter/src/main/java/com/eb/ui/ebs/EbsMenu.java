@@ -95,7 +95,7 @@ public class EbsMenu extends MenuBar {
         fileMenu.getItems().addAll(openItem, recentMenu, new SeparatorMenuItem(), exitItem);
         getMenus().add(fileMenu);
 
-        Menu toolsMenu = new Menu("Tools");
+        Menu toolsMenu = new Menu("Config");
         MenuItem aiSetupItem = new MenuItem("AI Chat Model Setup…");
         aiSetupItem.setOnAction(e -> AiFunctions.showModelSetupDialog());
 
