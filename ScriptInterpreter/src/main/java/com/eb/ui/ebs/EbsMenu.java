@@ -93,6 +93,14 @@ public class EbsMenu extends MenuBar {
 
         fileMenu.getItems().addAll(openItem, recentMenu, new SeparatorMenuItem(), exitItem);
         getMenus().add(fileMenu);
+
+        Menu toolsMenu = new Menu("Tools");
+        MenuItem aiSetupItem = new MenuItem("AI Chat Model Setup…");
+        aiSetupItem.setOnAction(e -> new AiChatModelSetupDialog().showAndWait());
+
+        toolsMenu.getItems().add(aiSetupItem);
+        getMenus().add(toolsMenu);
+
     }
 
     public final void refreshRecentMenu() {
