@@ -1,5 +1,6 @@
 package com.eb.ui.ebs;
 
+import com.eb.script.interpreter.AiFunctions;
 import com.eb.ui.tabs.TabContext;
 import java.nio.file.Path;
 import java.util.Deque;
@@ -96,7 +97,7 @@ public class EbsMenu extends MenuBar {
 
         Menu toolsMenu = new Menu("Tools");
         MenuItem aiSetupItem = new MenuItem("AI Chat Model Setup…");
-        aiSetupItem.setOnAction(e -> new AiChatModelSetupDialog().showAndWait());
+        aiSetupItem.setOnAction(e -> AiFunctions.showModelSetupDialog());
 
         toolsMenu.getItems().add(aiSetupItem);
         getMenus().add(toolsMenu);
