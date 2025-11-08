@@ -129,19 +129,35 @@ public enum EbsTokenType implements LexerToken {
     }
 
     public String getStyle() {
-        return lexerTypes[0].getStyle();
+        if (lexerTypes.length > 0) {
+            return lexerTypes[0].getStyle();
+        } else {
+            return null;
+        }
     }
 
     public Category getCategory() {
-        return lexerTypes[0].getCategory();
+        if (lexerTypes.length > 0) {
+            return lexerTypes[0].getCategory();
+        } else {
+            return null;
+        }
     }
 
     public DataType getDataType() {
-        return lexerTypes[0].getDataType();
+        if (lexerTypes.length > 0) {
+            return lexerTypes[0].getDataType();
+        } else {
+            return null;
+        }
     }
 
     public char getFirstChar() {
-        return lexerTypes[0].firstChar;
+        if (lexerTypes.length > 0) {
+            return lexerTypes[0].firstChar;
+        } else {
+            return 0;
+        }
     }
 
     public boolean contains(String comp) {
