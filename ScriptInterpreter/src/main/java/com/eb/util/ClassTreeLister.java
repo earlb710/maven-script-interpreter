@@ -115,12 +115,13 @@ public class ClassTreeLister {
             String implementsClause = classMatcher.group(4);
             if (implementsClause != null) {
                 // Parse implements clause carefully, handling generics
-                String[] parts = implementsClause.split(",");
-                for (String part : parts) {
+                // Split by commas that are not inside angle brackets
+                List<String> interfaces = splitByCommaOutsideGenerics(implementsClause);
+                for (String iface : interfaces) {
                     // Extract interface name before any generics
-                    String iface = part.trim().split("[<\\s]")[0].trim();
-                    if (!iface.isEmpty()) {
-                        String resolved = resolveClassName(iface, info.packageName, content);
+                    String ifaceName = iface.trim().split("[<\\s]")[0].trim();
+                    if (!ifaceName.isEmpty()) {
+                        String resolved = resolveClassName(ifaceName, info.packageName, content);
                         info.implementsInterfaces.add(resolved);
                     }
                 }
@@ -141,6 +142,34 @@ public class ClassTreeLister {
         // Remove multi-line comments (non-greedy)
         content = content.replaceAll("/\\*[^*]*\\*+(?:[^/*][^*]*\\*+)*/", "");
         return content;
+    }
+    
+    /**
+     * Splits a string by commas that are outside of angle brackets (generics)
+     */
+    private List<String> splitByCommaOutsideGenerics(String input) {
+        List<String> result = new ArrayList<>();
+        int depth = 0;
+        StringBuilder current = new StringBuilder();
+        
+        for (char c : input.toCharArray()) {
+            if (c == '<') {
+                depth++;
+            } else if (c == '>') {
+                depth--;
+            } else if (c == ',' && depth == 0) {
+                result.add(current.toString());
+                current = new StringBuilder();
+                continue;
+            }
+            current.append(c);
+        }
+        
+        if (current.length() > 0) {
+            result.add(current.toString());
+        }
+        
+        return result;
     }
     
     /**
