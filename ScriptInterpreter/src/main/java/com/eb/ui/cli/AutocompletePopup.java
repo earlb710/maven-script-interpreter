@@ -82,11 +82,9 @@ public class AutocompletePopup {
     private void updatePosition(ScriptArea area) {
         Bounds caretBounds = area.getCaretBounds().orElse(null);
         if (caretBounds != null) {
-            Bounds screenBounds = area.localToScreen(caretBounds);
-            if (screenBounds != null) {
-                popup.setX(screenBounds.getMinX());
-                popup.setY(screenBounds.getMaxY());
-            }
+            // getCaretBounds() already returns screen coordinates
+            popup.setX(caretBounds.getMinX());
+            popup.setY(caretBounds.getMaxY());
         }
     }
 
