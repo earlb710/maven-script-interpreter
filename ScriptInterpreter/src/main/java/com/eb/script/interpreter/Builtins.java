@@ -655,6 +655,19 @@ public final class Builtins {
                 newParam("text", DataType.STRING, true),
                 newParam("labels", DataType.JSON, true) // expect List<String>
         ));
+        
+        // ==========================
+        // ClassTree builtins
+        // ==========================
+        addBuiltin(info(
+                "classTree.generate", DataType.STRING,
+                newParam("sourceDir", DataType.STRING, false) // optional; defaults to "src/main/java"
+        ));
+        addBuiltin(info(
+                "classTree.scan", DataType.STRING,
+                newParam("sourceDir", DataType.STRING, false) // optional; defaults to "src/main/java"
+        ));
+        
         NAMES = Collections.unmodifiableSet(BUILTINS.keySet());
     }
 
@@ -1688,6 +1701,13 @@ public final class Builtins {
                 } catch (Exception e) {
                     throw new InterpreterError("ai.classify failed: " + e.getMessage());
                 }
+            }
+            // --- ClassTree functions ---
+            case "classtree.generate" -> {
+                return BuiltinsFile.generateClassTree(env, args);
+            }
+            case "classtree.scan" -> {
+                return BuiltinsFile.scanClassTree(env, args);
             }
             default ->
                 throw new InterpreterError("Unknown builtin: " + name);

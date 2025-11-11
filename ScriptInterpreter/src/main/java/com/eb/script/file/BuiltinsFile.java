@@ -6,9 +6,11 @@ import com.eb.script.arrays.ArrayFixedByte;
 import com.eb.script.interpreter.Environment;
 import com.eb.script.interpreter.InterpreterError;
 import com.eb.ui.cli.ScriptArea;
+import com.eb.util.ClassTreeLister;
 import com.eb.util.Util;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.Charset;
@@ -1028,6 +1030,120 @@ public class BuiltinsFile {
             throw ie;
         } catch (Exception ex) {
             throw new InterpreterError("file.size: " + ex.getMessage());
+        }
+    }
+
+    /**
+     * Generates a class tree listing for the specified source directory.
+     * Uses ClassTreeLister to scan Java source files and produce a hierarchical
+     * view of the class structure.
+     *
+     * @param env The environment context
+     * @param args args[0] = sourceDir (String, optional, defaults to "src/main/java")
+     * @return String containing the class tree output
+     * @throws InterpreterError if scanning fails
+     */
+    public static String generateClassTree(Environment env, Object... args) throws InterpreterError {
+        ScriptArea output = env.getOutputArea();
+        String sourceDir = "src/main/java";
+        
+        if (args.length > 0 && args[0] != null) {
+            sourceDir = (String) args[0];
+        }
+        
+        if (sourceDir == null || sourceDir.isBlank()) {
+            sourceDir = "src/main/java";
+        }
+        
+        try {
+            // Resolve the path relative to the sandbox
+            Path sourcePath = Util.resolveSandboxedPath(sourceDir);
+            
+            if (!Files.exists(sourcePath)) {
+                throw new InterpreterError("classTree.generate: source directory does not exist: " + sourceDir);
+            }
+            
+            if (!Files.isDirectory(sourcePath)) {
+                throw new InterpreterError("classTree.generate: path is not a directory: " + sourceDir);
+            }
+            
+            // Create ClassTreeLister instance
+            ClassTreeLister lister = new ClassTreeLister();
+            
+            // Capture output to a string
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8);
+            PrintStream oldOut = System.out;
+            
+            try {
+                System.setOut(ps);
+                lister.scan(sourcePath.toString());
+                lister.printTree();
+            } finally {
+                System.setOut(oldOut);
+            }
+            
+            String result = baos.toString(StandardCharsets.UTF_8);
+            
+            if (env.isEchoOn()) {
+                sysOutput(output, "Generated class tree for: " + sourcePath.toString());
+            }
+            
+            return result;
+            
+        } catch (InterpreterError ie) {
+            throw ie;
+        } catch (Exception ex) {
+            throw new InterpreterError("classTree.generate: " + ex.getMessage());
+        }
+    }
+
+    /**
+     * Scans a source directory and returns class information as JSON.
+     * 
+     * @param env The environment context
+     * @param args args[0] = sourceDir (String, optional, defaults to "src/main/java")
+     * @return JSON map containing class information
+     * @throws InterpreterError if scanning fails
+     */
+    public static String scanClassTree(Environment env, Object... args) throws InterpreterError {
+        ScriptArea output = env.getOutputArea();
+        String sourceDir = "src/main/java";
+        
+        if (args.length > 0 && args[0] != null) {
+            sourceDir = (String) args[0];
+        }
+        
+        if (sourceDir == null || sourceDir.isBlank()) {
+            sourceDir = "src/main/java";
+        }
+        
+        try {
+            // Resolve the path relative to the sandbox
+            Path sourcePath = Util.resolveSandboxedPath(sourceDir);
+            
+            if (!Files.exists(sourcePath)) {
+                throw new InterpreterError("classTree.scan: source directory does not exist: " + sourceDir);
+            }
+            
+            if (!Files.isDirectory(sourcePath)) {
+                throw new InterpreterError("classTree.scan: path is not a directory: " + sourceDir);
+            }
+            
+            // Create ClassTreeLister instance and scan
+            ClassTreeLister lister = new ClassTreeLister();
+            lister.scan(sourcePath.toString());
+            
+            if (env.isEchoOn()) {
+                sysOutput(output, "Scanned source directory: " + sourcePath.toString());
+            }
+            
+            return "Scan completed for: " + sourcePath.toString();
+            
+        } catch (InterpreterError ie) {
+            throw ie;
+        } catch (Exception ex) {
+            throw new InterpreterError("classTree.scan: " + ex.getMessage());
         }
     }
 }
