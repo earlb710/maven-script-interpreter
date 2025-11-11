@@ -1,0 +1,157 @@
+Scanning directory: /home/runner/work/maven-script-interpreter/maven-script-interpreter/ScriptInterpreter/src/main/java
+
+================================================================================
+CLASS HIERARCHY TREE
+================================================================================
+
+Package: com.eb.script
+--------------------------------------------------------------------------------
+Run
+RuntimeContext
+
+Package: com.eb.script.arrays
+--------------------------------------------------------------------------------
+«interface» ArrayDef (extends Iterable)
+  └─ ArrayFixedByte (implements ArrayDef)
+  └─ ArrayFixed (implements ArrayDef)
+  └─ ArrayDynamic (implements ArrayDef)
+
+Package: com.eb.script.file
+--------------------------------------------------------------------------------
+BuiltinsFile
+FileContext
+FileData
+
+Package: com.eb.script.interpreter
+--------------------------------------------------------------------------------
+AiFunctions
+Builtins
+Environment
+EnvironmentValues
+Interpreter (implements StatementVisitor, ExpressionVisitor)
+InterpreterError (extends Exception)
+
+Package: com.eb.script.interpreter.db
+--------------------------------------------------------------------------------
+«interface» DbAdapter
+  └─ OracleDbAdapter (implements DbAdapter)
+«interface» DbConnection
+«interface» DbCursor
+
+Package: com.eb.script.interpreter.expression
+--------------------------------------------------------------------------------
+ArrayExpression (extends Expression)
+ArrayLiteralExpression (extends Expression)
+BinaryExpression (extends Expression)
+CallExpression (extends Expression)
+ChainComparisonExpression (extends Expression)
+CursorHasNextExpression (extends Expression)
+CursorNextExpression (extends Expression)
+«abstract» Expression
+  └─ VariableExpression (extends Expression)
+  └─ LengthExpression (extends Expression)
+  └─ SqlSelectExpression (extends Expression)
+  └─ IndexExpression (extends Expression)
+  └─ UnaryExpression (extends Expression)
+  └─ LiteralExpression (extends Expression)
+«interface» ExpressionVisitor
+
+Package: com.eb.script.interpreter.statement
+--------------------------------------------------------------------------------
+AssignStatement (extends Statement)
+BlockStatement (extends Statement)
+BreakStatement (extends Statement)
+CallStatement (extends Statement)
+CloseConnectionStatement (extends Statement)
+CloseCursorStatement (extends Statement)
+ConnectStatement (extends Statement)
+ContinueStatement (extends Statement)
+CursorStatement (extends Statement)
+DoWhileStatement (extends Statement)
+ForEachStatement (extends Statement)
+IfStatement (extends Statement)
+IndexAssignStatement (extends Statement)
+OpenCursorStatement (extends Statement)
+Parameter
+PrintStatement (extends Statement)
+ReturnStatement (extends Statement)
+«abstract» Statement
+  └─ VarStatement (extends Statement)
+  └─ WhileStatement (extends Statement)
+  └─ UseConnectionStatement (extends Statement)
+«enum» StatementKind
+«interface» StatementVisitor
+
+Package: com.eb.script.json
+--------------------------------------------------------------------------------
+Json
+JsonSchema
+JsonSchemaDeriver
+JsonValidate
+ValidationError
+
+Package: com.eb.script.parser
+--------------------------------------------------------------------------------
+ParseError (extends Exception)
+Parser
+
+Package: com.eb.script.token
+--------------------------------------------------------------------------------
+«enum» Category
+«enum» DataType
+«abstract» Lexer
+  └─ EbsLexer (extends Lexer)
+«interface» LexerToken
+  └─ «enum» EbsTokenType (implements LexerToken)
+  └─ EbsToken (implements LexerToken)
+LexerType
+«enum» PrintStyle
+
+Package: com.eb.script.token.ebs
+--------------------------------------------------------------------------------
+
+Package: com.eb.ui.cli
+--------------------------------------------------------------------------------
+Console
+«interface» Handler
+  └─ EbsHandler (implements Handler)
+    └─ EbsConsoleHandler (extends EbsHandler)
+MainApp (extends Application)
+ScriptArea (extends StyleClassedTextArea)
+StyledTextAreaOutputStream (extends OutputStream)
+
+Package: com.eb.ui.ebs
+--------------------------------------------------------------------------------
+AiChatModelSetupDialog (extends Stage)
+EbsApp
+EbsMenu (extends MenuBar)
+EbsStyled
+
+Package: com.eb.ui.tabs
+--------------------------------------------------------------------------------
+EbsTab (extends Tab)
+TabContext
+TabHandler (implements TabOpener)
+«interface» TabOpener
+
+Package: com.eb.util
+--------------------------------------------------------------------------------
+ClassTreeLister
+Debugger
+EmbeddingSearch
+LogStructureProbe
+MarkupTokenizer
+Util
+ZipBase64
+
+Package: com.eb.util.io
+--------------------------------------------------------------------------------
+LargeTextPager (implements AutoCloseable)
+
+================================================================================
+STATISTICS
+================================================================================
+Total classes: 82
+Total interfaces: 9
+Total enums: 5
+Abstract classes: 3
