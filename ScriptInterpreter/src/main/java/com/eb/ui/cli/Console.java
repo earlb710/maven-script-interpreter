@@ -208,9 +208,9 @@ public final class Console {
         // Hide autocomplete on specific key presses
         inputArea.addEventHandler(KeyEvent.KEY_PRESSED, e -> {
             if (autocompletePopup.isShowing()) {
-                // Hide popup on: Ctrl+Space, Space, Enter, Tab, or Backspace
-                if ((e.getCode() == KeyCode.SPACE && e.isControlDown()) ||
-                    (e.getCode() == KeyCode.SPACE && !e.isControlDown()) ||
+                // Hide popup on: Space (not Ctrl+Space), Enter, Tab, or Backspace
+                // Note: Ctrl+Space is used to trigger autocomplete, so don't hide on that
+                if ((e.getCode() == KeyCode.SPACE && !e.isControlDown()) ||
                     e.getCode() == KeyCode.ENTER ||
                     e.getCode() == KeyCode.TAB ||
                     e.getCode() == KeyCode.BACK_SPACE) {
