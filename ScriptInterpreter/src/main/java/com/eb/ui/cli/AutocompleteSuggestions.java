@@ -74,7 +74,7 @@ public class AutocompleteSuggestions {
 
     /**
      * Determine what suggestions to show based on the current input context.
-     * Returns builtins only if the last token is 'call' or '#', otherwise returns all suggestions.
+     * Returns builtins only if the last token is 'call' or '#', otherwise returns only keywords.
      */
     public static List<String> getSuggestionsForContext(String text, int caretPosition) {
         // Get the text before the caret
@@ -118,8 +118,8 @@ public class AutocompleteSuggestions {
             // Only show builtins after 'call' or '#'
             suggestions = getBuiltinSuggestions();
         } else {
-            // Show all suggestions (keywords + builtins)
-            suggestions = getAllSuggestions();
+            // Show only keywords (not builtins)
+            suggestions = getKeywordSuggestions();
         }
         
         // Filter by current word prefix
