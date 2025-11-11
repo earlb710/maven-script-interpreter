@@ -47,12 +47,16 @@ public final class Console {
     private final List<String> history = new ArrayList<>();
     private int historyIndex = -1;
     private final Handler handler;
+    // autocomplete
+    private final AutocompletePopup autocompletePopup;
 
     public Console(Handler handler) {
         this.handler = handler;
+        this.autocompletePopup = new AutocompletePopup();
         consoleTab = buildConsoleTab();
         this.handler.setUI_outputArea(outputArea);
         hookSystemStreams();
+        setupAutocomplete();
     }
 
     public Tab getConsoleTab() {
@@ -146,9 +150,22 @@ public final class Console {
 //   • Ctrl+Enter submits
 //   • Ctrl+Up / Ctrl+Down navigate history (anywhere in buffer)
 //   • Plain Up/Down behave normally (cursor movement)
+//   • Ctrl+Space triggers autocomplete
         inputArea.addEventHandler(KeyEvent.KEY_PRESSED, e -> {
+            // First check if autocomplete popup wants to handle the event
+            if (autocompletePopup.handleKeyEvent(e)) {
+                return;
+            }
+
             if (e.getCode() == KeyCode.ENTER && e.isControlDown()) {
                 submitInputBuffer();
+                e.consume();
+                return;
+            }
+
+            // Autocomplete: Ctrl+Space
+            if (e.getCode() == KeyCode.SPACE && e.isControlDown()) {
+                showAutocomplete();
                 e.consume();
                 return;
             }
@@ -186,6 +203,14 @@ public final class Console {
             }
 
             // Otherwise: let JavaFX handle normal editing/navigation keys
+        });
+
+        // Hide autocomplete on typing or other actions
+        inputArea.addEventHandler(KeyEvent.KEY_TYPED, e -> {
+            // Hide popup if user types something (except when it's the space from Ctrl+Space)
+            if (!e.isControlDown() && autocompletePopup.isShowing()) {
+                autocompletePopup.hide();
+            }
         });
     }
 
@@ -267,5 +292,54 @@ public final class Console {
             outputArea.clear();
             inputArea.clear();
         });
+    }
+
+    /**
+     * Setup autocomplete callback to insert selected suggestion.
+     */
+    private void setupAutocomplete() {
+        autocompletePopup.setOnSelect(suggestion -> {
+            insertSuggestion(suggestion);
+        });
+    }
+
+    /**
+     * Show the autocomplete popup with context-aware suggestions.
+     */
+    private void showAutocomplete() {
+        String text = inputArea.getText();
+        int caretPos = inputArea.getCaretPosition();
+        
+        List<String> suggestions = AutocompleteSuggestions.getSuggestionsForContext(text, caretPos);
+        
+        if (!suggestions.isEmpty()) {
+            autocompletePopup.show(inputArea, suggestions);
+        }
+    }
+
+    /**
+     * Insert the selected suggestion at the caret position,
+     * replacing the current word being typed.
+     */
+    private void insertSuggestion(String suggestion) {
+        String text = inputArea.getText();
+        int caretPos = inputArea.getCaretPosition();
+        
+        // Find the start of the current word
+        int wordStart = caretPos;
+        while (wordStart > 0) {
+            char c = text.charAt(wordStart - 1);
+            if (Character.isLetterOrDigit(c) || c == '.' || c == '_') {
+                wordStart--;
+            } else {
+                break;
+            }
+        }
+        
+        // Replace the current word with the suggestion
+        inputArea.replaceText(wordStart, caretPos, suggestion);
+        
+        // Move caret to end of inserted text
+        inputArea.moveTo(wordStart + suggestion.length());
     }
 }
