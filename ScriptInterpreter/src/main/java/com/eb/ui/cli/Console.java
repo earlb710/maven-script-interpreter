@@ -218,6 +218,14 @@ public final class Console {
                 }
             }
         });
+
+        // Update autocomplete as user types
+        inputArea.addEventHandler(KeyEvent.KEY_TYPED, e -> {
+            if (autocompletePopup.isShowing()) {
+                // Update the suggestions based on the new text
+                showAutocomplete();
+            }
+        });
     }
 
 // ---- Input syntax highlighting using Token.style --------------------------------
