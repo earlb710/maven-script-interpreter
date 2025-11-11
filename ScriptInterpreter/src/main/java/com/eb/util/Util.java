@@ -418,12 +418,42 @@ public class Util {
         if (path != null) {
             Path p = SANDBOX_ROOT.resolve(path).normalize();
             if (!p.startsWith(SANDBOX_ROOT)) {
-                throw new RuntimeException("Path escapes sandbox: " + path);
+                // Check if path is in a safe directory
+                if (!isInSafeDirectory(p)) {
+                    throw new RuntimeException("Path escapes sandbox: " + path);
+                }
             }
             return p;
         } else {
             return SANDBOX_ROOT;
         }
+    }
+
+    /**
+     * Checks if a path is within one of the configured safe directories.
+     * Safe directories are configured through the Safe Directories dialog in the Config menu.
+     */
+    private static boolean isInSafeDirectory(Path path) {
+        try {
+            // Use reflection to avoid hard dependency on UI class
+            Class<?> dialogClass = Class.forName("com.eb.ui.ebs.SafeDirectoriesDialog");
+            java.lang.reflect.Method method = dialogClass.getMethod("getSafeDirectories");
+            @SuppressWarnings("unchecked")
+            java.util.List<String> safeDirs = (java.util.List<String>) method.invoke(null);
+            
+            Path absolutePath = path.toAbsolutePath().normalize();
+            for (String safeDirStr : safeDirs) {
+                Path safeDir = Path.of(safeDirStr).toAbsolutePath().normalize();
+                if (absolutePath.startsWith(safeDir)) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            // If we can't load safe directories (e.g., class not found in non-UI mode),
+            // just return false and enforce sandbox
+            return false;
+        }
+        return false;
     }
 
     public static String formatExceptionWith2Origin(Throwable ex) {

@@ -99,7 +99,13 @@ public class EbsMenu extends MenuBar {
         MenuItem aiSetupItem = new MenuItem("AI Chat Model Setup…");
         aiSetupItem.setOnAction(e -> AiFunctions.showModelSetupDialog());
 
-        toolsMenu.getItems().add(aiSetupItem);
+        MenuItem safeDirsItem = new MenuItem("Safe Directories…");
+        safeDirsItem.setOnAction(e -> {
+            SafeDirectoriesDialog dialog = new SafeDirectoriesDialog();
+            dialog.show();
+        });
+
+        toolsMenu.getItems().addAll(aiSetupItem, safeDirsItem);
         getMenus().add(toolsMenu);
 
     }
