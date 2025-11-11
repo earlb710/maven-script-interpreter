@@ -275,3 +275,63 @@
     -fx-border-radius: 4;
     -fx-background-radius: 4;
 }
+
+/* ===== Autocomplete popup styling ===== */
+.autocomplete-list {
+    -fx-background-color: #1e1e1e;
+    -fx-border-color: #3d3d3d;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 8, 0.0, 0, 2);
+}
+
+.autocomplete-list .list-cell {
+    -fx-background-color: #1e1e1e;
+    -fx-text-fill: #e6e6e6;
+    -fx-font-family: "Consolas", "Menlo", "JetBrains Mono", monospace;
+    -fx-font-size: 12px;
+    -fx-padding: 4 8 4 8;
+}
+
+.autocomplete-list .list-cell:hover {
+    -fx-background-color: #2d2d30;
+}
+
+.autocomplete-list .list-cell:selected {
+    -fx-background-color: #094771;
+    -fx-text-fill: #ffffff;
+}
+
+.autocomplete-list .list-cell:filled:selected:focused,
+.autocomplete-list .list-cell:filled:selected {
+    -fx-background-color: #0e639c;
+    -fx-text-fill: #ffffff;
+}
+
+.autocomplete-list .list-cell:empty {
+    -fx-background-color: transparent;
+}
+
+/* Scrollbar styling for autocomplete list */
+.autocomplete-list .scroll-bar:vertical {
+    -fx-background-color: #1e1e1e;
+}
+
+.autocomplete-list .scroll-bar:vertical .thumb {
+    -fx-background-color: #424242;
+    -fx-background-radius: 0;
+}
+
+.autocomplete-list .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #4e4e4e;
+}
+
+.autocomplete-list .scroll-bar:vertical .track {
+    -fx-background-color: #1e1e1e;
+}
+
+.autocomplete-list .scroll-bar:vertical .increment-button,
+.autocomplete-list .scroll-bar:vertical .decrement-button {
+    -fx-background-color: #1e1e1e;
+    -fx-padding: 0;
+}
+

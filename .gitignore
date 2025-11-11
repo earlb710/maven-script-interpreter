@@ -30,3 +30,6 @@ nbactions.xml
 *.zip
 *.tar.gz
 *.rar
+
+# JDK download
+jdk-*/
