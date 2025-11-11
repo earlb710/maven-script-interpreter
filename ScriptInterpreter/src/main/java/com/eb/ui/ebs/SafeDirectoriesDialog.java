@@ -1,5 +1,7 @@
 package com.eb.ui.ebs;
 
+import java.awt.Desktop;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -9,6 +11,8 @@ import java.util.prefs.Preferences;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -50,21 +54,30 @@ public class SafeDirectoriesDialog extends Stage {
         // --- Buttons ---
         Button btnAdd = new Button("Add Directory…");
         Button btnRemove = new Button("Remove");
+        Button btnCopy = new Button("Copy to Clipboard");
+        Button btnBrowse = new Button("Browse");
         Button btnSave = new Button("Save");
         Button btnClose = new Button("Close");
         
         btnSave.setDefaultButton(true);
         btnClose.setCancelButton(true);
         btnRemove.setDisable(true);
+        btnCopy.setDisable(true);
+        btnBrowse.setDisable(true);
 
-        // Enable/disable remove button based on selection
+        // Enable/disable buttons based on selection
         dirListView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            btnRemove.setDisable(newVal == null);
+            boolean hasSelection = newVal != null;
+            btnRemove.setDisable(!hasSelection);
+            btnCopy.setDisable(!hasSelection);
+            btnBrowse.setDisable(!hasSelection);
         });
 
         // --- Actions ---
         btnAdd.setOnAction(e -> onAddDirectory());
         btnRemove.setOnAction(e -> onRemoveDirectory());
+        btnCopy.setOnAction(e -> onCopyToClipboard());
+        btnBrowse.setOnAction(e -> onBrowse());
         btnSave.setOnAction(e -> onSave());
         btnClose.setOnAction(e -> close());
 
@@ -79,7 +92,7 @@ public class SafeDirectoriesDialog extends Stage {
         infoLabel.setWrapText(true);
 
         HBox buttonBox = new HBox(10);
-        buttonBox.getChildren().addAll(btnAdd, btnRemove);
+        buttonBox.getChildren().addAll(btnAdd, btnRemove, btnCopy, btnBrowse);
 
         HBox bottomButtons = new HBox(10);
         bottomButtons.getChildren().addAll(btnSave, btnClose);
@@ -141,6 +154,52 @@ public class SafeDirectoriesDialog extends Stage {
         if (selected != null) {
             safeDirectories.remove(selected);
             refreshListView();
+        }
+    }
+
+    private void onCopyToClipboard() {
+        String selected = dirListView.getSelectionModel().getSelectedItem();
+        if (selected != null) {
+            ClipboardContent content = new ClipboardContent();
+            content.putString(selected);
+            Clipboard.getSystemClipboard().setContent(content);
+            
+            showAlert(Alert.AlertType.INFORMATION, "Copied", 
+                "Directory path copied to clipboard:\n" + selected);
+        }
+    }
+
+    private void onBrowse() {
+        String selected = dirListView.getSelectionModel().getSelectedItem();
+        if (selected != null) {
+            Path path = Paths.get(selected);
+            
+            // Check if directory exists
+            if (!Files.exists(path)) {
+                showAlert(Alert.AlertType.WARNING, "Directory Not Found", 
+                    "The directory does not exist:\n" + selected);
+                return;
+            }
+            
+            if (!Files.isDirectory(path)) {
+                showAlert(Alert.AlertType.WARNING, "Not a Directory", 
+                    "The path is not a directory:\n" + selected);
+                return;
+            }
+            
+            // Try to open the directory in the system file browser
+            if (Desktop.isDesktopSupported()) {
+                Desktop desktop = Desktop.getDesktop();
+                try {
+                    desktop.open(path.toFile());
+                } catch (IOException e) {
+                    showAlert(Alert.AlertType.ERROR, "Browse Failed", 
+                        "Failed to open directory in file browser:\n" + e.getMessage());
+                }
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Not Supported", 
+                    "Desktop browsing is not supported on this system.");
+            }
         }
     }
 
