@@ -50,7 +50,7 @@ public class AutocompletePopup {
     }
 
     /**
-     * Show the popup with the given suggestions at the caret position.
+     * Show the popup with the given suggestions just underneath the cursor.
      */
     public void show(ScriptArea area, List<String> suggestions) {
         if (suggestions == null || suggestions.isEmpty()) {
@@ -66,7 +66,7 @@ public class AutocompletePopup {
             // Already showing, just update position
             updatePosition(area);
         } else {
-            // Show at caret position
+            // Show just underneath the cursor
             updatePosition(area);
             popup.show(area, 0, 0); // Initial show, position will be corrected
             updatePosition(area);
@@ -77,16 +77,14 @@ public class AutocompletePopup {
     }
 
     /**
-     * Update popup position to be at the caret.
+     * Update popup position to be just underneath the cursor.
      */
     private void updatePosition(ScriptArea area) {
         Bounds caretBounds = area.getCaretBounds().orElse(null);
         if (caretBounds != null) {
-            Bounds screenBounds = area.localToScreen(caretBounds);
-            if (screenBounds != null) {
-                popup.setX(screenBounds.getMinX());
-                popup.setY(screenBounds.getMaxY());
-            }
+            // getCaretBounds() already returns screen coordinates
+            popup.setX(caretBounds.getMinX());
+            popup.setY(caretBounds.getMaxY());
         }
     }
 

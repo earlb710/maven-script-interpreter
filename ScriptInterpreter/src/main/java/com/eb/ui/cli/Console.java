@@ -205,11 +205,25 @@ public final class Console {
             // Otherwise: let JavaFX handle normal editing/navigation keys
         });
 
-        // Hide autocomplete on typing or other actions
+        // Hide autocomplete on specific key presses
+        inputArea.addEventHandler(KeyEvent.KEY_PRESSED, e -> {
+            if (autocompletePopup.isShowing()) {
+                // Hide popup on: Space (not Ctrl+Space), Enter, Tab, or Backspace
+                // Note: Ctrl+Space is used to trigger autocomplete, so don't hide on that
+                if ((e.getCode() == KeyCode.SPACE && !e.isControlDown()) ||
+                    e.getCode() == KeyCode.ENTER ||
+                    e.getCode() == KeyCode.TAB ||
+                    e.getCode() == KeyCode.BACK_SPACE) {
+                    autocompletePopup.hide();
+                }
+            }
+        });
+
+        // Update autocomplete as user types
         inputArea.addEventHandler(KeyEvent.KEY_TYPED, e -> {
-            // Hide popup if user types something (except when it's the space from Ctrl+Space)
-            if (!e.isControlDown() && autocompletePopup.isShowing()) {
-                autocompletePopup.hide();
+            if (autocompletePopup.isShowing()) {
+                // Update the suggestions based on the new text
+                showAutocomplete();
             }
         });
     }
@@ -310,11 +324,41 @@ public final class Console {
         String text = inputArea.getText();
         int caretPos = inputArea.getCaretPosition();
         
-        List<String> suggestions = AutocompleteSuggestions.getSuggestionsForContext(text, caretPos);
+        // Get only the current line for tokenization
+        String currentLineText = getCurrentLineText(text, caretPos);
+        int caretPosInLine = getCaretPositionInCurrentLine(text, caretPos);
+        
+        List<String> suggestions = AutocompleteSuggestions.getSuggestionsForContext(currentLineText, caretPosInLine);
         
         if (!suggestions.isEmpty()) {
             autocompletePopup.show(inputArea, suggestions);
         }
+    }
+
+    /**
+     * Get the text of the current line where the caret is positioned.
+     */
+    private String getCurrentLineText(String text, int caretPos) {
+        // Find the start of the current line (last newline before caret)
+        int lineStart = text.lastIndexOf('\n', caretPos - 1);
+        lineStart = (lineStart == -1) ? 0 : lineStart + 1;
+        
+        // Find the end of the current line (next newline after caret)
+        int lineEnd = text.indexOf('\n', caretPos);
+        lineEnd = (lineEnd == -1) ? text.length() : lineEnd;
+        
+        return text.substring(lineStart, lineEnd);
+    }
+
+    /**
+     * Get the caret position relative to the start of the current line.
+     */
+    private int getCaretPositionInCurrentLine(String text, int caretPos) {
+        // Find the start of the current line
+        int lineStart = text.lastIndexOf('\n', caretPos - 1);
+        lineStart = (lineStart == -1) ? 0 : lineStart + 1;
+        
+        return caretPos - lineStart;
     }
 
     /**
