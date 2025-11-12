@@ -238,8 +238,11 @@ public class AutocompleteSuggestions {
                     case BOOL:
                         sb.append("false");
                         break;
+                    case JSON:
+                        sb.append("{}");
+                        break;
                     default:
-                        // For other types (JSON, ARRAY, DATE, ANY), leave empty
+                        // For other types (ARRAY, DATE, ANY), leave empty
                         break;
                 }
             }
