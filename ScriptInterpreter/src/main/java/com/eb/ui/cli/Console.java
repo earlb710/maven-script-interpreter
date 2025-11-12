@@ -392,9 +392,11 @@ public final class Console {
         
         if (paramSignature != null) {
             insertText = suggestion + paramSignature;
-            // Position caret after the opening paren and first parameter name
-            // This allows user to immediately start typing the first parameter value
-            finalCaretOffset = suggestion.length() + paramSignature.indexOf(": ") + 2;
+            // Position caret after the first = sign to allow user to type/replace the default value
+            int firstEquals = paramSignature.indexOf("=");
+            if (firstEquals >= 0) {
+                finalCaretOffset = suggestion.length() + firstEquals + 1;
+            }
         }
         
         // Replace the current word with the suggestion (and parameters if applicable)

@@ -3,6 +3,7 @@ package com.eb.ui.cli;
 import com.eb.script.interpreter.Builtins;
 import com.eb.script.interpreter.statement.Parameter;
 import com.eb.script.token.Category;
+import com.eb.script.token.DataType;
 import com.eb.script.token.ebs.EbsToken;
 import com.eb.script.token.ebs.EbsTokenType;
 import com.eb.ui.ebs.EbsStyled;
@@ -201,9 +202,9 @@ public class AutocompleteSuggestions {
     }
 
     /**
-     * Generate parameter signature for a builtin function. Returns a string
-     * like "(param1: , param2: )" with empty values. Returns null if the name
-     * is not a builtin.
+     * Generate parameter signature for a builtin function.
+     * Returns a string like "(param1="", param2=0)" with default values based on type.
+     * Returns null if the name is not a builtin.
      */
     public static String getBuiltinParameterSignature(String builtinName) {
         Builtins.BuiltinInfo info = Builtins.getBuiltinInfo(builtinName);
@@ -217,7 +218,29 @@ public class AutocompleteSuggestions {
             if (i > 0) {
                 sb.append(", ");
             }
-            sb.append(param.name).append(": ");
+            sb.append(param.name).append("=");
+            
+            // Add default value based on parameter type
+            if (param.paramType != null) {
+                switch (param.paramType) {
+                    case STRING:
+                        sb.append("\"\"");
+                        break;
+                    case INTEGER:
+                    case LONG:
+                    case BYTE:
+                    case FLOAT:
+                    case DOUBLE:
+                        sb.append("0");
+                        break;
+                    case BOOL:
+                        sb.append("false");
+                        break;
+                    default:
+                        // For other types (JSON, ARRAY, DATE, ANY), leave empty
+                        break;
+                }
+            }
         }
         sb.append(")");
 
