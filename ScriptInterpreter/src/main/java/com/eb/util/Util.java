@@ -36,6 +36,31 @@ public class Util {
 
     public static final Path SANDBOX_ROOT = Path.of(System.getProperty("user.dir")).toAbsolutePath().normalize();
     public static String defaultFormat = "yyyy-MM-dd HH:mm:ss";
+    
+    // ThreadLocal to store the current RuntimeContext's source path directory
+    private static final ThreadLocal<Path> currentContextSourceDir = new ThreadLocal<>();
+    
+    /**
+     * Sets the source directory for the current executing context.
+     * This directory will be considered safe for file operations.
+     */
+    public static void setCurrentContextSourceDir(Path sourceDir) {
+        currentContextSourceDir.set(sourceDir);
+    }
+    
+    /**
+     * Clears the current context source directory.
+     */
+    public static void clearCurrentContextSourceDir() {
+        currentContextSourceDir.remove();
+    }
+    
+    /**
+     * Gets the current context source directory, if set.
+     */
+    public static Path getCurrentContextSourceDir() {
+        return currentContextSourceDir.get();
+    }
 
     public static boolean checkDataType(DataType expectedType, Object value) {
         if (value == null) {
@@ -432,16 +457,27 @@ public class Util {
     /**
      * Checks if a path is within one of the configured safe directories.
      * Safe directories are configured through the Safe Directories dialog in the Config menu.
+     * Also checks if the path is within the directory of the currently executing script.
      */
     private static boolean isInSafeDirectory(Path path) {
         try {
+            Path absolutePath = path.toAbsolutePath().normalize();
+            
+            // Check if path is within the current context's source directory
+            Path contextSourceDir = getCurrentContextSourceDir();
+            if (contextSourceDir != null) {
+                Path contextDir = contextSourceDir.toAbsolutePath().normalize();
+                if (absolutePath.startsWith(contextDir)) {
+                    return true;
+                }
+            }
+            
             // Use reflection to avoid hard dependency on UI class
             Class<?> dialogClass = Class.forName("com.eb.ui.ebs.SafeDirectoriesDialog");
             java.lang.reflect.Method method = dialogClass.getMethod("getSafeDirectories");
             @SuppressWarnings("unchecked")
             java.util.List<String> safeDirs = (java.util.List<String>) method.invoke(null);
             
-            Path absolutePath = path.toAbsolutePath().normalize();
             for (String safeDirStr : safeDirs) {
                 Path safeDir = Path.of(safeDirStr).toAbsolutePath().normalize();
                 if (absolutePath.startsWith(safeDir)) {

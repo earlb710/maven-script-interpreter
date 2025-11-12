@@ -85,24 +85,40 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         output = environment.getOutputArea();
         debug = environment.getDebugger();
 
-        Builtins.setStackSupplier(() -> new java.util.ArrayList<>(environment.getCallStack()));
-        environment.clearCallStack();
-        environment.pushCallStack(0, StatementKind.SCRIPT, "Script : %1 ", runtime.name);
-
-        for (Statement stmt : runtime.statements) {
-            environment.pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "%1", stmt);
-            try {
-                if (debug.isDebugTraceOn()) {
-                    debug.debugWriteStart("TRACE", "line " + stmt.getLine() + " : " + stmt.getClass().getSimpleName());
-                    stmt.accept(this);
-                    debug.debugWriteEnd();
-                } else {
-                    stmt.accept(this);
-                }
-
-            } finally {
-                environment.popCallStack();
+        // Set the source directory as safe for file operations during this execution
+        if (runtime.sourcePath != null) {
+            Path sourceDir = runtime.sourcePath.getParent();
+            if (sourceDir != null) {
+                com.eb.util.Util.setCurrentContextSourceDir(sourceDir);
             }
+        }
+
+        try {
+            // Add runtime context name as a predefined variable accessible to scripts
+            environment.getEnvironmentValues().define("__name__", runtime.name);
+
+            Builtins.setStackSupplier(() -> new java.util.ArrayList<>(environment.getCallStack()));
+            environment.clearCallStack();
+            environment.pushCallStack(0, StatementKind.SCRIPT, "Script : %1 ", runtime.name);
+
+            for (Statement stmt : runtime.statements) {
+                environment.pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "%1", stmt);
+                try {
+                    if (debug.isDebugTraceOn()) {
+                        debug.debugWriteStart("TRACE", "line " + stmt.getLine() + " : " + stmt.getClass().getSimpleName());
+                        stmt.accept(this);
+                        debug.debugWriteEnd();
+                    } else {
+                        stmt.accept(this);
+                    }
+
+                } finally {
+                    environment.popCallStack();
+                }
+            }
+        } finally {
+            // Clear the context source directory after execution
+            com.eb.util.Util.clearCurrentContextSourceDir();
         }
     }
 
