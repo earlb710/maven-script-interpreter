@@ -701,3 +701,4 @@ Error Reporting:
 - Java 21 or higher
 - Maven 3.x
 - Source code must be valid Java syntax
+- Keep ARCHITECTURE.md up to date when changes are made.
