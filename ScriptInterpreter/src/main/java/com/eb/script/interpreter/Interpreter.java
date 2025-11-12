@@ -97,6 +97,31 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         try {
             // Add runtime context name as a predefined variable accessible to scripts
             environment.getEnvironmentValues().define("__name__", runtime.name);
+            
+            // Load safe directories with names and define them as global variables
+            try {
+                Class<?> dialogClass = Class.forName("com.eb.ui.ebs.SafeDirectoriesDialog");
+                java.lang.reflect.Method method = dialogClass.getMethod("getSafeDirectoryEntries");
+                @SuppressWarnings("unchecked")
+                java.util.List<?> entries = (java.util.List<?>) method.invoke(null);
+                
+                for (Object entryObj : entries) {
+                    // Use reflection to get directory and name from SafeDirectoryEntry
+                    java.lang.reflect.Method getDirMethod = entryObj.getClass().getMethod("getDirectory");
+                    java.lang.reflect.Method getNameMethod = entryObj.getClass().getMethod("getName");
+                    
+                    String directory = (String) getDirMethod.invoke(entryObj);
+                    String name = (String) getNameMethod.invoke(entryObj);
+                    
+                    // If the safe directory has a name, define it as a global variable
+                    if (name != null && !name.trim().isEmpty()) {
+                        environment.getEnvironmentValues().define(name.trim(), directory);
+                    }
+                }
+            } catch (Exception e) {
+                // If we can't load safe directories (e.g., class not found in non-UI mode),
+                // just continue without defining safe directory variables
+            }
 
             Builtins.setStackSupplier(() -> new java.util.ArrayList<>(environment.getCallStack()));
             environment.clearCallStack();

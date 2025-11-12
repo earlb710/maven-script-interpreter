@@ -346,4 +346,23 @@ public class SafeDirectoriesDialog extends Stage {
         
         return dirs;
     }
+    
+    /**
+     * Static method to retrieve the list of safe directory entries (with names) from preferences.
+     * Used by the interpreter to define global variables for named safe directories.
+     */
+    public static List<SafeDirectoryEntry> getSafeDirectoryEntries() {
+        List<SafeDirectoryEntry> entries = new ArrayList<>();
+        Preferences prefs = Preferences.userRoot().node(PREF_NODE);
+        
+        for (int i = 0; i < MAX_SAFE_DIRS; i++) {
+            String dir = prefs.get(PREF_KEY_DIR_PREFIX + i, null);
+            if (dir != null && !dir.isEmpty()) {
+                String name = prefs.get(PREF_KEY_NAME_PREFIX + i, "");
+                entries.add(new SafeDirectoryEntry(dir, name));
+            }
+        }
+        
+        return entries;
+    }
 }
