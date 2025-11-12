@@ -387,6 +387,30 @@
       "example": "if call json.isEmpty(value=myJson) then {\n  print \"Empty JSON\";\n}"
     },
     {
+      "function": "json.registerScheme",
+      "short_description": "Registers a JSON schema",
+      "long_help": "Registers a JSON schema with a given name for later validation. The schema defines the expected structure, types, and constraints for JSON data.",
+      "parameters": ["name", "schema"],
+      "return_type": "json",
+      "example": "var schema = {\"type\": \"object\", \"properties\": {\"name\": {\"type\": \"string\"}}};\ncall json.registerScheme(name=\"personSchema\", schema=schema);"
+    },
+    {
+      "function": "json.deriveScheme",
+      "short_description": "Derives schema from JSON",
+      "long_help": "Analyzes a JSON object and generates a schema that describes its structure. Optionally calculates length constraints for strings and arrays.",
+      "parameters": ["json", "calcLengths"],
+      "return_type": "json",
+      "example": "var data = {\"name\": \"Alice\", \"age\": 30};\nvar schema = call json.deriveScheme(json=data, calcLengths=false);"
+    },
+    {
+      "function": "json.validate",
+      "short_description": "Validates JSON against schema",
+      "long_help": "Validates a JSON object against a registered schema. Returns a list of validation errors, or an empty list if validation succeeds.",
+      "parameters": ["schemaName", "json"],
+      "return_type": "json",
+      "example": "var errors = call json.validate(schemaName=\"personSchema\", json=myData);\nif call json.isEmpty(value=errors) then {\n  print \"Valid!\";\n}"
+    },
+    {
       "function": "array.create",
       "short_description": "Creates a new array",
       "long_help": "Creates a new array with the specified size. Elements are initialized to null or zero depending on type.",
@@ -601,6 +625,94 @@
       "parameters": ["dateString", "format"],
       "return_type": "date",
       "example": "var parsed = call date.parse(dateString=\"2024-01-15\", format=\"yyyy-MM-dd\");"
+    },
+    {
+      "function": "http.get",
+      "short_description": "Performs HTTP GET request",
+      "long_help": "Executes an HTTP GET request to the specified URL. Returns a JSON envelope containing status, headers, and body. Optional headers can be provided as a JSON object. Timeout is in milliseconds.",
+      "parameters": ["url", "headers", "timeoutMs"],
+      "return_type": "json",
+      "example": "var response = call http.get(url=\"https://api.example.com/data\", headers={\"Authorization\": \"Bearer token\"}, timeoutMs=5000);\nprint response.status;"
+    },
+    {
+      "function": "http.post",
+      "short_description": "Performs HTTP POST request",
+      "long_help": "Executes an HTTP POST request with optional body content. Returns a JSON envelope with status, headers, and body. Headers are optional JSON object. Body is sent as-is.",
+      "parameters": ["url", "body", "headers", "timeoutMs"],
+      "return_type": "json",
+      "example": "var response = call http.post(url=\"https://api.example.com/submit\", body=\"{\\\"key\\\": \\\"value\\\"}\", headers={\"Content-Type\": \"application/json\"});"
+    },
+    {
+      "function": "http.getJson",
+      "short_description": "Gets JSON from HTTP endpoint",
+      "long_help": "Performs HTTP GET and automatically parses the response body as JSON. Throws an error if response is not valid JSON. Returns the parsed JSON directly (not wrapped in envelope).",
+      "parameters": ["url", "headers", "timeoutMs"],
+      "return_type": "json",
+      "example": "var data = call http.getJson(url=\"https://api.example.com/users\");\nforeach user in data {\n  print user.name;\n}"
+    },
+    {
+      "function": "http.postJson",
+      "short_description": "Posts JSON to HTTP endpoint",
+      "long_help": "Performs HTTP POST with JSON body and parses the JSON response. Automatically serializes the jsonBody parameter and sets Content-Type header. Returns parsed JSON response.",
+      "parameters": ["url", "jsonBody", "headers", "timeoutMs"],
+      "return_type": "json",
+      "example": "var payload = {\"username\": \"alice\", \"email\": \"alice@example.com\"};\nvar result = call http.postJson(url=\"https://api.example.com/users\", jsonBody=payload);"
+    },
+    {
+      "function": "http.getText",
+      "short_description": "Gets text from HTTP endpoint",
+      "long_help": "Performs HTTP GET and returns the response body as a plain string. Useful for fetching HTML, XML, or plain text content.",
+      "parameters": ["url", "headers", "timeoutMs"],
+      "return_type": "string",
+      "example": "var html = call http.getText(url=\"https://example.com\");\nprint html;"
+    },
+    {
+      "function": "http.postText",
+      "short_description": "Posts text to HTTP endpoint",
+      "long_help": "Performs HTTP POST with text body and returns response as plain string. The body parameter is sent as-is without JSON serialization.",
+      "parameters": ["url", "body", "headers", "timeoutMs"],
+      "return_type": "string",
+      "example": "var xmlData = \"<request><id>123</id></request>\";\nvar response = call http.postText(url=\"https://api.example.com/process\", body=xmlData, headers={\"Content-Type\": \"application/xml\"});"
+    },
+    {
+      "function": "http.ensure2xx",
+      "short_description": "Validates HTTP 2xx status",
+      "long_help": "Checks if an HTTP response has a 2xx status code. Accepts either a full response envelope or just a status code. Throws an error with optional message if status is not 2xx.",
+      "parameters": ["statusOrEnvelope", "message"],
+      "return_type": "json",
+      "example": "var response = call http.get(url=\"https://api.example.com/data\");\ncall http.ensure2xx(statusOrEnvelope=response, message=\"Failed to fetch data\");"
+    },
+    {
+      "function": "ai.complete",
+      "short_description": "Gets AI chat completion",
+      "long_help": "Calls an OpenAI-compatible API to generate text completions. Supports optional system prompt, required user prompt, and optional maxTokens and temperature parameters. Uses configuration from system properties or environment variables.",
+      "parameters": ["system", "user", "maxTokens", "temperature"],
+      "return_type": "string",
+      "example": "var answer = call ai.complete(system=\"You are a helpful assistant\", user=\"Explain quantum computing\", maxTokens=500, temperature=0.7);\nprint answer;"
+    },
+    {
+      "function": "ai.summarize",
+      "short_description": "Summarizes text using AI",
+      "long_help": "Uses AI to generate a concise summary of the provided text. Optionally specify maximum tokens for the summary length.",
+      "parameters": ["text", "maxTokens"],
+      "return_type": "string",
+      "example": "var longText = call file.readTextFile(path=\"article.txt\");\nvar summary = call ai.summarize(text=longText, maxTokens=200);\nprint summary;"
+    },
+    {
+      "function": "ai.embed",
+      "short_description": "Gets text embeddings from AI",
+      "long_help": "Generates vector embeddings for the given text using an AI embedding model. Returns a JSON array of floating-point numbers representing the semantic meaning of the text. Useful for similarity searches and semantic analysis.",
+      "parameters": ["text"],
+      "return_type": "json",
+      "example": "var embedding = call ai.embed(text=\"machine learning\");\nprint \"Embedding dimension: \" + call array.length(array=embedding);"
+    },
+    {
+      "function": "ai.classify",
+      "short_description": "Classifies text using AI",
+      "long_help": "Uses AI to classify the given text into one of the provided labels. The labels parameter should be a JSON array of strings. Returns the most appropriate label.",
+      "parameters": ["text", "labels"],
+      "return_type": "string",
+      "example": "var labels = [\"positive\", \"negative\", \"neutral\"];\nvar sentiment = call ai.classify(text=\"This product is amazing!\", labels=labels);\nprint sentiment;"
     }
   ]
 }
