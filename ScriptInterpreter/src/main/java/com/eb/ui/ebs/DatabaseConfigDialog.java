@@ -160,8 +160,7 @@ public class DatabaseConfigDialog extends Stage {
             "Supported Database Connection Formats:\n" +
             "• Oracle:     jdbc:oracle:thin:@//host:port/service  or  jdbc:oracle:thin:@host:port:sid\n" +
             "• MySQL:      jdbc:mysql://host:port/database\n" +
-            "• PostgreSQL: jdbc:postgresql://host:port/database\n\n" +
-            "All three database adapters are fully supported with JDBC drivers included."
+            "• PostgreSQL: jdbc:postgresql://host:port/database\n"
         );
         infoLabel.setWrapText(true);
 
