@@ -1,6 +1,7 @@
 package com.eb.ui.ebs;
 
 import com.eb.script.RuntimeContext;
+import com.eb.script.arrays.ArrayDynamic;
 import com.eb.script.file.FileContext;
 import com.eb.script.interpreter.Builtins;
 import com.eb.script.interpreter.InterpreterError;
@@ -19,7 +20,6 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.List;
 import java.util.Map;
 import java.util.prefs.Preferences;
 import javafx.event.ActionEvent;
@@ -63,31 +63,31 @@ public class EbsConsoleHandler extends EbsHandler {
                     if (cmd.startsWith("/list ")) {
                         line = line.substring(6).trim();
                         cmd = line.toLowerCase();
-                        List json = null;
+                        ArrayDynamic arrayResult = null;
                         if (cmd.length() >= 5 && cmd.substring(0, 5).equals("files")) {
                             if (cmd.length() > 5) {
                                 line = line.substring(6).trim();
                             } else {
                                 line = ".";
                             }
-                            json = (List) Builtins.callBuiltin(env, "file.listfiles", line);
-                            if (json.isEmpty()) {
+                            arrayResult = (ArrayDynamic) Builtins.callBuiltin(env, "file.listfiles", line);
+                            if (arrayResult.isEmpty()) {
                                 output.println("No files.");
                             } else {
-                                output.println("List files : " + json.size());
-                                output.println(Json.prettyJson(json));
+                                output.println("List files : " + arrayResult.size());
+                                output.println(Json.prettyJson(arrayResult));
                             }
                             continue;
                         } else if (cmd.equals("open files") || cmd.equals("openfiles")) {
-                            json = (List) Builtins.callBuiltin(env, "file.openfiles");
+                            arrayResult = (ArrayDynamic) Builtins.callBuiltin(env, "file.openfiles");
                         }
                         // pretty‑print your JSON‑like structure
-                        if (json instanceof List list) {
-                            if (list.isEmpty()) {
+                        if (arrayResult != null) {
+                            if (arrayResult.isEmpty()) {
                                 output.println("No open files.");
                             } else {
-                                output.println("Open files : " + json.size());
-                                for (Object o : list) {
+                                output.println("Open files : " + arrayResult.size());
+                                for (Object o : arrayResult) {
                                     Map m = (Map) o;
                                     output.println(
                                             m.get("handle") + "  "
@@ -98,7 +98,7 @@ public class EbsConsoleHandler extends EbsHandler {
                                 }
                             }
                         } else {
-                            output.println(String.valueOf(json));
+                            output.println(String.valueOf(arrayResult));
                         }
                         continue;
 
@@ -280,9 +280,10 @@ public class EbsConsoleHandler extends EbsHandler {
             Map<String, Object> lookup = (Map<String, Object>) Json.parse(jsonContent);
             
             // Search in keywords first
-            List<Map<String, Object>> keywords = (List<Map<String, Object>>) lookup.get("keywords");
+            ArrayDynamic keywords = (ArrayDynamic) lookup.get("keywords");
             if (keywords != null) {
-                for (Map<String, Object> keyword : keywords) {
+                for (Object keywordObj : keywords) {
+                    Map<String, Object> keyword = (Map<String, Object>) keywordObj;
                     String kwName = (String) keyword.get("keyword");
                     if (kwName != null && kwName.equalsIgnoreCase(itemName)) {
                         displayHelpEntry(output, kwName, keyword, "Keyword");
@@ -292,9 +293,10 @@ public class EbsConsoleHandler extends EbsHandler {
             }
             
             // Search in builtins
-            List<Map<String, Object>> builtins = (List<Map<String, Object>>) lookup.get("builtins");
+            ArrayDynamic builtins = (ArrayDynamic) lookup.get("builtins");
             if (builtins != null) {
-                for (Map<String, Object> builtin : builtins) {
+                for (Object builtinObj : builtins) {
+                    Map<String, Object> builtin = (Map<String, Object>) builtinObj;
                     String funcName = (String) builtin.get("function");
                     if (funcName != null && funcName.equalsIgnoreCase(itemName)) {
                         displayHelpEntry(output, funcName, builtin, "Builtin Function");
@@ -325,9 +327,19 @@ public class EbsConsoleHandler extends EbsHandler {
         
         // For builtins, show parameters and return type
         if (entry.containsKey("parameters")) {
-            List<String> params = (List<String>) entry.get("parameters");
+            ArrayDynamic params = (ArrayDynamic) entry.get("parameters");
             if (params != null && !params.isEmpty()) {
-                output.println("<b>Parameters:</b> " + String.join(", ", params));
+                // Convert ArrayDynamic to comma-separated string
+                StringBuilder paramStr = new StringBuilder();
+                boolean first = true;
+                for (Object param : params) {
+                    if (!first) {
+                        paramStr.append(", ");
+                    }
+                    paramStr.append(param.toString());
+                    first = false;
+                }
+                output.println("<b>Parameters:</b> " + paramStr.toString());
             }
         }
         
