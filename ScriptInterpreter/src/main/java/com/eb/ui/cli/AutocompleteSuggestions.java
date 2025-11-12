@@ -1,6 +1,7 @@
 package com.eb.ui.cli;
 
 import com.eb.script.interpreter.Builtins;
+import com.eb.script.interpreter.statement.Parameter;
 import com.eb.script.token.Category;
 import com.eb.script.token.ebs.EbsToken;
 import com.eb.script.token.ebs.EbsTokenType;
@@ -189,5 +190,36 @@ public class AutocompleteSuggestions {
         }
 
         return text.substring(start, end);
+    }
+    
+    /**
+     * Check if a given name is a builtin function.
+     */
+    public static boolean isBuiltin(String name) {
+        return Builtins.getBuiltins().contains(name);
+    }
+    
+    /**
+     * Generate parameter signature for a builtin function.
+     * Returns a string like "(param1: , param2: )" with empty values.
+     * Returns null if the name is not a builtin.
+     */
+    public static String getBuiltinParameterSignature(String builtinName) {
+        Builtins.BuiltinInfo info = Builtins.getBuiltinInfo(builtinName);
+        if (info == null || info.params == null || info.params.length == 0) {
+            return null;
+        }
+        
+        StringBuilder sb = new StringBuilder("(");
+        for (int i = 0; i < info.params.length; i++) {
+            Parameter param = info.params[i];
+            if (i > 0) {
+                sb.append(", ");
+            }
+            sb.append(param.name).append(": ");
+        }
+        sb.append(")");
+        
+        return sb.toString();
     }
 }

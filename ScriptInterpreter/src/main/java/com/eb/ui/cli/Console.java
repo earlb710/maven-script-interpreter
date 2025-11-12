@@ -380,10 +380,27 @@ public final class Console {
             }
         }
         
-        // Replace the current word with the suggestion
-        inputArea.replaceText(wordStart, caretPos, suggestion);
+        // Check if the suggestion is a builtin and get its parameter signature
+        String paramSignature = null;
+        if (AutocompleteSuggestions.isBuiltin(suggestion)) {
+            paramSignature = AutocompleteSuggestions.getBuiltinParameterSignature(suggestion);
+        }
         
-        // Move caret to end of inserted text
-        inputArea.moveTo(wordStart + suggestion.length());
+        // Build the text to insert
+        String insertText = suggestion;
+        int finalCaretOffset = suggestion.length();
+        
+        if (paramSignature != null) {
+            insertText = suggestion + paramSignature;
+            // Position caret after the opening paren and first parameter name
+            // This allows user to immediately start typing the first parameter value
+            finalCaretOffset = suggestion.length() + paramSignature.indexOf(": ") + 2;
+        }
+        
+        // Replace the current word with the suggestion (and parameters if applicable)
+        inputArea.replaceText(wordStart, caretPos, insertText);
+        
+        // Move caret to the appropriate position
+        inputArea.moveTo(wordStart + finalCaretOffset);
     }
 }
