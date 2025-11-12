@@ -106,8 +106,11 @@ public class DatabaseConfigDialog extends Stage {
             entry.setVarName(event.getNewValue());
             
             // Move to connection string column after editing variable name
+            // Use Platform.runLater to ensure edit mode is properly ended before starting new edit
             int row = event.getTablePosition().getRow();
-            dbTableView.edit(row, connColumn);
+            javafx.application.Platform.runLater(() -> {
+                dbTableView.edit(row, connColumn);
+            });
         });
         
         connColumn.setOnEditCommit(event -> {
