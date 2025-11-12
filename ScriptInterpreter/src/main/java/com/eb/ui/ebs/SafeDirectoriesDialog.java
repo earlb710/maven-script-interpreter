@@ -153,7 +153,7 @@ public class SafeDirectoriesDialog extends Stage {
         Label infoLabel = new Label(
             "Safe directories are additional paths that can be accessed by scripts.\n" +
             "By default, only the current working directory is accessible.\n" +
-            "You can optionally provide a name for each directory."
+            "You can optionally provide a variable name for each directory."
         );
         infoLabel.setWrapText(true);
 
