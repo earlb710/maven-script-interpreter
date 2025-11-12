@@ -92,10 +92,6 @@ public class DatabaseConfigDialog extends Stage {
         nameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         nameColumn.setMinWidth(150);
         nameColumn.setEditable(true);
-        nameColumn.setOnEditCommit(event -> {
-            DatabaseConfigEntry entry = event.getRowValue();
-            entry.setVarName(event.getNewValue());
-        });
         
         // Connection String column (editable)
         TableColumn<DatabaseConfigEntry, String> connColumn = new TableColumn<>("Database Connection String");
@@ -103,6 +99,17 @@ public class DatabaseConfigDialog extends Stage {
         connColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         connColumn.setMinWidth(500);
         connColumn.setEditable(true);
+        
+        // Set up edit commit handlers after both columns are declared
+        nameColumn.setOnEditCommit(event -> {
+            DatabaseConfigEntry entry = event.getRowValue();
+            entry.setVarName(event.getNewValue());
+            
+            // Move to connection string column after editing variable name
+            int row = event.getTablePosition().getRow();
+            dbTableView.edit(row, connColumn);
+        });
+        
         connColumn.setOnEditCommit(event -> {
             DatabaseConfigEntry entry = event.getRowValue();
             entry.setConnectionString(event.getNewValue());
