@@ -48,6 +48,7 @@ import com.eb.script.interpreter.statement.UseConnectionStatement;
 import com.eb.script.interpreter.statement.WhileStatement;
 import com.eb.script.token.ebs.EbsTokenType;
 import com.eb.ui.cli.ScriptArea;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
