@@ -11,8 +11,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Provides autocomplete suggestions for keywords and builtins.
- * Filters suggestions based on context (e.g., only builtins after 'call' or '#').
+ * Provides autocomplete suggestions for keywords, builtins, and console commands.
+ * Filters suggestions based on context (e.g., only builtins after 'call' or '#',
+ * console commands when input starts with '/').
  *
  * @author Earl Bosch
  */
@@ -28,6 +29,27 @@ public class AutocompleteSuggestions {
         "string", "date", "bool", "boolean", "json",
         "connect", "use", "cursor", "open", "close", "connection",
         "select", "from", "where", "order", "by", "group", "having"
+    );
+
+    private static final List<String> CONSOLE_COMMANDS = Arrays.asList(
+        "/help", "/?",
+        "/help keywords",
+        "/clear",
+        "/reset",
+        "/time",
+        "/open",
+        "/close",
+        "/list files",
+        "/list open files",
+        "/echo",
+        "/echo on",
+        "/echo off",
+        "/debug",
+        "/debug on",
+        "/debug off",
+        "/debug trace on",
+        "/debug trace off",
+        "/exit"
     );
 
     /**
@@ -59,6 +81,13 @@ public class AutocompleteSuggestions {
     }
 
     /**
+     * Get only console command suggestions.
+     */
+    public static List<String> getConsoleCommandSuggestions() {
+        return new ArrayList<>(CONSOLE_COMMANDS);
+    }
+
+    /**
      * Get suggestions filtered by the given prefix (case-insensitive).
      */
     public static List<String> getSuggestionsWithPrefix(List<String> suggestions, String prefix) {
@@ -74,17 +103,25 @@ public class AutocompleteSuggestions {
 
     /**
      * Determine what suggestions to show based on the current input context.
-     * Returns builtins only if the last token is 'call' or '#', otherwise returns only keywords.
+     * Returns console commands if the token starts with '/', builtins after 'call' or '#', 
+     * otherwise returns only keywords.
      */
     public static List<String> getSuggestionsForContext(String text, int caretPosition) {
         // Get the text before the caret
         String beforeCaret = text.substring(0, Math.min(caretPosition, text.length()));
         
-        // Tokenize to find the context
-        List<EbsToken> tokens = EbsStyled.tokenizeConsole(beforeCaret);
-        
         // Find the word at caret position
         String currentWord = getCurrentWord(beforeCaret);
+        
+        // Check if the current line starts with '/' (console command)
+        String trimmedLine = beforeCaret.trim();
+        if (trimmedLine.startsWith("/") || currentWord.startsWith("/")) {
+            // Show console commands
+            return getSuggestionsWithPrefix(getConsoleCommandSuggestions(), currentWord.isEmpty() ? "/" : currentWord);
+        }
+        
+        // Tokenize to find the context
+        List<EbsToken> tokens = EbsStyled.tokenizeConsole(beforeCaret);
         
         // Check if we're after a 'call' keyword or '#' token
         boolean afterCallOrHash = false;
@@ -138,10 +175,10 @@ public class AutocompleteSuggestions {
         int end = text.length();
         int start = end;
         
-        // Move backwards while we have valid identifier characters
+        // Move backwards while we have valid identifier characters or '/' for console commands
         while (start > 0) {
             char c = text.charAt(start - 1);
-            if (Character.isLetterOrDigit(c) || c == '.' || c == '_') {
+            if (Character.isLetterOrDigit(c) || c == '.' || c == '_' || c == '/' || c == '?') {
                 start--;
             } else {
                 break;
