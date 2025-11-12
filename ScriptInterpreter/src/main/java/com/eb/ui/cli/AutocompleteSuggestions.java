@@ -37,24 +37,24 @@ public class AutocompleteSuggestions {
     }
 
     private static final List<String> CONSOLE_COMMANDS = Arrays.asList(
-            "help", "?",
-            "help keywords",
-            "clear",
-            "reset",
-            "time",
-            "open",
-            "close",
-            "list files",
-            "list open files",
-            "echo",
-            "echo on",
-            "echo off",
-            "debug",
-            "debug on",
-            "debug off",
-            "debug trace on",
-            "debug trace off",
-            "exit"
+            "/help", "/?",
+            "/help keywords",
+            "/clear",
+            "/reset",
+            "/time",
+            "/open",
+            "/close",
+            "/list files",
+            "/list open files",
+            "/echo",
+            "/echo on",
+            "/echo off",
+            "/debug",
+            "/debug on",
+            "/debug off",
+            "/debug trace on",
+            "/debug trace off",
+            "/exit"
     );
 
     /**
@@ -63,6 +63,7 @@ public class AutocompleteSuggestions {
     public static List<String> getAllSuggestions() {
         List<String> all = new ArrayList<>(KEYWORDS);
         all.addAll(Builtins.getBuiltins());
+        all.addAll(CONSOLE_COMMANDS);
         return all.stream()
                 .distinct()
                 .sorted()
@@ -136,7 +137,7 @@ public class AutocompleteSuggestions {
                 String tokenStr = token.literal != null ? token.literal.toString().trim() : "";
 
                 // Skip empty tokens
-                if (tokenStr.isEmpty()) {
+                if (tokenStr.isEmpty() || token.type == EbsTokenType.EOF) {
                     continue;
                 }
 
@@ -191,25 +192,25 @@ public class AutocompleteSuggestions {
 
         return text.substring(start, end);
     }
-    
+
     /**
      * Check if a given name is a builtin function.
      */
     public static boolean isBuiltin(String name) {
         return Builtins.getBuiltins().contains(name);
     }
-    
+
     /**
-     * Generate parameter signature for a builtin function.
-     * Returns a string like "(param1: , param2: )" with empty values.
-     * Returns null if the name is not a builtin.
+     * Generate parameter signature for a builtin function. Returns a string
+     * like "(param1: , param2: )" with empty values. Returns null if the name
+     * is not a builtin.
      */
     public static String getBuiltinParameterSignature(String builtinName) {
         Builtins.BuiltinInfo info = Builtins.getBuiltinInfo(builtinName);
         if (info == null || info.params == null || info.params.length == 0) {
             return null;
         }
-        
+
         StringBuilder sb = new StringBuilder("(");
         for (int i = 0; i < info.params.length; i++) {
             Parameter param = info.params[i];
@@ -219,7 +220,7 @@ public class AutocompleteSuggestions {
             sb.append(param.name).append(": ");
         }
         sb.append(")");
-        
+
         return sb.toString();
     }
 }
