@@ -122,6 +122,32 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 // If we can't load safe directories (e.g., class not found in non-UI mode),
                 // just continue without defining safe directory variables
             }
+            
+            // Load database configurations and define them as global variables
+            try {
+                Class<?> dbDialogClass = Class.forName("com.eb.ui.ebs.DatabaseConfigDialog");
+                java.lang.reflect.Method dbMethod = dbDialogClass.getMethod("getDatabaseConfigEntries");
+                @SuppressWarnings("unchecked")
+                java.util.List<?> dbEntries = (java.util.List<?>) dbMethod.invoke(null);
+                
+                for (Object entryObj : dbEntries) {
+                    // Use reflection to get variable name and connection string from DatabaseConfigEntry
+                    java.lang.reflect.Method getVarNameMethod = entryObj.getClass().getMethod("getVarName");
+                    java.lang.reflect.Method getConnStrMethod = entryObj.getClass().getMethod("getConnectionString");
+                    
+                    String varName = (String) getVarNameMethod.invoke(entryObj);
+                    String connStr = (String) getConnStrMethod.invoke(entryObj);
+                    
+                    // If both variable name and connection string are present, define as global variable
+                    if (varName != null && !varName.trim().isEmpty() && 
+                        connStr != null && !connStr.trim().isEmpty()) {
+                        environment.getEnvironmentValues().define(varName.trim(), connStr);
+                    }
+                }
+            } catch (Exception e) {
+                // If we can't load database configs (e.g., class not found in non-UI mode),
+                // just continue without defining database variables
+            }
 
             Builtins.setStackSupplier(() -> new java.util.ArrayList<>(environment.getCallStack()));
             environment.clearCallStack();
