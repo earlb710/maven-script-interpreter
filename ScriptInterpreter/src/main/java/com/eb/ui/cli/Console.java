@@ -373,7 +373,7 @@ public final class Console {
         int wordStart = caretPos;
         while (wordStart > 0) {
             char c = text.charAt(wordStart - 1);
-            if (Character.isLetterOrDigit(c) || c == '.' || c == '_') {
+            if (Character.isLetterOrDigit(c) || c == '.' || c == '_'|| c == '/') {
                 wordStart--;
             } else {
                 break;

@@ -41,6 +41,9 @@ public class AutocompletePopup {
             } else if (e.getCode() == KeyCode.ESCAPE) {
                 hide();
                 e.consume();
+            } else if (e.getCode() == KeyCode.SPACE) {
+                hide();
+                e.consume();
             }
         });
 
