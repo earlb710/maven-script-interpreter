@@ -232,8 +232,8 @@ public class SafeDirectoriesDialog extends Stage {
             content.putString(selected.getDirectory());
             Clipboard.getSystemClipboard().setContent(content);
             
-            showAlert(Alert.AlertType.INFORMATION, "Copied", 
-                "Directory path copied to clipboard:\n" + selected.getDirectory());
+//            showAlert(Alert.AlertType.INFORMATION, "Copied", 
+//                "Directory path copied to clipboard:\n" + selected.getDirectory());
         }
     }
 

@@ -215,8 +215,8 @@ public class DatabaseConfigDialog extends Stage {
             content.putString(selected.getConnectionString());
             Clipboard.getSystemClipboard().setContent(content);
             
-            showAlert(Alert.AlertType.INFORMATION, "Copied", 
-                "Connection string copied to clipboard:\n" + selected.getConnectionString());
+//            showAlert(Alert.AlertType.INFORMATION, "Copied", 
+//                "Connection string copied to clipboard:\n" + selected.getConnectionString());
         }
     }
 
