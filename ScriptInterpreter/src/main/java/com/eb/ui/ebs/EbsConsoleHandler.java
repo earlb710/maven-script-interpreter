@@ -11,6 +11,8 @@ import com.eb.ui.tabs.TabContext;
 import com.eb.util.Util;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalTime;
@@ -138,6 +140,26 @@ public class EbsConsoleHandler extends EbsHandler {
                         handleDebug(output, cmd);
                         continue;
                     } else {
+                        // Check if /help has a parameter
+                        if (cmd.startsWith("/help ") || cmd.startsWith("/?")) {
+                            String param = "";
+                            if (cmd.startsWith("/help ") && cmd.length() > 6) {
+                                param = line.substring(6).trim();
+                            } else if (cmd.startsWith("/? ") && cmd.length() > 3) {
+                                param = line.substring(3).trim();
+                            }
+                            
+                            if (!param.isEmpty()) {
+                                if (param.equalsIgnoreCase("keywords")) {
+                                    Builtins.callBuiltin(env, "system.help");
+                                } else {
+                                    // Display help for specific keyword or builtin
+                                    displayDetailedHelp(output, param);
+                                }
+                                continue;
+                            }
+                        }
+                        
                         switch (cmd) {
                             case "/?":
                             case "/help":
@@ -147,6 +169,7 @@ public class EbsConsoleHandler extends EbsHandler {
                                 output.println("  <b>control + down</b>   <i>- next input from history</i>");
                                 output.println("  <b>/help or /?</b>      <i>- show this help</i>");
                                 output.println("  <b>/help keywords</b>   <i>- show list of keywords and builtins</i>");
+                                output.println("  <b>/help &lt;keyword|builtin&gt;</b> <i>- show detailed help for a keyword or builtin (e.g., /help file.readTextFile)</i>");
                                 output.println("  <b>/clear</b>           <i>- clear the console</i>");
                                 output.println("  <b>/reset</b>           <i>- clear all variables</i>");
                                 output.println("  <b>/time</b>            <i>- print the current time</i>");
@@ -239,6 +262,100 @@ public class EbsConsoleHandler extends EbsHandler {
             return;
         }
         output.printlnWarn("usage: /debug on|off | /debug trace on|off");
+    }
+
+    private void displayDetailedHelp(ScriptArea output, String itemName) {
+        try {
+            // Load system-lookup.json from resources
+            InputStream is = getClass().getClassLoader().getResourceAsStream("system-lookup.json");
+            if (is == null) {
+                output.printlnWarn("Help system not available (system-lookup.json not found)");
+                return;
+            }
+            
+            String jsonContent = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+            is.close();
+            
+            // Parse JSON
+            Map<String, Object> lookup = (Map<String, Object>) Json.parse(jsonContent);
+            
+            // Search in keywords first
+            List<Map<String, Object>> keywords = (List<Map<String, Object>>) lookup.get("keywords");
+            if (keywords != null) {
+                for (Map<String, Object> keyword : keywords) {
+                    String kwName = (String) keyword.get("keyword");
+                    if (kwName != null && kwName.equalsIgnoreCase(itemName)) {
+                        displayHelpEntry(output, kwName, keyword, "Keyword");
+                        return;
+                    }
+                }
+            }
+            
+            // Search in builtins
+            List<Map<String, Object>> builtins = (List<Map<String, Object>>) lookup.get("builtins");
+            if (builtins != null) {
+                for (Map<String, Object> builtin : builtins) {
+                    String funcName = (String) builtin.get("function");
+                    if (funcName != null && funcName.equalsIgnoreCase(itemName)) {
+                        displayHelpEntry(output, funcName, builtin, "Builtin Function");
+                        return;
+                    }
+                }
+            }
+            
+            // Not found
+            output.printlnWarn("No help found for: " + itemName);
+            output.println("Use <b>/help keywords</b> to see all available keywords and builtins.");
+            
+        } catch (Exception ex) {
+            output.printlnWarn("Error loading help: " + ex.getMessage());
+        }
+    }
+    
+    private void displayHelpEntry(ScriptArea output, String name, Map<String, Object> entry, String type) {
+        output.println("<b>═══════════════════════════════════════════════════════════</b>");
+        output.println("<b>" + type + ":</b> <u>" + name + "</u>");
+        output.println("<b>═══════════════════════════════════════════════════════════</b>");
+        
+        String shortDesc = (String) entry.get("short_description");
+        if (shortDesc != null && !shortDesc.isEmpty()) {
+            output.println("<b>Description:</b> " + shortDesc);
+            output.println("");
+        }
+        
+        // For builtins, show parameters and return type
+        if (entry.containsKey("parameters")) {
+            List<String> params = (List<String>) entry.get("parameters");
+            if (params != null && !params.isEmpty()) {
+                output.println("<b>Parameters:</b> " + String.join(", ", params));
+            }
+        }
+        
+        if (entry.containsKey("return_type")) {
+            String returnType = (String) entry.get("return_type");
+            if (returnType != null && !returnType.isEmpty()) {
+                output.println("<b>Returns:</b> " + returnType);
+            }
+        }
+        
+        if (entry.containsKey("parameters") || entry.containsKey("return_type")) {
+            output.println("");
+        }
+        
+        String longHelp = (String) entry.get("long_help");
+        if (longHelp != null && !longHelp.isEmpty()) {
+            output.println("<b>Details:</b>");
+            output.println(longHelp);
+            output.println("");
+        }
+        
+        String example = (String) entry.get("example");
+        if (example != null && !example.isEmpty()) {
+            output.println("<b>Example:</b>");
+            output.println("<i>" + example + "</i>");
+        }
+        
+        output.println("<b>═══════════════════════════════════════════════════════════</b>");
     }
 
     @Override
