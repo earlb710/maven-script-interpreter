@@ -151,7 +151,7 @@ public class DatabaseConfigDialog extends Stage {
             "• Oracle:     jdbc:oracle:thin:@//host:port/service  or  jdbc:oracle:thin:@host:port:sid\n" +
             "• MySQL:      jdbc:mysql://host:port/database\n" +
             "• PostgreSQL: jdbc:postgresql://host:port/database\n\n" +
-            "Note: Currently only Oracle adapter is fully implemented in the interpreter."
+            "All three database adapters are fully supported with JDBC drivers included."
         );
         infoLabel.setWrapText(true);
 
