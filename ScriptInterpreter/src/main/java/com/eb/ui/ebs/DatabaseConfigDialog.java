@@ -146,7 +146,12 @@ public class DatabaseConfigDialog extends Stage {
         Label infoLabel = new Label(
             "Configure database connections with variable names.\n" +
             "These variables will be available as global string variables in scripts.\n" +
-            "Example: If you name a connection 'myDB', you can use it like: connect db = myDB;"
+            "Example: If you name a connection 'myDB', you can use it like: connect db = myDB;\n\n" +
+            "Supported Database Connection Formats:\n" +
+            "• Oracle:     jdbc:oracle:thin:@//host:port/service  or  jdbc:oracle:thin:@host:port:sid\n" +
+            "• MySQL:      jdbc:mysql://host:port/database\n" +
+            "• PostgreSQL: jdbc:postgresql://host:port/database\n\n" +
+            "Note: Currently only Oracle adapter is fully implemented in the interpreter."
         );
         infoLabel.setWrapText(true);
 
@@ -169,7 +174,7 @@ public class DatabaseConfigDialog extends Stage {
         setScene(new Scene(layout));
         sizeToScene();
         setMinWidth(850);
-        setMinHeight(450);
+        setMinHeight(550);
     }
 
     private void onAddConfig() {
