@@ -229,9 +229,11 @@ public class AutocompleteSuggestions {
                     case INTEGER:
                     case LONG:
                     case BYTE:
+                        sb.append("0");
+                        break;
                     case FLOAT:
                     case DOUBLE:
-                        sb.append("0");
+                        sb.append("0.0");
                         break;
                     case BOOL:
                         sb.append("false");
