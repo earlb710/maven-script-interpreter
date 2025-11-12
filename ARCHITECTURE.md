@@ -702,3 +702,4 @@ Error Reporting:
 - Maven 3.x
 - Source code must be valid Java syntax
 - Keep ARCHITECTURE.md up to date when changes are made.
+- Keep system-lookup.json up to date when changes are made to keywords or builtin functions.
