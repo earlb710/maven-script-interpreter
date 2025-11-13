@@ -110,8 +110,9 @@ public class AutocompleteSuggestions {
 
     /**
      * Determine what suggestions to show based on the current input context.
-     * Returns console commands if the token starts with '/', builtins after
-     * 'call' or '#', otherwise returns only keywords.
+     * Returns console commands if the token starts with '/', all keywords and 
+     * builtins after '/help ' or '/? ', builtins after 'call' or '#', 
+     * otherwise returns only keywords.
      */
     public static List<String> getSuggestionsForContext(String text, int caretPosition) {
         // Get the text before the caret
