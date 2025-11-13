@@ -108,7 +108,7 @@ public final class Console {
 
         // Live syntax highlighting (debounced)
         inputArea.multiPlainChanges()
-                .successionEnds(Duration.ofMillis(20))
+                .successionEnds(Duration.ofMillis(10))
                 .subscribe(ignore -> applyInputHighlighting());
         applyInputHighlighting(); // initial
 
