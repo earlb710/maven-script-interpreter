@@ -1,0 +1,509 @@
+/**
+ * Default Styles for Screen Input Item Types
+ * This CSS file defines default styling for all JavaFX input control types
+ * used in the screen keyword's variable display definitions.
+ */
+
+/* ==================== Text Input Controls ==================== */
+
+/* TextField - Single-line text input */
+.screen-input-textfield {
+    -fx-padding: 5 10 5 10;
+    -fx-background-color: white;
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+    -fx-font-size: 13px;
+}
+
+.screen-input-textfield:focused {
+    -fx-border-color: #4a90e2;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(74, 144, 226, 0.3), 4, 0, 0, 0);
+}
+
+.screen-input-textfield:disabled {
+    -fx-opacity: 0.6;
+    -fx-background-color: #f5f5f5;
+}
+
+/* TextArea - Multi-line text input */
+.screen-input-textarea {
+    -fx-padding: 5 10 5 10;
+    -fx-background-color: white;
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+    -fx-font-size: 13px;
+}
+
+.screen-input-textarea:focused {
+    -fx-border-color: #4a90e2;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(74, 144, 226, 0.3), 4, 0, 0, 0);
+}
+
+.screen-input-textarea .content {
+    -fx-background-color: white;
+}
+
+/* PasswordField - Password input with masked characters */
+.screen-input-passwordfield {
+    -fx-padding: 5 10 5 10;
+    -fx-background-color: white;
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+    -fx-font-size: 13px;
+}
+
+.screen-input-passwordfield:focused {
+    -fx-border-color: #4a90e2;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(74, 144, 226, 0.3), 4, 0, 0, 0);
+}
+
+/* ==================== Selection Controls ==================== */
+
+/* CheckBox - Boolean checkbox */
+.screen-input-checkbox {
+    -fx-padding: 5;
+}
+
+.screen-input-checkbox .box {
+    -fx-background-color: white;
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+}
+
+.screen-input-checkbox:selected .box {
+    -fx-background-color: #4a90e2;
+    -fx-border-color: #4a90e2;
+}
+
+.screen-input-checkbox:selected .mark {
+    -fx-background-color: white;
+}
+
+.screen-input-checkbox:hover .box {
+    -fx-border-color: #4a90e2;
+}
+
+/* RadioButton - Radio button selection */
+.screen-input-radiobutton {
+    -fx-padding: 5;
+}
+
+.screen-input-radiobutton .radio {
+    -fx-background-color: white;
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1;
+    -fx-background-radius: 50%;
+    -fx-border-radius: 50%;
+}
+
+.screen-input-radiobutton:selected .radio {
+    -fx-background-color: #4a90e2;
+    -fx-border-color: #4a90e2;
+}
+
+.screen-input-radiobutton:selected .dot {
+    -fx-background-color: white;
+}
+
+/* ToggleButton - Toggle button */
+.screen-input-togglebutton {
+    -fx-padding: 8 15 8 15;
+    -fx-background-color: #e0e0e0;
+    -fx-text-fill: #333333;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+    -fx-cursor: hand;
+}
+
+.screen-input-togglebutton:selected {
+    -fx-background-color: #4a90e2;
+    -fx-text-fill: white;
+}
+
+.screen-input-togglebutton:hover {
+    -fx-background-color: #d0d0d0;
+}
+
+.screen-input-togglebutton:selected:hover {
+    -fx-background-color: #357abd;
+}
+
+/* ComboBox - Dropdown selection */
+.screen-input-combobox {
+    -fx-padding: 5 10 5 10;
+    -fx-background-color: white;
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+}
+
+.screen-input-combobox:focused {
+    -fx-border-color: #4a90e2;
+    -fx-border-width: 2;
+}
+
+.screen-input-combobox .arrow-button {
+    -fx-background-color: #f0f0f0;
+    -fx-border-color: #cccccc;
+    -fx-border-width: 0 0 0 1;
+}
+
+.screen-input-combobox:hover .arrow-button {
+    -fx-background-color: #e0e0e0;
+}
+
+/* ChoiceBox - Choice selection */
+.screen-input-choicebox {
+    -fx-padding: 5 10 5 10;
+    -fx-background-color: white;
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1;
+}
+
+.screen-input-choicebox:focused {
+    -fx-border-color: #4a90e2;
+    -fx-border-width: 2;
+}
+
+/* ListView - List selection */
+.screen-input-listview {
+    -fx-background-color: white;
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1;
+}
+
+.screen-input-listview .list-cell {
+    -fx-padding: 5 10 5 10;
+    -fx-background-color: white;
+}
+
+.screen-input-listview .list-cell:selected {
+    -fx-background-color: #4a90e2;
+    -fx-text-fill: white;
+}
+
+.screen-input-listview .list-cell:hover {
+    -fx-background-color: #e8f4ff;
+}
+
+/* ==================== Numeric Controls ==================== */
+
+/* Spinner - Numeric spinner */
+.screen-input-spinner {
+    -fx-padding: 5 10 5 10;
+}
+
+.screen-input-spinner .text-field {
+    -fx-background-color: white;
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1;
+    -fx-border-radius: 3 0 0 3;
+    -fx-background-radius: 3 0 0 3;
+}
+
+.screen-input-spinner .increment-arrow-button,
+.screen-input-spinner .decrement-arrow-button {
+    -fx-background-color: #f0f0f0;
+    -fx-border-color: #cccccc;
+}
+
+.screen-input-spinner .increment-arrow-button:hover,
+.screen-input-spinner .decrement-arrow-button:hover {
+    -fx-background-color: #e0e0e0;
+}
+
+/* Slider - Value slider */
+.screen-input-slider {
+    -fx-padding: 5 10 5 10;
+}
+
+.screen-input-slider .track {
+    -fx-background-color: #e0e0e0;
+    -fx-background-radius: 3;
+}
+
+.screen-input-slider .thumb {
+    -fx-background-color: #4a90e2;
+    -fx-background-radius: 50%;
+    -fx-pref-width: 16;
+    -fx-pref-height: 16;
+}
+
+.screen-input-slider:focused .thumb {
+    -fx-effect: dropshadow(gaussian, rgba(74, 144, 226, 0.5), 6, 0, 0, 0);
+}
+
+/* ==================== Date/Time Controls ==================== */
+
+/* DatePicker - Date selection */
+.screen-input-datepicker {
+    -fx-padding: 5 10 5 10;
+    -fx-background-color: white;
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+}
+
+.screen-input-datepicker:focused {
+    -fx-border-color: #4a90e2;
+    -fx-border-width: 2;
+}
+
+.screen-input-datepicker .arrow-button {
+    -fx-background-color: #f0f0f0;
+    -fx-border-color: #cccccc;
+    -fx-border-width: 0 0 0 1;
+}
+
+.screen-input-datepicker:hover .arrow-button {
+    -fx-background-color: #e0e0e0;
+}
+
+/* ==================== Color Control ==================== */
+
+/* ColorPicker - Color selection */
+.screen-input-colorpicker {
+    -fx-padding: 5 10 5 10;
+}
+
+.screen-input-colorpicker .color-picker-label {
+    -fx-background-color: white;
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+}
+
+.screen-input-colorpicker:focused .color-picker-label {
+    -fx-border-color: #4a90e2;
+    -fx-border-width: 2;
+}
+
+/* ==================== Button Controls ==================== */
+
+/* Button - Action button */
+.screen-input-button {
+    -fx-padding: 8 15 8 15;
+    -fx-background-color: #4a90e2;
+    -fx-text-fill: white;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+    -fx-cursor: hand;
+    -fx-font-size: 13px;
+}
+
+.screen-input-button:hover {
+    -fx-background-color: #357abd;
+}
+
+.screen-input-button:pressed {
+    -fx-background-color: #2a5f8f;
+}
+
+.screen-input-button:disabled {
+    -fx-opacity: 0.6;
+    -fx-cursor: default;
+}
+
+/* ==================== Display Controls ==================== */
+
+/* Label - Text label */
+.screen-input-label {
+    -fx-padding: 2 5 2 5;
+    -fx-font-size: 13px;
+    -fx-text-fill: #333333;
+}
+
+.screen-input-label.mandatory {
+    -fx-font-weight: bold;
+}
+
+/* Hyperlink - Clickable link */
+.screen-input-hyperlink {
+    -fx-padding: 2 5 2 5;
+    -fx-text-fill: #4a90e2;
+    -fx-underline: true;
+    -fx-cursor: hand;
+}
+
+.screen-input-hyperlink:hover {
+    -fx-text-fill: #357abd;
+}
+
+.screen-input-hyperlink:visited {
+    -fx-text-fill: #7b68ee;
+}
+
+/* ==================== Media Controls ==================== */
+
+/* ImageView - Image display */
+.screen-input-imageview {
+    -fx-fit-width: 100;
+    -fx-fit-height: 100;
+    -fx-preserve-ratio: true;
+    -fx-smooth: true;
+}
+
+/* MediaView - Media player */
+.screen-input-mediaview {
+    -fx-background-color: black;
+}
+
+/* WebView - Web browser */
+.screen-input-webview {
+    -fx-pref-width: 800;
+    -fx-pref-height: 600;
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1;
+}
+
+/* ==================== Progress Controls ==================== */
+
+/* ProgressBar - Progress indicator */
+.screen-input-progressbar {
+    -fx-pref-width: 200;
+    -fx-pref-height: 20;
+}
+
+.screen-input-progressbar .track {
+    -fx-background-color: #e0e0e0;
+    -fx-background-radius: 3;
+}
+
+.screen-input-progressbar .bar {
+    -fx-background-color: #4a90e2;
+    -fx-background-radius: 3;
+    -fx-padding: 2;
+}
+
+/* ProgressIndicator - Circular progress */
+.screen-input-progressindicator {
+    -fx-progress-color: #4a90e2;
+}
+
+/* ==================== Validation States ==================== */
+
+/* Mandatory field indicator */
+.screen-input-mandatory {
+    -fx-border-color: #ff9800 !important;
+    -fx-border-width: 2 !important;
+}
+
+.screen-input-mandatory:focused {
+    -fx-border-color: #ff5722 !important;
+}
+
+/* Valid state */
+.screen-input-valid {
+    -fx-border-color: #4caf50 !important;
+    -fx-border-width: 2 !important;
+}
+
+/* Invalid state */
+.screen-input-invalid {
+    -fx-border-color: #f44336 !important;
+    -fx-border-width: 2 !important;
+}
+
+.screen-input-invalid:focused {
+    -fx-effect: dropshadow(gaussian, rgba(244, 67, 54, 0.3), 4, 0, 0, 0);
+}
+
+/* ==================== Size Variants ==================== */
+
+/* Small input */
+.screen-input-small {
+    -fx-font-size: 11px;
+    -fx-padding: 3 8 3 8;
+}
+
+/* Large input */
+.screen-input-large {
+    -fx-font-size: 15px;
+    -fx-padding: 10 15 10 15;
+}
+
+/* ==================== Theme Variants ==================== */
+
+/* Dark theme inputs */
+.screen-input-dark .screen-input-textfield,
+.screen-input-dark .screen-input-textarea,
+.screen-input-dark .screen-input-passwordfield,
+.screen-input-dark .screen-input-combobox {
+    -fx-background-color: #3c3c3c;
+    -fx-text-fill: #e0e0e0;
+    -fx-border-color: #555555;
+}
+
+.screen-input-dark .screen-input-textfield:focused,
+.screen-input-dark .screen-input-textarea:focused,
+.screen-input-dark .screen-input-passwordfield:focused {
+    -fx-border-color: #4a90e2;
+}
+
+.screen-input-dark .screen-input-label {
+    -fx-text-fill: #e0e0e0;
+}
+
+.screen-input-dark .screen-input-button {
+    -fx-background-color: #357abd;
+}
+
+/* ==================== Accessibility ==================== */
+
+/* High contrast mode */
+.high-contrast .screen-input-textfield,
+.high-contrast .screen-input-textarea,
+.high-contrast .screen-input-passwordfield {
+    -fx-border-width: 2;
+    -fx-border-color: #000000;
+}
+
+.high-contrast .screen-input-button {
+    -fx-border-width: 2;
+    -fx-border-color: #000000;
+}
+
+/* Focus indicator for keyboard navigation */
+.screen-input-textfield:focused,
+.screen-input-textarea:focused,
+.screen-input-passwordfield:focused,
+.screen-input-combobox:focused,
+.screen-input-button:focused {
+    -fx-background-insets: -2;
+    -fx-border-insets: -2;
+}
+
+/* ==================== Animations ==================== */
+
+@keyframes pulse {
+    0% {
+        -fx-scale-x: 1;
+        -fx-scale-y: 1;
+    }
+    50% {
+        -fx-scale-x: 1.05;
+        -fx-scale-y: 1.05;
+    }
+    100% {
+        -fx-scale-x: 1;
+        -fx-scale-y: 1;
+    }
+}
+
+.screen-input-pulse {
+    -fx-animation: pulse 0.5s ease-in-out;
+}

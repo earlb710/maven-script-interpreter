@@ -40,6 +40,7 @@ import com.eb.script.interpreter.expression.CursorNextExpression;
 import com.eb.script.interpreter.statement.ConnectStatement;
 import com.eb.script.interpreter.statement.UseConnectionStatement;
 import com.eb.script.interpreter.statement.CloseConnectionStatement;
+import com.eb.script.interpreter.statement.ScreenStatement;
 import com.eb.script.token.ebs.EbsTokenType;
 import com.eb.util.Util;
 import java.io.IOException;
@@ -315,6 +316,8 @@ public class Parser {
             return continueStatement();
         } else if (match(EbsTokenType.CONNECT)) {
             return connectStatement();
+        } else if (match(EbsTokenType.SCREEN)) {
+            return screenStatement();
         } else if (match(EbsTokenType.USE)) {
             return useConnectionStatement();
         } else if (matchAll(EbsTokenType.CLOSE, EbsTokenType.CONNECTION)) {
@@ -1120,6 +1123,35 @@ public class Parser {
         EbsToken nameTok = consume(EbsTokenType.IDENTIFIER, "Expected connection name after 'close connection'.");
         consume(EbsTokenType.SEMICOLON, "Expected ';' after close connection.");
         return new CloseConnectionStatement(line, (String) nameTok.literal);
+    }
+
+    private Statement screenStatement() throws ParseError {
+        int line = previous().line; // the 'screen' token
+
+        // 1) Require screen name
+        EbsToken nameTok = consume(EbsTokenType.IDENTIFIER, "Expected screen name after 'screen'.");
+        String screenName = (String) nameTok.literal;
+
+        // 2) Require '='
+        consume(EbsTokenType.EQUAL, "Expected '=' after screen name.");
+
+        // 3) Parse the spec:
+        //    - JSON literal ({...}) captured from source
+        //    - IDENTIFIER (reference to a var holding json)
+        Expression spec;
+        if (checkAny(EbsTokenType.LBRACE, EbsTokenType.LBRACKET)) {
+            spec = parseJsonLiteralFromSource();
+        } else if (check(EbsTokenType.IDENTIFIER)) {
+            EbsToken id = consume(EbsTokenType.IDENTIFIER, "Expected screen configuration json or variable.");
+            spec = new VariableExpression(id.line, (String) id.literal);
+        } else {
+            throw error(peek(), "Expected screen configuration json or variable after '='.");
+        }
+
+        // 4) ';'
+        consume(EbsTokenType.SEMICOLON, "Expected ';' after screen statement.");
+
+        return new ScreenStatement(line, screenName, spec);
     }
 
     private SqlSelectExpression parseSqlSelectFromSource() throws ParseError {
