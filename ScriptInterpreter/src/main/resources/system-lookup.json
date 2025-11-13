@@ -161,7 +161,7 @@
     {
       "keyword": "screen",
       "short_description": "Creates a UI window",
-      "long_help": "The 'screen' keyword creates a new JavaFX window (Stage) with properties specified in JSON format. Supports title, width, height, maximize, vars, and area properties. Variables can have display metadata. Areas define layout regions with positioned items. Supported area types: pane, stackpane, anchorpane, borderpane, flowpane, gridpane, hbox, vbox, tilepane, scrollpane, splitpane, tabpane, tab, accordion, titledpane, group, region, canvas. Each type has default styling.",
+      "long_help": "The 'screen' keyword creates a new JavaFX window (Stage) with properties specified in JSON format. Supports title, width, height, maximize, vars, and area properties. Variables can have display metadata with input types: textfield, textarea, passwordfield, checkbox, radiobutton, togglebutton, combobox, choicebox, listview, spinner, slider, datepicker, colorpicker, button, label, hyperlink, imageview, mediaview, webview, progressbar, progressindicator. Areas support container types: pane, stackpane, anchorpane, borderpane, flowpane, gridpane, hbox, vbox, tilepane, scrollpane, splitpane, tabpane, tab, accordion, titledpane, group, region, canvas. All types have default styling.",
       "example": "screen myWindow = {title:\"My App\", width:800, height:600, vars:[{name:\"userName\", type:\"string\", default:\"\", display:{type:\"textfield\", mandatory:true}}], area:[{name:\"mainArea\", type:\"vbox\", layout:\"vbox\", items:[{name:\"userField\", sequence:1, relativePos:\"top\", varRef:\"userName\"}]}]};"
     },
     {
