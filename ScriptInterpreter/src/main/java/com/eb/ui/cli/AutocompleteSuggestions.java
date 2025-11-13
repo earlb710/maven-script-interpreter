@@ -132,6 +132,11 @@ public class AutocompleteSuggestions {
             // Combine keywords and builtins for /help autocomplete
             List<String> helpSuggestions = new ArrayList<>(KEYWORDS);
             helpSuggestions.addAll(Builtins.getBuiltins());
+            // Sort the combined list
+            helpSuggestions = helpSuggestions.stream()
+                    .distinct()
+                    .sorted()
+                    .collect(Collectors.toList());
             return getSuggestionsWithPrefix(helpSuggestions, currentWord);
         }
 
