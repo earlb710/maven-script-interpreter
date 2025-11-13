@@ -2174,6 +2174,392 @@
       ],
       "return_type": "bool",
       "example": "call file.appendToTextFile(path=\"log.txt\", content=\"Log entry\\n\");"
+    },
+    {
+      "function": "http.is2xx",
+      "short_description": "Checks if HTTP status is 2xx",
+      "long_help": "Returns true if the HTTP status code is in the 2xx range (200-299), indicating success. Accepts either a full response envelope (with 'status' field) or just a status code number.",
+      "parameters": [
+        {
+          "name": "statusOrEnvelope",
+          "type": "json"
+        }
+      ],
+      "return_type": "bool",
+      "example": "var response = call http.get(url=\"https://api.example.com/data\");\nif call http.is2xx(statusOrEnvelope=response) then {\n  print \"Success!\";\n}"
+    },
+    {
+      "function": "http.request",
+      "short_description": "Performs HTTP request with full control",
+      "long_help": "Executes an HTTP request with full control over method, body, headers, and timeout. Returns a JSON envelope containing status, headers, and body. Method can be GET, POST, PUT, DELETE, etc.",
+      "parameters": [
+        {
+          "name": "url",
+          "type": "string"
+        },
+        {
+          "name": "method",
+          "type": "string"
+        },
+        {
+          "name": "body",
+          "type": "string"
+        },
+        {
+          "name": "headers",
+          "type": "json"
+        },
+        {
+          "name": "timeoutMs",
+          "type": "long"
+        }
+      ],
+      "return_type": "json",
+      "example": "var response = call http.request(url=\"https://api.example.com/resource\", method=\"PUT\", body=\"{\\\"data\\\": \\\"value\\\"}\", headers={\"Content-Type\": \"application/json\"}, timeoutMs=5000);\nprint response.status;"
+    },
+    {
+      "function": "json.add",
+      "short_description": "Adds element to JSON array",
+      "long_help": "Adds a value to the end of a JSON array at the specified path. Creates the array if it doesn't exist. Returns the modified JSON object.",
+      "parameters": [
+        {
+          "name": "root",
+          "type": "json"
+        },
+        {
+          "name": "arrayPath",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "type": "json"
+        }
+      ],
+      "return_type": "json",
+      "example": "var data = {\"items\": [1, 2, 3]};\nvar updated = call json.add(root=data, arrayPath=\"items\", value=4);\nprint updated; // {\"items\": [1, 2, 3, 4]}"
+    },
+    {
+      "function": "json.getArray",
+      "short_description": "Gets array from JSON path",
+      "long_help": "Retrieves an array (list) value from a JSON object using a dot-notation path. Returns null if the path doesn't exist or the value is not an array.",
+      "parameters": [
+        {
+          "name": "root",
+          "type": "json"
+        },
+        {
+          "name": "path",
+          "type": "string"
+        }
+      ],
+      "return_type": "json",
+      "example": "var data = {\"users\": [{\"name\": \"Alice\"}, {\"name\": \"Bob\"}]};\nvar users = call json.getArray(root=data, path=\"users\");\nforeach user in users do {\n  print user.name;\n}"
+    },
+    {
+      "function": "json.getDouble",
+      "short_description": "Gets double from JSON path",
+      "long_help": "Retrieves a double value from a JSON object using a dot-notation path. Returns a default value if the path doesn't exist.",
+      "parameters": [
+        {
+          "name": "root",
+          "type": "json"
+        },
+        {
+          "name": "path",
+          "type": "string"
+        },
+        {
+          "name": "default",
+          "type": "double",
+          "optional": true
+        }
+      ],
+      "return_type": "double",
+      "example": "var price = call json.getDouble(root=config, path=\"product.price\", default=0.0);"
+    },
+    {
+      "function": "json.getInteger",
+      "short_description": "Gets integer from JSON path",
+      "long_help": "Retrieves an integer value from a JSON object using a dot-notation path. Returns a default value if the path doesn't exist. Alias for json.getInt.",
+      "parameters": [
+        {
+          "name": "root",
+          "type": "json"
+        },
+        {
+          "name": "path",
+          "type": "string"
+        },
+        {
+          "name": "default",
+          "type": "integer",
+          "optional": true
+        }
+      ],
+      "return_type": "integer",
+      "example": "var count = call json.getInteger(root=config, path=\"settings.maxCount\", default=100);"
+    },
+    {
+      "function": "json.getLong",
+      "short_description": "Gets long from JSON path",
+      "long_help": "Retrieves a long value from a JSON object using a dot-notation path. Returns a default value if the path doesn't exist.",
+      "parameters": [
+        {
+          "name": "root",
+          "type": "json"
+        },
+        {
+          "name": "path",
+          "type": "string"
+        },
+        {
+          "name": "default",
+          "type": "long",
+          "optional": true
+        }
+      ],
+      "return_type": "long",
+      "example": "var timestamp = call json.getLong(root=data, path=\"event.timestamp\", default=0);"
+    },
+    {
+      "function": "json.getObject",
+      "short_description": "Gets object from JSON path",
+      "long_help": "Retrieves an object (map) value from a JSON object using a dot-notation path. Returns null if the path doesn't exist or the value is not an object.",
+      "parameters": [
+        {
+          "name": "root",
+          "type": "json"
+        },
+        {
+          "name": "path",
+          "type": "string"
+        }
+      ],
+      "return_type": "json",
+      "example": "var data = {\"user\": {\"name\": \"Alice\", \"age\": 30}};\nvar user = call json.getObject(root=data, path=\"user\");\nprint user.name; // \"Alice\""
+    },
+    {
+      "function": "json.getStrict",
+      "short_description": "Gets value from JSON path (strict)",
+      "long_help": "Retrieves a value from a JSON object using a dot-notation path. Unlike json.get, this throws an error if the path doesn't exist, ensuring strict validation.",
+      "parameters": [
+        {
+          "name": "root",
+          "type": "json"
+        },
+        {
+          "name": "path",
+          "type": "string"
+        }
+      ],
+      "return_type": "json",
+      "example": "var value = call json.getStrict(root=config, path=\"database.host\");\n// Throws error if path doesn't exist"
+    },
+    {
+      "function": "json.insert",
+      "short_description": "Inserts element into JSON array",
+      "long_help": "Inserts a value at a specific index in a JSON array at the specified path. Returns the modified JSON object.",
+      "parameters": [
+        {
+          "name": "root",
+          "type": "json"
+        },
+        {
+          "name": "arrayPath",
+          "type": "string"
+        },
+        {
+          "name": "index",
+          "type": "integer"
+        },
+        {
+          "name": "value",
+          "type": "json"
+        }
+      ],
+      "return_type": "json",
+      "example": "var data = {\"items\": [1, 3, 4]};\nvar updated = call json.insert(root=data, arrayPath=\"items\", index=1, value=2);\nprint updated; // {\"items\": [1, 2, 3, 4]}"
+    },
+    {
+      "function": "json.setStrict",
+      "short_description": "Sets value in JSON object (strict)",
+      "long_help": "Sets a value at the specified path in a JSON object. Unlike json.set, this throws an error if intermediate paths don't exist, ensuring strict validation. Returns the modified JSON object.",
+      "parameters": [
+        {
+          "name": "root",
+          "type": "json"
+        },
+        {
+          "name": "path",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "type": "json"
+        }
+      ],
+      "return_type": "json",
+      "example": "var data = {\"user\": {\"name\": \"Alice\"}};\nvar updated = call json.setStrict(root=data, path=\"user.name\", value=\"Bob\");\n// Throws error if path doesn't exist"
+    },
+    {
+      "function": "string.equals",
+      "short_description": "Checks if two strings are equal",
+      "long_help": "Returns true if the two strings are exactly equal (case-sensitive), false otherwise. Handles null values safely.",
+      "parameters": [
+        {
+          "name": "value1",
+          "type": "string"
+        },
+        {
+          "name": "value2",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "if call string.equals(value1=input, value2=\"expected\") then {\n  print \"Match!\";\n}"
+    },
+    {
+      "function": "string.equalsIgnoreCase",
+      "short_description": "Checks if strings are equal (case-insensitive)",
+      "long_help": "Returns true if the two strings are equal ignoring case differences, false otherwise. Useful for case-insensitive comparisons.",
+      "parameters": [
+        {
+          "name": "value1",
+          "type": "string"
+        },
+        {
+          "name": "value2",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "if call string.equalsIgnoreCase(value1=\"Hello\", value2=\"hello\") then {\n  print \"Match!\";\n}"
+    },
+    {
+      "function": "string.isBlank",
+      "short_description": "Checks if string is blank",
+      "long_help": "Returns true if the string is null, empty, or contains only whitespace characters, false otherwise.",
+      "parameters": [
+        {
+          "name": "str",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "if call string.isBlank(str=userInput) then {\n  print \"Please enter a value\";\n}"
+    },
+    {
+      "function": "string.isEmpty",
+      "short_description": "Checks if string is empty",
+      "long_help": "Returns true if the string is null or has zero length, false otherwise. Unlike isBlank, this does not consider whitespace.",
+      "parameters": [
+        {
+          "name": "str",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "if call string.isEmpty(str=name) then {\n  print \"Name is empty\";\n}"
+    },
+    {
+      "function": "system.command",
+      "short_description": "Executes a system command",
+      "long_help": "Executes a system command with optional arguments, timeout, and working directory. Returns a JSON object containing exit code, stdout, and stderr. Arguments should be provided as a JSON array.",
+      "parameters": [
+        {
+          "name": "command",
+          "type": "string"
+        },
+        {
+          "name": "args",
+          "type": "json",
+          "optional": true
+        },
+        {
+          "name": "timeoutMs",
+          "type": "long",
+          "optional": true
+        },
+        {
+          "name": "cwd",
+          "type": "string",
+          "optional": true
+        }
+      ],
+      "return_type": "json",
+      "example": "var result = call system.command(command=\"ls\", args=[\"-la\", \"/tmp\"], timeoutMs=5000, cwd=\"/home\");\nprint \"Exit code: \" + result.exitCode;\nprint \"Output: \" + result.stdout;"
+    },
+    {
+      "function": "system.getProperty",
+      "short_description": "Gets a system property",
+      "long_help": "Retrieves a Java system property by name. Returns the property value or a default value if not found. Common properties include 'user.home', 'os.name', 'java.version', etc.",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "default",
+          "type": "string",
+          "optional": true
+        }
+      ],
+      "return_type": "string",
+      "example": "var home = call system.getProperty(name=\"user.home\", default=\"/home/user\");\nprint \"Home directory: \" + home;"
+    },
+    {
+      "function": "system.help",
+      "short_description": "Returns help information",
+      "long_help": "Returns comprehensive help information about the scripting language, including keywords, operators, datatypes, and all available builtin functions with their signatures. Outputs to console and returns the text as a string.",
+      "parameters": [],
+      "return_type": "json",
+      "example": "var helpText = call system.help();\nprint helpText;"
+    },
+    {
+      "function": "system.setProperty",
+      "short_description": "Sets a system property",
+      "long_help": "Sets a Java system property to the specified value. Pass null as the value to clear the property. Returns the previous value of the property, or null if it was not set.",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "optional": true
+        }
+      ],
+      "return_type": "string",
+      "example": "var oldValue = call system.setProperty(name=\"my.custom.property\", value=\"customValue\");\nprint \"Previous value: \" + oldValue;"
+    },
+    {
+      "function": "system.winCommand",
+      "short_description": "Executes a Windows command",
+      "long_help": "Executes a Windows-specific command with optional arguments, timeout, and working directory. Similar to system.command but optimized for Windows environments. Returns a JSON object containing exit code, stdout, and stderr.",
+      "parameters": [
+        {
+          "name": "command",
+          "type": "string"
+        },
+        {
+          "name": "args",
+          "type": "json",
+          "optional": true
+        },
+        {
+          "name": "timeoutMs",
+          "type": "long",
+          "optional": true
+        },
+        {
+          "name": "cwd",
+          "type": "string",
+          "optional": true
+        }
+      ],
+      "return_type": "json",
+      "example": "var result = call system.winCommand(command=\"cmd.exe\", args=[\"/c\", \"dir\"], timeoutMs=5000);\nprint \"Exit code: \" + result.exitCode;\nprint \"Output: \" + result.stdout;"
     }
   ]
 }
