@@ -46,8 +46,13 @@ import com.eb.script.interpreter.statement.ReturnStatement;
 import com.eb.script.interpreter.statement.StatementKind;
 import com.eb.script.interpreter.statement.UseConnectionStatement;
 import com.eb.script.interpreter.statement.WhileStatement;
+import com.eb.script.interpreter.statement.ScreenStatement;
 import com.eb.script.token.ebs.EbsTokenType;
 import com.eb.ui.cli.ScriptArea;
+import javafx.application.Platform;
+import javafx.stage.Stage;
+import javafx.scene.Scene;
+import javafx.scene.layout.StackPane;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -62,6 +67,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
 
     private final java.util.Map<String, DbConnection> connections = new java.util.HashMap<>();
     private final java.util.Map<String, CursorSpec> cursorSpecs = new java.util.HashMap<>();
+    private final java.util.Map<String, Stage> screens = new java.util.HashMap<>();
     private final java.util.Deque<String> connectionStack = new java.util.ArrayDeque<>();
     private DbAdapter db = new OracleDbAdapter();
     private ScriptArea output;
@@ -1349,6 +1355,68 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             } catch (Exception e) {
                 throw error(stmt.getLine(), "Close connection failed: " + e.getMessage());
             }
+        } catch (InterpreterError ex) {
+            System.getLogger(Interpreter.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        } finally {
+            environment.popCallStack();
+        }
+    }
+
+    @Override
+    public void visitScreenStatement(ScreenStatement stmt) {
+        environment.pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Screen %1", stmt.name);
+        try {
+            if (screens.containsKey(stmt.name)) {
+                throw error(stmt.getLine(), "Screen '" + stmt.name + "' already exists.");
+            }
+            
+            // Evaluate the spec (should be a JSON object)
+            Object spec = evaluate(stmt.spec);
+            
+            if (!(spec instanceof Map)) {
+                throw error(stmt.getLine(), "Screen configuration must be a JSON object (map).");
+            }
+            
+            @SuppressWarnings("unchecked")
+            Map<String, Object> config = (Map<String, Object>) spec;
+            
+            // Extract configuration properties with defaults
+            String title = config.containsKey("title") ? String.valueOf(config.get("title")) : "Screen " + stmt.name;
+            int width = config.containsKey("width") ? ((Number) config.get("width")).intValue() : 800;
+            int height = config.containsKey("height") ? ((Number) config.get("height")).intValue() : 600;
+            boolean maximize = config.containsKey("maximize") && Boolean.TRUE.equals(config.get("maximize"));
+            
+            // Create the screen on JavaFX Application Thread
+            Platform.runLater(() -> {
+                try {
+                    Stage stage = new Stage();
+                    stage.setTitle(title);
+                    
+                    // Create a simple scene with a StackPane
+                    StackPane root = new StackPane();
+                    Scene scene = new Scene(root, width, height);
+                    stage.setScene(scene);
+                    
+                    if (maximize) {
+                        stage.setMaximized(true);
+                    }
+                    
+                    // Store the stage reference
+                    screens.put(stmt.name, stage);
+                    
+                    // Show the screen
+                    stage.show();
+                    
+                    if (output != null) {
+                        output.appendSuccess("Screen '" + stmt.name + "' created with title: " + title + "\n");
+                    }
+                } catch (Exception e) {
+                    if (output != null) {
+                        output.appendError("Failed to create screen '" + stmt.name + "': " + e.getMessage() + "\n");
+                    }
+                }
+            });
+            
         } catch (InterpreterError ex) {
             System.getLogger(Interpreter.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         } finally {

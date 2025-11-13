@@ -159,6 +159,12 @@
       "example": "select dept, count(*) from emp group by dept having count(*) > 5;"
     },
     {
+      "keyword": "screen",
+      "short_description": "Creates a UI window",
+      "long_help": "The 'screen' keyword creates a new JavaFX window (Stage) with properties specified in JSON format. Supports title, width, height, and maximize properties.",
+      "example": "screen myWindow = {title:\"My Application\", width:800, height:600, maximize:false};\nscreen dashboard = {title:\"Dashboard\", width:1024, height:768, maximize:true};"
+    },
+    {
       "keyword": "null",
       "short_description": "Represents absence of value",
       "long_help": "The 'null' keyword represents the absence of a value or an uninitialized variable.",

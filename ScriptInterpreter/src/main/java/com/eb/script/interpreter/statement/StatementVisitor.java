@@ -42,4 +42,6 @@ public interface StatementVisitor {
 
     void visitCloseConnectionStatement(CloseConnectionStatement stmt) throws InterpreterError;
 
+    void visitScreenStatement(ScreenStatement stmt) throws InterpreterError;
+
 }
