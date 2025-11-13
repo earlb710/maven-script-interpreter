@@ -61,6 +61,7 @@ public final class MarkupTokenizer {
         
         // Replace <br> tags with newlines before processing
         line = line.replace("<br>", "\n");
+        line = line.replace("<BR>", "\n");
 
         StringBuilder buf = new StringBuilder();
         Deque<String> styleStack = new ArrayDeque<>();
