@@ -1627,6 +1627,9 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             area.type = "pane";
         }
         
+        // Set CSS class from enum
+        area.cssClass = area.areaType.getCssClass();
+        
         // Extract layout configuration
         if (areaDef.containsKey("layout")) {
             area.layout = String.valueOf(areaDef.get("layout"));
@@ -1698,42 +1701,50 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
      */
     enum AreaType {
         // Layout Panes
-        PANE("pane", "-fx-background-color: transparent;"),
-        STACKPANE("stackpane", "-fx-background-color: transparent; -fx-alignment: center;"),
-        ANCHORPANE("anchorpane", "-fx-background-color: transparent;"),
-        BORDERPANE("borderpane", "-fx-background-color: transparent;"),
-        FLOWPANE("flowpane", "-fx-background-color: transparent; -fx-hgap: 5; -fx-vgap: 5;"),
-        GRIDPANE("gridpane", "-fx-background-color: transparent; -fx-hgap: 10; -fx-vgap: 10;"),
-        HBOX("hbox", "-fx-background-color: transparent; -fx-spacing: 10; -fx-alignment: center-left;"),
-        VBOX("vbox", "-fx-background-color: transparent; -fx-spacing: 10; -fx-alignment: top-center;"),
-        TILEPANE("tilepane", "-fx-background-color: transparent; -fx-hgap: 5; -fx-vgap: 5;"),
+        PANE("pane", "screen-area-pane", "-fx-background-color: transparent;"),
+        STACKPANE("stackpane", "screen-area-stackpane", "-fx-background-color: transparent; -fx-alignment: center;"),
+        ANCHORPANE("anchorpane", "screen-area-anchorpane", "-fx-background-color: transparent;"),
+        BORDERPANE("borderpane", "screen-area-borderpane", "-fx-background-color: transparent;"),
+        FLOWPANE("flowpane", "screen-area-flowpane", "-fx-background-color: transparent; -fx-hgap: 5; -fx-vgap: 5;"),
+        GRIDPANE("gridpane", "screen-area-gridpane", "-fx-background-color: transparent; -fx-hgap: 10; -fx-vgap: 10;"),
+        HBOX("hbox", "screen-area-hbox", "-fx-background-color: transparent; -fx-spacing: 10; -fx-alignment: center-left;"),
+        VBOX("vbox", "screen-area-vbox", "-fx-background-color: transparent; -fx-spacing: 10; -fx-alignment: top-center;"),
+        TILEPANE("tilepane", "screen-area-tilepane", "-fx-background-color: transparent; -fx-hgap: 5; -fx-vgap: 5;"),
         
         // Containers
-        SCROLLPANE("scrollpane", "-fx-background-color: transparent; -fx-fit-to-width: true;"),
-        SPLITPANE("splitpane", "-fx-background-color: transparent;"),
-        TABPANE("tabpane", "-fx-background-color: transparent;"),
-        TAB("tab", ""),
-        ACCORDION("accordion", "-fx-background-color: transparent;"),
-        TITLEDPANE("titledpane", "-fx-background-color: transparent;"),
+        SCROLLPANE("scrollpane", "screen-area-scrollpane", "-fx-background-color: transparent; -fx-fit-to-width: true;"),
+        SPLITPANE("splitpane", "screen-area-splitpane", "-fx-background-color: transparent;"),
+        TABPANE("tabpane", "screen-area-tabpane", "-fx-background-color: transparent;"),
+        TAB("tab", "screen-area-tab", ""),
+        ACCORDION("accordion", "screen-area-accordion", "-fx-background-color: transparent;"),
+        TITLEDPANE("titledpane", "screen-area-titledpane", "-fx-background-color: transparent;"),
         
         // Special
-        GROUP("group", ""),
-        REGION("region", "-fx-background-color: transparent;"),
-        CANVAS("canvas", ""),
+        GROUP("group", "screen-area-group", ""),
+        REGION("region", "screen-area-region", "-fx-background-color: transparent;"),
+        CANVAS("canvas", "screen-area-canvas", ""),
         
         // Default fallback
-        CUSTOM("custom", "");
+        CUSTOM("custom", "screen-area-custom", "");
+        
+        public static final String CSS_FILE = "/css/screen-areas.css";
         
         private final String typeName;
+        private final String cssClass;
         private final String defaultStyle;
         
-        AreaType(String typeName, String defaultStyle) {
+        AreaType(String typeName, String cssClass, String defaultStyle) {
             this.typeName = typeName;
+            this.cssClass = cssClass;
             this.defaultStyle = defaultStyle;
         }
         
         public String getTypeName() {
             return typeName;
+        }
+        
+        public String getCssClass() {
+            return cssClass;
         }
         
         public String getDefaultStyle() {
@@ -1768,6 +1779,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         String name;                          // Area name/identifier
         AreaType areaType;                    // Area type enum
         String type;                          // Area type string (for compatibility)
+        String cssClass;                      // CSS class name from enum
         String layout;                        // Layout configuration
         String style;                         // Style string (defaults to areaType's default)
         String screenName;                    // Associated screen name
@@ -1778,6 +1790,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             return "AreaDefinition{" +
                    "name='" + name + '\'' +
                    ", areaType=" + areaType +
+                   ", cssClass='" + cssClass + '\'' +
                    ", layout='" + layout + '\'' +
                    ", style='" + style + '\'' +
                    ", items=" + items.size() +

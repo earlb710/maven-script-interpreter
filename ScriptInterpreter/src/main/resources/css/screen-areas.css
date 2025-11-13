@@ -1,0 +1,381 @@
+/**
+ * Default Styles for Screen Area Types
+ * This CSS file defines default styling for all JavaFX container types
+ * used in the screen keyword's area definitions.
+ */
+
+/* ==================== Layout Panes ==================== */
+
+/* Generic Pane */
+.screen-area-pane {
+    -fx-background-color: transparent;
+}
+
+/* StackPane - Center-aligned stacking */
+.screen-area-stackpane {
+    -fx-background-color: transparent;
+    -fx-alignment: center;
+}
+
+/* AnchorPane - Anchor-based positioning */
+.screen-area-anchorpane {
+    -fx-background-color: transparent;
+}
+
+/* BorderPane - Five-region layout */
+.screen-area-borderpane {
+    -fx-background-color: transparent;
+}
+
+/* FlowPane - Flowing layout with gaps */
+.screen-area-flowpane {
+    -fx-background-color: transparent;
+    -fx-hgap: 5;
+    -fx-vgap: 5;
+}
+
+/* GridPane - Grid layout with gaps */
+.screen-area-gridpane {
+    -fx-background-color: transparent;
+    -fx-hgap: 10;
+    -fx-vgap: 10;
+    -fx-padding: 10;
+}
+
+/* HBox - Horizontal box with spacing */
+.screen-area-hbox {
+    -fx-background-color: transparent;
+    -fx-spacing: 10;
+    -fx-alignment: center-left;
+    -fx-padding: 5;
+}
+
+/* VBox - Vertical box with spacing */
+.screen-area-vbox {
+    -fx-background-color: transparent;
+    -fx-spacing: 10;
+    -fx-alignment: top-center;
+    -fx-padding: 5;
+}
+
+/* TilePane - Tile layout with gaps */
+.screen-area-tilepane {
+    -fx-background-color: transparent;
+    -fx-hgap: 5;
+    -fx-vgap: 5;
+    -fx-padding: 5;
+}
+
+/* ==================== Containers ==================== */
+
+/* ScrollPane - Scrollable container */
+.screen-area-scrollpane {
+    -fx-background-color: transparent;
+    -fx-fit-to-width: true;
+    -fx-fit-to-height: false;
+}
+
+.screen-area-scrollpane > .viewport {
+    -fx-background-color: transparent;
+}
+
+/* SplitPane - Resizable split view */
+.screen-area-splitpane {
+    -fx-background-color: transparent;
+}
+
+/* TabPane - Tab container */
+.screen-area-tabpane {
+    -fx-background-color: transparent;
+}
+
+.screen-area-tabpane .tab-header-area {
+    -fx-padding: 5 5 0 5;
+}
+
+.screen-area-tabpane .tab {
+    -fx-background-color: #e0e0e0;
+    -fx-background-radius: 5 5 0 0;
+    -fx-padding: 5 10 5 10;
+}
+
+.screen-area-tabpane .tab:selected {
+    -fx-background-color: #ffffff;
+}
+
+.screen-area-tabpane .tab-content-area {
+    -fx-background-color: #ffffff;
+    -fx-padding: 10;
+}
+
+/* Individual Tab */
+.screen-area-tab {
+    -fx-background-color: transparent;
+    -fx-padding: 10;
+}
+
+/* Accordion - Collapsible sections */
+.screen-area-accordion {
+    -fx-background-color: transparent;
+}
+
+.screen-area-accordion .titled-pane > .title {
+    -fx-background-color: #f0f0f0;
+    -fx-padding: 5 10 5 10;
+}
+
+.screen-area-accordion .titled-pane > .content {
+    -fx-background-color: #ffffff;
+    -fx-padding: 10;
+}
+
+/* TitledPane - Titled collapsible pane */
+.screen-area-titledpane {
+    -fx-background-color: transparent;
+}
+
+.screen-area-titledpane > .title {
+    -fx-background-color: #f5f5f5;
+    -fx-padding: 5 10 5 10;
+    -fx-font-weight: bold;
+}
+
+.screen-area-titledpane > .content {
+    -fx-background-color: #ffffff;
+    -fx-padding: 10;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 0 1 1 1;
+}
+
+/* ==================== Special ==================== */
+
+/* Group - Group container */
+.screen-area-group {
+    /* Groups don't have direct styling */
+}
+
+/* Region - Base region */
+.screen-area-region {
+    -fx-background-color: transparent;
+}
+
+/* Canvas - Drawing canvas */
+.screen-area-canvas {
+    -fx-background-color: white;
+}
+
+/* ==================== Form Elements in Areas ==================== */
+
+/* TextField in screen areas */
+.screen-area .text-field {
+    -fx-padding: 5 10 5 10;
+    -fx-background-color: white;
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+}
+
+.screen-area .text-field:focused {
+    -fx-border-color: #4a90e2;
+    -fx-border-width: 2;
+}
+
+/* TextArea in screen areas */
+.screen-area .text-area {
+    -fx-padding: 5 10 5 10;
+    -fx-background-color: white;
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+}
+
+.screen-area .text-area:focused {
+    -fx-border-color: #4a90e2;
+    -fx-border-width: 2;
+}
+
+/* CheckBox in screen areas */
+.screen-area .check-box {
+    -fx-padding: 5;
+}
+
+/* ComboBox in screen areas */
+.screen-area .combo-box {
+    -fx-padding: 5 10 5 10;
+    -fx-background-color: white;
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+}
+
+/* Spinner in screen areas */
+.screen-area .spinner {
+    -fx-padding: 5 10 5 10;
+}
+
+/* Slider in screen areas */
+.screen-area .slider {
+    -fx-padding: 5 10 5 10;
+}
+
+/* ==================== Labels and Text ==================== */
+
+.screen-area .label {
+    -fx-padding: 2 5 2 5;
+    -fx-font-size: 13px;
+}
+
+.screen-area .label.mandatory {
+    -fx-font-weight: bold;
+}
+
+.screen-area .label.mandatory:after {
+    content: " *";
+    -fx-fill: red;
+}
+
+/* ==================== Buttons ==================== */
+
+.screen-area .button {
+    -fx-padding: 8 15 8 15;
+    -fx-background-color: #4a90e2;
+    -fx-text-fill: white;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+    -fx-cursor: hand;
+}
+
+.screen-area .button:hover {
+    -fx-background-color: #357abd;
+}
+
+.screen-area .button:pressed {
+    -fx-background-color: #2a5f8f;
+}
+
+/* ==================== Separators ==================== */
+
+.screen-area .separator {
+    -fx-padding: 5 0 5 0;
+}
+
+/* ==================== Custom Area Styles ==================== */
+
+/* Custom background for content areas */
+.screen-area-content {
+    -fx-background-color: #f9f9f9;
+    -fx-padding: 15;
+}
+
+/* Custom background for header areas */
+.screen-area-header {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 10;
+}
+
+/* Custom background for footer areas */
+.screen-area-footer {
+    -fx-background-color: #f5f5f5;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1 0 0 0;
+    -fx-padding: 10;
+}
+
+/* Custom background for sidebar areas */
+.screen-area-sidebar {
+    -fx-background-color: #f0f0f0;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 0 1 0 0;
+    -fx-padding: 10;
+}
+
+/* ==================== Responsive Utilities ==================== */
+
+/* Compact spacing for smaller screens */
+.screen-area-compact .vbox,
+.screen-area-compact .hbox {
+    -fx-spacing: 5;
+    -fx-padding: 3;
+}
+
+.screen-area-compact .gridpane {
+    -fx-hgap: 5;
+    -fx-vgap: 5;
+    -fx-padding: 5;
+}
+
+/* Spacious layout for larger screens */
+.screen-area-spacious .vbox,
+.screen-area-spacious .hbox {
+    -fx-spacing: 15;
+    -fx-padding: 10;
+}
+
+.screen-area-spacious .gridpane {
+    -fx-hgap: 15;
+    -fx-vgap: 15;
+    -fx-padding: 15;
+}
+
+/* ==================== Theme Support ==================== */
+
+/* Light theme (default) */
+.screen-area-light {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #333333;
+}
+
+/* Dark theme */
+.screen-area-dark {
+    -fx-background-color: #2b2b2b;
+    -fx-text-fill: #e0e0e0;
+}
+
+.screen-area-dark .text-field,
+.screen-area-dark .text-area,
+.screen-area-dark .combo-box {
+    -fx-background-color: #3c3c3c;
+    -fx-text-fill: #e0e0e0;
+    -fx-border-color: #555555;
+}
+
+.screen-area-dark .label {
+    -fx-text-fill: #e0e0e0;
+}
+
+/* ==================== Animation Classes ==================== */
+
+/* Fade in animation */
+@keyframes fadeIn {
+    from {
+        -fx-opacity: 0;
+    }
+    to {
+        -fx-opacity: 1;
+    }
+}
+
+.screen-area-fade-in {
+    -fx-animation: fadeIn 0.3s ease-in;
+}
+
+/* Slide in animation */
+@keyframes slideIn {
+    from {
+        -fx-translate-y: -20;
+        -fx-opacity: 0;
+    }
+    to {
+        -fx-translate-y: 0;
+        -fx-opacity: 1;
+    }
+}
+
+.screen-area-slide-in {
+    -fx-animation: slideIn 0.3s ease-out;
+}
