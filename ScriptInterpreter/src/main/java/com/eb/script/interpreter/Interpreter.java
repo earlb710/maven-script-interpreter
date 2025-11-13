@@ -49,9 +49,8 @@ import com.eb.script.interpreter.statement.WhileStatement;
 import com.eb.script.interpreter.statement.ScreenStatement;
 import com.eb.script.token.ebs.EbsTokenType;
 import com.eb.script.interpreter.DisplayMetadata.InputItemType;
-import com.eb.script.interpreter.DisplayMetadata.AreaType;
-import com.eb.script.interpreter.DisplayMetadata.AreaDefinition;
-import com.eb.script.interpreter.DisplayMetadata.AreaItem;
+import com.eb.script.interpreter.AreaDefinition.AreaType;
+import com.eb.script.interpreter.AreaDefinition.AreaItem;
 import com.eb.ui.cli.ScriptArea;
 import javafx.application.Platform;
 import javafx.stage.Stage;
@@ -1547,6 +1546,17 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
      * Helper method to store display metadata for a variable
      */
     private void storeDisplayMetadata(String varName, Map<String, Object> displayDef, String screenName) {
+        DisplayMetadata metadata = parseDisplayMetadata(displayDef, screenName);
+        
+        // Store the metadata using a composite key: screenName.varName
+        String key = screenName + "." + varName;
+        displayMetadata.put(key, metadata);
+    }
+    
+    /**
+     * Helper method to parse display metadata from a definition map
+     */
+    private DisplayMetadata parseDisplayMetadata(Map<String, Object> displayDef, String screenName) {
         DisplayMetadata metadata = new DisplayMetadata();
         
         // Extract display type and convert to enum
@@ -1590,9 +1600,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         
         metadata.screenName = screenName;
         
-        // Store the metadata using a composite key: screenName.varName
-        String key = screenName + "." + varName;
-        displayMetadata.put(key, metadata);
+        return metadata;
     }
     
     /**
@@ -1673,6 +1681,21 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                         } else if (itemDef.containsKey("var_ref")) {
                             item.varRef = String.valueOf(itemDef.get("var_ref"));
                         }
+                        
+                        // Process optional display metadata for the item
+                        // If not provided, the item will use the DisplayMetadata from varRef
+                        if (itemDef.containsKey("display")) {
+                            Object displayObj = itemDef.get("display");
+                            if (displayObj instanceof Map) {
+                                @SuppressWarnings("unchecked")
+                                Map<String, Object> displayDef = (Map<String, Object>) displayObj;
+                                
+                                // Parse display metadata for this specific item
+                                item.displayMetadata = parseDisplayMetadata(displayDef, screenName);
+                            }
+                        }
+                        // If displayMetadata is not set here, it will remain null
+                        // and the consuming code should fall back to using varRef's DisplayMetadata
                         
                         area.items.add(item);
                     }
