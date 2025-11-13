@@ -126,6 +126,15 @@ public class AutocompleteSuggestions {
             return getSuggestionsWithPrefix(getConsoleCommandSuggestions(), currentWord);
         }
 
+        // Check if we're after a '/help ' or '/? ' command - show all keywords and builtins
+        String trimmedBefore = beforeCaret.trim().toLowerCase();
+        if (trimmedBefore.startsWith("/help ") || trimmedBefore.startsWith("/? ")) {
+            // Combine keywords and builtins for /help autocomplete
+            List<String> helpSuggestions = new ArrayList<>(KEYWORDS);
+            helpSuggestions.addAll(Builtins.getBuiltins());
+            return getSuggestionsWithPrefix(helpSuggestions, currentWord);
+        }
+
         // Tokenize to find the context
         List<EbsToken> tokens = EbsStyled.tokenizeConsole(beforeCaret);
 
