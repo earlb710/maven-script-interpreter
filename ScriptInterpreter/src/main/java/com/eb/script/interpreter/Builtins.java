@@ -629,7 +629,8 @@ public final class Builtins {
         ));
 
         addBuiltin(info(
-                "system.help", DataType.JSON // no parameters; returns a JSON summary
+                "system.help", DataType.STRING, // returns help text as string
+                newParam("keyword", DataType.STRING, false) // optional keyword/builtin name
         ));
 // ==========================
 // AI builtins
@@ -1527,6 +1528,14 @@ public final class Builtins {
             }
 
             case "system.help" -> {
+                // Check if a specific keyword/builtin was requested
+                String keyword = args.length > 0 && args[0] != null ? args[0].toString() : null;
+                
+                if (keyword != null && !keyword.isEmpty()) {
+                    // Return detailed help for the specific keyword/builtin
+                    return getDetailedHelp(keyword);
+                }
+                
                 // --- Collect keywords/operators/datatypes directly from Token.Type ---
                 final java.util.Set<String> keywords = new java.util.TreeSet<>();
                 final java.util.Set<String> operators = new java.util.TreeSet<>();
@@ -1890,5 +1899,129 @@ public final class Builtins {
             ret.append(" : ").append(Util.stringifyShort(retValue));
         }
         return ret.toString();
+    }
+
+    /**
+     * Get detailed help for a specific keyword or builtin.
+     * Returns formatted help text similar to /help <keyword> command.
+     */
+    private static String getDetailedHelp(String itemName) {
+        try {
+            // Load system-lookup.json from resources
+            java.io.InputStream is = Builtins.class.getClassLoader().getResourceAsStream("system-lookup.json");
+            if (is == null) {
+                return "Help system not available (system-lookup.json not found)";
+            }
+            
+            String jsonContent = new String(is.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            is.close();
+            
+            // Parse JSON
+            Map<String, Object> lookup = (Map<String, Object>) Json.parse(jsonContent);
+            
+            // Search in keywords first
+            ArrayDynamic keywords = (ArrayDynamic) lookup.get("keywords");
+            if (keywords != null) {
+                for (Object keywordObj : keywords) {
+                    Map<String, Object> keyword = (Map<String, Object>) keywordObj;
+                    String kwName = (String) keyword.get("keyword");
+                    if (kwName != null && kwName.equalsIgnoreCase(itemName)) {
+                        return formatHelpEntry(kwName, keyword, "Keyword");
+                    }
+                }
+            }
+            
+            // Search in builtins
+            ArrayDynamic builtins = (ArrayDynamic) lookup.get("builtins");
+            if (builtins != null) {
+                for (Object builtinObj : builtins) {
+                    Map<String, Object> builtin = (Map<String, Object>) builtinObj;
+                    String funcName = (String) builtin.get("function");
+                    if (funcName != null && funcName.equalsIgnoreCase(itemName)) {
+                        return formatHelpEntry(funcName, builtin, "Builtin Function");
+                    }
+                }
+            }
+            
+            // Not found
+            return "No help found for: " + itemName + "\nUse system.help() or /help keywords to see all available keywords and builtins.";
+            
+        } catch (Exception ex) {
+            return "Error loading help: " + ex.getMessage();
+        }
+    }
+
+    /**
+     * Format a help entry as plain text (similar to displayHelpEntry but returns string).
+     */
+    private static String formatHelpEntry(String name, Map<String, Object> entry, String type) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("═══════════════════════════════════════════════════════════\n");
+        sb.append(type).append(": ").append(name).append("\n");
+        sb.append("═══════════════════════════════════════════════════════════\n");
+        
+        String shortDesc = (String) entry.get("short_description");
+        if (shortDesc != null && !shortDesc.isEmpty()) {
+            sb.append("Description: ").append(shortDesc).append("\n\n");
+        }
+        
+        // For builtins, show parameters and return type
+        if (entry.containsKey("parameters")) {
+            ArrayDynamic params = (ArrayDynamic) entry.get("parameters");
+            if (params != null && !params.isEmpty()) {
+                StringBuilder paramStr = new StringBuilder();
+                boolean first = true;
+                for (Object param : params) {
+                    if (!first) {
+                        paramStr.append(", ");
+                    }
+                    if (param instanceof Map) {
+                        Map<String, Object> paramMap = (Map<String, Object>) param;
+                        String paramName = (String) paramMap.get("name");
+                        String paramType = (String) paramMap.get("type");
+                        Boolean optional = (Boolean) paramMap.get("optional");
+                        if (paramName != null) {
+                            paramStr.append(paramName);
+                            if (paramType != null && !paramType.isEmpty()) {
+                                paramStr.append(":").append(paramType);
+                            }
+                            if (Boolean.TRUE.equals(optional)) {
+                                paramStr.append("?");
+                            }
+                        }
+                    } else {
+                        paramStr.append(param.toString());
+                    }
+                    first = false;
+                }
+                sb.append("Parameters: ").append(paramStr.toString()).append("\n");
+            }
+        }
+        
+        if (entry.containsKey("return_type")) {
+            String returnType = (String) entry.get("return_type");
+            if (returnType != null && !returnType.isEmpty()) {
+                sb.append("Returns: ").append(returnType).append("\n");
+            }
+        }
+        
+        if (entry.containsKey("parameters") || entry.containsKey("return_type")) {
+            sb.append("\n");
+        }
+        
+        String longHelp = (String) entry.get("long_help");
+        if (longHelp != null && !longHelp.isEmpty()) {
+            sb.append("Details:\n");
+            sb.append(longHelp).append("\n\n");
+        }
+        
+        String example = (String) entry.get("example");
+        if (example != null && !example.isEmpty()) {
+            sb.append("Example:\n");
+            sb.append(example).append("\n");
+        }
+        
+        sb.append("═══════════════════════════════════════════════════════════\n");
+        return sb.toString();
     }
 }

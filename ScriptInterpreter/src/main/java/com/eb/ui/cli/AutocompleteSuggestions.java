@@ -16,7 +16,8 @@ import java.util.stream.Collectors;
 /**
  * Provides autocomplete suggestions for keywords, builtins, and console
  * commands. Filters suggestions based on context (e.g., only builtins after
- * 'call' or '#', console commands when input starts with '/').
+ * 'call' or '#', console commands when input starts with '/', all keywords
+ * and builtins after '/help ' or '/? ').
  *
  * @author Earl Bosch
  */
@@ -110,8 +111,9 @@ public class AutocompleteSuggestions {
 
     /**
      * Determine what suggestions to show based on the current input context.
-     * Returns console commands if the token starts with '/', builtins after
-     * 'call' or '#', otherwise returns only keywords.
+     * Returns console commands if the token starts with '/', all keywords and 
+     * builtins after '/help ' or '/? ', builtins after 'call' or '#', 
+     * otherwise returns only keywords.
      */
     public static List<String> getSuggestionsForContext(String text, int caretPosition) {
         // Get the text before the caret
@@ -119,6 +121,28 @@ public class AutocompleteSuggestions {
 
         // Find the word at caret position
         String currentWord = getCurrentWord(beforeCaret);
+
+        // Check if we're after a '/help ' or '/? ' command - show all keywords and builtins
+        // This check needs to come BEFORE the general console command check
+        String lowerBefore = beforeCaret.toLowerCase();
+        // Check if the line starts with /help or /? followed by space or if we're at the end after /help or /?
+        boolean afterHelp = lowerBefore.startsWith("/help ") || lowerBefore.startsWith("/? ");
+        // Also match if the text is exactly "/help" or "/?" (user might autocomplete right after the command)
+        if (!afterHelp && (lowerBefore.equals("/help") || lowerBefore.equals("/?"))) {
+            afterHelp = true;
+        }
+        
+        if (afterHelp) {
+            // Combine keywords and builtins for /help autocomplete
+            List<String> helpSuggestions = new ArrayList<>(KEYWORDS);
+            helpSuggestions.addAll(Builtins.getBuiltins());
+            // Sort the combined list
+            helpSuggestions = helpSuggestions.stream()
+                    .distinct()
+                    .sorted()
+                    .collect(Collectors.toList());
+            return getSuggestionsWithPrefix(helpSuggestions, currentWord);
+        }
 
         // Check if the current line starts with '/' (console command)
         if (currentWord.startsWith("/")) {

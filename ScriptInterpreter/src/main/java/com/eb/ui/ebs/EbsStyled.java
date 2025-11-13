@@ -102,9 +102,9 @@ public class EbsStyled {
             if (end > totalLength) {
                 end = totalLength;  // clip
             }
-            // Fill gap (unstyled)
+            // Fill gap (unstyled) - use "info" style for default appearance
             if (start > last) {
-                spans.add(Collections.emptyList(), start - last);
+                spans.add(Collections.singleton("info"), start - last);
                 count++;
             }
             // Apply the token's CSS class
@@ -119,9 +119,9 @@ public class EbsStyled {
             last = end;
         }
 
-        // Trailing gap
+        // Trailing gap - use "info" style for default appearance
         if (last < totalLength) {
-            spans.add(Collections.emptyList(), totalLength - last);
+            spans.add(Collections.singleton("info"), totalLength - last);
             count++;
         }
         if (count > 0) {

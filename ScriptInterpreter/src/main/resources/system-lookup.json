@@ -5,8 +5,8 @@
     {
       "keyword": "var",
       "short_description": "Declares a variable",
-      "long_help": "The 'var' keyword is used to declare a new variable. Variables can hold values of any data type including strings, numbers, booleans, JSON objects, and arrays.",
-      "example": "var myName = \"John\";\nvar age = 25;\nvar isActive = true;"
+      "long_help": "The 'var' keyword is used to declare a new variable. Variables can hold values of any data type including strings, numbers, booleans, JSON objects, and arrays. You can optionally specify the data type using the syntax 'var name:type = value;' (e.g., var x:int=10;).",
+      "example": "var myName = \"John\";\nvar age = 25;\nvar isActive = true;\nvar x:int = 10;\nvar count:long = 1000000;"
     },
     {
       "keyword": "print",
