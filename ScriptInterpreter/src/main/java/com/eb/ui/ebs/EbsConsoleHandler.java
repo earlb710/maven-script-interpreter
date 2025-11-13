@@ -329,14 +329,28 @@ public class EbsConsoleHandler extends EbsHandler {
         if (entry.containsKey("parameters")) {
             ArrayDynamic params = (ArrayDynamic) entry.get("parameters");
             if (params != null && !params.isEmpty()) {
-                // Convert ArrayDynamic to comma-separated string
+                // Convert ArrayDynamic to comma-separated string with name:type format
                 StringBuilder paramStr = new StringBuilder();
                 boolean first = true;
                 for (Object param : params) {
                     if (!first) {
                         paramStr.append(", ");
                     }
-                    paramStr.append(param.toString());
+                    // Handle both old string format and new map format
+                    if (param instanceof Map) {
+                        Map<String, Object> paramMap = (Map<String, Object>) param;
+                        String paramName = (String) paramMap.get("name");
+                        String paramType = (String) paramMap.get("type");
+                        if (paramName != null) {
+                            paramStr.append(paramName);
+                            if (paramType != null && !paramType.isEmpty()) {
+                                paramStr.append(":").append(paramType);
+                            }
+                        }
+                    } else {
+                        // Fallback for old string format
+                        paramStr.append(param.toString());
+                    }
                     first = false;
                 }
                 output.println("<b>Parameters:</b> " + paramStr.toString());
