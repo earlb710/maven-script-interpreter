@@ -68,6 +68,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     private final java.util.Map<String, DbConnection> connections = new java.util.HashMap<>();
     private final java.util.Map<String, CursorSpec> cursorSpecs = new java.util.HashMap<>();
     private final java.util.Map<String, Stage> screens = new java.util.HashMap<>();
+    private final java.util.Map<String, DisplayMetadata> displayMetadata = new java.util.HashMap<>();
     private final java.util.Deque<String> connectionStack = new java.util.ArrayDeque<>();
     private DbAdapter db = new OracleDbAdapter();
     private ScriptArea output;
@@ -1422,6 +1423,18 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                                 value = varType.convertValue(value);
                             }
                             
+                            // Process optional display metadata
+                            if (varDef.containsKey("display")) {
+                                Object displayObj = varDef.get("display");
+                                if (displayObj instanceof Map) {
+                                    @SuppressWarnings("unchecked")
+                                    Map<String, Object> displayDef = (Map<String, Object>) displayObj;
+                                    
+                                    // Store display metadata for the variable
+                                    storeDisplayMetadata(varName, displayDef, stmt.name);
+                                }
+                            }
+                            
                             // Define the variable in the environment
                             environment.getEnvironmentValues().define(varName, value);
                         }
@@ -1498,6 +1511,72 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 return DataType.JSON;
             default:
                 return null;
+        }
+    }
+    
+    /**
+     * Helper method to store display metadata for a variable
+     */
+    private void storeDisplayMetadata(String varName, Map<String, Object> displayDef, String screenName) {
+        DisplayMetadata metadata = new DisplayMetadata();
+        
+        // Extract display properties
+        if (displayDef.containsKey("type")) {
+            metadata.type = String.valueOf(displayDef.get("type"));
+        }
+        
+        if (displayDef.containsKey("mandatory")) {
+            Object mandatoryObj = displayDef.get("mandatory");
+            if (mandatoryObj instanceof Boolean) {
+                metadata.mandatory = (Boolean) mandatoryObj;
+            }
+        }
+        
+        if (displayDef.containsKey("case")) {
+            metadata.caseFormat = String.valueOf(displayDef.get("case")).toLowerCase();
+        }
+        
+        if (displayDef.containsKey("min")) {
+            metadata.min = displayDef.get("min");
+        }
+        
+        if (displayDef.containsKey("max")) {
+            metadata.max = displayDef.get("max");
+        }
+        
+        if (displayDef.containsKey("style")) {
+            metadata.style = String.valueOf(displayDef.get("style"));
+        }
+        
+        metadata.screenName = screenName;
+        
+        // Store the metadata using a composite key: screenName.varName
+        String key = screenName + "." + varName;
+        displayMetadata.put(key, metadata);
+    }
+    
+    /**
+     * Inner class to hold display metadata for variables
+     */
+    static class DisplayMetadata {
+        String type;              // JavaFX input item type (e.g., "textfield", "textarea", "checkbox", etc.)
+        boolean mandatory = false; // Whether the field is mandatory
+        String caseFormat;        // Case handling: "upper", "lower", "title"
+        Object min;               // Minimum value constraint
+        Object max;               // Maximum value constraint
+        String style;             // CSS style string
+        String screenName;        // Associated screen name
+        
+        @Override
+        public String toString() {
+            return "DisplayMetadata{" +
+                   "type='" + type + '\'' +
+                   ", mandatory=" + mandatory +
+                   ", case='" + caseFormat + '\'' +
+                   ", min=" + min +
+                   ", max=" + max +
+                   ", style='" + style + '\'' +
+                   '}';
         }
     }
 
