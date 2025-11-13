@@ -1606,7 +1606,7 @@ public final class Builtins {
                             String ptype = (String) pm.get("type");
                             boolean mand = Boolean.TRUE.equals(pm.get("mandatory"));
                             boolean arr = Boolean.TRUE.equals(pm.get("array"));
-                            sb.append(pname).append(":").append(ptype == null ? "ANY" : ptype);
+                            sb.append(pname).append(":").append(ptype == null ? "any" : ptype.toLowerCase());
                             if (arr) {
                                 sb.append("[]");
                             }
@@ -1618,7 +1618,8 @@ public final class Builtins {
                             }
                         }
                     }
-                    sb.append(") : ").append(bi.get("returnType")).append('\n');
+                    String returnType = (String) bi.get("returnType");
+                    sb.append(") : ").append(returnType == null ? "null" : returnType.toLowerCase()).append('\n');
                 }
                 final String text = sb.toString();
 
