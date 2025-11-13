@@ -181,7 +181,7 @@
     {
       "function": "file.readTextFile",
       "short_description": "Reads text file contents",
-      "long_help": "Reads the entire contents of a text file and returns it as a string. The file must be in a safe directory or the script's own directory.",
+      "long_help": "Reads the entire contents of a text file and returns it as a string. The file must be in a safe directory or the<br>script's own directory.",
       "parameters": [
         {
           "name": "path",
@@ -194,7 +194,7 @@
     {
       "function": "file.writeTextFile",
       "short_description": "Writes text to a file",
-      "long_help": "Writes the given text content to a file. Creates the file if it doesn't exist, overwrites if it does. The file must be in a safe directory.",
+      "long_help": "Writes the given text content to a file. Creates the file if it doesn't exist, overwrites if it does. The file must be<br>in a safe directory.",
       "parameters": [
         {
           "name": "path",
@@ -495,7 +495,7 @@
     {
       "function": "json.getString",
       "short_description": "Gets string from JSON path",
-      "long_help": "Retrieves a string value from a JSON object using a dot-notation path. Returns a default value if the path doesn't exist.",
+      "long_help": "Retrieves a string value from a JSON object using a dot-notation path. Returns a default value if the path doesn't<br>exist.",
       "parameters": [
         {
           "name": "root",
@@ -517,7 +517,7 @@
     {
       "function": "json.getInt",
       "short_description": "Gets integer from JSON path",
-      "long_help": "Retrieves an integer value from a JSON object using a dot-notation path. Returns a default value if the path doesn't exist.",
+      "long_help": "Retrieves an integer value from a JSON object using a dot-notation path. Returns a default value if the path doesn't<br>exist.",
       "parameters": [
         {
           "name": "root",
@@ -539,7 +539,7 @@
     {
       "function": "json.getBool",
       "short_description": "Gets boolean from JSON path",
-      "long_help": "Retrieves a boolean value from a JSON object using a dot-notation path. Returns a default value if the path doesn't exist.",
+      "long_help": "Retrieves a boolean value from a JSON object using a dot-notation path. Returns a default value if the path doesn't<br>exist.",
       "parameters": [
         {
           "name": "root",
@@ -561,7 +561,7 @@
     {
       "function": "json.set",
       "short_description": "Sets value in JSON object",
-      "long_help": "Sets a value at the specified path in a JSON object. Creates intermediate objects as needed. Returns the modified JSON object.",
+      "long_help": "Sets a value at the specified path in a JSON object. Creates intermediate objects as needed. Returns the modified JSON<br>object.",
       "parameters": [
         {
           "name": "root",
@@ -612,7 +612,7 @@
     {
       "function": "json.registerScheme",
       "short_description": "Registers a JSON schema",
-      "long_help": "Registers a JSON schema with a given name for later validation. The schema defines the expected structure, types, and constraints for JSON data.",
+      "long_help": "Registers a JSON schema with a given name for later validation. The schema defines the expected structure, types, and<br>constraints for JSON data.",
       "parameters": [
         {
           "name": "name",
@@ -629,7 +629,7 @@
     {
       "function": "json.deriveScheme",
       "short_description": "Derives schema from JSON",
-      "long_help": "Analyzes a JSON object and generates a schema that describes its structure. Optionally calculates length constraints for strings and arrays.",
+      "long_help": "Analyzes a JSON object and generates a schema that describes its structure. Optionally calculates length constraints for<br>strings and arrays.",
       "parameters": [
         {
           "name": "json",
@@ -646,7 +646,7 @@
     {
       "function": "json.validate",
       "short_description": "Validates JSON against schema",
-      "long_help": "Validates a JSON object against a registered schema. Returns a list of validation errors, or an empty list if validation succeeds.",
+      "long_help": "Validates a JSON object against a registered schema. Returns a list of validation errors, or an empty list if validation<br>succeeds.",
       "parameters": [
         {
           "name": "schemaName",
@@ -1054,7 +1054,7 @@
     {
       "function": "http.get",
       "short_description": "Performs HTTP GET request",
-      "long_help": "Executes an HTTP GET request to the specified URL. Returns a JSON envelope containing status, headers, and body. Optional headers can be provided as a JSON object. Timeout is in milliseconds.",
+      "long_help": "Executes an HTTP GET request to the specified URL. Returns a JSON envelope containing status, headers, and body.<br>Optional headers can be provided as a JSON object. Timeout is in milliseconds.",
       "parameters": [
         {
           "name": "url",
@@ -1077,7 +1077,7 @@
     {
       "function": "http.post",
       "short_description": "Performs HTTP POST request",
-      "long_help": "Executes an HTTP POST request with optional body content. Returns a JSON envelope with status, headers, and body. Headers are optional JSON object. Body is sent as-is.",
+      "long_help": "Executes an HTTP POST request with optional body content. Returns a JSON envelope with status, headers, and body.<br>Headers are optional JSON object. Body is sent as-is.",
       "parameters": [
         {
           "name": "url",
@@ -1104,7 +1104,7 @@
     {
       "function": "http.getJson",
       "short_description": "Gets JSON from HTTP endpoint",
-      "long_help": "Performs HTTP GET and automatically parses the response body as JSON. Throws an error if response is not valid JSON. Returns the parsed JSON directly (not wrapped in envelope).",
+      "long_help": "Performs HTTP GET and automatically parses the response body as JSON. Throws an error if response is not valid JSON.<br>Returns the parsed JSON directly (not wrapped in envelope).",
       "parameters": [
         {
           "name": "url",
@@ -1127,7 +1127,7 @@
     {
       "function": "http.postJson",
       "short_description": "Posts JSON to HTTP endpoint",
-      "long_help": "Performs HTTP POST with JSON body and parses the JSON response. Automatically serializes the jsonBody parameter and sets Content-Type header. Returns parsed JSON response.",
+      "long_help": "Performs HTTP POST with JSON body and parses the JSON response. Automatically serializes the jsonBody parameter and sets<br>Content-Type header. Returns parsed JSON response.",
       "parameters": [
         {
           "name": "url",
@@ -1177,7 +1177,7 @@
     {
       "function": "http.postText",
       "short_description": "Posts text to HTTP endpoint",
-      "long_help": "Performs HTTP POST with text body and returns response as plain string. The body parameter is sent as-is without JSON serialization.",
+      "long_help": "Performs HTTP POST with text body and returns response as plain string. The body parameter is sent as-is without JSON<br>serialization.",
       "parameters": [
         {
           "name": "url",
@@ -1204,7 +1204,7 @@
     {
       "function": "http.ensure2xx",
       "short_description": "Validates HTTP 2xx status",
-      "long_help": "Checks if an HTTP response has a 2xx status code. Accepts either a full response envelope or just a status code. Throws an error with optional message if status is not 2xx.",
+      "long_help": "Checks if an HTTP response has a 2xx status code. Accepts either a full response envelope or just a status code. Throws<br>an error with optional message if status is not 2xx.",
       "parameters": [
         {
           "name": "statusOrEnvelope",
@@ -1222,7 +1222,7 @@
     {
       "function": "ai.complete",
       "short_description": "Gets AI chat completion",
-      "long_help": "Calls an OpenAI-compatible API to generate text completions. Supports optional system prompt, required user prompt, and optional maxTokens and temperature parameters. Uses configuration from system properties or environment variables.",
+      "long_help": "Calls an OpenAI-compatible API to generate text completions. Supports optional system prompt, required user prompt, and<br>optional maxTokens and temperature parameters. Uses configuration from system properties or environment variables.",
       "parameters": [
         {
           "name": "system",
@@ -1268,7 +1268,7 @@
     {
       "function": "ai.embed",
       "short_description": "Gets text embeddings from AI",
-      "long_help": "Generates vector embeddings for the given text using an AI embedding model. Returns a JSON array of floating-point numbers representing the semantic meaning of the text. Useful for similarity searches and semantic analysis.",
+      "long_help": "Generates vector embeddings for the given text using an AI embedding model. Returns a JSON array of floating-point<br>numbers representing the semantic meaning of the text. Useful for similarity searches and semantic analysis.",
       "parameters": [
         {
           "name": "text",
@@ -1281,7 +1281,7 @@
     {
       "function": "ai.classify",
       "short_description": "Classifies text using AI",
-      "long_help": "Uses AI to classify the given text into one of the provided labels. The labels parameter should be a JSON array of strings. Returns the most appropriate label.",
+      "long_help": "Uses AI to classify the given text into one of the provided labels. The labels parameter should be a JSON array of<br>strings. Returns the most appropriate label.",
       "parameters": [
         {
           "name": "text",
@@ -1298,7 +1298,7 @@
     {
       "function": "array.base64decode",
       "short_description": "Decodes a base64 string to a byte array",
-      "long_help": "Decodes a base64-encoded string and returns the decoded bytes as an array. Useful for handling binary data encoded in text format.",
+      "long_help": "Decodes a base64-encoded string and returns the decoded bytes as an array. Useful for handling binary data encoded in<br>text format.",
       "parameters": [
         {
           "name": "b64",
@@ -1341,7 +1341,7 @@
     {
       "function": "array.fill",
       "short_description": "Fills array with specified value",
-      "long_help": "Fills an array to the specified length with the given value. If value is not provided, fills with null. Modifies the array in place.",
+      "long_help": "Fills an array to the specified length with the given value. If value is not provided, fills with null. Modifies the<br>array in place.",
       "parameters": [
         {
           "name": "array",
@@ -1362,7 +1362,7 @@
     {
       "function": "classTree.generate",
       "short_description": "Generates class hierarchy tree",
-      "long_help": "Generates a visual class hierarchy tree from Java source files in the specified directory. If no directory is provided, uses the current directory.",
+      "long_help": "Generates a visual class hierarchy tree from Java source files in the specified directory. If no directory is provided,<br>uses the current directory.",
       "parameters": [
         {
           "name": "sourceDir",
@@ -1376,7 +1376,7 @@
     {
       "function": "classTree.scan",
       "short_description": "Scans and analyzes class structure",
-      "long_help": "Scans Java source files in the specified directory and analyzes the class structure. Returns metadata about classes, interfaces, and their relationships.",
+      "long_help": "Scans Java source files in the specified directory and analyzes the class structure. Returns metadata about classes,<br>interfaces, and their relationships.",
       "parameters": [
         {
           "name": "sourceDir",
@@ -1390,7 +1390,7 @@
     {
       "function": "debug.assertEquals",
       "short_description": "Asserts two values are equal",
-      "long_help": "Asserts that the expected and actual values are equal. Returns true if equal, false otherwise. Optionally logs a custom message on failure.",
+      "long_help": "Asserts that the expected and actual values are equal. Returns true if equal, false otherwise. Optionally logs a custom<br>message on failure.",
       "parameters": [
         {
           "name": "expected",
@@ -1412,7 +1412,7 @@
     {
       "function": "debug.file",
       "short_description": "Sets debug output file",
-      "long_help": "Sets the file path where debug output should be written. Debug messages will be appended to this file instead of console output.",
+      "long_help": "Sets the file path where debug output should be written. Debug messages will be appended to this file instead of console<br>output.",
       "parameters": [
         {
           "name": "filename",
@@ -1425,7 +1425,7 @@
     {
       "function": "debug.memUsage",
       "short_description": "Returns memory usage statistics",
-      "long_help": "Returns current memory usage statistics including used, free, and total memory. Unit parameter can be 'B', 'KB', 'MB', or 'GB'. Default is 'MB'.",
+      "long_help": "Returns current memory usage statistics including used, free, and total memory. Unit parameter can be 'B', 'KB', 'MB',<br>or 'GB'. Default is 'MB'.",
       "parameters": [
         {
           "name": "unit",
@@ -1452,7 +1452,7 @@
     {
       "function": "debug.stack",
       "short_description": "Returns current call stack",
-      "long_help": "Returns the current call stack as a JSON array. Each element contains information about a stack frame including line numbers and context.",
+      "long_help": "Returns the current call stack as a JSON array. Each element contains information about a stack frame including line<br>numbers and context.",
       "parameters": [],
       "return_type": "json",
       "example": "var stack = call debug.stack();\nforeach frame in stack {\n  print frame;\n}"
@@ -1468,7 +1468,7 @@
     {
       "function": "debug.traceOn",
       "short_description": "Enables trace mode",
-      "long_help": "Enables trace mode debugging. Trace mode logs detailed execution information including every statement and expression evaluated.",
+      "long_help": "Enables trace mode debugging. Trace mode logs detailed execution information including every statement and expression<br>evaluated.",
       "parameters": [],
       "return_type": "bool",
       "example": "call debug.traceOn();\n// Detailed execution trace will be logged"
@@ -1502,7 +1502,7 @@
     {
       "function": "file.copy",
       "short_description": "Copies a file",
-      "long_help": "Copies a file from source path to destination path. Overwrites destination if it exists. Both paths must be within safe directories.",
+      "long_help": "Copies a file from source path to destination path. Overwrites destination if it exists. Both paths must be within safe<br>directories.",
       "parameters": [
         {
           "name": "source",
@@ -1519,7 +1519,7 @@
     {
       "function": "file.eof",
       "short_description": "Checks if end of file reached",
-      "long_help": "Checks if the file pointer has reached the end of the file for the given handle. Returns true if at EOF, false otherwise.",
+      "long_help": "Checks if the file pointer has reached the end of the file for the given handle. Returns true if at EOF, false<br>otherwise.",
       "parameters": [
         {
           "name": "handle",
@@ -1558,7 +1558,7 @@
     {
       "function": "file.move",
       "short_description": "Moves or renames a file",
-      "long_help": "Moves a file from source path to destination path. Can also be used to rename files. Both paths must be within safe directories.",
+      "long_help": "Moves a file from source path to destination path. Can also be used to rename files. Both paths must be within safe<br>directories.",
       "parameters": [
         {
           "name": "source",
@@ -1575,7 +1575,7 @@
     {
       "function": "file.open",
       "short_description": "Opens a file and returns a handle",
-      "long_help": "Opens a file for reading or writing and returns a handle string. Mode can be 'r' (read), 'w' (write), or 'a' (append). Default is 'r'.",
+      "long_help": "Opens a file for reading or writing and returns a handle string. Mode can be 'r' (read), 'w' (write), or 'a' (append).<br>Default is 'r'.",
       "parameters": [
         {
           "name": "path",
@@ -1593,7 +1593,7 @@
     {
       "function": "file.openZip",
       "short_description": "Opens a ZIP file and returns a handle",
-      "long_help": "Opens a ZIP file for reading or writing. Mode can be 'r' (read) or 'w' (write). Returns a handle for subsequent ZIP operations.",
+      "long_help": "Opens a ZIP file for reading or writing. Mode can be 'r' (read) or 'w' (write). Returns a handle for subsequent ZIP<br>operations.",
       "parameters": [
         {
           "name": "path",
@@ -1649,7 +1649,7 @@
     {
       "function": "file.readln",
       "short_description": "Reads a line from file handle",
-      "long_help": "Reads and returns the next line from an open file handle. Optional encoding parameter (default: UTF-8). Returns null at EOF.",
+      "long_help": "Reads and returns the next line from an open file handle. Optional encoding parameter (default: UTF-8). Returns null at<br>EOF.",
       "parameters": [
         {
           "name": "handle",
@@ -1697,7 +1697,7 @@
     {
       "function": "file.unzip",
       "short_description": "Extracts files from ZIP archive",
-      "long_help": "Extracts files from a ZIP archive to the specified destination directory. Can optionally specify which entries to extract and whether to overwrite existing files.",
+      "long_help": "Extracts files from a ZIP archive to the specified destination directory. Can optionally specify which entries to<br>extract and whether to overwrite existing files.",
       "parameters": [
         {
           "name": "handle",
@@ -1802,7 +1802,7 @@
     {
       "function": "file.writeToTextFile",
       "short_description": "Writes text to a file",
-      "long_help": "Writes text content to a file, creating it if it doesn't exist or overwriting if it does. Similar to file.writeTextFile but different parameter name for compatibility.",
+      "long_help": "Writes text content to a file, creating it if it doesn't exist or overwriting if it does. Similar to file.writeTextFile<br>but different parameter name for compatibility.",
       "parameters": [
         {
           "name": "path",
@@ -1819,7 +1819,7 @@
     {
       "function": "file.zip",
       "short_description": "Adds files to ZIP archive",
-      "long_help": "Adds files to a ZIP archive. Requires an open ZIP file handle in write mode. Can specify source files and their archive paths.",
+      "long_help": "Adds files to a ZIP archive. Requires an open ZIP file handle in write mode. Can specify source files and their archive<br>paths.",
       "parameters": [
         {
           "name": "handle",
@@ -2161,7 +2161,7 @@
     {
       "function": "file.appendToTextFile",
       "short_description": "Appends text to a file",
-      "long_help": "Appends the specified text content to an existing file. Creates the file if it doesn't exist. The file must be within a safe directory.",
+      "long_help": "Appends the specified text content to an existing file. Creates the file if it doesn't exist. The file must be within a<br>safe directory.",
       "parameters": [
         {
           "name": "path",
@@ -2178,7 +2178,7 @@
     {
       "function": "http.is2xx",
       "short_description": "Checks if HTTP status is 2xx",
-      "long_help": "Returns true if the HTTP status code is in the 2xx range (200-299), indicating success. Accepts either a full response envelope (with 'status' field) or just a status code number.",
+      "long_help": "Returns true if the HTTP status code is in the 2xx range (200-299), indicating success. Accepts either a full response<br>envelope (with 'status' field) or just a status code number.",
       "parameters": [
         {
           "name": "statusOrEnvelope",
@@ -2191,7 +2191,7 @@
     {
       "function": "http.request",
       "short_description": "Performs HTTP request with full control",
-      "long_help": "Executes an HTTP request with full control over method, body, headers, and timeout. Returns a JSON envelope containing status, headers, and body. Method can be GET, POST, PUT, DELETE, etc.",
+      "long_help": "Executes an HTTP request with full control over method, body, headers, and timeout. Returns a JSON envelope containing<br>status, headers, and body. Method can be GET, POST, PUT, DELETE, etc.",
       "parameters": [
         {
           "name": "url",
@@ -2220,7 +2220,7 @@
     {
       "function": "json.add",
       "short_description": "Adds element to JSON array",
-      "long_help": "Adds a value to the end of a JSON array at the specified path. Creates the array if it doesn't exist. Returns the modified JSON object.",
+      "long_help": "Adds a value to the end of a JSON array at the specified path. Creates the array if it doesn't exist. Returns the<br>modified JSON object.",
       "parameters": [
         {
           "name": "root",
@@ -2241,7 +2241,7 @@
     {
       "function": "json.getArray",
       "short_description": "Gets array from JSON path",
-      "long_help": "Retrieves an array (list) value from a JSON object using a dot-notation path. Returns null if the path doesn't exist or the value is not an array.",
+      "long_help": "Retrieves an array (list) value from a JSON object using a dot-notation path. Returns null if the path doesn't exist or<br>the value is not an array.",
       "parameters": [
         {
           "name": "root",
@@ -2258,7 +2258,7 @@
     {
       "function": "json.getDouble",
       "short_description": "Gets double from JSON path",
-      "long_help": "Retrieves a double value from a JSON object using a dot-notation path. Returns a default value if the path doesn't exist.",
+      "long_help": "Retrieves a double value from a JSON object using a dot-notation path. Returns a default value if the path doesn't<br>exist.",
       "parameters": [
         {
           "name": "root",
@@ -2280,7 +2280,7 @@
     {
       "function": "json.getInteger",
       "short_description": "Gets integer from JSON path",
-      "long_help": "Retrieves an integer value from a JSON object using a dot-notation path. Returns a default value if the path doesn't exist. Alias for json.getInt.",
+      "long_help": "Retrieves an integer value from a JSON object using a dot-notation path. Returns a default value if the path doesn't<br>exist. Alias for json.getInt.",
       "parameters": [
         {
           "name": "root",
@@ -2324,7 +2324,7 @@
     {
       "function": "json.getObject",
       "short_description": "Gets object from JSON path",
-      "long_help": "Retrieves an object (map) value from a JSON object using a dot-notation path. Returns null if the path doesn't exist or the value is not an object.",
+      "long_help": "Retrieves an object (map) value from a JSON object using a dot-notation path. Returns null if the path doesn't exist or<br>the value is not an object.",
       "parameters": [
         {
           "name": "root",
@@ -2341,7 +2341,7 @@
     {
       "function": "json.getStrict",
       "short_description": "Gets value from JSON path (strict)",
-      "long_help": "Retrieves a value from a JSON object using a dot-notation path. Unlike json.get, this throws an error if the path doesn't exist, ensuring strict validation.",
+      "long_help": "Retrieves a value from a JSON object using a dot-notation path. Unlike json.get, this throws an error if the path<br>doesn't exist, ensuring strict validation.",
       "parameters": [
         {
           "name": "root",
@@ -2383,7 +2383,7 @@
     {
       "function": "json.setStrict",
       "short_description": "Sets value in JSON object (strict)",
-      "long_help": "Sets a value at the specified path in a JSON object. Unlike json.set, this throws an error if intermediate paths don't exist, ensuring strict validation. Returns the modified JSON object.",
+      "long_help": "Sets a value at the specified path in a JSON object. Unlike json.set, this throws an error if intermediate paths don't<br>exist, ensuring strict validation. Returns the modified JSON object.",
       "parameters": [
         {
           "name": "root",
@@ -2421,7 +2421,7 @@
     {
       "function": "string.equalsIgnoreCase",
       "short_description": "Checks if strings are equal (case-insensitive)",
-      "long_help": "Returns true if the two strings are equal ignoring case differences, false otherwise. Useful for case-insensitive comparisons.",
+      "long_help": "Returns true if the two strings are equal ignoring case differences, false otherwise. Useful for case-insensitive<br>comparisons.",
       "parameters": [
         {
           "name": "value1",
@@ -2451,7 +2451,7 @@
     {
       "function": "string.isEmpty",
       "short_description": "Checks if string is empty",
-      "long_help": "Returns true if the string is null or has zero length, false otherwise. Unlike isBlank, this does not consider whitespace.",
+      "long_help": "Returns true if the string is null or has zero length, false otherwise. Unlike isBlank, this does not consider<br>whitespace.",
       "parameters": [
         {
           "name": "str",
@@ -2464,7 +2464,7 @@
     {
       "function": "system.command",
       "short_description": "Executes a system command",
-      "long_help": "Executes a system command with optional arguments, timeout, and working directory. Returns a JSON object containing exit code, stdout, and stderr. Arguments should be provided as a JSON array.",
+      "long_help": "Executes a system command with optional arguments, timeout, and working directory. Returns a JSON object containing exit<br>code, stdout, and stderr. Arguments should be provided as a JSON array.",
       "parameters": [
         {
           "name": "command",
@@ -2492,7 +2492,7 @@
     {
       "function": "system.getProperty",
       "short_description": "Gets a system property",
-      "long_help": "Retrieves a Java system property by name. Returns the property value or a default value if not found. Common properties include 'user.home', 'os.name', 'java.version', etc.",
+      "long_help": "Retrieves a Java system property by name. Returns the property value or a default value if not found. Common properties<br>include 'user.home', 'os.name', 'java.version', etc.",
       "parameters": [
         {
           "name": "name",
@@ -2510,7 +2510,7 @@
     {
       "function": "system.help",
       "short_description": "Returns help information",
-      "long_help": "Returns comprehensive help information about the scripting language, including keywords, operators, datatypes, and all available builtin functions with their signatures. Outputs to console and returns the text as a string.",
+      "long_help": "Returns comprehensive help information about the scripting language, including keywords, operators, datatypes, and all<br>available builtin functions with their signatures. Outputs to console and returns the text as a string.",
       "parameters": [],
       "return_type": "json",
       "example": "var helpText = call system.help();\nprint helpText;"
@@ -2518,7 +2518,7 @@
     {
       "function": "system.setProperty",
       "short_description": "Sets a system property",
-      "long_help": "Sets a Java system property to the specified value. Pass null as the value to clear the property. Returns the previous value of the property, or null if it was not set.",
+      "long_help": "Sets a Java system property to the specified value. Pass null as the value to clear the property. Returns the previous<br>value of the property, or null if it was not set.",
       "parameters": [
         {
           "name": "name",
@@ -2536,7 +2536,7 @@
     {
       "function": "system.winCommand",
       "short_description": "Executes a Windows command",
-      "long_help": "Executes a Windows-specific command with optional arguments, timeout, and working directory. Similar to system.command but optimized for Windows environments. Returns a JSON object containing exit code, stdout, and stderr.",
+      "long_help": "Executes a Windows-specific command with optional arguments, timeout, and working directory. Similar to system.command<br>but optimized for Windows environments. Returns a JSON object containing exit code, stdout, and stderr.",
       "parameters": [
         {
           "name": "command",
