@@ -69,6 +69,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     private final java.util.Map<String, CursorSpec> cursorSpecs = new java.util.HashMap<>();
     private final java.util.Map<String, Stage> screens = new java.util.HashMap<>();
     private final java.util.Map<String, DisplayMetadata> displayMetadata = new java.util.HashMap<>();
+    private final java.util.Map<String, java.util.List<AreaDefinition>> screenAreas = new java.util.HashMap<>();
     private final java.util.Deque<String> connectionStack = new java.util.ArrayDeque<>();
     private DbAdapter db = new OracleDbAdapter();
     private ScriptArea output;
@@ -1444,6 +1445,30 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 }
             }
             
+            // Process area definitions if present
+            if (config.containsKey("area")) {
+                Object areaObj = config.get("area");
+                if (areaObj instanceof List) {
+                    @SuppressWarnings("unchecked")
+                    List<Object> areaList = (List<Object>) areaObj;
+                    java.util.List<AreaDefinition> areas = new java.util.ArrayList<>();
+                    
+                    for (Object aObj : areaList) {
+                        if (aObj instanceof Map) {
+                            @SuppressWarnings("unchecked")
+                            Map<String, Object> areaDef = (Map<String, Object>) aObj;
+                            
+                            AreaDefinition area = parseAreaDefinition(areaDef, stmt.name, stmt.getLine());
+                            areas.add(area);
+                        }
+                    }
+                    
+                    screenAreas.put(stmt.name, areas);
+                } else {
+                    throw error(stmt.getLine(), "The 'area' property in screen '" + stmt.name + "' must be an array.");
+                }
+            }
+            
             // Create the screen on JavaFX Application Thread
             Platform.runLater(() -> {
                 try {
@@ -1576,6 +1601,123 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                    ", min=" + min +
                    ", max=" + max +
                    ", style='" + style + '\'' +
+                   '}';
+        }
+    }
+    
+    /**
+     * Helper method to parse area definition from JSON
+     */
+    private AreaDefinition parseAreaDefinition(Map<String, Object> areaDef, String screenName, int line) throws InterpreterError {
+        AreaDefinition area = new AreaDefinition();
+        
+        // Extract area name (required)
+        if (areaDef.containsKey("name")) {
+            area.name = String.valueOf(areaDef.get("name"));
+        } else {
+            throw error(line, "Area definition in screen '" + screenName + "' must have a 'name' property.");
+        }
+        
+        // Extract area type (e.g., "pane", "tab", etc.)
+        if (areaDef.containsKey("type")) {
+            area.type = String.valueOf(areaDef.get("type")).toLowerCase();
+        }
+        
+        // Extract layout configuration
+        if (areaDef.containsKey("layout")) {
+            area.layout = String.valueOf(areaDef.get("layout"));
+        }
+        
+        area.screenName = screenName;
+        
+        // Process items in the area
+        if (areaDef.containsKey("items")) {
+            Object itemsObj = areaDef.get("items");
+            if (itemsObj instanceof List) {
+                @SuppressWarnings("unchecked")
+                List<Object> itemsList = (List<Object>) itemsObj;
+                
+                for (Object itemObj : itemsList) {
+                    if (itemObj instanceof Map) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> itemDef = (Map<String, Object>) itemObj;
+                        
+                        AreaItem item = new AreaItem();
+                        
+                        // Extract item properties
+                        if (itemDef.containsKey("name")) {
+                            item.name = String.valueOf(itemDef.get("name"));
+                        }
+                        
+                        if (itemDef.containsKey("sequence")) {
+                            Object seqObj = itemDef.get("sequence");
+                            if (seqObj instanceof Number) {
+                                item.sequence = ((Number) seqObj).intValue();
+                            }
+                        }
+                        
+                        if (itemDef.containsKey("relativePos")) {
+                            item.relativePos = String.valueOf(itemDef.get("relativePos"));
+                        } else if (itemDef.containsKey("relative_pos")) {
+                            // Support both camelCase and snake_case
+                            item.relativePos = String.valueOf(itemDef.get("relative_pos"));
+                        }
+                        
+                        if (itemDef.containsKey("varRef")) {
+                            item.varRef = String.valueOf(itemDef.get("varRef"));
+                        } else if (itemDef.containsKey("var_ref")) {
+                            item.varRef = String.valueOf(itemDef.get("var_ref"));
+                        }
+                        
+                        area.items.add(item);
+                    }
+                }
+                
+                // Sort items by sequence
+                area.items.sort((a, b) -> Integer.compare(a.sequence, b.sequence));
+            }
+        }
+        
+        return area;
+    }
+    
+    /**
+     * Inner class to hold area definition
+     */
+    static class AreaDefinition {
+        String name;                          // Area name/identifier
+        String type;                          // Area type: "pane", "tab", "grid", etc.
+        String layout;                        // Layout configuration
+        String screenName;                    // Associated screen name
+        java.util.List<AreaItem> items = new java.util.ArrayList<>();  // Items in this area
+        
+        @Override
+        public String toString() {
+            return "AreaDefinition{" +
+                   "name='" + name + '\'' +
+                   ", type='" + type + '\'' +
+                   ", layout='" + layout + '\'' +
+                   ", items=" + items.size() +
+                   '}';
+        }
+    }
+    
+    /**
+     * Inner class to hold area item definition
+     */
+    static class AreaItem {
+        String name;                          // Item name/identifier
+        int sequence = 0;                     // Display sequence/order
+        String relativePos;                   // Relative position (e.g., "top", "left", "center", coordinates)
+        String varRef;                        // Reference to a variable
+        
+        @Override
+        public String toString() {
+            return "AreaItem{" +
+                   "name='" + name + '\'' +
+                   ", sequence=" + sequence +
+                   ", relativePos='" + relativePos + '\'' +
+                   ", varRef='" + varRef + '\'' +
                    '}';
         }
     }
