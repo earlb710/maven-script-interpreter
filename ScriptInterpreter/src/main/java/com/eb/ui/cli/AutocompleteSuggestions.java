@@ -16,7 +16,8 @@ import java.util.stream.Collectors;
 /**
  * Provides autocomplete suggestions for keywords, builtins, and console
  * commands. Filters suggestions based on context (e.g., only builtins after
- * 'call' or '#', console commands when input starts with '/').
+ * 'call' or '#', console commands when input starts with '/', all keywords
+ * and builtins after '/help ' or '/? ').
  *
  * @author Earl Bosch
  */
