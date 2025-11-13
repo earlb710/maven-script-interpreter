@@ -341,10 +341,14 @@ public class EbsConsoleHandler extends EbsHandler {
                         Map<String, Object> paramMap = (Map<String, Object>) param;
                         String paramName = (String) paramMap.get("name");
                         String paramType = (String) paramMap.get("type");
+                        Boolean optional = (Boolean) paramMap.get("optional");
                         if (paramName != null) {
                             paramStr.append(paramName);
                             if (paramType != null && !paramType.isEmpty()) {
                                 paramStr.append(":").append(paramType);
+                            }
+                            if (Boolean.TRUE.equals(optional)) {
+                                paramStr.append("?");
                             }
                         }
                     } else {

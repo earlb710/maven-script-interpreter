@@ -258,7 +258,8 @@
       "parameters": [
         {
           "name": "path",
-          "type": "string"
+          "type": "string",
+          "optional": true
         }
       ],
       "return_type": "json",
@@ -352,7 +353,8 @@
         },
         {
           "name": "limit",
-          "type": "integer"
+          "type": "integer",
+          "optional": true
         }
       ],
       "return_type": "json",
@@ -505,7 +507,8 @@
         },
         {
           "name": "default",
-          "type": "string"
+          "type": "string",
+          "optional": true
         }
       ],
       "return_type": "string",
@@ -526,7 +529,8 @@
         },
         {
           "name": "default",
-          "type": "integer"
+          "type": "integer",
+          "optional": true
         }
       ],
       "return_type": "integer",
@@ -547,7 +551,8 @@
         },
         {
           "name": "default",
-          "type": "bool"
+          "type": "bool",
+          "optional": true
         }
       ],
       "return_type": "bool",
@@ -942,7 +947,8 @@
         },
         {
           "name": "message",
-          "type": "string"
+          "type": "string",
+          "optional": true
         }
       ],
       "return_type": "void",
@@ -1056,11 +1062,13 @@
         },
         {
           "name": "headers",
-          "type": "json"
+          "type": "json",
+          "optional": true
         },
         {
           "name": "timeoutMs",
-          "type": "long"
+          "type": "long",
+          "optional": true
         }
       ],
       "return_type": "json",
@@ -1081,11 +1089,13 @@
         },
         {
           "name": "headers",
-          "type": "json"
+          "type": "json",
+          "optional": true
         },
         {
           "name": "timeoutMs",
-          "type": "long"
+          "type": "long",
+          "optional": true
         }
       ],
       "return_type": "json",
@@ -1102,11 +1112,13 @@
         },
         {
           "name": "headers",
-          "type": "json"
+          "type": "json",
+          "optional": true
         },
         {
           "name": "timeoutMs",
-          "type": "long"
+          "type": "long",
+          "optional": true
         }
       ],
       "return_type": "json",
@@ -1127,11 +1139,13 @@
         },
         {
           "name": "headers",
-          "type": "json"
+          "type": "json",
+          "optional": true
         },
         {
           "name": "timeoutMs",
-          "type": "long"
+          "type": "long",
+          "optional": true
         }
       ],
       "return_type": "json",
@@ -1148,11 +1162,13 @@
         },
         {
           "name": "headers",
-          "type": "json"
+          "type": "json",
+          "optional": true
         },
         {
           "name": "timeoutMs",
-          "type": "long"
+          "type": "long",
+          "optional": true
         }
       ],
       "return_type": "string",
@@ -1173,11 +1189,13 @@
         },
         {
           "name": "headers",
-          "type": "json"
+          "type": "json",
+          "optional": true
         },
         {
           "name": "timeoutMs",
-          "type": "long"
+          "type": "long",
+          "optional": true
         }
       ],
       "return_type": "string",
@@ -1194,7 +1212,8 @@
         },
         {
           "name": "message",
-          "type": "string"
+          "type": "string",
+          "optional": true
         }
       ],
       "return_type": "json",
@@ -1207,7 +1226,8 @@
       "parameters": [
         {
           "name": "system",
-          "type": "string"
+          "type": "string",
+          "optional": true
         },
         {
           "name": "user",
@@ -1215,11 +1235,13 @@
         },
         {
           "name": "maxTokens",
-          "type": "integer"
+          "type": "integer",
+          "optional": true
         },
         {
           "name": "temperature",
-          "type": "double"
+          "type": "double",
+          "optional": true
         }
       ],
       "return_type": "string",
@@ -1236,7 +1258,8 @@
         },
         {
           "name": "maxTokens",
-          "type": "integer"
+          "type": "integer",
+          "optional": true
         }
       ],
       "return_type": "string",
@@ -1343,7 +1366,8 @@
       "parameters": [
         {
           "name": "sourceDir",
-          "type": "string"
+          "type": "string",
+          "optional": true
         }
       ],
       "return_type": "string",
@@ -1356,7 +1380,8 @@
       "parameters": [
         {
           "name": "sourceDir",
-          "type": "string"
+          "type": "string",
+          "optional": true
         }
       ],
       "return_type": "string",
@@ -1377,7 +1402,8 @@
         },
         {
           "name": "message",
-          "type": "string"
+          "type": "string",
+          "optional": true
         }
       ],
       "return_type": "bool",
@@ -1403,7 +1429,8 @@
       "parameters": [
         {
           "name": "unit",
-          "type": "string"
+          "type": "string",
+          "optional": true
         }
       ],
       "return_type": "json",
@@ -1521,7 +1548,8 @@
         },
         {
           "name": "path",
-          "type": "string"
+          "type": "string",
+          "optional": true
         }
       ],
       "return_type": "json",
@@ -1555,7 +1583,8 @@
         },
         {
           "name": "mode",
-          "type": "string"
+          "type": "string",
+          "optional": true
         }
       ],
       "return_type": "string",
@@ -1628,7 +1657,8 @@
         },
         {
           "name": "encoding",
-          "type": "string"
+          "type": "string",
+          "optional": true
         }
       ],
       "return_type": "string",
@@ -1679,11 +1709,13 @@
         },
         {
           "name": "entries",
-          "type": "json"
+          "type": "json",
+          "optional": true
         },
         {
           "name": "overwrite",
-          "type": "bool"
+          "type": "bool",
+          "optional": true
         }
       ],
       "return_type": "bool",
@@ -1704,7 +1736,8 @@
         },
         {
           "name": "encoding",
-          "type": "string"
+          "type": "string",
+          "optional": true
         }
       ],
       "return_type": "bool",
@@ -1759,7 +1792,8 @@
         },
         {
           "name": "encoding",
-          "type": "string"
+          "type": "string",
+          "optional": true
         }
       ],
       "return_type": "bool",
