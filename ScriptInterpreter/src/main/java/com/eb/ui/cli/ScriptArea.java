@@ -115,6 +115,7 @@ public class ScriptArea extends StyleClassedTextArea {
                     this.setStyleClass(start, end, s);
                 }
             } else {
+                styleClasses.add(0, "info");
                 this.setStyle(start, end, styleClasses); // multi-class API
             }
 

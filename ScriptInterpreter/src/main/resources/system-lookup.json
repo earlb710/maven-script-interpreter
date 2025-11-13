@@ -181,7 +181,7 @@
     {
       "function": "file.readTextFile",
       "short_description": "Reads text file contents",
-      "long_help": "Reads the entire contents of a text file and returns it as a string. The file must be in a safe directory or the script's own directory.",
+      "long_help": "Reads the entire contents of a text file and returns it as a string. The file must be in a safe directory or the<br>script's own directory.",
       "parameters": [
         {
           "name": "path",
@@ -189,12 +189,12 @@
         }
       ],
       "return_type": "string",
-      "example": "var content = call file.readTextFile(path=\"data.txt\");\nprint content;"
+      "example": "<b>var</b> <b>content</b> = <b>call</b> <b>file.readTextFile</b>(path=\"data.txt\");\n<b>print</b> content;"
     },
     {
       "function": "file.writeTextFile",
       "short_description": "Writes text to a file",
-      "long_help": "Writes the given text content to a file. Creates the file if it doesn't exist, overwrites if it does. The file must be in a safe directory.",
+      "long_help": "Writes the given text content to a file. Creates the file if it doesn't exist, overwrites if it does. The file must be<br>in a safe directory.",
       "parameters": [
         {
           "name": "path",
@@ -206,7 +206,7 @@
         }
       ],
       "return_type": "bool",
-      "example": "var success = call file.writeTextFile(path=\"output.txt\", content=\"Hello, World!\");"
+      "example": "<b>var</b> <b>success</b> = <b>call</b> <b>file.writeTextFile</b>(path=\"output.txt\", content=\"Hello, World!\");"
     },
     {
       "function": "file.appendTextFile",
@@ -223,7 +223,7 @@
         }
       ],
       "return_type": "bool",
-      "example": "call file.appendTextFile(path=\"log.txt\", content=\"New log entry\\n\");"
+      "example": "<b>call</b> <b>file.appendTextFile</b>(path=\"log.txt\", content=\"New log entry\\n\");"
     },
     {
       "function": "file.exists",
@@ -236,7 +236,7 @@
         }
       ],
       "return_type": "bool",
-      "example": "if call file.exists(path=\"config.json\") then {\n  print \"Config file found\";\n}"
+      "example": "<b>if</b> <b>call</b> <b>file.exists</b>(path=\"config.json\") <b>then</b> {\n  <b>print</b> \"Config file found\";\n}"
     },
     {
       "function": "file.delete",
@@ -249,7 +249,7 @@
         }
       ],
       "return_type": "bool",
-      "example": "var deleted = call file.delete(path=\"temp.txt\");"
+      "example": "<b>var</b> <b>deleted</b> = <b>call</b> <b>file.delete</b>(path=\"temp.txt\");"
     },
     {
       "function": "file.listFiles",
@@ -263,7 +263,7 @@
         }
       ],
       "return_type": "json",
-      "example": "var files = call file.listFiles(path=\"./data\");\nforeach f in files do {\n  print f;\n}"
+      "example": "<b>var</b> <b>files</b> = <b>call</b> <b>file.listFiles</b>(path=\"./data\");\n<b>foreach</b> f <b>in</b> files <b>do</b> {\n  <b>print</b> f;\n}"
     },
     {
       "function": "string.toString",
@@ -276,7 +276,7 @@
         }
       ],
       "return_type": "string",
-      "example": "var num = 42;\nvar str = call string.toString(value=num);"
+      "example": "<b>var</b> <b>num</b> = 42;\n<b>var</b> <b>str</b> = <b>call</b> <b>string.toString</b>(value=num);"
     },
     {
       "function": "string.toUpper",
@@ -289,7 +289,7 @@
         }
       ],
       "return_type": "string",
-      "example": "var upper = call string.toUpper(str=\"hello\");\nprint upper; // \"HELLO\""
+      "example": "<b>var</b> <b>upper</b> = <b>call</b> <b>string.toUpper</b>(str=\"hello\");\n<b>print</b> upper; // \"HELLO\""
     },
     {
       "function": "string.toLower",
@@ -302,7 +302,7 @@
         }
       ],
       "return_type": "string",
-      "example": "var lower = call string.toLower(str=\"WORLD\");\nprint lower; // \"world\""
+      "example": "<b>var</b> <b>lower</b> = <b>call</b> <b>string.toLower</b>(str=\"WORLD\");\n<b>print</b> lower; // \"world\""
     },
     {
       "function": "string.trim",
@@ -315,7 +315,7 @@
         }
       ],
       "return_type": "string",
-      "example": "var trimmed = call string.trim(str=\"  hello  \");\nprint trimmed; // \"hello\""
+      "example": "<b>var</b> <b>trimmed</b> = <b>call</b> <b>string.trim</b>(str=\"  hello  \");\n<b>print</b> trimmed; // \"hello\""
     },
     {
       "function": "string.replace",
@@ -336,7 +336,7 @@
         }
       ],
       "return_type": "string",
-      "example": "var result = call string.replace(source=\"hello world\", target=\"world\", replacement=\"there\");\nprint result; // \"hello there\""
+      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>string.replace</b>(source=\"hello world\", target=\"world\", replacement=\"there\");<br><b>print</b> result; // \"hello there\""
     },
     {
       "function": "string.split",
@@ -358,7 +358,7 @@
         }
       ],
       "return_type": "json",
-      "example": "var parts = call string.split(text=\"apple,banana,cherry\", regex=\",\");\nforeach part in parts do {\n  print part;\n}"
+      "example": "<b>var</b> <b>parts</b> = <b>call</b> <b>string.split</b>(text=\"apple,banana,cherry\", regex=\",\");\n<b>foreach</b> part <b>in</b> parts <b>do</b> {\n  <b>print</b> part;\n}"
     },
     {
       "function": "string.join",
@@ -375,7 +375,7 @@
         }
       ],
       "return_type": "string",
-      "example": "var arr = [\"hello\", \"world\"];\nvar joined = call string.join(array=arr, delimiter=\" \");\nprint joined; // \"hello world\""
+      "example": "<b>var</b> <b>arr</b> = [\"hello\", \"world\"];\n<b>var</b> <b>joined</b> = <b>call</b> <b>string.join</b>(array=arr, delimiter=\" \");\n<b>print</b> joined; // \"hello world\""
     },
     {
       "function": "string.contains",
@@ -392,7 +392,7 @@
         }
       ],
       "return_type": "bool",
-      "example": "if call string.contains(str=\"hello world\", substring=\"world\") then {\n  print \"Found!\";\n}"
+      "example": "<b>if</b> <b>call</b> <b>string.contains</b>(str=\"hello world\", substring=\"world\") <b>then</b> {\n  <b>print</b> \"Found!\";\n}"
     },
     {
       "function": "string.startsWith",
@@ -409,7 +409,7 @@
         }
       ],
       "return_type": "bool",
-      "example": "if call string.startsWith(str=\"hello\", prefix=\"hel\") then {\n  print \"Starts with hel\";\n}"
+      "example": "<b>if</b> <b>call</b> <b>string.startsWith</b>(str=\"hello\", prefix=\"hel\") <b>then</b> {\n  <b>print</b> \"Starts with hel\";\n}"
     },
     {
       "function": "string.endsWith",
@@ -426,7 +426,7 @@
         }
       ],
       "return_type": "bool",
-      "example": "if call string.endsWith(str=\"hello\", suffix=\"llo\") then {\n  print \"Ends with llo\";\n}"
+      "example": "<b>if</b> <b>call</b> <b>string.endsWith</b>(str=\"hello\", suffix=\"llo\") <b>then</b> {\n  <b>print</b> \"Ends with llo\";\n}"
     },
     {
       "function": "string.substring",
@@ -447,7 +447,7 @@
         }
       ],
       "return_type": "string",
-      "example": "var sub = call string.substring(str=\"hello world\", startIndex=0, endIndex=5);\nprint sub; // \"hello\""
+      "example": "<b>var</b> <b>sub</b> = <b>call</b> <b>string.substring</b>(str=\"hello world\", startIndex=0, endIndex=5);\n<b>print</b> sub; // \"hello\""
     },
     {
       "function": "string.length",
@@ -460,7 +460,7 @@
         }
       ],
       "return_type": "integer",
-      "example": "var len = call string.length(str=\"hello\");\nprint len; // 5"
+      "example": "<b>var</b> <b>len</b> = <b>call</b> <b>string.length</b>(str=\"hello\");\n<b>print</b> len; // 5"
     },
     {
       "function": "json.jsonFromString",
@@ -473,7 +473,7 @@
         }
       ],
       "return_type": "json",
-      "example": "var obj = call json.jsonFromString(jsonString=\"{\\\"name\\\":\\\"Alice\\\",\\\"age\\\":30}\");\nprint obj.name;"
+      "example": "<b>var</b> <b>obj</b> = <b>call</b> <b>json.jsonFromString</b>(jsonString=\"{\\\"name\\\":\\\"Alice\\\",\\\"age\\\":30}\");\n<b>print</b> obj.name;"
     },
     {
       "function": "json.get",
@@ -490,12 +490,12 @@
         }
       ],
       "return_type": "json",
-      "example": "var value = call json.get(root=myJson, path=\"user.address.city\");"
+      "example": "<b>var</b> <b>value</b> = <b>call</b> <b>json.get</b>(root=myJson, path=\"user.address.city\");"
     },
     {
       "function": "json.getString",
       "short_description": "Gets string from JSON path",
-      "long_help": "Retrieves a string value from a JSON object using a dot-notation path. Returns a default value if the path doesn't exist.",
+      "long_help": "Retrieves a string value from a JSON object using a dot-notation path. Returns a default value if the path doesn't<br>exist.",
       "parameters": [
         {
           "name": "root",
@@ -512,12 +512,12 @@
         }
       ],
       "return_type": "string",
-      "example": "var name = call json.getString(root=config, path=\"database.host\", default=\"localhost\");"
+      "example": "<b>var</b> <b>name</b> = <b>call</b> <b>json.getString</b>(root=config, path=\"database.host\", default=\"localhost\");"
     },
     {
       "function": "json.getInt",
       "short_description": "Gets integer from JSON path",
-      "long_help": "Retrieves an integer value from a JSON object using a dot-notation path. Returns a default value if the path doesn't exist.",
+      "long_help": "Retrieves an integer value from a JSON object using a dot-notation path. Returns a default value if the path doesn't<br>exist.",
       "parameters": [
         {
           "name": "root",
@@ -534,12 +534,12 @@
         }
       ],
       "return_type": "integer",
-      "example": "var port = call json.getInt(root=config, path=\"server.port\", default=8080);"
+      "example": "<b>var</b> <b>port</b> = <b>call</b> <b>json.getInt</b>(root=config, path=\"server.port\", default=8080);"
     },
     {
       "function": "json.getBool",
       "short_description": "Gets boolean from JSON path",
-      "long_help": "Retrieves a boolean value from a JSON object using a dot-notation path. Returns a default value if the path doesn't exist.",
+      "long_help": "Retrieves a boolean value from a JSON object using a dot-notation path. Returns a default value if the path doesn't<br>exist.",
       "parameters": [
         {
           "name": "root",
@@ -556,12 +556,12 @@
         }
       ],
       "return_type": "bool",
-      "example": "var enabled = call json.getBool(root=config, path=\"features.logging\", default=false);"
+      "example": "<b>var</b> <b>enabled</b> = <b>call</b> <b>json.getBool</b>(root=config, path=\"features.logging\", default=false);"
     },
     {
       "function": "json.set",
       "short_description": "Sets value in JSON object",
-      "long_help": "Sets a value at the specified path in a JSON object. Creates intermediate objects as needed. Returns the modified JSON object.",
+      "long_help": "Sets a value at the specified path in a JSON object. Creates intermediate objects as needed. Returns the modified JSON<br>object.",
       "parameters": [
         {
           "name": "root",
@@ -577,7 +577,7 @@
         }
       ],
       "return_type": "json",
-      "example": "var updated = call json.set(root=myJson, path=\"user.name\", value=\"Bob\");"
+      "example": "<b>var</b> <b>updated</b> = <b>call</b> <b>json.set</b>(root=myJson, path=\"user.name\", value=\"Bob\");"
     },
     {
       "function": "json.remove",
@@ -594,7 +594,7 @@
         }
       ],
       "return_type": "json",
-      "example": "var updated = call json.remove(root=myJson, path=\"user.tempData\");"
+      "example": "<b>var</b> <b>updated</b> = <b>call</b> <b>json.remove</b>(root=myJson, path=\"user.tempData\");"
     },
     {
       "function": "json.isEmpty",
@@ -607,12 +607,12 @@
         }
       ],
       "return_type": "bool",
-      "example": "if call json.isEmpty(value=myJson) then {\n  print \"Empty JSON\";\n}"
+      "example": "<b>if</b> <b>call</b> <b>json.isEmpty</b>(value=myJson) <b>then</b> {\n  <b>print</b> \"Empty JSON\";\n}"
     },
     {
       "function": "json.registerScheme",
       "short_description": "Registers a JSON schema",
-      "long_help": "Registers a JSON schema with a given name for later validation. The schema defines the expected structure, types, and constraints for JSON data.",
+      "long_help": "Registers a JSON schema with a given name for later validation. The schema defines the expected structure, types, and<br>constraints for JSON data.",
       "parameters": [
         {
           "name": "name",
@@ -624,12 +624,12 @@
         }
       ],
       "return_type": "json",
-      "example": "var schema = {\"type\": \"object\", \"properties\": {\"name\": {\"type\": \"string\"}}};\ncall json.registerScheme(name=\"personSchema\", schema=schema);"
+      "example": "<b>var</b> <b>schema</b> = {\"type\": \"object\", \"properties\": {\"name\": {\"type\": \"string\"}}};<br><b>call</b> <b>json.registerScheme</b>(name=\"personSchema\", schema=schema);"
     },
     {
       "function": "json.deriveScheme",
       "short_description": "Derives schema from JSON",
-      "long_help": "Analyzes a JSON object and generates a schema that describes its structure. Optionally calculates length constraints for strings and arrays.",
+      "long_help": "Analyzes a JSON object and generates a schema that describes its structure. Optionally calculates length constraints for<br>strings and arrays.",
       "parameters": [
         {
           "name": "json",
@@ -641,12 +641,12 @@
         }
       ],
       "return_type": "json",
-      "example": "var data = {\"name\": \"Alice\", \"age\": 30};\nvar schema = call json.deriveScheme(json=data, calcLengths=false);"
+      "example": "<b>var</b> <b>data</b> = {\"name\": \"Alice\", \"age\": 30};\n<b>var</b> <b>schema</b> = <b>call</b> <b>json.deriveScheme</b>(json=data, calcLengths=false);"
     },
     {
       "function": "json.validate",
       "short_description": "Validates JSON against schema",
-      "long_help": "Validates a JSON object against a registered schema. Returns a list of validation errors, or an empty list if validation succeeds.",
+      "long_help": "Validates a JSON object against a registered schema. Returns a list of validation errors, or an empty list if validation<br>succeeds.",
       "parameters": [
         {
           "name": "schemaName",
@@ -658,7 +658,7 @@
         }
       ],
       "return_type": "json",
-      "example": "var errors = call json.validate(schemaName=\"personSchema\", json=myData);\nif call json.isEmpty(value=errors) then {\n  print \"Valid!\";\n}"
+      "example": "<b>var</b> <b>errors</b> = <b>call</b> <b>json.validate</b>(schemaName=\"personSchema\", json=myData);<br><b>if</b> <b>call</b> <b>json.isEmpty</b>(value=errors) <b>then</b> {<br>  <b>print</b> \"Valid!\";<br>}"
     },
     {
       "function": "array.create",
@@ -675,7 +675,7 @@
         }
       ],
       "return_type": "array",
-      "example": "var arr = call array.create(size=10, type=\"int\");"
+      "example": "<b>var</b> <b>arr</b> = <b>call</b> <b>array.create</b>(size=10, type=\"int\");"
     },
     {
       "function": "array.length",
@@ -688,7 +688,7 @@
         }
       ],
       "return_type": "integer",
-      "example": "var len = call array.length(array=myArray);\nprint len;"
+      "example": "<b>var</b> <b>len</b> = <b>call</b> <b>array.length</b>(array=myArray);\n<b>print</b> len;"
     },
     {
       "function": "array.get",
@@ -705,7 +705,7 @@
         }
       ],
       "return_type": "any",
-      "example": "var item = call array.get(array=myArray, index=0);"
+      "example": "<b>var</b> <b>item</b> = <b>call</b> <b>array.get</b>(array=myArray, index=0);"
     },
     {
       "function": "array.set",
@@ -726,7 +726,7 @@
         }
       ],
       "return_type": "void",
-      "example": "call array.set(array=myArray, index=0, value=\"Hello\");"
+      "example": "<b>call</b> <b>array.set</b>(array=myArray, index=0, value=\"Hello\");"
     },
     {
       "function": "array.contains",
@@ -743,7 +743,7 @@
         }
       ],
       "return_type": "bool",
-      "example": "if call array.contains(array=numbers, value=42) then {\n  print \"Found!\";\n}"
+      "example": "<b>if</b> <b>call</b> <b>array.contains</b>(array=numbers, value=42) <b>then</b> {\n  <b>print</b> \"Found!\";\n}"
     },
     {
       "function": "array.indexOf",
@@ -760,7 +760,7 @@
         }
       ],
       "return_type": "integer",
-      "example": "var pos = call array.indexOf(array=items, value=\"apple\");"
+      "example": "<b>var</b> <b>pos</b> = <b>call</b> <b>array.indexOf</b>(array=items, value=\"apple\");"
     },
     {
       "function": "array.sort",
@@ -777,7 +777,7 @@
         }
       ],
       "return_type": "void",
-      "example": "call array.sort(array=numbers, ascending=true);"
+      "example": "<b>call</b> <b>array.sort</b>(array=numbers, ascending=true);"
     },
     {
       "function": "math.abs",
@@ -790,7 +790,7 @@
         }
       ],
       "return_type": "double",
-      "example": "var result = call math.abs(value=-5.5);\nprint result; // 5.5"
+      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>math.abs</b>(value=-5.5);\n<b>print</b> result; // 5.5"
     },
     {
       "function": "math.round",
@@ -803,7 +803,7 @@
         }
       ],
       "return_type": "long",
-      "example": "var rounded = call math.round(value=3.7);\nprint rounded; // 4"
+      "example": "<b>var</b> <b>rounded</b> = <b>call</b> <b>math.round</b>(value=3.7);\n<b>print</b> rounded; // 4"
     },
     {
       "function": "math.floor",
@@ -816,7 +816,7 @@
         }
       ],
       "return_type": "long",
-      "example": "var floored = call math.floor(value=3.9);\nprint floored; // 3"
+      "example": "<b>var</b> <b>floored</b> = <b>call</b> <b>math.floor</b>(value=3.9);\n<b>print</b> floored; // 3"
     },
     {
       "function": "math.ceil",
@@ -829,7 +829,7 @@
         }
       ],
       "return_type": "long",
-      "example": "var ceiled = call math.ceil(value=3.1);\nprint ceiled; // 4"
+      "example": "<b>var</b> <b>ceiled</b> = <b>call</b> <b>math.ceil</b>(value=3.1);\n<b>print</b> ceiled; // 4"
     },
     {
       "function": "math.pow",
@@ -846,7 +846,7 @@
         }
       ],
       "return_type": "double",
-      "example": "var result = call math.pow(base=2.0, exponent=3.0);\nprint result; // 8.0"
+      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>math.pow</b>(base=2.0, exponent=3.0);\n<b>print</b> result; // 8.0"
     },
     {
       "function": "math.sqrt",
@@ -859,7 +859,7 @@
         }
       ],
       "return_type": "double",
-      "example": "var result = call math.sqrt(value=16.0);\nprint result; // 4.0"
+      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>math.sqrt</b>(value=16.0);\n<b>print</b> result; // 4.0"
     },
     {
       "function": "math.min",
@@ -876,7 +876,7 @@
         }
       ],
       "return_type": "double",
-      "example": "var min = call math.min(a=5.0, b=3.0);\nprint min; // 3.0"
+      "example": "<b>var</b> <b>min</b> = <b>call</b> <b>math.min</b>(a=5.0, b=3.0);\n<b>print</b> min; // 3.0"
     },
     {
       "function": "math.max",
@@ -893,7 +893,7 @@
         }
       ],
       "return_type": "double",
-      "example": "var max = call math.max(a=5.0, b=3.0);\nprint max; // 5.0"
+      "example": "<b>var</b> <b>max</b> = <b>call</b> <b>math.max</b>(a=5.0, b=3.0);\n<b>print</b> max; // 5.0"
     },
     {
       "function": "math.random",
@@ -901,7 +901,7 @@
       "long_help": "Returns a random double value between 0.0 (inclusive) and 1.0 (exclusive).",
       "parameters": [],
       "return_type": "double",
-      "example": "var rand = call math.random();\nprint rand;"
+      "example": "<b>var</b> <b>rand</b> = <b>call</b> <b>math.random</b>();\n<b>print</b> rand;"
     },
     {
       "function": "debug.log",
@@ -918,7 +918,7 @@
         }
       ],
       "return_type": "void",
-      "example": "call debug.log(message=\"Processing started\");"
+      "example": "<b>call</b> <b>debug.log</b>(message=\"Processing started\");"
     },
     {
       "function": "debug.on",
@@ -926,7 +926,7 @@
       "long_help": "Enables debug mode, causing debug.log messages to be output.",
       "parameters": [],
       "return_type": "void",
-      "example": "call debug.on();"
+      "example": "<b>call</b> <b>debug.on</b>();"
     },
     {
       "function": "debug.off",
@@ -934,7 +934,7 @@
       "long_help": "Disables debug mode, suppressing debug.log messages.",
       "parameters": [],
       "return_type": "void",
-      "example": "call debug.off();"
+      "example": "<b>call</b> <b>debug.off</b>();"
     },
     {
       "function": "debug.assert",
@@ -952,7 +952,7 @@
         }
       ],
       "return_type": "void",
-      "example": "call debug.assert(condition=(x > 0), message=\"x must be positive\");"
+      "example": "<b>call</b> <b>debug.assert</b>(condition=(x > 0), message=\"x must be positive\");"
     },
     {
       "function": "debug.vars",
@@ -960,7 +960,7 @@
       "long_help": "Returns a JSON object containing all currently defined variables and their values.",
       "parameters": [],
       "return_type": "json",
-      "example": "var allVars = call debug.vars();\nprint allVars;"
+      "example": "<b>var</b> <b>allVars</b> = <b>call</b> <b>debug.vars</b>();\n<b>print</b> allVars;"
     },
     {
       "function": "system.getEnv",
@@ -977,7 +977,7 @@
         }
       ],
       "return_type": "string",
-      "example": "var home = call system.getEnv(name=\"HOME\", default=\"/home/user\");"
+      "example": "<b>var</b> <b>home</b> = <b>call</b> <b>system.getEnv</b>(name=\"HOME\", default=\"/home/user\");"
     },
     {
       "function": "system.exec",
@@ -994,7 +994,7 @@
         }
       ],
       "return_type": "string",
-      "example": "var output = call system.exec(command=\"ls -la\", cwd=\"/tmp\");\nprint output;"
+      "example": "<b>var</b> <b>output</b> = <b>call</b> <b>system.exec</b>(command=\"ls -la\", cwd=\"/tmp\");\n<b>print</b> output;"
     },
     {
       "function": "system.sleep",
@@ -1007,7 +1007,7 @@
         }
       ],
       "return_type": "void",
-      "example": "call system.sleep(millis=1000); // Sleep for 1 second"
+      "example": "<b>call</b> <b>system.sleep</b>(millis=1000); // Sleep for 1 second"
     },
     {
       "function": "date.now",
@@ -1015,7 +1015,7 @@
       "long_help": "Returns the current date and time as a Date object.",
       "parameters": [],
       "return_type": "date",
-      "example": "var now = call date.now();\nprint now;"
+      "example": "<b>var</b> <b>now</b> = <b>call</b> <b>date.now</b>();\n<b>print</b> now;"
     },
     {
       "function": "date.format",
@@ -1032,7 +1032,7 @@
         }
       ],
       "return_type": "string",
-      "example": "var formatted = call date.format(date=myDate, format=\"yyyy-MM-dd HH:mm:ss\");"
+      "example": "<b>var</b> <b>formatted</b> = <b>call</b> <b>date.format</b>(date=myDate, format=\"yyyy-MM-dd HH:mm:ss\");"
     },
     {
       "function": "date.parse",
@@ -1049,12 +1049,12 @@
         }
       ],
       "return_type": "date",
-      "example": "var parsed = call date.parse(dateString=\"2024-01-15\", format=\"yyyy-MM-dd\");"
+      "example": "<b>var</b> <b>parsed</b> = <b>call</b> <b>date.parse</b>(dateString=\"2024-01-15\", format=\"yyyy-MM-dd\");"
     },
     {
       "function": "http.get",
       "short_description": "Performs HTTP GET request",
-      "long_help": "Executes an HTTP GET request to the specified URL. Returns a JSON envelope containing status, headers, and body. Optional headers can be provided as a JSON object. Timeout is in milliseconds.",
+      "long_help": "Executes an HTTP GET request to the specified URL. Returns a JSON envelope containing status, headers, and body.<br>Optional headers can be provided as a JSON object. Timeout is in milliseconds.",
       "parameters": [
         {
           "name": "url",
@@ -1072,12 +1072,12 @@
         }
       ],
       "return_type": "json",
-      "example": "var response = call http.get(url=\"https://api.example.com/data\", headers={\"Authorization\": \"Bearer token\"}, timeoutMs=5000);\nprint response.status;"
+      "example": "<b>var</b> <b>response</b> = <b>call</b> <b>http.get</b>(url=\"https://api.example.com/data\", headers={\"Authorization\":<br>\"Bearer token\"}, timeoutMs=5000);<br><b>print</b> response.status;"
     },
     {
       "function": "http.post",
       "short_description": "Performs HTTP POST request",
-      "long_help": "Executes an HTTP POST request with optional body content. Returns a JSON envelope with status, headers, and body. Headers are optional JSON object. Body is sent as-is.",
+      "long_help": "Executes an HTTP POST request with optional body content. Returns a JSON envelope with status, headers, and body.<br>Headers are optional JSON object. Body is sent as-is.",
       "parameters": [
         {
           "name": "url",
@@ -1099,12 +1099,12 @@
         }
       ],
       "return_type": "json",
-      "example": "var response = call http.post(url=\"https://api.example.com/submit\", body=\"{\\\"key\\\": \\\"value\\\"}\", headers={\"Content-Type\": \"application/json\"});"
+      "example": "<b>var</b> <b>response</b> = <b>call</b> <b>http.post</b>(url=\"https://api.example.com/submit\", body=\"{\\\"key\\\":<br>\\\"value\\\"}\", headers={\"Content-Type\": \"application/json\"});"
     },
     {
       "function": "http.getJson",
       "short_description": "Gets JSON from HTTP endpoint",
-      "long_help": "Performs HTTP GET and automatically parses the response body as JSON. Throws an error if response is not valid JSON. Returns the parsed JSON directly (not wrapped in envelope).",
+      "long_help": "Performs HTTP GET and automatically parses the response body as JSON. Throws an error if response is not valid JSON.<br>Returns the parsed JSON directly (not wrapped in envelope).",
       "parameters": [
         {
           "name": "url",
@@ -1122,12 +1122,12 @@
         }
       ],
       "return_type": "json",
-      "example": "var data = call http.getJson(url=\"https://api.example.com/users\");\nforeach user in data {\n  print user.name;\n}"
+      "example": "<b>var</b> <b>data</b> = <b>call</b> <b>http.getJson</b>(url=\"https://api.example.com/users\");\n<b>foreach</b> user <b>in</b> data {\n  <b>print</b> user.name;\n}"
     },
     {
       "function": "http.postJson",
       "short_description": "Posts JSON to HTTP endpoint",
-      "long_help": "Performs HTTP POST with JSON body and parses the JSON response. Automatically serializes the jsonBody parameter and sets Content-Type header. Returns parsed JSON response.",
+      "long_help": "Performs HTTP POST with JSON body and parses the JSON response. Automatically serializes the jsonBody parameter and sets<br>Content-Type header. Returns parsed JSON response.",
       "parameters": [
         {
           "name": "url",
@@ -1149,7 +1149,7 @@
         }
       ],
       "return_type": "json",
-      "example": "var payload = {\"username\": \"alice\", \"email\": \"alice@example.com\"};\nvar result = call http.postJson(url=\"https://api.example.com/users\", jsonBody=payload);"
+      "example": "<b>var</b> <b>payload</b> = {\"username\": \"alice\", \"email\": \"alice@example.com\"};<br><b>var</b> <b>result</b> = <b>call</b> <b>http.postJson</b>(url=\"https://api.example.com/users\", jsonBody=payload);"
     },
     {
       "function": "http.getText",
@@ -1172,12 +1172,12 @@
         }
       ],
       "return_type": "string",
-      "example": "var html = call http.getText(url=\"https://example.com\");\nprint html;"
+      "example": "<b>var</b> <b>html</b> = <b>call</b> <b>http.getText</b>(url=\"https://example.com\");\n<b>print</b> html;"
     },
     {
       "function": "http.postText",
       "short_description": "Posts text to HTTP endpoint",
-      "long_help": "Performs HTTP POST with text body and returns response as plain string. The body parameter is sent as-is without JSON serialization.",
+      "long_help": "Performs HTTP POST with text body and returns response as plain string. The body parameter is sent as-is without JSON<br>serialization.",
       "parameters": [
         {
           "name": "url",
@@ -1199,12 +1199,12 @@
         }
       ],
       "return_type": "string",
-      "example": "var xmlData = \"<request><id>123</id></request>\";\nvar response = call http.postText(url=\"https://api.example.com/process\", body=xmlData, headers={\"Content-Type\": \"application/xml\"});"
+      "example": "<b>var</b> <b>xmlData</b> = \"<request><id>123</id></request>\";<br><b>var</b> <b>response</b> = <b>call</b> <b>http.postText</b>(url=\"https://api.example.com/process\", body=xmlData,<br>headers={\"Content-Type\": \"application/xml\"});"
     },
     {
       "function": "http.ensure2xx",
       "short_description": "Validates HTTP 2xx status",
-      "long_help": "Checks if an HTTP response has a 2xx status code. Accepts either a full response envelope or just a status code. Throws an error with optional message if status is not 2xx.",
+      "long_help": "Checks if an HTTP response has a 2xx status code. Accepts either a full response envelope or just a status code. Throws<br>an error with optional message if status is not 2xx.",
       "parameters": [
         {
           "name": "statusOrEnvelope",
@@ -1217,12 +1217,12 @@
         }
       ],
       "return_type": "json",
-      "example": "var response = call http.get(url=\"https://api.example.com/data\");\ncall http.ensure2xx(statusOrEnvelope=response, message=\"Failed to fetch data\");"
+      "example": "<b>var</b> <b>response</b> = <b>call</b> <b>http.get</b>(url=\"https://api.example.com/data\");<br><b>call</b> <b>http.ensure2xx</b>(statusOrEnvelope=response, message=\"Failed to fetch data\");"
     },
     {
       "function": "ai.complete",
       "short_description": "Gets AI chat completion",
-      "long_help": "Calls an OpenAI-compatible API to generate text completions. Supports optional system prompt, required user prompt, and optional maxTokens and temperature parameters. Uses configuration from system properties or environment variables.",
+      "long_help": "Calls an OpenAI-compatible API to generate text completions. Supports optional system prompt, required user prompt, and<br>optional maxTokens and temperature parameters. Uses configuration from system properties or environment variables.",
       "parameters": [
         {
           "name": "system",
@@ -1245,7 +1245,7 @@
         }
       ],
       "return_type": "string",
-      "example": "var answer = call ai.complete(system=\"You are a helpful assistant\", user=\"Explain quantum computing\", maxTokens=500, temperature=0.7);\nprint answer;"
+      "example": "<b>var</b> <b>answer</b> = <b>call</b> <b>ai.complete</b>(system=\"You are a helpful assistant\", user=\"Explain quantum<br>computing\", maxTokens=500, temperature=0.7);<br><b>print</b> answer;"
     },
     {
       "function": "ai.summarize",
@@ -1263,12 +1263,12 @@
         }
       ],
       "return_type": "string",
-      "example": "var longText = call file.readTextFile(path=\"article.txt\");\nvar summary = call ai.summarize(text=longText, maxTokens=200);\nprint summary;"
+      "example": "<b>var</b> <b>longText</b> = <b>call</b> <b>file.readTextFile</b>(path=\"article.txt\");<br><b>var</b> <b>summary</b> = <b>call</b> <b>ai.summarize</b>(text=longText, maxTokens=200);<br><b>print</b> summary;"
     },
     {
       "function": "ai.embed",
       "short_description": "Gets text embeddings from AI",
-      "long_help": "Generates vector embeddings for the given text using an AI embedding model. Returns a JSON array of floating-point numbers representing the semantic meaning of the text. Useful for similarity searches and semantic analysis.",
+      "long_help": "Generates vector embeddings for the given text using an AI embedding model. Returns a JSON array of floating-point<br>numbers representing the semantic meaning of the text. Useful for similarity searches and semantic analysis.",
       "parameters": [
         {
           "name": "text",
@@ -1276,12 +1276,12 @@
         }
       ],
       "return_type": "json",
-      "example": "var embedding = call ai.embed(text=\"machine learning\");\nprint \"Embedding dimension: \" + call array.length(array=embedding);"
+      "example": "<b>var</b> <b>embedding</b> = <b>call</b> <b>ai.embed</b>(text=\"machine learning\");<br><b>print</b> \"Embedding dimension: \" + <b>call</b> <b>array.length</b>(array=embedding);"
     },
     {
       "function": "ai.classify",
       "short_description": "Classifies text using AI",
-      "long_help": "Uses AI to classify the given text into one of the provided labels. The labels parameter should be a JSON array of strings. Returns the most appropriate label.",
+      "long_help": "Uses AI to classify the given text into one of the provided labels. The labels parameter should be a JSON array of<br>strings. Returns the most appropriate label.",
       "parameters": [
         {
           "name": "text",
@@ -1293,12 +1293,12 @@
         }
       ],
       "return_type": "string",
-      "example": "var labels = [\"positive\", \"negative\", \"neutral\"];\nvar sentiment = call ai.classify(text=\"This product is amazing!\", labels=labels);\nprint sentiment;"
+      "example": "<b>var</b> <b>labels</b> = [\"positive\", \"negative\", \"neutral\"];<br><b>var</b> <b>sentiment</b> = <b>call</b> <b>ai.classify</b>(text=\"This product is amazing!\", labels=labels);<br><b>print</b> sentiment;"
     },
     {
       "function": "array.base64decode",
       "short_description": "Decodes a base64 string to a byte array",
-      "long_help": "Decodes a base64-encoded string and returns the decoded bytes as an array. Useful for handling binary data encoded in text format.",
+      "long_help": "Decodes a base64-encoded string and returns the decoded bytes as an array. Useful for handling binary data encoded in<br>text format.",
       "parameters": [
         {
           "name": "b64",
@@ -1306,7 +1306,7 @@
         }
       ],
       "return_type": "array",
-      "example": "var decoded = call array.base64decode(b64=\"SGVsbG8gV29ybGQ=\");"
+      "example": "<b>var</b> <b>decoded</b> = <b>call</b> <b>array.base64decode</b>(b64=\"SGVsbG8gV29ybGQ=\");"
     },
     {
       "function": "array.base64encode",
@@ -1319,7 +1319,7 @@
         }
       ],
       "return_type": "string",
-      "example": "var encoded = call array.base64encode(bytes=myByteArray);"
+      "example": "<b>var</b> <b>encoded</b> = <b>call</b> <b>array.base64encode</b>(bytes=myByteArray);"
     },
     {
       "function": "array.expand",
@@ -1336,12 +1336,12 @@
         }
       ],
       "return_type": "null",
-      "example": "var arr = call array.create();\ncall array.expand(array=arr, length=10);"
+      "example": "<b>var</b> <b>arr</b> = <b>call</b> <b>array.create</b>();\n<b>call</b> <b>array.expand</b>(array=arr, length=10);"
     },
     {
       "function": "array.fill",
       "short_description": "Fills array with specified value",
-      "long_help": "Fills an array to the specified length with the given value. If value is not provided, fills with null. Modifies the array in place.",
+      "long_help": "Fills an array to the specified length with the given value. If value is not provided, fills with null. Modifies the<br>array in place.",
       "parameters": [
         {
           "name": "array",
@@ -1357,12 +1357,12 @@
         }
       ],
       "return_type": "null",
-      "example": "var arr = call array.create();\ncall array.fill(array=arr, length=5, value=0);"
+      "example": "<b>var</b> <b>arr</b> = <b>call</b> <b>array.create</b>();\n<b>call</b> <b>array.fill</b>(array=arr, length=5, value=0);"
     },
     {
       "function": "classTree.generate",
       "short_description": "Generates class hierarchy tree",
-      "long_help": "Generates a visual class hierarchy tree from Java source files in the specified directory. If no directory is provided, uses the current directory.",
+      "long_help": "Generates a visual class hierarchy tree from Java source files in the specified directory. If no directory is provided,<br>uses the current directory.",
       "parameters": [
         {
           "name": "sourceDir",
@@ -1371,12 +1371,12 @@
         }
       ],
       "return_type": "string",
-      "example": "var tree = call classTree.generate(sourcedir=\"./src\");\nprint tree;"
+      "example": "<b>var</b> <b>tree</b> = <b>call</b> <b>classTree.generate</b>(sourcedir=\"./src\");\n<b>print</b> tree;"
     },
     {
       "function": "classTree.scan",
       "short_description": "Scans and analyzes class structure",
-      "long_help": "Scans Java source files in the specified directory and analyzes the class structure. Returns metadata about classes, interfaces, and their relationships.",
+      "long_help": "Scans Java source files in the specified directory and analyzes the class structure. Returns metadata about classes,<br>interfaces, and their relationships.",
       "parameters": [
         {
           "name": "sourceDir",
@@ -1385,12 +1385,12 @@
         }
       ],
       "return_type": "string",
-      "example": "var analysis = call classTree.scan(sourcedir=\"./src\");\nprint analysis;"
+      "example": "<b>var</b> <b>analysis</b> = <b>call</b> <b>classTree.scan</b>(sourcedir=\"./src\");\n<b>print</b> analysis;"
     },
     {
       "function": "debug.assertEquals",
       "short_description": "Asserts two values are equal",
-      "long_help": "Asserts that the expected and actual values are equal. Returns true if equal, false otherwise. Optionally logs a custom message on failure.",
+      "long_help": "Asserts that the expected and actual values are equal. Returns true if equal, false otherwise. Optionally logs a custom<br>message on failure.",
       "parameters": [
         {
           "name": "expected",
@@ -1407,12 +1407,12 @@
         }
       ],
       "return_type": "bool",
-      "example": "var result = call debug.assertEquals(expected=10, actual=myValue, message=\"Value mismatch\");"
+      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>debug.assertEquals</b>(expected=10, actual=myValue, message=\"Value mismatch\");"
     },
     {
       "function": "debug.file",
       "short_description": "Sets debug output file",
-      "long_help": "Sets the file path where debug output should be written. Debug messages will be appended to this file instead of console output.",
+      "long_help": "Sets the file path where debug output should be written. Debug messages will be appended to this file instead of console<br>output.",
       "parameters": [
         {
           "name": "filename",
@@ -1420,12 +1420,12 @@
         }
       ],
       "return_type": "null",
-      "example": "call debug.file(filename=\"debug.log\");\ncall debug.log(level=\"INFO\", message=\"Test\");"
+      "example": "<b>call</b> <b>debug.file</b>(filename=\"debug.log\");\n<b>call</b> <b>debug.log</b>(level=\"INFO\", message=\"Test\");"
     },
     {
       "function": "debug.memUsage",
       "short_description": "Returns memory usage statistics",
-      "long_help": "Returns current memory usage statistics including used, free, and total memory. Unit parameter can be 'B', 'KB', 'MB', or 'GB'. Default is 'MB'.",
+      "long_help": "Returns current memory usage statistics including used, free, and total memory. Unit parameter can be 'B', 'KB', 'MB',<br>or 'GB'. Default is 'MB'.",
       "parameters": [
         {
           "name": "unit",
@@ -1434,7 +1434,7 @@
         }
       ],
       "return_type": "json",
-      "example": "var mem = call debug.memUsage(unit=\"MB\");\nprint \"Used: \" + mem.used + \" MB\";"
+      "example": "<b>var</b> <b>mem</b> = <b>call</b> <b>debug.memUsage</b>(unit=\"MB\");\n<b>print</b> \"Used: \" + mem.used + \" MB\";"
     },
     {
       "function": "debug.newFile",
@@ -1447,15 +1447,15 @@
         }
       ],
       "return_type": "null",
-      "example": "call debug.newFile(filename=\"debug.log\");"
+      "example": "<b>call</b> <b>debug.newFile</b>(filename=\"debug.log\");"
     },
     {
       "function": "debug.stack",
       "short_description": "Returns current call stack",
-      "long_help": "Returns the current call stack as a JSON array. Each element contains information about a stack frame including line numbers and context.",
+      "long_help": "Returns the current call stack as a JSON array. Each element contains information about a stack frame including line<br>numbers and context.",
       "parameters": [],
       "return_type": "json",
-      "example": "var stack = call debug.stack();\nforeach frame in stack {\n  print frame;\n}"
+      "example": "<b>var</b> <b>stack</b> = <b>call</b> <b>debug.stack</b>();\n<b>foreach</b> frame <b>in</b> stack {\n  <b>print</b> frame;\n}"
     },
     {
       "function": "debug.traceOff",
@@ -1463,15 +1463,15 @@
       "long_help": "Disables trace mode debugging. Trace mode logs detailed execution information for troubleshooting.",
       "parameters": [],
       "return_type": "bool",
-      "example": "call debug.traceOff();"
+      "example": "<b>call</b> <b>debug.traceOff</b>();"
     },
     {
       "function": "debug.traceOn",
       "short_description": "Enables trace mode",
-      "long_help": "Enables trace mode debugging. Trace mode logs detailed execution information including every statement and expression evaluated.",
+      "long_help": "Enables trace mode debugging. Trace mode logs detailed execution information including every statement and expression<br>evaluated.",
       "parameters": [],
       "return_type": "bool",
-      "example": "call debug.traceOn();\n// Detailed execution trace will be logged"
+      "example": "<b>call</b> <b>debug.traceOn</b>();\n// Detailed execution trace will be logged"
     },
     {
       "function": "file.close",
@@ -1484,7 +1484,7 @@
         }
       ],
       "return_type": "bool",
-      "example": "var h = call file.open(path=\"data.txt\", mode=\"r\");\nvar content = call file.read(handle=h);\ncall file.close(handle=h);"
+      "example": "<b>var</b> <b>h</b> = <b>call</b> <b>file.open</b>(path=\"data.txt\", mode=\"r\");\n<b>var</b> <b>content</b> = <b>call</b> <b>file.read</b>(handle=h);\n<b>call</b> <b>file.close</b>(handle=h);"
     },
     {
       "function": "file.closeZip",
@@ -1497,12 +1497,12 @@
         }
       ],
       "return_type": "bool",
-      "example": "var zh = call file.openZip(path=\"archive.zip\", mode=\"r\");\ncall file.listZipFiles(handle=zh);\ncall file.closeZip(handle=zh);"
+      "example": "<b>var</b> <b>zh</b> = <b>call</b> <b>file.openZip</b>(path=\"archive.zip\", mode=\"r\");<br><b>call</b> <b>file.listZipFiles</b>(handle=zh);<br><b>call</b> <b>file.closeZip</b>(handle=zh);"
     },
     {
       "function": "file.copy",
       "short_description": "Copies a file",
-      "long_help": "Copies a file from source path to destination path. Overwrites destination if it exists. Both paths must be within safe directories.",
+      "long_help": "Copies a file from source path to destination path. Overwrites destination if it exists. Both paths must be within safe<br>directories.",
       "parameters": [
         {
           "name": "source",
@@ -1514,12 +1514,12 @@
         }
       ],
       "return_type": "bool",
-      "example": "var success = call file.copy(source=\"data.txt\", dest=\"backup/data.txt\");"
+      "example": "<b>var</b> <b>success</b> = <b>call</b> <b>file.copy</b>(source=\"data.txt\", dest=\"backup/data.txt\");"
     },
     {
       "function": "file.eof",
       "short_description": "Checks if end of file reached",
-      "long_help": "Checks if the file pointer has reached the end of the file for the given handle. Returns true if at EOF, false otherwise.",
+      "long_help": "Checks if the file pointer has reached the end of the file for the given handle. Returns true if at EOF, false<br>otherwise.",
       "parameters": [
         {
           "name": "handle",
@@ -1527,7 +1527,7 @@
         }
       ],
       "return_type": "bool",
-      "example": "var h = call file.open(path=\"data.txt\", mode=\"r\");\nwhile !call file.eof(handle=h) do {\n  var line = call file.readln(handle=h);\n  print line;\n}"
+      "example": "<b>var</b> <b>h</b> = <b>call</b> <b>file.open</b>(path=\"data.txt\", mode=\"r\");<br><b>while</b> !<b>call</b> <b>file.eof</b>(handle=h) <b>do</b> {<br>  <b>var</b> <b>line</b> = <b>call</b> <b>file.readln</b>(handle=h);<br>  <b>print</b> line;<br>}"
     },
     {
       "function": "file.listOpenFiles",
@@ -1535,7 +1535,7 @@
       "long_help": "Returns a JSON array of all currently open file handles. Useful for debugging file handle leaks.",
       "parameters": [],
       "return_type": "json",
-      "example": "var openFiles = call file.listOpenFiles();\nforeach handle in openFiles {\n  print handle;\n}"
+      "example": "<b>var</b> <b>openFiles</b> = <b>call</b> <b>file.listOpenFiles</b>();\n<b>foreach</b> handle <b>in</b> openFiles {\n  <b>print</b> handle;\n}"
     },
     {
       "function": "file.listZipFiles",
@@ -1553,12 +1553,12 @@
         }
       ],
       "return_type": "json",
-      "example": "var zh = call file.openZip(path=\"archive.zip\", mode=\"r\");\nvar files = call file.listZipFiles(handle=zh, path=\"docs/\");\nprint files;"
+      "example": "<b>var</b> <b>zh</b> = <b>call</b> <b>file.openZip</b>(path=\"archive.zip\", mode=\"r\");<br><b>var</b> <b>files</b> = <b>call</b> <b>file.listZipFiles</b>(handle=zh, path=\"docs/\");<br><b>print</b> files;"
     },
     {
       "function": "file.move",
       "short_description": "Moves or renames a file",
-      "long_help": "Moves a file from source path to destination path. Can also be used to rename files. Both paths must be within safe directories.",
+      "long_help": "Moves a file from source path to destination path. Can also be used to rename files. Both paths must be within safe<br>directories.",
       "parameters": [
         {
           "name": "source",
@@ -1570,12 +1570,12 @@
         }
       ],
       "return_type": "bool",
-      "example": "var success = call file.move(source=\"temp.txt\", dest=\"final.txt\");"
+      "example": "<b>var</b> <b>success</b> = <b>call</b> <b>file.move</b>(source=\"temp.txt\", dest=\"final.txt\");"
     },
     {
       "function": "file.open",
       "short_description": "Opens a file and returns a handle",
-      "long_help": "Opens a file for reading or writing and returns a handle string. Mode can be 'r' (read), 'w' (write), or 'a' (append). Default is 'r'.",
+      "long_help": "Opens a file for reading or writing and returns a handle string. Mode can be 'r' (read), 'w' (write), or 'a' (append).<br>Default is 'r'.",
       "parameters": [
         {
           "name": "path",
@@ -1588,12 +1588,12 @@
         }
       ],
       "return_type": "string",
-      "example": "var h = call file.open(path=\"data.txt\", mode=\"r\");\nvar content = call file.read(handle=h);\ncall file.close(handle=h);"
+      "example": "<b>var</b> <b>h</b> = <b>call</b> <b>file.open</b>(path=\"data.txt\", mode=\"r\");\n<b>var</b> <b>content</b> = <b>call</b> <b>file.read</b>(handle=h);\n<b>call</b> <b>file.close</b>(handle=h);"
     },
     {
       "function": "file.openZip",
       "short_description": "Opens a ZIP file and returns a handle",
-      "long_help": "Opens a ZIP file for reading or writing. Mode can be 'r' (read) or 'w' (write). Returns a handle for subsequent ZIP operations.",
+      "long_help": "Opens a ZIP file for reading or writing. Mode can be 'r' (read) or 'w' (write). Returns a handle for subsequent ZIP<br>operations.",
       "parameters": [
         {
           "name": "path",
@@ -1605,7 +1605,7 @@
         }
       ],
       "return_type": "string",
-      "example": "var zh = call file.openZip(path=\"archive.zip\", mode=\"r\");\nvar files = call file.listZipFiles(handle=zh);\ncall file.closeZip(handle=zh);"
+      "example": "<b>var</b> <b>zh</b> = <b>call</b> <b>file.openZip</b>(path=\"archive.zip\", mode=\"r\");<br><b>var</b> <b>files</b> = <b>call</b> <b>file.listZipFiles</b>(handle=zh);<br><b>call</b> <b>file.closeZip</b>(handle=zh);"
     },
     {
       "function": "file.read",
@@ -1618,7 +1618,7 @@
         }
       ],
       "return_type": "string",
-      "example": "var h = call file.open(path=\"data.txt\", mode=\"r\");\nvar content = call file.read(handle=h);\ncall file.close(handle=h);"
+      "example": "<b>var</b> <b>h</b> = <b>call</b> <b>file.open</b>(path=\"data.txt\", mode=\"r\");\n<b>var</b> <b>content</b> = <b>call</b> <b>file.read</b>(handle=h);\n<b>call</b> <b>file.close</b>(handle=h);"
     },
     {
       "function": "file.readBin",
@@ -1631,7 +1631,7 @@
         }
       ],
       "return_type": "array",
-      "example": "var h = call file.open(path=\"image.png\", mode=\"r\");\nvar bytes = call file.readBin(handle=h);\ncall file.close(handle=h);"
+      "example": "<b>var</b> <b>h</b> = <b>call</b> <b>file.open</b>(path=\"image.png\", mode=\"r\");\n<b>var</b> <b>bytes</b> = <b>call</b> <b>file.readBin</b>(handle=h);\n<b>call</b> <b>file.close</b>(handle=h);"
     },
     {
       "function": "file.readBinFile",
@@ -1644,12 +1644,12 @@
         }
       ],
       "return_type": "array",
-      "example": "var bytes = call file.readBinFile(path=\"image.png\");"
+      "example": "<b>var</b> <b>bytes</b> = <b>call</b> <b>file.readBinFile</b>(path=\"image.png\");"
     },
     {
       "function": "file.readln",
       "short_description": "Reads a line from file handle",
-      "long_help": "Reads and returns the next line from an open file handle. Optional encoding parameter (default: UTF-8). Returns null at EOF.",
+      "long_help": "Reads and returns the next line from an open file handle. Optional encoding parameter (default: UTF-8). Returns null at<br>EOF.",
       "parameters": [
         {
           "name": "handle",
@@ -1662,7 +1662,7 @@
         }
       ],
       "return_type": "string",
-      "example": "var h = call file.open(path=\"data.txt\", mode=\"r\");\nvar line = call file.readln(handle=h, encoding=\"UTF-8\");\ncall file.close(handle=h);"
+      "example": "<b>var</b> <b>h</b> = <b>call</b> <b>file.open</b>(path=\"data.txt\", mode=\"r\");<br><b>var</b> <b>line</b> = <b>call</b> <b>file.readln</b>(handle=h, encoding=\"UTF-8\");<br><b>call</b> <b>file.close</b>(handle=h);"
     },
     {
       "function": "file.rename",
@@ -1679,7 +1679,7 @@
         }
       ],
       "return_type": "bool",
-      "example": "var success = call file.rename(path=\"old.txt\", newname=\"new.txt\");"
+      "example": "<b>var</b> <b>success</b> = <b>call</b> <b>file.rename</b>(path=\"old.txt\", newname=\"new.txt\");"
     },
     {
       "function": "file.size",
@@ -1692,12 +1692,12 @@
         }
       ],
       "return_type": "long",
-      "example": "var bytes = call file.size(pathorhandle=\"data.txt\");\nprint \"File size: \" + bytes + \" bytes\";"
+      "example": "<b>var</b> <b>bytes</b> = <b>call</b> <b>file.size</b>(pathorhandle=\"data.txt\");\n<b>print</b> \"File size: \" + bytes + \" bytes\";"
     },
     {
       "function": "file.unzip",
       "short_description": "Extracts files from ZIP archive",
-      "long_help": "Extracts files from a ZIP archive to the specified destination directory. Can optionally specify which entries to extract and whether to overwrite existing files.",
+      "long_help": "Extracts files from a ZIP archive to the specified destination directory. Can optionally specify which entries to<br>extract and whether to overwrite existing files.",
       "parameters": [
         {
           "name": "handle",
@@ -1719,7 +1719,7 @@
         }
       ],
       "return_type": "bool",
-      "example": "var zh = call file.openZip(path=\"archive.zip\", mode=\"r\");\ncall file.unzip(handle=zh, destdir=\"./extracted\", overwrite=true);\ncall file.closeZip(handle=zh);"
+      "example": "<b>var</b> <b>zh</b> = <b>call</b> <b>file.openZip</b>(path=\"archive.zip\", mode=\"r\");<br><b>call</b> <b>file.unzip</b>(handle=zh, destdir=\"./extracted\", overwrite=true);<br><b>call</b> <b>file.closeZip</b>(handle=zh);"
     },
     {
       "function": "file.write",
@@ -1741,7 +1741,7 @@
         }
       ],
       "return_type": "bool",
-      "example": "var h = call file.open(path=\"output.txt\", mode=\"w\");\ncall file.write(handle=h, text=\"Hello World\");\ncall file.close(handle=h);"
+      "example": "<b>var</b> <b>h</b> = <b>call</b> <b>file.open</b>(path=\"output.txt\", mode=\"w\");<br><b>call</b> <b>file.write</b>(handle=h, text=\"Hello World\");<br><b>call</b> <b>file.close</b>(handle=h);"
     },
     {
       "function": "file.writeBin",
@@ -1758,7 +1758,7 @@
         }
       ],
       "return_type": "bool",
-      "example": "var h = call file.open(path=\"output.bin\", mode=\"w\");\ncall file.writeBin(handle=h, bytes=myByteArray);\ncall file.close(handle=h);"
+      "example": "<b>var</b> <b>h</b> = <b>call</b> <b>file.open</b>(path=\"output.bin\", mode=\"w\");<br><b>call</b> <b>file.writeBin</b>(handle=h, bytes=myByteArray);<br><b>call</b> <b>file.close</b>(handle=h);"
     },
     {
       "function": "file.writeBinFile",
@@ -1775,7 +1775,7 @@
         }
       ],
       "return_type": "bool",
-      "example": "call file.writeBinFile(path=\"output.bin\", bytes=myByteArray);"
+      "example": "<b>call</b> <b>file.writeBinFile</b>(path=\"output.bin\", bytes=myByteArray);"
     },
     {
       "function": "file.writeln",
@@ -1797,12 +1797,12 @@
         }
       ],
       "return_type": "bool",
-      "example": "var h = call file.open(path=\"output.txt\", mode=\"w\");\ncall file.writeln(handle=h, text=\"Line 1\");\ncall file.writeln(handle=h, text=\"Line 2\");\ncall file.close(handle=h);"
+      "example": "<b>var</b> <b>h</b> = <b>call</b> <b>file.open</b>(path=\"output.txt\", mode=\"w\");<br><b>call</b> <b>file.writeln</b>(handle=h, text=\"Line 1\");<br><b>call</b> <b>file.writeln</b>(handle=h, text=\"Line 2\");<br><b>call</b> <b>file.close</b>(handle=h);"
     },
     {
       "function": "file.writeToTextFile",
       "short_description": "Writes text to a file",
-      "long_help": "Writes text content to a file, creating it if it doesn't exist or overwriting if it does. Similar to file.writeTextFile but different parameter name for compatibility.",
+      "long_help": "Writes text content to a file, creating it if it doesn't exist or overwriting if it does. Similar to file.writeTextFile<br>but different parameter name for compatibility.",
       "parameters": [
         {
           "name": "path",
@@ -1814,12 +1814,12 @@
         }
       ],
       "return_type": "bool",
-      "example": "call file.writeToTextFile(path=\"output.txt\", content=\"Hello World\\n\");"
+      "example": "<b>call</b> <b>file.writeToTextFile</b>(path=\"output.txt\", content=\"Hello World\\n\");"
     },
     {
       "function": "file.zip",
       "short_description": "Adds files to ZIP archive",
-      "long_help": "Adds files to a ZIP archive. Requires an open ZIP file handle in write mode. Can specify source files and their archive paths.",
+      "long_help": "Adds files to a ZIP archive. Requires an open ZIP file handle in write mode. Can specify source files and their archive<br>paths.",
       "parameters": [
         {
           "name": "handle",
@@ -1835,7 +1835,7 @@
         }
       ],
       "return_type": "bool",
-      "example": "var zh = call file.openZip(path=\"archive.zip\", mode=\"w\");\ncall file.zip(handle=zh, sourcepath=\"data.txt\", archivepath=\"docs/data.txt\");\ncall file.closeZip(handle=zh);"
+      "example": "<b>var</b> <b>zh</b> = <b>call</b> <b>file.openZip</b>(path=\"archive.zip\", mode=\"w\");<br><b>call</b> <b>file.zip</b>(handle=zh, sourcepath=\"data.txt\", archivepath=\"docs/data.txt\");<br><b>call</b> <b>file.closeZip</b>(handle=zh);"
     },
     {
       "function": "json.fromMap",
@@ -1848,7 +1848,7 @@
         }
       ],
       "return_type": "json",
-      "example": "var jsonObj = call json.fromMap(map=myMap);"
+      "example": "<b>var</b> <b>jsonObj</b> = <b>call</b> <b>json.fromMap</b>(map=myMap);"
     },
     {
       "function": "json.parse",
@@ -1861,7 +1861,7 @@
         }
       ],
       "return_type": "json",
-      "example": "var obj = call json.parse(jsonStr=\"{\\\"name\\\":\\\"John\\\",\\\"age\\\":30}\");\nprint obj.name;"
+      "example": "<b>var</b> <b>obj</b> = <b>call</b> <b>json.parse</b>(jsonStr=\"{\\\"name\\\":\\\"John\\\",\\\"age\\\":30}\");\n<b>print</b> obj.name;"
     },
     {
       "function": "json.toMap",
@@ -1874,7 +1874,7 @@
         }
       ],
       "return_type": "map",
-      "example": "var map = call json.toMap(json=myJsonObj);"
+      "example": "<b>var</b> <b>map</b> = <b>call</b> <b>json.toMap</b>(json=myJsonObj);"
     },
     {
       "function": "json.toString",
@@ -1891,7 +1891,7 @@
         }
       ],
       "return_type": "string",
-      "example": "var jsonStr = call json.toString(json=myObj, pretty=true);\nprint jsonStr;"
+      "example": "<b>var</b> <b>jsonStr</b> = <b>call</b> <b>json.toString</b>(json=myObj, pretty=true);\n<b>print</b> jsonStr;"
     },
     {
       "function": "math.acos",
@@ -1904,7 +1904,7 @@
         }
       ],
       "return_type": "double",
-      "example": "var angle = call math.acos(value=0.5);\nprint \"Angle: \" + angle + \" radians\";"
+      "example": "<b>var</b> <b>angle</b> = <b>call</b> <b>math.acos</b>(value=0.5);\n<b>print</b> \"Angle: \" + angle + \" radians\";"
     },
     {
       "function": "math.asin",
@@ -1917,7 +1917,7 @@
         }
       ],
       "return_type": "double",
-      "example": "var angle = call math.asin(value=0.5);\nprint \"Angle: \" + angle + \" radians\";"
+      "example": "<b>var</b> <b>angle</b> = <b>call</b> <b>math.asin</b>(value=0.5);\n<b>print</b> \"Angle: \" + angle + \" radians\";"
     },
     {
       "function": "math.atan",
@@ -1930,7 +1930,7 @@
         }
       ],
       "return_type": "double",
-      "example": "var angle = call math.atan(value=1.0);\nprint \"Angle: \" + angle + \" radians\";"
+      "example": "<b>var</b> <b>angle</b> = <b>call</b> <b>math.atan</b>(value=1.0);\n<b>print</b> \"Angle: \" + angle + \" radians\";"
     },
     {
       "function": "math.cos",
@@ -1943,7 +1943,7 @@
         }
       ],
       "return_type": "double",
-      "example": "var result = call math.cos(angle=1.57);\nprint \"Cosine: \" + result;"
+      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>math.cos</b>(angle=1.57);\n<b>print</b> \"Cosine: \" + result;"
     },
     {
       "function": "math.exp",
@@ -1956,7 +1956,7 @@
         }
       ],
       "return_type": "double",
-      "example": "var result = call math.exp(value=2.0);\nprint \"e^2 = \" + result;"
+      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>math.exp</b>(value=2.0);\n<b>print</b> \"e^2 = \" + result;"
     },
     {
       "function": "math.log",
@@ -1969,7 +1969,7 @@
         }
       ],
       "return_type": "double",
-      "example": "var result = call math.log(value=10.0);\nprint \"ln(10) = \" + result;"
+      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>math.log</b>(value=10.0);\n<b>print</b> \"ln(10) = \" + result;"
     },
     {
       "function": "math.log10",
@@ -1982,7 +1982,7 @@
         }
       ],
       "return_type": "double",
-      "example": "var result = call math.log10(value=100.0);\nprint \"log10(100) = \" + result;"
+      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>math.log10</b>(value=100.0);\n<b>print</b> \"log10(100) = \" + result;"
     },
     {
       "function": "math.sin",
@@ -1995,7 +1995,7 @@
         }
       ],
       "return_type": "double",
-      "example": "var result = call math.sin(angle=1.57);\nprint \"Sine: \" + result;"
+      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>math.sin</b>(angle=1.57);\n<b>print</b> \"Sine: \" + result;"
     },
     {
       "function": "math.tan",
@@ -2008,7 +2008,7 @@
         }
       ],
       "return_type": "double",
-      "example": "var result = call math.tan(angle=0.785);\nprint \"Tangent: \" + result;"
+      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>math.tan</b>(angle=0.785);\n<b>print</b> \"Tangent: \" + result;"
     },
     {
       "function": "string.charAt",
@@ -2025,7 +2025,7 @@
         }
       ],
       "return_type": "string",
-      "example": "var char = call string.charAt(str=\"Hello\", index=1);\nprint char; // Outputs: e"
+      "example": "<b>var</b> <b>char</b> = <b>call</b> <b>string.charAt</b>(str=\"Hello\", index=1);\n<b>print</b> char; // Outputs: e"
     },
     {
       "function": "string.indexOf",
@@ -2042,7 +2042,7 @@
         }
       ],
       "return_type": "integer",
-      "example": "var pos = call string.indexOf(str=\"Hello World\", substring=\"World\");\nprint pos; // Outputs: 6"
+      "example": "<b>var</b> <b>pos</b> = <b>call</b> <b>string.indexOf</b>(str=\"Hello World\", substring=\"World\");\n<b>print</b> pos; // Outputs: 6"
     },
     {
       "function": "string.lastIndexOf",
@@ -2059,7 +2059,7 @@
         }
       ],
       "return_type": "integer",
-      "example": "var pos = call string.lastIndexOf(str=\"Hello Hello\", substring=\"Hello\");\nprint pos; // Outputs: 6"
+      "example": "<b>var</b> <b>pos</b> = <b>call</b> <b>string.lastIndexOf</b>(str=\"Hello Hello\", substring=\"Hello\");\n<b>print</b> pos; // Outputs: 6"
     },
     {
       "function": "string.matches",
@@ -2076,7 +2076,7 @@
         }
       ],
       "return_type": "bool",
-      "example": "var isEmail = call string.matches(str=\"test@example.com\", pattern=\"^[\\\\w.-]+@[\\\\w.-]+\\\\.\\\\w+$\");"
+      "example": "<b>var</b> <b>isEmail</b> = <b>call</b> <b>string.matches</b>(str=\"test@example.com\", pattern=\"^[\\\\w.-]+@[\\\\w.-]+\\\\.\\\\w+$\");"
     },
     {
       "function": "string.replaceAll",
@@ -2097,7 +2097,7 @@
         }
       ],
       "return_type": "string",
-      "example": "var result = call string.replaceAll(str=\"Hello 123 World 456\", pattern=\"\\\\d+\", replacement=\"NUM\");\nprint result; // Outputs: Hello NUM World NUM"
+      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>string.replaceAll</b>(str=\"Hello 123 World 456\", pattern=\"\\\\d+\",<br>replacement=\"NUM\");<br><b>print</b> result; // Outputs: Hello NUM World NUM"
     },
     {
       "function": "system.currentTimeMillis",
@@ -2105,7 +2105,7 @@
       "long_help": "Returns the current time in milliseconds since Unix epoch (January 1, 1970 00:00:00 UTC).",
       "parameters": [],
       "return_type": "long",
-      "example": "var now = call system.currentTimeMillis();\nprint \"Current time: \" + now;"
+      "example": "<b>var</b> <b>now</b> = <b>call</b> <b>system.currentTimeMillis</b>();\n<b>print</b> \"Current time: \" + now;"
     },
     {
       "function": "system.props",
@@ -2113,7 +2113,7 @@
       "long_help": "Returns a JSON object containing all system properties such as os.name, java.version, user.home, etc.",
       "parameters": [],
       "return_type": "json",
-      "example": "var props = call system.props();\nprint \"OS: \" + props[\"os.name\"];"
+      "example": "<b>var</b> <b>props</b> = <b>call</b> <b>system.props</b>();\n<b>print</b> \"OS: \" + props[\"os.name\"];"
     },
     {
       "function": "system.setprop",
@@ -2130,7 +2130,7 @@
         }
       ],
       "return_type": "bool",
-      "example": "call system.setprop(key=\"my.custom.prop\", value=\"customValue\");"
+      "example": "<b>call</b> <b>system.setprop</b>(key=\"my.custom.prop\", value=\"customValue\");"
     },
     {
       "function": "url.decode",
@@ -2143,7 +2143,7 @@
         }
       ],
       "return_type": "string",
-      "example": "var decoded = call url.decode(encoded=\"Hello%20World%21\");\nprint decoded; // Outputs: Hello World!"
+      "example": "<b>var</b> <b>decoded</b> = <b>call</b> <b>url.decode</b>(encoded=\"Hello%20World%21\");\n<b>print</b> decoded; // Outputs: Hello World!"
     },
     {
       "function": "url.encode",
@@ -2156,12 +2156,12 @@
         }
       ],
       "return_type": "string",
-      "example": "var encoded = call url.encode(str=\"Hello World!\");\nprint encoded; // Outputs: Hello+World%21"
+      "example": "<b>var</b> <b>encoded</b> = <b>call</b> <b>url.encode</b>(str=\"Hello World!\");\n<b>print</b> encoded; // Outputs: Hello+World%21"
     },
     {
       "function": "file.appendToTextFile",
       "short_description": "Appends text to a file",
-      "long_help": "Appends the specified text content to an existing file. Creates the file if it doesn't exist. The file must be within a safe directory.",
+      "long_help": "Appends the specified text content to an existing file. Creates the file if it doesn't exist. The file must be within a<br>safe directory.",
       "parameters": [
         {
           "name": "path",
@@ -2173,7 +2173,393 @@
         }
       ],
       "return_type": "bool",
-      "example": "call file.appendToTextFile(path=\"log.txt\", content=\"Log entry\\n\");"
+      "example": "<b>call</b> <b>file.appendToTextFile</b>(path=\"log.txt\", content=\"Log entry\\n\");"
+    },
+    {
+      "function": "http.is2xx",
+      "short_description": "Checks if HTTP status is 2xx",
+      "long_help": "Returns true if the HTTP status code is in the 2xx range (200-299), indicating success. Accepts either a full response<br>envelope (with 'status' field) or just a status code number.",
+      "parameters": [
+        {
+          "name": "statusOrEnvelope",
+          "type": "json"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>var</b> <b>response</b> = <b>call</b> <b>http.get</b>(url=\"https://api.example.com/data\");<br><b>if</b> <b>call</b> <b>http.is2xx</b>(statusOrEnvelope=response) <b>then</b> {<br>  <b>print</b> \"Success!\";<br>}"
+    },
+    {
+      "function": "http.request",
+      "short_description": "Performs HTTP request with full control",
+      "long_help": "Executes an HTTP request with full control over method, body, headers, and timeout. Returns a JSON envelope containing<br>status, headers, and body. Method can be GET, POST, PUT, DELETE, etc.",
+      "parameters": [
+        {
+          "name": "url",
+          "type": "string"
+        },
+        {
+          "name": "method",
+          "type": "string"
+        },
+        {
+          "name": "body",
+          "type": "string"
+        },
+        {
+          "name": "headers",
+          "type": "json"
+        },
+        {
+          "name": "timeoutMs",
+          "type": "long"
+        }
+      ],
+      "return_type": "json",
+      "example": "<b>var</b> <b>response</b> = <b>call</b> <b>http.request</b>(url=\"https://api.example.com/resource\", method=\"PUT\",<br>body=\"{\\\"data\\\": \\\"value\\\"}\", headers={\"Content-Type\": \"application/json\"}, timeoutMs=5000);<br><b>print</b> response.status;"
+    },
+    {
+      "function": "json.add",
+      "short_description": "Adds element to JSON array",
+      "long_help": "Adds a value to the end of a JSON array at the specified path. Creates the array if it doesn't exist. Returns the<br>modified JSON object.",
+      "parameters": [
+        {
+          "name": "root",
+          "type": "json"
+        },
+        {
+          "name": "arrayPath",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "type": "json"
+        }
+      ],
+      "return_type": "json",
+      "example": "<b>var</b> <b>data</b> = {\"items\": [1, 2, 3]};<br><b>var</b> <b>updated</b> = <b>call</b> <b>json.add</b>(root=data, arrayPath=\"items\", value=4);<br><b>print</b> updated; // {\"items\": [1, 2, 3, 4]}"
+    },
+    {
+      "function": "json.getArray",
+      "short_description": "Gets array from JSON path",
+      "long_help": "Retrieves an array (list) value from a JSON object using a dot-notation path. Returns null if the path doesn't exist or<br>the value is not an array.",
+      "parameters": [
+        {
+          "name": "root",
+          "type": "json"
+        },
+        {
+          "name": "path",
+          "type": "string"
+        }
+      ],
+      "return_type": "json",
+      "example": "<b>var</b> <b>data</b> = {\"users\": [{\"name\": \"Alice\"}, {\"name\": \"Bob\"}]};<br><b>var</b> <b>users</b> = <b>call</b> <b>json.getArray</b>(root=data, path=\"users\");<br><b>foreach</b> user <b>in</b> users <b>do</b> {<br>  <b>print</b> user.name;<br>}"
+    },
+    {
+      "function": "json.getDouble",
+      "short_description": "Gets double from JSON path",
+      "long_help": "Retrieves a double value from a JSON object using a dot-notation path. Returns a default value if the path doesn't<br>exist.",
+      "parameters": [
+        {
+          "name": "root",
+          "type": "json"
+        },
+        {
+          "name": "path",
+          "type": "string"
+        },
+        {
+          "name": "default",
+          "type": "double",
+          "optional": true
+        }
+      ],
+      "return_type": "double",
+      "example": "<b>var</b> <b>price</b> = <b>call</b> <b>json.getDouble</b>(root=config, path=\"product.price\", default=0.0);"
+    },
+    {
+      "function": "json.getInteger",
+      "short_description": "Gets integer from JSON path",
+      "long_help": "Retrieves an integer value from a JSON object using a dot-notation path. Returns a default value if the path doesn't<br>exist. Alias for json.getInt.",
+      "parameters": [
+        {
+          "name": "root",
+          "type": "json"
+        },
+        {
+          "name": "path",
+          "type": "string"
+        },
+        {
+          "name": "default",
+          "type": "integer",
+          "optional": true
+        }
+      ],
+      "return_type": "integer",
+      "example": "<b>var</b> <b>count</b> = <b>call</b> <b>json.getInteger</b>(root=config, path=\"settings.maxCount\", default=100);"
+    },
+    {
+      "function": "json.getLong",
+      "short_description": "Gets long from JSON path",
+      "long_help": "Retrieves a long value from a JSON object using a dot-notation path. Returns a default value if the path doesn't exist.",
+      "parameters": [
+        {
+          "name": "root",
+          "type": "json"
+        },
+        {
+          "name": "path",
+          "type": "string"
+        },
+        {
+          "name": "default",
+          "type": "long",
+          "optional": true
+        }
+      ],
+      "return_type": "long",
+      "example": "<b>var</b> <b>timestamp</b> = <b>call</b> <b>json.getLong</b>(root=data, path=\"event.timestamp\", default=0);"
+    },
+    {
+      "function": "json.getObject",
+      "short_description": "Gets object from JSON path",
+      "long_help": "Retrieves an object (map) value from a JSON object using a dot-notation path. Returns null if the path doesn't exist or<br>the value is not an object.",
+      "parameters": [
+        {
+          "name": "root",
+          "type": "json"
+        },
+        {
+          "name": "path",
+          "type": "string"
+        }
+      ],
+      "return_type": "json",
+      "example": "<b>var</b> <b>data</b> = {\"user\": {\"name\": \"Alice\", \"age\": 30}};<br><b>var</b> <b>user</b> = <b>call</b> <b>json.getObject</b>(root=data, path=\"user\");<br><b>print</b> user.name; // \"Alice\""
+    },
+    {
+      "function": "json.getStrict",
+      "short_description": "Gets value from JSON path (strict)",
+      "long_help": "Retrieves a value from a JSON object using a dot-notation path. Unlike json.get, this throws an error if the path<br>doesn't exist, ensuring strict validation.",
+      "parameters": [
+        {
+          "name": "root",
+          "type": "json"
+        },
+        {
+          "name": "path",
+          "type": "string"
+        }
+      ],
+      "return_type": "json",
+      "example": "<b>var</b> <b>value</b> = <b>call</b> <b>json.getStrict</b>(root=config, path=\"database.host\");\n// Throws error <b>if</b> path doesn't exist"
+    },
+    {
+      "function": "json.insert",
+      "short_description": "Inserts element into JSON array",
+      "long_help": "Inserts a value at a specific index in a JSON array at the specified path. Returns the modified JSON object.",
+      "parameters": [
+        {
+          "name": "root",
+          "type": "json"
+        },
+        {
+          "name": "arrayPath",
+          "type": "string"
+        },
+        {
+          "name": "index",
+          "type": "integer"
+        },
+        {
+          "name": "value",
+          "type": "json"
+        }
+      ],
+      "return_type": "json",
+      "example": "<b>var</b> <b>data</b> = {\"items\": [1, 3, 4]};<br><b>var</b> <b>updated</b> = <b>call</b> <b>json.insert</b>(root=data, arrayPath=\"items\", index=1, value=2);<br><b>print</b> updated; // {\"items\": [1, 2, 3, 4]}"
+    },
+    {
+      "function": "json.setStrict",
+      "short_description": "Sets value in JSON object (strict)",
+      "long_help": "Sets a value at the specified path in a JSON object. Unlike json.set, this throws an error if intermediate paths don't<br>exist, ensuring strict validation. Returns the modified JSON object.",
+      "parameters": [
+        {
+          "name": "root",
+          "type": "json"
+        },
+        {
+          "name": "path",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "type": "json"
+        }
+      ],
+      "return_type": "json",
+      "example": "<b>var</b> <b>data</b> = {\"user\": {\"name\": \"Alice\"}};<br><b>var</b> <b>updated</b> = <b>call</b> <b>json.setStrict</b>(root=data, path=\"user.name\", value=\"Bob\");<br>// Throws error <b>if</b> path doesn't exist"
+    },
+    {
+      "function": "string.equals",
+      "short_description": "Checks if two strings are equal",
+      "long_help": "Returns true if the two strings are exactly equal (case-sensitive), false otherwise. Handles null values safely.",
+      "parameters": [
+        {
+          "name": "value1",
+          "type": "string"
+        },
+        {
+          "name": "value2",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>if</b> <b>call</b> <b>string.equals</b>(value1=input, value2=\"expected\") <b>then</b> {\n  <b>print</b> \"Match!\";\n}"
+    },
+    {
+      "function": "string.equalsIgnoreCase",
+      "short_description": "Checks if strings are equal (case-insensitive)",
+      "long_help": "Returns true if the two strings are equal ignoring case differences, false otherwise. Useful for case-insensitive<br>comparisons.",
+      "parameters": [
+        {
+          "name": "value1",
+          "type": "string"
+        },
+        {
+          "name": "value2",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>if</b> <b>call</b> <b>string.equalsIgnoreCase</b>(value1=\"Hello\", value2=\"hello\") <b>then</b> {\n  <b>print</b> \"Match!\";\n}"
+    },
+    {
+      "function": "string.isBlank",
+      "short_description": "Checks if string is blank",
+      "long_help": "Returns true if the string is null, empty, or contains only whitespace characters, false otherwise.",
+      "parameters": [
+        {
+          "name": "str",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>if</b> <b>call</b> <b>string.isBlank</b>(str=userInput) <b>then</b> {\n  <b>print</b> \"Please enter a value\";\n}"
+    },
+    {
+      "function": "string.isEmpty",
+      "short_description": "Checks if string is empty",
+      "long_help": "Returns true if the string is null or has zero length, false otherwise. Unlike isBlank, this does not consider<br>whitespace.",
+      "parameters": [
+        {
+          "name": "str",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>if</b> <b>call</b> <b>string.isEmpty</b>(str=name) <b>then</b> {\n  <b>print</b> \"Name is empty\";\n}"
+    },
+    {
+      "function": "system.command",
+      "short_description": "Executes a system command",
+      "long_help": "Executes a system command with optional arguments, timeout, and working directory. Returns a JSON object containing exit<br>code, stdout, and stderr. Arguments should be provided as a JSON array.",
+      "parameters": [
+        {
+          "name": "command",
+          "type": "string"
+        },
+        {
+          "name": "args",
+          "type": "json",
+          "optional": true
+        },
+        {
+          "name": "timeoutMs",
+          "type": "long",
+          "optional": true
+        },
+        {
+          "name": "cwd",
+          "type": "string",
+          "optional": true
+        }
+      ],
+      "return_type": "json",
+      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>system.command</b>(command=\"ls\", args=[\"-la\", \"/tmp\"], timeoutMs=5000,<br>cwd=\"/home\");<br><b>print</b> \"Exit code: \" + result.exitCode;<br><b>print</b> \"Output: \" + result.stdout;"
+    },
+    {
+      "function": "system.getProperty",
+      "short_description": "Gets a system property",
+      "long_help": "Retrieves a Java system property by name. Returns the property value or a default value if not found. Common properties<br>include 'user.home', 'os.name', 'java.version', etc.",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "default",
+          "type": "string",
+          "optional": true
+        }
+      ],
+      "return_type": "string",
+      "example": "<b>var</b> <b>home</b> = <b>call</b> <b>system.getProperty</b>(name=\"user.home\", default=\"/home/user\");\n<b>print</b> \"Home directory: \" + home;"
+    },
+    {
+      "function": "system.help",
+      "short_description": "Returns help information",
+      "long_help": "Returns comprehensive help information about the scripting language, including keywords, operators, datatypes, and all<br>available builtin functions with their signatures. Outputs to console and returns the text as a string.",
+      "parameters": [],
+      "return_type": "json",
+      "example": "<b>var</b> <b>helpText</b> = <b>call</b> <b>system.help</b>();\n<b>print</b> helpText;"
+    },
+    {
+      "function": "system.setProperty",
+      "short_description": "Sets a system property",
+      "long_help": "Sets a Java system property to the specified value. Pass null as the value to clear the property. Returns the previous<br>value of the property, or null if it was not set.",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "optional": true
+        }
+      ],
+      "return_type": "string",
+      "example": "<b>var</b> <b>oldValue</b> = <b>call</b> <b>system.setProperty</b>(name=\"my.custom.property\", value=\"customValue\");<br><b>print</b> \"Previous value: \" + oldValue;"
+    },
+    {
+      "function": "system.winCommand",
+      "short_description": "Executes a Windows command",
+      "long_help": "Executes a Windows-specific command with optional arguments, timeout, and working directory. Similar to system.command<br>but optimized for Windows environments. Returns a JSON object containing exit code, stdout, and stderr.",
+      "parameters": [
+        {
+          "name": "command",
+          "type": "string"
+        },
+        {
+          "name": "args",
+          "type": "json",
+          "optional": true
+        },
+        {
+          "name": "timeoutMs",
+          "type": "long",
+          "optional": true
+        },
+        {
+          "name": "cwd",
+          "type": "string",
+          "optional": true
+        }
+      ],
+      "return_type": "json",
+      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>system.winCommand</b>(command=\"cmd.exe\", args=[\"/c\", \"dir\"], timeoutMs=5000);<br><b>print</b> \"Exit code: \" + result.exitCode;<br><b>print</b> \"Output: \" + result.stdout;"
     }
   ]
 }
