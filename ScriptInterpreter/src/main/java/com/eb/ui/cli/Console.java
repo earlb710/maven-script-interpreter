@@ -373,17 +373,36 @@ public final class Console {
         int wordStart = caretPos;
         while (wordStart > 0) {
             char c = text.charAt(wordStart - 1);
-            if (Character.isLetterOrDigit(c) || c == '.' || c == '_') {
+            if (Character.isLetterOrDigit(c) || c == '.' || c == '_'|| c == '/') {
                 wordStart--;
             } else {
                 break;
             }
         }
         
-        // Replace the current word with the suggestion
-        inputArea.replaceText(wordStart, caretPos, suggestion);
+        // Check if the suggestion is a builtin and get its parameter signature
+        String paramSignature = null;
+        if (AutocompleteSuggestions.isBuiltin(suggestion)) {
+            paramSignature = AutocompleteSuggestions.getBuiltinParameterSignature(suggestion);
+        }
         
-        // Move caret to end of inserted text
-        inputArea.moveTo(wordStart + suggestion.length());
+        // Build the text to insert
+        String insertText = suggestion;
+        int finalCaretOffset = suggestion.length();
+        
+        if (paramSignature != null) {
+            insertText = suggestion + paramSignature;
+            // Position caret after the first = sign to allow user to type/replace the default value
+            int firstEquals = paramSignature.indexOf("=");
+            if (firstEquals >= 0) {
+                finalCaretOffset = suggestion.length() + firstEquals + 1;
+            }
+        }
+        
+        // Replace the current word with the suggestion (and parameters if applicable)
+        inputArea.replaceText(wordStart, caretPos, insertText);
+        
+        // Move caret to the appropriate position
+        inputArea.moveTo(wordStart + finalCaretOffset);
     }
 }

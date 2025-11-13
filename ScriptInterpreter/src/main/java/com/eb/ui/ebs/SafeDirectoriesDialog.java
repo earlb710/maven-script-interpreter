@@ -8,9 +8,13 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.prefs.Preferences;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.GridPane;
@@ -31,11 +35,49 @@ import javafx.stage.Stage;
 public class SafeDirectoriesDialog extends Stage {
 
     private static final String PREF_NODE = "com.eb.sandbox";
-    private static final String PREF_KEY_PREFIX = "safeDir.";
+    private static final String PREF_KEY_DIR_PREFIX = "safeDir.";
+    private static final String PREF_KEY_NAME_PREFIX = "safeDirName.";
     private static final int MAX_SAFE_DIRS = 20;
 
-    private final ListView<String> dirListView;
-    private final List<String> safeDirectories;
+    private final TableView<SafeDirectoryEntry> dirTableView;
+    private final List<SafeDirectoryEntry> safeDirectories;
+    
+    /**
+     * Data model for a safe directory entry with an optional name.
+     */
+    public static class SafeDirectoryEntry {
+        private final StringProperty directory;
+        private final StringProperty name;
+        
+        public SafeDirectoryEntry(String directory, String name) {
+            this.directory = new SimpleStringProperty(directory);
+            this.name = new SimpleStringProperty(name != null ? name : "");
+        }
+        
+        public String getDirectory() {
+            return directory.get();
+        }
+        
+        public void setDirectory(String value) {
+            directory.set(value);
+        }
+        
+        public StringProperty directoryProperty() {
+            return directory;
+        }
+        
+        public String getName() {
+            return name.get();
+        }
+        
+        public void setName(String value) {
+            name.set(value != null ? value : "");
+        }
+        
+        public StringProperty nameProperty() {
+            return name;
+        }
+    }
 
     public SafeDirectoriesDialog() {
         setTitle("Safe Directories Configuration");
@@ -45,11 +87,34 @@ public class SafeDirectoriesDialog extends Stage {
         safeDirectories = new ArrayList<>();
         loadSafeDirectories();
 
-        // --- Create ListView for directories ---
-        dirListView = new ListView<>();
-        dirListView.setPrefHeight(300);
-        dirListView.setPrefWidth(500);
-        refreshListView();
+        // --- Create TableView for directories with name column ---
+        dirTableView = new TableView<>();
+        dirTableView.setPrefHeight(300);
+        dirTableView.setPrefWidth(700);
+        dirTableView.setEditable(true);
+        dirTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        
+        // Directory column (not editable)
+        TableColumn<SafeDirectoryEntry, String> dirColumn = new TableColumn<>("Directory Path");
+        dirColumn.setCellValueFactory(new PropertyValueFactory<>("directory"));
+        dirColumn.setMinWidth(400);
+        dirColumn.setEditable(false);
+        
+        // Name column (editable)
+        TableColumn<SafeDirectoryEntry, String> nameColumn = new TableColumn<>("Name (Optional)");
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        nameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        nameColumn.setMinWidth(200);
+        nameColumn.setEditable(true);
+        nameColumn.setOnEditCommit(event -> {
+            SafeDirectoryEntry entry = event.getRowValue();
+            entry.setName(event.getNewValue());
+        });
+        
+        dirTableView.getColumns().add(dirColumn);
+        dirTableView.getColumns().add(nameColumn);
+        
+        refreshTableView();
 
         // --- Buttons ---
         Button btnAdd = new Button("Add Directory…");
@@ -66,7 +131,7 @@ public class SafeDirectoriesDialog extends Stage {
         btnBrowse.setDisable(true);
 
         // Enable/disable buttons based on selection
-        dirListView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+        dirTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             boolean hasSelection = newVal != null;
             btnRemove.setDisable(!hasSelection);
             btnCopy.setDisable(!hasSelection);
@@ -87,7 +152,8 @@ public class SafeDirectoriesDialog extends Stage {
 
         Label infoLabel = new Label(
             "Safe directories are additional paths that can be accessed by scripts.\n" +
-            "By default, only the current working directory is accessible."
+            "By default, only the current working directory is accessible.\n" +
+            "You can optionally provide a variable name for each directory."
         );
         infoLabel.setWrapText(true);
 
@@ -100,16 +166,16 @@ public class SafeDirectoriesDialog extends Stage {
         layout.getChildren().addAll(
             infoLabel,
             new Label("Safe Directories:"),
-            dirListView,
+            dirTableView,
             buttonBox,
             bottomButtons
         );
 
-        VBox.setVgrow(dirListView, Priority.ALWAYS);
+        VBox.setVgrow(dirTableView, Priority.ALWAYS);
 
         setScene(new Scene(layout));
         sizeToScene();
-        setMinWidth(550);
+        setMinWidth(750);
         setMinHeight(450);
     }
 
@@ -131,7 +197,9 @@ public class SafeDirectoriesDialog extends Stage {
             String dirPath = selectedDir.getAbsolutePath();
             
             // Check if already in list
-            if (safeDirectories.contains(dirPath)) {
+            boolean exists = safeDirectories.stream()
+                .anyMatch(entry -> entry.getDirectory().equals(dirPath));
+            if (exists) {
                 showAlert(Alert.AlertType.WARNING, "Duplicate", 
                     "This directory is already in the safe directories list.");
                 return;
@@ -144,46 +212,45 @@ public class SafeDirectoriesDialog extends Stage {
                 return;
             }
 
-            safeDirectories.add(dirPath);
-            refreshListView();
+            safeDirectories.add(new SafeDirectoryEntry(dirPath, ""));
+            refreshTableView();
         }
     }
 
     private void onRemoveDirectory() {
-        String selected = dirListView.getSelectionModel().getSelectedItem();
+        SafeDirectoryEntry selected = dirTableView.getSelectionModel().getSelectedItem();
         if (selected != null) {
             safeDirectories.remove(selected);
-            refreshListView();
+            refreshTableView();
         }
     }
 
     private void onCopyToClipboard() {
-        String selected = dirListView.getSelectionModel().getSelectedItem();
+        SafeDirectoryEntry selected = dirTableView.getSelectionModel().getSelectedItem();
         if (selected != null) {
             ClipboardContent content = new ClipboardContent();
-            content.putString(selected);
+            content.putString(selected.getDirectory());
             Clipboard.getSystemClipboard().setContent(content);
-            
-            showAlert(Alert.AlertType.INFORMATION, "Copied", 
-                "Directory path copied to clipboard:\n" + selected);
+//            showAlert(Alert.AlertType.INFORMATION, "Copied", 
+//                "Directory path copied to clipboard:\n" + selected.getDirectory());
         }
     }
 
     private void onBrowse() {
-        String selected = dirListView.getSelectionModel().getSelectedItem();
+        SafeDirectoryEntry selected = dirTableView.getSelectionModel().getSelectedItem();
         if (selected != null) {
-            Path path = Paths.get(selected);
+            Path path = Paths.get(selected.getDirectory());
             
             // Check if directory exists
             if (!Files.exists(path)) {
                 showAlert(Alert.AlertType.WARNING, "Directory Not Found", 
-                    "The directory does not exist:\n" + selected);
+                    "The directory does not exist:\n" + selected.getDirectory());
                 return;
             }
             
             if (!Files.isDirectory(path)) {
                 showAlert(Alert.AlertType.WARNING, "Not a Directory", 
-                    "The path is not a directory:\n" + selected);
+                    "The path is not a directory:\n" + selected.getDirectory());
                 return;
             }
             
@@ -214,9 +281,9 @@ public class SafeDirectoriesDialog extends Stage {
         }
     }
 
-    private void refreshListView() {
-        dirListView.getItems().clear();
-        dirListView.getItems().addAll(safeDirectories);
+    private void refreshTableView() {
+        dirTableView.getItems().clear();
+        dirTableView.getItems().addAll(safeDirectories);
     }
 
     private void loadSafeDirectories() {
@@ -224,9 +291,10 @@ public class SafeDirectoriesDialog extends Stage {
         Preferences prefs = Preferences.userRoot().node(PREF_NODE);
         
         for (int i = 0; i < MAX_SAFE_DIRS; i++) {
-            String dir = prefs.get(PREF_KEY_PREFIX + i, null);
+            String dir = prefs.get(PREF_KEY_DIR_PREFIX + i, null);
             if (dir != null && !dir.isEmpty()) {
-                safeDirectories.add(dir);
+                String name = prefs.get(PREF_KEY_NAME_PREFIX + i, "");
+                safeDirectories.add(new SafeDirectoryEntry(dir, name));
             }
         }
     }
@@ -236,12 +304,18 @@ public class SafeDirectoriesDialog extends Stage {
         
         // Clear all existing entries
         for (int i = 0; i < MAX_SAFE_DIRS; i++) {
-            prefs.remove(PREF_KEY_PREFIX + i);
+            prefs.remove(PREF_KEY_DIR_PREFIX + i);
+            prefs.remove(PREF_KEY_NAME_PREFIX + i);
         }
         
         // Save current list
         for (int i = 0; i < safeDirectories.size(); i++) {
-            prefs.put(PREF_KEY_PREFIX + i, safeDirectories.get(i));
+            SafeDirectoryEntry entry = safeDirectories.get(i);
+            prefs.put(PREF_KEY_DIR_PREFIX + i, entry.getDirectory());
+            String name = entry.getName();
+            if (name != null && !name.trim().isEmpty()) {
+                prefs.put(PREF_KEY_NAME_PREFIX + i, name);
+            }
         }
     }
 
@@ -263,12 +337,31 @@ public class SafeDirectoriesDialog extends Stage {
         Preferences prefs = Preferences.userRoot().node(PREF_NODE);
         
         for (int i = 0; i < MAX_SAFE_DIRS; i++) {
-            String dir = prefs.get(PREF_KEY_PREFIX + i, null);
+            String dir = prefs.get(PREF_KEY_DIR_PREFIX + i, null);
             if (dir != null && !dir.isEmpty()) {
                 dirs.add(dir);
             }
         }
         
         return dirs;
+    }
+    
+    /**
+     * Static method to retrieve the list of safe directory entries (with names) from preferences.
+     * Used by the interpreter to define global variables for named safe directories.
+     */
+    public static List<SafeDirectoryEntry> getSafeDirectoryEntries() {
+        List<SafeDirectoryEntry> entries = new ArrayList<>();
+        Preferences prefs = Preferences.userRoot().node(PREF_NODE);
+        
+        for (int i = 0; i < MAX_SAFE_DIRS; i++) {
+            String dir = prefs.get(PREF_KEY_DIR_PREFIX + i, null);
+            if (dir != null && !dir.isEmpty()) {
+                String name = prefs.get(PREF_KEY_NAME_PREFIX + i, "");
+                entries.add(new SafeDirectoryEntry(dir, name));
+            }
+        }
+        
+        return entries;
     }
 }

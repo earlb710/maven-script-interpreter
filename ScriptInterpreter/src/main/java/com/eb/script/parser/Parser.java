@@ -73,7 +73,7 @@ public class Parser {
 
         Parser parser = new Parser(script, tokens);
         parser.parse();
-        RuntimeContext ret = new RuntimeContext(file.getFileName().toString(), parser.blocks, statementsToArray(parser.statements));
+        RuntimeContext ret = new RuntimeContext(file.getFileName().toString(), file, parser.blocks, statementsToArray(parser.statements));
         return ret;
     }
 

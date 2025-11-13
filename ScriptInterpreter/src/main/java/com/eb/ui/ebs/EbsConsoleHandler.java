@@ -1,6 +1,7 @@
 package com.eb.ui.ebs;
 
 import com.eb.script.RuntimeContext;
+import com.eb.script.arrays.ArrayDynamic;
 import com.eb.script.file.FileContext;
 import com.eb.script.interpreter.Builtins;
 import com.eb.script.interpreter.InterpreterError;
@@ -11,13 +12,14 @@ import com.eb.ui.tabs.TabContext;
 import com.eb.util.Util;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.List;
 import java.util.Map;
 import java.util.prefs.Preferences;
 import javafx.event.ActionEvent;
@@ -61,31 +63,31 @@ public class EbsConsoleHandler extends EbsHandler {
                     if (cmd.startsWith("/list ")) {
                         line = line.substring(6).trim();
                         cmd = line.toLowerCase();
-                        List json = null;
+                        ArrayDynamic arrayResult = null;
                         if (cmd.length() >= 5 && cmd.substring(0, 5).equals("files")) {
                             if (cmd.length() > 5) {
                                 line = line.substring(6).trim();
                             } else {
                                 line = ".";
                             }
-                            json = (List) Builtins.callBuiltin(env, "file.listfiles", line);
-                            if (json.isEmpty()) {
+                            arrayResult = (ArrayDynamic) Builtins.callBuiltin(env, "file.listfiles", line);
+                            if (arrayResult.isEmpty()) {
                                 output.println("No files.");
                             } else {
-                                output.println("List files : " + json.size());
-                                output.println(Json.prettyJson(json));
+                                output.println("List files : " + arrayResult.size());
+                                output.println(Json.prettyJson(arrayResult));
                             }
                             continue;
                         } else if (cmd.equals("open files") || cmd.equals("openfiles")) {
-                            json = (List) Builtins.callBuiltin(env, "file.openfiles");
+                            arrayResult = (ArrayDynamic) Builtins.callBuiltin(env, "file.openfiles");
                         }
                         // pretty‑print your JSON‑like structure
-                        if (json instanceof List list) {
-                            if (list.isEmpty()) {
+                        if (arrayResult != null) {
+                            if (arrayResult.isEmpty()) {
                                 output.println("No open files.");
                             } else {
-                                output.println("Open files : " + json.size());
-                                for (Object o : list) {
+                                output.println("Open files : " + arrayResult.size());
+                                for (Object o : arrayResult) {
                                     Map m = (Map) o;
                                     output.println(
                                             m.get("handle") + "  "
@@ -96,7 +98,7 @@ public class EbsConsoleHandler extends EbsHandler {
                                 }
                             }
                         } else {
-                            output.println(String.valueOf(json));
+                            output.println(String.valueOf(arrayResult));
                         }
                         continue;
 
@@ -138,6 +140,26 @@ public class EbsConsoleHandler extends EbsHandler {
                         handleDebug(output, cmd);
                         continue;
                     } else {
+                        // Check if /help has a parameter
+                        if (cmd.startsWith("/help ") || cmd.startsWith("/?")) {
+                            String param = "";
+                            if (cmd.startsWith("/help ") && cmd.length() > 6) {
+                                param = line.substring(6).trim();
+                            } else if (cmd.startsWith("/? ") && cmd.length() > 3) {
+                                param = line.substring(3).trim();
+                            }
+                            
+                            if (!param.isEmpty()) {
+                                if (param.equalsIgnoreCase("keywords")) {
+                                    Builtins.callBuiltin(env, "system.help");
+                                } else {
+                                    // Display help for specific keyword or builtin
+                                    displayDetailedHelp(output, param);
+                                }
+                                continue;
+                            }
+                        }
+                        
                         switch (cmd) {
                             case "/?":
                             case "/help":
@@ -147,6 +169,7 @@ public class EbsConsoleHandler extends EbsHandler {
                                 output.println("  <b>control + down</b>   <i>- next input from history</i>");
                                 output.println("  <b>/help or /?</b>      <i>- show this help</i>");
                                 output.println("  <b>/help keywords</b>   <i>- show list of keywords and builtins</i>");
+                                output.println("  <b>/help &lt;keyword|builtin&gt;</b> <i>- show detailed help for a keyword or builtin (e.g., /help file.readTextFile)</i>");
                                 output.println("  <b>/clear</b>           <i>- clear the console</i>");
                                 output.println("  <b>/reset</b>           <i>- clear all variables</i>");
                                 output.println("  <b>/time</b>            <i>- print the current time</i>");
@@ -239,6 +262,112 @@ public class EbsConsoleHandler extends EbsHandler {
             return;
         }
         output.printlnWarn("usage: /debug on|off | /debug trace on|off");
+    }
+
+    private void displayDetailedHelp(ScriptArea output, String itemName) {
+        try {
+            // Load system-lookup.json from resources
+            InputStream is = getClass().getClassLoader().getResourceAsStream("system-lookup.json");
+            if (is == null) {
+                output.printlnWarn("Help system not available (system-lookup.json not found)");
+                return;
+            }
+            
+            String jsonContent = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+            is.close();
+            
+            // Parse JSON
+            Map<String, Object> lookup = (Map<String, Object>) Json.parse(jsonContent);
+            
+            // Search in keywords first
+            ArrayDynamic keywords = (ArrayDynamic) lookup.get("keywords");
+            if (keywords != null) {
+                for (Object keywordObj : keywords) {
+                    Map<String, Object> keyword = (Map<String, Object>) keywordObj;
+                    String kwName = (String) keyword.get("keyword");
+                    if (kwName != null && kwName.equalsIgnoreCase(itemName)) {
+                        displayHelpEntry(output, kwName, keyword, "Keyword");
+                        return;
+                    }
+                }
+            }
+            
+            // Search in builtins
+            ArrayDynamic builtins = (ArrayDynamic) lookup.get("builtins");
+            if (builtins != null) {
+                for (Object builtinObj : builtins) {
+                    Map<String, Object> builtin = (Map<String, Object>) builtinObj;
+                    String funcName = (String) builtin.get("function");
+                    if (funcName != null && funcName.equalsIgnoreCase(itemName)) {
+                        displayHelpEntry(output, funcName, builtin, "Builtin Function");
+                        return;
+                    }
+                }
+            }
+            
+            // Not found
+            output.printlnWarn("No help found for: " + itemName);
+            output.println("Use <b>/help keywords</b> to see all available keywords and builtins.");
+            
+        } catch (Exception ex) {
+            output.printlnWarn("Error loading help: " + ex.getMessage());
+        }
+    }
+    
+    private void displayHelpEntry(ScriptArea output, String name, Map<String, Object> entry, String type) {
+        output.println("<b>═══════════════════════════════════════════════════════════</b>");
+        output.println("<b>" + type + ":</b> <u>" + name + "</u>");
+        output.println("<b>═══════════════════════════════════════════════════════════</b>");
+        
+        String shortDesc = (String) entry.get("short_description");
+        if (shortDesc != null && !shortDesc.isEmpty()) {
+            output.println("<b>Description:</b> " + shortDesc);
+            output.println("");
+        }
+        
+        // For builtins, show parameters and return type
+        if (entry.containsKey("parameters")) {
+            ArrayDynamic params = (ArrayDynamic) entry.get("parameters");
+            if (params != null && !params.isEmpty()) {
+                // Convert ArrayDynamic to comma-separated string
+                StringBuilder paramStr = new StringBuilder();
+                boolean first = true;
+                for (Object param : params) {
+                    if (!first) {
+                        paramStr.append(", ");
+                    }
+                    paramStr.append(param.toString());
+                    first = false;
+                }
+                output.println("<b>Parameters:</b> " + paramStr.toString());
+            }
+        }
+        
+        if (entry.containsKey("return_type")) {
+            String returnType = (String) entry.get("return_type");
+            if (returnType != null && !returnType.isEmpty()) {
+                output.println("<b>Returns:</b> " + returnType);
+            }
+        }
+        
+        if (entry.containsKey("parameters") || entry.containsKey("return_type")) {
+            output.println("");
+        }
+        
+        String longHelp = (String) entry.get("long_help");
+        if (longHelp != null && !longHelp.isEmpty()) {
+            output.println("<b>Details:</b>");
+            output.println(longHelp);
+            output.println("");
+        }
+        
+        String example = (String) entry.get("example");
+        if (example != null && !example.isEmpty()) {
+            output.println("<b>Example:</b>");
+            output.println("<i>" + example + "</i>");
+        }
+        
+        output.println("<b>═══════════════════════════════════════════════════════════</b>");
     }
 
     @Override

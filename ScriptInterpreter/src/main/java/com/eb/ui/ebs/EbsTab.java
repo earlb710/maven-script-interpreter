@@ -70,7 +70,7 @@ public class EbsTab extends Tab {
 
     public EbsTab(TabContext tabContext) throws IOException {
         this.tabContext = tabContext;
-        this.context = new RuntimeContext(tabContext.name);
+        this.context = new RuntimeContext(tabContext.name, tabContext.path);
         this.handler = new EbsHandler(context);
         handler.setUI_outputArea(outputArea);
         context.environment.setEcho(false);

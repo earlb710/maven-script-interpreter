@@ -104,8 +104,14 @@ public class EbsMenu extends MenuBar {
             SafeDirectoriesDialog dialog = new SafeDirectoriesDialog();
             dialog.show();
         });
+        
+        MenuItem dbConfigItem = new MenuItem("Database Config…");
+        dbConfigItem.setOnAction(e -> {
+            DatabaseConfigDialog dialog = new DatabaseConfigDialog();
+            dialog.show();
+        });
 
-        toolsMenu.getItems().addAll(aiSetupItem, safeDirsItem);
+        toolsMenu.getItems().addAll(aiSetupItem, safeDirsItem, dbConfigItem);
         getMenus().add(toolsMenu);
 
     }
