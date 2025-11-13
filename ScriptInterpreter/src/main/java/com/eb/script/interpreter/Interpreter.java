@@ -1386,6 +1386,51 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             int height = config.containsKey("height") ? ((Number) config.get("height")).intValue() : 600;
             boolean maximize = config.containsKey("maximize") && Boolean.TRUE.equals(config.get("maximize"));
             
+            // Process variable definitions if present
+            if (config.containsKey("vars")) {
+                Object varsObj = config.get("vars");
+                if (varsObj instanceof List) {
+                    @SuppressWarnings("unchecked")
+                    List<Object> varsList = (List<Object>) varsObj;
+                    
+                    for (Object varObj : varsList) {
+                        if (varObj instanceof Map) {
+                            @SuppressWarnings("unchecked")
+                            Map<String, Object> varDef = (Map<String, Object>) varObj;
+                            
+                            // Extract variable properties
+                            String varName = varDef.containsKey("name") ? String.valueOf(varDef.get("name")) : null;
+                            String varTypeStr = varDef.containsKey("type") ? String.valueOf(varDef.get("type")).toLowerCase() : null;
+                            Object defaultValue = varDef.get("default");
+                            
+                            if (varName == null || varName.isEmpty()) {
+                                throw error(stmt.getLine(), "Variable definition in screen '" + stmt.name + "' must have a 'name' property.");
+                            }
+                            
+                            // Convert type string to DataType
+                            DataType varType = null;
+                            if (varTypeStr != null) {
+                                varType = parseDataType(varTypeStr);
+                                if (varType == null) {
+                                    throw error(stmt.getLine(), "Unknown type '" + varTypeStr + "' for variable '" + varName + "' in screen '" + stmt.name + "'.");
+                                }
+                            }
+                            
+                            // Convert and set the default value
+                            Object value = defaultValue;
+                            if (varType != null && value != null) {
+                                value = varType.convertValue(value);
+                            }
+                            
+                            // Define the variable in the environment
+                            environment.getEnvironmentValues().define(varName, value);
+                        }
+                    }
+                } else {
+                    throw error(stmt.getLine(), "The 'vars' property in screen '" + stmt.name + "' must be an array.");
+                }
+            }
+            
             // Create the screen on JavaFX Application Thread
             Platform.runLater(() -> {
                 try {
@@ -1421,6 +1466,38 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             System.getLogger(Interpreter.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         } finally {
             environment.popCallStack();
+        }
+    }
+    
+    /**
+     * Helper method to parse data type string to DataType enum
+     */
+    private DataType parseDataType(String typeStr) {
+        if (typeStr == null) return null;
+        
+        switch (typeStr.toLowerCase()) {
+            case "int":
+            case "integer":
+                return DataType.INTEGER;
+            case "long":
+                return DataType.LONG;
+            case "float":
+                return DataType.FLOAT;
+            case "double":
+                return DataType.DOUBLE;
+            case "string":
+                return DataType.STRING;
+            case "bool":
+            case "boolean":
+                return DataType.BOOL;
+            case "date":
+                return DataType.DATE;
+            case "byte":
+                return DataType.BYTE;
+            case "json":
+                return DataType.JSON;
+            default:
+                return null;
         }
     }
 

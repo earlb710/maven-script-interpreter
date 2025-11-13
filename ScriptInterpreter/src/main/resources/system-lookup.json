@@ -161,8 +161,8 @@
     {
       "keyword": "screen",
       "short_description": "Creates a UI window",
-      "long_help": "The 'screen' keyword creates a new JavaFX window (Stage) with properties specified in JSON format. Supports title, width, height, and maximize properties.",
-      "example": "screen myWindow = {title:\"My Application\", width:800, height:600, maximize:false};\nscreen dashboard = {title:\"Dashboard\", width:1024, height:768, maximize:true};"
+      "long_help": "The 'screen' keyword creates a new JavaFX window (Stage) with properties specified in JSON format. Supports title, width, height, maximize, and vars properties. The 'vars' property allows defining multiple variables with their datatypes and optional default values.",
+      "example": "screen myWindow = {title:\"My Application\", width:800, height:600, maximize:false};\nscreen dashboard = {title:\"Dashboard\", width:1024, height:768, maximize:true, vars:[{name:\"counter\", type:\"int\", default:0}, {name:\"message\", type:\"string\", default:\"Hello\"}]};"
     },
     {
       "keyword": "null",
