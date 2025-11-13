@@ -1554,6 +1554,20 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     }
     
     /**
+     * Retrieve DisplayMetadata for a variable in a screen.
+     * This allows fallback logic in AreaItem: if an AreaItem doesn't have its own
+     * DisplayMetadata, it can retrieve the metadata from its varRef.
+     * 
+     * @param screenName The name of the screen
+     * @param varName The name of the variable
+     * @return The DisplayMetadata for the variable, or null if not found
+     */
+    public DisplayMetadata getDisplayMetadata(String screenName, String varName) {
+        String key = screenName + "." + varName;
+        return displayMetadata.get(key);
+    }
+    
+    /**
      * Helper method to parse display metadata from a definition map
      */
     private DisplayMetadata parseDisplayMetadata(Map<String, Object> displayDef, String screenName) {
