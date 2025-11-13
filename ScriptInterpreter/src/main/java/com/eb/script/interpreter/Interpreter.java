@@ -1618,14 +1618,26 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             throw error(line, "Area definition in screen '" + screenName + "' must have a 'name' property.");
         }
         
-        // Extract area type (e.g., "pane", "tab", etc.)
+        // Extract area type and convert to enum
         if (areaDef.containsKey("type")) {
             area.type = String.valueOf(areaDef.get("type")).toLowerCase();
+            area.areaType = AreaType.fromString(area.type);
+        } else {
+            area.areaType = AreaType.PANE; // Default to PANE
+            area.type = "pane";
         }
         
         // Extract layout configuration
         if (areaDef.containsKey("layout")) {
             area.layout = String.valueOf(areaDef.get("layout"));
+        }
+        
+        // Extract or set default style
+        if (areaDef.containsKey("style")) {
+            area.style = String.valueOf(areaDef.get("style"));
+        } else {
+            // Use default style from the enum
+            area.style = area.areaType.getDefaultStyle();
         }
         
         area.screenName = screenName;
@@ -1682,12 +1694,82 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     }
     
     /**
+     * Enum for JavaFX area container types with default styles
+     */
+    enum AreaType {
+        // Layout Panes
+        PANE("pane", "-fx-background-color: transparent;"),
+        STACKPANE("stackpane", "-fx-background-color: transparent; -fx-alignment: center;"),
+        ANCHORPANE("anchorpane", "-fx-background-color: transparent;"),
+        BORDERPANE("borderpane", "-fx-background-color: transparent;"),
+        FLOWPANE("flowpane", "-fx-background-color: transparent; -fx-hgap: 5; -fx-vgap: 5;"),
+        GRIDPANE("gridpane", "-fx-background-color: transparent; -fx-hgap: 10; -fx-vgap: 10;"),
+        HBOX("hbox", "-fx-background-color: transparent; -fx-spacing: 10; -fx-alignment: center-left;"),
+        VBOX("vbox", "-fx-background-color: transparent; -fx-spacing: 10; -fx-alignment: top-center;"),
+        TILEPANE("tilepane", "-fx-background-color: transparent; -fx-hgap: 5; -fx-vgap: 5;"),
+        
+        // Containers
+        SCROLLPANE("scrollpane", "-fx-background-color: transparent; -fx-fit-to-width: true;"),
+        SPLITPANE("splitpane", "-fx-background-color: transparent;"),
+        TABPANE("tabpane", "-fx-background-color: transparent;"),
+        TAB("tab", ""),
+        ACCORDION("accordion", "-fx-background-color: transparent;"),
+        TITLEDPANE("titledpane", "-fx-background-color: transparent;"),
+        
+        // Special
+        GROUP("group", ""),
+        REGION("region", "-fx-background-color: transparent;"),
+        CANVAS("canvas", ""),
+        
+        // Default fallback
+        CUSTOM("custom", "");
+        
+        private final String typeName;
+        private final String defaultStyle;
+        
+        AreaType(String typeName, String defaultStyle) {
+            this.typeName = typeName;
+            this.defaultStyle = defaultStyle;
+        }
+        
+        public String getTypeName() {
+            return typeName;
+        }
+        
+        public String getDefaultStyle() {
+            return defaultStyle;
+        }
+        
+        /**
+         * Get AreaType from string, case-insensitive
+         */
+        public static AreaType fromString(String type) {
+            if (type == null) return PANE;
+            
+            String lowerType = type.toLowerCase().trim();
+            for (AreaType at : values()) {
+                if (at.typeName.equals(lowerType)) {
+                    return at;
+                }
+            }
+            return CUSTOM; // Default to custom if not found
+        }
+        
+        @Override
+        public String toString() {
+            return typeName;
+        }
+    }
+    
+    /**
      * Inner class to hold area definition
      */
     static class AreaDefinition {
         String name;                          // Area name/identifier
-        String type;                          // Area type: "pane", "tab", "grid", etc.
+        AreaType areaType;                    // Area type enum
+        String type;                          // Area type string (for compatibility)
         String layout;                        // Layout configuration
+        String style;                         // Style string (defaults to areaType's default)
         String screenName;                    // Associated screen name
         java.util.List<AreaItem> items = new java.util.ArrayList<>();  // Items in this area
         
@@ -1695,8 +1777,9 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         public String toString() {
             return "AreaDefinition{" +
                    "name='" + name + '\'' +
-                   ", type='" + type + '\'' +
+                   ", areaType=" + areaType +
                    ", layout='" + layout + '\'' +
+                   ", style='" + style + '\'' +
                    ", items=" + items.size() +
                    '}';
         }
