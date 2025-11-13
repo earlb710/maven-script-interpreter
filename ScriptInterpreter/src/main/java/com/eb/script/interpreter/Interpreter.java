@@ -1604,6 +1604,14 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             metadata.max = displayDef.get("max");
         }
         
+        if (displayDef.containsKey("alignment")) {
+            metadata.alignment = String.valueOf(displayDef.get("alignment")).toLowerCase();
+        }
+        
+        if (displayDef.containsKey("pattern")) {
+            metadata.pattern = String.valueOf(displayDef.get("pattern"));
+        }
+        
         // Extract or set default style
         if (displayDef.containsKey("style")) {
             metadata.style = String.valueOf(displayDef.get("style"));
@@ -1710,6 +1718,50 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                         }
                         // If displayMetadata is not set here, it will remain null
                         // and the consuming code should fall back to using varRef's DisplayMetadata
+                        
+                        // Parse additional UI properties for the item
+                        if (itemDef.containsKey("promptText")) {
+                            item.promptText = String.valueOf(itemDef.get("promptText"));
+                        } else if (itemDef.containsKey("prompt_text")) {
+                            item.promptText = String.valueOf(itemDef.get("prompt_text"));
+                        }
+                        
+                        if (itemDef.containsKey("editable")) {
+                            Object editableObj = itemDef.get("editable");
+                            if (editableObj instanceof Boolean) {
+                                item.editable = (Boolean) editableObj;
+                            }
+                        }
+                        
+                        if (itemDef.containsKey("disabled")) {
+                            Object disabledObj = itemDef.get("disabled");
+                            if (disabledObj instanceof Boolean) {
+                                item.disabled = (Boolean) disabledObj;
+                            }
+                        }
+                        
+                        if (itemDef.containsKey("visible")) {
+                            Object visibleObj = itemDef.get("visible");
+                            if (visibleObj instanceof Boolean) {
+                                item.visible = (Boolean) visibleObj;
+                            }
+                        }
+                        
+                        if (itemDef.containsKey("tooltip")) {
+                            item.tooltip = String.valueOf(itemDef.get("tooltip"));
+                        }
+                        
+                        if (itemDef.containsKey("textColor")) {
+                            item.textColor = String.valueOf(itemDef.get("textColor"));
+                        } else if (itemDef.containsKey("text_color")) {
+                            item.textColor = String.valueOf(itemDef.get("text_color"));
+                        }
+                        
+                        if (itemDef.containsKey("backgroundColor")) {
+                            item.backgroundColor = String.valueOf(itemDef.get("backgroundColor"));
+                        } else if (itemDef.containsKey("background_color")) {
+                            item.backgroundColor = String.valueOf(itemDef.get("background_color"));
+                        }
                         
                         area.items.add(item);
                     }

@@ -130,6 +130,22 @@ public class AreaDefinition {
         // If null, will use the DisplayMetadata from varRef
         DisplayMetadata displayMetadata;
         
+        // Additional UI properties for this item
+        // Placeholder text for text inputs
+        String promptText;
+        // Whether the field can be edited
+        Boolean editable;
+        // Whether the control is disabled
+        Boolean disabled;
+        // Whether the control is visible
+        Boolean visible;
+        // Hover tooltip text
+        String tooltip;
+        // Text color (e.g., "#000000", "red")
+        String textColor;
+        // Background color (e.g., "#FFFFFF", "lightblue")
+        String backgroundColor;
+        
         @Override
         public String toString() {
             return "AreaItem{" +
@@ -138,6 +154,13 @@ public class AreaDefinition {
                    ", relativePos='" + relativePos + '\'' +
                    ", varRef='" + varRef + '\'' +
                    ", displayMetadata=" + (displayMetadata != null ? "provided" : "from varRef") +
+                   ", promptText='" + promptText + '\'' +
+                   ", editable=" + editable +
+                   ", disabled=" + disabled +
+                   ", visible=" + visible +
+                   ", tooltip='" + tooltip + '\'' +
+                   ", textColor='" + textColor + '\'' +
+                   ", backgroundColor='" + backgroundColor + '\'' +
                    '}';
         }
     }

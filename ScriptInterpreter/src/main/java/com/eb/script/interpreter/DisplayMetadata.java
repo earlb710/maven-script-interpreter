@@ -26,6 +26,10 @@ public class DisplayMetadata {
     String style;
     // Associated screen name
     String screenName;
+    // Text/content alignment (e.g., "left", "center", "right")
+    String alignment;
+    // Regex pattern for validation (useful for text inputs)
+    String pattern;
     
     @Override
     public String toString() {
@@ -37,6 +41,8 @@ public class DisplayMetadata {
                ", min=" + min +
                ", max=" + max +
                ", style='" + style + '\'' +
+               ", alignment='" + alignment + '\'' +
+               ", pattern='" + pattern + '\'' +
                '}';
     }
     
