@@ -122,15 +122,17 @@ public class AutocompleteSuggestions {
         // Find the word at caret position
         String currentWord = getCurrentWord(beforeCaret);
 
-        // Check if the current line starts with '/' (console command)
-        if (currentWord.startsWith("/")) {
-            currentWord = currentWord.substring(1);
-            return getSuggestionsWithPrefix(getConsoleCommandSuggestions(), currentWord);
-        }
-
         // Check if we're after a '/help ' or '/? ' command - show all keywords and builtins
-        String trimmedBefore = beforeCaret.trim().toLowerCase();
-        if (trimmedBefore.startsWith("/help ") || trimmedBefore.startsWith("/? ")) {
+        // This check needs to come BEFORE the general console command check
+        String lowerBefore = beforeCaret.toLowerCase();
+        // Check if the line starts with /help or /? followed by space or if we're at the end after /help or /?
+        boolean afterHelp = lowerBefore.startsWith("/help ") || lowerBefore.startsWith("/? ");
+        // Also match if the text is exactly "/help" or "/?" (user might autocomplete right after the command)
+        if (!afterHelp && (lowerBefore.equals("/help") || lowerBefore.equals("/?"))) {
+            afterHelp = true;
+        }
+        
+        if (afterHelp) {
             // Combine keywords and builtins for /help autocomplete
             List<String> helpSuggestions = new ArrayList<>(KEYWORDS);
             helpSuggestions.addAll(Builtins.getBuiltins());
@@ -140,6 +142,12 @@ public class AutocompleteSuggestions {
                     .sorted()
                     .collect(Collectors.toList());
             return getSuggestionsWithPrefix(helpSuggestions, currentWord);
+        }
+
+        // Check if the current line starts with '/' (console command)
+        if (currentWord.startsWith("/")) {
+            currentWord = currentWord.substring(1);
+            return getSuggestionsWithPrefix(getConsoleCommandSuggestions(), currentWord);
         }
 
         // Tokenize to find the context
