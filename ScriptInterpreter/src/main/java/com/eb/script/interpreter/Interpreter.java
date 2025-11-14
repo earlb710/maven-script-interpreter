@@ -1567,6 +1567,37 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 } else {
                     throw error(stmt.getLine(), "The 'area' property in screen '" + stmt.name + "' must be an array.");
                 }
+            } else {
+                // If no explicit areas defined but variables with display metadata exist,
+                // create a default area with items for all displayed variables
+                java.util.List<String> varsWithDisplay = new java.util.ArrayList<>();
+                for (String key : displayMetadata.keySet()) {
+                    if (key.startsWith(stmt.name + ".")) {
+                        String varName = key.substring(stmt.name.length() + 1);
+                        varsWithDisplay.add(varName);
+                    }
+                }
+                
+                if (!varsWithDisplay.isEmpty()) {
+                    // Create a default VBox area with all variables as items
+                    AreaDefinition defaultArea = new AreaDefinition();
+                    defaultArea.areaType = AreaDefinition.AreaType.VBOX;
+                    defaultArea.name = "default";
+                    defaultArea.screenName = stmt.name;
+                    
+                    int sequence = 0;
+                    for (String varName : varsWithDisplay) {
+                        AreaDefinition.AreaItem item = new AreaDefinition.AreaItem();
+                        item.varRef = varName;
+                        item.sequence = sequence++;
+                        item.displayMetadata = displayMetadata.get(stmt.name + "." + varName);
+                        defaultArea.items.add(item);
+                    }
+                    
+                    java.util.List<AreaDefinition> areas = new java.util.ArrayList<>();
+                    areas.add(defaultArea);
+                    screenAreas.put(stmt.name, areas);
+                }
             }
 
             // Create the screen on JavaFX Application Thread and set up thread management
