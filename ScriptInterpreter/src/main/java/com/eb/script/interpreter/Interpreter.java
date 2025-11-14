@@ -2044,10 +2044,16 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         // Process items in the area
         if (areaDef.containsKey("items")) {
             Object itemsObj = areaDef.get("items");
-            if (itemsObj instanceof List) {
+            List<Object> itemsList = null;
+            if (itemsObj instanceof ArrayDynamic) {
+                itemsList = ((ArrayDynamic) itemsObj).getAll();
+            } else if (itemsObj instanceof List) {
                 @SuppressWarnings("unchecked")
-                List<Object> itemsList = (List<Object>) itemsObj;
-
+                List<Object> list = (List<Object>) itemsObj;
+                itemsList = list;
+            }
+            
+            if (itemsList != null) {
                 for (Object itemObj : itemsList) {
                     if (itemObj instanceof Map) {
                         @SuppressWarnings("unchecked")
