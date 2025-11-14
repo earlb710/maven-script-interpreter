@@ -2240,6 +2240,26 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 area.items.sort((a, b) -> Integer.compare(a.sequence, b.sequence));
             }
         }
+        
+        // Process nested child areas (areas within areas)
+        if (areaDef.containsKey("areas")) {
+            Object areasObj = areaDef.get("areas");
+            if (areasObj instanceof List) {
+                @SuppressWarnings("unchecked")
+                List<Object> areasList = (List<Object>) areasObj;
+                
+                for (Object childAreaObj : areasList) {
+                    if (childAreaObj instanceof Map) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> childAreaDef = (Map<String, Object>) childAreaObj;
+                        
+                        // Recursively parse child area
+                        AreaDefinition childArea = parseAreaDefinition(childAreaDef, screenName, line);
+                        area.childAreas.add(childArea);
+                    }
+                }
+            }
+        }
 
         return area;
     }
