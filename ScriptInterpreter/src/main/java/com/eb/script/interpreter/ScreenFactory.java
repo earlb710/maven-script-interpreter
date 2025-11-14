@@ -2,6 +2,12 @@ package com.eb.script.interpreter;
 
 import com.eb.script.interpreter.AreaDefinition.AreaItem;
 import com.eb.script.interpreter.AreaDefinition.AreaType;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.networknt.schema.JsonSchema;
+import com.networknt.schema.JsonSchemaFactory;
+import com.networknt.schema.SpecVersion;
+import com.networknt.schema.ValidationMessage;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -10,14 +16,44 @@ import javafx.scene.Scene;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
+import java.io.InputStream;
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 /**
  * Factory class for creating complete JavaFX screens/windows from AreaDefinitions.
  * This factory uses AreaContainerFactory and AreaItemFactory to create a fully assembled screen.
+ * Includes JSON Schema validation for screen definitions.
  */
 public class ScreenFactory {
+
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final JsonSchemaFactory schemaFactory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7);
+    private static JsonSchema screenSchema;
+    private static JsonSchema areaSchema;
+    private static JsonSchema displayMetadataSchema;
+
+    static {
+        try {
+            // Load schemas from resources
+            InputStream screenSchemaStream = ScreenFactory.class.getResourceAsStream("/json/screen-definition.json");
+            InputStream areaSchemaStream = ScreenFactory.class.getResourceAsStream("/json/area-definition.json");
+            InputStream displayMetadataSchemaStream = ScreenFactory.class.getResourceAsStream("/json/display-metadata.json");
+
+            if (screenSchemaStream != null) {
+                screenSchema = schemaFactory.getSchema(screenSchemaStream);
+            }
+            if (areaSchemaStream != null) {
+                areaSchema = schemaFactory.getSchema(areaSchemaStream);
+            }
+            if (displayMetadataSchemaStream != null) {
+                displayMetadataSchema = schemaFactory.getSchema(displayMetadataSchemaStream);
+            }
+        } catch (Exception e) {
+            System.err.println("Warning: Failed to load JSON schemas: " + e.getMessage());
+        }
+    }
 
     /**
      * Creates a complete JavaFX window/screen from area definitions.
@@ -439,12 +475,31 @@ public class ScreenFactory {
     /**
      * Creates a complete JavaFX window/screen from a Map-based screen definition (JSON/EBS format).
      * This method parses the screen definition and creates the window.
+     * Validates the screen definition against the JSON schema if validation is enabled.
      *
      * @param screenDef Map containing screen definition with keys: name, title, width, height, vars, area
      * @return A Stage representing the complete window
      * @throws IllegalArgumentException if the screen definition is invalid
      */
     public static Stage createScreenFromDefinition(Map<String, Object> screenDef) {
+        return createScreenFromDefinition(screenDef, true);
+    }
+
+    /**
+     * Creates a complete JavaFX window/screen from a Map-based screen definition (JSON/EBS format).
+     * This method parses the screen definition and creates the window.
+     *
+     * @param screenDef Map containing screen definition with keys: name, title, width, height, vars, area
+     * @param validate Whether to validate against JSON schema
+     * @return A Stage representing the complete window
+     * @throws IllegalArgumentException if the screen definition is invalid
+     */
+    public static Stage createScreenFromDefinition(Map<String, Object> screenDef, boolean validate) {
+        // Validate screen definition if requested and schema is available
+        if (validate && screenSchema != null) {
+            validateScreenDefinition(screenDef);
+        }
+
         // Extract screen properties
         String screenName = getStringValue(screenDef, "name", "Screen");
         String title = getStringValue(screenDef, "title", screenName);
@@ -685,5 +740,109 @@ public class ScreenFactory {
             return Boolean.parseBoolean(String.valueOf(value));
         }
         return defaultValue;
+    }
+
+    // Schema validation methods
+
+    /**
+     * Validates a screen definition against the JSON schema.
+     * 
+     * @param screenDef The screen definition to validate
+     * @throws IllegalArgumentException if validation fails
+     */
+    public static void validateScreenDefinition(Map<String, Object> screenDef) {
+        if (screenSchema == null) {
+            System.err.println("Warning: Screen schema not loaded, skipping validation");
+            return;
+        }
+
+        try {
+            JsonNode jsonNode = objectMapper.valueToTree(screenDef);
+            Set<ValidationMessage> errors = screenSchema.validate(jsonNode);
+            
+            if (!errors.isEmpty()) {
+                String errorMessage = "Screen definition validation failed:\n" +
+                    errors.stream()
+                        .map(ValidationMessage::getMessage)
+                        .collect(Collectors.joining("\n"));
+                throw new IllegalArgumentException(errorMessage);
+            }
+        } catch (Exception e) {
+            if (e instanceof IllegalArgumentException) {
+                throw e;
+            }
+            throw new IllegalArgumentException("Failed to validate screen definition: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Validates an area definition against the JSON schema.
+     * 
+     * @param areaDef The area definition to validate
+     * @throws IllegalArgumentException if validation fails
+     */
+    public static void validateAreaDefinition(Map<String, Object> areaDef) {
+        if (areaSchema == null) {
+            System.err.println("Warning: Area schema not loaded, skipping validation");
+            return;
+        }
+
+        try {
+            JsonNode jsonNode = objectMapper.valueToTree(areaDef);
+            Set<ValidationMessage> errors = areaSchema.validate(jsonNode);
+            
+            if (!errors.isEmpty()) {
+                String errorMessage = "Area definition validation failed:\n" +
+                    errors.stream()
+                        .map(ValidationMessage::getMessage)
+                        .collect(Collectors.joining("\n"));
+                throw new IllegalArgumentException(errorMessage);
+            }
+        } catch (Exception e) {
+            if (e instanceof IllegalArgumentException) {
+                throw e;
+            }
+            throw new IllegalArgumentException("Failed to validate area definition: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Validates display metadata against the JSON schema.
+     * 
+     * @param displayDef The display metadata to validate
+     * @throws IllegalArgumentException if validation fails
+     */
+    public static void validateDisplayMetadata(Map<String, Object> displayDef) {
+        if (displayMetadataSchema == null) {
+            System.err.println("Warning: Display metadata schema not loaded, skipping validation");
+            return;
+        }
+
+        try {
+            JsonNode jsonNode = objectMapper.valueToTree(displayDef);
+            Set<ValidationMessage> errors = displayMetadataSchema.validate(jsonNode);
+            
+            if (!errors.isEmpty()) {
+                String errorMessage = "Display metadata validation failed:\n" +
+                    errors.stream()
+                        .map(ValidationMessage::getMessage)
+                        .collect(Collectors.joining("\n"));
+                throw new IllegalArgumentException(errorMessage);
+            }
+        } catch (Exception e) {
+            if (e instanceof IllegalArgumentException) {
+                throw e;
+            }
+            throw new IllegalArgumentException("Failed to validate display metadata: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Checks if schema validation is available.
+     * 
+     * @return true if schemas are loaded and validation is available
+     */
+    public static boolean isValidationAvailable() {
+        return screenSchema != null && areaSchema != null && displayMetadataSchema != null;
     }
 }
