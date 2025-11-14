@@ -2244,10 +2244,18 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         // Process nested child areas (areas within areas)
         if (areaDef.containsKey("areas")) {
             Object areasObj = areaDef.get("areas");
-            if (areasObj instanceof List) {
+            List<Object> areasList = null;
+            
+            // Handle both List and ArrayDynamic (JSON always uses ArrayDynamic)
+            if (areasObj instanceof ArrayDynamic) {
+                areasList = ((ArrayDynamic) areasObj).getAll();
+            } else if (areasObj instanceof List) {
                 @SuppressWarnings("unchecked")
-                List<Object> areasList = (List<Object>) areasObj;
-                
+                List<Object> list = (List<Object>) areasObj;
+                areasList = list;
+            }
+            
+            if (areasList != null) {
                 for (Object childAreaObj : areasList) {
                     if (childAreaObj instanceof Map) {
                         @SuppressWarnings("unchecked")
