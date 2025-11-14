@@ -1,0 +1,67 @@
+screen webPageRecorder = {
+    "title": "Web Page Recorder",
+    "width": 900,
+    "height": 700,
+    "vars": [
+        {
+            "name": "url",
+            "type": "string",
+            "default": "",
+            "display": {"type": "textfield", "mandatory": true}
+        },
+        {
+            "name": "shortDescription",
+            "type": "string",
+            "default": "",
+            "display": {"type": "textarea", "mandatory": true}
+        },
+        {
+            "name": "subPages",
+            "type": "string",
+            "default": "[]",
+            "display": {"type": "textarea"}
+        },
+        {
+            "name": "pageSummary",
+            "type": "string",
+            "default": "",
+            "display": {"type": "textarea"}
+        },
+        {
+            "name": "contentRating",
+            "type": "int",
+            "default": 0,
+            "display": {"type": "slider", "min": -10, "max": 10}
+        },
+        {
+            "name": "usabilityRating",
+            "type": "int",
+            "default": 0,
+            "display": {"type": "slider", "min": -10, "max": 10}
+        },
+        {
+            "name": "visualRating",
+            "type": "int",
+            "default": 0,
+            "display": {"type": "slider", "min": -10, "max": 10}
+        },
+        {
+            "name": "topKeywords",
+            "type": "string",
+            "default": "[]",
+            "display": {"type": "textarea"}
+        }
+    ]
+};
+
+// Access and modify variables
+webPageRecorder.url = "https://example.com";
+webPageRecorder.shortDescription = "Example website";
+webPageRecorder.subPages = "[\"page1\", \"page2\", \"page3\"]";
+webPageRecorder.pageSummary = "Detailed information about the website";
+webPageRecorder.contentRating = 8;
+webPageRecorder.usabilityRating = 9;
+webPageRecorder.visualRating = 7;
+webPageRecorder.topKeywords = "[\"keyword1\", \"keyword2\", \"keyword3\"]";
+
+screen webPageRecorder show;

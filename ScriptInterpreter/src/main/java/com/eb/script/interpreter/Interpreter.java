@@ -1445,10 +1445,9 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             // Process variable definitions if present
             if (config.containsKey("vars")) {
                 Object varsObj = config.get("vars");
-                if (varsObj instanceof List) {
+                if (varsObj instanceof ArrayDynamic varsArray) {
                     @SuppressWarnings("unchecked")
-                    List<Object> varsList = (List<Object>) varsObj;
-
+                    List varsList = varsArray.getAll();
                     for (Object varObj : varsList) {
                         if (varObj instanceof Map) {
                             @SuppressWarnings("unchecked")
