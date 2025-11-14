@@ -668,6 +668,28 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     @Override
     public void visitAssignStatement(AssignStatement stmt) throws InterpreterError {
         Object value = evaluate(stmt.value);
+        
+        // Check if this is a screen variable assignment (screen_name.var_name)
+        String name = stmt.name;
+        int dotIndex = name.indexOf('.');
+        
+        if (dotIndex > 0) {
+            String screenName = name.substring(0, dotIndex);
+            String varName = name.substring(dotIndex + 1);
+            
+            // Check if this is a screen variable
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVarMap = screenVars.get(screenName);
+            if (screenVarMap != null) {
+                if (screenVarMap.containsKey(varName)) {
+                    screenVarMap.put(varName, value);
+                    return;
+                } else {
+                    throw error(stmt.getLine(), "Screen '" + screenName + "' does not have a variable named '" + varName + "'.");
+                }
+            }
+        }
+        
+        // Fall back to regular environment variable assignment
         environment.getEnvironmentValues().assign(stmt.name, value);
     }
 
@@ -837,6 +859,26 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
 
     @Override
     public Object visitVariableExpression(VariableExpression expr) throws InterpreterError {
+        // Check if this is a screen variable access (screen_name.var_name)
+        String name = expr.name;
+        int dotIndex = name.indexOf('.');
+        
+        if (dotIndex > 0) {
+            String screenName = name.substring(0, dotIndex);
+            String varName = name.substring(dotIndex + 1);
+            
+            // Check if this is a screen variable
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVarMap = screenVars.get(screenName);
+            if (screenVarMap != null) {
+                if (screenVarMap.containsKey(varName)) {
+                    return screenVarMap.get(varName);
+                } else {
+                    throw error(expr.line, "Screen '" + screenName + "' does not have a variable named '" + varName + "'.");
+                }
+            }
+        }
+        
+        // Fall back to regular environment variable
         return environment.get(expr.name);
     }
 
@@ -1395,6 +1437,10 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             int height = config.containsKey("height") ? ((Number) config.get("height")).intValue() : 600;
             boolean maximize = config.containsKey("maximize") && Boolean.TRUE.equals(config.get("maximize"));
             
+            // Create thread-safe variable storage for this screen
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVarMap = new java.util.concurrent.ConcurrentHashMap<>();
+            screenVars.put(stmt.name, screenVarMap);
+            
             // Process variable definitions if present
             if (config.containsKey("vars")) {
                 Object varsObj = config.get("vars");
@@ -1443,8 +1489,8 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                                 }
                             }
                             
-                            // Define the variable in the environment
-                            environment.getEnvironmentValues().define(varName, value);
+                            // Store in screen's thread-safe variable map
+                            screenVarMap.put(varName, value);
                         }
                     }
                 } else {
@@ -1475,10 +1521,6 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                     throw error(stmt.getLine(), "The 'area' property in screen '" + stmt.name + "' must be an array.");
                 }
             }
-            
-            // Create thread-safe variable storage for this screen
-            java.util.concurrent.ConcurrentHashMap<String, Object> screenVarMap = new java.util.concurrent.ConcurrentHashMap<>();
-            screenVars.put(stmt.name, screenVarMap);
             
             // Create the screen on JavaFX Application Thread and set up thread management
             final String screenName = stmt.name;

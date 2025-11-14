@@ -119,6 +119,14 @@ screen myWindow = {
     ]
 };
 
+// Access screen variables using screen_name.var_name syntax
+var currentCount = myWindow.counter;
+print currentCount;  // Prints: 0
+
+// Assign to screen variables
+myWindow.counter = 42;
+myWindow.message = "Updated!";
+
 // Show the screen
 screen myWindow show;
 
@@ -133,6 +141,8 @@ screen myWindow show;
 - Each screen runs in its own dedicated thread
 - The thread automatically stops when the screen is closed
 - All screen variables are thread-safe (using ConcurrentHashMap)
+- Access variables via `screen_name.var_name` syntax (e.g., `myWindow.counter`)
+- Assign to variables via `screen_name.var_name = value` (e.g., `myWindow.counter = 10`)
 - Multiple screens can be created and managed independently
 
 ### Console Commands
