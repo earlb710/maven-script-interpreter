@@ -129,6 +129,8 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         screens.clear();
         screenThreads.clear();
         screenVars.clear();
+        screenAreas.clear();
+        displayMetadata.clear();
     }
 
     // --- Call stack support ---
@@ -1631,6 +1633,11 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                         screens.remove(screenName);
                         screenThreads.remove(screenName);
                         screenVars.remove(screenName);
+                        screenAreas.remove(screenName);
+                        
+                        // Clean up display metadata for this screen
+                        displayMetadata.entrySet().removeIf(entry -> 
+                            entry.getKey().startsWith(screenName + "."));
                     });
 
                     // Store the stage reference
