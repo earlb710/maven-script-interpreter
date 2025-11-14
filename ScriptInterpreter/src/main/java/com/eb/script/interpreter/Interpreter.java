@@ -1587,10 +1587,53 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                     
                     int sequence = 0;
                     for (String varName : varsWithDisplay) {
+                        // Create a label for the variable name
+                        AreaDefinition.AreaItem labelItem = new AreaDefinition.AreaItem();
+                        labelItem.name = varName + "_label";
+                        labelItem.sequence = sequence++;
+                        DisplayMetadata labelMetadata = new DisplayMetadata();
+                        labelMetadata.itemType = DisplayMetadata.ItemType.LABEL;
+                        labelItem.displayMetadata = labelMetadata;
+                        labelItem.varRef = null; // Labels don't bind to variables
+                        labelItem.promptText = capitalizeWords(varName) + ":"; // Add colon after label
+                        labelItem.maxWidth = "USE_PREF_SIZE";
+                        labelItem.hgrow = "NEVER";
+                        defaultArea.items.add(labelItem);
+                        
+                        // Create the input control for the variable
                         AreaDefinition.AreaItem item = new AreaDefinition.AreaItem();
                         item.varRef = varName;
                         item.sequence = sequence++;
                         item.displayMetadata = displayMetadata.get(stmt.name + "." + varName);
+                        
+                        // Set sizing to fit content, not stretch to screen width
+                        item.maxWidth = "USE_PREF_SIZE";
+                        item.hgrow = "NEVER";
+                        
+                        // Set reasonable preferred widths based on item type
+                        if (item.displayMetadata != null) {
+                            switch (item.displayMetadata.itemType) {
+                                case TEXTFIELD:
+                                case PASSWORDFIELD:
+                                    item.prefWidth = "300";
+                                    break;
+                                case TEXTAREA:
+                                    item.prefWidth = "400";
+                                    item.prefHeight = "100";
+                                    break;
+                                case SLIDER:
+                                    item.prefWidth = "300";
+                                    break;
+                                case COMBOBOX:
+                                case CHOICEBOX:
+                                    item.prefWidth = "200";
+                                    break;
+                                default:
+                                    // Let other controls use default sizing
+                                    break;
+                            }
+                        }
+                        
                         defaultArea.items.add(item);
                     }
                     
@@ -1799,6 +1842,36 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         } finally {
             environment.popCallStack();
         }
+    }
+
+    /**
+     * Helper method to capitalize words in a string (e.g., "myVariable" -> "My Variable")
+     */
+    private String capitalizeWords(String input) {
+        if (input == null || input.isEmpty()) {
+            return input;
+        }
+        
+        // Split camelCase or lowercase string into words
+        String withSpaces = input.replaceAll("([a-z])([A-Z])", "$1 $2")
+                                 .replaceAll("([A-Z])([A-Z][a-z])", "$1 $2");
+        
+        // Capitalize first letter of each word
+        String[] words = withSpaces.split("\\s+");
+        StringBuilder result = new StringBuilder();
+        for (String word : words) {
+            if (!word.isEmpty()) {
+                if (result.length() > 0) {
+                    result.append(" ");
+                }
+                result.append(Character.toUpperCase(word.charAt(0)));
+                if (word.length() > 1) {
+                    result.append(word.substring(1).toLowerCase());
+                }
+            }
+        }
+        
+        return result.toString();
     }
 
     /**
