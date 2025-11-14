@@ -53,6 +53,7 @@ import com.eb.script.token.ebs.EbsTokenType;
 import com.eb.script.interpreter.DisplayMetadata.ItemType;
 import com.eb.script.interpreter.AreaDefinition.AreaType;
 import com.eb.script.interpreter.AreaDefinition.AreaItem;
+import com.eb.script.interpreter.statement.ConnectStatement;
 import com.eb.ui.cli.ScriptArea;
 import javafx.application.Platform;
 import javafx.stage.Stage;
@@ -112,22 +113,22 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         try {
             // Add runtime context name as a predefined variable accessible to scripts
             environment.getEnvironmentValues().define("__name__", runtime.name);
-            
+
             // Load safe directories with names and define them as global variables
             try {
                 Class<?> dialogClass = Class.forName("com.eb.ui.ebs.SafeDirectoriesDialog");
                 java.lang.reflect.Method method = dialogClass.getMethod("getSafeDirectoryEntries");
                 @SuppressWarnings("unchecked")
                 java.util.List<?> entries = (java.util.List<?>) method.invoke(null);
-                
+
                 for (Object entryObj : entries) {
                     // Use reflection to get directory and name from SafeDirectoryEntry
                     java.lang.reflect.Method getDirMethod = entryObj.getClass().getMethod("getDirectory");
                     java.lang.reflect.Method getNameMethod = entryObj.getClass().getMethod("getName");
-                    
+
                     String directory = (String) getDirMethod.invoke(entryObj);
                     String name = (String) getNameMethod.invoke(entryObj);
-                    
+
                     // If the safe directory has a name, define it as a global variable
                     if (name != null && !name.trim().isEmpty()) {
                         environment.getEnvironmentValues().define(name.trim(), directory);
@@ -137,25 +138,25 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 // If we can't load safe directories (e.g., class not found in non-UI mode),
                 // just continue without defining safe directory variables
             }
-            
+
             // Load database configurations and define them as global variables
             try {
                 Class<?> dbDialogClass = Class.forName("com.eb.ui.ebs.DatabaseConfigDialog");
                 java.lang.reflect.Method dbMethod = dbDialogClass.getMethod("getDatabaseConfigEntries");
                 @SuppressWarnings("unchecked")
                 java.util.List<?> dbEntries = (java.util.List<?>) dbMethod.invoke(null);
-                
+
                 for (Object entryObj : dbEntries) {
                     // Use reflection to get variable name and connection string from DatabaseConfigEntry
                     java.lang.reflect.Method getVarNameMethod = entryObj.getClass().getMethod("getVarName");
                     java.lang.reflect.Method getConnStrMethod = entryObj.getClass().getMethod("getConnectionString");
-                    
+
                     String varName = (String) getVarNameMethod.invoke(entryObj);
                     String connStr = (String) getConnStrMethod.invoke(entryObj);
-                    
+
                     // If both variable name and connection string are present, define as global variable
-                    if (varName != null && !varName.trim().isEmpty() && 
-                        connStr != null && !connStr.trim().isEmpty()) {
+                    if (varName != null && !varName.trim().isEmpty()
+                            && connStr != null && !connStr.trim().isEmpty()) {
                         environment.getEnvironmentValues().define(varName.trim(), connStr);
                     }
                 }
@@ -668,15 +669,15 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     @Override
     public void visitAssignStatement(AssignStatement stmt) throws InterpreterError {
         Object value = evaluate(stmt.value);
-        
+
         // Check if this is a screen variable assignment (screen_name.var_name)
         String name = stmt.name;
         int dotIndex = name.indexOf('.');
-        
+
         if (dotIndex > 0) {
             String screenName = name.substring(0, dotIndex);
             String varName = name.substring(dotIndex + 1);
-            
+
             // Check if this is a screen variable
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVarMap = screenVars.get(screenName);
             if (screenVarMap != null) {
@@ -688,7 +689,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 }
             }
         }
-        
+
         // Fall back to regular environment variable assignment
         environment.getEnvironmentValues().assign(stmt.name, value);
     }
@@ -862,11 +863,11 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         // Check if this is a screen variable access (screen_name.var_name)
         String name = expr.name;
         int dotIndex = name.indexOf('.');
-        
+
         if (dotIndex > 0) {
             String screenName = name.substring(0, dotIndex);
             String varName = name.substring(dotIndex + 1);
-            
+
             // Check if this is a screen variable
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVarMap = screenVars.get(screenName);
             if (screenVarMap != null) {
@@ -877,7 +878,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 }
             }
         }
-        
+
         // Fall back to regular environment variable
         return environment.get(expr.name);
     }
@@ -1372,7 +1373,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     }
 
     @Override
-    public void visitConnectStatement(com.eb.script.interpreter.statement.ConnectStatement stmt) {
+    public void visitConnectStatement(ConnectStatement stmt) throws InterpreterError {
         environment.pushCallStack(stmt.getLine(), StatementKind.SQL, "Connect %1", stmt.name);
         try {
             if (connections.containsKey(stmt.name)) {
@@ -1387,14 +1388,14 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             }
             connections.put(stmt.name, conn);
         } catch (InterpreterError ex) {
-            System.getLogger(Interpreter.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+            throw error(stmt.getLine(), ex.getLocalizedMessage());
         } finally {
             environment.popCallStack();
         }
     }
 
     @Override
-    public void visitCloseConnectionStatement(CloseConnectionStatement stmt) {
+    public void visitCloseConnectionStatement(CloseConnectionStatement stmt) throws InterpreterError {
         environment.pushCallStack(stmt.getLine(), StatementKind.SQL, "Close connect %1", stmt.name);
         try {
             DbConnection conn = connections.remove(stmt.name);
@@ -1407,61 +1408,61 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 throw error(stmt.getLine(), "Close connection failed: " + e.getMessage());
             }
         } catch (InterpreterError ex) {
-            System.getLogger(Interpreter.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+            throw error(stmt.getLine(), ex.getLocalizedMessage());
         } finally {
             environment.popCallStack();
         }
     }
 
     @Override
-    public void visitScreenStatement(ScreenStatement stmt) {
+    public void visitScreenStatement(ScreenStatement stmt) throws InterpreterError {
         environment.pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Screen %1", stmt.name);
         try {
             if (screens.containsKey(stmt.name)) {
                 throw error(stmt.getLine(), "Screen '" + stmt.name + "' already exists.");
             }
-            
+
             // Evaluate the spec (should be a JSON object)
             Object spec = evaluate(stmt.spec);
-            
+
             if (!(spec instanceof Map)) {
                 throw error(stmt.getLine(), "Screen configuration must be a JSON object (map).");
             }
-            
+
             @SuppressWarnings("unchecked")
             Map<String, Object> config = (Map<String, Object>) spec;
-            
+
             // Extract configuration properties with defaults
             String title = config.containsKey("title") ? String.valueOf(config.get("title")) : "Screen " + stmt.name;
             int width = config.containsKey("width") ? ((Number) config.get("width")).intValue() : 800;
             int height = config.containsKey("height") ? ((Number) config.get("height")).intValue() : 600;
             boolean maximize = config.containsKey("maximize") && Boolean.TRUE.equals(config.get("maximize"));
-            
+
             // Create thread-safe variable storage for this screen
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVarMap = new java.util.concurrent.ConcurrentHashMap<>();
             screenVars.put(stmt.name, screenVarMap);
-            
+
             // Process variable definitions if present
             if (config.containsKey("vars")) {
                 Object varsObj = config.get("vars");
                 if (varsObj instanceof List) {
                     @SuppressWarnings("unchecked")
                     List<Object> varsList = (List<Object>) varsObj;
-                    
+
                     for (Object varObj : varsList) {
                         if (varObj instanceof Map) {
                             @SuppressWarnings("unchecked")
                             Map<String, Object> varDef = (Map<String, Object>) varObj;
-                            
+
                             // Extract variable properties
                             String varName = varDef.containsKey("name") ? String.valueOf(varDef.get("name")).toLowerCase() : null;
                             String varTypeStr = varDef.containsKey("type") ? String.valueOf(varDef.get("type")).toLowerCase() : null;
                             Object defaultValue = varDef.get("default");
-                            
+
                             if (varName == null || varName.isEmpty()) {
                                 throw error(stmt.getLine(), "Variable definition in screen '" + stmt.name + "' must have a 'name' property.");
                             }
-                            
+
                             // Convert type string to DataType
                             DataType varType = null;
                             if (varTypeStr != null) {
@@ -1470,25 +1471,25 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                                     throw error(stmt.getLine(), "Unknown type '" + varTypeStr + "' for variable '" + varName + "' in screen '" + stmt.name + "'.");
                                 }
                             }
-                            
+
                             // Convert and set the default value
                             Object value = defaultValue;
                             if (varType != null && value != null) {
                                 value = varType.convertValue(value);
                             }
-                            
+
                             // Process optional display metadata
                             if (varDef.containsKey("display")) {
                                 Object displayObj = varDef.get("display");
                                 if (displayObj instanceof Map) {
                                     @SuppressWarnings("unchecked")
                                     Map<String, Object> displayDef = (Map<String, Object>) displayObj;
-                                    
+
                                     // Store display metadata for the variable
                                     storeDisplayMetadata(varName, displayDef, stmt.name);
                                 }
                             }
-                            
+
                             // Store in screen's thread-safe variable map
                             screenVarMap.put(varName, value);
                         }
@@ -1497,7 +1498,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                     throw error(stmt.getLine(), "The 'vars' property in screen '" + stmt.name + "' must be an array.");
                 }
             }
-            
+
             // Process area definitions if present
             if (config.containsKey("area")) {
                 Object areaObj = config.get("area");
@@ -1505,44 +1506,44 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                     @SuppressWarnings("unchecked")
                     List<Object> areaList = (List<Object>) areaObj;
                     java.util.List<AreaDefinition> areas = new java.util.ArrayList<>();
-                    
+
                     for (Object aObj : areaList) {
                         if (aObj instanceof Map) {
                             @SuppressWarnings("unchecked")
                             Map<String, Object> areaDef = (Map<String, Object>) aObj;
-                            
+
                             AreaDefinition area = parseAreaDefinition(areaDef, stmt.name, stmt.getLine());
                             areas.add(area);
                         }
                     }
-                    
+
                     screenAreas.put(stmt.name, areas);
                 } else {
                     throw error(stmt.getLine(), "The 'area' property in screen '" + stmt.name + "' must be an array.");
                 }
             }
-            
+
             // Create the screen on JavaFX Application Thread and set up thread management
             final String screenName = stmt.name;
             final String screenTitle = title;
             final int screenWidth = width;
             final int screenHeight = height;
             final boolean screenMaximize = maximize;
-            
+
             Platform.runLater(() -> {
                 try {
                     Stage stage = new Stage();
                     stage.setTitle(screenTitle);
-                    
+
                     // Create a simple scene with a StackPane
                     StackPane root = new StackPane();
                     Scene scene = new Scene(root, screenWidth, screenHeight);
                     stage.setScene(scene);
-                    
+
                     if (screenMaximize) {
                         stage.setMaximized(true);
                     }
-                    
+
                     // Create a thread for this screen
                     Thread screenThread = new Thread(() -> {
                         // Screen thread runs until interrupted or window closed
@@ -1554,13 +1555,13 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                             Thread.currentThread().interrupt();
                         }
                     }, "Screen-" + screenName);
-                    
+
                     screenThread.setDaemon(true);
                     screenThread.start();
-                    
+
                     // Store thread reference
                     screenThreads.put(screenName, screenThread);
-                    
+
                     // Set up cleanup when screen is closed
                     stage.setOnCloseRequest(event -> {
                         // Interrupt and stop the screen thread
@@ -1573,13 +1574,13 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                         screenThreads.remove(screenName);
                         screenVars.remove(screenName);
                     });
-                    
+
                     // Store the stage reference
                     screens.put(screenName, stage);
-                    
+
                     // Show the screen
                     stage.show();
-                    
+
                     if (output != null) {
                         output.printlnOk("Screen '" + screenName + "' created with title: " + screenTitle);
                     }
@@ -1589,23 +1590,23 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                     }
                 }
             });
-            
+
         } catch (InterpreterError ex) {
-            System.getLogger(Interpreter.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+            throw error(stmt.getLine(), ex.getLocalizedMessage());
         } finally {
             environment.popCallStack();
         }
     }
-    
+
     @Override
-    public void visitScreenShowStatement(ScreenShowStatement stmt) {
+    public void visitScreenShowStatement(ScreenShowStatement stmt) throws InterpreterError {
         environment.pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Screen %1 show", stmt.name);
         try {
             Stage stage = screens.get(stmt.name);
             if (stage == null) {
                 throw error(stmt.getLine(), "Screen '" + stmt.name + "' does not exist. Create it first with 'screen " + stmt.name + " = {...};'");
             }
-            
+
             // Show the screen on JavaFX Application Thread
             Platform.runLater(() -> {
                 if (!stage.isShowing()) {
@@ -1619,23 +1620,23 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                     }
                 }
             });
-            
+
         } catch (InterpreterError ex) {
-            System.getLogger(Interpreter.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+            throw error(stmt.getLine(), ex.getLocalizedMessage());
         } finally {
             environment.popCallStack();
         }
     }
-    
+
     @Override
-    public void visitScreenHideStatement(ScreenHideStatement stmt) {
+    public void visitScreenHideStatement(ScreenHideStatement stmt) throws InterpreterError {
         environment.pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Screen %1 hide", stmt.name);
         try {
             Stage stage = screens.get(stmt.name);
             if (stage == null) {
                 throw error(stmt.getLine(), "Screen '" + stmt.name + "' does not exist. Create it first with 'screen " + stmt.name + " = {...};'");
             }
-            
+
             // Hide the screen on JavaFX Application Thread
             Platform.runLater(() -> {
                 if (stage.isShowing()) {
@@ -1649,20 +1650,22 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                     }
                 }
             });
-            
+
         } catch (InterpreterError ex) {
-            System.getLogger(Interpreter.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+            throw error(stmt.getLine(), ex.getLocalizedMessage());
         } finally {
             environment.popCallStack();
         }
     }
-    
+
     /**
      * Helper method to parse data type string to DataType enum
      */
     private DataType parseDataType(String typeStr) {
-        if (typeStr == null) return null;
-        
+        if (typeStr == null) {
+            return null;
+        }
+
         switch (typeStr.toLowerCase()) {
             case "int":
             case "integer":
@@ -1688,23 +1691,23 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 return null;
         }
     }
-    
+
     /**
      * Helper method to store display metadata for a variable
      */
     private void storeDisplayMetadata(String varName, Map<String, Object> displayDef, String screenName) {
         DisplayMetadata metadata = parseDisplayMetadata(displayDef, screenName);
-        
+
         // Store the metadata using a composite key: screenName.varName
         String key = screenName + "." + varName;
         displayMetadata.put(key, metadata);
     }
-    
+
     /**
-     * Retrieve DisplayMetadata for a variable in a screen.
-     * This allows fallback logic in AreaItem: if an AreaItem doesn't have its own
-     * DisplayMetadata, it can retrieve the metadata from its varRef.
-     * 
+     * Retrieve DisplayMetadata for a variable in a screen. This allows fallback
+     * logic in AreaItem: if an AreaItem doesn't have its own DisplayMetadata,
+     * it can retrieve the metadata from its varRef.
+     *
      * @param screenName The name of the screen
      * @param varName The name of the variable
      * @return The DisplayMetadata for the variable, or null if not found
@@ -1713,13 +1716,13 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         String key = screenName + "." + varName;
         return displayMetadata.get(key);
     }
-    
+
     /**
      * Helper method to parse display metadata from a definition map
      */
     private DisplayMetadata parseDisplayMetadata(Map<String, Object> displayDef, String screenName) {
         DisplayMetadata metadata = new DisplayMetadata();
-        
+
         // Extract display type and convert to enum
         if (displayDef.containsKey("type")) {
             metadata.type = String.valueOf(displayDef.get("type")).toLowerCase();
@@ -1728,37 +1731,37 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             metadata.itemType = ItemType.TEXTFIELD; // Default to textfield
             metadata.type = "textfield";
         }
-        
+
         // Set CSS class from enum
         metadata.cssClass = metadata.itemType.getCssClass();
-        
+
         if (displayDef.containsKey("mandatory")) {
             Object mandatoryObj = displayDef.get("mandatory");
             if (mandatoryObj instanceof Boolean) {
                 metadata.mandatory = (Boolean) mandatoryObj;
             }
         }
-        
+
         if (displayDef.containsKey("case")) {
             metadata.caseFormat = String.valueOf(displayDef.get("case")).toLowerCase();
         }
-        
+
         if (displayDef.containsKey("min")) {
             metadata.min = displayDef.get("min");
         }
-        
+
         if (displayDef.containsKey("max")) {
             metadata.max = displayDef.get("max");
         }
-        
+
         if (displayDef.containsKey("alignment")) {
             metadata.alignment = String.valueOf(displayDef.get("alignment")).toLowerCase();
         }
-        
+
         if (displayDef.containsKey("pattern")) {
             metadata.pattern = String.valueOf(displayDef.get("pattern"));
         }
-        
+
         // Extract or set default style
         if (displayDef.containsKey("style")) {
             metadata.style = String.valueOf(displayDef.get("style"));
@@ -1766,25 +1769,25 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             // Use default style from the enum
             metadata.style = metadata.itemType.getDefaultStyle();
         }
-        
+
         metadata.screenName = screenName;
-        
+
         return metadata;
     }
-    
+
     /**
      * Helper method to parse area definition from JSON
      */
     private AreaDefinition parseAreaDefinition(Map<String, Object> areaDef, String screenName, int line) throws InterpreterError {
         AreaDefinition area = new AreaDefinition();
-        
+
         // Extract area name (required)
         if (areaDef.containsKey("name")) {
             area.name = String.valueOf(areaDef.get("name"));
         } else {
             throw error(line, "Area definition in screen '" + screenName + "' must have a 'name' property.");
         }
-        
+
         // Extract area type and convert to enum
         if (areaDef.containsKey("type")) {
             area.type = String.valueOf(areaDef.get("type")).toLowerCase();
@@ -1793,15 +1796,15 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             area.areaType = AreaType.PANE; // Default to PANE
             area.type = "pane";
         }
-        
+
         // Set CSS class from enum
         area.cssClass = area.areaType.getCssClass();
-        
+
         // Extract layout configuration
         if (areaDef.containsKey("layout")) {
             area.layout = String.valueOf(areaDef.get("layout"));
         }
-        
+
         // Extract or set default style
         if (areaDef.containsKey("style")) {
             area.style = String.valueOf(areaDef.get("style"));
@@ -1809,35 +1812,35 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             // Use default style from the enum
             area.style = area.areaType.getDefaultStyle();
         }
-        
+
         area.screenName = screenName;
-        
+
         // Process items in the area
         if (areaDef.containsKey("items")) {
             Object itemsObj = areaDef.get("items");
             if (itemsObj instanceof List) {
                 @SuppressWarnings("unchecked")
                 List<Object> itemsList = (List<Object>) itemsObj;
-                
+
                 for (Object itemObj : itemsList) {
                     if (itemObj instanceof Map) {
                         @SuppressWarnings("unchecked")
                         Map<String, Object> itemDef = (Map<String, Object>) itemObj;
-                        
+
                         AreaItem item = new AreaItem();
-                        
+
                         // Extract item properties
                         if (itemDef.containsKey("name")) {
                             item.name = String.valueOf(itemDef.get("name"));
                         }
-                        
+
                         if (itemDef.containsKey("sequence")) {
                             Object seqObj = itemDef.get("sequence");
                             if (seqObj instanceof Number) {
                                 item.sequence = ((Number) seqObj).intValue();
                             }
                         }
-                        
+
                         if (itemDef.containsKey("layoutPos")) {
                             item.layoutPos = String.valueOf(itemDef.get("layoutPos"));
                         } else if (itemDef.containsKey("layout_pos")) {
@@ -1850,13 +1853,13 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                             // Backward compatibility with old name (snake_case)
                             item.layoutPos = String.valueOf(itemDef.get("relative_pos"));
                         }
-                        
+
                         if (itemDef.containsKey("varRef")) {
                             item.varRef = String.valueOf(itemDef.get("varRef"));
                         } else if (itemDef.containsKey("var_ref")) {
                             item.varRef = String.valueOf(itemDef.get("var_ref"));
                         }
-                        
+
                         // Process optional display metadata for the item
                         // If not provided, the item will use the DisplayMetadata from varRef
                         if (itemDef.containsKey("display")) {
@@ -1864,58 +1867,58 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                             if (displayObj instanceof Map) {
                                 @SuppressWarnings("unchecked")
                                 Map<String, Object> displayDef = (Map<String, Object>) displayObj;
-                                
+
                                 // Parse display metadata for this specific item
                                 item.displayMetadata = parseDisplayMetadata(displayDef, screenName);
                             }
                         }
                         // If displayMetadata is not set here, it will remain null
                         // and the consuming code should fall back to using varRef's DisplayMetadata
-                        
+
                         // Parse additional UI properties for the item
                         if (itemDef.containsKey("promptText")) {
                             item.promptText = String.valueOf(itemDef.get("promptText"));
                         } else if (itemDef.containsKey("prompt_text")) {
                             item.promptText = String.valueOf(itemDef.get("prompt_text"));
                         }
-                        
+
                         if (itemDef.containsKey("editable")) {
                             Object editableObj = itemDef.get("editable");
                             if (editableObj instanceof Boolean) {
                                 item.editable = (Boolean) editableObj;
                             }
                         }
-                        
+
                         if (itemDef.containsKey("disabled")) {
                             Object disabledObj = itemDef.get("disabled");
                             if (disabledObj instanceof Boolean) {
                                 item.disabled = (Boolean) disabledObj;
                             }
                         }
-                        
+
                         if (itemDef.containsKey("visible")) {
                             Object visibleObj = itemDef.get("visible");
                             if (visibleObj instanceof Boolean) {
                                 item.visible = (Boolean) visibleObj;
                             }
                         }
-                        
+
                         if (itemDef.containsKey("tooltip")) {
                             item.tooltip = String.valueOf(itemDef.get("tooltip"));
                         }
-                        
+
                         if (itemDef.containsKey("textColor")) {
                             item.textColor = String.valueOf(itemDef.get("textColor"));
                         } else if (itemDef.containsKey("text_color")) {
                             item.textColor = String.valueOf(itemDef.get("text_color"));
                         }
-                        
+
                         if (itemDef.containsKey("backgroundColor")) {
                             item.backgroundColor = String.valueOf(itemDef.get("backgroundColor"));
                         } else if (itemDef.containsKey("background_color")) {
                             item.backgroundColor = String.valueOf(itemDef.get("background_color"));
                         }
-                        
+
                         // Parse layout-specific properties
                         if (itemDef.containsKey("colSpan")) {
                             Object colSpanObj = itemDef.get("colSpan");
@@ -1928,7 +1931,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                                 item.colSpan = ((Number) colSpanObj).intValue();
                             }
                         }
-                        
+
                         if (itemDef.containsKey("rowSpan")) {
                             Object rowSpanObj = itemDef.get("rowSpan");
                             if (rowSpanObj instanceof Number) {
@@ -1940,77 +1943,77 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                                 item.rowSpan = ((Number) rowSpanObj).intValue();
                             }
                         }
-                        
+
                         if (itemDef.containsKey("hgrow")) {
                             item.hgrow = String.valueOf(itemDef.get("hgrow")).toUpperCase();
                         }
-                        
+
                         if (itemDef.containsKey("vgrow")) {
                             item.vgrow = String.valueOf(itemDef.get("vgrow")).toUpperCase();
                         }
-                        
+
                         if (itemDef.containsKey("margin")) {
                             item.margin = String.valueOf(itemDef.get("margin"));
                         }
-                        
+
                         if (itemDef.containsKey("padding")) {
                             item.padding = String.valueOf(itemDef.get("padding"));
                         }
-                        
+
                         if (itemDef.containsKey("prefWidth")) {
                             item.prefWidth = String.valueOf(itemDef.get("prefWidth"));
                         } else if (itemDef.containsKey("pref_width")) {
                             item.prefWidth = String.valueOf(itemDef.get("pref_width"));
                         }
-                        
+
                         if (itemDef.containsKey("prefHeight")) {
                             item.prefHeight = String.valueOf(itemDef.get("prefHeight"));
                         } else if (itemDef.containsKey("pref_height")) {
                             item.prefHeight = String.valueOf(itemDef.get("pref_height"));
                         }
-                        
+
                         if (itemDef.containsKey("minWidth")) {
                             item.minWidth = String.valueOf(itemDef.get("minWidth"));
                         } else if (itemDef.containsKey("min_width")) {
                             item.minWidth = String.valueOf(itemDef.get("min_width"));
                         }
-                        
+
                         if (itemDef.containsKey("minHeight")) {
                             item.minHeight = String.valueOf(itemDef.get("minHeight"));
                         } else if (itemDef.containsKey("min_height")) {
                             item.minHeight = String.valueOf(itemDef.get("min_height"));
                         }
-                        
+
                         if (itemDef.containsKey("maxWidth")) {
                             item.maxWidth = String.valueOf(itemDef.get("maxWidth"));
                         } else if (itemDef.containsKey("max_width")) {
                             item.maxWidth = String.valueOf(itemDef.get("max_width"));
                         }
-                        
+
                         if (itemDef.containsKey("maxHeight")) {
                             item.maxHeight = String.valueOf(itemDef.get("maxHeight"));
                         } else if (itemDef.containsKey("max_height")) {
                             item.maxHeight = String.valueOf(itemDef.get("max_height"));
                         }
-                        
+
                         if (itemDef.containsKey("alignment")) {
                             item.alignment = String.valueOf(itemDef.get("alignment")).toLowerCase();
                         }
-                        
+
                         area.items.add(item);
                     }
                 }
-                
+
                 // Sort items by sequence
                 area.items.sort((a, b) -> Integer.compare(a.sequence, b.sequence));
             }
         }
-        
+
         return area;
     }
-    
+
     @Override
-    public void visitUseConnectionStatement(UseConnectionStatement stmt) {
+    public void visitUseConnectionStatement(UseConnectionStatement stmt) throws InterpreterError {
         environment.pushCallStack(stmt.getLine(), StatementKind.SQL, "Use connection %1", stmt.connectionName);
         try {
             DbConnection conn = connections.get(stmt.connectionName);
@@ -2033,14 +2036,14 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 connectionStack.pop();
             }
         } catch (InterpreterError ex) {
-            System.getLogger(Interpreter.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+            throw error(stmt.getLine(), ex.getLocalizedMessage());
         } finally {
             environment.popCallStack();
         }
     }
 
     @Override
-    public void visitCursorStatement(CursorStatement stmt) {
+    public void visitCursorStatement(CursorStatement stmt) throws InterpreterError {
         environment.pushCallStack(stmt.getLine(), StatementKind.SQL, "Cursor %1", stmt.name);
         try {
             String connName = currentConnection();
@@ -2050,14 +2053,14 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             // Parser ensures SELECT text is captured in stmt.select.sql
             cursorSpecs.put(stmt.name, new CursorSpec(connName, stmt.select.sql, stmt.getLine())); // [1](https://za-prod.asyncgw.teams.microsoft.com/v1/objects/0-nza-d4-608facf2fafd223072e8197a8a6a9d5e/views/original/ScriptInterpreter_now.zip)
         } catch (InterpreterError ex) {
-            System.getLogger(Interpreter.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+            throw error(stmt.getLine(), ex.getLocalizedMessage());
         } finally {
             environment.popCallStack();
         }
     }
 
     @Override
-    public void visitOpenCursorStatement(OpenCursorStatement stmt) {
+    public void visitOpenCursorStatement(OpenCursorStatement stmt) throws InterpreterError {
         environment.pushCallStack(stmt.getLine(), StatementKind.SQL, "Open cursor %1", stmt.name);
         try {
             CursorSpec spec = cursorSpecs.get(stmt.name);
@@ -2090,7 +2093,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 throw error(stmt.getLine(), "Open cursor failed: " + e.getMessage());
             }
         } catch (InterpreterError ex) {
-            System.getLogger(Interpreter.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+            throw error(stmt.getLine(), ex.getLocalizedMessage());
         } finally {
             environment.popCallStack();
         }
@@ -2205,7 +2208,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             for (Parameter p : c.parameters) {
                 args[idx] = (p == null) ? null : evaluate(p.value);
                 DataType ptype = params[idx].paramType;
-                if (ptype != DataType.JSON && ptype != DataType.ANY&& ptype != DataType.ANY && !Util.checkDataType(ptype, args[idx])) {
+                if (ptype != DataType.JSON && ptype != DataType.ANY && ptype != DataType.ANY && !Util.checkDataType(ptype, args[idx])) {
                     args[idx] = ptype.convertValue(args[idx]);
                     if (!Util.checkDataType(ptype, args[idx])) {
                         throw error(c.getLine(), "Call to [" + info.name + "] parameter [" + params[idx].name + ":" + params[idx].paramType + "] wrong type, expected " + params[idx].paramType + " but found " + args[idx].getClass().getName());
