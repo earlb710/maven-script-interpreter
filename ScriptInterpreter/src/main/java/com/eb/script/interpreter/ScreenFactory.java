@@ -10,8 +10,7 @@ import javafx.scene.Scene;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.function.BiFunction;
 
 /**
@@ -435,5 +434,256 @@ public class ScreenFactory {
             
             stage.show();
         });
+    }
+
+    /**
+     * Creates a complete JavaFX window/screen from a Map-based screen definition (JSON/EBS format).
+     * This method parses the screen definition and creates the window.
+     *
+     * @param screenDef Map containing screen definition with keys: name, title, width, height, vars, area
+     * @return A Stage representing the complete window
+     * @throws IllegalArgumentException if the screen definition is invalid
+     */
+    public static Stage createScreenFromDefinition(Map<String, Object> screenDef) {
+        // Extract screen properties
+        String screenName = getStringValue(screenDef, "name", "Screen");
+        String title = getStringValue(screenDef, "title", screenName);
+        double width = getNumberValue(screenDef, "width", 800.0);
+        double height = getNumberValue(screenDef, "height", 600.0);
+
+        // Parse variables and build metadata map
+        Map<String, DisplayMetadata> metadataMap = new HashMap<>();
+        if (screenDef.containsKey("vars")) {
+            Object varsObj = screenDef.get("vars");
+            if (varsObj instanceof List) {
+                @SuppressWarnings("unchecked")
+                List<Object> varsList = (List<Object>) varsObj;
+                for (Object varObj : varsList) {
+                    if (varObj instanceof Map) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> varDef = (Map<String, Object>) varObj;
+                        String varName = getStringValue(varDef, "name", null);
+                        if (varName != null && varDef.containsKey("display")) {
+                            Object displayObj = varDef.get("display");
+                            if (displayObj instanceof Map) {
+                                @SuppressWarnings("unchecked")
+                                Map<String, Object> displayDef = (Map<String, Object>) displayObj;
+                                DisplayMetadata metadata = parseDisplayMetadata(displayDef, screenName);
+                                metadataMap.put(varName, metadata);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Parse areas
+        List<AreaDefinition> areas = new ArrayList<>();
+        if (screenDef.containsKey("area")) {
+            Object areaObj = screenDef.get("area");
+            if (areaObj instanceof List) {
+                @SuppressWarnings("unchecked")
+                List<Object> areaList = (List<Object>) areaObj;
+                for (Object areaDef : areaList) {
+                    if (areaDef instanceof Map) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> areaDefMap = (Map<String, Object>) areaDef;
+                        AreaDefinition area = parseAreaDefinition(areaDefMap, screenName);
+                        areas.add(area);
+                    }
+                }
+            }
+        }
+
+        // Create metadata provider from map
+        BiFunction<String, String, DisplayMetadata> metadataProvider = 
+            (sName, varName) -> metadataMap.get(varName);
+
+        return createScreen(screenName, title, width, height, areas, metadataProvider);
+    }
+
+    /**
+     * Parses an AreaDefinition from a Map.
+     */
+    private static AreaDefinition parseAreaDefinition(Map<String, Object> areaDef, String screenName) {
+        AreaDefinition area = new AreaDefinition();
+        
+        // Extract area name (required)
+        area.name = getStringValue(areaDef, "name", "area");
+        
+        // Extract area type and convert to enum
+        String typeStr = getStringValue(areaDef, "type", "pane");
+        area.type = typeStr.toLowerCase();
+        area.areaType = AreaType.fromString(area.type);
+        
+        // Set CSS class from enum
+        area.cssClass = area.areaType.getCssClass();
+        
+        // Extract layout configuration
+        area.layout = getStringValue(areaDef, "layout", null);
+        
+        // Extract or set default style
+        area.style = getStringValue(areaDef, "style", area.areaType.getDefaultStyle());
+        
+        area.screenName = screenName;
+        
+        // Process items in the area
+        if (areaDef.containsKey("items")) {
+            Object itemsObj = areaDef.get("items");
+            if (itemsObj instanceof List) {
+                @SuppressWarnings("unchecked")
+                List<Object> itemsList = (List<Object>) itemsObj;
+                
+                for (Object itemObj : itemsList) {
+                    if (itemObj instanceof Map) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> itemDef = (Map<String, Object>) itemObj;
+                        AreaItem item = parseAreaItem(itemDef, screenName);
+                        area.items.add(item);
+                    }
+                }
+            }
+        }
+        
+        return area;
+    }
+
+    /**
+     * Parses an AreaItem from a Map.
+     */
+    private static AreaItem parseAreaItem(Map<String, Object> itemDef, String screenName) {
+        AreaItem item = new AreaItem();
+        
+        // Extract item properties
+        item.name = getStringValue(itemDef, "name", null);
+        item.sequence = getIntValue(itemDef, "sequence", 0);
+        item.varRef = getStringValue(itemDef, "varRef", getStringValue(itemDef, "var_ref", null));
+        
+        // Layout position (support multiple naming conventions)
+        item.layoutPos = getStringValue(itemDef, "layoutPos", 
+                        getStringValue(itemDef, "layout_pos",
+                        getStringValue(itemDef, "relativePos",
+                        getStringValue(itemDef, "relative_pos", null))));
+        
+        // Process optional display metadata for the item
+        if (itemDef.containsKey("display")) {
+            Object displayObj = itemDef.get("display");
+            if (displayObj instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> displayDef = (Map<String, Object>) displayObj;
+                item.displayMetadata = parseDisplayMetadata(displayDef, screenName);
+            }
+        }
+        
+        // UI properties
+        item.promptText = getStringValue(itemDef, "promptText", getStringValue(itemDef, "prompt_text", null));
+        item.tooltip = getStringValue(itemDef, "tooltip", null);
+        item.editable = getBooleanValue(itemDef, "editable", null);
+        item.disabled = getBooleanValue(itemDef, "disabled", null);
+        item.visible = getBooleanValue(itemDef, "visible", null);
+        item.textColor = getStringValue(itemDef, "textColor", getStringValue(itemDef, "text_color", null));
+        item.backgroundColor = getStringValue(itemDef, "backgroundColor", getStringValue(itemDef, "background_color", null));
+        
+        // Layout properties
+        item.colSpan = getIntValue(itemDef, "colSpan", getIntValue(itemDef, "col_span", null));
+        item.rowSpan = getIntValue(itemDef, "rowSpan", getIntValue(itemDef, "row_span", null));
+        item.hgrow = getStringValue(itemDef, "hgrow", null);
+        item.vgrow = getStringValue(itemDef, "vgrow", null);
+        item.margin = getStringValue(itemDef, "margin", null);
+        item.padding = getStringValue(itemDef, "padding", null);
+        item.prefWidth = getStringValue(itemDef, "prefWidth", getStringValue(itemDef, "pref_width", null));
+        item.prefHeight = getStringValue(itemDef, "prefHeight", getStringValue(itemDef, "pref_height", null));
+        item.minWidth = getStringValue(itemDef, "minWidth", getStringValue(itemDef, "min_width", null));
+        item.minHeight = getStringValue(itemDef, "minHeight", getStringValue(itemDef, "min_height", null));
+        item.maxWidth = getStringValue(itemDef, "maxWidth", getStringValue(itemDef, "max_width", null));
+        item.maxHeight = getStringValue(itemDef, "maxHeight", getStringValue(itemDef, "max_height", null));
+        item.alignment = getStringValue(itemDef, "alignment", null);
+        
+        return item;
+    }
+
+    /**
+     * Parses DisplayMetadata from a Map.
+     */
+    private static DisplayMetadata parseDisplayMetadata(Map<String, Object> displayDef, String screenName) {
+        DisplayMetadata metadata = new DisplayMetadata();
+        
+        // Extract display type and convert to enum
+        String typeStr = getStringValue(displayDef, "type", "textfield");
+        metadata.type = typeStr.toLowerCase();
+        metadata.itemType = DisplayMetadata.ItemType.fromString(metadata.type);
+        
+        // Set CSS class from enum
+        metadata.cssClass = metadata.itemType.getCssClass();
+        
+        metadata.mandatory = getBooleanValue(displayDef, "mandatory", false);
+        metadata.caseFormat = getStringValue(displayDef, "case", null);
+        metadata.alignment = getStringValue(displayDef, "alignment", null);
+        metadata.pattern = getStringValue(displayDef, "pattern", null);
+        
+        // Min and max can be various types
+        if (displayDef.containsKey("min")) {
+            metadata.min = displayDef.get("min");
+        }
+        if (displayDef.containsKey("max")) {
+            metadata.max = displayDef.get("max");
+        }
+        
+        // Extract or set default style
+        metadata.style = getStringValue(displayDef, "style", metadata.itemType.getDefaultStyle());
+        metadata.screenName = screenName;
+        
+        return metadata;
+    }
+
+    // Helper methods for safe value extraction from Maps
+
+    private static String getStringValue(Map<String, Object> map, String key, String defaultValue) {
+        if (map.containsKey(key)) {
+            Object value = map.get(key);
+            return value != null ? String.valueOf(value) : defaultValue;
+        }
+        return defaultValue;
+    }
+
+    private static double getNumberValue(Map<String, Object> map, String key, double defaultValue) {
+        if (map.containsKey(key)) {
+            Object value = map.get(key);
+            if (value instanceof Number) {
+                return ((Number) value).doubleValue();
+            }
+            try {
+                return Double.parseDouble(String.valueOf(value));
+            } catch (NumberFormatException e) {
+                return defaultValue;
+            }
+        }
+        return defaultValue;
+    }
+
+    private static Integer getIntValue(Map<String, Object> map, String key, Integer defaultValue) {
+        if (map.containsKey(key)) {
+            Object value = map.get(key);
+            if (value instanceof Number) {
+                return ((Number) value).intValue();
+            }
+            try {
+                return Integer.parseInt(String.valueOf(value));
+            } catch (NumberFormatException e) {
+                return defaultValue;
+            }
+        }
+        return defaultValue;
+    }
+
+    private static Boolean getBooleanValue(Map<String, Object> map, String key, Boolean defaultValue) {
+        if (map.containsKey(key)) {
+            Object value = map.get(key);
+            if (value instanceof Boolean) {
+                return (Boolean) value;
+            }
+            return Boolean.parseBoolean(String.valueOf(value));
+        }
+        return defaultValue;
     }
 }
