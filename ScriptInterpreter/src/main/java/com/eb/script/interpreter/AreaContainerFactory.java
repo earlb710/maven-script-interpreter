@@ -1,0 +1,188 @@
+package com.eb.script.interpreter;
+
+import com.eb.script.interpreter.AreaDefinition.AreaType;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.scene.Group;
+
+/**
+ * Factory class for creating JavaFX container controls from AreaDefinition.
+ * This factory creates JavaFX containers based on the AreaType and applies
+ * layout properties only (no items added).
+ */
+public class AreaContainerFactory {
+
+    /**
+     * Creates a JavaFX container based on the provided AreaDefinition.
+     * Only layout properties are applied (style, cssClass, layout configuration).
+     * Items should be added by the caller after creation.
+     *
+     * @param areaDef The AreaDefinition containing container type and layout properties
+     * @return A JavaFX Region/Pane representing the container
+     */
+    public static Region createContainer(AreaDefinition areaDef) {
+        if (areaDef == null) {
+            // If no definition provided, create a simple Pane as fallback
+            return new Pane();
+        }
+
+        AreaType areaType = areaDef.areaType;
+        if (areaType == null) {
+            areaType = AreaType.PANE; // Default fallback
+        }
+
+        Region container = createContainerByType(areaType);
+        
+        // Apply layout properties
+        applyLayoutProperties(container, areaDef);
+        
+        return container;
+    }
+
+    /**
+     * Creates the appropriate JavaFX container based on the AreaType.
+     */
+    private static Region createContainerByType(AreaType areaType) {
+        switch (areaType) {
+            // Layout Panes
+            case PANE:
+                return new Pane();
+            case STACKPANE:
+                return new StackPane();
+            case ANCHORPANE:
+                return new AnchorPane();
+            case BORDERPANE:
+                return new BorderPane();
+            case FLOWPANE:
+                return new FlowPane();
+            case GRIDPANE:
+                return new GridPane();
+            case HBOX:
+                return new HBox();
+            case VBOX:
+                return new VBox();
+            case TILEPANE:
+                return new TilePane();
+
+            // Containers
+            case SCROLLPANE:
+                return new ScrollPane();
+            case SPLITPANE:
+                return new SplitPane();
+            case TABPANE:
+                return new TabPane();
+            case TAB:
+                // Tab is not a Region, but we can wrap it in a Pane
+                // The caller should handle Tab specially
+                return new Pane(); // Placeholder - Tab needs special handling
+            case ACCORDION:
+                return new Accordion();
+            case TITLEDPANE:
+                return new TitledPane();
+
+            // Special
+            case GROUP:
+                // Group is not a Region, wrap in Pane
+                return new Pane(); // Placeholder - Group needs special handling
+            case REGION:
+                return new Region();
+            case CANVAS:
+                // Canvas is not a Region, wrap in Pane containing Canvas
+                Pane canvasPane = new Pane();
+                Canvas canvas = new Canvas();
+                canvasPane.getChildren().add(canvas);
+                return canvasPane;
+
+            // Default fallback
+            case CUSTOM:
+            default:
+                return new Pane();
+        }
+    }
+
+    /**
+     * Applies layout properties from AreaDefinition to the container.
+     */
+    private static void applyLayoutProperties(Region container, AreaDefinition areaDef) {
+        // Apply CSS class from AreaDefinition
+        if (areaDef.cssClass != null && !areaDef.cssClass.isEmpty()) {
+            container.getStyleClass().add(areaDef.cssClass);
+        }
+
+        // Apply default style from AreaType
+        if (areaDef.areaType != null && areaDef.areaType.getDefaultStyle() != null) {
+            String defaultStyle = areaDef.areaType.getDefaultStyle();
+            if (!defaultStyle.isEmpty()) {
+                container.setStyle(defaultStyle);
+            }
+        }
+
+        // Apply custom style from AreaDefinition (overrides default)
+        if (areaDef.style != null && !areaDef.style.isEmpty()) {
+            container.setStyle(container.getStyle() + "; " + areaDef.style);
+        }
+
+        // Apply layout configuration if provided
+        if (areaDef.layout != null && !areaDef.layout.isEmpty()) {
+            applyLayoutConfiguration(container, areaDef.layout);
+        }
+    }
+
+    /**
+     * Applies layout configuration based on the layout string.
+     * This method can be extended to handle various layout configurations.
+     */
+    private static void applyLayoutConfiguration(Region container, String layout) {
+        // The layout string can contain various configuration options
+        // For now, we'll handle basic cases like "fill"
+        
+        if ("fill".equalsIgnoreCase(layout)) {
+            // Make the container fill available space
+            if (container instanceof VBox) {
+                VBox.setVgrow(container, Priority.ALWAYS);
+            } else if (container instanceof HBox) {
+                HBox.setHgrow(container, Priority.ALWAYS);
+            }
+            // Set preferred size to grow
+            container.setMaxWidth(Double.MAX_VALUE);
+            container.setMaxHeight(Double.MAX_VALUE);
+        }
+        
+        // Additional layout configurations can be added here based on requirements
+        // Examples: "center", "stretch", specific dimensions, etc.
+    }
+
+    /**
+     * Helper method to parse alignment string to JavaFX Pos enum.
+     * Used for containers that support alignment like StackPane, HBox, VBox.
+     */
+    private static Pos parseAlignment(String alignment) {
+        if (alignment == null || alignment.isEmpty()) {
+            return Pos.CENTER;
+        }
+
+        String normalized = alignment.toUpperCase().replace("-", "_").replace(" ", "_");
+        
+        try {
+            return Pos.valueOf(normalized);
+        } catch (IllegalArgumentException e) {
+            // If not a valid Pos value, try to map common variations
+            switch (normalized) {
+                case "LEFT":
+                    return Pos.CENTER_LEFT;
+                case "RIGHT":
+                    return Pos.CENTER_RIGHT;
+                case "TOP":
+                    return Pos.TOP_CENTER;
+                case "BOTTOM":
+                    return Pos.BOTTOM_CENTER;
+                case "CENTER":
+                default:
+                    return Pos.CENTER;
+            }
+        }
+    }
+}

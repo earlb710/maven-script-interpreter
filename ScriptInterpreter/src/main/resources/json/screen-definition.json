@@ -1,0 +1,118 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/earlb710/maven-script-interpreter/schemas/screen-definition.json",
+  "title": "ScreenDefinition",
+  "description": "Complete schema for EBS screen definitions including variables, areas, and items",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Unique screen identifier"
+    },
+    "title": {
+      "type": "string",
+      "description": "Window title displayed in title bar"
+    },
+    "width": {
+      "type": "number",
+      "description": "Window width in pixels",
+      "minimum": 100
+    },
+    "height": {
+      "type": "number",
+      "description": "Window height in pixels",
+      "minimum": 100
+    },
+    "maximize": {
+      "type": "boolean",
+      "description": "Whether to maximize the window on display",
+      "default": false
+    },
+    "vars": {
+      "type": "array",
+      "description": "Variable definitions with display metadata",
+      "items": {
+        "$ref": "#/definitions/Variable"
+      }
+    },
+    "area": {
+      "type": "array",
+      "description": "Container area definitions",
+      "items": {
+        "$ref": "area-definition.json"
+      }
+    }
+  },
+  "required": ["name"],
+  "definitions": {
+    "Variable": {
+      "type": "object",
+      "description": "Variable definition with type and display metadata",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Variable name"
+        },
+        "type": {
+          "type": "string",
+          "description": "Data type",
+          "enum": ["string", "int", "integer", "long", "float", "double", "bool", "boolean", "date", "byte", "json"]
+        },
+        "display": {
+          "$ref": "display-metadata.json",
+          "description": "Display metadata for UI rendering"
+        }
+      },
+      "required": ["name"]
+    }
+  },
+  "examples": [
+    {
+      "name": "LoginScreen",
+      "title": "Login",
+      "width": 400,
+      "height": 300,
+      "vars": [
+        {
+          "name": "username",
+          "type": "string",
+          "display": {
+            "type": "textfield",
+            "mandatory": true
+          }
+        },
+        {
+          "name": "password",
+          "type": "string",
+          "display": {
+            "type": "passwordfield",
+            "mandatory": true
+          }
+        }
+      ],
+      "area": [
+        {
+          "name": "loginForm",
+          "type": "vbox",
+          "style": "-fx-padding: 20; -fx-spacing: 15; -fx-alignment: center;",
+          "items": [
+            {
+              "name": "usernameField",
+              "varRef": "username",
+              "sequence": 1,
+              "promptText": "Enter your username",
+              "prefWidth": "300"
+            },
+            {
+              "name": "passwordField",
+              "varRef": "password",
+              "sequence": 2,
+              "promptText": "Enter your password",
+              "prefWidth": "300"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
