@@ -1464,6 +1464,9 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 throw error(stmt.getLine(), "Screen '" + stmt.name + "' already exists.");
             }
 
+            // Put a placeholder to prevent duplicate creation during async initialization
+            screens.put(stmt.name, null);
+
             // Evaluate the spec (should be a JSON object)
             Object spec = evaluate(stmt.spec);
 
@@ -1573,6 +1576,10 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             
             // Get the areas for this screen
             final java.util.List<AreaDefinition> areas = screenAreas.get(screenName);
+            
+            // Use CountDownLatch to wait for stage creation
+            final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
+            final java.util.concurrent.atomic.AtomicReference<Exception> creationError = new java.util.concurrent.atomic.AtomicReference<>();
 
             Platform.runLater(() -> {
                 try {
@@ -1649,11 +1656,30 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                         output.printlnOk("Screen '" + screenName + "' created with title: " + screenTitle);
                     }
                 } catch (Exception e) {
+                    creationError.set(e);
+                    // Remove placeholder on error
+                    screens.remove(screenName);
                     if (output != null) {
                         output.printlnError("Failed to create screen '" + screenName + "': " + e.getMessage());
                     }
+                } finally {
+                    // Signal that creation is complete
+                    latch.countDown();
                 }
             });
+            
+            // Wait for stage creation to complete
+            try {
+                latch.await(10, java.util.concurrent.TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw error(stmt.getLine(), "Screen creation was interrupted");
+            }
+            
+            // Check if there was an error during creation
+            if (creationError.get() != null) {
+                throw error(stmt.getLine(), "Failed to create screen: " + creationError.get().getMessage());
+            }
 
         } catch (InterpreterError ex) {
             throw error(stmt.getLine(), ex.getLocalizedMessage());
@@ -1666,9 +1692,15 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     public void visitScreenShowStatement(ScreenShowStatement stmt) throws InterpreterError {
         environment.pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Screen %1 show", stmt.name);
         try {
+            // Check if screen exists (may be null if still being created, but key should be present)
+            if (!screens.containsKey(stmt.name)) {
+                throw error(stmt.getLine(), "Screen '" + stmt.name + "' does not exist. Create it first with 'screen " + stmt.name + " = {...};'");
+            }
+            
             Stage stage = screens.get(stmt.name);
             if (stage == null) {
-                throw error(stmt.getLine(), "Screen '" + stmt.name + "' does not exist. Create it first with 'screen " + stmt.name + " = {...};'");
+                // This shouldn't happen with the latch, but handle it gracefully
+                throw error(stmt.getLine(), "Screen '" + stmt.name + "' is still being initialized. Please try again.");
             }
 
             // Show the screen on JavaFX Application Thread
@@ -1696,9 +1728,15 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     public void visitScreenHideStatement(ScreenHideStatement stmt) throws InterpreterError {
         environment.pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Screen %1 hide", stmt.name);
         try {
+            // Check if screen exists (may be null if still being created, but key should be present)
+            if (!screens.containsKey(stmt.name)) {
+                throw error(stmt.getLine(), "Screen '" + stmt.name + "' does not exist. Create it first with 'screen " + stmt.name + " = {...};'");
+            }
+            
             Stage stage = screens.get(stmt.name);
             if (stage == null) {
-                throw error(stmt.getLine(), "Screen '" + stmt.name + "' does not exist. Create it first with 'screen " + stmt.name + " = {...};'");
+                // This shouldn't happen with the latch, but handle it gracefully
+                throw error(stmt.getLine(), "Screen '" + stmt.name + "' is still being initialized. Please try again.");
             }
 
             // Hide the screen on JavaFX Application Thread
