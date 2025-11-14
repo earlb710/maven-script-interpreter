@@ -48,10 +48,9 @@ import com.eb.script.interpreter.statement.UseConnectionStatement;
 import com.eb.script.interpreter.statement.WhileStatement;
 import com.eb.script.interpreter.statement.ScreenStatement;
 import com.eb.script.token.ebs.EbsTokenType;
-import com.eb.script.interpreter.DisplayMetadata.InputItemType;
-import com.eb.script.interpreter.DisplayMetadata.AreaType;
-import com.eb.script.interpreter.DisplayMetadata.AreaDefinition;
-import com.eb.script.interpreter.DisplayMetadata.AreaItem;
+import com.eb.script.interpreter.DisplayMetadata.ItemType;
+import com.eb.script.interpreter.AreaDefinition.AreaType;
+import com.eb.script.interpreter.AreaDefinition.AreaItem;
 import com.eb.ui.cli.ScriptArea;
 import javafx.application.Platform;
 import javafx.stage.Stage;
@@ -1547,14 +1546,39 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
      * Helper method to store display metadata for a variable
      */
     private void storeDisplayMetadata(String varName, Map<String, Object> displayDef, String screenName) {
+        DisplayMetadata metadata = parseDisplayMetadata(displayDef, screenName);
+        
+        // Store the metadata using a composite key: screenName.varName
+        String key = screenName + "." + varName;
+        displayMetadata.put(key, metadata);
+    }
+    
+    /**
+     * Retrieve DisplayMetadata for a variable in a screen.
+     * This allows fallback logic in AreaItem: if an AreaItem doesn't have its own
+     * DisplayMetadata, it can retrieve the metadata from its varRef.
+     * 
+     * @param screenName The name of the screen
+     * @param varName The name of the variable
+     * @return The DisplayMetadata for the variable, or null if not found
+     */
+    public DisplayMetadata getDisplayMetadata(String screenName, String varName) {
+        String key = screenName + "." + varName;
+        return displayMetadata.get(key);
+    }
+    
+    /**
+     * Helper method to parse display metadata from a definition map
+     */
+    private DisplayMetadata parseDisplayMetadata(Map<String, Object> displayDef, String screenName) {
         DisplayMetadata metadata = new DisplayMetadata();
         
         // Extract display type and convert to enum
         if (displayDef.containsKey("type")) {
             metadata.type = String.valueOf(displayDef.get("type")).toLowerCase();
-            metadata.itemType = InputItemType.fromString(metadata.type);
+            metadata.itemType = ItemType.fromString(metadata.type);
         } else {
-            metadata.itemType = InputItemType.TEXTFIELD; // Default to textfield
+            metadata.itemType = ItemType.TEXTFIELD; // Default to textfield
             metadata.type = "textfield";
         }
         
@@ -1580,6 +1604,14 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             metadata.max = displayDef.get("max");
         }
         
+        if (displayDef.containsKey("alignment")) {
+            metadata.alignment = String.valueOf(displayDef.get("alignment")).toLowerCase();
+        }
+        
+        if (displayDef.containsKey("pattern")) {
+            metadata.pattern = String.valueOf(displayDef.get("pattern"));
+        }
+        
         // Extract or set default style
         if (displayDef.containsKey("style")) {
             metadata.style = String.valueOf(displayDef.get("style"));
@@ -1590,9 +1622,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         
         metadata.screenName = screenName;
         
-        // Store the metadata using a composite key: screenName.varName
-        String key = screenName + "." + varName;
-        displayMetadata.put(key, metadata);
+        return metadata;
     }
     
     /**
@@ -1661,17 +1691,163 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                             }
                         }
                         
-                        if (itemDef.containsKey("relativePos")) {
-                            item.relativePos = String.valueOf(itemDef.get("relativePos"));
-                        } else if (itemDef.containsKey("relative_pos")) {
+                        if (itemDef.containsKey("layoutPos")) {
+                            item.layoutPos = String.valueOf(itemDef.get("layoutPos"));
+                        } else if (itemDef.containsKey("layout_pos")) {
                             // Support both camelCase and snake_case
-                            item.relativePos = String.valueOf(itemDef.get("relative_pos"));
+                            item.layoutPos = String.valueOf(itemDef.get("layout_pos"));
+                        } else if (itemDef.containsKey("relativePos")) {
+                            // Backward compatibility with old name
+                            item.layoutPos = String.valueOf(itemDef.get("relativePos"));
+                        } else if (itemDef.containsKey("relative_pos")) {
+                            // Backward compatibility with old name (snake_case)
+                            item.layoutPos = String.valueOf(itemDef.get("relative_pos"));
                         }
                         
                         if (itemDef.containsKey("varRef")) {
                             item.varRef = String.valueOf(itemDef.get("varRef"));
                         } else if (itemDef.containsKey("var_ref")) {
                             item.varRef = String.valueOf(itemDef.get("var_ref"));
+                        }
+                        
+                        // Process optional display metadata for the item
+                        // If not provided, the item will use the DisplayMetadata from varRef
+                        if (itemDef.containsKey("display")) {
+                            Object displayObj = itemDef.get("display");
+                            if (displayObj instanceof Map) {
+                                @SuppressWarnings("unchecked")
+                                Map<String, Object> displayDef = (Map<String, Object>) displayObj;
+                                
+                                // Parse display metadata for this specific item
+                                item.displayMetadata = parseDisplayMetadata(displayDef, screenName);
+                            }
+                        }
+                        // If displayMetadata is not set here, it will remain null
+                        // and the consuming code should fall back to using varRef's DisplayMetadata
+                        
+                        // Parse additional UI properties for the item
+                        if (itemDef.containsKey("promptText")) {
+                            item.promptText = String.valueOf(itemDef.get("promptText"));
+                        } else if (itemDef.containsKey("prompt_text")) {
+                            item.promptText = String.valueOf(itemDef.get("prompt_text"));
+                        }
+                        
+                        if (itemDef.containsKey("editable")) {
+                            Object editableObj = itemDef.get("editable");
+                            if (editableObj instanceof Boolean) {
+                                item.editable = (Boolean) editableObj;
+                            }
+                        }
+                        
+                        if (itemDef.containsKey("disabled")) {
+                            Object disabledObj = itemDef.get("disabled");
+                            if (disabledObj instanceof Boolean) {
+                                item.disabled = (Boolean) disabledObj;
+                            }
+                        }
+                        
+                        if (itemDef.containsKey("visible")) {
+                            Object visibleObj = itemDef.get("visible");
+                            if (visibleObj instanceof Boolean) {
+                                item.visible = (Boolean) visibleObj;
+                            }
+                        }
+                        
+                        if (itemDef.containsKey("tooltip")) {
+                            item.tooltip = String.valueOf(itemDef.get("tooltip"));
+                        }
+                        
+                        if (itemDef.containsKey("textColor")) {
+                            item.textColor = String.valueOf(itemDef.get("textColor"));
+                        } else if (itemDef.containsKey("text_color")) {
+                            item.textColor = String.valueOf(itemDef.get("text_color"));
+                        }
+                        
+                        if (itemDef.containsKey("backgroundColor")) {
+                            item.backgroundColor = String.valueOf(itemDef.get("backgroundColor"));
+                        } else if (itemDef.containsKey("background_color")) {
+                            item.backgroundColor = String.valueOf(itemDef.get("background_color"));
+                        }
+                        
+                        // Parse layout-specific properties
+                        if (itemDef.containsKey("colSpan")) {
+                            Object colSpanObj = itemDef.get("colSpan");
+                            if (colSpanObj instanceof Number) {
+                                item.colSpan = ((Number) colSpanObj).intValue();
+                            }
+                        } else if (itemDef.containsKey("col_span")) {
+                            Object colSpanObj = itemDef.get("col_span");
+                            if (colSpanObj instanceof Number) {
+                                item.colSpan = ((Number) colSpanObj).intValue();
+                            }
+                        }
+                        
+                        if (itemDef.containsKey("rowSpan")) {
+                            Object rowSpanObj = itemDef.get("rowSpan");
+                            if (rowSpanObj instanceof Number) {
+                                item.rowSpan = ((Number) rowSpanObj).intValue();
+                            }
+                        } else if (itemDef.containsKey("row_span")) {
+                            Object rowSpanObj = itemDef.get("row_span");
+                            if (rowSpanObj instanceof Number) {
+                                item.rowSpan = ((Number) rowSpanObj).intValue();
+                            }
+                        }
+                        
+                        if (itemDef.containsKey("hgrow")) {
+                            item.hgrow = String.valueOf(itemDef.get("hgrow")).toUpperCase();
+                        }
+                        
+                        if (itemDef.containsKey("vgrow")) {
+                            item.vgrow = String.valueOf(itemDef.get("vgrow")).toUpperCase();
+                        }
+                        
+                        if (itemDef.containsKey("margin")) {
+                            item.margin = String.valueOf(itemDef.get("margin"));
+                        }
+                        
+                        if (itemDef.containsKey("padding")) {
+                            item.padding = String.valueOf(itemDef.get("padding"));
+                        }
+                        
+                        if (itemDef.containsKey("prefWidth")) {
+                            item.prefWidth = String.valueOf(itemDef.get("prefWidth"));
+                        } else if (itemDef.containsKey("pref_width")) {
+                            item.prefWidth = String.valueOf(itemDef.get("pref_width"));
+                        }
+                        
+                        if (itemDef.containsKey("prefHeight")) {
+                            item.prefHeight = String.valueOf(itemDef.get("prefHeight"));
+                        } else if (itemDef.containsKey("pref_height")) {
+                            item.prefHeight = String.valueOf(itemDef.get("pref_height"));
+                        }
+                        
+                        if (itemDef.containsKey("minWidth")) {
+                            item.minWidth = String.valueOf(itemDef.get("minWidth"));
+                        } else if (itemDef.containsKey("min_width")) {
+                            item.minWidth = String.valueOf(itemDef.get("min_width"));
+                        }
+                        
+                        if (itemDef.containsKey("minHeight")) {
+                            item.minHeight = String.valueOf(itemDef.get("minHeight"));
+                        } else if (itemDef.containsKey("min_height")) {
+                            item.minHeight = String.valueOf(itemDef.get("min_height"));
+                        }
+                        
+                        if (itemDef.containsKey("maxWidth")) {
+                            item.maxWidth = String.valueOf(itemDef.get("maxWidth"));
+                        } else if (itemDef.containsKey("max_width")) {
+                            item.maxWidth = String.valueOf(itemDef.get("max_width"));
+                        }
+                        
+                        if (itemDef.containsKey("maxHeight")) {
+                            item.maxHeight = String.valueOf(itemDef.get("maxHeight"));
+                        } else if (itemDef.containsKey("max_height")) {
+                            item.maxHeight = String.valueOf(itemDef.get("max_height"));
+                        }
+                        
+                        if (itemDef.containsKey("alignment")) {
+                            item.alignment = String.valueOf(itemDef.get("alignment")).toLowerCase();
                         }
                         
                         area.items.add(item);
