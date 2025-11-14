@@ -1,0 +1,166 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/earlb710/maven-script-interpreter/schemas/area-definition.json",
+  "title": "AreaDefinition",
+  "description": "Schema for JavaFX container area definitions in EBS screen system",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Unique identifier for the area"
+    },
+    "type": {
+      "type": "string",
+      "description": "Container type",
+      "enum": [
+        "pane", "stackpane", "anchorpane", "borderpane", "flowpane", "gridpane",
+        "hbox", "vbox", "tilepane", "scrollpane", "splitpane", "tabpane", "tab",
+        "accordion", "titledpane", "group", "region", "canvas", "custom"
+      ]
+    },
+    "layout": {
+      "type": "string",
+      "description": "Layout configuration (e.g., 'fill' to maximize space)"
+    },
+    "style": {
+      "type": "string",
+      "description": "JavaFX CSS style string for the container"
+    },
+    "cssClass": {
+      "type": "string",
+      "description": "CSS class name for the container"
+    },
+    "screenName": {
+      "type": "string",
+      "description": "Associated screen name"
+    },
+    "items": {
+      "type": "array",
+      "description": "UI items/controls within this area",
+      "items": {
+        "$ref": "#/definitions/AreaItem"
+      }
+    }
+  },
+  "required": ["name"],
+  "definitions": {
+    "AreaItem": {
+      "type": "object",
+      "description": "Individual UI item/control within an area",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Item identifier"
+        },
+        "sequence": {
+          "type": "integer",
+          "description": "Display order/sequence",
+          "default": 0
+        },
+        "varRef": {
+          "type": "string",
+          "description": "Reference to a variable for data binding"
+        },
+        "layoutPos": {
+          "type": "string",
+          "description": "Position in layout (e.g., 'top', '0,1' for GridPane row,col, '10,20,30,40' for AnchorPane)"
+        },
+        "display": {
+          "$ref": "display-metadata.json",
+          "description": "Optional display metadata override for this item"
+        },
+        "promptText": {
+          "type": "string",
+          "description": "Placeholder text for text input controls"
+        },
+        "tooltip": {
+          "type": "string",
+          "description": "Hover tooltip text"
+        },
+        "editable": {
+          "type": "boolean",
+          "description": "Whether the control is editable"
+        },
+        "disabled": {
+          "type": "boolean",
+          "description": "Whether the control is disabled"
+        },
+        "visible": {
+          "type": "boolean",
+          "description": "Whether the control is visible"
+        },
+        "textColor": {
+          "type": "string",
+          "description": "Text color (CSS color value, e.g., '#000000', 'red')"
+        },
+        "backgroundColor": {
+          "type": "string",
+          "description": "Background color (CSS color value, e.g., '#FFFFFF', 'lightblue')"
+        },
+        "colSpan": {
+          "type": "integer",
+          "description": "Column span for GridPane layouts",
+          "minimum": 1
+        },
+        "rowSpan": {
+          "type": "integer",
+          "description": "Row span for GridPane layouts",
+          "minimum": 1
+        },
+        "hgrow": {
+          "type": "string",
+          "description": "Horizontal grow priority",
+          "enum": ["ALWAYS", "SOMETIMES", "NEVER"]
+        },
+        "vgrow": {
+          "type": "string",
+          "description": "Vertical grow priority",
+          "enum": ["ALWAYS", "SOMETIMES", "NEVER"]
+        },
+        "margin": {
+          "type": "string",
+          "description": "Margin around the item (e.g., '10', '10 5', '10 5 10 5')",
+          "pattern": "^\\d+(\\.\\d+)?(\\s+\\d+(\\.\\d+)?){0,3}$"
+        },
+        "padding": {
+          "type": "string",
+          "description": "Padding inside the item (e.g., '10', '10 5', '10 5 10 5')",
+          "pattern": "^\\d+(\\.\\d+)?(\\s+\\d+(\\.\\d+)?){0,3}$"
+        },
+        "prefWidth": {
+          "type": "string",
+          "description": "Preferred width (e.g., '300', '50%')"
+        },
+        "prefHeight": {
+          "type": "string",
+          "description": "Preferred height (e.g., '200', '30%')"
+        },
+        "minWidth": {
+          "type": "string",
+          "description": "Minimum width"
+        },
+        "minHeight": {
+          "type": "string",
+          "description": "Minimum height"
+        },
+        "maxWidth": {
+          "type": "string",
+          "description": "Maximum width"
+        },
+        "maxHeight": {
+          "type": "string",
+          "description": "Maximum height"
+        },
+        "alignment": {
+          "type": "string",
+          "description": "Alignment within parent container",
+          "enum": [
+            "center", "top-left", "top-center", "top-right",
+            "center-left", "center-right", "bottom-left", "bottom-center", "bottom-right",
+            "baseline-left", "baseline-center", "baseline-right"
+          ]
+        }
+      }
+    }
+  }
+}

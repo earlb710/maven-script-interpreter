@@ -1,0 +1,93 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/earlb710/maven-script-interpreter/schemas/display-metadata.json",
+  "title": "DisplayMetadata",
+  "description": "Schema for JavaFX UI control display metadata in EBS screen system",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "description": "UI control type",
+      "enum": [
+        "textfield", "textarea", "passwordfield",
+        "checkbox", "radiobutton", "togglebutton", "combobox", "choicebox", "listview",
+        "spinner", "slider",
+        "datepicker",
+        "colorpicker",
+        "button",
+        "label", "labeltext", "text", "hyperlink", "separator",
+        "imageview", "mediaview", "webview", "chart",
+        "progressbar", "progressindicator",
+        "custom"
+      ]
+    },
+    "mandatory": {
+      "type": "boolean",
+      "description": "Whether the field is mandatory/required",
+      "default": false
+    },
+    "case": {
+      "type": "string",
+      "description": "Text case transformation",
+      "enum": ["upper", "lower", "title"]
+    },
+    "min": {
+      "oneOf": [
+        { "type": "number" },
+        { "type": "string" }
+      ],
+      "description": "Minimum value constraint (for numeric or date inputs)"
+    },
+    "max": {
+      "oneOf": [
+        { "type": "number" },
+        { "type": "string" }
+      ],
+      "description": "Maximum value constraint (for numeric or date inputs)"
+    },
+    "style": {
+      "type": "string",
+      "description": "JavaFX CSS style string for the control"
+    },
+    "cssClass": {
+      "type": "string",
+      "description": "CSS class name for the control"
+    },
+    "screenName": {
+      "type": "string",
+      "description": "Associated screen name"
+    },
+    "alignment": {
+      "type": "string",
+      "description": "Text/content alignment",
+      "enum": ["left", "center", "right", "justify"]
+    },
+    "pattern": {
+      "type": "string",
+      "description": "Regular expression pattern for validation (useful for text inputs)"
+    }
+  },
+  "examples": [
+    {
+      "type": "textfield",
+      "mandatory": true,
+      "pattern": "^[\\w.-]+@[\\w.-]+\\.[a-z]{2,}$",
+      "alignment": "left"
+    },
+    {
+      "type": "passwordfield",
+      "mandatory": true,
+      "case": "lower"
+    },
+    {
+      "type": "spinner",
+      "min": 0,
+      "max": 100
+    },
+    {
+      "type": "datepicker",
+      "min": "2024-01-01",
+      "max": "2024-12-31"
+    }
+  ]
+}
