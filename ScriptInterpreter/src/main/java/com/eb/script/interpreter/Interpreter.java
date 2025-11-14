@@ -76,6 +76,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     private final java.util.concurrent.ConcurrentHashMap<String, Stage> screens = new java.util.concurrent.ConcurrentHashMap<>();
     private final java.util.concurrent.ConcurrentHashMap<String, Thread> screenThreads = new java.util.concurrent.ConcurrentHashMap<>();
     private final java.util.concurrent.ConcurrentHashMap<String, java.util.concurrent.ConcurrentHashMap<String, Object>> screenVars = new java.util.concurrent.ConcurrentHashMap<>();
+    private final java.util.Set<String> screensBeingCreated = java.util.concurrent.ConcurrentHashMap.newKeySet();
     private final java.util.Map<String, DisplayMetadata> displayMetadata = new java.util.HashMap<>();
     private final java.util.Map<String, java.util.List<AreaDefinition>> screenAreas = new java.util.HashMap<>();
     private final java.util.Deque<String> connectionStack = new java.util.ArrayDeque<>();
@@ -131,6 +132,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         screenVars.clear();
         screenAreas.clear();
         displayMetadata.clear();
+        screensBeingCreated.clear();
     }
 
     // --- Call stack support ---
@@ -1460,12 +1462,12 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     public void visitScreenStatement(ScreenStatement stmt) throws InterpreterError {
         environment.pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Screen %1", stmt.name);
         try {
-            if (screens.containsKey(stmt.name)) {
+            if (screens.containsKey(stmt.name) || screensBeingCreated.contains(stmt.name)) {
                 throw error(stmt.getLine(), "Screen '" + stmt.name + "' already exists.");
             }
 
-            // Put a placeholder to prevent duplicate creation during async initialization
-            screens.put(stmt.name, null);
+            // Mark this screen as being created to prevent duplicate creation during async initialization
+            screensBeingCreated.add(stmt.name);
 
             // Evaluate the spec (should be a JSON object)
             Object spec = evaluate(stmt.spec);
@@ -1649,6 +1651,8 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
 
                     // Store the stage reference
                     screens.put(screenName, stage);
+                    // Remove from being created set
+                    screensBeingCreated.remove(screenName);
 
                     // Don't show the screen automatically - user must explicitly call "screen <name> show;"
                     
@@ -1657,8 +1661,8 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                     }
                 } catch (Exception e) {
                     creationError.set(e);
-                    // Remove placeholder on error
-                    screens.remove(screenName);
+                    // Remove from being created set on error
+                    screensBeingCreated.remove(screenName);
                     if (output != null) {
                         output.printlnError("Failed to create screen '" + screenName + "': " + e.getMessage());
                     }
@@ -1670,8 +1674,14 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             
             // Wait for stage creation to complete
             try {
-                latch.await(10, java.util.concurrent.TimeUnit.SECONDS);
+                boolean completed = latch.await(10, java.util.concurrent.TimeUnit.SECONDS);
+                if (!completed) {
+                    // Timeout occurred
+                    screensBeingCreated.remove(stmt.name);
+                    throw error(stmt.getLine(), "Screen creation timed out after 10 seconds");
+                }
             } catch (InterruptedException e) {
+                screensBeingCreated.remove(stmt.name);
                 Thread.currentThread().interrupt();
                 throw error(stmt.getLine(), "Screen creation was interrupted");
             }
