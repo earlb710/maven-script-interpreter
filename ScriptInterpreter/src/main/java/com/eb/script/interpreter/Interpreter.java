@@ -1579,18 +1579,28 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 }
                 
                 if (!varsWithDisplay.isEmpty()) {
-                    // Create a default VBox area with all variables as items
+                    // Create a default VBox area with label-control pairs in HBox rows
+                    // This gives: Label : Control on same line, with rows stacked vertically
                     AreaDefinition defaultArea = new AreaDefinition();
                     defaultArea.areaType = AreaDefinition.AreaType.VBOX;
                     defaultArea.name = "default";
                     defaultArea.screenName = stmt.name;
                     
-                    int sequence = 0;
+                    // Instead of creating nested areas, we'll create a grid-like structure
+                    // by creating HBox sub-areas for each variable
+                    java.util.List<AreaDefinition> areas = new java.util.ArrayList<>();
+                    
                     for (String varName : varsWithDisplay) {
+                        // Create an HBox area to hold label and control side-by-side
+                        AreaDefinition hboxRow = new AreaDefinition();
+                        hboxRow.areaType = AreaDefinition.AreaType.HBOX;
+                        hboxRow.name = varName + "_row";
+                        hboxRow.screenName = stmt.name;
+                        
                         // Create a label for the variable name
                         AreaDefinition.AreaItem labelItem = new AreaDefinition.AreaItem();
                         labelItem.name = varName + "_label";
-                        labelItem.sequence = sequence++;
+                        labelItem.sequence = 0;
                         DisplayMetadata labelMetadata = new DisplayMetadata();
                         labelMetadata.itemType = DisplayMetadata.ItemType.LABEL;
                         labelItem.displayMetadata = labelMetadata;
@@ -1598,12 +1608,13 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                         labelItem.promptText = capitalizeWords(varName) + ":"; // Add colon after label
                         labelItem.maxWidth = "USE_PREF_SIZE";
                         labelItem.hgrow = "NEVER";
-                        defaultArea.items.add(labelItem);
+                        labelItem.minWidth = "150"; // Minimum width for label alignment
+                        hboxRow.items.add(labelItem);
                         
                         // Create the input control for the variable
                         AreaDefinition.AreaItem item = new AreaDefinition.AreaItem();
                         item.varRef = varName;
-                        item.sequence = sequence++;
+                        item.sequence = 1;
                         item.displayMetadata = displayMetadata.get(stmt.name + "." + varName);
                         
                         // Set sizing to fit content, not stretch to screen width
@@ -1634,11 +1645,10 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                             }
                         }
                         
-                        defaultArea.items.add(item);
+                        hboxRow.items.add(item);
+                        areas.add(hboxRow);
                     }
                     
-                    java.util.List<AreaDefinition> areas = new java.util.ArrayList<>();
-                    areas.add(defaultArea);
                     screenAreas.put(stmt.name, areas);
                 }
             }
