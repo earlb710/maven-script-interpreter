@@ -1568,16 +1568,35 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             final int screenWidth = width;
             final int screenHeight = height;
             final boolean screenMaximize = maximize;
+            
+            // Get the areas for this screen
+            final java.util.List<AreaDefinition> areas = screenAreas.get(screenName);
 
             Platform.runLater(() -> {
                 try {
-                    Stage stage = new Stage();
-                    stage.setTitle(screenTitle);
-
-                    // Create a simple scene with a StackPane
-                    StackPane root = new StackPane();
-                    Scene scene = new Scene(root, screenWidth, screenHeight);
-                    stage.setScene(scene);
+                    Stage stage;
+                    
+                    // Use ScreenFactory if areas are defined, otherwise create simple stage
+                    if (areas != null && !areas.isEmpty()) {
+                        // Create screen with areas using ScreenFactory
+                        stage = ScreenFactory.createScreen(
+                            screenName,
+                            screenTitle,
+                            screenWidth,
+                            screenHeight,
+                            areas,
+                            (scrName, varName) -> displayMetadata.get(scrName + "." + varName)
+                        );
+                    } else {
+                        // Create simple stage without areas
+                        stage = new Stage();
+                        stage.setTitle(screenTitle);
+                        
+                        // Create a simple scene with a StackPane
+                        StackPane root = new StackPane();
+                        Scene scene = new Scene(root, screenWidth, screenHeight);
+                        stage.setScene(scene);
+                    }
 
                     if (screenMaximize) {
                         stage.setMaximized(true);
