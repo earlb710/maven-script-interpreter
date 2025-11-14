@@ -1691,11 +1691,17 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                             }
                         }
                         
-                        if (itemDef.containsKey("relativePos")) {
-                            item.relativePos = String.valueOf(itemDef.get("relativePos"));
-                        } else if (itemDef.containsKey("relative_pos")) {
+                        if (itemDef.containsKey("layoutPos")) {
+                            item.layoutPos = String.valueOf(itemDef.get("layoutPos"));
+                        } else if (itemDef.containsKey("layout_pos")) {
                             // Support both camelCase and snake_case
-                            item.relativePos = String.valueOf(itemDef.get("relative_pos"));
+                            item.layoutPos = String.valueOf(itemDef.get("layout_pos"));
+                        } else if (itemDef.containsKey("relativePos")) {
+                            // Backward compatibility with old name
+                            item.layoutPos = String.valueOf(itemDef.get("relativePos"));
+                        } else if (itemDef.containsKey("relative_pos")) {
+                            // Backward compatibility with old name (snake_case)
+                            item.layoutPos = String.valueOf(itemDef.get("relative_pos"));
                         }
                         
                         if (itemDef.containsKey("varRef")) {
@@ -1761,6 +1767,87 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                             item.backgroundColor = String.valueOf(itemDef.get("backgroundColor"));
                         } else if (itemDef.containsKey("background_color")) {
                             item.backgroundColor = String.valueOf(itemDef.get("background_color"));
+                        }
+                        
+                        // Parse layout-specific properties
+                        if (itemDef.containsKey("colSpan")) {
+                            Object colSpanObj = itemDef.get("colSpan");
+                            if (colSpanObj instanceof Number) {
+                                item.colSpan = ((Number) colSpanObj).intValue();
+                            }
+                        } else if (itemDef.containsKey("col_span")) {
+                            Object colSpanObj = itemDef.get("col_span");
+                            if (colSpanObj instanceof Number) {
+                                item.colSpan = ((Number) colSpanObj).intValue();
+                            }
+                        }
+                        
+                        if (itemDef.containsKey("rowSpan")) {
+                            Object rowSpanObj = itemDef.get("rowSpan");
+                            if (rowSpanObj instanceof Number) {
+                                item.rowSpan = ((Number) rowSpanObj).intValue();
+                            }
+                        } else if (itemDef.containsKey("row_span")) {
+                            Object rowSpanObj = itemDef.get("row_span");
+                            if (rowSpanObj instanceof Number) {
+                                item.rowSpan = ((Number) rowSpanObj).intValue();
+                            }
+                        }
+                        
+                        if (itemDef.containsKey("hgrow")) {
+                            item.hgrow = String.valueOf(itemDef.get("hgrow")).toUpperCase();
+                        }
+                        
+                        if (itemDef.containsKey("vgrow")) {
+                            item.vgrow = String.valueOf(itemDef.get("vgrow")).toUpperCase();
+                        }
+                        
+                        if (itemDef.containsKey("margin")) {
+                            item.margin = String.valueOf(itemDef.get("margin"));
+                        }
+                        
+                        if (itemDef.containsKey("padding")) {
+                            item.padding = String.valueOf(itemDef.get("padding"));
+                        }
+                        
+                        if (itemDef.containsKey("prefWidth")) {
+                            item.prefWidth = String.valueOf(itemDef.get("prefWidth"));
+                        } else if (itemDef.containsKey("pref_width")) {
+                            item.prefWidth = String.valueOf(itemDef.get("pref_width"));
+                        }
+                        
+                        if (itemDef.containsKey("prefHeight")) {
+                            item.prefHeight = String.valueOf(itemDef.get("prefHeight"));
+                        } else if (itemDef.containsKey("pref_height")) {
+                            item.prefHeight = String.valueOf(itemDef.get("pref_height"));
+                        }
+                        
+                        if (itemDef.containsKey("minWidth")) {
+                            item.minWidth = String.valueOf(itemDef.get("minWidth"));
+                        } else if (itemDef.containsKey("min_width")) {
+                            item.minWidth = String.valueOf(itemDef.get("min_width"));
+                        }
+                        
+                        if (itemDef.containsKey("minHeight")) {
+                            item.minHeight = String.valueOf(itemDef.get("minHeight"));
+                        } else if (itemDef.containsKey("min_height")) {
+                            item.minHeight = String.valueOf(itemDef.get("min_height"));
+                        }
+                        
+                        if (itemDef.containsKey("maxWidth")) {
+                            item.maxWidth = String.valueOf(itemDef.get("maxWidth"));
+                        } else if (itemDef.containsKey("max_width")) {
+                            item.maxWidth = String.valueOf(itemDef.get("max_width"));
+                        }
+                        
+                        if (itemDef.containsKey("maxHeight")) {
+                            item.maxHeight = String.valueOf(itemDef.get("maxHeight"));
+                        } else if (itemDef.containsKey("max_height")) {
+                            item.maxHeight = String.valueOf(itemDef.get("max_height"));
+                        }
+                        
+                        if (itemDef.containsKey("alignment")) {
+                            item.alignment = String.valueOf(itemDef.get("alignment")).toLowerCase();
                         }
                         
                         area.items.add(item);
