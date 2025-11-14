@@ -2060,8 +2060,14 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                             item.name = String.valueOf(itemDef.get("name"));
                         }
 
+                        // Support both "sequence" and "seq" for compactness
                         if (itemDef.containsKey("sequence")) {
                             Object seqObj = itemDef.get("sequence");
+                            if (seqObj instanceof Number) {
+                                item.sequence = ((Number) seqObj).intValue();
+                            }
+                        } else if (itemDef.containsKey("seq")) {
+                            Object seqObj = itemDef.get("seq");
                             if (seqObj instanceof Number) {
                                 item.sequence = ((Number) seqObj).intValue();
                             }
