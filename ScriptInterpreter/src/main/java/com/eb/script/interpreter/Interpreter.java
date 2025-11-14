@@ -2087,9 +2087,9 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                         }
 
                         if (itemDef.containsKey("varRef")) {
-                            item.varRef = String.valueOf(itemDef.get("varRef"));
+                            item.varRef = String.valueOf(itemDef.get("varRef")).toLowerCase();
                         } else if (itemDef.containsKey("var_ref")) {
-                            item.varRef = String.valueOf(itemDef.get("var_ref"));
+                            item.varRef = String.valueOf(itemDef.get("var_ref")).toLowerCase();
                         }
 
                         // Process optional display metadata for the item
