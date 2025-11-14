@@ -47,6 +47,8 @@ import com.eb.script.interpreter.statement.StatementKind;
 import com.eb.script.interpreter.statement.UseConnectionStatement;
 import com.eb.script.interpreter.statement.WhileStatement;
 import com.eb.script.interpreter.statement.ScreenStatement;
+import com.eb.script.interpreter.statement.ScreenShowStatement;
+import com.eb.script.interpreter.statement.ScreenHideStatement;
 import com.eb.script.token.ebs.EbsTokenType;
 import com.eb.script.interpreter.DisplayMetadata.ItemType;
 import com.eb.script.interpreter.AreaDefinition.AreaType;
@@ -70,7 +72,9 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
 
     private final java.util.Map<String, DbConnection> connections = new java.util.HashMap<>();
     private final java.util.Map<String, CursorSpec> cursorSpecs = new java.util.HashMap<>();
-    private final java.util.Map<String, Stage> screens = new java.util.HashMap<>();
+    private final java.util.concurrent.ConcurrentHashMap<String, Stage> screens = new java.util.concurrent.ConcurrentHashMap<>();
+    private final java.util.concurrent.ConcurrentHashMap<String, Thread> screenThreads = new java.util.concurrent.ConcurrentHashMap<>();
+    private final java.util.concurrent.ConcurrentHashMap<String, java.util.concurrent.ConcurrentHashMap<String, Object>> screenVars = new java.util.concurrent.ConcurrentHashMap<>();
     private final java.util.Map<String, DisplayMetadata> displayMetadata = new java.util.HashMap<>();
     private final java.util.Map<String, java.util.List<AreaDefinition>> screenAreas = new java.util.HashMap<>();
     private final java.util.Deque<String> connectionStack = new java.util.ArrayDeque<>();
@@ -1472,33 +1476,134 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 }
             }
             
-            // Create the screen on JavaFX Application Thread
+            // Create thread-safe variable storage for this screen
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVarMap = new java.util.concurrent.ConcurrentHashMap<>();
+            screenVars.put(stmt.name, screenVarMap);
+            
+            // Create the screen on JavaFX Application Thread and set up thread management
+            final String screenName = stmt.name;
+            final String screenTitle = title;
+            final int screenWidth = width;
+            final int screenHeight = height;
+            final boolean screenMaximize = maximize;
+            
             Platform.runLater(() -> {
                 try {
                     Stage stage = new Stage();
-                    stage.setTitle(title);
+                    stage.setTitle(screenTitle);
                     
                     // Create a simple scene with a StackPane
                     StackPane root = new StackPane();
-                    Scene scene = new Scene(root, width, height);
+                    Scene scene = new Scene(root, screenWidth, screenHeight);
                     stage.setScene(scene);
                     
-                    if (maximize) {
+                    if (screenMaximize) {
                         stage.setMaximized(true);
                     }
                     
+                    // Create a thread for this screen
+                    Thread screenThread = new Thread(() -> {
+                        // Screen thread runs until interrupted or window closed
+                        try {
+                            while (!Thread.currentThread().isInterrupted()) {
+                                Thread.sleep(100); // Keep thread alive
+                            }
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+                    }, "Screen-" + screenName);
+                    
+                    screenThread.setDaemon(true);
+                    screenThread.start();
+                    
+                    // Store thread reference
+                    screenThreads.put(screenName, screenThread);
+                    
+                    // Set up cleanup when screen is closed
+                    stage.setOnCloseRequest(event -> {
+                        // Interrupt and stop the screen thread
+                        Thread thread = screenThreads.get(screenName);
+                        if (thread != null && thread.isAlive()) {
+                            thread.interrupt();
+                        }
+                        // Clean up resources
+                        screens.remove(screenName);
+                        screenThreads.remove(screenName);
+                        screenVars.remove(screenName);
+                    });
+                    
                     // Store the stage reference
-                    screens.put(stmt.name, stage);
+                    screens.put(screenName, stage);
                     
                     // Show the screen
                     stage.show();
                     
                     if (output != null) {
-                        output.printlnOk("Screen '" + stmt.name + "' created with title: " + title);
+                        output.printlnOk("Screen '" + screenName + "' created with title: " + screenTitle);
                     }
                 } catch (Exception e) {
                     if (output != null) {
-                        output.printlnError("Failed to create screen '" + stmt.name + "': " + e.getMessage());
+                        output.printlnError("Failed to create screen '" + screenName + "': " + e.getMessage());
+                    }
+                }
+            });
+            
+        } catch (InterpreterError ex) {
+            System.getLogger(Interpreter.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        } finally {
+            environment.popCallStack();
+        }
+    }
+    
+    @Override
+    public void visitScreenShowStatement(ScreenShowStatement stmt) {
+        environment.pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Screen %1 show", stmt.name);
+        try {
+            Stage stage = screens.get(stmt.name);
+            if (stage == null) {
+                throw error(stmt.getLine(), "Screen '" + stmt.name + "' does not exist. Create it first with 'screen " + stmt.name + " = {...};'");
+            }
+            
+            // Show the screen on JavaFX Application Thread
+            Platform.runLater(() -> {
+                if (!stage.isShowing()) {
+                    stage.show();
+                    if (output != null) {
+                        output.printlnOk("Screen '" + stmt.name + "' shown");
+                    }
+                } else {
+                    if (output != null) {
+                        output.printlnInfo("Screen '" + stmt.name + "' is already showing");
+                    }
+                }
+            });
+            
+        } catch (InterpreterError ex) {
+            System.getLogger(Interpreter.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        } finally {
+            environment.popCallStack();
+        }
+    }
+    
+    @Override
+    public void visitScreenHideStatement(ScreenHideStatement stmt) {
+        environment.pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Screen %1 hide", stmt.name);
+        try {
+            Stage stage = screens.get(stmt.name);
+            if (stage == null) {
+                throw error(stmt.getLine(), "Screen '" + stmt.name + "' does not exist. Create it first with 'screen " + stmt.name + " = {...};'");
+            }
+            
+            // Hide the screen on JavaFX Application Thread
+            Platform.runLater(() -> {
+                if (stage.isShowing()) {
+                    stage.hide();
+                    if (output != null) {
+                        output.printlnOk("Screen '" + stmt.name + "' hidden");
+                    }
+                } else {
+                    if (output != null) {
+                        output.printlnInfo("Screen '" + stmt.name + "' is already hidden");
                     }
                 }
             });
