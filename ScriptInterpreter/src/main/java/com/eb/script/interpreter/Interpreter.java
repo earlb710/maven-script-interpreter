@@ -1454,7 +1454,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                             Map<String, Object> varDef = (Map<String, Object>) varObj;
                             
                             // Extract variable properties
-                            String varName = varDef.containsKey("name") ? String.valueOf(varDef.get("name")) : null;
+                            String varName = varDef.containsKey("name") ? String.valueOf(varDef.get("name")).toLowerCase() : null;
                             String varTypeStr = varDef.containsKey("type") ? String.valueOf(varDef.get("type")).toLowerCase() : null;
                             Object defaultValue = varDef.get("default");
                             
