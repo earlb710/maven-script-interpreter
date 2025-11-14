@@ -133,6 +133,17 @@ public class ScreenFactory {
                 addItemToContainer(container, control, item, areaDef.areaType);
             }
         }
+        
+        // Add nested child areas to the container
+        if (areaDef.childAreas != null && !areaDef.childAreas.isEmpty()) {
+            for (AreaDefinition childArea : areaDef.childAreas) {
+                Region childContainer = createAreaWithItems(childArea, screenName, metadataProvider);
+                
+                // Add the child container to the parent container
+                // Treat child areas as regular nodes
+                addChildAreaToContainer(container, childContainer, areaDef.areaType);
+            }
+        }
 
         return container;
     }
@@ -371,6 +382,37 @@ public class ScreenFactory {
     }
 
     /**
+     * Adds a child area (nested container) to a parent container.
+     * Similar to addItemToContainer but for child areas.
+     */
+    private static void addChildAreaToContainer(Region container, Region childArea, AreaType areaType) {
+        if (container instanceof VBox) {
+            ((VBox) container).getChildren().add(childArea);
+        } else if (container instanceof HBox) {
+            ((HBox) container).getChildren().add(childArea);
+        } else if (container instanceof GridPane) {
+            // For GridPane, just add to next available position
+            ((GridPane) container).getChildren().add(childArea);
+        } else if (container instanceof BorderPane) {
+            // For BorderPane, default to center if not specified
+            BorderPane borderPane = (BorderPane) container;
+            if (borderPane.getCenter() == null) {
+                borderPane.setCenter(childArea);
+            }
+        } else if (container instanceof StackPane) {
+            ((StackPane) container).getChildren().add(childArea);
+        } else if (container instanceof FlowPane) {
+            ((FlowPane) container).getChildren().add(childArea);
+        } else if (container instanceof TilePane) {
+            ((TilePane) container).getChildren().add(childArea);
+        } else if (container instanceof AnchorPane) {
+            ((AnchorPane) container).getChildren().add(childArea);
+        } else if (container instanceof Pane) {
+            ((Pane) container).getChildren().add(childArea);
+        }
+    }
+
+    /**
      * Parse size string to double value.
      * Supports plain numbers and percentages (e.g., "300", "50%").
      */
@@ -600,6 +642,24 @@ public class ScreenFactory {
             }
         }
         
+        // Process nested child areas (areas within areas)
+        if (areaDef.containsKey("areas")) {
+            Object areasObj = areaDef.get("areas");
+            if (areasObj instanceof List) {
+                @SuppressWarnings("unchecked")
+                List<Object> areasList = (List<Object>) areasObj;
+                
+                for (Object childAreaObj : areasList) {
+                    if (childAreaObj instanceof Map) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> childAreaDef = (Map<String, Object>) childAreaObj;
+                        AreaDefinition childArea = parseAreaDefinition(childAreaDef, screenName);
+                        area.childAreas.add(childArea);
+                    }
+                }
+            }
+        }
+        
         return area;
     }
 
@@ -611,7 +671,8 @@ public class ScreenFactory {
         
         // Extract item properties
         item.name = getStringValue(itemDef, "name", null);
-        item.sequence = getIntValue(itemDef, "sequence", 0);
+        // Support both "sequence" and "seq" for compactness
+        item.sequence = getIntValue(itemDef, "sequence", getIntValue(itemDef, "seq", 0));
         item.varRef = getStringValue(itemDef, "varRef", getStringValue(itemDef, "var_ref", null));
         
         // Layout position (support multiple naming conventions)
