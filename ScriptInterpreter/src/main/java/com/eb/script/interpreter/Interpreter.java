@@ -1548,9 +1548,9 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             // Process area definitions if present
             if (config.containsKey("area")) {
                 Object areaObj = config.get("area");
-                if (areaObj instanceof List) {
+                if (areaObj instanceof  ArrayDynamic varsArray) {
                     @SuppressWarnings("unchecked")
-                    List<Object> areaList = (List<Object>) areaObj;
+                    List<Object> areaList = varsArray.getAll();
                     java.util.List<AreaDefinition> areas = new java.util.ArrayList<>();
 
                     for (Object aObj : areaList) {
