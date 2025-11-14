@@ -1577,9 +1577,8 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                     // Store the stage reference
                     screens.put(screenName, stage);
 
-                    // Show the screen
-                    stage.show();
-
+                    // Don't show the screen automatically - user must explicitly call "screen <name> show;"
+                    
                     if (output != null) {
                         output.printlnOk("Screen '" + screenName + "' created with title: " + screenTitle);
                     }

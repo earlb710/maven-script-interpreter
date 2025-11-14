@@ -138,11 +138,13 @@ screen myWindow show;
 ```
 
 **Screen Features:**
+- Screens are created but NOT shown automatically - use `screen <name> show;` to display
 - Each screen runs in its own dedicated thread
 - The thread automatically stops when the screen is closed
 - All screen variables are thread-safe (using ConcurrentHashMap)
 - Access variables via `screen_name.var_name` syntax (e.g., `myWindow.counter`)
 - Assign to variables via `screen_name.var_name = value` (e.g., `myWindow.counter = 10`)
+- Variable assignments do not trigger screen display
 - Multiple screens can be created and managed independently
 
 ### Console Commands
