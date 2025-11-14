@@ -9,6 +9,7 @@ The `AreaDefinition` class and its sub-components provide a comprehensive framew
 - [AreaDefinition Class](#areadefinition-class)
 - [AreaType Enum](#areatype-enum)
 - [AreaItem Class](#areaitem-class)
+- [DisplayMetadata Class](#displaymetadata-class)
 - [Usage Examples](#usage-examples)
 - [Best Practices](#best-practices)
 
@@ -171,6 +172,228 @@ if (metadata == null && item.varRef != null) {
     metadata = interpreter.getDisplayMetadata(screenName, item.varRef);
 }
 ```
+
+---
+
+## DisplayMetadata Class
+
+The `DisplayMetadata` class defines the display properties and behavior for UI items. It controls how variables are rendered visually, including their type, validation, styling, and constraints. AreaItems can optionally override these settings or use the metadata defined for their associated variable.
+
+### Properties
+
+| Property | Type | Description | Example Values |
+|----------|------|-------------|----------------|
+| `itemType` | ItemType | The UI control type (enum) | TEXTFIELD, LABEL, BUTTON |
+| `type` | String | Item type as string (for compatibility) | "textfield", "label" |
+| `cssClass` | String | CSS class name from ItemType enum | "screen-item-textfield" |
+| `mandatory` | boolean | Whether field is required | true, false |
+| `caseFormat` | String | Text case transformation | "upper", "lower", "title" |
+| `min` | Object | Minimum value constraint | 0, "2024-01-01" |
+| `max` | Object | Maximum value constraint | 100, "2024-12-31" |
+| `style` | String | CSS style string | "-fx-font-size: 14px;" |
+| `screenName` | String | Associated screen name | "LoginScreen" |
+| `alignment` | String | Text/content alignment | "left", "center", "right" |
+| `pattern` | String | Regex validation pattern | "^[a-zA-Z0-9]+$" |
+
+### ItemType Enum
+
+The `ItemType` enum defines all available UI control types, organized by category:
+
+#### Text Input Controls
+
+| Type | Description | Use Case |
+|------|-------------|----------|
+| `TEXTFIELD` | Single-line text input | Usernames, short text |
+| `TEXTAREA` | Multi-line text input | Comments, descriptions |
+| `PASSWORDFIELD` | Masked password input | Passwords, sensitive data |
+
+#### Selection Controls
+
+| Type | Description | Use Case |
+|------|-------------|----------|
+| `CHECKBOX` | Boolean selection | Accept terms, enable features |
+| `RADIOBUTTON` | Single selection from group | Gender, payment method |
+| `TOGGLEBUTTON` | Toggle state button | On/off switches |
+| `COMBOBOX` | Dropdown selection (editable) | Country, category selection |
+| `CHOICEBOX` | Dropdown selection | Simple selections |
+| `LISTVIEW` | List of items | Multiple options display |
+
+#### Numeric Controls
+
+| Type | Description | Use Case |
+|------|-------------|----------|
+| `SPINNER` | Numeric input with increment/decrement | Quantity, age |
+| `SLIDER` | Numeric input via slider | Volume, brightness |
+
+#### Date/Time Controls
+
+| Type | Description | Use Case |
+|------|-------------|----------|
+| `DATEPICKER` | Date selection calendar | Birth date, appointment |
+
+#### Color Control
+
+| Type | Description | Use Case |
+|------|-------------|----------|
+| `COLORPICKER` | Color selection | Theme customization |
+
+#### Button Controls
+
+| Type | Description | Use Case |
+|------|-------------|----------|
+| `BUTTON` | Action button | Submit, cancel, save |
+
+#### Display-Only Controls
+
+| Type | Description | Use Case |
+|------|-------------|----------|
+| `LABEL` | Text label with padding | Form labels, titles |
+| `LABELTEXT` | Text label (alias for LABEL) | Display text |
+| `TEXT` | Plain text (no padding) | Inline text, messages |
+| `HYPERLINK` | Clickable link | URLs, navigation |
+| `SEPARATOR` | Visual divider | Section separation |
+
+#### Media/Display Controls
+
+| Type | Description | Use Case |
+|------|-------------|----------|
+| `IMAGEVIEW` | Image display | Photos, icons |
+| `MEDIAVIEW` | Video/audio player | Media playback |
+| `WEBVIEW` | Embedded web browser | HTML content |
+| `CHART` | Data visualization | Graphs, charts |
+
+#### Progress/Status Controls
+
+| Type | Description | Use Case |
+|------|-------------|----------|
+| `PROGRESSBAR` | Horizontal progress bar | Download progress |
+| `PROGRESSINDICATOR` | Circular progress | Loading spinner |
+
+#### Custom
+
+| Type | Description | Use Case |
+|------|-------------|----------|
+| `CUSTOM` | Custom/fallback type | Extension point |
+
+### CSS Configuration
+
+- **CSS File**: `/css/screen-items.css`
+- **Class Prefix**: `screen-item-`
+- **Example Classes**: `screen-item-textfield`, `screen-item-button`, `screen-item-label`
+
+### EBS Script Syntax
+
+DisplayMetadata is typically defined within variable definitions:
+
+```javascript
+vars: [{
+    name: "username",
+    type: "string",
+    display: {
+        type: "textfield",
+        mandatory: true,
+        alignment: "left",
+        pattern: "^[a-zA-Z0-9_]{3,20}$",
+        style: "-fx-font-size: 14px;"
+    }
+}, {
+    name: "age",
+    type: "int",
+    display: {
+        type: "spinner",
+        min: 0,
+        max: 120
+    }
+}, {
+    name: "welcomeMessage",
+    type: "string",
+    display: {
+        type: "labeltext",
+        alignment: "center",
+        style: "-fx-font-size: 18px; -fx-font-weight: bold;"
+    }
+}]
+```
+
+### Fallback Mechanism
+
+AreaItems can override DisplayMetadata at the item level. When an AreaItem doesn't specify its own `displayMetadata`, it automatically uses the DisplayMetadata defined for its associated variable (`varRef`):
+
+```java
+// Automatic fallback logic
+DisplayMetadata metadata = item.displayMetadata;
+if (metadata == null && item.varRef != null) {
+    metadata = interpreter.getDisplayMetadata(screenName, item.varRef);
+}
+```
+
+This allows for:
+1. **Centralized configuration**: Define common properties once in the variable
+2. **Flexible overrides**: Customize specific items when needed
+3. **Consistency**: Default behavior promotes uniform UIs
+
+### DisplayMetadata vs AreaItem Properties
+
+Some properties can be specified in both DisplayMetadata and AreaItem. Understanding the relationship:
+
+| Property Category | DisplayMetadata | AreaItem | Notes |
+|-------------------|----------------|----------|-------|
+| **Control Type** | `itemType`, `type` | `displayMetadata.itemType` | Can be overridden per item |
+| **Validation** | `mandatory`, `pattern`, `min`, `max` | - | Defined at variable level |
+| **Text Formatting** | `caseFormat`, `alignment` | `alignment` | AreaItem alignment affects layout positioning |
+| **Styling** | `style`, `cssClass` | - | Base styling from DisplayMetadata |
+| **Colors** | - | `textColor`, `backgroundColor` | Item-specific colors |
+| **Behavior** | - | `editable`, `disabled`, `visible` | Runtime state control |
+| **UI Text** | - | `promptText`, `tooltip` | Item-specific hints |
+
+### Property Inheritance Example
+
+```javascript
+screen "UserForm" {
+    vars: [{
+        name: "email",
+        type: "string",
+        display: {
+            type: "textfield",
+            mandatory: true,
+            pattern: "^[\\w.-]+@[\\w.-]+\\.[a-z]{2,}$",
+            alignment: "left"
+        }
+    }],
+    area: [{
+        name: "formArea",
+        type: "vbox",
+        items: [{
+            // Uses all DisplayMetadata from "email" variable
+            varRef: "email",
+            sequence: 1
+        }, {
+            // Overrides DisplayMetadata - shows as passwordfield instead
+            varRef: "email",
+            sequence: 2,
+            display: {
+                type: "passwordfield"  // Override: different control type
+            },
+            promptText: "Confirm email",  // Item-specific property
+            backgroundColor: "#f0f0f0"     // Item-specific property
+        }]
+    }]
+}
+```
+
+In this example:
+- First item: Uses email's TEXTFIELD display with validation pattern
+- Second item: Overrides to PASSWORDFIELD but keeps validation, adds prompt text and color
+
+### Best Practices for DisplayMetadata
+
+1. **Define at Variable Level**: Set common display properties in variable definitions
+2. **Override Sparingly**: Only override at AreaItem level when necessary
+3. **Validation First**: Use `mandatory`, `pattern`, `min`, `max` for data integrity
+4. **Consistent Types**: Use appropriate ItemTypes for data types (SPINNER for numbers, DATEPICKER for dates)
+5. **Meaningful Patterns**: Provide clear regex patterns with validation messages
+6. **Accessibility**: Use `mandatory` flag, `tooltip`, and `promptText` for user guidance
+7. **Styling Strategy**: Define base styles in DisplayMetadata, item-specific colors in AreaItem
 
 ---
 
@@ -413,9 +636,13 @@ The old property name `relativePos` (and `relative_pos`) is still supported for 
 
 ## Related Components
 
-- **DisplayMetadata**: Defines display properties for variables (see DisplayMetadata.java)
-- **ItemType**: Enum of all available input and display item types
-- **Screen Statement**: Top-level screen definition containing areas
+- **DisplayMetadata**: Defines display properties for variables including ItemType, validation, styling, and constraints (see [DisplayMetadata Class](#displaymetadata-class) above and DisplayMetadata.java)
+- **ItemType**: Enum of all 24 available input and display item types (part of DisplayMetadata)
+- **AreaDefinition**: Container for areas within screens with AreaType and items
+- **AreaType**: Enum of 19 JavaFX container types for layouts
+- **AreaItem**: Individual items within areas with layout properties and optional DisplayMetadata override
+- **Screen Statement**: Top-level screen definition containing variables and areas
+- **Interpreter**: Parses and processes screen definitions, handles DisplayMetadata fallback logic
 
 ---
 
