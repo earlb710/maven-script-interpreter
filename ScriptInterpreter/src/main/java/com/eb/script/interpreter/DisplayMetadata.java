@@ -8,8 +8,8 @@ import java.util.List;
  * This class holds all the metadata and enum types related to JavaFX UI rendering for the screen keyword.
  */
 public class DisplayMetadata {
-    // Input item type enum
-    InputItemType itemType;
+    // Item type enum (input and display items)
+    ItemType itemType;
     // JavaFX input item type string (for compatibility)
     String type;
     // CSS class name from enum
@@ -47,79 +47,87 @@ public class DisplayMetadata {
     }
     
     /**
-     * Enum representing all supported JavaFX input item types with their CSS classes and default styles.
+     * Enum representing all supported JavaFX item types (input and display) with their CSS classes and default styles.
      */
-    public enum InputItemType {
+    public enum ItemType {
         // Text Input Controls
-        TEXTFIELD("textfield", "screen-input-textfield", 
+        TEXTFIELD("textfield", "screen-item-textfield", 
                   "-fx-padding: 5 10 5 10; -fx-border-color: #cccccc; -fx-border-width: 1; -fx-border-radius: 3; -fx-background-radius: 3;"),
-        TEXTAREA("textarea", "screen-input-textarea",
+        TEXTAREA("textarea", "screen-item-textarea",
                  "-fx-padding: 5 10 5 10; -fx-border-color: #cccccc; -fx-border-width: 1; -fx-border-radius: 3; -fx-background-radius: 3;"),
-        PASSWORDFIELD("passwordfield", "screen-input-passwordfield",
+        PASSWORDFIELD("passwordfield", "screen-item-passwordfield",
                       "-fx-padding: 5 10 5 10; -fx-border-color: #cccccc; -fx-border-width: 1; -fx-border-radius: 3; -fx-background-radius: 3;"),
         
         // Selection Controls
-        CHECKBOX("checkbox", "screen-input-checkbox",
+        CHECKBOX("checkbox", "screen-item-checkbox",
                  "-fx-padding: 5;"),
-        RADIOBUTTON("radiobutton", "screen-input-radiobutton",
+        RADIOBUTTON("radiobutton", "screen-item-radiobutton",
                     "-fx-padding: 5;"),
-        TOGGLEBUTTON("togglebutton", "screen-input-togglebutton",
+        TOGGLEBUTTON("togglebutton", "screen-item-togglebutton",
                      "-fx-padding: 8 15 8 15; -fx-background-color: #e0e0e0; -fx-border-radius: 3; -fx-background-radius: 3;"),
-        COMBOBOX("combobox", "screen-input-combobox",
+        COMBOBOX("combobox", "screen-item-combobox",
                  "-fx-padding: 5 10 5 10; -fx-background-color: white; -fx-border-color: #cccccc; -fx-border-width: 1; -fx-border-radius: 3;"),
-        CHOICEBOX("choicebox", "screen-input-choicebox",
+        CHOICEBOX("choicebox", "screen-item-choicebox",
                   "-fx-padding: 5 10 5 10; -fx-background-color: white; -fx-border-color: #cccccc; -fx-border-width: 1;"),
-        LISTVIEW("listview", "screen-input-listview",
+        LISTVIEW("listview", "screen-item-listview",
                  "-fx-border-color: #cccccc; -fx-border-width: 1;"),
         
         // Numeric Controls
-        SPINNER("spinner", "screen-input-spinner",
+        SPINNER("spinner", "screen-item-spinner",
                 "-fx-padding: 5 10 5 10;"),
-        SLIDER("slider", "screen-input-slider",
+        SLIDER("slider", "screen-item-slider",
                "-fx-padding: 5 10 5 10;"),
         
         // Date/Time Controls
-        DATEPICKER("datepicker", "screen-input-datepicker",
+        DATEPICKER("datepicker", "screen-item-datepicker",
                    "-fx-padding: 5 10 5 10; -fx-background-color: white; -fx-border-color: #cccccc; -fx-border-width: 1; -fx-border-radius: 3;"),
         
         // Color Control
-        COLORPICKER("colorpicker", "screen-input-colorpicker",
+        COLORPICKER("colorpicker", "screen-item-colorpicker",
                     "-fx-padding: 5 10 5 10;"),
         
         // Button Controls
-        BUTTON("button", "screen-input-button",
+        BUTTON("button", "screen-item-button",
                "-fx-padding: 8 15 8 15; -fx-background-color: #4a90e2; -fx-text-fill: white; -fx-border-radius: 3; -fx-background-radius: 3; -fx-cursor: hand;"),
         
-        // Display Controls
-        LABEL("label", "screen-input-label",
+        // Display-Only Controls
+        LABEL("label", "screen-item-label",
               "-fx-padding: 2 5 2 5; -fx-font-size: 13px;"),
-        HYPERLINK("hyperlink", "screen-input-hyperlink",
+        LABELTEXT("labeltext", "screen-item-labeltext",
+                  "-fx-padding: 2 5 2 5; -fx-font-size: 13px;"),
+        TEXT("text", "screen-item-text",
+             "-fx-font-size: 13px;"),
+        HYPERLINK("hyperlink", "screen-item-hyperlink",
                   "-fx-padding: 2 5 2 5; -fx-text-fill: #4a90e2; -fx-underline: true;"),
+        SEPARATOR("separator", "screen-item-separator",
+                  "-fx-padding: 5 0 5 0;"),
         
-        // Media Controls
-        IMAGEVIEW("imageview", "screen-input-imageview",
+        // Media/Display Controls
+        IMAGEVIEW("imageview", "screen-item-imageview",
                   "-fx-fit-width: 100; -fx-fit-height: 100; -fx-preserve-ratio: true;"),
-        MEDIAVIEW("mediaview", "screen-input-mediaview",
+        MEDIAVIEW("mediaview", "screen-item-mediaview",
                   ""),
-        WEBVIEW("webview", "screen-input-webview",
+        WEBVIEW("webview", "screen-item-webview",
                 "-fx-pref-width: 800; -fx-pref-height: 600;"),
+        CHART("chart", "screen-item-chart",
+              "-fx-padding: 10;"),
         
-        // Progress Controls
-        PROGRESSBAR("progressbar", "screen-input-progressbar",
+        // Progress/Status Controls
+        PROGRESSBAR("progressbar", "screen-item-progressbar",
                     "-fx-pref-width: 200;"),
-        PROGRESSINDICATOR("progressindicator", "screen-input-progressindicator",
+        PROGRESSINDICATOR("progressindicator", "screen-item-progressindicator",
                           ""),
         
         // Custom/Other
-        CUSTOM("custom", "screen-input-custom", "");
+        CUSTOM("custom", "screen-item-custom", "");
         
-        public static final String CSS_FILE = "/css/screen-inputs.css";
+        public static final String CSS_FILE = "/css/screen-items.css";
         
         private final String typeName;
         private final String cssClass;
         private final String defaultStyle;
         
-        InputItemType(String typeName, String cssClass, String defaultStyle) {
+        ItemType(String typeName, String cssClass, String defaultStyle) {
             this.typeName = typeName;
             this.cssClass = cssClass;
             this.defaultStyle = defaultStyle;
@@ -138,13 +146,13 @@ public class DisplayMetadata {
         }
         
         /**
-         * Get InputItemType from string, case-insensitive
+         * Get ItemType from string, case-insensitive
          */
-        public static InputItemType fromString(String type) {
+        public static ItemType fromString(String type) {
             if (type == null) return TEXTFIELD;
             
             String lowerType = type.toLowerCase().trim();
-            for (InputItemType it : values()) {
+            for (ItemType it : values()) {
                 if (it.typeName.equals(lowerType)) {
                     return it;
                 }

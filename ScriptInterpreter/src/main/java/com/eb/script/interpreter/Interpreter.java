@@ -48,7 +48,7 @@ import com.eb.script.interpreter.statement.UseConnectionStatement;
 import com.eb.script.interpreter.statement.WhileStatement;
 import com.eb.script.interpreter.statement.ScreenStatement;
 import com.eb.script.token.ebs.EbsTokenType;
-import com.eb.script.interpreter.DisplayMetadata.InputItemType;
+import com.eb.script.interpreter.DisplayMetadata.ItemType;
 import com.eb.script.interpreter.AreaDefinition.AreaType;
 import com.eb.script.interpreter.AreaDefinition.AreaItem;
 import com.eb.ui.cli.ScriptArea;
@@ -1576,9 +1576,9 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         // Extract display type and convert to enum
         if (displayDef.containsKey("type")) {
             metadata.type = String.valueOf(displayDef.get("type")).toLowerCase();
-            metadata.itemType = InputItemType.fromString(metadata.type);
+            metadata.itemType = ItemType.fromString(metadata.type);
         } else {
-            metadata.itemType = InputItemType.TEXTFIELD; // Default to textfield
+            metadata.itemType = ItemType.TEXTFIELD; // Default to textfield
             metadata.type = "textfield";
         }
         
