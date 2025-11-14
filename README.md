@@ -95,6 +95,46 @@ use db {
 close connection db;
 ```
 
+### UI Screens
+
+Create interactive UI windows with thread-safe variables:
+
+```javascript
+// Define a screen with variables
+screen myWindow = {
+    "title": "My Application",
+    "width": 800,
+    "height": 600,
+    "vars": [
+        {
+            "name": "counter",
+            "type": "int",
+            "default": 0
+        },
+        {
+            "name": "message",
+            "type": "string",
+            "default": "Hello"
+        }
+    ]
+};
+
+// Show the screen
+screen myWindow show;
+
+// Hide the screen
+screen myWindow hide;
+
+// Show it again
+screen myWindow show;
+```
+
+**Screen Features:**
+- Each screen runs in its own dedicated thread
+- The thread automatically stops when the screen is closed
+- All screen variables are thread-safe (using ConcurrentHashMap)
+- Multiple screens can be created and managed independently
+
 ### Console Commands
 
 When using the interactive console:
