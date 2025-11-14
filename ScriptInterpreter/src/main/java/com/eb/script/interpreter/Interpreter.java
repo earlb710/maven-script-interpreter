@@ -94,6 +94,43 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         return connectionStack.peek();
     }
 
+    /**
+     * Cleanup all screens and threads. Should be called when the application/console is closing.
+     * This ensures all screen windows are closed and their threads are properly terminated.
+     */
+    public void cleanup() {
+        // Close all screens on JavaFX thread
+        Platform.runLater(() -> {
+            for (Map.Entry<String, Stage> entry : screens.entrySet()) {
+                try {
+                    Stage stage = entry.getValue();
+                    if (stage != null) {
+                        stage.close();
+                    }
+                } catch (Exception e) {
+                    // Ignore errors during cleanup
+                }
+            }
+        });
+
+        // Interrupt all screen threads
+        for (Map.Entry<String, Thread> entry : screenThreads.entrySet()) {
+            try {
+                Thread thread = entry.getValue();
+                if (thread != null && thread.isAlive()) {
+                    thread.interrupt();
+                }
+            } catch (Exception e) {
+                // Ignore errors during cleanup
+            }
+        }
+
+        // Clear all maps
+        screens.clear();
+        screenThreads.clear();
+        screenVars.clear();
+    }
+
     // --- Call stack support ---
     // Each frame is a Map<String,Object> with keys like: name, kind, line.
     // We use fully-qualified types to avoid changing imports.
@@ -101,6 +138,9 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         environment = runtime.environment;
         output = environment.getOutputArea();
         debug = environment.getDebugger();
+        
+        // Register this interpreter in the environment for cleanup
+        environment.setCurrentInterpreter(this);
 
         // Set the source directory as safe for file operations during this execution
         if (runtime.sourcePath != null) {

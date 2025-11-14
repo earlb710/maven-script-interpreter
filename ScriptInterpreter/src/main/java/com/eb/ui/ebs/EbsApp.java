@@ -46,6 +46,9 @@ public class EbsApp {
             var res = confirm.showAndWait();
             if (res.isEmpty() || res.get() == ButtonType.CANCEL) {
                 evt.consume(); // cancel close
+            } else {
+                // User confirmed exit - cleanup all screens and threads
+                cleanupScreens();
             }
         });
         handler = new EbsConsoleHandler(stage, ctx);
@@ -83,9 +86,24 @@ public class EbsApp {
     }
 
     /**
+     * Cleanup all screens and threads when the application is closing
+     */
+    private void cleanupScreens() {
+        try {
+            Object interpreter = ctx.environment.getCurrentInterpreter();
+            if (interpreter instanceof com.eb.script.interpreter.Interpreter) {
+                ((com.eb.script.interpreter.Interpreter) interpreter).cleanup();
+            }
+        } catch (Exception e) {
+            // Ignore cleanup errors
+        }
+    }
+
+    /**
      * If you hook streams, restore them on exit if you wish.
      */
     public void stop() {
+        cleanupScreens();
     }
 
     public void submit(String... lines) throws Exception {
