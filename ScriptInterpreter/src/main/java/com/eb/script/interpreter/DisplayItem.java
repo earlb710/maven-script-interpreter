@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Container class for screen display metadata, input item types, area types, and related definitions.
+ * Container class for screen display item metadata, input item types, area types, and related definitions.
  * This class holds all the metadata and enum types related to JavaFX UI rendering for the screen keyword.
  */
-public class DisplayMetadata {
+public class DisplayItem {
     // Item type enum (input and display items)
     ItemType itemType;
     // JavaFX input item type string (for compatibility)
@@ -30,10 +30,12 @@ public class DisplayMetadata {
     String alignment;
     // Regex pattern for validation (useful for text inputs)
     String pattern;
+    // Placeholder text for text inputs
+    String promptText;
     
     @Override
     public String toString() {
-        return "DisplayMetadata{" +
+        return "DisplayItem{" +
                "itemType=" + itemType +
                ", cssClass='" + cssClass + '\'' +
                ", mandatory=" + mandatory +
@@ -43,6 +45,7 @@ public class DisplayMetadata {
                ", style='" + style + '\'' +
                ", alignment='" + alignment + '\'' +
                ", pattern='" + pattern + '\'' +
+               ", promptText='" + promptText + '\'' +
                '}';
     }
     

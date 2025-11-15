@@ -156,7 +156,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         context.getScreenThreads().clear();
         context.getScreenVars().clear();
         context.getScreenAreas().clear();
-        context.getDisplayMetadata().clear();
+        context.getDisplayItem().clear();
         context.getScreensBeingCreated().clear();
     }
 

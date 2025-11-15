@@ -11,59 +11,62 @@ screen textInputScreen = {
         {
             "name": "singleLineText",
             "type": "string",
-            "default": "Single line text field",
-            "display": {"type": "textfield", "mandatory": true}
+            "default": "",
+            "display": {"type": "textfield", "mandatory": true, "promptText": "Enter single line text"}
         },
         {
             "name": "email",
             "type": "string",
-            "default": "user@example.com",
+            "default": "",
             "display": {
                 "type": "textfield", 
                 "mandatory": true,
-                "pattern": "^[\\w.-]+@[\\w.-]+\\.\\w+$"
+                "pattern": "^[\\w.-]+@[\\w.-]+\\.\\w+$",
+                "promptText": "Enter email address"
             }
         },
         {
             "name": "multiLineText",
             "type": "string",
-            "default": "This is a multi-line\ntextarea control.\nYou can enter multiple lines of text here.",
-            "display": {"type": "textarea"}
+            "default": "",
+            "display": {"type": "textarea", "promptText": "Enter multiple lines of text here"}
         },
         {
             "name": "description",
             "type": "string",
-            "default": "Enter a detailed description...",
-            "display": {"type": "textarea", "mandatory": false}
+            "default": "",
+            "display": {"type": "textarea", "mandatory": false, "promptText": "Enter a detailed description"}
         },
         {
             "name": "password",
             "type": "string",
-            "default": "secret123",
-            "display": {"type": "passwordfield", "mandatory": true}
+            "default": "",
+            "display": {"type": "passwordfield", "mandatory": true, "promptText": "Enter password"}
         },
         {
             "name": "confirmPassword",
             "type": "string",
             "default": "",
-            "display": {"type": "passwordfield", "mandatory": true}
+            "display": {"type": "passwordfield", "mandatory": true, "promptText": "Confirm password"}
         },
         {
             "name": "upperCaseText",
             "type": "string",
-            "default": "text will be uppercase",
+            "default": "",
             "display": {
                 "type": "textfield",
-                "caseFormat": "upper"
+                "caseFormat": "upper",
+                "promptText": "Enter text (will be uppercase)"
             }
         },
         {
             "name": "lowerCaseText",
             "type": "string",
-            "default": "TEXT WILL BE LOWERCASE",
+            "default": "",
             "display": {
                 "type": "textfield",
-                "caseFormat": "lower"
+                "caseFormat": "lower",
+                "promptText": "Enter text (will be lowercase)"
             }
         }
     ]

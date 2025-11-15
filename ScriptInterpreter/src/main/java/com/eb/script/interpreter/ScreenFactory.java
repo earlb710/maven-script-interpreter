@@ -64,12 +64,12 @@ public class ScreenFactory {
      * @param width The window width
      * @param height The window height
      * @param areas List of AreaDefinitions containing containers and items
-     * @param metadataProvider Function to retrieve DisplayMetadata for variables (screenName, varName) -> metadata
+     * @param metadataProvider Function to retrieve DisplayItem for variables (screenName, varName) -> metadata
      * @return A Stage representing the complete window
      */
     public static Stage createScreen(String screenName, String title, double width, double height,
                                       List<AreaDefinition> areas,
-                                      BiFunction<String, String, DisplayMetadata> metadataProvider) {
+                                      BiFunction<String, String, DisplayItem> metadataProvider) {
         Stage stage = new Stage();
         stage.setTitle(title);
 
@@ -105,7 +105,7 @@ public class ScreenFactory {
      * Creates a container from AreaDefinition and adds all items to it.
      */
     private static Region createAreaWithItems(AreaDefinition areaDef, String screenName,
-                                               BiFunction<String, String, DisplayMetadata> metadataProvider) {
+                                               BiFunction<String, String, DisplayItem> metadataProvider) {
         // Create the container using AreaContainerFactory
         Region container = AreaContainerFactory.createContainer(areaDef);
 
@@ -118,7 +118,7 @@ public class ScreenFactory {
             // Add items to container based on container type
             for (AreaItem item : sortedItems) {
                 // Get metadata for the item
-                DisplayMetadata metadata = item.displayMetadata;
+                DisplayItem metadata = item.displayMetadata;
                 if (metadata == null && item.varRef != null && metadataProvider != null) {
                     metadata = metadataProvider.apply(screenName, item.varRef);
                 }
@@ -501,7 +501,7 @@ public class ScreenFactory {
      */
     public static void createAndShowScreen(String screenName, String title, double width, double height,
                                             List<AreaDefinition> areas,
-                                            BiFunction<String, String, DisplayMetadata> metadataProvider,
+                                            BiFunction<String, String, DisplayItem> metadataProvider,
                                             boolean maximize) {
         Platform.runLater(() -> {
             Stage stage = createScreen(screenName, title, width, height, areas, metadataProvider);
@@ -549,7 +549,7 @@ public class ScreenFactory {
         double height = getNumberValue(screenDef, "height", 600.0);
 
         // Parse variables and build metadata map
-        Map<String, DisplayMetadata> metadataMap = new HashMap<>();
+        Map<String, DisplayItem> metadataMap = new HashMap<>();
         if (screenDef.containsKey("vars")) {
             Object varsObj = screenDef.get("vars");
             if (varsObj instanceof List) {
@@ -565,7 +565,7 @@ public class ScreenFactory {
                             if (displayObj instanceof Map) {
                                 @SuppressWarnings("unchecked")
                                 Map<String, Object> displayDef = (Map<String, Object>) displayObj;
-                                DisplayMetadata metadata = parseDisplayMetadata(displayDef, screenName);
+                                DisplayItem metadata = parseDisplayItem(displayDef, screenName);
                                 metadataMap.put(varName, metadata);
                             }
                         }
@@ -593,7 +593,7 @@ public class ScreenFactory {
         }
 
         // Create metadata provider from map
-        BiFunction<String, String, DisplayMetadata> metadataProvider = 
+        BiFunction<String, String, DisplayItem> metadataProvider = 
             (sName, varName) -> metadataMap.get(varName);
 
         return createScreen(screenName, title, width, height, areas, metadataProvider);
@@ -687,12 +687,20 @@ public class ScreenFactory {
             if (displayObj instanceof Map) {
                 @SuppressWarnings("unchecked")
                 Map<String, Object> displayDef = (Map<String, Object>) displayObj;
-                item.displayMetadata = parseDisplayMetadata(displayDef, screenName);
+                item.displayMetadata = parseDisplayItem(displayDef, screenName);
             }
         }
         
         // UI properties
-        item.promptText = getStringValue(itemDef, "promptText", getStringValue(itemDef, "prompt_text", null));
+        // promptText now goes into displayMetadata
+        String promptText = getStringValue(itemDef, "promptText", getStringValue(itemDef, "prompt_text", null));
+        if (promptText != null) {
+            // If displayMetadata doesn't exist yet, create it
+            if (item.displayMetadata == null) {
+                item.displayMetadata = new DisplayItem();
+            }
+            item.displayMetadata.promptText = promptText;
+        }
         item.tooltip = getStringValue(itemDef, "tooltip", null);
         item.editable = getBooleanValue(itemDef, "editable", null);
         item.disabled = getBooleanValue(itemDef, "disabled", null);
@@ -719,15 +727,15 @@ public class ScreenFactory {
     }
 
     /**
-     * Parses DisplayMetadata from a Map.
+     * Parses DisplayItem from a Map.
      */
-    private static DisplayMetadata parseDisplayMetadata(Map<String, Object> displayDef, String screenName) {
-        DisplayMetadata metadata = new DisplayMetadata();
+    private static DisplayItem parseDisplayItem(Map<String, Object> displayDef, String screenName) {
+        DisplayItem metadata = new DisplayItem();
         
         // Extract display type and convert to enum
         String typeStr = getStringValue(displayDef, "type", "textfield");
         metadata.type = typeStr.toLowerCase();
-        metadata.itemType = DisplayMetadata.ItemType.fromString(metadata.type);
+        metadata.itemType = DisplayItem.ItemType.fromString(metadata.type);
         
         // Set CSS class from enum
         metadata.cssClass = metadata.itemType.getCssClass();
@@ -873,7 +881,7 @@ public class ScreenFactory {
      * @param displayDef The display metadata to validate
      * @throws IllegalArgumentException if validation fails
      */
-    public static void validateDisplayMetadata(Map<String, Object> displayDef) {
+    public static void validateDisplayItem(Map<String, Object> displayDef) {
         if (displayMetadataSchema == null) {
             System.err.println("Warning: Display metadata schema not loaded, skipping validation");
             return;

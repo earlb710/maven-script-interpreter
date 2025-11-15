@@ -12,55 +12,55 @@ screen selectionScreen = {
             "name": "agreeToTerms",
             "type": "bool",
             "default": false,
-            "display": {"type": "checkbox", "mandatory": true}
+            "display": {"type": "checkbox", "mandatory": true, "promptText": "I agree to terms and conditions"}
         },
         {
             "name": "enableNotifications",
             "type": "bool",
             "default": true,
-            "display": {"type": "checkbox"}
+            "display": {"type": "checkbox", "promptText": "Enable notifications"}
         },
         {
             "name": "subscribe",
             "type": "bool",
             "default": false,
-            "display": {"type": "checkbox"}
+            "display": {"type": "checkbox", "promptText": "Subscribe to newsletter"}
         },
         {
             "name": "theme",
             "type": "string",
             "default": "light",
-            "display": {"type": "radiobutton"}
+            "display": {"type": "radiobutton", "promptText": "Select theme"}
         },
         {
             "name": "darkMode",
             "type": "bool",
             "default": false,
-            "display": {"type": "togglebutton"}
+            "display": {"type": "togglebutton", "promptText": "Dark mode"}
         },
         {
             "name": "country",
             "type": "string",
             "default": "USA",
-            "display": {"type": "combobox"}
+            "display": {"type": "combobox", "promptText": "Select country"}
         },
         {
             "name": "language",
             "type": "string",
             "default": "English",
-            "display": {"type": "choicebox"}
+            "display": {"type": "choicebox", "promptText": "Select language"}
         },
         {
             "name": "categories",
             "type": "string",
             "default": "[]",
-            "display": {"type": "listview"}
+            "display": {"type": "listview", "promptText": "Select categories"}
         },
         {
             "name": "selectedItems",
             "type": "string",
             "default": "[\"Item1\", \"Item2\"]",
-            "display": {"type": "textarea"}
+            "display": {"type": "textarea", "promptText": "Selected items (JSON array)"}
         }
     ]
 };

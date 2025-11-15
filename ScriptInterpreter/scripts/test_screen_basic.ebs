@@ -12,20 +12,20 @@ screen basicScreen = {
         {
             "name": "userName",
             "type": "string",
-            "default": "Guest User",
-            "display": {"type": "textfield", "mandatory": true}
+            "default": "",
+            "display": {"type": "textfield", "mandatory": true, "promptText": "Enter user name"}
         },
         {
             "name": "counter",
             "type": "int",
             "default": 0,
-            "display": {"type": "textfield"}
+            "display": {"type": "textfield", "promptText": "Enter counter value"}
         },
         {
             "name": "message",
             "type": "string",
-            "default": "Welcome to the EBS Screen Test!",
-            "display": {"type": "textarea"}
+            "default": "",
+            "display": {"type": "textarea", "promptText": "Enter your message here"}
         }
     ]
 };

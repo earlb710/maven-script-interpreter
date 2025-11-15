@@ -1,7 +1,7 @@
 package com.eb.script.interpreter;
 
 import com.eb.script.interpreter.AreaDefinition.AreaItem;
-import com.eb.script.interpreter.DisplayMetadata.ItemType;
+import com.eb.script.interpreter.DisplayItem.ItemType;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.Region;
@@ -15,21 +15,21 @@ import javafx.scene.chart.NumberAxis;
 
 /**
  * Factory class for creating JavaFX UI controls from AreaItem definitions.
- * This factory creates JavaFX controls based on the DisplayMetadata and applies
+ * This factory creates JavaFX controls based on the DisplayItem and applies
  * display properties only (no layout properties).
  */
 public class AreaItemFactory {
 
     /**
-     * Creates a JavaFX control based on the provided AreaItem and DisplayMetadata.
+     * Creates a JavaFX control based on the provided AreaItem and DisplayItem.
      * Only display properties are applied (promptText, editable, disabled, visible, tooltip, colors, style).
      * Layout properties should be applied by the caller after creation.
      *
      * @param item The AreaItem containing display properties
-     * @param metadata The DisplayMetadata containing the control type and styling
+     * @param metadata The DisplayItem containing the control type and styling
      * @return A JavaFX Node representing the control
      */
-    public static Node createItem(AreaItem item, DisplayMetadata metadata) {
+    public static Node createItem(AreaItem item, DisplayItem metadata) {
         if (metadata == null) {
             // If no metadata provided, create a simple Label as fallback
             Label label = new Label("No metadata");
@@ -50,8 +50,8 @@ public class AreaItemFactory {
         // Apply metadata-specific properties
         applyMetadataProperties(control, metadata);
         
-        // Apply item-specific display properties
-        applyItemSpecificProperties(control, item);
+        // Apply item-specific display properties (including promptText from metadata)
+        applyItemSpecificProperties(control, item, metadata);
         
         return control;
     }
@@ -59,7 +59,7 @@ public class AreaItemFactory {
     /**
      * Creates the appropriate JavaFX control based on the ItemType.
      */
-    private static Node createControlByType(ItemType itemType, DisplayMetadata metadata) {
+    private static Node createControlByType(ItemType itemType, DisplayItem metadata) {
         switch (itemType) {
             // Text Input Controls
             case TEXTFIELD:
@@ -167,9 +167,9 @@ public class AreaItemFactory {
     }
 
     /**
-     * Applies properties from DisplayMetadata to the control.
+     * Applies properties from DisplayItem to the control.
      */
-    private static void applyMetadataProperties(Node control, DisplayMetadata metadata) {
+    private static void applyMetadataProperties(Node control, DisplayItem metadata) {
         // Apply CSS class from metadata
         if (metadata.cssClass != null && !metadata.cssClass.isEmpty()) {
             control.getStyleClass().add(metadata.cssClass);
@@ -192,21 +192,21 @@ public class AreaItemFactory {
     /**
      * Applies item-specific display properties to the control.
      */
-    private static void applyItemSpecificProperties(Node control, AreaItem item) {
-        // Apply prompt text or text content based on control type
-        if (item.promptText != null && !item.promptText.isEmpty()) {
+    private static void applyItemSpecificProperties(Node control, AreaItem item, DisplayItem metadata) {
+        // Apply prompt text or text content based on control type (from DisplayItem)
+        if (metadata != null && metadata.promptText != null && !metadata.promptText.isEmpty()) {
             if (control instanceof TextField) {
-                ((TextField) control).setPromptText(item.promptText);
+                ((TextField) control).setPromptText(metadata.promptText);
             } else if (control instanceof TextArea) {
-                ((TextArea) control).setPromptText(item.promptText);
+                ((TextArea) control).setPromptText(metadata.promptText);
             } else if (control instanceof ComboBox) {
-                ((ComboBox<?>) control).setPromptText(item.promptText);
+                ((ComboBox<?>) control).setPromptText(metadata.promptText);
             } else if (control instanceof Label) {
                 // For labels, use promptText as the label's text content
-                ((Label) control).setText(item.promptText);
+                ((Label) control).setText(metadata.promptText);
             } else if (control instanceof Button) {
                 // For buttons, use promptText as the button's text
-                ((Button) control).setText(item.promptText);
+                ((Button) control).setText(metadata.promptText);
             }
         }
 
