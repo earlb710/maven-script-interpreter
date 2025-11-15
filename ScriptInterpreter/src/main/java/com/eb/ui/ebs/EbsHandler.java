@@ -67,7 +67,7 @@ public class EbsHandler implements Handler {
                 line = line.trim();
                 String cmd = line.toLowerCase();
                 List<EbsToken> tokens = new EbsLexer().tokenize(cmd);
-                Parser.parse(ctx, cmd, tokens);
+                Parser.parse(ctx, line, tokens);
                 if (env.isEchoOn() && ctx.statements.length == 1) {
                     EbsStyled.appendStyledText(output, "> " + line + "\n");
                 }
