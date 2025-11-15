@@ -228,6 +228,12 @@ The schemas support both naming conventions:
 
 Both are accepted by the ScreenFactory parser.
 
+**Case-Insensitive Key Lookup**: When screen definitions are parsed from JSON, the EBS JSON parser uses case-insensitive mode, which converts all keys to lowercase. This means:
+- `varRef`, `VarRef`, `varref` → all normalized to `"varref"`
+- `promptText`, `PromptText`, `prompttext` → all normalized to `"prompttext"`
+- String values preserve their original casing
+- The ScreenFactory parser looks up properties using lowercase keys
+
 ## Notes
 
 - All schemas follow JSON Schema Draft 07

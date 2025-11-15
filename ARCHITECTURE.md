@@ -510,42 +510,54 @@ JSON Operations:
         - Direct JSON literal in source
 ```
 
-**Important: JSON Key and Value Normalization**
+**Important: JSON Case-Insensitive Key Lookup**
 
-The EBS JSON parser automatically converts all keys and values to lowercase during parsing. This behavior affects screen definitions, display metadata, and any JSON structures used in the language.
+The EBS JSON parser supports case-insensitive key lookup for screen definitions through a special parsing mode. This feature enables flexible JSON key naming while maintaining backward compatibility.
 
-**Key Normalization Examples:**
+**How It Works:**
+
+The `Json.parse()` method accepts an optional `lowerCaseKey` parameter:
+- `Json.parse(input)` - Default mode: preserves original key casing
+- `Json.parse(input, true)` - Case-insensitive mode: converts all keys to lowercase
+
+**When parsing screen definitions**, the parser automatically uses case-insensitive mode (`lowerCaseKey=true`) to allow flexible property naming.
+
+**Key Normalization Example:**
 ```javascript
-// Input JSON:
+// Input JSON (for screen definitions):
 {
     "promptText": "Click Me",
     "onClick": "print 'Hello';",
     "varRef": "myVariable"
 }
 
-// Parsed as:
+// Parsed with lowerCaseKey=true (screen definitions):
 {
-    "prompttext": "click me",
-    "onclick": "print 'hello';",
-    "varref": "myvariable"
+    "prompttext": "Click Me",         // Key lowercased, value preserved
+    "onclick": "print 'Hello';",      // Key lowercased, value preserved
+    "varref": "myVariable"            // Key lowercased, value preserved
 }
 ```
 
+**Important Notes:**
+- **Keys only**: Only JSON object keys are converted to lowercase; string values remain unchanged
+- **Screen-specific**: Case-insensitive parsing is used specifically for screen definitions
+- **Regular JSON**: Other JSON parsing (via `parseJson()` builtin) uses default case-sensitive mode
+
 **Affected Areas:**
-- **Screen Definitions**: All keys in screen JSON (varRef, promptText, onClick, etc.) are lowercased
-- **Display Metadata**: Properties like promptText, onClick become prompttext, onclick
-- **Variable References**: varRef becomes varref
-- **String Values**: All string values are also lowercased ("Click Me" → "click me")
+- **Screen Definitions**: Screen configuration JSON uses case-insensitive keys
+  - `varRef`, `VarRef`, or `varref` all map to `"varref"`
+  - `promptText`, `PromptText`, or `prompttext` all map to `"prompttext"`
+  - `onClick`, `OnClick`, or `onclick` all map to `"onclick"`
+- **Display Metadata**: All display property keys are normalized to lowercase
+- **Area/Item Definitions**: Container and UI control properties use lowercase keys
 
 **Code Implementation:**
-The parser implementation in `InterpreterScreen.java` handles this by checking for both camelCase and lowercase versions of keys:
-- Checks for `promptText` OR `prompttext`
-- Checks for `onClick` OR `onclick`  
-- Checks for `varRef` OR `varref`
+The parser implementation in `InterpreterScreen.java` handles this by checking for lowercase versions of keys since the JSON parser has already normalized them:
+- Looks up properties using lowercase names: `prompttext`, `onclick`, `varref`
+- Maintains backward compatibility by checking both camelCase and lowercase variants
 
-This dual-check approach ensures compatibility with both original camelCase specifications and the actual lowercase keys produced by the parser.
-
-**Developer Note:** When adding new JSON-based features, always implement fallback checks for lowercase versions of property names to ensure the parser works correctly.
+**Developer Note:** When adding new JSON-based screen features, always use lowercase property names in lookups since the parser normalizes all keys. For general JSON usage outside of screens, keys preserve their original casing.
 
 ### 9. UI Console Interaction
 
