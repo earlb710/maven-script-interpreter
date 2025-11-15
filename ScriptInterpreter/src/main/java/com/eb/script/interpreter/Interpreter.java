@@ -63,11 +63,13 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     private final InterpreterContext context;
     private InterpreterScreen screenInterpreter;
     private InterpreterDatabase databaseInterpreter;
+    private InterpreterArray arrayInterpreter;
 
     public Interpreter() {
         this.context = new InterpreterContext();
         this.screenInterpreter = new InterpreterScreen(context, this);
         this.databaseInterpreter = new InterpreterDatabase(context, this);
+        this.arrayInterpreter = new InterpreterArray(context, this);
     }
 
     public InterpreterContext getContext() {
@@ -281,371 +283,45 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         }
     }
 
-    @Override
+        @Override
     public ArrayDef visitArrayLiteralExpression(ArrayLiteralExpression expr) throws InterpreterError {
-        // Find predefined target array for assignment
-        ArrayDef target = null;
-
-        if (expr.array instanceof VariableExpression var) {
-            Object v = environment().get(var.name);
-            if (v instanceof ArrayDef av) {
-                target = av;
-            } else {
-                throw error(expr.line, "'" + var.name + "' is not an array.");
-            }
-
-        } else if (expr.array instanceof IndexExpression idx) {
-            // Evaluate container and indices to get to the leaf slot
-            Object container = evaluate(idx.target);
-
-            // Evaluate indices
-            int[] indices = new int[idx.indices.length];
-            for (int k = 0; k < indices.length; k++) {
-                indices[k] = toIndexInt(evaluate(idx.indices[k]), expr.line, k + 1);
-            }
-
-            // Traverse to final slot's parent
-            Object current = container;
-            for (int d = 0; d < indices.length - 1; d++) {
-                current = getIndexed(current, indices[d], expr.line);
-            }
-
-            // Fetch/create the child array at the final index
-            Object leaf = getIndexed(current, indices[indices.length - 1], expr.line);
-            if (leaf == null) {
-                if (current instanceof ArrayDef parent) {
-                    int childLen = (expr.elements == null) ? 0 : expr.elements.length;
-                    ArrayDef child = newChildArrayForLiteral(parent, childLen);
-                    setIndexed(current, indices[indices.length - 1], child, expr.line);
-                    target = child;
-                } else {
-                    throw error(expr.line, "Target at indexed position is null and not an array container.");
-                }
-            } else if (leaf instanceof ArrayDef av) {
-                target = av;
-            } else {
-                throw error(expr.line, "Target at indexed position is not an array.");
-            }
-
-        } else {
-            target = new ArrayDynamic(DataType.STRING);
-            //throw error(expr.line, "Array literal must assign to a predefined array.");
-        }
-
-        // Recursively copy content, converting leaf strings and expanding as needed
-        assignLiteralToArray(target, expr, expr.line);
-
-        // Return the target for chaining if needed
-        return target;
+        return arrayInterpreter.visitArrayLiteralExpression(expr);
     }
 
-    /**
-     * Create a child ArrayDef under a given parent slot. If the parent is
-     * fixed, create a fixed child sized exactly to childLen (no growth allowed
-     * later). If the parent is dynamic, create a dynamic child and expand to
-     * childLen.
-     */
-    private ArrayDef newChildArrayForLiteral(ArrayDef parent, int childLen) {
-        DataType elemType = parent.getDataType();
 
-        if (parent.isFixed()) {
-            // Create a fixed child sized to the nested literal length.
-            // No expand calls for fixed children; overflow will be handled by the assigner.
-            if (elemType == DataType.BYTE) {
-                return new ArrayFixedByte(Math.max(0, childLen));
-            } else {
-                return new ArrayFixed(elemType, Math.max(0, childLen));
-            }
-        } else {
-            // Dynamic child can grow
-            ArrayDynamic child = new ArrayDynamic(elemType);
-            if (childLen > 0) {
-                child.expandArray(childLen);
-            }
-            return child;
-        }
-    }
+    
 
-    /**
-     * Recursively assign a (possibly nested) literal array into a predefined
-     * ArrayDef, converting leaf string values to the array's DataType and
-     * expanding only dynamic arrays. Growth of fixed arrays (parent or child)
-     * is forbidden: overflow -> error.
-     */
-    private void assignLiteralToArray(ArrayDef target, ArrayLiteralExpression literal, int line) throws InterpreterError {
-        if (target == null) {
-            throw error(line, "Target array is null.");
-        }
+    
 
-        final int literalLen = (literal.elements == null) ? 0 : literal.elements.length;
-
-        // Enforce capacity rules at the parent level
-        Integer parentLen = target.size();   // may be null for dynamic
-        if (target.isFixed()) {
-            // For fixed arrays: do NOT grow; throw on overflow
-            if (parentLen != null && literalLen > parentLen) {
-                throw error(line, "Array literal length (" + literalLen + ") exceeds fixed array length (" + parentLen + ").");
-            }
-            // No expandArray() for fixed parents
-        } else {
-            // Dynamic arrays may grow to fit
-            int current = (parentLen == null ? 0 : parentLen);
-            if (literalLen > current) {
-                target.expandArray(literalLen);
-                parentLen = literalLen;
-            }
-        }
-
-        final DataType elemType = target.getDataType();
-
-        for (int i = 0; i < literalLen; i++) {
-            com.eb.script.interpreter.expression.Expression e = literal.elements[i];
-
-            if (e instanceof ArrayLiteralExpression nested) {
-                // Ensure child array exists at index i
-                Object slot = target.get(i);
-                ArrayDef child;
-
-                if (slot == null) {
-                    // Create a new child sized to nested length. If parent is fixed, child is fixed.
-                    int childLen = (nested.elements == null) ? 0 : nested.elements.length;
-                    child = newChildArrayForLiteral(target, childLen);
-                    target.set(i, child);
-                } else if (slot instanceof ArrayDef existingChild) {
-                    child = existingChild;
-                    int childLen = (nested.elements == null) ? 0 : nested.elements.length;
-
-                    if (child.isFixed()) {
-                        // FORBID growing fixed children; throw on overflow
-                        Integer cl = child.size();
-                        if (cl != null && childLen > cl) {
-                            throw error(line, "Nested array literal length (" + childLen
-                                    + ") exceeds fixed child length (" + cl + ") at index " + i + ".");
-                        }
-                        // do not expand fixed child
-                    } else {
-                        // Dynamic child: grow if required
-                        Integer cl = child.size();
-                        int current = (cl == null ? 0 : cl);
-                        if (childLen > current) {
-                            child.expandArray(childLen);
-                        }
-                    }
-                } else {
-                    throw error(line, "Target at index " + i + " is not an array, but literal has a nested array.");
-                }
-
-                // Recurse into child
-                assignLiteralToArray(child, nested, line);
-
-            } else {
-                // Leaf: evaluate to string, convert to DataType, assign
-                Object raw = evaluate(e);                 // grammar emits strings; be defensive anyway
-                if (!(raw instanceof String)) {
-                    raw = (raw == null ? null : raw.toString());
-                }
-
-                Object converted = (raw == null) ? null : elemType.convertValue(raw);
-                // For fixed arrays we already ensured i < capacity; for dynamic arrays we expanded above
-                target.set(i, converted);
-            }
-        }
-    }
-
-    @Override
+        @Override
     public Object visitArrayInitExpression(ArrayExpression expr) throws InterpreterError {
-        int dimCount = expr.dimensions.length;
-        if (dimCount == 0) {
-            throw error(expr.line, "Array declaration requires at least one dimension.");
-        }
-        Integer[] dims = new Integer[dimCount];
-        for (int i = 0; i < dimCount; i++) {
-            Expression ed = expr.dimensions[i];
-            dims[i] = (ed == null) ? null : toNonNegativeInt(expr.line, evaluate(ed), i + 1);
-        }
-        ArrayDef array = createEmptyArray(expr.dataType, dims, 0);
-        if (expr.initializer instanceof ArrayLiteralExpression lit) {
-            int idx = 0;
-            for (com.eb.script.interpreter.expression.Expression e : lit.elements) {
-                array.set(idx++, evaluate(e));
-            }
-        }
-        return array;
+        return arrayInterpreter.visitArrayInitExpression(expr);
     }
 
-    private String getTargetDescription(Object target) {
-        if (target instanceof ArrayDef array) {
-            return "Array[" + array.size() + "]:" + array.getDataType();
-        } else if (target instanceof List array) {
-            return "List[" + array.size() + "]";
-        } else if (target instanceof Object[] array) {
-            return "List[" + array.length + "]";
-        } else {
-            return "(unknown)";
-        }
-    }
 
-    @Override
+    
+
+        @Override
     public Object visitIndexExpression(IndexExpression expr) throws InterpreterError {
-        Object target = evaluate(expr.target);
-
-        environment().pushCallStack(expr.line, StatementKind.EXPRESSION, "IndexExpression [%1]", target.getClass().getSimpleName());
-        try {
-            if (expr.indices == null || expr.indices.length == 0) {
-                throw error(expr.line, "Index expression requires at least one index.");
-            }
-
-            // Evaluate index values once
-            int[] idx = new int[expr.indices.length];
-            for (int k = 0; k < idx.length; k++) {
-                Object v = evaluate(expr.indices[k]);
-                idx[k] = toIndexInt(v, expr.line, k + 1);
-            }
-
-            // Walk nested lists according to idx[]
-            Object current = target;
-            for (int d = 0; d < idx.length; d++) {
-                int i = idx[d];
-
-                if (current instanceof Object[] array) {
-                    checkBounds(expr.line, i, array.length);
-                    current = array[i];
-                } else if (current instanceof List<?> list) {
-                    checkBounds(expr.line, i, list.size());
-                    current = list.get(i);
-                } else if (current instanceof ArrayDef list) {
-                    checkBounds(expr.line, i, list.size());
-                    current = list.get(i);
-                } else {
-                    String kind = (current == null) ? "null" : current.getClass().getSimpleName();
-                    throw error(expr.line, "Cannot index into type " + kind + " for " + getTargetDescription(target));
-                }
-            }
-            return current;
-        } finally {
-            environment().popCallStack();
-        }
+        return arrayInterpreter.visitIndexExpression(expr);
     }
+
 
     /* ---------- helpers ---------- */
-    private int toIndexInt(Object v, int line, int position1Based) throws InterpreterError {
-        if (!(v instanceof Number)) {
-            throw error(line, "Index " + position1Based + " must be a number.");
-        }
-        int i = ((Number) v).intValue();
-        if (i < 0) {
-            throw error(line, "Index " + position1Based + " must be non-negative.");
-        }
-        return i;
-    }
+    
 
-    private void checkBounds(int line, int i, int len) throws InterpreterError {
-        if (i < 0 || i >= len) {
-            throw error(line, "Index out of bounds: " + i + " (size " + len + ").");
-        }
-    }
+    
 
     /* --------------------------
    Helpers used by the visitors
    -------------------------- */
-    /**
-     * Coerce a value to a non-negative int; throw runtime error on invalid
-     * input.
-     */
-    private int toNonNegativeInt(int line, Object v, int dimensionIndex1Based) throws InterpreterError {
-        if (!(v instanceof Number)) {
-            throw error(line, "Array size at dimension " + dimensionIndex1Based + " must be a number.");
-        }
-        int n = ((Number) v).intValue();
-        if (n < 0) {
-            throw error(line, "Array size at dimension " + dimensionIndex1Based + " must be non-negative.");
-        }
-        return n;
-    }
+    
 
-    /**
-     * Allocate nested lists with the given shape; leaf level is filled with
-     * nulls.
-     */
-    private ArrayDef createEmptyArray(DataType dataType, Integer[] dims, int depth) {
-        Integer len = dims[depth];
-        ArrayDef ret = null;
-        if (len == null) {
-            ret = new ArrayDynamic(dataType);
-            len = 0;
-        } else {
-            if (dataType == DataType.BYTE) {
-                ret = new ArrayFixedByte(len);
-            } else {
-                ret = new ArrayFixed(dataType, len);
-            }
-        }
-        if (depth == dims.length - 1) {
-            for (int i = 0; i < len; i++) {
-                ret.set(i, null);
-            }
-        } else {
-            for (int i = 0; i < len; i++) {
-                ret.set(i, createEmptyArray(dataType, dims, depth + 1));
-            }
-        }
-        return ret;
-    }
+    
 
-    private void expandArray(ArrayDef array, Integer[] dims, int depth) {
-        Integer len = dims[depth];
-        if (array.size() < len) {
-            for (int idx = array.size(); idx < len; idx++) {
-                if (depth < dims.length - 1) {
-                    array.set(idx, createEmptyArray(array.getDataType(), dims, depth + 1));
-                } else {
-                    array.set(idx, null);
-                }
-            }
-        }
-    }
+    
 
-    /**
-     * Compute shape of a nested list and validate it is rectangular. Returns an
-     * int[] shape (e.g., {rows, cols, ...}) or {n} for 1D. Throws if rows have
-     * different lengths or mixing scalar and list at same depth.
-     */
-    private int[] computeAndValidateShape(Object[] array, int line) throws InterpreterError {
-        if (array == null || array.length == 0) {
-            return new int[]{0};
-        }
-
-        // Determine shape of first element
-        int[] subShape = null;
-        boolean firstIsList = array[0] instanceof Object[];
-        if (firstIsList) {
-            subShape = computeAndValidateShape((Object[]) array[0], line);
-        }
-
-        // All elements must match "listness" and sub-shape
-        for (int i = 1; i < array.length; i++) {
-            Object el = array[i];
-            boolean isList = el instanceof Object[];
-            if (isList != firstIsList) {
-                throw error(line, "Array literal must be rectangular: mixed scalar and sub-array at the same level.");
-            }
-            if (isList) {
-                int[] shapeI = computeAndValidateShape((Object[]) el, line);
-                if (!java.util.Arrays.equals(shapeI, subShape)) {
-                    throw error(line, "Array literal is jagged: sub-arrays do not have consistent shape.");
-                }
-            }
-        }
-
-        if (firstIsList) {
-            int[] shape = new int[subShape.length + 1];
-            shape[0] = array.length;
-            System.arraycopy(subShape, 0, shape, 1, subShape.length);
-            return shape;
-        } else {
-            return new int[]{array.length};
-        }
-    }
+    
 
     @Override
     public void visitIfStatement(IfStatement stmt) throws InterpreterError {
@@ -760,71 +436,17 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         environment().getEnvironmentValues().assign(stmt.name, value);
     }
 
-    @Override
+        @Override
     public void visitIndexAssignStatement(IndexAssignStatement stmt) throws InterpreterError {
-        if (!(stmt.target instanceof IndexExpression idxExpr)) {
-            throw error(stmt.getLine(), "Internal error: index assignment target is not an index expression.");
-        }
-
-        // Evaluate the container (up to the last dimension) and the final index
-        // Example: for m[i, j], we need m[i] first, then set element at [j].
-        Object container = evaluate(idxExpr.target);
-
-        // Evaluate indices
-        int[] idx = new int[idxExpr.indices.length];
-        for (int k = 0; k < idx.length; k++) {
-            Object v = evaluate(idxExpr.indices[k]);
-            idx[k] = toIndexInt(v, stmt.getLine(), k + 1);
-        }
-
-        // Traverse to parent container (all but last index)
-        for (int d = 0; d < idx.length - 1; d++) {
-            container = getIndexed(container, idx[d], stmt.getLine());
-        }
-
-        // Set at last index
-        int last = idx[idx.length - 1];
-        Object rhs = evaluate(stmt.value);
-
-        setIndexed(container, last, rhs, stmt.getLine());
-
+        arrayInterpreter.visitIndexAssignStatement(stmt);
     }
+
 
     /* ---- helpers for assignment ---- */
-    private Object getIndexed(Object container, int i, int line) throws InterpreterError {
-        if (container instanceof Object[] array) {
-            checkBounds(line, i, array.length);
-            return array[i];
-        } else if (container instanceof List<?>) {
-            List<?> list = (java.util.List<?>) container;
-            checkBounds(line, i, list.size());
-            return list.get(i);
-        } else if (container instanceof ArrayDef arr) {
-            checkBounds(line, i, arr.size());
-            return arr.get(i); // in getIndexed
-        } else {
-            String kind = (container == null) ? "null" : container.getClass().getSimpleName();
-            throw error(line, "Cannot index into type " + kind + ".");
-        }
-    }
+    
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private void setIndexed(Object container, int i, Object value, int line) throws InterpreterError {
-        if (container instanceof Object[] array) {
-            checkBounds(line, i, array.length);
-            array[i] = value;
-        } else if (container instanceof java.util.List) {
-            java.util.List list = (java.util.List) container;
-            checkBounds(line, i, list.size());
-            list.set(i, value);
-        } else if (container instanceof ArrayDef arr) {
-            checkBounds(line, i, arr.size() + 1);
-            arr.set(i, value); // in setIndexed            
-        } else {
-            String kind = (container == null) ? "null" : container.getClass().getSimpleName();
-            throw error(line, "Cannot index into type " + kind + ".");
-        }
-    }
+    
 
     @Override
     public void visitPrintStatement(PrintStatement stmt) throws InterpreterError {
@@ -1589,53 +1211,6 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
 
 // Assign a literal array (whose elements evaluate to Strings) into a predefined ArrayDef,
 // converting each element to the target DataType and expanding if the array is dynamic.
-    private void assignStringLiteralArray(ArrayDef target, ArrayLiteralExpression literal, int line) throws InterpreterError {
-        if (target == null) {
-            throw error(line, "Target array is null.");
-        }
-
-        // How many elements are in the literal
-        final int literalLen = (literal.elements == null) ? 0 : literal.elements.length;
-
-        // If dynamic, expand to fit; if fixed and too small, throw
-        Integer dim = target.size();               // may be null for dynamic
-        boolean isFixed = target.isFixed();
-        if (isFixed) {
-            if (dim != null && literalLen > dim) {
-                throw error(line, "Array literal length (" + literalLen + ") exceeds fixed array length (" + dim + ").");
-            }
-            // no automatic shrink/expand on fixed arrays; we just write up to literalLen
-        } else {
-            // Dynamic array: ensure sufficient capacity
-            int current = (dim == null ? 0 : dim);
-            if (literalLen > current) {
-                target.expandArray(literalLen);
-            }
-        }
-
-        // Convert using the array's declared element DataType
-        final DataType elemType = target.getDataType();
-
-        // Copy & convert
-        for (int i = 0; i < literalLen; i++) {
-            Object raw = evaluate(literal.elements[i]); // expected to be String by your grammar
-            if (!(raw instanceof String)) {
-                // Be defensive: if someone slipped a non-string, normalize to string first.
-                raw = (raw == null ? null : raw.toString());
-            }
-
-            // Convert "string" -> target element type, e.g., "123" -> Integer, "Y"/"true" -> Boolean, etc.
-            Object converted = (raw == null) ? null : elemType.convertValue(raw);
-
-            // Write to array slot i
-            target.set(i, converted);
-        }
-
-        // If target is fixed and literal is shorter, we leave remaining elements as-is (nulls or prior values).
-        // If you prefer explicit nulling of the tail, uncomment:
-        // if (isFixed && dim != null) {
-        //     for (int i = literalLen; i < dim; i++) target.setElement(i, null);
-        // }
-    }
+    
 
 }
