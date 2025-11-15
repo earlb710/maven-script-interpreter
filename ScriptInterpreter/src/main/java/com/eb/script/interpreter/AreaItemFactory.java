@@ -308,17 +308,17 @@ public class AreaItemFactory {
         }
         
         // Apply color
-        if (metadata.promptColor != null && !metadata.promptColor.isEmpty()) {
-            styleBuilder.append("-fx-text-fill: ").append(metadata.promptColor).append("; ");
+        if (metadata.labelColor != null && !metadata.labelColor.isEmpty()) {
+            styleBuilder.append("-fx-text-fill: ").append(metadata.labelColor).append("; ");
         }
         
         // Apply bold
-        if (Boolean.TRUE.equals(metadata.promptBold)) {
+        if (Boolean.TRUE.equals(metadata.labelBold)) {
             styleBuilder.append("-fx-font-weight: bold; ");
         }
         
         // Apply italic
-        if (Boolean.TRUE.equals(metadata.promptItalic)) {
+        if (Boolean.TRUE.equals(metadata.labelItalic)) {
             styleBuilder.append("-fx-font-style: italic; ");
         }
         

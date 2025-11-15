@@ -194,10 +194,13 @@ public class InterpreterScreen {
                         String labelText;
                         if (varDisplayItem != null && varDisplayItem.labelText != null && !varDisplayItem.labelText.isEmpty()) {
                             // Use the promptText from the variable's display metadata as the label
-                            labelText = varDisplayItem.labelText + ":";
+                            labelText = varDisplayItem.labelText;
                         } else {
                             // Fallback to capitalizing the variable name if no promptText is available
-                            labelText = capitalizeWords(varName) + ":";
+                            labelText = capitalizeWords(varName);
+                        }
+                        if (!labelText.isBlank() && labelText.charAt(labelText.length() - 1) != ':') {
+                            labelText = labelText + ":";
                         }
                         labelMetadata.labelText = labelText;
                         labelMetadata.style = "-fx-alignment: center-right;"; // Right-align the label text
