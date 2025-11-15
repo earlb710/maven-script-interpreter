@@ -325,6 +325,27 @@ RuntimeContext
             │       - UseConnectionStatement: switch active connection
             │       - CloseConnectionStatement: close connection
             │
+            │   ├─▶ ImportStatement:
+            │   │   - Parse import path (e.g., import "utils.ebs")
+            │   │   - Resolve file path relative to current script
+            │   │   - Parse and execute imported file
+            │   │   - Register imported functions in current environment
+            │   │   - Imports are processed before other statements
+            │   │
+            │   └─▶ ScreenStatement:
+            │       - Parse screen definition from JSON configuration
+            │       - Process screen variables (vars)
+            │       - Process area definitions with items
+            │       - Support for button onClick handlers:
+            │           │
+            │           ├─▶ Parse onClick property from button display metadata
+            │           ├─▶ Create OnClickHandler that executes EBS code
+            │           ├─▶ Parse EBS code when button is clicked
+            │           └─▶ Execute in current interpreter context
+            │       - Create JavaFX Stage with controls
+            │       - Set up two-way data binding for varRef items
+            │       - Display screen window
+            │
             └─▶ Expression evaluation using Visitor pattern:
                 │
                 ├─▶ LiteralExpression:
@@ -488,6 +509,43 @@ JSON Operations:
         - var data: json = {"key": "value"};
         - Direct JSON literal in source
 ```
+
+**Important: JSON Key and Value Normalization**
+
+The EBS JSON parser automatically converts all keys and values to lowercase during parsing. This behavior affects screen definitions, display metadata, and any JSON structures used in the language.
+
+**Key Normalization Examples:**
+```javascript
+// Input JSON:
+{
+    "promptText": "Click Me",
+    "onClick": "print 'Hello';",
+    "varRef": "myVariable"
+}
+
+// Parsed as:
+{
+    "prompttext": "click me",
+    "onclick": "print 'hello';",
+    "varref": "myvariable"
+}
+```
+
+**Affected Areas:**
+- **Screen Definitions**: All keys in screen JSON (varRef, promptText, onClick, etc.) are lowercased
+- **Display Metadata**: Properties like promptText, onClick become prompttext, onclick
+- **Variable References**: varRef becomes varref
+- **String Values**: All string values are also lowercased ("Click Me" → "click me")
+
+**Code Implementation:**
+The parser implementation in `InterpreterScreen.java` handles this by checking for both camelCase and lowercase versions of keys:
+- Checks for `promptText` OR `prompttext`
+- Checks for `onClick` OR `onclick`  
+- Checks for `varRef` OR `varref`
+
+This dual-check approach ensures compatibility with both original camelCase specifications and the actual lowercase keys produced by the parser.
+
+**Developer Note:** When adding new JSON-based features, always implement fallback checks for lowercase versions of property names to ensure the parser works correctly.
 
 ### 9. UI Console Interaction
 
@@ -691,7 +749,6 @@ Error Reporting:
 - Additional database adapters (MySQL, PostgreSQL, etc.)
 - Debugger integration with breakpoints
 - Performance profiling tools
-- Module/import system
 - Native library integration
 - More built-in functions
 - Enhanced error messages with suggestions
