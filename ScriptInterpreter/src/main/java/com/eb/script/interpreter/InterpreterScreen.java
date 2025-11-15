@@ -178,6 +178,7 @@ public class InterpreterScreen {
                         DisplayItem labelMetadata = new DisplayItem();
                         labelMetadata.itemType = DisplayItem.ItemType.LABEL;
                         labelMetadata.promptText = capitalizeWords(varName) + ":"; // Add colon after label
+                        labelMetadata.style = "-fx-alignment: center-right;"; // Right-align the label text
                         labelItem.displayMetadata = labelMetadata;
                         labelItem.varRef = null; // Labels don't bind to variables
                         labelItem.maxWidth = "USE_PREF_SIZE";
@@ -211,6 +212,12 @@ public class InterpreterScreen {
                                     break;
                                 case COMBOBOX:
                                 case CHOICEBOX:
+                                    item.prefWidth = "200";
+                                    break;
+                                case COLORPICKER:
+                                    item.prefWidth = "200";
+                                    break;
+                                case DATEPICKER:
                                     item.prefWidth = "200";
                                     break;
                                 default:
