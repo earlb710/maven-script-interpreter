@@ -221,15 +221,9 @@ public class AreaItemFactory {
      * Applies item-specific display properties to the control.
      */
     private static void applyItemSpecificProperties(Node control, AreaItem item, DisplayItem metadata) {
-        // Debug logging
-        System.out.println("DEBUG applyItemSpecificProperties: control=" + control.getClass().getSimpleName() + 
-                           ", metadata=" + (metadata != null ? "present" : "null") + 
-                           ", promptText=" + (metadata != null ? metadata.promptText : "N/A"));
-        
         // Apply prompt text or text content based on control type (from DisplayItem)
         if (metadata != null && metadata.promptText != null && !metadata.promptText.isEmpty()) {
             if (control instanceof TextField) {
-                System.out.println("DEBUG: Setting TextField promptText to: " + metadata.promptText);
                 ((TextField) control).setPromptText(metadata.promptText);
             } else if (control instanceof TextArea) {
                 ((TextArea) control).setPromptText(metadata.promptText);
@@ -244,11 +238,8 @@ public class AreaItemFactory {
                 applyPromptTextStyling(label, metadata);
             } else if (control instanceof Button) {
                 // For buttons, use promptText as the button's text
-                System.out.println("DEBUG: Setting Button text to: " + metadata.promptText);
                 ((Button) control).setText(metadata.promptText);
             }
-        } else {
-            System.out.println("DEBUG: promptText condition failed - metadata null or promptText null/empty");
         }
 
         // Apply prompt text alignment for applicable controls

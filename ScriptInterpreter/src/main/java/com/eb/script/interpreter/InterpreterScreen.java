@@ -548,9 +548,6 @@ public class InterpreterScreen {
     }
 
     private DisplayItem parseDisplayItem(Map<String, Object> displayDef, String screenName) {
-        System.out.println("DEBUG parseDisplayItem: displayDef keys = " + displayDef.keySet());
-        System.out.println("DEBUG parseDisplayItem: displayDef = " + displayDef);
-        
         DisplayItem metadata = new DisplayItem();
 
         // Extract display type and convert to enum
@@ -592,16 +589,18 @@ public class InterpreterScreen {
             metadata.pattern = String.valueOf(displayDef.get("pattern"));
         }
         
+        // Check for both camelCase and lowercase versions
         if (displayDef.containsKey("promptText")) {
             metadata.promptText = String.valueOf(displayDef.get("promptText"));
-            System.out.println("DEBUG parseDisplayItem: Set promptText to: " + metadata.promptText);
-        } else {
-            System.out.println("DEBUG parseDisplayItem: promptText key NOT FOUND in displayDef");
+        } else if (displayDef.containsKey("prompttext")) {
+            metadata.promptText = String.valueOf(displayDef.get("prompttext"));
         }
 
-        // Extract onClick event handler for buttons
+        // Extract onClick event handler for buttons - check both camelCase and lowercase
         if (displayDef.containsKey("onClick")) {
             metadata.onClick = String.valueOf(displayDef.get("onClick"));
+        } else if (displayDef.containsKey("onclick")) {
+            metadata.onClick = String.valueOf(displayDef.get("onclick"));
         }
 
         // Extract or set default style
@@ -711,15 +710,10 @@ public class InterpreterScreen {
                         // Check for both camelCase and lowercase versions of varRef
                         if (itemDef.containsKey("varRef")) {
                             item.varRef = String.valueOf(itemDef.get("varRef")).toLowerCase();
-                            System.out.println("DEBUG: Found varRef: " + item.varRef);
                         } else if (itemDef.containsKey("varref")) {
                             item.varRef = String.valueOf(itemDef.get("varref")).toLowerCase();
-                            System.out.println("DEBUG: Found varref (lowercase): " + item.varRef);
                         } else if (itemDef.containsKey("var_ref")) {
                             item.varRef = String.valueOf(itemDef.get("var_ref")).toLowerCase();
-                            System.out.println("DEBUG: Found var_ref: " + item.varRef);
-                        } else {
-                            System.out.println("DEBUG: No varRef found for item: " + itemDef.get("name"));
                         }
 
                         // Process optional display metadata for the item

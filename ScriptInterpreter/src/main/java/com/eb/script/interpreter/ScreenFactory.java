@@ -189,14 +189,8 @@ public class ScreenFactory {
             for (AreaItem item : sortedItems) {
                 // Get metadata for the item
                 DisplayItem metadata = item.displayMetadata;
-                System.out.println("DEBUG ScreenFactory: item.name=" + item.name + 
-                                   ", item.displayMetadata=" + (item.displayMetadata != null ? "present" : "null") +
-                                   ", item.varRef=" + item.varRef);
-                
                 if (metadata == null && item.varRef != null && metadataProvider != null) {
                     metadata = metadataProvider.apply(screenName, item.varRef);
-                    System.out.println("DEBUG: Retrieved metadata from provider for varRef " + item.varRef + 
-                                       ": " + (metadata != null ? "present" : "null"));
                 }
 
                 // Create the item using AreaItemFactory
@@ -221,8 +215,6 @@ public class ScreenFactory {
 
                 // Set up two-way data binding if screenVars is provided and item has a varRef
                 if (screenVars != null && item.varRef != null) {
-                    Object value = screenVars.get(item.varRef);
-                    System.out.println("DEBUG: Setting up variable binding for " + item.varRef + " with value: " + value);
                     setupVariableBinding(control, item.varRef, screenVars, metadata);
                 }
 
