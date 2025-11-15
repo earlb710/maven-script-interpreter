@@ -27,6 +27,14 @@ import java.util.stream.Collectors;
  * Includes JSON Schema validation for screen definitions.
  */
 public class ScreenFactory {
+    
+    /**
+     * Functional interface for executing onClick EBS code
+     */
+    @FunctionalInterface
+    public interface OnClickHandler {
+        void execute(String ebsCode) throws InterpreterError;
+    }
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final JsonSchemaFactory schemaFactory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7);
@@ -70,7 +78,7 @@ public class ScreenFactory {
     public static Stage createScreen(String screenName, String title, double width, double height,
                                       List<AreaDefinition> areas,
                                       BiFunction<String, String, DisplayItem> metadataProvider) {
-        return createScreen(screenName, title, width, height, areas, metadataProvider, null);
+        return createScreen(screenName, title, width, height, areas, metadataProvider, null, null);
     }
 
     /**
@@ -90,6 +98,29 @@ public class ScreenFactory {
                                       List<AreaDefinition> areas,
                                       BiFunction<String, String, DisplayItem> metadataProvider,
                                       java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
+        return createScreen(screenName, title, width, height, areas, metadataProvider, screenVars, null);
+    }
+
+    /**
+     * Creates a complete JavaFX window/screen from area definitions with variable binding and onClick handlers.
+     * This method creates containers, adds items, applies layout properties, sets up two-way data binding,
+     * and configures button onClick handlers.
+     *
+     * @param screenName The name of the screen
+     * @param title The window title
+     * @param width The window width
+     * @param height The window height
+     * @param areas List of AreaDefinitions containing containers and items
+     * @param metadataProvider Function to retrieve DisplayItem for variables (screenName, varName) -> metadata
+     * @param screenVars The ConcurrentHashMap containing screen variables for two-way binding (can be null)
+     * @param onClickHandler Handler for button onClick events (can be null)
+     * @return A Stage representing the complete window
+     */
+    public static Stage createScreen(String screenName, String title, double width, double height,
+                                      List<AreaDefinition> areas,
+                                      BiFunction<String, String, DisplayItem> metadataProvider,
+                                      java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+                                      OnClickHandler onClickHandler) {
         Stage stage = new Stage();
         stage.setTitle(title);
 
@@ -101,14 +132,14 @@ public class ScreenFactory {
             rootContainer = new Pane();
         } else if (areas.size() == 1) {
             // Single area - use it as root
-            rootContainer = createAreaWithItems(areas.get(0), screenName, metadataProvider, screenVars);
+            rootContainer = createAreaWithItems(areas.get(0), screenName, metadataProvider, screenVars, onClickHandler);
         } else {
             // Multiple areas - arrange in VBox
             VBox root = new VBox();
             root.setSpacing(10);
             
             for (AreaDefinition areaDef : areas) {
-                Region areaContainer = createAreaWithItems(areaDef, screenName, metadataProvider, screenVars);
+                Region areaContainer = createAreaWithItems(areaDef, screenName, metadataProvider, screenVars, onClickHandler);
                 root.getChildren().add(areaContainer);
             }
             
@@ -126,7 +157,7 @@ public class ScreenFactory {
      */
     private static Region createAreaWithItems(AreaDefinition areaDef, String screenName,
                                                BiFunction<String, String, DisplayItem> metadataProvider) {
-        return createAreaWithItems(areaDef, screenName, metadataProvider, null);
+        return createAreaWithItems(areaDef, screenName, metadataProvider, null, null);
     }
 
     /**
@@ -135,6 +166,16 @@ public class ScreenFactory {
     private static Region createAreaWithItems(AreaDefinition areaDef, String screenName,
                                                BiFunction<String, String, DisplayItem> metadataProvider,
                                                java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
+        return createAreaWithItems(areaDef, screenName, metadataProvider, screenVars, null);
+    }
+
+    /**
+     * Creates a container from AreaDefinition and adds all items to it with variable binding and onClick handler.
+     */
+    private static Region createAreaWithItems(AreaDefinition areaDef, String screenName,
+                                               BiFunction<String, String, DisplayItem> metadataProvider,
+                                               java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+                                               OnClickHandler onClickHandler) {
         // Create the container using AreaContainerFactory
         Region container = AreaContainerFactory.createContainer(areaDef);
 
@@ -155,6 +196,23 @@ public class ScreenFactory {
                 // Create the item using AreaItemFactory
                 Node control = AreaItemFactory.createItem(item, metadata);
 
+                // Set up onClick handler for buttons
+                if (onClickHandler != null && metadata != null && metadata.onClick != null && !metadata.onClick.isEmpty()) {
+                    if (control instanceof javafx.scene.control.Button) {
+                        javafx.scene.control.Button button = (javafx.scene.control.Button) control;
+                        String ebsCode = metadata.onClick;
+                        button.setOnAction(event -> {
+                            try {
+                                onClickHandler.execute(ebsCode);
+                            } catch (InterpreterError e) {
+                                // Print error to console if available
+                                System.err.println("Error executing button onClick: " + e.getMessage());
+                                e.printStackTrace();
+                            }
+                        });
+                    }
+                }
+
                 // Set up two-way data binding if screenVars is provided and item has a varRef
                 if (screenVars != null && item.varRef != null) {
                     setupVariableBinding(control, item.varRef, screenVars, metadata);
@@ -171,7 +229,7 @@ public class ScreenFactory {
         // Add nested child areas to the container
         if (areaDef.childAreas != null && !areaDef.childAreas.isEmpty()) {
             for (AreaDefinition childArea : areaDef.childAreas) {
-                Region childContainer = createAreaWithItems(childArea, screenName, metadataProvider, screenVars);
+                Region childContainer = createAreaWithItems(childArea, screenName, metadataProvider, screenVars, onClickHandler);
                 
                 // Add the child container to the parent container
                 // Treat child areas as regular nodes

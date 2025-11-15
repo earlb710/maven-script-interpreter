@@ -9,6 +9,7 @@ import com.eb.script.interpreter.statement.ScreenHideStatement;
 import com.eb.script.interpreter.DisplayItem.ItemType;
 import com.eb.script.interpreter.AreaDefinition.AreaType;
 import com.eb.script.interpreter.AreaDefinition.AreaItem;
+import com.eb.script.RuntimeContext;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
@@ -269,6 +270,22 @@ public class InterpreterScreen {
                     // Use ScreenFactory if areas are defined, otherwise create simple stage
                     if (areas != null && !areas.isEmpty()) {
                         // Create screen with areas using ScreenFactory
+                        // Create onClick handler that executes EBS code
+                        ScreenFactory.OnClickHandler onClickHandler = (ebsCode) -> {
+                            try {
+                                // Parse and execute the EBS code
+                                RuntimeContext clickContext = com.eb.script.parser.Parser.parse("onClick_" + screenName, ebsCode);
+                                // Execute in the current interpreter context
+                                for (com.eb.script.interpreter.statement.Statement s : clickContext.statements) {
+                                    interpreter.acceptStatement(s);
+                                }
+                            } catch (com.eb.script.parser.ParseError e) {
+                                throw new InterpreterError("Failed to parse onClick code: " + e.getMessage());
+                            } catch (java.io.IOException e) {
+                                throw new InterpreterError("IO error executing onClick code: " + e.getMessage());
+                            }
+                        };
+                        
                         stage = ScreenFactory.createScreen(
                             screenName,
                             screenTitle,
@@ -276,7 +293,8 @@ public class InterpreterScreen {
                             screenHeight,
                             areas,
                             (scrName, varName) -> context.getDisplayItem().get(scrName + "." + varName),
-                            varsMap  // Pass screenVars for binding
+                            varsMap,  // Pass screenVars for binding
+                            onClickHandler  // Pass onClick handler for buttons
                         );
                     } else {
                         // Create simple stage without areas
@@ -572,6 +590,15 @@ public class InterpreterScreen {
 
         if (displayDef.containsKey("pattern")) {
             metadata.pattern = String.valueOf(displayDef.get("pattern"));
+        }
+        
+        if (displayDef.containsKey("promptText")) {
+            metadata.promptText = String.valueOf(displayDef.get("promptText"));
+        }
+
+        // Extract onClick event handler for buttons
+        if (displayDef.containsKey("onClick")) {
+            metadata.onClick = String.valueOf(displayDef.get("onClick"));
         }
 
         // Extract or set default style

@@ -40,6 +40,8 @@ public class DisplayItem {
     Boolean promptBold;
     // Prompt text italic flag
     Boolean promptItalic;
+    // onClick event handler - EBS code to execute when button is clicked
+    String onClick;
     
     @Override
     public String toString() {
