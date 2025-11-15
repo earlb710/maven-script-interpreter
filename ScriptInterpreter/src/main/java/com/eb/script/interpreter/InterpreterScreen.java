@@ -14,6 +14,7 @@ import javafx.application.Platform;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -612,6 +613,24 @@ public class InterpreterScreen {
             metadata.onClick = String.valueOf(displayDef.get("onClick"));
         } else if (displayDef.containsKey("onclick")) {
             metadata.onClick = String.valueOf(displayDef.get("onclick"));
+        }
+
+        // Extract options for selection controls (ComboBox, ChoiceBox, ListView)
+        if (displayDef.containsKey("options")) {
+            Object optionsObj = displayDef.get("options");
+            metadata.options = new ArrayList<>();
+            if (optionsObj instanceof ArrayDynamic) {
+                ArrayDynamic array = (ArrayDynamic) optionsObj;
+                for (Object item : array.getAll()) {
+                    metadata.options.add(String.valueOf(item));
+                }
+            } else if (optionsObj instanceof List) {
+                @SuppressWarnings("unchecked")
+                List<Object> list = (List<Object>) optionsObj;
+                for (Object item : list) {
+                    metadata.options.add(String.valueOf(item));
+                }
+            }
         }
 
         // Extract or set default style
