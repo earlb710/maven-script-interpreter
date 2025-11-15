@@ -1,0 +1,100 @@
+// Test Script: Date and Color Picker Controls
+// Description: Tests date picker and color picker controls
+// Author: EBS Test Suite
+// Date: 2025-11-15
+
+screen dateColorScreen = {
+    "title": "Date and Color Picker Test",
+    "width": 600,
+    "height": 500,
+    "vars": [
+        {
+            "name": "birthDate",
+            "type": "string",
+            "default": "2000-01-01",
+            "display": {"type": "datepicker", "mandatory": true, "promptText": "Select birth date"}
+        },
+        {
+            "name": "appointmentDate",
+            "type": "string",
+            "default": "2025-12-31",
+            "display": {"type": "datepicker", "promptText": "Select appointment date"}
+        },
+        {
+            "name": "startDate",
+            "type": "string",
+            "default": "2025-01-01",
+            "display": {"type": "datepicker", "promptText": "Select start date"}
+        },
+        {
+            "name": "endDate",
+            "type": "string",
+            "default": "2025-12-31",
+            "display": {"type": "datepicker", "promptText": "Select end date"}
+        },
+        {
+            "name": "backgroundColor",
+            "type": "string",
+            "default": "#FFFFFF",
+            "display": {"type": "colorpicker", "promptText": "Choose background color"}
+        },
+        {
+            "name": "textColor",
+            "type": "string",
+            "default": "#000000",
+            "display": {"type": "colorpicker", "promptText": "Choose text color"}
+        },
+        {
+            "name": "accentColor",
+            "type": "string",
+            "default": "#4A90E2",
+            "display": {"type": "colorpicker", "promptText": "Choose accent color"}
+        },
+        {
+            "name": "highlightColor",
+            "type": "string",
+            "default": "#FFD700",
+            "display": {"type": "colorpicker", "promptText": "Choose highlight color"}
+        }
+    ]
+};
+
+// Test variable access
+print "Testing date and color picker controls...";
+print "Birth Date: " + dateColorScreen.birthDate;
+print "Appointment Date: " + dateColorScreen.appointmentDate;
+print "Start Date: " + dateColorScreen.startDate;
+print "End Date: " + dateColorScreen.endDate;
+print "Background Color: " + dateColorScreen.backgroundColor;
+print "Text Color: " + dateColorScreen.textColor;
+print "Accent Color: " + dateColorScreen.accentColor;
+print "Highlight Color: " + dateColorScreen.highlightColor;
+
+// Modify values
+print "";
+print "Modifying date and color values...";
+dateColorScreen.birthDate = "1990/06/15";
+dateColorScreen.appointmentDate = "2026/03/20";
+dateColorScreen.startDate = "2025/06/01";
+dateColorScreen.endDate = "2025/11/30";
+dateColorScreen.backgroundColor = "#F0F0F0";
+dateColorScreen.textColor = "#333333";
+dateColorScreen.accentColor = "#FF6B6B";
+dateColorScreen.highlightColor = "#4ECDC4";
+
+// Verify modifications
+print "Birth Date: " + dateColorScreen.birthDate;
+print "Appointment Date: " + dateColorScreen.appointmentDate;
+print "Start Date: " + dateColorScreen.startDate;
+print "End Date: " + dateColorScreen.endDate;
+print "Background Color: " + dateColorScreen.backgroundColor;
+print "Text Color: " + dateColorScreen.textColor;
+print "Accent Color: " + dateColorScreen.accentColor;
+print "Highlight Color: " + dateColorScreen.highlightColor;
+
+// Show the screen
+print "";
+print "Displaying date and color picker screen...";
+screen dateColorScreen show;
+
+print "Date and color picker test completed!";

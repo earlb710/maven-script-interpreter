@@ -1,0 +1,126 @@
+// Test Script: Display-Only Controls
+// Description: Tests display-only controls (label, text, hyperlink, separator, etc.)
+// Author: EBS Test Suite
+// Date: 2025-11-15
+
+screen displayScreen = {
+    "title": "Display Controls Test",
+    "width": 700,
+    "height": 650,
+    "vars": [
+        {
+            "name": "titleLabel",
+            "type": "string",
+            "default": "Welcome to Display Controls Test",
+            "display": {"type": "label", "promptText": "Title"}
+        },
+        {
+            "name": "instructionLabel",
+            "type": "string",
+            "default": "This screen demonstrates various display-only controls",
+            "display": {"type": "labeltext", "promptText": "Instructions"}
+        },
+        {
+            "name": "descriptionText",
+            "type": "string",
+            "default": "Text controls can display formatted information without user editing",
+            "display": {"type": "text", "promptText": "Description"}
+        },
+        {
+            "name": "websiteLink",
+            "type": "string",
+            "default": "https://www.example.com",
+            "display": {"type": "hyperlink", "promptText": "Website link"}
+        },
+        {
+            "name": "documentationLink",
+            "type": "string",
+            "default": "https://docs.example.com",
+            "display": {"type": "hyperlink", "promptText": "Documentation link"}
+        },
+        {
+            "name": "statusMessage",
+            "type": "string",
+            "default": "System Status: All systems operational",
+            "display": {
+                "type": "label",
+                "style": "-fx-text-fill: green; -fx-font-weight: bold;",
+                "promptText": "Status"
+            }
+        },
+        {
+            "name": "errorMessage",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "label",
+                "style": "-fx-text-fill: red; -fx-font-weight: bold;",
+                "promptText": "Error"
+            }
+        },
+        {
+            "name": "warningMessage",
+            "type": "string",
+            "default": "Warning: This is a test environment",
+            "display": {
+                "type": "label",
+                "style": "-fx-text-fill: orange; -fx-font-style: italic;",
+                "promptText": "Warning"
+            }
+        },
+        {
+            "name": "separator1",
+            "type": "string",
+            "default": "---",
+            "display": {"type": "separator"}
+        },
+        {
+            "name": "infoText",
+            "type": "string",
+            "default": "Information can be displayed in various formats and styles",
+            "display": {
+                "type": "text",
+                "alignment": "center",
+                "promptText": "Information"
+            }
+        }
+    ]
+};
+
+// Test variable access
+print "Testing display controls...";
+print "Title: " + displayScreen.titleLabel;
+print "Instructions: " + displayScreen.instructionLabel;
+print "Description: " + displayScreen.descriptionText;
+print "Website: " + displayScreen.websiteLink;
+print "Documentation: " + displayScreen.documentationLink;
+print "Status: " + displayScreen.statusMessage;
+
+// Modify display values
+print "";
+print "Modifying display values...";
+displayScreen.titleLabel = "Updated Title - Display Test";
+displayScreen.instructionLabel = "These instructions have been dynamically updated";
+displayScreen.descriptionText = "All display controls are now showing modified content";
+displayScreen.websiteLink = "https://www.updated-example.com";
+displayScreen.statusMessage = "System Status: Updated successfully";
+displayScreen.errorMessage = "No errors detected";
+displayScreen.warningMessage = "All tests passed!";
+displayScreen.infoText = "Test completed - all display controls working correctly";
+
+// Verify modifications
+print "Title: " + displayScreen.titleLabel;
+print "Instructions: " + displayScreen.instructionLabel;
+print "Description: " + displayScreen.descriptionText;
+print "Website: " + displayScreen.websiteLink;
+print "Status: " + displayScreen.statusMessage;
+print "Error: " + displayScreen.errorMessage;
+print "Warning: " + displayScreen.warningMessage;
+print "Info: " + displayScreen.infoText;
+
+// Show the screen
+print "";
+print "Displaying display controls screen...";
+screen displayScreen show;
+
+print "Display controls test completed!";

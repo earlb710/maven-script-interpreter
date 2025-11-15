@@ -1,0 +1,56 @@
+// Test Script: Basic Screen Functionality
+// Description: Tests basic screen creation, variable access, and show/hide commands
+// Author: EBS Test Suite
+// Date: 2025-11-15
+
+// Create a simple screen with basic text inputs and a counter
+screen basicScreen = {
+    "title": "Basic Screen Test",
+    "width": 600,
+    "height": 400,
+    "vars": [
+        {
+            "name": "userName",
+            "type": "string",
+            "default": "",
+            "display": {"type": "textfield", "mandatory": true, "promptText": "Enter user name"}
+        },
+        {
+            "name": "counter",
+            "type": "int",
+            "default": 0,
+            "display": {"type": "textfield", "promptText": "Enter counter value"}
+        },
+        {
+            "name": "message",
+            "type": "string",
+            "default": "",
+            "display": {"type": "textarea", "promptText": "Enter your message here"}
+        }
+    ]
+};
+
+// Test variable access (reading default values)
+print "Testing variable access...";
+print "User Name: " + basicScreen.userName;
+print "Counter: " + basicScreen.counter;
+print "Message: " + basicScreen.message;
+
+// Test variable modification
+print "";
+print "Modifying variables...";
+basicScreen.userName = "Test User";
+basicScreen.counter = 42;
+basicScreen.message = "Variables have been modified successfully!";
+
+// Verify modifications
+print "User Name: " + basicScreen.userName;
+print "Counter: " + basicScreen.counter;
+print "Message: " + basicScreen.message;
+
+// Show the screen
+print "";
+print "Displaying screen...";
+screen basicScreen show;
+
+print "Basic screen test completed successfully!";

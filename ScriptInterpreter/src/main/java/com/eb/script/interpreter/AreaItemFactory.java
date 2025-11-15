@@ -1,7 +1,7 @@
 package com.eb.script.interpreter;
 
 import com.eb.script.interpreter.AreaDefinition.AreaItem;
-import com.eb.script.interpreter.DisplayMetadata.ItemType;
+import com.eb.script.interpreter.DisplayItem.ItemType;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.Region;
@@ -15,21 +15,21 @@ import javafx.scene.chart.NumberAxis;
 
 /**
  * Factory class for creating JavaFX UI controls from AreaItem definitions.
- * This factory creates JavaFX controls based on the DisplayMetadata and applies
+ * This factory creates JavaFX controls based on the DisplayItem and applies
  * display properties only (no layout properties).
  */
 public class AreaItemFactory {
 
     /**
-     * Creates a JavaFX control based on the provided AreaItem and DisplayMetadata.
+     * Creates a JavaFX control based on the provided AreaItem and DisplayItem.
      * Only display properties are applied (promptText, editable, disabled, visible, tooltip, colors, style).
      * Layout properties should be applied by the caller after creation.
      *
      * @param item The AreaItem containing display properties
-     * @param metadata The DisplayMetadata containing the control type and styling
+     * @param metadata The DisplayItem containing the control type and styling
      * @return A JavaFX Node representing the control
      */
-    public static Node createItem(AreaItem item, DisplayMetadata metadata) {
+    public static Node createItem(AreaItem item, DisplayItem metadata) {
         if (metadata == null) {
             // If no metadata provided, create a simple Label as fallback
             Label label = new Label("No metadata");
@@ -50,8 +50,8 @@ public class AreaItemFactory {
         // Apply metadata-specific properties
         applyMetadataProperties(control, metadata);
         
-        // Apply item-specific display properties
-        applyItemSpecificProperties(control, item);
+        // Apply item-specific display properties (including promptText from metadata)
+        applyItemSpecificProperties(control, item, metadata);
         
         return control;
     }
@@ -59,7 +59,7 @@ public class AreaItemFactory {
     /**
      * Creates the appropriate JavaFX control based on the ItemType.
      */
-    private static Node createControlByType(ItemType itemType, DisplayMetadata metadata) {
+    private static Node createControlByType(ItemType itemType, DisplayItem metadata) {
         switch (itemType) {
             // Text Input Controls
             case TEXTFIELD:
@@ -77,17 +77,45 @@ public class AreaItemFactory {
             case TOGGLEBUTTON:
                 return new ToggleButton();
             case COMBOBOX:
-                return new ComboBox<>();
+                ComboBox<String> comboBox = new ComboBox<>();
+                // Populate with options if available
+                if (metadata != null && metadata.options != null && !metadata.options.isEmpty()) {
+                    comboBox.getItems().addAll(metadata.options);
+                }
+                return comboBox;
             case CHOICEBOX:
-                return new ChoiceBox<>();
+                ChoiceBox<String> choiceBox = new ChoiceBox<>();
+                // Populate with options if available
+                if (metadata != null && metadata.options != null && !metadata.options.isEmpty()) {
+                    choiceBox.getItems().addAll(metadata.options);
+                }
+                return choiceBox;
             case LISTVIEW:
                 return new ListView<>();
 
             // Numeric Controls
             case SPINNER:
-                return new Spinner<>();
+                // Create Spinner with proper ValueFactory
+                Spinner<Integer> spinner = new Spinner<>();
+                int min = metadata != null && metadata.min instanceof Number ? ((Number) metadata.min).intValue() : 0;
+                int max = metadata != null && metadata.max instanceof Number ? ((Number) metadata.max).intValue() : 100;
+                int initial = min; // Start at minimum value
+                SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(min, max, initial);
+                spinner.setValueFactory(valueFactory);
+                spinner.setEditable(true);
+                return spinner;
             case SLIDER:
-                return new Slider();
+                Slider slider = new Slider();
+                // Set min/max if provided in metadata
+                if (metadata != null) {
+                    if (metadata.min instanceof Number) {
+                        slider.setMin(((Number) metadata.min).doubleValue());
+                    }
+                    if (metadata.max instanceof Number) {
+                        slider.setMax(((Number) metadata.max).doubleValue());
+                    }
+                }
+                return slider;
 
             // Date/Time Controls
             case DATEPICKER:
@@ -167,9 +195,9 @@ public class AreaItemFactory {
     }
 
     /**
-     * Applies properties from DisplayMetadata to the control.
+     * Applies properties from DisplayItem to the control.
      */
-    private static void applyMetadataProperties(Node control, DisplayMetadata metadata) {
+    private static void applyMetadataProperties(Node control, DisplayItem metadata) {
         // Apply CSS class from metadata
         if (metadata.cssClass != null && !metadata.cssClass.isEmpty()) {
             control.getStyleClass().add(metadata.cssClass);
@@ -192,21 +220,51 @@ public class AreaItemFactory {
     /**
      * Applies item-specific display properties to the control.
      */
-    private static void applyItemSpecificProperties(Node control, AreaItem item) {
-        // Apply prompt text or text content based on control type
-        if (item.promptText != null && !item.promptText.isEmpty()) {
+    private static void applyItemSpecificProperties(Node control, AreaItem item, DisplayItem metadata) {
+        // Apply prompt text or text content based on control type (from DisplayItem)
+        if (metadata != null && metadata.promptText != null && !metadata.promptText.isEmpty()) {
             if (control instanceof TextField) {
-                ((TextField) control).setPromptText(item.promptText);
+                ((TextField) control).setPromptText(metadata.promptText);
             } else if (control instanceof TextArea) {
-                ((TextArea) control).setPromptText(item.promptText);
+                ((TextArea) control).setPromptText(metadata.promptText);
             } else if (control instanceof ComboBox) {
-                ((ComboBox<?>) control).setPromptText(item.promptText);
+                ((ComboBox<?>) control).setPromptText(metadata.promptText);
             } else if (control instanceof Label) {
                 // For labels, use promptText as the label's text content
-                ((Label) control).setText(item.promptText);
+                Label label = (Label) control;
+                label.setText(metadata.promptText);
+                
+                // Apply prompt text styling (color, bold, italic) for labels
+                applyPromptTextStyling(label, metadata);
             } else if (control instanceof Button) {
                 // For buttons, use promptText as the button's text
-                ((Button) control).setText(item.promptText);
+                ((Button) control).setText(metadata.promptText);
+            }
+        }
+
+        // Apply prompt text alignment for applicable controls
+        if (item.promptAlignment != null && !item.promptAlignment.isEmpty()) {
+            String alignment = item.promptAlignment.toLowerCase();
+            String alignmentStyle = "";
+            
+            switch (alignment) {
+                case "left":
+                    alignmentStyle = "-fx-alignment: center-left;";
+                    break;
+                case "center":
+                    alignmentStyle = "-fx-alignment: center;";
+                    break;
+                case "right":
+                    alignmentStyle = "-fx-alignment: center-right;";
+                    break;
+            }
+            
+            if (!alignmentStyle.isEmpty()) {
+                if (control instanceof TextField || control instanceof TextArea || control instanceof ComboBox) {
+                    control.setStyle(control.getStyle() + " " + alignmentStyle);
+                } else if (control instanceof Label || control instanceof Button) {
+                    control.setStyle(control.getStyle() + " " + alignmentStyle);
+                }
             }
         }
 
@@ -231,6 +289,44 @@ public class AreaItemFactory {
         if (item.backgroundColor != null && !item.backgroundColor.isEmpty()) {
             String bgStyle = "-fx-background-color: " + item.backgroundColor + ";";
             control.setStyle(control.getStyle() + " " + bgStyle);
+        }
+    }
+
+    /**
+     * Applies prompt text styling (color, bold, italic) to a Label.
+     */
+    private static void applyPromptTextStyling(Label label, DisplayItem metadata) {
+        if (metadata == null) {
+            return;
+        }
+        
+        StringBuilder styleBuilder = new StringBuilder();
+        String existingStyle = label.getStyle();
+        if (existingStyle != null && !existingStyle.isEmpty()) {
+            styleBuilder.append(existingStyle);
+            if (!existingStyle.endsWith(";")) {
+                styleBuilder.append(";");
+            }
+            styleBuilder.append(" ");
+        }
+        
+        // Apply color
+        if (metadata.promptColor != null && !metadata.promptColor.isEmpty()) {
+            styleBuilder.append("-fx-text-fill: ").append(metadata.promptColor).append("; ");
+        }
+        
+        // Apply bold
+        if (Boolean.TRUE.equals(metadata.promptBold)) {
+            styleBuilder.append("-fx-font-weight: bold; ");
+        }
+        
+        // Apply italic
+        if (Boolean.TRUE.equals(metadata.promptItalic)) {
+            styleBuilder.append("-fx-font-style: italic; ");
+        }
+        
+        if (styleBuilder.length() > 0) {
+            label.setStyle(styleBuilder.toString());
         }
     }
 }

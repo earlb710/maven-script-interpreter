@@ -1,0 +1,76 @@
+// Test Script: Padding and Prompt Alignment Test
+// Description: Tests the reduced padding for textarea and text controls, and the new promptAlignment option
+// Author: EBS Test Suite
+// Date: 2025-11-15
+
+screen paddingAlignmentTest = {
+    "title": "Padding and Prompt Alignment Test",
+    "width": 700,
+    "height": 600,
+    "vars": [
+        {
+            "name": "textareaNotes",
+            "type": "string",
+            "default": "This textarea now has 2-pixel padding instead of 5-10-5-10.\nThe reduced padding creates a more compact appearance.\nYou can see the difference in spacing around the text.",
+            "display": {"type": "textarea"}
+        },
+        {
+            "name": "textDisplay",
+            "type": "string",
+            "default": "This text control now has 2-pixel padding for better spacing",
+            "display": {"type": "text"}
+        },
+        {
+            "name": "leftAligned",
+            "type": "string",
+            "default": "",
+            "display": {"type": "textfield"}
+        },
+        {
+            "name": "centerAligned",
+            "type": "string",
+            "default": "",
+            "display": {"type": "textfield"}
+        },
+        {
+            "name": "rightAligned",
+            "type": "string",
+            "default": "",
+            "display": {"type": "textfield"}
+        },
+        {
+            "name": "description",
+            "type": "string",
+            "default": "The above fields demonstrate prompt text alignment:\n- Left aligned (default)\n- Center aligned\n- Right aligned",
+            "display": {"type": "textarea"}
+        }
+    ]
+};
+
+// Test the screen
+print "Testing padding and prompt alignment features...";
+print "Textarea Notes: " + paddingAlignmentTest.textareaNotes;
+print "Text Display: " + paddingAlignmentTest.textDisplay;
+print "";
+
+// Modify values
+paddingAlignmentTest.leftAligned = "Left aligned text";
+paddingAlignmentTest.centerAligned = "Center aligned text";
+paddingAlignmentTest.rightAligned = "Right aligned text";
+
+print "Updated field values:";
+print "Left: " + paddingAlignmentTest.leftAligned;
+print "Center: " + paddingAlignmentTest.centerAligned;
+print "Right: " + paddingAlignmentTest.rightAligned;
+print "";
+
+// Show the screen
+print "Displaying padding and alignment test screen...";
+screen paddingAlignmentTest show;
+
+print "Test completed successfully!";
+print "";
+print "Changes applied:";
+print "1. Textarea padding reduced from '5 10 5 10' to '2' pixels";
+print "2. Text control padding added: '2' pixels";
+print "3. AreaItem now supports 'promptAlignment' property with values: left, center, right";

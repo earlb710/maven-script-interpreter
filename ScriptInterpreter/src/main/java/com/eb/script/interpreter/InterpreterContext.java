@@ -27,7 +27,7 @@ public class InterpreterContext {
     private final ConcurrentHashMap<String, Thread> screenThreads = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> screenVars = new ConcurrentHashMap<>();
     private final Set<String> screensBeingCreated = ConcurrentHashMap.newKeySet();
-    private final Map<String, DisplayMetadata> displayMetadata = new java.util.HashMap<>();
+    private final Map<String, DisplayItem> displayMetadata = new java.util.HashMap<>();
     private final Map<String, List<AreaDefinition>> screenAreas = new java.util.HashMap<>();
     private final Deque<String> connectionStack = new java.util.ArrayDeque<>();
     private DbAdapter db = new OracleDbAdapter();
@@ -75,7 +75,7 @@ public class InterpreterContext {
         return screensBeingCreated;
     }
 
-    public Map<String, DisplayMetadata> getDisplayMetadata() {
+    public Map<String, DisplayItem> getDisplayItem() {
         return displayMetadata;
     }
 

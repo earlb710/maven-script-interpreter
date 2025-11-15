@@ -6,7 +6,7 @@ import com.eb.script.interpreter.statement.StatementKind;
 import com.eb.script.interpreter.statement.ScreenStatement;
 import com.eb.script.interpreter.statement.ScreenShowStatement;
 import com.eb.script.interpreter.statement.ScreenHideStatement;
-import com.eb.script.interpreter.DisplayMetadata.ItemType;
+import com.eb.script.interpreter.DisplayItem.ItemType;
 import com.eb.script.interpreter.AreaDefinition.AreaType;
 import com.eb.script.interpreter.AreaDefinition.AreaItem;
 import javafx.application.Platform;
@@ -106,7 +106,7 @@ public class InterpreterScreen {
                                     Map<String, Object> displayDef = (Map<String, Object>) displayObj;
 
                                     // Store display metadata for the variable
-                                    storeDisplayMetadata(varName, displayDef, stmt.name);
+                                    storeDisplayItem(varName, displayDef, stmt.name);
                                 }
                             }
 
@@ -145,7 +145,7 @@ public class InterpreterScreen {
                 // If no explicit areas defined but variables with display metadata exist,
                 // create a default area with items for all displayed variables
                 java.util.List<String> varsWithDisplay = new java.util.ArrayList<>();
-                for (String key : context.getDisplayMetadata().keySet()) {
+                for (String key : context.getDisplayItem().keySet()) {
                     if (key.startsWith(stmt.name + ".")) {
                         String varName = key.substring(stmt.name.length() + 1);
                         varsWithDisplay.add(varName);
@@ -175,11 +175,23 @@ public class InterpreterScreen {
                         AreaDefinition.AreaItem labelItem = new AreaDefinition.AreaItem();
                         labelItem.name = varName + "_label";
                         labelItem.sequence = 0;
-                        DisplayMetadata labelMetadata = new DisplayMetadata();
-                        labelMetadata.itemType = DisplayMetadata.ItemType.LABEL;
+                        DisplayItem labelMetadata = new DisplayItem();
+                        labelMetadata.itemType = DisplayItem.ItemType.LABEL;
+                        
+                        // Get the display metadata for this variable to use its promptText as the label
+                        DisplayItem varDisplayItem = context.getDisplayItem().get(stmt.name + "." + varName);
+                        String labelText;
+                        if (varDisplayItem != null && varDisplayItem.promptText != null && !varDisplayItem.promptText.isEmpty()) {
+                            // Use the promptText from the variable's display metadata as the label
+                            labelText = varDisplayItem.promptText + ":";
+                        } else {
+                            // Fallback to capitalizing the variable name if no promptText is available
+                            labelText = capitalizeWords(varName) + ":";
+                        }
+                        labelMetadata.promptText = labelText;
+                        labelMetadata.style = "-fx-alignment: center-right;"; // Right-align the label text
                         labelItem.displayMetadata = labelMetadata;
                         labelItem.varRef = null; // Labels don't bind to variables
-                        labelItem.promptText = capitalizeWords(varName) + ":"; // Add colon after label
                         labelItem.maxWidth = "USE_PREF_SIZE";
                         labelItem.hgrow = "NEVER";
                         labelItem.minWidth = "150"; // Minimum width for label alignment
@@ -189,7 +201,7 @@ public class InterpreterScreen {
                         AreaDefinition.AreaItem item = new AreaDefinition.AreaItem();
                         item.varRef = varName;
                         item.sequence = 1;
-                        item.displayMetadata = context.getDisplayMetadata().get(stmt.name + "." + varName);
+                        item.displayMetadata = context.getDisplayItem().get(stmt.name + "." + varName);
                         
                         // Set sizing to fit content, not stretch to screen width
                         item.maxWidth = "USE_PREF_SIZE";
@@ -211,6 +223,12 @@ public class InterpreterScreen {
                                     break;
                                 case COMBOBOX:
                                 case CHOICEBOX:
+                                    item.prefWidth = "200";
+                                    break;
+                                case COLORPICKER:
+                                    item.prefWidth = "200";
+                                    break;
+                                case DATEPICKER:
                                     item.prefWidth = "200";
                                     break;
                                 default:
@@ -245,6 +263,9 @@ public class InterpreterScreen {
                 try {
                     Stage stage;
                     
+                    // Get screen variables map from context
+                    java.util.concurrent.ConcurrentHashMap<String, Object> varsMap = context.getScreenVars().get(screenName);
+                    
                     // Use ScreenFactory if areas are defined, otherwise create simple stage
                     if (areas != null && !areas.isEmpty()) {
                         // Create screen with areas using ScreenFactory
@@ -254,7 +275,8 @@ public class InterpreterScreen {
                             screenWidth,
                             screenHeight,
                             areas,
-                            (scrName, varName) -> context.getDisplayMetadata().get(scrName + "." + varName)
+                            (scrName, varName) -> context.getDisplayItem().get(scrName + "." + varName),
+                            varsMap  // Pass screenVars for binding
                         );
                     } else {
                         // Create simple stage without areas
@@ -303,7 +325,7 @@ public class InterpreterScreen {
                         context.getScreenAreas().remove(screenName);
                         
                         // Clean up display metadata for this screen
-                        context.getDisplayMetadata().entrySet().removeIf(entry -> 
+                        context.getDisplayItem().entrySet().removeIf(entry -> 
                             entry.getKey().startsWith(screenName + "."));
                     });
 
@@ -499,19 +521,19 @@ public class InterpreterScreen {
     /**
      * Helper method to store display metadata for a variable
      */
-    private void storeDisplayMetadata(String varName, Map<String, Object> displayDef, String screenName) {
-        DisplayMetadata metadata = parseDisplayMetadata(displayDef, screenName);
+    private void storeDisplayItem(String varName, Map<String, Object> displayDef, String screenName) {
+        DisplayItem metadata = parseDisplayItem(displayDef, screenName);
 
         // Store the metadata using a composite key: screenName.varName
         String key = screenName + "." + varName;
-        context.getDisplayMetadata().put(key, metadata);
+        context.getDisplayItem().put(key, metadata);
     }
 
     /**
      * Helper method to parse display metadata from JSON
      */
-    private DisplayMetadata parseDisplayMetadata(Map<String, Object> displayDef, String screenName) {
-        DisplayMetadata metadata = new DisplayMetadata();
+    private DisplayItem parseDisplayItem(Map<String, Object> displayDef, String screenName) {
+        DisplayItem metadata = new DisplayItem();
 
         // Extract display type and convert to enum
         if (displayDef.containsKey("type")) {
@@ -663,7 +685,7 @@ public class InterpreterScreen {
                         }
 
                         // Process optional display metadata for the item
-                        // If not provided, the item will use the DisplayMetadata from varRef
+                        // If not provided, the item will use the DisplayItem from varRef
                         if (itemDef.containsKey("display")) {
                             Object displayObj = itemDef.get("display");
                             if (displayObj instanceof Map) {
@@ -671,17 +693,24 @@ public class InterpreterScreen {
                                 Map<String, Object> displayDef = (Map<String, Object>) displayObj;
 
                                 // Parse display metadata for this specific item
-                                item.displayMetadata = parseDisplayMetadata(displayDef, screenName);
+                                item.displayMetadata = parseDisplayItem(displayDef, screenName);
                             }
                         }
                         // If displayMetadata is not set here, it will remain null
-                        // and the consuming code should fall back to using varRef's DisplayMetadata
+                        // and the consuming code should fall back to using varRef's DisplayItem
 
                         // Parse additional UI properties for the item
-                        if (itemDef.containsKey("promptText")) {
-                            item.promptText = String.valueOf(itemDef.get("promptText"));
-                        } else if (itemDef.containsKey("prompt_text")) {
-                            item.promptText = String.valueOf(itemDef.get("prompt_text"));
+                        // promptText now goes into displayMetadata
+                        if (itemDef.containsKey("promptText") || itemDef.containsKey("prompt_text")) {
+                            String promptText = itemDef.containsKey("promptText") 
+                                ? String.valueOf(itemDef.get("promptText"))
+                                : String.valueOf(itemDef.get("prompt_text"));
+                            
+                            // If displayMetadata doesn't exist yet, create it
+                            if (item.displayMetadata == null) {
+                                item.displayMetadata = new DisplayItem();
+                            }
+                            item.displayMetadata.promptText = promptText;
                         }
 
                         if (itemDef.containsKey("editable")) {

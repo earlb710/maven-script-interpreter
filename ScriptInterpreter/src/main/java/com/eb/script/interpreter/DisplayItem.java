@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Container class for screen display metadata, input item types, area types, and related definitions.
+ * Container class for screen display item metadata, input item types, area types, and related definitions.
  * This class holds all the metadata and enum types related to JavaFX UI rendering for the screen keyword.
  */
-public class DisplayMetadata {
+public class DisplayItem {
     // Item type enum (input and display items)
     ItemType itemType;
     // JavaFX input item type string (for compatibility)
@@ -30,10 +30,20 @@ public class DisplayMetadata {
     String alignment;
     // Regex pattern for validation (useful for text inputs)
     String pattern;
+    // Placeholder text for text inputs
+    String promptText;
+    // Options/values for selection controls (ComboBox, ChoiceBox, ListView)
+    List<String> options;
+    // Prompt text color
+    String promptColor;
+    // Prompt text bold flag
+    Boolean promptBold;
+    // Prompt text italic flag
+    Boolean promptItalic;
     
     @Override
     public String toString() {
-        return "DisplayMetadata{" +
+        return "DisplayItem{" +
                "itemType=" + itemType +
                ", cssClass='" + cssClass + '\'' +
                ", mandatory=" + mandatory +
@@ -43,6 +53,11 @@ public class DisplayMetadata {
                ", style='" + style + '\'' +
                ", alignment='" + alignment + '\'' +
                ", pattern='" + pattern + '\'' +
+               ", promptText='" + promptText + '\'' +
+               ", options=" + options +
+               ", promptColor='" + promptColor + '\'' +
+               ", promptBold=" + promptBold +
+               ", promptItalic=" + promptItalic +
                '}';
     }
     
@@ -54,7 +69,7 @@ public class DisplayMetadata {
         TEXTFIELD("textfield", "screen-item-textfield", 
                   "-fx-padding: 5 10 5 10; -fx-border-color: #cccccc; -fx-border-width: 1; -fx-border-radius: 3; -fx-background-radius: 3;"),
         TEXTAREA("textarea", "screen-item-textarea",
-                 "-fx-padding: 5 10 5 10; -fx-border-color: #cccccc; -fx-border-width: 1; -fx-border-radius: 3; -fx-background-radius: 3;"),
+                 "-fx-padding: 2; -fx-border-color: #cccccc; -fx-border-width: 1; -fx-border-radius: 3; -fx-background-radius: 3;"),
         PASSWORDFIELD("passwordfield", "screen-item-passwordfield",
                       "-fx-padding: 5 10 5 10; -fx-border-color: #cccccc; -fx-border-width: 1; -fx-border-radius: 3; -fx-background-radius: 3;"),
         
@@ -96,7 +111,7 @@ public class DisplayMetadata {
         LABELTEXT("labeltext", "screen-item-labeltext",
                   "-fx-padding: 2 5 2 5; -fx-font-size: 13px;"),
         TEXT("text", "screen-item-text",
-             "-fx-font-size: 13px;"),
+             "-fx-padding: 2; -fx-font-size: 13px;"),
         HYPERLINK("hyperlink", "screen-item-hyperlink",
                   "-fx-padding: 2 5 2 5; -fx-text-fill: #4a90e2; -fx-underline: true;"),
         SEPARATOR("separator", "screen-item-separator",

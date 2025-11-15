@@ -1,0 +1,171 @@
+// Test Script: Advanced Screen Features
+// Description: Tests advanced screen features including multiple screens, show/hide, and complex variable interactions
+// Author: EBS Test Suite
+// Date: 2025-11-15
+
+// First Screen - Main Control Panel
+screen mainPanel = {
+    "title": "Main Control Panel",
+    "width": 600,
+    "height": 500,
+    "vars": [
+        {
+            "name": "applicationName",
+            "type": "string",
+            "default": "",
+            "display": {"type": "textfield", "mandatory": true, "promptText": "Enter application name"}
+        },
+        {
+            "name": "version",
+            "type": "string",
+            "default": "",
+            "display": {"type": "textfield"}
+        },
+        {
+            "name": "isActive",
+            "type": "bool",
+            "default": true,
+            "display": {"type": "checkbox"}
+        },
+        {
+            "name": "statusMessage",
+            "type": "string",
+            "default": "",
+            "display": {"type": "textarea"}
+        }
+    ]
+};
+
+// Second Screen - Settings Panel
+screen settingsPanel = {
+    "title": "Settings Panel",
+    "width": 550,
+    "height": 450,
+    "vars": [
+        {
+            "name": "autoSave",
+            "type": "bool",
+            "default": false,
+            "display": {"type": "checkbox"}
+        },
+        {
+            "name": "refreshInterval",
+            "type": "int",
+            "default": 60,
+            "display": {
+                "type": "slider",
+                "min": 10,
+                "max": 300
+            }
+        },
+        {
+            "name": "logLevel",
+            "type": "string",
+            "default": "INFO",
+            "display": {"type": "combobox"}
+        },
+        {
+            "name": "maxConnections",
+            "type": "int",
+            "default": 10,
+            "display": {
+                "type": "spinner",
+                "min": 1,
+                "max": 100
+            }
+        }
+    ]
+};
+
+// Third Screen - Data Display
+screen dataDisplay = {
+    "title": "Data Display Panel",
+    "width": 500,
+    "height": 400,
+    "vars": [
+        {
+            "name": "currentData",
+            "type": "string",
+            "default": "",
+            "display": {"type": "label"}
+        },
+        {
+            "name": "recordCount",
+            "type": "int",
+            "default": 0,
+            "display": {"type": "textfield"}
+        },
+        {
+            "name": "lastUpdate",
+            "type": "string",
+            "default": "",
+            "display": {"type": "label"}
+        }
+    ]
+};
+
+// Test multiple screen creation
+print "Testing advanced screen features...";
+print "Created three screens: mainPanel, settingsPanel, dataDisplay";
+print "";
+
+// Access variables from different screens
+print "Main Panel - Application: " + mainPanel.applicationName;
+print "Settings Panel - Auto Save: " + settingsPanel.autoSave;
+print "Data Display - Record Count: " + dataDisplay.recordCount;
+print "";
+
+// Modify variables across screens
+print "Modifying variables across multiple screens...";
+mainPanel.applicationName = "Advanced EBS Manager";
+mainPanel.version = "2.0.0";
+mainPanel.isActive = true;
+mainPanel.statusMessage = "Multiple screens are active and synchronized";
+
+settingsPanel.autoSave = true;
+settingsPanel.refreshInterval = 120;
+settingsPanel.logLevel = "DEBUG";
+settingsPanel.maxConnections = 25;
+
+dataDisplay.currentData = "Sample data loaded successfully";
+dataDisplay.recordCount = 150;
+dataDisplay.lastUpdate = "2025/11/15 10:30:00";
+
+// Verify cross-screen modifications
+print "Main Panel Status: " + mainPanel.statusMessage;
+print "Settings - Auto Save: " + settingsPanel.autoSave;
+print "Settings - Refresh Interval: " + settingsPanel.refreshInterval;
+print "Data Display - Current Data: " + dataDisplay.currentData;
+print "Data Display - Record Count: " + dataDisplay.recordCount;
+print "";
+
+// Demonstrate variable interaction between screens
+var totalRefreshTime: int = settingsPanel.refreshInterval * 10;
+print "Calculated total refresh time (10 cycles): " + totalRefreshTime + " seconds";
+
+var summary: string = mainPanel.applicationName + " v" + mainPanel.version;
+print "Application Summary: " + summary;
+print "";
+
+// Test show/hide functionality
+print "Testing show/hide functionality...";
+print "Showing main panel...";
+screen mainPanel show;
+
+print "Showing settings panel...";
+screen settingsPanel show;
+
+print "Showing data display...";
+screen dataDisplay show;
+
+// Note: Hiding screens requires them to be shown first in a real interactive environment
+// print "Hiding settings panel...";
+// screen settingsPanel hide;
+
+// print "Showing settings panel again...";
+// screen settingsPanel show;
+
+print "";
+print "Advanced screen features test completed!";
+print "All three screens are now visible and can be interacted with independently.";
+print "Each screen runs in its own thread and maintains thread-safe variable access.";

@@ -118,7 +118,7 @@ public class AreaDefinition {
     
     /**
      * Class to hold area item definition with positioning, variable reference, and optional display metadata.
-     * If displayMetadata is not provided, the item will use the DisplayMetadata associated with its varRef.
+     * If displayMetadata is not provided, the item will use the DisplayItem associated with its varRef.
      */
     public static class AreaItem {
         // Item name/identifier
@@ -130,12 +130,12 @@ public class AreaDefinition {
         // Reference to a variable
         String varRef;
         // Optional display metadata for this specific item
-        // If null, will use the DisplayMetadata from varRef
-        DisplayMetadata displayMetadata;
+        // If null, will use the DisplayItem from varRef
+        DisplayItem displayMetadata;
         
         // Additional UI properties for this item
-        // Placeholder text for text inputs
-        String promptText;
+        // Alignment for prompt text (e.g., "left", "center", "right")
+        String promptAlignment;
         // Whether the field can be edited
         Boolean editable;
         // Whether the control is disabled
@@ -185,7 +185,7 @@ public class AreaDefinition {
                    ", layoutPos='" + layoutPos + '\'' +
                    ", varRef='" + varRef + '\'' +
                    ", displayMetadata=" + (displayMetadata != null ? "provided" : "from varRef") +
-                   ", promptText='" + promptText + '\'' +
+                   ", promptAlignment='" + promptAlignment + '\'' +
                    ", editable=" + editable +
                    ", disabled=" + disabled +
                    ", visible=" + visible +
