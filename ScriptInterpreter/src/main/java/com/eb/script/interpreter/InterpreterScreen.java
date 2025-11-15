@@ -177,7 +177,18 @@ public class InterpreterScreen {
                         labelItem.sequence = 0;
                         DisplayItem labelMetadata = new DisplayItem();
                         labelMetadata.itemType = DisplayItem.ItemType.LABEL;
-                        labelMetadata.promptText = capitalizeWords(varName) + ":"; // Add colon after label
+                        
+                        // Get the display metadata for this variable to use its promptText as the label
+                        DisplayItem varDisplayItem = context.getDisplayItem().get(stmt.name + "." + varName);
+                        String labelText;
+                        if (varDisplayItem != null && varDisplayItem.promptText != null && !varDisplayItem.promptText.isEmpty()) {
+                            // Use the promptText from the variable's display metadata as the label
+                            labelText = varDisplayItem.promptText + ":";
+                        } else {
+                            // Fallback to capitalizing the variable name if no promptText is available
+                            labelText = capitalizeWords(varName) + ":";
+                        }
+                        labelMetadata.promptText = labelText;
                         labelMetadata.style = "-fx-alignment: center-right;"; // Right-align the label text
                         labelItem.displayMetadata = labelMetadata;
                         labelItem.varRef = null; // Labels don't bind to variables
