@@ -124,8 +124,37 @@ public class ScreenFactory {
                                       java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
                                       java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
                                       OnClickHandler onClickHandler) {
+        return createScreen(screenName, title, width, height, areas, metadataProvider, screenVars, varTypes, onClickHandler, null);
+    }
+
+    /**
+     * Creates a complete JavaFX window/screen from area definitions with variable binding, onClick handlers,
+     * and stores bound controls in the context for later refresh.
+     *
+     * @param screenName The name of the screen
+     * @param title The window title
+     * @param width The window width
+     * @param height The window height
+     * @param areas List of AreaDefinitions containing containers and items
+     * @param metadataProvider Function to retrieve DisplayItem for variables (screenName, varName) -> metadata
+     * @param screenVars The ConcurrentHashMap containing screen variables for two-way binding (can be null)
+     * @param varTypes The ConcurrentHashMap containing screen variable types for proper type conversion (can be null)
+     * @param onClickHandler Handler for button onClick events (can be null)
+     * @param context InterpreterContext to store bound controls for later refresh (can be null)
+     * @return A Stage representing the complete window
+     */
+    public static Stage createScreen(String screenName, String title, double width, double height,
+                                      List<AreaDefinition> areas,
+                                      BiFunction<String, String, DisplayItem> metadataProvider,
+                                      java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+                                      java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
+                                      OnClickHandler onClickHandler,
+                                      InterpreterContext context) {
         Stage stage = new Stage();
         stage.setTitle(title);
+
+        // List to collect all bound controls for this screen
+        List<Node> allBoundControls = new ArrayList<>();
 
         // Create root container - use VBox as default if multiple areas
         Region rootContainer;
@@ -135,18 +164,31 @@ public class ScreenFactory {
             rootContainer = new Pane();
         } else if (areas.size() == 1) {
             // Single area - use it as root
-            rootContainer = createAreaWithItems(areas.get(0), screenName, metadataProvider, screenVars, varTypes, onClickHandler);
+            rootContainer = createAreaWithItems(areas.get(0), screenName, metadataProvider, screenVars, varTypes, onClickHandler, allBoundControls);
         } else {
             // Multiple areas - arrange in VBox
             VBox root = new VBox();
             root.setSpacing(10);
             
             for (AreaDefinition areaDef : areas) {
-                Region areaContainer = createAreaWithItems(areaDef, screenName, metadataProvider, screenVars, varTypes, onClickHandler);
+                Region areaContainer = createAreaWithItems(areaDef, screenName, metadataProvider, screenVars, varTypes, onClickHandler, allBoundControls);
                 root.getChildren().add(areaContainer);
             }
             
             rootContainer = root;
+        }
+
+        // Store bound controls in context if provided
+        if (context != null && !allBoundControls.isEmpty()) {
+            context.getScreenBoundControls().put(screenName, allBoundControls);
+            
+            // Register refresh callback that refreshes all bound controls
+            context.getScreenRefreshCallbacks().put(screenName, () -> {
+                // Use Platform.runLater to ensure UI updates happen on JavaFX Application Thread
+                Platform.runLater(() -> {
+                    refreshBoundControls(allBoundControls, screenVars);
+                });
+            });
         }
 
         Scene scene = new Scene(rootContainer, width, height);

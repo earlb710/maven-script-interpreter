@@ -306,7 +306,8 @@ public class InterpreterScreen {
                             (scrName, varName) -> context.getDisplayItem().get(scrName + "." + varName),
                             varsMap,  // Pass screenVars for binding
                             varTypesMap,  // Pass variable types for proper conversion
-                            onClickHandler  // Pass onClick handler for buttons
+                            onClickHandler,  // Pass onClick handler for buttons
+                            context  // Pass context to store bound controls for refresh
                         );
                     } else {
                         // Create simple stage without areas

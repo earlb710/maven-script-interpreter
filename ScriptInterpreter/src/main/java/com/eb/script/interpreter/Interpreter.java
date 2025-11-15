@@ -433,6 +433,8 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             if (screenVarMap != null) {
                 if (screenVarMap.containsKey(varName)) {
                     screenVarMap.put(varName, value);
+                    // Trigger screen refresh to update UI controls
+                    context.triggerScreenRefresh(screenName);
                     return;
                 } else {
                     throw error(stmt.getLine(), "Screen '" + screenName + "' does not have a variable named '" + varName + "'.");
