@@ -63,6 +63,10 @@ public class InterpreterScreen {
             // Create thread-safe variable storage for this screen
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVarMap = new java.util.concurrent.ConcurrentHashMap<>();
             context.getScreenVars().put(stmt.name, screenVarMap);
+            
+            // Create thread-safe variable type storage for this screen
+            java.util.concurrent.ConcurrentHashMap<String, DataType> screenVarTypeMap = new java.util.concurrent.ConcurrentHashMap<>();
+            context.getScreenVarTypes().put(stmt.name, screenVarTypeMap);
 
             // Process variable definitions if present
             if (config.containsKey("vars")) {
@@ -113,6 +117,11 @@ public class InterpreterScreen {
 
                             // Store in screen's thread-safe variable map
                             screenVarMap.put(varName, value);
+                            
+                            // Store the variable type if specified
+                            if (varType != null) {
+                                screenVarTypeMap.put(varName, varType);
+                            }
                         }
                     }
                 } else {
@@ -266,6 +275,7 @@ public class InterpreterScreen {
                     
                     // Get screen variables map from context
                     java.util.concurrent.ConcurrentHashMap<String, Object> varsMap = context.getScreenVars().get(screenName);
+                    java.util.concurrent.ConcurrentHashMap<String, DataType> varTypesMap = context.getScreenVarTypes().get(screenName);
                     
                     // Use ScreenFactory if areas are defined, otherwise create simple stage
                     if (areas != null && !areas.isEmpty()) {
@@ -294,6 +304,7 @@ public class InterpreterScreen {
                             areas,
                             (scrName, varName) -> context.getDisplayItem().get(scrName + "." + varName),
                             varsMap,  // Pass screenVars for binding
+                            varTypesMap,  // Pass variable types for proper conversion
                             onClickHandler  // Pass onClick handler for buttons
                         );
                     } else {

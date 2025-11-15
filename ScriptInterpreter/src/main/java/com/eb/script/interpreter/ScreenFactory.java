@@ -2,6 +2,7 @@ package com.eb.script.interpreter;
 
 import com.eb.script.interpreter.AreaDefinition.AreaItem;
 import com.eb.script.interpreter.AreaDefinition.AreaType;
+import com.eb.script.token.DataType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.networknt.schema.JsonSchema;
@@ -78,7 +79,7 @@ public class ScreenFactory {
     public static Stage createScreen(String screenName, String title, double width, double height,
                                       List<AreaDefinition> areas,
                                       BiFunction<String, String, DisplayItem> metadataProvider) {
-        return createScreen(screenName, title, width, height, areas, metadataProvider, null, null);
+        return createScreen(screenName, title, width, height, areas, metadataProvider, null, null, null);
     }
 
     /**
@@ -98,7 +99,7 @@ public class ScreenFactory {
                                       List<AreaDefinition> areas,
                                       BiFunction<String, String, DisplayItem> metadataProvider,
                                       java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
-        return createScreen(screenName, title, width, height, areas, metadataProvider, screenVars, null);
+        return createScreen(screenName, title, width, height, areas, metadataProvider, screenVars, null, null);
     }
 
     /**
@@ -113,6 +114,7 @@ public class ScreenFactory {
      * @param areas List of AreaDefinitions containing containers and items
      * @param metadataProvider Function to retrieve DisplayItem for variables (screenName, varName) -> metadata
      * @param screenVars The ConcurrentHashMap containing screen variables for two-way binding (can be null)
+     * @param varTypes The ConcurrentHashMap containing screen variable types for proper type conversion (can be null)
      * @param onClickHandler Handler for button onClick events (can be null)
      * @return A Stage representing the complete window
      */
@@ -120,6 +122,7 @@ public class ScreenFactory {
                                       List<AreaDefinition> areas,
                                       BiFunction<String, String, DisplayItem> metadataProvider,
                                       java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+                                      java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
                                       OnClickHandler onClickHandler) {
         Stage stage = new Stage();
         stage.setTitle(title);
@@ -132,14 +135,14 @@ public class ScreenFactory {
             rootContainer = new Pane();
         } else if (areas.size() == 1) {
             // Single area - use it as root
-            rootContainer = createAreaWithItems(areas.get(0), screenName, metadataProvider, screenVars, onClickHandler);
+            rootContainer = createAreaWithItems(areas.get(0), screenName, metadataProvider, screenVars, varTypes, onClickHandler);
         } else {
             // Multiple areas - arrange in VBox
             VBox root = new VBox();
             root.setSpacing(10);
             
             for (AreaDefinition areaDef : areas) {
-                Region areaContainer = createAreaWithItems(areaDef, screenName, metadataProvider, screenVars, onClickHandler);
+                Region areaContainer = createAreaWithItems(areaDef, screenName, metadataProvider, screenVars, varTypes, onClickHandler);
                 root.getChildren().add(areaContainer);
             }
             
@@ -157,7 +160,7 @@ public class ScreenFactory {
      */
     private static Region createAreaWithItems(AreaDefinition areaDef, String screenName,
                                                BiFunction<String, String, DisplayItem> metadataProvider) {
-        return createAreaWithItems(areaDef, screenName, metadataProvider, null, null);
+        return createAreaWithItems(areaDef, screenName, metadataProvider, null, null, null);
     }
 
     /**
@@ -166,7 +169,7 @@ public class ScreenFactory {
     private static Region createAreaWithItems(AreaDefinition areaDef, String screenName,
                                                BiFunction<String, String, DisplayItem> metadataProvider,
                                                java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
-        return createAreaWithItems(areaDef, screenName, metadataProvider, screenVars, null);
+        return createAreaWithItems(areaDef, screenName, metadataProvider, screenVars, null, null);
     }
 
     /**
@@ -175,9 +178,10 @@ public class ScreenFactory {
     private static Region createAreaWithItems(AreaDefinition areaDef, String screenName,
                                                BiFunction<String, String, DisplayItem> metadataProvider,
                                                java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+                                               java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
                                                OnClickHandler onClickHandler) {
         List<Node> boundControls = new ArrayList<>();
-        return createAreaWithItems(areaDef, screenName, metadataProvider, screenVars, onClickHandler, boundControls);
+        return createAreaWithItems(areaDef, screenName, metadataProvider, screenVars, varTypes, onClickHandler, boundControls);
     }
 
     /**
@@ -186,6 +190,7 @@ public class ScreenFactory {
     private static Region createAreaWithItems(AreaDefinition areaDef, String screenName,
                                                BiFunction<String, String, DisplayItem> metadataProvider,
                                                java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+                                               java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
                                                OnClickHandler onClickHandler,
                                                List<Node> boundControls) {
         // Create the container using AreaContainerFactory
@@ -229,7 +234,7 @@ public class ScreenFactory {
 
                 // Set up two-way data binding if screenVars is provided and item has a varRef
                 if (screenVars != null && item.varRef != null) {
-                    setupVariableBinding(control, item.varRef, screenVars, metadata);
+                    setupVariableBinding(control, item.varRef, screenVars, varTypes, metadata);
                     // Track this control so we can refresh it when variables change
                     boundControls.add(control);
                 }
@@ -245,7 +250,7 @@ public class ScreenFactory {
         // Add nested child areas to the container
         if (areaDef.childAreas != null && !areaDef.childAreas.isEmpty()) {
             for (AreaDefinition childArea : areaDef.childAreas) {
-                Region childContainer = createAreaWithItems(childArea, screenName, metadataProvider, screenVars, onClickHandler, boundControls);
+                Region childContainer = createAreaWithItems(childArea, screenName, metadataProvider, screenVars, varTypes, onClickHandler, boundControls);
                 
                 // Add the child container to the parent container
                 // Treat child areas as regular nodes
@@ -930,6 +935,7 @@ public class ScreenFactory {
      */
     private static void setupVariableBinding(Node control, String varName,
                                               java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+                                              java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
                                               DisplayItem metadata) {
         if (control == null || varName == null || screenVars == null) {
             return;
@@ -940,11 +946,12 @@ public class ScreenFactory {
         updateControlFromValue(control, currentValue, metadata);
 
         // Set up listener on the control to update the variable when control changes
-        addControlListener(control, varName, screenVars, metadata);
+        addControlListener(control, varName, screenVars, varTypes, metadata);
 
         // Store references for potential future use
         control.getProperties().put("varName", varName);
         control.getProperties().put("screenVars", screenVars);
+        control.getProperties().put("varTypes", varTypes);
         control.getProperties().put("metadata", metadata);
     }
 
@@ -993,10 +1000,22 @@ public class ScreenFactory {
      */
     private static void addControlListener(Node control, String varName,
                                             java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+                                            java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
                                             DisplayItem metadata) {
         if (control instanceof javafx.scene.control.TextField) {
             ((javafx.scene.control.TextField) control).textProperty().addListener((obs, oldVal, newVal) -> {
-                screenVars.put(varName, newVal);
+                // Convert the string value to the appropriate type if type info is available
+                Object convertedValue = newVal;
+                if (varTypes != null && varTypes.containsKey(varName)) {
+                    DataType type = varTypes.get(varName);
+                    try {
+                        convertedValue = type.convertValue(newVal);
+                    } catch (Exception e) {
+                        // If conversion fails, keep as string
+                        System.err.println("Warning: Could not convert '" + newVal + "' to " + type + " for variable '" + varName + "'");
+                    }
+                }
+                screenVars.put(varName, convertedValue);
             });
         } else if (control instanceof javafx.scene.control.TextArea) {
             ((javafx.scene.control.TextArea) control).textProperty().addListener((obs, oldVal, newVal) -> {

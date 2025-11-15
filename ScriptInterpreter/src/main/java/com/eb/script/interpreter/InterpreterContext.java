@@ -4,6 +4,7 @@ import com.eb.util.Debugger;
 import com.eb.script.interpreter.db.DbAdapter;
 import com.eb.script.interpreter.db.DbConnection;
 import com.eb.script.interpreter.db.OracleDbAdapter;
+import com.eb.script.token.DataType;
 import com.eb.ui.cli.ScriptArea;
 import javafx.stage.Stage;
 import java.util.Deque;
@@ -26,6 +27,7 @@ public class InterpreterContext {
     private final ConcurrentHashMap<String, Stage> screens = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Thread> screenThreads = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> screenVars = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, ConcurrentHashMap<String, DataType>> screenVarTypes = new ConcurrentHashMap<>();
     private final Set<String> screensBeingCreated = ConcurrentHashMap.newKeySet();
     private final Map<String, DisplayItem> displayMetadata = new java.util.HashMap<>();
     private final Map<String, List<AreaDefinition>> screenAreas = new java.util.HashMap<>();
@@ -69,6 +71,10 @@ public class InterpreterContext {
 
     public ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> getScreenVars() {
         return screenVars;
+    }
+
+    public ConcurrentHashMap<String, ConcurrentHashMap<String, DataType>> getScreenVarTypes() {
+        return screenVarTypes;
     }
 
     public Set<String> getScreensBeingCreated() {
