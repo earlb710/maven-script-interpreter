@@ -70,10 +70,12 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
 
     private final InterpreterContext context;
     private InterpreterScreen screenInterpreter;
+    private InterpreterDatabase databaseInterpreter;
 
     public Interpreter() {
         this.context = new InterpreterContext();
         this.screenInterpreter = new InterpreterScreen(context, this);
+        this.databaseInterpreter = new InterpreterDatabase(context, this);
     }
 
     public InterpreterContext getContext() {
@@ -88,7 +90,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         context.setDb(adapter);
     }
 
-    private String currentConnection() {
+    String currentConnection() {
         return context.getCurrentConnection();
     }
 
@@ -105,7 +107,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         return context.getOutput();
     }
     
-    // Public method for InterpreterScreen to call evaluate
+    // Public method for sub-interpreters to call evaluate
     public Object evaluate(com.eb.script.interpreter.expression.Expression expr) throws InterpreterError {
         if (expr == null) {
             return null;
@@ -113,7 +115,12 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         return expr.accept(this);
     }
     
-    // Public method for InterpreterScreen to create errors
+    // Public method for sub-interpreters to accept statements
+    public void acceptStatement(com.eb.script.interpreter.statement.Statement stmt) throws InterpreterError {
+        stmt.accept(this);
+    }
+    
+    // Public method for sub-interpreters to create errors
     public InterpreterError error(int line, String message) {
         message = "Runtime error on line " + line + " : " + message;
         return new InterpreterError(message, environment().getCallStack());
@@ -1441,44 +1448,12 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
 
     @Override
     public void visitConnectStatement(ConnectStatement stmt) throws InterpreterError {
-        environment().pushCallStack(stmt.getLine(), StatementKind.SQL, "Connect %1", stmt.name);
-        try {
-            if (context.getConnections().containsKey(stmt.name)) {
-                throw error(stmt.getLine(), "Connection '" + stmt.name + "' already exists.");
-            }
-            Object spec = evaluate(stmt.spec);        // string | json | identifier value
-            DbConnection conn;
-            try {
-                conn = context.getDb().connect(spec);
-            } catch (Exception e) {
-                throw error(stmt.getLine(), "Connect failed: " + e.getMessage());
-            }
-            context.getConnections().put(stmt.name, conn);
-        } catch (InterpreterError ex) {
-            throw error(stmt.getLine(), ex.getLocalizedMessage());
-        } finally {
-            environment().popCallStack();
-        }
+        databaseInterpreter.visitConnectStatement(stmt);
     }
 
     @Override
     public void visitCloseConnectionStatement(CloseConnectionStatement stmt) throws InterpreterError {
-        environment().pushCallStack(stmt.getLine(), StatementKind.SQL, "Close connect %1", stmt.name);
-        try {
-            DbConnection conn = context.getConnections().remove(stmt.name);
-            if (conn == null) {
-                throw error(stmt.getLine(), "Unknown connection '" + stmt.name + "'");
-            }
-            try {
-                conn.close();
-            } catch (Exception e) {
-                throw error(stmt.getLine(), "Close connection failed: " + e.getMessage());
-            }
-        } catch (InterpreterError ex) {
-            throw error(stmt.getLine(), ex.getLocalizedMessage());
-        } finally {
-            environment().popCallStack();
-        }
+        databaseInterpreter.visitCloseConnectionStatement(stmt);
     }
 
     @Override
@@ -1498,175 +1473,37 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
 
     @Override
     public void visitUseConnectionStatement(UseConnectionStatement stmt) throws InterpreterError {
-        environment().pushCallStack(stmt.getLine(), StatementKind.SQL, "Use connection %1", stmt.connectionName);
-        try {
-            DbConnection conn = context.getConnections().get(stmt.connectionName);
-            if (conn == null) {
-                throw error(stmt.getLine(), "Unknown connection '" + stmt.connectionName + "'. Did you connect first?");
-            }
-            context.getConnectionStack().push(stmt.connectionName);
-            try {
-                if (stmt.statements != null) {
-                    for (Statement s : stmt.statements) {
-                        environment().pushCallStack(s.getLine(), StatementKind.STATEMENT, "%1", s);
-                        try {
-                            s.accept(this);
-                        } finally {
-                            environment().popCallStack();
-                        }
-                    }
-                }
-            } finally {
-                context.getConnectionStack().pop();
-            }
-        } catch (InterpreterError ex) {
-            throw error(stmt.getLine(), ex.getLocalizedMessage());
-        } finally {
-            environment().popCallStack();
-        }
+        databaseInterpreter.visitUseConnectionStatement(stmt);
     }
 
     @Override
     public void visitCursorStatement(CursorStatement stmt) throws InterpreterError {
-        environment().pushCallStack(stmt.getLine(), StatementKind.SQL, "Cursor %1", stmt.name);
-        try {
-            String connName = currentConnection();
-            if (connName == null) {
-                throw error(stmt.getLine(), "cursor declaration requires an active 'use <connection> { ... }' block");
-            }
-            // Parser ensures SELECT text is captured in stmt.select.sql
-            context.getCursorSpecs().put(stmt.name, new CursorSpec(connName, stmt.select.sql, stmt.getLine())); // [1](https://za-prod.asyncgw.teams.microsoft.com/v1/objects/0-nza-d4-608facf2fafd223072e8197a8a6a9d5e/views/original/ScriptInterpreter_now.zip)
-        } catch (InterpreterError ex) {
-            throw error(stmt.getLine(), ex.getLocalizedMessage());
-        } finally {
-            environment().popCallStack();
-        }
+        databaseInterpreter.visitCursorStatement(stmt);
     }
 
     @Override
     public void visitOpenCursorStatement(OpenCursorStatement stmt) throws InterpreterError {
-        environment().pushCallStack(stmt.getLine(), StatementKind.SQL, "Open cursor %1", stmt.name);
-        try {
-            CursorSpec spec = context.getCursorSpecs().get(stmt.name);
-            if (spec == null) {
-                throw error(stmt.getLine(), "Unknown cursor '" + stmt.name + "'. Did you declare with 'cursor " + stmt.name + " = select ...;'?");
-            }
-            DbConnection conn = context.getConnections().get(spec.connectionName);
-            if (conn == null) {
-                throw error(stmt.getLine(), "Connection '" + spec.connectionName + "' is not open");
-            }
-            // Collect parameters (named and/or positional)
-            final java.util.Map<String, Object> named = new java.util.LinkedHashMap<>();
-            final java.util.List<Object> positional = new java.util.ArrayList<>();
-            if (stmt.parameters != null) {
-                for (com.eb.script.interpreter.statement.Parameter p : stmt.parameters) {
-                    Object val = evaluate(p.value);
-                    if (p.name != null) {
-                        named.put(p.name, val);
-                    } else {
-                        positional.add(val);
-                    }
-                }
-            }
-            // Open the cursor via adapter and expose it as a variable with the cursor's name
-            try {
-                DbCursor cursor = conn.openCursor(spec.sql, named, positional);
-                // make cursor variable visible (for myCursor.hasNext()/next())
-                environment().getEnvironmentValues().define(stmt.name, cursor);
-            } catch (Exception e) {
-                throw error(stmt.getLine(), "Open cursor failed: " + e.getMessage());
-            }
-        } catch (InterpreterError ex) {
-            throw error(stmt.getLine(), ex.getLocalizedMessage());
-        } finally {
-            environment().popCallStack();
-        }
+        databaseInterpreter.visitOpenCursorStatement(stmt);
     }
 
     @Override
     public void visitCloseCursorStatement(com.eb.script.interpreter.statement.CloseCursorStatement stmt) throws InterpreterError {
-        environment().pushCallStack(stmt.getLine(), StatementKind.SQL, "Close cursor %1", stmt.name);
-        try {
-            Object v;
-            try {
-                v = environment().get(stmt.name);
-            } catch (RuntimeException undefined) {
-                // not defined -> treat as not open
-                v = null;
-            }
-            if (v instanceof DbCursor c) {
-                try {
-                    c.close();
-                } catch (Exception e) {
-                    throw error(stmt.getLine(), "Close cursor failed: " + e.getMessage());
-                }
-                // Optionally clear variable so subsequent hasNext()/next() will fail fast
-                environment().getEnvironmentValues().assign(stmt.name, null);
-            } // else: silently ignore closing a non-open cursor name
-        } finally {
-            environment().popCallStack();
-        }
+        databaseInterpreter.visitCloseCursorStatement(stmt);
     }
 
     @Override
     public Object visitSqlSelectExpression(com.eb.script.interpreter.expression.SqlSelectExpression expr) throws InterpreterError {
-        environment().pushCallStack(expr.line, StatementKind.SQL, "Expression %1", expr.sql);
-        try {
-            String connName = currentConnection();
-            if (connName == null) {
-                throw error(expr.line, "SELECT requires an active 'use <connection> { ... }' block");
-            }
-            DbConnection conn = context.getConnections().get(connName);
-            if (conn == null) {
-                throw error(expr.line, "Connection '" + connName + "' is not open");
-            }
-            try {
-                // No parameters here; add if you later extend SELECT expr to support them.
-                return conn.executeSelect(expr.sql,
-                        java.util.Collections.emptyMap(),
-                        java.util.Collections.emptyList());
-            } catch (Exception e) {
-                throw error(expr.line, "SELECT failed: " + e.getMessage());
-            }
-        } finally {
-            environment().popCallStack();
-        }
+        return databaseInterpreter.visitSqlSelectExpression(expr);
     }
 
     @Override
     public Object visitCursorHasNextExpression(com.eb.script.interpreter.expression.CursorHasNextExpression expr) throws InterpreterError {
-        environment().pushCallStack(expr.getLine(), StatementKind.SQL, "HasNext %1", expr.target.toString());
-        try {
-            Object v = evaluate(expr.target);
-            if (!(v instanceof DbCursor c)) {
-                throw error(expr.getLine(), "hasNext() target is not a cursor");
-            }
-            try {
-                return c.hasNext();
-            } catch (Exception e) {
-                throw error(expr.getLine(), "hasNext() failed: " + e.getMessage());
-            }
-        } finally {
-            environment().popCallStack();
-        }
+        return databaseInterpreter.visitCursorHasNextExpression(expr);
     }
 
     @Override
     public Object visitCursorNextExpression(com.eb.script.interpreter.expression.CursorNextExpression expr) throws InterpreterError {
-        environment().pushCallStack(expr.getLine(), StatementKind.SQL, "Next %1", expr.target.toString());
-        try {
-            Object v = evaluate(expr.target);
-            if (!(v instanceof DbCursor c)) {
-                throw error(expr.getLine(), "next() target is not a cursor");
-            }
-            try {
-                return c.next(); // map of column -> value
-            } catch (Exception e) {
-                throw error(expr.getLine(), "next() failed: " + e.getMessage());
-            }
-        } finally {
-            environment().popCallStack();
-        }
+        return databaseInterpreter.visitCursorNextExpression(expr);
     }
 
     // --- Helpers ---
