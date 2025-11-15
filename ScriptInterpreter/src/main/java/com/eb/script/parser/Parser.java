@@ -149,10 +149,9 @@ public class Parser {
                         } catch (ParseError ex) {
                             throw new ParseError(ex.getMessage() + " in call to " + c.name + " on line " + c.getLine());
                         }
-                    } else {
-                        // existing behavior for unknown calls
-                        throw error("Call cannot find '" + c.name + "'");
                     }
+                    // Allow calls to unknown functions - they might be imported at runtime
+                    // The interpreter will validate at execution time
                 } else {
                     c.setBlockStatement(b);
                 }
@@ -190,10 +189,9 @@ public class Parser {
                         } catch (ParseError ex) {
                             throw new ParseError(ex.getMessage() + " in call to " + call.name + " on line " + call.getLine());
                         }
-                    } else {
-                        // existing behavior for unknown calls
-                        throw error("Call cannot find '" + call.name + "'");
                     }
+                    // Allow calls to unknown functions - they might be imported at runtime
+                    // The interpreter will validate at execution time
                 } else {
                     call.setBlockStatement(b);
                     ce.setReturnType(b.returnType);
@@ -378,8 +376,18 @@ public class Parser {
     private Statement importStatement() throws ParseError {
         int line = prevToken.line;
         
-        // Expect a string literal for the filename
-        EbsToken filenameToken = consume(EbsTokenType.DATATYPE, "Expected string literal for import filename.");
+        // Expect a string literal for the filename: QUOTE1 STRING QUOTE1 (or QUOTE2)
+        EbsTokenType quoteType = null;
+        if (match(EbsTokenType.QUOTE1)) {
+            quoteType = EbsTokenType.QUOTE1;
+        } else if (match(EbsTokenType.QUOTE2)) {
+            quoteType = EbsTokenType.QUOTE2;
+        } else {
+            throw error(peek(), "Expected string literal for import filename.");
+        }
+        
+        EbsToken filenameToken = consume(EbsTokenType.STRING, "Expected string value for import filename.");
+        consume(quoteType, "Expected closing quote after import filename.");
         
         if (!(filenameToken.literal instanceof String)) {
             throw error(filenameToken, "Import filename must be a string literal.");
@@ -574,10 +582,22 @@ public class Parser {
         EbsToken name = consume(EbsTokenType.IDENTIFIER, "Expected parameter name.");
         EbsTokenType type = null;
         if (match(EbsTokenType.COLON)) {
-            EbsToken t = consume(EbsTokenType.IDENTIFIER, "Expected type name after ':'.");
-            type = getTokenType((String) t.literal);
-            if (type == null) {
-                throw error(name, "Invalid type : " + (String) t.literal);
+            // Accept either IDENTIFIER or a data type keyword (STRING, INTEGER, etc.)
+            EbsToken t = peek();
+            if (t.type == EbsTokenType.IDENTIFIER || t.type == EbsTokenType.DATATYPE || 
+                t.type.getDataType() != null) {
+                advance();
+                if (t.type == EbsTokenType.IDENTIFIER || t.type == EbsTokenType.DATATYPE) {
+                    type = getTokenType((String) t.literal);
+                    if (type == null) {
+                        throw error(name, "Invalid type : " + (String) t.literal);
+                    }
+                } else {
+                    // It's already a data type keyword
+                    type = t.type;
+                }
+            } else {
+                throw error(t, "Expected type name after ':'.");
             }
         } else {
             throw error(name, "No parameter type supplied for " + (String) name.literal);

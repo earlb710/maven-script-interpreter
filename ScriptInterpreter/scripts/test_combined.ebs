@@ -1,0 +1,93 @@
+// Test Script: Combined Import and Button onClick Test
+// Description: Tests both import functionality and button onClick with inline EBS code
+// Date: 2025-11-15
+
+// Import utility functions first
+import "utils.ebs";
+
+print "=== Combined Test: Import + Button onClick ===";
+print "";
+
+// Create a screen that uses both imported functions and button onClick
+screen combinedTest = {
+    "title": "Combined Test - Import & onClick",
+    "width": 700,
+    "height": 500,
+    "vars": [
+        {
+            "name": "inputName",
+            "type": "string",
+            "default": "User",
+            "display": {"type": "textfield", "promptText": "Enter your name"}
+        },
+        {
+            "name": "inputNumber",
+            "type": "int",
+            "default": 5,
+            "display": {"type": "textfield", "promptText": "Enter a number"}
+        },
+        {
+            "name": "result",
+            "type": "string",
+            "default": "Results will appear here...",
+            "display": {"type": "textarea", "promptText": "Result"}
+        }
+    ],
+    "area": [
+        {
+            "name": "buttonArea",
+            "type": "hbox",
+            "items": [
+                {
+                    "name": "greetBtn",
+                    "sequence": 0,
+                    "display": {
+                        "type": "button",
+                        "promptText": "Format Greeting",
+                        "onClick": "var g: string = call formatGreeting(combinedTest.inputName); combinedTest.result = g; print g;"
+                    }
+                },
+                {
+                    "name": "doubleBtn",
+                    "sequence": 1,
+                    "display": {
+                        "type": "button",
+                        "promptText": "Multiply by 2",
+                        "onClick": "var d: int = call multiplyByTwo(combinedTest.inputNumber); combinedTest.result = \"Multiply \" + combinedTest.inputNumber + \" by 2 = \" + d; print combinedTest.result;"
+                    }
+                },
+                {
+                    "name": "factorialBtn",
+                    "sequence": 2,
+                    "display": {
+                        "type": "button",
+                        "promptText": "Calculate Factorial",
+                        "onClick": "var f: int = call factorial(combinedTest.inputNumber); combinedTest.result = \"Factorial of \" + combinedTest.inputNumber + \" = \" + f; print combinedTest.result;"
+                    }
+                },
+                {
+                    "name": "clearBtn",
+                    "sequence": 3,
+                    "display": {
+                        "type": "button",
+                        "promptText": "Clear",
+                        "onClick": "combinedTest.result = \"Results cleared\"; print \"Result cleared\";"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+print "Combined test screen created successfully";
+print "Using imported functions: formatGreeting, multiplyByTwo, factorial";
+print "Buttons configured with onClick handlers that call imported functions";
+print "";
+
+// Show the screen
+screen combinedTest show;
+
+print "Combined test screen is now visible.";
+print "Enter values and click buttons to test both features!";
+print "";
+print "=== Combined Test Setup Complete ===";

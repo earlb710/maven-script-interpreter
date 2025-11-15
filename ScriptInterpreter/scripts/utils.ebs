@@ -1,0 +1,22 @@
+// utils.ebs - Utility functions for import testing
+// This file can be imported by other scripts
+
+// Define a utility function to format a greeting
+formatGreeting(name: string) return string {
+    return "Hello, " + name + "! Welcome to EBS scripting.";
+}
+
+// Define a utility function to calculate factorial
+factorial(n: int) return int {
+    if n <= 1 then {
+        return 1;
+    }
+    return n * call factorial(n - 1);
+}
+
+// Define a utility function to multiply a number by 2
+multiplyByTwo(x: int) return int {
+    return x * 2;
+}
+
+print "Utility functions loaded from utils.ebs";
