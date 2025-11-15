@@ -31,15 +31,19 @@ public final class Json {
         this.i = 0;
     }
 
+    public static Object parse(String input) {
+        return parse(input, false);
+    }
+
     /**
      * Parse a JSON string into Java objects.
      */
-    public static Object parse(String input) {
+    public static Object parse(String input, boolean lowerCaseKey) {
         if (input == null) {
             return null;
         }
         Json p = new Json(input);
-        Object value = p.readValue();
+        Object value = p.readValue(lowerCaseKey);
         p.skipWs();
         if (!p.eof()) {
             throw p.error("Trailing content after JSON value");
@@ -48,7 +52,7 @@ public final class Json {
     }
 
     // === Core reading ===
-    private Object readValue() {
+    private Object readValue(boolean lowerCaseKey) {
         skipWs();
         if (eof()) {
             throw error("Unexpected end of input");
@@ -56,9 +60,9 @@ public final class Json {
         char c = peek();
         return switch (c) {
             case '{' ->
-                readObject();
+                readObject(lowerCaseKey);
             case '[' ->
-                readArray();
+                readArray(lowerCaseKey);
             case '"' ->
                 readString();
             case 't', 'f' ->
@@ -72,7 +76,7 @@ public final class Json {
         };
     }
 
-    private Map<String, Object> readObject() {
+    private Map<String, Object> readObject(boolean lowerCaseKey) {
         expect('{');
         skipWs();
         Map<String, Object> obj = new LinkedHashMap<>();
@@ -89,8 +93,12 @@ public final class Json {
             skipWs();
             expect(':');
             skipWs();
-            Object val = readValue();
-            obj.put(key, val);
+            Object val = readValue(lowerCaseKey);
+            if (lowerCaseKey) {
+                obj.put(key, val);
+            } else {
+                obj.put(key, val);
+            }
             skipWs();
             char c = next();
             if (c == '}') {
@@ -103,7 +111,7 @@ public final class Json {
         return obj;
     }
 
-    private ArrayDef<Object, List<Object>> readArray() {
+    private ArrayDef<Object, List<Object>> readArray(boolean lowerCaseKey) {
         expect('[');
         skipWs();
         ArrayDef arr = new ArrayDynamic(DataType.ANY);
@@ -112,7 +120,7 @@ public final class Json {
             return arr;
         }
         while (true) {
-            Object val = readValue();
+            Object val = readValue(lowerCaseKey);
             arr.add(val);
             skipWs();
             char c = next();
@@ -482,7 +490,6 @@ public final class Json {
      * JsonPath.getValue(root, "state[3].city[2].street[40].house[15].owner");
      * String s = JsonPath.getAs(root, "user.name", String.class, "<unknown>");
      */
-    
     // check empty json
     public static boolean isEmpty(Object obj) {
         if (obj == null) {
