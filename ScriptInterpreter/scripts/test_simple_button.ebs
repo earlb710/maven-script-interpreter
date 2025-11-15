@@ -1,0 +1,37 @@
+// Simple button test to verify text display and onClick
+print "Creating simple button test screen...";
+
+screen simpleBtn = {
+    "title": "Simple Button Test",
+    "width": 400,
+    "height": 200,
+    "vars": [
+        {
+            "name": "clickCount",
+            "type": "int",
+            "default": 0,
+            "display": {"type": "textfield", "promptText": "Click count"}
+        }
+    ],
+    "area": [
+        {
+            "name": "buttonArea",
+            "type": "vbox",
+            "items": [
+                {
+                    "name": "testButton",
+                    "sequence": 0,
+                    "display": {
+                        "type": "button",
+                        "promptText": "Click Me!",
+                        "onClick": "simpleBtn.clickCount = simpleBtn.clickCount + 1; print \"Button clicked! Count: \" + simpleBtn.clickCount;"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+print "Initial click count: " + simpleBtn.clickCount;
+screen simpleBtn show;
+print "Screen shown - try clicking the button!";

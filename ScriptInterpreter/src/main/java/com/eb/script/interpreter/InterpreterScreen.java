@@ -547,9 +547,6 @@ public class InterpreterScreen {
         context.getDisplayItem().put(key, metadata);
     }
 
-    /**
-     * Helper method to parse display metadata from JSON
-     */
     private DisplayItem parseDisplayItem(Map<String, Object> displayDef, String screenName) {
         DisplayItem metadata = new DisplayItem();
 
