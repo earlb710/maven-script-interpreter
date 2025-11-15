@@ -245,6 +245,9 @@ public class InterpreterScreen {
                 try {
                     Stage stage;
                     
+                    // Get screen variables map from context
+                    java.util.concurrent.ConcurrentHashMap<String, Object> varsMap = context.getScreenVars().get(screenName);
+                    
                     // Use ScreenFactory if areas are defined, otherwise create simple stage
                     if (areas != null && !areas.isEmpty()) {
                         // Create screen with areas using ScreenFactory
@@ -254,7 +257,8 @@ public class InterpreterScreen {
                             screenWidth,
                             screenHeight,
                             areas,
-                            (scrName, varName) -> context.getDisplayItem().get(scrName + "." + varName)
+                            (scrName, varName) -> context.getDisplayItem().get(scrName + "." + varName),
+                            varsMap  // Pass screenVars for binding
                         );
                     } else {
                         // Create simple stage without areas

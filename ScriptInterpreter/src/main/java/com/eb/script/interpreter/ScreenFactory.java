@@ -70,6 +70,26 @@ public class ScreenFactory {
     public static Stage createScreen(String screenName, String title, double width, double height,
                                       List<AreaDefinition> areas,
                                       BiFunction<String, String, DisplayItem> metadataProvider) {
+        return createScreen(screenName, title, width, height, areas, metadataProvider, null);
+    }
+
+    /**
+     * Creates a complete JavaFX window/screen from area definitions with variable binding.
+     * This method creates containers, adds items, applies layout properties, and sets up two-way data binding.
+     *
+     * @param screenName The name of the screen
+     * @param title The window title
+     * @param width The window width
+     * @param height The window height
+     * @param areas List of AreaDefinitions containing containers and items
+     * @param metadataProvider Function to retrieve DisplayItem for variables (screenName, varName) -> metadata
+     * @param screenVars The ConcurrentHashMap containing screen variables for two-way binding (can be null)
+     * @return A Stage representing the complete window
+     */
+    public static Stage createScreen(String screenName, String title, double width, double height,
+                                      List<AreaDefinition> areas,
+                                      BiFunction<String, String, DisplayItem> metadataProvider,
+                                      java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
         Stage stage = new Stage();
         stage.setTitle(title);
 
@@ -81,14 +101,14 @@ public class ScreenFactory {
             rootContainer = new Pane();
         } else if (areas.size() == 1) {
             // Single area - use it as root
-            rootContainer = createAreaWithItems(areas.get(0), screenName, metadataProvider);
+            rootContainer = createAreaWithItems(areas.get(0), screenName, metadataProvider, screenVars);
         } else {
             // Multiple areas - arrange in VBox
             VBox root = new VBox();
             root.setSpacing(10);
             
             for (AreaDefinition areaDef : areas) {
-                Region areaContainer = createAreaWithItems(areaDef, screenName, metadataProvider);
+                Region areaContainer = createAreaWithItems(areaDef, screenName, metadataProvider, screenVars);
                 root.getChildren().add(areaContainer);
             }
             
@@ -106,6 +126,15 @@ public class ScreenFactory {
      */
     private static Region createAreaWithItems(AreaDefinition areaDef, String screenName,
                                                BiFunction<String, String, DisplayItem> metadataProvider) {
+        return createAreaWithItems(areaDef, screenName, metadataProvider, null);
+    }
+
+    /**
+     * Creates a container from AreaDefinition and adds all items to it with variable binding.
+     */
+    private static Region createAreaWithItems(AreaDefinition areaDef, String screenName,
+                                               BiFunction<String, String, DisplayItem> metadataProvider,
+                                               java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
         // Create the container using AreaContainerFactory
         Region container = AreaContainerFactory.createContainer(areaDef);
 
@@ -126,6 +155,11 @@ public class ScreenFactory {
                 // Create the item using AreaItemFactory
                 Node control = AreaItemFactory.createItem(item, metadata);
 
+                // Set up two-way data binding if screenVars is provided and item has a varRef
+                if (screenVars != null && item.varRef != null) {
+                    setupVariableBinding(control, item.varRef, screenVars, metadata);
+                }
+
                 // Apply item layout properties
                 applyItemLayoutProperties(control, item);
 
@@ -137,7 +171,7 @@ public class ScreenFactory {
         // Add nested child areas to the container
         if (areaDef.childAreas != null && !areaDef.childAreas.isEmpty()) {
             for (AreaDefinition childArea : areaDef.childAreas) {
-                Region childContainer = createAreaWithItems(childArea, screenName, metadataProvider);
+                Region childContainer = createAreaWithItems(childArea, screenName, metadataProvider, screenVars);
                 
                 // Add the child container to the parent container
                 // Treat child areas as regular nodes
@@ -809,6 +843,115 @@ public class ScreenFactory {
             return Boolean.parseBoolean(String.valueOf(value));
         }
         return defaultValue;
+    }
+
+    /**
+     * Sets up two-way data binding between a UI control and a screen variable.
+     * When the variable changes, the UI updates. When the UI changes, the variable updates.
+     *
+     * @param control The JavaFX control to bind
+     * @param varName The variable name
+     * @param screenVars The map containing screen variables
+     * @param metadata The DisplayItem metadata for the control
+     */
+    private static void setupVariableBinding(Node control, String varName,
+                                              java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+                                              DisplayItem metadata) {
+        if (control == null || varName == null || screenVars == null) {
+            return;
+        }
+
+        // Initialize control with current variable value
+        Object currentValue = screenVars.get(varName);
+        updateControlFromValue(control, currentValue, metadata);
+
+        // Set up listener on the control to update the variable when control changes
+        addControlListener(control, varName, screenVars, metadata);
+
+        // Store references for potential future use
+        control.getProperties().put("varName", varName);
+        control.getProperties().put("screenVars", screenVars);
+        control.getProperties().put("metadata", metadata);
+    }
+
+    /**
+     * Updates a control's value based on the variable value.
+     */
+    private static void updateControlFromValue(Node control, Object value, DisplayItem metadata) {
+        if (control instanceof javafx.scene.control.TextField) {
+            ((javafx.scene.control.TextField) control).setText(value != null ? String.valueOf(value) : "");
+        } else if (control instanceof javafx.scene.control.TextArea) {
+            ((javafx.scene.control.TextArea) control).setText(value != null ? String.valueOf(value) : "");
+        } else if (control instanceof javafx.scene.control.CheckBox) {
+            ((javafx.scene.control.CheckBox) control).setSelected(value instanceof Boolean && (Boolean) value);
+        } else if (control instanceof javafx.scene.control.Slider) {
+            if (value instanceof Number) {
+                ((javafx.scene.control.Slider) control).setValue(((Number) value).doubleValue());
+            }
+        } else if (control instanceof javafx.scene.control.Spinner) {
+            if (value instanceof Number) {
+                @SuppressWarnings("unchecked")
+                javafx.scene.control.Spinner<Integer> spinner = (javafx.scene.control.Spinner<Integer>) control;
+                spinner.getValueFactory().setValue(((Number) value).intValue());
+            }
+        } else if (control instanceof javafx.scene.control.ComboBox) {
+            if (value != null) {
+                @SuppressWarnings("unchecked")
+                javafx.scene.control.ComboBox<String> comboBox = (javafx.scene.control.ComboBox<String>) control;
+                comboBox.setValue(String.valueOf(value));
+            }
+        } else if (control instanceof javafx.scene.control.ChoiceBox) {
+            if (value != null) {
+                @SuppressWarnings("unchecked")
+                javafx.scene.control.ChoiceBox<String> choiceBox = (javafx.scene.control.ChoiceBox<String>) control;
+                choiceBox.setValue(String.valueOf(value));
+            }
+        } else if (control instanceof javafx.scene.control.Label) {
+            ((javafx.scene.control.Label) control).setText(value != null ? String.valueOf(value) : "");
+        }
+    }
+
+    /**
+     * Adds a listener to a control to update the variable when the control changes.
+     */
+    private static void addControlListener(Node control, String varName,
+                                            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+                                            DisplayItem metadata) {
+        if (control instanceof javafx.scene.control.TextField) {
+            ((javafx.scene.control.TextField) control).textProperty().addListener((obs, oldVal, newVal) -> {
+                screenVars.put(varName, newVal);
+            });
+        } else if (control instanceof javafx.scene.control.TextArea) {
+            ((javafx.scene.control.TextArea) control).textProperty().addListener((obs, oldVal, newVal) -> {
+                screenVars.put(varName, newVal);
+            });
+        } else if (control instanceof javafx.scene.control.CheckBox) {
+            ((javafx.scene.control.CheckBox) control).selectedProperty().addListener((obs, oldVal, newVal) -> {
+                screenVars.put(varName, newVal);
+            });
+        } else if (control instanceof javafx.scene.control.Slider) {
+            ((javafx.scene.control.Slider) control).valueProperty().addListener((obs, oldVal, newVal) -> {
+                screenVars.put(varName, newVal.intValue());
+            });
+        } else if (control instanceof javafx.scene.control.Spinner) {
+            @SuppressWarnings("unchecked")
+            javafx.scene.control.Spinner<Integer> spinner = (javafx.scene.control.Spinner<Integer>) control;
+            spinner.valueProperty().addListener((obs, oldVal, newVal) -> {
+                screenVars.put(varName, newVal);
+            });
+        } else if (control instanceof javafx.scene.control.ComboBox) {
+            @SuppressWarnings("unchecked")
+            javafx.scene.control.ComboBox<String> comboBox = (javafx.scene.control.ComboBox<String>) control;
+            comboBox.valueProperty().addListener((obs, oldVal, newVal) -> {
+                screenVars.put(varName, newVal);
+            });
+        } else if (control instanceof javafx.scene.control.ChoiceBox) {
+            @SuppressWarnings("unchecked")
+            javafx.scene.control.ChoiceBox<String> choiceBox = (javafx.scene.control.ChoiceBox<String>) control;
+            choiceBox.valueProperty().addListener((obs, oldVal, newVal) -> {
+                screenVars.put(varName, newVal);
+            });
+        }
     }
 
     // Schema validation methods
