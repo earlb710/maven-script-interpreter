@@ -12,49 +12,49 @@ screen dateColorScreen = {
             "name": "birthDate",
             "type": "string",
             "default": "2000-01-01",
-            "display": {"type": "datepicker", "mandatory": true}
+            "display": {"type": "datepicker", "mandatory": true, "promptText": "Select birth date"}
         },
         {
             "name": "appointmentDate",
             "type": "string",
             "default": "2025-12-31",
-            "display": {"type": "datepicker"}
+            "display": {"type": "datepicker", "promptText": "Select appointment date"}
         },
         {
             "name": "startDate",
             "type": "string",
             "default": "2025-01-01",
-            "display": {"type": "datepicker"}
+            "display": {"type": "datepicker", "promptText": "Select start date"}
         },
         {
             "name": "endDate",
             "type": "string",
             "default": "2025-12-31",
-            "display": {"type": "datepicker"}
+            "display": {"type": "datepicker", "promptText": "Select end date"}
         },
         {
             "name": "backgroundColor",
             "type": "string",
             "default": "#FFFFFF",
-            "display": {"type": "colorpicker"}
+            "display": {"type": "colorpicker", "promptText": "Choose background color"}
         },
         {
             "name": "textColor",
             "type": "string",
             "default": "#000000",
-            "display": {"type": "colorpicker"}
+            "display": {"type": "colorpicker", "promptText": "Choose text color"}
         },
         {
             "name": "accentColor",
             "type": "string",
             "default": "#4A90E2",
-            "display": {"type": "colorpicker"}
+            "display": {"type": "colorpicker", "promptText": "Choose accent color"}
         },
         {
             "name": "highlightColor",
             "type": "string",
             "default": "#FFD700",
-            "display": {"type": "colorpicker"}
+            "display": {"type": "colorpicker", "promptText": "Choose highlight color"}
         }
     ]
 };

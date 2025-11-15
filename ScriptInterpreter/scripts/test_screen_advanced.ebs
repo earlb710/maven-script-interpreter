@@ -12,13 +12,13 @@ screen mainPanel = {
         {
             "name": "applicationName",
             "type": "string",
-            "default": "EBS Screen Manager",
-            "display": {"type": "textfield", "mandatory": true}
+            "default": "",
+            "display": {"type": "textfield", "mandatory": true, "promptText": "Enter application name"}
         },
         {
             "name": "version",
             "type": "string",
-            "default": "1.0.0",
+            "default": "",
             "display": {"type": "textfield"}
         },
         {
@@ -30,7 +30,7 @@ screen mainPanel = {
         {
             "name": "statusMessage",
             "type": "string",
-            "default": "System initialized",
+            "default": "",
             "display": {"type": "textarea"}
         }
     ]
@@ -86,7 +86,7 @@ screen dataDisplay = {
         {
             "name": "currentData",
             "type": "string",
-            "default": "No data loaded",
+            "default": "",
             "display": {"type": "label"}
         },
         {
@@ -98,7 +98,7 @@ screen dataDisplay = {
         {
             "name": "lastUpdate",
             "type": "string",
-            "default": "Never",
+            "default": "",
             "display": {"type": "label"}
         }
     ]

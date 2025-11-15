@@ -12,31 +12,31 @@ screen displayScreen = {
             "name": "titleLabel",
             "type": "string",
             "default": "Welcome to Display Controls Test",
-            "display": {"type": "label"}
+            "display": {"type": "label", "promptText": "Title"}
         },
         {
             "name": "instructionLabel",
             "type": "string",
             "default": "This screen demonstrates various display-only controls",
-            "display": {"type": "labeltext"}
+            "display": {"type": "labeltext", "promptText": "Instructions"}
         },
         {
             "name": "descriptionText",
             "type": "string",
             "default": "Text controls can display formatted information without user editing",
-            "display": {"type": "text"}
+            "display": {"type": "text", "promptText": "Description"}
         },
         {
             "name": "websiteLink",
             "type": "string",
             "default": "https://www.example.com",
-            "display": {"type": "hyperlink"}
+            "display": {"type": "hyperlink", "promptText": "Website link"}
         },
         {
             "name": "documentationLink",
             "type": "string",
             "default": "https://docs.example.com",
-            "display": {"type": "hyperlink"}
+            "display": {"type": "hyperlink", "promptText": "Documentation link"}
         },
         {
             "name": "statusMessage",
@@ -44,7 +44,8 @@ screen displayScreen = {
             "default": "System Status: All systems operational",
             "display": {
                 "type": "label",
-                "style": "-fx-text-fill: green; -fx-font-weight: bold;"
+                "style": "-fx-text-fill: green; -fx-font-weight: bold;",
+                "promptText": "Status"
             }
         },
         {
@@ -53,7 +54,8 @@ screen displayScreen = {
             "default": "",
             "display": {
                 "type": "label",
-                "style": "-fx-text-fill: red; -fx-font-weight: bold;"
+                "style": "-fx-text-fill: red; -fx-font-weight: bold;",
+                "promptText": "Error"
             }
         },
         {
@@ -62,7 +64,8 @@ screen displayScreen = {
             "default": "Warning: This is a test environment",
             "display": {
                 "type": "label",
-                "style": "-fx-text-fill: orange; -fx-font-style: italic;"
+                "style": "-fx-text-fill: orange; -fx-font-style: italic;",
+                "promptText": "Warning"
             }
         },
         {
@@ -77,7 +80,8 @@ screen displayScreen = {
             "default": "Information can be displayed in various formats and styles",
             "display": {
                 "type": "text",
-                "alignment": "center"
+                "alignment": "center",
+                "promptText": "Information"
             }
         }
     ]
