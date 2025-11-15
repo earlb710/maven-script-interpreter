@@ -54,7 +54,7 @@ public class DisplayMetadata {
         TEXTFIELD("textfield", "screen-item-textfield", 
                   "-fx-padding: 5 10 5 10; -fx-border-color: #cccccc; -fx-border-width: 1; -fx-border-radius: 3; -fx-background-radius: 3;"),
         TEXTAREA("textarea", "screen-item-textarea",
-                 "-fx-padding: 5 10 5 10; -fx-border-color: #cccccc; -fx-border-width: 1; -fx-border-radius: 3; -fx-background-radius: 3;"),
+                 "-fx-padding: 2; -fx-border-color: #cccccc; -fx-border-width: 1; -fx-border-radius: 3; -fx-background-radius: 3;"),
         PASSWORDFIELD("passwordfield", "screen-item-passwordfield",
                       "-fx-padding: 5 10 5 10; -fx-border-color: #cccccc; -fx-border-width: 1; -fx-border-radius: 3; -fx-background-radius: 3;"),
         
@@ -96,7 +96,7 @@ public class DisplayMetadata {
         LABELTEXT("labeltext", "screen-item-labeltext",
                   "-fx-padding: 2 5 2 5; -fx-font-size: 13px;"),
         TEXT("text", "screen-item-text",
-             "-fx-font-size: 13px;"),
+             "-fx-padding: 2; -fx-font-size: 13px;"),
         HYPERLINK("hyperlink", "screen-item-hyperlink",
                   "-fx-padding: 2 5 2 5; -fx-text-fill: #4a90e2; -fx-underline: true;"),
         SEPARATOR("separator", "screen-item-separator",

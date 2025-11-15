@@ -184,6 +184,25 @@ java -cp target/classes com.eb.script.Run scripts/test_screen_basic.ebs
 
 ---
 
+### 9. test_screen_padding_alignment.ebs
+**Purpose:** Tests reduced padding and prompt alignment features  
+**Features Tested:**
+- Textarea with reduced padding (2 pixels)
+- Text control with reduced padding (2 pixels)
+- Prompt text alignment options (left, center, right)
+
+**Changes Demonstrated:**
+- Textarea padding reduced from '5 10 5 10' to '2' pixels
+- Text control padding set to '2' pixels
+- New `promptAlignment` property for AreaItem
+
+**Use Cases:**
+- More compact UI layouts
+- Better control over text alignment
+- Improved visual consistency
+
+---
+
 ## Running the Tests
 
 ### Interactive Console (JavaFX UI)
@@ -212,6 +231,7 @@ java -cp target/classes com.eb.script.Run scripts/test_screen_date_color.ebs
 java -cp target/classes com.eb.script.Run scripts/test_screen_display.ebs
 java -cp target/classes com.eb.script.Run scripts/test_screen_advanced.ebs
 java -cp target/classes com.eb.script.Run scripts/test_screen_comprehensive.ebs
+java -cp target/classes com.eb.script.Run scripts/test_screen_padding_alignment.ebs
 ```
 
 ## Screen Control Types Reference
@@ -290,6 +310,16 @@ screen myScreen hide;
 - `alignment` - Text alignment (left, center, right)
 - `pattern` - Regex pattern for validation
 - `caseFormat` - Text case formatting (upper, lower, title)
+
+### AreaItem Properties (for area-based layouts)
+- `promptText` - Placeholder text for input controls
+- `promptAlignment` - Alignment for prompt text (left, center, right)
+- `editable` - Whether the field can be edited
+- `disabled` - Whether the control is disabled
+- `visible` - Whether the control is visible
+- `tooltip` - Hover tooltip text
+- `textColor` - Text color (hex or named color)
+- `backgroundColor` - Background color (hex or named color)
 
 ### Styling Example
 ```javascript

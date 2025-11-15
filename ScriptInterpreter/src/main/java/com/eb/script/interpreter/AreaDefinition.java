@@ -136,6 +136,8 @@ public class AreaDefinition {
         // Additional UI properties for this item
         // Placeholder text for text inputs
         String promptText;
+        // Alignment for prompt text (e.g., "left", "center", "right")
+        String promptAlignment;
         // Whether the field can be edited
         Boolean editable;
         // Whether the control is disabled
@@ -186,6 +188,7 @@ public class AreaDefinition {
                    ", varRef='" + varRef + '\'' +
                    ", displayMetadata=" + (displayMetadata != null ? "provided" : "from varRef") +
                    ", promptText='" + promptText + '\'' +
+                   ", promptAlignment='" + promptAlignment + '\'' +
                    ", editable=" + editable +
                    ", disabled=" + disabled +
                    ", visible=" + visible +

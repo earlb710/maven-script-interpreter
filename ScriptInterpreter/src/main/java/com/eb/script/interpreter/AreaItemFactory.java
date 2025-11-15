@@ -210,6 +210,32 @@ public class AreaItemFactory {
             }
         }
 
+        // Apply prompt text alignment for applicable controls
+        if (item.promptAlignment != null && !item.promptAlignment.isEmpty()) {
+            String alignment = item.promptAlignment.toLowerCase();
+            String alignmentStyle = "";
+            
+            switch (alignment) {
+                case "left":
+                    alignmentStyle = "-fx-alignment: center-left;";
+                    break;
+                case "center":
+                    alignmentStyle = "-fx-alignment: center;";
+                    break;
+                case "right":
+                    alignmentStyle = "-fx-alignment: center-right;";
+                    break;
+            }
+            
+            if (!alignmentStyle.isEmpty()) {
+                if (control instanceof TextField || control instanceof TextArea || control instanceof ComboBox) {
+                    control.setStyle(control.getStyle() + " " + alignmentStyle);
+                } else if (control instanceof Label || control instanceof Button) {
+                    control.setStyle(control.getStyle() + " " + alignmentStyle);
+                }
+            }
+        }
+
         // Apply editable property
         if (item.editable != null) {
             if (control instanceof TextField) {
