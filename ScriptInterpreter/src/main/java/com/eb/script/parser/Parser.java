@@ -43,6 +43,7 @@ import com.eb.script.interpreter.statement.CloseConnectionStatement;
 import com.eb.script.interpreter.statement.ScreenStatement;
 import com.eb.script.interpreter.statement.ScreenShowStatement;
 import com.eb.script.interpreter.statement.ScreenHideStatement;
+import com.eb.script.interpreter.statement.ImportStatement;
 import com.eb.script.token.ebs.EbsTokenType;
 import com.eb.util.Util;
 import java.io.IOException;
@@ -105,21 +106,33 @@ public class Parser {
         current = 0;
         currToken = tokens.get(current);
         blocks = new HashMap();
-        statements = new ArrayList<>();
+        
+        // Separate imports from other statements
+        List<Statement> importStatements = new ArrayList<>();
+        List<Statement> otherStatements = new ArrayList<>();
+        
         while (!isAtEnd()) {
             Statement s = statement();
             if (s != null) {
-                if (s instanceof BlockStatement bs) {
+                if (s instanceof ImportStatement) {
+                    importStatements.add(s);
+                } else if (s instanceof BlockStatement bs) {
                     if (bs.name != null) {
                         blocks.put(bs.name, bs);
                     } else {
-                        statements.add(s);
+                        otherStatements.add(s);
                     }
                 } else {
-                    statements.add(s);
+                    otherStatements.add(s);
                 }
             }
         }
+        
+        // Place imports first, then other statements
+        statements = new ArrayList<>();
+        statements.addAll(importStatements);
+        statements.addAll(otherStatements);
+        
         postParse();
     }
 
@@ -302,7 +315,9 @@ public class Parser {
     }
 
     private Statement statement() throws ParseError {
-        if (match(EbsTokenType.VAR)) {
+        if (match(EbsTokenType.IMPORT)) {
+            return importStatement();
+        } else if (match(EbsTokenType.VAR)) {
             return varDeclaration();
         } else if (match(EbsTokenType.IF)) {
             return ifStatement();
@@ -358,6 +373,22 @@ public class Parser {
             return null;
         }
         return assignmentStatement();
+    }
+
+    private Statement importStatement() throws ParseError {
+        int line = prevToken.line;
+        
+        // Expect a string literal for the filename
+        EbsToken filenameToken = consume(EbsTokenType.DATATYPE, "Expected string literal for import filename.");
+        
+        if (!(filenameToken.literal instanceof String)) {
+            throw error(filenameToken, "Import filename must be a string literal.");
+        }
+        
+        String filename = (String) filenameToken.literal;
+        consume(EbsTokenType.SEMICOLON, "Expected ';' after import statement.");
+        
+        return new ImportStatement(line, filename);
     }
 
     private Statement varDeclaration() throws ParseError {

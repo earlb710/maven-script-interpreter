@@ -19,6 +19,7 @@ public enum EbsTokenType implements LexerToken {
     SEMICOLON(";"), LBRACE("{"), RBRACE("}"), COLON(":"), COMMA(","), DOT("."), LPAREN("("), RPAREN(")"), LBRACKET("["), RBRACKET("]"),
     // Keywords
     VAR(PrintStyle.KEYWORD, Category.KEYWORD, "var"), PRINT(PrintStyle.KEYWORD, Category.KEYWORD, "print"), CALL(PrintStyle.KEYWORD, Category.KEYWORD, "call", "#"), RETURN(PrintStyle.KEYWORD, Category.KEYWORD, "return"),
+    IMPORT(PrintStyle.KEYWORD, Category.KEYWORD, "import"),
     // Conditional
     IF(PrintStyle.KEYWORD, Category.KEYWORD, "if"), THEN(PrintStyle.KEYWORD, Category.KEYWORD, "then"), ELSE(PrintStyle.KEYWORD, Category.KEYWORD, "else"),
     // Loop
