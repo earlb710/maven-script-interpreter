@@ -189,14 +189,17 @@ public class InterpreterScreen {
                         DisplayItem labelMetadata = new DisplayItem();
                         labelMetadata.itemType = DisplayItem.ItemType.LABEL;
                         
-                        // Get the display metadata for this variable to use its promptText as the label
+                        // Get the display metadata for this variable to use its labelText or promptText as the label
                         DisplayItem varDisplayItem = context.getDisplayItem().get(stmt.name + "." + varName);
                         String labelText;
-                        if (varDisplayItem != null && varDisplayItem.promptText != null && !varDisplayItem.promptText.isEmpty()) {
-                            // Use the promptText from the variable's display metadata as the label
+                        if (varDisplayItem != null && varDisplayItem.labelText != null && !varDisplayItem.labelText.isEmpty()) {
+                            // Prefer labelText if specified - don't add colon if it already has one
+                            labelText = varDisplayItem.labelText.endsWith(":") ? varDisplayItem.labelText : varDisplayItem.labelText + ":";
+                        } else if (varDisplayItem != null && varDisplayItem.promptText != null && !varDisplayItem.promptText.isEmpty()) {
+                            // Fall back to promptText if no labelText is available
                             labelText = varDisplayItem.promptText + ":";
                         } else {
-                            // Fallback to capitalizing the variable name if no promptText is available
+                            // Final fallback to capitalizing the variable name if neither labelText nor promptText is available
                             labelText = capitalizeWords(varName) + ":";
                         }
                         labelMetadata.promptText = labelText;
@@ -645,6 +648,37 @@ public class InterpreterScreen {
                 for (Object item : list) {
                     metadata.options.add(String.valueOf(item));
                 }
+            }
+        }
+
+        // Extract promptText styling properties - check both camelCase and lowercase
+        if (displayDef.containsKey("promptColor")) {
+            metadata.promptColor = String.valueOf(displayDef.get("promptColor"));
+        } else if (displayDef.containsKey("promptcolor")) {
+            metadata.promptColor = String.valueOf(displayDef.get("promptcolor"));
+        }
+
+        if (displayDef.containsKey("promptBold")) {
+            Object boldObj = displayDef.get("promptBold");
+            if (boldObj instanceof Boolean) {
+                metadata.promptBold = (Boolean) boldObj;
+            }
+        } else if (displayDef.containsKey("promptbold")) {
+            Object boldObj = displayDef.get("promptbold");
+            if (boldObj instanceof Boolean) {
+                metadata.promptBold = (Boolean) boldObj;
+            }
+        }
+
+        if (displayDef.containsKey("promptItalic")) {
+            Object italicObj = displayDef.get("promptItalic");
+            if (italicObj instanceof Boolean) {
+                metadata.promptItalic = (Boolean) italicObj;
+            }
+        } else if (displayDef.containsKey("promptitalic")) {
+            Object italicObj = displayDef.get("promptitalic");
+            if (italicObj instanceof Boolean) {
+                metadata.promptItalic = (Boolean) italicObj;
             }
         }
 
