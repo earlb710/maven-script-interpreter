@@ -708,9 +708,13 @@ public class InterpreterScreen {
                             item.layoutPos = String.valueOf(itemDef.get("relative_pos"));
                         }
 
+                        // Check for both camelCase and lowercase versions of varRef
                         if (itemDef.containsKey("varRef")) {
                             item.varRef = String.valueOf(itemDef.get("varRef")).toLowerCase();
                             System.out.println("DEBUG: Found varRef: " + item.varRef);
+                        } else if (itemDef.containsKey("varref")) {
+                            item.varRef = String.valueOf(itemDef.get("varref")).toLowerCase();
+                            System.out.println("DEBUG: Found varref (lowercase): " + item.varRef);
                         } else if (itemDef.containsKey("var_ref")) {
                             item.varRef = String.valueOf(itemDef.get("var_ref")).toLowerCase();
                             System.out.println("DEBUG: Found var_ref: " + item.varRef);
