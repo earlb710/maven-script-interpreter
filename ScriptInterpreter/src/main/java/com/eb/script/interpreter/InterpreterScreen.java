@@ -548,6 +548,9 @@ public class InterpreterScreen {
     }
 
     private DisplayItem parseDisplayItem(Map<String, Object> displayDef, String screenName) {
+        System.out.println("DEBUG parseDisplayItem: displayDef keys = " + displayDef.keySet());
+        System.out.println("DEBUG parseDisplayItem: displayDef = " + displayDef);
+        
         DisplayItem metadata = new DisplayItem();
 
         // Extract display type and convert to enum
@@ -591,6 +594,9 @@ public class InterpreterScreen {
         
         if (displayDef.containsKey("promptText")) {
             metadata.promptText = String.valueOf(displayDef.get("promptText"));
+            System.out.println("DEBUG parseDisplayItem: Set promptText to: " + metadata.promptText);
+        } else {
+            System.out.println("DEBUG parseDisplayItem: promptText key NOT FOUND in displayDef");
         }
 
         // Extract onClick event handler for buttons
@@ -704,8 +710,12 @@ public class InterpreterScreen {
 
                         if (itemDef.containsKey("varRef")) {
                             item.varRef = String.valueOf(itemDef.get("varRef")).toLowerCase();
+                            System.out.println("DEBUG: Found varRef: " + item.varRef);
                         } else if (itemDef.containsKey("var_ref")) {
                             item.varRef = String.valueOf(itemDef.get("var_ref")).toLowerCase();
+                            System.out.println("DEBUG: Found var_ref: " + item.varRef);
+                        } else {
+                            System.out.println("DEBUG: No varRef found for item: " + itemDef.get("name"));
                         }
 
                         // Process optional display metadata for the item
