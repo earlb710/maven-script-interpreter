@@ -39,19 +39,34 @@ screen combinedTest = {
                     "name": "nameField",
                     "sequence": 0,
                     "varRef": "inputName",
-                    "display": {"type": "textfield", "promptText": "Enter your name"}
+                    "display": {
+                        "type": "textfield",
+                        "promptText": "enter your name",
+                        "labelText": "Name:",
+                        "labelTextAlignment": "left"
+                    }
                 },
                 {
                     "name": "numberField",
                     "sequence": 1,
                     "varRef": "inputNumber",
-                    "display": {"type": "textfield", "promptText": "Enter a number"}
+                    "display": {
+                        "type": "textfield",
+                        "promptText": "enter a number",
+                        "labelText": "Number:",
+                        "labelTextAlignment": "left"
+                    }
                 },
                 {
                     "name": "resultField",
                     "sequence": 2,
                     "varRef": "result",
-                    "display": {"type": "textarea", "promptText": "Result"}
+                    "display": {
+                        "type": "textarea",
+                        "promptText": "results appear here",
+                        "labelText": "Result:",
+                        "labelTextAlignment": "left"
+                    }
                 }
             ]
         },

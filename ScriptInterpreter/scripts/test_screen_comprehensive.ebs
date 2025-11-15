@@ -13,39 +13,65 @@ screen comprehensiveScreen = {
             "name": "username",
             "type": "string",
             "default": "",
-            "display": {"type": "textfield", "mandatory": true, "promptText": "Enter user name"}
+            "display": {
+                "type": "textfield",
+                "mandatory": true,
+                "promptText": "enter user name",
+                "labelText": "Username:",
+                "labelTextAlignment": "left"
+            }
         },
         {
             "name": "bio",
             "type": "string",
             "default": "",
-            "display": {"type": "textarea", "promptText": "Enter your biography"}
+            "display": {
+                "type": "textarea",
+                "promptText": "enter your biography",
+                "labelText": "Biography:",
+                "labelTextAlignment": "left"
+            }
         },
         {
             "name": "password",
             "type": "string",
             "default": "",
-            "display": {"type": "passwordfield", "mandatory": true, "promptText": "Enter password"}
+            "display": {
+                "type": "passwordfield",
+                "mandatory": true,
+                "promptText": "enter password",
+                "labelText": "Password:",
+                "labelTextAlignment": "left"
+            }
         },
         {
             "name": "agreeTerms",
             "type": "bool",
             "default": false,
-            "display": {"type": "checkbox", "mandatory": true, "promptText": "I agree to terms"}
+            "display": {
+                "type": "checkbox",
+                "mandatory": true,
+                "promptText": "I agree to terms"
+            }
         },
         {
             "name": "newsletter",
             "type": "bool",
             "default": true,
-            "display": {"type": "checkbox", "promptText": "Subscribe to newsletter"}
+            "display": {
+                "type": "checkbox",
+                "promptText": "Subscribe to newsletter"
+            }
         },
         {
             "name": "accountType",
             "type": "string",
             "default": "",
             "display": {
-                "type": "combobox", 
-                "promptText": "Select account type",
+                "type": "combobox",
+                "promptText": "choose account type",
+                "labelText": "Account Type:",
+                "labelTextAlignment": "left",
                 "options": ["Basic", "Standard", "Premium", "Enterprise"]
             }
         },
@@ -54,8 +80,10 @@ screen comprehensiveScreen = {
             "type": "string",
             "default": "",
             "display": {
-                "type": "choicebox", 
-                "promptText": "Select region",
+                "type": "choicebox",
+                "promptText": "choose your region",
+                "labelText": "Region:",
+                "labelTextAlignment": "left",
                 "options": ["North America", "Europe", "Asia Pacific", "Latin America", "Middle East"]
             }
         },
@@ -67,7 +95,9 @@ screen comprehensiveScreen = {
                 "type": "spinner",
                 "min": 18,
                 "max": 120,
-                "promptText": "Enter age"
+                "promptText": "enter age",
+                "labelText": "Age:",
+                "labelTextAlignment": "left"
             }
         },
         {
@@ -78,7 +108,9 @@ screen comprehensiveScreen = {
                 "type": "slider",
                 "min": 0,
                 "max": 50,
-                "promptText": "Years of experience"
+                "promptText": "years of experience",
+                "labelText": "Experience (Years):",
+                "labelTextAlignment": "left"
             }
         },
         {
@@ -89,20 +121,32 @@ screen comprehensiveScreen = {
                 "type": "slider",
                 "min": 1,
                 "max": 10,
-                "promptText": "Rate satisfaction (1-10)"
+                "promptText": "rate from 1 to 10",
+                "labelText": "Satisfaction Rating:",
+                "labelTextAlignment": "left"
             }
         },
         {
             "name": "joinDate",
             "type": "string",
             "default": "2025-01-01",
-            "display": {"type": "datepicker", "promptText": "Select join date"}
+            "display": {
+                "type": "datepicker",
+                "promptText": "select join date",
+                "labelText": "Join Date:",
+                "labelTextAlignment": "left"
+            }
         },
         {
             "name": "themeColor",
             "type": "string",
             "default": "#4A90E2",
-            "display": {"type": "colorpicker", "promptText": "Choose theme color"}
+            "display": {
+                "type": "colorpicker",
+                "promptText": "choose theme color",
+                "labelText": "Theme Color:",
+                "labelTextAlignment": "left"
+            }
         },
         {
             "name": "welcomeMessage",
@@ -142,7 +186,12 @@ screen comprehensiveScreen = {
             "name": "preferences",
             "type": "string",
             "default": "{\"notifications\": true, \"language\": \"en\"}",
-            "display": {"type": "textarea", "promptText": "Enter preferences (JSON)"}
+            "display": {
+                "type": "textarea",
+                "promptText": "enter preferences (JSON format)",
+                "labelText": "Preferences:",
+                "labelTextAlignment": "left"
+            }
         }
     ]
 };

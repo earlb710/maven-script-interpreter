@@ -24,7 +24,9 @@ screen minTest = {
                     "varRef": "count",
                     "display": {
                         "type": "textfield",
-                        "promptText": "Count"
+                        "promptText": "enter count value",
+                        "labelText": "Count:",
+                        "labelTextAlignment": "left"
                     }
                 },
                 {

@@ -33,7 +33,9 @@ screen testBtn = {
                     "varRef": "clickCount",
                     "display": {
                         "type": "textfield",
-                        "promptText": "Number of clicks"
+                        "promptText": "enter number of clicks",
+                        "labelText": "Click Count:",
+                        "labelTextAlignment": "left"
                     }
                 },
                 {
@@ -42,7 +44,9 @@ screen testBtn = {
                     "varRef": "status",
                     "display": {
                         "type": "textfield",
-                        "promptText": "Status"
+                        "promptText": "current status message",
+                        "labelText": "Status:",
+                        "labelTextAlignment": "left"
                     }
                 },
                 {

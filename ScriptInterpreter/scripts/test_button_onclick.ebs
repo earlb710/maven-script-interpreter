@@ -31,13 +31,23 @@ screen buttonTest = {
                     "name": "counterField",
                     "sequence": 0,
                     "varRef": "counter",
-                    "display": {"type": "textfield", "promptText": "Counter"}
+                    "display": {
+                        "type": "textfield",
+                        "promptText": "enter counter value",
+                        "labelText": "Counter:",
+                        "labelTextAlignment": "left"
+                    }
                 },
                 {
                     "name": "messageField",
                     "sequence": 1,
                     "varRef": "message",
-                    "display": {"type": "textarea", "promptText": "Message"}
+                    "display": {
+                        "type": "textarea",
+                        "promptText": "message text appears here",
+                        "labelText": "Message:",
+                        "labelTextAlignment": "left"
+                    }
                 }
             ]
         },

@@ -21,7 +21,12 @@ screen simpleBtn = {
                     "name": "clickCountField",
                     "sequence": 0,
                     "varRef": "clickCount",
-                    "display": {"type": "textfield", "promptText": "Click count"}
+                    "display": {
+                        "type": "textfield",
+                        "promptText": "enter click count",
+                        "labelText": "Click Count:",
+                        "labelTextAlignment": "left"
+                    }
                 },
                 {
                     "name": "testButton",
