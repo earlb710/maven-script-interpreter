@@ -892,7 +892,10 @@ public class ScreenFactory {
             if (value instanceof Number) {
                 @SuppressWarnings("unchecked")
                 javafx.scene.control.Spinner<Integer> spinner = (javafx.scene.control.Spinner<Integer>) control;
-                spinner.getValueFactory().setValue(((Number) value).intValue());
+                // Check if ValueFactory exists before trying to set value
+                if (spinner.getValueFactory() != null) {
+                    spinner.getValueFactory().setValue(((Number) value).intValue());
+                }
             }
         } else if (control instanceof javafx.scene.control.ComboBox) {
             if (value != null) {
@@ -936,9 +939,14 @@ public class ScreenFactory {
         } else if (control instanceof javafx.scene.control.Spinner) {
             @SuppressWarnings("unchecked")
             javafx.scene.control.Spinner<Integer> spinner = (javafx.scene.control.Spinner<Integer>) control;
-            spinner.valueProperty().addListener((obs, oldVal, newVal) -> {
-                screenVars.put(varName, newVal);
-            });
+            // Check if ValueFactory exists before adding listener
+            if (spinner.getValueFactory() != null) {
+                spinner.valueProperty().addListener((obs, oldVal, newVal) -> {
+                    if (newVal != null) {
+                        screenVars.put(varName, newVal);
+                    }
+                });
+            }
         } else if (control instanceof javafx.scene.control.ComboBox) {
             @SuppressWarnings("unchecked")
             javafx.scene.control.ComboBox<String> comboBox = (javafx.scene.control.ComboBox<String>) control;

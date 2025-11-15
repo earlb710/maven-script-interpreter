@@ -85,9 +85,27 @@ public class AreaItemFactory {
 
             // Numeric Controls
             case SPINNER:
-                return new Spinner<>();
+                // Create Spinner with proper ValueFactory
+                Spinner<Integer> spinner = new Spinner<>();
+                int min = metadata != null && metadata.min instanceof Number ? ((Number) metadata.min).intValue() : 0;
+                int max = metadata != null && metadata.max instanceof Number ? ((Number) metadata.max).intValue() : 100;
+                int initial = min; // Start at minimum value
+                SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(min, max, initial);
+                spinner.setValueFactory(valueFactory);
+                spinner.setEditable(true);
+                return spinner;
             case SLIDER:
-                return new Slider();
+                Slider slider = new Slider();
+                // Set min/max if provided in metadata
+                if (metadata != null) {
+                    if (metadata.min instanceof Number) {
+                        slider.setMin(((Number) metadata.min).doubleValue());
+                    }
+                    if (metadata.max instanceof Number) {
+                        slider.setMax(((Number) metadata.max).doubleValue());
+                    }
+                }
+                return slider;
 
             // Date/Time Controls
             case DATEPICKER:
