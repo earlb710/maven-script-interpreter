@@ -77,9 +77,19 @@ public class AreaItemFactory {
             case TOGGLEBUTTON:
                 return new ToggleButton();
             case COMBOBOX:
-                return new ComboBox<>();
+                ComboBox<String> comboBox = new ComboBox<>();
+                // Populate with options if available
+                if (metadata != null && metadata.options != null && !metadata.options.isEmpty()) {
+                    comboBox.getItems().addAll(metadata.options);
+                }
+                return comboBox;
             case CHOICEBOX:
-                return new ChoiceBox<>();
+                ChoiceBox<String> choiceBox = new ChoiceBox<>();
+                // Populate with options if available
+                if (metadata != null && metadata.options != null && !metadata.options.isEmpty()) {
+                    choiceBox.getItems().addAll(metadata.options);
+                }
+                return choiceBox;
             case LISTVIEW:
                 return new ListView<>();
 
@@ -221,7 +231,11 @@ public class AreaItemFactory {
                 ((ComboBox<?>) control).setPromptText(metadata.promptText);
             } else if (control instanceof Label) {
                 // For labels, use promptText as the label's text content
-                ((Label) control).setText(metadata.promptText);
+                Label label = (Label) control;
+                label.setText(metadata.promptText);
+                
+                // Apply prompt text styling (color, bold, italic) for labels
+                applyPromptTextStyling(label, metadata);
             } else if (control instanceof Button) {
                 // For buttons, use promptText as the button's text
                 ((Button) control).setText(metadata.promptText);
@@ -275,6 +289,44 @@ public class AreaItemFactory {
         if (item.backgroundColor != null && !item.backgroundColor.isEmpty()) {
             String bgStyle = "-fx-background-color: " + item.backgroundColor + ";";
             control.setStyle(control.getStyle() + " " + bgStyle);
+        }
+    }
+
+    /**
+     * Applies prompt text styling (color, bold, italic) to a Label.
+     */
+    private static void applyPromptTextStyling(Label label, DisplayItem metadata) {
+        if (metadata == null) {
+            return;
+        }
+        
+        StringBuilder styleBuilder = new StringBuilder();
+        String existingStyle = label.getStyle();
+        if (existingStyle != null && !existingStyle.isEmpty()) {
+            styleBuilder.append(existingStyle);
+            if (!existingStyle.endsWith(";")) {
+                styleBuilder.append(";");
+            }
+            styleBuilder.append(" ");
+        }
+        
+        // Apply color
+        if (metadata.promptColor != null && !metadata.promptColor.isEmpty()) {
+            styleBuilder.append("-fx-text-fill: ").append(metadata.promptColor).append("; ");
+        }
+        
+        // Apply bold
+        if (Boolean.TRUE.equals(metadata.promptBold)) {
+            styleBuilder.append("-fx-font-weight: bold; ");
+        }
+        
+        // Apply italic
+        if (Boolean.TRUE.equals(metadata.promptItalic)) {
+            styleBuilder.append("-fx-font-style: italic; ");
+        }
+        
+        if (styleBuilder.length() > 0) {
+            label.setStyle(styleBuilder.toString());
         }
     }
 }

@@ -43,13 +43,21 @@ screen comprehensiveScreen = {
             "name": "accountType",
             "type": "string",
             "default": "",
-            "display": {"type": "combobox", "promptText": "Select account type"}
+            "display": {
+                "type": "combobox", 
+                "promptText": "Select account type",
+                "options": ["Basic", "Standard", "Premium", "Enterprise"]
+            }
         },
         {
             "name": "region",
             "type": "string",
             "default": "",
-            "display": {"type": "choicebox", "promptText": "Select region"}
+            "display": {
+                "type": "choicebox", 
+                "promptText": "Select region",
+                "options": ["North America", "Europe", "Asia Pacific", "Latin America", "Middle East"]
+            }
         },
         {
             "name": "age",
@@ -102,21 +110,33 @@ screen comprehensiveScreen = {
             "default": "Welcome",
             "display": {
                 "type": "label",
-                "style": "-fx-font-size: 16px; -fx-font-weight: bold;",
-                "promptText": "Welcome message"
+                "style": "-fx-font-size: 16px;",
+                "promptText": "Welcome message",
+                "promptColor": "#2E86C1",
+                "promptBold": true
             }
         },
         {
             "name": "instructions",
             "type": "string",
             "default": "Instructions",
-            "display": {"type": "text", "promptText": "Instructions"}
+            "display": {
+                "type": "text", 
+                "promptText": "Instructions",
+                "promptItalic": true
+            }
         },
         {
             "name": "supportLink",
             "type": "string",
             "default": "https://support.example.com",
-            "display": {"type": "hyperlink", "promptText": "Support link"}
+            "display": {
+                "type": "hyperlink", 
+                "promptText": "Support link",
+                "promptColor": "#E74C3C",
+                "promptBold": true,
+                "promptItalic": true
+            }
         },
         {
             "name": "preferences",

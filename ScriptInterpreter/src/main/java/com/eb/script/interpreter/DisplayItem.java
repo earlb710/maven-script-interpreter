@@ -32,6 +32,14 @@ public class DisplayItem {
     String pattern;
     // Placeholder text for text inputs
     String promptText;
+    // Options/values for selection controls (ComboBox, ChoiceBox, ListView)
+    List<String> options;
+    // Prompt text color
+    String promptColor;
+    // Prompt text bold flag
+    Boolean promptBold;
+    // Prompt text italic flag
+    Boolean promptItalic;
     
     @Override
     public String toString() {
@@ -46,6 +54,10 @@ public class DisplayItem {
                ", alignment='" + alignment + '\'' +
                ", pattern='" + pattern + '\'' +
                ", promptText='" + promptText + '\'' +
+               ", options=" + options +
+               ", promptColor='" + promptColor + '\'' +
+               ", promptBold=" + promptBold +
+               ", promptItalic=" + promptItalic +
                '}';
     }
     
