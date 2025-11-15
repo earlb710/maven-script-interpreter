@@ -4,6 +4,7 @@ import com.eb.util.Debugger;
 import com.eb.script.interpreter.db.DbAdapter;
 import com.eb.script.interpreter.db.DbConnection;
 import com.eb.script.interpreter.db.OracleDbAdapter;
+import com.eb.script.token.DataType;
 import com.eb.ui.cli.ScriptArea;
 import javafx.stage.Stage;
 import java.util.Deque;
@@ -26,10 +27,13 @@ public class InterpreterContext {
     private final ConcurrentHashMap<String, Stage> screens = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Thread> screenThreads = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> screenVars = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, ConcurrentHashMap<String, DataType>> screenVarTypes = new ConcurrentHashMap<>();
     private final Set<String> screensBeingCreated = ConcurrentHashMap.newKeySet();
     private final Map<String, DisplayItem> displayMetadata = new java.util.HashMap<>();
     private final Map<String, List<AreaDefinition>> screenAreas = new java.util.HashMap<>();
     private final Deque<String> connectionStack = new java.util.ArrayDeque<>();
+    private final Map<String, Runnable> screenRefreshCallbacks = new ConcurrentHashMap<>();
+    private final Map<String, List<javafx.scene.Node>> screenBoundControls = new ConcurrentHashMap<>();
     private DbAdapter db = new OracleDbAdapter();
     private ScriptArea output;
 
@@ -69,6 +73,10 @@ public class InterpreterContext {
 
     public ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> getScreenVars() {
         return screenVars;
+    }
+
+    public ConcurrentHashMap<String, ConcurrentHashMap<String, DataType>> getScreenVarTypes() {
+        return screenVarTypes;
     }
 
     public Set<String> getScreensBeingCreated() {
@@ -117,5 +125,32 @@ public class InterpreterContext {
      */
     public boolean isEchoOn() {
         return environment != null && environment.isEchoOn();
+    }
+
+    /**
+     * Get the screen refresh callbacks map.
+     * @return the screen refresh callbacks map
+     */
+    public Map<String, Runnable> getScreenRefreshCallbacks() {
+        return screenRefreshCallbacks;
+    }
+
+    /**
+     * Get the screen bound controls map.
+     * @return the screen bound controls map
+     */
+    public Map<String, List<javafx.scene.Node>> getScreenBoundControls() {
+        return screenBoundControls;
+    }
+
+    /**
+     * Trigger a screen refresh for the given screen name.
+     * @param screenName the name of the screen to refresh
+     */
+    public void triggerScreenRefresh(String screenName) {
+        Runnable callback = screenRefreshCallbacks.get(screenName);
+        if (callback != null) {
+            callback.run();
+        }
     }
 }

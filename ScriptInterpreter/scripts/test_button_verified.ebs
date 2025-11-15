@@ -1,0 +1,92 @@
+// VERIFIED TEST: Button with promptText and onClick
+// This test verifies that buttons display text from promptText
+// and execute EBS code when clicked
+
+print "=== Testing Button promptText and onClick ===";
+print "";
+
+// Create a screen with a button that has both promptText (for display) and onClick (for action)
+screen testBtn = {
+    "title": "Button Test - promptText and onClick",
+    "width": 500,
+    "height": 300,
+    "vars": [
+        {
+            "name": "clickCount",
+            "type": "int",
+            "default": 0
+        },
+        {
+            "name": "status",
+            "type": "string",
+            "default": "Ready"
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "items": [
+                {
+                    "name": "clickCountField",
+                    "sequence": 0,
+                    "varRef": "clickCount",
+                    "display": {
+                        "type": "textfield",
+                        "promptText": "enter number of clicks",
+                        "labelText": "Click Count:",
+                        "labelTextAlignment": "left"
+                    }
+                },
+                {
+                    "name": "statusField",
+                    "sequence": 1,
+                    "varRef": "status",
+                    "display": {
+                        "type": "textfield",
+                        "promptText": "current status message",
+                        "labelText": "Status:",
+                        "labelTextAlignment": "left"
+                    }
+                },
+                {
+                    "name": "clickButton",
+                    "sequence": 2,
+                    "display": {
+                        "type": "button",
+                        "promptText": "Click Me!",
+                        "onClick": "testBtn.clickCount = testBtn.clickCount + 1; testBtn.status = \"Clicked \" + testBtn.clickCount + \" times\"; print \"Button clicked! Count: \" + testBtn.clickCount;"
+                    }
+                },
+                {
+                    "name": "resetButton",
+                    "sequence": 3,
+                    "display": {
+                        "type": "button",
+                        "promptText": "Reset",
+                        "onClick": "testBtn.clickCount = 0; testBtn.status = \"Reset\"; print \"Counter reset\";"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+print "Screen created. Initial values:";
+print "Click count: " + testBtn.clickCount;
+print "Status: " + testBtn.status;
+print "";
+print "NOTE: Text fields should display the values above (0 and 'Ready')";
+print "NOTE: First button should be labeled 'Click Me!'";
+print "NOTE: Second button should be labeled 'Reset'";
+print "";
+
+// Show the screen
+screen testBtn show;
+
+print "Screen shown. Expected behavior:";
+print "1. Two text fields at top showing '0' and 'Ready'";
+print "2. Button labeled 'Click Me!' below them";
+print "3. Button labeled 'Reset' at the bottom";
+print "4. Clicking 'Click Me!' increments counter and updates status";
+print "5. Clicking 'Reset' resets both to initial values";

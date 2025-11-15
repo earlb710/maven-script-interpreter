@@ -1,0 +1,25 @@
+// Test Script: Import Functionality
+// Description: Tests the import statement to load functions from external EBS files
+// Date: 2025-11-15
+
+// Import the utility functions from utils.ebs
+import "utils.ebs";
+
+print "=== Import Test Starting ===";
+print "";
+
+// Test the imported formatGreeting function
+var greeting: string = call formatGreeting("Alice");
+print greeting;
+
+// Test the imported multiplyByTwo function
+var number: int = 21;
+var multiplied: int = call multiplyByTwo(number);
+print "Multiply " + number + " by 2 = " + multiplied;
+
+// Test the imported factorial function
+var factValue: int = call factorial(5);
+print "Factorial of 5 is: " + factValue;
+
+print "";
+print "=== Import Test Completed Successfully ===";

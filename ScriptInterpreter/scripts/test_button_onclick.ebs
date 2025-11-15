@@ -1,0 +1,110 @@
+// Test Script: Button onClick Functionality
+// Description: Tests buttons with onClick property containing inline EBS code
+// Date: 2025-11-15
+
+print "=== Button onClick Test Starting ===";
+print "";
+
+// Create a screen with buttons that have onClick handlers
+screen buttonTest = {
+    "title": "Button onClick Test",
+    "width": 600,
+    "height": 400,
+    "vars": [
+        {
+            "name": "counter",
+            "type": "int",
+            "default": 0
+        },
+        {
+            "name": "message",
+            "type": "string",
+            "default": "Click a button!"
+        }
+    ],
+    "area": [
+        {
+            "name": "displayArea",
+            "type": "vbox",
+            "items": [
+                {
+                    "name": "counterField",
+                    "sequence": 0,
+                    "varRef": "counter",
+                    "display": {
+                        "type": "textfield",
+                        "promptText": "enter counter value",
+                        "labelText": "Counter:",
+                        "labelTextAlignment": "left"
+                    }
+                },
+                {
+                    "name": "messageField",
+                    "sequence": 1,
+                    "varRef": "message",
+                    "display": {
+                        "type": "textarea",
+                        "promptText": "message text appears here",
+                        "labelText": "Message:",
+                        "labelTextAlignment": "left"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "controls",
+            "type": "hbox",
+            "items": [
+                {
+                    "name": "incrementBtn",
+                    "sequence": 0,
+                    "display": {
+                        "type": "button",
+                        "promptText": "Increment Counter",
+                        "onClick": "buttonTest.counter = buttonTest.counter + 1; print \"Counter incremented to: \" + buttonTest.counter;"
+                    }
+                },
+                {
+                    "name": "decrementBtn",
+                    "sequence": 1,
+                    "display": {
+                        "type": "button",
+                        "promptText": "Decrement Counter",
+                        "onClick": "buttonTest.counter = buttonTest.counter - 1; print \"Counter decremented to: \" + buttonTest.counter;"
+                    }
+                },
+                {
+                    "name": "resetBtn",
+                    "sequence": 2,
+                    "display": {
+                        "type": "button",
+                        "promptText": "Reset Counter",
+                        "onClick": "buttonTest.counter = 0; buttonTest.message = \"Counter reset!\"; print \"Counter reset to 0\";"
+                    }
+                },
+                {
+                    "name": "greetBtn",
+                    "sequence": 3,
+                    "display": {
+                        "type": "button",
+                        "promptText": "Show Greeting",
+                        "onClick": "buttonTest.message = \"Hello from EBS button onClick!\"; print \"Greeting displayed\";"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+print "Button test screen created with onClick handlers";
+print "Counter initial value: " + buttonTest.counter;
+print "Message initial value: " + buttonTest.message;
+print "";
+
+// Show the screen
+screen buttonTest show;
+
+print "Button onClick test screen is now visible.";
+print "Click the buttons to test onClick functionality!";
+print "";
+print "=== Button onClick Test Setup Complete ===";

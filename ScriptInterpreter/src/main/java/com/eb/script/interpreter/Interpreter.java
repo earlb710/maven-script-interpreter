@@ -46,12 +46,18 @@ import com.eb.script.interpreter.statement.WhileStatement;
 import com.eb.script.interpreter.statement.ScreenStatement;
 import com.eb.script.interpreter.statement.ScreenShowStatement;
 import com.eb.script.interpreter.statement.ScreenHideStatement;
+import com.eb.script.interpreter.statement.ImportStatement;
 import com.eb.script.token.ebs.EbsTokenType;
 import com.eb.script.interpreter.statement.ConnectStatement;
+import com.eb.script.parser.Parser;
+import com.eb.script.parser.ParseError;
 import com.eb.ui.cli.ScriptArea;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import java.nio.file.Path;
+import java.nio.file.Files;
+import java.nio.charset.StandardCharsets;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -64,6 +70,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     private InterpreterScreen screenInterpreter;
     private InterpreterDatabase databaseInterpreter;
     private InterpreterArray arrayInterpreter;
+    private RuntimeContext currentRuntime;  // Store current runtime context for import resolution
 
     public Interpreter() {
         this.context = new InterpreterContext();
@@ -164,6 +171,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     // Each frame is a Map<String,Object> with keys like: name, kind, line.
     // We use fully-qualified types to avoid changing imports.
     public void interpret(RuntimeContext runtime) throws InterpreterError {
+        this.currentRuntime = runtime;  // Store for import resolution
         context.setEnvironment(runtime.environment);
         context.setOutput(runtime.environment.getOutputArea());
         
@@ -425,6 +433,8 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             if (screenVarMap != null) {
                 if (screenVarMap.containsKey(varName)) {
                     screenVarMap.put(varName, value);
+                    // Trigger screen refresh to update UI controls
+                    context.triggerScreenRefresh(screenName);
                     return;
                 } else {
                     throw error(stmt.getLine(), "Screen '" + screenName + "' does not have a variable named '" + varName + "'.");
@@ -1083,6 +1093,65 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     @Override
     public void visitScreenHideStatement(ScreenHideStatement stmt) throws InterpreterError {
         screenInterpreter.visitScreenHideStatement(stmt);
+    }
+
+    @Override
+    public void visitImportStatement(ImportStatement stmt) throws InterpreterError {
+        environment().pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Import %1", stmt.filename);
+        try {
+            // Resolve the file path
+            Path importPath = resolveImportPath(stmt.filename);
+            
+            if (!Files.exists(importPath)) {
+                throw error(stmt.getLine(), "Import file not found: " + stmt.filename);
+            }
+            
+            // Read and parse the imported file
+            String importedScript = Files.readString(importPath, StandardCharsets.UTF_8);
+            RuntimeContext importContext = Parser.parse(importPath.getFileName().toString(), importedScript);
+            
+            // Execute the imported script in the current environment
+            for (Statement s : importContext.statements) {
+                s.accept(this);
+            }
+            
+            // Register imported blocks/functions in the current runtime context
+            if (importContext.blocks != null && currentRuntime != null) {
+                for (Map.Entry<String, BlockStatement> entry : importContext.blocks.entrySet()) {
+                    // Store blocks so they can be called later
+                    currentRuntime.blocks.put(entry.getKey(), entry.getValue());
+                }
+            }
+            
+            if (context.getOutput() != null) {
+                context.getOutput().printlnOk("Imported: " + stmt.filename);
+            }
+        } catch (IOException e) {
+            throw error(stmt.getLine(), "Failed to read import file: " + e.getMessage());
+        } catch (ParseError e) {
+            throw error(stmt.getLine(), "Failed to parse import file: " + e.getMessage());
+        } finally {
+            environment().popCallStack();
+        }
+    }
+    
+    /**
+     * Resolve import file path relative to current script location or working directory
+     */
+    private Path resolveImportPath(String filename) {
+        // First try relative to current script directory
+        if (currentRuntime != null && currentRuntime.sourcePath != null) {
+            Path scriptDir = currentRuntime.sourcePath.getParent();
+            if (scriptDir != null) {
+                Path resolvedPath = scriptDir.resolve(filename);
+                if (Files.exists(resolvedPath)) {
+                    return resolvedPath;
+                }
+            }
+        }
+        
+        // Fall back to current working directory
+        return Path.of(filename);
     }
 
     @Override

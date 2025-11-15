@@ -9,10 +9,12 @@ import com.eb.script.interpreter.statement.ScreenHideStatement;
 import com.eb.script.interpreter.DisplayItem.ItemType;
 import com.eb.script.interpreter.AreaDefinition.AreaType;
 import com.eb.script.interpreter.AreaDefinition.AreaItem;
+import com.eb.script.RuntimeContext;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -62,6 +64,10 @@ public class InterpreterScreen {
             // Create thread-safe variable storage for this screen
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVarMap = new java.util.concurrent.ConcurrentHashMap<>();
             context.getScreenVars().put(stmt.name, screenVarMap);
+            
+            // Create thread-safe variable type storage for this screen
+            java.util.concurrent.ConcurrentHashMap<String, DataType> screenVarTypeMap = new java.util.concurrent.ConcurrentHashMap<>();
+            context.getScreenVarTypes().put(stmt.name, screenVarTypeMap);
 
             // Process variable definitions if present
             if (config.containsKey("vars")) {
@@ -112,6 +118,11 @@ public class InterpreterScreen {
 
                             // Store in screen's thread-safe variable map
                             screenVarMap.put(varName, value);
+                            
+                            // Store the variable type if specified
+                            if (varType != null) {
+                                screenVarTypeMap.put(varName, varType);
+                            }
                         }
                     }
                 } else {
@@ -265,10 +276,27 @@ public class InterpreterScreen {
                     
                     // Get screen variables map from context
                     java.util.concurrent.ConcurrentHashMap<String, Object> varsMap = context.getScreenVars().get(screenName);
+                    java.util.concurrent.ConcurrentHashMap<String, DataType> varTypesMap = context.getScreenVarTypes().get(screenName);
                     
                     // Use ScreenFactory if areas are defined, otherwise create simple stage
                     if (areas != null && !areas.isEmpty()) {
                         // Create screen with areas using ScreenFactory
+                        // Create onClick handler that executes EBS code
+                        ScreenFactory.OnClickHandler onClickHandler = (ebsCode) -> {
+                            try {
+                                // Parse and execute the EBS code
+                                RuntimeContext clickContext = com.eb.script.parser.Parser.parse("onClick_" + screenName, ebsCode);
+                                // Execute in the current interpreter context
+                                for (com.eb.script.interpreter.statement.Statement s : clickContext.statements) {
+                                    interpreter.acceptStatement(s);
+                                }
+                            } catch (com.eb.script.parser.ParseError e) {
+                                throw new InterpreterError("Failed to parse onClick code: " + e.getMessage());
+                            } catch (java.io.IOException e) {
+                                throw new InterpreterError("IO error executing onClick code: " + e.getMessage());
+                            }
+                        };
+                        
                         stage = ScreenFactory.createScreen(
                             screenName,
                             screenTitle,
@@ -276,7 +304,10 @@ public class InterpreterScreen {
                             screenHeight,
                             areas,
                             (scrName, varName) -> context.getDisplayItem().get(scrName + "." + varName),
-                            varsMap  // Pass screenVars for binding
+                            varsMap,  // Pass screenVars for binding
+                            varTypesMap,  // Pass variable types for proper conversion
+                            onClickHandler,  // Pass onClick handler for buttons
+                            context  // Pass context to store bound controls for refresh
                         );
                     } else {
                         // Create simple stage without areas
@@ -529,9 +560,6 @@ public class InterpreterScreen {
         context.getDisplayItem().put(key, metadata);
     }
 
-    /**
-     * Helper method to parse display metadata from JSON
-     */
     private DisplayItem parseDisplayItem(Map<String, Object> displayDef, String screenName) {
         DisplayItem metadata = new DisplayItem();
 
@@ -572,6 +600,52 @@ public class InterpreterScreen {
 
         if (displayDef.containsKey("pattern")) {
             metadata.pattern = String.valueOf(displayDef.get("pattern"));
+        }
+        
+        // Check for both camelCase and lowercase versions - promptText (placeholder hint)
+        if (displayDef.containsKey("promptText")) {
+            metadata.promptText = String.valueOf(displayDef.get("promptText"));
+        } else if (displayDef.containsKey("prompttext")) {
+            metadata.promptText = String.valueOf(displayDef.get("prompttext"));
+        }
+
+        // Extract labelText (permanent label displayed before/above control)
+        if (displayDef.containsKey("labelText")) {
+            metadata.labelText = String.valueOf(displayDef.get("labelText"));
+        } else if (displayDef.containsKey("labeltext")) {
+            metadata.labelText = String.valueOf(displayDef.get("labeltext"));
+        }
+
+        // Extract labelText alignment
+        if (displayDef.containsKey("labelTextAlignment")) {
+            metadata.labelTextAlignment = String.valueOf(displayDef.get("labelTextAlignment")).toLowerCase();
+        } else if (displayDef.containsKey("labeltextalignment")) {
+            metadata.labelTextAlignment = String.valueOf(displayDef.get("labeltextalignment")).toLowerCase();
+        }
+
+        // Extract onClick event handler for buttons - check both camelCase and lowercase
+        if (displayDef.containsKey("onClick")) {
+            metadata.onClick = String.valueOf(displayDef.get("onClick"));
+        } else if (displayDef.containsKey("onclick")) {
+            metadata.onClick = String.valueOf(displayDef.get("onclick"));
+        }
+
+        // Extract options for selection controls (ComboBox, ChoiceBox, ListView)
+        if (displayDef.containsKey("options")) {
+            Object optionsObj = displayDef.get("options");
+            metadata.options = new ArrayList<>();
+            if (optionsObj instanceof ArrayDynamic) {
+                ArrayDynamic array = (ArrayDynamic) optionsObj;
+                for (Object item : array.getAll()) {
+                    metadata.options.add(String.valueOf(item));
+                }
+            } else if (optionsObj instanceof List) {
+                @SuppressWarnings("unchecked")
+                List<Object> list = (List<Object>) optionsObj;
+                for (Object item : list) {
+                    metadata.options.add(String.valueOf(item));
+                }
+            }
         }
 
         // Extract or set default style
@@ -678,8 +752,11 @@ public class InterpreterScreen {
                             item.layoutPos = String.valueOf(itemDef.get("relative_pos"));
                         }
 
+                        // Check for both camelCase and lowercase versions of varRef
                         if (itemDef.containsKey("varRef")) {
                             item.varRef = String.valueOf(itemDef.get("varRef")).toLowerCase();
+                        } else if (itemDef.containsKey("varref")) {
+                            item.varRef = String.valueOf(itemDef.get("varref")).toLowerCase();
                         } else if (itemDef.containsKey("var_ref")) {
                             item.varRef = String.valueOf(itemDef.get("var_ref")).toLowerCase();
                         }

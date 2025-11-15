@@ -43,6 +43,7 @@ import com.eb.script.interpreter.statement.CloseConnectionStatement;
 import com.eb.script.interpreter.statement.ScreenStatement;
 import com.eb.script.interpreter.statement.ScreenShowStatement;
 import com.eb.script.interpreter.statement.ScreenHideStatement;
+import com.eb.script.interpreter.statement.ImportStatement;
 import com.eb.script.token.ebs.EbsTokenType;
 import com.eb.util.Util;
 import java.io.IOException;
@@ -105,21 +106,33 @@ public class Parser {
         current = 0;
         currToken = tokens.get(current);
         blocks = new HashMap();
-        statements = new ArrayList<>();
+        
+        // Separate imports from other statements
+        List<Statement> importStatements = new ArrayList<>();
+        List<Statement> otherStatements = new ArrayList<>();
+        
         while (!isAtEnd()) {
             Statement s = statement();
             if (s != null) {
-                if (s instanceof BlockStatement bs) {
+                if (s instanceof ImportStatement) {
+                    importStatements.add(s);
+                } else if (s instanceof BlockStatement bs) {
                     if (bs.name != null) {
                         blocks.put(bs.name, bs);
                     } else {
-                        statements.add(s);
+                        otherStatements.add(s);
                     }
                 } else {
-                    statements.add(s);
+                    otherStatements.add(s);
                 }
             }
         }
+        
+        // Place imports first, then other statements
+        statements = new ArrayList<>();
+        statements.addAll(importStatements);
+        statements.addAll(otherStatements);
+        
         postParse();
     }
 
@@ -136,10 +149,9 @@ public class Parser {
                         } catch (ParseError ex) {
                             throw new ParseError(ex.getMessage() + " in call to " + c.name + " on line " + c.getLine());
                         }
-                    } else {
-                        // existing behavior for unknown calls
-                        throw error("Call cannot find '" + c.name + "'");
                     }
+                    // Allow calls to unknown functions - they might be imported at runtime
+                    // The interpreter will validate at execution time
                 } else {
                     c.setBlockStatement(b);
                 }
@@ -177,10 +189,9 @@ public class Parser {
                         } catch (ParseError ex) {
                             throw new ParseError(ex.getMessage() + " in call to " + call.name + " on line " + call.getLine());
                         }
-                    } else {
-                        // existing behavior for unknown calls
-                        throw error("Call cannot find '" + call.name + "'");
                     }
+                    // Allow calls to unknown functions - they might be imported at runtime
+                    // The interpreter will validate at execution time
                 } else {
                     call.setBlockStatement(b);
                     ce.setReturnType(b.returnType);
@@ -302,7 +313,9 @@ public class Parser {
     }
 
     private Statement statement() throws ParseError {
-        if (match(EbsTokenType.VAR)) {
+        if (match(EbsTokenType.IMPORT)) {
+            return importStatement();
+        } else if (match(EbsTokenType.VAR)) {
             return varDeclaration();
         } else if (match(EbsTokenType.IF)) {
             return ifStatement();
@@ -358,6 +371,32 @@ public class Parser {
             return null;
         }
         return assignmentStatement();
+    }
+
+    private Statement importStatement() throws ParseError {
+        int line = prevToken.line;
+        
+        // Expect a string literal for the filename: QUOTE1 STRING QUOTE1 (or QUOTE2)
+        EbsTokenType quoteType = null;
+        if (match(EbsTokenType.QUOTE1)) {
+            quoteType = EbsTokenType.QUOTE1;
+        } else if (match(EbsTokenType.QUOTE2)) {
+            quoteType = EbsTokenType.QUOTE2;
+        } else {
+            throw error(peek(), "Expected string literal for import filename.");
+        }
+        
+        EbsToken filenameToken = consume(EbsTokenType.STRING, "Expected string value for import filename.");
+        consume(quoteType, "Expected closing quote after import filename.");
+        
+        if (!(filenameToken.literal instanceof String)) {
+            throw error(filenameToken, "Import filename must be a string literal.");
+        }
+        
+        String filename = (String) filenameToken.literal;
+        consume(EbsTokenType.SEMICOLON, "Expected ';' after import statement.");
+        
+        return new ImportStatement(line, filename);
     }
 
     private Statement varDeclaration() throws ParseError {
@@ -543,10 +582,22 @@ public class Parser {
         EbsToken name = consume(EbsTokenType.IDENTIFIER, "Expected parameter name.");
         EbsTokenType type = null;
         if (match(EbsTokenType.COLON)) {
-            EbsToken t = consume(EbsTokenType.IDENTIFIER, "Expected type name after ':'.");
-            type = getTokenType((String) t.literal);
-            if (type == null) {
-                throw error(name, "Invalid type : " + (String) t.literal);
+            // Accept either IDENTIFIER or a data type keyword (STRING, INTEGER, etc.)
+            EbsToken t = peek();
+            if (t.type == EbsTokenType.IDENTIFIER || t.type == EbsTokenType.DATATYPE || 
+                t.type.getDataType() != null) {
+                advance();
+                if (t.type == EbsTokenType.IDENTIFIER || t.type == EbsTokenType.DATATYPE) {
+                    type = getTokenType((String) t.literal);
+                    if (type == null) {
+                        throw error(name, "Invalid type : " + (String) t.literal);
+                    }
+                } else {
+                    // It's already a data type keyword
+                    type = t.type;
+                }
+            } else {
+                throw error(t, "Expected type name after ':'.");
             }
         } else {
             throw error(name, "No parameter type supplied for " + (String) name.literal);
@@ -617,8 +668,18 @@ public class Parser {
     private Statement assignmentStatement() throws ParseError {
         // We need to parse an lvalue:
         // either IDENTIFIER, or IDENTIFIER followed by one or more [ index-list ]
+        // Also support DOT for screen variable access (screenName.varName)
         EbsToken name = consume(EbsTokenType.IDENTIFIER, "Expected variable name.");
-        Expression lvalue = new VariableExpression(name.line, (String) name.literal);
+        String varName = (String) name.literal;
+        
+        // Check if this is a screen variable access (screenName.varName)
+        if (match(EbsTokenType.DOT)) {
+            EbsToken fieldName = consume(EbsTokenType.IDENTIFIER, "Expected field name after '.'.");
+            // Treat screen.var as a single variable name with DOT
+            varName = varName + "." + fieldName.literal;
+        }
+        
+        Expression lvalue = new VariableExpression(name.line, varName);
 
         // Attach any number of bracketed index-suffixes to the variable
         while (check(EbsTokenType.LBRACKET)) {

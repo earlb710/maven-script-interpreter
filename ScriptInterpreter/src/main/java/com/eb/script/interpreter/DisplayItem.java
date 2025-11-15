@@ -30,8 +30,12 @@ public class DisplayItem {
     String alignment;
     // Regex pattern for validation (useful for text inputs)
     String pattern;
-    // Placeholder text for text inputs
+    // Placeholder text for text inputs (hint shown in empty field)
     String promptText;
+    // Label text displayed before/above the control
+    String labelText;
+    // Label text alignment: "left", "center", "right"
+    String labelTextAlignment;
     // Options/values for selection controls (ComboBox, ChoiceBox, ListView)
     List<String> options;
     // Prompt text color
@@ -40,6 +44,8 @@ public class DisplayItem {
     Boolean promptBold;
     // Prompt text italic flag
     Boolean promptItalic;
+    // onClick event handler - EBS code to execute when button is clicked
+    String onClick;
     
     @Override
     public String toString() {

@@ -2,6 +2,7 @@ package com.eb.script.interpreter;
 
 import com.eb.script.interpreter.AreaDefinition.AreaItem;
 import com.eb.script.interpreter.AreaDefinition.AreaType;
+import com.eb.script.token.DataType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.networknt.schema.JsonSchema;
@@ -27,6 +28,14 @@ import java.util.stream.Collectors;
  * Includes JSON Schema validation for screen definitions.
  */
 public class ScreenFactory {
+    
+    /**
+     * Functional interface for executing onClick EBS code
+     */
+    @FunctionalInterface
+    public interface OnClickHandler {
+        void execute(String ebsCode) throws InterpreterError;
+    }
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final JsonSchemaFactory schemaFactory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7);
@@ -70,7 +79,7 @@ public class ScreenFactory {
     public static Stage createScreen(String screenName, String title, double width, double height,
                                       List<AreaDefinition> areas,
                                       BiFunction<String, String, DisplayItem> metadataProvider) {
-        return createScreen(screenName, title, width, height, areas, metadataProvider, null);
+        return createScreen(screenName, title, width, height, areas, metadataProvider, null, null, null);
     }
 
     /**
@@ -90,8 +99,62 @@ public class ScreenFactory {
                                       List<AreaDefinition> areas,
                                       BiFunction<String, String, DisplayItem> metadataProvider,
                                       java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
+        return createScreen(screenName, title, width, height, areas, metadataProvider, screenVars, null, null);
+    }
+
+    /**
+     * Creates a complete JavaFX window/screen from area definitions with variable binding and onClick handlers.
+     * This method creates containers, adds items, applies layout properties, sets up two-way data binding,
+     * and configures button onClick handlers.
+     *
+     * @param screenName The name of the screen
+     * @param title The window title
+     * @param width The window width
+     * @param height The window height
+     * @param areas List of AreaDefinitions containing containers and items
+     * @param metadataProvider Function to retrieve DisplayItem for variables (screenName, varName) -> metadata
+     * @param screenVars The ConcurrentHashMap containing screen variables for two-way binding (can be null)
+     * @param varTypes The ConcurrentHashMap containing screen variable types for proper type conversion (can be null)
+     * @param onClickHandler Handler for button onClick events (can be null)
+     * @return A Stage representing the complete window
+     */
+    public static Stage createScreen(String screenName, String title, double width, double height,
+                                      List<AreaDefinition> areas,
+                                      BiFunction<String, String, DisplayItem> metadataProvider,
+                                      java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+                                      java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
+                                      OnClickHandler onClickHandler) {
+        return createScreen(screenName, title, width, height, areas, metadataProvider, screenVars, varTypes, onClickHandler, null);
+    }
+
+    /**
+     * Creates a complete JavaFX window/screen from area definitions with variable binding, onClick handlers,
+     * and stores bound controls in the context for later refresh.
+     *
+     * @param screenName The name of the screen
+     * @param title The window title
+     * @param width The window width
+     * @param height The window height
+     * @param areas List of AreaDefinitions containing containers and items
+     * @param metadataProvider Function to retrieve DisplayItem for variables (screenName, varName) -> metadata
+     * @param screenVars The ConcurrentHashMap containing screen variables for two-way binding (can be null)
+     * @param varTypes The ConcurrentHashMap containing screen variable types for proper type conversion (can be null)
+     * @param onClickHandler Handler for button onClick events (can be null)
+     * @param context InterpreterContext to store bound controls for later refresh (can be null)
+     * @return A Stage representing the complete window
+     */
+    public static Stage createScreen(String screenName, String title, double width, double height,
+                                      List<AreaDefinition> areas,
+                                      BiFunction<String, String, DisplayItem> metadataProvider,
+                                      java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+                                      java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
+                                      OnClickHandler onClickHandler,
+                                      InterpreterContext context) {
         Stage stage = new Stage();
         stage.setTitle(title);
+
+        // List to collect all bound controls for this screen
+        List<Node> allBoundControls = new ArrayList<>();
 
         // Create root container - use VBox as default if multiple areas
         Region rootContainer;
@@ -101,18 +164,31 @@ public class ScreenFactory {
             rootContainer = new Pane();
         } else if (areas.size() == 1) {
             // Single area - use it as root
-            rootContainer = createAreaWithItems(areas.get(0), screenName, metadataProvider, screenVars);
+            rootContainer = createAreaWithItems(areas.get(0), screenName, metadataProvider, screenVars, varTypes, onClickHandler, allBoundControls);
         } else {
             // Multiple areas - arrange in VBox
             VBox root = new VBox();
             root.setSpacing(10);
             
             for (AreaDefinition areaDef : areas) {
-                Region areaContainer = createAreaWithItems(areaDef, screenName, metadataProvider, screenVars);
+                Region areaContainer = createAreaWithItems(areaDef, screenName, metadataProvider, screenVars, varTypes, onClickHandler, allBoundControls);
                 root.getChildren().add(areaContainer);
             }
             
             rootContainer = root;
+        }
+
+        // Store bound controls in context if provided
+        if (context != null && !allBoundControls.isEmpty()) {
+            context.getScreenBoundControls().put(screenName, allBoundControls);
+            
+            // Register refresh callback that refreshes all bound controls
+            context.getScreenRefreshCallbacks().put(screenName, () -> {
+                // Use Platform.runLater to ensure UI updates happen on JavaFX Application Thread
+                Platform.runLater(() -> {
+                    refreshBoundControls(allBoundControls, screenVars);
+                });
+            });
         }
 
         Scene scene = new Scene(rootContainer, width, height);
@@ -126,7 +202,7 @@ public class ScreenFactory {
      */
     private static Region createAreaWithItems(AreaDefinition areaDef, String screenName,
                                                BiFunction<String, String, DisplayItem> metadataProvider) {
-        return createAreaWithItems(areaDef, screenName, metadataProvider, null);
+        return createAreaWithItems(areaDef, screenName, metadataProvider, null, null, null);
     }
 
     /**
@@ -135,6 +211,30 @@ public class ScreenFactory {
     private static Region createAreaWithItems(AreaDefinition areaDef, String screenName,
                                                BiFunction<String, String, DisplayItem> metadataProvider,
                                                java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
+        return createAreaWithItems(areaDef, screenName, metadataProvider, screenVars, null, null);
+    }
+
+    /**
+     * Creates a container from AreaDefinition and adds all items to it with variable binding and onClick handler.
+     */
+    private static Region createAreaWithItems(AreaDefinition areaDef, String screenName,
+                                               BiFunction<String, String, DisplayItem> metadataProvider,
+                                               java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+                                               java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
+                                               OnClickHandler onClickHandler) {
+        List<Node> boundControls = new ArrayList<>();
+        return createAreaWithItems(areaDef, screenName, metadataProvider, screenVars, varTypes, onClickHandler, boundControls);
+    }
+
+    /**
+     * Creates a container from AreaDefinition and adds all items to it with variable binding, onClick handler, and control tracking.
+     */
+    private static Region createAreaWithItems(AreaDefinition areaDef, String screenName,
+                                               BiFunction<String, String, DisplayItem> metadataProvider,
+                                               java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+                                               java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
+                                               OnClickHandler onClickHandler,
+                                               List<Node> boundControls) {
         // Create the container using AreaContainerFactory
         Region container = AreaContainerFactory.createContainer(areaDef);
 
@@ -155,23 +255,50 @@ public class ScreenFactory {
                 // Create the item using AreaItemFactory
                 Node control = AreaItemFactory.createItem(item, metadata);
 
+                // If labelText is specified, wrap the control with a label
+                Node nodeToAdd = control;
+                if (metadata != null && metadata.labelText != null && !metadata.labelText.isEmpty()) {
+                    nodeToAdd = createLabeledControl(metadata.labelText, metadata.labelTextAlignment, control);
+                }
+
+                // Set up onClick handler for buttons
+                if (onClickHandler != null && metadata != null && metadata.onClick != null && !metadata.onClick.isEmpty()) {
+                    if (control instanceof javafx.scene.control.Button) {
+                        javafx.scene.control.Button button = (javafx.scene.control.Button) control;
+                        String ebsCode = metadata.onClick;
+                        button.setOnAction(event -> {
+                            try {
+                                onClickHandler.execute(ebsCode);
+                                // After executing the onClick code, refresh all bound controls
+                                refreshBoundControls(boundControls, screenVars);
+                            } catch (InterpreterError e) {
+                                // Print error to console if available
+                                System.err.println("Error executing button onClick: " + e.getMessage());
+                                e.printStackTrace();
+                            }
+                        });
+                    }
+                }
+
                 // Set up two-way data binding if screenVars is provided and item has a varRef
                 if (screenVars != null && item.varRef != null) {
-                    setupVariableBinding(control, item.varRef, screenVars, metadata);
+                    setupVariableBinding(control, item.varRef, screenVars, varTypes, metadata);
+                    // Track this control so we can refresh it when variables change
+                    boundControls.add(control);
                 }
 
                 // Apply item layout properties
                 applyItemLayoutProperties(control, item);
 
                 // Add item to container based on container type
-                addItemToContainer(container, control, item, areaDef.areaType);
+                addItemToContainer(container, nodeToAdd, item, areaDef.areaType);
             }
         }
         
         // Add nested child areas to the container
         if (areaDef.childAreas != null && !areaDef.childAreas.isEmpty()) {
             for (AreaDefinition childArea : areaDef.childAreas) {
-                Region childContainer = createAreaWithItems(childArea, screenName, metadataProvider, screenVars);
+                Region childContainer = createAreaWithItems(childArea, screenName, metadataProvider, screenVars, varTypes, onClickHandler, boundControls);
                 
                 // Add the child container to the parent container
                 // Treat child areas as regular nodes
@@ -846,6 +973,48 @@ public class ScreenFactory {
     }
 
     /**
+     * Creates a labeled control by wrapping the control with a label.
+     * The label is displayed based on the specified alignment.
+     *
+     * @param labelText The text for the label
+     * @param alignment The alignment: "left", "center", "right" (default: "left")
+     * @param control The control to label
+     * @return A container with the label and control
+     */
+    private static Node createLabeledControl(String labelText, String alignment, Node control) {
+        javafx.scene.control.Label label = new javafx.scene.control.Label(labelText);
+        label.setStyle("-fx-font-weight: normal; -fx-padding: 0 10 0 0;");
+        
+        // Determine alignment (default to left if not specified)
+        String actualAlignment = (alignment != null) ? alignment.toLowerCase() : "left";
+        
+        // Create container based on alignment
+        javafx.scene.layout.HBox container = new javafx.scene.layout.HBox(5);
+        container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        
+        switch (actualAlignment) {
+            case "right":
+                // Control first, then label on the right
+                container.getChildren().addAll(control, label);
+                container.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
+                break;
+            case "center":
+                // Center both
+                container.setAlignment(javafx.geometry.Pos.CENTER);
+                container.getChildren().addAll(label, control);
+                break;
+            case "left":
+            default:
+                // Label first (on the left), then control
+                container.getChildren().addAll(label, control);
+                container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+                break;
+        }
+        
+        return container;
+    }
+
+    /**
      * Sets up two-way data binding between a UI control and a screen variable.
      * When the variable changes, the UI updates. When the UI changes, the variable updates.
      *
@@ -856,6 +1025,7 @@ public class ScreenFactory {
      */
     private static void setupVariableBinding(Node control, String varName,
                                               java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+                                              java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
                                               DisplayItem metadata) {
         if (control == null || varName == null || screenVars == null) {
             return;
@@ -866,11 +1036,12 @@ public class ScreenFactory {
         updateControlFromValue(control, currentValue, metadata);
 
         // Set up listener on the control to update the variable when control changes
-        addControlListener(control, varName, screenVars, metadata);
+        addControlListener(control, varName, screenVars, varTypes, metadata);
 
         // Store references for potential future use
         control.getProperties().put("varName", varName);
         control.getProperties().put("screenVars", screenVars);
+        control.getProperties().put("varTypes", varTypes);
         control.getProperties().put("metadata", metadata);
     }
 
@@ -919,10 +1090,22 @@ public class ScreenFactory {
      */
     private static void addControlListener(Node control, String varName,
                                             java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+                                            java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
                                             DisplayItem metadata) {
         if (control instanceof javafx.scene.control.TextField) {
             ((javafx.scene.control.TextField) control).textProperty().addListener((obs, oldVal, newVal) -> {
-                screenVars.put(varName, newVal);
+                // Convert the string value to the appropriate type if type info is available
+                Object convertedValue = newVal;
+                if (varTypes != null && varTypes.containsKey(varName)) {
+                    DataType type = varTypes.get(varName);
+                    try {
+                        convertedValue = type.convertValue(newVal);
+                    } catch (Exception e) {
+                        // If conversion fails, keep as string
+                        System.err.println("Warning: Could not convert '" + newVal + "' to " + type + " for variable '" + varName + "'");
+                    }
+                }
+                screenVars.put(varName, convertedValue);
             });
         } else if (control instanceof javafx.scene.control.TextArea) {
             ((javafx.scene.control.TextArea) control).textProperty().addListener((obs, oldVal, newVal) -> {
@@ -959,6 +1142,27 @@ public class ScreenFactory {
             choiceBox.valueProperty().addListener((obs, oldVal, newVal) -> {
                 screenVars.put(varName, newVal);
             });
+        }
+    }
+
+    /**
+     * Refreshes all bound controls by updating their values from the screenVars map.
+     * This is called after onClick handlers execute to reflect variable changes in the UI.
+     */
+    private static void refreshBoundControls(List<Node> boundControls, 
+                                              java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
+        if (boundControls == null || screenVars == null) {
+            return;
+        }
+        
+        for (Node control : boundControls) {
+            String varName = (String) control.getProperties().get("varName");
+            DisplayItem metadata = (DisplayItem) control.getProperties().get("metadata");
+            
+            if (varName != null) {
+                Object currentValue = screenVars.get(varName);
+                updateControlFromValue(control, currentValue, metadata);
+            }
         }
     }
 

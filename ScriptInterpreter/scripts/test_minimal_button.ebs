@@ -1,0 +1,48 @@
+// MINIMAL TEST: Button and text field
+print "=== Minimal Button Test ===";
+
+// Create screen with explicit area items for both text field and button
+screen minTest = {
+    "title": "Minimal Test",
+    "width": 400,
+    "height": 200,
+    "vars": [
+        {
+            "name": "count",
+            "type": "int",
+            "default": 5
+        }
+    ],
+    "area": [
+        {
+            "name": "main",
+            "type": "vbox",
+            "items": [
+                {
+                    "name": "countField",
+                    "sequence": 0,
+                    "varRef": "count",
+                    "display": {
+                        "type": "textfield",
+                        "promptText": "enter count value",
+                        "labelText": "Count:",
+                        "labelTextAlignment": "left"
+                    }
+                },
+                {
+                    "name": "btn",
+                    "sequence": 1,
+                    "display": {
+                        "type": "button",
+                        "promptText": "Add One",
+                        "onClick": "minTest.count = minTest.count + 1; print minTest.count;"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+print "Initial count: " + minTest.count;
+screen minTest show;
+print "Screen shown";

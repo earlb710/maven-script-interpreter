@@ -48,4 +48,6 @@ public interface StatementVisitor {
 
     void visitScreenHideStatement(ScreenHideStatement stmt) throws InterpreterError;
 
+    void visitImportStatement(ImportStatement stmt) throws InterpreterError;
+
 }
