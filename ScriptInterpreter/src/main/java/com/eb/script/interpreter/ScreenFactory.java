@@ -176,6 +176,18 @@ public class ScreenFactory {
                                                BiFunction<String, String, DisplayItem> metadataProvider,
                                                java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
                                                OnClickHandler onClickHandler) {
+        List<Node> boundControls = new ArrayList<>();
+        return createAreaWithItems(areaDef, screenName, metadataProvider, screenVars, onClickHandler, boundControls);
+    }
+
+    /**
+     * Creates a container from AreaDefinition and adds all items to it with variable binding, onClick handler, and control tracking.
+     */
+    private static Region createAreaWithItems(AreaDefinition areaDef, String screenName,
+                                               BiFunction<String, String, DisplayItem> metadataProvider,
+                                               java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+                                               OnClickHandler onClickHandler,
+                                               List<Node> boundControls) {
         // Create the container using AreaContainerFactory
         Region container = AreaContainerFactory.createContainer(areaDef);
 
@@ -204,6 +216,8 @@ public class ScreenFactory {
                         button.setOnAction(event -> {
                             try {
                                 onClickHandler.execute(ebsCode);
+                                // After executing the onClick code, refresh all bound controls
+                                refreshBoundControls(boundControls, screenVars);
                             } catch (InterpreterError e) {
                                 // Print error to console if available
                                 System.err.println("Error executing button onClick: " + e.getMessage());
@@ -216,6 +230,8 @@ public class ScreenFactory {
                 // Set up two-way data binding if screenVars is provided and item has a varRef
                 if (screenVars != null && item.varRef != null) {
                     setupVariableBinding(control, item.varRef, screenVars, metadata);
+                    // Track this control so we can refresh it when variables change
+                    boundControls.add(control);
                 }
 
                 // Apply item layout properties
@@ -229,7 +245,7 @@ public class ScreenFactory {
         // Add nested child areas to the container
         if (areaDef.childAreas != null && !areaDef.childAreas.isEmpty()) {
             for (AreaDefinition childArea : areaDef.childAreas) {
-                Region childContainer = createAreaWithItems(childArea, screenName, metadataProvider, screenVars, onClickHandler);
+                Region childContainer = createAreaWithItems(childArea, screenName, metadataProvider, screenVars, onClickHandler, boundControls);
                 
                 // Add the child container to the parent container
                 // Treat child areas as regular nodes
@@ -1017,6 +1033,27 @@ public class ScreenFactory {
             choiceBox.valueProperty().addListener((obs, oldVal, newVal) -> {
                 screenVars.put(varName, newVal);
             });
+        }
+    }
+
+    /**
+     * Refreshes all bound controls by updating their values from the screenVars map.
+     * This is called after onClick handlers execute to reflect variable changes in the UI.
+     */
+    private static void refreshBoundControls(List<Node> boundControls, 
+                                              java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
+        if (boundControls == null || screenVars == null) {
+            return;
+        }
+        
+        for (Node control : boundControls) {
+            String varName = (String) control.getProperties().get("varName");
+            DisplayItem metadata = (DisplayItem) control.getProperties().get("metadata");
+            
+            if (varName != null) {
+                Object currentValue = screenVars.get(varName);
+                updateControlFromValue(control, currentValue, metadata);
+            }
         }
     }
 
