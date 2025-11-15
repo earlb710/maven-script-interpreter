@@ -19,19 +19,19 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * InterpreterScreen handles all screen-related interpreter operations.
- * This includes creating screens, showing/hiding them, and managing screen state.
+ * InterpreterScreen handles all screen-related interpreter operations. This
+ * includes creating screens, showing/hiding them, and managing screen state.
  */
 public class InterpreterScreen {
-    
+
     private final InterpreterContext context;
     private final Interpreter interpreter;
-    
+
     public InterpreterScreen(InterpreterContext context, Interpreter interpreter) {
         this.context = context;
         this.interpreter = interpreter;
     }
-    
+
     /**
      * Visit a screen statement to create a new screen
      */
@@ -64,7 +64,7 @@ public class InterpreterScreen {
             // Create thread-safe variable storage for this screen
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVarMap = new java.util.concurrent.ConcurrentHashMap<>();
             context.getScreenVars().put(stmt.name, screenVarMap);
-            
+
             // Create thread-safe variable type storage for this screen
             java.util.concurrent.ConcurrentHashMap<String, DataType> screenVarTypeMap = new java.util.concurrent.ConcurrentHashMap<>();
             context.getScreenVarTypes().put(stmt.name, screenVarTypeMap);
@@ -118,7 +118,7 @@ public class InterpreterScreen {
 
                             // Store in screen's thread-safe variable map
                             screenVarMap.put(varName, value);
-                            
+
                             // Store the variable type if specified
                             if (varType != null) {
                                 screenVarTypeMap.put(varName, varType);
@@ -133,7 +133,7 @@ public class InterpreterScreen {
             // Process area definitions if present
             if (config.containsKey("area")) {
                 Object areaObj = config.get("area");
-                if (areaObj instanceof  ArrayDynamic varsArray) {
+                if (areaObj instanceof ArrayDynamic varsArray) {
                     @SuppressWarnings("unchecked")
                     List<Object> areaList = varsArray.getAll();
                     java.util.List<AreaDefinition> areas = new java.util.ArrayList<>();
@@ -162,7 +162,7 @@ public class InterpreterScreen {
                         varsWithDisplay.add(varName);
                     }
                 }
-                
+
                 if (!varsWithDisplay.isEmpty()) {
                     // Create a default VBox area with label-control pairs in HBox rows
                     // This gives: Label : Control on same line, with rows stacked vertically
@@ -170,18 +170,18 @@ public class InterpreterScreen {
                     defaultArea.areaType = AreaDefinition.AreaType.VBOX;
                     defaultArea.name = "default";
                     defaultArea.screenName = stmt.name;
-                    
+
                     // Instead of creating nested areas, we'll create a grid-like structure
                     // by creating HBox sub-areas for each variable
                     java.util.List<AreaDefinition> areas = new java.util.ArrayList<>();
-                    
+
                     for (String varName : varsWithDisplay) {
                         // Create an HBox area to hold label and control side-by-side
                         AreaDefinition hboxRow = new AreaDefinition();
                         hboxRow.areaType = AreaDefinition.AreaType.HBOX;
                         hboxRow.name = varName + "_row";
                         hboxRow.screenName = stmt.name;
-                        
+
                         // Create a label for the variable name
                         AreaDefinition.AreaItem labelItem = new AreaDefinition.AreaItem();
                         labelItem.name = varName + "_label";
@@ -202,7 +202,10 @@ public class InterpreterScreen {
                             // Final fallback to capitalizing the variable name if neither labelText nor promptText is available
                             labelText = capitalizeWords(varName) + ":";
                         }
-                        labelMetadata.promptText = labelText;
+                        if (!labelText.isBlank() && labelText.charAt(labelText.length() - 1) != ':') {
+                            labelText = labelText + ":";
+                        }
+                        labelMetadata.labelText = labelText;
                         labelMetadata.style = "-fx-alignment: center-right;"; // Right-align the label text
                         labelItem.displayMetadata = labelMetadata;
                         labelItem.varRef = null; // Labels don't bind to variables
@@ -210,17 +213,17 @@ public class InterpreterScreen {
                         labelItem.hgrow = "NEVER";
                         labelItem.minWidth = "150"; // Minimum width for label alignment
                         hboxRow.items.add(labelItem);
-                        
+
                         // Create the input control for the variable
                         AreaDefinition.AreaItem item = new AreaDefinition.AreaItem();
                         item.varRef = varName;
                         item.sequence = 1;
                         item.displayMetadata = context.getDisplayItem().get(stmt.name + "." + varName);
-                        
+
                         // Set sizing to fit content, not stretch to screen width
                         item.maxWidth = "USE_PREF_SIZE";
                         item.hgrow = "NEVER";
-                        
+
                         // Set reasonable preferred widths based on item type
                         if (item.displayMetadata != null) {
                             switch (item.displayMetadata.itemType) {
@@ -250,11 +253,11 @@ public class InterpreterScreen {
                                     break;
                             }
                         }
-                        
+
                         hboxRow.items.add(item);
                         areas.add(hboxRow);
                     }
-                    
+
                     context.getScreenAreas().put(stmt.name, areas);
                 }
             }
@@ -265,10 +268,10 @@ public class InterpreterScreen {
             final int screenWidth = width;
             final int screenHeight = height;
             final boolean screenMaximize = maximize;
-            
+
             // Get the areas for this screen
             final java.util.List<AreaDefinition> areas = context.getScreenAreas().get(screenName);
-            
+
             // Use CountDownLatch to wait for stage creation
             final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
             final java.util.concurrent.atomic.AtomicReference<Exception> creationError = new java.util.concurrent.atomic.AtomicReference<>();
@@ -276,11 +279,11 @@ public class InterpreterScreen {
             Platform.runLater(() -> {
                 try {
                     Stage stage;
-                    
+
                     // Get screen variables map from context
                     java.util.concurrent.ConcurrentHashMap<String, Object> varsMap = context.getScreenVars().get(screenName);
                     java.util.concurrent.ConcurrentHashMap<String, DataType> varTypesMap = context.getScreenVarTypes().get(screenName);
-                    
+
                     // Use ScreenFactory if areas are defined, otherwise create simple stage
                     if (areas != null && !areas.isEmpty()) {
                         // Create screen with areas using ScreenFactory
@@ -299,24 +302,24 @@ public class InterpreterScreen {
                                 throw new InterpreterError("IO error executing onClick code: " + e.getMessage());
                             }
                         };
-                        
+
                         stage = ScreenFactory.createScreen(
-                            screenName,
-                            screenTitle,
-                            screenWidth,
-                            screenHeight,
-                            areas,
-                            (scrName, varName) -> context.getDisplayItem().get(scrName + "." + varName),
-                            varsMap,  // Pass screenVars for binding
-                            varTypesMap,  // Pass variable types for proper conversion
-                            onClickHandler,  // Pass onClick handler for buttons
-                            context  // Pass context to store bound controls for refresh
+                                screenName,
+                                screenTitle,
+                                screenWidth,
+                                screenHeight,
+                                areas,
+                                (scrName, varName) -> context.getDisplayItem().get(scrName + "." + varName),
+                                varsMap, // Pass screenVars for binding
+                                varTypesMap, // Pass variable types for proper conversion
+                                onClickHandler, // Pass onClick handler for buttons
+                                context // Pass context to store bound controls for refresh
                         );
                     } else {
                         // Create simple stage without areas
                         stage = new Stage();
                         stage.setTitle(screenTitle);
-                        
+
                         // Create a simple scene with a StackPane
                         StackPane root = new StackPane();
                         Scene scene = new Scene(root, screenWidth, screenHeight);
@@ -357,10 +360,10 @@ public class InterpreterScreen {
                         context.getScreenThreads().remove(screenName);
                         context.getScreenVars().remove(screenName);
                         context.getScreenAreas().remove(screenName);
-                        
+
                         // Clean up display metadata for this screen
-                        context.getDisplayItem().entrySet().removeIf(entry -> 
-                            entry.getKey().startsWith(screenName + "."));
+                        context.getDisplayItem().entrySet().removeIf(entry
+                                -> entry.getKey().startsWith(screenName + "."));
                     });
 
                     // Store the stage reference
@@ -369,7 +372,6 @@ public class InterpreterScreen {
                     context.getScreensBeingCreated().remove(screenName);
 
                     // Don't show the screen automatically - user must explicitly call "screen <name> show;"
-                    
                     if (context.getOutput() != null) {
                         context.getOutput().printlnOk("Screen '" + screenName + "' created with title: " + screenTitle);
                     }
@@ -385,7 +387,7 @@ public class InterpreterScreen {
                     latch.countDown();
                 }
             });
-            
+
             // Wait for stage creation to complete
             try {
                 boolean completed = latch.await(10, java.util.concurrent.TimeUnit.SECONDS);
@@ -399,7 +401,7 @@ public class InterpreterScreen {
                 Thread.currentThread().interrupt();
                 throw interpreter.error(stmt.getLine(), "Screen creation was interrupted");
             }
-            
+
             // Check if there was an error during creation
             if (creationError.get() != null) {
                 throw interpreter.error(stmt.getLine(), "Failed to create screen: " + creationError.get().getMessage());
@@ -422,7 +424,7 @@ public class InterpreterScreen {
             if (!context.getScreens().containsKey(stmt.name)) {
                 throw interpreter.error(stmt.getLine(), "Screen '" + stmt.name + "' does not exist. Create it first with 'screen " + stmt.name + " = {...};'");
             }
-            
+
             Stage stage = context.getScreens().get(stmt.name);
             if (stage == null) {
                 // This shouldn't happen with the latch, but handle it gracefully
@@ -460,7 +462,7 @@ public class InterpreterScreen {
             if (!context.getScreens().containsKey(stmt.name)) {
                 throw interpreter.error(stmt.getLine(), "Screen '" + stmt.name + "' does not exist. Create it first with 'screen " + stmt.name + " = {...};'");
             }
-            
+
             Stage stage = context.getScreens().get(stmt.name);
             if (stage == null) {
                 // This shouldn't happen with the latch, but handle it gracefully
@@ -489,17 +491,18 @@ public class InterpreterScreen {
     }
 
     /**
-     * Helper method to capitalize words in a string (e.g., "myVariable" -> "My Variable")
+     * Helper method to capitalize words in a string (e.g., "myVariable" -> "My
+     * Variable")
      */
     private String capitalizeWords(String input) {
         if (input == null || input.isEmpty()) {
             return input;
         }
-        
+
         // Split camelCase or lowercase string into words
         String withSpaces = input.replaceAll("([a-z])([A-Z])", "$1 $2")
-                                 .replaceAll("([A-Z])([A-Z][a-z])", "$1 $2");
-        
+                .replaceAll("([A-Z])([A-Z][a-z])", "$1 $2");
+
         // Capitalize first letter of each word
         String[] words = withSpaces.split("\\s+");
         StringBuilder result = new StringBuilder();
@@ -514,7 +517,7 @@ public class InterpreterScreen {
                 }
             }
         }
-        
+
         return result.toString();
     }
 
@@ -604,32 +607,24 @@ public class InterpreterScreen {
         if (displayDef.containsKey("pattern")) {
             metadata.pattern = String.valueOf(displayDef.get("pattern"));
         }
-        
+
         // Check for both camelCase and lowercase versions - promptText (placeholder hint)
-        if (displayDef.containsKey("promptText")) {
-            metadata.promptText = String.valueOf(displayDef.get("promptText"));
-        } else if (displayDef.containsKey("prompttext")) {
-            metadata.promptText = String.valueOf(displayDef.get("prompttext"));
+        if (displayDef.containsKey("prompttext")) {
+            metadata.promptHelp = String.valueOf(displayDef.get("prompttext"));
         }
 
         // Extract labelText (permanent label displayed before/above control)
-        if (displayDef.containsKey("labelText")) {
-            metadata.labelText = String.valueOf(displayDef.get("labelText"));
-        } else if (displayDef.containsKey("labeltext")) {
+        if (displayDef.containsKey("labeltext")) {
             metadata.labelText = String.valueOf(displayDef.get("labeltext"));
         }
 
         // Extract labelText alignment
-        if (displayDef.containsKey("labelTextAlignment")) {
-            metadata.labelTextAlignment = String.valueOf(displayDef.get("labelTextAlignment")).toLowerCase();
-        } else if (displayDef.containsKey("labeltextalignment")) {
+        if (displayDef.containsKey("labeltextalignment")) {
             metadata.labelTextAlignment = String.valueOf(displayDef.get("labeltextalignment")).toLowerCase();
         }
 
         // Extract onClick event handler for buttons - check both camelCase and lowercase
-        if (displayDef.containsKey("onClick")) {
-            metadata.onClick = String.valueOf(displayDef.get("onClick"));
-        } else if (displayDef.containsKey("onclick")) {
+        if (displayDef.containsKey("onclick")) {
             metadata.onClick = String.valueOf(displayDef.get("onclick"));
         }
 
@@ -746,7 +741,7 @@ public class InterpreterScreen {
                 List<Object> list = (List<Object>) itemsObj;
                 itemsList = list;
             }
-            
+
             if (itemsList != null) {
                 for (Object itemObj : itemsList) {
                     if (itemObj instanceof Map) {
@@ -773,23 +768,21 @@ public class InterpreterScreen {
                             }
                         }
 
-                        if (itemDef.containsKey("layoutPos")) {
-                            item.layoutPos = String.valueOf(itemDef.get("layoutPos"));
+                        if (itemDef.containsKey("layoutpos")) {
+                            item.layoutPos = String.valueOf(itemDef.get("layoutpos"));
                         } else if (itemDef.containsKey("layout_pos")) {
                             // Support both camelCase and snake_case
                             item.layoutPos = String.valueOf(itemDef.get("layout_pos"));
-                        } else if (itemDef.containsKey("relativePos")) {
+                        } else if (itemDef.containsKey("relativepos")) {
                             // Backward compatibility with old name
-                            item.layoutPos = String.valueOf(itemDef.get("relativePos"));
+                            item.layoutPos = String.valueOf(itemDef.get("relativepos"));
                         } else if (itemDef.containsKey("relative_pos")) {
                             // Backward compatibility with old name (snake_case)
                             item.layoutPos = String.valueOf(itemDef.get("relative_pos"));
                         }
 
                         // Check for both camelCase and lowercase versions of varRef
-                        if (itemDef.containsKey("varRef")) {
-                            item.varRef = String.valueOf(itemDef.get("varRef")).toLowerCase();
-                        } else if (itemDef.containsKey("varref")) {
+                        if (itemDef.containsKey("varref")) {
                             item.varRef = String.valueOf(itemDef.get("varref")).toLowerCase();
                         } else if (itemDef.containsKey("var_ref")) {
                             item.varRef = String.valueOf(itemDef.get("var_ref")).toLowerCase();
@@ -812,16 +805,16 @@ public class InterpreterScreen {
 
                         // Parse additional UI properties for the item
                         // promptText now goes into displayMetadata
-                        if (itemDef.containsKey("promptText") || itemDef.containsKey("prompt_text")) {
-                            String promptText = itemDef.containsKey("promptText") 
-                                ? String.valueOf(itemDef.get("promptText"))
-                                : String.valueOf(itemDef.get("prompt_text"));
-                            
+                        if (itemDef.containsKey("prompttext") || itemDef.containsKey("prompt_text")) {
+                            String promptText = itemDef.containsKey("prompttext")
+                                    ? String.valueOf(itemDef.get("prompttext"))
+                                    : String.valueOf(itemDef.get("prompt_text"));
+
                             // If displayMetadata doesn't exist yet, create it
                             if (item.displayMetadata == null) {
                                 item.displayMetadata = new DisplayItem();
                             }
-                            item.displayMetadata.promptText = promptText;
+                            item.displayMetadata.promptHelp = promptText;
                         }
 
                         if (itemDef.containsKey("editable")) {
@@ -950,12 +943,12 @@ public class InterpreterScreen {
                 area.items.sort((a, b) -> Integer.compare(a.sequence, b.sequence));
             }
         }
-        
+
         // Process nested child areas (areas within areas)
         if (areaDef.containsKey("areas")) {
             Object areasObj = areaDef.get("areas");
             List<Object> areasList = null;
-            
+
             // Handle both List and ArrayDynamic (JSON always uses ArrayDynamic)
             if (areasObj instanceof ArrayDynamic) {
                 areasList = ((ArrayDynamic) areasObj).getAll();
@@ -964,13 +957,13 @@ public class InterpreterScreen {
                 List<Object> list = (List<Object>) areasObj;
                 areasList = list;
             }
-            
+
             if (areasList != null) {
                 for (Object childAreaObj : areasList) {
                     if (childAreaObj instanceof Map) {
                         @SuppressWarnings("unchecked")
                         Map<String, Object> childAreaDef = (Map<String, Object>) childAreaObj;
-                        
+
                         // Recursively parse child area
                         AreaDefinition childArea = parseAreaDefinition(childAreaDef, screenName, line);
                         area.childAreas.add(childArea);

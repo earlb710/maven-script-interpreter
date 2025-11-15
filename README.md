@@ -146,6 +146,10 @@ screen myWindow show;
 - Assign to variables via `screen_name.var_name = value` (e.g., `myWindow.counter = 10`)
 - Variable assignments do not trigger screen display
 - Multiple screens can be created and managed independently
+- **Case-Insensitive JSON Keys**: Screen definition JSON uses case-insensitive key lookup
+  - Property names like `varRef`, `VarRef`, or `varref` are all treated identically
+  - Keys are normalized to lowercase (`promptText` → `prompttext`)
+  - String values preserve their original casing
 
 ### Console Commands
 
@@ -238,6 +242,8 @@ The interpreter includes numerous built-in functions:
 ### JSON Operations
 - `parseJson()`, `stringifyJson()`
 - `validateJson()`, `deriveSchema()`
+
+**Note**: Screen definitions use case-insensitive JSON key parsing, where property names are normalized to lowercase. Regular JSON operations (`parseJson()`) preserve the original key casing.
 
 ### Date/Time
 - `now()`, `dateFormat()`, `parseDate()`

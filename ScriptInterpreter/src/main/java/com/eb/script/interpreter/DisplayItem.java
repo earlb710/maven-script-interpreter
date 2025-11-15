@@ -31,19 +31,19 @@ public class DisplayItem {
     // Regex pattern for validation (useful for text inputs)
     String pattern;
     // Placeholder text for text inputs (hint shown in empty field)
-    String promptText;
+    String promptHelp;
     // Label text displayed before/above the control
     String labelText;
     // Label text alignment: "left", "center", "right"
     String labelTextAlignment;
     // Options/values for selection controls (ComboBox, ChoiceBox, ListView)
     List<String> options;
-    // Prompt text color
-    String promptColor;
-    // Prompt text bold flag
-    Boolean promptBold;
-    // Prompt text italic flag
-    Boolean promptItalic;
+    // Label text color
+    String labelColor;
+    // Label text bold flag
+    Boolean labelBold;
+    // Label text italic flag
+    Boolean labelItalic;
     // onClick event handler - EBS code to execute when button is clicked
     String onClick;
     
@@ -59,11 +59,11 @@ public class DisplayItem {
                ", style='" + style + '\'' +
                ", alignment='" + alignment + '\'' +
                ", pattern='" + pattern + '\'' +
-               ", promptText='" + promptText + '\'' +
+               ", promptHelp='" + promptHelp + '\'' +
                ", options=" + options +
-               ", promptColor='" + promptColor + '\'' +
-               ", promptBold=" + promptBold +
-               ", promptItalic=" + promptItalic +
+               ", promptColor='" + labelColor + '\'' +
+               ", promptBold=" + labelBold +
+               ", promptItalic=" + labelItalic +
                '}';
     }
     

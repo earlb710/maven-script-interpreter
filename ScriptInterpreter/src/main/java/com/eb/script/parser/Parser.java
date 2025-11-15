@@ -454,6 +454,9 @@ public class Parser {
     }
 
     private LiteralExpression parseJsonLiteralFromSource() throws ParseError {
+        return parseJsonLiteralFromSource(false);
+    }
+    private LiteralExpression parseJsonLiteralFromSource(boolean lowerCaseKey) throws ParseError {
         if (source == null) {
             throw error(currToken, "Parser was not constructed with source; cannot parse JSON literal.");
         }
@@ -500,7 +503,7 @@ public class Parser {
         int toInclusive = last.end;
         String jsonText = source.substring(from, toInclusive + 1);
 
-        Object value = Json.parse(jsonText);   // your minimal JSON parser
+        Object value = Json.parse(jsonText, lowerCaseKey);   // your minimal JSON parser
         return new com.eb.script.interpreter.expression.LiteralExpression(com.eb.script.token.DataType.JSON, value);
     }
 
@@ -1211,7 +1214,7 @@ public class Parser {
             //    - IDENTIFIER (reference to a var holding json)
             Expression spec;
             if (checkAny(EbsTokenType.LBRACE, EbsTokenType.LBRACKET)) {
-                spec = parseJsonLiteralFromSource();
+                spec = parseJsonLiteralFromSource(true);
             } else if (check(EbsTokenType.IDENTIFIER)) {
                 EbsToken id = consume(EbsTokenType.IDENTIFIER, "Expected screen configuration json or variable.");
                 spec = new VariableExpression(id.line, (String) id.literal);
