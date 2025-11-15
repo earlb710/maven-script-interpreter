@@ -24,6 +24,8 @@ public class AreaDefinition {
     String screenName;
     // Items in this area
     List<AreaItem> items = new ArrayList<>();
+    // Nested child areas (areas within areas)
+    List<AreaDefinition> childAreas = new ArrayList<>();
     
     @Override
     public String toString() {
@@ -34,6 +36,7 @@ public class AreaDefinition {
                ", layout='" + layout + '\'' +
                ", style='" + style + '\'' +
                ", items=" + items.size() +
+               ", childAreas=" + childAreas.size() +
                '}';
     }
     

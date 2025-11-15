@@ -10,6 +10,7 @@ import com.eb.script.token.ebs.EbsToken;
 import com.eb.ui.cli.Handler;
 import com.eb.ui.cli.ScriptArea;
 import com.eb.util.Debugger;
+import com.eb.util.Util;
 import javafx.application.Platform;
 import javafx.scene.control.Tab;
 
@@ -337,8 +338,7 @@ public class EbsTab extends Tab {
                         outputArea.printlnOk("✓ Done.");
                     });
                 } catch (Exception ex) {
-                    Platform.runLater(() -> outputArea.printlnError("✗ Error: " + ex.getMessage())
-                    );
+                    Platform.runLater(() -> outputArea.printlnError("✗ Error: " + Util.formatExceptionWith2Origin(ex)));
                 } finally {
                     Platform.runLater(() -> runBtn.setDisable(false));
                 }

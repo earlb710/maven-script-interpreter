@@ -44,4 +44,8 @@ public interface StatementVisitor {
 
     void visitScreenStatement(ScreenStatement stmt) throws InterpreterError;
 
+    void visitScreenShowStatement(ScreenShowStatement stmt) throws InterpreterError;
+
+    void visitScreenHideStatement(ScreenHideStatement stmt) throws InterpreterError;
+
 }

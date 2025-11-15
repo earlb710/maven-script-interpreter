@@ -193,7 +193,7 @@ public class AreaItemFactory {
      * Applies item-specific display properties to the control.
      */
     private static void applyItemSpecificProperties(Node control, AreaItem item) {
-        // Apply prompt text for text input controls
+        // Apply prompt text or text content based on control type
         if (item.promptText != null && !item.promptText.isEmpty()) {
             if (control instanceof TextField) {
                 ((TextField) control).setPromptText(item.promptText);
@@ -201,6 +201,12 @@ public class AreaItemFactory {
                 ((TextArea) control).setPromptText(item.promptText);
             } else if (control instanceof ComboBox) {
                 ((ComboBox<?>) control).setPromptText(item.promptText);
+            } else if (control instanceof Label) {
+                // For labels, use promptText as the label's text content
+                ((Label) control).setText(item.promptText);
+            } else if (control instanceof Button) {
+                // For buttons, use promptText as the button's text
+                ((Button) control).setText(item.promptText);
             }
         }
 
