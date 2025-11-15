@@ -68,31 +68,39 @@ import java.util.Map;
 
 public class Interpreter implements StatementVisitor, ExpressionVisitor {
 
-    private Environment environment;
-    private Debugger debug;
+    private final InterpreterContext context;
 
-    private final java.util.Map<String, DbConnection> connections = new java.util.HashMap<>();
-    private final java.util.Map<String, CursorSpec> cursorSpecs = new java.util.HashMap<>();
-    private final java.util.concurrent.ConcurrentHashMap<String, Stage> screens = new java.util.concurrent.ConcurrentHashMap<>();
-    private final java.util.concurrent.ConcurrentHashMap<String, Thread> screenThreads = new java.util.concurrent.ConcurrentHashMap<>();
-    private final java.util.concurrent.ConcurrentHashMap<String, java.util.concurrent.ConcurrentHashMap<String, Object>> screenVars = new java.util.concurrent.ConcurrentHashMap<>();
-    private final java.util.Set<String> screensBeingCreated = java.util.concurrent.ConcurrentHashMap.newKeySet();
-    private final java.util.Map<String, DisplayMetadata> displayMetadata = new java.util.HashMap<>();
-    private final java.util.Map<String, java.util.List<AreaDefinition>> screenAreas = new java.util.HashMap<>();
-    private final java.util.Deque<String> connectionStack = new java.util.ArrayDeque<>();
-    private DbAdapter db = new OracleDbAdapter();
-    private ScriptArea output;
+    public Interpreter() {
+        this.context = new InterpreterContext();
+    }
+
+    public InterpreterContext getContext() {
+        return context;
+    }
 
     public boolean isEchoOn() {
-        return environment.isEchoOn();
+        return context.isEchoOn();
     }
 
     public void setDbAdapter(DbAdapter adapter) {
-        this.db = (adapter == null ? DbAdapter.NOOP : adapter);
+        context.setDb(adapter);
     }
 
     private String currentConnection() {
-        return connectionStack.peek();
+        return context.getCurrentConnection();
+    }
+
+    // Convenience accessors for frequently used context fields
+    private Environment environment() {
+        return context.getEnvironment();
+    }
+
+    private Debugger debug() {
+        return context.getDebug();
+    }
+
+    private ScriptArea output() {
+        return context.getOutput();
     }
 
     /**
@@ -102,7 +110,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     public void cleanup() {
         // Close all screens on JavaFX thread
         Platform.runLater(() -> {
-            for (Map.Entry<String, Stage> entry : screens.entrySet()) {
+            for (Map.Entry<String, Stage> entry : context.getScreens().entrySet()) {
                 try {
                     Stage stage = entry.getValue();
                     if (stage != null) {
@@ -115,7 +123,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         });
 
         // Interrupt all screen threads
-        for (Map.Entry<String, Thread> entry : screenThreads.entrySet()) {
+        for (Map.Entry<String, Thread> entry : context.getScreenThreads().entrySet()) {
             try {
                 Thread thread = entry.getValue();
                 if (thread != null && thread.isAlive()) {
@@ -127,24 +135,23 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         }
 
         // Clear all maps
-        screens.clear();
-        screenThreads.clear();
-        screenVars.clear();
-        screenAreas.clear();
-        displayMetadata.clear();
-        screensBeingCreated.clear();
+        context.getScreens().clear();
+        context.getScreenThreads().clear();
+        context.getScreenVars().clear();
+        context.getScreenAreas().clear();
+        context.getDisplayMetadata().clear();
+        context.getScreensBeingCreated().clear();
     }
 
     // --- Call stack support ---
     // Each frame is a Map<String,Object> with keys like: name, kind, line.
     // We use fully-qualified types to avoid changing imports.
     public void interpret(RuntimeContext runtime) throws InterpreterError {
-        environment = runtime.environment;
-        output = environment.getOutputArea();
-        debug = environment.getDebugger();
+        context.setEnvironment(runtime.environment);
+        context.setOutput(runtime.environment.getOutputArea());
         
         // Register this interpreter in the environment for cleanup
-        environment.setCurrentInterpreter(this);
+        environment().setCurrentInterpreter(this);
 
         // Set the source directory as safe for file operations during this execution
         if (runtime.sourcePath != null) {
@@ -156,7 +163,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
 
         try {
             // Add runtime context name as a predefined variable accessible to scripts
-            environment.getEnvironmentValues().define("__name__", runtime.name);
+            environment().getEnvironmentValues().define("__name__", runtime.name);
 
             // Load safe directories with names and define them as global variables
             try {
@@ -175,7 +182,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
 
                     // If the safe directory has a name, define it as a global variable
                     if (name != null && !name.trim().isEmpty()) {
-                        environment.getEnvironmentValues().define(name.trim(), directory);
+                        environment().getEnvironmentValues().define(name.trim(), directory);
                     }
                 }
             } catch (Exception e) {
@@ -201,7 +208,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                     // If both variable name and connection string are present, define as global variable
                     if (varName != null && !varName.trim().isEmpty()
                             && connStr != null && !connStr.trim().isEmpty()) {
-                        environment.getEnvironmentValues().define(varName.trim(), connStr);
+                        environment().getEnvironmentValues().define(varName.trim(), connStr);
                     }
                 }
             } catch (Exception e) {
@@ -209,23 +216,23 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 // just continue without defining database variables
             }
 
-            Builtins.setStackSupplier(() -> new java.util.ArrayList<>(environment.getCallStack()));
-            environment.clearCallStack();
-            environment.pushCallStack(0, StatementKind.SCRIPT, "Script : %1 ", runtime.name);
+            Builtins.setStackSupplier(() -> new java.util.ArrayList<>(environment().getCallStack()));
+            environment().clearCallStack();
+            environment().pushCallStack(0, StatementKind.SCRIPT, "Script : %1 ", runtime.name);
 
             for (Statement stmt : runtime.statements) {
-                environment.pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "%1", stmt);
+                environment().pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "%1", stmt);
                 try {
-                    if (debug.isDebugTraceOn()) {
-                        debug.debugWriteStart("TRACE", "line " + stmt.getLine() + " : " + stmt.getClass().getSimpleName());
+                    if (debug().isDebugTraceOn()) {
+                        debug().debugWriteStart("TRACE", "line " + stmt.getLine() + " : " + stmt.getClass().getSimpleName());
                         stmt.accept(this);
-                        debug.debugWriteEnd();
+                        debug().debugWriteEnd();
                     } else {
                         stmt.accept(this);
                     }
 
                 } finally {
-                    environment.popCallStack();
+                    environment().popCallStack();
                 }
             }
         } finally {
@@ -237,7 +244,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     // --- Statement Visitors ---
     @Override
     public void visitVarStatement(VarStatement stmt) throws InterpreterError {
-        environment.pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Var %1", stmt.name);  // name may be null
+        environment().pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Var %1", stmt.name);  // name may be null
         try {
             Object value = evaluate(stmt.initializer);
 
@@ -253,9 +260,9 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                     throw error(stmt.getLine(), "Type mismatch: expected " + expectedType + " for variable '" + stmt.name + "'");
                 }
             }
-            environment.getEnvironmentValues().define(stmt.name, value);
+            environment().getEnvironmentValues().define(stmt.name, value);
         } finally {
-            environment.popCallStack();
+            environment().popCallStack();
         }
     }
 
@@ -265,7 +272,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         ArrayDef target = null;
 
         if (expr.array instanceof VariableExpression var) {
-            Object v = environment.get(var.name);
+            Object v = environment().get(var.name);
             if (v instanceof ArrayDef av) {
                 target = av;
             } else {
@@ -467,7 +474,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     public Object visitIndexExpression(IndexExpression expr) throws InterpreterError {
         Object target = evaluate(expr.target);
 
-        environment.pushCallStack(expr.line, StatementKind.EXPRESSION, "IndexExpression [%1]", target.getClass().getSimpleName());
+        environment().pushCallStack(expr.line, StatementKind.EXPRESSION, "IndexExpression [%1]", target.getClass().getSimpleName());
         try {
             if (expr.indices == null || expr.indices.length == 0) {
                 throw error(expr.line, "Index expression requires at least one index.");
@@ -501,7 +508,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             }
             return current;
         } finally {
-            environment.popCallStack();
+            environment().popCallStack();
         }
     }
 
@@ -627,7 +634,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
 
     @Override
     public void visitIfStatement(IfStatement stmt) throws InterpreterError {
-        environment.pushCallStack(stmt.getLine(), StatementKind.CONDITION, "If (%1)", stmt.condition);  // name may be null
+        environment().pushCallStack(stmt.getLine(), StatementKind.CONDITION, "If (%1)", stmt.condition);  // name may be null
         try {
             Object value = evaluate(stmt.condition);
             if (value instanceof Boolean cond) {
@@ -642,7 +649,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 throw error(stmt.getLine(), "\"If\" condition expression must be boolean, but is = " + value);
             }
         } finally {
-            environment.popCallStack();
+            environment().popCallStack();
         }
     }
 
@@ -658,7 +665,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
 
     @Override
     public void visitWhileStatement(WhileStatement stmt) throws InterpreterError {
-        environment.pushCallStack(stmt.getLine(), StatementKind.LOOP, "While (%1)", stmt.condition);  // name may be null
+        environment().pushCallStack(stmt.getLine(), StatementKind.LOOP, "While (%1)", stmt.condition);  // name may be null
         try {
             int loopIdx = 0;
             while (evaluateBoolean(stmt.condition)) {
@@ -674,13 +681,13 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 }
             }
         } finally {
-            environment.popCallStack();
+            environment().popCallStack();
         }
     }
 
     @Override
     public void visitDoWhileStatement(DoWhileStatement stmt) throws InterpreterError {
-        environment.pushCallStack(stmt.getLine(), StatementKind.LOOP, "Do While (%1)", stmt.condition);  // name may be null
+        environment().pushCallStack(stmt.getLine(), StatementKind.LOOP, "Do While (%1)", stmt.condition);  // name may be null
         try {
             int loopIdx = 0;
             do {
@@ -696,7 +703,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 }
             } while (evaluateBoolean(stmt.condition));
         } finally {
-            environment.popCallStack();
+            environment().popCallStack();
         }
     }
 
@@ -723,7 +730,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             String varName = name.substring(dotIndex + 1);
 
             // Check if this is a screen variable
-            java.util.concurrent.ConcurrentHashMap<String, Object> screenVarMap = screenVars.get(screenName);
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars().get(screenName);
             if (screenVarMap != null) {
                 if (screenVarMap.containsKey(varName)) {
                     screenVarMap.put(varName, value);
@@ -735,7 +742,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         }
 
         // Fall back to regular environment variable assignment
-        environment.getEnvironmentValues().assign(stmt.name, value);
+        environment().getEnvironmentValues().assign(stmt.name, value);
     }
 
     @Override
@@ -806,16 +813,16 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
 
     @Override
     public void visitPrintStatement(PrintStatement stmt) throws InterpreterError {
-        environment.pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Print");  // name may be null
+        environment().pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Print");  // name may be null
         try {
             Object value = evaluate(stmt.expression);
-            if (output == null) {
+            if (output() == null) {
                 System.out.println(Util.stringify(value));
             } else {
-                output.println(Util.stringify(value));
+                output().println(Util.stringify(value));
             }
         } finally {
-            environment.popCallStack();
+            environment().popCallStack();
         }
     }
 
@@ -825,8 +832,8 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     }
 
     public Object visitBlockStatement(BlockStatement stmt, Statement[] parameters) throws InterpreterError {
-        environment.pushEnvironmentValues();
-        environment.pushCallStack(stmt.getLine(), StatementKind.BLOCK, "Block %1", stmt.name);  // name may be null
+        environment().pushEnvironmentValues();
+        environment().pushCallStack(stmt.getLine(), StatementKind.BLOCK, "Block %1", stmt.name);  // name may be null
 
         try {
             if (parameters != null) {
@@ -847,8 +854,8 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             return r.value;
         } finally {
             // POP the frame even on errors/returns
-            environment.popCallStack();
-            environment.popEnvironmentValues();
+            environment().popCallStack();
+            environment().popEnvironmentValues();
         }
         return null;
     }
@@ -913,7 +920,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             String varName = name.substring(dotIndex + 1);
 
             // Check if this is a screen variable
-            java.util.concurrent.ConcurrentHashMap<String, Object> screenVarMap = screenVars.get(screenName);
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars().get(screenName);
             if (screenVarMap != null) {
                 if (screenVarMap.containsKey(varName)) {
                     return screenVarMap.get(varName);
@@ -924,7 +931,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         }
 
         // Fall back to regular environment variable
-        return environment.get(expr.name);
+        return environment().get(expr.name);
     }
 
     @Override
@@ -1331,14 +1338,14 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
 
     @Override
     public void visitForEachStatement(ForEachStatement stmt) throws InterpreterError {
-        environment.pushCallStack(stmt.getLine(), StatementKind.LOOP, "foreach %1", stmt.varName);
+        environment().pushCallStack(stmt.getLine(), StatementKind.LOOP, "foreach %1", stmt.varName);
         try {
             final Object it = evaluate(stmt.iterable);
 
             java.util.function.Consumer<Object> runBodyWith = (elem) -> {
-                environment.pushEnvironmentValues();
+                environment().pushEnvironmentValues();
                 try {
-                    environment.getEnvironmentValues().define(stmt.varName, elem);
+                    environment().getEnvironmentValues().define(stmt.varName, elem);
                     try {
                         stmt.body.accept(this);
                     } catch (ContinueSignal c) {
@@ -1347,7 +1354,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                         throw new RuntimeException(ex.getMessage());
                     }
                 } finally {
-                    environment.popEnvironmentValues();
+                    environment().popEnvironmentValues();
                 }
             };
 
@@ -1412,37 +1419,37 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 // nothing
             }
         } finally {
-            environment.popCallStack();
+            environment().popCallStack();
         }
     }
 
     @Override
     public void visitConnectStatement(ConnectStatement stmt) throws InterpreterError {
-        environment.pushCallStack(stmt.getLine(), StatementKind.SQL, "Connect %1", stmt.name);
+        environment().pushCallStack(stmt.getLine(), StatementKind.SQL, "Connect %1", stmt.name);
         try {
-            if (connections.containsKey(stmt.name)) {
+            if (context.getConnections().containsKey(stmt.name)) {
                 throw error(stmt.getLine(), "Connection '" + stmt.name + "' already exists.");
             }
             Object spec = evaluate(stmt.spec);        // string | json | identifier value
             DbConnection conn;
             try {
-                conn = db.connect(spec);
+                conn = context.getDb().connect(spec);
             } catch (Exception e) {
                 throw error(stmt.getLine(), "Connect failed: " + e.getMessage());
             }
-            connections.put(stmt.name, conn);
+            context.getConnections().put(stmt.name, conn);
         } catch (InterpreterError ex) {
             throw error(stmt.getLine(), ex.getLocalizedMessage());
         } finally {
-            environment.popCallStack();
+            environment().popCallStack();
         }
     }
 
     @Override
     public void visitCloseConnectionStatement(CloseConnectionStatement stmt) throws InterpreterError {
-        environment.pushCallStack(stmt.getLine(), StatementKind.SQL, "Close connect %1", stmt.name);
+        environment().pushCallStack(stmt.getLine(), StatementKind.SQL, "Close connect %1", stmt.name);
         try {
-            DbConnection conn = connections.remove(stmt.name);
+            DbConnection conn = context.getConnections().remove(stmt.name);
             if (conn == null) {
                 throw error(stmt.getLine(), "Unknown connection '" + stmt.name + "'");
             }
@@ -1454,20 +1461,20 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         } catch (InterpreterError ex) {
             throw error(stmt.getLine(), ex.getLocalizedMessage());
         } finally {
-            environment.popCallStack();
+            environment().popCallStack();
         }
     }
 
     @Override
     public void visitScreenStatement(ScreenStatement stmt) throws InterpreterError {
-        environment.pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Screen %1", stmt.name);
+        environment().pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Screen %1", stmt.name);
         try {
-            if (screens.containsKey(stmt.name) || screensBeingCreated.contains(stmt.name)) {
+            if (context.getScreens().containsKey(stmt.name) || context.getScreensBeingCreated().contains(stmt.name)) {
                 throw error(stmt.getLine(), "Screen '" + stmt.name + "' already exists.");
             }
 
             // Mark this screen as being created to prevent duplicate creation during async initialization
-            screensBeingCreated.add(stmt.name);
+            context.getScreensBeingCreated().add(stmt.name);
 
             // Evaluate the spec (should be a JSON object)
             Object spec = evaluate(stmt.spec);
@@ -1487,7 +1494,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
 
             // Create thread-safe variable storage for this screen
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVarMap = new java.util.concurrent.ConcurrentHashMap<>();
-            screenVars.put(stmt.name, screenVarMap);
+            context.getScreenVars().put(stmt.name, screenVarMap);
 
             // Process variable definitions if present
             if (config.containsKey("vars")) {
@@ -1563,7 +1570,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                         }
                     }
 
-                    screenAreas.put(stmt.name, areas);
+                    context.getScreenAreas().put(stmt.name, areas);
                 } else {
                     throw error(stmt.getLine(), "The 'area' property in screen '" + stmt.name + "' must be an array.");
                 }
@@ -1571,7 +1578,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 // If no explicit areas defined but variables with display metadata exist,
                 // create a default area with items for all displayed variables
                 java.util.List<String> varsWithDisplay = new java.util.ArrayList<>();
-                for (String key : displayMetadata.keySet()) {
+                for (String key : context.getDisplayMetadata().keySet()) {
                     if (key.startsWith(stmt.name + ".")) {
                         String varName = key.substring(stmt.name.length() + 1);
                         varsWithDisplay.add(varName);
@@ -1615,7 +1622,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                         AreaDefinition.AreaItem item = new AreaDefinition.AreaItem();
                         item.varRef = varName;
                         item.sequence = 1;
-                        item.displayMetadata = displayMetadata.get(stmt.name + "." + varName);
+                        item.displayMetadata = context.getDisplayMetadata().get(stmt.name + "." + varName);
                         
                         // Set sizing to fit content, not stretch to screen width
                         item.maxWidth = "USE_PREF_SIZE";
@@ -1649,7 +1656,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                         areas.add(hboxRow);
                     }
                     
-                    screenAreas.put(stmt.name, areas);
+                    context.getScreenAreas().put(stmt.name, areas);
                 }
             }
 
@@ -1661,7 +1668,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             final boolean screenMaximize = maximize;
             
             // Get the areas for this screen
-            final java.util.List<AreaDefinition> areas = screenAreas.get(screenName);
+            final java.util.List<AreaDefinition> areas = context.getScreenAreas().get(screenName);
             
             // Use CountDownLatch to wait for stage creation
             final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
@@ -1680,7 +1687,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                             screenWidth,
                             screenHeight,
                             areas,
-                            (scrName, varName) -> displayMetadata.get(scrName + "." + varName)
+                            (scrName, varName) -> context.getDisplayMetadata().get(scrName + "." + varName)
                         );
                     } else {
                         // Create simple stage without areas
@@ -1713,42 +1720,42 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                     screenThread.start();
 
                     // Store thread reference
-                    screenThreads.put(screenName, screenThread);
+                    context.getScreenThreads().put(screenName, screenThread);
 
                     // Set up cleanup when screen is closed
                     stage.setOnCloseRequest(event -> {
                         // Interrupt and stop the screen thread
-                        Thread thread = screenThreads.get(screenName);
+                        Thread thread = context.getScreenThreads().get(screenName);
                         if (thread != null && thread.isAlive()) {
                             thread.interrupt();
                         }
                         // Clean up resources
-                        screens.remove(screenName);
-                        screenThreads.remove(screenName);
-                        screenVars.remove(screenName);
-                        screenAreas.remove(screenName);
+                        context.getScreens().remove(screenName);
+                        context.getScreenThreads().remove(screenName);
+                        context.getScreenVars().remove(screenName);
+                        context.getScreenAreas().remove(screenName);
                         
                         // Clean up display metadata for this screen
-                        displayMetadata.entrySet().removeIf(entry -> 
+                        context.getDisplayMetadata().entrySet().removeIf(entry -> 
                             entry.getKey().startsWith(screenName + "."));
                     });
 
                     // Store the stage reference
-                    screens.put(screenName, stage);
+                    context.getScreens().put(screenName, stage);
                     // Remove from being created set
-                    screensBeingCreated.remove(screenName);
+                    context.getScreensBeingCreated().remove(screenName);
 
                     // Don't show the screen automatically - user must explicitly call "screen <name> show;"
                     
-                    if (output != null) {
-                        output.printlnOk("Screen '" + screenName + "' created with title: " + screenTitle);
+                    if (output() != null) {
+                        output().printlnOk("Screen '" + screenName + "' created with title: " + screenTitle);
                     }
                 } catch (Exception e) {
                     creationError.set(e);
                     // Remove from being created set on error
-                    screensBeingCreated.remove(screenName);
-                    if (output != null) {
-                        output.printlnError("Failed to create screen '" + screenName + "': " + e.getMessage());
+                    context.getScreensBeingCreated().remove(screenName);
+                    if (output() != null) {
+                        output().printlnError("Failed to create screen '" + screenName + "': " + e.getMessage());
                     }
                 } finally {
                     // Signal that creation is complete
@@ -1761,11 +1768,11 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 boolean completed = latch.await(10, java.util.concurrent.TimeUnit.SECONDS);
                 if (!completed) {
                     // Timeout occurred
-                    screensBeingCreated.remove(stmt.name);
+                    context.getScreensBeingCreated().remove(stmt.name);
                     throw error(stmt.getLine(), "Screen creation timed out after 10 seconds");
                 }
             } catch (InterruptedException e) {
-                screensBeingCreated.remove(stmt.name);
+                context.getScreensBeingCreated().remove(stmt.name);
                 Thread.currentThread().interrupt();
                 throw error(stmt.getLine(), "Screen creation was interrupted");
             }
@@ -1778,20 +1785,20 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         } catch (InterpreterError ex) {
             throw error(stmt.getLine(), ex.getLocalizedMessage());
         } finally {
-            environment.popCallStack();
+            environment().popCallStack();
         }
     }
 
     @Override
     public void visitScreenShowStatement(ScreenShowStatement stmt) throws InterpreterError {
-        environment.pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Screen %1 show", stmt.name);
+        environment().pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Screen %1 show", stmt.name);
         try {
             // Check if screen exists (may be null if still being created, but key should be present)
-            if (!screens.containsKey(stmt.name)) {
+            if (!context.getScreens().containsKey(stmt.name)) {
                 throw error(stmt.getLine(), "Screen '" + stmt.name + "' does not exist. Create it first with 'screen " + stmt.name + " = {...};'");
             }
             
-            Stage stage = screens.get(stmt.name);
+            Stage stage = context.getScreens().get(stmt.name);
             if (stage == null) {
                 // This shouldn't happen with the latch, but handle it gracefully
                 throw error(stmt.getLine(), "Screen '" + stmt.name + "' is still being initialized. Please try again.");
@@ -1801,12 +1808,12 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             Platform.runLater(() -> {
                 if (!stage.isShowing()) {
                     stage.show();
-                    if (output != null) {
-                        output.printlnOk("Screen '" + stmt.name + "' shown");
+                    if (output() != null) {
+                        output().printlnOk("Screen '" + stmt.name + "' shown");
                     }
                 } else {
-                    if (output != null) {
-                        output.printlnInfo("Screen '" + stmt.name + "' is already showing");
+                    if (output() != null) {
+                        output().printlnInfo("Screen '" + stmt.name + "' is already showing");
                     }
                 }
             });
@@ -1814,20 +1821,20 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         } catch (InterpreterError ex) {
             throw error(stmt.getLine(), ex.getLocalizedMessage());
         } finally {
-            environment.popCallStack();
+            environment().popCallStack();
         }
     }
 
     @Override
     public void visitScreenHideStatement(ScreenHideStatement stmt) throws InterpreterError {
-        environment.pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Screen %1 hide", stmt.name);
+        environment().pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Screen %1 hide", stmt.name);
         try {
             // Check if screen exists (may be null if still being created, but key should be present)
-            if (!screens.containsKey(stmt.name)) {
+            if (!context.getScreens().containsKey(stmt.name)) {
                 throw error(stmt.getLine(), "Screen '" + stmt.name + "' does not exist. Create it first with 'screen " + stmt.name + " = {...};'");
             }
             
-            Stage stage = screens.get(stmt.name);
+            Stage stage = context.getScreens().get(stmt.name);
             if (stage == null) {
                 // This shouldn't happen with the latch, but handle it gracefully
                 throw error(stmt.getLine(), "Screen '" + stmt.name + "' is still being initialized. Please try again.");
@@ -1837,12 +1844,12 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             Platform.runLater(() -> {
                 if (stage.isShowing()) {
                     stage.hide();
-                    if (output != null) {
-                        output.printlnOk("Screen '" + stmt.name + "' hidden");
+                    if (output() != null) {
+                        output().printlnOk("Screen '" + stmt.name + "' hidden");
                     }
                 } else {
-                    if (output != null) {
-                        output.printlnInfo("Screen '" + stmt.name + "' is already hidden");
+                    if (output() != null) {
+                        output().printlnInfo("Screen '" + stmt.name + "' is already hidden");
                     }
                 }
             });
@@ -1850,7 +1857,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         } catch (InterpreterError ex) {
             throw error(stmt.getLine(), ex.getLocalizedMessage());
         } finally {
-            environment.popCallStack();
+            environment().popCallStack();
         }
     }
 
@@ -1926,7 +1933,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
 
         // Store the metadata using a composite key: screenName.varName
         String key = screenName + "." + varName;
-        displayMetadata.put(key, metadata);
+        context.getDisplayMetadata().put(key, metadata);
     }
 
     /**
@@ -1940,7 +1947,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
      */
     public DisplayMetadata getDisplayMetadata(String screenName, String varName) {
         String key = screenName + "." + varName;
-        return displayMetadata.get(key);
+        return context.getDisplayMetadata().get(key);
     }
 
     /**
@@ -2280,60 +2287,60 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
 
     @Override
     public void visitUseConnectionStatement(UseConnectionStatement stmt) throws InterpreterError {
-        environment.pushCallStack(stmt.getLine(), StatementKind.SQL, "Use connection %1", stmt.connectionName);
+        environment().pushCallStack(stmt.getLine(), StatementKind.SQL, "Use connection %1", stmt.connectionName);
         try {
-            DbConnection conn = connections.get(stmt.connectionName);
+            DbConnection conn = context.getConnections().get(stmt.connectionName);
             if (conn == null) {
                 throw error(stmt.getLine(), "Unknown connection '" + stmt.connectionName + "'. Did you connect first?");
             }
-            connectionStack.push(stmt.connectionName);
+            context.getConnectionStack().push(stmt.connectionName);
             try {
                 if (stmt.statements != null) {
                     for (Statement s : stmt.statements) {
-                        environment.pushCallStack(s.getLine(), StatementKind.STATEMENT, "%1", s);
+                        environment().pushCallStack(s.getLine(), StatementKind.STATEMENT, "%1", s);
                         try {
                             s.accept(this);
                         } finally {
-                            environment.popCallStack();
+                            environment().popCallStack();
                         }
                     }
                 }
             } finally {
-                connectionStack.pop();
+                context.getConnectionStack().pop();
             }
         } catch (InterpreterError ex) {
             throw error(stmt.getLine(), ex.getLocalizedMessage());
         } finally {
-            environment.popCallStack();
+            environment().popCallStack();
         }
     }
 
     @Override
     public void visitCursorStatement(CursorStatement stmt) throws InterpreterError {
-        environment.pushCallStack(stmt.getLine(), StatementKind.SQL, "Cursor %1", stmt.name);
+        environment().pushCallStack(stmt.getLine(), StatementKind.SQL, "Cursor %1", stmt.name);
         try {
             String connName = currentConnection();
             if (connName == null) {
                 throw error(stmt.getLine(), "cursor declaration requires an active 'use <connection> { ... }' block");
             }
             // Parser ensures SELECT text is captured in stmt.select.sql
-            cursorSpecs.put(stmt.name, new CursorSpec(connName, stmt.select.sql, stmt.getLine())); // [1](https://za-prod.asyncgw.teams.microsoft.com/v1/objects/0-nza-d4-608facf2fafd223072e8197a8a6a9d5e/views/original/ScriptInterpreter_now.zip)
+            context.getCursorSpecs().put(stmt.name, new CursorSpec(connName, stmt.select.sql, stmt.getLine())); // [1](https://za-prod.asyncgw.teams.microsoft.com/v1/objects/0-nza-d4-608facf2fafd223072e8197a8a6a9d5e/views/original/ScriptInterpreter_now.zip)
         } catch (InterpreterError ex) {
             throw error(stmt.getLine(), ex.getLocalizedMessage());
         } finally {
-            environment.popCallStack();
+            environment().popCallStack();
         }
     }
 
     @Override
     public void visitOpenCursorStatement(OpenCursorStatement stmt) throws InterpreterError {
-        environment.pushCallStack(stmt.getLine(), StatementKind.SQL, "Open cursor %1", stmt.name);
+        environment().pushCallStack(stmt.getLine(), StatementKind.SQL, "Open cursor %1", stmt.name);
         try {
-            CursorSpec spec = cursorSpecs.get(stmt.name);
+            CursorSpec spec = context.getCursorSpecs().get(stmt.name);
             if (spec == null) {
                 throw error(stmt.getLine(), "Unknown cursor '" + stmt.name + "'. Did you declare with 'cursor " + stmt.name + " = select ...;'?");
             }
-            DbConnection conn = connections.get(spec.connectionName);
+            DbConnection conn = context.getConnections().get(spec.connectionName);
             if (conn == null) {
                 throw error(stmt.getLine(), "Connection '" + spec.connectionName + "' is not open");
             }
@@ -2354,24 +2361,24 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             try {
                 DbCursor cursor = conn.openCursor(spec.sql, named, positional);
                 // make cursor variable visible (for myCursor.hasNext()/next())
-                environment.getEnvironmentValues().define(stmt.name, cursor);
+                environment().getEnvironmentValues().define(stmt.name, cursor);
             } catch (Exception e) {
                 throw error(stmt.getLine(), "Open cursor failed: " + e.getMessage());
             }
         } catch (InterpreterError ex) {
             throw error(stmt.getLine(), ex.getLocalizedMessage());
         } finally {
-            environment.popCallStack();
+            environment().popCallStack();
         }
     }
 
     @Override
     public void visitCloseCursorStatement(com.eb.script.interpreter.statement.CloseCursorStatement stmt) throws InterpreterError {
-        environment.pushCallStack(stmt.getLine(), StatementKind.SQL, "Close cursor %1", stmt.name);
+        environment().pushCallStack(stmt.getLine(), StatementKind.SQL, "Close cursor %1", stmt.name);
         try {
             Object v;
             try {
-                v = environment.get(stmt.name);
+                v = environment().get(stmt.name);
             } catch (RuntimeException undefined) {
                 // not defined -> treat as not open
                 v = null;
@@ -2383,22 +2390,22 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                     throw error(stmt.getLine(), "Close cursor failed: " + e.getMessage());
                 }
                 // Optionally clear variable so subsequent hasNext()/next() will fail fast
-                environment.getEnvironmentValues().assign(stmt.name, null);
+                environment().getEnvironmentValues().assign(stmt.name, null);
             } // else: silently ignore closing a non-open cursor name
         } finally {
-            environment.popCallStack();
+            environment().popCallStack();
         }
     }
 
     @Override
     public Object visitSqlSelectExpression(com.eb.script.interpreter.expression.SqlSelectExpression expr) throws InterpreterError {
-        environment.pushCallStack(expr.line, StatementKind.SQL, "Expression %1", expr.sql);
+        environment().pushCallStack(expr.line, StatementKind.SQL, "Expression %1", expr.sql);
         try {
             String connName = currentConnection();
             if (connName == null) {
                 throw error(expr.line, "SELECT requires an active 'use <connection> { ... }' block");
             }
-            DbConnection conn = connections.get(connName);
+            DbConnection conn = context.getConnections().get(connName);
             if (conn == null) {
                 throw error(expr.line, "Connection '" + connName + "' is not open");
             }
@@ -2411,13 +2418,13 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 throw error(expr.line, "SELECT failed: " + e.getMessage());
             }
         } finally {
-            environment.popCallStack();
+            environment().popCallStack();
         }
     }
 
     @Override
     public Object visitCursorHasNextExpression(com.eb.script.interpreter.expression.CursorHasNextExpression expr) throws InterpreterError {
-        environment.pushCallStack(expr.getLine(), StatementKind.SQL, "HasNext %1", expr.target.toString());
+        environment().pushCallStack(expr.getLine(), StatementKind.SQL, "HasNext %1", expr.target.toString());
         try {
             Object v = evaluate(expr.target);
             if (!(v instanceof DbCursor c)) {
@@ -2429,13 +2436,13 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 throw error(expr.getLine(), "hasNext() failed: " + e.getMessage());
             }
         } finally {
-            environment.popCallStack();
+            environment().popCallStack();
         }
     }
 
     @Override
     public Object visitCursorNextExpression(com.eb.script.interpreter.expression.CursorNextExpression expr) throws InterpreterError {
-        environment.pushCallStack(expr.getLine(), StatementKind.SQL, "Next %1", expr.target.toString());
+        environment().pushCallStack(expr.getLine(), StatementKind.SQL, "Next %1", expr.target.toString());
         try {
             Object v = evaluate(expr.target);
             if (!(v instanceof DbCursor c)) {
@@ -2447,7 +2454,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 throw error(expr.getLine(), "next() failed: " + e.getMessage());
             }
         } finally {
-            environment.popCallStack();
+            environment().popCallStack();
         }
     }
 
@@ -2485,18 +2492,18 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         }
 
         // PUSH a builtin frame
-        environment.pushCallStack(c.getLine(), StatementKind.BUILTIN, "Call %1", name);
+        environment().pushCallStack(c.getLine(), StatementKind.BUILTIN, "Call %1", name);
         try {
-            return Builtins.callBuiltin(environment, name, args);
+            return Builtins.callBuiltin(environment(), name, args);
         } catch (Exception ex) {
             throw error(c.getLine(), "Call Builtin -> " + ex.getMessage());
         } finally {
             // POP even on failure
-            environment.popCallStack();
+            environment().popCallStack();
         }
     }
 
-    private static final class CursorSpec {
+    public static final class CursorSpec {
 
         final String connectionName;
         final String sql;
@@ -2511,7 +2518,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
 
     private InterpreterError error(int line, String message) {
         message = "Runtime error on line " + line + " : " + message;
-        return new InterpreterError(message, environment.getCallStack());
+        return new InterpreterError(message, environment().getCallStack());
     }
 
     public static class BreakSignal extends RuntimeException {
