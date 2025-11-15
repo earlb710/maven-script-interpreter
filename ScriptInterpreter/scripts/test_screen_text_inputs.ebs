@@ -1,0 +1,96 @@
+// Test Script: Text Input Controls
+// Description: Tests all text-based input controls (textfield, textarea, passwordfield)
+// Author: EBS Test Suite
+// Date: 2025-11-15
+
+screen textInputScreen = {
+    "title": "Text Input Controls Test",
+    "width": 700,
+    "height": 650,
+    "vars": [
+        {
+            "name": "singleLineText",
+            "type": "string",
+            "default": "Single line text field",
+            "display": {"type": "textfield", "mandatory": true}
+        },
+        {
+            "name": "email",
+            "type": "string",
+            "default": "user@example.com",
+            "display": {
+                "type": "textfield", 
+                "mandatory": true,
+                "pattern": "^[\\w.-]+@[\\w.-]+\\.\\w+$"
+            }
+        },
+        {
+            "name": "multiLineText",
+            "type": "string",
+            "default": "This is a multi-line\ntextarea control.\nYou can enter multiple lines of text here.",
+            "display": {"type": "textarea"}
+        },
+        {
+            "name": "description",
+            "type": "string",
+            "default": "Enter a detailed description...",
+            "display": {"type": "textarea", "mandatory": false}
+        },
+        {
+            "name": "password",
+            "type": "string",
+            "default": "secret123",
+            "display": {"type": "passwordfield", "mandatory": true}
+        },
+        {
+            "name": "confirmPassword",
+            "type": "string",
+            "default": "",
+            "display": {"type": "passwordfield", "mandatory": true}
+        },
+        {
+            "name": "upperCaseText",
+            "type": "string",
+            "default": "text will be uppercase",
+            "display": {
+                "type": "textfield",
+                "caseFormat": "upper"
+            }
+        },
+        {
+            "name": "lowerCaseText",
+            "type": "string",
+            "default": "TEXT WILL BE LOWERCASE",
+            "display": {
+                "type": "textfield",
+                "caseFormat": "lower"
+            }
+        }
+    ]
+};
+
+// Test variable access
+print "Testing text input controls...";
+print "Single Line Text: " + textInputScreen.singleLineText;
+print "Email: " + textInputScreen.email;
+print "Multi-line Text: " + textInputScreen.multiLineText;
+print "Password: " + textInputScreen.password;
+
+// Modify some values
+textInputScreen.singleLineText = "Modified single line text";
+textInputScreen.email = "newemail@test.com";
+textInputScreen.description = "This is a comprehensive test\nof the textarea control\nwith multiple lines.";
+textInputScreen.confirmPassword = "secret123";
+
+print "";
+print "Modified values:";
+print "Single Line Text: " + textInputScreen.singleLineText;
+print "Email: " + textInputScreen.email;
+print "Description: " + textInputScreen.description;
+
+// Show the screen
+print "";
+print "Displaying text input screen...";
+screen textInputScreen show;
+
+print "Text input controls test completed!";

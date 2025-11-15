@@ -1,0 +1,136 @@
+// Test Script: Numeric Controls
+// Description: Tests numeric input controls (spinner, slider)
+// Author: EBS Test Suite
+// Date: 2025-11-15
+
+screen numericScreen = {
+    "title": "Numeric Controls Test",
+    "width": 650,
+    "height": 550,
+    "vars": [
+        {
+            "name": "age",
+            "type": "int",
+            "default": 25,
+            "display": {
+                "type": "spinner",
+                "min": 0,
+                "max": 150
+            }
+        },
+        {
+            "name": "quantity",
+            "type": "int",
+            "default": 1,
+            "display": {
+                "type": "spinner",
+                "min": 1,
+                "max": 100
+            }
+        },
+        {
+            "name": "volume",
+            "type": "int",
+            "default": 50,
+            "display": {
+                "type": "slider",
+                "min": 0,
+                "max": 100
+            }
+        },
+        {
+            "name": "brightness",
+            "type": "int",
+            "default": 75,
+            "display": {
+                "type": "slider",
+                "min": 0,
+                "max": 100
+            }
+        },
+        {
+            "name": "rating",
+            "type": "int",
+            "default": 5,
+            "display": {
+                "type": "slider",
+                "min": 1,
+                "max": 10
+            }
+        },
+        {
+            "name": "temperature",
+            "type": "int",
+            "default": 20,
+            "display": {
+                "type": "slider",
+                "min": -10,
+                "max": 50
+            }
+        },
+        {
+            "name": "percentage",
+            "type": "double",
+            "default": 0.75,
+            "display": {
+                "type": "textfield"
+            }
+        },
+        {
+            "name": "price",
+            "type": "double",
+            "default": 99.99,
+            "display": {
+                "type": "textfield"
+            }
+        }
+    ]
+};
+
+// Test variable access
+print "Testing numeric controls...";
+print "Age: " + numericScreen.age;
+print "Quantity: " + numericScreen.quantity;
+print "Volume: " + numericScreen.volume;
+print "Brightness: " + numericScreen.brightness;
+print "Rating: " + numericScreen.rating;
+print "Temperature: " + numericScreen.temperature;
+print "Percentage: " + numericScreen.percentage;
+print "Price: " + numericScreen.price;
+
+// Modify values
+print "";
+print "Modifying numeric values...";
+numericScreen.age = 30;
+numericScreen.quantity = 5;
+numericScreen.volume = 80;
+numericScreen.brightness = 90;
+numericScreen.rating = 8;
+numericScreen.temperature = 25;
+numericScreen.percentage = 0;
+numericScreen.price = 149;
+
+// Verify modifications
+print "Age: " + numericScreen.age;
+print "Quantity: " + numericScreen.quantity;
+print "Volume: " + numericScreen.volume;
+print "Brightness: " + numericScreen.brightness;
+print "Rating: " + numericScreen.rating;
+print "Temperature: " + numericScreen.temperature;
+print "Percentage: " + numericScreen.percentage;
+print "Price: " + numericScreen.price;
+
+// Test boundary conditions
+print "";
+print "Testing boundary conditions...";
+numericScreen.volume = 0;
+print "Volume at minimum: " + numericScreen.volume;
+numericScreen.volume = 100;
+print "Volume at maximum: " + numericScreen.volume;
+
+// Show the screen
+print "";
+print "Displaying numeric controls screen...";
+screen numericScreen show;
+
+print "Numeric controls test completed!";

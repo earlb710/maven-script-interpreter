@@ -1,0 +1,105 @@
+// Test Script: Selection Controls
+// Description: Tests selection-based input controls (checkbox, radiobutton, combobox, listview, etc.)
+// Author: EBS Test Suite
+// Date: 2025-11-15
+
+screen selectionScreen = {
+    "title": "Selection Controls Test",
+    "width": 700,
+    "height": 700,
+    "vars": [
+        {
+            "name": "agreeToTerms",
+            "type": "bool",
+            "default": false,
+            "display": {"type": "checkbox", "mandatory": true}
+        },
+        {
+            "name": "enableNotifications",
+            "type": "bool",
+            "default": true,
+            "display": {"type": "checkbox"}
+        },
+        {
+            "name": "subscribe",
+            "type": "bool",
+            "default": false,
+            "display": {"type": "checkbox"}
+        },
+        {
+            "name": "theme",
+            "type": "string",
+            "default": "light",
+            "display": {"type": "radiobutton"}
+        },
+        {
+            "name": "darkMode",
+            "type": "bool",
+            "default": false,
+            "display": {"type": "togglebutton"}
+        },
+        {
+            "name": "country",
+            "type": "string",
+            "default": "USA",
+            "display": {"type": "combobox"}
+        },
+        {
+            "name": "language",
+            "type": "string",
+            "default": "English",
+            "display": {"type": "choicebox"}
+        },
+        {
+            "name": "categories",
+            "type": "string",
+            "default": "[]",
+            "display": {"type": "listview"}
+        },
+        {
+            "name": "selectedItems",
+            "type": "string",
+            "default": "[\"Item1\", \"Item2\"]",
+            "display": {"type": "textarea"}
+        }
+    ]
+};
+
+// Test variable access
+print "Testing selection controls...";
+print "Agree to Terms: " + selectionScreen.agreeToTerms;
+print "Enable Notifications: " + selectionScreen.enableNotifications;
+print "Subscribe: " + selectionScreen.subscribe;
+print "Theme: " + selectionScreen.theme;
+print "Dark Mode: " + selectionScreen.darkMode;
+print "Country: " + selectionScreen.country;
+print "Language: " + selectionScreen.language;
+
+// Modify values
+print "";
+print "Modifying selection values...";
+selectionScreen.agreeToTerms = true;
+selectionScreen.enableNotifications = false;
+selectionScreen.subscribe = true;
+selectionScreen.theme = "dark";
+selectionScreen.darkMode = true;
+selectionScreen.country = "Canada";
+selectionScreen.language = "French";
+selectionScreen.categories = "[\"Technology\", \"Science\", \"Arts\"]";
+
+// Verify modifications
+print "Agree to Terms: " + selectionScreen.agreeToTerms;
+print "Enable Notifications: " + selectionScreen.enableNotifications;
+print "Subscribe: " + selectionScreen.subscribe;
+print "Theme: " + selectionScreen.theme;
+print "Dark Mode: " + selectionScreen.darkMode;
+print "Country: " + selectionScreen.country;
+print "Language: " + selectionScreen.language;
+print "Categories: " + selectionScreen.categories;
+
+// Show the screen
+print "";
+print "Displaying selection controls screen...";
+screen selectionScreen show;
+
+print "Selection controls test completed!";

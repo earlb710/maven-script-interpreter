@@ -1,0 +1,241 @@
+// Test Script: Comprehensive Screen Test
+// Description: Comprehensive test combining all screen features and control types
+// Author: EBS Test Suite
+// Date: 2025-11-15
+
+screen comprehensiveScreen = {
+    "title": "Comprehensive Screen Test - All Controls",
+    "width": 900,
+    "height": 800,
+    "maximize": false,
+    "vars": [
+        {
+            "name": "username",
+            "type": "string",
+            "default": "testuser",
+            "display": {"type": "textfield", "mandatory": true}
+        },
+        {
+            "name": "bio",
+            "type": "string",
+            "default": "Enter your biography here...",
+            "display": {"type": "textarea"}
+        },
+        {
+            "name": "password",
+            "type": "string",
+            "default": "",
+            "display": {"type": "passwordfield", "mandatory": true}
+        },
+        {
+            "name": "agreeTerms",
+            "type": "bool",
+            "default": false,
+            "display": {"type": "checkbox", "mandatory": true}
+        },
+        {
+            "name": "newsletter",
+            "type": "bool",
+            "default": true,
+            "display": {"type": "checkbox"}
+        },
+        {
+            "name": "accountType",
+            "type": "string",
+            "default": "Standard",
+            "display": {"type": "combobox"}
+        },
+        {
+            "name": "region",
+            "type": "string",
+            "default": "North America",
+            "display": {"type": "choicebox"}
+        },
+        {
+            "name": "age",
+            "type": "int",
+            "default": 25,
+            "display": {
+                "type": "spinner",
+                "min": 18,
+                "max": 120
+            }
+        },
+        {
+            "name": "experience",
+            "type": "int",
+            "default": 5,
+            "display": {
+                "type": "slider",
+                "min": 0,
+                "max": 50
+            }
+        },
+        {
+            "name": "satisfaction",
+            "type": "int",
+            "default": 7,
+            "display": {
+                "type": "slider",
+                "min": 1,
+                "max": 10
+            }
+        },
+        {
+            "name": "joinDate",
+            "type": "string",
+            "default": "2025-01-01",
+            "display": {"type": "datepicker"}
+        },
+        {
+            "name": "themeColor",
+            "type": "string",
+            "default": "#4A90E2",
+            "display": {"type": "colorpicker"}
+        },
+        {
+            "name": "welcomeMessage",
+            "type": "string",
+            "default": "Welcome to the Comprehensive Screen Test!",
+            "display": {
+                "type": "label",
+                "style": "-fx-font-size: 16px; -fx-font-weight: bold;"
+            }
+        },
+        {
+            "name": "instructions",
+            "type": "string",
+            "default": "Please fill out all mandatory fields marked with an asterisk (*)",
+            "display": {"type": "text"}
+        },
+        {
+            "name": "supportLink",
+            "type": "string",
+            "default": "https://support.example.com",
+            "display": {"type": "hyperlink"}
+        },
+        {
+            "name": "preferences",
+            "type": "string",
+            "default": "{\"notifications\": true, \"language\": \"en\"}",
+            "display": {"type": "textarea"}
+        },
+        {
+            "name": "tags",
+            "type": "string",
+            "default": "[\"developer\", \"tester\", \"analyst\"]",
+            "display": {"type": "textarea"}
+        },
+        {
+            "name": "profileComplete",
+            "type": "int",
+            "default": 45,
+            "display": {"type": "textfield"}
+        },
+        {
+            "name": "statusText",
+            "type": "string",
+            "default": "Profile 45% complete",
+            "display": {
+                "type": "label",
+                "style": "-fx-text-fill: #FF8C00;"
+            }
+        }
+    ]
+};
+
+// Initialize and display comprehensive information
+print "========================================";
+print "COMPREHENSIVE SCREEN TEST";
+print "========================================";
+print "";
+
+// Text Input Section
+print "TEXT INPUT CONTROLS:";
+print "Username: " + comprehensiveScreen.username;
+print "Bio: " + comprehensiveScreen.bio;
+print "Password: " + comprehensiveScreen.password;
+print "";
+
+// Selection Section
+print "SELECTION CONTROLS:";
+print "Terms Agreed: " + comprehensiveScreen.agreeTerms;
+print "Newsletter Subscribed: " + comprehensiveScreen.newsletter;
+print "Account Type: " + comprehensiveScreen.accountType;
+print "Region: " + comprehensiveScreen.region;
+print "";
+
+// Numeric Section
+print "NUMERIC CONTROLS:";
+print "Age: " + comprehensiveScreen.age;
+print "Experience (years): " + comprehensiveScreen.experience;
+print "Satisfaction (1-10): " + comprehensiveScreen.satisfaction;
+print "";
+
+// Date and Color Section
+print "DATE & COLOR CONTROLS:";
+print "Join Date: " + comprehensiveScreen.joinDate;
+print "Theme Color: " + comprehensiveScreen.themeColor;
+print "";
+
+// Modify all values to test thread-safe access
+print "========================================";
+print "MODIFYING ALL VALUES...";
+print "========================================";
+print "";
+
+comprehensiveScreen.username = "poweruser";
+comprehensiveScreen.bio = "Experienced software developer\nSpecializing in test automation\nPassionate about quality assurance";
+comprehensiveScreen.password = "secure_password_123";
+
+comprehensiveScreen.agreeTerms = true;
+comprehensiveScreen.newsletter = false;
+comprehensiveScreen.accountType = "Premium";
+comprehensiveScreen.region = "Europe";
+
+comprehensiveScreen.age = 32;
+comprehensiveScreen.experience = 10;
+comprehensiveScreen.satisfaction = 9;
+
+comprehensiveScreen.joinDate = "2020/06/15";
+comprehensiveScreen.themeColor = "#2ECC71";
+
+comprehensiveScreen.welcomeMessage = "Welcome back, " + comprehensiveScreen.username + "!";
+comprehensiveScreen.instructions = "All fields have been pre-filled for your convenience";
+comprehensiveScreen.preferences = "{\"notifications\": false, \"language\": \"en\", \"theme\": \"dark\"}";
+comprehensiveScreen.tags = "[\"senior\", \"architect\", \"mentor\"]";
+comprehensiveScreen.profileComplete = 95;
+comprehensiveScreen.statusText = "Profile 95% complete - Almost there!";
+
+// Display updated values
+print "UPDATED VALUES:";
+print "Username: " + comprehensiveScreen.username;
+print "Terms Agreed: " + comprehensiveScreen.agreeTerms;
+print "Account Type: " + comprehensiveScreen.accountType;
+print "Experience: " + comprehensiveScreen.experience + " years";
+print "Satisfaction: " + comprehensiveScreen.satisfaction + "/10";
+print "Join Date: " + comprehensiveScreen.joinDate;
+print "Theme Color: " + comprehensiveScreen.themeColor;
+print "Profile Completion: " + comprehensiveScreen.profileComplete + "%";
+print "";
+
+// Demonstrate variable calculations
+var experienceMultiplier: int = comprehensiveScreen.experience * comprehensiveScreen.satisfaction;
+print "Experience Quality Score: " + experienceMultiplier;
+
+// Show the comprehensive screen
+print "========================================";
+print "DISPLAYING COMPREHENSIVE SCREEN...";
+print "========================================";
+screen comprehensiveScreen show;
+
+print "";
+print "Comprehensive screen test completed successfully!";
+print "The screen contains all control types and demonstrates:";
+print "- Text input fields (textfield, textarea, passwordfield)";
+print "- Selection controls (checkbox, combobox, choicebox)";
+print "- Numeric controls (spinner, slider)";
+print "- Date and color pickers";
+print "- Display-only controls (label, text, hyperlink)";
+print "- Thread-safe variable access and modification";
+print "- Cross-variable calculations and interactions";
