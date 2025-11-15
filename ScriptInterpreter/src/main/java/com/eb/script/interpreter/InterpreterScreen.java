@@ -601,11 +601,25 @@ public class InterpreterScreen {
             metadata.pattern = String.valueOf(displayDef.get("pattern"));
         }
         
-        // Check for both camelCase and lowercase versions
+        // Check for both camelCase and lowercase versions - promptText (placeholder hint)
         if (displayDef.containsKey("promptText")) {
             metadata.promptText = String.valueOf(displayDef.get("promptText"));
         } else if (displayDef.containsKey("prompttext")) {
             metadata.promptText = String.valueOf(displayDef.get("prompttext"));
+        }
+
+        // Extract labelText (permanent label displayed before/above control)
+        if (displayDef.containsKey("labelText")) {
+            metadata.labelText = String.valueOf(displayDef.get("labelText"));
+        } else if (displayDef.containsKey("labeltext")) {
+            metadata.labelText = String.valueOf(displayDef.get("labeltext"));
+        }
+
+        // Extract labelText alignment
+        if (displayDef.containsKey("labelTextAlignment")) {
+            metadata.labelTextAlignment = String.valueOf(displayDef.get("labelTextAlignment")).toLowerCase();
+        } else if (displayDef.containsKey("labeltextalignment")) {
+            metadata.labelTextAlignment = String.valueOf(displayDef.get("labeltextalignment")).toLowerCase();
         }
 
         // Extract onClick event handler for buttons - check both camelCase and lowercase

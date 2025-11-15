@@ -213,6 +213,12 @@ public class ScreenFactory {
                 // Create the item using AreaItemFactory
                 Node control = AreaItemFactory.createItem(item, metadata);
 
+                // If labelText is specified, wrap the control with a label
+                Node nodeToAdd = control;
+                if (metadata != null && metadata.labelText != null && !metadata.labelText.isEmpty()) {
+                    nodeToAdd = createLabeledControl(metadata.labelText, metadata.labelTextAlignment, control);
+                }
+
                 // Set up onClick handler for buttons
                 if (onClickHandler != null && metadata != null && metadata.onClick != null && !metadata.onClick.isEmpty()) {
                     if (control instanceof javafx.scene.control.Button) {
@@ -243,7 +249,7 @@ public class ScreenFactory {
                 applyItemLayoutProperties(control, item);
 
                 // Add item to container based on container type
-                addItemToContainer(container, control, item, areaDef.areaType);
+                addItemToContainer(container, nodeToAdd, item, areaDef.areaType);
             }
         }
         
@@ -922,6 +928,48 @@ public class ScreenFactory {
             return Boolean.parseBoolean(String.valueOf(value));
         }
         return defaultValue;
+    }
+
+    /**
+     * Creates a labeled control by wrapping the control with a label.
+     * The label is displayed based on the specified alignment.
+     *
+     * @param labelText The text for the label
+     * @param alignment The alignment: "left", "center", "right" (default: "left")
+     * @param control The control to label
+     * @return A container with the label and control
+     */
+    private static Node createLabeledControl(String labelText, String alignment, Node control) {
+        javafx.scene.control.Label label = new javafx.scene.control.Label(labelText);
+        label.setStyle("-fx-font-weight: normal; -fx-padding: 0 10 0 0;");
+        
+        // Determine alignment (default to left if not specified)
+        String actualAlignment = (alignment != null) ? alignment.toLowerCase() : "left";
+        
+        // Create container based on alignment
+        javafx.scene.layout.HBox container = new javafx.scene.layout.HBox(5);
+        container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        
+        switch (actualAlignment) {
+            case "right":
+                // Control first, then label on the right
+                container.getChildren().addAll(control, label);
+                container.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
+                break;
+            case "center":
+                // Center both
+                container.setAlignment(javafx.geometry.Pos.CENTER);
+                container.getChildren().addAll(label, control);
+                break;
+            case "left":
+            default:
+                // Label first (on the left), then control
+                container.getChildren().addAll(label, control);
+                container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+                break;
+        }
+        
+        return container;
     }
 
     /**

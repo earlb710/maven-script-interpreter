@@ -1,0 +1,100 @@
+// Test Script: Label Text Feature
+// Description: Demonstrates labelText with different alignments
+// Author: EBS Test Suite
+// Date: 2025-11-15
+
+screen labelTestScreen = {
+    "title": "Label Text Demonstration",
+    "width": 600,
+    "height": 500,
+    "vars": [
+        {
+            "name": "username",
+            "type": "string",
+            "default": "john_doe",
+            "display": {
+                "type": "textfield",
+                "promptText": "Enter your username (this is placeholder text)",
+                "labelText": "Username:",
+                "labelTextAlignment": "left"
+            }
+        },
+        {
+            "name": "email",
+            "type": "string",
+            "default": "john@example.com",
+            "display": {
+                "type": "textfield",
+                "promptText": "your@email.com",
+                "labelText": "Email Address:",
+                "labelTextAlignment": "left"
+            }
+        },
+        {
+            "name": "age",
+            "type": "int",
+            "default": 25,
+            "display": {
+                "type": "spinner",
+                "min": 18,
+                "max": 120,
+                "labelText": "Age:",
+                "labelTextAlignment": "left"
+            }
+        },
+        {
+            "name": "country",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "combobox",
+                "promptText": "Select your country",
+                "labelText": "Country:",
+                "labelTextAlignment": "left",
+                "options": ["United States", "Canada", "United Kingdom", "Australia", "Germany", "France", "Japan"]
+            }
+        },
+        {
+            "name": "subscribe",
+            "type": "bool",
+            "default": false,
+            "display": {
+                "type": "checkbox",
+                "labelText": "Subscribe to Newsletter",
+                "labelTextAlignment": "left"
+            }
+        },
+        {
+            "name": "bio",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textarea",
+                "promptText": "Tell us about yourself...",
+                "labelText": "Biography:",
+                "labelTextAlignment": "left"
+            }
+        }
+    ]
+};
+
+print "LabelText Test Script";
+print "==================";
+print "";
+print "Key Differences:";
+print "- promptText: Placeholder hint shown ONLY when field is empty";
+print "- labelText: Permanent label displayed before/beside the control";
+print "";
+print "Current Values:";
+print "Username: " + labelTestScreen.username;
+print "Email: " + labelTestScreen.email;
+print "Age: " + labelTestScreen.age;
+print "Country: " + labelTestScreen.country;
+print "Subscribe: " + labelTestScreen.subscribe;
+print "Bio: " + labelTestScreen.bio;
+print "";
+print "Displaying screen with labelText...";
+
+screen labelTestScreen show;
+
+print "Test complete!";
