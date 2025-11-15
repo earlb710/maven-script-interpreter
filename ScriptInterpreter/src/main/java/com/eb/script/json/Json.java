@@ -95,7 +95,7 @@ public final class Json {
             skipWs();
             Object val = readValue(lowerCaseKey);
             if (lowerCaseKey) {
-                obj.put(key, val);
+                obj.put(key.toLowerCase(), val);
             } else {
                 obj.put(key, val);
             }
