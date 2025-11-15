@@ -14,17 +14,33 @@ screen buttonTest = {
         {
             "name": "counter",
             "type": "int",
-            "default": 0,
-            "display": {"type": "textfield", "promptText": "Counter"}
+            "default": 0
         },
         {
             "name": "message",
             "type": "string",
-            "default": "Click a button!",
-            "display": {"type": "textarea", "promptText": "Message"}
+            "default": "Click a button!"
         }
     ],
     "area": [
+        {
+            "name": "displayArea",
+            "type": "vbox",
+            "items": [
+                {
+                    "name": "counterField",
+                    "sequence": 0,
+                    "varRef": "counter",
+                    "display": {"type": "textfield", "promptText": "Counter"}
+                },
+                {
+                    "name": "messageField",
+                    "sequence": 1,
+                    "varRef": "message",
+                    "display": {"type": "textarea", "promptText": "Message"}
+                }
+            ]
+        },
         {
             "name": "controls",
             "type": "hbox",

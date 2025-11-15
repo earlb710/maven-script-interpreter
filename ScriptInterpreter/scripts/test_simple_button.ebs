@@ -9,8 +9,7 @@ screen simpleBtn = {
         {
             "name": "clickCount",
             "type": "int",
-            "default": 0,
-            "display": {"type": "textfield", "promptText": "Click count"}
+            "default": 0
         }
     ],
     "area": [
@@ -19,8 +18,14 @@ screen simpleBtn = {
             "type": "vbox",
             "items": [
                 {
-                    "name": "testButton",
+                    "name": "clickCountField",
                     "sequence": 0,
+                    "varRef": "clickCount",
+                    "display": {"type": "textfield", "promptText": "Click count"}
+                },
+                {
+                    "name": "testButton",
+                    "sequence": 1,
                     "display": {
                         "type": "button",
                         "promptText": "Click Me!",

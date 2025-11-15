@@ -17,23 +17,44 @@ screen combinedTest = {
         {
             "name": "inputName",
             "type": "string",
-            "default": "User",
-            "display": {"type": "textfield", "promptText": "Enter your name"}
+            "default": "User"
         },
         {
             "name": "inputNumber",
             "type": "int",
-            "default": 5,
-            "display": {"type": "textfield", "promptText": "Enter a number"}
+            "default": 5
         },
         {
             "name": "result",
             "type": "string",
-            "default": "Results will appear here...",
-            "display": {"type": "textarea", "promptText": "Result"}
+            "default": "Results will appear here..."
         }
     ],
     "area": [
+        {
+            "name": "inputArea",
+            "type": "vbox",
+            "items": [
+                {
+                    "name": "nameField",
+                    "sequence": 0,
+                    "varRef": "inputName",
+                    "display": {"type": "textfield", "promptText": "Enter your name"}
+                },
+                {
+                    "name": "numberField",
+                    "sequence": 1,
+                    "varRef": "inputNumber",
+                    "display": {"type": "textfield", "promptText": "Enter a number"}
+                },
+                {
+                    "name": "resultField",
+                    "sequence": 2,
+                    "varRef": "result",
+                    "display": {"type": "textarea", "promptText": "Result"}
+                }
+            ]
+        },
         {
             "name": "buttonArea",
             "type": "hbox",

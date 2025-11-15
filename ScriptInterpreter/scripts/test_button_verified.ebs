@@ -14,14 +14,12 @@ screen testBtn = {
         {
             "name": "clickCount",
             "type": "int",
-            "default": 0,
-            "display": {"type": "textfield", "promptText": "Number of clicks"}
+            "default": 0
         },
         {
             "name": "status",
             "type": "string",
-            "default": "Ready",
-            "display": {"type": "textfield", "promptText": "Status"}
+            "default": "Ready"
         }
     ],
     "area": [
@@ -30,8 +28,20 @@ screen testBtn = {
             "type": "vbox",
             "items": [
                 {
-                    "name": "clickButton",
+                    "name": "clickCountField",
                     "sequence": 0,
+                    "varRef": "clickCount",
+                    "display": {"type": "textfield", "promptText": "Number of clicks"}
+                },
+                {
+                    "name": "statusField",
+                    "sequence": 1,
+                    "varRef": "status",
+                    "display": {"type": "textfield", "promptText": "Status"}
+                },
+                {
+                    "name": "clickButton",
+                    "sequence": 2,
                     "display": {
                         "type": "button",
                         "promptText": "Click Me!",
@@ -40,7 +50,7 @@ screen testBtn = {
                 },
                 {
                     "name": "resetButton",
-                    "sequence": 1,
+                    "sequence": 3,
                     "display": {
                         "type": "button",
                         "promptText": "Reset",
@@ -61,6 +71,7 @@ print "";
 screen testBtn show;
 
 print "Screen shown. Click the buttons to test:";
-print "1. 'Click Me!' button should increment the counter";
-print "2. 'Reset' button should reset the counter to 0";
-print "3. Both buttons should update the status text field";
+print "1. Text fields should show the current values";
+print "2. 'Click Me!' button should increment the counter";
+print "3. 'Reset' button should reset the counter to 0";
+print "4. Both buttons should update the status text field";
