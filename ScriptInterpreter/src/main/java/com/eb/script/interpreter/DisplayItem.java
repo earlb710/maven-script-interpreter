@@ -31,7 +31,7 @@ public class DisplayItem {
     // Regex pattern for validation (useful for text inputs)
     String pattern;
     // Placeholder text for text inputs (hint shown in empty field)
-    String promptText;
+    String promptHelp;
     // Label text displayed before/above the control
     String labelText;
     // Label text alignment: "left", "center", "right"
@@ -59,7 +59,7 @@ public class DisplayItem {
                ", style='" + style + '\'' +
                ", alignment='" + alignment + '\'' +
                ", pattern='" + pattern + '\'' +
-               ", promptText='" + promptText + '\'' +
+               ", promptHelp='" + promptHelp + '\'' +
                ", options=" + options +
                ", promptColor='" + promptColor + '\'' +
                ", promptBold=" + promptBold +

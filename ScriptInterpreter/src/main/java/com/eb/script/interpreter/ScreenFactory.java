@@ -860,7 +860,7 @@ public class ScreenFactory {
             if (item.displayMetadata == null) {
                 item.displayMetadata = new DisplayItem();
             }
-            item.displayMetadata.promptText = promptText;
+            item.displayMetadata.promptHelp = promptText;
         }
         item.tooltip = getStringValue(itemDef, "tooltip", null);
         item.editable = getBooleanValue(itemDef, "editable", null);
@@ -924,7 +924,7 @@ public class ScreenFactory {
     // Helper methods for safe value extraction from Maps
 
     private static String getStringValue(Map<String, Object> map, String key, String defaultValue) {
-        if (map.containsKey(key)) {
+        if (map.containsKey(key.toLowerCase())) {
             Object value = map.get(key);
             return value != null ? String.valueOf(value) : defaultValue;
         }
@@ -932,7 +932,7 @@ public class ScreenFactory {
     }
 
     private static double getNumberValue(Map<String, Object> map, String key, double defaultValue) {
-        if (map.containsKey(key)) {
+        if (map.containsKey(key.toLowerCase())) {
             Object value = map.get(key);
             if (value instanceof Number) {
                 return ((Number) value).doubleValue();
@@ -947,7 +947,7 @@ public class ScreenFactory {
     }
 
     private static Integer getIntValue(Map<String, Object> map, String key, Integer defaultValue) {
-        if (map.containsKey(key)) {
+        if (map.containsKey(key.toLowerCase())) {
             Object value = map.get(key);
             if (value instanceof Number) {
                 return ((Number) value).intValue();
@@ -962,7 +962,7 @@ public class ScreenFactory {
     }
 
     private static Boolean getBooleanValue(Map<String, Object> map, String key, Boolean defaultValue) {
-        if (map.containsKey(key)) {
+        if (map.containsKey(key.toLowerCase())) {
             Object value = map.get(key);
             if (value instanceof Boolean) {
                 return (Boolean) value;

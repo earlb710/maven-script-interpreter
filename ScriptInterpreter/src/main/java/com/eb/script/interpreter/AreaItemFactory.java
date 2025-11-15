@@ -4,11 +4,8 @@ import com.eb.script.interpreter.AreaDefinition.AreaItem;
 import com.eb.script.interpreter.DisplayItem.ItemType;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.layout.Region;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.image.ImageView;
-import javafx.scene.canvas.Canvas;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
@@ -222,23 +219,23 @@ public class AreaItemFactory {
      */
     private static void applyItemSpecificProperties(Node control, AreaItem item, DisplayItem metadata) {
         // Apply prompt text or text content based on control type (from DisplayItem)
-        if (metadata != null && metadata.promptText != null && !metadata.promptText.isEmpty()) {
+        if (metadata != null && metadata.promptHelp != null && !metadata.promptHelp.isEmpty()) {
             if (control instanceof TextField) {
-                ((TextField) control).setPromptText(metadata.promptText);
+                ((TextField) control).setPromptText(metadata.promptHelp);
             } else if (control instanceof TextArea) {
-                ((TextArea) control).setPromptText(metadata.promptText);
+                ((TextArea) control).setPromptText(metadata.promptHelp);
             } else if (control instanceof ComboBox) {
-                ((ComboBox<?>) control).setPromptText(metadata.promptText);
+                ((ComboBox<?>) control).setPromptText(metadata.promptHelp);
             } else if (control instanceof Label) {
                 // For labels, use promptText as the label's text content
                 Label label = (Label) control;
-                label.setText(metadata.promptText);
+                label.setText(metadata.labelText);
                 
                 // Apply prompt text styling (color, bold, italic) for labels
                 applyPromptTextStyling(label, metadata);
             } else if (control instanceof Button) {
                 // For buttons, use promptText as the button's text
-                ((Button) control).setText(metadata.promptText);
+                ((Button) control).setText(metadata.labelText);
             }
         }
 
