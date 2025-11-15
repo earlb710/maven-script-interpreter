@@ -31,13 +31,19 @@ screen testBtn = {
                     "name": "clickCountField",
                     "sequence": 0,
                     "varRef": "clickCount",
-                    "display": {"type": "textfield", "promptText": "Number of clicks"}
+                    "display": {
+                        "type": "textfield",
+                        "promptText": "Number of clicks"
+                    }
                 },
                 {
                     "name": "statusField",
                     "sequence": 1,
                     "varRef": "status",
-                    "display": {"type": "textfield", "promptText": "Status"}
+                    "display": {
+                        "type": "textfield",
+                        "promptText": "Status"
+                    }
                 },
                 {
                     "name": "clickButton",
@@ -66,12 +72,17 @@ print "Screen created. Initial values:";
 print "Click count: " + testBtn.clickCount;
 print "Status: " + testBtn.status;
 print "";
+print "NOTE: Text fields should display the values above (0 and 'Ready')";
+print "NOTE: First button should be labeled 'Click Me!'";
+print "NOTE: Second button should be labeled 'Reset'";
+print "";
 
 // Show the screen
 screen testBtn show;
 
-print "Screen shown. Click the buttons to test:";
-print "1. Text fields should show the current values";
-print "2. 'Click Me!' button should increment the counter";
-print "3. 'Reset' button should reset the counter to 0";
-print "4. Both buttons should update the status text field";
+print "Screen shown. Expected behavior:";
+print "1. Two text fields at top showing '0' and 'Ready'";
+print "2. Button labeled 'Click Me!' below them";
+print "3. Button labeled 'Reset' at the bottom";
+print "4. Clicking 'Click Me!' increments counter and updates status";
+print "5. Clicking 'Reset' resets both to initial values";
