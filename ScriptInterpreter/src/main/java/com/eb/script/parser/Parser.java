@@ -668,8 +668,18 @@ public class Parser {
     private Statement assignmentStatement() throws ParseError {
         // We need to parse an lvalue:
         // either IDENTIFIER, or IDENTIFIER followed by one or more [ index-list ]
+        // Also support DOT for screen variable access (screenName.varName)
         EbsToken name = consume(EbsTokenType.IDENTIFIER, "Expected variable name.");
-        Expression lvalue = new VariableExpression(name.line, (String) name.literal);
+        String varName = (String) name.literal;
+        
+        // Check if this is a screen variable access (screenName.varName)
+        if (match(EbsTokenType.DOT)) {
+            EbsToken fieldName = consume(EbsTokenType.IDENTIFIER, "Expected field name after '.'.");
+            // Treat screen.var as a single variable name with DOT
+            varName = varName + "." + fieldName.literal;
+        }
+        
+        Expression lvalue = new VariableExpression(name.line, varName);
 
         // Attach any number of bracketed index-suffixes to the variable
         while (check(EbsTokenType.LBRACKET)) {
