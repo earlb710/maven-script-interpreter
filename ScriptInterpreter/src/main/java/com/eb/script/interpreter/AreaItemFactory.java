@@ -218,7 +218,7 @@ public class AreaItemFactory {
      * Applies item-specific display properties to the control.
      */
     private static void applyItemSpecificProperties(Node control, AreaItem item, DisplayItem metadata) {
-        // Apply prompt text or text content based on control type (from DisplayItem)
+        // Apply prompt text for input controls (placeholder hint text)
         if (metadata != null && metadata.promptHelp != null && !metadata.promptHelp.isEmpty()) {
             if (control instanceof TextField) {
                 ((TextField) control).setPromptText(metadata.promptHelp);
@@ -226,15 +226,18 @@ public class AreaItemFactory {
                 ((TextArea) control).setPromptText(metadata.promptHelp);
             } else if (control instanceof ComboBox) {
                 ((ComboBox<?>) control).setPromptText(metadata.promptHelp);
-            } else if (control instanceof Label) {
-                // For labels, use promptText as the label's text content
+            }
+        }
+        
+        // Apply label text for labels and buttons (actual displayed text)
+        if (metadata != null && metadata.labelText != null && !metadata.labelText.isEmpty()) {
+            if (control instanceof Label) {
                 Label label = (Label) control;
                 label.setText(metadata.labelText);
                 
-                // Apply prompt text styling (color, bold, italic) for labels
+                // Apply label text styling (color, bold, italic)
                 applyPromptTextStyling(label, metadata);
             } else if (control instanceof Button) {
-                // For buttons, use promptText as the button's text
                 ((Button) control).setText(metadata.labelText);
             }
         }
