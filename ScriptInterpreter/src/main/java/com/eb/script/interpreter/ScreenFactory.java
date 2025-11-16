@@ -988,7 +988,10 @@ public class ScreenFactory {
      */
     private static Node createLabeledControl(String labelText, String alignment, Node control) {
         javafx.scene.control.Label label = new javafx.scene.control.Label(labelText);
-        label.setStyle("-fx-font-weight: normal; -fx-padding: 0 10 0 0;");
+        // Set label styling with right alignment and minimum width for consistent alignment
+        label.setStyle("-fx-font-weight: normal; -fx-padding: 0 10 0 0; -fx-alignment: center-right;");
+        label.setMinWidth(150); // Minimum width to align labels underneath each other
+        label.setMaxWidth(Region.USE_PREF_SIZE);
         
         // Determine alignment (default to left if not specified)
         String actualAlignment = (alignment != null) ? alignment.toLowerCase() : "left";
