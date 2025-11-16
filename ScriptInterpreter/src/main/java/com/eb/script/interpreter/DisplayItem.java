@@ -87,9 +87,9 @@ public class DisplayItem {
         TOGGLEBUTTON("togglebutton", "screen-item-togglebutton",
                      "-fx-padding: 8 15 8 15; -fx-background-color: #e0e0e0; -fx-border-radius: 3; -fx-background-radius: 3;"),
         COMBOBOX("combobox", "screen-item-combobox",
-                 "-fx-padding: 5 10 5 10; -fx-background-color: white; -fx-border-color: #cccccc; -fx-border-width: 1; -fx-border-radius: 3;"),
+                 "-fx-padding: 2; -fx-background-color: white; -fx-border-color: #cccccc; -fx-border-width: 1; -fx-border-radius: 3;"),
         CHOICEBOX("choicebox", "screen-item-choicebox",
-                  "-fx-padding: 5 10 5 10; -fx-background-color: white; -fx-border-color: #cccccc; -fx-border-width: 1;"),
+                  "-fx-padding: 2; -fx-background-color: white; -fx-border-color: #cccccc; -fx-border-width: 1;"),
         LISTVIEW("listview", "screen-item-listview",
                  "-fx-border-color: #cccccc; -fx-border-width: 1;"),
         

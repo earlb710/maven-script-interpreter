@@ -244,6 +244,9 @@ public class ScreenFactory {
                 .sorted(Comparator.comparingInt(item -> item.sequence))
                 .toList();
 
+            // First pass: Calculate maximum label width for alignment
+            double maxLabelWidth = calculateMaxLabelWidth(sortedItems, screenName, metadataProvider);
+
             // Add items to container based on container type
             for (AreaItem item : sortedItems) {
                 // Get metadata for the item
@@ -262,7 +265,7 @@ public class ScreenFactory {
                     // Only wrap input controls, not Label or Button which display their own text
                     if (!(control instanceof javafx.scene.control.Label) && 
                         !(control instanceof javafx.scene.control.Button)) {
-                        nodeToAdd = createLabeledControl(metadata.labelText, metadata.labelTextAlignment, control);
+                        nodeToAdd = createLabeledControl(metadata.labelText, metadata.labelTextAlignment, control, maxLabelWidth);
                     }
                 }
 
@@ -978,19 +981,59 @@ public class ScreenFactory {
     }
 
     /**
+     * Calculates the maximum label width needed for proper alignment.
+     * This ensures all labels in a form have consistent width.
+     *
+     * @param items The list of items to check for labels
+     * @param screenName The screen name
+     * @param metadataProvider Provider to get metadata for items
+     * @return The maximum label width in pixels
+     */
+    private static double calculateMaxLabelWidth(List<AreaItem> items, String screenName, 
+                                                  BiFunction<String, String, DisplayItem> metadataProvider) {
+        double maxWidth = 100; // Minimum width
+        javafx.scene.text.Text measuringText = new javafx.scene.text.Text();
+        measuringText.setStyle("-fx-font-weight: normal;");
+        
+        for (AreaItem item : items) {
+            DisplayItem metadata = item.displayItem;
+            if (metadata == null && item.varRef != null && metadataProvider != null) {
+                metadata = metadataProvider.apply(screenName, item.varRef);
+            }
+            
+            // Only measure labels for controls that will be wrapped (not Label or Button controls)
+            if (metadata != null && metadata.labelText != null && !metadata.labelText.isEmpty()) {
+                // Check if this is a control that will have a label wrapper
+                if (metadata.itemType != DisplayItem.ItemType.LABEL && 
+                    metadata.itemType != DisplayItem.ItemType.LABELTEXT &&
+                    metadata.itemType != DisplayItem.ItemType.BUTTON) {
+                    measuringText.setText(metadata.labelText);
+                    double width = measuringText.getLayoutBounds().getWidth() + 20; // Add padding
+                    if (width > maxWidth) {
+                        maxWidth = width;
+                    }
+                }
+            }
+        }
+        
+        return maxWidth;
+    }
+
+    /**
      * Creates a labeled control by wrapping the control with a label.
      * The label is displayed based on the specified alignment.
      *
      * @param labelText The text for the label
      * @param alignment The alignment: "left", "center", "right" (default: "left")
      * @param control The control to label
+     * @param minWidth The minimum width for the label for alignment consistency
      * @return A container with the label and control
      */
-    private static Node createLabeledControl(String labelText, String alignment, Node control) {
+    private static Node createLabeledControl(String labelText, String alignment, Node control, double minWidth) {
         javafx.scene.control.Label label = new javafx.scene.control.Label(labelText);
-        // Set label styling with right alignment and minimum width for consistent alignment
+        // Set label styling with right alignment and calculated minimum width for consistent alignment
         label.setStyle("-fx-font-weight: normal; -fx-padding: 0 10 0 0; -fx-alignment: center-right;");
-        label.setMinWidth(150); // Minimum width to align labels underneath each other
+        label.setMinWidth(minWidth); // Use calculated minimum width to align labels underneath each other
         label.setMaxWidth(Region.USE_PREF_SIZE);
         
         // Determine alignment (default to left if not specified)
