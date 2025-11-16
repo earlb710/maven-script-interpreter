@@ -175,18 +175,25 @@ public class InterpreterScreen {
                         // Get the display metadata for this variable
                         DisplayItem varDisplayItem = context.getDisplayItem().get(stmt.name + "." + varName);
                         
-                        // Ensure labelText is set for the variable's displayItem
-                        // This will cause ScreenFactory to wrap the control with a label
+                        // Only add labelText if explicitly specified - don't generate from variable name
+                        // Set default alignment based on control type
                         if (varDisplayItem != null) {
-                            if (varDisplayItem.labelText == null || varDisplayItem.labelText.isEmpty()) {
-                                // Generate label text from variable name
-                                varDisplayItem.labelText = capitalizeWords(varName) + ":";
-                            } else if (!varDisplayItem.labelText.endsWith(":")) {
-                                // Add colon if not already present
+                            // Add colon to labelText if specified and doesn't have one
+                            if (varDisplayItem.labelText != null && !varDisplayItem.labelText.isEmpty() 
+                                && !varDisplayItem.labelText.endsWith(":")) {
                                 varDisplayItem.labelText = varDisplayItem.labelText + ":";
                             }
                             
-                            // Set default alignment for label text
+                            // Set default alignment based on control type if not specified
+                            if (varDisplayItem.alignment == null || varDisplayItem.alignment.isEmpty()) {
+                                // Numeric fields should be right-aligned by default
+                                if (isNumericControl(varDisplayItem.itemType)) {
+                                    varDisplayItem.alignment = "right";
+                                }
+                                // Other fields default to left alignment (handled by control defaults)
+                            }
+                            
+                            // Set default label text alignment if not specified
                             if (varDisplayItem.labelTextAlignment == null || varDisplayItem.labelTextAlignment.isEmpty()) {
                                 varDisplayItem.labelTextAlignment = "left";
                             }
@@ -499,6 +506,18 @@ public class InterpreterScreen {
         }
 
         return result.toString();
+    }
+
+    /**
+     * Helper method to determine if a control type is numeric
+     */
+    private boolean isNumericControl(DisplayItem.ItemType itemType) {
+        if (itemType == null) {
+            return false;
+        }
+        return itemType == DisplayItem.ItemType.SPINNER || 
+               itemType == DisplayItem.ItemType.SLIDER ||
+               itemType == DisplayItem.ItemType.TEXTFIELD; // TextField can be used for numeric input
     }
 
     /**

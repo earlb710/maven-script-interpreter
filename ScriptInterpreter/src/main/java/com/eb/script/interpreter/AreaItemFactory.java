@@ -242,9 +242,9 @@ public class AreaItemFactory {
             }
         }
 
-        // Apply prompt text alignment for applicable controls
-        if (item.displayItem.labelTextAlignment != null && !item.displayItem.labelTextAlignment.isEmpty()) {
-            String alignment = item.displayItem.labelTextAlignment.toLowerCase();
+        // Apply control text alignment (for the content inside the control)
+        if (metadata != null && metadata.alignment != null && !metadata.alignment.isEmpty()) {
+            String alignment = metadata.alignment.toLowerCase();
             String alignmentStyle = "";
             
             switch (alignment) {
@@ -265,10 +265,23 @@ public class AreaItemFactory {
             if (!alignmentStyle.isEmpty()) {
                 if (control instanceof TextField || control instanceof TextArea || control instanceof ComboBox) {
                     control.setStyle(control.getStyle() + " " + alignmentStyle);
-                } else if (control instanceof Label || control instanceof Button) {
-                    control.setStyle(control.getStyle() + " " + alignmentStyle);
+                } else if (control instanceof Spinner) {
+                    // For Spinner, we need to access the internal TextField
+                    Spinner<?> spinner = (Spinner<?>) control;
+                    spinner.setStyle(control.getStyle() + " " + alignmentStyle);
+                    // Also try to set on the editor if accessible
+                    if (spinner.getEditor() != null) {
+                        spinner.getEditor().setStyle(alignmentStyle);
+                    }
                 }
             }
+        }
+
+        // Apply label text alignment (this is for the wrapper label, not the control content)
+        // This is handled separately and used by ScreenFactory when creating labeled controls
+        if (item.displayItem.labelTextAlignment != null && !item.displayItem.labelTextAlignment.isEmpty()) {
+            // This alignment is used by ScreenFactory for the label wrapper
+            // No need to apply it to the control itself here
         }
 
         // Apply editable property
