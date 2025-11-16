@@ -274,6 +274,18 @@ public class ScreenFactory {
                         !(control instanceof javafx.scene.control.Button)) {
                         nodeToAdd = createLabeledControl(metadata.labelText, metadata.labelTextAlignment, control, maxLabelWidth, metadata);
                     }
+                } else {
+                    // No label specified - wrap control in HBox with left padding to align with labeled controls
+                    // This ensures controls without labels still align properly with labeled controls
+                    if (!(control instanceof javafx.scene.control.Label) && 
+                        !(control instanceof javafx.scene.control.Button)) {
+                        javafx.scene.layout.HBox alignmentBox = new javafx.scene.layout.HBox();
+                        alignmentBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+                        // Add left padding equal to label width plus spacing to align with labeled controls
+                        alignmentBox.setPadding(new javafx.geometry.Insets(0, 0, 0, maxLabelWidth + 5));
+                        alignmentBox.getChildren().add(control);
+                        nodeToAdd = alignmentBox;
+                    }
                 }
 
                 // Set up onClick handler for buttons
@@ -1065,12 +1077,30 @@ public class ScreenFactory {
     private static Node createLabeledControl(String labelText, String alignment, Node control, double minWidth, DisplayItem metadata) {
         javafx.scene.control.Label label = new javafx.scene.control.Label(labelText);
         
-        // Build label style with right alignment, padding, and optional font size
+        // Build label style with right alignment and padding
         StringBuilder styleBuilder = new StringBuilder("-fx-font-weight: normal; -fx-padding: 0 10 0 0; -fx-alignment: center-right;");
         
-        // Apply font size if specified
-        if (metadata != null && metadata.labelFontSize != null && !metadata.labelFontSize.isEmpty()) {
-            styleBuilder.append(" -fx-font-size: ").append(metadata.labelFontSize).append(";");
+        // Apply label styling from metadata
+        if (metadata != null) {
+            // Apply font size if specified
+            if (metadata.labelFontSize != null && !metadata.labelFontSize.isEmpty()) {
+                styleBuilder.append(" -fx-font-size: ").append(metadata.labelFontSize).append(";");
+            }
+            
+            // Apply label color if specified
+            if (metadata.labelColor != null && !metadata.labelColor.isEmpty()) {
+                styleBuilder.append(" -fx-text-fill: ").append(metadata.labelColor).append(";");
+            }
+            
+            // Apply bold if specified
+            if (metadata.labelBold != null && metadata.labelBold) {
+                styleBuilder.append(" -fx-font-weight: bold;");
+            }
+            
+            // Apply italic if specified
+            if (metadata.labelItalic != null && metadata.labelItalic) {
+                styleBuilder.append(" -fx-font-style: italic;");
+            }
         }
         
         label.setStyle(styleBuilder.toString());
