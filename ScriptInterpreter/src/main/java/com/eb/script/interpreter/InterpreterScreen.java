@@ -175,8 +175,11 @@ public class InterpreterScreen {
                         // Get the display metadata for this variable
                         DisplayItem varDisplayItem = context.getDisplayItem().get(stmt.name + "." + varName);
                         
+                        // Get the variable type to determine numeric vs string
+                        DataType varType = screenVarTypeMap.get(varName);
+                        
                         // Only add labelText if explicitly specified - don't generate from variable name
-                        // Set default alignment based on control type
+                        // Set default alignment based on control type and variable type
                         if (varDisplayItem != null) {
                             // Add colon to labelText if specified and doesn't have one
                             if (varDisplayItem.labelText != null && !varDisplayItem.labelText.isEmpty() 
@@ -184,13 +187,16 @@ public class InterpreterScreen {
                                 varDisplayItem.labelText = varDisplayItem.labelText + ":";
                             }
                             
-                            // Set default alignment based on control type if not specified
+                            // Set default alignment based on control type and variable type if not specified
                             if (varDisplayItem.alignment == null || varDisplayItem.alignment.isEmpty()) {
                                 // Numeric fields should be right-aligned by default
-                                if (isNumericControl(varDisplayItem.itemType)) {
+                                // String fields (including TextField with string type) should be left-aligned
+                                if (isNumericControl(varDisplayItem.itemType, varType)) {
                                     varDisplayItem.alignment = "right";
+                                } else {
+                                    // Explicitly set left alignment for string/text fields
+                                    varDisplayItem.alignment = "left";
                                 }
-                                // Other fields default to left alignment (handled by control defaults)
                             }
                             
                             // Set default label text alignment if not specified
@@ -509,15 +515,27 @@ public class InterpreterScreen {
     }
 
     /**
-     * Helper method to determine if a control type is numeric
+     * Helper method to determine if a control type is numeric based on control type and variable type
      */
-    private boolean isNumericControl(DisplayItem.ItemType itemType) {
+    private boolean isNumericControl(DisplayItem.ItemType itemType, DataType varType) {
         if (itemType == null) {
             return false;
         }
-        return itemType == DisplayItem.ItemType.SPINNER || 
-               itemType == DisplayItem.ItemType.SLIDER ||
-               itemType == DisplayItem.ItemType.TEXTFIELD; // TextField can be used for numeric input
+        
+        // Spinner and Slider are always numeric
+        if (itemType == DisplayItem.ItemType.SPINNER || itemType == DisplayItem.ItemType.SLIDER) {
+            return true;
+        }
+        
+        // TextField is numeric only if the variable type is numeric
+        if (itemType == DisplayItem.ItemType.TEXTFIELD && varType != null) {
+            return varType == DataType.INTEGER || 
+                   varType == DataType.LONG || 
+                   varType == DataType.FLOAT || 
+                   varType == DataType.DOUBLE;
+        }
+        
+        return false;
     }
 
     /**
