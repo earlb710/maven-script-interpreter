@@ -1,6 +1,5 @@
 package com.eb.script.interpreter.screen;
 
-import com.eb.script.interpreter.screen.AreaDefinition.AreaItem;
 import com.eb.script.interpreter.screen.DisplayItem.ItemType;
 import javafx.scene.Node;
 import javafx.scene.control.*;

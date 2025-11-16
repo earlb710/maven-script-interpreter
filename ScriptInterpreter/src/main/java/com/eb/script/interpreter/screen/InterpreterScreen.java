@@ -1,6 +1,5 @@
 package com.eb.script.interpreter.screen;
 
-import com.eb.script.interpreter.screen.AreaDefinition;
 import com.eb.script.token.DataType;
 import com.eb.script.arrays.ArrayDynamic;
 import com.eb.script.interpreter.statement.StatementKind;
@@ -9,7 +8,6 @@ import com.eb.script.interpreter.statement.ScreenShowStatement;
 import com.eb.script.interpreter.statement.ScreenHideStatement;
 import com.eb.script.interpreter.screen.DisplayItem.ItemType;
 import com.eb.script.interpreter.screen.AreaDefinition.AreaType;
-import com.eb.script.interpreter.screen.AreaDefinition.AreaItem;
 import com.eb.script.RuntimeContext;
 import com.eb.script.interpreter.Interpreter;
 import com.eb.script.interpreter.InterpreterContext;
@@ -210,7 +208,7 @@ public class InterpreterScreen {
                         }
 
                         // Create a single item for the input control (label will be added by ScreenFactory)
-                        AreaDefinition.AreaItem item = new AreaDefinition.AreaItem();
+                        AreaItem item = new AreaItem();
                         item.name = varName + "_field";
                         item.varRef = varName;
                         item.sequence = defaultArea.items.size();
