@@ -65,6 +65,44 @@
     "pattern": {
       "type": "string",
       "description": "Regular expression pattern for validation (useful for text inputs)"
+    },
+    "promptHelp": {
+      "type": "string",
+      "description": "Placeholder text for text inputs (hint shown in empty field)"
+    },
+    "labelText": {
+      "type": "string",
+      "description": "Label text displayed before/above the control"
+    },
+    "labelTextAlignment": {
+      "type": "string",
+      "description": "Label text alignment",
+      "enum": ["left", "center", "right", "l", "c", "r"]
+    },
+    "options": {
+      "type": "array",
+      "description": "Options/values for selection controls (ComboBox, ChoiceBox, ListView)",
+      "items": {
+        "type": "string"
+      }
+    },
+    "labelColor": {
+      "type": "string",
+      "description": "Label text color (e.g., '#000000', 'red')"
+    },
+    "labelBold": {
+      "type": "boolean",
+      "description": "Whether the label text should be bold",
+      "default": false
+    },
+    "labelItalic": {
+      "type": "boolean",
+      "description": "Whether the label text should be italic",
+      "default": false
+    },
+    "onClick": {
+      "type": "string",
+      "description": "onClick event handler - EBS code to execute when button is clicked"
     }
   },
   "examples": [
@@ -72,12 +110,15 @@
       "type": "textfield",
       "mandatory": true,
       "pattern": "^[\\w.-]+@[\\w.-]+\\.[a-z]{2,}$",
-      "alignment": "left"
+      "alignment": "left",
+      "promptHelp": "Enter your email address",
+      "labelText": "Email:"
     },
     {
       "type": "passwordfield",
       "mandatory": true,
-      "case": "lower"
+      "case": "lower",
+      "promptHelp": "Enter your password"
     },
     {
       "type": "spinner",
@@ -88,6 +129,23 @@
       "type": "datepicker",
       "min": "2024-01-01",
       "max": "2024-12-31"
+    },
+    {
+      "type": "combobox",
+      "options": ["Option 1", "Option 2", "Option 3"],
+      "promptHelp": "Select an option"
+    },
+    {
+      "type": "label",
+      "labelText": "Important Notice",
+      "labelColor": "#FF0000",
+      "labelBold": true,
+      "labelTextAlignment": "center"
+    },
+    {
+      "type": "button",
+      "labelText": "Submit",
+      "onClick": "handleSubmit()"
     }
   ]
 }
