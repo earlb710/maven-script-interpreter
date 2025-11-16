@@ -14,6 +14,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
@@ -191,7 +192,13 @@ public class ScreenFactory {
             });
         }
 
-        Scene scene = new Scene(rootContainer, width, height);
+        // Wrap content in ScrollPane to handle overflow when content is larger than window
+        ScrollPane scrollPane = new ScrollPane(rootContainer);
+        scrollPane.setFitToWidth(true);  // Make content fit to scroll pane width
+        scrollPane.setFitToHeight(false); // Allow vertical scrolling when needed
+        scrollPane.setStyle("-fx-background-color: transparent;");
+        
+        Scene scene = new Scene(scrollPane, width, height);
         stage.setScene(scene);
 
         return stage;
