@@ -164,62 +164,40 @@ public class InterpreterScreen {
                 }
 
                 if (!varsWithDisplay.isEmpty()) {
-                    // Create a default VBox area with label-control pairs in HBox rows
-                    // This gives: Label : Control on same line, with rows stacked vertically
+                    // Create a default VBox area with items for all displayed variables
                     AreaDefinition defaultArea = new AreaDefinition();
                     defaultArea.areaType = AreaDefinition.AreaType.VBOX;
                     defaultArea.name = "default";
                     defaultArea.screenName = stmt.name;
-
-                    // Instead of creating nested areas, we'll create a grid-like structure
-                    // by creating HBox sub-areas for each variable
-                    java.util.List<AreaDefinition> areas = new java.util.ArrayList<>();
+                    defaultArea.style = "-fx-spacing: 10; -fx-padding: 10;";
 
                     for (String varName : varsWithDisplay) {
-                        // Create an HBox area to hold label and control side-by-side
-                        AreaDefinition hboxRow = new AreaDefinition();
-                        hboxRow.areaType = AreaDefinition.AreaType.HBOX;
-                        hboxRow.name = varName + "_row";
-                        hboxRow.screenName = stmt.name;
-
-                        // Create a label for the variable name
-                        AreaDefinition.AreaItem labelItem = new AreaDefinition.AreaItem();
-                        labelItem.name = varName + "_label";
-                        labelItem.sequence = 0;
-                        DisplayItem labelDisplay = new DisplayItem();
-                        labelDisplay.itemType = DisplayItem.ItemType.LABEL;
-
-                        // Get the display metadata for this variable to use its labelText or promptText as the label
+                        // Get the display metadata for this variable
                         DisplayItem varDisplayItem = context.getDisplayItem().get(stmt.name + "." + varName);
-                        String labelText;
-                        if (varDisplayItem != null && varDisplayItem.labelText != null && !varDisplayItem.labelText.isEmpty()) {
-                            // Prefer labelText if specified - don't add colon if it already has one
-                            labelText = varDisplayItem.labelText.endsWith(":") ? varDisplayItem.labelText : varDisplayItem.labelText + ":";
-                        } else {
-                            // Final fallback to capitalizing the variable name if neither labelText nor promptText is available
-                            labelText = capitalizeWords(varName) + ":";
+                        
+                        // Ensure labelText is set for the variable's displayItem
+                        // This will cause ScreenFactory to wrap the control with a label
+                        if (varDisplayItem != null) {
+                            if (varDisplayItem.labelText == null || varDisplayItem.labelText.isEmpty()) {
+                                // Generate label text from variable name
+                                varDisplayItem.labelText = capitalizeWords(varName) + ":";
+                            } else if (!varDisplayItem.labelText.endsWith(":")) {
+                                // Add colon if not already present
+                                varDisplayItem.labelText = varDisplayItem.labelText + ":";
+                            }
+                            
+                            // Set default alignment for label text
+                            if (varDisplayItem.labelTextAlignment == null || varDisplayItem.labelTextAlignment.isEmpty()) {
+                                varDisplayItem.labelTextAlignment = "left";
+                            }
                         }
-                        if (!labelText.isBlank() && labelText.charAt(labelText.length() - 1) != ':') {
-                            labelText = labelText + ":";
-                        }
-                        if (varDisplayItem != null && varDisplayItem.promptHelp != null && !varDisplayItem.promptHelp.isEmpty()) {
-                            // Fall back to promptText if no labelText is available
-                            labelDisplay.promptHelp = varDisplayItem.promptHelp;
-                        }
-                        labelDisplay.labelText = labelText;
-                        labelDisplay.style = "-fx-alignment: center-right;"; // Right-align the label text
-                        labelItem.displayItem = labelDisplay;
-                        labelItem.varRef = null; // Labels don't bind to variables
-                        labelItem.maxWidth = "USE_PREF_SIZE";
-                        labelItem.hgrow = "NEVER";
-                        labelItem.minWidth = "150"; // Minimum width for label alignment
-                        hboxRow.items.add(labelItem);
 
-                        // Create the input control for the variable
+                        // Create a single item for the input control (label will be added by ScreenFactory)
                         AreaDefinition.AreaItem item = new AreaDefinition.AreaItem();
+                        item.name = varName + "_field";
                         item.varRef = varName;
-                        item.sequence = 1;
-                        item.displayItem = context.getDisplayItem().get(stmt.name + "." + varName);
+                        item.sequence = defaultArea.items.size();
+                        item.displayItem = varDisplayItem;
 
                         // Set sizing to fit content, not stretch to screen width
                         item.maxWidth = "USE_PREF_SIZE";
@@ -255,10 +233,11 @@ public class InterpreterScreen {
                             }
                         }
 
-                        hboxRow.items.add(item);
-                        areas.add(hboxRow);
+                        defaultArea.items.add(item);
                     }
 
+                    java.util.List<AreaDefinition> areas = new java.util.ArrayList<>();
+                    areas.add(defaultArea);
                     context.getScreenAreas().put(stmt.name, areas);
                 }
             }
