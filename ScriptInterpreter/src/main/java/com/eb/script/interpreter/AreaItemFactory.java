@@ -300,14 +300,24 @@ public class AreaItemFactory {
 
         // Apply text color
         if (item.textColor != null && !item.textColor.isEmpty()) {
+            String currentStyle = control.getStyle();
             String colorStyle = "-fx-text-fill: " + item.textColor + ";";
-            control.setStyle(control.getStyle() + " " + colorStyle);
+            if (currentStyle == null || currentStyle.isEmpty()) {
+                control.setStyle(colorStyle);
+            } else {
+                control.setStyle(currentStyle + " " + colorStyle);
+            }
         }
 
         // Apply background color
         if (item.backgroundColor != null && !item.backgroundColor.isEmpty()) {
+            String currentStyle = control.getStyle();
             String bgStyle = "-fx-background-color: " + item.backgroundColor + ";";
-            control.setStyle(control.getStyle() + " " + bgStyle);
+            if (currentStyle == null || currentStyle.isEmpty()) {
+                control.setStyle(bgStyle);
+            } else {
+                control.setStyle(currentStyle + " " + bgStyle);
+            }
         }
     }
 
