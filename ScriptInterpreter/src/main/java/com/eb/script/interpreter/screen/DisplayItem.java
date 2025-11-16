@@ -73,9 +73,9 @@ public class DisplayItem {
                ", pattern='" + pattern + '\'' +
                ", promptHelp='" + promptHelp + '\'' +
                ", options=" + options +
-               ", promptColor='" + labelColor + '\'' +
-               ", promptBold=" + labelBold +
-               ", promptItalic=" + labelItalic +
+               ", labelColor='" + labelColor + '\'' +
+               ", labelBold=" + labelBold +
+               ", labelItalic=" + labelItalic +
                '}';
     }
     
