@@ -131,7 +131,7 @@ public class AreaDefinition {
         String varRef;
         // Optional display metadata for this specific item
         // If null, will use the DisplayItem from varRef
-        DisplayItem displayMetadata;
+        DisplayItem displayItem;
         
         // Additional UI properties for this item
         // Alignment for prompt text (e.g., "left", "center", "right")
@@ -184,7 +184,7 @@ public class AreaDefinition {
                    ", sequence=" + sequence +
                    ", layoutPos='" + layoutPos + '\'' +
                    ", varRef='" + varRef + '\'' +
-                   ", displayMetadata=" + (displayMetadata != null ? "provided" : "from varRef") +
+                   ", displayMetadata=" + (displayItem != null ? "provided" : "from varRef") +
                    ", promptAlignment='" + promptAlignment + '\'' +
                    ", editable=" + editable +
                    ", disabled=" + disabled +

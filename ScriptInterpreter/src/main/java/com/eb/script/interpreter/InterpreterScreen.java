@@ -186,18 +186,15 @@ public class InterpreterScreen {
                         AreaDefinition.AreaItem labelItem = new AreaDefinition.AreaItem();
                         labelItem.name = varName + "_label";
                         labelItem.sequence = 0;
-                        DisplayItem labelMetadata = new DisplayItem();
-                        labelMetadata.itemType = DisplayItem.ItemType.LABEL;
-                        
+                        DisplayItem labelDisplay = new DisplayItem();
+                        labelDisplay.itemType = DisplayItem.ItemType.LABEL;
+
                         // Get the display metadata for this variable to use its labelText or promptText as the label
                         DisplayItem varDisplayItem = context.getDisplayItem().get(stmt.name + "." + varName);
                         String labelText;
                         if (varDisplayItem != null && varDisplayItem.labelText != null && !varDisplayItem.labelText.isEmpty()) {
                             // Prefer labelText if specified - don't add colon if it already has one
                             labelText = varDisplayItem.labelText.endsWith(":") ? varDisplayItem.labelText : varDisplayItem.labelText + ":";
-                        } else if (varDisplayItem != null && varDisplayItem.promptText != null && !varDisplayItem.promptText.isEmpty()) {
-                            // Fall back to promptText if no labelText is available
-                            labelText = varDisplayItem.promptText + ":";
                         } else {
                             // Final fallback to capitalizing the variable name if neither labelText nor promptText is available
                             labelText = capitalizeWords(varName) + ":";
@@ -205,9 +202,13 @@ public class InterpreterScreen {
                         if (!labelText.isBlank() && labelText.charAt(labelText.length() - 1) != ':') {
                             labelText = labelText + ":";
                         }
-                        labelMetadata.labelText = labelText;
-                        labelMetadata.style = "-fx-alignment: center-right;"; // Right-align the label text
-                        labelItem.displayMetadata = labelMetadata;
+                        if (varDisplayItem != null && varDisplayItem.promptHelp != null && !varDisplayItem.promptHelp.isEmpty()) {
+                            // Fall back to promptText if no labelText is available
+                            labelDisplay.promptHelp = varDisplayItem.promptHelp;
+                        }
+                        labelDisplay.labelText = labelText;
+                        labelDisplay.style = "-fx-alignment: center-right;"; // Right-align the label text
+                        labelItem.displayItem = labelDisplay;
                         labelItem.varRef = null; // Labels don't bind to variables
                         labelItem.maxWidth = "USE_PREF_SIZE";
                         labelItem.hgrow = "NEVER";
@@ -218,15 +219,15 @@ public class InterpreterScreen {
                         AreaDefinition.AreaItem item = new AreaDefinition.AreaItem();
                         item.varRef = varName;
                         item.sequence = 1;
-                        item.displayMetadata = context.getDisplayItem().get(stmt.name + "." + varName);
+                        item.displayItem = context.getDisplayItem().get(stmt.name + "." + varName);
 
                         // Set sizing to fit content, not stretch to screen width
                         item.maxWidth = "USE_PREF_SIZE";
                         item.hgrow = "NEVER";
 
                         // Set reasonable preferred widths based on item type
-                        if (item.displayMetadata != null) {
-                            switch (item.displayMetadata.itemType) {
+                        if (item.displayItem != null) {
+                            switch (item.displayItem.itemType) {
                                 case TEXTFIELD:
                                 case PASSWORDFIELD:
                                     item.prefWidth = "300";
@@ -648,32 +649,32 @@ public class InterpreterScreen {
 
         // Extract promptText styling properties - check both camelCase and lowercase
         if (displayDef.containsKey("promptColor")) {
-            metadata.promptColor = String.valueOf(displayDef.get("promptColor"));
+            metadata.labelColor = String.valueOf(displayDef.get("promptColor"));
         } else if (displayDef.containsKey("promptcolor")) {
-            metadata.promptColor = String.valueOf(displayDef.get("promptcolor"));
+            metadata.labelColor = String.valueOf(displayDef.get("promptcolor"));
         }
 
         if (displayDef.containsKey("promptBold")) {
             Object boldObj = displayDef.get("promptBold");
             if (boldObj instanceof Boolean) {
-                metadata.promptBold = (Boolean) boldObj;
+                metadata.labelBold = (Boolean) boldObj;
             }
         } else if (displayDef.containsKey("promptbold")) {
             Object boldObj = displayDef.get("promptbold");
             if (boldObj instanceof Boolean) {
-                metadata.promptBold = (Boolean) boldObj;
+                metadata.labelBold = (Boolean) boldObj;
             }
         }
 
         if (displayDef.containsKey("promptItalic")) {
             Object italicObj = displayDef.get("promptItalic");
             if (italicObj instanceof Boolean) {
-                metadata.promptItalic = (Boolean) italicObj;
+                metadata.labelItalic = (Boolean) italicObj;
             }
         } else if (displayDef.containsKey("promptitalic")) {
             Object italicObj = displayDef.get("promptitalic");
             if (italicObj instanceof Boolean) {
-                metadata.promptItalic = (Boolean) italicObj;
+                metadata.labelItalic = (Boolean) italicObj;
             }
         }
 
@@ -797,24 +798,24 @@ public class InterpreterScreen {
                                 Map<String, Object> displayDef = (Map<String, Object>) displayObj;
 
                                 // Parse display metadata for this specific item
-                                item.displayMetadata = parseDisplayItem(displayDef, screenName);
+                                item.displayItem = parseDisplayItem(displayDef, screenName);
                             }
                         }
-                        // If displayMetadata is not set here, it will remain null
+                        // If displayItem is not set here, it will remain null
                         // and the consuming code should fall back to using varRef's DisplayItem
 
                         // Parse additional UI properties for the item
-                        // promptText now goes into displayMetadata
+                        // promptText now goes into displayItem
                         if (itemDef.containsKey("prompttext") || itemDef.containsKey("prompt_text")) {
                             String promptText = itemDef.containsKey("prompttext")
                                     ? String.valueOf(itemDef.get("prompttext"))
                                     : String.valueOf(itemDef.get("prompt_text"));
 
-                            // If displayMetadata doesn't exist yet, create it
-                            if (item.displayMetadata == null) {
-                                item.displayMetadata = new DisplayItem();
+                            // If displayItem doesn't exist yet, create it
+                            if (item.displayItem == null) {
+                                item.displayItem = new DisplayItem();
                             }
-                            item.displayMetadata.promptHelp = promptText;
+                            item.displayItem.promptHelp = promptText;
                         }
 
                         if (itemDef.containsKey("editable")) {

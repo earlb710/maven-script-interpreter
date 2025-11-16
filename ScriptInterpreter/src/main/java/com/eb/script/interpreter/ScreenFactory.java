@@ -247,7 +247,7 @@ public class ScreenFactory {
             // Add items to container based on container type
             for (AreaItem item : sortedItems) {
                 // Get metadata for the item
-                DisplayItem metadata = item.displayMetadata;
+                DisplayItem metadata = item.displayItem;
                 if (metadata == null && item.varRef != null && metadataProvider != null) {
                     metadata = metadataProvider.apply(screenName, item.varRef);
                 }
@@ -848,19 +848,19 @@ public class ScreenFactory {
             if (displayObj instanceof Map) {
                 @SuppressWarnings("unchecked")
                 Map<String, Object> displayDef = (Map<String, Object>) displayObj;
-                item.displayMetadata = parseDisplayItem(displayDef, screenName);
+                item.displayItem = parseDisplayItem(displayDef, screenName);
             }
         }
         
         // UI properties
-        // promptText now goes into displayMetadata
+        // promptText now goes into displayItem
         String promptText = getStringValue(itemDef, "promptText", getStringValue(itemDef, "prompt_text", null));
         if (promptText != null) {
-            // If displayMetadata doesn't exist yet, create it
-            if (item.displayMetadata == null) {
-                item.displayMetadata = new DisplayItem();
+            // If displayItem doesn't exist yet, create it
+            if (item.displayItem == null) {
+                item.displayItem = new DisplayItem();
             }
-            item.displayMetadata.promptHelp = promptText;
+            item.displayItem.promptHelp = promptText;
         }
         item.tooltip = getStringValue(itemDef, "tooltip", null);
         item.editable = getBooleanValue(itemDef, "editable", null);
