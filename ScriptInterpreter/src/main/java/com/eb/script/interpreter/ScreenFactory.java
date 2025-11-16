@@ -256,9 +256,14 @@ public class ScreenFactory {
                 Node control = AreaItemFactory.createItem(item, metadata);
 
                 // If labelText is specified, wrap the control with a label
+                // BUT: Don't wrap Label or Button controls - they display their own text
                 Node nodeToAdd = control;
                 if (metadata != null && metadata.labelText != null && !metadata.labelText.isEmpty()) {
-                    nodeToAdd = createLabeledControl(metadata.labelText, metadata.labelTextAlignment, control);
+                    // Only wrap input controls, not Label or Button which display their own text
+                    if (!(control instanceof javafx.scene.control.Label) && 
+                        !(control instanceof javafx.scene.control.Button)) {
+                        nodeToAdd = createLabeledControl(metadata.labelText, metadata.labelTextAlignment, control);
+                    }
                 }
 
                 // Set up onClick handler for buttons

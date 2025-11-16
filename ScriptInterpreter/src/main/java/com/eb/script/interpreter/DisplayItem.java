@@ -95,17 +95,17 @@ public class DisplayItem {
         
         // Numeric Controls
         SPINNER("spinner", "screen-item-spinner",
-                "-fx-padding: 5 10 5 10;"),
+                "-fx-padding: 2;"),
         SLIDER("slider", "screen-item-slider",
                "-fx-padding: 5 10 5 10;"),
         
         // Date/Time Controls
         DATEPICKER("datepicker", "screen-item-datepicker",
-                   "-fx-padding: 5 10 5 10; -fx-background-color: white; -fx-border-color: #cccccc; -fx-border-width: 1; -fx-border-radius: 3;"),
+                   "-fx-padding: 2; -fx-background-color: white; -fx-border-color: #cccccc; -fx-border-width: 1; -fx-border-radius: 3;"),
         
         // Color Control
         COLORPICKER("colorpicker", "screen-item-colorpicker",
-                    "-fx-padding: 5 10 5 10;"),
+                    "-fx-padding: 2;"),
         
         // Button Controls
         BUTTON("button", "screen-item-button",
