@@ -133,9 +133,6 @@ public class AreaDefinition {
         // If null, will use the DisplayItem from varRef
         DisplayItem displayItem;
         
-        // Additional UI properties for this item
-        // Alignment for prompt text (e.g., "left", "center", "right")
-        String promptAlignment;
         // Whether the field can be edited
         Boolean editable;
         // Whether the control is disabled
@@ -185,7 +182,6 @@ public class AreaDefinition {
                    ", layoutPos='" + layoutPos + '\'' +
                    ", varRef='" + varRef + '\'' +
                    ", displayMetadata=" + (displayItem != null ? "provided" : "from varRef") +
-                   ", promptAlignment='" + promptAlignment + '\'' +
                    ", editable=" + editable +
                    ", disabled=" + disabled +
                    ", visible=" + visible +

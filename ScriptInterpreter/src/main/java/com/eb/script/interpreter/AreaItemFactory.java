@@ -240,17 +240,20 @@ public class AreaItemFactory {
         }
 
         // Apply prompt text alignment for applicable controls
-        if (item.promptAlignment != null && !item.promptAlignment.isEmpty()) {
-            String alignment = item.promptAlignment.toLowerCase();
+        if (item.displayItem.labelTextAlignment != null && !item.displayItem.labelTextAlignment.isEmpty()) {
+            String alignment = item.displayItem.labelTextAlignment.toLowerCase();
             String alignmentStyle = "";
             
             switch (alignment) {
+                case "l":
                 case "left":
                     alignmentStyle = "-fx-alignment: center-left;";
                     break;
+                case "c":
                 case "center":
                     alignmentStyle = "-fx-alignment: center;";
                     break;
+                case "r":
                 case "right":
                     alignmentStyle = "-fx-alignment: center-right;";
                     break;
