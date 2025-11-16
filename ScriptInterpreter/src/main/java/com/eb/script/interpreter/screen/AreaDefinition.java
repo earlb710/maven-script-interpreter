@@ -1,4 +1,4 @@
-package com.eb.script.interpreter;
+package com.eb.script.interpreter.screen;
 
 import java.util.ArrayList;
 import java.util.List;

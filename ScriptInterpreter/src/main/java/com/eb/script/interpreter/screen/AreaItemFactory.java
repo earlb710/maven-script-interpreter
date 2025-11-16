@@ -1,7 +1,7 @@
-package com.eb.script.interpreter;
+package com.eb.script.interpreter.screen;
 
-import com.eb.script.interpreter.AreaDefinition.AreaItem;
-import com.eb.script.interpreter.DisplayItem.ItemType;
+import com.eb.script.interpreter.screen.AreaDefinition.AreaItem;
+import com.eb.script.interpreter.screen.DisplayItem.ItemType;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.text.Text;
@@ -306,6 +306,7 @@ public class AreaItemFactory {
                 control.setStyle(colorStyle);
             } else {
                 control.setStyle(currentStyle + " " + colorStyle);
+                System.out.println("textColor setStyle ("+currentStyle + " " + colorStyle+")");
             }
         }
 

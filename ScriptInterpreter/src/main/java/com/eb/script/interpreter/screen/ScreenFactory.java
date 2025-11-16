@@ -1,7 +1,12 @@
-package com.eb.script.interpreter;
+package com.eb.script.interpreter.screen;
 
-import com.eb.script.interpreter.AreaDefinition.AreaItem;
-import com.eb.script.interpreter.AreaDefinition.AreaType;
+import com.eb.script.interpreter.InterpreterContext;
+import com.eb.script.interpreter.InterpreterError;
+import com.eb.script.interpreter.screen.AreaDefinition;
+import com.eb.script.interpreter.screen.AreaContainerFactory;
+import com.eb.script.interpreter.screen.AreaItemFactory;
+import com.eb.script.interpreter.screen.AreaDefinition.AreaItem;
+import com.eb.script.interpreter.screen.AreaDefinition.AreaType;
 import com.eb.script.token.DataType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

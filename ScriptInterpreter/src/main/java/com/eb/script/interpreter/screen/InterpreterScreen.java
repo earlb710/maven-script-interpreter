@@ -1,15 +1,19 @@
-package com.eb.script.interpreter;
+package com.eb.script.interpreter.screen;
 
+import com.eb.script.interpreter.screen.AreaDefinition;
 import com.eb.script.token.DataType;
 import com.eb.script.arrays.ArrayDynamic;
 import com.eb.script.interpreter.statement.StatementKind;
 import com.eb.script.interpreter.statement.ScreenStatement;
 import com.eb.script.interpreter.statement.ScreenShowStatement;
 import com.eb.script.interpreter.statement.ScreenHideStatement;
-import com.eb.script.interpreter.DisplayItem.ItemType;
-import com.eb.script.interpreter.AreaDefinition.AreaType;
-import com.eb.script.interpreter.AreaDefinition.AreaItem;
+import com.eb.script.interpreter.screen.DisplayItem.ItemType;
+import com.eb.script.interpreter.screen.AreaDefinition.AreaType;
+import com.eb.script.interpreter.screen.AreaDefinition.AreaItem;
 import com.eb.script.RuntimeContext;
+import com.eb.script.interpreter.Interpreter;
+import com.eb.script.interpreter.InterpreterContext;
+import com.eb.script.interpreter.InterpreterError;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
