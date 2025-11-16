@@ -44,6 +44,8 @@ public class DisplayItem {
     Boolean labelBold;
     // Label text italic flag
     Boolean labelItalic;
+    // Label font size (e.g., "14px", "16px")
+    String labelFontSize;
     // onClick event handler - EBS code to execute when button is clicked
     String onClick;
     

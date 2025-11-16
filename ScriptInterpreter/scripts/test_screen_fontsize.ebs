@@ -1,0 +1,135 @@
+// Test Script: Label Font Size and Multiline Labels
+// Description: Demonstrates labelFontSize feature and multiline label handling
+// Author: EBS Test Suite
+// Date: 2025-11-16
+
+screen fontSizeTestScreen = {
+    "title": "Label Font Size Test",
+    "width": 700,
+    "height": 600,
+    "vars": [
+        {
+            "name": "field1",
+            "type": "string",
+            "default": "Default size",
+            "display": {
+                "type": "textfield",
+                "labelText": "Default Label (no fontSize):"
+            }
+        },
+        {
+            "name": "field2",
+            "type": "string",
+            "default": "Small size",
+            "display": {
+                "type": "textfield",
+                "labelText": "Small Label (10px):",
+                "labelFontSize": "10px"
+            }
+        },
+        {
+            "name": "field3",
+            "type": "string",
+            "default": "Medium size",
+            "display": {
+                "type": "textfield",
+                "labelText": "Medium Label (14px):",
+                "labelFontSize": "14px"
+            }
+        },
+        {
+            "name": "field4",
+            "type": "string",
+            "default": "Large size",
+            "display": {
+                "type": "textfield",
+                "labelText": "Large Label (18px):",
+                "labelFontSize": "18px"
+            }
+        },
+        {
+            "name": "field5",
+            "type": "string",
+            "default": "Extra large",
+            "display": {
+                "type": "textfield",
+                "labelText": "Extra Large (22px):",
+                "labelFontSize": "22px"
+            }
+        },
+        {
+            "name": "field6",
+            "type": "string",
+            "default": "Test multiline",
+            "display": {
+                "type": "textfield",
+                "labelText": "Multi\nLine\nLabel:",
+                "labelFontSize": "14px"
+            }
+        },
+        {
+            "name": "field7",
+            "type": "string",
+            "default": "Another multiline",
+            "display": {
+                "type": "textfield",
+                "labelText": "Another Multi\nLine Text:",
+                "labelFontSize": "12px"
+            }
+        },
+        {
+            "name": "field8",
+            "type": "int",
+            "default": 42,
+            "display": {
+                "type": "spinner",
+                "min": 0,
+                "max": 100,
+                "labelText": "Numeric Field\n(with newline):",
+                "labelFontSize": "16px"
+            }
+        },
+        {
+            "name": "field9",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "combobox",
+                "labelText": "Very Long Single Line Label Text:",
+                "labelFontSize": "14px",
+                "options": ["Option A", "Option B", "Option C"]
+            }
+        },
+        {
+            "name": "field10",
+            "type": "string",
+            "default": "EM units",
+            "display": {
+                "type": "textfield",
+                "labelText": "EM Units (1.5em):",
+                "labelFontSize": "1.5em"
+            }
+        }
+    ]
+};
+
+print "Label Font Size Test Script";
+print "===========================";
+print "";
+print "This screen demonstrates:";
+print "1. Custom font sizes for labels (10px, 14px, 18px, 22px, 1.5em)";
+print "2. Multiline labels with \\n characters";
+print "3. Dynamic label width calculation that:";
+print "   - Considers font size when measuring";
+print "   - Handles multiline labels by measuring the longest line";
+print "   - Ensures all labels align consistently";
+print "";
+print "Notice how:";
+print "- Labels with different font sizes still align on the right";
+print "- Multiline labels measure only the longest line for width";
+print "- All labels maintain consistent right-edge alignment";
+print "";
+
+screen fontSizeTestScreen show;
+
+print "Font size test complete!";

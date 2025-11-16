@@ -272,7 +272,7 @@ public class ScreenFactory {
                     // Only wrap input controls, not Label or Button which display their own text
                     if (!(control instanceof javafx.scene.control.Label) && 
                         !(control instanceof javafx.scene.control.Button)) {
-                        nodeToAdd = createLabeledControl(metadata.labelText, metadata.labelTextAlignment, control, maxLabelWidth);
+                        nodeToAdd = createLabeledControl(metadata.labelText, metadata.labelTextAlignment, control, maxLabelWidth, metadata);
                     }
                 }
 
@@ -1000,7 +1000,6 @@ public class ScreenFactory {
                                                   BiFunction<String, String, DisplayItem> metadataProvider) {
         double maxWidth = 100; // Minimum width
         javafx.scene.text.Text measuringText = new javafx.scene.text.Text();
-        measuringText.setStyle("-fx-font-weight: normal;");
         
         for (AreaItem item : items) {
             DisplayItem metadata = item.displayItem;
@@ -1014,10 +1013,36 @@ public class ScreenFactory {
                 if (metadata.itemType != DisplayItem.ItemType.LABEL && 
                     metadata.itemType != DisplayItem.ItemType.LABELTEXT &&
                     metadata.itemType != DisplayItem.ItemType.BUTTON) {
-                    measuringText.setText(metadata.labelText);
-                    double width = measuringText.getLayoutBounds().getWidth() + 20; // Add padding
-                    if (width > maxWidth) {
-                        maxWidth = width;
+                    
+                    // Set font style based on metadata
+                    String fontStyle = "-fx-font-weight: normal;";
+                    if (metadata.labelFontSize != null && !metadata.labelFontSize.isEmpty()) {
+                        fontStyle += " -fx-font-size: " + metadata.labelFontSize + ";";
+                    }
+                    measuringText.setStyle(fontStyle);
+                    
+                    // Handle multiline labels by splitting on \n and measuring the longest line
+                    String labelText = metadata.labelText;
+                    if (labelText.contains("\n")) {
+                        String[] lines = labelText.split("\n");
+                        double maxLineWidth = 0;
+                        for (String line : lines) {
+                            measuringText.setText(line);
+                            double lineWidth = measuringText.getLayoutBounds().getWidth();
+                            if (lineWidth > maxLineWidth) {
+                                maxLineWidth = lineWidth;
+                            }
+                        }
+                        double width = maxLineWidth + 20; // Add padding
+                        if (width > maxWidth) {
+                            maxWidth = width;
+                        }
+                    } else {
+                        measuringText.setText(labelText);
+                        double width = measuringText.getLayoutBounds().getWidth() + 20; // Add padding
+                        if (width > maxWidth) {
+                            maxWidth = width;
+                        }
                     }
                 }
             }
@@ -1034,12 +1059,21 @@ public class ScreenFactory {
      * @param alignment The alignment: "left", "center", "right" (default: "left")
      * @param control The control to label
      * @param minWidth The minimum width for the label for alignment consistency
+     * @param metadata The display metadata containing font size and styling information
      * @return A container with the label and control
      */
-    private static Node createLabeledControl(String labelText, String alignment, Node control, double minWidth) {
+    private static Node createLabeledControl(String labelText, String alignment, Node control, double minWidth, DisplayItem metadata) {
         javafx.scene.control.Label label = new javafx.scene.control.Label(labelText);
-        // Set label styling with right alignment and calculated minimum width for consistent alignment
-        label.setStyle("-fx-font-weight: normal; -fx-padding: 0 10 0 0; -fx-alignment: center-right;");
+        
+        // Build label style with right alignment, padding, and optional font size
+        StringBuilder styleBuilder = new StringBuilder("-fx-font-weight: normal; -fx-padding: 0 10 0 0; -fx-alignment: center-right;");
+        
+        // Apply font size if specified
+        if (metadata != null && metadata.labelFontSize != null && !metadata.labelFontSize.isEmpty()) {
+            styleBuilder.append(" -fx-font-size: ").append(metadata.labelFontSize).append(";");
+        }
+        
+        label.setStyle(styleBuilder.toString());
         label.setMinWidth(minWidth); // Use calculated minimum width to align labels underneath each other
         label.setMaxWidth(Region.USE_PREF_SIZE);
         
