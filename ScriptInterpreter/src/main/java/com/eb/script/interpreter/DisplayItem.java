@@ -50,6 +50,12 @@ public class DisplayItem {
     String itemFontSize;
     // Maximum length/width for the control (number of characters for text fields)
     Integer maxLength;
+    // Item/control text color
+    String itemColor;
+    // Item/control text bold flag
+    Boolean itemBold;
+    // Item/control text italic flag
+    Boolean itemItalic;
     // onClick event handler - EBS code to execute when button is clicked
     String onClick;
     

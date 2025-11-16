@@ -320,10 +320,37 @@ public class AreaItemFactory {
             return;
         }
         
+        // Build comprehensive style string for item
+        StringBuilder itemStyle = new StringBuilder();
+        
         // Apply item font size
         if (metadata.itemFontSize != null && !metadata.itemFontSize.isEmpty()) {
-            String fontSizeStyle = "-fx-font-size: " + metadata.itemFontSize + ";";
-            control.setStyle(control.getStyle() + " " + fontSizeStyle);
+            itemStyle.append("-fx-font-size: ").append(metadata.itemFontSize).append("; ");
+        }
+        
+        // Apply item text color
+        if (metadata.itemColor != null && !metadata.itemColor.isEmpty()) {
+            itemStyle.append("-fx-text-fill: ").append(metadata.itemColor).append("; ");
+        }
+        
+        // Apply item bold
+        if (metadata.itemBold != null && metadata.itemBold) {
+            itemStyle.append("-fx-font-weight: bold; ");
+        }
+        
+        // Apply item italic
+        if (metadata.itemItalic != null && metadata.itemItalic) {
+            itemStyle.append("-fx-font-style: italic; ");
+        }
+        
+        // Apply the combined style to the control
+        if (itemStyle.length() > 0) {
+            String currentStyle = control.getStyle();
+            if (currentStyle == null || currentStyle.isEmpty()) {
+                control.setStyle(itemStyle.toString());
+            } else {
+                control.setStyle(currentStyle + " " + itemStyle.toString());
+            }
         }
         
         // Calculate and apply preferred width based on maxLength or data type

@@ -113,6 +113,20 @@
       "description": "Maximum length/width for the control (number of characters for text fields)",
       "minimum": 1
     },
+    "itemColor": {
+      "type": "string",
+      "description": "Control/item text color (e.g., '#000000', 'red', '#0000FF')"
+    },
+    "itemBold": {
+      "type": "boolean",
+      "description": "Whether the control/item text should be bold",
+      "default": false
+    },
+    "itemItalic": {
+      "type": "boolean",
+      "description": "Whether the control/item text should be italic",
+      "default": false
+    },
     "onClick": {
       "type": "string",
       "description": "onClick event handler - EBS code to execute when button is clicked"
@@ -174,6 +188,26 @@
       "itemFontSize": "14px",
       "maxLength": 10,
       "promptHelp": "Narrow field for short input"
+    },
+    {
+      "type": "textfield",
+      "labelText": "Styled Item",
+      "itemFontSize": "16px",
+      "itemColor": "#0000FF",
+      "itemBold": true,
+      "itemItalic": false,
+      "maxLength": 20,
+      "promptHelp": "Blue, bold, 16px font"
+    },
+    {
+      "type": "textarea",
+      "labelText": "Rich Text",
+      "itemFontSize": "14px",
+      "itemColor": "#008800",
+      "itemBold": false,
+      "itemItalic": true,
+      "maxLength": 40,
+      "promptHelp": "Green italic text"
     },
     {
       "type": "button",
