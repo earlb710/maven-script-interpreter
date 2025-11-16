@@ -104,6 +104,15 @@
       "type": "string",
       "description": "Label font size (e.g., '12px', '14px', '16px', '1.2em')"
     },
+    "itemFontSize": {
+      "type": "string",
+      "description": "Control/item font size (e.g., '12px', '14px', '16px', '1em')"
+    },
+    "maxLength": {
+      "type": "integer",
+      "description": "Maximum length/width for the control (number of characters for text fields)",
+      "minimum": 1
+    },
     "onClick": {
       "type": "string",
       "description": "onClick event handler - EBS code to execute when button is clicked"
@@ -151,6 +160,20 @@
       "labelText": "Custom Size Label",
       "labelFontSize": "16px",
       "promptHelp": "This label has a custom font size"
+    },
+    {
+      "type": "textfield",
+      "labelText": "Large Font Field",
+      "itemFontSize": "18px",
+      "maxLength": 25,
+      "promptHelp": "Field with large font and custom width"
+    },
+    {
+      "type": "textfield",
+      "labelText": "Short Field",
+      "itemFontSize": "14px",
+      "maxLength": 10,
+      "promptHelp": "Narrow field for short input"
     },
     {
       "type": "button",

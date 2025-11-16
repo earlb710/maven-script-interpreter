@@ -50,6 +50,9 @@ public class AreaItemFactory {
         // Apply item-specific display properties (including promptText from metadata)
         applyItemSpecificProperties(control, item, metadata);
         
+        // Apply control size and font styling
+        applyControlSizeAndFont(control, metadata, item);
+        
         return control;
     }
 
@@ -305,6 +308,121 @@ public class AreaItemFactory {
         if (item.backgroundColor != null && !item.backgroundColor.isEmpty()) {
             String bgStyle = "-fx-background-color: " + item.backgroundColor + ";";
             control.setStyle(control.getStyle() + " " + bgStyle);
+        }
+    }
+
+    /**
+     * Applies control size and font styling based on metadata.
+     * Calculates preferred width based on maxLength or data type, considering font size.
+     */
+    private static void applyControlSizeAndFont(Node control, DisplayItem metadata, AreaItem item) {
+        if (metadata == null) {
+            return;
+        }
+        
+        // Apply item font size
+        if (metadata.itemFontSize != null && !metadata.itemFontSize.isEmpty()) {
+            String fontSizeStyle = "-fx-font-size: " + metadata.itemFontSize + ";";
+            control.setStyle(control.getStyle() + " " + fontSizeStyle);
+        }
+        
+        // Calculate and apply preferred width based on maxLength or data type
+        double prefWidth = calculateControlWidth(metadata, item);
+        if (prefWidth > 0) {
+            if (control instanceof TextField) {
+                ((TextField) control).setPrefWidth(prefWidth);
+            } else if (control instanceof TextArea) {
+                ((TextArea) control).setPrefWidth(prefWidth);
+            } else if (control instanceof PasswordField) {
+                ((PasswordField) control).setPrefWidth(prefWidth);
+            } else if (control instanceof ComboBox) {
+                ((ComboBox<?>) control).setPrefWidth(prefWidth);
+            } else if (control instanceof ChoiceBox) {
+                ((ChoiceBox<?>) control).setPrefWidth(prefWidth);
+            } else if (control instanceof Spinner) {
+                ((Spinner<?>) control).setPrefWidth(prefWidth);
+            }
+        }
+    }
+    
+    /**
+     * Calculates the preferred width for a control based on maxLength or data type.
+     * Takes font size into consideration for accurate sizing.
+     */
+    private static double calculateControlWidth(DisplayItem metadata, AreaItem item) {
+        if (metadata == null) {
+            return -1; // Use default
+        }
+        
+        // Determine the character width to use for calculation
+        int charCount = 0;
+        
+        // Use maxLength if specified
+        if (metadata.maxLength != null && metadata.maxLength > 0) {
+            charCount = metadata.maxLength;
+        } else {
+            // Guess length based on item type and data type
+            charCount = guessLengthByType(metadata.itemType, item);
+        }
+        
+        if (charCount <= 0) {
+            return -1; // Use default
+        }
+        
+        // Create a measuring text node to calculate width
+        javafx.scene.text.Text measuringText = new javafx.scene.text.Text();
+        
+        // Apply font size if specified
+        String fontStyle = "-fx-font-weight: normal;";
+        if (metadata.itemFontSize != null && !metadata.itemFontSize.isEmpty()) {
+            fontStyle += " -fx-font-size: " + metadata.itemFontSize + ";";
+        }
+        measuringText.setStyle(fontStyle);
+        
+        // Use 'M' as a representative character (one of the widest)
+        String sampleText = "M".repeat(charCount);
+        measuringText.setText(sampleText);
+        
+        // Get the width and add padding for borders, scrollbars, etc.
+        double textWidth = measuringText.getLayoutBounds().getWidth();
+        double padding = 20; // Account for padding and borders
+        
+        return textWidth + padding;
+    }
+    
+    /**
+     * Guesses an appropriate character length based on control type and context.
+     */
+    private static int guessLengthByType(DisplayItem.ItemType itemType, AreaItem item) {
+        if (itemType == null) {
+            return 20; // Default
+        }
+        
+        switch (itemType) {
+            case TEXTFIELD:
+            case PASSWORDFIELD:
+                // Check if item has type info to guess better
+                if (item != null && item.varRef != null) {
+                    // For numeric types, shorter width
+                    return 15;
+                }
+                return 30; // Default for text fields
+                
+            case TEXTAREA:
+                return 50; // Wider for text areas
+                
+            case SPINNER:
+                return 10; // Spinners are typically narrow
+                
+            case COMBOBOX:
+            case CHOICEBOX:
+                return 20; // Medium width for dropdowns
+                
+            case DATEPICKER:
+                return 15; // Date format is typically short
+                
+            default:
+                return 20; // Default fallback
         }
     }
 

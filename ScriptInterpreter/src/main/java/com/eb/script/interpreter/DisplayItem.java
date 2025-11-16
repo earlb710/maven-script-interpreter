@@ -46,6 +46,10 @@ public class DisplayItem {
     Boolean labelItalic;
     // Label font size (e.g., "14px", "16px")
     String labelFontSize;
+    // Item/control font size (e.g., "12px", "14px", "1em")
+    String itemFontSize;
+    // Maximum length/width for the control (number of characters for text fields)
+    Integer maxLength;
     // onClick event handler - EBS code to execute when button is clicked
     String onClick;
     
