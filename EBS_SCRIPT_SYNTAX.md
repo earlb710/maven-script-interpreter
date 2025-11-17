@@ -1333,6 +1333,98 @@ while i < lines.length {
 
 ---
 
+## Maintaining This Documentation
+
+### When to Update This Document
+
+This syntax reference must be kept synchronized with the EBS language implementation. Update this document whenever you make changes to:
+
+#### Language Features
+- **New Keywords**: Add any new keywords to the Keywords section and update relevant syntax sections
+- **New Data Types**: Document in the Data Types section with examples
+- **New Operators**: Add to the Operators section with precedence information
+- **Control Flow Changes**: Update Control Flow section if syntax changes
+- **Statement Types**: Document new statement types in appropriate sections
+
+#### Built-in Functions
+- **New Functions**: Add to the Built-in Functions section organized by category
+- **Function Signature Changes**: Update parameter lists and return types
+- **Deprecated Functions**: Mark as deprecated with alternatives
+- **New Function Categories**: Create new subsections as needed
+
+#### Screen/UI Features
+- **New Control Types**: Add to the Available Control Types table with descriptions
+- **New Display Properties**: Document in the Display Properties section
+- **Layout Changes**: Update Area Definition section
+
+#### Database Features
+- **New Connection Types**: Document in Connection Management
+- **SQL Syntax Changes**: Update SQL statements section
+- **Cursor Operations**: Add new cursor methods/operations
+
+### How to Update
+
+1. **Make Language Changes First**: Implement and test your language changes in the codebase
+2. **Update EBNF Grammar**: Modify `syntax_ebnf.txt` to reflect grammar changes
+3. **Update This Document**: Add/modify sections to document the changes
+4. **Add Examples**: Include practical examples demonstrating new features
+5. **Update Version Info**: Update the Version Information section
+6. **Test Examples**: Verify all code examples compile and run correctly
+7. **Review Cross-References**: Check that all internal links and references are valid
+
+### Documentation Standards
+
+#### Code Examples
+- Use consistent formatting and indentation
+- Include comments explaining non-obvious behavior
+- Test all examples before committing
+- Use realistic variable and function names
+
+#### Sections
+- Keep sections focused and well-organized
+- Use appropriate heading levels (##, ###, ####)
+- Include tables for reference information
+- Cross-reference related sections
+
+#### Language
+- Be clear and concise
+- Use present tense for statements of fact
+- Include "why" explanations where helpful
+- Provide both simple and complex examples
+
+### Validation Checklist
+
+Before committing documentation changes, verify:
+
+- [ ] All code examples use correct syntax according to `syntax_ebnf.txt`
+- [ ] New features are documented in appropriate sections
+- [ ] Examples have been tested and work correctly
+- [ ] Internal links point to existing sections
+- [ ] Grammar reference is updated if syntax changed
+- [ ] Version information is current
+- [ ] No contradictions with existing documentation
+- [ ] Related sections are cross-referenced
+- [ ] Built-in function signatures are accurate
+
+### File Locations
+
+Keep these files synchronized:
+- **EBS_SCRIPT_SYNTAX.md** (this file) - User-facing syntax reference
+- **syntax_ebnf.txt** - Formal EBNF grammar specification
+- **README.md** - Language overview and quick start
+- **ARCHITECTURE.md** - Implementation details
+- **Test Scripts** - Practical examples in `ScriptInterpreter/scripts/`
+
+### Questions or Issues?
+
+If you're unsure how to document a feature:
+1. Review existing documentation for similar features
+2. Check `syntax_ebnf.txt` for the formal grammar
+3. Look at test scripts for usage examples
+4. Consult project maintainers if needed
+
+---
+
 ## Grammar Reference (EBNF)
 
 For the complete formal grammar specification, see:

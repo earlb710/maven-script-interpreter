@@ -213,35 +213,35 @@ screen widthCalcScreen = {
 };
 
 // Display test information
-println("Width Calculation Test");
-println("=====================");
-println("");
-println("This test demonstrates width calculation for:");
-println("  1. DatePicker - auto-sized based on date format");
-println("  2. ColorPicker - auto-sized");
-println("  3. ComboBox - sized based on longest option when no maxLength specified");
-println("  4. ChoiceBox - sized based on longest option when no maxLength specified");
-println("");
-println("Expected behavior:");
-println("  - DatePicker should be narrower than controls with maxLength override");
-println("  - ColorPicker should be compact");
-println("  - Size ComboBox should be narrow (short options: XS, S, M, L, XL, XXL)");
-println("  - Department ComboBox should be wide (long options)");
-println("  - Status ChoiceBox should be narrow (short options)");
-println("  - Country ChoiceBox should be wide (long options)");
-println("  - Controls with maxLength override should use that width regardless of data");
-println("");
+print "Width Calculation Test";
+print "=====================";
+print "";
+print "This test demonstrates width calculation for:";
+print "  1. DatePicker - auto-sized based on date format";
+print "  2. ColorPicker - auto-sized";
+print "  3. ComboBox - sized based on longest option when no maxLength specified";
+print "  4. ChoiceBox - sized based on longest option when no maxLength specified";
+print "";
+print "Expected behavior:";
+print "  - DatePicker should be narrower than controls with maxLength override";
+print "  - ColorPicker should be compact";
+print "  - Size ComboBox should be narrow (short options: XS, S, M, L, XL, XXL)";
+print "  - Department ComboBox should be wide (long options)";
+print "  - Status ChoiceBox should be narrow (short options)";
+print "  - Country ChoiceBox should be wide (long options)";
+print "  - Controls with maxLength override should use that width regardless of data";
+print "";
 
 // Show the screen
 show widthCalcScreen;
 
-println("");
-println("Screen displayed successfully!");
-println("Please verify that:");
-println("  ✓ DatePicker controls have appropriate width");
-println("  ✓ ColorPicker controls have appropriate width");
-println("  ✓ ComboBox with short options is narrow");
-println("  ✓ ComboBox with long options is wide enough to show full text");
-println("  ✓ ChoiceBox with short options is narrow");
-println("  ✓ ChoiceBox with long options is wide enough to show full text");
-println("  ✓ Controls with maxLength specified use that width");
+print "";
+print "Screen displayed successfully!";
+print "Please verify that:";
+print "  ✓ DatePicker controls have appropriate width";
+print "  ✓ ColorPicker controls have appropriate width";
+print "  ✓ ComboBox with short options is narrow";
+print "  ✓ ComboBox with long options is wide enough to show full text";
+print "  ✓ ChoiceBox with short options is narrow";
+print "  ✓ ChoiceBox with long options is wide enough to show full text";
+print "  ✓ Controls with maxLength specified use that width";
