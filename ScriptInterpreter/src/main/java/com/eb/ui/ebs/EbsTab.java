@@ -111,6 +111,24 @@ public class EbsTab extends Tab {
             if (e.isControlDown() && e.getCode() == KeyCode.L) {
                 outputArea.toggleLineNumbers();   // <— turns line numbers on/off
                 e.consume();                    // prevent further handling of the keystroke
+            } else if (e.isControlDown() && e.getCode() == KeyCode.F) {
+                // Transfer focus to editor and show find bar
+                Platform.runLater(() -> {
+                    dispArea.requestFocus();
+                    if (findBar.isVisible()) {
+                        hideFind();                  // close if open
+                    } else {
+                        showFind(false);             // open in Find-only mode
+                    }
+                });
+                e.consume();
+            } else if (e.isControlDown() && e.getCode() == KeyCode.H) {
+                // Transfer focus to editor and show find/replace bar
+                Platform.runLater(() -> {
+                    dispArea.requestFocus();
+                    showFind(true);
+                });
+                e.consume();
             }
         });
 
