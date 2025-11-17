@@ -95,6 +95,52 @@ public class EbsMenu extends MenuBar {
         fileMenu.getItems().addAll(openItem, recentMenu, new SeparatorMenuItem(), exitItem);
         getMenus().add(fileMenu);
 
+        // --- Edit Menu ---
+        Menu editMenu = new Menu("Edit");
+        
+        // Undo
+        MenuItem undoItem = new MenuItem("Undo");
+        undoItem.setAccelerator(new KeyCodeCombination(KeyCode.Z, KeyCombination.CONTROL_DOWN));
+        undoItem.setOnAction(e -> {
+            Tab tab = handler.getSelectedTab();
+            if (tab instanceof EbsTab et) {
+                et.dispArea.undo();
+            }
+        });
+        
+        // Redo
+        MenuItem redoItem = new MenuItem("Redo");
+        redoItem.setAccelerator(new KeyCodeCombination(KeyCode.Y, KeyCombination.CONTROL_DOWN));
+        redoItem.setOnAction(e -> {
+            Tab tab = handler.getSelectedTab();
+            if (tab instanceof EbsTab et) {
+                et.dispArea.redo();
+            }
+        });
+        
+        // Find
+        MenuItem findItem = new MenuItem("Find");
+        findItem.setAccelerator(new KeyCodeCombination(KeyCode.F, KeyCombination.CONTROL_DOWN));
+        findItem.setOnAction(e -> {
+            Tab tab = handler.getSelectedTab();
+            if (tab instanceof EbsTab et) {
+                et.showFindFromMenu(false);
+            }
+        });
+        
+        // Replace
+        MenuItem replaceItem = new MenuItem("Replace");
+        replaceItem.setAccelerator(new KeyCodeCombination(KeyCode.H, KeyCombination.CONTROL_DOWN));
+        replaceItem.setOnAction(e -> {
+            Tab tab = handler.getSelectedTab();
+            if (tab instanceof EbsTab et) {
+                et.showFindFromMenu(true);
+            }
+        });
+        
+        editMenu.getItems().addAll(undoItem, redoItem, new SeparatorMenuItem(), findItem, replaceItem);
+        getMenus().add(editMenu);
+
         Menu toolsMenu = new Menu("Config");
         MenuItem aiSetupItem = new MenuItem("AI Chat Model Setup…");
         aiSetupItem.setOnAction(e -> AiFunctions.showModelSetupDialog());

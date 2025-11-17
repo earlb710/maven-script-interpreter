@@ -62,7 +62,7 @@ public class EbsTab extends Tab {
 
     private HBox findBar;
     private TextField findField, replaceField;
-    private CheckBox chkCase, chkWord, chkRegex, chkHighlightAll;
+    private CheckBox chkCase, chkWord, chkRegex;
     private Button btnNext, btnPrev, btnReplace, btnReplaceAll, btnClose;
     private Label lblCount;
 
@@ -111,6 +111,24 @@ public class EbsTab extends Tab {
             if (e.isControlDown() && e.getCode() == KeyCode.L) {
                 outputArea.toggleLineNumbers();   // <— turns line numbers on/off
                 e.consume();                    // prevent further handling of the keystroke
+            } else if (e.isControlDown() && e.getCode() == KeyCode.F) {
+                // Transfer focus to editor and show find bar
+                Platform.runLater(() -> {
+                    dispArea.requestFocus();
+                    if (findBar.isVisible()) {
+                        hideFind();                  // close if open
+                    } else {
+                        showFind(false);             // open in Find-only mode
+                    }
+                });
+                e.consume();
+            } else if (e.isControlDown() && e.getCode() == KeyCode.H) {
+                // Transfer focus to editor and show find/replace bar
+                Platform.runLater(() -> {
+                    dispArea.requestFocus();
+                    showFind(true);
+                });
+                e.consume();
             }
         });
 
@@ -208,8 +226,6 @@ public class EbsTab extends Tab {
         chkCase = new CheckBox("Aa");
         chkWord = new CheckBox("Word");
         chkRegex = new CheckBox("Regex");
-        chkHighlightAll = new CheckBox("Highlight all");
-        chkHighlightAll.setSelected(true);
 
         btnPrev = new Button("Prev");
         btnNext = new Button("Next");
@@ -219,7 +235,7 @@ public class EbsTab extends Tab {
         lblCount = new Label("");
 
         findBar = new HBox(8, new Label("Find:"),
-                findField, chkCase, chkWord, chkRegex, chkHighlightAll,
+                findField, chkCase, chkWord, chkRegex,
                 btnPrev, btnNext,
                 new Label("Replace:"), replaceField, btnReplace, btnReplaceAll,
                 lblCount, btnClose);
@@ -534,6 +550,16 @@ public class EbsTab extends Tab {
         }
     }
 
+    // Public method to show find bar from menu
+    public void showFindFromMenu(boolean withReplace) {
+        dispArea.requestFocus();
+        if (findBar.isVisible() && !withReplace) {
+            hideFind();
+        } else {
+            showFind(withReplace);
+        }
+    }
+
     private void showFind(boolean withReplace) {
         findBar.setVisible(true);
         findBar.setManaged(true);
@@ -565,13 +591,6 @@ public class EbsTab extends Tab {
                 }
         );
         chkRegex.selectedProperty().addListener(
-                (obs, o, n) -> {
-                    Platform.runLater(() -> {
-                        runSearch();
-                    });
-                }
-        );
-        chkHighlightAll.selectedProperty().addListener(
                 (obs, o, n) -> {
                     Platform.runLater(() -> {
                         runSearch();
@@ -653,9 +672,9 @@ public class EbsTab extends Tab {
         }
 
         lastMatches = hits;
-        lblCount.setText(hits.isEmpty() ? "0" : (hits.size() + " matches"));
-
+        
         if (hits.isEmpty()) {
+            lblCount.setText("0 matches");
             return;
         }
 
@@ -663,21 +682,21 @@ public class EbsTab extends Tab {
         currentIndex = 0;
         int[] cur = hits.get(currentIndex);
         selectCurrent(cur);
+        updateCountLabel();
 
-        // Highlight all if requested (additive)
-        if (chkHighlightAll.isSelected()) {
-            for (int[] r : hits) {
-                dispArea.addStyleToRange(r[0], r[1], "find-hit");
-            }
-            // Emphasize current
-            dispArea.addStyleToRange(cur[0], cur[1], "find-current");
+        // Highlight all matches (always enabled)
+        for (int[] r : hits) {
+            dispArea.addStyleToRange(r[0], r[1], "find-hit");
         }
+        // Emphasize current
+        dispArea.addStyleToRange(cur[0], cur[1], "find-current");
     }
 
     private void selectCurrent(int[] r) {
         dispArea.selectRange(r[0], r[1]); // selection shows current; also scrolls into view
         // optional: move caret to end/start
         dispArea.moveTo(r[1]);
+        dispArea.requestFollowCaret(); // Ensure the caret is scrolled into view
     }
 
     private void gotoNext() {
@@ -688,9 +707,8 @@ public class EbsTab extends Tab {
         currentIndex = (currentIndex + 1) % lastMatches.size();
         int[] cur = lastMatches.get(currentIndex);
         selectCurrent(cur);
-        if (chkHighlightAll.isSelected()) {
-            dispArea.addStyleToRange(cur[0], cur[1], "find-current");
-        }
+        updateCountLabel();
+        dispArea.addStyleToRange(cur[0], cur[1], "find-current");
     }
 
     private void gotoPrev() {
@@ -701,26 +719,32 @@ public class EbsTab extends Tab {
         currentIndex = (currentIndex - 1 + lastMatches.size()) % lastMatches.size();
         int[] cur = lastMatches.get(currentIndex);
         selectCurrent(cur);
-        if (chkHighlightAll.isSelected()) {
-            dispArea.addStyleToRange(cur[0], cur[1], "find-current");
-        }
+        updateCountLabel();
+        dispArea.addStyleToRange(cur[0], cur[1], "find-current");
     }
 
     // Clear only the 'find-current' class on the previous current match
     private void clearCurrentEmphasis() {
-        if (chkHighlightAll.isSelected() && currentIndex >= 0 && currentIndex < lastMatches.size()) {
+        if (currentIndex >= 0 && currentIndex < lastMatches.size()) {
             int[] prev = lastMatches.get(currentIndex);
             dispArea.removeStyleFromRange(prev[0], prev[1], "find-current");
         }
     }
 
+    // Update the count label to show "current/total matches"
+    private void updateCountLabel() {
+        if (lastMatches.isEmpty()) {
+            lblCount.setText("0 matches");
+        } else {
+            lblCount.setText((currentIndex + 1) + "/" + lastMatches.size() + " matches");
+        }
+    }
+
     private void clearHighlights() {
         // remove highlight classes from all previously-highlighted ranges
-        if (chkHighlightAll.isSelected()) {
-            for (int[] r : lastMatches) {
-                dispArea.removeStyleFromRange(r[0], r[1], "find-hit");
-                dispArea.removeStyleFromRange(r[0], r[1], "find-current");
-            }
+        for (int[] r : lastMatches) {
+            dispArea.removeStyleFromRange(r[0], r[1], "find-hit");
+            dispArea.removeStyleFromRange(r[0], r[1], "find-current");
         }
     }
 
