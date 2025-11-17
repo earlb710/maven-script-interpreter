@@ -98,13 +98,31 @@ public class EbsLexer extends Lexer<EbsTokenType> {
             String text = getIdentifier();
             char c = peek();
             while (c == '.') {
-                text = text + ".";
+                // Save position before consuming the dot
+                int beforeDot = current;
                 advance();
                 start = current;
                 c = peek();
                 if (isAlpha(c)) {
-                    text = text + getIdentifier();
+                    // Peek ahead to see what the next identifier is
+                    int tempStart = current;
+                    String nextIdent = getIdentifier();
+                    
+                    // Check if the next identifier is a reserved keyword (length, size, etc.)
+                    EbsTokenType nextType = keywords.get(nextIdent);
+                    if (nextType != null) {
+                        // Don't combine with keywords - stop here
+                        current = beforeDot;
+                        break;
+                    }
+                    
+                    // Not a keyword, combine it
+                    text = text + "." + nextIdent;
                     c = peek();
+                } else {
+                    // No identifier after dot, rewind
+                    current = beforeDot;
+                    break;
                 }
             }
             start = startIdent;

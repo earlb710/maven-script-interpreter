@@ -1009,9 +1009,13 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             return java.lang.reflect.Array.getLength(target);
         }
 
+        if (target instanceof String str) {
+            return str.length();
+        }
+
         throw error( // choose appropriate line source if needed
                 (expr.target instanceof VariableExpression v) ? v.line : 0,
-                "'.length' can only be used on arrays."
+                "'.length' or '.size' can only be used on arrays and strings."
         );
     }
 
