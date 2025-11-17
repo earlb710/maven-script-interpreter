@@ -653,9 +653,9 @@ public class EbsTab extends Tab {
         }
 
         lastMatches = hits;
-        lblCount.setText(hits.isEmpty() ? "0" : (hits.size() + " matches"));
-
+        
         if (hits.isEmpty()) {
+            lblCount.setText("0 matches");
             return;
         }
 
@@ -663,6 +663,7 @@ public class EbsTab extends Tab {
         currentIndex = 0;
         int[] cur = hits.get(currentIndex);
         selectCurrent(cur);
+        updateCountLabel();
 
         // Highlight all if requested (additive)
         if (chkHighlightAll.isSelected()) {
@@ -678,6 +679,7 @@ public class EbsTab extends Tab {
         dispArea.selectRange(r[0], r[1]); // selection shows current; also scrolls into view
         // optional: move caret to end/start
         dispArea.moveTo(r[1]);
+        dispArea.requestFollowCaret(); // Ensure the caret is scrolled into view
     }
 
     private void gotoNext() {
@@ -688,6 +690,7 @@ public class EbsTab extends Tab {
         currentIndex = (currentIndex + 1) % lastMatches.size();
         int[] cur = lastMatches.get(currentIndex);
         selectCurrent(cur);
+        updateCountLabel();
         if (chkHighlightAll.isSelected()) {
             dispArea.addStyleToRange(cur[0], cur[1], "find-current");
         }
@@ -701,6 +704,7 @@ public class EbsTab extends Tab {
         currentIndex = (currentIndex - 1 + lastMatches.size()) % lastMatches.size();
         int[] cur = lastMatches.get(currentIndex);
         selectCurrent(cur);
+        updateCountLabel();
         if (chkHighlightAll.isSelected()) {
             dispArea.addStyleToRange(cur[0], cur[1], "find-current");
         }
@@ -711,6 +715,15 @@ public class EbsTab extends Tab {
         if (chkHighlightAll.isSelected() && currentIndex >= 0 && currentIndex < lastMatches.size()) {
             int[] prev = lastMatches.get(currentIndex);
             dispArea.removeStyleFromRange(prev[0], prev[1], "find-current");
+        }
+    }
+
+    // Update the count label to show "current/total matches"
+    private void updateCountLabel() {
+        if (lastMatches.isEmpty()) {
+            lblCount.setText("0 matches");
+        } else {
+            lblCount.setText((currentIndex + 1) + "/" + lastMatches.size() + " matches");
         }
     }
 
