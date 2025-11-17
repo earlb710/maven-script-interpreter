@@ -268,8 +268,19 @@ public final class Json {
 
     // === Helpers ===
     private void skipWs() {
-        while (!eof() && Character.isWhitespace(peek())) {
-            i++;
+        while (!eof()) {
+            if (Character.isWhitespace(peek())) {
+                i++;
+            } else if (peek() == '/' && i + 1 < s.length() && s.charAt(i + 1) == '/') {
+                // Skip // comment until end of line
+                i += 2; // skip the '//'
+                while (!eof() && peek() != '\n' && peek() != '\r') {
+                    i++;
+                }
+                // The newline itself will be consumed in the next iteration as whitespace
+            } else {
+                break;
+            }
         }
     }
 
