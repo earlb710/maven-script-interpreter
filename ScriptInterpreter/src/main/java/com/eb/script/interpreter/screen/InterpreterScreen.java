@@ -665,34 +665,90 @@ public class InterpreterScreen {
             }
         }
 
-        // Extract promptText styling properties - check both camelCase and lowercase
-        if (displayDef.containsKey("promptColor")) {
-            metadata.labelColor = String.valueOf(displayDef.get("promptColor"));
-        } else if (displayDef.containsKey("promptcolor")) {
-            metadata.labelColor = String.valueOf(displayDef.get("promptcolor"));
+        // Extract label styling properties (for the label wrapper text)
+        if (displayDef.containsKey("labelColor")) {
+            metadata.labelColor = String.valueOf(displayDef.get("labelColor"));
+        } else if (displayDef.containsKey("labelcolor")) {
+            metadata.labelColor = String.valueOf(displayDef.get("labelcolor"));
         }
 
-        if (displayDef.containsKey("promptBold")) {
-            Object boldObj = displayDef.get("promptBold");
+        if (displayDef.containsKey("labelBold")) {
+            Object boldObj = displayDef.get("labelBold");
             if (boldObj instanceof Boolean) {
                 metadata.labelBold = (Boolean) boldObj;
             }
-        } else if (displayDef.containsKey("promptbold")) {
-            Object boldObj = displayDef.get("promptbold");
+        } else if (displayDef.containsKey("labelbold")) {
+            Object boldObj = displayDef.get("labelbold");
             if (boldObj instanceof Boolean) {
                 metadata.labelBold = (Boolean) boldObj;
             }
         }
 
-        if (displayDef.containsKey("promptItalic")) {
-            Object italicObj = displayDef.get("promptItalic");
+        if (displayDef.containsKey("labelItalic")) {
+            Object italicObj = displayDef.get("labelItalic");
             if (italicObj instanceof Boolean) {
                 metadata.labelItalic = (Boolean) italicObj;
             }
-        } else if (displayDef.containsKey("promptitalic")) {
-            Object italicObj = displayDef.get("promptitalic");
+        } else if (displayDef.containsKey("labelitalic")) {
+            Object italicObj = displayDef.get("labelitalic");
             if (italicObj instanceof Boolean) {
                 metadata.labelItalic = (Boolean) italicObj;
+            }
+        }
+
+        if (displayDef.containsKey("labelFontSize")) {
+            metadata.labelFontSize = String.valueOf(displayDef.get("labelFontSize"));
+        } else if (displayDef.containsKey("labelfontsize")) {
+            metadata.labelFontSize = String.valueOf(displayDef.get("labelfontsize"));
+        }
+
+        // Extract item/control styling properties (for the control itself)
+        if (displayDef.containsKey("itemColor")) {
+            metadata.itemColor = String.valueOf(displayDef.get("itemColor"));
+        } else if (displayDef.containsKey("itemcolor")) {
+            metadata.itemColor = String.valueOf(displayDef.get("itemcolor"));
+        }
+
+        if (displayDef.containsKey("itemBold")) {
+            Object boldObj = displayDef.get("itemBold");
+            if (boldObj instanceof Boolean) {
+                metadata.itemBold = (Boolean) boldObj;
+            }
+        } else if (displayDef.containsKey("itembold")) {
+            Object boldObj = displayDef.get("itembold");
+            if (boldObj instanceof Boolean) {
+                metadata.itemBold = (Boolean) boldObj;
+            }
+        }
+
+        if (displayDef.containsKey("itemItalic")) {
+            Object italicObj = displayDef.get("itemItalic");
+            if (italicObj instanceof Boolean) {
+                metadata.itemItalic = (Boolean) italicObj;
+            }
+        } else if (displayDef.containsKey("itemitalic")) {
+            Object italicObj = displayDef.get("itemitalic");
+            if (italicObj instanceof Boolean) {
+                metadata.itemItalic = (Boolean) italicObj;
+            }
+        }
+
+        if (displayDef.containsKey("itemFontSize")) {
+            metadata.itemFontSize = String.valueOf(displayDef.get("itemFontSize"));
+        } else if (displayDef.containsKey("itemfontsize")) {
+            metadata.itemFontSize = String.valueOf(displayDef.get("itemfontsize"));
+        }
+
+        // Extract maxLength (for control width calculation)
+        if (displayDef.containsKey("maxLength")) {
+            Object maxLenObj = displayDef.get("maxLength");
+            if (maxLenObj instanceof Number) {
+                metadata.maxLength = ((Number) maxLenObj).intValue();
+            }
+        } else if (displayDef.containsKey("maxlength")) {
+            Object maxLenObj = displayDef.get("maxlength");
+            if (maxLenObj instanceof Number) {
+                metadata.maxLength = ((Number) maxLenObj).intValue();
             }
         }
 
