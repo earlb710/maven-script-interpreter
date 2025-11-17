@@ -22,7 +22,7 @@ public final class JsonSchema {
 
         public boolean validateFormats = true;
         public boolean requiredNonNull = false;
-        public boolean uniqueCaseInsensitive = false;
+        public boolean uniqueCaseInsensitive = true;
         public boolean uniqueIgnoreNulls = false;
     }
 
