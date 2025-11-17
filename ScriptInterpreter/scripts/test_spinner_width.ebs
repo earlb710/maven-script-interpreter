@@ -183,7 +183,7 @@ print "  - Temperature spinner width based on -100/100 (4 chars including minus)
 print "";
 
 // Show the screen
-show spinnerWidthTest;
+screen spinnerWidthTest show;
 
 print "";
 print "Screen displayed successfully!";

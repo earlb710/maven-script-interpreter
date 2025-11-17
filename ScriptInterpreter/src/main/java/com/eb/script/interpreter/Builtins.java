@@ -9,6 +9,8 @@ import com.eb.script.arrays.ArrayDef;
 import com.eb.script.arrays.ArrayDynamic;
 import com.eb.script.arrays.ArrayFixed;
 import com.eb.script.arrays.ArrayFixedByte;
+import com.eb.script.interpreter.screen.AreaDefinition;
+import com.eb.script.interpreter.screen.AreaItem;
 import com.eb.script.interpreter.statement.Parameter;
 import com.eb.script.json.JsonSchema;
 import com.eb.script.json.JsonSchemaDeriver;
@@ -656,7 +658,7 @@ public final class Builtins {
                 newParam("text", DataType.STRING, true),
                 newParam("labels", DataType.JSON, true) // expect List<String>
         ));
-        
+
         // ==========================
         // ClassTree builtins
         // ==========================
@@ -668,7 +670,7 @@ public final class Builtins {
                 "classTree.scan", DataType.STRING,
                 newParam("sourceDir", DataType.STRING, false) // optional; defaults to "src/main/java"
         ));
-        
+
         // ==========================
         // Screen property builtins
         // ==========================
@@ -687,7 +689,7 @@ public final class Builtins {
                 "screen.getItemList", DataType.ANY,
                 newParam("screenName", DataType.STRING, true) // required; screen name
         ));
-        
+
         NAMES = Collections.unmodifiableSet(BUILTINS.keySet());
     }
 
@@ -697,6 +699,15 @@ public final class Builtins {
 
     // genral script functions that can be called with "call"
     public static Object callBuiltin(Environment env, String name, Object... args) throws InterpreterError {
+        return callBuiltin(env, null, name, args);
+    }
+
+    public static Object callBuiltin(InterpreterContext context, String name, Object... args) throws InterpreterError {
+        Environment env = context.getEnvironment();
+        return callBuiltin(env, context, name, args);
+    }
+
+    public static Object callBuiltin(Environment env, InterpreterContext context, String name, Object... args) throws InterpreterError {
         Debugger debug = env.getDebugger();
         ScriptArea output = env.getOutputArea();
         if (args == null) {
@@ -1549,12 +1560,12 @@ public final class Builtins {
             case "system.help" -> {
                 // Check if a specific keyword/builtin was requested
                 String keyword = args.length > 0 && args[0] != null ? args[0].toString() : null;
-                
+
                 if (keyword != null && !keyword.isEmpty()) {
                     // Return detailed help for the specific keyword/builtin
                     return getDetailedHelp(keyword);
                 }
-                
+
                 // --- Collect keywords/operators/datatypes directly from Token.Type ---
                 final java.util.Set<String> keywords = new java.util.TreeSet<>();
                 final java.util.Set<String> operators = new java.util.TreeSet<>();
@@ -1738,18 +1749,18 @@ public final class Builtins {
             case "classtree.scan" -> {
                 return BuiltinsFile.scanClassTree(env, args);
             }
-            
+
             // --- Screen property functions ---
             case "screen.setproperty" -> {
-                return screenSetProperty(env, args);
+                return screenSetProperty(context, args);
             }
             case "screen.getproperty" -> {
-                return screenGetProperty(env, args);
+                return screenGetProperty(context, args);
             }
             case "screen.getitemlist" -> {
-                return screenGetItemList(env, args);
+                return screenGetItemList(context, args);
             }
-            
+
             default ->
                 throw new InterpreterError("Unknown builtin: " + name);
         }
@@ -1933,8 +1944,8 @@ public final class Builtins {
     }
 
     /**
-     * Get detailed help for a specific keyword or builtin.
-     * Returns formatted help text similar to /help <keyword> command.
+     * Get detailed help for a specific keyword or builtin. Returns formatted
+     * help text similar to /help <keyword> command.
      */
     private static String getDetailedHelp(String itemName) {
         try {
@@ -1943,13 +1954,13 @@ public final class Builtins {
             if (is == null) {
                 return "Help system not available (system-lookup.json not found)";
             }
-            
+
             String jsonContent = new String(is.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
             is.close();
-            
+
             // Parse JSON
             Map<String, Object> lookup = (Map<String, Object>) Json.parse(jsonContent);
-            
+
             // Search in keywords first
             ArrayDynamic keywords = (ArrayDynamic) lookup.get("keywords");
             if (keywords != null) {
@@ -1961,7 +1972,7 @@ public final class Builtins {
                     }
                 }
             }
-            
+
             // Search in builtins
             ArrayDynamic builtins = (ArrayDynamic) lookup.get("builtins");
             if (builtins != null) {
@@ -1973,29 +1984,30 @@ public final class Builtins {
                     }
                 }
             }
-            
+
             // Not found
             return "No help found for: " + itemName + "\nUse system.help() or /help keywords to see all available keywords and builtins.";
-            
+
         } catch (Exception ex) {
             return "Error loading help: " + ex.getMessage();
         }
     }
 
     /**
-     * Format a help entry as plain text (similar to displayHelpEntry but returns string).
+     * Format a help entry as plain text (similar to displayHelpEntry but
+     * returns string).
      */
     private static String formatHelpEntry(String name, Map<String, Object> entry, String type) {
         StringBuilder sb = new StringBuilder();
         sb.append("═══════════════════════════════════════════════════════════\n");
         sb.append(type).append(": ").append(name).append("\n");
         sb.append("═══════════════════════════════════════════════════════════\n");
-        
+
         String shortDesc = (String) entry.get("short_description");
         if (shortDesc != null && !shortDesc.isEmpty()) {
             sb.append("Description: ").append(shortDesc).append("\n\n");
         }
-        
+
         // For builtins, show parameters and return type
         if (entry.containsKey("parameters")) {
             ArrayDynamic params = (ArrayDynamic) entry.get("parameters");
@@ -2028,30 +2040,30 @@ public final class Builtins {
                 sb.append("Parameters: ").append(paramStr.toString()).append("\n");
             }
         }
-        
+
         if (entry.containsKey("return_type")) {
             String returnType = (String) entry.get("return_type");
             if (returnType != null && !returnType.isEmpty()) {
                 sb.append("Returns: ").append(returnType).append("\n");
             }
         }
-        
+
         if (entry.containsKey("parameters") || entry.containsKey("return_type")) {
             sb.append("\n");
         }
-        
+
         String longHelp = (String) entry.get("long_help");
         if (longHelp != null && !longHelp.isEmpty()) {
             sb.append("Details:\n");
             sb.append(longHelp).append("\n\n");
         }
-        
+
         String example = (String) entry.get("example");
         if (example != null && !example.isEmpty()) {
             sb.append("Example:\n");
             sb.append(example).append("\n");
         }
-        
+
         sb.append("═══════════════════════════════════════════════════════════\n");
         return sb.toString();
     }
@@ -2060,7 +2072,7 @@ public final class Builtins {
      * screen.setProperty(screenName.areaItemName, propertyName, value) -> BOOL
      * Sets a property on an area item in a screen.
      */
-    private static Object screenSetProperty(Environment env, Object[] args) throws InterpreterError {
+    private static Object screenSetProperty(InterpreterContext context, Object[] args) throws InterpreterError {
         String areaItemPath = (String) args[0];
         String propertyName = (String) args[1];
         Object value = args[2];
@@ -2081,24 +2093,16 @@ public final class Builtins {
         String screenName = parts[0];
         String itemName = parts[1];
 
-        // Get the interpreter context
-        Object interp = env.getCurrentInterpreter();
-        if (!(interp instanceof Interpreter)) {
-            throw new InterpreterError("screen.setProperty: interpreter context not available");
-        }
-        Interpreter interpreter = (Interpreter) interp;
-        InterpreterContext context = interpreter.getContext();
-
         // Find the screen and area item
-        java.util.List<com.eb.script.interpreter.screen.AreaDefinition> areas = context.getScreenAreas().get(screenName);
+        List<AreaDefinition> areas = context.getScreenAreas(screenName);
         if (areas == null) {
             throw new InterpreterError("screen.setProperty: screen '" + screenName + "' not found");
         }
 
         // Search for the item in all areas
-        com.eb.script.interpreter.screen.AreaItem targetItem = null;
-        for (com.eb.script.interpreter.screen.AreaDefinition area : areas) {
-            targetItem = findItemInArea(area, itemName);
+        AreaItem targetItem = null;
+        for (AreaDefinition area : areas) {
+            targetItem = findItemInArea(context, area, itemName.toLowerCase());
             if (targetItem != null) {
                 break;
             }
@@ -2118,7 +2122,7 @@ public final class Builtins {
         final com.eb.script.interpreter.screen.AreaItem finalItem = targetItem;
         final String finalPropertyName = propertyName;
         final Object finalValue = value;
-        
+
         javafx.application.Platform.runLater(() -> {
             try {
                 // Get the list of bound controls for this screen
@@ -2145,10 +2149,10 @@ public final class Builtins {
     }
 
     /**
-     * screen.getProperty(screenName.areaItemName, propertyName) -> ANY
-     * Gets a property value from an area item in a screen.
+     * screen.getProperty(screenName.areaItemName, propertyName) -> ANY Gets a
+     * property value from an area item in a screen.
      */
-    private static Object screenGetProperty(Environment env, Object[] args) throws InterpreterError {
+    private static Object screenGetProperty(InterpreterContext context, Object[] args) throws InterpreterError {
         String areaItemPath = (String) args[0];
         String propertyName = (String) args[1];
 
@@ -2168,16 +2172,8 @@ public final class Builtins {
         String screenName = parts[0];
         String itemName = parts[1];
 
-        // Get the interpreter context
-        Object interp = env.getCurrentInterpreter();
-        if (!(interp instanceof Interpreter)) {
-            throw new InterpreterError("screen.getProperty: interpreter context not available");
-        }
-        Interpreter interpreter = (Interpreter) interp;
-        InterpreterContext context = interpreter.getContext();
-
         // Find the screen and area item
-        java.util.List<com.eb.script.interpreter.screen.AreaDefinition> areas = context.getScreenAreas().get(screenName);
+        List<AreaDefinition> areas = context.getScreenAreas(screenName);
         if (areas == null) {
             throw new InterpreterError("screen.getProperty: screen '" + screenName + "' not found");
         }
@@ -2185,7 +2181,7 @@ public final class Builtins {
         // Search for the item in all areas
         com.eb.script.interpreter.screen.AreaItem targetItem = null;
         for (com.eb.script.interpreter.screen.AreaDefinition area : areas) {
-            targetItem = findItemInArea(area, itemName);
+            targetItem = findItemInArea(context, area, itemName.toLowerCase());
             if (targetItem != null) {
                 break;
             }
@@ -2200,26 +2196,18 @@ public final class Builtins {
     }
 
     /**
-     * screen.getItemList(screenName) -> ArrayDynamic
-     * Returns a list of all item names in the screen.
+     * screen.getItemList(screenName) -> ArrayDynamic Returns a list of all item
+     * names in the screen.
      */
-    private static Object screenGetItemList(Environment env, Object[] args) throws InterpreterError {
+    private static Object screenGetItemList(InterpreterContext context, Object[] args) throws InterpreterError {
         String screenName = (String) args[0];
 
         if (screenName == null || screenName.isEmpty()) {
             throw new InterpreterError("screen.getItemList: screenName parameter cannot be null or empty");
         }
 
-        // Get the interpreter context
-        Object interp = env.getCurrentInterpreter();
-        if (!(interp instanceof Interpreter)) {
-            throw new InterpreterError("screen.getItemList: interpreter context not available");
-        }
-        Interpreter interpreter = (Interpreter) interp;
-        InterpreterContext context = interpreter.getContext();
-
         // Find the screen
-        java.util.List<com.eb.script.interpreter.screen.AreaDefinition> areas = context.getScreenAreas().get(screenName);
+        Map<String, AreaItem> areas = context.getScreenAreaItems(screenName);
         if (areas == null) {
             throw new InterpreterError("screen.getItemList: screen '" + screenName + "' not found");
         }
@@ -2228,43 +2216,26 @@ public final class Builtins {
         ArrayDynamic itemList = new ArrayDynamic(DataType.STRING);
 
         // Collect all item names from all areas
-        for (com.eb.script.interpreter.screen.AreaDefinition area : areas) {
-            collectItemNames(area, itemList);
+        for (String name : areas.keySet()) {
+            itemList.add(name);
         }
 
         return itemList;
     }
 
     /**
-     * Helper method to recursively collect all item names from an area and its child areas.
-     */
-    private static void collectItemNames(com.eb.script.interpreter.screen.AreaDefinition area, ArrayDynamic itemList) {
-        // Add all item names from this area
-        for (com.eb.script.interpreter.screen.AreaItem item : area.items) {
-            if (item.name != null && !item.name.isEmpty()) {
-                itemList.add(item.name);
-            }
-        }
-        // Recursively collect from child areas
-        for (com.eb.script.interpreter.screen.AreaDefinition childArea : area.childAreas) {
-            collectItemNames(childArea, itemList);
-        }
-    }
-
-    /**
      * Helper method to recursively find an item by name in an area definition.
      */
-    private static com.eb.script.interpreter.screen.AreaItem findItemInArea(
-            com.eb.script.interpreter.screen.AreaDefinition area, String itemName) {
+    private static AreaItem findItemInArea(InterpreterContext context, AreaDefinition area, String itemName) {
         // Search in this area's items
-        for (com.eb.script.interpreter.screen.AreaItem item : area.items) {
-            if (itemName.equals(item.name)) {
-                return item;
-            }
+        Map<String, AreaItem> items = context.getScreenAreaItems(area.screenName);
+        AreaItem areaItem = items.get(itemName);
+        if (areaItem != null) {
+            return areaItem;
         }
         // Recursively search in child areas
-        for (com.eb.script.interpreter.screen.AreaDefinition childArea : area.childAreas) {
-            com.eb.script.interpreter.screen.AreaItem found = findItemInArea(childArea, itemName);
+        for (AreaDefinition childArea : area.childAreas) {
+            AreaItem found = findItemInArea(context, childArea, itemName);
             if (found != null) {
                 return found;
             }
@@ -2275,10 +2246,10 @@ public final class Builtins {
     /**
      * Helper method to set a property on an AreaItem.
      */
-    private static void setAreaItemProperty(com.eb.script.interpreter.screen.AreaItem item, 
-                                           String propertyName, Object value) throws InterpreterError {
+    private static void setAreaItemProperty(com.eb.script.interpreter.screen.AreaItem item,
+            String propertyName, Object value) throws InterpreterError {
         String propLower = propertyName.toLowerCase();
-        
+
         switch (propLower) {
             case "editable" -> {
                 if (value instanceof Boolean) {
@@ -2301,9 +2272,12 @@ public final class Builtins {
                     throw new InterpreterError("screen.setProperty: 'visible' property must be a boolean");
                 }
             }
-            case "tooltip" -> item.tooltip = value != null ? String.valueOf(value) : null;
-            case "textcolor" -> item.textColor = value != null ? String.valueOf(value) : null;
-            case "backgroundcolor" -> item.backgroundColor = value != null ? String.valueOf(value) : null;
+            case "tooltip" ->
+                item.tooltip = value != null ? String.valueOf(value) : null;
+            case "textcolor" ->
+                item.textColor = value != null ? String.valueOf(value) : null;
+            case "backgroundcolor" ->
+                item.backgroundColor = value != null ? String.valueOf(value) : null;
             case "colspan" -> {
                 if (value instanceof Number) {
                     item.colSpan = ((Number) value).intValue();
@@ -2322,59 +2296,91 @@ public final class Builtins {
                     throw new InterpreterError("screen.setProperty: 'rowSpan' property must be a number");
                 }
             }
-            case "hgrow" -> item.hgrow = value != null ? String.valueOf(value).toUpperCase() : null;
-            case "vgrow" -> item.vgrow = value != null ? String.valueOf(value).toUpperCase() : null;
-            case "margin" -> item.margin = value != null ? String.valueOf(value) : null;
-            case "padding" -> item.padding = value != null ? String.valueOf(value) : null;
-            case "prefwidth" -> item.prefWidth = value != null ? String.valueOf(value) : null;
-            case "prefheight" -> item.prefHeight = value != null ? String.valueOf(value) : null;
-            case "minwidth" -> item.minWidth = value != null ? String.valueOf(value) : null;
-            case "minheight" -> item.minHeight = value != null ? String.valueOf(value) : null;
-            case "maxwidth" -> item.maxWidth = value != null ? String.valueOf(value) : null;
-            case "maxheight" -> item.maxHeight = value != null ? String.valueOf(value) : null;
-            case "alignment" -> item.alignment = value != null ? String.valueOf(value).toLowerCase() : null;
-            default -> throw new InterpreterError("screen.setProperty: unknown property '" + propertyName + "'");
+            case "hgrow" ->
+                item.hgrow = value != null ? String.valueOf(value).toUpperCase() : null;
+            case "vgrow" ->
+                item.vgrow = value != null ? String.valueOf(value).toUpperCase() : null;
+            case "margin" ->
+                item.margin = value != null ? String.valueOf(value) : null;
+            case "padding" ->
+                item.padding = value != null ? String.valueOf(value) : null;
+            case "prefwidth" ->
+                item.prefWidth = value != null ? String.valueOf(value) : null;
+            case "prefheight" ->
+                item.prefHeight = value != null ? String.valueOf(value) : null;
+            case "minwidth" ->
+                item.minWidth = value != null ? String.valueOf(value) : null;
+            case "minheight" ->
+                item.minHeight = value != null ? String.valueOf(value) : null;
+            case "maxwidth" ->
+                item.maxWidth = value != null ? String.valueOf(value) : null;
+            case "maxheight" ->
+                item.maxHeight = value != null ? String.valueOf(value) : null;
+            case "alignment" ->
+                item.alignment = value != null ? String.valueOf(value).toLowerCase() : null;
+            default ->
+                throw new InterpreterError("screen.setProperty: unknown property '" + propertyName + "'");
         }
     }
 
     /**
      * Helper method to get a property value from an AreaItem.
      */
-    private static Object getAreaItemProperty(com.eb.script.interpreter.screen.AreaItem item, 
-                                             String propertyName) throws InterpreterError {
+    private static Object getAreaItemProperty(com.eb.script.interpreter.screen.AreaItem item,
+            String propertyName) throws InterpreterError {
         String propLower = propertyName.toLowerCase();
-        
+
         return switch (propLower) {
-            case "editable" -> item.editable;
-            case "disabled" -> item.disabled;
-            case "visible" -> item.visible;
-            case "tooltip" -> item.tooltip;
-            case "textcolor" -> item.textColor;
-            case "backgroundcolor" -> item.backgroundColor;
-            case "colspan" -> item.colSpan;
-            case "rowspan" -> item.rowSpan;
-            case "hgrow" -> item.hgrow;
-            case "vgrow" -> item.vgrow;
-            case "margin" -> item.margin;
-            case "padding" -> item.padding;
-            case "prefwidth" -> item.prefWidth;
-            case "prefheight" -> item.prefHeight;
-            case "minwidth" -> item.minWidth;
-            case "minheight" -> item.minHeight;
-            case "maxwidth" -> item.maxWidth;
-            case "maxheight" -> item.maxHeight;
-            case "alignment" -> item.alignment;
-            default -> throw new InterpreterError("screen.getProperty: unknown property '" + propertyName + "'");
+            case "editable" ->
+                item.editable;
+            case "disabled" ->
+                item.disabled;
+            case "visible" ->
+                item.visible;
+            case "tooltip" ->
+                item.tooltip;
+            case "textcolor" ->
+                item.textColor;
+            case "backgroundcolor" ->
+                item.backgroundColor;
+            case "colspan" ->
+                item.colSpan;
+            case "rowspan" ->
+                item.rowSpan;
+            case "hgrow" ->
+                item.hgrow;
+            case "vgrow" ->
+                item.vgrow;
+            case "margin" ->
+                item.margin;
+            case "padding" ->
+                item.padding;
+            case "prefwidth" ->
+                item.prefWidth;
+            case "prefheight" ->
+                item.prefHeight;
+            case "minwidth" ->
+                item.minWidth;
+            case "minheight" ->
+                item.minHeight;
+            case "maxwidth" ->
+                item.maxWidth;
+            case "maxheight" ->
+                item.maxHeight;
+            case "alignment" ->
+                item.alignment;
+            default ->
+                throw new InterpreterError("screen.getProperty: unknown property '" + propertyName + "'");
         };
     }
 
     /**
-     * Helper method to apply a property change to a JavaFX control.
-     * This method is called on the JavaFX Application Thread.
+     * Helper method to apply a property change to a JavaFX control. This method
+     * is called on the JavaFX Application Thread.
      */
     private static void applyPropertyToControl(javafx.scene.Node control, String propertyName, Object value) {
         String propLower = propertyName.toLowerCase();
-        
+
         switch (propLower) {
             case "editable" -> {
                 if (value instanceof Boolean) {
@@ -2403,7 +2409,7 @@ public final class Builtins {
                     String tooltipText = value != null ? String.valueOf(value) : null;
                     if (tooltipText != null && !tooltipText.isEmpty()) {
                         ((javafx.scene.control.Control) control).setTooltip(
-                            new javafx.scene.control.Tooltip(tooltipText));
+                                new javafx.scene.control.Tooltip(tooltipText));
                     } else {
                         ((javafx.scene.control.Control) control).setTooltip(null);
                     }

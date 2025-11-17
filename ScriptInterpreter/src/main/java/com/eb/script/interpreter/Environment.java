@@ -19,7 +19,7 @@ public class Environment {
     private Debugger debug = new Debugger(null);
     private boolean echo = true;
     private ScriptArea outputArea;
-    private Object currentInterpreter; // Reference to current Interpreter for cleanup
+    private Interpreter currentInterpreter; // Reference to current Interpreter for cleanup
 
     private static final ConcurrentMap<String, FileContext> openedFiles = new ConcurrentHashMap<>();
 
@@ -40,11 +40,11 @@ public class Environment {
         return outputArea;
     }
 
-    public void setCurrentInterpreter(Object interpreter) {
+    public void setCurrentInterpreter(Interpreter interpreter) {
         this.currentInterpreter = interpreter;
     }
 
-    public Object getCurrentInterpreter() {
+    public Interpreter getCurrentInterpreter() {
         return currentInterpreter;
     }
 

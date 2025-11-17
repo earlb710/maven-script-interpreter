@@ -19,6 +19,7 @@ import javafx.scene.layout.StackPane;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * InterpreterScreen handles all screen-related interpreter operations. This
@@ -64,21 +65,21 @@ public class InterpreterScreen {
             boolean maximize = config.containsKey("maximize") && Boolean.TRUE.equals(config.get("maximize"));
 
             // Create thread-safe variable storage for this screen
-            java.util.concurrent.ConcurrentHashMap<String, Object> screenVarMap = new java.util.concurrent.ConcurrentHashMap<>();
-            context.getScreenVars().put(stmt.name, screenVarMap);
+            ConcurrentHashMap<String, Object> screenVarMap = new java.util.concurrent.ConcurrentHashMap<>();
+            context.setScreenVars(stmt.name, screenVarMap);
 
             // Create thread-safe variable type storage for this screen
-            java.util.concurrent.ConcurrentHashMap<String, DataType> screenVarTypeMap = new java.util.concurrent.ConcurrentHashMap<>();
-            context.getScreenVarTypes().put(stmt.name, screenVarTypeMap);
+            ConcurrentHashMap<String, DataType> screenVarTypeMap = new java.util.concurrent.ConcurrentHashMap<>();
+            context.setScreenVarTypes(stmt.name, screenVarTypeMap);
 
             // Initialize new storage structures for this screen
             Map<String, VarSet> varSetsMap = new java.util.HashMap<>();
             Map<String, Var> varItemsMap = new java.util.HashMap<>();
             Map<String, AreaItem> areaItemsMap = new java.util.HashMap<>();
             
-            context.getScreenVarSets().put(stmt.name, varSetsMap);
-            context.getScreenVarItems().put(stmt.name, varItemsMap);
-            context.getScreenAreaItems().put(stmt.name, areaItemsMap);
+            context.setScreenVarSets(stmt.name, varSetsMap);
+            context.setScreenVarItems(stmt.name, varItemsMap);
+            context.setScreenAreaItems(stmt.name, areaItemsMap);
             
             // Process variable sets if present (new structure)
             if (config.containsKey("sets")) {
@@ -155,7 +156,7 @@ public class InterpreterScreen {
                         }
                     }
 
-                    context.getScreenAreas().put(stmt.name, areas);
+                    context.setScreenAreas(stmt.name, areas);
                 } else {
                     throw interpreter.error(stmt.getLine(), "The 'area' property in screen '" + stmt.name + "' must be an array.");
                 }
@@ -258,7 +259,7 @@ public class InterpreterScreen {
 
                     java.util.List<AreaDefinition> areas = new java.util.ArrayList<>();
                     areas.add(defaultArea);
-                    context.getScreenAreas().put(stmt.name, areas);
+                    context.setScreenAreas(stmt.name, areas);
                 }
             }
 
@@ -270,7 +271,7 @@ public class InterpreterScreen {
             final boolean screenMaximize = maximize;
 
             // Get the areas for this screen
-            final java.util.List<AreaDefinition> areas = context.getScreenAreas().get(screenName);
+            final java.util.List<AreaDefinition> areas = context.getScreenAreas(screenName);
 
             // Use CountDownLatch to wait for stage creation
             final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
@@ -281,8 +282,8 @@ public class InterpreterScreen {
                     Stage stage;
 
                     // Get screen variables map from context
-                    java.util.concurrent.ConcurrentHashMap<String, Object> varsMap = context.getScreenVars().get(screenName);
-                    java.util.concurrent.ConcurrentHashMap<String, DataType> varTypesMap = context.getScreenVarTypes().get(screenName);
+                    ConcurrentHashMap<String, Object> varsMap = context.getScreenVars(screenName);
+                    ConcurrentHashMap<String, DataType> varTypesMap = context.getScreenVarTypes(screenName);
 
                     // Use ScreenFactory if areas are defined, otherwise create simple stage
                     if (areas != null && !areas.isEmpty()) {
@@ -356,14 +357,7 @@ public class InterpreterScreen {
                             thread.interrupt();
                         }
                         // Clean up resources
-                        context.getScreens().remove(screenName);
-                        context.getScreenThreads().remove(screenName);
-                        context.getScreenVars().remove(screenName);
-                        context.getScreenAreas().remove(screenName);
-
-                        // Clean up display metadata for this screen
-                        context.getDisplayItem().entrySet().removeIf(entry
-                                -> entry.getKey().startsWith(screenName + "."));
+                        context.remove(screenName);
                     });
 
                     // Store the stage reference
@@ -1018,7 +1012,7 @@ public class InterpreterScreen {
                         // Store in screenAreaItems map if this item has a varRef
                         if (item.varRef != null && !item.varRef.isEmpty()) {
                             // Get the areaItems map for this screen
-                            Map<String, AreaItem> areaItemsMap = context.getScreenAreaItems().get(screenName);
+                            Map<String, AreaItem> areaItemsMap = context.getScreenAreaItems(screenName);
                             if (areaItemsMap != null) {
                                 // Store with the same key format as variables (setname.varname in lowercase)
                                 // For backward compatibility, check if varRef contains a dot (already qualified)

@@ -64,6 +64,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Interpreter implements StatementVisitor, ExpressionVisitor {
 
@@ -160,12 +161,8 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         }
 
         // Clear all maps
-        context.getScreens().clear();
-        context.getScreenThreads().clear();
-        context.getScreenVars().clear();
-        context.getScreenAreas().clear();
-        context.getDisplayItem().clear();
-        context.getScreensBeingCreated().clear();
+        
+        context.clear();
     }
 
     // --- Call stack support ---
@@ -422,7 +419,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         Object value = evaluate(stmt.value);
 
         // Check if this is a screen variable assignment (screen_name.var_name)
-        String name = stmt.name;
+        String name = stmt.name.toLowerCase();
         int dotIndex = name.indexOf('.');
 
         if (dotIndex > 0) {
@@ -430,7 +427,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             String varName = name.substring(dotIndex + 1);
 
             // Check if this is a screen variable
-            java.util.concurrent.ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars().get(screenName);
+            ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars(screenName);
             if (screenVarMap != null) {
                 if (screenVarMap.containsKey(varName)) {
                     screenVarMap.put(varName, value);
@@ -611,7 +608,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     @Override
     public Object visitVariableExpression(VariableExpression expr) throws InterpreterError {
         // Check if this is a screen variable access (screen_name.var_name)
-        String name = expr.name;
+        String name = expr.name.toLowerCase();
         int dotIndex = name.indexOf('.');
 
         if (dotIndex > 0) {
@@ -619,7 +616,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             String varName = name.substring(dotIndex + 1);
 
             // Check if this is a screen variable
-            java.util.concurrent.ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars().get(screenName);
+            ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars(screenName);
             if (screenVarMap != null) {
                 if (screenVarMap.containsKey(varName)) {
                     return screenVarMap.get(varName);
@@ -1274,7 +1271,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         // PUSH a builtin frame
         environment().pushCallStack(c.getLine(), StatementKind.BUILTIN, "Call %1", name);
         try {
-            return Builtins.callBuiltin(environment(), name, args);
+            return Builtins.callBuiltin(context, name, args);
         } catch (Exception ex) {
             throw error(c.getLine(), "Call Builtin -> " + ex.getMessage());
         } finally {
