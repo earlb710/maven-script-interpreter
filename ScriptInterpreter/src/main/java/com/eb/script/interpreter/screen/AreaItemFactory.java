@@ -326,15 +326,15 @@ public class AreaItemFactory {
      */
     private static void applyControlSizeAndFont(Node control, DisplayItem metadata, AreaItem item) {
         if (metadata == null) {
-            System.out.println("[DEBUG] applyControlSizeAndFont: metadata is null, returning");
+//            System.out.println("[DEBUG] applyControlSizeAndFont: metadata is null, returning");
             return;
         }
         
-        System.out.println("[DEBUG] applyControlSizeAndFont called for control: " + control.getClass().getSimpleName());
-        System.out.println("[DEBUG]   itemFontSize: " + metadata.itemFontSize);
-        System.out.println("[DEBUG]   itemColor: " + metadata.itemColor);
-        System.out.println("[DEBUG]   itemBold: " + metadata.itemBold);
-        System.out.println("[DEBUG]   itemItalic: " + metadata.itemItalic);
+//        System.out.println("[DEBUG] applyControlSizeAndFont called for control: " + control.getClass().getSimpleName());
+//        System.out.println("[DEBUG]   itemFontSize: " + metadata.itemFontSize);
+//        System.out.println("[DEBUG]   itemColor: " + metadata.itemColor);
+//        System.out.println("[DEBUG]   itemBold: " + metadata.itemBold);
+//        System.out.println("[DEBUG]   itemItalic: " + metadata.itemItalic);
         
         // Build comprehensive style string for item
         StringBuilder itemStyle = new StringBuilder();
