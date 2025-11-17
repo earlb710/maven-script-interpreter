@@ -9,23 +9,23 @@ import java.util.List;
  */
 public class AreaDefinition {
     // Area name/identifier
-    String name;
+    public String name;
     // Area type enum
-    AreaType areaType;
+    public AreaType areaType;
     // Area type string (for compatibility)
-    String type;
+    public String type;
     // CSS class name from enum
-    String cssClass;
+    public String cssClass;
     // Layout configuration
-    String layout;
+    public String layout;
     // Style string (defaults to areaType's default)
-    String style;
+    public String style;
     // Associated screen name
-    String screenName;
+    public String screenName;
     // Items in this area
-    List<AreaItem> items = new ArrayList<>();
+    public List<AreaItem> items = new ArrayList<>();
     // Nested child areas (areas within areas)
-    List<AreaDefinition> childAreas = new ArrayList<>();
+    public List<AreaDefinition> childAreas = new ArrayList<>();
     
     @Override
     public String toString() {

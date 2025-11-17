@@ -669,6 +669,21 @@ public final class Builtins {
                 newParam("sourceDir", DataType.STRING, false) // optional; defaults to "src/main/java"
         ));
         
+        // ==========================
+        // Screen property builtins
+        // ==========================
+        addBuiltin(info(
+                "screen.setProperty", DataType.BOOL,
+                newParam("areaItem", DataType.STRING, true), // required; format "screenName.areaItemName"
+                newParam("property", DataType.STRING, true), // required; property name
+                newParam("value", DataType.ANY, true) // required; value to set
+        ));
+        addBuiltin(info(
+                "screen.getProperty", DataType.ANY,
+                newParam("areaItem", DataType.STRING, true), // required; format "screenName.areaItemName"
+                newParam("property", DataType.STRING, true) // required; property name
+        ));
+        
         NAMES = Collections.unmodifiableSet(BUILTINS.keySet());
     }
 
@@ -1719,6 +1734,15 @@ public final class Builtins {
             case "classtree.scan" -> {
                 return BuiltinsFile.scanClassTree(env, args);
             }
+            
+            // --- Screen property functions ---
+            case "screen.setproperty" -> {
+                return screenSetProperty(env, args);
+            }
+            case "screen.getproperty" -> {
+                return screenGetProperty(env, args);
+            }
+            
             default ->
                 throw new InterpreterError("Unknown builtin: " + name);
         }
@@ -2023,5 +2047,250 @@ public final class Builtins {
         
         sb.append("═══════════════════════════════════════════════════════════\n");
         return sb.toString();
+    }
+
+    /**
+     * screen.setProperty(screenName.areaItemName, propertyName, value) -> BOOL
+     * Sets a property on an area item in a screen.
+     */
+    private static Object screenSetProperty(Environment env, Object[] args) throws InterpreterError {
+        String areaItemPath = (String) args[0];
+        String propertyName = (String) args[1];
+        Object value = args[2];
+
+        if (areaItemPath == null || areaItemPath.isEmpty()) {
+            throw new InterpreterError("screen.setProperty: areaItem parameter cannot be null or empty");
+        }
+        if (propertyName == null || propertyName.isEmpty()) {
+            throw new InterpreterError("screen.setProperty: property parameter cannot be null or empty");
+        }
+
+        // Parse the compound key: screenName.areaItemName
+        String[] parts = areaItemPath.split("\\.", 2);
+        if (parts.length != 2) {
+            throw new InterpreterError("screen.setProperty: areaItem must be in format 'screenName.areaItemName', got: " + areaItemPath);
+        }
+
+        String screenName = parts[0];
+        String itemName = parts[1];
+
+        // Get the interpreter context
+        Object interp = env.getCurrentInterpreter();
+        if (!(interp instanceof Interpreter)) {
+            throw new InterpreterError("screen.setProperty: interpreter context not available");
+        }
+        Interpreter interpreter = (Interpreter) interp;
+        InterpreterContext context = interpreter.getContext();
+
+        // Find the screen and area item
+        java.util.List<com.eb.script.interpreter.screen.AreaDefinition> areas = context.getScreenAreas().get(screenName);
+        if (areas == null) {
+            throw new InterpreterError("screen.setProperty: screen '" + screenName + "' not found");
+        }
+
+        // Search for the item in all areas
+        com.eb.script.interpreter.screen.AreaItem targetItem = null;
+        for (com.eb.script.interpreter.screen.AreaDefinition area : areas) {
+            targetItem = findItemInArea(area, itemName);
+            if (targetItem != null) {
+                break;
+            }
+        }
+
+        if (targetItem == null) {
+            throw new InterpreterError("screen.setProperty: area item '" + itemName + "' not found in screen '" + screenName + "'");
+        }
+
+        // Set the property on the AreaItem
+        setAreaItemProperty(targetItem, propertyName, value);
+
+        // Refresh the screen to apply changes to the UI
+        // This needs to run on the JavaFX Application Thread
+        final String screenNameFinal = screenName;
+        javafx.application.Platform.runLater(() -> {
+            try {
+                // Get the refresh callback for this screen
+                Runnable refreshCallback = context.getScreenRefreshCallbacks().get(screenNameFinal);
+                if (refreshCallback != null) {
+                    refreshCallback.run();
+                }
+            } catch (Exception e) {
+                System.err.println("Error refreshing screen after setProperty: " + e.getMessage());
+            }
+        });
+
+        return Boolean.TRUE;
+    }
+
+    /**
+     * screen.getProperty(screenName.areaItemName, propertyName) -> ANY
+     * Gets a property value from an area item in a screen.
+     */
+    private static Object screenGetProperty(Environment env, Object[] args) throws InterpreterError {
+        String areaItemPath = (String) args[0];
+        String propertyName = (String) args[1];
+
+        if (areaItemPath == null || areaItemPath.isEmpty()) {
+            throw new InterpreterError("screen.getProperty: areaItem parameter cannot be null or empty");
+        }
+        if (propertyName == null || propertyName.isEmpty()) {
+            throw new InterpreterError("screen.getProperty: property parameter cannot be null or empty");
+        }
+
+        // Parse the compound key: screenName.areaItemName
+        String[] parts = areaItemPath.split("\\.", 2);
+        if (parts.length != 2) {
+            throw new InterpreterError("screen.getProperty: areaItem must be in format 'screenName.areaItemName', got: " + areaItemPath);
+        }
+
+        String screenName = parts[0];
+        String itemName = parts[1];
+
+        // Get the interpreter context
+        Object interp = env.getCurrentInterpreter();
+        if (!(interp instanceof Interpreter)) {
+            throw new InterpreterError("screen.getProperty: interpreter context not available");
+        }
+        Interpreter interpreter = (Interpreter) interp;
+        InterpreterContext context = interpreter.getContext();
+
+        // Find the screen and area item
+        java.util.List<com.eb.script.interpreter.screen.AreaDefinition> areas = context.getScreenAreas().get(screenName);
+        if (areas == null) {
+            throw new InterpreterError("screen.getProperty: screen '" + screenName + "' not found");
+        }
+
+        // Search for the item in all areas
+        com.eb.script.interpreter.screen.AreaItem targetItem = null;
+        for (com.eb.script.interpreter.screen.AreaDefinition area : areas) {
+            targetItem = findItemInArea(area, itemName);
+            if (targetItem != null) {
+                break;
+            }
+        }
+
+        if (targetItem == null) {
+            throw new InterpreterError("screen.getProperty: area item '" + itemName + "' not found in screen '" + screenName + "'");
+        }
+
+        // Get the property from the AreaItem
+        return getAreaItemProperty(targetItem, propertyName);
+    }
+
+    /**
+     * Helper method to recursively find an item by name in an area definition.
+     */
+    private static com.eb.script.interpreter.screen.AreaItem findItemInArea(
+            com.eb.script.interpreter.screen.AreaDefinition area, String itemName) {
+        // Search in this area's items
+        for (com.eb.script.interpreter.screen.AreaItem item : area.items) {
+            if (itemName.equals(item.name)) {
+                return item;
+            }
+        }
+        // Recursively search in child areas
+        for (com.eb.script.interpreter.screen.AreaDefinition childArea : area.childAreas) {
+            com.eb.script.interpreter.screen.AreaItem found = findItemInArea(childArea, itemName);
+            if (found != null) {
+                return found;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Helper method to set a property on an AreaItem.
+     */
+    private static void setAreaItemProperty(com.eb.script.interpreter.screen.AreaItem item, 
+                                           String propertyName, Object value) throws InterpreterError {
+        String propLower = propertyName.toLowerCase();
+        
+        switch (propLower) {
+            case "editable" -> {
+                if (value instanceof Boolean) {
+                    item.editable = (Boolean) value;
+                } else {
+                    throw new InterpreterError("screen.setProperty: 'editable' property must be a boolean");
+                }
+            }
+            case "disabled" -> {
+                if (value instanceof Boolean) {
+                    item.disabled = (Boolean) value;
+                } else {
+                    throw new InterpreterError("screen.setProperty: 'disabled' property must be a boolean");
+                }
+            }
+            case "visible" -> {
+                if (value instanceof Boolean) {
+                    item.visible = (Boolean) value;
+                } else {
+                    throw new InterpreterError("screen.setProperty: 'visible' property must be a boolean");
+                }
+            }
+            case "tooltip" -> item.tooltip = value != null ? String.valueOf(value) : null;
+            case "textcolor" -> item.textColor = value != null ? String.valueOf(value) : null;
+            case "backgroundcolor" -> item.backgroundColor = value != null ? String.valueOf(value) : null;
+            case "colspan" -> {
+                if (value instanceof Number) {
+                    item.colSpan = ((Number) value).intValue();
+                } else if (value == null) {
+                    item.colSpan = null;
+                } else {
+                    throw new InterpreterError("screen.setProperty: 'colSpan' property must be a number");
+                }
+            }
+            case "rowspan" -> {
+                if (value instanceof Number) {
+                    item.rowSpan = ((Number) value).intValue();
+                } else if (value == null) {
+                    item.rowSpan = null;
+                } else {
+                    throw new InterpreterError("screen.setProperty: 'rowSpan' property must be a number");
+                }
+            }
+            case "hgrow" -> item.hgrow = value != null ? String.valueOf(value).toUpperCase() : null;
+            case "vgrow" -> item.vgrow = value != null ? String.valueOf(value).toUpperCase() : null;
+            case "margin" -> item.margin = value != null ? String.valueOf(value) : null;
+            case "padding" -> item.padding = value != null ? String.valueOf(value) : null;
+            case "prefwidth" -> item.prefWidth = value != null ? String.valueOf(value) : null;
+            case "prefheight" -> item.prefHeight = value != null ? String.valueOf(value) : null;
+            case "minwidth" -> item.minWidth = value != null ? String.valueOf(value) : null;
+            case "minheight" -> item.minHeight = value != null ? String.valueOf(value) : null;
+            case "maxwidth" -> item.maxWidth = value != null ? String.valueOf(value) : null;
+            case "maxheight" -> item.maxHeight = value != null ? String.valueOf(value) : null;
+            case "alignment" -> item.alignment = value != null ? String.valueOf(value).toLowerCase() : null;
+            default -> throw new InterpreterError("screen.setProperty: unknown property '" + propertyName + "'");
+        }
+    }
+
+    /**
+     * Helper method to get a property value from an AreaItem.
+     */
+    private static Object getAreaItemProperty(com.eb.script.interpreter.screen.AreaItem item, 
+                                             String propertyName) throws InterpreterError {
+        String propLower = propertyName.toLowerCase();
+        
+        return switch (propLower) {
+            case "editable" -> item.editable;
+            case "disabled" -> item.disabled;
+            case "visible" -> item.visible;
+            case "tooltip" -> item.tooltip;
+            case "textcolor" -> item.textColor;
+            case "backgroundcolor" -> item.backgroundColor;
+            case "colspan" -> item.colSpan;
+            case "rowspan" -> item.rowSpan;
+            case "hgrow" -> item.hgrow;
+            case "vgrow" -> item.vgrow;
+            case "margin" -> item.margin;
+            case "padding" -> item.padding;
+            case "prefwidth" -> item.prefWidth;
+            case "prefheight" -> item.prefHeight;
+            case "minwidth" -> item.minWidth;
+            case "minheight" -> item.minHeight;
+            case "maxwidth" -> item.maxWidth;
+            case "maxheight" -> item.maxHeight;
+            case "alignment" -> item.alignment;
+            default -> throw new InterpreterError("screen.getProperty: unknown property '" + propertyName + "'");
+        };
     }
 }

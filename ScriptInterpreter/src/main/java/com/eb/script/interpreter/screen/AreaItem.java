@@ -11,57 +11,57 @@ package com.eb.script.interpreter.screen;
 public class AreaItem {
     // Item name/identifier
 
-    String name;
+    public String name;
     // Display sequence/order
-    int sequence = 0;
+    public int sequence = 0;
     // Layout position (e.g., "top", "left", "center", "0,0" for GridPane row,col)
-    String layoutPos;
+    public String layoutPos;
     // Reference to a variable
-    String varRef;
+    public String varRef;
     // Optional display metadata for this specific item
     // If null, will use the DisplayItem from varRef
-    DisplayItem displayItem;
+    public DisplayItem displayItem;
 
     // Whether the field can be edited
-    Boolean editable;
+    public Boolean editable;
     // Whether the control is disabled
-    Boolean disabled;
+    public Boolean disabled;
     // Whether the control is visible
-    Boolean visible;
+    public Boolean visible;
     // Hover tooltip text
-    String tooltip;
+    public String tooltip;
     // Text color (e.g., "#000000", "red")
-    String textColor;
+    public String textColor;
     // Background color (e.g., "#FFFFFF", "lightblue")
-    String backgroundColor;
+    public String backgroundColor;
 
     // Layout-specific properties
     // Column span for GridPane layouts
-    Integer colSpan;
+    public Integer colSpan;
     // Row span for GridPane layouts
-    Integer rowSpan;
+    public Integer rowSpan;
     // Horizontal grow priority (for HBox, VBox)
-    String hgrow;
+    public String hgrow;
     // Vertical grow priority (for HBox, VBox)
-    String vgrow;
+    public String vgrow;
     // Margin around the item (e.g., "10", "10 5", "10 5 10 5")
-    String margin;
+    public String margin;
     // Padding inside the item (e.g., "10", "10 5", "10 5 10 5")
-    String padding;
+    public String padding;
     // Preferred width
-    String prefWidth;
+    public String prefWidth;
     // Preferred height
-    String prefHeight;
+    public String prefHeight;
     // Minimum width
-    String minWidth;
+    public String minWidth;
     // Minimum height
-    String minHeight;
+    public String minHeight;
     // Maximum width
-    String maxWidth;
+    public String maxWidth;
     // Maximum height
-    String maxHeight;
+    public String maxHeight;
     // Alignment within parent (e.g., "center", "top-left")
-    String alignment;
+    public String alignment;
 
     @Override
     public String toString() {
