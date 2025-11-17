@@ -735,6 +735,87 @@ screen formScreen = {
 }
 ```
 
+### Automatic Width Calculation
+
+The EBS interpreter automatically calculates control widths based on their data when no explicit `maxLength` is specified. This ensures controls are sized appropriately for their content.
+
+#### Width Calculation Priority
+
+1. **Explicit maxLength** (highest priority) - Always used when specified
+2. **Data-driven width** - Automatic sizing based on control data
+3. **Type-based default** - Fallback default width
+
+#### Data-Driven Width Controls
+
+##### ComboBox and ChoiceBox
+Width is calculated based on the longest option in the `options` array:
+
+```javascript
+"display": {
+    "type": "combobox",
+    "options": ["XS", "S", "M", "L", "XL"]  // Narrow width
+}
+
+"display": {
+    "type": "combobox",
+    "options": ["Information Technology", "Human Resources"]  // Wide width
+}
+```
+
+##### Spinner
+Width is calculated based on the string length of `min` and `max` values:
+
+```javascript
+"display": {
+    "type": "spinner",
+    "min": 1,
+    "max": 10  // Narrow width (2 characters)
+}
+
+"display": {
+    "type": "spinner",
+    "min": -10000,
+    "max": 100000  // Wide width (6 characters for "100000")
+}
+```
+
+##### DatePicker and ColorPicker
+Use type-specific defaults:
+- **DatePicker**: 15 characters (for date format)
+- **ColorPicker**: 12 characters (compact)
+
+#### Overriding Automatic Width
+
+Use `maxLength` to override automatic calculation:
+
+```javascript
+"display": {
+    "type": "spinner",
+    "min": 0,
+    "max": 1000000,
+    "maxLength": 10  // Forces specific width regardless of min/max
+}
+
+"display": {
+    "type": "combobox",
+    "options": ["Very Long Option Name Here"],
+    "maxLength": 15  // Limits width even with long options
+}
+```
+
+#### Default Widths (when no data available)
+
+| Control Type | Default Width |
+|--------------|---------------|
+| TextField | 30 characters |
+| TextArea | 50 characters |
+| PasswordField | 30 characters |
+| Spinner | 10 characters |
+| ComboBox | 20 characters |
+| ChoiceBox | 20 characters |
+| DatePicker | 15 characters |
+| ColorPicker | 12 characters |
+
 ### Layout Configuration
 
 #### Area Definition

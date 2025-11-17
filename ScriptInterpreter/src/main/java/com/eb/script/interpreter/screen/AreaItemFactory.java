@@ -448,6 +448,34 @@ public class AreaItemFactory {
                 }
             }
             
+            // For Spinner, use min/max values to determine size if available
+            if (metadata.itemType == ItemType.SPINNER && (metadata.min != null || metadata.max != null)) {
+                // Find the longest value between min and max
+                String longestValue = "";
+                
+                if (metadata.min != null) {
+                    String minStr = String.valueOf(metadata.min);
+                    if (minStr.length() > longestValue.length()) {
+                        longestValue = minStr;
+                    }
+                }
+                
+                if (metadata.max != null) {
+                    String maxStr = String.valueOf(metadata.max);
+                    if (maxStr.length() > longestValue.length()) {
+                        longestValue = maxStr;
+                    }
+                }
+                
+                if (!longestValue.isEmpty()) {
+                    sampleText = longestValue;
+                    measuringText.setText(sampleText);
+                    double textWidth = measuringText.getLayoutBounds().getWidth();
+                    double padding = 30; // Padding for spinner buttons and borders
+                    return textWidth + padding;
+                }
+            }
+            
             // Otherwise, guess length based on item type and data type
             charCount = guessLengthByType(metadata.itemType, item);
         }
