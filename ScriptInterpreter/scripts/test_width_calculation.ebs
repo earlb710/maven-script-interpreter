@@ -1,0 +1,247 @@
+// Test Script: Width Calculation for Input Controls
+// Description: Test screen to verify width calculations for DatePicker, ColorPicker, ComboBox, and ChoiceBox
+// Tests:
+//   1. DatePicker width calculation (should auto-size based on date format)
+//   2. ColorPicker width calculation (should auto-size)
+//   3. ComboBox width calculation with options (should size based on longest option)
+//   4. ChoiceBox width calculation with options (should size based on longest option)
+//   5. ChoiceBox with short options vs long options (demonstrates data-driven sizing)
+// Author: EBS Test Suite
+// Date: 2025-11-17
+
+screen widthCalcScreen = {
+    "title": "Width Calculation Test - DatePicker, ColorPicker, ComboBox, ChoiceBox",
+    "width": 900,
+    "height": 700,
+    "maximize": false,
+    "vars": [
+        // DatePicker test
+        {
+            "name": "birthDate",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "datepicker",
+                "labelText": "Birth Date (auto-width):",
+                "labelTextAlignment": "left",
+                "promptText": "Select date"
+            }
+        },
+        {
+            "name": "appointmentDate",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "datepicker",
+                "labelText": "Appointment Date (maxLength=25):",
+                "labelTextAlignment": "left",
+                "maxLength": 25
+            }
+        },
+        // ColorPicker test
+        {
+            "name": "favoriteColor",
+            "type": "string",
+            "default": "#4a90e2",
+            "display": {
+                "type": "colorpicker",
+                "labelText": "Favorite Color (auto-width):",
+                "labelTextAlignment": "left"
+            }
+        },
+        {
+            "name": "accentColor",
+            "type": "string",
+            "default": "#ff5722",
+            "display": {
+                "type": "colorpicker",
+                "labelText": "Accent Color (maxLength=20):",
+                "labelTextAlignment": "left",
+                "maxLength": 20
+            }
+        },
+        // ComboBox test - short options
+        {
+            "name": "size",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "combobox",
+                "labelText": "Size (short options - data-driven):",
+                "labelTextAlignment": "left",
+                "promptText": "Select",
+                "options": ["XS", "S", "M", "L", "XL", "XXL"]
+            }
+        },
+        // ComboBox test - long options
+        {
+            "name": "department",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "combobox",
+                "labelText": "Department (long options - data-driven):",
+                "labelTextAlignment": "left",
+                "promptText": "Select department",
+                "options": ["Human Resources", "Information Technology", "Marketing and Sales", "Research and Development", "Customer Service"]
+            }
+        },
+        // ComboBox with maxLength override
+        {
+            "name": "priority",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "combobox",
+                "labelText": "Priority (maxLength=15 override):",
+                "labelTextAlignment": "left",
+                "maxLength": 15,
+                "options": ["Low", "Medium", "High", "Critical"]
+            }
+        },
+        // ChoiceBox test - short options
+        {
+            "name": "status",
+            "type": "string",
+            "default": "Active",
+            "display": {
+                "type": "choicebox",
+                "labelText": "Status (short options - data-driven):",
+                "labelTextAlignment": "left",
+                "options": ["Active", "Inactive", "Pending"]
+            }
+        },
+        // ChoiceBox test - long options
+        {
+            "name": "country",
+            "type": "string",
+            "default": "USA",
+            "display": {
+                "type": "choicebox",
+                "labelText": "Country (long options - data-driven):",
+                "labelTextAlignment": "left",
+                "options": ["United States of America", "United Kingdom", "Canada", "Australia", "New Zealand", "Germany"]
+            }
+        },
+        // ChoiceBox with maxLength override
+        {
+            "name": "role",
+            "type": "string",
+            "default": "User",
+            "display": {
+                "type": "choicebox",
+                "labelText": "Role (maxLength=12 override):",
+                "labelTextAlignment": "left",
+                "maxLength": 12,
+                "options": ["Administrator", "User", "Guest", "Moderator"]
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "testGrid",
+            "type": "gridpane",
+            "style": "-fx-hgap: 15; -fx-vgap: 12; -fx-padding: 20;",
+            "items": [
+                // DatePicker tests
+                {
+                    "name": "birthDateField",
+                    "varRef": "birthDate",
+                    "sequence": 1,
+                    "layoutPos": "0,0"
+                },
+                {
+                    "name": "appointmentDateField",
+                    "varRef": "appointmentDate",
+                    "sequence": 2,
+                    "layoutPos": "1,0"
+                },
+                // ColorPicker tests
+                {
+                    "name": "favoriteColorField",
+                    "varRef": "favoriteColor",
+                    "sequence": 3,
+                    "layoutPos": "2,0"
+                },
+                {
+                    "name": "accentColorField",
+                    "varRef": "accentColor",
+                    "sequence": 4,
+                    "layoutPos": "3,0"
+                },
+                // ComboBox tests
+                {
+                    "name": "sizeField",
+                    "varRef": "size",
+                    "sequence": 5,
+                    "layoutPos": "4,0"
+                },
+                {
+                    "name": "departmentField",
+                    "varRef": "department",
+                    "sequence": 6,
+                    "layoutPos": "5,0"
+                },
+                {
+                    "name": "priorityField",
+                    "varRef": "priority",
+                    "sequence": 7,
+                    "layoutPos": "6,0"
+                },
+                // ChoiceBox tests
+                {
+                    "name": "statusField",
+                    "varRef": "status",
+                    "sequence": 8,
+                    "layoutPos": "7,0"
+                },
+                {
+                    "name": "countryField",
+                    "varRef": "country",
+                    "sequence": 9,
+                    "layoutPos": "8,0"
+                },
+                {
+                    "name": "roleField",
+                    "varRef": "role",
+                    "sequence": 10,
+                    "layoutPos": "9,0"
+                }
+            ]
+        }
+    ]
+};
+
+// Display test information
+print "Width Calculation Test";
+print "=====================";
+print "";
+print "This test demonstrates width calculation for:";
+print "  1. DatePicker - auto-sized based on date format";
+print "  2. ColorPicker - auto-sized";
+print "  3. ComboBox - sized based on longest option when no maxLength specified";
+print "  4. ChoiceBox - sized based on longest option when no maxLength specified";
+print "";
+print "Expected behavior:";
+print "  - DatePicker should be narrower than controls with maxLength override";
+print "  - ColorPicker should be compact";
+print "  - Size ComboBox should be narrow (short options: XS, S, M, L, XL, XXL)";
+print "  - Department ComboBox should be wide (long options)";
+print "  - Status ChoiceBox should be narrow (short options)";
+print "  - Country ChoiceBox should be wide (long options)";
+print "  - Controls with maxLength override should use that width regardless of data";
+print "";
+
+// Show the screen
+show widthCalcScreen;
+
+print "";
+print "Screen displayed successfully!";
+print "Please verify that:";
+print "  ✓ DatePicker controls have appropriate width";
+print "  ✓ ColorPicker controls have appropriate width";
+print "  ✓ ComboBox with short options is narrow";
+print "  ✓ ComboBox with long options is wide enough to show full text";
+print "  ✓ ChoiceBox with short options is narrow";
+print "  ✓ ChoiceBox with long options is wide enough to show full text";
+print "  ✓ Controls with maxLength specified use that width";

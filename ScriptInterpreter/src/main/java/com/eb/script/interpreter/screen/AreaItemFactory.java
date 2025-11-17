@@ -394,6 +394,10 @@ public class AreaItemFactory {
                 ((ChoiceBox<?>) control).setPrefWidth(prefWidth);
             } else if (control instanceof Spinner) {
                 ((Spinner<?>) control).setPrefWidth(prefWidth);
+            } else if (control instanceof DatePicker) {
+                ((DatePicker) control).setPrefWidth(prefWidth);
+            } else if (control instanceof ColorPicker) {
+                ((ColorPicker) control).setPrefWidth(prefWidth);
             }
         }
     }
@@ -407,21 +411,6 @@ public class AreaItemFactory {
             return -1; // Use default
         }
         
-        // Determine the character width to use for calculation
-        int charCount = 0;
-        
-        // Use maxLength if specified
-        if (metadata.maxLength != null && metadata.maxLength > 0) {
-            charCount = metadata.maxLength;
-        } else {
-            // Guess length based on item type and data type
-            charCount = guessLengthByType(metadata.itemType, item);
-        }
-        
-        if (charCount <= 0) {
-            return -1; // Use default
-        }
-        
         // Create a measuring text node to calculate width
         javafx.scene.text.Text measuringText = new javafx.scene.text.Text();
         
@@ -432,8 +421,71 @@ public class AreaItemFactory {
         }
         measuringText.setStyle(fontStyle);
         
+        // Determine the character width to use for calculation
+        int charCount = 0;
+        String sampleText = null;
+        
+        // Use maxLength if specified
+        if (metadata.maxLength != null && metadata.maxLength > 0) {
+            charCount = metadata.maxLength;
+        } else {
+            // For ChoiceBox and ComboBox, use options data to determine size if available
+            if ((metadata.itemType == ItemType.CHOICEBOX || metadata.itemType == ItemType.COMBOBOX) 
+                    && metadata.options != null && !metadata.options.isEmpty()) {
+                // Find the longest option to use as the basis for width calculation
+                String longestOption = "";
+                for (String option : metadata.options) {
+                    if (option != null && option.length() > longestOption.length()) {
+                        longestOption = option;
+                    }
+                }
+                if (!longestOption.isEmpty()) {
+                    sampleText = longestOption;
+                    measuringText.setText(sampleText);
+                    double textWidth = measuringText.getLayoutBounds().getWidth();
+                    double padding = 40; // Extra padding for dropdown arrow and borders
+                    return textWidth + padding;
+                }
+            }
+            
+            // For Spinner, use min/max values to determine size if available
+            if (metadata.itemType == ItemType.SPINNER && (metadata.min != null || metadata.max != null)) {
+                // Find the longest value between min and max
+                String longestValue = "";
+                
+                if (metadata.min != null) {
+                    String minStr = String.valueOf(metadata.min);
+                    if (minStr.length() > longestValue.length()) {
+                        longestValue = minStr;
+                    }
+                }
+                
+                if (metadata.max != null) {
+                    String maxStr = String.valueOf(metadata.max);
+                    if (maxStr.length() > longestValue.length()) {
+                        longestValue = maxStr;
+                    }
+                }
+                
+                if (!longestValue.isEmpty()) {
+                    sampleText = longestValue;
+                    measuringText.setText(sampleText);
+                    double textWidth = measuringText.getLayoutBounds().getWidth();
+                    double padding = 30; // Padding for spinner buttons and borders
+                    return textWidth + padding;
+                }
+            }
+            
+            // Otherwise, guess length based on item type and data type
+            charCount = guessLengthByType(metadata.itemType, item);
+        }
+        
+        if (charCount <= 0) {
+            return -1; // Use default
+        }
+        
         // Use 'M' as a representative character (one of the widest)
-        String sampleText = "M".repeat(charCount);
+        sampleText = "M".repeat(charCount);
         measuringText.setText(sampleText);
         
         // Get the width and add padding for borders, scrollbars, etc.
@@ -473,6 +525,9 @@ public class AreaItemFactory {
                 
             case DATEPICKER:
                 return 15; // Date format is typically short
+                
+            case COLORPICKER:
+                return 12; // Color picker is relatively compact
                 
             default:
                 return 20; // Default fallback

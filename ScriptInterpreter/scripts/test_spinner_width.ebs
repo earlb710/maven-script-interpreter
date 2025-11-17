@@ -1,0 +1,198 @@
+// Test Script: Spinner Width Calculation
+// Description: Test screen to verify Spinner width calculations based on min/max values
+// Tests:
+//   1. Spinner with small range (1-10) - should be narrow
+//   2. Spinner with medium range (0-1000) - should be wider
+//   3. Spinner with large range (-10000 to 100000) - should be widest
+//   4. Spinner with maxLength override - should use specified width
+//   5. Spinner without min/max specified - should use default width
+// Author: EBS Test Suite
+// Date: 2025-11-17
+
+screen spinnerWidthTest = {
+    "title": "Spinner Width Calculation Test",
+    "width": 700,
+    "height": 600,
+    "maximize": false,
+    "vars": [
+        // Spinner with small range - narrow width
+        {
+            "name": "rating",
+            "type": "int",
+            "default": 5,
+            "display": {
+                "type": "spinner",
+                "labelText": "Rating (1-10, data-driven narrow):",
+                "labelTextAlignment": "left",
+                "min": 1,
+                "max": 10
+            }
+        },
+        // Spinner with medium range - medium width
+        {
+            "name": "quantity",
+            "type": "int",
+            "default": 100,
+            "display": {
+                "type": "spinner",
+                "labelText": "Quantity (0-1000, data-driven medium):",
+                "labelTextAlignment": "left",
+                "min": 0,
+                "max": 1000
+            }
+        },
+        // Spinner with large range - wide width
+        {
+            "name": "amount",
+            "type": "int",
+            "default": 0,
+            "display": {
+                "type": "spinner",
+                "labelText": "Amount (-10000 to 100000, data-driven wide):",
+                "labelTextAlignment": "left",
+                "min": -10000,
+                "max": 100000
+            }
+        },
+        // Spinner with very large number - extra wide
+        {
+            "name": "population",
+            "type": "int",
+            "default": 1000000,
+            "display": {
+                "type": "spinner",
+                "labelText": "Population (0-1000000000, data-driven extra wide):",
+                "labelTextAlignment": "left",
+                "min": 0,
+                "max": 1000000000
+            }
+        },
+        // Spinner with maxLength override
+        {
+            "name": "priority",
+            "type": "int",
+            "default": 5,
+            "display": {
+                "type": "spinner",
+                "labelText": "Priority (1-100, maxLength=20 override):",
+                "labelTextAlignment": "left",
+                "min": 1,
+                "max": 100,
+                "maxLength": 20
+            }
+        },
+        // Spinner without min/max - default width
+        {
+            "name": "counter",
+            "type": "int",
+            "default": 0,
+            "display": {
+                "type": "spinner",
+                "labelText": "Counter (no min/max, default width):",
+                "labelTextAlignment": "left"
+            }
+        },
+        // Spinner with negative range
+        {
+            "name": "temperature",
+            "type": "int",
+            "default": 0,
+            "display": {
+                "type": "spinner",
+                "labelText": "Temperature (-100 to 100, data-driven):",
+                "labelTextAlignment": "left",
+                "min": -100,
+                "max": 100
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "testGrid",
+            "type": "gridpane",
+            "style": "-fx-hgap: 15; -fx-vgap: 12; -fx-padding: 20;",
+            "items": [
+                {
+                    "name": "ratingField",
+                    "varRef": "rating",
+                    "sequence": 1,
+                    "layoutPos": "0,0"
+                },
+                {
+                    "name": "quantityField",
+                    "varRef": "quantity",
+                    "sequence": 2,
+                    "layoutPos": "1,0"
+                },
+                {
+                    "name": "amountField",
+                    "varRef": "amount",
+                    "sequence": 3,
+                    "layoutPos": "2,0"
+                },
+                {
+                    "name": "populationField",
+                    "varRef": "population",
+                    "sequence": 4,
+                    "layoutPos": "3,0"
+                },
+                {
+                    "name": "priorityField",
+                    "varRef": "priority",
+                    "sequence": 5,
+                    "layoutPos": "4,0"
+                },
+                {
+                    "name": "counterField",
+                    "varRef": "counter",
+                    "sequence": 6,
+                    "layoutPos": "5,0"
+                },
+                {
+                    "name": "temperatureField",
+                    "varRef": "temperature",
+                    "sequence": 7,
+                    "layoutPos": "6,0"
+                }
+            ]
+        }
+    ]
+};
+
+// Display test information
+print "Spinner Width Calculation Test";
+print "==============================";
+print "";
+print "This test demonstrates Spinner width calculation based on min/max values:";
+print "  1. Small range (1-10) - narrow width";
+print "  2. Medium range (0-1000) - medium width";
+print "  3. Large range (-10000 to 100000) - wide width";
+print "  4. Very large range (0-1000000000) - extra wide width";
+print "  5. maxLength override - uses specified width";
+print "  6. No min/max specified - uses default width";
+print "  7. Negative range (-100 to 100) - width based on longer value";
+print "";
+print "Expected behavior:";
+print "  - Rating spinner should be narrow (displays 1-10)";
+print "  - Quantity spinner should be medium width (displays 0-1000)";
+print "  - Amount spinner should be wide (displays -10000 to 100000)";
+print "  - Population spinner should be extra wide (displays 0-1000000000)";
+print "  - Priority spinner should use maxLength=20 regardless of min/max";
+print "  - Counter spinner should use default width (no min/max)";
+print "  - Temperature spinner width based on -100/100 (4 chars including minus)";
+print "";
+
+// Show the screen
+show spinnerWidthTest;
+
+print "";
+print "Screen displayed successfully!";
+print "Please verify that:";
+print "  ✓ Rating spinner (1-10) is narrowest";
+print "  ✓ Quantity spinner (0-1000) is medium width";
+print "  ✓ Amount spinner (-10000 to 100000) is wide";
+print "  ✓ Population spinner (0-1000000000) is widest";
+print "  ✓ Priority spinner uses maxLength override width";
+print "  ✓ Counter spinner uses default width";
+print "  ✓ Temperature spinner width accommodates -100 to 100";
+print "  ✓ All spinners are sized appropriately for their value range";
