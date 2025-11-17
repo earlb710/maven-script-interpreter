@@ -258,7 +258,7 @@ screen fourColumnScreen = {
                     "sequence": 13,
                     "display": {
                         "type": "button",
-                        "promptText": "Update Full Name",
+                        "labelText": "Update Full Name",
                         "onClick": "fourColumnScreen.fullName = fourColumnScreen.firstName + \" \" + fourColumnScreen.lastName; print \"Full Name updated: \" + fourColumnScreen.fullName;"
                     }
                 },
@@ -267,7 +267,7 @@ screen fourColumnScreen = {
                     "sequence": 14,
                     "display": {
                         "type": "button",
-                        "promptText": "Calculate Total",
+                        "labelText": "Calculate Total",
                         "onClick": "fourColumnScreen.total = fourColumnScreen.quantity * fourColumnScreen.price; print \"Total calculated: $\" + fourColumnScreen.total;"
                     }
                 },
@@ -276,7 +276,7 @@ screen fourColumnScreen = {
                     "sequence": 15,
                     "display": {
                         "type": "button",
-                        "promptText": "Sync Category",
+                        "labelText": "Sync Category",
                         "onClick": "fourColumnScreen.categoryMirror = fourColumnScreen.category; print \"Category synced: \" + fourColumnScreen.category;"
                     }
                 },
@@ -285,7 +285,7 @@ screen fourColumnScreen = {
                     "sequence": 16,
                     "display": {
                         "type": "button",
-                        "promptText": "Sync Status",
+                        "labelText": "Sync Status",
                         "onClick": "fourColumnScreen.statusMirror = fourColumnScreen.status; print \"Status synced: \" + fourColumnScreen.status;"
                     }
                 },
@@ -294,7 +294,7 @@ screen fourColumnScreen = {
                     "sequence": 17,
                     "display": {
                         "type": "button",
-                        "promptText": "Update All",
+                        "labelText": "Update All",
                         "onClick": "fourColumnScreen.fullName = fourColumnScreen.firstName + \" \" + fourColumnScreen.lastName; fourColumnScreen.total = fourColumnScreen.quantity * fourColumnScreen.price; fourColumnScreen.categoryMirror = fourColumnScreen.category; fourColumnScreen.statusMirror = fourColumnScreen.status; print \"All fields updated!\";"
                     }
                 }
