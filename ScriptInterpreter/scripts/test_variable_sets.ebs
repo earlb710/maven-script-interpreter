@@ -1,0 +1,105 @@
+// Test Script: Variable Sets Structure
+// Description: Tests the new "sets" structure for grouping variables
+// Author: EBS Test Suite
+// Date: 2025-11-17
+
+print "Testing new variable sets structure...";
+
+// Test new sets structure
+screen testSetsScreen = {
+    "title": "Variable Sets Test",
+    "width": 800,
+    "height": 600,
+    "sets": [
+        {
+            "setname": "PersonalInfo",
+            "hiddenind": "N",
+            "vars": [
+                {
+                    "name": "firstName",
+                    "type": "string",
+                    "default": "John",
+                    "display": {"type": "textfield", "labeltext": "First Name"}
+                },
+                {
+                    "name": "lastName",
+                    "type": "string",
+                    "default": "Doe",
+                    "display": {"type": "textfield", "labeltext": "Last Name"}
+                },
+                {
+                    "name": "age",
+                    "type": "int",
+                    "default": 30,
+                    "display": {"type": "spinner", "min": 0, "max": 120, "labeltext": "Age"}
+                }
+            ]
+        },
+        {
+            "setname": "ContactInfo",
+            "hiddenind": "N",
+            "vars": [
+                {
+                    "name": "email",
+                    "type": "string",
+                    "default": "john.doe@example.com",
+                    "display": {"type": "textfield", "labeltext": "Email"}
+                },
+                {
+                    "name": "phone",
+                    "type": "string",
+                    "default": "555-1234",
+                    "display": {"type": "textfield", "labeltext": "Phone"}
+                }
+            ]
+        },
+        {
+            "setname": "Internal",
+            "hiddenind": "Y",
+            "vars": [
+                {
+                    "name": "userId",
+                    "type": "int",
+                    "default": 12345
+                },
+                {
+                    "name": "sessionToken",
+                    "type": "string",
+                    "default": "abc-123-xyz"
+                }
+            ]
+        }
+    ]
+};
+
+print "Screen created successfully!";
+
+// Test variable access (backward compatibility)
+print "";
+print "Testing variable access:";
+print "First Name: " + testSetsScreen.firstName;
+print "Last Name: " + testSetsScreen.lastName;
+print "Age: " + testSetsScreen.age;
+print "Email: " + testSetsScreen.email;
+print "Phone: " + testSetsScreen.phone;
+
+// Modify values
+testSetsScreen.firstName = "Jane";
+testSetsScreen.lastName = "Smith";
+testSetsScreen.age = 25;
+testSetsScreen.email = "jane.smith@example.com";
+
+print "";
+print "Modified values:";
+print "First Name: " + testSetsScreen.firstName;
+print "Last Name: " + testSetsScreen.lastName;
+print "Age: " + testSetsScreen.age;
+print "Email: " + testSetsScreen.email;
+
+// Show the screen
+print "";
+print "Displaying screen...";
+screen testSetsScreen show;
+
+print "";
+print "Variable sets test completed!";

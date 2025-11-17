@@ -1,0 +1,58 @@
+// Test Script: Backward Compatibility Test
+// Description: Tests that the old "vars" structure still works
+// Author: EBS Test Suite
+// Date: 2025-11-17
+
+print "Testing backward compatibility with legacy vars structure...";
+
+// Test legacy vars structure (should still work)
+screen legacyScreen = {
+    "title": "Legacy Vars Test",
+    "width": 600,
+    "height": 400,
+    "vars": [
+        {
+            "name": "username",
+            "type": "string",
+            "default": "testuser",
+            "display": {"type": "textfield", "labeltext": "Username"}
+        },
+        {
+            "name": "password",
+            "type": "string",
+            "default": "",
+            "display": {"type": "passwordfield", "labeltext": "Password"}
+        },
+        {
+            "name": "rememberMe",
+            "type": "bool",
+            "default": false,
+            "display": {"type": "checkbox", "labeltext": "Remember Me"}
+        }
+    ]
+};
+
+print "Legacy screen created successfully!";
+
+// Test variable access
+print "";
+print "Testing variable access:";
+print "Username: " + legacyScreen.username;
+print "Remember Me: " + legacyScreen.rememberMe;
+
+// Modify values
+legacyScreen.username = "newuser";
+legacyScreen.rememberMe = true;
+
+print "";
+print "Modified values:";
+print "Username: " + legacyScreen.username;
+print "Remember Me: " + legacyScreen.rememberMe;
+
+// Show the screen
+print "";
+print "Displaying legacy screen...";
+screen legacyScreen show;
+
+print "";
+print "Backward compatibility test completed!";
