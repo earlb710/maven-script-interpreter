@@ -550,6 +550,16 @@ public class EbsTab extends Tab {
         }
     }
 
+    // Public method to show find bar from menu
+    public void showFindFromMenu(boolean withReplace) {
+        dispArea.requestFocus();
+        if (findBar.isVisible() && !withReplace) {
+            hideFind();
+        } else {
+            showFind(withReplace);
+        }
+    }
+
     private void showFind(boolean withReplace) {
         findBar.setVisible(true);
         findBar.setManaged(true);
