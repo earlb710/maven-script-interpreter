@@ -1,0 +1,209 @@
+// Test Script: Input Alignment
+// Description: Demonstrates text alignment (left, center, right) for various input controls
+// Author: EBS Test Suite
+// Date: 2025-11-16
+
+screen alignmentTestScreen = {
+    "title": "Input Alignment Test",
+    "width": 700,
+    "height": 650,
+    "vars": [
+        {
+            "name": "leftText",
+            "type": "string",
+            "default": "Left aligned text",
+            "display": {
+                "type": "textfield",
+                "labelText": "Left Aligned TextField:",
+                "alignment": "left"
+            }
+        },
+        {
+            "name": "centerText",
+            "type": "string",
+            "default": "Center aligned text",
+            "display": {
+                "type": "textfield",
+                "labelText": "Center Aligned TextField:",
+                "alignment": "center"
+            }
+        },
+        {
+            "name": "rightText",
+            "type": "string",
+            "default": "Right aligned text",
+            "display": {
+                "type": "textfield",
+                "labelText": "Right Aligned TextField:",
+                "alignment": "right"
+            }
+        },
+        {
+            "name": "leftNumber",
+            "type": "int",
+            "default": 12345,
+            "display": {
+                "type": "textfield",
+                "labelText": "Left Aligned Number:",
+                "alignment": "left",
+                "promptHelp": "Number left-aligned"
+            }
+        },
+        {
+            "name": "centerNumber",
+            "type": "int",
+            "default": 67890,
+            "display": {
+                "type": "textfield",
+                "labelText": "Center Aligned Number:",
+                "alignment": "center",
+                "promptHelp": "Number center-aligned"
+            }
+        },
+        {
+            "name": "rightNumber",
+            "type": "int",
+            "default": 54321,
+            "display": {
+                "type": "textfield",
+                "labelText": "Right Aligned Number:",
+                "alignment": "right",
+                "promptHelp": "Number right-aligned"
+            }
+        },
+        {
+            "name": "defaultNumber",
+            "type": "int",
+            "default": 99999,
+            "display": {
+                "type": "textfield",
+                "labelText": "Default Aligned (Auto Right):",
+                "promptHelp": "Numeric fields auto-align right"
+            }
+        },
+        {
+            "name": "spinnerLeft",
+            "type": "int",
+            "default": 25,
+            "display": {
+                "type": "spinner",
+                "min": 0,
+                "max": 100,
+                "labelText": "Spinner Left:",
+                "alignment": "left"
+            }
+        },
+        {
+            "name": "spinnerCenter",
+            "type": "int",
+            "default": 50,
+            "display": {
+                "type": "spinner",
+                "min": 0,
+                "max": 100,
+                "labelText": "Spinner Center:",
+                "alignment": "center"
+            }
+        },
+        {
+            "name": "spinnerRight",
+            "type": "int",
+            "default": 75,
+            "display": {
+                "type": "spinner",
+                "min": 0,
+                "max": 100,
+                "labelText": "Spinner Right:",
+                "alignment": "right"
+            }
+        },
+        {
+            "name": "spinnerDefault",
+            "type": "int",
+            "default": 33,
+            "display": {
+                "type": "spinner",
+                "min": 0,
+                "max": 100,
+                "labelText": "Spinner Default (Auto Right):"
+            }
+        },
+        {
+            "name": "comboLeft",
+            "type": "string",
+            "default": "Left",
+            "display": {
+                "type": "combobox",
+                "labelText": "ComboBox Left:",
+                "alignment": "left",
+                "options": ["Left", "Center", "Right"]
+            }
+        },
+        {
+            "name": "comboCenter",
+            "type": "string",
+            "default": "Center",
+            "display": {
+                "type": "combobox",
+                "labelText": "ComboBox Center:",
+                "alignment": "center",
+                "options": ["Left", "Center", "Right"]
+            }
+        },
+        {
+            "name": "comboRight",
+            "type": "string",
+            "default": "Right",
+            "display": {
+                "type": "combobox",
+                "labelText": "ComboBox Right:",
+                "alignment": "right",
+                "options": ["Left", "Center", "Right"]
+            }
+        },
+        {
+            "name": "textareaLeft",
+            "type": "string",
+            "default": "Left aligned\nmultiline text\nhere",
+            "display": {
+                "type": "textarea",
+                "labelText": "TextArea Left:",
+                "alignment": "left"
+            }
+        },
+        {
+            "name": "textareaRight",
+            "type": "string",
+            "default": "Right aligned\nmultiline text\nhere",
+            "display": {
+                "type": "textarea",
+                "labelText": "TextArea Right:",
+                "alignment": "right"
+            }
+        }
+    ]
+};
+
+print "Input Alignment Test Script";
+print "==========================";
+print "";
+print "This screen demonstrates text alignment for various input controls:";
+print "- TextFields with left, center, right, and default alignment";
+print "- Spinners with left, center, right, and default alignment";
+print "- ComboBoxes with left, center, right alignment";
+print "- TextAreas with left and right alignment";
+print "";
+print "Note: Numeric fields (int, double) automatically default to RIGHT alignment";
+print "      unless explicitly overridden with the 'alignment' property.";
+print "";
+print "Current Values:";
+print "Left Text: " + alignmentTestScreen.leftText;
+print "Center Text: " + alignmentTestScreen.centerText;
+print "Right Text: " + alignmentTestScreen.rightText;
+print "Default Number: " + alignmentTestScreen.defaultNumber;
+print "";
+
+screen alignmentTestScreen show;
+
+print "Alignment test complete!";
+print "Try typing in the fields to see how text aligns as you type.";

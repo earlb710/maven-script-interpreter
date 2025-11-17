@@ -1,7 +1,7 @@
 // Test Script: Label Text Feature
-// Description: Demonstrates labelText with different alignments
+// Description: Demonstrates labelText with different alignments and promptHelp
 // Author: EBS Test Suite
-// Date: 2025-11-15
+// Date: 2025-11-16
 
 screen labelTestScreen = {
     "title": "Label Text Demonstration",
@@ -14,7 +14,7 @@ screen labelTestScreen = {
             "default": "john_doe",
             "display": {
                 "type": "textfield",
-                "promptText": "Enter your username (this is placeholder text)",
+                "promptHelp": "Enter your username",
                 "labelText": "Username:",
                 "labelTextAlignment": "left"
             }
@@ -25,7 +25,7 @@ screen labelTestScreen = {
             "default": "john@example.com",
             "display": {
                 "type": "textfield",
-                "promptText": "your@email.com",
+                "promptHelp": "your@email.com",
                 "labelText": "Email Address:",
                 "labelTextAlignment": "left"
             }
@@ -48,7 +48,7 @@ screen labelTestScreen = {
             "default": "",
             "display": {
                 "type": "combobox",
-                "promptText": "Select your country",
+                "promptHelp": "Select your country",
                 "labelText": "Country:",
                 "labelTextAlignment": "left",
                 "options": ["United States", "Canada", "United Kingdom", "Australia", "Germany", "France", "Japan"]
@@ -70,7 +70,7 @@ screen labelTestScreen = {
             "default": "",
             "display": {
                 "type": "textarea",
-                "promptText": "Tell us about yourself...",
+                "promptHelp": "Tell us about yourself...",
                 "labelText": "Biography:",
                 "labelTextAlignment": "left"
             }
@@ -82,7 +82,7 @@ print "LabelText Test Script";
 print "==================";
 print "";
 print "Key Differences:";
-print "- promptText: Placeholder hint shown ONLY when field is empty";
+print "- promptHelp: Placeholder hint shown ONLY when field is empty";
 print "- labelText: Permanent label displayed before/beside the control";
 print "";
 print "Current Values:";
@@ -94,6 +94,7 @@ print "Subscribe: " + labelTestScreen.subscribe;
 print "Bio: " + labelTestScreen.bio;
 print "";
 print "Displaying screen with labelText...";
+print "Note: If content exceeds window size, scrollbar will appear automatically";
 
 screen labelTestScreen show;
 

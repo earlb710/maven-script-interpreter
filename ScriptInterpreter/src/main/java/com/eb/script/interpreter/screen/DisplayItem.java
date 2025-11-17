@@ -1,4 +1,4 @@
-package com.eb.script.interpreter;
+package com.eb.script.interpreter.screen;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +44,18 @@ public class DisplayItem {
     Boolean labelBold;
     // Label text italic flag
     Boolean labelItalic;
+    // Label font size (e.g., "14px", "16px")
+    String labelFontSize;
+    // Item/control font size (e.g., "12px", "14px", "1em")
+    String itemFontSize;
+    // Maximum length/width for the control (number of characters for text fields)
+    Integer maxLength;
+    // Item/control text color
+    String itemColor;
+    // Item/control text bold flag
+    Boolean itemBold;
+    // Item/control text italic flag
+    Boolean itemItalic;
     // onClick event handler - EBS code to execute when button is clicked
     String onClick;
     
@@ -61,9 +73,9 @@ public class DisplayItem {
                ", pattern='" + pattern + '\'' +
                ", promptHelp='" + promptHelp + '\'' +
                ", options=" + options +
-               ", promptColor='" + labelColor + '\'' +
-               ", promptBold=" + labelBold +
-               ", promptItalic=" + labelItalic +
+               ", labelColor='" + labelColor + '\'' +
+               ", labelBold=" + labelBold +
+               ", labelItalic=" + labelItalic +
                '}';
     }
     
@@ -87,25 +99,25 @@ public class DisplayItem {
         TOGGLEBUTTON("togglebutton", "screen-item-togglebutton",
                      "-fx-padding: 8 15 8 15; -fx-background-color: #e0e0e0; -fx-border-radius: 3; -fx-background-radius: 3;"),
         COMBOBOX("combobox", "screen-item-combobox",
-                 "-fx-padding: 5 10 5 10; -fx-background-color: white; -fx-border-color: #cccccc; -fx-border-width: 1; -fx-border-radius: 3;"),
+                 "-fx-padding: 2; -fx-background-color: white; -fx-border-color: #cccccc; -fx-border-width: 1; -fx-border-radius: 3;"),
         CHOICEBOX("choicebox", "screen-item-choicebox",
-                  "-fx-padding: 5 10 5 10; -fx-background-color: white; -fx-border-color: #cccccc; -fx-border-width: 1;"),
+                  "-fx-padding: 2; -fx-background-color: white; -fx-border-color: #cccccc; -fx-border-width: 1;"),
         LISTVIEW("listview", "screen-item-listview",
                  "-fx-border-color: #cccccc; -fx-border-width: 1;"),
         
         // Numeric Controls
         SPINNER("spinner", "screen-item-spinner",
-                "-fx-padding: 5 10 5 10;"),
+                "-fx-padding: 2;"),
         SLIDER("slider", "screen-item-slider",
                "-fx-padding: 5 10 5 10;"),
         
         // Date/Time Controls
         DATEPICKER("datepicker", "screen-item-datepicker",
-                   "-fx-padding: 5 10 5 10; -fx-background-color: white; -fx-border-color: #cccccc; -fx-border-width: 1; -fx-border-radius: 3;"),
+                   "-fx-padding: 2; -fx-background-color: white; -fx-border-color: #cccccc; -fx-border-width: 1; -fx-border-radius: 3;"),
         
         // Color Control
         COLORPICKER("colorpicker", "screen-item-colorpicker",
-                    "-fx-padding: 5 10 5 10;"),
+                    "-fx-padding: 2;"),
         
         // Button Controls
         BUTTON("button", "screen-item-button",

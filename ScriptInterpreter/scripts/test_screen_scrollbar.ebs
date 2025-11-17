@@ -1,0 +1,169 @@
+// Test Script: Scrollbar Feature
+// Description: Demonstrates automatic scrollbar when content exceeds window size
+// Author: EBS Test Suite
+// Date: 2025-11-16
+
+screen scrollTestScreen = {
+    "title": "Scrollbar Test - Many Fields",
+    "width": 500,
+    "height": 400,
+    "vars": [
+        {
+            "name": "field1",
+            "type": "string",
+            "default": "Value 1",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 1:"
+            }
+        },
+        {
+            "name": "field2",
+            "type": "string",
+            "default": "Value 2",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 2:"
+            }
+        },
+        {
+            "name": "field3",
+            "type": "string",
+            "default": "Value 3",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 3:"
+            }
+        },
+        {
+            "name": "field4",
+            "type": "int",
+            "default": 42,
+            "display": {
+                "type": "spinner",
+                "min": 0,
+                "max": 100,
+                "labelText": "Numeric Field 4:"
+            }
+        },
+        {
+            "name": "field5",
+            "type": "string",
+            "default": "Value 5",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 5:"
+            }
+        },
+        {
+            "name": "field6",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "combobox",
+                "labelText": "Selection Field 6:",
+                "options": ["Option A", "Option B", "Option C", "Option D", "Option E"]
+            }
+        },
+        {
+            "name": "field7",
+            "type": "string",
+            "default": "Value 7",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 7:"
+            }
+        },
+        {
+            "name": "field8",
+            "type": "int",
+            "default": 50,
+            "display": {
+                "type": "slider",
+                "min": 0,
+                "max": 100,
+                "labelText": "Slider Field 8:"
+            }
+        },
+        {
+            "name": "field9",
+            "type": "string",
+            "default": "Value 9",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 9:"
+            }
+        },
+        {
+            "name": "field10",
+            "type": "string",
+            "default": "Value 10",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 10:"
+            }
+        },
+        {
+            "name": "field11",
+            "type": "bool",
+            "default": false,
+            "display": {
+                "type": "checkbox",
+                "labelText": "Checkbox Field 11"
+            }
+        },
+        {
+            "name": "field12",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textarea",
+                "labelText": "Text Area Field 12:",
+                "promptHelp": "Enter multiple lines of text here..."
+            }
+        },
+        {
+            "name": "field13",
+            "type": "string",
+            "default": "Value 13",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 13:"
+            }
+        },
+        {
+            "name": "field14",
+            "type": "int",
+            "default": 75,
+            "display": {
+                "type": "spinner",
+                "min": 0,
+                "max": 100,
+                "labelText": "Numeric Field 14:"
+            }
+        },
+        {
+            "name": "field15",
+            "type": "string",
+            "default": "Value 15",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 15:"
+            }
+        }
+    ]
+};
+
+print "Scrollbar Test Script";
+print "===================";
+print "";
+print "This screen has 15 fields in a 500x400 window.";
+print "The content will exceed the window height, and a vertical scrollbar";
+print "will automatically appear to allow scrolling through all fields.";
+print "";
+print "Try resizing the window to see how the scrollbar adapts!";
+print "";
+
+screen scrollTestScreen show;
+
+print "Scrollbar test complete!";

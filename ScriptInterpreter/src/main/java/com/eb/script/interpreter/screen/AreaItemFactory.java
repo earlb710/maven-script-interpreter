@@ -1,7 +1,6 @@
-package com.eb.script.interpreter;
+package com.eb.script.interpreter.screen;
 
-import com.eb.script.interpreter.AreaDefinition.AreaItem;
-import com.eb.script.interpreter.DisplayItem.ItemType;
+import com.eb.script.interpreter.screen.DisplayItem.ItemType;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.text.Text;
@@ -49,6 +48,9 @@ public class AreaItemFactory {
         
         // Apply item-specific display properties (including promptText from metadata)
         applyItemSpecificProperties(control, item, metadata);
+        
+        // Apply control size and font styling
+        applyControlSizeAndFont(control, metadata, item);
         
         return control;
     }
@@ -218,7 +220,7 @@ public class AreaItemFactory {
      * Applies item-specific display properties to the control.
      */
     private static void applyItemSpecificProperties(Node control, AreaItem item, DisplayItem metadata) {
-        // Apply prompt text or text content based on control type (from DisplayItem)
+        // Apply prompt text for input controls (placeholder hint text)
         if (metadata != null && metadata.promptHelp != null && !metadata.promptHelp.isEmpty()) {
             if (control instanceof TextField) {
                 ((TextField) control).setPromptText(metadata.promptHelp);
@@ -226,22 +228,25 @@ public class AreaItemFactory {
                 ((TextArea) control).setPromptText(metadata.promptHelp);
             } else if (control instanceof ComboBox) {
                 ((ComboBox<?>) control).setPromptText(metadata.promptHelp);
-            } else if (control instanceof Label) {
-                // For labels, use promptText as the label's text content
+            }
+        }
+        
+        // Apply label text for labels and buttons (actual displayed text)
+        if (metadata != null && metadata.labelText != null && !metadata.labelText.isEmpty()) {
+            if (control instanceof Label) {
                 Label label = (Label) control;
                 label.setText(metadata.labelText);
                 
-                // Apply prompt text styling (color, bold, italic) for labels
+                // Apply label text styling (color, bold, italic)
                 applyPromptTextStyling(label, metadata);
             } else if (control instanceof Button) {
-                // For buttons, use promptText as the button's text
                 ((Button) control).setText(metadata.labelText);
             }
         }
 
-        // Apply prompt text alignment for applicable controls
-        if (item.displayItem.labelTextAlignment != null && !item.displayItem.labelTextAlignment.isEmpty()) {
-            String alignment = item.displayItem.labelTextAlignment.toLowerCase();
+        // Apply control text alignment (for the content inside the control)
+        if (metadata != null && metadata.alignment != null && !metadata.alignment.isEmpty()) {
+            String alignment = metadata.alignment.toLowerCase();
             String alignmentStyle = "";
             
             switch (alignment) {
@@ -262,10 +267,23 @@ public class AreaItemFactory {
             if (!alignmentStyle.isEmpty()) {
                 if (control instanceof TextField || control instanceof TextArea || control instanceof ComboBox) {
                     control.setStyle(control.getStyle() + " " + alignmentStyle);
-                } else if (control instanceof Label || control instanceof Button) {
-                    control.setStyle(control.getStyle() + " " + alignmentStyle);
+                } else if (control instanceof Spinner) {
+                    // For Spinner, we need to access the internal TextField
+                    Spinner<?> spinner = (Spinner<?>) control;
+                    spinner.setStyle(control.getStyle() + " " + alignmentStyle);
+                    // Also try to set on the editor if accessible
+                    if (spinner.getEditor() != null) {
+                        spinner.getEditor().setStyle(alignmentStyle);
+                    }
                 }
             }
+        }
+
+        // Apply label text alignment (this is for the wrapper label, not the control content)
+        // This is handled separately and used by ScreenFactory when creating labeled controls
+        if (item.displayItem.labelTextAlignment != null && !item.displayItem.labelTextAlignment.isEmpty()) {
+            // This alignment is used by ScreenFactory for the label wrapper
+            // No need to apply it to the control itself here
         }
 
         // Apply editable property
@@ -281,14 +299,183 @@ public class AreaItemFactory {
 
         // Apply text color
         if (item.textColor != null && !item.textColor.isEmpty()) {
+            String currentStyle = control.getStyle();
             String colorStyle = "-fx-text-fill: " + item.textColor + ";";
-            control.setStyle(control.getStyle() + " " + colorStyle);
+            if (currentStyle == null || currentStyle.isEmpty()) {
+                control.setStyle(colorStyle);
+            } else {
+                control.setStyle(currentStyle + " " + colorStyle);
+            }
         }
 
         // Apply background color
         if (item.backgroundColor != null && !item.backgroundColor.isEmpty()) {
+            String currentStyle = control.getStyle();
             String bgStyle = "-fx-background-color: " + item.backgroundColor + ";";
-            control.setStyle(control.getStyle() + " " + bgStyle);
+            if (currentStyle == null || currentStyle.isEmpty()) {
+                control.setStyle(bgStyle);
+            } else {
+                control.setStyle(currentStyle + " " + bgStyle);
+            }
+        }
+    }
+
+    /**
+     * Applies control size and font styling based on metadata.
+     * Calculates preferred width based on maxLength or data type, considering font size.
+     */
+    private static void applyControlSizeAndFont(Node control, DisplayItem metadata, AreaItem item) {
+        if (metadata == null) {
+            System.out.println("[DEBUG] applyControlSizeAndFont: metadata is null, returning");
+            return;
+        }
+        
+        System.out.println("[DEBUG] applyControlSizeAndFont called for control: " + control.getClass().getSimpleName());
+        System.out.println("[DEBUG]   itemFontSize: " + metadata.itemFontSize);
+        System.out.println("[DEBUG]   itemColor: " + metadata.itemColor);
+        System.out.println("[DEBUG]   itemBold: " + metadata.itemBold);
+        System.out.println("[DEBUG]   itemItalic: " + metadata.itemItalic);
+        
+        // Build comprehensive style string for item
+        StringBuilder itemStyle = new StringBuilder();
+        
+        // Apply item font size
+        if (metadata.itemFontSize != null && !metadata.itemFontSize.isEmpty()) {
+            itemStyle.append("-fx-font-size: ").append(metadata.itemFontSize).append("; ");
+            System.out.println("[DEBUG]   Adding font-size: " + metadata.itemFontSize);
+        }
+        
+        // Apply item text color
+        if (metadata.itemColor != null && !metadata.itemColor.isEmpty()) {
+            itemStyle.append("-fx-text-fill: ").append(metadata.itemColor).append("; ");
+            System.out.println("[DEBUG]   Adding text-fill: " + metadata.itemColor);
+        }
+        
+        // Apply item bold
+        if (metadata.itemBold != null && metadata.itemBold) {
+            itemStyle.append("-fx-font-weight: bold; ");
+            System.out.println("[DEBUG]   Adding font-weight: bold");
+        }
+        
+        // Apply item italic
+        if (metadata.itemItalic != null && metadata.itemItalic) {
+            itemStyle.append("-fx-font-style: italic; ");
+            System.out.println("[DEBUG]   Adding font-style: italic");
+        }
+        
+        System.out.println("[DEBUG]   Built style string: '" + itemStyle.toString() + "'");
+        
+        // Apply the combined style to the control
+        if (itemStyle.length() > 0) {
+            String currentStyle = control.getStyle();
+            System.out.println("[DEBUG]   Current style before applying: '" + currentStyle + "'");
+            if (currentStyle == null || currentStyle.isEmpty()) {
+                control.setStyle(itemStyle.toString());
+            } else {
+                control.setStyle(currentStyle + " " + itemStyle.toString());
+            }
+            System.out.println("[DEBUG]   Final style after applying: '" + control.getStyle() + "'");
+        } else {
+            System.out.println("[DEBUG]   No styles to apply (itemStyle is empty)");
+        }
+        
+        // Calculate and apply preferred width based on maxLength or data type
+        double prefWidth = calculateControlWidth(metadata, item);
+        if (prefWidth > 0) {
+            if (control instanceof TextField) {
+                ((TextField) control).setPrefWidth(prefWidth);
+            } else if (control instanceof TextArea) {
+                ((TextArea) control).setPrefWidth(prefWidth);
+            } else if (control instanceof PasswordField) {
+                ((PasswordField) control).setPrefWidth(prefWidth);
+            } else if (control instanceof ComboBox) {
+                ((ComboBox<?>) control).setPrefWidth(prefWidth);
+            } else if (control instanceof ChoiceBox) {
+                ((ChoiceBox<?>) control).setPrefWidth(prefWidth);
+            } else if (control instanceof Spinner) {
+                ((Spinner<?>) control).setPrefWidth(prefWidth);
+            }
+        }
+    }
+    
+    /**
+     * Calculates the preferred width for a control based on maxLength or data type.
+     * Takes font size into consideration for accurate sizing.
+     */
+    private static double calculateControlWidth(DisplayItem metadata, AreaItem item) {
+        if (metadata == null) {
+            return -1; // Use default
+        }
+        
+        // Determine the character width to use for calculation
+        int charCount = 0;
+        
+        // Use maxLength if specified
+        if (metadata.maxLength != null && metadata.maxLength > 0) {
+            charCount = metadata.maxLength;
+        } else {
+            // Guess length based on item type and data type
+            charCount = guessLengthByType(metadata.itemType, item);
+        }
+        
+        if (charCount <= 0) {
+            return -1; // Use default
+        }
+        
+        // Create a measuring text node to calculate width
+        javafx.scene.text.Text measuringText = new javafx.scene.text.Text();
+        
+        // Apply font size if specified
+        String fontStyle = "-fx-font-weight: normal;";
+        if (metadata.itemFontSize != null && !metadata.itemFontSize.isEmpty()) {
+            fontStyle += " -fx-font-size: " + metadata.itemFontSize + ";";
+        }
+        measuringText.setStyle(fontStyle);
+        
+        // Use 'M' as a representative character (one of the widest)
+        String sampleText = "M".repeat(charCount);
+        measuringText.setText(sampleText);
+        
+        // Get the width and add padding for borders, scrollbars, etc.
+        double textWidth = measuringText.getLayoutBounds().getWidth();
+        double padding = 20; // Account for padding and borders
+        
+        return textWidth + padding;
+    }
+    
+    /**
+     * Guesses an appropriate character length based on control type and context.
+     */
+    private static int guessLengthByType(DisplayItem.ItemType itemType, AreaItem item) {
+        if (itemType == null) {
+            return 20; // Default
+        }
+        
+        switch (itemType) {
+            case TEXTFIELD:
+            case PASSWORDFIELD:
+                // Check if item has type info to guess better
+                if (item != null && item.varRef != null) {
+                    // For numeric types, shorter width
+                    return 15;
+                }
+                return 30; // Default for text fields
+                
+            case TEXTAREA:
+                return 50; // Wider for text areas
+                
+            case SPINNER:
+                return 10; // Spinners are typically narrow
+                
+            case COMBOBOX:
+            case CHOICEBOX:
+                return 20; // Medium width for dropdowns
+                
+            case DATEPICKER:
+                return 15; // Date format is typically short
+                
+            default:
+                return 20; // Default fallback
         }
     }
 

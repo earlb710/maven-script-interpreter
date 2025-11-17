@@ -1,4 +1,4 @@
-package com.eb.script.interpreter;
+package com.eb.script.interpreter.screen;
 
 import com.eb.script.token.DataType;
 import com.eb.script.arrays.ArrayDynamic;
@@ -6,10 +6,12 @@ import com.eb.script.interpreter.statement.StatementKind;
 import com.eb.script.interpreter.statement.ScreenStatement;
 import com.eb.script.interpreter.statement.ScreenShowStatement;
 import com.eb.script.interpreter.statement.ScreenHideStatement;
-import com.eb.script.interpreter.DisplayItem.ItemType;
-import com.eb.script.interpreter.AreaDefinition.AreaType;
-import com.eb.script.interpreter.AreaDefinition.AreaItem;
+import com.eb.script.interpreter.screen.DisplayItem.ItemType;
+import com.eb.script.interpreter.screen.AreaDefinition.AreaType;
 import com.eb.script.RuntimeContext;
+import com.eb.script.interpreter.Interpreter;
+import com.eb.script.interpreter.InterpreterContext;
+import com.eb.script.interpreter.InterpreterError;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
@@ -164,62 +166,53 @@ public class InterpreterScreen {
                 }
 
                 if (!varsWithDisplay.isEmpty()) {
-                    // Create a default VBox area with label-control pairs in HBox rows
-                    // This gives: Label : Control on same line, with rows stacked vertically
+                    // Create a default VBox area with items for all displayed variables
                     AreaDefinition defaultArea = new AreaDefinition();
                     defaultArea.areaType = AreaDefinition.AreaType.VBOX;
                     defaultArea.name = "default";
                     defaultArea.screenName = stmt.name;
-
-                    // Instead of creating nested areas, we'll create a grid-like structure
-                    // by creating HBox sub-areas for each variable
-                    java.util.List<AreaDefinition> areas = new java.util.ArrayList<>();
+                    defaultArea.style = "-fx-spacing: 10; -fx-padding: 10;";
 
                     for (String varName : varsWithDisplay) {
-                        // Create an HBox area to hold label and control side-by-side
-                        AreaDefinition hboxRow = new AreaDefinition();
-                        hboxRow.areaType = AreaDefinition.AreaType.HBOX;
-                        hboxRow.name = varName + "_row";
-                        hboxRow.screenName = stmt.name;
-
-                        // Create a label for the variable name
-                        AreaDefinition.AreaItem labelItem = new AreaDefinition.AreaItem();
-                        labelItem.name = varName + "_label";
-                        labelItem.sequence = 0;
-                        DisplayItem labelDisplay = new DisplayItem();
-                        labelDisplay.itemType = DisplayItem.ItemType.LABEL;
-
-                        // Get the display metadata for this variable to use its labelText or promptText as the label
+                        // Get the display metadata for this variable
                         DisplayItem varDisplayItem = context.getDisplayItem().get(stmt.name + "." + varName);
-                        String labelText;
-                        if (varDisplayItem != null && varDisplayItem.labelText != null && !varDisplayItem.labelText.isEmpty()) {
-                            // Prefer labelText if specified - don't add colon if it already has one
-                            labelText = varDisplayItem.labelText.endsWith(":") ? varDisplayItem.labelText : varDisplayItem.labelText + ":";
-                        } else {
-                            // Final fallback to capitalizing the variable name if neither labelText nor promptText is available
-                            labelText = capitalizeWords(varName) + ":";
+                        
+                        // Get the variable type to determine numeric vs string
+                        DataType varType = screenVarTypeMap.get(varName);
+                        
+                        // Only add labelText if explicitly specified - don't generate from variable name
+                        // Set default alignment based on control type and variable type
+                        if (varDisplayItem != null) {
+                            // Add colon to labelText if specified and doesn't have one
+                            if (varDisplayItem.labelText != null && !varDisplayItem.labelText.isEmpty() 
+                                && !varDisplayItem.labelText.endsWith(":")) {
+                                varDisplayItem.labelText = varDisplayItem.labelText + ":";
+                            }
+                            
+                            // Set default alignment based on control type and variable type if not specified
+                            if (varDisplayItem.alignment == null || varDisplayItem.alignment.isEmpty()) {
+                                // Numeric fields should be right-aligned by default
+                                // String fields (including TextField with string type) should be left-aligned
+                                if (isNumericControl(varDisplayItem.itemType, varType)) {
+                                    varDisplayItem.alignment = "right";
+                                } else {
+                                    // Explicitly set left alignment for string/text fields
+                                    varDisplayItem.alignment = "left";
+                                }
+                            }
+                            
+                            // Set default label text alignment if not specified
+                            if (varDisplayItem.labelTextAlignment == null || varDisplayItem.labelTextAlignment.isEmpty()) {
+                                varDisplayItem.labelTextAlignment = "left";
+                            }
                         }
-                        if (!labelText.isBlank() && labelText.charAt(labelText.length() - 1) != ':') {
-                            labelText = labelText + ":";
-                        }
-                        if (varDisplayItem != null && varDisplayItem.promptHelp != null && !varDisplayItem.promptHelp.isEmpty()) {
-                            // Fall back to promptText if no labelText is available
-                            labelDisplay.promptHelp = varDisplayItem.promptHelp;
-                        }
-                        labelDisplay.labelText = labelText;
-                        labelDisplay.style = "-fx-alignment: center-right;"; // Right-align the label text
-                        labelItem.displayItem = labelDisplay;
-                        labelItem.varRef = null; // Labels don't bind to variables
-                        labelItem.maxWidth = "USE_PREF_SIZE";
-                        labelItem.hgrow = "NEVER";
-                        labelItem.minWidth = "150"; // Minimum width for label alignment
-                        hboxRow.items.add(labelItem);
 
-                        // Create the input control for the variable
-                        AreaDefinition.AreaItem item = new AreaDefinition.AreaItem();
+                        // Create a single item for the input control (label will be added by ScreenFactory)
+                        AreaItem item = new AreaItem();
+                        item.name = varName + "_field";
                         item.varRef = varName;
-                        item.sequence = 1;
-                        item.displayItem = context.getDisplayItem().get(stmt.name + "." + varName);
+                        item.sequence = defaultArea.items.size();
+                        item.displayItem = varDisplayItem;
 
                         // Set sizing to fit content, not stretch to screen width
                         item.maxWidth = "USE_PREF_SIZE";
@@ -255,10 +248,11 @@ public class InterpreterScreen {
                             }
                         }
 
-                        hboxRow.items.add(item);
-                        areas.add(hboxRow);
+                        defaultArea.items.add(item);
                     }
 
+                    java.util.List<AreaDefinition> areas = new java.util.ArrayList<>();
+                    areas.add(defaultArea);
                     context.getScreenAreas().put(stmt.name, areas);
                 }
             }
@@ -523,6 +517,30 @@ public class InterpreterScreen {
     }
 
     /**
+     * Helper method to determine if a control type is numeric based on control type and variable type
+     */
+    private boolean isNumericControl(DisplayItem.ItemType itemType, DataType varType) {
+        if (itemType == null) {
+            return false;
+        }
+        
+        // Spinner and Slider are always numeric
+        if (itemType == DisplayItem.ItemType.SPINNER || itemType == DisplayItem.ItemType.SLIDER) {
+            return true;
+        }
+        
+        // TextField is numeric only if the variable type is numeric
+        if (itemType == DisplayItem.ItemType.TEXTFIELD && varType != null) {
+            return varType == DataType.INTEGER || 
+                   varType == DataType.LONG || 
+                   varType == DataType.FLOAT || 
+                   varType == DataType.DOUBLE;
+        }
+        
+        return false;
+    }
+
+    /**
      * Helper method to parse data type string to DataType enum
      */
     private DataType parseDataType(String typeStr) {
@@ -647,34 +665,90 @@ public class InterpreterScreen {
             }
         }
 
-        // Extract promptText styling properties - check both camelCase and lowercase
-        if (displayDef.containsKey("promptColor")) {
-            metadata.labelColor = String.valueOf(displayDef.get("promptColor"));
-        } else if (displayDef.containsKey("promptcolor")) {
-            metadata.labelColor = String.valueOf(displayDef.get("promptcolor"));
+        // Extract label styling properties (for the label wrapper text)
+        if (displayDef.containsKey("labelColor")) {
+            metadata.labelColor = String.valueOf(displayDef.get("labelColor"));
+        } else if (displayDef.containsKey("labelcolor")) {
+            metadata.labelColor = String.valueOf(displayDef.get("labelcolor"));
         }
 
-        if (displayDef.containsKey("promptBold")) {
-            Object boldObj = displayDef.get("promptBold");
+        if (displayDef.containsKey("labelBold")) {
+            Object boldObj = displayDef.get("labelBold");
             if (boldObj instanceof Boolean) {
                 metadata.labelBold = (Boolean) boldObj;
             }
-        } else if (displayDef.containsKey("promptbold")) {
-            Object boldObj = displayDef.get("promptbold");
+        } else if (displayDef.containsKey("labelbold")) {
+            Object boldObj = displayDef.get("labelbold");
             if (boldObj instanceof Boolean) {
                 metadata.labelBold = (Boolean) boldObj;
             }
         }
 
-        if (displayDef.containsKey("promptItalic")) {
-            Object italicObj = displayDef.get("promptItalic");
+        if (displayDef.containsKey("labelItalic")) {
+            Object italicObj = displayDef.get("labelItalic");
             if (italicObj instanceof Boolean) {
                 metadata.labelItalic = (Boolean) italicObj;
             }
-        } else if (displayDef.containsKey("promptitalic")) {
-            Object italicObj = displayDef.get("promptitalic");
+        } else if (displayDef.containsKey("labelitalic")) {
+            Object italicObj = displayDef.get("labelitalic");
             if (italicObj instanceof Boolean) {
                 metadata.labelItalic = (Boolean) italicObj;
+            }
+        }
+
+        if (displayDef.containsKey("labelFontSize")) {
+            metadata.labelFontSize = String.valueOf(displayDef.get("labelFontSize"));
+        } else if (displayDef.containsKey("labelfontsize")) {
+            metadata.labelFontSize = String.valueOf(displayDef.get("labelfontsize"));
+        }
+
+        // Extract item/control styling properties (for the control itself)
+        if (displayDef.containsKey("itemColor")) {
+            metadata.itemColor = String.valueOf(displayDef.get("itemColor"));
+        } else if (displayDef.containsKey("itemcolor")) {
+            metadata.itemColor = String.valueOf(displayDef.get("itemcolor"));
+        }
+
+        if (displayDef.containsKey("itemBold")) {
+            Object boldObj = displayDef.get("itemBold");
+            if (boldObj instanceof Boolean) {
+                metadata.itemBold = (Boolean) boldObj;
+            }
+        } else if (displayDef.containsKey("itembold")) {
+            Object boldObj = displayDef.get("itembold");
+            if (boldObj instanceof Boolean) {
+                metadata.itemBold = (Boolean) boldObj;
+            }
+        }
+
+        if (displayDef.containsKey("itemItalic")) {
+            Object italicObj = displayDef.get("itemItalic");
+            if (italicObj instanceof Boolean) {
+                metadata.itemItalic = (Boolean) italicObj;
+            }
+        } else if (displayDef.containsKey("itemitalic")) {
+            Object italicObj = displayDef.get("itemitalic");
+            if (italicObj instanceof Boolean) {
+                metadata.itemItalic = (Boolean) italicObj;
+            }
+        }
+
+        if (displayDef.containsKey("itemFontSize")) {
+            metadata.itemFontSize = String.valueOf(displayDef.get("itemFontSize"));
+        } else if (displayDef.containsKey("itemfontsize")) {
+            metadata.itemFontSize = String.valueOf(displayDef.get("itemfontsize"));
+        }
+
+        // Extract maxLength (for control width calculation)
+        if (displayDef.containsKey("maxLength")) {
+            Object maxLenObj = displayDef.get("maxLength");
+            if (maxLenObj instanceof Number) {
+                metadata.maxLength = ((Number) maxLenObj).intValue();
+            }
+        } else if (displayDef.containsKey("maxlength")) {
+            Object maxLenObj = displayDef.get("maxlength");
+            if (maxLenObj instanceof Number) {
+                metadata.maxLength = ((Number) maxLenObj).intValue();
             }
         }
 

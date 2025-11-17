@@ -1,7 +1,7 @@
 // Test Script: Numeric Controls
-// Description: Tests numeric input controls (spinner, slider)
+// Description: Tests numeric input controls (spinner, slider) with right alignment
 // Author: EBS Test Suite
-// Date: 2025-11-15
+// Date: 2025-11-16
 
 screen numericScreen = {
     "title": "Numeric Controls Test",
@@ -16,7 +16,7 @@ screen numericScreen = {
                 "type": "spinner",
                 "min": 0,
                 "max": 150,
-                "promptText": "Enter age"
+                "labelText": "Age:"
             }
         },
         {
@@ -27,7 +27,7 @@ screen numericScreen = {
                 "type": "spinner",
                 "min": 1,
                 "max": 100,
-                "promptText": "Enter quantity"
+                "labelText": "Quantity:"
             }
         },
         {
@@ -38,7 +38,7 @@ screen numericScreen = {
                 "type": "slider",
                 "min": 0,
                 "max": 100,
-                "promptText": "Adjust volume"
+                "labelText": "Volume:"
             }
         },
         {
@@ -49,7 +49,7 @@ screen numericScreen = {
                 "type": "slider",
                 "min": 0,
                 "max": 100,
-                "promptText": "Adjust brightness"
+                "labelText": "Brightness:"
             }
         },
         {
@@ -60,7 +60,7 @@ screen numericScreen = {
                 "type": "slider",
                 "min": 1,
                 "max": 10,
-                "promptText": "Rate from 1 to 10"
+                "labelText": "Rating (1-10):"
             }
         },
         {
@@ -71,25 +71,27 @@ screen numericScreen = {
                 "type": "slider",
                 "min": -10,
                 "max": 50,
-                "promptText": "Set temperature"
+                "labelText": "Temperature (°C):"
             }
         },
         {
             "name": "percentage",
             "type": "double",
-            "default": 0,
+            "default": 0.5,
             "display": {
                 "type": "textfield",
-                "promptText": "Enter percentage (0.0 - 1.0)"
+                "labelText": "Percentage:",
+                "promptHelp": "0.0 - 1.0"
             }
         },
         {
             "name": "price",
             "type": "double",
-            "default": 0,
+            "default": 99.99,
             "display": {
                 "type": "textfield",
-                "promptText": "Enter price"
+                "labelText": "Price ($):",
+                "promptHelp": "0.00"
             }
         }
     ]
@@ -115,8 +117,8 @@ numericScreen.volume = 80;
 numericScreen.brightness = 90;
 numericScreen.rating = 8;
 numericScreen.temperature = 25;
-numericScreen.percentage = 0;
-numericScreen.price = 149;
+numericScreen.percentage = 0.75;
+numericScreen.price = 149.99;
 
 // Verify modifications
 print "Age: " + numericScreen.age;
@@ -139,6 +141,7 @@ print "Volume at maximum: " + numericScreen.volume;
 // Show the screen
 print "";
 print "Displaying numeric controls screen...";
+print "Note: Numeric fields are now right-aligned by default";
 screen numericScreen show;
 
 print "Numeric controls test completed!";

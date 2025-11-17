@@ -40,6 +40,13 @@
       "items": {
         "$ref": "#/definitions/AreaItem"
       }
+    },
+    "areas": {
+      "type": "array",
+      "description": "Nested child areas (areas within areas) for hierarchical layouts",
+      "items": {
+        "$ref": "#"
+      }
     }
   },
   "required": ["name"],
@@ -162,5 +169,51 @@
         }
       }
     }
-  }
+  },
+  "examples": [
+    {
+      "name": "mainContent",
+      "type": "vbox",
+      "style": "-fx-padding: 20; -fx-spacing: 10;",
+      "items": [
+        {
+          "name": "titleLabel",
+          "varRef": "title",
+          "sequence": 1
+        }
+      ]
+    },
+    {
+      "name": "formContainer",
+      "type": "vbox",
+      "areas": [
+        {
+          "name": "inputRow1",
+          "type": "hbox",
+          "style": "-fx-spacing: 10;",
+          "items": [
+            {
+              "name": "field1",
+              "varRef": "firstName",
+              "sequence": 1,
+              "prefWidth": "200"
+            }
+          ]
+        },
+        {
+          "name": "inputRow2",
+          "type": "hbox",
+          "style": "-fx-spacing: 10;",
+          "items": [
+            {
+              "name": "field2",
+              "varRef": "lastName",
+              "sequence": 1,
+              "prefWidth": "200"
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }

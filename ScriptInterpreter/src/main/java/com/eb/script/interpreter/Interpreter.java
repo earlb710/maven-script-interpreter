@@ -1,5 +1,6 @@
 package com.eb.script.interpreter;
 
+import com.eb.script.interpreter.screen.InterpreterScreen;
 import com.eb.util.Debugger;
 import com.eb.script.RuntimeContext;
 import com.eb.script.token.DataType;
@@ -91,12 +92,12 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         context.setDb(adapter);
     }
 
-    String currentConnection() {
+    public String currentConnection() {
         return context.getCurrentConnection();
     }
 
     // Convenience accessors for frequently used context fields
-    Environment environment() {
+    public Environment environment() {
         return context.getEnvironment();
     }
 
