@@ -1,0 +1,283 @@
+screen nColumnScreen = {
+    "title": "N-Column Layout Test (3 Columns)",
+    "width": 1200,
+    "height": 600,
+    "maximize": false,
+    "vars": [
+        {
+            "name": "field1",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 1:",
+                "labelTextAlignment": "left",
+                "promptText": "Enter value"
+            }
+        },
+        {
+            "name": "field2",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 2:",
+                "labelTextAlignment": "left",
+                "promptText": "Enter value"
+            }
+        },
+        {
+            "name": "field3",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 3:",
+                "labelTextAlignment": "left",
+                "promptText": "Enter value"
+            }
+        },
+        {
+            "name": "field4",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 4:",
+                "labelTextAlignment": "left",
+                "promptText": "Enter value"
+            }
+        },
+        {
+            "name": "field5",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 5:",
+                "labelTextAlignment": "left",
+                "promptText": "Enter value"
+            }
+        },
+        {
+            "name": "field6",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 6:",
+                "labelTextAlignment": "left",
+                "promptText": "Enter value"
+            }
+        },
+        {
+            "name": "field7",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 7:",
+                "labelTextAlignment": "left",
+                "promptText": "Enter value"
+            }
+        },
+        {
+            "name": "field8",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 8:",
+                "labelTextAlignment": "left",
+                "promptText": "Enter value"
+            }
+        },
+        {
+            "name": "field9",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 9:",
+                "labelTextAlignment": "left",
+                "promptText": "Enter value"
+            }
+        },
+        {
+            "name": "field10",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 10:",
+                "labelTextAlignment": "left",
+                "promptText": "Enter value"
+            }
+        },
+        {
+            "name": "field11",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 11:",
+                "labelTextAlignment": "left",
+                "promptText": "Enter value"
+            }
+        },
+        {
+            "name": "field12",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 12:",
+                "labelTextAlignment": "left",
+                "promptText": "Enter value"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "formGrid",
+            "type": "gridpane",
+            "style": "-fx-hgap: 20; -fx-vgap: 15; -fx-padding: 30;",
+            "items": [
+                {
+                    "name": "field1Control",
+                    "varRef": "field1",
+                    "sequence": 1,
+                    "layoutPos": "0,0",
+                    "prefWidth": "300"
+                },
+                {
+                    "name": "field2Control",
+                    "varRef": "field2",
+                    "sequence": 2,
+                    "layoutPos": "1,0",
+                    "prefWidth": "300"
+                },
+                {
+                    "name": "field3Control",
+                    "varRef": "field3",
+                    "sequence": 3,
+                    "layoutPos": "2,0",
+                    "prefWidth": "300"
+                },
+                {
+                    "name": "field4Control",
+                    "varRef": "field4",
+                    "sequence": 4,
+                    "layoutPos": "3,0",
+                    "prefWidth": "300"
+                },
+                {
+                    "name": "field5Control",
+                    "varRef": "field5",
+                    "sequence": 5,
+                    "layoutPos": "0,1",
+                    "prefWidth": "300"
+                },
+                {
+                    "name": "field6Control",
+                    "varRef": "field6",
+                    "sequence": 6,
+                    "layoutPos": "1,1",
+                    "prefWidth": "300"
+                },
+                {
+                    "name": "field7Control",
+                    "varRef": "field7",
+                    "sequence": 7,
+                    "layoutPos": "2,1",
+                    "prefWidth": "300"
+                },
+                {
+                    "name": "field8Control",
+                    "varRef": "field8",
+                    "sequence": 8,
+                    "layoutPos": "3,1",
+                    "prefWidth": "300"
+                },
+                {
+                    "name": "field9Control",
+                    "varRef": "field9",
+                    "sequence": 9,
+                    "layoutPos": "0,2",
+                    "prefWidth": "300"
+                },
+                {
+                    "name": "field10Control",
+                    "varRef": "field10",
+                    "sequence": 10,
+                    "layoutPos": "1,2",
+                    "prefWidth": "300"
+                },
+                {
+                    "name": "field11Control",
+                    "varRef": "field11",
+                    "sequence": 11,
+                    "layoutPos": "2,2",
+                    "prefWidth": "300"
+                },
+                {
+                    "name": "field12Control",
+                    "varRef": "field12",
+                    "sequence": 12,
+                    "layoutPos": "3,2",
+                    "prefWidth": "300"
+                }
+            ]
+        }
+    ]
+};
+
+print "N-Column Layout Test (3 Columns x 4 Rows)";
+print "=========================================";
+print "";
+print "This screen demonstrates a flexible n-column layout with GridPane:";
+print "- Column 1: Fields 1-4 (top to bottom)";
+print "- Column 2: Fields 5-8 (top to bottom)";
+print "- Column 3: Fields 9-12 (top to bottom)";
+print "- Navigation (tab order) goes top-to-bottom in each column";
+print "";
+print "Initial Values:";
+int i = 1;
+while i <= 12 {
+    print "Field " + i + ": " + nColumnScreen.("field" + i);
+    i = i + 1;
+}
+print "";
+
+print "Setting test values...";
+nColumnScreen.field1 = "Value 1";
+nColumnScreen.field2 = "Value 2";
+nColumnScreen.field3 = "Value 3";
+nColumnScreen.field4 = "Value 4";
+nColumnScreen.field5 = "Value 5";
+nColumnScreen.field6 = "Value 6";
+nColumnScreen.field7 = "Value 7";
+nColumnScreen.field8 = "Value 8";
+nColumnScreen.field9 = "Value 9";
+nColumnScreen.field10 = "Value 10";
+nColumnScreen.field11 = "Value 11";
+nColumnScreen.field12 = "Value 12";
+
+print "";
+print "Updated Values:";
+i = 1;
+while i <= 12 {
+    print "Field " + i + ": " + nColumnScreen.("field" + i);
+    i = i + 1;
+}
+print "";
+
+print "Displaying n-column screen...";
+screen nColumnScreen show;
+
+print "";
+print "Test completed!";
+print "Try using Tab key to navigate - it should go:";
+print "Field 1 -> Field 2 -> Field 3 -> Field 4 (column 1)";
+print "  -> Field 5 -> Field 6 -> Field 7 -> Field 8 (column 2)";
+print "  -> Field 9 -> Field 10 -> Field 11 -> Field 12 (column 3)";
