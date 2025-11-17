@@ -2,6 +2,9 @@ package com.eb.script.interpreter;
 
 import com.eb.script.interpreter.screen.DisplayItem;
 import com.eb.script.interpreter.screen.AreaDefinition;
+import com.eb.script.interpreter.screen.AreaItem;
+import com.eb.script.interpreter.screen.VarSet;
+import com.eb.script.interpreter.screen.Var;
 import com.eb.util.Debugger;
 import com.eb.script.interpreter.db.DbAdapter;
 import com.eb.script.interpreter.db.DbConnection;
@@ -36,6 +39,12 @@ public class InterpreterContext {
     private final Deque<String> connectionStack = new java.util.ArrayDeque<>();
     private final Map<String, Runnable> screenRefreshCallbacks = new ConcurrentHashMap<>();
     private final Map<String, List<javafx.scene.Node>> screenBoundControls = new ConcurrentHashMap<>();
+    
+    // New storage structures for the refactored variable sets
+    private final Map<String, Map<String, VarSet>> screenVarSets = new ConcurrentHashMap<>(); // screenName -> (setName -> VarSet)
+    private final Map<String, Map<String, Var>> screenVarItems = new ConcurrentHashMap<>(); // screenName -> (setName.varName -> Var)
+    private final Map<String, Map<String, AreaItem>> screenAreaItems = new ConcurrentHashMap<>(); // screenName -> (setName.varName -> AreaItem)
+    
     private DbAdapter db = new OracleDbAdapter();
     private ScriptArea output;
 
@@ -154,5 +163,57 @@ public class InterpreterContext {
         if (callback != null) {
             callback.run();
         }
+    }
+    
+    /**
+     * Get the screen variable sets map.
+     * @return the screen variable sets map
+     */
+    public Map<String, Map<String, VarSet>> getScreenVarSets() {
+        return screenVarSets;
+    }
+    
+    /**
+     * Get the screen variable items map.
+     * @return the screen variable items map
+     */
+    public Map<String, Map<String, Var>> getScreenVarItems() {
+        return screenVarItems;
+    }
+    
+    /**
+     * Get the screen area items map.
+     * @return the screen area items map
+     */
+    public Map<String, Map<String, AreaItem>> getScreenAreaItems() {
+        return screenAreaItems;
+    }
+    
+    /**
+     * Get a variable from a screen by its fully qualified key (setName.varName).
+     * @param screenName the name of the screen
+     * @param varKey the variable key (setName.varName, case-insensitive)
+     * @return the Var object, or null if not found
+     */
+    public Var getScreenVar(String screenName, String varKey) {
+        Map<String, Var> screenItems = screenVarItems.get(screenName);
+        if (screenItems == null) {
+            return null;
+        }
+        return screenItems.get(varKey.toLowerCase());
+    }
+    
+    /**
+     * Get a variable set from a screen by its name.
+     * @param screenName the name of the screen
+     * @param setName the name of the variable set (case-insensitive)
+     * @return the VarSet object, or null if not found
+     */
+    public VarSet getScreenVarSet(String screenName, String setName) {
+        Map<String, VarSet> sets = screenVarSets.get(screenName);
+        if (sets == null) {
+            return null;
+        }
+        return sets.get(setName.toLowerCase());
     }
 }
