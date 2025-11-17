@@ -7,6 +7,8 @@ import com.eb.script.file.BuiltinsFile;
 import com.eb.script.file.FileData;
 import com.eb.script.token.ebs.EbsLexer;
 import com.eb.script.token.ebs.EbsToken;
+import com.eb.ui.cli.AutocompletePopup;
+import com.eb.ui.cli.AutocompleteSuggestions;
 import com.eb.ui.cli.Handler;
 import com.eb.ui.cli.ScriptArea;
 import com.eb.util.Debugger;
@@ -68,11 +70,15 @@ public class EbsTab extends Tab {
 
     private List<int[]> lastMatches = java.util.Collections.emptyList(); // each int[]{start,endExclusive}
     private int currentIndex = -1;
+    
+    // autocomplete
+    private final AutocompletePopup autocompletePopup;
 
     public EbsTab(TabContext tabContext) throws IOException {
         this.tabContext = tabContext;
         this.context = new RuntimeContext(tabContext.name, tabContext.path);
         this.handler = new EbsHandler(context);
+        this.autocompletePopup = new AutocompletePopup();
         handler.setUI_outputArea(outputArea);
         context.environment.setEcho(false);
         Debugger debug = context.environment.getDebugger();
@@ -81,6 +87,9 @@ public class EbsTab extends Tab {
         ext = filename.substring(filename.lastIndexOf('.'));
         loadFile(tabContext);
         tabUI();
+        
+        // Make outputArea not editable
+        outputArea.setEditable(false);
 
         // After you know the tabContext/path/filename:
         this.baseTitle = (tabContext != null && tabContext.name != null)
@@ -101,11 +110,23 @@ public class EbsTab extends Tab {
         });
 
         dispArea.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
+            // First check if autocomplete popup wants to handle the event
+            if (autocompletePopup.handleKeyEvent(e)) {
+                return;
+            }
+            
             if (e.isControlDown() && e.getCode() == KeyCode.L) {
                 dispArea.toggleLineNumbers();   // <— turns line numbers on/off
                 e.consume();                    // prevent further handling of the keystroke
+            } else if (e.getCode() == KeyCode.SPACE && e.isControlDown()) {
+                // Autocomplete: Ctrl+Space
+                showAutocomplete();
+                e.consume();
             }
         });
+        
+        // Setup autocomplete callback
+        setupAutocomplete();
 
         outputArea.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
             if (e.isControlDown() && e.getCode() == KeyCode.L) {
@@ -147,6 +168,73 @@ public class EbsTab extends Tab {
             outputArea.printlnError("load error:" + ex.getMessage());
         }
     }
+    
+    /**
+     * Setup autocomplete callback for when user selects a suggestion.
+     */
+    private void setupAutocomplete() {
+        autocompletePopup.setOnSelect(suggestion -> {
+            insertSuggestion(suggestion);
+        });
+    }
+    
+    /**
+     * Show the autocomplete popup with context-aware suggestions.
+     */
+    private void showAutocomplete() {
+        String text = dispArea.getText();
+        int caretPos = dispArea.getCaretPosition();
+        
+        List<String> suggestions = AutocompleteSuggestions.getSuggestionsForContext(text, caretPos);
+        
+        if (!suggestions.isEmpty()) {
+            autocompletePopup.show(dispArea, suggestions);
+        }
+    }
+    
+    /**
+     * Insert the selected suggestion at the current cursor position.
+     * Replaces the current word being typed with the suggestion.
+     */
+    private void insertSuggestion(String suggestion) {
+        int caretPos = dispArea.getCaretPosition();
+        String text = dispArea.getText();
+        
+        // Find the start of the current word
+        int start = caretPos;
+        while (start > 0) {
+            char c = text.charAt(start - 1);
+            if (Character.isLetterOrDigit(c) || c == '_' || c == '.') {
+                start--;
+            } else {
+                break;
+            }
+        }
+        
+        // Check if the suggestion is a builtin function that needs parameters
+        String toInsert = suggestion;
+        String paramSignature = AutocompleteSuggestions.getBuiltinParameterSignature(suggestion);
+        if (paramSignature != null) {
+            toInsert = suggestion + paramSignature;
+        }
+        
+        // Replace the current word with the suggestion
+        dispArea.replaceText(start, caretPos, toInsert);
+        
+        // Move cursor to appropriate position
+        // If we inserted parameters, move cursor inside the parentheses
+        if (paramSignature != null && paramSignature.length() > 2) {
+            // Move cursor to after the opening paren
+            dispArea.moveTo(start + suggestion.length() + 1);
+        } else {
+            // Move cursor to end of inserted text
+            dispArea.moveTo(start + toInsert.length());
+        }
+        
+        // Request focus back to the editor
+        dispArea.requestFocus();
+    }
+    
 //    private void loadFile(Path path) throws IOException {
 //        filename = path.getFileName() != null ? path.getFileName().toString() : path.toString();
 //        ext = filename.substring(filename.lastIndexOf('.'));
