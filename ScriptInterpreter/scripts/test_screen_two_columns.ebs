@@ -1,0 +1,267 @@
+// Test Script: Two Column Layout
+// Description: Test screen with items divided in 2 columns with top-to-bottom navigation
+//              Navigation order: left column top to bottom, then right column top to bottom
+// Author: EBS Test Suite
+// Date: 2025-11-17
+
+screen twoColumnScreen = {
+    "title": "Two Column Layout Test",
+    "width": 800,
+    "height": 600,
+    "maximize": false,
+    "vars": [
+        // Left Column Variables
+        {
+            "name": "firstName",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "First Name:",
+                "labelTextAlignment": "left",
+                "promptText": "Enter first name"
+            }
+        },
+        {
+            "name": "lastName",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Last Name:",
+                "labelTextAlignment": "left",
+                "promptText": "Enter last name"
+            }
+        },
+        {
+            "name": "email",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Email:",
+                "labelTextAlignment": "left",
+                "promptText": "Enter email address"
+            }
+        },
+        {
+            "name": "phone",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Phone:",
+                "labelTextAlignment": "left",
+                "promptText": "Enter phone number"
+            }
+        },
+        {
+            "name": "age",
+            "type": "int",
+            "default": 25,
+            "display": {
+                "type": "spinner",
+                "min": 18,
+                "max": 100,
+                "labelText": "Age:",
+                "labelTextAlignment": "left"
+            }
+        },
+        // Right Column Variables
+        {
+            "name": "address",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Address:",
+                "labelTextAlignment": "left",
+                "promptText": "Enter address"
+            }
+        },
+        {
+            "name": "city",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "City:",
+                "labelTextAlignment": "left",
+                "promptText": "Enter city"
+            }
+        },
+        {
+            "name": "state",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "combobox",
+                "labelText": "State:",
+                "labelTextAlignment": "left",
+                "promptText": "Select state",
+                "options": ["California", "Texas", "New York", "Florida", "Illinois"]
+            }
+        },
+        {
+            "name": "zipCode",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Zip Code:",
+                "labelTextAlignment": "left",
+                "promptText": "Enter zip code"
+            }
+        },
+        {
+            "name": "country",
+            "type": "string",
+            "default": "USA",
+            "display": {
+                "type": "choicebox",
+                "labelText": "Country:",
+                "labelTextAlignment": "left",
+                "options": ["USA", "Canada", "Mexico", "UK", "Australia"]
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "formGrid",
+            "type": "gridpane",
+            "style": "-fx-hgap: 20; -fx-vgap: 15; -fx-padding: 30;",
+            "items": [
+                // Left Column (column 0) - Items 1-5
+                {
+                    "name": "firstNameField",
+                    "varRef": "firstName",
+                    "sequence": 1,
+                    "layoutPos": "0,0",
+                    "prefWidth": "300"
+                },
+                {
+                    "name": "lastNameField",
+                    "varRef": "lastName",
+                    "sequence": 2,
+                    "layoutPos": "1,0",
+                    "prefWidth": "300"
+                },
+                {
+                    "name": "emailField",
+                    "varRef": "email",
+                    "sequence": 3,
+                    "layoutPos": "2,0",
+                    "prefWidth": "300"
+                },
+                {
+                    "name": "phoneField",
+                    "varRef": "phone",
+                    "sequence": 4,
+                    "layoutPos": "3,0",
+                    "prefWidth": "300"
+                },
+                {
+                    "name": "ageSpinner",
+                    "varRef": "age",
+                    "sequence": 5,
+                    "layoutPos": "4,0",
+                    "prefWidth": "300"
+                },
+                // Right Column (column 1) - Items 6-10
+                {
+                    "name": "addressField",
+                    "varRef": "address",
+                    "sequence": 6,
+                    "layoutPos": "0,1",
+                    "prefWidth": "300"
+                },
+                {
+                    "name": "cityField",
+                    "varRef": "city",
+                    "sequence": 7,
+                    "layoutPos": "1,1",
+                    "prefWidth": "300"
+                },
+                {
+                    "name": "stateCombo",
+                    "varRef": "state",
+                    "sequence": 8,
+                    "layoutPos": "2,1",
+                    "prefWidth": "300"
+                },
+                {
+                    "name": "zipField",
+                    "varRef": "zipCode",
+                    "sequence": 9,
+                    "layoutPos": "3,1",
+                    "prefWidth": "300"
+                },
+                {
+                    "name": "countryChoice",
+                    "varRef": "country",
+                    "sequence": 10,
+                    "layoutPos": "4,1",
+                    "prefWidth": "300"
+                }
+            ]
+        }
+    ]
+};
+
+// Test output
+print "Two Column Layout Test";
+print "=====================";
+print "";
+print "This screen demonstrates a two-column layout with GridPane:";
+print "- Left column contains: First Name, Last Name, Email, Phone, Age";
+print "- Right column contains: Address, City, State, Zip Code, Country";
+print "- Navigation (tab order) goes top-to-bottom in left column first,";
+print "  then top-to-bottom in right column";
+print "";
+print "Initial Values:";
+print "First Name: " + twoColumnScreen.firstName;
+print "Last Name: " + twoColumnScreen.lastName;
+print "Email: " + twoColumnScreen.email;
+print "Phone: " + twoColumnScreen.phone;
+print "Age: " + twoColumnScreen.age;
+print "Address: " + twoColumnScreen.address;
+print "City: " + twoColumnScreen.city;
+print "State: " + twoColumnScreen.state;
+print "Zip Code: " + twoColumnScreen.zipCode;
+print "Country: " + twoColumnScreen.country;
+print "";
+
+// Modify values to test binding
+print "Setting test values...";
+twoColumnScreen.firstName = "John";
+twoColumnScreen.lastName = "Doe";
+twoColumnScreen.email = "john.doe@example.com";
+twoColumnScreen.phone = "555-1234";
+twoColumnScreen.age = 30;
+twoColumnScreen.address = "123 Main Street";
+twoColumnScreen.city = "Springfield";
+twoColumnScreen.state = "Illinois";
+twoColumnScreen.zipCode = "62701";
+twoColumnScreen.country = "USA";
+
+print "First Name: " + twoColumnScreen.firstName;
+print "Last Name: " + twoColumnScreen.lastName;
+print "Email: " + twoColumnScreen.email;
+print "Phone: " + twoColumnScreen.phone;
+print "Age: " + twoColumnScreen.age;
+print "Address: " + twoColumnScreen.address;
+print "City: " + twoColumnScreen.city;
+print "State: " + twoColumnScreen.state;
+print "Zip Code: " + twoColumnScreen.zipCode;
+print "Country: " + twoColumnScreen.country;
+print "";
+
+// Show the screen
+print "Displaying two column screen...";
+screen twoColumnScreen show;
+
+print "";
+print "Test completed!";
+print "Try using Tab key to navigate - it should go:";
+print "First Name -> Last Name -> Email -> Phone -> Age (left column)";
+print "  -> Address -> City -> State -> Zip Code -> Country (right column)";
