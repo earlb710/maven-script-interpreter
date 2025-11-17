@@ -683,6 +683,10 @@ public final class Builtins {
                 newParam("areaItem", DataType.STRING, true), // required; format "screenName.areaItemName"
                 newParam("property", DataType.STRING, true) // required; property name
         ));
+        addBuiltin(info(
+                "screen.getItemList", DataType.ANY,
+                newParam("screenName", DataType.STRING, true) // required; screen name
+        ));
         
         NAMES = Collections.unmodifiableSet(BUILTINS.keySet());
     }
@@ -1742,6 +1746,9 @@ public final class Builtins {
             case "screen.getproperty" -> {
                 return screenGetProperty(env, args);
             }
+            case "screen.getitemlist" -> {
+                return screenGetItemList(env, args);
+            }
             
             default ->
                 throw new InterpreterError("Unknown builtin: " + name);
@@ -2190,6 +2197,58 @@ public final class Builtins {
 
         // Get the property from the AreaItem
         return getAreaItemProperty(targetItem, propertyName);
+    }
+
+    /**
+     * screen.getItemList(screenName) -> ArrayDynamic
+     * Returns a list of all item names in the screen.
+     */
+    private static Object screenGetItemList(Environment env, Object[] args) throws InterpreterError {
+        String screenName = (String) args[0];
+
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("screen.getItemList: screenName parameter cannot be null or empty");
+        }
+
+        // Get the interpreter context
+        Object interp = env.getCurrentInterpreter();
+        if (!(interp instanceof Interpreter)) {
+            throw new InterpreterError("screen.getItemList: interpreter context not available");
+        }
+        Interpreter interpreter = (Interpreter) interp;
+        InterpreterContext context = interpreter.getContext();
+
+        // Find the screen
+        java.util.List<com.eb.script.interpreter.screen.AreaDefinition> areas = context.getScreenAreas().get(screenName);
+        if (areas == null) {
+            throw new InterpreterError("screen.getItemList: screen '" + screenName + "' not found");
+        }
+
+        // Create a dynamic array to hold the item names
+        ArrayDynamic itemList = new ArrayDynamic(DataType.STRING);
+
+        // Collect all item names from all areas
+        for (com.eb.script.interpreter.screen.AreaDefinition area : areas) {
+            collectItemNames(area, itemList);
+        }
+
+        return itemList;
+    }
+
+    /**
+     * Helper method to recursively collect all item names from an area and its child areas.
+     */
+    private static void collectItemNames(com.eb.script.interpreter.screen.AreaDefinition area, ArrayDynamic itemList) {
+        // Add all item names from this area
+        for (com.eb.script.interpreter.screen.AreaItem item : area.items) {
+            if (item.name != null && !item.name.isEmpty()) {
+                itemList.add(item.name);
+            }
+        }
+        // Recursively collect from child areas
+        for (com.eb.script.interpreter.screen.AreaDefinition childArea : area.childAreas) {
+            collectItemNames(childArea, itemList);
+        }
     }
 
     /**

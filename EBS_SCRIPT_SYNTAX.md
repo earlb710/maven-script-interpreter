@@ -1039,6 +1039,25 @@ call system.setproperty(name, value);
 call system.help();
 ```
 
+### Screen Functions
+```javascript
+// Get property value from a screen item
+var value = call screen.getProperty("screenName.itemName", "propertyName");
+
+// Set property value on a screen item
+call screen.setProperty("screenName.itemName", "propertyName", value);
+
+// Get list of all item names in a screen
+var itemList = call screen.getItemList("screenName");
+// Returns an ArrayDynamic of strings containing all item names
+
+// Examples:
+var editable = call screen.getProperty("propTest.usernamefield", "editable");
+call screen.setProperty("propTest.usernamefield", "visible", false);
+var items = call screen.getItemList("propTest");
+// items[0], items[1], ... contain item names like "usernamefield", "agefield", etc.
+```
+
 ### Debug Functions
 ```javascript
 // Debug mode
