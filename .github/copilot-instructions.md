@@ -158,6 +158,7 @@ See `ScriptInterpreter/src/main/java/com/eb/script/syntax_ebnf.txt` for the comp
 
 ## Documentation Resources
 
+- **SPACE_RULES.md**: Copilot Space rules and interaction conventions for this project
 - **ARCHITECTURE.md**: Comprehensive documentation of system architecture, component interactions, and data flow
 - **README.md**: User-facing documentation with language syntax and examples
 - **CLASS_TREE_LISTER.md**: Tool for analyzing class hierarchy
