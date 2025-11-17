@@ -641,6 +641,15 @@ public class Parser {
                 return tokenType.getDataType();
             }
             
+            // Handle DATATYPE token (datatype keywords like "string", "int", etc.)
+            if (tokenType == EbsTokenType.DATATYPE) {
+                ttype = advance();
+                EbsTokenType type = getTokenType((String) ttype.literal);
+                if (type != null) {
+                    return type.getDataType();
+                }
+            }
+            
             // Otherwise, expect an identifier and look it up as a type name
             ttype = consume(EbsTokenType.IDENTIFIER, "Expected type after return.");
             EbsTokenType type = getTokenType((String) ttype.literal);

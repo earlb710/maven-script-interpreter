@@ -496,10 +496,18 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             }
 
         } catch (ReturnSignal r) {
-            if (!Util.checkDataType(stmt.returnType, r.value)) {
-                throw error(stmt.getLine(), "Return value '" + r.value + "' not correct type : " + stmt.returnType + " in " + stmt.name);
+            // Only handle return for named blocks (functions) with a declared return type
+            // For anonymous blocks (e.g., if/then blocks), re-throw the signal to propagate it up
+            if (stmt.returnType != null) {
+                // This is a function block with a return type - validate and return the value
+                if (!Util.checkDataType(stmt.returnType, r.value)) {
+                    throw error(stmt.getLine(), "Return value '" + r.value + "' not correct type : " + stmt.returnType + " in " + stmt.name);
+                }
+                return r.value;
+            } else {
+                // This is an anonymous block - propagate the return signal up
+                throw r;
             }
-            return r.value;
         } finally {
             // POP the frame even on errors/returns
             environment().popCallStack();
@@ -517,6 +525,14 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         } else if (call.block != null) {
             // user-defined block
             return visitBlockStatement(call.block, call.paramInit);
+        } else if (currentRuntime != null && currentRuntime.blocks != null) {
+            // Check if block was imported at runtime
+            BlockStatement block = currentRuntime.blocks.get(call.name);
+            if (block != null) {
+                // Prepare parameter initialization statements
+                Statement[] paramInit = prepareParamInit(call, block);
+                return visitBlockStatement(block, paramInit);
+            }
         }
         throw error(call.getLine(), "Call cannot find '" + call.name + "'");
     }
@@ -530,8 +546,43 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         } else if (stmt.block != null) {
             visitBlockStatement(stmt.block, stmt.paramInit);
             return;
+        } else if (currentRuntime != null && currentRuntime.blocks != null) {
+            // Check if block was imported at runtime
+            BlockStatement block = currentRuntime.blocks.get(stmt.name);
+            if (block != null) {
+                // Prepare parameter initialization statements
+                Statement[] paramInit = prepareParamInit(stmt, block);
+                visitBlockStatement(block, paramInit);
+                return;
+            }
         }
         throw error(stmt.getLine(), "Call cannot find '" + stmt.name + "'");
+    }
+    
+    /**
+     * Prepare parameter initialization statements for a runtime-resolved block call
+     */
+    private Statement[] prepareParamInit(CallStatement call, BlockStatement block) throws InterpreterError {
+        if (block.parameters == null || block.parameters.length == 0) {
+            return null;
+        }
+        
+        // Match the call parameters to the block's parameter definitions
+        Parameter[] blockParams = block.parameters;
+        Parameter[] callParams = call.parameters;
+        
+        Statement[] paramInit = new Statement[blockParams.length];
+        for (int i = 0; i < blockParams.length; i++) {
+            Parameter blockParam = blockParams[i];
+            if (callParams != null && i < callParams.length && callParams[i] != null) {
+                // Use the value from the call
+                paramInit[i] = new VarStatement(call.getLine(), blockParam.name, blockParam.paramType, callParams[i].value);
+            } else {
+                // Use the default value from the block definition if available
+                paramInit[i] = new VarStatement(call.getLine(), blockParam.name, blockParam.paramType, blockParam.value);
+            }
+        }
+        return paramInit;
     }
 
     @Override
