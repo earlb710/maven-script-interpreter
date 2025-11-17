@@ -3,6 +3,7 @@ package com.eb.script.parser;
 import com.eb.script.interpreter.Builtins;
 import com.eb.script.json.Json;
 import com.eb.script.RuntimeContext;
+import com.eb.script.token.Category;
 import com.eb.script.token.DataType;
 import com.eb.script.token.ebs.EbsLexer;
 import com.eb.script.token.ebs.EbsToken;
@@ -400,7 +401,14 @@ public class Parser {
     }
 
     private Statement varDeclaration() throws ParseError {
-        EbsToken name = consume(EbsTokenType.IDENTIFIER, "Expected variable name.");
+        EbsToken name = peek();
+        
+        // Check if the token is a keyword and reject it with a clear error message
+        if (name.type.getCategory() == Category.KEYWORD) {
+            throw error(name, "Cannot use keyword '" + name.literal + "' as a variable name.");
+        }
+        
+        name = consume(EbsTokenType.IDENTIFIER, "Expected variable name.");
         DataType elemType = null;
         Expression[] arrayDims = null;
 
@@ -582,7 +590,14 @@ public class Parser {
     }
 
     private Parameter parameterDef() throws ParseError {
-        EbsToken name = consume(EbsTokenType.IDENTIFIER, "Expected parameter name.");
+        EbsToken name = peek();
+        
+        // Check if the token is a keyword and reject it with a clear error message
+        if (name.type.getCategory() == Category.KEYWORD) {
+            throw error(name, "Cannot use keyword '" + name.literal + "' as a parameter name.");
+        }
+        
+        name = consume(EbsTokenType.IDENTIFIER, "Expected parameter name.");
         EbsTokenType type = null;
         if (match(EbsTokenType.COLON)) {
             // Accept either IDENTIFIER or a data type keyword (STRING, INTEGER, etc.)
@@ -958,8 +973,20 @@ public class Parser {
 
         while (match(EbsTokenType.DOT)) {
             int line = currToken.line;
-            EbsToken prop = consume(EbsTokenType.IDENTIFIER, "Expected property name after '.'.");
-            String name = (String) prop.literal;
+            
+            // Accept either IDENTIFIER, LENGTH, or SIZE after DOT
+            EbsToken prop;
+            String name;
+            if (check(EbsTokenType.LENGTH)) {
+                prop = advance();
+                name = "length";
+            } else if (check(EbsTokenType.SIZE)) {
+                prop = advance();
+                name = "size";
+            } else {
+                prop = consume(EbsTokenType.IDENTIFIER, "Expected property name after '.'.");
+                name = (String) prop.literal;
+            }
 
             // Optional empty parentheses for method-style calls
             boolean callEmpty = false;
@@ -969,7 +996,7 @@ public class Parser {
                 callEmpty = true;
             }
 
-            if ("length".equals(name) && !callEmpty) {
+            if (("length".equals(name) || "size".equals(name)) && !callEmpty) {
                 base = new LengthExpression(line, base);
             } else if ("hasNext".equals(name) && callEmpty) {
                 base = new CursorHasNextExpression(line, base);
@@ -1098,13 +1125,27 @@ public class Parser {
         Expression collection;
 
         if (match(EbsTokenType.LPAREN)) {
-            EbsToken var = consume(EbsTokenType.IDENTIFIER, "Expected loop variable name.");
+            EbsToken var = peek();
+            
+            // Check if the token is a keyword and reject it with a clear error message
+            if (var.type.getCategory() == Category.KEYWORD) {
+                throw error(var, "Cannot use keyword '" + var.literal + "' as a loop variable name.");
+            }
+            
+            var = consume(EbsTokenType.IDENTIFIER, "Expected loop variable name.");
             varName = (String) var.literal;
             consume(EbsTokenType.IN, "Expected 'in' after loop variable.");
             collection = expression();
             consume(EbsTokenType.RPAREN, "Expected ')' after foreach header.");
         } else {
-            EbsToken var = consume(EbsTokenType.IDENTIFIER, "Expected loop variable name.");
+            EbsToken var = peek();
+            
+            // Check if the token is a keyword and reject it with a clear error message
+            if (var.type.getCategory() == Category.KEYWORD) {
+                throw error(var, "Cannot use keyword '" + var.literal + "' as a loop variable name.");
+            }
+            
+            var = consume(EbsTokenType.IDENTIFIER, "Expected loop variable name.");
             varName = (String) var.literal;
             consume(EbsTokenType.IN, "Expected 'in' after loop variable.");
             collection = expression();
