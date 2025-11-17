@@ -1072,12 +1072,20 @@ public class ScreenFactory {
                         && metadata.itemType != DisplayItem.ItemType.LABELTEXT
                         && metadata.itemType != DisplayItem.ItemType.BUTTON) {
 
-                    // Set font style based on metadata
-                    String fontStyle = "-fx-font-weight: normal;";
+                    // Parse font size and create proper Font object for accurate measurement
+                    double fontSize = 13.0; // Default font size
+                    javafx.scene.text.FontWeight fontWeight = javafx.scene.text.FontWeight.NORMAL;
+                    
                     if (metadata.labelFontSize != null && !metadata.labelFontSize.isEmpty()) {
-                        fontStyle += " -fx-font-size: " + metadata.labelFontSize + ";";
+                        fontSize = parseFontSize(metadata.labelFontSize);
                     }
-                    measuringText.setStyle(fontStyle);
+                    
+                    if (metadata.labelBold != null && metadata.labelBold) {
+                        fontWeight = javafx.scene.text.FontWeight.BOLD;
+                    }
+                    
+                    // Set font directly on Text node for accurate measurement
+                    measuringText.setFont(javafx.scene.text.Font.font("System", fontWeight, fontSize));
 
                     // Handle multiline labels by splitting on \n and measuring the longest line
                     String labelText = metadata.labelText;
@@ -1107,6 +1115,41 @@ public class ScreenFactory {
         }
 
         return maxWidth;
+    }
+    
+    /**
+     * Parses a font size string (e.g., "14px", "1.5em", "16") and returns the size in pixels.
+     * 
+     * @param fontSizeStr The font size string to parse
+     * @return The font size in pixels
+     */
+    private static double parseFontSize(String fontSizeStr) {
+        if (fontSizeStr == null || fontSizeStr.isEmpty()) {
+            return 13.0; // Default font size
+        }
+        
+        String trimmed = fontSizeStr.trim().toLowerCase();
+        
+        try {
+            if (trimmed.endsWith("px")) {
+                // Parse pixel values (e.g., "14px")
+                return Double.parseDouble(trimmed.substring(0, trimmed.length() - 2));
+            } else if (trimmed.endsWith("em")) {
+                // Parse em values (e.g., "1.5em") - 1em = 13px (default)
+                double emValue = Double.parseDouble(trimmed.substring(0, trimmed.length() - 2));
+                return emValue * 13.0;
+            } else if (trimmed.endsWith("pt")) {
+                // Parse point values (e.g., "12pt") - 1pt = 1.333px
+                double ptValue = Double.parseDouble(trimmed.substring(0, trimmed.length() - 2));
+                return ptValue * 1.333;
+            } else {
+                // No unit specified, assume pixels
+                return Double.parseDouble(trimmed);
+            }
+        } catch (NumberFormatException e) {
+            System.err.println("Warning: Could not parse font size '" + fontSizeStr + "', using default 13px");
+            return 13.0;
+        }
     }
 
     /**
