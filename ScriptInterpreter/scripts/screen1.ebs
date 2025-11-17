@@ -7,7 +7,7 @@ screen webPageRecorder = {
             "name": "url",
             "type": "string",
             "default": "",
-            "display": {"type": "textfield", "mandatory": true}
+            "display": {"type": "textfield", "mandatory": true, "labelText": "Url"}
         },
         {
             "name": "shortDescription",

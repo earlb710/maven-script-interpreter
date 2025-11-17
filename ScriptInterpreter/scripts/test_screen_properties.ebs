@@ -82,9 +82,11 @@ screen propTest = {
     ]
 };
 
+print #screen.getItemList("propTest");
+
 // Test getting properties before showing screen
 print "Testing screen.getProperty before showing screen:";
-var editable: string = call screen.getProperty("propTest.usernamefield", "editable");
+var editable: string = call screen.getProperty("propTest.usernameField", "editable");
 print "  usernameField editable: " + editable;
 
 var visible: bool = call screen.getProperty("propTest.usernamefield", "visible");
