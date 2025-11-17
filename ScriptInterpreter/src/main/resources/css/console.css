@@ -269,7 +269,7 @@
 /* find bar container (optional styling) */
 .find-bar {
     -fx-background-color: linear-gradient(to bottom, #f7f7f7, #eaeaea);
-    -fx-padding: 6 8 6 8;
+    -fx-padding: 3 4 3 4;
     -fx-spacing: 8;
     -fx-border-color: #cccccc;
     -fx-border-radius: 4;
