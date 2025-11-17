@@ -62,7 +62,7 @@ public class EbsTab extends Tab {
 
     private HBox findBar;
     private TextField findField, replaceField;
-    private CheckBox chkCase, chkWord, chkRegex, chkHighlightAll;
+    private CheckBox chkCase, chkWord, chkRegex;
     private Button btnNext, btnPrev, btnReplace, btnReplaceAll, btnClose;
     private Label lblCount;
 
@@ -208,8 +208,6 @@ public class EbsTab extends Tab {
         chkCase = new CheckBox("Aa");
         chkWord = new CheckBox("Word");
         chkRegex = new CheckBox("Regex");
-        chkHighlightAll = new CheckBox("Highlight all");
-        chkHighlightAll.setSelected(true);
 
         btnPrev = new Button("Prev");
         btnNext = new Button("Next");
@@ -219,7 +217,7 @@ public class EbsTab extends Tab {
         lblCount = new Label("");
 
         findBar = new HBox(8, new Label("Find:"),
-                findField, chkCase, chkWord, chkRegex, chkHighlightAll,
+                findField, chkCase, chkWord, chkRegex,
                 btnPrev, btnNext,
                 new Label("Replace:"), replaceField, btnReplace, btnReplaceAll,
                 lblCount, btnClose);
@@ -571,13 +569,6 @@ public class EbsTab extends Tab {
                     });
                 }
         );
-        chkHighlightAll.selectedProperty().addListener(
-                (obs, o, n) -> {
-                    Platform.runLater(() -> {
-                        runSearch();
-                    });
-                }
-        );
 
         btnNext.setOnAction(e -> {
             Platform.runLater(() -> {
@@ -665,14 +656,12 @@ public class EbsTab extends Tab {
         selectCurrent(cur);
         updateCountLabel();
 
-        // Highlight all if requested (additive)
-        if (chkHighlightAll.isSelected()) {
-            for (int[] r : hits) {
-                dispArea.addStyleToRange(r[0], r[1], "find-hit");
-            }
-            // Emphasize current
-            dispArea.addStyleToRange(cur[0], cur[1], "find-current");
+        // Highlight all matches (always enabled)
+        for (int[] r : hits) {
+            dispArea.addStyleToRange(r[0], r[1], "find-hit");
         }
+        // Emphasize current
+        dispArea.addStyleToRange(cur[0], cur[1], "find-current");
     }
 
     private void selectCurrent(int[] r) {
@@ -691,9 +680,7 @@ public class EbsTab extends Tab {
         int[] cur = lastMatches.get(currentIndex);
         selectCurrent(cur);
         updateCountLabel();
-        if (chkHighlightAll.isSelected()) {
-            dispArea.addStyleToRange(cur[0], cur[1], "find-current");
-        }
+        dispArea.addStyleToRange(cur[0], cur[1], "find-current");
     }
 
     private void gotoPrev() {
@@ -705,14 +692,12 @@ public class EbsTab extends Tab {
         int[] cur = lastMatches.get(currentIndex);
         selectCurrent(cur);
         updateCountLabel();
-        if (chkHighlightAll.isSelected()) {
-            dispArea.addStyleToRange(cur[0], cur[1], "find-current");
-        }
+        dispArea.addStyleToRange(cur[0], cur[1], "find-current");
     }
 
     // Clear only the 'find-current' class on the previous current match
     private void clearCurrentEmphasis() {
-        if (chkHighlightAll.isSelected() && currentIndex >= 0 && currentIndex < lastMatches.size()) {
+        if (currentIndex >= 0 && currentIndex < lastMatches.size()) {
             int[] prev = lastMatches.get(currentIndex);
             dispArea.removeStyleFromRange(prev[0], prev[1], "find-current");
         }
@@ -729,11 +714,9 @@ public class EbsTab extends Tab {
 
     private void clearHighlights() {
         // remove highlight classes from all previously-highlighted ranges
-        if (chkHighlightAll.isSelected()) {
-            for (int[] r : lastMatches) {
-                dispArea.removeStyleFromRange(r[0], r[1], "find-hit");
-                dispArea.removeStyleFromRange(r[0], r[1], "find-current");
-            }
+        for (int[] r : lastMatches) {
+            dispArea.removeStyleFromRange(r[0], r[1], "find-hit");
+            dispArea.removeStyleFromRange(r[0], r[1], "find-current");
         }
     }
 
