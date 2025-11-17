@@ -47,7 +47,7 @@ screen propTest = {
                     "display": {
                         "type": "button",
                         "labelText": "Toggle Username Field",
-                        "onClick": "string editable = screen.getProperty('propTest.usernameField', 'editable'); print 'Current editable: ' + editable; bool newVal = !editable; screen.setProperty('propTest.usernameField', 'editable', newVal); print 'Set editable to: ' + newVal;"
+                        "onClick": "var editable: string = call screen.getProperty('propTest.usernameField', 'editable'); print 'Current editable: ' + editable; var newVal: bool = !editable; call screen.setProperty('propTest.usernameField', 'editable', newVal); print 'Set editable to: ' + newVal;"
                     }
                 },
                 {
@@ -56,7 +56,7 @@ screen propTest = {
                     "display": {
                         "type": "button",
                         "labelText": "Change Age Field Color",
-                        "onClick": "screen.setProperty('propTest.ageField', 'textColor', 'blue'); screen.setProperty('propTest.ageField', 'backgroundColor', 'lightgray'); print 'Changed age field colors';"
+                        "onClick": "call screen.setProperty('propTest.ageField', 'textColor', 'blue'); call screen.setProperty('propTest.ageField', 'backgroundColor', 'lightgray'); print 'Changed age field colors';"
                     }
                 },
                 {
@@ -65,7 +65,7 @@ screen propTest = {
                     "display": {
                         "type": "button",
                         "labelText": "Hide Username Field",
-                        "onClick": "screen.setProperty('propTest.usernameField', 'visible', false); print 'Username field hidden';"
+                        "onClick": "call screen.setProperty('propTest.usernameField', 'visible', false); print 'Username field hidden';"
                     }
                 },
                 {
@@ -74,7 +74,7 @@ screen propTest = {
                     "display": {
                         "type": "button",
                         "labelText": "Show Username Field",
-                        "onClick": "screen.setProperty('propTest.usernameField', 'visible', true); print 'Username field shown';"
+                        "onClick": "call screen.setProperty('propTest.usernameField', 'visible', true); print 'Username field shown';"
                     }
                 }
             ]
@@ -84,18 +84,18 @@ screen propTest = {
 
 // Test getting properties before showing screen
 print "Testing screen.getProperty before showing screen:";
-string editable = screen.getProperty("propTest.usernameField", "editable");
+var editable: string = call screen.getProperty("propTest.usernameField", "editable");
 print "  usernameField editable: " + editable;
 
-bool visible = screen.getProperty("propTest.usernameField", "visible");
+var visible: bool = call screen.getProperty("propTest.usernameField", "visible");
 print "  usernameField visible: " + visible;
 
 // Test setting properties before showing screen
 print "\nTesting screen.setProperty before showing screen:";
-screen.setProperty("propTest.usernameField", "tooltip", "Enter your username here");
+call screen.setProperty("propTest.usernameField", "tooltip", "Enter your username here");
 print "  Set tooltip on usernameField";
 
-screen.setProperty("propTest.ageField", "alignment", "right");
+call screen.setProperty("propTest.ageField", "alignment", "right");
 print "  Set alignment on ageField to right";
 
 // Show the screen
