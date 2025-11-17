@@ -418,13 +418,35 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     public void visitAssignStatement(AssignStatement stmt) throws InterpreterError {
         Object value = evaluate(stmt.value);
 
-        // Check if this is a screen variable assignment (screen_name.var_name)
+        // Check if this is a screen variable assignment (screen_name.set_name.var_name)
         String name = stmt.name.toLowerCase();
-        int dotIndex = name.indexOf('.');
+        int firstDot = name.indexOf('.');
+        int secondDot = firstDot > 0 ? name.indexOf('.', firstDot + 1) : -1;
 
-        if (dotIndex > 0) {
-            String screenName = name.substring(0, dotIndex);
-            String varName = name.substring(dotIndex + 1);
+        if (secondDot > 0) {
+            // Three-part notation: screen.setName.varName
+            String screenName = name.substring(0, firstDot);
+            String setName = name.substring(firstDot + 1, secondDot);
+            String varName = name.substring(secondDot + 1);
+            String fullVarKey = setName + "." + varName;
+
+            // Check if this is a screen variable
+            ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars(screenName);
+            if (screenVarMap != null) {
+                if (screenVarMap.containsKey(varName)) {
+                    // Variable exists with simple name (legacy format)
+                    screenVarMap.put(varName, value);
+                    // Trigger screen refresh to update UI controls
+                    context.triggerScreenRefresh(screenName);
+                    return;
+                } else {
+                    throw error(stmt.getLine(), "Screen '" + screenName + "' does not have a variable '" + setName + "." + varName + "'.");
+                }
+            }
+        } else if (firstDot > 0) {
+            // Two-part notation for backward compatibility: screen.varName
+            String screenName = name.substring(0, firstDot);
+            String varName = name.substring(firstDot + 1);
 
             // Check if this is a screen variable
             ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars(screenName);
@@ -607,13 +629,32 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
 
     @Override
     public Object visitVariableExpression(VariableExpression expr) throws InterpreterError {
-        // Check if this is a screen variable access (screen_name.var_name)
+        // Check if this is a screen variable access (screen_name.set_name.var_name)
         String name = expr.name.toLowerCase();
-        int dotIndex = name.indexOf('.');
+        int firstDot = name.indexOf('.');
+        int secondDot = firstDot > 0 ? name.indexOf('.', firstDot + 1) : -1;
 
-        if (dotIndex > 0) {
-            String screenName = name.substring(0, dotIndex);
-            String varName = name.substring(dotIndex + 1);
+        if (secondDot > 0) {
+            // Three-part notation: screen.setName.varName
+            String screenName = name.substring(0, firstDot);
+            String setName = name.substring(firstDot + 1, secondDot);
+            String varName = name.substring(secondDot + 1);
+            String fullVarKey = setName + "." + varName;
+
+            // Check if this is a screen variable
+            ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars(screenName);
+            if (screenVarMap != null) {
+                if (screenVarMap.containsKey(varName)) {
+                    // Variable exists with simple name (legacy format)
+                    return screenVarMap.get(varName);
+                } else {
+                    throw error(expr.line, "Screen '" + screenName + "' does not have a variable '" + setName + "." + varName + "'.");
+                }
+            }
+        } else if (firstDot > 0) {
+            // Two-part notation for backward compatibility: screen.varName
+            String screenName = name.substring(0, firstDot);
+            String varName = name.substring(firstDot + 1);
 
             // Check if this is a screen variable
             ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars(screenName);

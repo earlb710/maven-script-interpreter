@@ -128,21 +128,35 @@ screenVarItems: {
 
 ## Variable Access (EBS Script)
 
-Both formats support the same access pattern:
+The new format uses three-part notation for variable access:
 
 ```ebs
 screen myScreen = { ... };
 
-// Access variables directly (backward compatible)
-print myScreen.firstName;
-print myScreen.email;
+// Access variables with three-part notation: screen.setName.varName
+print myScreen.PersonalInfo.firstName;
+print myScreen.ContactInfo.email;
 
 // Modify variables
-myScreen.firstName = "Jane";
-myScreen.age = 25;
+myScreen.PersonalInfo.firstName = "Jane";
+myScreen.PersonalInfo.age = 25;
 ```
 
-The internal storage uses qualified keys ("setname.varname"), but external access remains simple and backward compatible.
+For legacy format with "vars", variables are in the "default" set:
+
+```ebs
+screen legacyScreen = {
+    "vars": [{"name": "username", "type": "string"}]
+};
+
+// Access using three-part notation with "default" set
+print legacyScreen.default.username;
+
+// Or use two-part notation for backward compatibility
+print legacyScreen.username;
+```
+
+The three-part notation (`screen.setName.varName`) makes the organization explicit and allows proper scoping of variables within their sets.
 
 ## Case Sensitivity
 

@@ -95,18 +95,39 @@ Variables are automatically placed in a default set called "default" with `hidde
 
 ## Variable Access
 
-Variable access remains the same for backward compatibility:
+Variable access now uses three-part notation to include the set name:
 
 ```ebs
 screen myScreen = { ... };
 
-// Access variables
-print myScreen.firstName;
-print myScreen.lastName;
+// Access variables with three-part notation: screen.setName.varName
+print myScreen.PersonalInfo.firstName;
+print myScreen.PersonalInfo.lastName;
+print myScreen.ContactInfo.email;
 
 // Modify variables
-myScreen.firstName = "Jane";
-myScreen.age = 25;
+myScreen.PersonalInfo.firstName = "Jane";
+myScreen.PersonalInfo.age = 25;
+myScreen.ContactInfo.email = "jane@example.com";
+```
+
+For backward compatibility with legacy "vars" format, the default set name is "default":
+
+```ebs
+// Legacy screen with flat vars
+screen legacyScreen = {
+    "vars": [
+        {"name": "username", "type": "string"}
+    ]
+};
+
+// Access uses: screen.default.varName
+print legacyScreen.default.username;
+legacyScreen.default.username = "newuser";
+
+// Or use two-part notation for backward compatibility
+print legacyScreen.username;
+legacyScreen.username = "newuser";
 ```
 
 ## Data Classes

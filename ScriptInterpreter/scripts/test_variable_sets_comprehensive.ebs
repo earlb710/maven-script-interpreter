@@ -165,52 +165,52 @@ print "";
 
 // Test 2: Variable access from visible sets
 print "TEST 2: Accessing variables from visible sets...";
-print "BasicInfo.fullName: " + comprehensiveScreen.fullName;
-print "BasicInfo.birthYear: " + comprehensiveScreen.birthYear;
-print "BasicInfo.isActive: " + comprehensiveScreen.isActive;
-print "ContactDetails.emailAddress: " + comprehensiveScreen.emailAddress;
-print "ContactDetails.phoneNumber: " + comprehensiveScreen.phoneNumber;
-print "ContactDetails.country: " + comprehensiveScreen.country;
-print "Preferences.theme: " + comprehensiveScreen.theme;
-print "Preferences.fontSize: " + comprehensiveScreen.fontSize;
+print "BasicInfo.fullName: " + comprehensiveScreen.BasicInfo.fullName;
+print "BasicInfo.birthYear: " + comprehensiveScreen.BasicInfo.birthYear;
+print "BasicInfo.isActive: " + comprehensiveScreen.BasicInfo.isActive;
+print "ContactDetails.emailAddress: " + comprehensiveScreen.ContactDetails.emailAddress;
+print "ContactDetails.phoneNumber: " + comprehensiveScreen.ContactDetails.phoneNumber;
+print "ContactDetails.country: " + comprehensiveScreen.ContactDetails.country;
+print "Preferences.theme: " + comprehensiveScreen.Preferences.theme;
+print "Preferences.fontSize: " + comprehensiveScreen.Preferences.fontSize;
 print "✓ All visible set variables accessible";
 print "";
 
 // Test 3: Variable access from hidden sets
 print "TEST 3: Accessing variables from hidden sets...";
-print "InternalData.userId: " + comprehensiveScreen.userId;
-print "InternalData.sessionToken: " + comprehensiveScreen.sessionToken;
-print "InternalData.lastLoginTime: " + comprehensiveScreen.lastLoginTime;
-print "InternalData.accessLevel: " + comprehensiveScreen.accessLevel;
-print "SystemFlags.debugMode: " + comprehensiveScreen.debugMode;
-print "SystemFlags.autoSave: " + comprehensiveScreen.autoSave;
+print "InternalData.userId: " + comprehensiveScreen.InternalData.userId;
+print "InternalData.sessionToken: " + comprehensiveScreen.InternalData.sessionToken;
+print "InternalData.lastLoginTime: " + comprehensiveScreen.InternalData.lastLoginTime;
+print "InternalData.accessLevel: " + comprehensiveScreen.InternalData.accessLevel;
+print "SystemFlags.debugMode: " + comprehensiveScreen.SystemFlags.debugMode;
+print "SystemFlags.autoSave: " + comprehensiveScreen.SystemFlags.autoSave;
 print "✓ All hidden set variables accessible";
 print "";
 
 // Test 4: Modifying variables across different sets
 print "TEST 4: Modifying variables across different sets...";
-comprehensiveScreen.fullName = "Jane Doe";
-comprehensiveScreen.birthYear = 1995;
-comprehensiveScreen.isActive = false;
-comprehensiveScreen.emailAddress = "jane.doe@example.com";
-comprehensiveScreen.phoneNumber = "555-0200";
-comprehensiveScreen.country = "Canada";
-comprehensiveScreen.theme = "Dark";
-comprehensiveScreen.fontSize = 14;
-comprehensiveScreen.userId = 10002;
-comprehensiveScreen.sessionToken = "token-def-456-uvw";
-comprehensiveScreen.debugMode = true;
-comprehensiveScreen.autoSave = false;
+comprehensiveScreen.BasicInfo.fullName = "Jane Doe";
+comprehensiveScreen.BasicInfo.birthYear = 1995;
+comprehensiveScreen.BasicInfo.isActive = false;
+comprehensiveScreen.ContactDetails.emailAddress = "jane.doe@example.com";
+comprehensiveScreen.ContactDetails.phoneNumber = "555-0200";
+comprehensiveScreen.ContactDetails.country = "Canada";
+comprehensiveScreen.Preferences.theme = "Dark";
+comprehensiveScreen.Preferences.fontSize = 14;
+comprehensiveScreen.InternalData.userId = 10002;
+comprehensiveScreen.InternalData.sessionToken = "token-def-456-uvw";
+comprehensiveScreen.SystemFlags.debugMode = true;
+comprehensiveScreen.SystemFlags.autoSave = false;
 
 print "Modified values:";
-print "  fullName: " + comprehensiveScreen.fullName;
-print "  birthYear: " + comprehensiveScreen.birthYear;
-print "  isActive: " + comprehensiveScreen.isActive;
-print "  emailAddress: " + comprehensiveScreen.emailAddress;
-print "  country: " + comprehensiveScreen.country;
-print "  theme: " + comprehensiveScreen.theme;
-print "  userId: " + comprehensiveScreen.userId;
-print "  debugMode: " + comprehensiveScreen.debugMode;
+print "  fullName: " + comprehensiveScreen.BasicInfo.fullName;
+print "  birthYear: " + comprehensiveScreen.BasicInfo.birthYear;
+print "  isActive: " + comprehensiveScreen.BasicInfo.isActive;
+print "  emailAddress: " + comprehensiveScreen.ContactDetails.emailAddress;
+print "  country: " + comprehensiveScreen.ContactDetails.country;
+print "  theme: " + comprehensiveScreen.Preferences.theme;
+print "  userId: " + comprehensiveScreen.InternalData.userId;
+print "  debugMode: " + comprehensiveScreen.SystemFlags.debugMode;
 print "✓ All variables modified successfully";
 print "";
 
@@ -273,17 +273,17 @@ screen areaTestScreen = {
 
 print "✓ Screen with areas created successfully!";
 print "  Testing AreaItem variable access:";
-print "  fieldOne: " + areaTestScreen.fieldOne;
-print "  fieldTwo: " + areaTestScreen.fieldTwo;
-print "  fieldThree: " + areaTestScreen.fieldThree;
+print "  fieldOne: " + areaTestScreen.FormData.fieldOne;
+print "  fieldTwo: " + areaTestScreen.FormData.fieldTwo;
+print "  fieldThree: " + areaTestScreen.FormData.fieldThree;
 print "";
 
 // Test 6: Test type conversion and validation
 print "TEST 6: Testing type conversion and different data types...";
-comprehensiveScreen.birthYear = "2000";  // String to int
-comprehensiveScreen.fontSize = "16";      // String to int
-print "  birthYear (converted from string): " + comprehensiveScreen.birthYear;
-print "  fontSize (converted from string): " + comprehensiveScreen.fontSize;
+comprehensiveScreen.BasicInfo.birthYear = "2000";  // String to int
+comprehensiveScreen.Preferences.fontSize = "16";      // String to int
+print "  birthYear (converted from string): " + comprehensiveScreen.BasicInfo.birthYear;
+print "  fontSize (converted from string): " + comprehensiveScreen.Preferences.fontSize;
 print "✓ Type conversion working";
 print "";
 
@@ -314,7 +314,7 @@ screen edgeCaseScreen = {
 };
 
 print "  Empty set created successfully";
-print "  Single variable set: " + edgeCaseScreen.onlyOne;
+print "  Single variable set: " + edgeCaseScreen.SingleVar.onlyOne;
 print "✓ Edge cases handled";
 print "";
 

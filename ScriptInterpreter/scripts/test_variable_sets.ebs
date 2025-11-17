@@ -74,27 +74,27 @@ screen testSetsScreen = {
 
 print "Screen created successfully!";
 
-// Test variable access (backward compatibility)
+// Test variable access (new three-part notation: screen.setName.varName)
 print "";
 print "Testing variable access:";
-print "First Name: " + testSetsScreen.firstName;
-print "Last Name: " + testSetsScreen.lastName;
-print "Age: " + testSetsScreen.age;
-print "Email: " + testSetsScreen.email;
-print "Phone: " + testSetsScreen.phone;
+print "First Name: " + testSetsScreen.PersonalInfo.firstName;
+print "Last Name: " + testSetsScreen.PersonalInfo.lastName;
+print "Age: " + testSetsScreen.PersonalInfo.age;
+print "Email: " + testSetsScreen.ContactInfo.email;
+print "Phone: " + testSetsScreen.ContactInfo.phone;
 
 // Modify values
-testSetsScreen.firstName = "Jane";
-testSetsScreen.lastName = "Smith";
-testSetsScreen.age = 25;
-testSetsScreen.email = "jane.smith@example.com";
+testSetsScreen.PersonalInfo.firstName = "Jane";
+testSetsScreen.PersonalInfo.lastName = "Smith";
+testSetsScreen.PersonalInfo.age = 25;
+testSetsScreen.ContactInfo.email = "jane.smith@example.com";
 
 print "";
 print "Modified values:";
-print "First Name: " + testSetsScreen.firstName;
-print "Last Name: " + testSetsScreen.lastName;
-print "Age: " + testSetsScreen.age;
-print "Email: " + testSetsScreen.email;
+print "First Name: " + testSetsScreen.PersonalInfo.firstName;
+print "Last Name: " + testSetsScreen.PersonalInfo.lastName;
+print "Age: " + testSetsScreen.PersonalInfo.age;
+print "Email: " + testSetsScreen.ContactInfo.email;
 
 // Show the screen
 print "";
