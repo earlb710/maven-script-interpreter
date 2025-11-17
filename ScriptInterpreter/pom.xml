@@ -38,12 +38,6 @@
             <artifactId>postgresql</artifactId>
             <version>42.7.4</version>
         </dependency>
-        <!-- JSON Schema Validation -->
-        <dependency>
-            <groupId>com.networknt</groupId>
-            <artifactId>json-schema-validator</artifactId>
-            <version>1.5.1</version>
-        </dependency>
     </dependencies>
     
     <build>
