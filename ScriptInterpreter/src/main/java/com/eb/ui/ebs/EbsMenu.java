@@ -98,6 +98,36 @@ public class EbsMenu extends MenuBar {
         // --- Edit Menu ---
         Menu editMenu = new Menu("Edit");
         
+        // Cut
+        MenuItem cutItem = new MenuItem("Cut");
+        cutItem.setAccelerator(new KeyCodeCombination(KeyCode.X, KeyCombination.CONTROL_DOWN));
+        cutItem.setOnAction(e -> {
+            Tab tab = handler.getSelectedTab();
+            if (tab instanceof EbsTab et) {
+                et.dispArea.cut();
+            }
+        });
+        
+        // Copy
+        MenuItem copyItem = new MenuItem("Copy");
+        copyItem.setAccelerator(new KeyCodeCombination(KeyCode.C, KeyCombination.CONTROL_DOWN));
+        copyItem.setOnAction(e -> {
+            Tab tab = handler.getSelectedTab();
+            if (tab instanceof EbsTab et) {
+                et.dispArea.copy();
+            }
+        });
+        
+        // Paste
+        MenuItem pasteItem = new MenuItem("Paste");
+        pasteItem.setAccelerator(new KeyCodeCombination(KeyCode.V, KeyCombination.CONTROL_DOWN));
+        pasteItem.setOnAction(e -> {
+            Tab tab = handler.getSelectedTab();
+            if (tab instanceof EbsTab et) {
+                et.dispArea.paste();
+            }
+        });
+        
         // Undo
         MenuItem undoItem = new MenuItem("Undo");
         undoItem.setAccelerator(new KeyCodeCombination(KeyCode.Z, KeyCombination.CONTROL_DOWN));
@@ -138,7 +168,7 @@ public class EbsMenu extends MenuBar {
             }
         });
         
-        editMenu.getItems().addAll(undoItem, redoItem, new SeparatorMenuItem(), findItem, replaceItem);
+        editMenu.getItems().addAll(cutItem, copyItem, pasteItem, new SeparatorMenuItem(), undoItem, redoItem, new SeparatorMenuItem(), findItem, replaceItem);
         getMenus().add(editMenu);
 
         Menu toolsMenu = new Menu("Config");
