@@ -47,9 +47,9 @@ public class ScreenFactory {
     static {
         try {
             // Load schemas from resources
-            FileData screenSchemaFile = BuiltinsFile.readTextFile(ScreenFactory.class.getResource("/json/screen-definition.json").getPath());
-            FileData areaSchemaFile = BuiltinsFile.readTextFile(ScreenFactory.class.getResource("/json/area-definition.json").getPath());
-            FileData displayMetadataFile = BuiltinsFile.readTextFile(ScreenFactory.class.getResource("/json/display-metadata.json").getPath());
+            FileData screenSchemaFile = BuiltinsFile.readTextFile(ScreenFactory.class.getResourceAsStream("/json/screen-definition.json"));
+            FileData areaSchemaFile = BuiltinsFile.readTextFile(ScreenFactory.class.getResourceAsStream("/json/area-definition.json"));
+            FileData displayMetadataFile = BuiltinsFile.readTextFile(ScreenFactory.class.getResourceAsStream("/json/display-metadata.json"));
 
             if (screenSchemaFile != null) {
                 screenSchema = (Map<String, Object>) Json.parse(screenSchemaFile.stringData);

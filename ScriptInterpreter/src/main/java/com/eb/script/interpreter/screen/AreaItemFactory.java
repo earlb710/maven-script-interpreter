@@ -342,41 +342,41 @@ public class AreaItemFactory {
         // Apply item font size
         if (metadata.itemFontSize != null && !metadata.itemFontSize.isEmpty()) {
             itemStyle.append("-fx-font-size: ").append(metadata.itemFontSize).append("; ");
-            System.out.println("[DEBUG]   Adding font-size: " + metadata.itemFontSize);
+            //System.out.println("[DEBUG]   Adding font-size: " + metadata.itemFontSize);
         }
         
         // Apply item text color
         if (metadata.itemColor != null && !metadata.itemColor.isEmpty()) {
             itemStyle.append("-fx-text-fill: ").append(metadata.itemColor).append("; ");
-            System.out.println("[DEBUG]   Adding text-fill: " + metadata.itemColor);
+            //System.out.println("[DEBUG]   Adding text-fill: " + metadata.itemColor);
         }
         
         // Apply item bold
         if (metadata.itemBold != null && metadata.itemBold) {
             itemStyle.append("-fx-font-weight: bold; ");
-            System.out.println("[DEBUG]   Adding font-weight: bold");
+            //System.out.println("[DEBUG]   Adding font-weight: bold");
         }
         
         // Apply item italic
         if (metadata.itemItalic != null && metadata.itemItalic) {
             itemStyle.append("-fx-font-style: italic; ");
-            System.out.println("[DEBUG]   Adding font-style: italic");
+            //System.out.println("[DEBUG]   Adding font-style: italic");
         }
         
-        System.out.println("[DEBUG]   Built style string: '" + itemStyle.toString() + "'");
+        //System.out.println("[DEBUG]   Built style string: '" + itemStyle.toString() + "'");
         
         // Apply the combined style to the control
         if (itemStyle.length() > 0) {
             String currentStyle = control.getStyle();
-            System.out.println("[DEBUG]   Current style before applying: '" + currentStyle + "'");
+            //System.out.println("[DEBUG]   Current style before applying: '" + currentStyle + "'");
             if (currentStyle == null || currentStyle.isEmpty()) {
                 control.setStyle(itemStyle.toString());
             } else {
                 control.setStyle(currentStyle + " " + itemStyle.toString());
             }
-            System.out.println("[DEBUG]   Final style after applying: '" + control.getStyle() + "'");
+            //System.out.println("[DEBUG]   Final style after applying: '" + control.getStyle() + "'");
         } else {
-            System.out.println("[DEBUG]   No styles to apply (itemStyle is empty)");
+            //System.out.println("[DEBUG]   No styles to apply (itemStyle is empty)");
         }
         
         // Calculate and apply preferred width based on maxLength or data type

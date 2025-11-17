@@ -8,10 +8,13 @@ import com.eb.script.interpreter.InterpreterError;
 import com.eb.ui.cli.ScriptArea;
 import com.eb.util.ClassTreeLister;
 import com.eb.util.Util;
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.io.Reader;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.Charset;
@@ -272,7 +275,31 @@ public class BuiltinsFile {
         FileData data = readTextFile(env, path);
         return data.stringData;
     }
-    
+
+    public static FileData readTextFile(InputStream pInput) throws IOException {
+        Reader targetReader = new InputStreamReader(pInput);
+        return readTextFile(targetReader);
+    }
+
+    public static FileData readTextFile(Reader pReader) throws IOException {
+        StringBuilder ret = new StringBuilder();
+        char[] buffer = new char[64 * 1024];
+        int readCount = 0;
+        try (BufferedReader vFileBufferedReader = new BufferedReader(pReader)) {
+            do {
+                readCount = vFileBufferedReader.read(buffer);
+                if (readCount > 0) {
+                    ret.append(buffer, 0, readCount);
+                }
+            } while (readCount > 0);
+        }
+        FileContext opened = new FileContext(null, null, "r");
+        opened.size = ret.length();
+        opened.pos = opened.size;
+        opened.closed = true;
+        return new FileData(opened, ret.toString());
+    }
+
     public static FileData readTextFile(String filePath) throws InterpreterError, IOException {
         Path p = Util.resolveSandboxedPath(filePath);
         String ret = Files.readString(p, StandardCharsets.UTF_8);
@@ -1035,47 +1062,48 @@ public class BuiltinsFile {
     }
 
     /**
-     * Generates a class tree listing for the specified source directory.
-     * Uses ClassTreeLister to scan Java source files and produce a hierarchical
-     * view of the class structure.
+     * Generates a class tree listing for the specified source directory. Uses
+     * ClassTreeLister to scan Java source files and produce a hierarchical view
+     * of the class structure.
      *
      * @param env The environment context
-     * @param args args[0] = sourceDir (String, optional, defaults to "src/main/java")
+     * @param args args[0] = sourceDir (String, optional, defaults to
+     * "src/main/java")
      * @return String containing the class tree output
      * @throws InterpreterError if scanning fails
      */
     public static String generateClassTree(Environment env, Object... args) throws InterpreterError {
         ScriptArea output = env.getOutputArea();
         String sourceDir = "src/main/java";
-        
+
         if (args.length > 0 && args[0] != null) {
             sourceDir = (String) args[0];
         }
-        
+
         if (sourceDir == null || sourceDir.isBlank()) {
             sourceDir = "src/main/java";
         }
-        
+
         try {
             // Resolve the path relative to the sandbox
             Path sourcePath = Util.resolveSandboxedPath(sourceDir);
-            
+
             if (!Files.exists(sourcePath)) {
                 throw new InterpreterError("classTree.generate: source directory does not exist: " + sourceDir);
             }
-            
+
             if (!Files.isDirectory(sourcePath)) {
                 throw new InterpreterError("classTree.generate: path is not a directory: " + sourceDir);
             }
-            
+
             // Create ClassTreeLister instance
             ClassTreeLister lister = new ClassTreeLister();
-            
+
             // Capture output to a string
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8);
             PrintStream oldOut = System.out;
-            
+
             try {
                 System.setOut(ps);
                 lister.scan(sourcePath.toString());
@@ -1083,15 +1111,15 @@ public class BuiltinsFile {
             } finally {
                 System.setOut(oldOut);
             }
-            
+
             String result = baos.toString(StandardCharsets.UTF_8);
-            
+
             if (env.isEchoOn()) {
                 sysOutput(output, "Generated class tree for: " + sourcePath.toString());
             }
-            
+
             return result;
-            
+
         } catch (InterpreterError ie) {
             throw ie;
         } catch (Exception ex) {
@@ -1101,46 +1129,47 @@ public class BuiltinsFile {
 
     /**
      * Scans a source directory and returns class information as JSON.
-     * 
+     *
      * @param env The environment context
-     * @param args args[0] = sourceDir (String, optional, defaults to "src/main/java")
+     * @param args args[0] = sourceDir (String, optional, defaults to
+     * "src/main/java")
      * @return JSON map containing class information
      * @throws InterpreterError if scanning fails
      */
     public static String scanClassTree(Environment env, Object... args) throws InterpreterError {
         ScriptArea output = env.getOutputArea();
         String sourceDir = "src/main/java";
-        
+
         if (args.length > 0 && args[0] != null) {
             sourceDir = (String) args[0];
         }
-        
+
         if (sourceDir == null || sourceDir.isBlank()) {
             sourceDir = "src/main/java";
         }
-        
+
         try {
             // Resolve the path relative to the sandbox
             Path sourcePath = Util.resolveSandboxedPath(sourceDir);
-            
+
             if (!Files.exists(sourcePath)) {
                 throw new InterpreterError("classTree.scan: source directory does not exist: " + sourceDir);
             }
-            
+
             if (!Files.isDirectory(sourcePath)) {
                 throw new InterpreterError("classTree.scan: path is not a directory: " + sourceDir);
             }
-            
+
             // Create ClassTreeLister instance and scan
             ClassTreeLister lister = new ClassTreeLister();
             lister.scan(sourcePath.toString());
-            
+
             if (env.isEchoOn()) {
                 sysOutput(output, "Scanned source directory: " + sourcePath.toString());
             }
-            
+
             return "Scan completed for: " + sourcePath.toString();
-            
+
         } catch (InterpreterError ie) {
             throw ie;
         } catch (Exception ex) {
