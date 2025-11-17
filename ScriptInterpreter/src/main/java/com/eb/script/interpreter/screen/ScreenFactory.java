@@ -283,6 +283,12 @@ public class ScreenFactory {
 
                 // Create the item using AreaItemFactory
                 Node control = AreaItemFactory.createItem(item, metadata);
+                
+                // Store item metadata in control's user data for later retrieval by screen.setProperty/getProperty
+                // Format: "screenName.itemName"
+                if (item.name != null && !item.name.isEmpty()) {
+                    control.setUserData(screenName + "." + item.name);
+                }
 
                 // If labelText is specified, wrap the control with a label
                 // BUT: Don't wrap Label or Button controls - they display their own text
