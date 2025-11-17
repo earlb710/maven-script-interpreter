@@ -2104,18 +2104,33 @@ public final class Builtins {
         // Set the property on the AreaItem
         setAreaItemProperty(targetItem, propertyName, value);
 
-        // Refresh the screen to apply changes to the UI
-        // This needs to run on the JavaFX Application Thread
+        // Apply changes to the actual JavaFX control on the UI thread
+        // Find the control by its user data and apply the property change
         final String screenNameFinal = screenName;
+        final String itemNameFinal = itemName;
+        final com.eb.script.interpreter.screen.AreaItem finalItem = targetItem;
+        final String finalPropertyName = propertyName;
+        final Object finalValue = value;
+        
         javafx.application.Platform.runLater(() -> {
             try {
-                // Get the refresh callback for this screen
-                Runnable refreshCallback = context.getScreenRefreshCallbacks().get(screenNameFinal);
-                if (refreshCallback != null) {
-                    refreshCallback.run();
+                // Get the list of bound controls for this screen
+                java.util.List<javafx.scene.Node> controls = context.getScreenBoundControls().get(screenNameFinal);
+                if (controls != null) {
+                    // Find the control with matching user data
+                    String targetUserData = screenNameFinal + "." + itemNameFinal;
+                    for (javafx.scene.Node control : controls) {
+                        Object userData = control.getUserData();
+                        if (targetUserData.equals(userData)) {
+                            // Found the control - apply the property
+                            applyPropertyToControl(control, finalPropertyName, finalValue);
+                            break;
+                        }
+                    }
                 }
             } catch (Exception e) {
-                System.err.println("Error refreshing screen after setProperty: " + e.getMessage());
+                System.err.println("Error applying property to control: " + e.getMessage());
+                e.printStackTrace();
             }
         });
 
@@ -2292,5 +2307,152 @@ public final class Builtins {
             case "alignment" -> item.alignment;
             default -> throw new InterpreterError("screen.getProperty: unknown property '" + propertyName + "'");
         };
+    }
+
+    /**
+     * Helper method to apply a property change to a JavaFX control.
+     * This method is called on the JavaFX Application Thread.
+     */
+    private static void applyPropertyToControl(javafx.scene.Node control, String propertyName, Object value) {
+        String propLower = propertyName.toLowerCase();
+        
+        switch (propLower) {
+            case "editable" -> {
+                if (value instanceof Boolean) {
+                    boolean boolVal = (Boolean) value;
+                    if (control instanceof javafx.scene.control.TextField) {
+                        ((javafx.scene.control.TextField) control).setEditable(boolVal);
+                    } else if (control instanceof javafx.scene.control.TextArea) {
+                        ((javafx.scene.control.TextArea) control).setEditable(boolVal);
+                    } else if (control instanceof javafx.scene.control.ComboBox) {
+                        ((javafx.scene.control.ComboBox<?>) control).setEditable(boolVal);
+                    }
+                }
+            }
+            case "disabled" -> {
+                if (value instanceof Boolean) {
+                    control.setDisable((Boolean) value);
+                }
+            }
+            case "visible" -> {
+                if (value instanceof Boolean) {
+                    control.setVisible((Boolean) value);
+                }
+            }
+            case "tooltip" -> {
+                if (control instanceof javafx.scene.control.Control) {
+                    String tooltipText = value != null ? String.valueOf(value) : null;
+                    if (tooltipText != null && !tooltipText.isEmpty()) {
+                        ((javafx.scene.control.Control) control).setTooltip(
+                            new javafx.scene.control.Tooltip(tooltipText));
+                    } else {
+                        ((javafx.scene.control.Control) control).setTooltip(null);
+                    }
+                }
+            }
+            case "textcolor" -> {
+                if (value != null) {
+                    String color = String.valueOf(value);
+                    String currentStyle = control.getStyle();
+                    String newStyle = currentStyle == null ? "" : currentStyle;
+                    // Remove old text color if present
+                    newStyle = newStyle.replaceAll("-fx-text-fill:\\s*[^;]+;?", "");
+                    newStyle += " -fx-text-fill: " + color + ";";
+                    control.setStyle(newStyle.trim());
+                }
+            }
+            case "backgroundcolor" -> {
+                if (value != null) {
+                    String color = String.valueOf(value);
+                    String currentStyle = control.getStyle();
+                    String newStyle = currentStyle == null ? "" : currentStyle;
+                    // Remove old background color if present
+                    newStyle = newStyle.replaceAll("-fx-background-color:\\s*[^;]+;?", "");
+                    newStyle += " -fx-background-color: " + color + ";";
+                    control.setStyle(newStyle.trim());
+                }
+            }
+            case "prefwidth" -> {
+                if (control instanceof javafx.scene.layout.Region) {
+                    javafx.scene.layout.Region region = (javafx.scene.layout.Region) control;
+                    if (value != null) {
+                        try {
+                            double width = Double.parseDouble(String.valueOf(value));
+                            region.setPrefWidth(width);
+                        } catch (NumberFormatException e) {
+                            // Ignore invalid width values
+                        }
+                    }
+                }
+            }
+            case "prefheight" -> {
+                if (control instanceof javafx.scene.layout.Region) {
+                    javafx.scene.layout.Region region = (javafx.scene.layout.Region) control;
+                    if (value != null) {
+                        try {
+                            double height = Double.parseDouble(String.valueOf(value));
+                            region.setPrefHeight(height);
+                        } catch (NumberFormatException e) {
+                            // Ignore invalid height values
+                        }
+                    }
+                }
+            }
+            case "minwidth" -> {
+                if (control instanceof javafx.scene.layout.Region) {
+                    javafx.scene.layout.Region region = (javafx.scene.layout.Region) control;
+                    if (value != null) {
+                        try {
+                            double width = Double.parseDouble(String.valueOf(value));
+                            region.setMinWidth(width);
+                        } catch (NumberFormatException e) {
+                            // Ignore invalid width values
+                        }
+                    }
+                }
+            }
+            case "minheight" -> {
+                if (control instanceof javafx.scene.layout.Region) {
+                    javafx.scene.layout.Region region = (javafx.scene.layout.Region) control;
+                    if (value != null) {
+                        try {
+                            double height = Double.parseDouble(String.valueOf(value));
+                            region.setMinHeight(height);
+                        } catch (NumberFormatException e) {
+                            // Ignore invalid height values
+                        }
+                    }
+                }
+            }
+            case "maxwidth" -> {
+                if (control instanceof javafx.scene.layout.Region) {
+                    javafx.scene.layout.Region region = (javafx.scene.layout.Region) control;
+                    if (value != null) {
+                        try {
+                            double width = Double.parseDouble(String.valueOf(value));
+                            region.setMaxWidth(width);
+                        } catch (NumberFormatException e) {
+                            // Ignore invalid width values
+                        }
+                    }
+                }
+            }
+            case "maxheight" -> {
+                if (control instanceof javafx.scene.layout.Region) {
+                    javafx.scene.layout.Region region = (javafx.scene.layout.Region) control;
+                    if (value != null) {
+                        try {
+                            double height = Double.parseDouble(String.valueOf(value));
+                            region.setMaxHeight(height);
+                        } catch (NumberFormatException e) {
+                            // Ignore invalid height values
+                        }
+                    }
+                }
+            }
+            // Note: Other properties like colspan, rowspan, hgrow, vgrow, margin, padding, alignment
+            // are layout-specific and would require re-layouting the parent container to apply.
+            // These are stored in the AreaItem but not directly applied to the control at runtime.
+        }
     }
 }
