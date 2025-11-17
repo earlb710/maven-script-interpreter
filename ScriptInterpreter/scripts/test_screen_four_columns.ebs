@@ -1,0 +1,407 @@
+// Test Script: Four Column Layout with Item Listeners
+// Description: Test screen with items divided in 4 columns with top-to-bottom navigation
+//              Demonstrates item listeners - changes in some fields reflect on other fields
+//              This tests the two-way data binding and listener functionality
+// Author: EBS Test Suite
+// Date: 2025-11-17
+
+screen fourColumnScreen = {
+    "title": "Four Column Layout Test - Item Listeners",
+    "width": 1600,
+    "height": 700,
+    "maximize": false,
+    "vars": [
+        // Shared variables that will be bound to multiple controls
+        // to demonstrate item listeners
+        {
+            "name": "firstName",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "First Name:",
+                "labelTextAlignment": "left",
+                "promptText": "Enter first name"
+            }
+        },
+        {
+            "name": "lastName",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Last Name:",
+                "labelTextAlignment": "left",
+                "promptText": "Enter last name"
+            }
+        },
+        {
+            "name": "fullName",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Full Name:",
+                "labelTextAlignment": "left",
+                "promptText": "Auto-populated"
+            }
+        },
+        // Column 2: Numeric fields with listeners
+        {
+            "name": "quantity",
+            "type": "int",
+            "default": 1,
+            "display": {
+                "type": "spinner",
+                "min": 1,
+                "max": 100,
+                "labelText": "Quantity:",
+                "labelTextAlignment": "left"
+            }
+        },
+        {
+            "name": "price",
+            "type": "int",
+            "default": 10,
+            "display": {
+                "type": "spinner",
+                "min": 1,
+                "max": 1000,
+                "labelText": "Price ($):",
+                "labelTextAlignment": "left"
+            }
+        },
+        {
+            "name": "total",
+            "type": "int",
+            "default": 10,
+            "display": {
+                "type": "textfield",
+                "labelText": "Total ($):",
+                "labelTextAlignment": "left",
+                "promptText": "Auto-calculated"
+            }
+        },
+        // Column 3: Selection fields with mirrors
+        {
+            "name": "category",
+            "type": "string",
+            "default": "Electronics",
+            "display": {
+                "type": "combobox",
+                "labelText": "Category:",
+                "labelTextAlignment": "left",
+                "promptText": "Select category",
+                "options": ["Electronics", "Books", "Clothing", "Food", "Toys"]
+            }
+        },
+        {
+            "name": "priority",
+            "type": "string",
+            "default": "Medium",
+            "display": {
+                "type": "choicebox",
+                "labelText": "Priority:",
+                "labelTextAlignment": "left",
+                "options": ["Low", "Medium", "High", "Urgent"]
+            }
+        },
+        {
+            "name": "categoryMirror",
+            "type": "string",
+            "default": "Electronics",
+            "display": {
+                "type": "textfield",
+                "labelText": "Category Mirror:",
+                "labelTextAlignment": "left",
+                "promptText": "Mirrors selection"
+            }
+        },
+        // Column 4: Additional listener tests
+        {
+            "name": "status",
+            "type": "string",
+            "default": "Active",
+            "display": {
+                "type": "combobox",
+                "labelText": "Status:",
+                "labelTextAlignment": "left",
+                "options": ["Active", "Inactive", "Pending", "Completed"]
+            }
+        },
+        {
+            "name": "notes",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Notes:",
+                "labelTextAlignment": "left",
+                "promptText": "Additional info"
+            }
+        },
+        {
+            "name": "statusMirror",
+            "type": "string",
+            "default": "Active",
+            "display": {
+                "type": "textfield",
+                "labelText": "Status Mirror:",
+                "labelTextAlignment": "left",
+                "promptText": "Reflects status"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "formGrid",
+            "type": "gridpane",
+            "style": "-fx-hgap: 20; -fx-vgap: 15; -fx-padding: 30;",
+            "items": [
+                // Column 0 (First Column) - Items 1-3
+                {
+                    "name": "firstNameField",
+                    "varRef": "firstName",
+                    "sequence": 1,
+                    "layoutPos": "0,0",
+                    "prefWidth": "300"
+                },
+                {
+                    "name": "lastNameField",
+                    "varRef": "lastName",
+                    "sequence": 2,
+                    "layoutPos": "1,0",
+                    "prefWidth": "300"
+                },
+                {
+                    "name": "fullNameField",
+                    "varRef": "fullName",
+                    "sequence": 3,
+                    "layoutPos": "2,0",
+                    "prefWidth": "300"
+                },
+                // Column 1 (Second Column) - Items 4-6
+                {
+                    "name": "quantitySpinner",
+                    "varRef": "quantity",
+                    "sequence": 4,
+                    "layoutPos": "0,1",
+                    "prefWidth": "300"
+                },
+                {
+                    "name": "priceSpinner",
+                    "varRef": "price",
+                    "sequence": 5,
+                    "layoutPos": "1,1",
+                    "prefWidth": "300"
+                },
+                {
+                    "name": "totalField",
+                    "varRef": "total",
+                    "sequence": 6,
+                    "layoutPos": "2,1",
+                    "prefWidth": "300"
+                },
+                // Column 2 (Third Column) - Items 7-9
+                {
+                    "name": "categoryCombo",
+                    "varRef": "category",
+                    "sequence": 7,
+                    "layoutPos": "0,2",
+                    "prefWidth": "300"
+                },
+                {
+                    "name": "priorityChoice",
+                    "varRef": "priority",
+                    "sequence": 8,
+                    "layoutPos": "1,2",
+                    "prefWidth": "300"
+                },
+                {
+                    "name": "categoryMirrorField",
+                    "varRef": "categoryMirror",
+                    "sequence": 9,
+                    "layoutPos": "2,2",
+                    "prefWidth": "300"
+                },
+                // Column 3 (Fourth Column) - Items 10-12
+                {
+                    "name": "statusCombo",
+                    "varRef": "status",
+                    "sequence": 10,
+                    "layoutPos": "0,3",
+                    "prefWidth": "300"
+                },
+                {
+                    "name": "notesField",
+                    "varRef": "notes",
+                    "sequence": 11,
+                    "layoutPos": "1,3",
+                    "prefWidth": "300"
+                },
+                {
+                    "name": "statusMirrorField",
+                    "varRef": "statusMirror",
+                    "sequence": 12,
+                    "layoutPos": "2,3",
+                    "prefWidth": "300"
+                }
+            ]
+        },
+        {
+            "name": "buttonArea",
+            "type": "hbox",
+            "style": "-fx-spacing: 10; -fx-padding: 10; -fx-alignment: center;",
+            "items": [
+                {
+                    "name": "updateNameBtn",
+                    "sequence": 13,
+                    "display": {
+                        "type": "button",
+                        "promptText": "Update Full Name",
+                        "onClick": "fourColumnScreen.fullName = fourColumnScreen.firstName + \" \" + fourColumnScreen.lastName; print \"Full Name updated: \" + fourColumnScreen.fullName;"
+                    }
+                },
+                {
+                    "name": "updateTotalBtn",
+                    "sequence": 14,
+                    "display": {
+                        "type": "button",
+                        "promptText": "Calculate Total",
+                        "onClick": "fourColumnScreen.total = fourColumnScreen.quantity * fourColumnScreen.price; print \"Total calculated: $\" + fourColumnScreen.total;"
+                    }
+                },
+                {
+                    "name": "syncCategoryBtn",
+                    "sequence": 15,
+                    "display": {
+                        "type": "button",
+                        "promptText": "Sync Category",
+                        "onClick": "fourColumnScreen.categoryMirror = fourColumnScreen.category; print \"Category synced: \" + fourColumnScreen.category;"
+                    }
+                },
+                {
+                    "name": "syncStatusBtn",
+                    "sequence": 16,
+                    "display": {
+                        "type": "button",
+                        "promptText": "Sync Status",
+                        "onClick": "fourColumnScreen.statusMirror = fourColumnScreen.status; print \"Status synced: \" + fourColumnScreen.status;"
+                    }
+                },
+                {
+                    "name": "updateAllBtn",
+                    "sequence": 17,
+                    "display": {
+                        "type": "button",
+                        "promptText": "Update All",
+                        "onClick": "fourColumnScreen.fullName = fourColumnScreen.firstName + \" \" + fourColumnScreen.lastName; fourColumnScreen.total = fourColumnScreen.quantity * fourColumnScreen.price; fourColumnScreen.categoryMirror = fourColumnScreen.category; fourColumnScreen.statusMirror = fourColumnScreen.status; print \"All fields updated!\";"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+// Test output
+print "Four Column Layout Test with Item Listeners";
+print "============================================";
+print "";
+print "This screen demonstrates a four-column layout with item listeners:";
+print "- Column 1: First Name, Last Name, Full Name";
+print "- Column 2: Quantity, Price, Total";
+print "- Column 3: Category, Priority, Category Mirror";
+print "- Column 4: Status, Notes, Status Mirror";
+print "";
+print "Item Listener Features:";
+print "- Changes in one field can trigger updates in other fields";
+print "- Buttons demonstrate how to propagate changes between related fields";
+print "- Full Name calculated from First + Last Name";
+print "- Total calculated from Quantity × Price";
+print "- Mirror fields reflect dropdown selections";
+print "";
+print "Initial Values:";
+print "First Name: " + fourColumnScreen.firstName;
+print "Last Name: " + fourColumnScreen.lastName;
+print "Full Name: " + fourColumnScreen.fullName;
+print "Quantity: " + fourColumnScreen.quantity;
+print "Price: $" + fourColumnScreen.price;
+print "Total: $" + fourColumnScreen.total;
+print "Category: " + fourColumnScreen.category;
+print "Priority: " + fourColumnScreen.priority;
+print "Category Mirror: " + fourColumnScreen.categoryMirror;
+print "Status: " + fourColumnScreen.status;
+print "Notes: " + fourColumnScreen.notes;
+print "Status Mirror: " + fourColumnScreen.statusMirror;
+print "";
+
+// Set up initial values to demonstrate listeners
+print "Setting initial test values...";
+fourColumnScreen.firstName = "John";
+fourColumnScreen.lastName = "Doe";
+fourColumnScreen.fullName = fourColumnScreen.firstName + " " + fourColumnScreen.lastName;
+
+fourColumnScreen.quantity = 5;
+fourColumnScreen.price = 20;
+fourColumnScreen.total = fourColumnScreen.quantity * fourColumnScreen.price;
+
+fourColumnScreen.category = "Books";
+fourColumnScreen.categoryMirror = fourColumnScreen.category;
+
+fourColumnScreen.status = "Pending";
+fourColumnScreen.statusMirror = fourColumnScreen.status;
+
+fourColumnScreen.notes = "Testing item listeners";
+
+print "";
+print "Updated Values:";
+print "First Name: " + fourColumnScreen.firstName;
+print "Last Name: " + fourColumnScreen.lastName;
+print "Full Name: " + fourColumnScreen.fullName;
+print "Quantity: " + fourColumnScreen.quantity;
+print "Price: $" + fourColumnScreen.price;
+print "Total: $" + fourColumnScreen.total;
+print "Category: " + fourColumnScreen.category;
+print "Priority: " + fourColumnScreen.priority;
+print "Category Mirror: " + fourColumnScreen.categoryMirror;
+print "Status: " + fourColumnScreen.status;
+print "Notes: " + fourColumnScreen.notes;
+print "Status Mirror: " + fourColumnScreen.statusMirror;
+print "";
+
+// Show the screen
+print "Displaying four column screen...";
+print "";
+print "=== HOW TO TEST ITEM LISTENERS ===";
+print "";
+print "1. EDIT FIELDS:";
+print "   - Change First Name or Last Name fields";
+print "   - Change Quantity or Price spinners";
+print "   - Select different Category or Status from dropdowns";
+print "";
+print "2. CLICK UPDATE BUTTONS:";
+print "   - 'Update Full Name' - combines First + Last Name";
+print "   - 'Calculate Total' - multiplies Quantity × Price";
+print "   - 'Sync Category' - copies Category to Mirror";
+print "   - 'Sync Status' - copies Status to Mirror";
+print "   - 'Update All' - updates all calculated/mirrored fields";
+print "";
+print "3. OBSERVE LISTENER BEHAVIOR:";
+print "   - Watch how button clicks update multiple fields";
+print "   - See how changes propagate to related fields";
+print "   - Notice the two-way data binding in action";
+print "";
+
+screen fourColumnScreen show;
+
+print "";
+print "Test completed!";
+print "";
+print "Navigation order (Tab key):";
+print "Column 1: First Name -> Last Name -> Full Name (items 1-3)";
+print "  -> Column 2: Quantity -> Price -> Total (items 4-6)";
+print "  -> Column 3: Category -> Priority -> Category Mirror (items 7-9)";
+print "  -> Column 4: Status -> Notes -> Status Mirror (items 10-12)";
+print "  -> Buttons: Update Full Name -> Calculate Total -> Sync Category -> Sync Status -> Update All";
+print "";
+print "Enjoy testing the item listeners!";
