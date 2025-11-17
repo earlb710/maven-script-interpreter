@@ -1,15 +1,16 @@
 package com.eb.script.interpreter.screen;
 
+import com.eb.script.arrays.ArrayDef;
+import com.eb.script.file.BuiltinsFile;
+import com.eb.script.file.FileData;
 import com.eb.script.interpreter.InterpreterContext;
 import com.eb.script.interpreter.InterpreterError;
 import com.eb.script.interpreter.screen.AreaDefinition.AreaType;
+import com.eb.script.json.Json;
+import com.eb.script.json.JsonSchema;
+import com.eb.script.json.JsonValidate;
 import com.eb.script.token.DataType;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.networknt.schema.JsonSchema;
-import com.networknt.schema.JsonSchemaFactory;
-import com.networknt.schema.SpecVersion;
-import com.networknt.schema.ValidationMessage;
+import com.eb.util.Util;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -25,41 +26,44 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 /**
- * Factory class for creating complete JavaFX screens/windows from AreaDefinitions.
- * This factory uses AreaContainerFactory and AreaItemFactory to create a fully assembled screen.
- * Includes JSON Schema validation for screen definitions.
+ * Factory class for creating complete JavaFX screens/windows from
+ * AreaDefinitions. This factory uses AreaContainerFactory and AreaItemFactory
+ * to create a fully assembled screen. Includes JSON Schema validation for
+ * screen definitions.
  */
 public class ScreenFactory {
-    
+
     /**
      * Functional interface for executing onClick EBS code
      */
     @FunctionalInterface
     public interface OnClickHandler {
+
         void execute(String ebsCode) throws InterpreterError;
     }
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
-    private static final JsonSchemaFactory schemaFactory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7);
-    private static JsonSchema screenSchema;
-    private static JsonSchema areaSchema;
-    private static JsonSchema displayMetadataSchema;
+    private static Map<String, Object> screenSchema;
+    private static Map<String, Object> areaSchema;
+    private static Map<String, Object> displayMetadataSchema;
 
     static {
         try {
             // Load schemas from resources
-            InputStream screenSchemaStream = ScreenFactory.class.getResourceAsStream("/json/screen-definition.json");
-            InputStream areaSchemaStream = ScreenFactory.class.getResourceAsStream("/json/area-definition.json");
-            InputStream displayMetadataSchemaStream = ScreenFactory.class.getResourceAsStream("/json/display-metadata.json");
+            FileData screenSchemaFile = BuiltinsFile.readTextFile(ScreenFactory.class.getResource("/json/screen-definition.json").getPath());
+            FileData areaSchemaFile = BuiltinsFile.readTextFile(ScreenFactory.class.getResource("/json/area-definition.json").getPath());
+            FileData displayMetadataFile = BuiltinsFile.readTextFile(ScreenFactory.class.getResource("/json/display-metadata.json").getPath());
 
-            if (screenSchemaStream != null) {
-                screenSchema = schemaFactory.getSchema(screenSchemaStream);
+            if (screenSchemaFile != null) {
+                screenSchema = (Map<String, Object>) Json.parse(screenSchemaFile.stringData);
+                JsonValidate.registerSchema("sys.screenSchema", screenSchema);
             }
-            if (areaSchemaStream != null) {
-                areaSchema = schemaFactory.getSchema(areaSchemaStream);
+            if (areaSchemaFile != null) {
+                areaSchema = (Map<String, Object>) Json.parse(areaSchemaFile.stringData);
+                JsonValidate.registerSchema("sys.areaSchema", areaSchema);
             }
-            if (displayMetadataSchemaStream != null) {
-                displayMetadataSchema = schemaFactory.getSchema(displayMetadataSchemaStream);
+            if (displayMetadataFile != null) {
+                displayMetadataSchema = (Map<String, Object>) Json.parse(displayMetadataFile.stringData);
+                JsonValidate.registerSchema("sys.displayMetadataSchema", displayMetadataSchema);
             }
         } catch (Exception e) {
             System.err.println("Warning: Failed to load JSON schemas: " + e.getMessage());
@@ -67,91 +71,104 @@ public class ScreenFactory {
     }
 
     /**
-     * Creates a complete JavaFX window/screen from area definitions.
-     * This method creates containers, adds items, and applies layout properties.
+     * Creates a complete JavaFX window/screen from area definitions. This
+     * method creates containers, adds items, and applies layout properties.
      *
      * @param screenName The name of the screen
      * @param title The window title
      * @param width The window width
      * @param height The window height
      * @param areas List of AreaDefinitions containing containers and items
-     * @param metadataProvider Function to retrieve DisplayItem for variables (screenName, varName) -> metadata
+     * @param metadataProvider Function to retrieve DisplayItem for variables
+     * (screenName, varName) -> metadata
      * @return A Stage representing the complete window
      */
     public static Stage createScreen(String screenName, String title, double width, double height,
-                                      List<AreaDefinition> areas,
-                                      BiFunction<String, String, DisplayItem> metadataProvider) {
+            List<AreaDefinition> areas,
+            BiFunction<String, String, DisplayItem> metadataProvider) {
         return createScreen(screenName, title, width, height, areas, metadataProvider, null, null, null);
     }
 
     /**
-     * Creates a complete JavaFX window/screen from area definitions with variable binding.
-     * This method creates containers, adds items, applies layout properties, and sets up two-way data binding.
+     * Creates a complete JavaFX window/screen from area definitions with
+     * variable binding. This method creates containers, adds items, applies
+     * layout properties, and sets up two-way data binding.
      *
      * @param screenName The name of the screen
      * @param title The window title
      * @param width The window width
      * @param height The window height
      * @param areas List of AreaDefinitions containing containers and items
-     * @param metadataProvider Function to retrieve DisplayItem for variables (screenName, varName) -> metadata
-     * @param screenVars The ConcurrentHashMap containing screen variables for two-way binding (can be null)
+     * @param metadataProvider Function to retrieve DisplayItem for variables
+     * (screenName, varName) -> metadata
+     * @param screenVars The ConcurrentHashMap containing screen variables for
+     * two-way binding (can be null)
      * @return A Stage representing the complete window
      */
     public static Stage createScreen(String screenName, String title, double width, double height,
-                                      List<AreaDefinition> areas,
-                                      BiFunction<String, String, DisplayItem> metadataProvider,
-                                      java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
+            List<AreaDefinition> areas,
+            BiFunction<String, String, DisplayItem> metadataProvider,
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
         return createScreen(screenName, title, width, height, areas, metadataProvider, screenVars, null, null);
     }
 
     /**
-     * Creates a complete JavaFX window/screen from area definitions with variable binding and onClick handlers.
-     * This method creates containers, adds items, applies layout properties, sets up two-way data binding,
-     * and configures button onClick handlers.
+     * Creates a complete JavaFX window/screen from area definitions with
+     * variable binding and onClick handlers. This method creates containers,
+     * adds items, applies layout properties, sets up two-way data binding, and
+     * configures button onClick handlers.
      *
      * @param screenName The name of the screen
      * @param title The window title
      * @param width The window width
      * @param height The window height
      * @param areas List of AreaDefinitions containing containers and items
-     * @param metadataProvider Function to retrieve DisplayItem for variables (screenName, varName) -> metadata
-     * @param screenVars The ConcurrentHashMap containing screen variables for two-way binding (can be null)
-     * @param varTypes The ConcurrentHashMap containing screen variable types for proper type conversion (can be null)
+     * @param metadataProvider Function to retrieve DisplayItem for variables
+     * (screenName, varName) -> metadata
+     * @param screenVars The ConcurrentHashMap containing screen variables for
+     * two-way binding (can be null)
+     * @param varTypes The ConcurrentHashMap containing screen variable types
+     * for proper type conversion (can be null)
      * @param onClickHandler Handler for button onClick events (can be null)
      * @return A Stage representing the complete window
      */
     public static Stage createScreen(String screenName, String title, double width, double height,
-                                      List<AreaDefinition> areas,
-                                      BiFunction<String, String, DisplayItem> metadataProvider,
-                                      java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
-                                      java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
-                                      OnClickHandler onClickHandler) {
+            List<AreaDefinition> areas,
+            BiFunction<String, String, DisplayItem> metadataProvider,
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+            java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
+            OnClickHandler onClickHandler) {
         return createScreen(screenName, title, width, height, areas, metadataProvider, screenVars, varTypes, onClickHandler, null);
     }
 
     /**
-     * Creates a complete JavaFX window/screen from area definitions with variable binding, onClick handlers,
-     * and stores bound controls in the context for later refresh.
+     * Creates a complete JavaFX window/screen from area definitions with
+     * variable binding, onClick handlers, and stores bound controls in the
+     * context for later refresh.
      *
      * @param screenName The name of the screen
      * @param title The window title
      * @param width The window width
      * @param height The window height
      * @param areas List of AreaDefinitions containing containers and items
-     * @param metadataProvider Function to retrieve DisplayItem for variables (screenName, varName) -> metadata
-     * @param screenVars The ConcurrentHashMap containing screen variables for two-way binding (can be null)
-     * @param varTypes The ConcurrentHashMap containing screen variable types for proper type conversion (can be null)
+     * @param metadataProvider Function to retrieve DisplayItem for variables
+     * (screenName, varName) -> metadata
+     * @param screenVars The ConcurrentHashMap containing screen variables for
+     * two-way binding (can be null)
+     * @param varTypes The ConcurrentHashMap containing screen variable types
+     * for proper type conversion (can be null)
      * @param onClickHandler Handler for button onClick events (can be null)
-     * @param context InterpreterContext to store bound controls for later refresh (can be null)
+     * @param context InterpreterContext to store bound controls for later
+     * refresh (can be null)
      * @return A Stage representing the complete window
      */
     public static Stage createScreen(String screenName, String title, double width, double height,
-                                      List<AreaDefinition> areas,
-                                      BiFunction<String, String, DisplayItem> metadataProvider,
-                                      java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
-                                      java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
-                                      OnClickHandler onClickHandler,
-                                      InterpreterContext context) {
+            List<AreaDefinition> areas,
+            BiFunction<String, String, DisplayItem> metadataProvider,
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+            java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
+            OnClickHandler onClickHandler,
+            InterpreterContext context) {
         Stage stage = new Stage();
         stage.setTitle(title);
 
@@ -160,7 +177,7 @@ public class ScreenFactory {
 
         // Create root container - use VBox as default if multiple areas
         Region rootContainer;
-        
+
         if (areas == null || areas.isEmpty()) {
             // No areas defined, create empty pane
             rootContainer = new Pane();
@@ -171,19 +188,19 @@ public class ScreenFactory {
             // Multiple areas - arrange in VBox
             VBox root = new VBox();
             root.setSpacing(10);
-            
+
             for (AreaDefinition areaDef : areas) {
                 Region areaContainer = createAreaWithItems(areaDef, screenName, metadataProvider, screenVars, varTypes, onClickHandler, allBoundControls);
                 root.getChildren().add(areaContainer);
             }
-            
+
             rootContainer = root;
         }
 
         // Store bound controls in context if provided
         if (context != null && !allBoundControls.isEmpty()) {
             context.getScreenBoundControls().put(screenName, allBoundControls);
-            
+
             // Register refresh callback that refreshes all bound controls
             context.getScreenRefreshCallbacks().put(screenName, () -> {
                 // Use Platform.runLater to ensure UI updates happen on JavaFX Application Thread
@@ -198,7 +215,7 @@ public class ScreenFactory {
         scrollPane.setFitToWidth(true);  // Make content fit to scroll pane width
         scrollPane.setFitToHeight(false); // Allow vertical scrolling when needed
         scrollPane.setStyle("-fx-background-color: transparent;");
-        
+
         Scene scene = new Scene(scrollPane, width, height);
         stage.setScene(scene);
 
@@ -209,48 +226,51 @@ public class ScreenFactory {
      * Creates a container from AreaDefinition and adds all items to it.
      */
     private static Region createAreaWithItems(AreaDefinition areaDef, String screenName,
-                                               BiFunction<String, String, DisplayItem> metadataProvider) {
+            BiFunction<String, String, DisplayItem> metadataProvider) {
         return createAreaWithItems(areaDef, screenName, metadataProvider, null, null, null);
     }
 
     /**
-     * Creates a container from AreaDefinition and adds all items to it with variable binding.
+     * Creates a container from AreaDefinition and adds all items to it with
+     * variable binding.
      */
     private static Region createAreaWithItems(AreaDefinition areaDef, String screenName,
-                                               BiFunction<String, String, DisplayItem> metadataProvider,
-                                               java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
+            BiFunction<String, String, DisplayItem> metadataProvider,
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
         return createAreaWithItems(areaDef, screenName, metadataProvider, screenVars, null, null);
     }
 
     /**
-     * Creates a container from AreaDefinition and adds all items to it with variable binding and onClick handler.
+     * Creates a container from AreaDefinition and adds all items to it with
+     * variable binding and onClick handler.
      */
     private static Region createAreaWithItems(AreaDefinition areaDef, String screenName,
-                                               BiFunction<String, String, DisplayItem> metadataProvider,
-                                               java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
-                                               java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
-                                               OnClickHandler onClickHandler) {
+            BiFunction<String, String, DisplayItem> metadataProvider,
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+            java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
+            OnClickHandler onClickHandler) {
         List<Node> boundControls = new ArrayList<>();
         return createAreaWithItems(areaDef, screenName, metadataProvider, screenVars, varTypes, onClickHandler, boundControls);
     }
 
     /**
-     * Creates a container from AreaDefinition and adds all items to it with variable binding, onClick handler, and control tracking.
+     * Creates a container from AreaDefinition and adds all items to it with
+     * variable binding, onClick handler, and control tracking.
      */
     private static Region createAreaWithItems(AreaDefinition areaDef, String screenName,
-                                               BiFunction<String, String, DisplayItem> metadataProvider,
-                                               java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
-                                               java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
-                                               OnClickHandler onClickHandler,
-                                               List<Node> boundControls) {
+            BiFunction<String, String, DisplayItem> metadataProvider,
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+            java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
+            OnClickHandler onClickHandler,
+            List<Node> boundControls) {
         // Create the container using AreaContainerFactory
         Region container = AreaContainerFactory.createContainer(areaDef);
 
         // Sort items by sequence
         if (areaDef.items != null && !areaDef.items.isEmpty()) {
             List<AreaItem> sortedItems = areaDef.items.stream()
-                .sorted(Comparator.comparingInt(item -> item.sequence))
-                .toList();
+                    .sorted(Comparator.comparingInt(item -> item.sequence))
+                    .toList();
 
             // First pass: Calculate maximum label width for alignment
             double maxLabelWidth = calculateMaxLabelWidth(sortedItems, screenName, metadataProvider);
@@ -271,15 +291,15 @@ public class ScreenFactory {
                 Node nodeToAdd = control;
                 if (metadata != null && metadata.labelText != null && !metadata.labelText.isEmpty()) {
                     // Only wrap input controls, not Label or Button which display their own text
-                    if (!(control instanceof javafx.scene.control.Label) && 
-                        !(control instanceof javafx.scene.control.Button)) {
+                    if (!(control instanceof javafx.scene.control.Label)
+                            && !(control instanceof javafx.scene.control.Button)) {
                         nodeToAdd = createLabeledControl(metadata.labelText, metadata.labelTextAlignment, control, maxLabelWidth, metadata);
                     }
                 } else {
                     // No label specified - wrap control in HBox with left padding to align with labeled controls
                     // This ensures controls without labels still align properly with labeled controls
-                    if (!(control instanceof javafx.scene.control.Label) && 
-                        !(control instanceof javafx.scene.control.Button)) {
+                    if (!(control instanceof javafx.scene.control.Label)
+                            && !(control instanceof javafx.scene.control.Button)) {
                         javafx.scene.layout.HBox alignmentBox = new javafx.scene.layout.HBox();
                         alignmentBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
                         // Add left padding equal to label width plus spacing to align with labeled controls
@@ -322,12 +342,12 @@ public class ScreenFactory {
                 addItemToContainer(container, nodeToAdd, item, areaDef.areaType);
             }
         }
-        
+
         // Add nested child areas to the container
         if (areaDef.childAreas != null && !areaDef.childAreas.isEmpty()) {
             for (AreaDefinition childArea : areaDef.childAreas) {
                 Region childContainer = createAreaWithItems(childArea, screenName, metadataProvider, screenVars, varTypes, onClickHandler, boundControls);
-                
+
                 // Add the child container to the parent container
                 // Treat child areas as regular nodes
                 addChildAreaToContainer(container, childContainer, areaDef.areaType);
@@ -338,63 +358,76 @@ public class ScreenFactory {
     }
 
     /**
-     * Applies layout properties from AreaItem to the control.
-     * These are the properties NOT applied by AreaItemFactory (which only applies display properties).
+     * Applies layout properties from AreaItem to the control. These are the
+     * properties NOT applied by AreaItemFactory (which only applies display
+     * properties).
      */
     private static void applyItemLayoutProperties(Node control, AreaItem item) {
         // Apply sizing properties
         if (control instanceof Region) {
             Region region = (Region) control;
-            
+
             if (item.prefWidth != null && !item.prefWidth.isEmpty()) {
                 try {
                     double width = parseSize(item.prefWidth);
-                    if (width > 0) region.setPrefWidth(width);
+                    if (width > 0) {
+                        region.setPrefWidth(width);
+                    }
                 } catch (NumberFormatException e) {
                     // Ignore invalid values
                 }
             }
-            
+
             if (item.prefHeight != null && !item.prefHeight.isEmpty()) {
                 try {
                     double height = parseSize(item.prefHeight);
-                    if (height > 0) region.setPrefHeight(height);
+                    if (height > 0) {
+                        region.setPrefHeight(height);
+                    }
                 } catch (NumberFormatException e) {
                     // Ignore invalid values
                 }
             }
-            
+
             if (item.minWidth != null && !item.minWidth.isEmpty()) {
                 try {
                     double width = parseSize(item.minWidth);
-                    if (width > 0) region.setMinWidth(width);
+                    if (width > 0) {
+                        region.setMinWidth(width);
+                    }
                 } catch (NumberFormatException e) {
                     // Ignore invalid values
                 }
             }
-            
+
             if (item.minHeight != null && !item.minHeight.isEmpty()) {
                 try {
                     double height = parseSize(item.minHeight);
-                    if (height > 0) region.setMinHeight(height);
+                    if (height > 0) {
+                        region.setMinHeight(height);
+                    }
                 } catch (NumberFormatException e) {
                     // Ignore invalid values
                 }
             }
-            
+
             if (item.maxWidth != null && !item.maxWidth.isEmpty()) {
                 try {
                     double width = parseSize(item.maxWidth);
-                    if (width > 0) region.setMaxWidth(width);
+                    if (width > 0) {
+                        region.setMaxWidth(width);
+                    }
                 } catch (NumberFormatException e) {
                     // Ignore invalid values
                 }
             }
-            
+
             if (item.maxHeight != null && !item.maxHeight.isEmpty()) {
                 try {
                     double height = parseSize(item.maxHeight);
-                    if (height > 0) region.setMaxHeight(height);
+                    if (height > 0) {
+                        region.setMaxHeight(height);
+                    }
                 } catch (NumberFormatException e) {
                     // Ignore invalid values
                 }
@@ -422,7 +455,7 @@ public class ScreenFactory {
         if (container instanceof VBox) {
             VBox vbox = (VBox) container;
             vbox.getChildren().add(control);
-            
+
             // Apply VBox-specific properties
             if (item.vgrow != null && !item.vgrow.isEmpty()) {
                 try {
@@ -432,11 +465,11 @@ public class ScreenFactory {
                     // Ignore invalid values
                 }
             }
-            
+
         } else if (container instanceof HBox) {
             HBox hbox = (HBox) container;
             hbox.getChildren().add(control);
-            
+
             // Apply HBox-specific properties
             if (item.hgrow != null && !item.hgrow.isEmpty()) {
                 try {
@@ -446,10 +479,10 @@ public class ScreenFactory {
                     // Ignore invalid values
                 }
             }
-            
+
         } else if (container instanceof GridPane) {
             GridPane gridPane = (GridPane) container;
-            
+
             // Parse layoutPos for row, col
             int row = 0;
             int col = 0;
@@ -464,9 +497,9 @@ public class ScreenFactory {
                     }
                 }
             }
-            
+
             gridPane.add(control, col, row);
-            
+
             // Apply column and row span
             if (item.colSpan != null && item.colSpan > 1) {
                 GridPane.setColumnSpan(control, item.colSpan);
@@ -474,7 +507,7 @@ public class ScreenFactory {
             if (item.rowSpan != null && item.rowSpan > 1) {
                 GridPane.setRowSpan(control, item.rowSpan);
             }
-            
+
             // Apply grid grow priorities
             if (item.hgrow != null && !item.hgrow.isEmpty()) {
                 try {
@@ -492,13 +525,13 @@ public class ScreenFactory {
                     // Ignore invalid values
                 }
             }
-            
+
         } else if (container instanceof BorderPane) {
             BorderPane borderPane = (BorderPane) container;
-            
+
             // Parse layoutPos for position (top, bottom, left, right, center)
             String position = item.layoutPos != null ? item.layoutPos.toLowerCase() : "center";
-            
+
             switch (position) {
                 case "top":
                     borderPane.setTop(control);
@@ -517,11 +550,11 @@ public class ScreenFactory {
                     borderPane.setCenter(control);
                     break;
             }
-            
+
         } else if (container instanceof StackPane) {
             StackPane stackPane = (StackPane) container;
             stackPane.getChildren().add(control);
-            
+
             // Apply alignment if specified
             if (item.alignment != null && !item.alignment.isEmpty()) {
                 try {
@@ -531,19 +564,19 @@ public class ScreenFactory {
                     // Ignore invalid values
                 }
             }
-            
+
         } else if (container instanceof FlowPane) {
             FlowPane flowPane = (FlowPane) container;
             flowPane.getChildren().add(control);
-            
+
         } else if (container instanceof TilePane) {
             TilePane tilePane = (TilePane) container;
             tilePane.getChildren().add(control);
-            
+
         } else if (container instanceof AnchorPane) {
             AnchorPane anchorPane = (AnchorPane) container;
             anchorPane.getChildren().add(control);
-            
+
             // Parse layoutPos for anchor constraints (e.g., "10,20,30,40" for top,right,bottom,left)
             if (item.layoutPos != null && !item.layoutPos.isEmpty()) {
                 String[] parts = item.layoutPos.split(",");
@@ -553,17 +586,25 @@ public class ScreenFactory {
                         double right = Double.parseDouble(parts[1].trim());
                         double bottom = Double.parseDouble(parts[2].trim());
                         double left = Double.parseDouble(parts[3].trim());
-                        
-                        if (top >= 0) AnchorPane.setTopAnchor(control, top);
-                        if (right >= 0) AnchorPane.setRightAnchor(control, right);
-                        if (bottom >= 0) AnchorPane.setBottomAnchor(control, bottom);
-                        if (left >= 0) AnchorPane.setLeftAnchor(control, left);
+
+                        if (top >= 0) {
+                            AnchorPane.setTopAnchor(control, top);
+                        }
+                        if (right >= 0) {
+                            AnchorPane.setRightAnchor(control, right);
+                        }
+                        if (bottom >= 0) {
+                            AnchorPane.setBottomAnchor(control, bottom);
+                        }
+                        if (left >= 0) {
+                            AnchorPane.setLeftAnchor(control, left);
+                        }
                     } catch (NumberFormatException e) {
                         // Ignore invalid values
                     }
                 }
             }
-            
+
         } else if (container instanceof Pane) {
             // Generic Pane - just add the control
             ((Pane) container).getChildren().add(control);
@@ -571,8 +612,8 @@ public class ScreenFactory {
     }
 
     /**
-     * Adds a child area (nested container) to a parent container.
-     * Similar to addItemToContainer but for child areas.
+     * Adds a child area (nested container) to a parent container. Similar to
+     * addItemToContainer but for child areas.
      */
     private static void addChildAreaToContainer(Region container, Region childArea, AreaType areaType) {
         if (container instanceof VBox) {
@@ -602,16 +643,16 @@ public class ScreenFactory {
     }
 
     /**
-     * Parse size string to double value.
-     * Supports plain numbers and percentages (e.g., "300", "50%").
+     * Parse size string to double value. Supports plain numbers and percentages
+     * (e.g., "300", "50%").
      */
     private static double parseSize(String size) {
         if (size == null || size.isEmpty()) {
             return -1;
         }
-        
+
         size = size.trim();
-        
+
         if (size.endsWith("%")) {
             // Percentage - not directly supported, return -1
             return -1;
@@ -623,8 +664,8 @@ public class ScreenFactory {
     }
 
     /**
-     * Parse insets string to Insets object.
-     * Supports formats: "10" (all), "10 5" (vertical horizontal), "10 5 10 5" (top right bottom left).
+     * Parse insets string to Insets object. Supports formats: "10" (all), "10
+     * 5" (vertical horizontal), "10 5 10 5" (top right bottom left).
      */
     private static Insets parseInsets(String insetsStr) {
         if (insetsStr == null || insetsStr.isEmpty()) {
@@ -632,7 +673,7 @@ public class ScreenFactory {
         }
 
         String[] parts = insetsStr.trim().split("\\s+");
-        
+
         try {
             if (parts.length == 1) {
                 double all = Double.parseDouble(parts[0]);
@@ -651,7 +692,7 @@ public class ScreenFactory {
         } catch (NumberFormatException e) {
             // Return null for invalid format
         }
-        
+
         return null;
     }
 
@@ -664,7 +705,7 @@ public class ScreenFactory {
         }
 
         String normalized = alignment.toUpperCase().replace("-", "_").replace(" ", "_");
-        
+
         try {
             return Pos.valueOf(normalized);
         } catch (IllegalArgumentException e) {
@@ -686,29 +727,32 @@ public class ScreenFactory {
     }
 
     /**
-     * Convenience method to create and show a screen on the JavaFX Application Thread.
+     * Convenience method to create and show a screen on the JavaFX Application
+     * Thread.
      */
     public static void createAndShowScreen(String screenName, String title, double width, double height,
-                                            List<AreaDefinition> areas,
-                                            BiFunction<String, String, DisplayItem> metadataProvider,
-                                            boolean maximize) {
+            List<AreaDefinition> areas,
+            BiFunction<String, String, DisplayItem> metadataProvider,
+            boolean maximize) {
         Platform.runLater(() -> {
             Stage stage = createScreen(screenName, title, width, height, areas, metadataProvider);
-            
+
             if (maximize) {
                 stage.setMaximized(true);
             }
-            
+
             stage.show();
         });
     }
 
     /**
-     * Creates a complete JavaFX window/screen from a Map-based screen definition (JSON/EBS format).
-     * This method parses the screen definition and creates the window.
-     * Validates the screen definition against the JSON schema if validation is enabled.
+     * Creates a complete JavaFX window/screen from a Map-based screen
+     * definition (JSON/EBS format). This method parses the screen definition
+     * and creates the window. Validates the screen definition against the JSON
+     * schema if validation is enabled.
      *
-     * @param screenDef Map containing screen definition with keys: name, title, width, height, vars, area
+     * @param screenDef Map containing screen definition with keys: name, title,
+     * width, height, vars, area
      * @return A Stage representing the complete window
      * @throws IllegalArgumentException if the screen definition is invalid
      */
@@ -717,10 +761,12 @@ public class ScreenFactory {
     }
 
     /**
-     * Creates a complete JavaFX window/screen from a Map-based screen definition (JSON/EBS format).
-     * This method parses the screen definition and creates the window.
+     * Creates a complete JavaFX window/screen from a Map-based screen
+     * definition (JSON/EBS format). This method parses the screen definition
+     * and creates the window.
      *
-     * @param screenDef Map containing screen definition with keys: name, title, width, height, vars, area
+     * @param screenDef Map containing screen definition with keys: name, title,
+     * width, height, vars, area
      * @param validate Whether to validate against JSON schema
      * @return A Stage representing the complete window
      * @throws IllegalArgumentException if the screen definition is invalid
@@ -782,8 +828,8 @@ public class ScreenFactory {
         }
 
         // Create metadata provider from map
-        BiFunction<String, String, DisplayItem> metadataProvider = 
-            (sName, varName) -> metadataMap.get(varName);
+        BiFunction<String, String, DisplayItem> metadataProvider
+                = (sName, varName) -> metadataMap.get(varName);
 
         return createScreen(screenName, title, width, height, areas, metadataProvider);
     }
@@ -793,33 +839,33 @@ public class ScreenFactory {
      */
     private static AreaDefinition parseAreaDefinition(Map<String, Object> areaDef, String screenName) {
         AreaDefinition area = new AreaDefinition();
-        
+
         // Extract area name (required)
         area.name = getStringValue(areaDef, "name", "area");
-        
+
         // Extract area type and convert to enum
         String typeStr = getStringValue(areaDef, "type", "pane");
         area.type = typeStr.toLowerCase();
         area.areaType = AreaType.fromString(area.type);
-        
+
         // Set CSS class from enum
         area.cssClass = area.areaType.getCssClass();
-        
+
         // Extract layout configuration
         area.layout = getStringValue(areaDef, "layout", null);
-        
+
         // Extract or set default style
         area.style = getStringValue(areaDef, "style", area.areaType.getDefaultStyle());
-        
+
         area.screenName = screenName;
-        
+
         // Process items in the area
         if (areaDef.containsKey("items")) {
             Object itemsObj = areaDef.get("items");
             if (itemsObj instanceof List) {
                 @SuppressWarnings("unchecked")
                 List<Object> itemsList = (List<Object>) itemsObj;
-                
+
                 for (Object itemObj : itemsList) {
                     if (itemObj instanceof Map) {
                         @SuppressWarnings("unchecked")
@@ -830,14 +876,14 @@ public class ScreenFactory {
                 }
             }
         }
-        
+
         // Process nested child areas (areas within areas)
         if (areaDef.containsKey("areas")) {
             Object areasObj = areaDef.get("areas");
             if (areasObj instanceof List) {
                 @SuppressWarnings("unchecked")
                 List<Object> areasList = (List<Object>) areasObj;
-                
+
                 for (Object childAreaObj : areasList) {
                     if (childAreaObj instanceof Map) {
                         @SuppressWarnings("unchecked")
@@ -848,7 +894,7 @@ public class ScreenFactory {
                 }
             }
         }
-        
+
         return area;
     }
 
@@ -857,19 +903,19 @@ public class ScreenFactory {
      */
     private static AreaItem parseAreaItem(Map<String, Object> itemDef, String screenName) {
         AreaItem item = new AreaItem();
-        
+
         // Extract item properties
         item.name = getStringValue(itemDef, "name", null);
         // Support both "sequence" and "seq" for compactness
         item.sequence = getIntValue(itemDef, "sequence", getIntValue(itemDef, "seq", 0));
         item.varRef = getStringValue(itemDef, "varRef", getStringValue(itemDef, "var_ref", null));
-        
+
         // Layout position (support multiple naming conventions)
-        item.layoutPos = getStringValue(itemDef, "layoutPos", 
-                        getStringValue(itemDef, "layout_pos",
+        item.layoutPos = getStringValue(itemDef, "layoutPos",
+                getStringValue(itemDef, "layout_pos",
                         getStringValue(itemDef, "relativePos",
-                        getStringValue(itemDef, "relative_pos", null))));
-        
+                                getStringValue(itemDef, "relative_pos", null))));
+
         // Process optional display metadata for the item
         if (itemDef.containsKey("display")) {
             Object displayObj = itemDef.get("display");
@@ -879,7 +925,7 @@ public class ScreenFactory {
                 item.displayItem = parseDisplayItem(displayDef, screenName);
             }
         }
-        
+
         // UI properties
         // promptText now goes into displayItem
         String promptText = getStringValue(itemDef, "promptText", getStringValue(itemDef, "prompt_text", null));
@@ -896,7 +942,7 @@ public class ScreenFactory {
         item.visible = getBooleanValue(itemDef, "visible", null);
         item.textColor = getStringValue(itemDef, "textColor", getStringValue(itemDef, "text_color", null));
         item.backgroundColor = getStringValue(itemDef, "backgroundColor", getStringValue(itemDef, "background_color", null));
-        
+
         // Layout properties
         item.colSpan = getIntValue(itemDef, "colSpan", getIntValue(itemDef, "col_span", null));
         item.rowSpan = getIntValue(itemDef, "rowSpan", getIntValue(itemDef, "row_span", null));
@@ -911,7 +957,7 @@ public class ScreenFactory {
         item.maxWidth = getStringValue(itemDef, "maxWidth", getStringValue(itemDef, "max_width", null));
         item.maxHeight = getStringValue(itemDef, "maxHeight", getStringValue(itemDef, "max_height", null));
         item.alignment = getStringValue(itemDef, "alignment", null);
-        
+
         return item;
     }
 
@@ -920,20 +966,20 @@ public class ScreenFactory {
      */
     private static DisplayItem parseDisplayItem(Map<String, Object> displayDef, String screenName) {
         DisplayItem metadata = new DisplayItem();
-        
+
         // Extract display type and convert to enum
         String typeStr = getStringValue(displayDef, "type", "textfield");
         metadata.type = typeStr.toLowerCase();
         metadata.itemType = DisplayItem.ItemType.fromString(metadata.type);
-        
+
         // Set CSS class from enum
         metadata.cssClass = metadata.itemType.getCssClass();
-        
+
         metadata.mandatory = getBooleanValue(displayDef, "mandatory", false);
         metadata.caseFormat = getStringValue(displayDef, "case", null);
         metadata.alignment = getStringValue(displayDef, "alignment", null);
         metadata.pattern = getStringValue(displayDef, "pattern", null);
-        
+
         // Min and max can be various types
         if (displayDef.containsKey("min")) {
             metadata.min = displayDef.get("min");
@@ -941,16 +987,15 @@ public class ScreenFactory {
         if (displayDef.containsKey("max")) {
             metadata.max = displayDef.get("max");
         }
-        
+
         // Extract or set default style
         metadata.style = getStringValue(displayDef, "style", metadata.itemType.getDefaultStyle());
         metadata.screenName = screenName;
-        
+
         return metadata;
     }
 
     // Helper methods for safe value extraction from Maps
-
     private static String getStringValue(Map<String, Object> map, String key, String defaultValue) {
         if (map.containsKey(key.toLowerCase())) {
             Object value = map.get(key);
@@ -1001,39 +1046,39 @@ public class ScreenFactory {
     }
 
     /**
-     * Calculates the maximum label width needed for proper alignment.
-     * This ensures all labels in a form have consistent width.
+     * Calculates the maximum label width needed for proper alignment. This
+     * ensures all labels in a form have consistent width.
      *
      * @param items The list of items to check for labels
      * @param screenName The screen name
      * @param metadataProvider Provider to get metadata for items
      * @return The maximum label width in pixels
      */
-    private static double calculateMaxLabelWidth(List<AreaItem> items, String screenName, 
-                                                  BiFunction<String, String, DisplayItem> metadataProvider) {
+    private static double calculateMaxLabelWidth(List<AreaItem> items, String screenName,
+            BiFunction<String, String, DisplayItem> metadataProvider) {
         double maxWidth = 100; // Minimum width
         javafx.scene.text.Text measuringText = new javafx.scene.text.Text();
-        
+
         for (AreaItem item : items) {
             DisplayItem metadata = item.displayItem;
             if (metadata == null && item.varRef != null && metadataProvider != null) {
                 metadata = metadataProvider.apply(screenName, item.varRef);
             }
-            
+
             // Only measure labels for controls that will be wrapped (not Label or Button controls)
             if (metadata != null && metadata.labelText != null && !metadata.labelText.isEmpty()) {
                 // Check if this is a control that will have a label wrapper
-                if (metadata.itemType != DisplayItem.ItemType.LABEL && 
-                    metadata.itemType != DisplayItem.ItemType.LABELTEXT &&
-                    metadata.itemType != DisplayItem.ItemType.BUTTON) {
-                    
+                if (metadata.itemType != DisplayItem.ItemType.LABEL
+                        && metadata.itemType != DisplayItem.ItemType.LABELTEXT
+                        && metadata.itemType != DisplayItem.ItemType.BUTTON) {
+
                     // Set font style based on metadata
                     String fontStyle = "-fx-font-weight: normal;";
                     if (metadata.labelFontSize != null && !metadata.labelFontSize.isEmpty()) {
                         fontStyle += " -fx-font-size: " + metadata.labelFontSize + ";";
                     }
                     measuringText.setStyle(fontStyle);
-                    
+
                     // Handle multiline labels by splitting on \n and measuring the longest line
                     String labelText = metadata.labelText;
                     if (labelText.contains("\n")) {
@@ -1060,61 +1105,63 @@ public class ScreenFactory {
                 }
             }
         }
-        
+
         return maxWidth;
     }
 
     /**
-     * Creates a labeled control by wrapping the control with a label.
-     * The label is displayed based on the specified alignment.
+     * Creates a labeled control by wrapping the control with a label. The label
+     * is displayed based on the specified alignment.
      *
      * @param labelText The text for the label
-     * @param alignment The alignment: "left", "center", "right" (default: "left")
+     * @param alignment The alignment: "left", "center", "right" (default:
+     * "left")
      * @param control The control to label
      * @param minWidth The minimum width for the label for alignment consistency
-     * @param metadata The display metadata containing font size and styling information
+     * @param metadata The display metadata containing font size and styling
+     * information
      * @return A container with the label and control
      */
     private static Node createLabeledControl(String labelText, String alignment, Node control, double minWidth, DisplayItem metadata) {
         javafx.scene.control.Label label = new javafx.scene.control.Label(labelText);
-        
+
         // Build label style with right alignment and padding
         StringBuilder styleBuilder = new StringBuilder("-fx-font-weight: normal; -fx-padding: 0 10 0 0; -fx-alignment: center-right;");
-        
+
         // Apply label styling from metadata
         if (metadata != null) {
             // Apply font size if specified
             if (metadata.labelFontSize != null && !metadata.labelFontSize.isEmpty()) {
                 styleBuilder.append(" -fx-font-size: ").append(metadata.labelFontSize).append(";");
             }
-            
+
             // Apply label color if specified
             if (metadata.labelColor != null && !metadata.labelColor.isEmpty()) {
                 styleBuilder.append(" -fx-text-fill: ").append(metadata.labelColor).append(";");
             }
-            
+
             // Apply bold if specified
             if (metadata.labelBold != null && metadata.labelBold) {
                 styleBuilder.append(" -fx-font-weight: bold;");
             }
-            
+
             // Apply italic if specified
             if (metadata.labelItalic != null && metadata.labelItalic) {
                 styleBuilder.append(" -fx-font-style: italic;");
             }
         }
-        
+
         label.setStyle(styleBuilder.toString());
         label.setMinWidth(minWidth); // Use calculated minimum width to align labels underneath each other
         label.setMaxWidth(Region.USE_PREF_SIZE);
-        
+
         // Determine alignment (default to left if not specified)
         String actualAlignment = (alignment != null) ? alignment.toLowerCase() : "left";
-        
+
         // Create container based on alignment
         javafx.scene.layout.HBox container = new javafx.scene.layout.HBox(5);
         container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-        
+
         switch (actualAlignment) {
             case "right":
                 // Control first, then label on the right
@@ -1133,13 +1180,14 @@ public class ScreenFactory {
                 container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
                 break;
         }
-        
+
         return container;
     }
 
     /**
      * Sets up two-way data binding between a UI control and a screen variable.
-     * When the variable changes, the UI updates. When the UI changes, the variable updates.
+     * When the variable changes, the UI updates. When the UI changes, the
+     * variable updates.
      *
      * @param control The JavaFX control to bind
      * @param varName The variable name
@@ -1147,9 +1195,9 @@ public class ScreenFactory {
      * @param metadata The DisplayItem metadata for the control
      */
     private static void setupVariableBinding(Node control, String varName,
-                                              java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
-                                              java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
-                                              DisplayItem metadata) {
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+            java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
+            DisplayItem metadata) {
         if (control == null || varName == null || screenVars == null) {
             return;
         }
@@ -1209,12 +1257,13 @@ public class ScreenFactory {
     }
 
     /**
-     * Adds a listener to a control to update the variable when the control changes.
+     * Adds a listener to a control to update the variable when the control
+     * changes.
      */
     private static void addControlListener(Node control, String varName,
-                                            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
-                                            java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
-                                            DisplayItem metadata) {
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+            java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
+            DisplayItem metadata) {
         if (control instanceof javafx.scene.control.TextField) {
             ((javafx.scene.control.TextField) control).textProperty().addListener((obs, oldVal, newVal) -> {
                 // Convert the string value to the appropriate type if type info is available
@@ -1269,19 +1318,20 @@ public class ScreenFactory {
     }
 
     /**
-     * Refreshes all bound controls by updating their values from the screenVars map.
-     * This is called after onClick handlers execute to reflect variable changes in the UI.
+     * Refreshes all bound controls by updating their values from the screenVars
+     * map. This is called after onClick handlers execute to reflect variable
+     * changes in the UI.
      */
-    private static void refreshBoundControls(List<Node> boundControls, 
-                                              java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
+    private static void refreshBoundControls(List<Node> boundControls,
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
         if (boundControls == null || screenVars == null) {
             return;
         }
-        
+
         for (Node control : boundControls) {
             String varName = (String) control.getProperties().get("varName");
             DisplayItem metadata = (DisplayItem) control.getProperties().get("metadata");
-            
+
             if (varName != null) {
                 Object currentValue = screenVars.get(varName);
                 updateControlFromValue(control, currentValue, metadata);
@@ -1290,10 +1340,9 @@ public class ScreenFactory {
     }
 
     // Schema validation methods
-
     /**
      * Validates a screen definition against the JSON schema.
-     * 
+     *
      * @param screenDef The screen definition to validate
      * @throws IllegalArgumentException if validation fails
      */
@@ -1304,14 +1353,9 @@ public class ScreenFactory {
         }
 
         try {
-            JsonNode jsonNode = objectMapper.valueToTree(screenDef);
-            Set<ValidationMessage> errors = screenSchema.validate(jsonNode);
-            
+            Map<String, ArrayDef> errors = JsonSchema.validate(screenDef, screenSchema);
             if (!errors.isEmpty()) {
-                String errorMessage = "Screen definition validation failed:\n" +
-                    errors.stream()
-                        .map(ValidationMessage::getMessage)
-                        .collect(Collectors.joining("\n"));
+                String errorMessage = "Screen definition validation failed:\n" + Util.stringify(errors);
                 throw new IllegalArgumentException(errorMessage);
             }
         } catch (Exception e) {
@@ -1324,7 +1368,7 @@ public class ScreenFactory {
 
     /**
      * Validates an area definition against the JSON schema.
-     * 
+     *
      * @param areaDef The area definition to validate
      * @throws IllegalArgumentException if validation fails
      */
@@ -1335,14 +1379,10 @@ public class ScreenFactory {
         }
 
         try {
-            JsonNode jsonNode = objectMapper.valueToTree(areaDef);
-            Set<ValidationMessage> errors = areaSchema.validate(jsonNode);
-            
+            Map<String, ArrayDef> errors = JsonSchema.validate(areaSchema, areaSchema);
+
             if (!errors.isEmpty()) {
-                String errorMessage = "Area definition validation failed:\n" +
-                    errors.stream()
-                        .map(ValidationMessage::getMessage)
-                        .collect(Collectors.joining("\n"));
+                String errorMessage = "Area definition validation failed:\n" + Util.stringify(errors);
                 throw new IllegalArgumentException(errorMessage);
             }
         } catch (Exception e) {
@@ -1355,7 +1395,7 @@ public class ScreenFactory {
 
     /**
      * Validates display metadata against the JSON schema.
-     * 
+     *
      * @param displayDef The display metadata to validate
      * @throws IllegalArgumentException if validation fails
      */
@@ -1366,14 +1406,10 @@ public class ScreenFactory {
         }
 
         try {
-            JsonNode jsonNode = objectMapper.valueToTree(displayDef);
-            Set<ValidationMessage> errors = displayMetadataSchema.validate(jsonNode);
-            
+            Map<String, ArrayDef> errors = JsonSchema.validate(displayDef, displayMetadataSchema);
+
             if (!errors.isEmpty()) {
-                String errorMessage = "Display metadata validation failed:\n" +
-                    errors.stream()
-                        .map(ValidationMessage::getMessage)
-                        .collect(Collectors.joining("\n"));
+                String errorMessage = "Display metadata validation failed:\n" + Util.stringify(errors);
                 throw new IllegalArgumentException(errorMessage);
             }
         } catch (Exception e) {
@@ -1386,7 +1422,7 @@ public class ScreenFactory {
 
     /**
      * Checks if schema validation is available.
-     * 
+     *
      * @return true if schemas are loaded and validation is available
      */
     public static boolean isValidationAvailable() {
