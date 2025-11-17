@@ -1,0 +1,84 @@
+// TEST: screen.getItemList function
+print "=== Testing Screen.getItemList Function ===";
+
+// Create a test screen with multiple items
+screen testScreen = {
+    "title": "Item List Test",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "field1",
+            "type": "string",
+            "default": "Value 1"
+        },
+        {
+            "name": "field2",
+            "type": "string",
+            "default": "Value 2"
+        },
+        {
+            "name": "field3",
+            "type": "int",
+            "default": 42
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "items": [
+                {
+                    "name": "item1",
+                    "sequence": 0,
+                    "varRef": "field1",
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Field 1:"
+                    }
+                },
+                {
+                    "name": "item2",
+                    "sequence": 1,
+                    "varRef": "field2",
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Field 2:"
+                    }
+                },
+                {
+                    "name": "item3",
+                    "sequence": 2,
+                    "varRef": "field3",
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Field 3:"
+                    }
+                },
+                {
+                    "name": "submitBtn",
+                    "sequence": 3,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Submit"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+// Test getting the item list
+print "Getting item list from screen 'testScreen'...";
+var itemList = call screen.getItemList("testScreen");
+
+print "Number of items: " + itemList.length;
+print "Item names:";
+
+var i = 0;
+while i < itemList.length {
+    print "  [" + i + "] " + itemList[i];
+    i = i + 1;
+}
+
+print "\nTest completed successfully!";
