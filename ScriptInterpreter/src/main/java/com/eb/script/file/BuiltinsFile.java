@@ -10,6 +10,7 @@ import com.eb.util.ClassTreeLister;
 import com.eb.util.Util;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
@@ -271,7 +272,7 @@ public class BuiltinsFile {
         FileData data = readTextFile(env, path);
         return data.stringData;
     }
-
+    
     public static FileData readTextFile(String filePath) throws InterpreterError, IOException {
         Path p = Util.resolveSandboxedPath(filePath);
         String ret = Files.readString(p, StandardCharsets.UTF_8);

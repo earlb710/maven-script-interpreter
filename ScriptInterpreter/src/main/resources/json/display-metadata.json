@@ -65,6 +65,71 @@
     "pattern": {
       "type": "string",
       "description": "Regular expression pattern for validation (useful for text inputs)"
+    },
+    "promptHelp": {
+      "type": "string",
+      "description": "Placeholder text for text inputs (hint shown in empty field)"
+    },
+    "labelText": {
+      "type": "string",
+      "description": "Label text displayed before/above the control"
+    },
+    "labelTextAlignment": {
+      "type": "string",
+      "description": "Label text alignment",
+      "enum": ["left", "center", "right", "l", "c", "r"]
+    },
+    "options": {
+      "type": "array",
+      "description": "Options/values for selection controls (ComboBox, ChoiceBox, ListView)",
+      "items": {
+        "type": "string"
+      }
+    },
+    "labelColor": {
+      "type": "string",
+      "description": "Label text color (e.g., '#000000', 'red')"
+    },
+    "labelBold": {
+      "type": "boolean",
+      "description": "Whether the label text should be bold",
+      "default": false
+    },
+    "labelItalic": {
+      "type": "boolean",
+      "description": "Whether the label text should be italic",
+      "default": false
+    },
+    "labelFontSize": {
+      "type": "string",
+      "description": "Label font size (e.g., '12px', '14px', '16px', '1.2em')"
+    },
+    "itemFontSize": {
+      "type": "string",
+      "description": "Control/item font size (e.g., '12px', '14px', '16px', '1em')"
+    },
+    "maxLength": {
+      "type": "integer",
+      "description": "Maximum length/width for the control (number of characters for text fields)",
+      "minimum": 1
+    },
+    "itemColor": {
+      "type": "string",
+      "description": "Control/item text color (e.g., '#000000', 'red', '#0000FF')"
+    },
+    "itemBold": {
+      "type": "boolean",
+      "description": "Whether the control/item text should be bold",
+      "default": false
+    },
+    "itemItalic": {
+      "type": "boolean",
+      "description": "Whether the control/item text should be italic",
+      "default": false
+    },
+    "onClick": {
+      "type": "string",
+      "description": "onClick event handler - EBS code to execute when button is clicked"
     }
   },
   "examples": [
@@ -72,12 +137,15 @@
       "type": "textfield",
       "mandatory": true,
       "pattern": "^[\\w.-]+@[\\w.-]+\\.[a-z]{2,}$",
-      "alignment": "left"
+      "alignment": "left",
+      "promptHelp": "Enter your email address",
+      "labelText": "Email:"
     },
     {
       "type": "passwordfield",
       "mandatory": true,
-      "case": "lower"
+      "case": "lower",
+      "promptHelp": "Enter your password"
     },
     {
       "type": "spinner",
@@ -88,6 +156,63 @@
       "type": "datepicker",
       "min": "2024-01-01",
       "max": "2024-12-31"
+    },
+    {
+      "type": "combobox",
+      "options": ["Option 1", "Option 2", "Option 3"],
+      "promptHelp": "Select an option"
+    },
+    {
+      "type": "label",
+      "labelText": "Important Notice",
+      "labelColor": "#FF0000",
+      "labelBold": true,
+      "labelTextAlignment": "center"
+    },
+    {
+      "type": "textfield",
+      "labelText": "Custom Size Label",
+      "labelFontSize": "16px",
+      "promptHelp": "This label has a custom font size"
+    },
+    {
+      "type": "textfield",
+      "labelText": "Large Font Field",
+      "itemFontSize": "18px",
+      "maxLength": 25,
+      "promptHelp": "Field with large font and custom width"
+    },
+    {
+      "type": "textfield",
+      "labelText": "Short Field",
+      "itemFontSize": "14px",
+      "maxLength": 10,
+      "promptHelp": "Narrow field for short input"
+    },
+    {
+      "type": "textfield",
+      "labelText": "Styled Item",
+      "itemFontSize": "16px",
+      "itemColor": "#0000FF",
+      "itemBold": true,
+      "itemItalic": false,
+      "maxLength": 20,
+      "promptHelp": "Blue, bold, 16px font"
+    },
+    {
+      "type": "textarea",
+      "labelText": "Rich Text",
+      "itemFontSize": "14px",
+      "itemColor": "#008800",
+      "itemBold": false,
+      "itemItalic": true,
+      "maxLength": 40,
+      "promptHelp": "Green italic text"
+    },
+    {
+      "type": "button",
+      "labelText": "Submit",
+      "onClick": "handleSubmit()"
     }
   ]
 }

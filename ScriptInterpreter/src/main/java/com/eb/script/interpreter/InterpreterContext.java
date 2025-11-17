@@ -1,5 +1,7 @@
 package com.eb.script.interpreter;
 
+import com.eb.script.interpreter.screen.DisplayItem;
+import com.eb.script.interpreter.screen.AreaDefinition;
 import com.eb.util.Debugger;
 import com.eb.script.interpreter.db.DbAdapter;
 import com.eb.script.interpreter.db.DbConnection;

@@ -1,0 +1,355 @@
+// Test Script: Item Styling - Font Size, Color, Bold, Italic, and Alignment
+// Description: Comprehensive test for control/item styling properties
+// Author: EBS Test Suite
+// Date: 2025-11-16
+
+screen itemStyleTestScreen = {
+    "title": "Item Styling Test - Font, Color, Bold, Italic, Width",
+    "width": 850,
+    "height": 800,
+    "vars": [
+        {
+            "name": "item1",
+            "type": "string",
+            "default": "Default styling",
+            "display": {
+                "type": "textfield",
+                "labelText": "Default (no custom style):"
+            }
+        },
+        {
+            "name": "item2",
+            "type": "string",
+            "default": "Small font 10px",
+            "display": {
+                "type": "textfield",
+                "labelText": "Font Size 10px:",
+                "itemFontSize": "10px",
+                "maxLength": 20
+            }
+        },
+        {
+            "name": "item3",
+            "type": "string",
+            "default": "Medium font 14px",
+            "display": {
+                "type": "textfield",
+                "labelText": "Font Size 14px:",
+                "itemFontSize": "14px",
+                "maxLength": 20
+            }
+        },
+        {
+            "name": "item4",
+            "type": "string",
+            "default": "Large font 18px",
+            "display": {
+                "type": "textfield",
+                "labelText": "Font Size 18px:",
+                "itemFontSize": "18px",
+                "maxLength": 20
+            }
+        },
+        {
+            "name": "item5",
+            "type": "string",
+            "default": "Very large 22px",
+            "display": {
+                "type": "textfield",
+                "labelText": "Font Size 22px:",
+                "itemFontSize": "22px",
+                "maxLength": 20
+            }
+        },
+        {
+            "name": "item6",
+            "type": "string",
+            "default": "Red text",
+            "display": {
+                "type": "textfield",
+                "labelText": "Red Color:",
+                "itemFontSize": "14px",
+                "itemColor": "#FF0000",
+                "maxLength": 15
+            }
+        },
+        {
+            "name": "item7",
+            "type": "string",
+            "default": "Blue text",
+            "display": {
+                "type": "textfield",
+                "labelText": "Blue Color:",
+                "itemFontSize": "14px",
+                "itemColor": "#0000FF",
+                "maxLength": 15
+            }
+        },
+        {
+            "name": "item8",
+            "type": "string",
+            "default": "Green text",
+            "display": {
+                "type": "textfield",
+                "labelText": "Green Color:",
+                "itemFontSize": "14px",
+                "itemColor": "#008800",
+                "maxLength": 15
+            }
+        },
+        {
+            "name": "item9",
+            "type": "string",
+            "default": "Bold text",
+            "display": {
+                "type": "textfield",
+                "labelText": "Bold:",
+                "itemFontSize": "14px",
+                "itemBold": true,
+                "maxLength": 15
+            }
+        },
+        {
+            "name": "item10",
+            "type": "string",
+            "default": "Italic text",
+            "display": {
+                "type": "textfield",
+                "labelText": "Italic:",
+                "itemFontSize": "14px",
+                "itemItalic": true,
+                "maxLength": 15
+            }
+        },
+        {
+            "name": "item11",
+            "type": "string",
+            "default": "Bold + Italic",
+            "display": {
+                "type": "textfield",
+                "labelText": "Bold + Italic:",
+                "itemFontSize": "14px",
+                "itemBold": true,
+                "itemItalic": true,
+                "maxLength": 15
+            }
+        },
+        {
+            "name": "item12",
+            "type": "string",
+            "default": "Large, Red, Bold",
+            "display": {
+                "type": "textfield",
+                "labelText": "18px + Red + Bold:",
+                "itemFontSize": "18px",
+                "itemColor": "#FF0000",
+                "itemBold": true,
+                "maxLength": 20
+            }
+        },
+        {
+            "name": "item13",
+            "type": "string",
+            "default": "Blue, Italic",
+            "display": {
+                "type": "textfield",
+                "labelText": "16px + Blue + Italic:",
+                "itemFontSize": "16px",
+                "itemColor": "#0000FF",
+                "itemItalic": true,
+                "maxLength": 20
+            }
+        },
+        {
+            "name": "item14",
+            "type": "string",
+            "default": "All styles",
+            "display": {
+                "type": "textfield",
+                "labelText": "All Combined:",
+                "itemFontSize": "20px",
+                "itemColor": "#880088",
+                "itemBold": true,
+                "itemItalic": true,
+                "maxLength": 25
+            }
+        },
+        {
+            "name": "item15",
+            "type": "string",
+            "default": "Left aligned",
+            "display": {
+                "type": "textfield",
+                "labelText": "Left Aligned (default):",
+                "itemFontSize": "14px",
+                "alignment": "left",
+                "maxLength": 20
+            }
+        },
+        {
+            "name": "item16",
+            "type": "string",
+            "default": "Center",
+            "display": {
+                "type": "textfield",
+                "labelText": "Center Aligned:",
+                "itemFontSize": "14px",
+                "alignment": "center",
+                "maxLength": 20
+            }
+        },
+        {
+            "name": "item17",
+            "type": "string",
+            "default": "Right",
+            "display": {
+                "type": "textfield",
+                "labelText": "Right Aligned:",
+                "itemFontSize": "14px",
+                "alignment": "right",
+                "maxLength": 20
+            }
+        },
+        {
+            "name": "item18",
+            "type": "string",
+            "default": "Narrow 10 chars",
+            "display": {
+                "type": "textfield",
+                "labelText": "MaxLength 10:",
+                "itemFontSize": "14px",
+                "maxLength": 10
+            }
+        },
+        {
+            "name": "item19",
+            "type": "string",
+            "default": "Medium width field",
+            "display": {
+                "type": "textfield",
+                "labelText": "MaxLength 20:",
+                "itemFontSize": "14px",
+                "maxLength": 20
+            }
+        },
+        {
+            "name": "item20",
+            "type": "string",
+            "default": "Very wide field with 50 character capacity",
+            "display": {
+                "type": "textfield",
+                "labelText": "MaxLength 50:",
+                "itemFontSize": "14px",
+                "maxLength": 50
+            }
+        },
+        {
+            "name": "item21",
+            "type": "string",
+            "default": "Large font\nwide field",
+            "display": {
+                "type": "textarea",
+                "labelText": "TextArea 18px, Green:",
+                "itemFontSize": "18px",
+                "itemColor": "#008800",
+                "maxLength": 40
+            }
+        },
+        {
+            "name": "item22",
+            "type": "int",
+            "default": 12345,
+            "display": {
+                "type": "spinner",
+                "min": 0,
+                "max": 99999,
+                "labelText": "Spinner 16px, Blue, Bold:",
+                "itemFontSize": "16px",
+                "itemColor": "#0000FF",
+                "itemBold": true,
+                "maxLength": 10
+            }
+        },
+        {
+            "name": "item23",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "combobox",
+                "labelText": "ComboBox 14px, Purple:",
+                "itemFontSize": "14px",
+                "itemColor": "#880088",
+                "maxLength": 25,
+                "options": ["Small Option", "Medium Length Option", "Very Long Option Name Here"]
+            }
+        },
+        {
+            "name": "item24",
+            "type": "string",
+            "default": "Password text",
+            "display": {
+                "type": "passwordfield",
+                "labelText": "Password 16px, Bold:",
+                "itemFontSize": "16px",
+                "itemBold": true,
+                "maxLength": 20
+            }
+        }
+    ]
+};
+
+print "Item Styling Test Script";
+print "========================";
+print "";
+print "This screen demonstrates comprehensive item/control styling:";
+print "";
+print "FONT SIZES (should be clearly visible differences):";
+print "  - 10px (very small)";
+print "  - 14px (medium)";
+print "  - 18px (large)";
+print "  - 22px (very large)";
+print "";
+print "COLORS:";
+print "  - Red (#FF0000)";
+print "  - Blue (#0000FF)";
+print "  - Green (#008800)";
+print "  - Purple (#880088)";
+print "";
+print "TEXT STYLES:";
+print "  - Bold text";
+print "  - Italic text";
+print "  - Bold + Italic combined";
+print "";
+print "ALIGNMENT:";
+print "  - Left (default for strings)";
+print "  - Center";
+print "  - Right";
+print "";
+print "WIDTHS (should show different physical widths):";
+print "  - maxLength 10 (narrow)";
+print "  - maxLength 20 (medium)";
+print "  - maxLength 50 (very wide)";
+print "";
+print "COMBINED STYLES:";
+print "  - Font size + Color + Bold/Italic";
+print "  - All properties combined";
+print "";
+print "CONTROL TYPES:";
+print "  - TextField (most common)";
+print "  - TextArea (multi-line)";
+print "  - Spinner (numeric)";
+print "  - ComboBox (dropdown)";
+print "  - PasswordField (masked)";
+print "";
+print "Expected Results:";
+print "  1. Font sizes should be clearly different from each other";
+print "  2. Colors should be visible and distinct";
+print "  3. Bold text should be noticeably heavier/thicker";
+print "  4. Italic text should be slanted";
+print "  5. Field widths should vary based on maxLength";
+print "  6. All properties should work together (combined styles)";
+print "";
+
+screen itemStyleTestScreen show;
+
+print "Item styling test complete!";

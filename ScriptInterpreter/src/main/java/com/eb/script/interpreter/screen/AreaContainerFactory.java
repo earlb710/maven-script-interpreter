@@ -1,6 +1,6 @@
-package com.eb.script.interpreter;
+package com.eb.script.interpreter.screen;
 
-import com.eb.script.interpreter.AreaDefinition.AreaType;
+import com.eb.script.interpreter.screen.AreaDefinition.AreaType;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;

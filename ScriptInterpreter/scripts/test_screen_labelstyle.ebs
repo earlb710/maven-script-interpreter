@@ -1,0 +1,290 @@
+// Test Script: Label Styling and Alignment
+// Description: Comprehensive test for label alignment, color, bold, italic, font size, and checkbox alignment
+// Author: EBS Test Suite
+// Date: 2025-11-16
+
+screen labelStylingTestScreen = {
+    "title": "Label Styling and Alignment Test",
+    "width": 800,
+    "height": 850,
+    "vars": [
+        {
+            "name": "field1",
+            "type": "string",
+            "default": "Default label",
+            "display": {
+                "type": "textfield",
+                "labelText": "Default Label (no styling):"
+            }
+        },
+        {
+            "name": "field2",
+            "type": "string",
+            "default": "Small font",
+            "display": {
+                "type": "textfield",
+                "labelText": "Small Font Label (10px):",
+                "labelFontSize": "10px"
+            }
+        },
+        {
+            "name": "field3",
+            "type": "string",
+            "default": "Medium font",
+            "display": {
+                "type": "textfield",
+                "labelText": "Medium Font Label (14px):",
+                "labelFontSize": "14px"
+            }
+        },
+        {
+            "name": "field4",
+            "type": "string",
+            "default": "Large font",
+            "display": {
+                "type": "textfield",
+                "labelText": "Large Font Label (18px):",
+                "labelFontSize": "18px"
+            }
+        },
+        {
+            "name": "field5",
+            "type": "string",
+            "default": "Extra large",
+            "display": {
+                "type": "textfield",
+                "labelText": "Extra Large Label (22px):",
+                "labelFontSize": "22px"
+            }
+        },
+        {
+            "name": "field6",
+            "type": "string",
+            "default": "Red color",
+            "display": {
+                "type": "textfield",
+                "labelText": "Red Label:",
+                "labelColor": "#FF0000",
+                "labelFontSize": "14px"
+            }
+        },
+        {
+            "name": "field7",
+            "type": "string",
+            "default": "Blue color",
+            "display": {
+                "type": "textfield",
+                "labelText": "Blue Label:",
+                "labelColor": "#0000FF",
+                "labelFontSize": "14px"
+            }
+        },
+        {
+            "name": "field8",
+            "type": "string",
+            "default": "Green color",
+            "display": {
+                "type": "textfield",
+                "labelText": "Green Label:",
+                "labelColor": "#00AA00",
+                "labelFontSize": "14px"
+            }
+        },
+        {
+            "name": "field9",
+            "type": "string",
+            "default": "Bold text",
+            "display": {
+                "type": "textfield",
+                "labelText": "Bold Label:",
+                "labelBold": true,
+                "labelFontSize": "14px"
+            }
+        },
+        {
+            "name": "field10",
+            "type": "string",
+            "default": "Italic text",
+            "display": {
+                "type": "textfield",
+                "labelText": "Italic Label:",
+                "labelItalic": true,
+                "labelFontSize": "14px"
+            }
+        },
+        {
+            "name": "field11",
+            "type": "string",
+            "default": "Bold italic",
+            "display": {
+                "type": "textfield",
+                "labelText": "Bold Italic Label:",
+                "labelBold": true,
+                "labelItalic": true,
+                "labelFontSize": "14px"
+            }
+        },
+        {
+            "name": "field12",
+            "type": "string",
+            "default": "All styles",
+            "display": {
+                "type": "textfield",
+                "labelText": "All Styles Label:",
+                "labelFontSize": "18px",
+                "labelColor": "#CC0099",
+                "labelBold": true,
+                "labelItalic": true
+            }
+        },
+        {
+            "name": "field13",
+            "type": "string",
+            "default": "Left aligned",
+            "display": {
+                "type": "textfield",
+                "labelText": "Left Alignment:",
+                "labelFontSize": "14px",
+                "labelTextAlignment": "left"
+            }
+        },
+        {
+            "name": "field14",
+            "type": "string",
+            "default": "Center aligned",
+            "display": {
+                "type": "textfield",
+                "labelText": "Center Alignment:",
+                "labelFontSize": "14px",
+                "labelTextAlignment": "center"
+            }
+        },
+        {
+            "name": "field15",
+            "type": "string",
+            "default": "Right aligned",
+            "display": {
+                "type": "textfield",
+                "labelText": "Right Alignment:",
+                "labelFontSize": "14px",
+                "labelTextAlignment": "right"
+            }
+        },
+        {
+            "name": "checkbox1",
+            "type": "bool",
+            "default": false,
+            "display": {
+                "type": "checkbox",
+                "labelText": "Checkbox With Label:",
+                "labelFontSize": "14px",
+                "labelColor": "#0000AA"
+            }
+        },
+        {
+            "name": "checkbox2",
+            "type": "bool",
+            "default": true,
+            "display": {
+                "type": "checkbox"
+            }
+        },
+        {
+            "name": "checkbox3",
+            "type": "bool",
+            "default": false,
+            "display": {
+                "type": "checkbox"
+            }
+        },
+        {
+            "name": "field16",
+            "type": "string",
+            "default": "After checkboxes",
+            "display": {
+                "type": "textfield",
+                "labelText": "After Checkboxes:",
+                "labelFontSize": "14px"
+            }
+        },
+        {
+            "name": "multiline1",
+            "type": "string",
+            "default": "Multiline",
+            "display": {
+                "type": "textfield",
+                "labelText": "Multi\nLine\nLabel:",
+                "labelFontSize": "14px",
+                "labelColor": "#AA0000",
+                "labelBold": true
+            }
+        },
+        {
+            "name": "multiline2",
+            "type": "string",
+            "default": "Another",
+            "display": {
+                "type": "textfield",
+                "labelText": "Another\nMulti Line:",
+                "labelFontSize": "16px",
+                "labelItalic": true
+            }
+        }
+    ]
+};
+
+print "Label Styling and Alignment Test Script";
+print "========================================";
+print "";
+print "This screen demonstrates:";
+print "";
+print "1. Label Font Sizes:";
+print "   - Various sizes: 10px, 14px, 18px, 22px";
+print "   - All labels should display at their specified size";
+print "   - Labels should still align on the right edge";
+print "";
+print "2. Label Colors:";
+print "   - Red (#FF0000)";
+print "   - Blue (#0000FF)";
+print "   - Green (#00AA00)";
+print "   - Purple (#CC0099)";
+print "";
+print "3. Label Styling:";
+print "   - Bold text";
+print "   - Italic text";
+print "   - Bold + Italic combination";
+print "   - All styles combined (size + color + bold + italic)";
+print "";
+print "4. Label Alignment:";
+print "   - Left alignment (label on left of control)";
+print "   - Center alignment (label and control centered)";
+print "   - Right alignment (control on left, label on right)";
+print "";
+print "5. Checkbox Alignment:";
+print "   - Checkbox WITH label (aligned like other controls)";
+print "   - Checkboxes WITHOUT labels (should align with controls, not centered)";
+print "   - Following field should align with checkboxes";
+print "";
+print "6. Multiline Labels:";
+print "   - Labels with \\n characters";
+print "   - With color and bold styling";
+print "   - With italic styling";
+print "";
+print "Expected Results:";
+print "- All label font sizes should be visibly different";
+print "- All label colors should be clearly visible";
+print "- Bold and italic styles should be apparent";
+print "- Checkboxes without labels should align left with other input controls";
+print "- Labels should all align on their right edge";
+print "";
+
+screen labelStylingTestScreen show;
+
+print "Label styling test complete!";
+print "";
+print "Check that:";
+print "1. Font sizes are different (10px is smaller than 22px)";
+print "2. Colors are visible (red, blue, green, purple)";
+print "3. Bold text is thicker/heavier";
+print "4. Italic text is slanted";
+print "5. Checkboxes without labels align with other controls (not centered)";

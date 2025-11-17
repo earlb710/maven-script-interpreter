@@ -1,0 +1,191 @@
+// Test Script: Item Font Size and Control Width
+// Description: Demonstrates itemFontSize and maxLength features with font-aware width calculation
+// Author: EBS Test Suite
+// Date: 2025-11-16
+
+screen itemSizeTestScreen = {
+    "title": "Item Font Size and Width Test",
+    "width": 750,
+    "height": 700,
+    "vars": [
+        {
+            "name": "field1",
+            "type": "string",
+            "default": "Default size",
+            "display": {
+                "type": "textfield",
+                "labelText": "Default (no custom size):"
+            }
+        },
+        {
+            "name": "field2",
+            "type": "string",
+            "default": "Small",
+            "display": {
+                "type": "textfield",
+                "labelText": "Small Font (10px):",
+                "itemFontSize": "10px"
+            }
+        },
+        {
+            "name": "field3",
+            "type": "string",
+            "default": "Large Font",
+            "display": {
+                "type": "textfield",
+                "labelText": "Large Font (18px):",
+                "itemFontSize": "18px"
+            }
+        },
+        {
+            "name": "field4",
+            "type": "string",
+            "default": "Short",
+            "display": {
+                "type": "textfield",
+                "labelText": "MaxLength 10:",
+                "itemFontSize": "14px",
+                "maxLength": 10
+            }
+        },
+        {
+            "name": "field5",
+            "type": "string",
+            "default": "Medium length field",
+            "display": {
+                "type": "textfield",
+                "labelText": "MaxLength 20:",
+                "itemFontSize": "14px",
+                "maxLength": 20
+            }
+        },
+        {
+            "name": "field6",
+            "type": "string",
+            "default": "Very long field for extensive text input",
+            "display": {
+                "type": "textfield",
+                "labelText": "MaxLength 50:",
+                "itemFontSize": "14px",
+                "maxLength": 50
+            }
+        },
+        {
+            "name": "field7",
+            "type": "string",
+            "default": "Large font, wide field",
+            "display": {
+                "type": "textfield",
+                "labelText": "18px font, maxLength 30:",
+                "itemFontSize": "18px",
+                "maxLength": 30
+            }
+        },
+        {
+            "name": "field8",
+            "type": "string",
+            "default": "Small font, narrow",
+            "display": {
+                "type": "textfield",
+                "labelText": "10px font, maxLength 15:",
+                "itemFontSize": "10px",
+                "maxLength": 15
+            }
+        },
+        {
+            "name": "field9",
+            "type": "int",
+            "default": 12345,
+            "display": {
+                "type": "textfield",
+                "labelText": "Numeric (auto-sized):",
+                "itemFontSize": "16px"
+            }
+        },
+        {
+            "name": "field10",
+            "type": "int",
+            "default": 42,
+            "display": {
+                "type": "spinner",
+                "min": 0,
+                "max": 100,
+                "labelText": "Spinner (small):",
+                "itemFontSize": "14px",
+                "maxLength": 5
+            }
+        },
+        {
+            "name": "field11",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "combobox",
+                "labelText": "ComboBox (custom width):",
+                "itemFontSize": "14px",
+                "maxLength": 25,
+                "options": ["Short", "Medium Option", "Very Long Option Name Here"]
+            }
+        },
+        {
+            "name": "field12",
+            "type": "string",
+            "default": "Password field",
+            "display": {
+                "type": "passwordfield",
+                "labelText": "Password (maxLength 20):",
+                "itemFontSize": "14px",
+                "maxLength": 20
+            }
+        },
+        {
+            "name": "field13",
+            "type": "string",
+            "default": "Large font text\nMultiple lines",
+            "display": {
+                "type": "textarea",
+                "labelText": "TextArea (large font):",
+                "itemFontSize": "16px",
+                "maxLength": 40
+            }
+        },
+        {
+            "name": "field14",
+            "type": "string",
+            "default": "EM units",
+            "display": {
+                "type": "textfield",
+                "labelText": "EM units (1.5em):",
+                "itemFontSize": "1.5em",
+                "maxLength": 20
+            }
+        }
+    ]
+};
+
+print "Item Font Size and Width Test Script";
+print "====================================";
+print "";
+print "This screen demonstrates:";
+print "1. Custom font sizes for controls (itemFontSize)";
+print "2. Custom control widths based on maxLength";
+print "3. Font-aware width calculation:";
+print "   - Width is calculated using 'M' character (widest)";
+print "   - Font size is considered in the calculation";
+print "   - Ensures controls fit the specified character count";
+print "";
+print "Features demonstrated:";
+print "- Various font sizes (10px, 14px, 16px, 18px, 1.5em)";
+print "- Various maxLength values (5, 10, 15, 20, 25, 30, 40, 50)";
+print "- TextField, PasswordField, TextArea, ComboBox, Spinner";
+print "- Automatic width based on data type when maxLength not specified";
+print "";
+print "Notice how:";
+print "- Larger fonts create wider controls for the same maxLength";
+print "- MaxLength determines the visual width of the control";
+print "- Controls are appropriately sized for their purpose";
+print "";
+
+screen itemSizeTestScreen show;
+
+print "Item size test complete!";

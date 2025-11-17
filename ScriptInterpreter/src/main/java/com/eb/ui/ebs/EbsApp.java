@@ -49,6 +49,8 @@ public class EbsApp {
             } else {
                 // User confirmed exit - cleanup all screens and threads
                 cleanupScreens();
+                // Exit JavaFX platform to ensure all windows close
+                Platform.exit();
             }
         });
         handler = new EbsConsoleHandler(stage, ctx);
@@ -101,9 +103,11 @@ public class EbsApp {
 
     /**
      * If you hook streams, restore them on exit if you wish.
+     * This is called when the JavaFX application is stopping.
      */
     public void stop() {
         cleanupScreens();
+        Platform.exit();
     }
 
     public void submit(String... lines) throws Exception {

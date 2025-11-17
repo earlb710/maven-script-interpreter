@@ -17,6 +17,10 @@ public class JsonValidate {
         schemas.put(name, schema);
     }
 
+    public static void registerSchema(String name, Map<String, Object> jsonSchema) {
+        schemas.put(name, jsonSchema);
+    }
+
     public static Map<String, Object> getSchema(String name) {
         return schemas.get(name);
     }

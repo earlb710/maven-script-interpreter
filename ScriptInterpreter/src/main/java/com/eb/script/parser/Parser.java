@@ -631,7 +631,18 @@ public class Parser {
     private DataType blockParameterReturn() throws ParseError {
         EbsToken ret = consumeOptional(EbsTokenType.RETURN);
         if (ret != null) {
-            EbsToken ttype = consume(EbsTokenType.IDENTIFIER, "Expected type after return.");
+            // Check if current token is a datatype keyword or identifier
+            EbsToken ttype = currToken;
+            EbsTokenType tokenType = ttype.type;
+            
+            // If it's a datatype keyword token, use it directly
+            if (tokenType.getDataType() != null) {
+                advance();
+                return tokenType.getDataType();
+            }
+            
+            // Otherwise, expect an identifier and look it up as a type name
+            ttype = consume(EbsTokenType.IDENTIFIER, "Expected type after return.");
             EbsTokenType type = getTokenType((String) ttype.literal);
             if (type != null) {
                 return type.getDataType();
