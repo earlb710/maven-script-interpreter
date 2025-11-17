@@ -281,7 +281,7 @@ public class AreaItemFactory {
 
         // Apply label text alignment (this is for the wrapper label, not the control content)
         // This is handled separately and used by ScreenFactory when creating labeled controls
-        if (item.displayItem.labelTextAlignment != null && !item.displayItem.labelTextAlignment.isEmpty()) {
+        if (item.displayItem != null && item.displayItem.labelTextAlignment != null && !item.displayItem.labelTextAlignment.isEmpty()) {
             // This alignment is used by ScreenFactory for the label wrapper
             // No need to apply it to the control itself here
         }
