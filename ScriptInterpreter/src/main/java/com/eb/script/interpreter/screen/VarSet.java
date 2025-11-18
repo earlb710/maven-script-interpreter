@@ -13,8 +13,9 @@ public class VarSet {
     // Name of the variable set
     private String setName;
     
-    // Hidden indicator: "Y" = internal access only, "N" = visible
-    private String hiddenInd;
+    // Scope: Indicates visibility and parameter direction
+    // Values: "visible" (default), "internal", "in"/"parameterIn", "out"/"parameterOut", "inout"
+    private String scope;
     
     // Map of variables in this set, keyed by lowercase varName
     private Map<String, Var> variables;
@@ -24,7 +25,7 @@ public class VarSet {
      */
     public VarSet() {
         this.variables = new HashMap<>();
-        this.hiddenInd = "N"; // Default to visible
+        this.scope = "visible"; // Default to visible
     }
     
     /**
@@ -39,12 +40,12 @@ public class VarSet {
     /**
      * Constructor with all fields
      * @param setName The name of the variable set
-     * @param hiddenInd Hidden indicator ("Y" or "N")
+     * @param scope Scope indicator (e.g., "internal", "visible", "in", "out", "inout")
      */
-    public VarSet(String setName, String hiddenInd) {
+    public VarSet(String setName, String scope) {
         this();
         this.setName = setName;
-        this.hiddenInd = hiddenInd;
+        this.scope = normalizeScope(scope);
     }
     
     // Getters and setters
@@ -57,12 +58,34 @@ public class VarSet {
         this.setName = setName;
     }
     
-    public String getHiddenInd() {
-        return hiddenInd;
+    public String getScope() {
+        return scope;
     }
     
-    public void setHiddenInd(String hiddenInd) {
-        this.hiddenInd = hiddenInd;
+    public void setScope(String scope) {
+        this.scope = normalizeScope(scope);
+    }
+    
+    /**
+     * Normalize scope value to handle aliases
+     * @param scope The scope value
+     * @return Normalized scope value
+     */
+    private String normalizeScope(String scope) {
+        if (scope == null) {
+            return "visible";
+        }
+        String normalized = scope.toLowerCase();
+        
+        // Handle parameter direction aliases
+        if ("parameterin".equals(normalized)) {
+            return "in";
+        } else if ("parameterout".equals(normalized)) {
+            return "out";
+        }
+        
+        // Valid values: visible, internal, in, out, inout
+        return normalized;
     }
     
     public Map<String, Var> getVariables() {
@@ -96,18 +119,35 @@ public class VarSet {
     }
     
     /**
-     * Check if this set is hidden
-     * @return true if hiddenInd is "Y", false otherwise
+     * Check if this set is internal (hidden from UI)
+     * @return true if scope is "internal", false otherwise
      */
-    public boolean isHidden() {
-        return "Y".equalsIgnoreCase(hiddenInd);
+    public boolean isInternal() {
+        return "internal".equalsIgnoreCase(scope);
     }
+    
+    /**
+     * Check if this set is for input parameters
+     * @return true if scope is "in" or "inout"
+     */
+    public boolean isInput() {
+        return "in".equalsIgnoreCase(scope) || "inout".equalsIgnoreCase(scope);
+    }
+    
+    /**
+     * Check if this set is for output parameters
+     * @return true if scope is "out" or "inout"
+     */
+    public boolean isOutput() {
+        return "out".equalsIgnoreCase(scope) || "inout".equalsIgnoreCase(scope);
+    }
+    
     
     @Override
     public String toString() {
         return "VarSet{" +
                 "setName='" + setName + '\'' +
-                ", hiddenInd='" + hiddenInd + '\'' +
+                ", scope='" + scope + '\'' +
                 ", variables=" + variables.size() +
                 '}';
     }

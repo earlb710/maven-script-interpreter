@@ -1,0 +1,64 @@
+// Test Script: Verify screen.getItemList works
+// Description: Tests screen builtin functions after scope/direction changes
+// Author: EBS Test Suite
+// Date: 2025-11-18
+
+print "Testing screen.getItemList functionality...";
+print "";
+
+// Create a test screen with display items
+screen testScreen = {
+    "title": "Test Screen",
+    "width": 600,
+    "height": 400,
+    "sets": [
+        {
+            "setname": "TestSet",
+            "scope": "visible",
+            "vars": [
+                {
+                    "name": "field1",
+                    "type": "string",
+                    "default": "value1",
+                    "display": {"type": "textfield", "labeltext": "Field 1"}
+                },
+                {
+                    "name": "field2",
+                    "type": "int",
+                    "default": 42,
+                    "display": {"type": "spinner", "min": 0, "max": 100, "labeltext": "Field 2"}
+                },
+                {
+                    "name": "field3",
+                    "type": "string",
+                    "default": "value3",
+                    "display": {"type": "textfield", "labeltext": "Field 3"}
+                }
+            ]
+        }
+    ]
+};
+
+print "Screen created successfully";
+print "";
+
+// Test screen.getItemList
+print "Testing screen.getItemList...";
+var itemList = call screen.getItemList("testScreen");
+
+if (itemList == null) {
+    print "ERROR: screen.getItemList returned null!";
+} else {
+    print "SUCCESS: screen.getItemList returned a list";
+    print "Number of items: " + itemList.length;
+    print "";
+    print "Items in the list:";
+    var i:int = 0;
+    while (i < itemList.length) {
+        print "  " + i + ": " + itemList[i];
+        i = i + 1;
+    }
+}
+
+print "";
+print "Test completed!";

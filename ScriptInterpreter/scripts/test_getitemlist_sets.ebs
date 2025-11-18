@@ -1,0 +1,53 @@
+// Test: screen.getItemList for comprehensiveScreen
+print "Testing screen.getItemList for comprehensiveScreen...";
+
+screen comprehensiveScreen = {
+    "title": "Test Screen",
+    "width": 600,
+    "height": 400,
+    "sets": [
+        {
+            "setname": "TestSet",
+            "scope": "visible",
+            "vars": [
+                {
+                    "name": "field1",
+                    "type": "string",
+                    "default": "value1",
+                    "display": {"type": "textfield", "labeltext": "Field 1"}
+                },
+                {
+                    "name": "field2",
+                    "type": "int",
+                    "default": 42,
+                    "display": {"type": "spinner", "min": 0, "max": 100, "labeltext": "Field 2"}
+                }
+            ]
+        }
+    ]
+};
+
+print "Screen created.";
+
+// Test screen.getItemList
+var itemList = call screen.getItemList("comprehensiveScreen");
+
+if (itemList == null) {
+    print "ERROR: screen.getItemList returned null!";
+} else {
+    print "SUCCESS: Got item list";
+    print "Number of items: " + itemList.length;
+    
+    if (itemList.length > 0) {
+        print "Items:";
+        var i:int = 0;
+        while (i < itemList.length) {
+            print "  [" + i + "] " + itemList[i];
+            i = i + 1;
+        }
+    } else {
+        print "WARNING: Item list is empty!";
+    }
+}
+
+print "Test completed.";

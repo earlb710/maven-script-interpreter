@@ -1,0 +1,115 @@
+// Test Script: Variable Sets with Scope and Direction
+// Description: Tests the new "scope" property and "direction" parameter indicators
+// Author: EBS Test Suite
+// Date: 2025-11-18
+
+print "Testing variable sets with scope and direction...";
+
+// Test new scope and direction features
+screen dataProcessing = {
+    "title": "Data Processing Example",
+    "width": 900,
+    "height": 700,
+    "sets": [
+        {
+            "setname": "InputData",
+            "scope": "visible",
+            "vars": [
+                {
+                    "name": "sourceFile",
+                    "type": "string",
+                    "default": "data.csv",
+                    "direction": "in",
+                    "display": {"type": "textfield", "labeltext": "Source File"}
+                },
+                {
+                    "name": "processMode",
+                    "type": "string",
+                    "default": "auto",
+                    "direction": "in",
+                    "display": {"type": "textfield", "labeltext": "Process Mode"}
+                }
+            ]
+        },
+        {
+            "setname": "OutputData",
+            "scope": "visible",
+            "vars": [
+                {
+                    "name": "recordsProcessed",
+                    "type": "int",
+                    "default": 0,
+                    "direction": "out",
+                    "display": {"type": "spinner", "min": 0, "max": 100000, "labeltext": "Records Processed"}
+                },
+                {
+                    "name": "status",
+                    "type": "string",
+                    "default": "pending",
+                    "direction": "out",
+                    "display": {"type": "textfield", "labeltext": "Status"}
+                }
+            ]
+        },
+        {
+            "setname": "WorkingVars",
+            "scope": "internal",
+            "vars": [
+                {
+                    "name": "currentRecord",
+                    "type": "int",
+                    "default": 0,
+                    "direction": "inout"
+                },
+                {
+                    "name": "errorCount",
+                    "type": "int",
+                    "default": 0,
+                    "direction": "inout"
+                }
+            ]
+        }
+    ]
+};
+
+print "Screen created successfully!";
+print "";
+
+// Test variable access
+print "Input Variables (direction='in'):";
+print "  Source File: " + dataProcessing.InputData.sourceFile;
+print "  Process Mode: " + dataProcessing.InputData.processMode;
+print "";
+
+print "Output Variables (direction='out'):";
+print "  Records Processed: " + dataProcessing.OutputData.recordsProcessed;
+print "  Status: " + dataProcessing.OutputData.status;
+print "";
+
+print "Internal Working Variables (scope='internal', direction='inout'):";
+print "  Current Record: " + dataProcessing.WorkingVars.currentRecord;
+print "  Error Count: " + dataProcessing.WorkingVars.errorCount;
+print "";
+
+// Simulate processing
+print "Simulating data processing...";
+dataProcessing.WorkingVars.currentRecord = 1;
+dataProcessing.WorkingVars.errorCount = 0;
+
+// Update output variables
+dataProcessing.OutputData.recordsProcessed = 1000;
+dataProcessing.OutputData.status = "completed";
+
+print "";
+print "After processing:";
+print "  Records Processed: " + dataProcessing.OutputData.recordsProcessed;
+print "  Status: " + dataProcessing.OutputData.status;
+print "  Error Count: " + dataProcessing.WorkingVars.errorCount;
+
+// Show the screen
+print "";
+print "Displaying screen (note: internal variables are not shown in UI)...";
+screen dataProcessing show;
+
+print "";
+print "Variable sets with scope and direction test completed!";

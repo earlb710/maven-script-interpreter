@@ -94,14 +94,15 @@ public class InterpreterScreen {
                             
                             // Extract set properties
                             String setName = setDef.containsKey("setname") ? String.valueOf(setDef.get("setname")) : null;
-                            String hiddenInd = setDef.containsKey("hiddenind") ? String.valueOf(setDef.get("hiddenind")) : "N";
+                            // Get scope property (default to "visible")
+                            String scope = setDef.containsKey("scope") ? String.valueOf(setDef.get("scope")) : "visible";
                             
                             if (setName == null || setName.isEmpty()) {
                                 throw interpreter.error(stmt.getLine(), "Variable set in screen '" + stmt.name + "' must have a 'setname' property.");
                             }
                             
                             // Create VarSet
-                            VarSet varSet = new VarSet(setName, hiddenInd);
+                            VarSet varSet = new VarSet(setName, scope);
                             varSetsMap.put(setName.toLowerCase(), varSet);
                             
                             // Process vars within this set
@@ -186,6 +187,24 @@ public class InterpreterScreen {
                         // Get the variable type to determine numeric vs string
                         DataType varType = screenVarTypeMap.get(varName);
                         
+                        // Find which set this variable belongs to by checking varItemsMap
+                        String setName = null;
+                        for (Map.Entry<String, Var> entry : varItemsMap.entrySet()) {
+                            String key = entry.getKey(); // format: "setname.varname"
+                            Var var = entry.getValue();
+                            // Check if this is our variable by comparing the var name part
+                            if (key.endsWith("." + varName) && var.getName().equalsIgnoreCase(varName)) {
+                                // Extract setname from the key
+                                setName = key.substring(0, key.lastIndexOf("."));
+                                break;
+                            }
+                        }
+                        
+                        // If we couldn't find the set, default to "default"
+                        if (setName == null) {
+                            setName = "default";
+                        }
+                        
                         // Only add labelText if explicitly specified - don't generate from variable name
                         // Set default alignment based on control type and variable type
                         if (varDisplayItem != null) {
@@ -215,7 +234,7 @@ public class InterpreterScreen {
 
                         // Create a single item for the input control (label will be added by ScreenFactory)
                         AreaItem item = new AreaItem();
-                        item.name = varName + "_field";
+                        item.name = varName;  // Use just the variable name
                         item.varRef = varName;
                         item.sequence = defaultArea.items.size();
                         item.displayItem = varDisplayItem;
@@ -255,6 +274,10 @@ public class InterpreterScreen {
                         }
 
                         defaultArea.items.add(item);
+                        
+                        // Register item in areaItemsMap with format "setname.itemname" for screen.getItemList
+                        String itemKey = setName + "." + item.name;
+                        areaItemsMap.put(itemKey.toLowerCase(), item);
                     }
 
                     java.util.List<AreaDefinition> areas = new java.util.ArrayList<>();
