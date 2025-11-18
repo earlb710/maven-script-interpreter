@@ -704,6 +704,15 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     }
 
     private Object evalOperator(int line, Object left, EbsTokenType operator, Object right) throws InterpreterError {
+        // Handle null equality/inequality checks BEFORE type coercion
+        // This allows proper null validation (e.g., "if a == null")
+        if (operator == EbsTokenType.BOOL_EQ || operator == EbsTokenType.BOOL_NEQ) {
+            if (left == null || right == null) {
+                boolean isEqual = (left == null && right == null);
+                return operator == EbsTokenType.BOOL_EQ ? isEqual : !isEqual;
+            }
+        }
+        
         if (left == null) {
             if (right != null) {
                 switch (right) {
