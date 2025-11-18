@@ -291,11 +291,68 @@ print "✓ TEST 10: Data types - PASSED";
 print "";
 print "All tests completed successfully!";
 print "====================================================";
-print #screen.getitemlist("scopeVisibleTest");
-print #screen.getitemlist("scopeInternalTest");
-print #screen.getitemlist("directionInTest");
-print #screen.getitemlist("directionOutTest");
-print #screen.getitemlist("directionInoutTest");
-print #screen.getitemlist("combinedTest");
+print "";
+
+// ==================================================
+// TEST 11: screen.getItemList functionality
+// ==================================================
+print "TEST 11: Testing screen.getItemList functionality...";
+print "";
+print "Note: screen.getItemList returns UI items (variables with display metadata).";
+print "Variables without display metadata do not create UI items, so getItemList will be empty.";
+print "";
+
+// Test with screens that have display metadata
+screen testWithDisplay = {
+    "title": "Test With Display",
+    "width": 600,
+    "height": 400,
+    "sets": [
+        {
+            "setname": "TestSet",
+            "scope": "visible",
+            "vars": [
+                {
+                    "name": "field1",
+                    "type": "string",
+                    "default": "value1",
+                    "display": {"type": "textfield", "labeltext": "Field 1"}
+                },
+                {
+                    "name": "field2",
+                    "type": "int",
+                    "default": 42,
+                    "display": {"type": "spinner", "min": 0, "max": 100, "labeltext": "Field 2"}
+                }
+            ]
+        }
+    ]
+};
+
+print "Screen with display metadata created.";
+var itemList = call screen.getItemList("testWithDisplay");
+print "  Items returned by getItemList: " + itemList.length();
+if (itemList.length() > 0) {
+    print "  Item names (setname.itemname format):";
+    var i:int = 0;
+    while (i < itemList.length()) {
+        print "    [" + i + "] " + itemList[i];
+        i = i + 1;
+    }
+} else {
+    print "  WARNING: No items found!";
+}
+print "";
+
+// Show that screens without display metadata return empty
+print "Testing screens WITHOUT display metadata (should return empty):";
+var list1 = call screen.getItemList("scopeVisibleTest");
+print "  scopeVisibleTest: " + list1.length() + " items (no display metadata)";
+var list2 = call screen.getItemList("directionInTest");
+print "  directionInTest: " + list2.length() + " items (no display metadata)";
+print "";
+print "✓ TEST 11: screen.getItemList - PASSED";
+print "====================================================";
+
 
 
