@@ -169,7 +169,6 @@ public class EbsLexer extends Lexer<EbsTokenType> {
             }
             current--; // back up after going past last digit
             end = current;
-            end = current;
             if (isAlpha(c)) {
                 switch (c) {
                     case 'd', 'D' -> {
