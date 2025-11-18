@@ -101,6 +101,7 @@ Documentation and Maintenance
   - Update any keyword/builtin lookup resources referenced there.
 - Keep JSON schema docs and examples aligned with parser behavior.
 - Prefer absolute GitHub links to canonical docs in responses.
+- Put new documents generated in the docs folder
 
 Interaction Conventions for This Space
 - When producing screen JSON, ensure it validates against the schemas and uses lowercase key lookups (while accepting camel/snake inputs).
