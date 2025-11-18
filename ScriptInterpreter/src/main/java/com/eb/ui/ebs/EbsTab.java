@@ -694,6 +694,11 @@ public class EbsTab extends Tab {
             showFind(withReplace);
         }
     }
+    
+    // Public method to toggle line numbers
+    public void toggleLineNumbers() {
+        dispArea.toggleLineNumbers();
+    }
 
     private void showFind(boolean withReplace) {
         findBar.setVisible(true);
@@ -701,6 +706,13 @@ public class EbsTab extends Tab {
         replaceField.setDisable(!withReplace);
         btnReplace.setDisable(!withReplace);
         btnReplaceAll.setDisable(!withReplace);
+        
+        // Populate find field with current selection
+        String selectedText = dispArea.getSelectedText();
+        if (selectedText != null && !selectedText.isEmpty()) {
+            findField.setText(selectedText);
+        }
+        
         Platform.runLater(() -> findField.requestFocus());
 
         // live search when typing
