@@ -109,12 +109,22 @@ screen myWindow = {
         {
             "name": "counter",
             "type": "int",
+            "scope": "parameter",
+            "direction": "inout",
             "default": 0
         },
         {
             "name": "message",
             "type": "string",
+            "scope": "parameter",
+            "direction": "in",
             "default": "Hello"
+        },
+        {
+            "name": "sessionToken",
+            "type": "string",
+            "scope": "internal",
+            "default": "secret-xyz"
         }
     ]
 };
@@ -126,6 +136,7 @@ print currentCount;  // Prints: 0
 // Assign to screen variables
 myWindow.counter = 42;
 myWindow.message = "Updated!";
+myWindow.sessionToken = "new-token";  // Internal variable, not displayed
 
 // Show the screen
 screen myWindow show;
@@ -146,6 +157,13 @@ screen myWindow show;
 - Assign to variables via `screen_name.var_name = value` (e.g., `myWindow.counter = 10`)
 - Variable assignments do not trigger screen display
 - Multiple screens can be created and managed independently
+- **Variable Scope**: Variables can have `scope` property:
+  - `"parameter"` (default): Variable may be displayed in UI and accessed/modified
+  - `"internal"`: Variable is not displayed, used only for internal calculations
+- **Variable Direction**: Parameter variables can have `direction` property:
+  - `"in"`: Input-only parameter (data flows into the screen)
+  - `"out"`: Output-only parameter (data flows out of the screen)
+  - `"inout"` (default): Bidirectional parameter (data flows both ways)
 - **Case-Insensitive JSON Keys**: Screen definition JSON uses case-insensitive key lookup
   - Property names like `varRef`, `VarRef`, or `varref` are all treated identically
   - Keys are normalized to lowercase (`promptText` → `prompttext`)
