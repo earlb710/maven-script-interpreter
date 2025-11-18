@@ -735,6 +735,11 @@ public class EbsTab extends Tab {
             showFind(withReplace);
         }
     }
+    
+    // Public method to toggle line numbers
+    public void toggleLineNumbers() {
+        dispArea.toggleLineNumbers();
+    }
 
     private void showFind(boolean withReplace) {
         findBar.setVisible(true);
@@ -742,6 +747,13 @@ public class EbsTab extends Tab {
         replaceField.setDisable(!withReplace);
         btnReplace.setDisable(!withReplace);
         btnReplaceAll.setDisable(!withReplace);
+        
+        // Populate find field with current selection
+        String selectedText = dispArea.getSelectedText();
+        if (selectedText != null && !selectedText.isEmpty()) {
+            findField.setText(selectedText);
+        }
+        
         Platform.runLater(() -> findField.requestFocus());
 
         // live search when typing
@@ -854,8 +866,16 @@ public class EbsTab extends Tab {
             return;
         }
 
-        // Current = first hit initially
+        // Find the first match at or after the current cursor position
+        int cursorPos = dispArea.getCaretPosition();
         currentIndex = 0;
+        for (int i = 0; i < hits.size(); i++) {
+            if (hits.get(i)[0] >= cursorPos) {
+                currentIndex = i;
+                break;
+            }
+        }
+        
         int[] cur = hits.get(currentIndex);
         selectCurrent(cur);
         updateCountLabel();
@@ -869,10 +889,16 @@ public class EbsTab extends Tab {
     }
 
     private void selectCurrent(int[] r) {
-        dispArea.selectRange(r[0], r[1]); // selection shows current; also scrolls into view
-        // optional: move caret to end/start
+        dispArea.selectRange(r[0], r[1]); // selection shows current
         dispArea.moveTo(r[1]);
-        dispArea.requestFollowCaret(); // Ensure the caret is scrolled into view
+        
+        // Scroll to center the match in the viewport
+        int paragraph = dispArea.getCurrentParagraph();
+        int visibleParagraphs = dispArea.getVisibleParagraphs().size();
+        int offset = visibleParagraphs / 2;
+        int targetParagraph = Math.max(0, paragraph - offset);
+        
+        dispArea.showParagraphAtTop(targetParagraph);
     }
 
     private void gotoNext() {

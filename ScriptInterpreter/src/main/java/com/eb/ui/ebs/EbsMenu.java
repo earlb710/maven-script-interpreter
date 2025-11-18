@@ -168,7 +168,17 @@ public class EbsMenu extends MenuBar {
             }
         });
         
-        editMenu.getItems().addAll(cutItem, copyItem, pasteItem, new SeparatorMenuItem(), undoItem, redoItem, new SeparatorMenuItem(), findItem, replaceItem);
+        // Show/Hide Line Numbers
+        MenuItem toggleLineNumbersItem = new MenuItem("Show/Hide Line Numbers");
+        toggleLineNumbersItem.setAccelerator(new KeyCodeCombination(KeyCode.L, KeyCombination.CONTROL_DOWN));
+        toggleLineNumbersItem.setOnAction(e -> {
+            Tab tab = handler.getSelectedTab();
+            if (tab instanceof EbsTab et) {
+                et.toggleLineNumbers();
+            }
+        });
+        
+        editMenu.getItems().addAll(cutItem, copyItem, pasteItem, new SeparatorMenuItem(), undoItem, redoItem, new SeparatorMenuItem(), findItem, replaceItem, new SeparatorMenuItem(), toggleLineNumbersItem);
         getMenus().add(editMenu);
 
         Menu toolsMenu = new Menu("Config");
