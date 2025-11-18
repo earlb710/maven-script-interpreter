@@ -398,6 +398,36 @@ public class JsonSchemaAutocomplete {
         
         return false;
     }
+    
+    /**
+     * Check if we're in a context where JSON property keys should be suggested.
+     * This helps the UI know whether to add quotes around the suggestion.
+     * 
+     * @param text The full text being edited
+     * @param caretPos The current caret position
+     * @return true if we're suggesting property keys (which need quotes)
+     */
+    public static boolean isSuggestingJsonKeys(String text, int caretPos) {
+        if (!looksLikeJson(text)) {
+            return false;
+        }
+        
+        // Find where the JSON actually starts
+        int jsonStartPos = findJsonStartPosition(text);
+        if (jsonStartPos < 0 || caretPos < jsonStartPos) {
+            return false;
+        }
+        
+        // Extract just the JSON portion and adjust caret position
+        String pureJson = text.substring(jsonStartPos);
+        int adjustedCaretPos = caretPos - jsonStartPos;
+        
+        // Analyze context
+        JsonContext context = analyzeContext(pureJson, adjustedCaretPos);
+        
+        // We're suggesting keys if we're in a string that's a key, or expecting a key
+        return (context.isInString && context.isKey) || context.expectingKey;
+    }
 
     /**
      * Context information about the current position in JSON.

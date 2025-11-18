@@ -380,12 +380,15 @@ public final class Console {
         int wordStart = caretPos;
         while (wordStart > 0) {
             char c = text.charAt(wordStart - 1);
-            if (Character.isLetterOrDigit(c) || c == '.' || c == '_'|| c == '/') {
+            if (Character.isLetterOrDigit(c) || c == '.' || c == '_'|| c == '/' || c == '"') {
                 wordStart--;
             } else {
                 break;
             }
         }
+        
+        // Check if we're inserting a JSON property key (which needs quotes)
+        boolean isJsonKey = JsonSchemaAutocomplete.isSuggestingJsonKeys(text, caretPos);
         
         // Check if the suggestion is a builtin and get its parameter signature
         String paramSignature = null;
@@ -397,7 +400,22 @@ public final class Console {
         String insertText = suggestion;
         int finalCaretOffset = suggestion.length();
         
-        if (paramSignature != null) {
+        if (isJsonKey) {
+            // For JSON property keys, add quotes if not already present
+            boolean hasOpeningQuote = wordStart > 0 && text.charAt(wordStart - 1) == '"';
+            boolean hasClosingQuote = caretPos < text.length() && text.charAt(caretPos) == '"';
+            
+            if (!hasOpeningQuote) {
+                insertText = "\"" + insertText;
+                finalCaretOffset++;
+            }
+            if (!hasClosingQuote) {
+                insertText = insertText + "\"";
+            } else {
+                // If there's already a closing quote, we'll position caret after it
+                finalCaretOffset++;
+            }
+        } else if (paramSignature != null) {
             insertText = suggestion + paramSignature;
             // Position caret after the first = sign to allow user to type/replace the default value
             int firstEquals = paramSignature.indexOf("=");
