@@ -42,6 +42,7 @@ public class Var {
      * @param name The variable name
      */
     public Var(String name) {
+        this();
         this.name = name;
     }
     
@@ -51,6 +52,7 @@ public class Var {
      * @param type The variable data type
      */
     public Var(String name, DataType type) {
+        this();
         this.name = name;
         this.type = type;
     }
@@ -62,6 +64,7 @@ public class Var {
      * @param defaultValue The default value
      */
     public Var(String name, DataType type, Object defaultValue) {
+        this();
         this.name = name;
         this.type = type;
         this.defaultValue = defaultValue;
