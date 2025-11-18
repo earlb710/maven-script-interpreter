@@ -29,6 +29,7 @@ public class EbsHandler implements Handler {
     protected final Environment env;
     protected final Debugger dbg;           // debugger bound to the env
     protected TabHandler tabHandler;
+    protected StatusBar statusBar;
 
     public EbsHandler(RuntimeContext ctx) {
         this.ctx = ctx;
@@ -44,6 +45,22 @@ public class EbsHandler implements Handler {
     @Override
     public void setUI_outputArea(ScriptArea outputArea) {
         this.env.registerOutputArea(outputArea);
+    }
+    
+    /**
+     * Set the status bar for this handler
+     * @param statusBar The status bar to use
+     */
+    public void setStatusBar(StatusBar statusBar) {
+        this.statusBar = statusBar;
+    }
+    
+    /**
+     * Get the status bar associated with this handler
+     * @return The status bar, or null if not set
+     */
+    public StatusBar getStatusBar() {
+        return statusBar;
     }
 
     @Override
