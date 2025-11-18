@@ -217,6 +217,9 @@ public class ScreenFactory {
         // Create status bar for the screen
         com.eb.ui.ebs.StatusBar statusBar = new com.eb.ui.ebs.StatusBar();
         
+        // Add focus listeners to all bound controls to update status bar
+        setupStatusBarUpdates(allBoundControls, statusBar, metadataProvider, screenName);
+        
         // Wrap in BorderPane to add status bar at bottom
         BorderPane screenRoot = new BorderPane();
         screenRoot.setCenter(scrollPane);
@@ -231,6 +234,54 @@ public class ScreenFactory {
         stage.setScene(scene);
 
         return stage;
+    }
+    
+    /**
+     * Setup focus listeners on all controls to update the status bar
+     * with tooltip and min/max information
+     */
+    private static void setupStatusBarUpdates(List<Node> controls, 
+            com.eb.ui.ebs.StatusBar statusBar,
+            BiFunction<String, String, DisplayItem> metadataProvider,
+            String screenName) {
+        for (Node control : controls) {
+            control.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+                if (isFocused) {
+                    // Get the item's user data which contains "screenName.itemName"
+                    Object userData = control.getUserData();
+                    if (userData != null && userData instanceof String) {
+                        String fullRef = (String) userData;
+                        // Extract item name from "screenName.itemName"
+                        String itemName = fullRef.substring(screenName.length() + 1);
+                        
+                        // Get metadata for this item
+                        DisplayItem metadata = metadataProvider.apply(screenName, itemName);
+                        if (metadata != null) {
+                            // Update message with promptHelp/tooltip
+                            String message = metadata.promptHelp != null ? metadata.promptHelp : "";
+                            statusBar.setMessage(message);
+                            
+                            // Update custom with min/max info
+                            String minMaxInfo = "";
+                            if (metadata.min != null && metadata.max != null) {
+                                minMaxInfo = String.format("min:%s max:%s", metadata.min, metadata.max);
+                            } else if (metadata.min != null) {
+                                minMaxInfo = "min:" + metadata.min;
+                            } else if (metadata.max != null) {
+                                minMaxInfo = "max:" + metadata.max;
+                            } else if (metadata.maxLength != null) {
+                                minMaxInfo = "len:" + metadata.maxLength;
+                            }
+                            statusBar.setCustom(minMaxInfo);
+                        }
+                    }
+                } else {
+                    // Lost focus - clear status bar
+                    statusBar.clearMessage();
+                    statusBar.clearCustom();
+                }
+            });
+        }
     }
 
     /**
