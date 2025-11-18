@@ -689,6 +689,10 @@ public final class Builtins {
                 "screen.getItemList", DataType.ANY,
                 newParam("screenName", DataType.STRING, true) // required; screen name
         ));
+        addBuiltin(info(
+                "screen.getScreenItemList", DataType.ANY,
+                newParam("screenName", DataType.STRING, true) // required; screen name
+        ));
 
         NAMES = Collections.unmodifiableSet(BUILTINS.keySet());
     }
@@ -1760,6 +1764,9 @@ public final class Builtins {
             case "screen.getitemlist" -> {
                 return screenGetItemList(context, args);
             }
+            case "screen.getscreenitemlist" -> {
+                return screenGetScreenItemList(context, args);
+            }
 
             default ->
                 throw new InterpreterError("Unknown builtin: " + name);
@@ -2221,6 +2228,16 @@ public final class Builtins {
         }
 
         return itemList;
+    }
+
+    /**
+     * screen.getScreenItemList(screenName) -> ArrayDynamic 
+     * Returns a list of all item names in the screen (same as getItemList).
+     * This is an alias for getItemList for clarity.
+     */
+    private static Object screenGetScreenItemList(InterpreterContext context, Object[] args) throws InterpreterError {
+        // This is simply an alias for getItemList
+        return screenGetItemList(context, args);
     }
 
     /**

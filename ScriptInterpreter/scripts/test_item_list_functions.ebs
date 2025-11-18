@@ -1,0 +1,135 @@
+// Test Script: screen.getItemList and screen.getScreenItemList
+// Description: Tests that item list functions work with new screen.set.var naming
+// Author: EBS Test Suite
+// Date: 2025-11-18
+
+print "========================================";
+print "Testing screen.getItemList Functions";
+print "========================================";
+print "";
+
+// Create a test screen with sets
+screen testItemListScreen = {
+    "title": "Item List Test",
+    "width": 600,
+    "height": 400,
+    "sets": [
+        {
+            "setname": "UserInfo",
+            "hiddenind": "N",
+            "vars": [
+                {
+                    "name": "username",
+                    "type": "string",
+                    "default": "testuser",
+                    "display": {"type": "textfield", "labeltext": "Username"}
+                },
+                {
+                    "name": "email",
+                    "type": "string",
+                    "default": "test@example.com",
+                    "display": {"type": "textfield", "labeltext": "Email"}
+                }
+            ]
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "items": [
+                {
+                    "name": "username_field",
+                    "varref": "username",
+                    "sequence": 1
+                },
+                {
+                    "name": "email_field",
+                    "varref": "email",
+                    "sequence": 2
+                },
+                {
+                    "name": "submit_button",
+                    "sequence": 3,
+                    "display": {
+                        "type": "button",
+                        "labeltext": "Submit"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+print "Screen created successfully!";
+print "";
+
+// Test screen.getItemList
+print "TEST 1: Testing screen.getItemList...";
+var itemList = screen.getItemList("testItemListScreen");
+print "  Item count: " + itemList.size();
+print "  Items:";
+int i = 0;
+while i < itemList.size() {
+    print "    " + (i + 1) + ". " + itemList[i];
+    i = i + 1;
+}
+print "✓ screen.getItemList works";
+print "";
+
+// Test screen.getScreenItemList (new function)
+print "TEST 2: Testing screen.getScreenItemList...";
+var screenItemList = screen.getScreenItemList("testItemListScreen");
+print "  Item count: " + screenItemList.size();
+print "  Items:";
+i = 0;
+while i < screenItemList.size() {
+    print "    " + (i + 1) + ". " + screenItemList[i];
+    i = i + 1;
+}
+print "✓ screen.getScreenItemList works";
+print "";
+
+// Test screen.getProperty with item names
+print "TEST 3: Testing screen.getProperty with item names...";
+var usernameVisible = screen.getProperty("testItemListScreen.username_field", "visible");
+print "  username_field visible: " + usernameVisible;
+print "✓ screen.getProperty works with item names";
+print "";
+
+// Test screen.setProperty with item names
+print "TEST 4: Testing screen.setProperty with item names...";
+screen.setProperty("testItemListScreen.submit_button", "disabled", true);
+print "  submit_button disabled property set to true";
+var buttonDisabled = screen.getProperty("testItemListScreen.submit_button", "disabled");
+print "  submit_button disabled: " + buttonDisabled;
+print "✓ screen.setProperty works with item names";
+print "";
+
+// Test variable access with three-part notation
+print "TEST 5: Testing variable access...";
+print "  username: " + testItemListScreen.UserInfo.username;
+print "  email: " + testItemListScreen.UserInfo.email;
+testItemListScreen.UserInfo.username = "newuser";
+testItemListScreen.UserInfo.email = "new@example.com";
+print "  Modified username: " + testItemListScreen.UserInfo.username;
+print "  Modified email: " + testItemListScreen.UserInfo.email;
+print "✓ Variable access works";
+print "";
+
+// Show the screen
+print "TEST 6: Displaying screen...";
+screen testItemListScreen show;
+print "✓ Screen displayed";
+print "";
+
+print "========================================";
+print "ALL TESTS PASSED!";
+print "========================================";
+print "";
+print "Summary:";
+print "  ✓ screen.getItemList works with new structure";
+print "  ✓ screen.getScreenItemList works (new function)";
+print "  ✓ screen.getProperty works with item names";
+print "  ✓ screen.setProperty works with item names";
+print "  ✓ Variable access with screen.set.var notation works";

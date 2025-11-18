@@ -1009,9 +1009,17 @@ public class InterpreterScreen {
                             item.alignment = String.valueOf(itemDef.get("alignment")).toLowerCase();
                         }
 
-                        // Store in screenAreaItems map if this item has a varRef
+                        // Store in screenAreaItems map by item name (for screen.getProperty/setProperty)
+                        if (item.name != null && !item.name.isEmpty()) {
+                            Map<String, AreaItem> areaItemsMap = context.getScreenAreaItems(screenName);
+                            if (areaItemsMap != null) {
+                                // Store by item name (lowercase) for direct lookup
+                                areaItemsMap.put(item.name.toLowerCase(), item);
+                            }
+                        }
+                        
+                        // Also store by varRef if present (for variable-to-item linking)
                         if (item.varRef != null && !item.varRef.isEmpty()) {
-                            // Get the areaItems map for this screen
                             Map<String, AreaItem> areaItemsMap = context.getScreenAreaItems(screenName);
                             if (areaItemsMap != null) {
                                 // Store with the same key format as variables (setname.varname in lowercase)
