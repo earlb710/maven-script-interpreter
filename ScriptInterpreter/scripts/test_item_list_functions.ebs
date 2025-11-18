@@ -69,7 +69,7 @@ print "TEST 1: Testing screen.getItemList...";
 var itemList = screen.getItemList("testItemListScreen");
 print "  Item count: " + itemList.size();
 print "  Items:";
-int i = 0;
+var i = 0;
 while i < itemList.size() {
     print "    " + (i + 1) + ". " + itemList[i];
     i = i + 1;
