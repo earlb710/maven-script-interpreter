@@ -921,5 +921,13 @@ public class EbsTab extends Tab {
             }
         }
     }
+    
+    /**
+     * Get the handler for this tab
+     * @return The handler
+     */
+    public Handler getHandler() {
+        return handler;
+    }
 
 }

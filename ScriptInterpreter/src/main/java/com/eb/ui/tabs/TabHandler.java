@@ -208,6 +208,17 @@ public class TabHandler implements TabOpener {
             split.getItems().addAll(top, bottom);
             split.setDividerPositions(0.6); // 60% code, 40% output by default
             Tab tab = new EbsTab(context);
+            
+            // Set the status bar on the tab's handler so it can update the status bar
+            if (tab instanceof EbsTab ebsTab) {
+                if (ebsTab.getHandler() instanceof com.eb.ui.ebs.EbsHandler ebsHandler) {
+                    // Get the status bar from the console handler and set it on this tab's handler
+                    com.eb.ui.ebs.StatusBar statusBar = consoleHandler.getStatusBar();
+                    if (statusBar != null) {
+                        ebsHandler.setStatusBar(statusBar);
+                    }
+                }
+            }
 
             tabPane.getTabs().add(tab);
             select(tab, requestFocus);
