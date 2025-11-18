@@ -825,8 +825,16 @@ public class EbsTab extends Tab {
             return;
         }
 
-        // Current = first hit initially
+        // Find the first match at or after the current cursor position
+        int cursorPos = dispArea.getCaretPosition();
         currentIndex = 0;
+        for (int i = 0; i < hits.size(); i++) {
+            if (hits.get(i)[0] >= cursorPos) {
+                currentIndex = i;
+                break;
+            }
+        }
+        
         int[] cur = hits.get(currentIndex);
         selectCurrent(cur);
         updateCountLabel();
