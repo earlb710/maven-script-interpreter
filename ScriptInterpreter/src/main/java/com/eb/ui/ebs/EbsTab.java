@@ -146,6 +146,18 @@ public class EbsTab extends Tab {
         
         // Setup autocomplete callback
         setupAutocomplete();
+        
+        // Add cursor position tracking for dispArea
+        dispArea.caretPositionProperty().addListener((obs, oldPos, newPos) -> {
+            updateCursorPosition(dispArea);
+        });
+        
+        // Also update on focus (when switching to this tab)
+        dispArea.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+            if (isFocused) {
+                updateCursorPosition(dispArea);
+            }
+        });
 
         outputArea.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
             if (e.isControlDown() && e.getCode() == KeyCode.L) {
@@ -478,6 +490,15 @@ public class EbsTab extends Tab {
             String src = dispArea.getSelectedText().isEmpty() ? dispArea.getText() : dispArea.getSelectedText();
             outputArea.printlnWarn("> Running " + tabContext.path.getFileName() + (dispArea.getSelectedText().isEmpty() ? "" : " (selection)") + "...");
             runBtn.setDisable(true);
+            
+            // Update status bar from handler (uses main window's status bar)
+            if (handler instanceof EbsHandler) {
+                StatusBar statusBar = ((EbsHandler) handler).getStatusBar();
+                if (statusBar != null) {
+                    statusBar.setStatus("Running");
+                    statusBar.clearMessage();
+                }
+            }
 
             // Offload execution to avoid freezing the UI if scripts are long
             Thread t = new Thread(() -> {
@@ -487,9 +508,29 @@ public class EbsTab extends Tab {
 
                     Platform.runLater(() -> {
                         outputArea.printlnOk("✓ Done.");
+                        if (handler instanceof EbsHandler) {
+                            StatusBar statusBar = ((EbsHandler) handler).getStatusBar();
+                            if (statusBar != null) {
+                                statusBar.clearStatus();
+                                statusBar.setMessage("Execution completed");
+                            }
+                        }
                     });
                 } catch (Exception ex) {
-                    Platform.runLater(() -> outputArea.printlnError("✗ Error: " + Util.formatExceptionWith2Origin(ex)));
+                    Platform.runLater(() -> {
+                        outputArea.printlnError("✗ Error: " + Util.formatExceptionWith2Origin(ex));
+                        if (handler instanceof EbsHandler) {
+                            StatusBar statusBar = ((EbsHandler) handler).getStatusBar();
+                            if (statusBar != null) {
+                                statusBar.clearStatus();
+                                String errorMsg = ex.getMessage() != null ? ex.getMessage() : ex.getClass().getSimpleName();
+                                String displayMsg = errorMsg.length() > 60 
+                                    ? errorMsg.substring(0, 57) + "..." 
+                                    : errorMsg;
+                                statusBar.setMessage(displayMsg, errorMsg);
+                            }
+                        }
+                    });
                 } finally {
                     Platform.runLater(() -> runBtn.setDisable(false));
                 }
@@ -906,6 +947,34 @@ public class EbsTab extends Tab {
             dispArea.replaceText(r[0], r[1], repl == null ? "" : repl);
         }
         runSearch();
+    }
+    
+    /**
+     * Update the cursor position in the status bar's custom section
+     * @param area The ScriptArea to get cursor position from
+     */
+    private void updateCursorPosition(ScriptArea area) {
+        if (handler instanceof EbsHandler) {
+            StatusBar statusBar = ((EbsHandler) handler).getStatusBar();
+            if (statusBar != null) {
+                // Get current paragraph (row) and column
+                int caretPos = area.getCaretPosition();
+                int currentParagraph = area.getCurrentParagraph();
+                int columnPos = area.getCaretColumn();
+                
+                // Format as (col,row) - using 1-based indexing for user display
+                String position = String.format("(%d,%d)", columnPos + 1, currentParagraph + 1);
+                statusBar.setCustom(position);
+            }
+        }
+    }
+    
+    /**
+     * Get the handler for this tab
+     * @return The handler
+     */
+    public Handler getHandler() {
+        return handler;
     }
 
 }

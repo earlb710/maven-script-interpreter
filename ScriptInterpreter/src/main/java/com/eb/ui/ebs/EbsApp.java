@@ -27,6 +27,7 @@ public class EbsApp {
     private TabPane mainTabs;
     private Console console;
     private EbsConsoleHandler handler;
+    private StatusBar statusBar; // Main window status bar
 
     public void start(Stage primaryStage) {
 
@@ -136,6 +137,13 @@ public class EbsApp {
         MenuBar menuBar = new EbsMenu(handler);
         root.setTop(menuBar);
         root.setCenter(mainTabs);
+        
+        // --- Status bar ---
+        statusBar = new StatusBar();
+        root.setBottom(statusBar);
+        
+        // Make status bar accessible to handler
+        handler.setStatusBar(statusBar);
 
     }
 

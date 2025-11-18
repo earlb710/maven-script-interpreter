@@ -391,6 +391,17 @@ public class EbsConsoleHandler extends EbsHandler {
     @Override
     public void submitErrors(String... lines) {
         super.submitErrors(lines);
+        // Update status bar with last error message
+        if (statusBar != null && lines != null && lines.length > 0) {
+            String lastError = lines[lines.length - 1];
+            if (lastError != null && !lastError.isEmpty()) {
+                // Truncate message if too long for display
+                String displayMsg = lastError.length() > 60 
+                    ? lastError.substring(0, 57) + "..." 
+                    : lastError;
+                statusBar.setMessage(displayMsg, lastError); // full message in tooltip
+            }
+        }
     }
 
     public void addRecentFile(Path p) {

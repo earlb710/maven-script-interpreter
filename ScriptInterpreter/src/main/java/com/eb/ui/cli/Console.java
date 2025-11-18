@@ -134,6 +134,10 @@ public final class Console {
         bottom.setPadding(new Insets(3));
         inputScroller.setMaxWidth(Double.MAX_VALUE);
         inputEvents();
+        
+        // Add cursor position tracking for console input area
+        setupCursorTracking(inputArea);
+        
         BorderPane content = new BorderPane(outputFrame);
         content.setBottom(bottom);
 
@@ -446,5 +450,44 @@ public final class Console {
         
         // Move caret to the appropriate position
         inputArea.moveTo(wordStart + finalCaretOffset);
+    }
+    
+    /**
+     * Setup cursor position tracking for the given ScriptArea
+     * Updates the status bar's custom section with cursor position (col,row)
+     */
+    private void setupCursorTracking(ScriptArea area) {
+        // Add cursor position listener
+        area.caretPositionProperty().addListener((obs, oldPos, newPos) -> {
+            updateCursorPosition(area);
+        });
+        
+        // Also update on focus
+        area.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+            if (isFocused) {
+                updateCursorPosition(area);
+            }
+        });
+        
+        // Initial update
+        updateCursorPosition(area);
+    }
+    
+    /**
+     * Update the cursor position in the status bar's custom section
+     */
+    private void updateCursorPosition(ScriptArea area) {
+        if (handler instanceof com.eb.ui.ebs.EbsHandler) {
+            com.eb.ui.ebs.StatusBar statusBar = ((com.eb.ui.ebs.EbsHandler) handler).getStatusBar();
+            if (statusBar != null) {
+                // Get current paragraph (row) and column
+                int currentParagraph = area.getCurrentParagraph();
+                int columnPos = area.getCaretColumn();
+                
+                // Format as (col,row) - using 1-based indexing for user display
+                String position = String.format("(%d,%d)", columnPos + 1, currentParagraph + 1);
+                statusBar.setCustom(position);
+            }
+        }
     }
 }

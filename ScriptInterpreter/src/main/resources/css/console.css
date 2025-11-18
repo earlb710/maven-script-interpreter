@@ -335,3 +335,21 @@
     -fx-padding: 0;
 }
 
+/* ===== Status bar styling ===== */
+.status-bar {
+    -fx-background-color: linear-gradient(to bottom, #f0f0f0, #e0e0e0);
+    -fx-border-color: #c0c0c0;
+    -fx-border-width: 1 0 0 0;
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 11px;
+    -fx-text-fill: #333333;
+}
+
+.status-bar .label {
+    -fx-text-fill: #333333;
+}
+
+.status-bar .separator {
+    -fx-padding: 0 2 0 2;
+}
+
