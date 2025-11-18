@@ -988,8 +988,7 @@ call file.copy(source, destination);
 call file.listopenfiles();
 
 // ZIP operations
-var zipHandle = call file.openzip(zipPath);
-var zipHandle = call file.createzip(zipPath);
+var zipHandle = call file.openzip(zipPath, mode);  // mode: "r" (read) or "w" (write/create)
 var files = call file.listzipfiles(zipHandle);
 call file.unzip(zipHandle, entryName, targetPath);
 call file.closezip(zipHandle);
@@ -1192,8 +1191,8 @@ Ctrl+Enter             Execute the script in the editor
 var x = "10" + 5;      // String concatenation: "105"
 var y = 10 + 5;        // Numeric addition: 15
 
-// Explicit conversion
-var num = call string.toint("42");
+// Explicit conversion via variable declaration
+var num: int = "42";   // Automatic type conversion
 var str = call string.tostring(42);
 ```
 
