@@ -1,0 +1,16 @@
+// Test: Builtin calls inside JSON literals (screen definitions)
+// This should work after implementing the feature
+
+print "Test 1: Simple builtin in JSON";
+print "================================";
+
+// This should fail currently - builtin call in JSON literal
+screen testScreen = {
+    "title": #string.concat("Hello", " ", "World"),
+    "width": 600,
+    "height": 400,
+    "vars": []
+};
+
+print "Screen title should be: Hello World";
+print "Test completed!";
