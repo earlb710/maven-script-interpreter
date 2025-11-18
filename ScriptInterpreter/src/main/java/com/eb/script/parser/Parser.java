@@ -1323,11 +1323,8 @@ public class Parser {
         StringBuilder sb = new StringBuilder();
         
         // Check if we have a CALL token (the # symbol)
-        EbsToken callToken = consumeOptional(EbsTokenType.CALL);
-        if (callToken != null) {
-            // We have a #, append it and continue parsing
-            sb.append("#");
-        }
+        // The # is just a shorthand for "call" and should be consumed but not included in the name
+        consumeOptional(EbsTokenType.CALL);
         
         // Now check for BUILTIN or IDENTIFIER
         EbsToken first = consumeOptional(EbsTokenType.BUILTIN);
