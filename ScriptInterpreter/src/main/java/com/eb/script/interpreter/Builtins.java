@@ -561,6 +561,9 @@ public final class Builtins {
         addBuiltin(info("debug.log", DataType.BOOL, newParam("level", DataType.STRING), newParam("message", DataType.STRING))); // log timestamped message
         addBuiltin(info("debug.assert", DataType.BOOL, newParam("condition", DataType.BOOL), newParam("message", DataType.STRING, false)));
         addBuiltin(info("debug.assertEquals", DataType.BOOL, newParam("expected", DataType.JSON), newParam("actual", DataType.JSON), newParam("message", DataType.STRING, false)));
+        // Echo mode
+        addBuiltin(info("echo.on", null)); // Enable echo mode
+        addBuiltin(info("echo.off", null)); // Disable echo mode
         // Vars/stack
         addBuiltin(info("debug.vars", DataType.JSON));
         addBuiltin(info("debug.stack", DataType.JSON));

@@ -5,9 +5,17 @@ This grammar is reconstructed from Parser.java / Token.java in the attached proj
 
 LEXICAL
 -------
-keywords   = "var" | "print" | "call" | "return" | "if" | "then" | "else" | "while" | "do" | "break" | "exit" | "continue" | "null" | "true" | "false" ;
-datatypes = "byte" | "int" | "integer" | "long" | "float" | "double" | "string" | "date" | "bool" | "boolean" | "json" | "any" ;
-operators  = "+" | "-" | "*" | "/" | "^" | "=" | "!" | ">" | "<" | ">=" | "<=" | "==" | "!=" | "and" | "or" ;
+keywords   = "var" | "print" | "call" | "return" | "if" | "then" | "else" | "while" | "do" | "break" | "exit" | "continue" 
+           | "null" | "true" | "false" 
+           | "import" | "foreach" | "in"
+           | "connect" | "use" | "cursor" | "open" | "close" | "connection"
+           | "select" | "from" | "where" | "order" | "by" | "group" | "having"
+           | "screen" | "show" | "hide"
+           | "length" | "size" ;
+datatypes  = "byte" | "int" | "integer" | "long" | "float" | "double" | "string" | "date" | "bool" | "boolean" | "json" ;
+operators  = "+" | "-" | "*" | "/" | "^" | "=" | "!" | ">" | "<" | ">=" | "<=" | "==" | "!=" 
+           | "and" | "or" | "&&" | "||" 
+           | "=>" | "=<" ;
 separators = ":" | "," | "." | ";" | "(" | ")" | "[" | "]" | "{" | "}" ;
 identifier = letter ( letter | digit | "_" )* ;
 
