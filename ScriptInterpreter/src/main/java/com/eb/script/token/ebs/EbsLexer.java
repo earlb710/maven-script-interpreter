@@ -159,12 +159,16 @@ public class EbsLexer extends Lexer<EbsTokenType> {
         boolean isFloat = false;
         boolean isDouble = false;
         int end = current;
-        if (peek() == '.' && isDigit(peekNext())) {
+        // Check if next char is '.' and the char after that is a digit
+        if (peekNext() == '.' && current + 2 < sourceLength && isDigit(source.charAt(current + 2))) {
             isDecimal = true;
-            c = advance(); // consume '.'
+            advance(); // move to '.'
+            c = advance(); // consume '.' and get first digit after it
             while (isDigit(c)) {
                 c = advance();
             }
+            current--; // back up after going past last digit
+            end = current;
             end = current;
             if (isAlpha(c)) {
                 switch (c) {
