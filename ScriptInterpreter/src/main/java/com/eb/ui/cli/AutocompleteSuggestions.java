@@ -178,7 +178,7 @@ public class AutocompleteSuggestions {
         // Check if we're after a 'call' keyword or '#' token
         boolean afterCallOrHash = false;
         if (!tokens.isEmpty()) {
-            // Check last non-whitespace token
+            // Check last non-whitespace token, skipping dots and identifiers
             for (int i = tokens.size() - 1; i >= 0; i--) {
                 EbsToken token = tokens.get(i);
                 String tokenStr = token.literal != null ? token.literal.toString().trim() : "";
@@ -194,8 +194,14 @@ public class AutocompleteSuggestions {
                     break;
                 }
 
+                // Skip dots and identifiers when looking for context
+                // This allows "#ai." to still recognize we're after '#'
+                if (token.type == EbsTokenType.IDENTIFIER || ".".equals(tokenStr)) {
+                    continue;
+                }
+
                 // If we hit another significant token, stop looking
-                if (token.type != EbsTokenType.IDENTIFIER && !tokenStr.trim().isEmpty()) {
+                if (!tokenStr.trim().isEmpty()) {
                     break;
                 }
             }
