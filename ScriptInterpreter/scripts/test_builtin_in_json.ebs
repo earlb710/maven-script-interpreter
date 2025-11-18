@@ -6,11 +6,11 @@ print "================================";
 
 // This should fail currently - builtin call in JSON literal
 screen testScreen = {
-    "title": #string.concat("Hello", " ", "World"),
+    "title": #string.toUpper("hello world"),
     "width": 600,
     "height": 400,
     "vars": []
 };
 
-print "Screen title should be: Hello World";
+print "Screen title should be: HELLO WORLD";
 print "Test completed!";
