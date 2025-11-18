@@ -1,0 +1,231 @@
+// Test Script: Status Bar Tooltip and Min/Max Display
+// Description: Demonstrates status bar displaying tooltips and constraints when focusing on form fields
+// Author: EBS Test Suite
+// Date: 2025-11-18
+// Purpose: Test the status bar feature that shows promptHelp and min/max/length constraints
+
+screen statusBarTestScreen = {
+    "title": "Status Bar Tooltip Test - Focus on fields to see status bar updates",
+    "width": 800,
+    "height": 700,
+    "vars": [
+        {
+            "name": "username",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Username:",
+                "promptHelp": "Enter a unique username (alphanumeric only)",
+                "maxLength": 20,
+                "mandatory": true
+            }
+        },
+        {
+            "name": "email",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Email Address:",
+                "promptHelp": "Enter a valid email address (e.g., user@example.com)",
+                "maxLength": 50,
+                "pattern": "^[\\w.-]+@[\\w.-]+\\.\\w+$",
+                "mandatory": true
+            }
+        },
+        {
+            "name": "age",
+            "type": "int",
+            "default": 18,
+            "display": {
+                "type": "spinner",
+                "labelText": "Age:",
+                "promptHelp": "Enter your age (must be between 18 and 99)",
+                "min": 18,
+                "max": 99
+            }
+        },
+        {
+            "name": "quantity",
+            "type": "int",
+            "default": 1,
+            "display": {
+                "type": "spinner",
+                "labelText": "Order Quantity:",
+                "promptHelp": "Minimum order quantity is 1, maximum is 1000",
+                "min": 1,
+                "max": 1000
+            }
+        },
+        {
+            "name": "discount",
+            "type": "int",
+            "default": 0,
+            "display": {
+                "type": "slider",
+                "labelText": "Discount (%):",
+                "promptHelp": "Select discount percentage (0% to 50%)",
+                "min": 0,
+                "max": 50
+            }
+        },
+        {
+            "name": "rating",
+            "type": "int",
+            "default": 5,
+            "display": {
+                "type": "slider",
+                "labelText": "Rating:",
+                "promptHelp": "Rate from 1 (poor) to 10 (excellent)",
+                "min": 1,
+                "max": 10
+            }
+        },
+        {
+            "name": "price",
+            "type": "double",
+            "default": 0.0,
+            "display": {
+                "type": "textfield",
+                "labelText": "Price ($):",
+                "promptHelp": "Enter price (minimum $0.01)",
+                "min": 0.01
+            }
+        },
+        {
+            "name": "temperature",
+            "type": "int",
+            "default": 20,
+            "display": {
+                "type": "slider",
+                "labelText": "Temperature (°C):",
+                "promptHelp": "Acceptable temperature range: -10°C to 50°C",
+                "min": -10,
+                "max": 50
+            }
+        },
+        {
+            "name": "description",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textarea",
+                "labelText": "Description:",
+                "promptHelp": "Enter a detailed description (up to 500 characters)",
+                "maxLength": 500
+            }
+        },
+        {
+            "name": "password",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "passwordfield",
+                "labelText": "Password:",
+                "promptHelp": "Create a secure password (8-32 characters)",
+                "maxLength": 32,
+                "mandatory": true
+            }
+        },
+        {
+            "name": "phoneNumber",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Phone Number:",
+                "promptHelp": "Enter phone number (10 digits)",
+                "maxLength": 10,
+                "pattern": "^[0-9]{10}$"
+            }
+        },
+        {
+            "name": "zipCode",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "ZIP Code:",
+                "promptHelp": "Enter 5-digit ZIP code",
+                "maxLength": 5,
+                "pattern": "^[0-9]{5}$"
+            }
+        }
+    ]
+};
+
+// Instructions for testing
+print "========================================";
+print "STATUS BAR TOOLTIP TEST";
+print "========================================";
+print "";
+print "INSTRUCTIONS:";
+print "1. The screen will open with multiple form fields";
+print "2. Click or tab to focus on each field";
+print "3. Watch the status bar at the bottom of the screen:";
+print "   - MESSAGE section: Shows the field's help text (tooltip)";
+print "   - CUSTOM section: Shows constraints (min/max values or max length)";
+print "4. Try these examples:";
+print "   - Username field: Shows 'len:20' (max length constraint)";
+print "   - Age spinner: Shows 'min:18 max:99' (age range)";
+print "   - Discount slider: Shows 'min:0 max:50' (percentage range)";
+print "   - Price field: Shows 'min:0.01' (minimum price)";
+print "   - Description textarea: Shows 'len:500' (character limit)";
+print "";
+print "STATUS BAR FORMAT:";
+print "┌─────────┬────────────────────────────────┬──────────────┐";
+print "│ Status  │ Message (Help Text)           │ Constraints  │";
+print "└─────────┴────────────────────────────────┴──────────────┘";
+print "";
+
+// Set some initial values
+statusBarTestScreen.username = "testuser";
+statusBarTestScreen.email = "test@example.com";
+statusBarTestScreen.age = 25;
+statusBarTestScreen.quantity = 5;
+statusBarTestScreen.discount = 10;
+statusBarTestScreen.rating = 8;
+statusBarTestScreen.price = 99.99;
+statusBarTestScreen.temperature = 22;
+statusBarTestScreen.phoneNumber = "5551234567";
+statusBarTestScreen.zipCode = "12345";
+
+// Display current values
+print "INITIAL VALUES:";
+print "Username: " + statusBarTestScreen.username;
+print "Email: " + statusBarTestScreen.email;
+print "Age: " + statusBarTestScreen.age;
+print "Quantity: " + statusBarTestScreen.quantity;
+print "Discount: " + statusBarTestScreen.discount + "%";
+print "Rating: " + statusBarTestScreen.rating + "/10";
+print "Price: $" + statusBarTestScreen.price;
+print "Temperature: " + statusBarTestScreen.temperature + "°C";
+print "Phone: " + statusBarTestScreen.phoneNumber;
+print "ZIP: " + statusBarTestScreen.zipCode;
+print "";
+
+// Show the screen
+print "Opening screen - Focus on different fields to see status bar updates!";
+print "";
+screen statusBarTestScreen show;
+
+// After screen closes, display final values
+print "";
+print "========================================";
+print "FINAL VALUES (after screen closed):";
+print "========================================";
+print "Username: " + statusBarTestScreen.username;
+print "Email: " + statusBarTestScreen.email;
+print "Age: " + statusBarTestScreen.age;
+print "Quantity: " + statusBarTestScreen.quantity;
+print "Discount: " + statusBarTestScreen.discount + "%";
+print "Rating: " + statusBarTestScreen.rating + "/10";
+print "Price: $" + statusBarTestScreen.price;
+print "Temperature: " + statusBarTestScreen.temperature + "°C";
+print "Description: " + statusBarTestScreen.description;
+print "Phone: " + statusBarTestScreen.phoneNumber;
+print "ZIP: " + statusBarTestScreen.zipCode;
+print "";
+print "Status bar tooltip test completed!";
+print "========================================";
