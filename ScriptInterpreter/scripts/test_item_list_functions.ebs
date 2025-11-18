@@ -66,11 +66,11 @@ print "";
 
 // Test screen.getItemList
 print "TEST 1: Testing screen.getItemList...";
-var itemList = screen.getItemList("testItemListScreen");
-print "  Item count: " + itemList.size();
+var itemList = #screen.getItemList("testItemListScreen");
+print "  Item count: " + itemList.size;
 print "  Items:";
 var i = 0;
-while i < itemList.size() {
+while i < itemList.size {
     print "    " + (i + 1) + ". " + itemList[i];
     i = i + 1;
 }
@@ -79,11 +79,11 @@ print "";
 
 // Test screen.getScreenItemList (new function)
 print "TEST 2: Testing screen.getScreenItemList...";
-var screenItemList = screen.getScreenItemList("testItemListScreen");
-print "  Item count: " + screenItemList.size();
+var screenItemList = #screen.getScreenItemList("testItemListScreen");
+print "  Item count: " + screenItemList.size;
 print "  Items:";
 i = 0;
-while i < screenItemList.size() {
+while i < screenItemList.size {
     print "    " + (i + 1) + ". " + screenItemList[i];
     i = i + 1;
 }
@@ -92,16 +92,16 @@ print "";
 
 // Test screen.getProperty with item names
 print "TEST 3: Testing screen.getProperty with item names...";
-var usernameVisible = screen.getProperty("testItemListScreen.username_field", "visible");
+var usernameVisible = #screen.getProperty("testItemListScreen.username_field", "visible");
 print "  username_field visible: " + usernameVisible;
 print "✓ screen.getProperty works with item names";
 print "";
 
 // Test screen.setProperty with item names
 print "TEST 4: Testing screen.setProperty with item names...";
-screen.setProperty("testItemListScreen.submit_button", "disabled", true);
+#screen.setProperty("testItemListScreen.submit_button", "disabled", true);
 print "  submit_button disabled property set to true";
-var buttonDisabled = screen.getProperty("testItemListScreen.submit_button", "disabled");
+var buttonDisabled = #screen.getProperty("testItemListScreen.submit_button", "disabled");
 print "  submit_button disabled: " + buttonDisabled;
 print "✓ screen.setProperty works with item names";
 print "";
