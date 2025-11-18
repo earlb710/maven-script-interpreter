@@ -53,47 +53,47 @@ print "  Value: " + scopeInternalTest.InternalSet.testVar2;
 print "";
 
 // ==================================================
-// TEST 3: Backward compatibility with "hiddenind": "N"
+// TEST 3: Scope "visible" (explicit)
 // ==================================================
-print "TEST 3: Testing backward compatibility with hiddenind='N'...";
-screen hiddenindNTest = {
-    "title": "HiddenInd N Test",
+print "TEST 3: Testing explicit scope='visible'...";
+screen explicitVisibleTest = {
+    "title": "Explicit Visible Test",
     "width": 600,
     "height": 400,
     "sets": [
         {
-            "setname": "LegacyVisibleSet",
-            "hiddenind": "N",
+            "setname": "VisibleSet",
+            "scope": "visible",
             "vars": [
-                {"name": "testVar3", "type": "string", "default": "legacy_visible"}
+                {"name": "testVar3", "type": "string", "default": "explicit_visible"}
             ]
         }
     ]
 };
-print "  ✓ Screen with hiddenind='N' created successfully";
-print "  Value: " + hiddenindNTest.LegacyVisibleSet.testVar3;
+print "  ✓ Screen with explicit scope='visible' created successfully";
+print "  Value: " + explicitVisibleTest.VisibleSet.testVar3;
 print "";
 
 // ==================================================
-// TEST 4: Backward compatibility with "hiddenind": "Y"
+// TEST 4: Scope "internal" for hidden variables
 // ==================================================
-print "TEST 4: Testing backward compatibility with hiddenind='Y'...";
-screen hiddenindYTest = {
-    "title": "HiddenInd Y Test",
+print "TEST 4: Testing scope='internal' for hidden variables...";
+screen internalScopeTest = {
+    "title": "Internal Scope Test",
     "width": 600,
     "height": 400,
     "sets": [
         {
-            "setname": "LegacyInternalSet",
-            "hiddenind": "Y",
+            "setname": "InternalSet",
+            "scope": "internal",
             "vars": [
-                {"name": "testVar4", "type": "string", "default": "legacy_internal"}
+                {"name": "testVar4", "type": "string", "default": "internal_value"}
             ]
         }
     ]
 };
-print "  ✓ Screen with hiddenind='Y' created successfully";
-print "  Value: " + hiddenindYTest.LegacyInternalSet.testVar4;
+print "  ✓ Screen with scope='internal' created successfully";
+print "  Value: " + internalScopeTest.InternalSet.testVar4;
 print "";
 
 // ==================================================
@@ -223,8 +223,8 @@ screen combinedTest = {
             ]
         },
         {
-            "setname": "LegacyHidden",
-            "hiddenind": "Y",
+            "setname": "InternalHidden",
+            "scope": "internal",
             "vars": [
                 {"name": "internalFlag", "type": "string", "default": "hidden"}
             ]
@@ -239,7 +239,7 @@ print "  Output (direction='out') updated: " + combinedTest.VisibleOutputs.resul
 print "  Internal (scope='internal'): " + combinedTest.InternalState.sessionId;
 combinedTest.InternalState.sessionId = 12345;
 print "  Internal updated: " + combinedTest.InternalState.sessionId;
-print "  Legacy hidden (hiddenind='Y'): " + combinedTest.LegacyHidden.internalFlag;
+print "  Internal hidden (scope='internal'): " + combinedTest.InternalHidden.internalFlag;
 print "";
 
 // ==================================================
@@ -280,8 +280,8 @@ print "TEST SUMMARY";
 print "====================================================";
 print "✓ TEST 1:  New scope='visible' - PASSED";
 print "✓ TEST 2:  New scope='internal' - PASSED";
-print "✓ TEST 3:  Legacy hiddenind='N' - PASSED";
-print "✓ TEST 4:  Legacy hiddenind='Y' - PASSED";
+print "✓ TEST 3:  Explicit scope='visible' - PASSED";
+print "✓ TEST 4:  Scope='internal' for hidden variables - PASSED";
 print "✓ TEST 5:  Direction='in' - PASSED";
 print "✓ TEST 6:  Direction='out' - PASSED";
 print "✓ TEST 7:  Direction='inout' - PASSED";

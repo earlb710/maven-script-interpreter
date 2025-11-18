@@ -14,8 +14,7 @@ public class VarSet {
     private String setName;
     
     // Scope: Indicates visibility and parameter direction
-    // Values: "visible" (default), "internal", "in"/"parameterIn", "out"/"parameterOut", "inOut"
-    // Legacy values: "Y" = internal, "N" = visible (for backward compatibility)
+    // Values: "visible" (default), "internal", "in"/"parameterIn", "out"/"parameterOut", "inout"
     private String scope;
     
     // Map of variables in this set, keyed by lowercase varName
@@ -41,7 +40,7 @@ public class VarSet {
     /**
      * Constructor with all fields
      * @param setName The name of the variable set
-     * @param scope Scope indicator ("internal", "visible", or legacy "Y"/"N")
+     * @param scope Scope indicator (e.g., "internal", "visible", "in", "out", "inout")
      */
     public VarSet(String setName, String scope) {
         this();
@@ -68,7 +67,7 @@ public class VarSet {
     }
     
     /**
-     * Normalize scope value to handle legacy values and aliases
+     * Normalize scope value to handle aliases
      * @param scope The scope value
      * @return Normalized scope value
      */
@@ -77,13 +76,6 @@ public class VarSet {
             return "visible";
         }
         String normalized = scope.toLowerCase();
-        
-        // Handle legacy values
-        if ("y".equals(normalized)) {
-            return "internal";
-        } else if ("n".equals(normalized)) {
-            return "visible";
-        }
         
         // Handle parameter direction aliases
         if ("parameterin".equals(normalized)) {
@@ -150,15 +142,6 @@ public class VarSet {
         return "out".equalsIgnoreCase(scope) || "inout".equalsIgnoreCase(scope);
     }
     
-    /**
-     * Check if this set is hidden (legacy method for backward compatibility)
-     * @return true if scope is "internal", false otherwise
-     * @deprecated Use isInternal() instead
-     */
-    @Deprecated
-    public boolean isHidden() {
-        return isInternal();
-    }
     
     @Override
     public String toString() {

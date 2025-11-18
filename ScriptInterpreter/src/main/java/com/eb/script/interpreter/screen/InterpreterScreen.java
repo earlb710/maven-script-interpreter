@@ -94,9 +94,8 @@ public class InterpreterScreen {
                             
                             // Extract set properties
                             String setName = setDef.containsKey("setname") ? String.valueOf(setDef.get("setname")) : null;
-                            // Support both legacy "hiddenind" and new "scope" property names
-                            String scope = setDef.containsKey("scope") ? String.valueOf(setDef.get("scope")) : 
-                                          (setDef.containsKey("hiddenind") ? String.valueOf(setDef.get("hiddenind")) : "visible");
+                            // Get scope property (default to "visible")
+                            String scope = setDef.containsKey("scope") ? String.valueOf(setDef.get("scope")) : "visible";
                             
                             if (setName == null || setName.isEmpty()) {
                                 throw interpreter.error(stmt.getLine(), "Variable set in screen '" + stmt.name + "' must have a 'setname' property.");
