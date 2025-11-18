@@ -27,14 +27,10 @@ public class Var {
     // Reference to the set this variable belongs to
     private String setName;
     
-    // Parameter direction: "in", "out", or "inout" (default)
-    private String direction;
-    
     /**
      * Default constructor
      */
     public Var() {
-        this.direction = "inout"; // Default to inout
     }
     
     /**
@@ -121,47 +117,6 @@ public class Var {
         this.setName = setName;
     }
     
-    public String getDirection() {
-        return direction;
-    }
-    
-    public void setDirection(String direction) {
-        this.direction = normalizeDirection(direction);
-    }
-    
-    /**
-     * Normalize direction value to valid options
-     * @param direction The direction value
-     * @return Normalized direction ("in", "out", or "inout")
-     */
-    private String normalizeDirection(String direction) {
-        if (direction == null) {
-            return "inout";
-        }
-        String normalized = direction.toLowerCase();
-        if ("in".equals(normalized) || "out".equals(normalized) || "inout".equals(normalized)) {
-            return normalized;
-        }
-        // Default to inout for invalid values
-        return "inout";
-    }
-    
-    /**
-     * Check if this variable is an input parameter
-     * @return true if direction is "in" or "inout"
-     */
-    public boolean isInput() {
-        return "in".equals(direction) || "inout".equals(direction);
-    }
-    
-    /**
-     * Check if this variable is an output parameter
-     * @return true if direction is "out" or "inout"
-     */
-    public boolean isOutput() {
-        return "out".equals(direction) || "inout".equals(direction);
-    }
-    
     /**
      * Get the fully qualified key for this variable (setname.varname in lowercase)
      * @return The key string
@@ -181,7 +136,6 @@ public class Var {
                 ", defaultValue=" + defaultValue +
                 ", value=" + value +
                 ", setName='" + setName + '\'' +
-                ", direction='" + direction + '\'' +
                 ", hasDisplay=" + (displayItem != null) +
                 '}';
     }

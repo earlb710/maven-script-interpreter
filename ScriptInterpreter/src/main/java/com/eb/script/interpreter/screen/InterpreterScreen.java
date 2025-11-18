@@ -1106,7 +1106,6 @@ public class InterpreterScreen {
                 String varName = varDef.containsKey("name") ? String.valueOf(varDef.get("name")).toLowerCase() : null;
                 String varTypeStr = varDef.containsKey("type") ? String.valueOf(varDef.get("type")).toLowerCase() : null;
                 Object defaultValue = varDef.get("default");
-                String direction = varDef.containsKey("direction") ? String.valueOf(varDef.get("direction")) : "inout";
 
                 if (varName == null || varName.isEmpty()) {
                     throw interpreter.error(line, "Variable definition in screen '" + screenName + "' must have a 'name' property.");
@@ -1131,7 +1130,6 @@ public class InterpreterScreen {
                 Var var = new Var(varName, varType, defaultValue);
                 var.setValue(value);
                 var.setSetName(setName);
-                var.setDirection(direction);
 
                 // Process optional display metadata
                 if (varDef.containsKey("display")) {

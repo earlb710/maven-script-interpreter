@@ -13,7 +13,8 @@ public class VarSet {
     // Name of the variable set
     private String setName;
     
-    // Scope: "internal" = internal access only, "visible" = visible (default)
+    // Scope: Indicates visibility and parameter direction
+    // Values: "visible" (default), "internal", "in"/"parameterIn", "out"/"parameterOut", "inOut"
     // Legacy values: "Y" = internal, "N" = visible (for backward compatibility)
     private String scope;
     
@@ -67,22 +68,32 @@ public class VarSet {
     }
     
     /**
-     * Normalize scope value to handle legacy "Y"/"N" values
-     * @param scope The scope value (can be "internal", "visible", "Y", or "N")
-     * @return Normalized scope ("internal" or "visible")
+     * Normalize scope value to handle legacy values and aliases
+     * @param scope The scope value
+     * @return Normalized scope value
      */
     private String normalizeScope(String scope) {
         if (scope == null) {
             return "visible";
         }
+        String normalized = scope.toLowerCase();
+        
         // Handle legacy values
-        if ("Y".equalsIgnoreCase(scope)) {
+        if ("y".equals(normalized)) {
             return "internal";
-        } else if ("N".equalsIgnoreCase(scope)) {
+        } else if ("n".equals(normalized)) {
             return "visible";
         }
-        // Return as-is for new values
-        return scope.toLowerCase();
+        
+        // Handle parameter direction aliases
+        if ("parameterin".equals(normalized)) {
+            return "in";
+        } else if ("parameterout".equals(normalized)) {
+            return "out";
+        }
+        
+        // Valid values: visible, internal, in, out, inout
+        return normalized;
     }
     
     public Map<String, Var> getVariables() {
@@ -121,6 +132,22 @@ public class VarSet {
      */
     public boolean isInternal() {
         return "internal".equalsIgnoreCase(scope);
+    }
+    
+    /**
+     * Check if this set is for input parameters
+     * @return true if scope is "in" or "inout"
+     */
+    public boolean isInput() {
+        return "in".equalsIgnoreCase(scope) || "inout".equalsIgnoreCase(scope);
+    }
+    
+    /**
+     * Check if this set is for output parameters
+     * @return true if scope is "out" or "inout"
+     */
+    public boolean isOutput() {
+        return "out".equalsIgnoreCase(scope) || "inout".equalsIgnoreCase(scope);
     }
     
     /**

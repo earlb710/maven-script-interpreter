@@ -53,7 +53,7 @@ Storage in InterpreterContext
 ```
 VarSet
 ├── setName: "PersonalInfo"
-├── scope: "visible"  (or "internal" for hidden sets)
+├── scope: "visible"  (visible, internal, in, out, inout)
 └── variables: Map<String, Var>
     ├── "firstname" → Var
     ├── "lastname" → Var
@@ -63,6 +63,9 @@ VarSet
 **Scope Values:**
 - `"visible"` - Variables are visible in UI (default)
 - `"internal"` - Variables are for internal use only, hidden from UI
+- `"in"` (or `"parameterIn"`) - Input parameters
+- `"out"` (or `"parameterOut"`) - Output parameters
+- `"inout"` - Input/Output parameters (both)
 - Legacy: `"Y"` (internal) and `"N"` (visible) still supported for backward compatibility
 
 ### Var Object
@@ -73,15 +76,9 @@ Var
 ├── defaultValue: "John"
 ├── value: "John"
 ├── setName: "PersonalInfo"
-├── direction: "inout"  (in, out, or inout)
 ├── displayItem: DisplayItem {...}
 └── getKey() → "personalinfo.firstname"
 ```
-
-**Direction Values:**
-- `"in"` - Input parameter only (can be read from)
-- `"out"` - Output parameter only (can be written to)
-- `"inout"` - Both input and output (default)
 
 ## Access Patterns
 
