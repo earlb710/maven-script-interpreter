@@ -29,18 +29,19 @@ public class StatusBar extends HBox {
         messageLabel = new Label();
         customLabel = new Label();
         
-        // Configure status label (first, left-aligned)
+        // Configure status label (first, left-aligned, fixed width)
         statusLabel.setMinWidth(100);
         statusLabel.setPrefWidth(100);
         statusLabel.setMaxWidth(100);
         statusLabel.setAlignment(Pos.CENTER_LEFT);
         
-        // Configure message label (second, left-aligned, flexible width)
-        messageLabel.setMinWidth(200);
+        // Configure message label (second, left-aligned, flexible width - uses 50%+ of space)
+        // No min width constraint to allow natural stretching based on Priority.ALWAYS
         messageLabel.setAlignment(Pos.CENTER_LEFT);
-        HBox.setHgrow(messageLabel, Priority.ALWAYS);
+        messageLabel.setMaxWidth(Double.MAX_VALUE); // Allow unlimited expansion
+        HBox.setHgrow(messageLabel, Priority.ALWAYS); // Auto-stretch to fill available space
         
-        // Configure custom label (third, right-aligned)
+        // Configure custom label (third, right-aligned, fixed width)
         customLabel.setMinWidth(100);
         customLabel.setPrefWidth(100);
         customLabel.setMaxWidth(100);
