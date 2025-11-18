@@ -17,6 +17,8 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
@@ -414,11 +416,26 @@ public class ScreenFactory {
         // Add nested child areas to the container
         if (areaDef.childAreas != null && !areaDef.childAreas.isEmpty()) {
             for (AreaDefinition childArea : areaDef.childAreas) {
-                Region childContainer = createAreaWithItems(childArea, screenName, metadataProvider, screenVars, varTypes, onClickHandler, boundControls);
-
-                // Add the child container to the parent container
-                // Treat child areas as regular nodes
-                addChildAreaToContainer(container, childContainer, areaDef.areaType);
+                // Special handling for Tab areas when parent is TabPane
+                if (areaDef.areaType == AreaType.TABPANE && childArea.areaType == AreaType.TAB) {
+                    // Create Tab control instead of Region
+                    Region tabContent = createAreaWithItems(childArea, screenName, metadataProvider, screenVars, varTypes, onClickHandler, boundControls);
+                    Tab tab = new Tab();
+                    tab.setText(childArea.screenName != null ? childArea.screenName : childArea.name);
+                    tab.setContent(tabContent);
+                    tab.setClosable(false); // Tabs not closable by default
+                    
+                    if (container instanceof TabPane) {
+                        ((TabPane) container).getTabs().add(tab);
+                    }
+                } else {
+                    // Normal nested area handling
+                    Region childContainer = createAreaWithItems(childArea, screenName, metadataProvider, screenVars, varTypes, onClickHandler, boundControls);
+                    
+                    // Add the child container to the parent container
+                    // Treat child areas as regular nodes
+                    addChildAreaToContainer(container, childContainer, areaDef.areaType, childArea);
+                }
             }
         }
 
@@ -683,7 +700,7 @@ public class ScreenFactory {
      * Adds a child area (nested container) to a parent container. Similar to
      * addItemToContainer but for child areas.
      */
-    private static void addChildAreaToContainer(Region container, Region childArea, AreaType areaType) {
+    private static void addChildAreaToContainer(Region container, Region childArea, AreaType areaType, AreaDefinition childAreaDef) {
         if (container instanceof VBox) {
             ((VBox) container).getChildren().add(childArea);
         } else if (container instanceof HBox) {
