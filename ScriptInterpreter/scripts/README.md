@@ -312,7 +312,7 @@ screen myScreen hide;
 - `caseFormat` - Text case formatting (upper, lower, title)
 
 ### AreaItem Properties (for area-based layouts)
-- `promptText` - Placeholder text for input controls
+- `promptHelp` - Placeholder text for input controls
 - `promptAlignment` - Alignment for prompt text (left, center, right)
 - `editable` - Whether the field can be edited
 - `disabled` - Whether the control is disabled

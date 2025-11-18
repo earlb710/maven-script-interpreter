@@ -156,8 +156,8 @@ public class StyleDebugTest extends Application {
         return box;
     }
 
-    private HBox createTestTextField(String promptText, String style) {
-        Label descLabel = new Label(promptText + ":");
+    private HBox createTestTextField(String description, String style) {
+        Label descLabel = new Label(description + ":");
         descLabel.setMinWidth(200);
         
         TextField textField = new TextField("Test Text");

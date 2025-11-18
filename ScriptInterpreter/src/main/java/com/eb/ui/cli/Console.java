@@ -222,8 +222,18 @@ public final class Console {
         // Update autocomplete as user types
         inputArea.addEventHandler(KeyEvent.KEY_TYPED, e -> {
             if (autocompletePopup.isShowing()) {
-                // Update the suggestions based on the new text
-                showAutocomplete();
+                // Don't hide popup when typing dot (.)
+                if (!".".equals(e.getCharacter())) {
+                    // Update the suggestions based on the new text
+                    showAutocomplete();
+                }
+            }
+        });
+        
+        // Hide autocomplete when clicking in the editor (JavaFX Popup doesn't auto-hide on owner clicks)
+        inputArea.setOnMouseClicked(e -> {
+            if (autocompletePopup.isShowing()) {
+                autocompletePopup.hide();
             }
         });
     }
@@ -324,14 +334,28 @@ public final class Console {
         String text = inputArea.getText();
         int caretPos = inputArea.getCaretPosition();
         
-        // Get only the current line for tokenization
-        String currentLineText = getCurrentLineText(text, caretPos);
-        int caretPosInLine = getCaretPositionInCurrentLine(text, caretPos);
+        // For JSON autocomplete, use the full text to maintain context
+        // For other cases, just use current line
+        String contextText;
+        int contextCaretPos;
         
-        List<String> suggestions = AutocompleteSuggestions.getSuggestionsForContext(currentLineText, caretPosInLine);
+        if (JsonSchemaAutocomplete.looksLikeJson(text)) {
+            // Use full text for JSON to maintain proper context
+            contextText = text;
+            contextCaretPos = caretPos;
+        } else {
+            // For non-JSON, use current line only
+            contextText = getCurrentLineText(text, caretPos);
+            contextCaretPos = getCaretPositionInCurrentLine(text, caretPos);
+        }
+        
+        List<String> suggestions = AutocompleteSuggestions.getSuggestionsForContext(contextText, contextCaretPos);
         
         if (!suggestions.isEmpty()) {
             autocompletePopup.show(inputArea, suggestions);
+        } else {
+            // Hide popup if no suggestions available
+            autocompletePopup.hide();
         }
     }
 
@@ -373,12 +397,15 @@ public final class Console {
         int wordStart = caretPos;
         while (wordStart > 0) {
             char c = text.charAt(wordStart - 1);
-            if (Character.isLetterOrDigit(c) || c == '.' || c == '_'|| c == '/') {
+            if (Character.isLetterOrDigit(c) || c == '.' || c == '_'|| c == '/' || c == '"') {
                 wordStart--;
             } else {
                 break;
             }
         }
+        
+        // Check if we're inserting a JSON property key (which needs quotes)
+        boolean isJsonKey = JsonSchemaAutocomplete.isSuggestingJsonKeys(text, caretPos);
         
         // Check if the suggestion is a builtin and get its parameter signature
         String paramSignature = null;
@@ -390,7 +417,22 @@ public final class Console {
         String insertText = suggestion;
         int finalCaretOffset = suggestion.length();
         
-        if (paramSignature != null) {
+        if (isJsonKey) {
+            // For JSON property keys, add quotes if not already present
+            boolean hasOpeningQuote = wordStart > 0 && text.charAt(wordStart - 1) == '"';
+            boolean hasClosingQuote = caretPos < text.length() && text.charAt(caretPos) == '"';
+            
+            if (!hasOpeningQuote) {
+                insertText = "\"" + insertText;
+                finalCaretOffset++;
+            }
+            if (!hasClosingQuote) {
+                insertText = insertText + "\"";
+            } else {
+                // If there's already a closing quote, we'll position caret after it
+                finalCaretOffset++;
+            }
+        } else if (paramSignature != null) {
             insertText = suggestion + paramSignature;
             // Position caret after the first = sign to allow user to type/replace the default value
             int firstEquals = paramSignature.indexOf("=");

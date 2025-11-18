@@ -931,14 +931,14 @@ public class ScreenFactory {
         }
 
         // UI properties
-        // promptText now goes into displayItem
-        String promptText = getStringValue(itemDef, "promptText", getStringValue(itemDef, "prompt_text", null));
-        if (promptText != null) {
+        // promptHelp (formerly promptText) now goes into displayItem
+        String promptHelp = getStringValue(itemDef, "promptHelp", getStringValue(itemDef, "prompt_help", null));
+        if (promptHelp != null) {
             // If displayItem doesn't exist yet, create it
             if (item.displayItem == null) {
                 item.displayItem = new DisplayItem();
             }
-            item.displayItem.promptHelp = promptText;
+            item.displayItem.promptHelp = promptHelp;
         }
         item.tooltip = getStringValue(itemDef, "tooltip", null);
         item.editable = getBooleanValue(itemDef, "editable", null);

@@ -526,7 +526,7 @@ The `Json.parse()` method accepts an optional `lowerCaseKey` parameter:
 ```javascript
 // Input JSON (for screen definitions):
 {
-    "promptText": "Click Me",
+    "promptHelp": "Click Me",
     "onClick": "print 'Hello';",
     "varRef": "myVariable"
 }
@@ -547,7 +547,7 @@ The `Json.parse()` method accepts an optional `lowerCaseKey` parameter:
 **Affected Areas:**
 - **Screen Definitions**: Screen configuration JSON uses case-insensitive keys
   - `varRef`, `VarRef`, or `varref` all map to `"varref"`
-  - `promptText`, `PromptText`, or `prompttext` all map to `"prompttext"`
+  - `promptHelp`, `PromptText`, or `prompttext` all map to `"prompttext"`
   - `onClick`, `OnClick`, or `onclick` all map to `"onclick"`
 - **Display Metadata**: All display property keys are normalized to lowercase
 - **Area/Item Definitions**: Container and UI control properties use lowercase keys

@@ -566,7 +566,7 @@ screen myWindow = {
             "display": {
                 "type": "textfield",
                 "labelText": "User Name:",
-                "promptText": "Enter your name"
+                "promptHelp": "Enter your name"
             }
         }
     ]
@@ -589,7 +589,7 @@ screen formScreen = {
                 "type": "textfield",
                 "labelText": "First Name:",
                 "labelTextAlignment": "left",
-                "promptText": "Enter first name",
+                "promptHelp": "Enter first name",
                 "maxLength": 30
             }
         },
@@ -648,7 +648,7 @@ screen formScreen = {
             "display": {
                 "type": "textarea",
                 "labelText": "Biography:",
-                "promptText": "Tell us about yourself"
+                "promptHelp": "Tell us about yourself"
             }
         }
     ]
@@ -659,18 +659,18 @@ screen formScreen = {
 
 | Control Type | Description | Display Properties |
 |--------------|-------------|-------------------|
-| `textfield` | Single-line text input | `promptText`, `maxLength`, `alignment` |
-| `textarea` | Multi-line text input | `promptText`, `maxLength` |
-| `passwordfield` | Password input (masked) | `promptText`, `maxLength` |
+| `textfield` | Single-line text input | `promptHelp`, `maxLength`, `alignment` |
+| `textarea` | Multi-line text input | `promptHelp`, `maxLength` |
+| `passwordfield` | Password input (masked) | `promptHelp`, `maxLength` |
 | `checkbox` | Boolean checkbox | `labelText` |
 | `radiobutton` | Radio button (exclusive selection) | `labelText` |
 | `togglebutton` | Toggle button | `labelText` |
-| `combobox` | Editable dropdown | `options`, `promptText`, `maxLength` |
+| `combobox` | Editable dropdown | `options`, `promptHelp`, `maxLength` |
 | `choicebox` | Non-editable dropdown | `options`, `maxLength` |
 | `listview` | List selection control | `options` |
 | `spinner` | Numeric spinner | `min`, `max` |
 | `slider` | Numeric slider | `min`, `max` |
-| `datepicker` | Date picker | `promptText`, `maxLength` |
+| `datepicker` | Date picker | `promptHelp`, `maxLength` |
 | `colorpicker` | Color picker | `maxLength` |
 | `button` | Click button | `labelText`, `onClick` |
 | `label` / `labeltext` | Display label | `labelText`, `alignment` |
@@ -687,7 +687,7 @@ screen formScreen = {
     "type": "textfield",
     "labelText": "Field Label:",           // Label shown before control
     "labelTextAlignment": "left",           // "left", "center", "right"
-    "promptText": "Enter value",            // Placeholder text
+    "promptHelp": "Enter value",            // Placeholder text
     "maxLength": 50,                        // Maximum length/width
     "mandatory": true,                      // Field is required
     "alignment": "left",                    // Content alignment

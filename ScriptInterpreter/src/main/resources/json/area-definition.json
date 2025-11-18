@@ -76,7 +76,7 @@
           "$ref": "display-metadata.json",
           "description": "Optional display metadata override for this item"
         },
-        "promptText": {
+        "promptHelp": {
           "type": "string",
           "description": "Placeholder text for text input controls"
         },

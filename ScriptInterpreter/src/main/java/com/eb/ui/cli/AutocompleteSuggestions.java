@@ -97,13 +97,25 @@ public class AutocompleteSuggestions {
 
     /**
      * Get suggestions filtered by the given prefix (case-insensitive).
+     * Strips trailing dots from the prefix to allow autocomplete after member access.
      */
     public static List<String> getSuggestionsWithPrefix(List<String> suggestions, String prefix) {
         if (prefix == null || prefix.isEmpty()) {
             return suggestions;
         }
 
-        String lowerPrefix = prefix.toLowerCase();
+        // Strip trailing dots to allow autocomplete after member access (e.g., "#ai.")
+        String cleanPrefix = prefix;
+        while (cleanPrefix.endsWith(".")) {
+            cleanPrefix = cleanPrefix.substring(0, cleanPrefix.length() - 1);
+        }
+        
+        // If prefix was only dots, return all suggestions
+        if (cleanPrefix.isEmpty()) {
+            return suggestions;
+        }
+
+        String lowerPrefix = cleanPrefix.toLowerCase();
         return suggestions.stream()
                 .filter(s -> s.toLowerCase().startsWith(lowerPrefix))
                 .collect(Collectors.toList());
@@ -112,12 +124,22 @@ public class AutocompleteSuggestions {
     /**
      * Determine what suggestions to show based on the current input context.
      * Returns console commands if the token starts with '/', all keywords and 
-     * builtins after '/help ' or '/? ', builtins after 'call' or '#', 
+     * builtins after '/help ' or '/? ', builtins after 'call' or '#',
+     * JSON schema-based suggestions if editing JSON content,
      * otherwise returns only keywords.
      */
     public static List<String> getSuggestionsForContext(String text, int caretPosition) {
         // Get the text before the caret
         String beforeCaret = text.substring(0, Math.min(caretPosition, text.length()));
+
+        // Check if we're editing JSON content - provide schema-based suggestions
+        if (JsonSchemaAutocomplete.looksLikeJson(text)) {
+            List<String> jsonSuggestions = JsonSchemaAutocomplete.getJsonSuggestions(text, caretPosition);
+            if (!jsonSuggestions.isEmpty()) {
+                return jsonSuggestions;
+            }
+            // Fall through to normal suggestions if no JSON suggestions found
+        }
 
         // Find the word at caret position
         String currentWord = getCurrentWord(beforeCaret);
@@ -156,7 +178,7 @@ public class AutocompleteSuggestions {
         // Check if we're after a 'call' keyword or '#' token
         boolean afterCallOrHash = false;
         if (!tokens.isEmpty()) {
-            // Check last non-whitespace token
+            // Check last non-whitespace token, skipping dots and identifiers
             for (int i = tokens.size() - 1; i >= 0; i--) {
                 EbsToken token = tokens.get(i);
                 String tokenStr = token.literal != null ? token.literal.toString().trim() : "";
@@ -172,8 +194,14 @@ public class AutocompleteSuggestions {
                     break;
                 }
 
+                // Skip dots and identifiers when looking for context
+                // This allows "#ai." to still recognize we're after '#'
+                if (token.type == EbsTokenType.IDENTIFIER || ".".equals(tokenStr)) {
+                    continue;
+                }
+
                 // If we hit another significant token, stop looking
-                if (token.type != EbsTokenType.IDENTIFIER && !tokenStr.trim().isEmpty()) {
+                if (!tokenStr.trim().isEmpty()) {
                     break;
                 }
             }

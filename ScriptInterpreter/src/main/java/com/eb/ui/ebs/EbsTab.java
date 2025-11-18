@@ -10,6 +10,7 @@ import com.eb.script.token.ebs.EbsToken;
 import com.eb.ui.cli.AutocompletePopup;
 import com.eb.ui.cli.AutocompleteSuggestions;
 import com.eb.ui.cli.Handler;
+import com.eb.ui.cli.JsonSchemaAutocomplete;
 import com.eb.ui.cli.ScriptArea;
 import com.eb.util.Debugger;
 import com.eb.util.Util;
@@ -125,6 +126,24 @@ public class EbsTab extends Tab {
             }
         });
         
+        // Update autocomplete as user types (like in Console)
+        dispArea.addEventHandler(KeyEvent.KEY_TYPED, e -> {
+            if (autocompletePopup.isShowing()) {
+                // Don't hide popup when typing dot (.)
+                if (!".".equals(e.getCharacter())) {
+                    // Update the suggestions based on the new text
+                    showAutocomplete();
+                }
+            }
+        });
+        
+        // Hide autocomplete when clicking in the editor (JavaFX Popup doesn't auto-hide on owner clicks)
+        dispArea.setOnMouseClicked(e -> {
+            if (autocompletePopup.isShowing()) {
+                autocompletePopup.hide();
+            }
+        });
+        
         // Setup autocomplete callback
         setupAutocomplete();
 
@@ -185,10 +204,15 @@ public class EbsTab extends Tab {
         String text = dispArea.getText();
         int caretPos = dispArea.getCaretPosition();
         
+        // For JSON autocomplete, use full text to maintain context
+        // For other cases, use full text as well (editor has full context)
         List<String> suggestions = AutocompleteSuggestions.getSuggestionsForContext(text, caretPos);
         
         if (!suggestions.isEmpty()) {
             autocompletePopup.show(dispArea, suggestions);
+        } else {
+            // Hide popup if no suggestions available
+            autocompletePopup.hide();
         }
     }
     
@@ -204,32 +228,55 @@ public class EbsTab extends Tab {
         int start = caretPos;
         while (start > 0) {
             char c = text.charAt(start - 1);
-            if (Character.isLetterOrDigit(c) || c == '_' || c == '.') {
+            if (Character.isLetterOrDigit(c) || c == '_' || c == '.' || c == '"') {
                 start--;
             } else {
                 break;
             }
         }
         
+        // Check if we're inserting a JSON property key (which needs quotes)
+        boolean isJsonKey = JsonSchemaAutocomplete.isSuggestingJsonKeys(text, caretPos);
+        
         // Check if the suggestion is a builtin function that needs parameters
         String toInsert = suggestion;
-        String paramSignature = AutocompleteSuggestions.getBuiltinParameterSignature(suggestion);
-        if (paramSignature != null) {
-            toInsert = suggestion + paramSignature;
+        int finalCaretOffset = suggestion.length();
+        
+        if (isJsonKey) {
+            // For JSON property keys, add quotes if not already present
+            boolean hasOpeningQuote = start > 0 && text.charAt(start - 1) == '"';
+            boolean hasClosingQuote = caretPos < text.length() && text.charAt(caretPos) == '"';
+            
+            if (!hasOpeningQuote) {
+                toInsert = "\"" + toInsert;
+                finalCaretOffset++;
+            }
+            if (!hasClosingQuote) {
+                toInsert = toInsert + "\"";
+            } else {
+                // If there's already a closing quote, we'll position caret after it
+                finalCaretOffset++;
+            }
+        } else {
+            String paramSignature = AutocompleteSuggestions.getBuiltinParameterSignature(suggestion);
+            if (paramSignature != null) {
+                toInsert = suggestion + paramSignature;
+                // Position cursor inside the parentheses after first = sign
+                int firstEquals = paramSignature.indexOf("=");
+                if (firstEquals >= 0) {
+                    finalCaretOffset = suggestion.length() + firstEquals + 1;
+                } else {
+                    // Move cursor to after the opening paren
+                    finalCaretOffset = suggestion.length() + 1;
+                }
+            }
         }
         
         // Replace the current word with the suggestion
         dispArea.replaceText(start, caretPos, toInsert);
         
         // Move cursor to appropriate position
-        // If we inserted parameters, move cursor inside the parentheses
-        if (paramSignature != null && paramSignature.length() > 2) {
-            // Move cursor to after the opening paren
-            dispArea.moveTo(start + suggestion.length() + 1);
-        } else {
-            // Move cursor to end of inserted text
-            dispArea.moveTo(start + toInsert.length());
-        }
+        dispArea.moveTo(start + finalCaretOffset);
         
         // Request focus back to the editor
         dispArea.requestFocus();
