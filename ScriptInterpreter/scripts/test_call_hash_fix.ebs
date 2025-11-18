@@ -1,0 +1,19 @@
+// Test to verify the # call fix works correctly
+
+// Test 1: Call #debug.assert directly
+call #debug.assert(true, "Test 1: Simple call with # works");
+
+// Test 2: Call with variable in parameter
+var testVar = "test value";
+call #debug.assert(testVar == "test value", "Test 2: Call with variable works");
+
+// Test 3: Call with expression
+var x = 10;
+var y = 20;
+call #debug.assert(x + y == 30, "Test 3: Call with expression works");
+
+// Test 4: Multiple # calls
+call #debug.assert(1 < 2, "Test 4a: Comparison works");
+call #debug.assert("abc" == "abc", "Test 4b: String comparison works");
+
+print "✓ All parser tests passed - # notation is working correctly!";
