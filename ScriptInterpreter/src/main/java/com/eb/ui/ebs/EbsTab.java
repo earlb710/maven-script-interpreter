@@ -888,7 +888,7 @@ public class EbsTab extends Tab {
         selectCurrent(cur);
         updateCountLabel();
 
-        // Highlight all matches (always enabled)
+        // Highlight all matches (optimized via batched style updates in ScriptArea)
         for (int[] r : hits) {
             dispArea.addStyleToRange(r[0], r[1], "find-hit");
         }
@@ -951,7 +951,8 @@ public class EbsTab extends Tab {
     }
 
     private void clearHighlights() {
-        // remove highlight classes from all previously-highlighted ranges
+        // Remove highlight classes from all previously-highlighted ranges
+        // (optimized via batched style updates in ScriptArea)
         for (int[] r : lastMatches) {
             dispArea.removeStyleFromRange(r[0], r[1], "find-hit");
             dispArea.removeStyleFromRange(r[0], r[1], "find-current");
