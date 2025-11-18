@@ -291,3 +291,11 @@ print "✓ TEST 10: Data types - PASSED";
 print "";
 print "All tests completed successfully!";
 print "====================================================";
+print #screen.getitemlist("scopeVisibleTest");
+print #screen.getitemlist("scopeInternalTest");
+print #screen.getitemlist("directionInTest");
+print #screen.getitemlist("directionOutTest");
+print #screen.getitemlist("directionInoutTest");
+print #screen.getitemlist("combinedTest");
+
+
