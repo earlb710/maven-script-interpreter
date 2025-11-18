@@ -471,7 +471,9 @@ public class AreaItemFactory {
                     sampleText = longestValue;
                     measuringText.setText(sampleText);
                     double textWidth = measuringText.getLayoutBounds().getWidth();
-                    double padding = 30; // Padding for spinner buttons and borders
+                    // Increase padding for spinner buttons and borders - spinners need more space
+                    // for the up/down arrows on the right side
+                    double padding = 50; // Padding for spinner buttons and borders
                     return textWidth + padding;
                 }
             }
