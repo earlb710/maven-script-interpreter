@@ -7,7 +7,7 @@ A powerful script interpreter for the EBS (Earl Bosch Script) language, featurin
 - **Custom Scripting Language**: Full-featured scripting language with familiar syntax
 - **Interactive Console**: JavaFX-based IDE with rich text editing
 - **Syntax Highlighting**: Color-coded syntax for better readability
-- **Autocomplete**: Intelligent code completion suggestions
+- **Autocomplete**: Intelligent code completion suggestions for keywords, built-ins, and JSON schemas
 - **Database Integration**: Built-in SQL support with cursors and connections
 - **Array Support**: Multi-dimensional arrays with type safety
 - **JSON Support**: Native JSON parsing, validation, and schema support
@@ -164,6 +164,44 @@ When using the interactive console:
 - `/safe-dirs` - Configure trusted directories
 
 Press `Ctrl+Enter` to execute the script in the editor.
+Press `Ctrl+Space` to trigger autocomplete for keywords, built-ins, and JSON properties.
+
+### Autocomplete Features
+
+The interactive console provides intelligent autocomplete support (triggered with `Ctrl+Space`):
+
+#### EBS Code Autocomplete
+- **Keywords**: Language keywords (`if`, `then`, `while`, `for`, `function`, `return`, etc.)
+- **Built-in Functions**: Over 50 built-in functions like `print`, `substring`, `parseJson`, etc.
+- **Context-Aware**: Shows only relevant suggestions based on context (e.g., built-ins after `call` or `#`)
+- **Console Commands**: Autocomplete for `/` commands when typing in console
+
+#### JSON Schema Autocomplete
+When editing JSON content (screen definitions, area definitions, display metadata), autocomplete provides:
+
+- **Property Names**: Suggests valid property names from JSON schemas
+  - Type `{` then `Ctrl+Space` to see all available properties
+  - Start typing a property name for filtered suggestions (e.g., type `"na` to see `name`)
+  
+- **Enum Values**: Suggests valid enum values for properties with constrained values
+  - After `"type": "`, press `Ctrl+Space` to see all valid control types (textfield, button, label, etc.)
+  - After `"alignment": "`, see valid alignment options (left, center, right, etc.)
+
+**Example:**
+```json
+{
+  "name": "LoginScreen",
+  "type": "   ← Ctrl+Space here shows: textfield, button, label, etc.
+  "title":    ← Ctrl+Space after opening quote shows: property suggestions
+}
+```
+
+**Supported JSON Schemas:**
+- `screen-definition.json` - Top-level screen properties (name, title, width, height, vars, area)
+- `area-definition.json` - Container properties (type, layout, items, style)
+- `display-metadata.json` - UI control metadata (type, mandatory, alignment, min, max, etc.)
+
+The autocomplete automatically detects JSON content and provides schema-aware suggestions from all three schemas combined.
 
 ## Documentation
 
