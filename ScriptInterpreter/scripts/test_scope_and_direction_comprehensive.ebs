@@ -2,6 +2,11 @@
 // Description: Tests both new features and backward compatibility
 // Author: EBS Test Suite
 // Date: 2025-11-18
+//
+// NOTE: This test uses #debug.assert and #debug.assertEquals for assertions
+//       - Use #debug.assert(condition, "message") to assert a boolean condition
+//       - Use #debug.assertEquals(expected, actual, "message") to assert equality
+//       - Arrays use .length property (not .length() method)
 
 print "====================================================";
 print "COMPREHENSIVE TEST: Scope and Direction Features";
@@ -26,6 +31,7 @@ screen scopeVisibleTest = {
         }
     ]
 };
+call #debug.assert(scopeVisibleTest.VisibleSet.testVar1 == "visible1", "TEST 1: Value should be 'visible1'");
 print "  ✓ Screen with scope='visible' created successfully";
 print "  Value: " + scopeVisibleTest.VisibleSet.testVar1;
 print "";
@@ -48,6 +54,7 @@ screen scopeInternalTest = {
         }
     ]
 };
+call #debug.assertEquals("internal1", scopeInternalTest.InternalSet.testVar2, "TEST 2: Value should be 'internal1'");
 print "  ✓ Screen with scope='internal' created successfully";
 print "  Value: " + scopeInternalTest.InternalSet.testVar2;
 print "";
@@ -70,6 +77,7 @@ screen explicitVisibleTest = {
         }
     ]
 };
+call #debug.assertEquals("explicit_visible", explicitVisibleTest.VisibleSet.testVar3, "TEST 3: Value should be 'explicit_visible'");
 print "  ✓ Screen with explicit scope='visible' created successfully";
 print "  Value: " + explicitVisibleTest.VisibleSet.testVar3;
 print "";
@@ -331,6 +339,7 @@ screen testWithDisplay = {
 
 print "Screen with display metadata created.";
 var itemList = call screen.getItemList("testWithDisplay");
+call #debug.assert(itemList.length == 2, "TEST 11: Should have 2 items with display metadata");
 print "  Items returned by getItemList: " + itemList.length;
 if (itemList.length > 0) {
     print "  Item names (setname.itemname format):";
@@ -339,6 +348,8 @@ if (itemList.length > 0) {
         print "    [" + i + "] " + itemList[i];
         i = i + 1;
     }
+    call #debug.assertEquals("testset.field1", itemList[0], "TEST 11: First item should be 'testset.field1'");
+    call #debug.assertEquals("testset.field2", itemList[1], "TEST 11: Second item should be 'testset.field2'");
 } else {
     print "  WARNING: No items found!";
 }
@@ -347,8 +358,10 @@ print "";
 // Show that screens without display metadata return empty
 print "Testing screens WITHOUT display metadata (should return empty):";
 var list1 = call screen.getItemList("scopeVisibleTest");
+call #debug.assert(list1.length == 0, "TEST 11: scopeVisibleTest should have 0 items (no display metadata)");
 print "  scopeVisibleTest: " + list1.length + " items (no display metadata)";
 var list2 = call screen.getItemList("directionInTest");
+call #debug.assert(list2.length == 0, "TEST 11: directionInTest should have 0 items (no display metadata)");
 print "  directionInTest: " + list2.length + " items (no display metadata)";
 print "";
 print "✓ TEST 11: screen.getItemList - PASSED";

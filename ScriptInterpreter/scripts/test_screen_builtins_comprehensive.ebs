@@ -3,8 +3,11 @@
 // Author: EBS Test Suite
 // Date: 2025-11-18
 //
-// NOTE: In EBS scripts, use .length (property) not .length() (method call)
-//       Arrays have a .length property, not a length() method.
+// NOTES FOR EBS SCRIPTS:
+//   - Use .length (property) not .length() (method call)
+//     Arrays have a .length property, not a length() method.
+//   - Use #debug.assert(condition, "message") for boolean assertions
+//   - Use #debug.assertEquals(expected, actual, "message") for equality assertions
 
 print "====================================================";
 print "COMPREHENSIVE TEST: All Screen Builtin Functions";
@@ -45,6 +48,7 @@ screen testScreen1 = {
 };
 
 var items = call screen.getItemList("testScreen1");
+call #debug.assert(items.length == 2, "TEST 1: Should have 2 items");
 print "  Items found: " + items.length;
 if (items.length > 0) {
     var i:int = 0;
@@ -52,6 +56,8 @@ if (items.length > 0) {
         print "    [" + i + "] " + items[i];
         i = i + 1;
     }
+    call #debug.assertEquals("testset.field1", items[0], "TEST 1: First item should be 'testset.field1'");
+    call #debug.assertEquals("testset.field2", items[1], "TEST 1: Second item should be 'testset.field2'");
     print "  ✓ screen.getItemList - PASSED";
 } else {
     print "  ✗ ERROR: No items found!";
@@ -66,6 +72,8 @@ print "Purpose: Alias for getItemList - returns list of item names";
 print "";
 
 var items2 = call screen.getScreenItemList("testScreen1");
+call #debug.assert(items2.length == 2, "TEST 2: Should have 2 items");
+call #debug.assertEquals(items.length, items2.length, "TEST 2: getScreenItemList should return same as getItemList");
 print "  Items found: " + items2.length;
 if (items2.length > 0) {
     print "  ✓ screen.getScreenItemList - PASSED";
@@ -103,6 +111,7 @@ screen testScreen2 = {
 
 // Set a property on the item
 var setResult = call screen.setProperty("testScreen2.propset.myfield", "prefwidth", "400");
+call #debug.assert(setResult == true, "TEST 3: setProperty should return true");
 if (setResult == true) {
     print "  ✓ screen.setProperty - PASSED";
 } else {
@@ -120,6 +129,8 @@ print "";
 
 // Get the property we just set
 var propValue = call screen.getProperty("testScreen2.propset.myfield", "prefwidth");
+call #debug.assert(propValue != null, "TEST 4: Property value should not be null");
+call #debug.assertEquals("400", propValue, "TEST 4: Property value should be '400'");
 print "  Property value retrieved: " + propValue;
 if (propValue != null) {
     print "  ✓ screen.getProperty - PASSED";
@@ -179,6 +190,7 @@ screen testScreen3 = {
 };
 
 var multiItems = call screen.getItemList("testScreen3");
+call #debug.assert(multiItems.length == 3, "TEST 5: Should have 3 items across all sets");
 print "  Items in multi-set screen: " + multiItems.length;
 if (multiItems.length > 0) {
     var j:int = 0;
