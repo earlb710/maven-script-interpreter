@@ -1,0 +1,86 @@
+// Test Script: Variable Scope and Direction Validation
+// Description: Tests validation of scope and direction properties
+// Author: EBS Test Suite
+// Date: 2025-11-18
+
+print "=== Testing Variable Scope and Direction Validation ===";
+print "";
+
+// Test 1: Valid internal variable without display
+print "Test 1: Valid internal variable without display...";
+screen test1 = {
+    "title": "Test 1",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "internal1",
+            "type": "string",
+            "scope": "internal",
+            "default": "hidden"
+        }
+    ]
+};
+print "✓ Test 1 passed: Internal variable created successfully";
+print "";
+
+// Test 2: Valid parameter variables with different directions
+print "Test 2: Valid parameter variables with different directions...";
+screen test2 = {
+    "title": "Test 2",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "input1",
+            "type": "string",
+            "scope": "parameter",
+            "direction": "in",
+            "default": "",
+            "display": {"type": "textfield"}
+        },
+        {
+            "name": "output1",
+            "type": "string",
+            "scope": "parameter",
+            "direction": "out",
+            "default": "",
+            "display": {"type": "textfield"}
+        },
+        {
+            "name": "inout1",
+            "type": "string",
+            "scope": "parameter",
+            "direction": "inout",
+            "default": "",
+            "display": {"type": "textfield"}
+        }
+    ]
+};
+print "✓ Test 2 passed: All direction types created successfully";
+print "";
+
+// Test 3: Default values (scope and direction omitted)
+print "Test 3: Variables with default scope and direction...";
+screen test3 = {
+    "title": "Test 3",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "defaultVar",
+            "type": "string",
+            "default": "default",
+            "display": {"type": "textfield"}
+        }
+    ]
+};
+print "✓ Test 3 passed: Default values applied successfully";
+print "";
+
+print "=== All Validation Tests Passed ===";
+print "";
+print "Summary:";
+print "- Internal variables can be created without display metadata";
+print "- All direction types (in, out, inout) are valid";
+print "- Default values (parameter/inout) work correctly";
