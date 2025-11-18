@@ -1320,8 +1320,17 @@ public class Parser {
      * identifier ('.' identifier)* → combined like "ns.name"
      */
     private String parseQualifiedName() throws ParseError {
-        EbsToken first = consumeOptional(EbsTokenType.BUILTIN);
         StringBuilder sb = new StringBuilder();
+        
+        // Check if we have a CALL token (the # symbol)
+        EbsToken callToken = consumeOptional(EbsTokenType.CALL);
+        if (callToken != null) {
+            // We have a #, append it and continue parsing
+            sb.append("#");
+        }
+        
+        // Now check for BUILTIN or IDENTIFIER
+        EbsToken first = consumeOptional(EbsTokenType.BUILTIN);
         if (first == null) {
             first = consume(EbsTokenType.IDENTIFIER, "Expected identifier.");
             sb = sb.append((String) first.literal);

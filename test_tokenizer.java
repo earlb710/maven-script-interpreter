@@ -11,7 +11,7 @@ public class test_tokenizer {
         List<EbsToken> tokens = lexer.tokenize(code);
         for (int i = 0; i < tokens.size() && i < 15; i++) {
             EbsToken token = tokens.get(i);
-            System.out.println(i + ": " + token.type + " (" + token.literal + ")");
+            System.out.println(i + ": " + token.type.name() + " = '" + token.literal + "'");
         }
     }
 }
