@@ -97,13 +97,25 @@ public class AutocompleteSuggestions {
 
     /**
      * Get suggestions filtered by the given prefix (case-insensitive).
+     * Strips trailing dots from the prefix to allow autocomplete after member access.
      */
     public static List<String> getSuggestionsWithPrefix(List<String> suggestions, String prefix) {
         if (prefix == null || prefix.isEmpty()) {
             return suggestions;
         }
 
-        String lowerPrefix = prefix.toLowerCase();
+        // Strip trailing dots to allow autocomplete after member access (e.g., "#ai.")
+        String cleanPrefix = prefix;
+        while (cleanPrefix.endsWith(".")) {
+            cleanPrefix = cleanPrefix.substring(0, cleanPrefix.length() - 1);
+        }
+        
+        // If prefix was only dots, return all suggestions
+        if (cleanPrefix.isEmpty()) {
+            return suggestions;
+        }
+
+        String lowerPrefix = cleanPrefix.toLowerCase();
         return suggestions.stream()
                 .filter(s -> s.toLowerCase().startsWith(lowerPrefix))
                 .collect(Collectors.toList());
