@@ -29,18 +29,18 @@ public class StatusBar extends HBox {
         messageLabel = new Label();
         customLabel = new Label();
         
-        // Configure status label
+        // Configure status label (first, left-aligned)
         statusLabel.setMinWidth(100);
         statusLabel.setPrefWidth(100);
         statusLabel.setMaxWidth(100);
         statusLabel.setAlignment(Pos.CENTER_LEFT);
         
-        // Configure message label
+        // Configure message label (second, left-aligned, flexible width)
         messageLabel.setMinWidth(200);
         messageLabel.setAlignment(Pos.CENTER_LEFT);
         HBox.setHgrow(messageLabel, Priority.ALWAYS);
         
-        // Configure custom label
+        // Configure custom label (third, right-aligned)
         customLabel.setMinWidth(100);
         customLabel.setPrefWidth(100);
         customLabel.setMaxWidth(100);
@@ -53,7 +53,7 @@ public class StatusBar extends HBox {
         Separator sep2 = new Separator();
         sep2.setOrientation(javafx.geometry.Orientation.VERTICAL);
         
-        // Add all components
+        // Add all components in order: Status | Message | Custom
         getChildren().addAll(
             statusLabel,
             sep1,

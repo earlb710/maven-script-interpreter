@@ -39,6 +39,7 @@ public class InterpreterContext {
     private final Deque<String> connectionStack = new java.util.ArrayDeque<>();
     private final Map<String, Runnable> screenRefreshCallbacks = new ConcurrentHashMap<>();
     private final Map<String, List<javafx.scene.Node>> screenBoundControls = new ConcurrentHashMap<>();
+    private final Map<String, com.eb.ui.ebs.StatusBar> screenStatusBars = new ConcurrentHashMap<>();
 
     // New storage structures for the refactored variable sets
     private final Map<String, Map<String, VarSet>> screenVarSets = new ConcurrentHashMap<>(); // screenName -> (setName -> VarSet)
@@ -167,6 +168,15 @@ public class InterpreterContext {
      */
     public Map<String, List<javafx.scene.Node>> getScreenBoundControls() {
         return screenBoundControls;
+    }
+
+    /**
+     * Get the screen status bars map.
+     *
+     * @return the screen status bars map
+     */
+    public Map<String, com.eb.ui.ebs.StatusBar> getScreenStatusBars() {
+        return screenStatusBars;
     }
 
     /**

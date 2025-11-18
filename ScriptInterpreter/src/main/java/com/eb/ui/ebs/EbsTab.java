@@ -27,7 +27,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tooltip;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
@@ -74,9 +73,6 @@ public class EbsTab extends Tab {
     
     // autocomplete
     private final AutocompletePopup autocompletePopup;
-    
-    // Status bar for this tab
-    private StatusBar statusBar;
 
     public EbsTab(TabContext tabContext) throws IOException {
         this.tabContext = tabContext;
@@ -364,26 +360,12 @@ public class EbsTab extends Tab {
         split.setOrientation(Orientation.VERTICAL);
         split.getItems().addAll(top, bottom);
         split.setDividerPositions(0.6); // 60% code, 40% output by default
-        
-        // Create status bar for this tab
-        statusBar = new StatusBar();
-        
-        // Wrap in BorderPane to add status bar
-        BorderPane tabRoot = new BorderPane();
-        tabRoot.setCenter(split);
-        tabRoot.setBottom(statusBar);
-        
         this.setText(tabContext.name);
-        this.setContent(tabRoot);
+        this.setContent(split);
         //Tab tab = new Tab(fileName, split);
         setClosable(true);
         setTooltip(new Tooltip(tabContext.path.toString()));
         getStyleClass().add("tab-file");
-        
-        // Make status bar accessible to handler
-        if (handler instanceof EbsHandler) {
-            ((EbsHandler) handler).setStatusBar(statusBar);
-        }
 
         // Store path + handle on the tab
         setUserData(tabContext);
@@ -450,10 +432,13 @@ public class EbsTab extends Tab {
             outputArea.printlnWarn("> Running " + tabContext.path.getFileName() + (dispArea.getSelectedText().isEmpty() ? "" : " (selection)") + "...");
             runBtn.setDisable(true);
             
-            // Update status bar
-            if (statusBar != null) {
-                statusBar.setStatus("Running");
-                statusBar.clearMessage();
+            // Update status bar from handler (uses main window's status bar)
+            if (handler instanceof EbsHandler) {
+                StatusBar statusBar = ((EbsHandler) handler).getStatusBar();
+                if (statusBar != null) {
+                    statusBar.setStatus("Running");
+                    statusBar.clearMessage();
+                }
             }
 
             // Offload execution to avoid freezing the UI if scripts are long
@@ -464,21 +449,27 @@ public class EbsTab extends Tab {
 
                     Platform.runLater(() -> {
                         outputArea.printlnOk("✓ Done.");
-                        if (statusBar != null) {
-                            statusBar.clearStatus();
-                            statusBar.setMessage("Execution completed");
+                        if (handler instanceof EbsHandler) {
+                            StatusBar statusBar = ((EbsHandler) handler).getStatusBar();
+                            if (statusBar != null) {
+                                statusBar.clearStatus();
+                                statusBar.setMessage("Execution completed");
+                            }
                         }
                     });
                 } catch (Exception ex) {
                     Platform.runLater(() -> {
                         outputArea.printlnError("✗ Error: " + Util.formatExceptionWith2Origin(ex));
-                        if (statusBar != null) {
-                            statusBar.clearStatus();
-                            String errorMsg = ex.getMessage() != null ? ex.getMessage() : ex.getClass().getSimpleName();
-                            String displayMsg = errorMsg.length() > 60 
-                                ? errorMsg.substring(0, 57) + "..." 
-                                : errorMsg;
-                            statusBar.setMessage(displayMsg, errorMsg);
+                        if (handler instanceof EbsHandler) {
+                            StatusBar statusBar = ((EbsHandler) handler).getStatusBar();
+                            if (statusBar != null) {
+                                statusBar.clearStatus();
+                                String errorMsg = ex.getMessage() != null ? ex.getMessage() : ex.getClass().getSimpleName();
+                                String displayMsg = errorMsg.length() > 60 
+                                    ? errorMsg.substring(0, 57) + "..." 
+                                    : errorMsg;
+                                statusBar.setMessage(displayMsg, errorMsg);
+                            }
                         }
                     });
                 } finally {
@@ -897,14 +888,6 @@ public class EbsTab extends Tab {
             dispArea.replaceText(r[0], r[1], repl == null ? "" : repl);
         }
         runSearch();
-    }
-    
-    /**
-     * Get the status bar for this tab
-     * @return The status bar
-     */
-    public StatusBar getStatusBar() {
-        return statusBar;
     }
 
 }

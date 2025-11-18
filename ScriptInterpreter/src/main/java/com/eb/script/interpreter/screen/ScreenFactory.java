@@ -214,7 +214,20 @@ public class ScreenFactory {
         scrollPane.setFitToHeight(false); // Allow vertical scrolling when needed
         scrollPane.setStyle("-fx-background-color: transparent;");
 
-        Scene scene = new Scene(scrollPane, width, height);
+        // Create status bar for the screen
+        com.eb.ui.ebs.StatusBar statusBar = new com.eb.ui.ebs.StatusBar();
+        
+        // Wrap in BorderPane to add status bar at bottom
+        BorderPane screenRoot = new BorderPane();
+        screenRoot.setCenter(scrollPane);
+        screenRoot.setBottom(statusBar);
+        
+        // Store status bar in context for later access
+        if (context != null) {
+            context.getScreenStatusBars().put(screenName, statusBar);
+        }
+
+        Scene scene = new Scene(screenRoot, width, height);
         stage.setScene(scene);
 
         return stage;
