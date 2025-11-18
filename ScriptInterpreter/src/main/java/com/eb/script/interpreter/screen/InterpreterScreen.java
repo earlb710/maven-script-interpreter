@@ -19,6 +19,7 @@ import javafx.scene.layout.StackPane;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * InterpreterScreen handles all screen-related interpreter operations. This
@@ -64,69 +65,74 @@ public class InterpreterScreen {
             boolean maximize = config.containsKey("maximize") && Boolean.TRUE.equals(config.get("maximize"));
 
             // Create thread-safe variable storage for this screen
-            java.util.concurrent.ConcurrentHashMap<String, Object> screenVarMap = new java.util.concurrent.ConcurrentHashMap<>();
-            context.getScreenVars().put(stmt.name, screenVarMap);
+            ConcurrentHashMap<String, Object> screenVarMap = new java.util.concurrent.ConcurrentHashMap<>();
+            context.setScreenVars(stmt.name, screenVarMap);
 
             // Create thread-safe variable type storage for this screen
-            java.util.concurrent.ConcurrentHashMap<String, DataType> screenVarTypeMap = new java.util.concurrent.ConcurrentHashMap<>();
-            context.getScreenVarTypes().put(stmt.name, screenVarTypeMap);
+            ConcurrentHashMap<String, DataType> screenVarTypeMap = new java.util.concurrent.ConcurrentHashMap<>();
+            context.setScreenVarTypes(stmt.name, screenVarTypeMap);
 
-            // Process variable definitions if present
-            if (config.containsKey("vars")) {
+            // Initialize new storage structures for this screen
+            Map<String, VarSet> varSetsMap = new java.util.HashMap<>();
+            Map<String, Var> varItemsMap = new java.util.HashMap<>();
+            Map<String, AreaItem> areaItemsMap = new java.util.HashMap<>();
+            
+            context.setScreenVarSets(stmt.name, varSetsMap);
+            context.setScreenVarItems(stmt.name, varItemsMap);
+            context.setScreenAreaItems(stmt.name, areaItemsMap);
+            
+            // Process variable sets if present (new structure)
+            if (config.containsKey("sets")) {
+                Object setsObj = config.get("sets");
+                if (setsObj instanceof ArrayDynamic setsArray) {
+                    @SuppressWarnings("unchecked")
+                    List setsList = setsArray.getAll();
+                    for (Object setObj : setsList) {
+                        if (setObj instanceof Map) {
+                            @SuppressWarnings("unchecked")
+                            Map<String, Object> setDef = (Map<String, Object>) setObj;
+                            
+                            // Extract set properties
+                            String setName = setDef.containsKey("setname") ? String.valueOf(setDef.get("setname")) : null;
+                            String hiddenInd = setDef.containsKey("hiddenind") ? String.valueOf(setDef.get("hiddenind")) : "N";
+                            
+                            if (setName == null || setName.isEmpty()) {
+                                throw interpreter.error(stmt.getLine(), "Variable set in screen '" + stmt.name + "' must have a 'setname' property.");
+                            }
+                            
+                            // Create VarSet
+                            VarSet varSet = new VarSet(setName, hiddenInd);
+                            varSetsMap.put(setName.toLowerCase(), varSet);
+                            
+                            // Process vars within this set
+                            if (setDef.containsKey("vars")) {
+                                Object varsObj = setDef.get("vars");
+                                if (varsObj instanceof ArrayDynamic varsArray) {
+                                    @SuppressWarnings("unchecked")
+                                    List varsList = varsArray.getAll();
+                                    processVariableList(varsList, setName, stmt.name, stmt.getLine(), varSet, varItemsMap, screenVarMap, screenVarTypeMap);
+                                } else {
+                                    throw interpreter.error(stmt.getLine(), "The 'vars' property in set '" + setName + "' must be an array.");
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    throw interpreter.error(stmt.getLine(), "The 'sets' property in screen '" + stmt.name + "' must be an array.");
+                }
+            }
+            // Process variable definitions if present (legacy structure for backward compatibility)
+            else if (config.containsKey("vars")) {
+                // Create a default set for legacy format
+                String defaultSetName = "default";
+                VarSet defaultVarSet = new VarSet(defaultSetName, "N");
+                varSetsMap.put(defaultSetName.toLowerCase(), defaultVarSet);
+                
                 Object varsObj = config.get("vars");
                 if (varsObj instanceof ArrayDynamic varsArray) {
                     @SuppressWarnings("unchecked")
                     List varsList = varsArray.getAll();
-                    for (Object varObj : varsList) {
-                        if (varObj instanceof Map) {
-                            @SuppressWarnings("unchecked")
-                            Map<String, Object> varDef = (Map<String, Object>) varObj;
-
-                            // Extract variable properties
-                            String varName = varDef.containsKey("name") ? String.valueOf(varDef.get("name")).toLowerCase() : null;
-                            String varTypeStr = varDef.containsKey("type") ? String.valueOf(varDef.get("type")).toLowerCase() : null;
-                            Object defaultValue = varDef.get("default");
-
-                            if (varName == null || varName.isEmpty()) {
-                                throw interpreter.error(stmt.getLine(), "Variable definition in screen '" + stmt.name + "' must have a 'name' property.");
-                            }
-
-                            // Convert type string to DataType
-                            DataType varType = null;
-                            if (varTypeStr != null) {
-                                varType = parseDataType(varTypeStr);
-                                if (varType == null) {
-                                    throw interpreter.error(stmt.getLine(), "Unknown type '" + varTypeStr + "' for variable '" + varName + "' in screen '" + stmt.name + "'.");
-                                }
-                            }
-
-                            // Convert and set the default value
-                            Object value = defaultValue;
-                            if (varType != null && value != null) {
-                                value = varType.convertValue(value);
-                            }
-
-                            // Process optional display metadata
-                            if (varDef.containsKey("display")) {
-                                Object displayObj = varDef.get("display");
-                                if (displayObj instanceof Map) {
-                                    @SuppressWarnings("unchecked")
-                                    Map<String, Object> displayDef = (Map<String, Object>) displayObj;
-
-                                    // Store display metadata for the variable
-                                    storeDisplayItem(varName, displayDef, stmt.name);
-                                }
-                            }
-
-                            // Store in screen's thread-safe variable map
-                            screenVarMap.put(varName, value);
-
-                            // Store the variable type if specified
-                            if (varType != null) {
-                                screenVarTypeMap.put(varName, varType);
-                            }
-                        }
-                    }
+                    processVariableList(varsList, defaultSetName, stmt.name, stmt.getLine(), defaultVarSet, varItemsMap, screenVarMap, screenVarTypeMap);
                 } else {
                     throw interpreter.error(stmt.getLine(), "The 'vars' property in screen '" + stmt.name + "' must be an array.");
                 }
@@ -150,7 +156,7 @@ public class InterpreterScreen {
                         }
                     }
 
-                    context.getScreenAreas().put(stmt.name, areas);
+                    context.setScreenAreas(stmt.name, areas);
                 } else {
                     throw interpreter.error(stmt.getLine(), "The 'area' property in screen '" + stmt.name + "' must be an array.");
                 }
@@ -253,7 +259,7 @@ public class InterpreterScreen {
 
                     java.util.List<AreaDefinition> areas = new java.util.ArrayList<>();
                     areas.add(defaultArea);
-                    context.getScreenAreas().put(stmt.name, areas);
+                    context.setScreenAreas(stmt.name, areas);
                 }
             }
 
@@ -265,7 +271,7 @@ public class InterpreterScreen {
             final boolean screenMaximize = maximize;
 
             // Get the areas for this screen
-            final java.util.List<AreaDefinition> areas = context.getScreenAreas().get(screenName);
+            final java.util.List<AreaDefinition> areas = context.getScreenAreas(screenName);
 
             // Use CountDownLatch to wait for stage creation
             final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
@@ -276,8 +282,8 @@ public class InterpreterScreen {
                     Stage stage;
 
                     // Get screen variables map from context
-                    java.util.concurrent.ConcurrentHashMap<String, Object> varsMap = context.getScreenVars().get(screenName);
-                    java.util.concurrent.ConcurrentHashMap<String, DataType> varTypesMap = context.getScreenVarTypes().get(screenName);
+                    ConcurrentHashMap<String, Object> varsMap = context.getScreenVars(screenName);
+                    ConcurrentHashMap<String, DataType> varTypesMap = context.getScreenVarTypes(screenName);
 
                     // Use ScreenFactory if areas are defined, otherwise create simple stage
                     if (areas != null && !areas.isEmpty()) {
@@ -351,14 +357,7 @@ public class InterpreterScreen {
                             thread.interrupt();
                         }
                         // Clean up resources
-                        context.getScreens().remove(screenName);
-                        context.getScreenThreads().remove(screenName);
-                        context.getScreenVars().remove(screenName);
-                        context.getScreenAreas().remove(screenName);
-
-                        // Clean up display metadata for this screen
-                        context.getDisplayItem().entrySet().removeIf(entry
-                                -> entry.getKey().startsWith(screenName + "."));
+                        context.remove(screenName);
                     });
 
                     // Store the stage reference
@@ -1010,6 +1009,32 @@ public class InterpreterScreen {
                             item.alignment = String.valueOf(itemDef.get("alignment")).toLowerCase();
                         }
 
+                        // Store in screenAreaItems map by item name (for screen.getProperty/setProperty)
+                        if (item.name != null && !item.name.isEmpty()) {
+                            Map<String, AreaItem> areaItemsMap = context.getScreenAreaItems(screenName);
+                            if (areaItemsMap != null) {
+                                // Store by item name (lowercase) for direct lookup
+                                areaItemsMap.put(item.name.toLowerCase(), item);
+                            }
+                        }
+                        
+                        // Also store by varRef if present (for variable-to-item linking)
+                        if (item.varRef != null && !item.varRef.isEmpty()) {
+                            Map<String, AreaItem> areaItemsMap = context.getScreenAreaItems(screenName);
+                            if (areaItemsMap != null) {
+                                // Store with the same key format as variables (setname.varname in lowercase)
+                                // For backward compatibility, check if varRef contains a dot (already qualified)
+                                String areaItemKey;
+                                if (item.varRef.contains(".")) {
+                                    areaItemKey = item.varRef.toLowerCase();
+                                } else {
+                                    // If no set prefix, use "default.varname" for legacy format
+                                    areaItemKey = "default." + item.varRef.toLowerCase();
+                                }
+                                areaItemsMap.put(areaItemKey, item);
+                            }
+                        }
+
                         area.items.add(item);
                     }
                 }
@@ -1048,5 +1073,80 @@ public class InterpreterScreen {
         }
 
         return area;
+    }
+    
+    /**
+     * Helper method to process a list of variable definitions
+     */
+    private void processVariableList(List varsList, String setName, String screenName, int line,
+                                     VarSet varSet, Map<String, Var> varItemsMap,
+                                     java.util.concurrent.ConcurrentHashMap<String, Object> screenVarMap,
+                                     java.util.concurrent.ConcurrentHashMap<String, DataType> screenVarTypeMap) throws InterpreterError {
+        for (Object varObj : varsList) {
+            if (varObj instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> varDef = (Map<String, Object>) varObj;
+
+                // Extract variable properties
+                String varName = varDef.containsKey("name") ? String.valueOf(varDef.get("name")).toLowerCase() : null;
+                String varTypeStr = varDef.containsKey("type") ? String.valueOf(varDef.get("type")).toLowerCase() : null;
+                Object defaultValue = varDef.get("default");
+
+                if (varName == null || varName.isEmpty()) {
+                    throw interpreter.error(line, "Variable definition in screen '" + screenName + "' must have a 'name' property.");
+                }
+
+                // Convert type string to DataType
+                DataType varType = null;
+                if (varTypeStr != null) {
+                    varType = parseDataType(varTypeStr);
+                    if (varType == null) {
+                        throw interpreter.error(line, "Unknown type '" + varTypeStr + "' for variable '" + varName + "' in screen '" + screenName + "'.");
+                    }
+                }
+
+                // Convert and set the default value
+                Object value = defaultValue;
+                if (varType != null && value != null) {
+                    value = varType.convertValue(value);
+                }
+
+                // Create Var object
+                Var var = new Var(varName, varType, defaultValue);
+                var.setValue(value);
+                var.setSetName(setName);
+
+                // Process optional display metadata
+                if (varDef.containsKey("display")) {
+                    Object displayObj = varDef.get("display");
+                    if (displayObj instanceof Map) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> displayDef = (Map<String, Object>) displayObj;
+
+                        // Parse and store display metadata
+                        DisplayItem displayItem = parseDisplayItem(displayDef, screenName);
+                        var.setDisplayItem(displayItem);
+                        
+                        // Store display metadata with the old key format for backward compatibility
+                        storeDisplayItem(varName, displayDef, screenName);
+                    }
+                }
+
+                // Add to VarSet
+                varSet.addVariable(var);
+
+                // Add to varItemsMap with key "setname.varname" (both lowercase)
+                String varKey = setName.toLowerCase() + "." + varName.toLowerCase();
+                varItemsMap.put(varKey, var);
+
+                // Store in screen's thread-safe variable map (legacy support)
+                screenVarMap.put(varName, value);
+
+                // Store the variable type if specified (legacy support)
+                if (varType != null) {
+                    screenVarTypeMap.put(varName, varType);
+                }
+            }
+        }
     }
 }

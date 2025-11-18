@@ -468,10 +468,11 @@ public class AreaItemFactory {
                 }
                 
                 if (!longestValue.isEmpty()) {
-                    sampleText = longestValue;
+                    // Add 2 extra characters for the spinner arrows
+                    sampleText = longestValue + "MM";
                     measuringText.setText(sampleText);
                     double textWidth = measuringText.getLayoutBounds().getWidth();
-                    double padding = 30; // Padding for spinner buttons and borders
+                    double padding = 20; // Basic padding for borders
                     return textWidth + padding;
                 }
             }
