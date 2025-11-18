@@ -1354,7 +1354,7 @@ public final class Builtins {
                     }
                     debug.debugWriteLine("ASSERT", m);
                 }
-                return Boolean.TRUE;
+                return ok;
             }
 
             case "debug.assertequals" -> {
@@ -1377,7 +1377,7 @@ public final class Builtins {
                     debug.debugWriteLine("ASSERT", m);
 //                    throw new RuntimeException(m);
                 }
-                return Boolean.TRUE;
+                return equal;
             }
 
             case "debug.vars" -> {
