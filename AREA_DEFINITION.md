@@ -112,7 +112,7 @@ The `AreaItem` class defines individual UI elements within an area, including th
 
 | Property | Type | Description | Example Values |
 |----------|------|-------------|----------------|
-| `promptText` | String | Placeholder text | "Enter username..." |
+| `promptHelp` | String | Placeholder text | "Enter username..." |
 | `editable` | Boolean | Whether editable | true, false |
 | `disabled` | Boolean | Disabled state | true, false |
 | `visible` | Boolean | Visibility | true, false |
@@ -344,7 +344,7 @@ Some properties can be specified in both DisplayMetadata and AreaItem. Understan
 | **Styling** | `style`, `cssClass` | - | Base styling from DisplayMetadata |
 | **Colors** | - | `textColor`, `backgroundColor` | Item-specific colors |
 | **Behavior** | - | `editable`, `disabled`, `visible` | Runtime state control |
-| **UI Text** | - | `promptText`, `tooltip` | Item-specific hints |
+| **UI Text** | - | `promptHelp`, `tooltip` | Item-specific hints |
 
 ### Property Inheritance Example
 
@@ -374,7 +374,7 @@ screen "UserForm" {
             display: {
                 type: "passwordfield"  // Override: different control type
             },
-            promptText: "Confirm email",  // Item-specific property
+            promptHelp: "Confirm email",  // Item-specific property
             backgroundColor: "#f0f0f0"     // Item-specific property
         }]
     }]
@@ -392,7 +392,7 @@ In this example:
 3. **Validation First**: Use `mandatory`, `pattern`, `min`, `max` for data integrity
 4. **Consistent Types**: Use appropriate ItemTypes for data types (SPINNER for numbers, DATEPICKER for dates)
 5. **Meaningful Patterns**: Provide clear regex patterns with validation messages
-6. **Accessibility**: Use `mandatory` flag, `tooltip`, and `promptText` for user guidance
+6. **Accessibility**: Use `mandatory` flag, `tooltip`, and `promptHelp` for user guidance
 7. **Styling Strategy**: Define base styles in DisplayMetadata, item-specific colors in AreaItem
 
 ---
@@ -420,13 +420,13 @@ screen "LoginScreen" {
             name: "usernameField",
             varRef: "username",
             sequence: 1,
-            promptText: "Enter your username",
+            promptHelp: "Enter your username",
             prefWidth: "300"
         }, {
             name: "passwordField",
             varRef: "password",
             sequence: 2,
-            promptText: "Enter your password",
+            promptHelp: "Enter your password",
             prefWidth: "300"
         }]
     }]
@@ -511,7 +511,7 @@ screen "DashboardScreen" {
             layoutPos: "center",
             margin: "20",
             prefWidth: "400",
-            promptText: "Enter data here..."
+            promptHelp: "Enter data here..."
         }]
     }]
 }
@@ -624,7 +624,7 @@ screen "InfoScreen" {
 All properties support both **camelCase** and **snake_case** naming:
 - `layoutPos` or `layout_pos`
 - `colSpan` or `col_span`
-- `promptText` or `prompt_text`
+- `promptHelp` or `prompt_help`
 - `textColor` or `text_color`
 - `backgroundColor` or `background_color`
 
@@ -698,7 +698,7 @@ area.items.add(item);
 
 - **v1.0**: Initial AreaDefinition implementation with AreaType enum
 - **v1.1**: Added AreaItem with display metadata support
-- **v1.2**: Added UI behavior properties (promptText, editable, disabled, etc.)
+- **v1.2**: Added UI behavior properties (promptHelp, editable, disabled, etc.)
 - **v1.3**: Renamed InputItemType to ItemType, added display-only items
 - **v1.4**: Renamed relativePos to layoutPos, added comprehensive layout properties
 

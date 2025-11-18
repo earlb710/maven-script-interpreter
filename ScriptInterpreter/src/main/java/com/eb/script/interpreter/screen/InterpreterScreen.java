@@ -626,9 +626,9 @@ public class InterpreterScreen {
             metadata.pattern = String.valueOf(displayDef.get("pattern"));
         }
 
-        // Check for both camelCase and lowercase versions - promptText (placeholder hint)
-        if (displayDef.containsKey("prompttext")) {
-            metadata.promptHelp = String.valueOf(displayDef.get("prompttext"));
+        // Check for both camelCase and lowercase versions - promptHelp (placeholder hint)
+        if (displayDef.containsKey("prompthelp")) {
+            metadata.promptHelp = String.valueOf(displayDef.get("prompthelp"));
         }
 
         // Extract labelText (permanent label displayed before/above control)
@@ -878,17 +878,17 @@ public class InterpreterScreen {
                         // and the consuming code should fall back to using varRef's DisplayItem
 
                         // Parse additional UI properties for the item
-                        // promptText now goes into displayItem
-                        if (itemDef.containsKey("prompttext") || itemDef.containsKey("prompt_text")) {
-                            String promptText = itemDef.containsKey("prompttext")
-                                    ? String.valueOf(itemDef.get("prompttext"))
-                                    : String.valueOf(itemDef.get("prompt_text"));
+                        // promptHelp (formerly promptText) now goes into displayItem
+                        if (itemDef.containsKey("prompthelp") || itemDef.containsKey("prompt_help")) {
+                            String promptHelp = itemDef.containsKey("prompthelp")
+                                    ? String.valueOf(itemDef.get("prompthelp"))
+                                    : String.valueOf(itemDef.get("prompt_help"));
 
                             // If displayItem doesn't exist yet, create it
                             if (item.displayItem == null) {
                                 item.displayItem = new DisplayItem();
                             }
-                            item.displayItem.promptHelp = promptText;
+                            item.displayItem.promptHelp = promptHelp;
                         }
 
                         if (itemDef.containsKey("editable")) {

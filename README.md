@@ -148,7 +148,7 @@ screen myWindow show;
 - Multiple screens can be created and managed independently
 - **Case-Insensitive JSON Keys**: Screen definition JSON uses case-insensitive key lookup
   - Property names like `varRef`, `VarRef`, or `varref` are all treated identically
-  - Keys are normalized to lowercase (`promptText` → `prompttext`)
+  - Keys are normalized to lowercase (`promptHelp` → `prompttext`)
   - String values preserve their original casing
 
 ### Console Commands

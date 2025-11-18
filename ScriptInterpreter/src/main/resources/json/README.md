@@ -133,14 +133,14 @@ Most modern IDEs support JSON Schema validation:
           "name": "usernameField",
           "varRef": "username",
           "sequence": 1,
-          "promptText": "Enter username",
+          "promptHelp": "Enter username",
           "prefWidth": "300"
         },
         {
           "name": "passwordField",
           "varRef": "password",
           "sequence": 2,
-          "promptText": "Enter password",
+          "promptHelp": "Enter password",
           "prefWidth": "300"
         }
       ]
@@ -230,7 +230,7 @@ Both are accepted by the ScreenFactory parser.
 
 **Case-Insensitive Key Lookup**: When screen definitions are parsed from JSON, the EBS JSON parser uses case-insensitive mode, which converts all keys to lowercase. This means:
 - `varRef`, `VarRef`, `varref` → all normalized to `"varref"`
-- `promptText`, `PromptText`, `prompttext` → all normalized to `"prompttext"`
+- `promptHelp`, `PromptHelp`, `prompthelp` → all normalized to `"prompthelp"`
 - String values preserve their original casing
 - The ScreenFactory parser looks up properties using lowercase keys
 

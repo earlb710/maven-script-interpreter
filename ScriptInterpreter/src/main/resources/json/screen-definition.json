@@ -100,14 +100,14 @@
               "name": "usernameField",
               "varRef": "username",
               "sequence": 1,
-              "promptText": "Enter your username",
+              "promptHelp": "Enter your username",
               "prefWidth": "300"
             },
             {
               "name": "passwordField",
               "varRef": "password",
               "sequence": 2,
-              "promptText": "Enter your password",
+              "promptHelp": "Enter your password",
               "prefWidth": "300"
             }
           ]

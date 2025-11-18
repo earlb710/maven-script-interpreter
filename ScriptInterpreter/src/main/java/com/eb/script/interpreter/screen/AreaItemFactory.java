@@ -18,7 +18,7 @@ public class AreaItemFactory {
 
     /**
      * Creates a JavaFX control based on the provided AreaItem and DisplayItem.
-     * Only display properties are applied (promptText, editable, disabled, visible, tooltip, colors, style).
+     * Only display properties are applied (promptHelp, editable, disabled, visible, tooltip, colors, style).
      * Layout properties should be applied by the caller after creation.
      *
      * @param item The AreaItem containing display properties
@@ -46,7 +46,7 @@ public class AreaItemFactory {
         // Apply metadata-specific properties
         applyMetadataProperties(control, metadata);
         
-        // Apply item-specific display properties (including promptText from metadata)
+        // Apply item-specific display properties (including promptHelp from metadata)
         applyItemSpecificProperties(control, item, metadata);
         
         // Apply control size and font styling
