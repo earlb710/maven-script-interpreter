@@ -257,6 +257,19 @@ public class InterpreterScreen {
                         }
 
                         defaultArea.items.add(item);
+                        
+                        // Register item in areaItemsMap for screen.getItemList to find
+                        // Store by item name (lowercase) for direct lookup
+                        if (item.name != null && !item.name.isEmpty()) {
+                            areaItemsMap.put(item.name.toLowerCase(), item);
+                        }
+                        
+                        // Also store by varRef for variable-to-item linking
+                        if (item.varRef != null && !item.varRef.isEmpty()) {
+                            // For default area with legacy vars, use "default.varname" format
+                            String areaItemKey = "default." + item.varRef.toLowerCase();
+                            areaItemsMap.put(areaItemKey, item);
+                        }
                     }
 
                     java.util.List<AreaDefinition> areas = new java.util.ArrayList<>();
