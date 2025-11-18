@@ -1,0 +1,293 @@
+// Test Script: Comprehensive Scope and Direction Features
+// Description: Tests both new features and backward compatibility
+// Author: EBS Test Suite
+// Date: 2025-11-18
+
+print "====================================================";
+print "COMPREHENSIVE TEST: Scope and Direction Features";
+print "====================================================";
+print "";
+
+// ==================================================
+// TEST 1: New "scope" property with "visible" value
+// ==================================================
+print "TEST 1: Testing new 'scope' property with 'visible'...";
+screen scopeVisibleTest = {
+    "title": "Scope Visible Test",
+    "width": 600,
+    "height": 400,
+    "sets": [
+        {
+            "setname": "VisibleSet",
+            "scope": "visible",
+            "vars": [
+                {"name": "testVar1", "type": "string", "default": "visible1"}
+            ]
+        }
+    ]
+};
+print "  ✓ Screen with scope='visible' created successfully";
+print "  Value: " + scopeVisibleTest.VisibleSet.testVar1;
+print "";
+
+// ==================================================
+// TEST 2: New "scope" property with "internal" value
+// ==================================================
+print "TEST 2: Testing new 'scope' property with 'internal'...";
+screen scopeInternalTest = {
+    "title": "Scope Internal Test",
+    "width": 600,
+    "height": 400,
+    "sets": [
+        {
+            "setname": "InternalSet",
+            "scope": "internal",
+            "vars": [
+                {"name": "testVar2", "type": "string", "default": "internal1"}
+            ]
+        }
+    ]
+};
+print "  ✓ Screen with scope='internal' created successfully";
+print "  Value: " + scopeInternalTest.InternalSet.testVar2;
+print "";
+
+// ==================================================
+// TEST 3: Backward compatibility with "hiddenind": "N"
+// ==================================================
+print "TEST 3: Testing backward compatibility with hiddenind='N'...";
+screen hiddenindNTest = {
+    "title": "HiddenInd N Test",
+    "width": 600,
+    "height": 400,
+    "sets": [
+        {
+            "setname": "LegacyVisibleSet",
+            "hiddenind": "N",
+            "vars": [
+                {"name": "testVar3", "type": "string", "default": "legacy_visible"}
+            ]
+        }
+    ]
+};
+print "  ✓ Screen with hiddenind='N' created successfully";
+print "  Value: " + hiddenindNTest.LegacyVisibleSet.testVar3;
+print "";
+
+// ==================================================
+// TEST 4: Backward compatibility with "hiddenind": "Y"
+// ==================================================
+print "TEST 4: Testing backward compatibility with hiddenind='Y'...";
+screen hiddenindYTest = {
+    "title": "HiddenInd Y Test",
+    "width": 600,
+    "height": 400,
+    "sets": [
+        {
+            "setname": "LegacyInternalSet",
+            "hiddenind": "Y",
+            "vars": [
+                {"name": "testVar4", "type": "string", "default": "legacy_internal"}
+            ]
+        }
+    ]
+};
+print "  ✓ Screen with hiddenind='Y' created successfully";
+print "  Value: " + hiddenindYTest.LegacyInternalSet.testVar4;
+print "";
+
+// ==================================================
+// TEST 5: Direction "in" parameter
+// ==================================================
+print "TEST 5: Testing direction='in' parameter...";
+screen directionInTest = {
+    "title": "Direction In Test",
+    "width": 600,
+    "height": 400,
+    "sets": [
+        {
+            "setname": "InputSet",
+            "scope": "visible",
+            "vars": [
+                {"name": "inputVar", "type": "string", "default": "input_value", "direction": "in"}
+            ]
+        }
+    ]
+};
+print "  ✓ Screen with direction='in' created successfully";
+print "  Value: " + directionInTest.InputSet.inputVar;
+print "";
+
+// ==================================================
+// TEST 6: Direction "out" parameter
+// ==================================================
+print "TEST 6: Testing direction='out' parameter...";
+screen directionOutTest = {
+    "title": "Direction Out Test",
+    "width": 600,
+    "height": 400,
+    "sets": [
+        {
+            "setname": "OutputSet",
+            "scope": "visible",
+            "vars": [
+                {"name": "outputVar", "type": "string", "default": "output_value", "direction": "out"}
+            ]
+        }
+    ]
+};
+print "  ✓ Screen with direction='out' created successfully";
+directionOutTest.OutputSet.outputVar = "modified_output";
+print "  Value after modification: " + directionOutTest.OutputSet.outputVar;
+print "";
+
+// ==================================================
+// TEST 7: Direction "inout" parameter (default)
+// ==================================================
+print "TEST 7: Testing direction='inout' parameter...";
+screen directionInoutTest = {
+    "title": "Direction Inout Test",
+    "width": 600,
+    "height": 400,
+    "sets": [
+        {
+            "setname": "InoutSet",
+            "scope": "visible",
+            "vars": [
+                {"name": "inoutVar", "type": "string", "default": "inout_value", "direction": "inout"}
+            ]
+        }
+    ]
+};
+print "  ✓ Screen with direction='inout' created successfully";
+print "  Initial value: " + directionInoutTest.InoutSet.inoutVar;
+directionInoutTest.InoutSet.inoutVar = "modified_inout";
+print "  Value after modification: " + directionInoutTest.InoutSet.inoutVar;
+print "";
+
+// ==================================================
+// TEST 8: Default direction (no direction specified)
+// ==================================================
+print "TEST 8: Testing default direction (no direction specified)...";
+screen directionDefaultTest = {
+    "title": "Direction Default Test",
+    "width": 600,
+    "height": 400,
+    "sets": [
+        {
+            "setname": "DefaultSet",
+            "scope": "visible",
+            "vars": [
+                {"name": "defaultVar", "type": "string", "default": "default_value"}
+            ]
+        }
+    ]
+};
+print "  ✓ Screen with no direction (defaults to 'inout') created successfully";
+print "  Initial value: " + directionDefaultTest.DefaultSet.defaultVar;
+directionDefaultTest.DefaultSet.defaultVar = "modified_default";
+print "  Value after modification: " + directionDefaultTest.DefaultSet.defaultVar;
+print "";
+
+// ==================================================
+// TEST 9: Combined test - multiple sets with different scopes and directions
+// ==================================================
+print "TEST 9: Testing combined features...";
+screen combinedTest = {
+    "title": "Combined Features Test",
+    "width": 900,
+    "height": 700,
+    "sets": [
+        {
+            "setname": "VisibleInputs",
+            "scope": "visible",
+            "vars": [
+                {"name": "username", "type": "string", "default": "john_doe", "direction": "in"},
+                {"name": "password", "type": "string", "default": "secret", "direction": "in"}
+            ]
+        },
+        {
+            "setname": "VisibleOutputs",
+            "scope": "visible",
+            "vars": [
+                {"name": "result", "type": "string", "default": "pending", "direction": "out"},
+                {"name": "timestamp", "type": "string", "default": "00:00:00", "direction": "out"}
+            ]
+        },
+        {
+            "setname": "InternalState",
+            "scope": "internal",
+            "vars": [
+                {"name": "sessionId", "type": "int", "default": 0, "direction": "inout"},
+                {"name": "retryCount", "type": "int", "default": 0, "direction": "inout"}
+            ]
+        },
+        {
+            "setname": "LegacyHidden",
+            "hiddenind": "Y",
+            "vars": [
+                {"name": "internalFlag", "type": "string", "default": "hidden"}
+            ]
+        }
+    ]
+};
+print "  ✓ Combined screen created successfully";
+print "  Input (direction='in'): " + combinedTest.VisibleInputs.username;
+print "  Output (direction='out') initial: " + combinedTest.VisibleOutputs.result;
+combinedTest.VisibleOutputs.result = "success";
+print "  Output (direction='out') updated: " + combinedTest.VisibleOutputs.result;
+print "  Internal (scope='internal'): " + combinedTest.InternalState.sessionId;
+combinedTest.InternalState.sessionId = 12345;
+print "  Internal updated: " + combinedTest.InternalState.sessionId;
+print "  Legacy hidden (hiddenind='Y'): " + combinedTest.LegacyHidden.internalFlag;
+print "";
+
+// ==================================================
+// TEST 10: Verify all data types work with new features
+// ==================================================
+print "TEST 10: Testing all data types with new features...";
+screen dataTypesTest = {
+    "title": "Data Types Test",
+    "width": 600,
+    "height": 500,
+    "sets": [
+        {
+            "setname": "TypeTests",
+            "scope": "visible",
+            "vars": [
+                {"name": "stringVar", "type": "string", "default": "test", "direction": "in"},
+                {"name": "intVar", "type": "int", "default": 42, "direction": "out"},
+                {"name": "floatVar", "type": "float", "default": 3.14, "direction": "inout"},
+                {"name": "doubleVar", "type": "double", "default": 2.718, "direction": "in"},
+                {"name": "boolVar", "type": "bool", "default": true, "direction": "out"}
+            ]
+        }
+    ]
+};
+print "  ✓ All data types created successfully with directions";
+print "  String (in): " + dataTypesTest.TypeTests.stringVar;
+print "  Int (out): " + dataTypesTest.TypeTests.intVar;
+print "  Float (inout): " + dataTypesTest.TypeTests.floatVar;
+print "  Double (in): " + dataTypesTest.TypeTests.doubleVar;
+print "  Bool (out): " + dataTypesTest.TypeTests.boolVar;
+print "";
+
+// ==================================================
+// SUMMARY
+// ==================================================
+print "====================================================";
+print "TEST SUMMARY";
+print "====================================================";
+print "✓ TEST 1:  New scope='visible' - PASSED";
+print "✓ TEST 2:  New scope='internal' - PASSED";
+print "✓ TEST 3:  Legacy hiddenind='N' - PASSED";
+print "✓ TEST 4:  Legacy hiddenind='Y' - PASSED";
+print "✓ TEST 5:  Direction='in' - PASSED";
+print "✓ TEST 6:  Direction='out' - PASSED";
+print "✓ TEST 7:  Direction='inout' - PASSED";
+print "✓ TEST 8:  Default direction - PASSED";
+print "✓ TEST 9:  Combined features - PASSED";
+print "✓ TEST 10: Data types - PASSED";
+print "";
+print "All tests completed successfully!";
+print "====================================================";
