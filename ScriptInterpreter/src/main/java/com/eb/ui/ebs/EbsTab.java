@@ -127,6 +127,18 @@ public class EbsTab extends Tab {
         
         // Setup autocomplete callback
         setupAutocomplete();
+        
+        // Add cursor position tracking for dispArea
+        dispArea.caretPositionProperty().addListener((obs, oldPos, newPos) -> {
+            updateCursorPosition(dispArea);
+        });
+        
+        // Also update on focus (when switching to this tab)
+        dispArea.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+            if (isFocused) {
+                updateCursorPosition(dispArea);
+            }
+        });
 
         outputArea.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
             if (e.isControlDown() && e.getCode() == KeyCode.L) {
@@ -888,6 +900,26 @@ public class EbsTab extends Tab {
             dispArea.replaceText(r[0], r[1], repl == null ? "" : repl);
         }
         runSearch();
+    }
+    
+    /**
+     * Update the cursor position in the status bar's custom section
+     * @param area The ScriptArea to get cursor position from
+     */
+    private void updateCursorPosition(ScriptArea area) {
+        if (handler instanceof EbsHandler) {
+            StatusBar statusBar = ((EbsHandler) handler).getStatusBar();
+            if (statusBar != null) {
+                // Get current paragraph (row) and column
+                int caretPos = area.getCaretPosition();
+                int currentParagraph = area.getCurrentParagraph();
+                int columnPos = area.getCaretColumn();
+                
+                // Format as (col,row) - using 1-based indexing for user display
+                String position = String.format("(%d,%d)", columnPos + 1, currentParagraph + 1);
+                statusBar.setCustom(position);
+            }
+        }
     }
 
 }
