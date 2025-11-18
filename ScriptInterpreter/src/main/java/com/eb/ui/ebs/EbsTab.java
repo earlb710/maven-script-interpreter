@@ -129,8 +129,18 @@ public class EbsTab extends Tab {
         // Update autocomplete as user types (like in Console)
         dispArea.addEventHandler(KeyEvent.KEY_TYPED, e -> {
             if (autocompletePopup.isShowing()) {
-                // Update the suggestions based on the new text
-                showAutocomplete();
+                // Don't hide popup when typing dot (.)
+                if (!".".equals(e.getCharacter())) {
+                    // Update the suggestions based on the new text
+                    showAutocomplete();
+                }
+            }
+        });
+        
+        // Hide autocomplete when clicking in the editor (JavaFX Popup doesn't auto-hide on owner clicks)
+        dispArea.setOnMouseClicked(e -> {
+            if (autocompletePopup.isShowing()) {
+                autocompletePopup.hide();
             }
         });
         
