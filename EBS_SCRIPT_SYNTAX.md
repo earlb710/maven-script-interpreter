@@ -58,7 +58,6 @@ print message;
 | `bool` / `boolean` | Boolean value | `true`, `false` |
 | `date` | Date/time value | `now()` |
 | `json` | JSON object/array | `{"key": "value"}` |
-| `any` | Any type (dynamic) | Any value |
 
 ### Type Inference
 ```javascript
@@ -935,6 +934,7 @@ call json.get(jsonObject, path);
 call json.getstrict(jsonObject, path);
 call json.getstring(jsonObject, path);
 call json.getint(jsonObject, path);
+call json.getinteger(jsonObject, path);  // Alias for json.getint
 call json.getlong(jsonObject, path);
 call json.getdouble(jsonObject, path);
 call json.getbool(jsonObject, path);
@@ -973,6 +973,8 @@ var line = call file.readln(handle);
 call file.writeln(handle, text);
 call file.write(handle, text);
 var text = call file.read(handle, bytes);
+var byteArray = call file.readbin(handle);
+call file.writebin(handle, byteArray);
 var isEof = call file.eof(handle);
 call file.close(handle);
 
@@ -1049,6 +1051,8 @@ call screen.setProperty("screenName.itemName", "propertyName", value);
 
 // Get list of all item names in a screen
 var itemList = call screen.getItemList("screenName");
+// Alias: screen.getScreenItemList also available
+var itemList = call screen.getScreenItemList("screenName");
 // Returns an ArrayDynamic of strings containing all item names
 
 // Examples:
