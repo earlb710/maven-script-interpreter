@@ -15,8 +15,8 @@ Primary Sources of Truth (in order of precedence)
   - https://github.com/earlb710/maven-script-interpreter/blob/master/ScriptInterpreter/scripts/README.md
 - JSON schemas and parsing conventions: ScriptInterpreter/src/main/resources/json/README.md
   - https://github.com/earlb710/maven-script-interpreter/blob/master/ScriptInterpreter/src/main/resources/json/README.md
-- Class hierarchy utility: CLASS_TREE_LISTER.md
-  - https://github.com/earlb710/maven-script-interpreter/blob/master/CLASS_TREE_LISTER.md
+- EBS Script syntax : EBS_SCRIPT_SYNTAX.md
+  - https://github.com/earlb710/maven-script-interpreter/blob/master/EBS_SCRIPT_SYNTAX.md
 
 General Response Policy
 - Cite the relevant source file(s) above when giving guidance or examples.
