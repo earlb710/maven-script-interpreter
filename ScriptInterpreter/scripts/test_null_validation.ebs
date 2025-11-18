@@ -1,0 +1,45 @@
+// Test script to demonstrate null validation issue
+// This script should test if (a == null) properly detects null values
+
+// Test 1: Variable explicitly set to null should be detected
+var a:string = null;
+if a == null then {
+    print "TEST 1 PASSED: a is null";
+} else {
+    print "TEST 1 FAILED: a should be null but was not detected";
+}
+
+// Test 2: Uninitialized variable should remain null until assigned
+var b:int;
+if b == null then {
+    print "TEST 2 PASSED: b is null";
+} else {
+    print "TEST 2 FAILED: b should be null but was not detected";
+}
+
+// Test 3: Variable set to a value should not be null
+var c:string = "hello";
+if c == null then {
+    print "TEST 3 FAILED: c should not be null";
+} else {
+    print "TEST 3 PASSED: c is not null";
+}
+
+// Test 4: Test with != null
+var d:string = null;
+if d != null then {
+    print "TEST 4 FAILED: d should be null";
+} else {
+    print "TEST 4 PASSED: d is null (using != operator)";
+}
+
+// Test 5: Test after assigning null to a previously assigned variable
+var e:int = 42;
+e = null;
+if e == null then {
+    print "TEST 5 PASSED: e is null after reassignment";
+} else {
+    print "TEST 5 FAILED: e should be null after reassignment";
+}
+
+print "=== NULL VALIDATION TEST COMPLETE ===";
