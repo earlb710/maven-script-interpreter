@@ -39,6 +39,7 @@ public class JsonSchemaAutocomplete {
             }
         } catch (Exception e) {
             System.err.println("Error loading schema " + resourcePath + ": " + e.getMessage());
+            e.printStackTrace();
         }
         return new HashMap<>();
     }
@@ -60,11 +61,17 @@ public class JsonSchemaAutocomplete {
         // Extract the current partial word being typed
         String partialWord = extractPartialWord(jsonText, caretPos);
 
-        if (context.isInString && !context.isKey) {
-            // We're in a string value - check if it's a property with enum values
-            suggestions.addAll(getEnumSuggestions(context));
-        } else if (context.expectingKey || context.isKey) {
-            // We're expecting a property name
+        if (context.isInString) {
+            // We're inside a string
+            if (context.isKey || context.expectingKey) {
+                // We're typing a property name
+                suggestions.addAll(getPropertySuggestions(context));
+            } else {
+                // We're typing a value - check if it's an enum property
+                suggestions.addAll(getEnumSuggestions(context));
+            }
+        } else if (context.expectingKey) {
+            // We're not in a string but expecting a key (just after { or ,)
             suggestions.addAll(getPropertySuggestions(context));
         } else if (context.expectingValue) {
             // We're expecting a value after a colon
@@ -105,12 +112,12 @@ public class JsonSchemaAutocomplete {
     private static JsonContext analyzeContext(String text, int caretPos) {
         JsonContext ctx = new JsonContext();
         
-        // Find the current position relative to JSON structure
+        // Find the most recent structural character before caret (outside of strings)
         int depth = 0;
         boolean inString = false;
         boolean escaped = false;
         String lastKey = null;
-        boolean afterColon = false;
+        Character lastStructuralChar = null;
         int stringStart = -1;
         
         for (int i = 0; i < Math.min(caretPos, text.length()); i++) {
@@ -134,71 +141,51 @@ public class JsonSchemaAutocomplete {
                 } else {
                     // Ending a string
                     inString = false;
-                    if (i < caretPos - 1) {
-                        // Just closed a string, check if it was a key
-                        int j = i + 1;
-                        while (j < text.length() && Character.isWhitespace(text.charAt(j))) {
-                            j++;
-                        }
-                        if (j < text.length() && text.charAt(j) == ':') {
-                            // It was a key, extract it
-                            lastKey = text.substring(stringStart + 1, i);
-                            afterColon = false;
-                        }
+                    // Check if this was a key (followed by :)
+                    int j = i + 1;
+                    while (j < text.length() && Character.isWhitespace(text.charAt(j))) {
+                        j++;
+                    }
+                    if (j < text.length() && text.charAt(j) == ':') {
+                        // It was a key
+                        lastKey = text.substring(stringStart + 1, i);
                     }
                 }
             } else if (!inString) {
-                if (c == '{') {
-                    depth++;
-                } else if (c == '}') {
-                    depth--;
-                } else if (c == ':') {
-                    afterColon = true;
-                } else if (c == ',') {
-                    afterColon = false;
-                    lastKey = null;
+                if (c == '{' || c == '}' || c == '[' || c == ']' || c == ':' || c == ',') {
+                    lastStructuralChar = c;
+                    if (c == ',') {
+                        lastKey = null; // Reset last key after comma
+                    }
                 }
             }
         }
         
-        // Determine if caret is inside a string
+        // Now determine the context
         ctx.isInString = inString;
         
-        // Check if we're at a position expecting a key or value
-        if (caretPos > 0 && caretPos <= text.length()) {
-            // Look backwards from caret to find context
-            int i = caretPos - 1;
+        // If we're in a string, we need to determine if it's a key or value
+        if (inString) {
+            // Look backwards to see what came before this string
+            int i = stringStart - 1;
             while (i >= 0 && Character.isWhitespace(text.charAt(i))) {
                 i--;
             }
             if (i >= 0) {
-                char prevChar = text.charAt(i);
-                
-                // If we're in a string, check if it's a key or value
-                if (inString) {
-                    // Check if there's a colon after the closing quote
-                    int j = i + 1;
-                    boolean foundColon = false;
-                    while (j < text.length()) {
-                        char ch = text.charAt(j);
-                        if (ch == ':') {
-                            foundColon = true;
-                            break;
-                        } else if (ch == '"' || ch == ',' || ch == '}') {
-                            break;
-                        }
-                        j++;
-                    }
-                    ctx.isKey = foundColon;
-                } else {
-                    ctx.expectingKey = (prevChar == '{' || prevChar == ',');
-                    ctx.expectingValue = (prevChar == ':');
-                }
-                
-                ctx.currentKey = lastKey;
-                ctx.afterColon = afterColon;
+                char beforeString = text.charAt(i);
+                // String after { or , is likely a key
+                ctx.isKey = (beforeString == '{' || beforeString == ',');
+                ctx.expectingKey = ctx.isKey;
+            }
+        } else {
+            // Not in a string, check last structural character
+            if (lastStructuralChar != null) {
+                ctx.expectingKey = (lastStructuralChar == '{' || lastStructuralChar == ',');
+                ctx.expectingValue = (lastStructuralChar == ':');
             }
         }
+        
+        ctx.currentKey = lastKey;
         
         return ctx;
     }
@@ -317,6 +304,15 @@ public class JsonSchemaAutocomplete {
         if (enumObj instanceof List) {
             List<?> enumList = (List<?>) enumObj;
             for (Object val : enumList) {
+                if (val != null) {
+                    values.add(String.valueOf(val));
+                }
+            }
+        } else if (enumObj instanceof com.eb.script.arrays.ArrayDef<?, ?>) {
+            // Handle ArrayDef from JSON parser
+            com.eb.script.arrays.ArrayDef<?, ?> arrayDef = (com.eb.script.arrays.ArrayDef<?, ?>) enumObj;
+            for (int i = 0; i < arrayDef.size(); i++) {
+                Object val = arrayDef.get(i);
                 if (val != null) {
                     values.add(String.valueOf(val));
                 }
