@@ -33,3 +33,7 @@ nbactions.xml
 
 # JDK download
 jdk-*/
+
+# Test artifacts
+ScriptInterpreter/test-images/
+ScriptInterpreter/test-images-resized/
