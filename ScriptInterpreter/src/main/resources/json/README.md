@@ -14,6 +14,11 @@ Complete schema for screen definitions including all components.
 - `title`: Window title
 - `width`, `height`: Window dimensions
 - `vars`: Array of variable definitions with display metadata
+  - `name`: Variable name (required)
+  - `type`: Data type (string, int, float, double, bool, date, etc.)
+  - `scope`: Variable scope - "internal" for internal-only variables not displayed in UI, "parameter" for variables that may be displayed/accessed (default: "parameter")
+  - `direction`: Parameter direction - "in" for input-only, "out" for output-only, "inout" for bidirectional (default: "inout")
+  - `display`: Display metadata for UI rendering (optional)
 - `area`: Array of container area definitions
 
 ### 2. area-definition.json
@@ -109,6 +114,8 @@ Most modern IDEs support JSON Schema validation:
     {
       "name": "username",
       "type": "string",
+      "scope": "parameter",
+      "direction": "in",
       "display": {
         "type": "textfield",
         "mandatory": true
@@ -117,10 +124,17 @@ Most modern IDEs support JSON Schema validation:
     {
       "name": "password",
       "type": "string",
+      "scope": "parameter",
+      "direction": "in",
       "display": {
         "type": "passwordfield",
         "mandatory": true
       }
+    },
+    {
+      "name": "sessionToken",
+      "type": "string",
+      "scope": "internal"
     }
   ],
   "area": [

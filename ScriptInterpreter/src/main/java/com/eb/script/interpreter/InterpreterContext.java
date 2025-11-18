@@ -30,6 +30,8 @@ public class InterpreterContext {
     private final ConcurrentHashMap<String, Thread> screenThreads = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> screenVars = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, ConcurrentHashMap<String, DataType>> screenVarTypes = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, ConcurrentHashMap<String, String>> screenVarScopes = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, ConcurrentHashMap<String, String>> screenVarDirections = new ConcurrentHashMap<>();
     private final Set<String> screensBeingCreated = ConcurrentHashMap.newKeySet();
     private final Map<String, DisplayItem> displayMetadata = new java.util.HashMap<>();
     private final Map<String, List<AreaDefinition>> screenAreas = new java.util.HashMap<>();
@@ -79,6 +81,14 @@ public class InterpreterContext {
 
     public ConcurrentHashMap<String, ConcurrentHashMap<String, DataType>> getScreenVarTypes() {
         return screenVarTypes;
+    }
+
+    public ConcurrentHashMap<String, ConcurrentHashMap<String, String>> getScreenVarScopes() {
+        return screenVarScopes;
+    }
+
+    public ConcurrentHashMap<String, ConcurrentHashMap<String, String>> getScreenVarDirections() {
+        return screenVarDirections;
     }
 
     public Set<String> getScreensBeingCreated() {

@@ -71,6 +71,14 @@ public class InterpreterScreen {
             java.util.concurrent.ConcurrentHashMap<String, DataType> screenVarTypeMap = new java.util.concurrent.ConcurrentHashMap<>();
             context.getScreenVarTypes().put(stmt.name, screenVarTypeMap);
 
+            // Create thread-safe variable scope storage for this screen
+            java.util.concurrent.ConcurrentHashMap<String, String> screenVarScopeMap = new java.util.concurrent.ConcurrentHashMap<>();
+            context.getScreenVarScopes().put(stmt.name, screenVarScopeMap);
+
+            // Create thread-safe variable direction storage for this screen
+            java.util.concurrent.ConcurrentHashMap<String, String> screenVarDirectionMap = new java.util.concurrent.ConcurrentHashMap<>();
+            context.getScreenVarDirections().put(stmt.name, screenVarDirectionMap);
+
             // Process variable definitions if present
             if (config.containsKey("vars")) {
                 Object varsObj = config.get("vars");
@@ -100,6 +108,24 @@ public class InterpreterScreen {
                                 }
                             }
 
+                            // Extract variable scope (internal or parameter)
+                            String varScope = "parameter"; // Default to "parameter"
+                            if (varDef.containsKey("scope")) {
+                                varScope = String.valueOf(varDef.get("scope")).toLowerCase();
+                                if (!varScope.equals("internal") && !varScope.equals("parameter")) {
+                                    throw interpreter.error(stmt.getLine(), "Invalid scope '" + varScope + "' for variable '" + varName + "' in screen '" + stmt.name + "'. Must be 'internal' or 'parameter'.");
+                                }
+                            }
+
+                            // Extract variable direction (in, out, inout)
+                            String varDirection = "inout"; // Default to "inout"
+                            if (varDef.containsKey("direction")) {
+                                varDirection = String.valueOf(varDef.get("direction")).toLowerCase();
+                                if (!varDirection.equals("in") && !varDirection.equals("out") && !varDirection.equals("inout")) {
+                                    throw interpreter.error(stmt.getLine(), "Invalid direction '" + varDirection + "' for variable '" + varName + "' in screen '" + stmt.name + "'. Must be 'in', 'out', or 'inout'.");
+                                }
+                            }
+
                             // Convert and set the default value
                             Object value = defaultValue;
                             if (varType != null && value != null) {
@@ -107,7 +133,11 @@ public class InterpreterScreen {
                             }
 
                             // Process optional display metadata
+                            // Note: internal variables should not have display metadata
                             if (varDef.containsKey("display")) {
+                                if (varScope.equals("internal")) {
+                                    throw interpreter.error(stmt.getLine(), "Variable '" + varName + "' in screen '" + stmt.name + "' has scope 'internal' but also has display metadata. Internal variables should not be displayed.");
+                                }
                                 Object displayObj = varDef.get("display");
                                 if (displayObj instanceof Map) {
                                     @SuppressWarnings("unchecked")
@@ -125,6 +155,12 @@ public class InterpreterScreen {
                             if (varType != null) {
                                 screenVarTypeMap.put(varName, varType);
                             }
+
+                            // Store the variable scope
+                            screenVarScopeMap.put(varName, varScope);
+
+                            // Store the variable direction
+                            screenVarDirectionMap.put(varName, varDirection);
                         }
                     }
                 } else {
@@ -354,6 +390,9 @@ public class InterpreterScreen {
                         context.getScreens().remove(screenName);
                         context.getScreenThreads().remove(screenName);
                         context.getScreenVars().remove(screenName);
+                        context.getScreenVarTypes().remove(screenName);
+                        context.getScreenVarScopes().remove(screenName);
+                        context.getScreenVarDirections().remove(screenName);
                         context.getScreenAreas().remove(screenName);
 
                         // Clean up display metadata for this screen

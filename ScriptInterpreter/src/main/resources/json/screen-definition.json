@@ -58,6 +58,18 @@
           "description": "Data type",
           "enum": ["string", "int", "integer", "long", "float", "double", "bool", "boolean", "date", "byte", "json"]
         },
+        "scope": {
+          "type": "string",
+          "description": "Variable scope - 'internal' for internal-only variables (not displayed), 'parameter' for variables that may be displayed/accessed",
+          "enum": ["internal", "parameter"],
+          "default": "parameter"
+        },
+        "direction": {
+          "type": "string",
+          "description": "Parameter direction - 'in' for input-only, 'out' for output-only, 'inout' for bidirectional. Only applicable when scope is 'parameter'",
+          "enum": ["in", "out", "inout"],
+          "default": "inout"
+        },
         "display": {
           "$ref": "display-metadata.json",
           "description": "Display metadata for UI rendering"
@@ -76,6 +88,8 @@
         {
           "name": "username",
           "type": "string",
+          "scope": "parameter",
+          "direction": "in",
           "display": {
             "type": "textfield",
             "mandatory": true
@@ -84,10 +98,17 @@
         {
           "name": "password",
           "type": "string",
+          "scope": "parameter",
+          "direction": "in",
           "display": {
             "type": "passwordfield",
             "mandatory": true
           }
+        },
+        {
+          "name": "sessionToken",
+          "type": "string",
+          "scope": "internal"
         }
       ],
       "area": [

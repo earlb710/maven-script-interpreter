@@ -1,0 +1,95 @@
+// Test Script: Variable Scope and Direction (No UI)
+// Description: Tests the new 'scope' and 'direction' properties for screen variables without showing UI
+// Author: EBS Test Suite
+// Date: 2025-11-18
+
+print "=== Testing Variable Scope and Direction ===";
+print "";
+
+// Test screen with different variable scopes and directions
+screen testScreen = {
+    "title": "Test Variable Scope & Direction",
+    "width": 500,
+    "height": 400,
+    "vars": [
+        {
+            "name": "inputField",
+            "type": "string",
+            "scope": "parameter",
+            "direction": "in",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Input Field (in)",
+                "promptText": "Enter input value"
+            }
+        },
+        {
+            "name": "outputField",
+            "type": "string",
+            "scope": "parameter",
+            "direction": "out",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Output Field (out)",
+                "promptText": "Output value"
+            }
+        },
+        {
+            "name": "bidirectionalField",
+            "type": "string",
+            "scope": "parameter",
+            "direction": "inout",
+            "default": "Bidirectional",
+            "display": {
+                "type": "textfield",
+                "labelText": "Bidirectional Field (inout)",
+                "promptText": "Input/Output value"
+            }
+        },
+        {
+            "name": "internalCounter",
+            "type": "int",
+            "scope": "internal",
+            "default": 0
+        },
+        {
+            "name": "internalToken",
+            "type": "string",
+            "scope": "internal",
+            "default": "secret-token-12345"
+        }
+    ]
+};
+
+// Test accessing variables
+print "Testing variable access...";
+print "Input Field: " + testScreen.inputField;
+print "Output Field: " + testScreen.outputField;
+print "Bidirectional Field: " + testScreen.bidirectionalField;
+print "Internal Counter: " + testScreen.internalCounter;
+print "Internal Token: " + testScreen.internalToken;
+
+// Modify variables
+print "";
+print "Modifying variables...";
+testScreen.inputField = "User Input";
+testScreen.outputField = "Computed Result";
+testScreen.bidirectionalField = "Updated Value";
+testScreen.internalCounter = 42;
+testScreen.internalToken = "new-token-67890";
+
+// Verify modifications
+print "After modification:";
+print "Input Field: " + testScreen.inputField;
+print "Output Field: " + testScreen.outputField;
+print "Bidirectional Field: " + testScreen.bidirectionalField;
+print "Internal Counter: " + testScreen.internalCounter;
+print "Internal Token: " + testScreen.internalToken;
+
+print "";
+print "Test completed successfully!";
+print "Screen created with variable scope and direction metadata.";
+print "Parameter variables: inputField (in), outputField (out), bidirectionalField (inout)";
+print "Internal variables: internalCounter, internalToken";
