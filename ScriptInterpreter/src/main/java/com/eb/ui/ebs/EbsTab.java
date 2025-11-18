@@ -840,10 +840,16 @@ public class EbsTab extends Tab {
     }
 
     private void selectCurrent(int[] r) {
-        dispArea.selectRange(r[0], r[1]); // selection shows current; also scrolls into view
-        // optional: move caret to end/start
+        dispArea.selectRange(r[0], r[1]); // selection shows current
         dispArea.moveTo(r[1]);
-        dispArea.requestFollowCaret(); // Ensure the caret is scrolled into view
+        
+        // Scroll to center the match in the viewport
+        int paragraph = dispArea.getCurrentParagraph();
+        int visibleParagraphs = dispArea.getVisibleParagraphs().size();
+        int offset = visibleParagraphs / 2;
+        int targetParagraph = Math.max(0, paragraph - offset);
+        
+        dispArea.showParagraphAtTop(targetParagraph);
     }
 
     private void gotoNext() {
