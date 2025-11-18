@@ -226,13 +226,6 @@ public final class Console {
                 showAutocomplete();
             }
         });
-        
-        // Hide autocomplete when user clicks in the editor (cursor position changes)
-        inputArea.setOnMouseClicked(e -> {
-            if (autocompletePopup.isShowing()) {
-                autocompletePopup.hide();
-            }
-        });
     }
 
 // ---- Input syntax highlighting using Token.style --------------------------------
@@ -331,14 +324,28 @@ public final class Console {
         String text = inputArea.getText();
         int caretPos = inputArea.getCaretPosition();
         
-        // Get only the current line for tokenization
-        String currentLineText = getCurrentLineText(text, caretPos);
-        int caretPosInLine = getCaretPositionInCurrentLine(text, caretPos);
+        // For JSON autocomplete, use the full text to maintain context
+        // For other cases, just use current line
+        String contextText;
+        int contextCaretPos;
         
-        List<String> suggestions = AutocompleteSuggestions.getSuggestionsForContext(currentLineText, caretPosInLine);
+        if (JsonSchemaAutocomplete.looksLikeJson(text)) {
+            // Use full text for JSON to maintain proper context
+            contextText = text;
+            contextCaretPos = caretPos;
+        } else {
+            // For non-JSON, use current line only
+            contextText = getCurrentLineText(text, caretPos);
+            contextCaretPos = getCaretPositionInCurrentLine(text, caretPos);
+        }
+        
+        List<String> suggestions = AutocompleteSuggestions.getSuggestionsForContext(contextText, contextCaretPos);
         
         if (!suggestions.isEmpty()) {
             autocompletePopup.show(inputArea, suggestions);
+        } else {
+            // Hide popup if no suggestions available
+            autocompletePopup.hide();
         }
     }
 
