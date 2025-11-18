@@ -81,9 +81,7 @@ public class EbsHandler implements Handler {
         ScriptArea output = env.getOutputArea();
         for (String line : lines) {
             if (line != null && !line.isBlank()) {
-                line = line.trim();
-                String cmd = line.toLowerCase();
-                List<EbsToken> tokens = new EbsLexer().tokenize(cmd);
+                List<EbsToken> tokens = new EbsLexer().tokenize(line);
                 Parser.parse(ctx, line, tokens);
                 if (env.isEchoOn() && ctx.statements.length == 1) {
                     EbsStyled.appendStyledText(output, "> " + line + "\n");
