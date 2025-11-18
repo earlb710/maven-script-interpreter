@@ -48,18 +48,30 @@ public class JsonSchemaAutocomplete {
      * Get autocomplete suggestions for JSON content based on cursor position.
      * Analyzes the JSON structure and provides context-aware suggestions.
      *
-     * @param jsonText The full JSON text being edited
-     * @param caretPos The current caret position
+     * @param jsonText The full JSON text being edited (may include assignment like "screen x = {")
+     * @param caretPos The current caret position in the full text
      * @return List of autocomplete suggestions
      */
     public static List<String> getJsonSuggestions(String jsonText, int caretPos) {
         List<String> suggestions = new ArrayList<>();
+        
+        // Find where the JSON actually starts (after = if present)
+        int jsonStartPos = findJsonStartPosition(jsonText);
+        
+        // If JSON hasn't started yet or caret is before JSON, return empty
+        if (jsonStartPos < 0 || caretPos < jsonStartPos) {
+            return suggestions;
+        }
+        
+        // Extract just the JSON portion and adjust caret position
+        String pureJson = jsonText.substring(jsonStartPos);
+        int adjustedCaretPos = caretPos - jsonStartPos;
 
         // Determine the current context (what are we completing?)
-        JsonContext context = analyzeContext(jsonText, caretPos);
+        JsonContext context = analyzeContext(pureJson, adjustedCaretPos);
         
         // Extract the current partial word being typed
-        String partialWord = extractPartialWord(jsonText, caretPos);
+        String partialWord = extractPartialWord(pureJson, adjustedCaretPos);
 
         if (context.isInString) {
             // We're inside a string
@@ -87,6 +99,42 @@ public class JsonSchemaAutocomplete {
         }
 
         return suggestions;
+    }
+    
+    /**
+     * Find the position where JSON content starts in the text.
+     * Handles cases like "screen x = {" where JSON starts after =.
+     * Returns the position of { or [, or -1 if not found.
+     */
+    private static int findJsonStartPosition(String text) {
+        if (text == null || text.isEmpty()) {
+            return -1;
+        }
+        
+        // Check if text starts with JSON
+        String trimmed = text.trim();
+        int trimOffset = text.indexOf(trimmed.charAt(0));
+        if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+            return trimOffset;
+        }
+        
+        // Look for = followed by { or [
+        int equalsIndex = text.indexOf('=');
+        if (equalsIndex >= 0) {
+            // Find the { or [ after the =
+            for (int i = equalsIndex + 1; i < text.length(); i++) {
+                char c = text.charAt(i);
+                if (c == '{' || c == '[') {
+                    return i;
+                }
+                if (!Character.isWhitespace(c)) {
+                    // Found a non-whitespace character that's not { or [
+                    break;
+                }
+            }
+        }
+        
+        return -1;
     }
     
     /**
@@ -323,13 +371,32 @@ public class JsonSchemaAutocomplete {
 
     /**
      * Check if the text appears to be JSON content.
+     * Looks for JSON opening braces/brackets anywhere in the text,
+     * which handles cases like "screen testScreen = {" where the JSON
+     * starts after an assignment.
      */
     public static boolean looksLikeJson(String text) {
         if (text == null || text.trim().isEmpty()) {
             return false;
         }
         String trimmed = text.trim();
-        return (trimmed.startsWith("{") || trimmed.startsWith("["));
+        
+        // Check if text starts with JSON
+        if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+            return true;
+        }
+        
+        // Check if there's an assignment followed by JSON (e.g., "screen x = {")
+        // Look for = followed by optional whitespace and then { or [
+        int equalsIndex = trimmed.indexOf('=');
+        if (equalsIndex >= 0 && equalsIndex < trimmed.length() - 1) {
+            String afterEquals = trimmed.substring(equalsIndex + 1).trim();
+            if (afterEquals.startsWith("{") || afterEquals.startsWith("[")) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     /**

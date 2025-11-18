@@ -226,6 +226,13 @@ public final class Console {
                 showAutocomplete();
             }
         });
+        
+        // Hide autocomplete when user clicks in the editor (cursor position changes)
+        inputArea.setOnMouseClicked(e -> {
+            if (autocompletePopup.isShowing()) {
+                autocompletePopup.hide();
+            }
+        });
     }
 
 // ---- Input syntax highlighting using Token.style --------------------------------
