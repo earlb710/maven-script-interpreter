@@ -112,12 +112,22 @@ public class AutocompleteSuggestions {
     /**
      * Determine what suggestions to show based on the current input context.
      * Returns console commands if the token starts with '/', all keywords and 
-     * builtins after '/help ' or '/? ', builtins after 'call' or '#', 
+     * builtins after '/help ' or '/? ', builtins after 'call' or '#',
+     * JSON schema-based suggestions if editing JSON content,
      * otherwise returns only keywords.
      */
     public static List<String> getSuggestionsForContext(String text, int caretPosition) {
         // Get the text before the caret
         String beforeCaret = text.substring(0, Math.min(caretPosition, text.length()));
+
+        // Check if we're editing JSON content - provide schema-based suggestions
+        if (JsonSchemaAutocomplete.looksLikeJson(text)) {
+            List<String> jsonSuggestions = JsonSchemaAutocomplete.getJsonSuggestions(text, caretPosition);
+            if (!jsonSuggestions.isEmpty()) {
+                return jsonSuggestions;
+            }
+            // Fall through to normal suggestions if no JSON suggestions found
+        }
 
         // Find the word at caret position
         String currentWord = getCurrentWord(beforeCaret);
