@@ -94,14 +94,16 @@ public class InterpreterScreen {
                             
                             // Extract set properties
                             String setName = setDef.containsKey("setname") ? String.valueOf(setDef.get("setname")) : null;
-                            String hiddenInd = setDef.containsKey("hiddenind") ? String.valueOf(setDef.get("hiddenind")) : "N";
+                            // Support both legacy "hiddenind" and new "scope" property names
+                            String scope = setDef.containsKey("scope") ? String.valueOf(setDef.get("scope")) : 
+                                          (setDef.containsKey("hiddenind") ? String.valueOf(setDef.get("hiddenind")) : "visible");
                             
                             if (setName == null || setName.isEmpty()) {
                                 throw interpreter.error(stmt.getLine(), "Variable set in screen '" + stmt.name + "' must have a 'setname' property.");
                             }
                             
                             // Create VarSet
-                            VarSet varSet = new VarSet(setName, hiddenInd);
+                            VarSet varSet = new VarSet(setName, scope);
                             varSetsMap.put(setName.toLowerCase(), varSet);
                             
                             // Process vars within this set
@@ -1091,6 +1093,7 @@ public class InterpreterScreen {
                 String varName = varDef.containsKey("name") ? String.valueOf(varDef.get("name")).toLowerCase() : null;
                 String varTypeStr = varDef.containsKey("type") ? String.valueOf(varDef.get("type")).toLowerCase() : null;
                 Object defaultValue = varDef.get("default");
+                String direction = varDef.containsKey("direction") ? String.valueOf(varDef.get("direction")) : "inout";
 
                 if (varName == null || varName.isEmpty()) {
                     throw interpreter.error(line, "Variable definition in screen '" + screenName + "' must have a 'name' property.");
@@ -1115,6 +1118,7 @@ public class InterpreterScreen {
                 Var var = new Var(varName, varType, defaultValue);
                 var.setValue(value);
                 var.setSetName(setName);
+                var.setDirection(direction);
 
                 // Process optional display metadata
                 if (varDef.containsKey("display")) {

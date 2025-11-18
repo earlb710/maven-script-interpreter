@@ -13,8 +13,9 @@ public class VarSet {
     // Name of the variable set
     private String setName;
     
-    // Hidden indicator: "Y" = internal access only, "N" = visible
-    private String hiddenInd;
+    // Scope: "internal" = internal access only, "visible" = visible (default)
+    // Legacy values: "Y" = internal, "N" = visible (for backward compatibility)
+    private String scope;
     
     // Map of variables in this set, keyed by lowercase varName
     private Map<String, Var> variables;
@@ -24,7 +25,7 @@ public class VarSet {
      */
     public VarSet() {
         this.variables = new HashMap<>();
-        this.hiddenInd = "N"; // Default to visible
+        this.scope = "visible"; // Default to visible
     }
     
     /**
@@ -39,12 +40,12 @@ public class VarSet {
     /**
      * Constructor with all fields
      * @param setName The name of the variable set
-     * @param hiddenInd Hidden indicator ("Y" or "N")
+     * @param scope Scope indicator ("internal", "visible", or legacy "Y"/"N")
      */
-    public VarSet(String setName, String hiddenInd) {
+    public VarSet(String setName, String scope) {
         this();
         this.setName = setName;
-        this.hiddenInd = hiddenInd;
+        this.scope = normalizeScope(scope);
     }
     
     // Getters and setters
@@ -57,12 +58,31 @@ public class VarSet {
         this.setName = setName;
     }
     
-    public String getHiddenInd() {
-        return hiddenInd;
+    public String getScope() {
+        return scope;
     }
     
-    public void setHiddenInd(String hiddenInd) {
-        this.hiddenInd = hiddenInd;
+    public void setScope(String scope) {
+        this.scope = normalizeScope(scope);
+    }
+    
+    /**
+     * Normalize scope value to handle legacy "Y"/"N" values
+     * @param scope The scope value (can be "internal", "visible", "Y", or "N")
+     * @return Normalized scope ("internal" or "visible")
+     */
+    private String normalizeScope(String scope) {
+        if (scope == null) {
+            return "visible";
+        }
+        // Handle legacy values
+        if ("Y".equalsIgnoreCase(scope)) {
+            return "internal";
+        } else if ("N".equalsIgnoreCase(scope)) {
+            return "visible";
+        }
+        // Return as-is for new values
+        return scope.toLowerCase();
     }
     
     public Map<String, Var> getVariables() {
@@ -96,18 +116,28 @@ public class VarSet {
     }
     
     /**
-     * Check if this set is hidden
-     * @return true if hiddenInd is "Y", false otherwise
+     * Check if this set is internal (hidden from UI)
+     * @return true if scope is "internal", false otherwise
      */
+    public boolean isInternal() {
+        return "internal".equalsIgnoreCase(scope);
+    }
+    
+    /**
+     * Check if this set is hidden (legacy method for backward compatibility)
+     * @return true if scope is "internal", false otherwise
+     * @deprecated Use isInternal() instead
+     */
+    @Deprecated
     public boolean isHidden() {
-        return "Y".equalsIgnoreCase(hiddenInd);
+        return isInternal();
     }
     
     @Override
     public String toString() {
         return "VarSet{" +
                 "setName='" + setName + '\'' +
-                ", hiddenInd='" + hiddenInd + '\'' +
+                ", scope='" + scope + '\'' +
                 ", variables=" + variables.size() +
                 '}';
     }
