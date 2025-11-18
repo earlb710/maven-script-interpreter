@@ -1,0 +1,418 @@
+// ============================================
+// EBS Example Test Suite
+// Purpose: Demonstrates complete test script
+//          structure with assertions and
+//          test result tracking
+// ============================================
+
+call debug.on();
+
+var totalTests: int = 0;
+var passedTests: int = 0;
+var failedTests: int = 0;
+
+print "========================================";
+print "EBS Example Test Suite";
+print "========================================";
+
+// ============================================
+// Test Section: Variables and Types
+// ============================================
+print "\n--- Testing Variables and Types ---";
+
+totalTests = totalTests + 1;
+var intVar: int = 42;
+if call debug.assertEquals(42, intVar, "Integer variable initialization") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+totalTests = totalTests + 1;
+var strVar: string = "Hello";
+if call debug.assertEquals("Hello", strVar, "String variable initialization") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+totalTests = totalTests + 1;
+var boolVar: bool = true;
+if call debug.assert(boolVar, "Boolean variable initialization") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+totalTests = totalTests + 1;
+var doubleVar: double = 3.14;
+if call debug.assert(doubleVar > 3.0, "Double variable comparison") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+// ============================================
+// Test Section: Arithmetic Operators
+// ============================================
+print "\n--- Testing Arithmetic Operators ---";
+
+totalTests = totalTests + 1;
+if call debug.assertEquals(15, 10 + 5, "Addition: 10 + 5") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+totalTests = totalTests + 1;
+if call debug.assertEquals(5, 10 - 5, "Subtraction: 10 - 5") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+totalTests = totalTests + 1;
+if call debug.assertEquals(50, 10 * 5, "Multiplication: 10 * 5") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+totalTests = totalTests + 1;
+if call debug.assertEquals(2, 10 / 5, "Division: 10 / 5") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+totalTests = totalTests + 1;
+var expResult: double = 2 ^ 3;
+if call debug.assert(expResult > 7.9, "Exponentiation: 2 ^ 3 = 8") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+// ============================================
+// Test Section: Comparison Operators
+// ============================================
+print "\n--- Testing Comparison Operators ---";
+
+totalTests = totalTests + 1;
+if call debug.assert(10 > 5, "Greater than: 10 > 5") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+totalTests = totalTests + 1;
+if call debug.assert(5 < 10, "Less than: 5 < 10") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+totalTests = totalTests + 1;
+if call debug.assert(10 >= 10, "Greater than or equal: 10 >= 10") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+totalTests = totalTests + 1;
+if call debug.assert(5 <= 10, "Less than or equal: 5 <= 10") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+totalTests = totalTests + 1;
+if call debug.assert(10 == 10, "Equality: 10 == 10") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+totalTests = totalTests + 1;
+if call debug.assert(10 != 5, "Inequality: 10 != 5") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+// ============================================
+// Test Section: String Functions
+// ============================================
+print "\n--- Testing String Functions ---";
+
+totalTests = totalTests + 1;
+if call debug.assertEquals("HELLO", call string.toupper("hello"), "string.toupper") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+totalTests = totalTests + 1;
+if call debug.assertEquals("world", call string.tolower("WORLD"), "string.tolower") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+totalTests = totalTests + 1;
+if call debug.assertEquals("test", call string.trim("  test  "), "string.trim") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+totalTests = totalTests + 1;
+if call debug.assert(call string.contains("hello world", "world"), "string.contains") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+totalTests = totalTests + 1;
+if call debug.assert(call string.startswith("hello", "hel"), "string.startswith") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+totalTests = totalTests + 1;
+if call debug.assert(call string.endswith("hello", "lo"), "string.endswith") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+totalTests = totalTests + 1;
+if call debug.assert(call string.isempty(""), "string.isempty on empty string") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+totalTests = totalTests + 1;
+if call debug.assert(call string.isblank("   "), "string.isblank on whitespace") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+// ============================================
+// Test Section: JSON Functions
+// ============================================
+print "\n--- Testing JSON Functions ---";
+
+totalTests = totalTests + 1;
+var jsonStr = "{\"name\":\"Alice\",\"age\":30,\"active\":true}";
+var jsonObj = call json.jsonfromstring(jsonStr);
+var name = call json.getstring(jsonObj, "name", "");
+if call debug.assertEquals("Alice", name, "json.jsonfromstring and json.getstring") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+totalTests = totalTests + 1;
+var age = call json.getint(jsonObj, "age", 0);
+if call debug.assertEquals(30, age, "json.getint - retrieve age") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+totalTests = totalTests + 1;
+var active = call json.getbool(jsonObj, "active", false);
+if call debug.assertEquals(true, active, "json.getbool - retrieve active flag") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+totalTests = totalTests + 1;
+call json.set(jsonObj, "city", "Boston");
+var city = call json.getstring(jsonObj, "city", "");
+if call debug.assertEquals("Boston", city, "json.set - add new field") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+totalTests = totalTests + 1;
+call json.remove(jsonObj, "age");
+var removedAge = call json.getint(jsonObj, "age", -1);
+if call debug.assertEquals(-1, removedAge, "json.remove - delete field") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+// ============================================
+// Test Section: Array Operations
+// ============================================
+print "\n--- Testing Array Operations ---";
+
+totalTests = totalTests + 1;
+var numbers: int[5];
+if call debug.assertEquals(5, numbers.length, "Array length property") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+totalTests = totalTests + 1;
+numbers[0] = 10;
+numbers[1] = 20;
+if call debug.assertEquals(10, numbers[0], "Array element access and assignment") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+totalTests = totalTests + 1;
+var items: int[*];
+call array.fill(items, 5, 0);
+items[0] = 1;
+items[1] = 2;
+items[2] = 3;
+items[3] = 4;
+items[4] = 5;
+if call debug.assertEquals(5, items.length, "Array element assignment") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+totalTests = totalTests + 1;
+var unsorted: int[*];
+call array.fill(unsorted, 5, 0);
+unsorted[0] = 5;
+unsorted[1] = 2;
+unsorted[2] = 8;
+unsorted[3] = 1;
+unsorted[4] = 9;
+call array.sort(unsorted, true);
+if call debug.assertEquals(1, unsorted[0], "array.sort - ascending order") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+// ============================================
+// Test Section: Control Flow
+// ============================================
+print "\n--- Testing Control Flow ---";
+
+totalTests = totalTests + 1;
+var x = 10;
+var ifResult = "";
+if x > 5 then {
+    ifResult = "greater";
+} else {
+    ifResult = "lesser";
+}
+if call debug.assertEquals("greater", ifResult, "if-then-else statement") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+totalTests = totalTests + 1;
+var whileCount = 0;
+var i = 0;
+while i < 5 {
+    whileCount = whileCount + 1;
+    i = i + 1;
+}
+if call debug.assertEquals(5, whileCount, "while loop iteration") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+totalTests = totalTests + 1;
+var doCount = 0;
+var j = 0;
+do {
+    doCount = doCount + 1;
+    j = j + 1;
+} while (j < 3);
+if call debug.assertEquals(3, doCount, "do-while loop iteration") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+// ============================================
+// Test Section: Functions
+// ============================================
+print "\n--- Testing Functions ---";
+
+totalTests = totalTests + 1;
+getMessage return string {
+    return "Hello, World!";
+}
+var msg = call getMessage();
+if call debug.assertEquals("Hello, World!", msg, "Function without parameters") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+totalTests = totalTests + 1;
+add(a: int, b: int) return int {
+    return a + b;
+}
+var sum = call add(5, 3);
+if call debug.assertEquals(8, sum, "Function with parameters") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+totalTests = totalTests + 1;
+greet(name: string = "Guest") return string {
+    return "Hello, " + name;
+}
+var greeting1 = call greet();
+if call debug.assertEquals("Hello, Guest", greeting1, "Function with default parameter") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+totalTests = totalTests + 1;
+var greeting2 = call greet("Alice");
+if call debug.assertEquals("Hello, Alice", greeting2, "Function override default parameter") then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+// ============================================
+// Test Summary
+// ============================================
+print "\n========================================";
+print "Test Results Summary";
+print "========================================";
+print "Total Tests:  " + totalTests;
+print "Passed:       " + passedTests;
+print "Failed:       " + failedTests;
+
+var successRate: int = 0;
+if totalTests > 0 then {
+    successRate = (passedTests * 100) / totalTests;
+}
+print "Success Rate: " + successRate + "%";
+print "========================================";
+
+if failedTests > 0 then {
+    print "Status: ❌ " + failedTests + " TEST(S) FAILED";
+} else {
+    print "Status: ✅ ALL TESTS PASSED";
+}
+
+call debug.off();
