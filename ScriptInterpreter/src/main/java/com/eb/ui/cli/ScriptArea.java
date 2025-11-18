@@ -125,20 +125,80 @@ public class ScriptArea extends StyleClassedTextArea {
     }
 
     public void addStyleToRange(int start, int endExclusive, String styleClass) {
-        for (int i = Math.max(0, start); i < Math.min(getLength(), endExclusive); i++) {
-            var curr = new java.util.ArrayList<>(getStyleOfChar(i)); // preserve existing
-            if (!curr.contains(styleClass)) {
-                curr.add(styleClass);
+        int actualStart = Math.max(0, start);
+        int actualEnd = Math.min(getLength(), endExclusive);
+        
+        if (actualStart >= actualEnd) {
+            return;
+        }
+        
+        // Batch consecutive characters with same initial style to reduce setStyle calls
+        int batchStart = actualStart;
+        java.util.List<String> batchStyle = null;
+        
+        for (int i = actualStart; i < actualEnd; i++) {
+            var curr = new java.util.ArrayList<>(getStyleOfChar(i));
+            
+            // Check if we need to start a new batch
+            if (batchStyle != null && !curr.equals(batchStyle)) {
+                // Apply previous batch
+                if (!batchStyle.contains(styleClass)) {
+                    batchStyle.add(styleClass);
+                }
+                setStyle(batchStart, i, batchStyle);
+                batchStart = i;
+                batchStyle = null;
             }
-            setStyle(i, i + 1, curr);
+            
+            // Initialize or continue batch
+            if (batchStyle == null) {
+                batchStyle = curr;
+            }
+        }
+        
+        // Apply final batch
+        if (batchStyle != null) {
+            if (!batchStyle.contains(styleClass)) {
+                batchStyle.add(styleClass);
+            }
+            setStyle(batchStart, actualEnd, batchStyle);
         }
     }
 
     public void removeStyleFromRange(int start, int endExclusive, String styleClass) {
-        for (int i = Math.max(0, start); i < Math.min(getLength(), endExclusive); i++) {
+        int actualStart = Math.max(0, start);
+        int actualEnd = Math.min(getLength(), endExclusive);
+        
+        if (actualStart >= actualEnd) {
+            return;
+        }
+        
+        // Batch consecutive characters with same initial style to reduce setStyle calls
+        int batchStart = actualStart;
+        java.util.List<String> batchStyle = null;
+        
+        for (int i = actualStart; i < actualEnd; i++) {
             var curr = new java.util.ArrayList<>(getStyleOfChar(i));
-            curr.removeIf(c -> c.equals(styleClass));
-            setStyle(i, i + 1, curr);
+            
+            // Check if we need to start a new batch
+            if (batchStyle != null && !curr.equals(batchStyle)) {
+                // Apply previous batch
+                batchStyle.removeIf(c -> c.equals(styleClass));
+                setStyle(batchStart, i, batchStyle);
+                batchStart = i;
+                batchStyle = null;
+            }
+            
+            // Initialize or continue batch
+            if (batchStyle == null) {
+                batchStyle = curr;
+            }
+        }
+        
+        // Apply final batch
+        if (batchStyle != null) {
+            batchStyle.removeIf(c -> c.equals(styleClass));
+            setStyle(batchStart, actualEnd, batchStyle);
         }
     }
 }
