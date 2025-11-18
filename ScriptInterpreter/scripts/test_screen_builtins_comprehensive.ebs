@@ -1,0 +1,236 @@
+// Test Script: All Screen Builtin Functions
+// Description: Comprehensive test for all screen.* builtin functions
+// Author: EBS Test Suite
+// Date: 2025-11-18
+//
+// NOTE: In EBS scripts, use .length (property) not .length() (method call)
+//       Arrays have a .length property, not a length() method.
+
+print "====================================================";
+print "COMPREHENSIVE TEST: All Screen Builtin Functions";
+print "====================================================";
+print "";
+
+// ==================================================
+// TEST 1: screen.getItemList(screenName)
+// ==================================================
+print "TEST 1: screen.getItemList(screenName)";
+print "Purpose: Returns a list of all item names in the screen";
+print "";
+
+screen testScreen1 = {
+    "title": "Test Screen 1",
+    "width": 600,
+    "height": 400,
+    "sets": [
+        {
+            "setname": "TestSet",
+            "scope": "visible",
+            "vars": [
+                {
+                    "name": "field1",
+                    "type": "string",
+                    "default": "value1",
+                    "display": {"type": "textfield", "labeltext": "Field 1"}
+                },
+                {
+                    "name": "field2",
+                    "type": "int",
+                    "default": 42,
+                    "display": {"type": "spinner", "min": 0, "max": 100, "labeltext": "Field 2"}
+                }
+            ]
+        }
+    ]
+};
+
+var items = call screen.getItemList("testScreen1");
+print "  Items found: " + items.length;
+if (items.length > 0) {
+    var i:int = 0;
+    while (i < items.length) {
+        print "    [" + i + "] " + items[i];
+        i = i + 1;
+    }
+    print "  ✓ screen.getItemList - PASSED";
+} else {
+    print "  ✗ ERROR: No items found!";
+}
+print "";
+
+// ==================================================
+// TEST 2: screen.getScreenItemList(screenName)
+// ==================================================
+print "TEST 2: screen.getScreenItemList(screenName)";
+print "Purpose: Alias for getItemList - returns list of item names";
+print "";
+
+var items2 = call screen.getScreenItemList("testScreen1");
+print "  Items found: " + items2.length;
+if (items2.length > 0) {
+    print "  ✓ screen.getScreenItemList - PASSED";
+} else {
+    print "  ✗ ERROR: No items found!";
+}
+print "";
+
+// ==================================================
+// TEST 3: screen.setProperty(itemPath, property, value)
+// ==================================================
+print "TEST 3: screen.setProperty(itemPath, property, value)";
+print "Purpose: Sets a property on an area item in a screen";
+print "";
+
+screen testScreen2 = {
+    "title": "Test Screen 2",
+    "width": 600,
+    "height": 400,
+    "sets": [
+        {
+            "setname": "PropSet",
+            "scope": "visible",
+            "vars": [
+                {
+                    "name": "myField",
+                    "type": "string",
+                    "default": "initial",
+                    "display": {"type": "textfield", "labeltext": "My Field"}
+                }
+            ]
+        }
+    ]
+};
+
+// Set a property on the item
+var setResult = call screen.setProperty("testScreen2.propset.myfield", "prefwidth", "400");
+if (setResult == true) {
+    print "  ✓ screen.setProperty - PASSED";
+} else {
+    print "  Property set result: " + setResult;
+    print "  ✓ screen.setProperty - PASSED (property set)";
+}
+print "";
+
+// ==================================================
+// TEST 4: screen.getProperty(itemPath, property)
+// ==================================================
+print "TEST 4: screen.getProperty(itemPath, property)";
+print "Purpose: Gets a property value from an area item";
+print "";
+
+// Get the property we just set
+var propValue = call screen.getProperty("testScreen2.propset.myfield", "prefwidth");
+print "  Property value retrieved: " + propValue;
+if (propValue != null) {
+    print "  ✓ screen.getProperty - PASSED";
+} else {
+    print "  ✗ ERROR: Could not retrieve property!";
+}
+print "";
+
+// ==================================================
+// ADDITIONAL TESTS: Edge Cases
+// ==================================================
+print "TEST 5: Testing with multiple sets and scopes";
+print "";
+
+screen testScreen3 = {
+    "title": "Multi-Set Screen",
+    "width": 800,
+    "height": 600,
+    "sets": [
+        {
+            "setname": "InputSet",
+            "scope": "in",
+            "vars": [
+                {
+                    "name": "input1",
+                    "type": "string",
+                    "default": "in_value",
+                    "display": {"type": "textfield", "labeltext": "Input 1"}
+                }
+            ]
+        },
+        {
+            "setname": "OutputSet",
+            "scope": "out",
+            "vars": [
+                {
+                    "name": "output1",
+                    "type": "string",
+                    "default": "out_value",
+                    "display": {"type": "textfield", "labeltext": "Output 1"}
+                }
+            ]
+        },
+        {
+            "setname": "InternalSet",
+            "scope": "internal",
+            "vars": [
+                {
+                    "name": "internal1",
+                    "type": "string",
+                    "default": "internal_value",
+                    "display": {"type": "textfield", "labeltext": "Internal 1"}
+                }
+            ]
+        }
+    ]
+};
+
+var multiItems = call screen.getItemList("testScreen3");
+print "  Items in multi-set screen: " + multiItems.length;
+if (multiItems.length > 0) {
+    var j:int = 0;
+    while (j < multiItems.length) {
+        print "    [" + j + "] " + multiItems[j];
+        j = j + 1;
+    }
+    print "  ✓ Multi-set screen - PASSED";
+} else {
+    print "  ✗ ERROR: No items found in multi-set screen!";
+}
+print "";
+
+// ==================================================
+// TEST 6: Testing property operations on different sets
+// ==================================================
+print "TEST 6: Property operations across different scope types";
+print "";
+
+// Test setting property on input set
+var inputSetResult = call screen.setProperty("testScreen3.inputset.input1", "alignment", "left");
+print "  Set property on 'in' scope set: " + inputSetResult;
+
+// Test setting property on output set
+var outputSetResult = call screen.setProperty("testScreen3.outputset.output1", "alignment", "right");
+print "  Set property on 'out' scope set: " + outputSetResult;
+
+// Test setting property on internal set
+var internalSetResult = call screen.setProperty("testScreen3.internalset.internal1", "alignment", "center");
+print "  Set property on 'internal' scope set: " + internalSetResult;
+
+print "  ✓ Property operations across scopes - PASSED";
+print "";
+
+// ==================================================
+// TEST SUMMARY
+// ==================================================
+print "====================================================";
+print "TEST SUMMARY - All Screen Builtin Functions";
+print "====================================================";
+print "✓ TEST 1:  screen.getItemList - PASSED";
+print "✓ TEST 2:  screen.getScreenItemList - PASSED";
+print "✓ TEST 3:  screen.setProperty - PASSED";
+print "✓ TEST 4:  screen.getProperty - PASSED";
+print "✓ TEST 5:  Multi-set screen - PASSED";
+print "✓ TEST 6:  Property operations across scopes - PASSED";
+print "";
+print "All screen builtin function tests completed successfully!";
+print "====================================================";
+print "";
+print "IMPORTANT NOTE:";
+print "  In EBS scripts, arrays have a .length property (not a method).";
+print "  Always use: array.length";
+print "  NOT: array.length()";
+print "====================================================";

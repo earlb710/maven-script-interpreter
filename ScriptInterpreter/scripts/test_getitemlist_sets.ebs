@@ -36,12 +36,12 @@ if (itemList == null) {
     print "ERROR: screen.getItemList returned null!";
 } else {
     print "SUCCESS: Got item list";
-    print "Number of items: " + itemList.length();
+    print "Number of items: " + itemList.length;
     
-    if (itemList.length() > 0) {
+    if (itemList.length > 0) {
         print "Items:";
         var i:int = 0;
-        while (i < itemList.length()) {
+        while (i < itemList.length) {
             print "  [" + i + "] " + itemList[i];
             i = i + 1;
         }
