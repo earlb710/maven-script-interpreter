@@ -461,6 +461,9 @@ public class EbsTab extends Tab {
                 e.consume();
             }
         });
+        
+        // Setup find listeners once during initialization
+        setupFindListeners();
 
         dispArea.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
             if (e.isControlDown() && e.getCode() == KeyCode.F) {
@@ -726,6 +729,60 @@ public class EbsTab extends Tab {
         }
     }
 
+    // Setup find bar listeners once during initialization
+    private void setupFindListeners() {
+        // Live search when typing in find field
+        findField.textProperty().addListener((obs, o, n) -> {
+            Platform.runLater(() -> {
+                runSearch();
+            });
+        });
+        
+        // Re-search when checkboxes change
+        chkCase.selectedProperty().addListener((obs, o, n) -> {
+            Platform.runLater(() -> {
+                runSearch();
+            });
+        });
+        chkWord.selectedProperty().addListener((obs, o, n) -> {
+            Platform.runLater(() -> {
+                runSearch();
+            });
+        });
+        chkRegex.selectedProperty().addListener((obs, o, n) -> {
+            Platform.runLater(() -> {
+                runSearch();
+            });
+        });
+        
+        // Button actions
+        btnNext.setOnAction(e -> {
+            Platform.runLater(() -> {
+                gotoNext();
+            });
+        });
+        btnPrev.setOnAction(e -> {
+            Platform.runLater(() -> {
+                gotoPrev();
+            });
+        });
+        btnReplace.setOnAction(e -> {
+            Platform.runLater(() -> {
+                replaceOne();
+            });
+        });
+        btnReplaceAll.setOnAction(e -> {
+            Platform.runLater(() -> {
+                replaceAll();
+            });
+        });
+        btnClose.setOnAction(e -> {
+            Platform.runLater(() -> {
+                hideFind();
+            });
+        });
+    }
+
     // Public method to show find bar from menu
     public void showFindFromMenu(boolean withReplace) {
         dispArea.requestFocus();
@@ -755,62 +812,6 @@ public class EbsTab extends Tab {
         }
         
         Platform.runLater(() -> findField.requestFocus());
-
-        // live search when typing
-        findField.textProperty().addListener(
-                (obs, o, n) -> {
-                    Platform.runLater(() -> {
-                        runSearch();
-                    });
-                }
-        );
-        chkCase.selectedProperty().addListener(
-                (obs, o, n) -> {
-                    Platform.runLater(() -> {
-                        runSearch();
-                    });
-                }
-        );
-        chkWord.selectedProperty().addListener(
-                (obs, o, n) -> {
-                    Platform.runLater(() -> {
-                        runSearch();
-                    });
-                }
-        );
-        chkRegex.selectedProperty().addListener(
-                (obs, o, n) -> {
-                    Platform.runLater(() -> {
-                        runSearch();
-                    });
-                }
-        );
-
-        btnNext.setOnAction(e -> {
-            Platform.runLater(() -> {
-                gotoNext();
-            });
-        });
-        btnPrev.setOnAction(e -> {
-            Platform.runLater(() -> {
-                gotoPrev();
-            });
-        });
-        btnReplace.setOnAction(e -> {
-            Platform.runLater(() -> {
-                replaceOne();
-            });
-        });
-        btnReplaceAll.setOnAction(e -> {
-            Platform.runLater(() -> {
-                replaceAll();
-            });
-        });
-        btnClose.setOnAction(e -> {
-            Platform.runLater(() -> {
-                hideFind();
-            });
-        });
     }
 
     private void hideFind() {
@@ -866,11 +867,18 @@ public class EbsTab extends Tab {
             return;
         }
 
-        // Find the first match at or after the current cursor position
-        int cursorPos = dispArea.getCaretPosition();
+        // Find the first match at or after the current position
+        // Use selection start if there's a selection, otherwise use caret position
+        int searchStartPos;
+        if (dispArea.getSelection().getLength() > 0) {
+            searchStartPos = dispArea.getSelection().getStart();
+        } else {
+            searchStartPos = dispArea.getCaretPosition();
+        }
+        
         currentIndex = 0;
         for (int i = 0; i < hits.size(); i++) {
-            if (hits.get(i)[0] >= cursorPos) {
+            if (hits.get(i)[0] >= searchStartPos) {
                 currentIndex = i;
                 break;
             }
