@@ -162,7 +162,7 @@
 }
 
 .screen-area-tabpane .tab-content-area {
-    -fx-background-color: #ffffff;
+    -fx-background-color: #e0e0e0;
     -fx-padding: 0;
     -fx-border-color: #d0d0d0 #808080 #808080 #d0d0d0;
     -fx-border-width: 2;
