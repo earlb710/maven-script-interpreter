@@ -222,8 +222,12 @@ public class ScreenFactory {
         // Add focus listeners to all bound controls to update status bar
         setupStatusBarUpdates(allBoundControls, statusBar, metadataProvider, screenName);
         
-        // Wrap in BorderPane to add status bar at bottom
+        // Create menu bar for the screen
+        javafx.scene.control.MenuBar menuBar = createScreenMenuBar(stage);
+        
+        // Wrap in BorderPane to add menu bar at top and status bar at bottom
         BorderPane screenRoot = new BorderPane();
+        screenRoot.setTop(menuBar);
         screenRoot.setCenter(scrollPane);
         screenRoot.setBottom(statusBar);
         
@@ -294,6 +298,31 @@ public class ScreenFactory {
                 }
             });
         }
+    }
+    
+    /**
+     * Create a menu bar for screen windows with Edit menu containing Close item
+     */
+    private static javafx.scene.control.MenuBar createScreenMenuBar(Stage stage) {
+        javafx.scene.control.MenuBar menuBar = new javafx.scene.control.MenuBar();
+        
+        // Create Edit menu
+        javafx.scene.control.Menu editMenu = new javafx.scene.control.Menu("Edit");
+        
+        // Close menu item with Ctrl+W
+        javafx.scene.control.MenuItem closeItem = new javafx.scene.control.MenuItem("Close");
+        closeItem.setAccelerator(new javafx.scene.input.KeyCodeCombination(
+            javafx.scene.input.KeyCode.W, 
+            javafx.scene.input.KeyCombination.CONTROL_DOWN));
+        closeItem.setOnAction(e -> {
+            // Close the screen window
+            stage.close();
+        });
+        
+        editMenu.getItems().add(closeItem);
+        menuBar.getMenus().add(editMenu);
+        
+        return menuBar;
     }
 
     /**

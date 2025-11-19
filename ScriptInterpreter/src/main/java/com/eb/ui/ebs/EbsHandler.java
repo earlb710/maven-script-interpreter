@@ -108,5 +108,15 @@ public class EbsHandler implements Handler {
     public TabContext getSelectedTabContext() {
         return tabHandler.getSelectedTabContext();
     }
+    
+    /**
+     * Close the given tab if it's closable
+     * @param tab The tab to close
+     */
+    public void closeTab(Tab tab) {
+        if (tabHandler != null) {
+            tabHandler.closeTab(tab);
+        }
+    }
 
 }
