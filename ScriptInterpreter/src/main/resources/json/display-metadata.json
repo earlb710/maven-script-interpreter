@@ -130,6 +130,11 @@
     "onClick": {
       "type": "string",
       "description": "onClick event handler - EBS code to execute when button is clicked"
+    },
+    "showSliderValue": {
+      "type": "boolean",
+      "description": "Whether to show the current value label for sliders (only applies to slider controls)",
+      "default": false
     }
   },
   "examples": [
@@ -213,6 +218,13 @@
       "type": "button",
       "labelText": "Submit",
       "onClick": "handleSubmit()"
+    },
+    {
+      "type": "slider",
+      "min": 0,
+      "max": 100,
+      "labelText": "Volume:",
+      "showSliderValue": true
     }
   ]
 }

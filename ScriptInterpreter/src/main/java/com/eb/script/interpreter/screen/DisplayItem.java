@@ -58,6 +58,8 @@ public class DisplayItem {
     Boolean itemItalic;
     // onClick event handler - EBS code to execute when button is clicked
     String onClick;
+    // Whether to show the current value label for sliders
+    Boolean showSliderValue;
     
     @Override
     public String toString() {

@@ -52,6 +52,11 @@ public class AreaItemFactory {
         // Apply control size and font styling
         applyControlSizeAndFont(control, metadata, item);
         
+        // If this is a slider and showSliderValue is true, wrap it with a value label
+        if (itemType == ItemType.SLIDER && metadata.showSliderValue != null && metadata.showSliderValue) {
+            return createSliderWithValueLabel(control, metadata);
+        }
+        
         return control;
     }
 
@@ -570,6 +575,93 @@ public class AreaItemFactory {
         
         if (styleBuilder.length() > 0) {
             label.setStyle(styleBuilder.toString());
+        }
+    }
+    
+    /**
+     * Creates a slider wrapped in an HBox with a value label that displays the current slider value.
+     * The label is positioned after the slider and updates dynamically as the slider changes.
+     * 
+     * @param sliderNode The slider control node
+     * @param metadata The DisplayItem metadata for styling information
+     * @return An HBox containing the slider and value label
+     */
+    private static Node createSliderWithValueLabel(Node sliderNode, DisplayItem metadata) {
+        if (!(sliderNode instanceof javafx.scene.control.Slider)) {
+            return sliderNode; // Safety check - return as-is if not a slider
+        }
+        
+        javafx.scene.control.Slider slider = (javafx.scene.control.Slider) sliderNode;
+        
+        // Create the value label
+        javafx.scene.control.Label valueLabel = new javafx.scene.control.Label();
+        
+        // Initialize with current slider value
+        updateSliderValueLabel(valueLabel, slider.getValue());
+        
+        // Apply styling to the value label to match item styling
+        StringBuilder valueLabelStyle = new StringBuilder();
+        valueLabelStyle.append("-fx-padding: 0 0 0 10; "); // Left padding to separate from slider
+        
+        // Apply font size from metadata
+        if (metadata != null && metadata.itemFontSize != null && !metadata.itemFontSize.isEmpty()) {
+            valueLabelStyle.append("-fx-font-size: ").append(metadata.itemFontSize).append("; ");
+        }
+        
+        // Apply text color from metadata
+        if (metadata != null && metadata.itemColor != null && !metadata.itemColor.isEmpty()) {
+            valueLabelStyle.append("-fx-text-fill: ").append(metadata.itemColor).append("; ");
+        }
+        
+        // Apply bold from metadata
+        if (metadata != null && metadata.itemBold != null && metadata.itemBold) {
+            valueLabelStyle.append("-fx-font-weight: bold; ");
+        }
+        
+        // Apply italic from metadata
+        if (metadata != null && metadata.itemItalic != null && metadata.itemItalic) {
+            valueLabelStyle.append("-fx-font-style: italic; ");
+        }
+        
+        valueLabel.setStyle(valueLabelStyle.toString());
+        valueLabel.setMinWidth(50); // Minimum width for the value label
+        
+        // Add listener to update the label when slider value changes
+        slider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            updateSliderValueLabel(valueLabel, newValue.doubleValue());
+        });
+        
+        // Store the value label as a property on the slider for later access
+        slider.getProperties().put("valueLabel", valueLabel);
+        
+        // Create HBox container
+        javafx.scene.layout.HBox container = new javafx.scene.layout.HBox(5);
+        container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        container.getChildren().addAll(slider, valueLabel);
+        
+        // Make container transparent for picking so tooltips work properly
+        container.setPickOnBounds(false);
+        
+        // Copy user data and properties from slider to container so they're accessible
+        container.setUserData(slider.getUserData());
+        container.getProperties().putAll(slider.getProperties());
+        
+        return container;
+    }
+    
+    /**
+     * Updates the value label with the current slider value.
+     * Formats the value as an integer if it's a whole number, otherwise as a decimal.
+     * 
+     * @param label The label to update
+     * @param value The slider value
+     */
+    private static void updateSliderValueLabel(javafx.scene.control.Label label, double value) {
+        // Format as integer if it's a whole number, otherwise show one decimal place
+        if (value == Math.floor(value)) {
+            label.setText(String.format("%d", (int) value));
+        } else {
+            label.setText(String.format("%.1f", value));
         }
     }
 }

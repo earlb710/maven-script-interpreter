@@ -1,0 +1,141 @@
+// Test Script: Slider Value Display
+// Description: Tests the showSliderValue feature for sliders
+// Date: 2025-11-19
+
+screen sliderValueScreen = {
+    "title": "Slider Value Display Test",
+    "width": 700,
+    "height": 600,
+    "vars": [
+        {
+            "name": "volume",
+            "type": "int",
+            "default": 50,
+            "display": {
+                "type": "slider",
+                "min": 0,
+                "max": 100,
+                "labelText": "Volume (with value):",
+                "showSliderValue": true
+            }
+        },
+        {
+            "name": "brightness",
+            "type": "int",
+            "default": 75,
+            "display": {
+                "type": "slider",
+                "min": 0,
+                "max": 100,
+                "labelText": "Brightness (without value):",
+                "showSliderValue": false
+            }
+        },
+        {
+            "name": "temperature",
+            "type": "int",
+            "default": 20,
+            "display": {
+                "type": "slider",
+                "min": -10,
+                "max": 50,
+                "labelText": "Temperature °C (with value):",
+                "showSliderValue": true
+            }
+        },
+        {
+            "name": "rating",
+            "type": "int",
+            "default": 5,
+            "display": {
+                "type": "slider",
+                "min": 1,
+                "max": 10,
+                "labelText": "Rating 1-10 (default, no value):"
+            }
+        },
+        {
+            "name": "opacity",
+            "type": "int",
+            "default": 80,
+            "display": {
+                "type": "slider",
+                "min": 0,
+                "max": 100,
+                "labelText": "Opacity % (with value):",
+                "showSliderValue": true,
+                "itemFontSize": "16px",
+                "itemColor": "#0066cc",
+                "itemBold": true
+            }
+        },
+        {
+            "name": "speed",
+            "type": "int",
+            "default": 30,
+            "display": {
+                "type": "slider",
+                "min": 0,
+                "max": 100,
+                "labelText": "Speed (with styled value):",
+                "showSliderValue": true,
+                "itemFontSize": "14px",
+                "itemColor": "#008800",
+                "itemItalic": true
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "20",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "volume",
+                    "varRef": "volume",
+                    "sequence": 1
+                },
+                {
+                    "name": "brightness",
+                    "varRef": "brightness",
+                    "sequence": 2
+                },
+                {
+                    "name": "temperature",
+                    "varRef": "temperature",
+                    "sequence": 3
+                },
+                {
+                    "name": "rating",
+                    "varRef": "rating",
+                    "sequence": 4
+                },
+                {
+                    "name": "opacity",
+                    "varRef": "opacity",
+                    "sequence": 5
+                },
+                {
+                    "name": "speed",
+                    "varRef": "speed",
+                    "sequence": 6
+                }
+            ]
+        }
+    ]
+};
+
+screen.show(sliderValueScreen);
+
+println("Slider Value Display Test Screen Loaded!");
+println("Try moving the sliders to see the value display feature.");
+println("");
+println("Note the differences:");
+println("- 'Volume' slider shows current value");
+println("- 'Brightness' slider has showSliderValue:false, no value shown");
+println("- 'Temperature' slider shows value (including negative values)");
+println("- 'Rating' slider has no showSliderValue property, defaults to false");
+println("- 'Opacity' slider shows value with custom styling (blue, bold)");
+println("- 'Speed' slider shows value with custom styling (green, italic)");
