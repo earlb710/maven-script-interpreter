@@ -285,12 +285,12 @@ public class EbsMenu extends MenuBar {
                     }
                 }
                 
-                // Add separator and "Close all windows" option at the bottom
+                // Add separator and "Close all screens" option at the bottom
                 screensMenu.getItems().add(new SeparatorMenuItem());
-                MenuItem closeAllItem = new MenuItem("Close all windows");
+                MenuItem closeAllItem = new MenuItem("Close all screens");
                 closeAllItem.setOnAction(e -> {
                     javafx.application.Platform.runLater(() -> {
-                        // Close all screens
+                        // Permanently close all screens (not just hide them)
                         for (String screenName : screenOrder) {
                             javafx.stage.Stage stage = screens.get(screenName);
                             if (stage != null) {
