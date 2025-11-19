@@ -273,6 +273,26 @@ public class InterpreterContext {
         return GLOBAL_SCREEN_CREATION_ORDER;
     }
 
+    /**
+     * Static accessor for global screens map - can be called without instance.
+     * This allows direct access to all screens from anywhere in the application.
+     *
+     * @return the global screens map
+     */
+    public static ConcurrentHashMap<String, Stage> getGlobalScreens() {
+        return GLOBAL_SCREENS;
+    }
+
+    /**
+     * Static accessor for global screen creation order - can be called without instance.
+     * This allows direct access to screen order from anywhere in the application.
+     *
+     * @return the global screen creation order list
+     */
+    public static List<String> getGlobalScreenCreationOrder() {
+        return GLOBAL_SCREEN_CREATION_ORDER;
+    }
+
     public void clear() {
         GLOBAL_SCREENS.clear();
         GLOBAL_SCREEN_THREADS.clear();

@@ -250,19 +250,10 @@ public class EbsMenu extends MenuBar {
     public final void refreshScreensMenu() {
         screensMenu.getItems().clear();
         
-        // Get the InterpreterContext from the environment
+        // Access global static maps directly - no need to go through interpreter
         try {
-            com.eb.script.interpreter.Interpreter interpreter = handler.env.getCurrentInterpreter();
-            if (interpreter == null) {
-                MenuItem none = new MenuItem("(No interpreter running)");
-                none.setDisable(true);
-                screensMenu.getItems().add(none);
-                return;
-            }
-            
-            com.eb.script.interpreter.InterpreterContext context = interpreter.getContext();
-            java.util.List<String> screenOrder = context.getScreenCreationOrder();
-            java.util.concurrent.ConcurrentHashMap<String, javafx.stage.Stage> screens = context.getScreens();
+            java.util.List<String> screenOrder = com.eb.script.interpreter.InterpreterContext.getGlobalScreenCreationOrder();
+            java.util.concurrent.ConcurrentHashMap<String, javafx.stage.Stage> screens = com.eb.script.interpreter.InterpreterContext.getGlobalScreens();
             
             if (screenOrder.isEmpty()) {
                 MenuItem none = new MenuItem("(No screens created)");
@@ -295,9 +286,10 @@ public class EbsMenu extends MenuBar {
                 }
             }
         } catch (Exception e) {
-            MenuItem error = new MenuItem("(Error accessing screens)");
+            MenuItem error = new MenuItem("(Error accessing screens: " + e.getMessage() + ")");
             error.setDisable(true);
             screensMenu.getItems().add(error);
+            e.printStackTrace(); // Log the error for debugging
         }
     }
 
