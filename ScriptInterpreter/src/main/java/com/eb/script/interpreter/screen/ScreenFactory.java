@@ -240,7 +240,7 @@ public class ScreenFactory {
     
     /**
      * Setup focus listeners on all controls to update the status bar
-     * with tooltip and min/max information
+     * with item tooltip and min/max information
      */
     private static void setupStatusBarUpdates(List<Node> controls, 
             com.eb.ui.ebs.StatusBar statusBar,
@@ -256,13 +256,14 @@ public class ScreenFactory {
                         // Extract item name from "screenName.itemName"
                         String itemName = fullRef.substring(screenName.length() + 1);
                         
-                        // Get metadata for this item
+                        // Update message with tooltip (prefer tooltip over promptHelp)
+                        String tooltip = (String) control.getProperties().get("itemTooltip");
+                        String message = tooltip != null ? tooltip : "";
+                        statusBar.setMessage(message);
+                        
+                        // Get metadata for min/max info
                         DisplayItem metadata = metadataProvider.apply(screenName, itemName);
                         if (metadata != null) {
-                            // Update message with promptHelp/tooltip
-                            String message = metadata.promptHelp != null ? metadata.promptHelp : "";
-                            statusBar.setMessage(message);
-                            
                             // Update custom with min/max info
                             String minMaxInfo = "";
                             if (metadata.min != null && metadata.max != null) {
@@ -359,6 +360,11 @@ public class ScreenFactory {
                 // Format: "screenName.itemName"
                 if (item.name != null && !item.name.isEmpty()) {
                     control.setUserData(screenName + "." + item.name);
+                }
+                
+                // Store tooltip in control's properties for status bar display
+                if (item.tooltip != null && !item.tooltip.isEmpty()) {
+                    control.getProperties().put("itemTooltip", item.tooltip);
                 }
 
                 // If labelText is specified, wrap the control with a label
