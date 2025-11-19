@@ -22,7 +22,6 @@ public class ScreenDefinition {
     
     // Complex screen creation parameters
     private List<AreaDefinition> areas;
-    private MetadataProvider metadataProvider;
     private ConcurrentHashMap<String, Object> screenVars;
     private ConcurrentHashMap<String, DataType> varTypes;
     private ScreenFactory.OnClickHandler onClickHandler;
@@ -115,7 +114,6 @@ public class ScreenDefinition {
                 width,
                 height,
                 areas,
-                metadataProvider,
                 screenVars,
                 varTypes,
                 onClickHandler,
@@ -191,15 +189,6 @@ public class ScreenDefinition {
      */
     public void setAreas(List<AreaDefinition> areas) {
         this.areas = areas;
-    }
-    
-    /**
-     * Sets the metadata provider for variable display information
-     * 
-     * @param metadataProvider Provider to retrieve DisplayItem for variables
-     */
-    public void setMetadataProvider(MetadataProvider metadataProvider) {
-        this.metadataProvider = metadataProvider;
     }
     
     /**
@@ -304,15 +293,6 @@ public class ScreenDefinition {
     }
     
     /**
-     * Gets the metadata provider
-     * 
-     * @return The metadata provider
-     */
-    public MetadataProvider getMetadataProvider() {
-        return metadataProvider;
-    }
-    
-    /**
      * Gets the screen variables map
      * 
      * @return The screen variables ConcurrentHashMap
@@ -358,7 +338,6 @@ public class ScreenDefinition {
                 ", singleton=" + singleton +
                 ", instances=" + instanceCounter.get() +
                 ", hasAreas=" + (areas != null && !areas.isEmpty()) +
-                ", hasMetadataProvider=" + (metadataProvider != null) +
                 ", hasScreenVars=" + (screenVars != null) +
                 ", hasContext=" + (context != null) +
                 '}';
