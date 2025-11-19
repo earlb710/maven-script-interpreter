@@ -154,8 +154,12 @@
 }
 
 .screen-area-tabpane .tab-content-area {
-    -fx-background-color: transparent;
+    -fx-background-color: #ffffff;
     -fx-padding: 0;
+    -fx-border-color: #d0d0d0 #808080 #808080 #d0d0d0;
+    -fx-border-width: 2;
+    -fx-border-insets: 0;
+    -fx-effect: innershadow(gaussian, rgba(255, 255, 255, 0.6), 3, 0, 1, 1);
 }
 
 /* Individual Tab */
