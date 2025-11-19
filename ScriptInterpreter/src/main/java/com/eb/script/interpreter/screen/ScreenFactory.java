@@ -342,9 +342,14 @@ public class ScreenFactory {
             // Add items to container based on container type
             for (AreaItem item : sortedItems) {
                 // Get metadata for the item
-                DisplayItem metadata = item.displayItem;
-                if (metadata == null && item.varRef != null && metadataProvider != null) {
+                // Start with var-level metadata (from vars section), then merge item-level metadata (from area items display)
+                DisplayItem metadata = null;
+                if (item.varRef != null && metadataProvider != null) {
                     metadata = metadataProvider.apply(screenName, item.varRef);
+                }
+                // If item has its own display metadata, merge it (item-level overwrites var-level)
+                if (item.displayItem != null) {
+                    metadata = mergeDisplayMetadata(metadata, item.displayItem);
                 }
 
                 // Create the item using AreaItemFactory
@@ -1156,6 +1161,85 @@ public class ScreenFactory {
         return metadata;
     }
 
+    /**
+     * Merges two DisplayItem metadata objects.
+     * The overlay metadata takes precedence over base metadata for non-null fields.
+     * 
+     * @param base The base metadata (typically from var definition)
+     * @param overlay The overlay metadata (typically from area item display)
+     * @return Merged metadata with overlay values taking precedence
+     */
+    private static DisplayItem mergeDisplayMetadata(DisplayItem base, DisplayItem overlay) {
+        // If no base, return overlay
+        if (base == null) {
+            return overlay;
+        }
+        // If no overlay, return base
+        if (overlay == null) {
+            return base;
+        }
+        
+        // Create a new DisplayItem with base values
+        DisplayItem merged = new DisplayItem();
+        
+        // Copy all fields from base first
+        merged.itemType = base.itemType;
+        merged.type = base.type;
+        merged.cssClass = base.cssClass;
+        merged.mandatory = base.mandatory;
+        merged.caseFormat = base.caseFormat;
+        merged.min = base.min;
+        merged.max = base.max;
+        merged.style = base.style;
+        merged.screenName = base.screenName;
+        merged.alignment = base.alignment;
+        merged.pattern = base.pattern;
+        merged.promptHelp = base.promptHelp;
+        merged.labelText = base.labelText;
+        merged.labelTextAlignment = base.labelTextAlignment;
+        merged.options = base.options;
+        merged.labelColor = base.labelColor;
+        merged.labelBold = base.labelBold;
+        merged.labelItalic = base.labelItalic;
+        merged.labelFontSize = base.labelFontSize;
+        merged.itemFontSize = base.itemFontSize;
+        merged.maxLength = base.maxLength;
+        merged.itemColor = base.itemColor;
+        merged.itemBold = base.itemBold;
+        merged.itemItalic = base.itemItalic;
+        merged.onClick = base.onClick;
+        
+        // Override with non-null overlay values
+        if (overlay.itemType != null) merged.itemType = overlay.itemType;
+        if (overlay.type != null) merged.type = overlay.type;
+        if (overlay.cssClass != null) merged.cssClass = overlay.cssClass;
+        // Always use overlay's mandatory flag if it's been explicitly set (even if false)
+        merged.mandatory = overlay.mandatory;
+        if (overlay.caseFormat != null) merged.caseFormat = overlay.caseFormat;
+        if (overlay.min != null) merged.min = overlay.min;
+        if (overlay.max != null) merged.max = overlay.max;
+        if (overlay.style != null) merged.style = overlay.style;
+        if (overlay.screenName != null) merged.screenName = overlay.screenName;
+        if (overlay.alignment != null) merged.alignment = overlay.alignment;
+        if (overlay.pattern != null) merged.pattern = overlay.pattern;
+        if (overlay.promptHelp != null) merged.promptHelp = overlay.promptHelp;
+        if (overlay.labelText != null) merged.labelText = overlay.labelText;
+        if (overlay.labelTextAlignment != null) merged.labelTextAlignment = overlay.labelTextAlignment;
+        if (overlay.options != null) merged.options = overlay.options;
+        if (overlay.labelColor != null) merged.labelColor = overlay.labelColor;
+        if (overlay.labelBold != null) merged.labelBold = overlay.labelBold;
+        if (overlay.labelItalic != null) merged.labelItalic = overlay.labelItalic;
+        if (overlay.labelFontSize != null) merged.labelFontSize = overlay.labelFontSize;
+        if (overlay.itemFontSize != null) merged.itemFontSize = overlay.itemFontSize;
+        if (overlay.maxLength != null) merged.maxLength = overlay.maxLength;
+        if (overlay.itemColor != null) merged.itemColor = overlay.itemColor;
+        if (overlay.itemBold != null) merged.itemBold = overlay.itemBold;
+        if (overlay.itemItalic != null) merged.itemItalic = overlay.itemItalic;
+        if (overlay.onClick != null) merged.onClick = overlay.onClick;
+        
+        return merged;
+    }
+
     // Helper methods for safe value extraction from Maps
     private static String getStringValue(Map<String, Object> map, String key, String defaultValue) {
         if (map.containsKey(key.toLowerCase())) {
@@ -1221,9 +1305,13 @@ public class ScreenFactory {
         javafx.scene.text.Text measuringText = new javafx.scene.text.Text();
 
         for (AreaItem item : items) {
-            DisplayItem metadata = item.displayItem;
-            if (metadata == null && item.varRef != null && metadataProvider != null) {
+            // Get metadata with same merge logic as createAreaWithItems
+            DisplayItem metadata = null;
+            if (item.varRef != null && metadataProvider != null) {
                 metadata = metadataProvider.apply(screenName, item.varRef);
+            }
+            if (item.displayItem != null) {
+                metadata = mergeDisplayMetadata(metadata, item.displayItem);
             }
 
             // Only measure labels for controls that will be wrapped (not Label or Button controls)
