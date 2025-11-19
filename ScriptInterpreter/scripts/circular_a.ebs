@@ -1,0 +1,10 @@
+// circular_a.ebs - File A that imports B
+print "Loading file A...";
+
+import "circular_b.ebs";
+
+funcA() {
+    print "Function A executed";
+}
+
+print "File A loaded successfully";

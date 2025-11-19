@@ -1,0 +1,19 @@
+// test_deep_import_chain.ebs
+// Tests a deep import chain A->B->C->D (no cycle, should succeed)
+// Dependency graph: Test -> deep_import_a -> deep_import_b -> deep_import_c -> deep_import_d
+
+print "=== Testing Deep Import Chain (No Cycle) ===";
+print "";
+print "This tests a deep chain: A -> B -> C -> D";
+print "";
+
+print "Importing deep_import_a.ebs (which will trigger chain)...";
+import "deep_import_a.ebs";
+
+print "";
+print "Testing function calls through the chain...";
+call funcDeepA();
+
+print "";
+print "SUCCESS: Deep import chain (4 levels) works correctly!";
+print "=== Test Completed ===";

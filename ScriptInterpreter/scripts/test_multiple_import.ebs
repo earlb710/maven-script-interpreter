@@ -1,0 +1,19 @@
+// test_multiple_import.ebs - Test that the same file can be imported multiple times (non-circular)
+print "=== Testing Multiple Non-Circular Imports ===";
+print "";
+
+print "First import of utils.ebs:";
+import "utils.ebs";
+
+print "";
+print "Second import of utils.ebs:";
+import "utils.ebs";
+
+print "";
+print "Testing imported function...";
+var result: int = call multiplyByTwo(7);
+print "multiplyByTwo(7) = " + result;
+
+print "";
+print "SUCCESS: Multiple non-circular imports work!";
+print "=== Test Completed ===";

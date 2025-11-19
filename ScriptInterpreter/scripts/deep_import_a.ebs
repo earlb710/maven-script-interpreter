@@ -1,0 +1,11 @@
+// deep_import_a.ebs - First file in a deep chain A->B->C->D (no cycle)
+print "Loading deep_import_a...";
+
+import "deep_import_b.ebs";
+
+funcDeepA() {
+    print "Function from deep_import_a";
+    call funcDeepB();
+}
+
+print "deep_import_a loaded";

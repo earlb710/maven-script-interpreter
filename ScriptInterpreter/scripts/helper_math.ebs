@@ -1,0 +1,18 @@
+// helper_math.ebs - Math helper functions
+// This file is imported by other test files
+
+print "Loading math helpers...";
+
+add(a: int, b: int) return int {
+    return a + b;
+}
+
+subtract(a: int, b: int) return int {
+    return a - b;
+}
+
+multiply(a: int, b: int) return int {
+    return a * b;
+}
+
+print "Math helpers loaded";
