@@ -43,7 +43,7 @@ public class InterpreterContext {
     private final Map<String, Runnable> screenRefreshCallbacks = new ConcurrentHashMap<>();
     private final Map<String, List<javafx.scene.Node>> screenBoundControls = new ConcurrentHashMap<>();
     private final Map<String, com.eb.ui.ebs.StatusBar> screenStatusBars = new ConcurrentHashMap<>();
-    private final Deque<String> importStack = new java.util.ArrayDeque<>();  // Track currently importing files to detect circular imports
+    private final Set<String> importedFiles = ConcurrentHashMap.newKeySet();  // Global list of all imported files to prevent circular imports and duplicate imports
 
     // New storage structures for the refactored variable sets
     private final Map<String, Map<String, VarSet>> screenVarSets = new ConcurrentHashMap<>(); // screenName -> (setName -> VarSet)
@@ -157,12 +157,12 @@ public class InterpreterContext {
     }
 
     /**
-     * Get the import stack for tracking currently importing files.
+     * Get the set of imported files (global cache to prevent circular and duplicate imports).
      *
-     * @return the import stack
+     * @return the set of imported files
      */
-    public Deque<String> getImportStack() {
-        return importStack;
+    public Set<String> getImportedFiles() {
+        return importedFiles;
     }
 
     /**

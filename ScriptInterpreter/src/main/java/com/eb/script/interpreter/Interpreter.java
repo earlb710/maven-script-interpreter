@@ -1220,54 +1220,36 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             
             String importPathStr = normalizedPath.toString();
             
-            // Check for circular import
-            if (context.getImportStack().contains(importPathStr)) {
-                // Build a readable circular import chain message
-                StringBuilder chain = new StringBuilder();
-                boolean foundStart = false;
-                for (String file : context.getImportStack()) {
-                    if (file.equals(importPathStr)) {
-                        foundStart = true;
-                    }
-                    if (foundStart) {
-                        if (chain.length() > 0) {
-                            chain.append(" -> ");
-                        }
-                        chain.append(Path.of(file).getFileName().toString());
-                    }
+            // Check if file has already been imported (prevents circular imports and duplicate imports)
+            if (context.getImportedFiles().contains(importPathStr)) {
+                if (context.getOutput() != null) {
+                    context.getOutput().printlnOk("Skipped (already imported): " + stmt.filename);
                 }
-                chain.append(" -> ").append(Path.of(importPathStr).getFileName().toString());
-                
-                throw error(stmt.getLine(), "Circular import detected: " + chain.toString());
+                return;  // Skip re-importing
             }
             
-            // Push current import onto the stack
-            context.getImportStack().push(importPathStr);
+            // Add to imported files set before processing to prevent circular imports
+            context.getImportedFiles().add(importPathStr);
             
-            try {
-                // Read and parse the imported file
-                String importedScript = Files.readString(importPath, StandardCharsets.UTF_8);
-                RuntimeContext importContext = Parser.parse(importPath.getFileName().toString(), importedScript);
-                
-                // Execute the imported script in the current environment
-                for (Statement s : importContext.statements) {
-                    s.accept(this);
+            // Read and parse the imported file
+            String importedScript = Files.readString(importPath, StandardCharsets.UTF_8);
+            RuntimeContext importContext = Parser.parse(importPath.getFileName().toString(), importedScript);
+            
+            // Execute the imported script in the current environment
+            for (Statement s : importContext.statements) {
+                s.accept(this);
+            }
+            
+            // Register imported blocks/functions in the current runtime context
+            if (importContext.blocks != null && currentRuntime != null) {
+                for (Map.Entry<String, BlockStatement> entry : importContext.blocks.entrySet()) {
+                    // Store blocks so they can be called later
+                    currentRuntime.blocks.put(entry.getKey(), entry.getValue());
                 }
-                
-                // Register imported blocks/functions in the current runtime context
-                if (importContext.blocks != null && currentRuntime != null) {
-                    for (Map.Entry<String, BlockStatement> entry : importContext.blocks.entrySet()) {
-                        // Store blocks so they can be called later
-                        currentRuntime.blocks.put(entry.getKey(), entry.getValue());
-                    }
-                }
-                
-                if (context.getOutput() != null) {
-                    context.getOutput().printlnOk("Imported: " + stmt.filename);
-                }
-            } finally {
-                // Always pop from import stack when done, even if an error occurred
-                context.getImportStack().pop();
+            }
+            
+            if (context.getOutput() != null) {
+                context.getOutput().printlnOk("Imported: " + stmt.filename);
             }
         } catch (IOException e) {
             throw error(stmt.getLine(), "Failed to read import file: " + e.getMessage());
