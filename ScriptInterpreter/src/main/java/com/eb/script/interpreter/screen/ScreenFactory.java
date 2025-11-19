@@ -1007,6 +1007,12 @@ public class ScreenFactory {
         
         // Extract displayName for UI labels (e.g., tab labels)
         area.displayName = getStringValue(areaDef, "displayName", null);
+        
+        // Extract spacing between children (for containers that support it)
+        area.spacing = getStringValue(areaDef, "spacing", null);
+        
+        // Extract padding inside the area
+        area.padding = getStringValue(areaDef, "padding", null);
 
         // Process items in the area
         if (areaDef.containsKey("items")) {
