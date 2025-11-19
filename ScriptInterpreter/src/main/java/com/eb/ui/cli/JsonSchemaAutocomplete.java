@@ -88,10 +88,18 @@ public class JsonSchemaAutocomplete {
             suggestions.addAll(getPropertySuggestions(context));
         } else if (context.expectingValue) {
             // We're expecting a value after a colon
-            // Add builtin suggestions (with # prefix)
-            suggestions.addAll(getBuiltinSuggestions());
-            // Also add enum suggestions for specific properties
-            suggestions.addAll(getEnumSuggestions(context));
+            // Check if user has typed '#' - if so, suggest builtins
+            if (partialWord.startsWith("#")) {
+                // User has typed #, suggest builtin functions
+                suggestions.addAll(getBuiltinSuggestions());
+            } else if (partialWord.isEmpty()) {
+                // No partial word yet, suggest '#' to trigger builtins and enum values
+                suggestions.add("#");
+                suggestions.addAll(getEnumSuggestions(context));
+            } else {
+                // User is typing something else, only suggest enum values
+                suggestions.addAll(getEnumSuggestions(context));
+            }
         }
         
         // Filter suggestions by partial word
