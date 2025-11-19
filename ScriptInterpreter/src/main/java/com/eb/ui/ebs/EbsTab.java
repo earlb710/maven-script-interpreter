@@ -216,9 +216,22 @@ public class EbsTab extends Tab {
         String text = dispArea.getText();
         int caretPos = dispArea.getCaretPosition();
         
-        // For JSON autocomplete, use full text to maintain context
-        // For other cases, use full text as well (editor has full context)
-        List<String> suggestions = AutocompleteSuggestions.getSuggestionsForContext(text, caretPos);
+        // For JSON autocomplete, use the full text to maintain context
+        // For other cases, just use current line (same as Console)
+        String contextText;
+        int contextCaretPos;
+        
+        if (JsonSchemaAutocomplete.looksLikeJson(text, caretPos)) {
+            // Use full text for JSON to maintain proper context
+            contextText = text;
+            contextCaretPos = caretPos;
+        } else {
+            // For non-JSON, use current line only
+            contextText = getCurrentLineText(text, caretPos);
+            contextCaretPos = getCaretPositionInCurrentLine(text, caretPos);
+        }
+        
+        List<String> suggestions = AutocompleteSuggestions.getSuggestionsForContext(contextText, contextCaretPos);
         
         if (!suggestions.isEmpty()) {
             autocompletePopup.show(dispArea, suggestions);
@@ -226,6 +239,32 @@ public class EbsTab extends Tab {
             // Hide popup if no suggestions available
             autocompletePopup.hide();
         }
+    }
+    
+    /**
+     * Get the text of the current line where the caret is positioned.
+     */
+    private String getCurrentLineText(String text, int caretPos) {
+        // Find the start of the current line (last newline before caret)
+        int lineStart = text.lastIndexOf('\n', caretPos - 1);
+        lineStart = (lineStart == -1) ? 0 : lineStart + 1;
+        
+        // Find the end of the current line (next newline after caret)
+        int lineEnd = text.indexOf('\n', caretPos);
+        lineEnd = (lineEnd == -1) ? text.length() : lineEnd;
+        
+        return text.substring(lineStart, lineEnd);
+    }
+    
+    /**
+     * Get the caret position relative to the start of the current line.
+     */
+    private int getCaretPositionInCurrentLine(String text, int caretPos) {
+        // Find the start of the current line
+        int lineStart = text.lastIndexOf('\n', caretPos - 1);
+        lineStart = (lineStart == -1) ? 0 : lineStart + 1;
+        
+        return caretPos - lineStart;
     }
     
     /**
@@ -240,7 +279,7 @@ public class EbsTab extends Tab {
         int start = caretPos;
         while (start > 0) {
             char c = text.charAt(start - 1);
-            if (Character.isLetterOrDigit(c) || c == '_' || c == '.' || c == '"') {
+            if (Character.isLetterOrDigit(c) || c == '_' || c == '.' || c == '"' || c == '#') {
                 start--;
             } else {
                 break;

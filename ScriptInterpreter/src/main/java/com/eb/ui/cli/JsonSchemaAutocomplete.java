@@ -1,6 +1,7 @@
 package com.eb.ui.cli;
 
 import com.eb.script.json.Json;
+import com.eb.script.interpreter.Builtins;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -87,7 +88,17 @@ public class JsonSchemaAutocomplete {
             suggestions.addAll(getPropertySuggestions(context));
         } else if (context.expectingValue) {
             // We're expecting a value after a colon
-            suggestions.addAll(getEnumSuggestions(context));
+            // Check if user has typed '#' - if so, suggest builtins
+            if (partialWord.startsWith("#")) {
+                // User has typed #, suggest builtin functions
+                suggestions.addAll(getBuiltinSuggestions());
+            } else if (partialWord.isEmpty()) {
+                // No partial word yet, suggest only '#' to trigger builtins
+                suggestions.add("#");
+            } else {
+                // User is typing something else, only suggest enum values
+                suggestions.addAll(getEnumSuggestions(context));
+            }
         }
         
         // Filter suggestions by partial word
@@ -118,17 +129,18 @@ public class JsonSchemaAutocomplete {
             return trimOffset;
         }
         
-        // Look for = followed by { or [
-        int equalsIndex = text.indexOf('=');
-        if (equalsIndex >= 0) {
-            // Find the { or [ after the =
+        // Search backwards for the last occurrence of = followed by { or [
+        // This handles cases like "var x = 10; screen s = {" where we want the second =
+        for (int equalsIndex = text.lastIndexOf('='); equalsIndex >= 0; equalsIndex = text.lastIndexOf('=', equalsIndex - 1)) {
+            // Find the { or [ after this =
             for (int i = equalsIndex + 1; i < text.length(); i++) {
                 char c = text.charAt(i);
                 if (c == '{' || c == '[') {
                     return i;
                 }
-                if (!Character.isWhitespace(c)) {
+                if (!Character.isWhitespace(c) && c != '\n' && c != '\r') {
                     // Found a non-whitespace character that's not { or [
+                    // This = is not followed by JSON, try the previous =
                     break;
                 }
             }
@@ -290,6 +302,15 @@ public class JsonSchemaAutocomplete {
     }
 
     /**
+     * Get builtin function suggestions with # prefix for use in JSON values.
+     */
+    private static List<String> getBuiltinSuggestions() {
+        return Builtins.getBuiltins().stream()
+                .map(name -> "#" + name)
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Get enum value suggestions based on the current property being edited.
      */
     private static List<String> getEnumSuggestions(JsonContext context) {
@@ -375,10 +396,69 @@ public class JsonSchemaAutocomplete {
      * which handles cases like "screen testScreen = {" where the JSON
      * starts after an assignment.
      */
-    public static boolean looksLikeJson(String text) {
+    /**
+     * Check if the text looks like JSON content, considering the caret position.
+     * @param text The full text
+     * @param caretPosition The current caret position (optional, -1 to check entire text)
+     * @return true if it looks like JSON
+     */
+    public static boolean looksLikeJson(String text, int caretPosition) {
         if (text == null || text.trim().isEmpty()) {
             return false;
         }
+        
+        // If caret position is provided, extract context around it
+        if (caretPosition >= 0) {
+            // Look backwards from caret to find the start of the current JSON structure
+            // or assignment statement
+            int searchStart = Math.max(0, caretPosition - 500); // Look back up to 500 chars
+            String localContext = text.substring(searchStart, Math.min(text.length(), caretPosition + 100));
+            
+            // Check if we're inside a JSON structure
+            if (localContext.contains("{") || localContext.contains("[")) {
+                // Count braces/brackets to see if we're inside JSON
+                int braceDepth = 0;
+                int bracketDepth = 0;
+                boolean inString = false;
+                char stringChar = 0;
+                
+                for (int i = 0; i < localContext.length() && i < caretPosition - searchStart; i++) {
+                    char c = localContext.charAt(i);
+                    if (inString) {
+                        if (c == '\\') {
+                            i++; // Skip escaped character
+                        } else if (c == stringChar) {
+                            inString = false;
+                        }
+                    } else {
+                        if (c == '"' || c == '\'') {
+                            inString = true;
+                            stringChar = c;
+                        } else if (c == '{') {
+                            braceDepth++;
+                        } else if (c == '}') {
+                            braceDepth--;
+                        } else if (c == '[') {
+                            bracketDepth++;
+                        } else if (c == ']') {
+                            bracketDepth--;
+                        }
+                    }
+                }
+                
+                // If we're inside braces/brackets, we're likely in JSON
+                if (braceDepth > 0 || bracketDepth > 0) {
+                    return true;
+                }
+            }
+            
+            // Check if there's a screen/var json assignment in the local context
+            if (localContext.matches("(?s).*\\b(screen|var\\s+json)\\s+\\w+\\s*=\\s*\\{.*")) {
+                return true;
+            }
+        }
+        
+        // Fall back to original logic for full-text check
         String trimmed = text.trim();
         
         // Check if text starts with JSON
@@ -397,6 +477,13 @@ public class JsonSchemaAutocomplete {
         }
         
         return false;
+    }
+    
+    /**
+     * Check if the text looks like JSON content (legacy method for backward compatibility).
+     */
+    public static boolean looksLikeJson(String text) {
+        return looksLikeJson(text, -1);
     }
     
     /**

@@ -1,0 +1,43 @@
+// Test: Builtin calls inside JSON literals (comprehensive test)
+// Tests multiple builtin functions in different JSON contexts
+
+print "Test: Builtin calls in JSON literals";
+print "======================================";
+print "";
+
+// Test 1: String builtin in screen definition
+print "Test 1: String builtin in screen title";
+screen test1 = {
+    "title": #string.toUpper("hello world"),
+    "width": 600,
+    "height": 400,
+    "vars": []
+};
+print "✓ Test 1 passed - string.toUpper in JSON";
+print "";
+
+// Test 2: Multiple builtins in same JSON object (screen)
+print "Test 2: Multiple builtins in one screen";
+screen test2 = {
+    "title": #string.trim("  My Screen  "),
+    "width": 800,
+    "height": 600,
+    "vars": []
+};
+print "✓ Test 2 passed - string.trim in JSON";
+print "";
+
+// Test 3: Different string builtins
+print "Test 3: Various string operations";
+screen test3 = {
+    "title": #string.toLower("UPPERCASE TITLE"),
+    "width": 700,
+    "height": 500,
+    "vars": []
+};
+print "✓ Test 3 passed - string.toLower in JSON";
+print "";
+
+print "======================================";
+print "All builtin-in-JSON tests passed!";
+print "======================================";

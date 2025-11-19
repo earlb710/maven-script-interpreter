@@ -461,6 +461,187 @@ public class Parser {
 
     }
 
+    /**
+     * Process builtin calls (#builtin.method(...)) in JSON text by evaluating them
+     * and replacing with their result values.
+     */
+    private String processBuiltinCallsInJson(String jsonText) throws ParseError {
+        StringBuilder result = new StringBuilder();
+        int pos = 0;
+        
+        while (pos < jsonText.length()) {
+            // Look for # character that starts a builtin call
+            int hashPos = jsonText.indexOf('#', pos);
+            if (hashPos == -1) {
+                // No more builtin calls
+                result.append(jsonText.substring(pos));
+                break;
+            }
+            
+            // Append everything before the #
+            result.append(jsonText.substring(pos, hashPos));
+            
+            // Try to parse the builtin call starting at hashPos
+            try {
+                // Extract the builtin call expression
+                int callEnd = findBuiltinCallEnd(jsonText, hashPos);
+                if (callEnd == -1) {
+                    // Not a valid builtin call, just append the # and continue
+                    result.append('#');
+                    pos = hashPos + 1;
+                    continue;
+                }
+                
+                String builtinCall = jsonText.substring(hashPos, callEnd);
+                
+                // Parse and evaluate the builtin call
+                // Remove the leading # to get the actual call syntax
+                String callText = builtinCall.substring(1); // Remove #
+                
+                // Tokenize just this expression
+                List<EbsToken> callTokens = lexer.tokenize(callText);
+                
+                // Create a temporary parser for this expression
+                Parser tempParser = new Parser(callText, callTokens);
+                // Initialize the parser state
+                tempParser.current = 0;
+                tempParser.currToken = callTokens.get(0);
+                
+                // Parse the call as an expression
+                // The call syntax is: qualifiedName(params)
+                // tempParser is positioned at the start
+                Expression expr = tempParser.parseBuiltinCallExpression();
+                
+                // Evaluate parameters
+                CallExpression callExpr = (CallExpression) expr;
+                CallStatement callStmt = callExpr.call;
+                String functionName = callStmt.name.toLowerCase();
+                
+                // Evaluate parameter expressions to get actual values
+                List<Object> argValues = new ArrayList<>();
+                for (Parameter param : callStmt.parameters) {
+                    // For literal values, extract directly
+                    if (param.value instanceof LiteralExpression litExpr) {
+                        argValues.add(litExpr.value);
+                    } else {
+                        // For more complex expressions, we'd need an interpreter
+                        // For now, throw an error
+                        throw new ParseError("Complex expressions in JSON builtin calls are not yet supported: " + param.value);
+                    }
+                }
+                
+                // Call the builtin function directly
+                com.eb.script.interpreter.Environment env = new com.eb.script.interpreter.Environment();
+                Object value = Builtins.callBuiltin(env, functionName, argValues.toArray());
+                
+                // Convert value to JSON representation
+                String jsonValue = valueToJson(value);
+                result.append(jsonValue);
+                
+                pos = callEnd;
+            } catch (Exception e) {
+                // If we can't parse/evaluate, treat # as literal
+                result.append('#');
+                pos = hashPos + 1;
+            }
+        }
+        
+        return result.toString();
+    }
+    
+    /**
+     * Find the end position of a builtin call starting at hashPos.
+     * Returns -1 if not a valid builtin call pattern.
+     */
+    private int findBuiltinCallEnd(String text, int hashPos) {
+        int pos = hashPos + 1; // Skip #
+        
+        // Must have identifier after #
+        if (pos >= text.length() || !Character.isJavaIdentifierStart(text.charAt(pos))) {
+            return -1;
+        }
+        
+        // Read first identifier
+        while (pos < text.length() && Character.isJavaIdentifierPart(text.charAt(pos))) {
+            pos++;
+        }
+        
+        // Expect dot for qualified name
+        if (pos >= text.length() || text.charAt(pos) != '.') {
+            return -1;
+        }
+        pos++; // Skip dot
+        
+        // Must have second identifier
+        if (pos >= text.length() || !Character.isJavaIdentifierStart(text.charAt(pos))) {
+            return -1;
+        }
+        
+        // Read second identifier
+        while (pos < text.length() && Character.isJavaIdentifierPart(text.charAt(pos))) {
+            pos++;
+        }
+        
+        // Expect opening paren
+        if (pos >= text.length() || text.charAt(pos) != '(') {
+            return -1;
+        }
+        pos++; // Skip (
+        
+        // Find matching closing paren, tracking nested parens
+        int depth = 1;
+        boolean inString = false;
+        char stringChar = 0;
+        
+        while (pos < text.length() && depth > 0) {
+            char c = text.charAt(pos);
+            
+            if (inString) {
+                if (c == '\\') {
+                    pos++; // Skip escape sequence
+                } else if (c == stringChar) {
+                    inString = false;
+                }
+            } else {
+                if (c == '"' || c == '\'') {
+                    inString = true;
+                    stringChar = c;
+                } else if (c == '(') {
+                    depth++;
+                } else if (c == ')') {
+                    depth--;
+                }
+            }
+            pos++;
+        }
+        
+        if (depth != 0) {
+            return -1; // Unmatched parens
+        }
+        
+        return pos;
+    }
+    
+    /**
+     * Convert a value to its JSON representation.
+     */
+    private String valueToJson(Object value) {
+        if (value == null) {
+            return "null";
+        } else if (value instanceof String) {
+            // Escape and quote string
+            return Json.compactJson(value);
+        } else if (value instanceof Boolean || value instanceof Number) {
+            return String.valueOf(value);
+        } else if (value instanceof Map || value instanceof List || value instanceof com.eb.script.arrays.ArrayDef) {
+            // Use Json.compactJson for complex types
+            return Json.compactJson(value);
+        } else {
+            // Default: convert to string and escape
+            return Json.compactJson(value.toString());
+        }
+    }
+
     private LiteralExpression parseJsonLiteralFromSource() throws ParseError {
         return parseJsonLiteralFromSource(false);
     }
@@ -510,6 +691,9 @@ public class Parser {
         int from = first.start;
         int toInclusive = last.end;
         String jsonText = source.substring(from, toInclusive + 1);
+
+        // Process builtin calls before parsing JSON
+        jsonText = processBuiltinCallsInJson(jsonText);
 
         Object value = Json.parse(jsonText, lowerCaseKey);   // your minimal JSON parser
         return new com.eb.script.interpreter.expression.LiteralExpression(com.eb.script.token.DataType.JSON, value);
@@ -1387,6 +1571,37 @@ public class Parser {
             }
         }
         return false;
+    }
+
+    /**
+     * Parse a builtin call expression for use in JSON preprocessing.
+     * Expected format: qualifiedName(param1, param2, ...)
+     */
+    private Expression parseBuiltinCallExpression() throws ParseError {
+        // Parse the qualified name (e.g., "string.concat")
+        String qname = parseQualifiedName();
+        
+        // Expect opening paren
+        consume(EbsTokenType.LPAREN, "Expected '(' after builtin name.");
+        
+        // Parse parameters
+        List<Parameter> parameters = new ArrayList<>();
+        while (!check(EbsTokenType.RPAREN) && !isAtEnd()) {
+            // Parse parameter expression
+            Expression paramExpr = expression();
+            parameters.add(new Parameter(paramExpr));
+            
+            // Check for comma
+            if (!check(EbsTokenType.RPAREN)) {
+                consume(EbsTokenType.COMMA, "Expected ',' or ')' in parameter list.");
+            }
+        }
+        
+        consume(EbsTokenType.RPAREN, "Expected ')' after parameters.");
+        
+        // Create a CallStatement and wrap it in a CallExpression
+        CallStatement callStmt = new CallStatement(1, qname, parameters);
+        return new CallExpression(callStmt);
     }
 
     private EbsToken advance() {
