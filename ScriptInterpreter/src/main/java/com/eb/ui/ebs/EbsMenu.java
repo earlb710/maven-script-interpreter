@@ -264,12 +264,12 @@ public class EbsMenu extends MenuBar {
                 for (String screenName : screenOrder) {
                     javafx.stage.Stage stage = screens.get(screenName);
                     if (stage != null) {
-                        // Show screen name and whether it's currently showing
+                        // Show screen name and whether it's currently showing (● visible, ○ minimized)
                         String status = stage.isShowing() ? "●" : "○";
                         String label = String.format("%d  %s %s", index, status, screenName);
                         MenuItem item = new MenuItem(label);
                         
-                        // When clicked, bring the screen to front or show it if hidden
+                        // When clicked, bring the screen to front or show it if minimized
                         item.setOnAction(e -> {
                             javafx.application.Platform.runLater(() -> {
                                 if (!stage.isShowing()) {
@@ -284,6 +284,22 @@ public class EbsMenu extends MenuBar {
                         index++;
                     }
                 }
+                
+                // Add separator and "Close all windows" option at the bottom
+                screensMenu.getItems().add(new SeparatorMenuItem());
+                MenuItem closeAllItem = new MenuItem("Close all windows");
+                closeAllItem.setOnAction(e -> {
+                    javafx.application.Platform.runLater(() -> {
+                        // Close all screens
+                        for (String screenName : screenOrder) {
+                            javafx.stage.Stage stage = screens.get(screenName);
+                            if (stage != null) {
+                                stage.close();
+                            }
+                        }
+                    });
+                });
+                screensMenu.getItems().add(closeAllItem);
             }
         } catch (Exception e) {
             MenuItem error = new MenuItem("(Error accessing screens: " + e.getMessage() + ")");
