@@ -24,16 +24,19 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class InterpreterContext {
 
+    // Global static maps shared across all interpreter instances for screen management
+    private static final ConcurrentHashMap<String, Stage> GLOBAL_SCREENS = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, Thread> GLOBAL_SCREEN_THREADS = new ConcurrentHashMap<>();
+    private static final List<String> GLOBAL_SCREEN_CREATION_ORDER = new java.util.concurrent.CopyOnWriteArrayList<>();
+    private static final Set<String> GLOBAL_SCREENS_BEING_CREATED = ConcurrentHashMap.newKeySet();
+
     private Environment environment;
     private Debugger debug;
 
     private final Map<String, DbConnection> connections = new java.util.HashMap<>();
     private final Map<String, Interpreter.CursorSpec> cursorSpecs = new java.util.HashMap<>();
-    private final ConcurrentHashMap<String, Stage> screens = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, Thread> screenThreads = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> screenVars = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, ConcurrentHashMap<String, DataType>> screenVarTypes = new ConcurrentHashMap<>();
-    private final Set<String> screensBeingCreated = ConcurrentHashMap.newKeySet();
     private final Map<String, DisplayItem> displayMetadata = new java.util.HashMap<>();
     private final Map<String, List<AreaDefinition>> screenAreas = new java.util.HashMap<>();
     private final Deque<String> connectionStack = new java.util.ArrayDeque<>();
@@ -75,11 +78,11 @@ public class InterpreterContext {
     }
 
     public ConcurrentHashMap<String, Stage> getScreens() {
-        return screens;
+        return GLOBAL_SCREENS;
     }
 
     public ConcurrentHashMap<String, Thread> getScreenThreads() {
-        return screenThreads;
+        return GLOBAL_SCREEN_THREADS;
     }
 
     public ConcurrentHashMap<String, Object> getScreenVars(String screen) {
@@ -99,7 +102,7 @@ public class InterpreterContext {
     }
 
     public Set<String> getScreensBeingCreated() {
-        return screensBeingCreated;
+        return GLOBAL_SCREENS_BEING_CREATED;
     }
 
     public Map<String, DisplayItem> getDisplayItem() {
@@ -261,27 +264,58 @@ public class InterpreterContext {
         return sets.get(setName.toLowerCase());
     }
 
+    /**
+     * Get the screen creation order list.
+     *
+     * @return the list of screen names in the order they were created
+     */
+    public List<String> getScreenCreationOrder() {
+        return GLOBAL_SCREEN_CREATION_ORDER;
+    }
+
+    /**
+     * Static accessor for global screens map - can be called without instance.
+     * This allows direct access to all screens from anywhere in the application.
+     *
+     * @return the global screens map
+     */
+    public static ConcurrentHashMap<String, Stage> getGlobalScreens() {
+        return GLOBAL_SCREENS;
+    }
+
+    /**
+     * Static accessor for global screen creation order - can be called without instance.
+     * This allows direct access to screen order from anywhere in the application.
+     *
+     * @return the global screen creation order list
+     */
+    public static List<String> getGlobalScreenCreationOrder() {
+        return GLOBAL_SCREEN_CREATION_ORDER;
+    }
+
     public void clear() {
-        screens.clear();
-        screenThreads.clear();
+        GLOBAL_SCREENS.clear();
+        GLOBAL_SCREEN_THREADS.clear();
         screenVars.clear();
         screenAreas.clear();
         displayMetadata.clear();
-        screensBeingCreated.clear();
+        GLOBAL_SCREENS_BEING_CREATED.clear();
         screenVarSets.clear();
         screenVarItems.clear();
         screenAreaItems.clear();
+        GLOBAL_SCREEN_CREATION_ORDER.clear();
     }
 
     public void remove(String screenName) {
-        screens.remove(screenName);
-        screenThreads.remove(screenName);
+        GLOBAL_SCREENS.remove(screenName);
+        GLOBAL_SCREEN_THREADS.remove(screenName);
         screenVars.remove(screenName);
         screenAreas.remove(screenName);
         screenVarSets.remove(screenName);
         screenVarItems.remove(screenName);
         screenAreaItems.remove(screenName);
         displayMetadata.entrySet().removeIf(entry -> entry.getKey().startsWith(screenName + "."));
+        GLOBAL_SCREEN_CREATION_ORDER.remove(screenName);
 
     }
 

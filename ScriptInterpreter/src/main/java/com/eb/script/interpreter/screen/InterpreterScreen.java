@@ -42,7 +42,9 @@ public class InterpreterScreen {
         interpreter.environment().pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Screen %1", stmt.name);
         try {
             if (context.getScreens().containsKey(stmt.name) || context.getScreensBeingCreated().contains(stmt.name)) {
-                throw interpreter.error(stmt.getLine(), "Screen '" + stmt.name + "' already exists.");
+                throw interpreter.error(stmt.getLine(), 
+                    "Screen '" + stmt.name + "' already exists. " +
+                    "Please close the existing screen first, or use a different screen name.");
             }
 
             // Mark this screen as being created to prevent duplicate creation during async initialization
@@ -387,6 +389,8 @@ public class InterpreterScreen {
                     context.getScreens().put(screenName, stage);
                     // Remove from being created set
                     context.getScreensBeingCreated().remove(screenName);
+                    // Add to screen creation order
+                    context.getScreenCreationOrder().add(screenName);
 
                     // Don't show the screen automatically - user must explicitly call "screen <name> show;"
                     if (context.getOutput() != null) {
