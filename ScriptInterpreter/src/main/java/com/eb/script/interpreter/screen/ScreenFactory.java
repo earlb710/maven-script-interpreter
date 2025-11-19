@@ -418,8 +418,31 @@ public class ScreenFactory {
             for (AreaDefinition childArea : areaDef.childAreas) {
                 // Special handling for Tab areas when parent is TabPane
                 if (areaDef.areaType == AreaType.TABPANE && childArea.areaType == AreaType.TAB) {
-                    // Create Tab control instead of Region
-                    Region tabContent = createAreaWithItems(childArea, screenName, metadataProvider, screenVars, varTypes, onClickHandler, boundControls);
+                    // Tab should contain its child areas directly, not wrapped in an extra container
+                    // Process the Tab's child areas to get the actual content
+                    Region tabContent;
+                    
+                    if (childArea.childAreas != null && !childArea.childAreas.isEmpty()) {
+                        // If Tab has multiple child areas, create a VBox to hold them
+                        if (childArea.childAreas.size() == 1) {
+                            // Single child area - use it directly
+                            tabContent = createAreaWithItems(childArea.childAreas.get(0), screenName, metadataProvider, screenVars, varTypes, onClickHandler, boundControls);
+                        } else {
+                            // Multiple child areas - wrap in VBox
+                            javafx.scene.layout.VBox vbox = new javafx.scene.layout.VBox(10);
+                            for (AreaDefinition tabChildArea : childArea.childAreas) {
+                                Region childContent = createAreaWithItems(tabChildArea, screenName, metadataProvider, screenVars, varTypes, onClickHandler, boundControls);
+                                vbox.getChildren().add(childContent);
+                            }
+                            tabContent = vbox;
+                        }
+                    } else if (childArea.items != null && !childArea.items.isEmpty()) {
+                        // Tab has items directly (no child areas)
+                        tabContent = createAreaWithItems(childArea, screenName, metadataProvider, screenVars, varTypes, onClickHandler, boundControls);
+                    } else {
+                        // Empty tab - create empty pane
+                        tabContent = new javafx.scene.layout.Pane();
+                    }
                     
                     // Ensure tab content has transparent background
                     if (tabContent.getStyle() == null || tabContent.getStyle().isEmpty()) {
@@ -435,9 +458,6 @@ public class ScreenFactory {
                     scrollPane.setStyle("-fx-background-color: transparent; -fx-background: transparent;");
                     scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
                     scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-                    // Ensure the content can grow beyond viewport height
-                    tabContent.setPrefHeight(Region.USE_COMPUTED_SIZE);
-                    tabContent.setMinHeight(Region.USE_PREF_SIZE);
                     
                     Tab tab = new Tab();
                     tab.setText(childArea.displayName != null ? childArea.displayName : childArea.name);
