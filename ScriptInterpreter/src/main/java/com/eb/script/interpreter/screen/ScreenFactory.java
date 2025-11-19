@@ -431,10 +431,15 @@ public class ScreenFactory {
                     // Wrap tab content in ScrollPane for automatic scrollbars when content is larger than tab
                     ScrollPane scrollPane = new ScrollPane(tabContent);
                     scrollPane.setFitToWidth(true);
-                    scrollPane.setFitToHeight(false); // Allow vertical scrolling
+                    scrollPane.setFitToHeight(false); // Allow vertical scrolling when content exceeds viewport
                     scrollPane.setStyle("-fx-background-color: transparent; -fx-background: transparent;");
                     scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
                     scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+                    // Ensure viewport is also transparent
+                    scrollPane.lookup(".viewport");
+                    if (scrollPane.lookup(".viewport") != null) {
+                        ((Region) scrollPane.lookup(".viewport")).setStyle("-fx-background-color: transparent;");
+                    }
                     
                     Tab tab = new Tab();
                     tab.setText(childArea.displayName != null ? childArea.displayName : childArea.name);
@@ -1095,6 +1100,40 @@ public class ScreenFactory {
         // Extract or set default style
         metadata.style = getStringValue(displayDef, "style", metadata.itemType.getDefaultStyle());
         metadata.screenName = screenName;
+        
+        // Extract promptHelp (placeholder text for text inputs)
+        metadata.promptHelp = getStringValue(displayDef, "promptHelp", getStringValue(displayDef, "prompt_help", null));
+        
+        // Extract labelText (permanent label displayed before/above control - used for buttons and labels)
+        metadata.labelText = getStringValue(displayDef, "labelText", getStringValue(displayDef, "label_text", null));
+        
+        // Extract labelText alignment
+        metadata.labelTextAlignment = getStringValue(displayDef, "labelTextAlignment", getStringValue(displayDef, "label_text_alignment", null));
+        
+        // Extract onClick event handler for buttons
+        metadata.onClick = getStringValue(displayDef, "onClick", getStringValue(displayDef, "on_click", null));
+        
+        // Extract options for selection controls
+        if (displayDef.containsKey("options")) {
+            Object optionsObj = displayDef.get("options");
+            if (optionsObj instanceof java.util.List) {
+                metadata.options = new ArrayList<>();
+                for (Object opt : (java.util.List<?>) optionsObj) {
+                    metadata.options.add(String.valueOf(opt));
+                }
+            }
+        }
+        
+        // Extract styling properties
+        metadata.labelColor = getStringValue(displayDef, "labelColor", getStringValue(displayDef, "label_color", null));
+        metadata.labelBold = getBooleanValue(displayDef, "labelBold", getBooleanValue(displayDef, "label_bold", null));
+        metadata.labelItalic = getBooleanValue(displayDef, "labelItalic", getBooleanValue(displayDef, "label_italic", null));
+        metadata.labelFontSize = getStringValue(displayDef, "labelFontSize", getStringValue(displayDef, "label_font_size", null));
+        metadata.itemFontSize = getStringValue(displayDef, "itemFontSize", getStringValue(displayDef, "item_font_size", null));
+        metadata.itemColor = getStringValue(displayDef, "itemColor", getStringValue(displayDef, "item_color", null));
+        metadata.itemBold = getBooleanValue(displayDef, "itemBold", getBooleanValue(displayDef, "item_bold", null));
+        metadata.itemItalic = getBooleanValue(displayDef, "itemItalic", getBooleanValue(displayDef, "item_italic", null));
+        metadata.maxLength = getIntValue(displayDef, "maxLength", getIntValue(displayDef, "max_length", null));
 
         return metadata;
     }
