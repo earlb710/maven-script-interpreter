@@ -1417,8 +1417,8 @@ public class ScreenFactory {
     private static Node createLabeledControl(String labelText, String alignment, Node control, double minWidth, DisplayItem metadata) {
         javafx.scene.control.Label label = new javafx.scene.control.Label(labelText);
 
-        // Build label style with right alignment and padding
-        StringBuilder styleBuilder = new StringBuilder("-fx-font-weight: normal; -fx-padding: 0 10 0 0; -fx-alignment: center-right;");
+        // Build label style with right alignment, padding, and default text color
+        StringBuilder styleBuilder = new StringBuilder("-fx-font-weight: normal; -fx-padding: 0 10 0 0; -fx-alignment: center-right; -fx-text-fill: #333333;");
 
         // Apply label styling from metadata
         if (metadata != null) {
@@ -1427,8 +1427,12 @@ public class ScreenFactory {
                 styleBuilder.append(" -fx-font-size: ").append(metadata.labelFontSize).append(";");
             }
 
-            // Apply label color if specified
+            // Apply label color if specified (this will override the default)
             if (metadata.labelColor != null && !metadata.labelColor.isEmpty()) {
+                // Remove default text-fill and apply custom color
+                String currentStyle = styleBuilder.toString();
+                currentStyle = currentStyle.replace("-fx-text-fill: #333333;", "");
+                styleBuilder = new StringBuilder(currentStyle);
                 styleBuilder.append(" -fx-text-fill: ").append(metadata.labelColor).append(";");
             }
 

@@ -11,10 +11,18 @@
     -fx-background-color: transparent;
 }
 
+.screen-area-pane .label {
+    -fx-text-fill: #333333;
+}
+
 /* StackPane - Center-aligned stacking */
 .screen-area-stackpane {
     -fx-background-color: transparent;
     -fx-alignment: center;
+}
+
+.screen-area-stackpane .label {
+    -fx-text-fill: #333333;
 }
 
 /* AnchorPane - Anchor-based positioning */
@@ -22,9 +30,17 @@
     -fx-background-color: transparent;
 }
 
+.screen-area-anchorpane .label {
+    -fx-text-fill: #333333;
+}
+
 /* BorderPane - Five-region layout */
 .screen-area-borderpane {
     -fx-background-color: transparent;
+}
+
+.screen-area-borderpane .label {
+    -fx-text-fill: #333333;
 }
 
 /* FlowPane - Flowing layout with gaps */
@@ -32,6 +48,10 @@
     -fx-background-color: transparent;
     -fx-hgap: 5;
     -fx-vgap: 5;
+}
+
+.screen-area-flowpane .label {
+    -fx-text-fill: #333333;
 }
 
 /* GridPane - Grid layout with gaps */
@@ -42,12 +62,20 @@
     -fx-padding: 10;
 }
 
+.screen-area-gridpane .label {
+    -fx-text-fill: #333333;
+}
+
 /* HBox - Horizontal box with spacing */
 .screen-area-hbox {
     -fx-background-color: transparent;
     -fx-spacing: 10;
     -fx-alignment: center-left;
     -fx-padding: 5;
+}
+
+.screen-area-hbox .label {
+    -fx-text-fill: #333333;
 }
 
 /* VBox - Vertical box with spacing */
@@ -58,12 +86,20 @@
     -fx-padding: 5;
 }
 
+.screen-area-vbox .label {
+    -fx-text-fill: #333333;
+}
+
 /* TilePane - Tile layout with gaps */
 .screen-area-tilepane {
     -fx-background-color: transparent;
     -fx-hgap: 5;
     -fx-vgap: 5;
     -fx-padding: 5;
+}
+
+.screen-area-tilepane .label {
+    -fx-text-fill: #333333;
 }
 
 /* ==================== Containers ==================== */
@@ -117,6 +153,15 @@
 .screen-area-tab {
     -fx-background-color: transparent;
     -fx-padding: 10;
+}
+
+/* Ensure labels in tabs have visible text color */
+.screen-area-tabpane .label {
+    -fx-text-fill: #333333;
+}
+
+.screen-area-tab .label {
+    -fx-text-fill: #333333;
 }
 
 /* Accordion - Collapsible sections */
