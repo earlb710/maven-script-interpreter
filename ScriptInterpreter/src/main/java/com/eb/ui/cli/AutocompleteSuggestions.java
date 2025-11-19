@@ -133,7 +133,7 @@ public class AutocompleteSuggestions {
         String beforeCaret = text.substring(0, Math.min(caretPosition, text.length()));
 
         // Check if we're editing JSON content - provide schema-based suggestions
-        if (JsonSchemaAutocomplete.looksLikeJson(text)) {
+        if (JsonSchemaAutocomplete.looksLikeJson(text, caretPosition)) {
             List<String> jsonSuggestions = JsonSchemaAutocomplete.getJsonSuggestions(text, caretPosition);
             if (!jsonSuggestions.isEmpty()) {
                 return jsonSuggestions;

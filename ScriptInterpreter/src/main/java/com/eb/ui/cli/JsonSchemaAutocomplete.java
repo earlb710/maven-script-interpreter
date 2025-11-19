@@ -395,10 +395,69 @@ public class JsonSchemaAutocomplete {
      * which handles cases like "screen testScreen = {" where the JSON
      * starts after an assignment.
      */
-    public static boolean looksLikeJson(String text) {
+    /**
+     * Check if the text looks like JSON content, considering the caret position.
+     * @param text The full text
+     * @param caretPosition The current caret position (optional, -1 to check entire text)
+     * @return true if it looks like JSON
+     */
+    public static boolean looksLikeJson(String text, int caretPosition) {
         if (text == null || text.trim().isEmpty()) {
             return false;
         }
+        
+        // If caret position is provided, extract context around it
+        if (caretPosition >= 0) {
+            // Look backwards from caret to find the start of the current JSON structure
+            // or assignment statement
+            int searchStart = Math.max(0, caretPosition - 500); // Look back up to 500 chars
+            String localContext = text.substring(searchStart, Math.min(text.length(), caretPosition + 100));
+            
+            // Check if we're inside a JSON structure
+            if (localContext.contains("{") || localContext.contains("[")) {
+                // Count braces/brackets to see if we're inside JSON
+                int braceDepth = 0;
+                int bracketDepth = 0;
+                boolean inString = false;
+                char stringChar = 0;
+                
+                for (int i = 0; i < localContext.length() && i < caretPosition - searchStart; i++) {
+                    char c = localContext.charAt(i);
+                    if (inString) {
+                        if (c == '\\') {
+                            i++; // Skip escaped character
+                        } else if (c == stringChar) {
+                            inString = false;
+                        }
+                    } else {
+                        if (c == '"' || c == '\'') {
+                            inString = true;
+                            stringChar = c;
+                        } else if (c == '{') {
+                            braceDepth++;
+                        } else if (c == '}') {
+                            braceDepth--;
+                        } else if (c == '[') {
+                            bracketDepth++;
+                        } else if (c == ']') {
+                            bracketDepth--;
+                        }
+                    }
+                }
+                
+                // If we're inside braces/brackets, we're likely in JSON
+                if (braceDepth > 0 || bracketDepth > 0) {
+                    return true;
+                }
+            }
+            
+            // Check if there's a screen/var json assignment in the local context
+            if (localContext.matches("(?s).*\\b(screen|var\\s+json)\\s+\\w+\\s*=\\s*\\{.*")) {
+                return true;
+            }
+        }
+        
+        // Fall back to original logic for full-text check
         String trimmed = text.trim();
         
         // Check if text starts with JSON
@@ -417,6 +476,13 @@ public class JsonSchemaAutocomplete {
         }
         
         return false;
+    }
+    
+    /**
+     * Check if the text looks like JSON content (legacy method for backward compatibility).
+     */
+    public static boolean looksLikeJson(String text) {
+        return looksLikeJson(text, -1);
     }
     
     /**
