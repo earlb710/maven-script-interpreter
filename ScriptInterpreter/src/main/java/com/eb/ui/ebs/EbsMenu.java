@@ -291,10 +291,21 @@ public class EbsMenu extends MenuBar {
                 closeAllItem.setOnAction(e -> {
                     javafx.application.Platform.runLater(() -> {
                         // Permanently close all screens (not just hide them)
-                        for (String screenName : screenOrder) {
+                        // Create a copy of the list to avoid concurrent modification
+                        java.util.List<String> screensToClose = new java.util.ArrayList<>(screenOrder);
+                        for (String screenName : screensToClose) {
                             javafx.stage.Stage stage = screens.get(screenName);
                             if (stage != null) {
-                                stage.close();
+                                // Fire close request event to trigger cleanup
+                                javafx.stage.WindowEvent closeEvent = new javafx.stage.WindowEvent(
+                                    stage, 
+                                    javafx.stage.WindowEvent.WINDOW_CLOSE_REQUEST
+                                );
+                                stage.fireEvent(closeEvent);
+                                // If event wasn't consumed, close the stage
+                                if (!closeEvent.isConsumed()) {
+                                    stage.close();
+                                }
                             }
                         }
                     });
