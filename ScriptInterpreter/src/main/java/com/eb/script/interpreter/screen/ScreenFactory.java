@@ -420,6 +420,14 @@ public class ScreenFactory {
                 if (areaDef.areaType == AreaType.TABPANE && childArea.areaType == AreaType.TAB) {
                     // Create Tab control instead of Region
                     Region tabContent = createAreaWithItems(childArea, screenName, metadataProvider, screenVars, varTypes, onClickHandler, boundControls);
+                    
+                    // Ensure tab content has transparent background
+                    if (tabContent.getStyle() == null || tabContent.getStyle().isEmpty()) {
+                        tabContent.setStyle("-fx-background-color: transparent;");
+                    } else if (!tabContent.getStyle().contains("-fx-background-color")) {
+                        tabContent.setStyle(tabContent.getStyle() + " -fx-background-color: transparent;");
+                    }
+                    
                     Tab tab = new Tab();
                     tab.setText(childArea.screenName != null ? childArea.screenName : childArea.name);
                     tab.setContent(tabContent);

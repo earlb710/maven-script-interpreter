@@ -311,7 +311,7 @@ screen tabTestScreen = {
                                             "layoutPos": "3,0",
                                             "display": {
                                                 "type": "button",
-                                                "promptText": "Update Contact",
+                                                "labelText": "Update Contact",
                                                 "onClick": "tabTestScreen.tab1Action = \"Contact information updated\"; print \"Tab 1: Contact information updated\";"
                                             },
                                             "tooltip": "Click to save changes"
@@ -322,7 +322,7 @@ screen tabTestScreen = {
                                             "layoutPos": "3,1",
                                             "display": {
                                                 "type": "button",
-                                                "promptText": "Clear Fields",
+                                                "labelText": "Clear Fields",
                                                 "onClick": "tabTestScreen.contactName = \"\"; tabTestScreen.email = \"\"; tabTestScreen.phone = \"\"; tabTestScreen.extension = \"\"; tabTestScreen.tab1Action = \"Fields cleared\"; print \"Tab 1: Fields cleared\";"
                                             },
                                             "tooltip": "This button will clear all the contact information fields in this tab. Use with caution as this action cannot be undone without manually re-entering the data."
@@ -397,7 +397,7 @@ screen tabTestScreen = {
                                             "layoutPos": "4,0",
                                             "display": {
                                                 "type": "button",
-                                                "promptText": "Save Account",
+                                                "labelText": "Save Account",
                                                 "onClick": "tabTestScreen.tab2Action = \"Account details saved\"; print \"Tab 2: Account details saved\";"
                                             },
                                             "tooltip": "Save account changes"
@@ -408,7 +408,7 @@ screen tabTestScreen = {
                                             "layoutPos": "4,1",
                                             "display": {
                                                 "type": "button",
-                                                "promptText": "Reset to Defaults",
+                                                "labelText": "Reset to Defaults",
                                                 "onClick": "tabTestScreen.accountType = \"Premium\"; tabTestScreen.monthlyBudget = 5000.00; tabTestScreen.contractTerm = 12; tabTestScreen.autoRenewal = true; tabTestScreen.priority = 3; tabTestScreen.accountNotes = \"\"; tabTestScreen.tab2Action = \"Reset to defaults\"; print \"Tab 2: Reset to default values\";"
                                             },
                                             "tooltip": "This button resets all account detail fields to their default values. Any unsaved changes will be lost. This is useful when you want to start over with fresh default settings."
@@ -440,7 +440,7 @@ screen tabTestScreen = {
                                             "sequence": 2,
                                             "display": {
                                                 "type": "button",
-                                                "promptText": "Refresh Summary",
+                                                "labelText": "Refresh Summary",
                                                 "onClick": "tabTestScreen.summaryText = \"=== CLIENT SUMMARY ===\\n\\nMASTER RECORD:\\n  Client ID: \" + tabTestScreen.clientId + \"\\n  Client Name: \" + tabTestScreen.clientName + \"\\n  Status: \" + tabTestScreen.clientStatus + \"\\n\\nCONTACT INFORMATION:\\n  Name: \" + tabTestScreen.contactName + \"\\n  Email: \" + tabTestScreen.email + \"\\n  Phone: \" + tabTestScreen.phone + \" ext. \" + tabTestScreen.extension + \"\\n  Department: \" + tabTestScreen.department + \"\\n  Preferred Contact: \" + tabTestScreen.preferredContact + \"\\n  Last Action: \" + tabTestScreen.tab1Action + \"\\n\\nACCOUNT DETAILS:\\n  Account Type: \" + tabTestScreen.accountType + \"\\n  Monthly Budget: $\" + tabTestScreen.monthlyBudget + \"\\n  Contract Term: \" + tabTestScreen.contractTerm + \" months\\n  Auto-Renewal: \" + tabTestScreen.autoRenewal + \"\\n  Priority Level: \" + tabTestScreen.priority + \"/5\\n  Last Action: \" + tabTestScreen.tab2Action + \"\\n  Notes: \" + tabTestScreen.accountNotes + \"\\n\\n=== END SUMMARY ===\"; print \"Summary refreshed\";"
                                             },
                                             "tooltip": "Click to update the summary with current values from all tabs"
