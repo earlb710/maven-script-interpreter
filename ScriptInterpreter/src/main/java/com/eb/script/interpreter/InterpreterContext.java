@@ -40,6 +40,7 @@ public class InterpreterContext {
     private final Map<String, Runnable> screenRefreshCallbacks = new ConcurrentHashMap<>();
     private final Map<String, List<javafx.scene.Node>> screenBoundControls = new ConcurrentHashMap<>();
     private final Map<String, com.eb.ui.ebs.StatusBar> screenStatusBars = new ConcurrentHashMap<>();
+    private final List<String> screenCreationOrder = new java.util.concurrent.CopyOnWriteArrayList<>();
 
     // New storage structures for the refactored variable sets
     private final Map<String, Map<String, VarSet>> screenVarSets = new ConcurrentHashMap<>(); // screenName -> (setName -> VarSet)
@@ -261,6 +262,15 @@ public class InterpreterContext {
         return sets.get(setName.toLowerCase());
     }
 
+    /**
+     * Get the screen creation order list.
+     *
+     * @return the list of screen names in the order they were created
+     */
+    public List<String> getScreenCreationOrder() {
+        return screenCreationOrder;
+    }
+
     public void clear() {
         screens.clear();
         screenThreads.clear();
@@ -271,6 +281,7 @@ public class InterpreterContext {
         screenVarSets.clear();
         screenVarItems.clear();
         screenAreaItems.clear();
+        screenCreationOrder.clear();
     }
 
     public void remove(String screenName) {
@@ -282,6 +293,7 @@ public class InterpreterContext {
         screenVarItems.remove(screenName);
         screenAreaItems.remove(screenName);
         displayMetadata.entrySet().removeIf(entry -> entry.getKey().startsWith(screenName + "."));
+        screenCreationOrder.remove(screenName);
 
     }
 

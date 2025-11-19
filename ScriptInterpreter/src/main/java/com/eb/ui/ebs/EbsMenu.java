@@ -22,11 +22,13 @@ import javafx.scene.input.KeyCombination;
 public class EbsMenu extends MenuBar {
 
     public final Menu recentMenu;
+    public final Menu screensMenu;
     public final EbsConsoleHandler handler;
 
     public EbsMenu(EbsConsoleHandler handler) {
         this.handler = handler;
         recentMenu = new Menu("Recent files");
+        screensMenu = new Menu("Screens");
         handler.loadRecentFiles();
         Menu fileMenu = new Menu("File");
 
@@ -200,6 +202,12 @@ public class EbsMenu extends MenuBar {
         toolsMenu.getItems().addAll(aiSetupItem, safeDirsItem, dbConfigItem);
         getMenus().add(toolsMenu);
 
+        // --- Screens Menu ---
+        refreshScreensMenu();
+        // Refresh screens menu when it's about to be shown
+        screensMenu.setOnShowing(e -> refreshScreensMenu());
+        getMenus().add(screensMenu);
+
     }
 
     public final void refreshRecentMenu() {
@@ -236,6 +244,60 @@ public class EbsMenu extends MenuBar {
                 refreshRecentMenu();
             });
             recentMenu.getItems().add(clear);
+        }
+    }
+
+    public final void refreshScreensMenu() {
+        screensMenu.getItems().clear();
+        
+        // Get the InterpreterContext from the environment
+        try {
+            com.eb.script.interpreter.Interpreter interpreter = handler.env.getCurrentInterpreter();
+            if (interpreter == null) {
+                MenuItem none = new MenuItem("(No interpreter running)");
+                none.setDisable(true);
+                screensMenu.getItems().add(none);
+                return;
+            }
+            
+            com.eb.script.interpreter.InterpreterContext context = interpreter.getContext();
+            java.util.List<String> screenOrder = context.getScreenCreationOrder();
+            java.util.concurrent.ConcurrentHashMap<String, javafx.stage.Stage> screens = context.getScreens();
+            
+            if (screenOrder.isEmpty()) {
+                MenuItem none = new MenuItem("(No screens created)");
+                none.setDisable(true);
+                screensMenu.getItems().add(none);
+            } else {
+                int index = 1;
+                for (String screenName : screenOrder) {
+                    javafx.stage.Stage stage = screens.get(screenName);
+                    if (stage != null) {
+                        // Show screen name and whether it's currently showing
+                        String status = stage.isShowing() ? "●" : "○";
+                        String label = String.format("%d  %s %s", index, status, screenName);
+                        MenuItem item = new MenuItem(label);
+                        
+                        // When clicked, bring the screen to front or show it if hidden
+                        item.setOnAction(e -> {
+                            javafx.application.Platform.runLater(() -> {
+                                if (!stage.isShowing()) {
+                                    stage.show();
+                                }
+                                stage.toFront();
+                                stage.requestFocus();
+                            });
+                        });
+                        
+                        screensMenu.getItems().add(item);
+                        index++;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            MenuItem error = new MenuItem("(Error accessing screens)");
+            error.setDisable(true);
+            screensMenu.getItems().add(error);
         }
     }
 
