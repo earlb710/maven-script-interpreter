@@ -43,6 +43,7 @@ public class UtilImage {
     /**
      * Resizes an image if either dimension exceeds maxLength, maintaining aspect ratio.
      * Returns the smaller of the new or original byte array.
+     * Memory-optimized to minimize byte array allocations.
      * 
      * @param inputStream the original image as an InputStream
      * @param maxLength the maximum allowed width or height
@@ -57,16 +58,23 @@ public class UtilImage {
             throw new IllegalArgumentException("maxLength must be positive");
         }
         
-        // Read original image bytes
+        // Read original image bytes - this is unavoidable as we need to compare sizes later
         byte[] originalBytes = inputStream.readAllBytes();
+        int originalSize = originalBytes.length;
         
-        // Detect image format
-        String formatName = getImageFormat(originalBytes);
-        if (formatName == null) {
-            throw new IOException("Unable to detect image format");
+        // Detect image format using ImageInputStream (no extra copy needed)
+        String formatName;
+        try (ImageInputStream iis = ImageIO.createImageInputStream(new ByteArrayInputStream(originalBytes))) {
+            Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
+            if (!readers.hasNext()) {
+                throw new IOException("Unable to detect image format");
+            }
+            ImageReader reader = readers.next();
+            formatName = reader.getFormatName().toLowerCase();
+            reader.dispose();
         }
         
-        // Read the image
+        // Read the image (reusing originalBytes, no extra copy)
         BufferedImage originalImage = ImageIO.read(new ByteArrayInputStream(originalBytes));
         if (originalImage == null) {
             throw new IOException("Unable to read image");
@@ -77,9 +85,9 @@ public class UtilImage {
         
         // Check if resizing is needed
         if (originalWidth <= maxLength && originalHeight <= maxLength) {
-            // No resizing needed, but still recreate the image to ensure consistency
-            byte[] recreatedBytes = writeImage(originalImage, formatName);
-            return recreatedBytes.length < originalBytes.length ? recreatedBytes : originalBytes;
+            // No resizing needed - just return original to avoid unnecessary processing
+            // This saves memory by not creating a recreated copy
+            return originalBytes;
         }
         
         // Calculate new dimensions maintaining aspect ratio
@@ -94,38 +102,27 @@ public class UtilImage {
             newWidth = (int) Math.round((double) originalWidth * maxLength / originalHeight);
         }
         
-        // Create resized image
+        // Clear reference to original image to free memory before creating resized version
         BufferedImage resizedImage = resizeImageInternal(originalImage, newWidth, newHeight);
+        originalImage = null; // Help GC reclaim memory
         
         // Write resized image to byte array
         byte[] resizedBytes = writeImage(resizedImage, formatName);
+        resizedImage = null; // Help GC reclaim memory
         
         // Return the smaller byte array
-        return resizedBytes.length < originalBytes.length ? resizedBytes : originalBytes;
-    }
-    
-    /**
-     * Detects the format of an image from its byte array.
-     * 
-     * @param imageBytes the image data
-     * @return the format name (e.g., "png", "jpg", "gif") or null if unable to detect
-     * @throws IOException if reading fails
-     */
-    private static String getImageFormat(byte[] imageBytes) throws IOException {
-        try (ImageInputStream iis = ImageIO.createImageInputStream(new ByteArrayInputStream(imageBytes))) {
-            Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
-            if (readers.hasNext()) {
-                ImageReader reader = readers.next();
-                String formatName = reader.getFormatName().toLowerCase();
-                reader.dispose();
-                return formatName;
-            }
+        // If resized is larger (rare but possible with certain formats), return original
+        if (resizedBytes.length < originalSize) {
+            originalBytes = null; // Help GC reclaim original bytes
+            return resizedBytes;
+        } else {
+            return originalBytes;
         }
-        return null;
     }
     
     /**
      * Resizes a BufferedImage to the specified dimensions using high-quality rendering.
+     * Memory-optimized to avoid creating intermediate Image objects.
      * 
      * @param originalImage the original image
      * @param targetWidth the target width
@@ -150,9 +147,9 @@ public class UtilImage {
             g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             
-            // Draw the scaled image
-            g2d.drawImage(originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_SMOOTH), 
-                         0, 0, targetWidth, targetHeight, null);
+            // Draw the scaled image directly without creating intermediate Image object
+            // This uses less memory than getScaledInstance which creates an extra Image
+            g2d.drawImage(originalImage, 0, 0, targetWidth, targetHeight, null);
         } finally {
             g2d.dispose();
         }
