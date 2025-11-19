@@ -343,7 +343,7 @@ public final class Console {
         String contextText;
         int contextCaretPos;
         
-        if (JsonSchemaAutocomplete.looksLikeJson(text)) {
+        if (JsonSchemaAutocomplete.looksLikeJson(text, caretPos)) {
             // Use full text for JSON to maintain proper context
             contextText = text;
             contextCaretPos = caretPos;
