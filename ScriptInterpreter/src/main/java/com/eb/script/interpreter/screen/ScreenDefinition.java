@@ -6,7 +6,6 @@ import javafx.stage.Stage;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiFunction;
 
 /**
  * ScreenDefinition class for managing screen creation with optional singleton pattern.
@@ -23,7 +22,7 @@ public class ScreenDefinition {
     
     // Complex screen creation parameters
     private List<AreaDefinition> areas;
-    private BiFunction<String, String, DisplayItem> metadataProvider;
+    private MetadataProvider metadataProvider;
     private ConcurrentHashMap<String, Object> screenVars;
     private ConcurrentHashMap<String, DataType> varTypes;
     private ScreenFactory.OnClickHandler onClickHandler;
@@ -197,9 +196,9 @@ public class ScreenDefinition {
     /**
      * Sets the metadata provider for variable display information
      * 
-     * @param metadataProvider Function to retrieve DisplayItem for variables (screenName, varName) -> metadata
+     * @param metadataProvider Provider to retrieve DisplayItem for variables
      */
-    public void setMetadataProvider(BiFunction<String, String, DisplayItem> metadataProvider) {
+    public void setMetadataProvider(MetadataProvider metadataProvider) {
         this.metadataProvider = metadataProvider;
     }
     
@@ -307,9 +306,9 @@ public class ScreenDefinition {
     /**
      * Gets the metadata provider
      * 
-     * @return The metadata provider function
+     * @return The metadata provider
      */
-    public BiFunction<String, String, DisplayItem> getMetadataProvider() {
+    public MetadataProvider getMetadataProvider() {
         return metadataProvider;
     }
     

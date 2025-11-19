@@ -23,7 +23,6 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 import java.util.*;
-import java.util.function.BiFunction;
 
 /**
  * Factory class for creating complete JavaFX screens/windows from
@@ -83,7 +82,7 @@ public class ScreenFactory {
      */
     public static ScreenDefinition createScreenDefinition(String screenName, String title, double width, double height,
             List<AreaDefinition> areas,
-            BiFunction<String, String, DisplayItem> metadataProvider) {
+            MetadataProvider metadataProvider) {
         return createScreenDefinition(screenName, title, width, height, areas, metadataProvider, null, null, null, null);
     }
     
@@ -101,7 +100,7 @@ public class ScreenFactory {
      */
     public static ScreenDefinition createScreenDefinition(String screenName, String title, double width, double height,
             List<AreaDefinition> areas,
-            BiFunction<String, String, DisplayItem> metadataProvider,
+            MetadataProvider metadataProvider,
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
         return createScreenDefinition(screenName, title, width, height, areas, metadataProvider, screenVars, null, null, null);
     }
@@ -122,7 +121,7 @@ public class ScreenFactory {
      */
     public static ScreenDefinition createScreenDefinition(String screenName, String title, double width, double height,
             List<AreaDefinition> areas,
-            BiFunction<String, String, DisplayItem> metadataProvider,
+            MetadataProvider metadataProvider,
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
             java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
             OnClickHandler onClickHandler) {
@@ -146,7 +145,7 @@ public class ScreenFactory {
      */
     public static ScreenDefinition createScreenDefinition(String screenName, String title, double width, double height,
             List<AreaDefinition> areas,
-            BiFunction<String, String, DisplayItem> metadataProvider,
+            MetadataProvider metadataProvider,
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
             java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
             OnClickHandler onClickHandler,
@@ -176,7 +175,7 @@ public class ScreenFactory {
      */
     public static Stage createScreen(String screenName, String title, double width, double height,
             List<AreaDefinition> areas,
-            BiFunction<String, String, DisplayItem> metadataProvider) {
+            MetadataProvider metadataProvider) {
         return createScreen(screenName, title, width, height, areas, metadataProvider, null, null, null);
     }
 
@@ -198,7 +197,7 @@ public class ScreenFactory {
      */
     public static Stage createScreen(String screenName, String title, double width, double height,
             List<AreaDefinition> areas,
-            BiFunction<String, String, DisplayItem> metadataProvider,
+            MetadataProvider metadataProvider,
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
         return createScreen(screenName, title, width, height, areas, metadataProvider, screenVars, null, null);
     }
@@ -225,7 +224,7 @@ public class ScreenFactory {
      */
     public static Stage createScreen(String screenName, String title, double width, double height,
             List<AreaDefinition> areas,
-            BiFunction<String, String, DisplayItem> metadataProvider,
+            MetadataProvider metadataProvider,
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
             java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
             OnClickHandler onClickHandler) {
@@ -255,7 +254,7 @@ public class ScreenFactory {
      */
     public static Stage createScreen(String screenName, String title, double width, double height,
             List<AreaDefinition> areas,
-            BiFunction<String, String, DisplayItem> metadataProvider,
+            MetadataProvider metadataProvider,
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
             java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
             OnClickHandler onClickHandler,
@@ -335,7 +334,7 @@ public class ScreenFactory {
      */
     private static void setupStatusBarUpdates(List<Node> controls, 
             com.eb.ui.ebs.StatusBar statusBar,
-            BiFunction<String, String, DisplayItem> metadataProvider,
+            MetadataProvider metadataProvider,
             String screenName) {
         for (Node control : controls) {
             control.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
@@ -348,7 +347,7 @@ public class ScreenFactory {
                         String itemName = fullRef.substring(screenName.length() + 1);
                         
                         // Get metadata for this item
-                        DisplayItem metadata = metadataProvider.apply(screenName, itemName);
+                        DisplayItem metadata = metadataProvider.getMetadata(screenName, itemName);
                         if (metadata != null) {
                             // Update message with promptHelp/tooltip
                             String message = metadata.promptHelp != null ? metadata.promptHelp : "";
@@ -381,7 +380,7 @@ public class ScreenFactory {
      * Creates a container from AreaDefinition and adds all items to it.
      */
     private static Region createAreaWithItems(AreaDefinition areaDef, String screenName,
-            BiFunction<String, String, DisplayItem> metadataProvider) {
+            MetadataProvider metadataProvider) {
         return createAreaWithItems(areaDef, screenName, metadataProvider, null, null, null);
     }
 
@@ -390,7 +389,7 @@ public class ScreenFactory {
      * variable binding.
      */
     private static Region createAreaWithItems(AreaDefinition areaDef, String screenName,
-            BiFunction<String, String, DisplayItem> metadataProvider,
+            MetadataProvider metadataProvider,
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
         return createAreaWithItems(areaDef, screenName, metadataProvider, screenVars, null, null);
     }
@@ -400,7 +399,7 @@ public class ScreenFactory {
      * variable binding and onClick handler.
      */
     private static Region createAreaWithItems(AreaDefinition areaDef, String screenName,
-            BiFunction<String, String, DisplayItem> metadataProvider,
+            MetadataProvider metadataProvider,
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
             java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
             OnClickHandler onClickHandler) {
@@ -413,7 +412,7 @@ public class ScreenFactory {
      * variable binding, onClick handler, and control tracking.
      */
     private static Region createAreaWithItems(AreaDefinition areaDef, String screenName,
-            BiFunction<String, String, DisplayItem> metadataProvider,
+            MetadataProvider metadataProvider,
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
             java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
             OnClickHandler onClickHandler,
@@ -436,7 +435,7 @@ public class ScreenFactory {
                 // Start with var-level metadata (from vars section), then merge item-level metadata (from area items display)
                 DisplayItem metadata = null;
                 if (item.varRef != null && metadataProvider != null) {
-                    metadata = metadataProvider.apply(screenName, item.varRef);
+                    metadata = metadataProvider.getMetadata(screenName, item.varRef);
                 }
                 // If item has its own display metadata, merge it (item-level overwrites var-level)
                 if (item.displayItem != null) {
@@ -952,7 +951,7 @@ public class ScreenFactory {
      */
     public static void createAndShowScreen(String screenName, String title, double width, double height,
             List<AreaDefinition> areas,
-            BiFunction<String, String, DisplayItem> metadataProvider,
+            MetadataProvider metadataProvider,
             boolean maximize) {
         Platform.runLater(() -> {
             Stage stage = createScreen(screenName, title, width, height, areas, metadataProvider);
@@ -1048,7 +1047,7 @@ public class ScreenFactory {
         }
 
         // Create metadata provider from map
-        BiFunction<String, String, DisplayItem> metadataProvider
+        MetadataProvider metadataProvider
                 = (sName, varName) -> metadataMap.get(varName);
 
         return createScreen(screenName, title, width, height, areas, metadataProvider);
@@ -1391,7 +1390,7 @@ public class ScreenFactory {
      * @return The maximum label width in pixels
      */
     private static double calculateMaxLabelWidth(List<AreaItem> items, String screenName,
-            BiFunction<String, String, DisplayItem> metadataProvider) {
+            MetadataProvider metadataProvider) {
         double maxWidth = 100; // Minimum width
         javafx.scene.text.Text measuringText = new javafx.scene.text.Text();
 
@@ -1399,7 +1398,7 @@ public class ScreenFactory {
             // Get metadata with same merge logic as createAreaWithItems
             DisplayItem metadata = null;
             if (item.varRef != null && metadataProvider != null) {
-                metadata = metadataProvider.apply(screenName, item.varRef);
+                metadata = metadataProvider.getMetadata(screenName, item.varRef);
             }
             if (item.displayItem != null) {
                 metadata = mergeDisplayMetadata(metadata, item.displayItem);
