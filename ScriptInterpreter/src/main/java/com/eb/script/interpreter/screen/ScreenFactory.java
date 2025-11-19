@@ -435,11 +435,9 @@ public class ScreenFactory {
                     scrollPane.setStyle("-fx-background-color: transparent; -fx-background: transparent;");
                     scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
                     scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-                    // Ensure viewport is also transparent
-                    scrollPane.lookup(".viewport");
-                    if (scrollPane.lookup(".viewport") != null) {
-                        ((Region) scrollPane.lookup(".viewport")).setStyle("-fx-background-color: transparent;");
-                    }
+                    // Ensure the content can grow beyond viewport height
+                    tabContent.setPrefHeight(Region.USE_COMPUTED_SIZE);
+                    tabContent.setMinHeight(Region.USE_PREF_SIZE);
                     
                     Tab tab = new Tab();
                     tab.setText(childArea.displayName != null ? childArea.displayName : childArea.name);
