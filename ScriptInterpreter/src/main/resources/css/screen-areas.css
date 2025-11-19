@@ -13,6 +13,7 @@
 
 .screen-area-pane .label {
     -fx-text-fill: #333333;
+    -fx-font-weight: normal;
 }
 
 /* StackPane - Center-aligned stacking */
@@ -23,6 +24,7 @@
 
 .screen-area-stackpane .label {
     -fx-text-fill: #333333;
+    -fx-font-weight: normal;
 }
 
 /* AnchorPane - Anchor-based positioning */
@@ -32,6 +34,7 @@
 
 .screen-area-anchorpane .label {
     -fx-text-fill: #333333;
+    -fx-font-weight: normal;
 }
 
 /* BorderPane - Five-region layout */
@@ -41,6 +44,7 @@
 
 .screen-area-borderpane .label {
     -fx-text-fill: #333333;
+    -fx-font-weight: normal;
 }
 
 /* FlowPane - Flowing layout with gaps */
@@ -52,6 +56,7 @@
 
 .screen-area-flowpane .label {
     -fx-text-fill: #333333;
+    -fx-font-weight: normal;
 }
 
 /* GridPane - Grid layout with gaps */
@@ -64,6 +69,7 @@
 
 .screen-area-gridpane .label {
     -fx-text-fill: #333333;
+    -fx-font-weight: normal;
 }
 
 /* HBox - Horizontal box with spacing */
@@ -76,6 +82,7 @@
 
 .screen-area-hbox .label {
     -fx-text-fill: #333333;
+    -fx-font-weight: normal;
 }
 
 /* VBox - Vertical box with spacing */
@@ -88,6 +95,7 @@
 
 .screen-area-vbox .label {
     -fx-text-fill: #333333;
+    -fx-font-weight: normal;
 }
 
 /* TilePane - Tile layout with gaps */
@@ -100,6 +108,7 @@
 
 .screen-area-tilepane .label {
     -fx-text-fill: #333333;
+    -fx-font-weight: normal;
 }
 
 /* ==================== Containers ==================== */
@@ -151,17 +160,23 @@
 
 /* Individual Tab */
 .screen-area-tab {
-    -fx-background-color: transparent;
+    -fx-background-color: #ffffff;
     -fx-padding: 10;
+    -fx-border-color: #d0d0d0 #808080 #808080 #d0d0d0;
+    -fx-border-width: 1;
+    -fx-border-insets: 0;
+    -fx-effect: innershadow(gaussian, rgba(255, 255, 255, 0.8), 2, 0, 1, 1);
 }
 
-/* Ensure labels in tabs have visible text color */
+/* Ensure labels in tabs have visible text color and normal font weight */
 .screen-area-tabpane .label {
     -fx-text-fill: #333333;
+    -fx-font-weight: normal;
 }
 
 .screen-area-tab .label {
     -fx-text-fill: #333333;
+    -fx-font-weight: normal;
 }
 
 /* Accordion - Collapsible sections */

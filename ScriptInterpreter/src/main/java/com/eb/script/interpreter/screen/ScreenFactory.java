@@ -379,6 +379,8 @@ public class ScreenFactory {
                         alignmentBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
                         // Add left padding equal to label width plus spacing to align with labeled controls
                         alignmentBox.setPadding(new javafx.geometry.Insets(0, 0, 0, maxLabelWidth + 5));
+                        // Make container pick on bounds so tooltips on child controls work properly
+                        alignmentBox.setPickOnBounds(false);
                         alignmentBox.getChildren().add(control);
                         nodeToAdd = alignmentBox;
                     }
@@ -1457,6 +1459,8 @@ public class ScreenFactory {
         // Create container based on alignment
         javafx.scene.layout.HBox container = new javafx.scene.layout.HBox(5);
         container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        // Make container pick on bounds so tooltips on child controls work properly
+        container.setPickOnBounds(false);
 
         switch (actualAlignment) {
             case "right":
