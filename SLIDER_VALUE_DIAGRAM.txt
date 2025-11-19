@@ -1,0 +1,92 @@
+┌─────────────────────────────────────────────────────────────────────────┐
+│                      Slider Value Display Feature                       │
+│                                                                          │
+│  Shows the current value of a slider as a label to the right           │
+└─────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│  BEFORE (showSliderValue not specified or false)                        │
+└─────────────────────────────────────────────────────────────────────────┘
+
+   Volume:          [═══════●═════════════]
+
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│  AFTER (showSliderValue: true)                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+
+   Volume:          [═══════●═════════════]  50
+                                            ↑↑↑
+                                      Value Label
+                                   (auto-updates)
+
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│  EXAMPLE: Multiple Sliders with Different Configurations               │
+└─────────────────────────────────────────────────────────────────────────┘
+
+   Volume:          [═══════●═════════════]  50
+                    (showSliderValue: true)
+
+   Brightness:      [══════════●══════════]
+                    (showSliderValue: false - no value shown)
+
+   Temperature:     [════●════════════════]  -5
+                    (showSliderValue: true, supports negative values)
+
+   Opacity:         [═════════════●═══════]  **80**
+                    (showSliderValue: true, custom styling: blue, bold, 16px)
+
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│  Component Structure (Technical)                                        │
+└─────────────────────────────────────────────────────────────────────────┘
+
+When showSliderValue: false (default):
+  ┌─────────┐
+  │ Slider  │
+  └─────────┘
+
+When showSliderValue: true:
+  ┌───────────────────────────┐
+  │         HBox              │
+  │  ┌─────────┐  ┌───────┐  │
+  │  │ Slider  │  │ Label │  │
+  │  └─────────┘  └───────┘  │
+  │   (control)   (value)    │
+  └───────────────────────────┘
+     ↑           ↑
+     │           └─ Updates dynamically
+     └─ Original slider control
+
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│  JSON Configuration Example                                             │
+└─────────────────────────────────────────────────────────────────────────┘
+
+{
+    "name": "volume",
+    "type": "int",
+    "default": 50,
+    "display": {
+        "type": "slider",
+        "min": 0,
+        "max": 100,
+        "labelText": "Volume:",
+        "showSliderValue": true    ← NEW PROPERTY
+    }
+}
+
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│  Key Features                                                           │
+└─────────────────────────────────────────────────────────────────────────┘
+
+✓ Automatic value updates as slider moves
+✓ Smart formatting (50 for integers, 50.5 for decimals)
+✓ Inherits all slider styling (font, color, bold, italic)
+✓ Backward compatible (defaults to false)
+✓ 50px minimum width for consistent appearance
+✓ 10px left padding for proper spacing
+✓ Two-way data binding preserved
+✓ Works with negative value ranges

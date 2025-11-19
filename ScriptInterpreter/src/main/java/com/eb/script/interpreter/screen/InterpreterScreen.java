@@ -786,6 +786,19 @@ public class InterpreterScreen {
             }
         }
 
+        // Extract showSliderValue (for displaying slider value label)
+        if (displayDef.containsKey("showSliderValue")) {
+            Object showSliderValueObj = displayDef.get("showSliderValue");
+            if (showSliderValueObj instanceof Boolean) {
+                metadata.showSliderValue = (Boolean) showSliderValueObj;
+            }
+        } else if (displayDef.containsKey("showslidervalue")) {
+            Object showSliderValueObj = displayDef.get("showslidervalue");
+            if (showSliderValueObj instanceof Boolean) {
+                metadata.showSliderValue = (Boolean) showSliderValueObj;
+            }
+        }
+
         // Extract or set default style
         if (displayDef.containsKey("style")) {
             metadata.style = String.valueOf(displayDef.get("style"));

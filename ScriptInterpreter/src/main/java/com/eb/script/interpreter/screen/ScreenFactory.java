@@ -1570,6 +1570,20 @@ public class ScreenFactory {
      * Updates a control's value based on the variable value.
      */
     private static void updateControlFromValue(Node control, Object value, DisplayItem metadata) {
+        // Handle HBox containing slider (when showSliderValue is true)
+        if (control instanceof javafx.scene.layout.HBox) {
+            javafx.scene.layout.HBox hbox = (javafx.scene.layout.HBox) control;
+            // Check if this HBox contains a Slider as its first child
+            if (!hbox.getChildren().isEmpty() && hbox.getChildren().get(0) instanceof javafx.scene.control.Slider) {
+                javafx.scene.control.Slider slider = (javafx.scene.control.Slider) hbox.getChildren().get(0);
+                if (value instanceof Number) {
+                    slider.setValue(((Number) value).doubleValue());
+                    // The value label will be updated automatically via the listener in AreaItemFactory
+                }
+                return;
+            }
+        }
+        
         if (control instanceof javafx.scene.control.TextField) {
             ((javafx.scene.control.TextField) control).setText(value != null ? String.valueOf(value) : "");
         } else if (control instanceof javafx.scene.control.TextArea) {
@@ -1614,6 +1628,19 @@ public class ScreenFactory {
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
             java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
             DisplayItem metadata) {
+        // Handle HBox containing slider (when showSliderValue is true)
+        if (control instanceof javafx.scene.layout.HBox) {
+            javafx.scene.layout.HBox hbox = (javafx.scene.layout.HBox) control;
+            // Check if this HBox contains a Slider as its first child
+            if (!hbox.getChildren().isEmpty() && hbox.getChildren().get(0) instanceof javafx.scene.control.Slider) {
+                javafx.scene.control.Slider slider = (javafx.scene.control.Slider) hbox.getChildren().get(0);
+                slider.valueProperty().addListener((obs, oldVal, newVal) -> {
+                    screenVars.put(varName, newVal.intValue());
+                });
+                return;
+            }
+        }
+        
         if (control instanceof javafx.scene.control.TextField) {
             ((javafx.scene.control.TextField) control).textProperty().addListener((obs, oldVal, newVal) -> {
                 // Convert the string value to the appropriate type if type info is available
