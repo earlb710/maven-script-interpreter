@@ -1209,19 +1209,14 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 throw error(stmt.getLine(), "Import file not found: " + stmt.filename);
             }
             
-            // Normalize the path to handle different representations (relative vs absolute, etc.)
-            Path normalizedPath;
-            try {
-                normalizedPath = importPath.toRealPath();
-            } catch (IOException e) {
-                // If toRealPath fails, use absolute path as fallback
-                normalizedPath = importPath.toAbsolutePath().normalize();
-            }
-            
-            String importPathStr = normalizedPath.toString();
+            // Normalize the import path as written by the user, maintaining the relative structure
+            // This provides a consistent representation while preserving the user's intent
+            Path normalizedImportPath = Path.of(stmt.filename).normalize();
+            String importKey = normalizedImportPath.toString();
             
             // Check if file has already been imported (prevents circular imports and duplicate imports)
-            if (context.getImportedFiles().contains(importPathStr)) {
+            // We use the normalized form of the import path as written by the user
+            if (context.getImportedFiles().contains(importKey)) {
                 if (context.getOutput() != null) {
                     context.getOutput().printlnOk("Skipped (already imported): " + stmt.filename);
                 }
@@ -1229,7 +1224,8 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             }
             
             // Add to imported files set before processing to prevent circular imports
-            context.getImportedFiles().add(importPathStr);
+            // Store the import path as normalized from what the user wrote
+            context.getImportedFiles().add(importKey);
             
             // Read and parse the imported file
             String importedScript = Files.readString(importPath, StandardCharsets.UTF_8);
