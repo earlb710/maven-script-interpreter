@@ -93,9 +93,8 @@ public class JsonSchemaAutocomplete {
                 // User has typed #, suggest builtin functions
                 suggestions.addAll(getBuiltinSuggestions());
             } else if (partialWord.isEmpty()) {
-                // No partial word yet, suggest '#' to trigger builtins and enum values
+                // No partial word yet, suggest only '#' to trigger builtins
                 suggestions.add("#");
-                suggestions.addAll(getEnumSuggestions(context));
             } else {
                 // User is typing something else, only suggest enum values
                 suggestions.addAll(getEnumSuggestions(context));
