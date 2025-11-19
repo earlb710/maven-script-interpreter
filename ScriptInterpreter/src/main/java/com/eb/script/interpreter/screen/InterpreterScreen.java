@@ -650,22 +650,30 @@ public class InterpreterScreen {
         }
 
         // Check for both camelCase and lowercase versions - promptHelp (placeholder hint)
-        if (displayDef.containsKey("prompthelp")) {
+        if (displayDef.containsKey("promptHelp")) {
+            metadata.promptHelp = String.valueOf(displayDef.get("promptHelp"));
+        } else if (displayDef.containsKey("prompthelp")) {
             metadata.promptHelp = String.valueOf(displayDef.get("prompthelp"));
         }
 
         // Extract labelText (permanent label displayed before/above control)
-        if (displayDef.containsKey("labeltext")) {
+        if (displayDef.containsKey("labelText")) {
+            metadata.labelText = String.valueOf(displayDef.get("labelText"));
+        } else if (displayDef.containsKey("labeltext")) {
             metadata.labelText = String.valueOf(displayDef.get("labeltext"));
         }
 
         // Extract labelText alignment
-        if (displayDef.containsKey("labeltextalignment")) {
+        if (displayDef.containsKey("labelTextAlignment")) {
+            metadata.labelTextAlignment = String.valueOf(displayDef.get("labelTextAlignment")).toLowerCase();
+        } else if (displayDef.containsKey("labeltextalignment")) {
             metadata.labelTextAlignment = String.valueOf(displayDef.get("labeltextalignment")).toLowerCase();
         }
 
         // Extract onClick event handler for buttons - check both camelCase and lowercase
-        if (displayDef.containsKey("onclick")) {
+        if (displayDef.containsKey("onClick")) {
+            metadata.onClick = String.valueOf(displayDef.get("onClick"));
+        } else if (displayDef.containsKey("onclick")) {
             metadata.onClick = String.valueOf(displayDef.get("onclick"));
         }
 
