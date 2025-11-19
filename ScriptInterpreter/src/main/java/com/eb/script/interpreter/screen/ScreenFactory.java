@@ -428,9 +428,17 @@ public class ScreenFactory {
                         tabContent.setStyle(tabContent.getStyle() + " -fx-background-color: transparent;");
                     }
                     
+                    // Wrap tab content in ScrollPane for automatic scrollbars when content is larger than tab
+                    ScrollPane scrollPane = new ScrollPane(tabContent);
+                    scrollPane.setFitToWidth(true);
+                    scrollPane.setFitToHeight(false); // Allow vertical scrolling
+                    scrollPane.setStyle("-fx-background-color: transparent; -fx-background: transparent;");
+                    scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+                    scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+                    
                     Tab tab = new Tab();
                     tab.setText(childArea.screenName != null ? childArea.screenName : childArea.name);
-                    tab.setContent(tabContent);
+                    tab.setContent(scrollPane);
                     tab.setClosable(false); // Tabs not closable by default
                     
                     if (container instanceof TabPane) {

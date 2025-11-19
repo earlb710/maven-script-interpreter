@@ -91,6 +91,11 @@
 
 .screen-area-tabpane .tab-header-area {
     -fx-padding: 5 5 0 5;
+    -fx-background-color: transparent;
+}
+
+.screen-area-tabpane .tab-header-background {
+    -fx-background-color: transparent;
 }
 
 .screen-area-tabpane .tab {
@@ -104,8 +109,8 @@
 }
 
 .screen-area-tabpane .tab-content-area {
-    -fx-background-color: #ffffff;
-    -fx-padding: 10;
+    -fx-background-color: transparent;
+    -fx-padding: 0;
 }
 
 /* Individual Tab */
