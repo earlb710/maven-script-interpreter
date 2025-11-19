@@ -30,11 +30,13 @@ public class EbsHandler implements Handler {
     protected final Debugger dbg;           // debugger bound to the env
     protected TabHandler tabHandler;
     protected StatusBar statusBar;
+    protected final Interpreter interpreter;  // Persistent interpreter to maintain screen state
 
     public EbsHandler(RuntimeContext ctx) {
         this.ctx = ctx;
         this.env = ctx.environment;
         this.dbg = env.getDebugger();
+        this.interpreter = new Interpreter();  // Create persistent interpreter instance
     }
 
     @Override
@@ -86,7 +88,7 @@ public class EbsHandler implements Handler {
                 if (env.isEchoOn() && ctx.statements.length == 1) {
                     EbsStyled.appendStyledText(output, "> " + line + "\n");
                 }
-                new Interpreter().interpret(ctx);
+                interpreter.interpret(ctx);  // Use persistent interpreter instance
             }
         }
     }
