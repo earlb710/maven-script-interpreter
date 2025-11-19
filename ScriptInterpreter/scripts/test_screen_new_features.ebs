@@ -93,10 +93,10 @@ handleScreenEvent(eventData: json) {
     print "    Timestamp: " + eventData.timestamp;
     
     // Check if this is a closed event with fields
-    if eventData.event == "closed" {
+    if (eventData.event == "closed") {
         print "    Output fields collected on close:";
-        if eventData.fields != null {
-            print "    Number of output fields: " + eventData.fields.size();
+        if (eventData.fields != null) {
+            print "    Number of output fields: " + eventData.fields.length;
         }
     }
 }
@@ -137,10 +137,10 @@ handleOutputFields(data: json) {
     print "    Screen: " + data.screenName;
     print "    Event: " + data.event;
     
-    if data.event == "closed" {
+    if (data.event == "closed") {
         print "    Collecting output fields...";
-        if data.fields != null {
-            var int fieldCount = data.fields.size();
+        if (data.fields != null) {
+            var fieldCount: int = data.fields.length;
             print "    Found " + fieldCount + " output field(s)";
             
             // Note: In actual implementation, iterate through fields array
@@ -226,8 +226,8 @@ handleAdvancedEvent(data: json) {
     print "    Screen name: " + data.screenName;
     print "    Event type: " + data.event;
     
-    if data.event == "closed" and data.fields != null {
-        print "    Output fields on close: " + data.fields.size();
+    if (data.event == "closed" && data.fields != null) {
+        print "    Output fields on close: " + data.fields.length;
     }
 }
 
@@ -270,7 +270,7 @@ outputCallback(data: json) {
     print "  Output callback:";
     print "    Event: " + data.event;
     
-    if data.event == "closed" {
+    if (data.event == "closed") {
         print "    Processing output fields...";
         // In real usage, access data.fields array
         print "    Output fields ready for processing";
