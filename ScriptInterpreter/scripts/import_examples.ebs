@@ -1,0 +1,42 @@
+// ============================================================================
+// Import Examples - Demonstrating Import Functionality
+// ============================================================================
+//
+// This script demonstrates the import functionality including:
+// - Subdirectory imports
+// - Spaces in directory/file names
+// - Single and double quotes
+// - Circular import prevention
+//
+// Run this script to see import functionality in action.
+// ============================================================================
+
+print "=== Import Functionality Examples ===";
+print "";
+
+// Example 1: Import from subdirectory
+print "1. Importing from subdirectory (util/stringUtil.ebs)...";
+import "util/stringUtil.ebs";
+print "";
+
+// Example 2: Import from subdirectory with spaces in path
+print "2. Importing from path with spaces (test dir/subdir/helper.ebs)...";
+import "test dir/subdir/helper.ebs";
+print "";
+
+// Example 3: Test the imported functions
+print "3. Testing imported functions:";
+var upperText: string = call toUpper("hello world");
+print "   toUpper('hello world') = " + upperText;
+
+var greeting: string = call greet("EBS User");
+print "   greet('EBS User') = " + greeting;
+print "";
+
+// Example 4: Demonstrate duplicate import prevention
+print "4. Attempting to import util/stringUtil.ebs again...";
+print "   (Should be skipped - already imported)";
+import "util/stringUtil.ebs";
+print "";
+
+print "=== All Examples Completed Successfully ===";
