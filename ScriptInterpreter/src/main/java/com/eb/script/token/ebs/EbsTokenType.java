@@ -67,6 +67,7 @@ public enum EbsTokenType implements LexerToken {
     SCREEN(PrintStyle.KEYWORD, Category.KEYWORD, "screen"),
     SHOW(PrintStyle.KEYWORD, Category.KEYWORD, "show"),
     HIDE(PrintStyle.KEYWORD, Category.KEYWORD, "hide"),
+    CALLBACK(PrintStyle.KEYWORD, Category.KEYWORD, "callback"),
     // --- Property keywords ---
     LENGTH(PrintStyle.KEYWORD, Category.KEYWORD, "length"),
     SIZE(PrintStyle.KEYWORD, Category.KEYWORD, "size"),

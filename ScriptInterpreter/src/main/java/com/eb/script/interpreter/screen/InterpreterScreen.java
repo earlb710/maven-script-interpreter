@@ -456,6 +456,17 @@ public class InterpreterScreen {
                         context.getOutput().printlnInfo("Screen '" + stmt.name + "' is already showing");
                     }
                 }
+                
+                // Invoke callback if specified
+                if (stmt.callbackName != null) {
+                    try {
+                        invokeScreenCallback(stmt.callbackName, stmt.name, "shown", stmt.getLine());
+                    } catch (InterpreterError e) {
+                        if (context.getOutput() != null) {
+                            context.getOutput().printlnError("Error invoking callback '" + stmt.callbackName + "': " + e.getMessage());
+                        }
+                    }
+                }
             });
 
         } catch (InterpreterError ex) {
@@ -463,6 +474,29 @@ public class InterpreterScreen {
         } finally {
             interpreter.environment().popCallStack();
         }
+    }
+    
+    /**
+     * Invoke a screen callback function with screen event data as JSON
+     */
+    private void invokeScreenCallback(String callbackName, String screenName, String event, int line) throws InterpreterError {
+        // Create JSON event data
+        Map<String, Object> eventData = new java.util.HashMap<>();
+        eventData.put("screen", screenName);
+        eventData.put("event", event);
+        eventData.put("timestamp", System.currentTimeMillis());
+        
+        // Create a call statement to invoke the callback with the JSON data
+        // Build the call: "call callbackName(eventData);"
+        List<com.eb.script.interpreter.statement.Parameter> paramsList = new ArrayList<>();
+        paramsList.add(new com.eb.script.interpreter.statement.Parameter("eventData", DataType.JSON, 
+            new com.eb.script.interpreter.expression.LiteralExpression(DataType.JSON, eventData)));
+        
+        com.eb.script.interpreter.statement.CallStatement callStmt = 
+            new com.eb.script.interpreter.statement.CallStatement(line, callbackName, paramsList);
+        
+        // Execute the call statement
+        interpreter.visitCallStatement(callStmt);
     }
 
     /**

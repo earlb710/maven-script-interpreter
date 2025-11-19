@@ -1494,8 +1494,15 @@ public class Parser {
             consume(EbsTokenType.RPAREN, "Expected ')' after parameters.");
         }
 
+        // Check for optional callback: callback name
+        String callbackName = null;
+        if (match(EbsTokenType.CALLBACK)) {
+            EbsToken callbackTok = consume(EbsTokenType.IDENTIFIER, "Expected callback function name after 'callback'.");
+            callbackName = (String) callbackTok.literal;
+        }
+
         consume(EbsTokenType.SEMICOLON, "Expected ';' after 'show screen <name>'.");
-        return new ScreenShowStatement(line, screenName, parameters);
+        return new ScreenShowStatement(line, screenName, parameters, callbackName);
     }
 
     private Statement hideScreenStatement() throws ParseError {

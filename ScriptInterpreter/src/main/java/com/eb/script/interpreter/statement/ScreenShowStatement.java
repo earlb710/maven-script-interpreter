@@ -8,17 +8,27 @@ public class ScreenShowStatement extends Statement {
 
     public final String name;          // required screen name
     public final List<Expression> parameters;  // optional parameters
+    public final String callbackName;  // optional callback function name
 
     public ScreenShowStatement(int line, String name) {
         super(line);
         this.name = name;
         this.parameters = null;
+        this.callbackName = null;
     }
 
     public ScreenShowStatement(int line, String name, List<Expression> parameters) {
         super(line);
         this.name = name;
         this.parameters = parameters;
+        this.callbackName = null;
+    }
+
+    public ScreenShowStatement(int line, String name, List<Expression> parameters, String callbackName) {
+        super(line);
+        this.name = name;
+        this.parameters = parameters;
+        this.callbackName = callbackName;
     }
 
     @Override
@@ -28,9 +38,13 @@ public class ScreenShowStatement extends Statement {
 
     @Override
     public String toString() {
+        StringBuilder sb = new StringBuilder("show screen " + name);
         if (parameters != null && !parameters.isEmpty()) {
-            return "show screen " + name + "(...)";
+            sb.append("(...)");
         }
-        return "show screen " + name;
+        if (callbackName != null) {
+            sb.append(" callback ").append(callbackName);
+        }
+        return sb.toString();
     }
 }
