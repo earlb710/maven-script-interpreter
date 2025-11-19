@@ -39,6 +39,9 @@ statement    = varDecl
              | returnStmt
              | printStmt
              | assignmentStmt
+             | screenStmt                  (*  screen <name> = {...};           *)
+             | showScreenStmt              (*  show screen <name> [(...)] ;     *)
+             | hideScreenStmt              (*  hide screen <name>;              *)
              | comment                     (*  // ...  — ignored by parser      *)
              ;
 
@@ -207,6 +210,73 @@ literal      = integer | long | float | double | string | date | boolean | null 
 (* Properties *)
 lengthExpr   = postfix "." "length" ;   (* already captured in postfix above *)
 
+SCREEN STATEMENTS
+-----------------
+(* Screen definitions allow creating JavaFX windows with UI controls *)
+
+screenStmt       = "screen" identifier "=" screenSpec ";" ;
+                   (* Define a screen with configuration *)
+                   (* Example: screen myScreen = { title: "My Screen", width: 800, height: 600 }; *)
+
+showScreenStmt   = "show" "screen" identifier ( "(" expressionList? ")" )? ";" ;
+                   (* Show a defined screen, optionally with parameters *)
+                   (* Examples:
+                      show screen myScreen;
+                      show screen myScreen(x, y);
+                      show screen myScreen(800, 600, "fullscreen");
+                   *)
+
+hideScreenStmt   = "hide" "screen" identifier ";" ;
+                   (* Hide a visible screen *)
+                   (* Example: hide screen myScreen; *)
+
+screenSpec       = jsonLiteral | identifier ;
+                   (* Screen configuration as JSON or reference to a variable *)
+                   (* JSON format:
+                      {
+                        title: "Window Title",
+                        width: 800,
+                        height: 600,
+                        maximize: false,
+                        singleton: true,
+                        vars: [...],
+                        area: [...]
+                      }
+                   *)
+
+expressionList   = expression ( "," expression )* ;
+                   (* List of expressions for parameters *)
+
+SCREEN CONFIGURATION
+--------------------
+(* Screen JSON specification supports the following properties:
+   - title: string            - Window title (default: "Screen <name>")
+   - width: number            - Window width in pixels (default: 800)
+   - height: number           - Window height in pixels (default: 600)
+   - maximize: boolean        - Start maximized (default: false)
+   - singleton: boolean       - Reuse same window instance (default: true)
+   - vars: array              - Variable definitions with display metadata
+   - sets: array              - Variable sets for organizing variables
+   - area: array              - Layout area definitions with items
+
+   Example:
+   screen myForm = {
+     title: "User Form",
+     width: 600,
+     height: 400,
+     vars: [
+       { name: "username", type: "string", display: { type: "textfield", labelText: "Username" } },
+       { name: "age", type: "int", display: { type: "spinner", min: 0, max: 120 } }
+     ],
+     area: [
+       { name: "main", type: "vbox", items: [ ... ] }
+     ]
+   };
+
+   show screen myForm;
+   hide screen myForm;
+*)
+
 COMMENTS
 --------
 lineComment  = "//" .* ("\n"|EOF) ;       (* Parser ignores these via the COMMENT token *)
@@ -221,3 +291,7 @@ NOTES
   – '+' '-' (left-assoc), '*' '/' (intended left-assoc), '^' (right-assoc), '!' unary
   – 'and' 'or' boolean connectives
   – Relational operators are present in tokens but the dedicated method in Parser.java is commented/stubbed.
+• Screen statements support JavaFX window creation with declarative UI configuration
+• Screen show statements can accept optional parameters for runtime configuration
+• Screens can be singleton (reuse same window) or multi-instance (create new windows)
+
