@@ -17,6 +17,8 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
@@ -340,9 +342,14 @@ public class ScreenFactory {
             // Add items to container based on container type
             for (AreaItem item : sortedItems) {
                 // Get metadata for the item
-                DisplayItem metadata = item.displayItem;
-                if (metadata == null && item.varRef != null && metadataProvider != null) {
+                // Start with var-level metadata (from vars section), then merge item-level metadata (from area items display)
+                DisplayItem metadata = null;
+                if (item.varRef != null && metadataProvider != null) {
                     metadata = metadataProvider.apply(screenName, item.varRef);
+                }
+                // If item has its own display metadata, merge it (item-level overwrites var-level)
+                if (item.displayItem != null) {
+                    metadata = mergeDisplayMetadata(metadata, item.displayItem);
                 }
 
                 // Create the item using AreaItemFactory
@@ -414,11 +421,65 @@ public class ScreenFactory {
         // Add nested child areas to the container
         if (areaDef.childAreas != null && !areaDef.childAreas.isEmpty()) {
             for (AreaDefinition childArea : areaDef.childAreas) {
-                Region childContainer = createAreaWithItems(childArea, screenName, metadataProvider, screenVars, varTypes, onClickHandler, boundControls);
-
-                // Add the child container to the parent container
-                // Treat child areas as regular nodes
-                addChildAreaToContainer(container, childContainer, areaDef.areaType);
+                // Special handling for Tab areas when parent is TabPane
+                if (areaDef.areaType == AreaType.TABPANE && childArea.areaType == AreaType.TAB) {
+                    // Tab should contain its child areas directly, not wrapped in an extra container
+                    // Process the Tab's child areas to get the actual content
+                    Region tabContent;
+                    
+                    if (childArea.childAreas != null && !childArea.childAreas.isEmpty()) {
+                        // If Tab has multiple child areas, create a VBox to hold them
+                        if (childArea.childAreas.size() == 1) {
+                            // Single child area - use it directly
+                            tabContent = createAreaWithItems(childArea.childAreas.get(0), screenName, metadataProvider, screenVars, varTypes, onClickHandler, boundControls);
+                        } else {
+                            // Multiple child areas - wrap in VBox
+                            javafx.scene.layout.VBox vbox = new javafx.scene.layout.VBox(10);
+                            for (AreaDefinition tabChildArea : childArea.childAreas) {
+                                Region childContent = createAreaWithItems(tabChildArea, screenName, metadataProvider, screenVars, varTypes, onClickHandler, boundControls);
+                                vbox.getChildren().add(childContent);
+                            }
+                            tabContent = vbox;
+                        }
+                    } else if (childArea.items != null && !childArea.items.isEmpty()) {
+                        // Tab has items directly (no child areas)
+                        tabContent = createAreaWithItems(childArea, screenName, metadataProvider, screenVars, varTypes, onClickHandler, boundControls);
+                    } else {
+                        // Empty tab - create empty pane
+                        tabContent = new javafx.scene.layout.Pane();
+                    }
+                    
+                    // Ensure tab content has transparent background
+                    if (tabContent.getStyle() == null || tabContent.getStyle().isEmpty()) {
+                        tabContent.setStyle("-fx-background-color: transparent;");
+                    } else if (!tabContent.getStyle().contains("-fx-background-color")) {
+                        tabContent.setStyle(tabContent.getStyle() + " -fx-background-color: transparent;");
+                    }
+                    
+                    // Wrap tab content in ScrollPane for automatic scrollbars when content is larger than tab
+                    ScrollPane scrollPane = new ScrollPane(tabContent);
+                    scrollPane.setFitToWidth(true);
+                    scrollPane.setFitToHeight(false); // Allow vertical scrolling when content exceeds viewport
+                    scrollPane.setStyle("-fx-background-color: transparent; -fx-background: transparent;");
+                    scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+                    scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+                    
+                    Tab tab = new Tab();
+                    tab.setText(childArea.displayName != null ? childArea.displayName : childArea.name);
+                    tab.setContent(scrollPane);
+                    tab.setClosable(false); // Tabs not closable by default
+                    
+                    if (container instanceof TabPane) {
+                        ((TabPane) container).getTabs().add(tab);
+                    }
+                } else {
+                    // Normal nested area handling
+                    Region childContainer = createAreaWithItems(childArea, screenName, metadataProvider, screenVars, varTypes, onClickHandler, boundControls);
+                    
+                    // Add the child container to the parent container
+                    // Treat child areas as regular nodes
+                    addChildAreaToContainer(container, childContainer, areaDef.areaType, childArea);
+                }
             }
         }
 
@@ -683,7 +744,7 @@ public class ScreenFactory {
      * Adds a child area (nested container) to a parent container. Similar to
      * addItemToContainer but for child areas.
      */
-    private static void addChildAreaToContainer(Region container, Region childArea, AreaType areaType) {
+    private static void addChildAreaToContainer(Region container, Region childArea, AreaType areaType, AreaDefinition childAreaDef) {
         if (container instanceof VBox) {
             ((VBox) container).getChildren().add(childArea);
         } else if (container instanceof HBox) {
@@ -926,6 +987,9 @@ public class ScreenFactory {
         area.style = getStringValue(areaDef, "style", area.areaType.getDefaultStyle());
 
         area.screenName = screenName;
+        
+        // Extract displayName for UI labels (e.g., tab labels)
+        area.displayName = getStringValue(areaDef, "displayName", null);
 
         // Process items in the area
         if (areaDef.containsKey("items")) {
@@ -1059,8 +1123,121 @@ public class ScreenFactory {
         // Extract or set default style
         metadata.style = getStringValue(displayDef, "style", metadata.itemType.getDefaultStyle());
         metadata.screenName = screenName;
+        
+        // Extract promptHelp (placeholder text for text inputs)
+        metadata.promptHelp = getStringValue(displayDef, "promptHelp", getStringValue(displayDef, "prompt_help", null));
+        
+        // Extract labelText (permanent label displayed before/above control - used for buttons and labels)
+        metadata.labelText = getStringValue(displayDef, "labelText", getStringValue(displayDef, "label_text", null));
+        
+        // Extract labelText alignment
+        metadata.labelTextAlignment = getStringValue(displayDef, "labelTextAlignment", getStringValue(displayDef, "label_text_alignment", null));
+        
+        // Extract onClick event handler for buttons
+        metadata.onClick = getStringValue(displayDef, "onClick", getStringValue(displayDef, "on_click", null));
+        
+        // Extract options for selection controls
+        if (displayDef.containsKey("options")) {
+            Object optionsObj = displayDef.get("options");
+            if (optionsObj instanceof java.util.List) {
+                metadata.options = new ArrayList<>();
+                for (Object opt : (java.util.List<?>) optionsObj) {
+                    metadata.options.add(String.valueOf(opt));
+                }
+            }
+        }
+        
+        // Extract styling properties
+        metadata.labelColor = getStringValue(displayDef, "labelColor", getStringValue(displayDef, "label_color", null));
+        metadata.labelBold = getBooleanValue(displayDef, "labelBold", getBooleanValue(displayDef, "label_bold", null));
+        metadata.labelItalic = getBooleanValue(displayDef, "labelItalic", getBooleanValue(displayDef, "label_italic", null));
+        metadata.labelFontSize = getStringValue(displayDef, "labelFontSize", getStringValue(displayDef, "label_font_size", null));
+        metadata.itemFontSize = getStringValue(displayDef, "itemFontSize", getStringValue(displayDef, "item_font_size", null));
+        metadata.itemColor = getStringValue(displayDef, "itemColor", getStringValue(displayDef, "item_color", null));
+        metadata.itemBold = getBooleanValue(displayDef, "itemBold", getBooleanValue(displayDef, "item_bold", null));
+        metadata.itemItalic = getBooleanValue(displayDef, "itemItalic", getBooleanValue(displayDef, "item_italic", null));
+        metadata.maxLength = getIntValue(displayDef, "maxLength", getIntValue(displayDef, "max_length", null));
 
         return metadata;
+    }
+
+    /**
+     * Merges two DisplayItem metadata objects.
+     * The overlay metadata takes precedence over base metadata for non-null fields.
+     * 
+     * @param base The base metadata (typically from var definition)
+     * @param overlay The overlay metadata (typically from area item display)
+     * @return Merged metadata with overlay values taking precedence
+     */
+    private static DisplayItem mergeDisplayMetadata(DisplayItem base, DisplayItem overlay) {
+        // If no base, return overlay
+        if (base == null) {
+            return overlay;
+        }
+        // If no overlay, return base
+        if (overlay == null) {
+            return base;
+        }
+        
+        // Create a new DisplayItem with base values
+        DisplayItem merged = new DisplayItem();
+        
+        // Copy all fields from base first
+        merged.itemType = base.itemType;
+        merged.type = base.type;
+        merged.cssClass = base.cssClass;
+        merged.mandatory = base.mandatory;
+        merged.caseFormat = base.caseFormat;
+        merged.min = base.min;
+        merged.max = base.max;
+        merged.style = base.style;
+        merged.screenName = base.screenName;
+        merged.alignment = base.alignment;
+        merged.pattern = base.pattern;
+        merged.promptHelp = base.promptHelp;
+        merged.labelText = base.labelText;
+        merged.labelTextAlignment = base.labelTextAlignment;
+        merged.options = base.options;
+        merged.labelColor = base.labelColor;
+        merged.labelBold = base.labelBold;
+        merged.labelItalic = base.labelItalic;
+        merged.labelFontSize = base.labelFontSize;
+        merged.itemFontSize = base.itemFontSize;
+        merged.maxLength = base.maxLength;
+        merged.itemColor = base.itemColor;
+        merged.itemBold = base.itemBold;
+        merged.itemItalic = base.itemItalic;
+        merged.onClick = base.onClick;
+        
+        // Override with non-null overlay values
+        if (overlay.itemType != null) merged.itemType = overlay.itemType;
+        if (overlay.type != null) merged.type = overlay.type;
+        if (overlay.cssClass != null) merged.cssClass = overlay.cssClass;
+        // Always use overlay's mandatory flag if it's been explicitly set (even if false)
+        merged.mandatory = overlay.mandatory;
+        if (overlay.caseFormat != null) merged.caseFormat = overlay.caseFormat;
+        if (overlay.min != null) merged.min = overlay.min;
+        if (overlay.max != null) merged.max = overlay.max;
+        if (overlay.style != null) merged.style = overlay.style;
+        if (overlay.screenName != null) merged.screenName = overlay.screenName;
+        if (overlay.alignment != null) merged.alignment = overlay.alignment;
+        if (overlay.pattern != null) merged.pattern = overlay.pattern;
+        if (overlay.promptHelp != null) merged.promptHelp = overlay.promptHelp;
+        if (overlay.labelText != null) merged.labelText = overlay.labelText;
+        if (overlay.labelTextAlignment != null) merged.labelTextAlignment = overlay.labelTextAlignment;
+        if (overlay.options != null) merged.options = overlay.options;
+        if (overlay.labelColor != null) merged.labelColor = overlay.labelColor;
+        if (overlay.labelBold != null) merged.labelBold = overlay.labelBold;
+        if (overlay.labelItalic != null) merged.labelItalic = overlay.labelItalic;
+        if (overlay.labelFontSize != null) merged.labelFontSize = overlay.labelFontSize;
+        if (overlay.itemFontSize != null) merged.itemFontSize = overlay.itemFontSize;
+        if (overlay.maxLength != null) merged.maxLength = overlay.maxLength;
+        if (overlay.itemColor != null) merged.itemColor = overlay.itemColor;
+        if (overlay.itemBold != null) merged.itemBold = overlay.itemBold;
+        if (overlay.itemItalic != null) merged.itemItalic = overlay.itemItalic;
+        if (overlay.onClick != null) merged.onClick = overlay.onClick;
+        
+        return merged;
     }
 
     // Helper methods for safe value extraction from Maps
@@ -1128,9 +1305,13 @@ public class ScreenFactory {
         javafx.scene.text.Text measuringText = new javafx.scene.text.Text();
 
         for (AreaItem item : items) {
-            DisplayItem metadata = item.displayItem;
-            if (metadata == null && item.varRef != null && metadataProvider != null) {
+            // Get metadata with same merge logic as createAreaWithItems
+            DisplayItem metadata = null;
+            if (item.varRef != null && metadataProvider != null) {
                 metadata = metadataProvider.apply(screenName, item.varRef);
+            }
+            if (item.displayItem != null) {
+                metadata = mergeDisplayMetadata(metadata, item.displayItem);
             }
 
             // Only measure labels for controls that will be wrapped (not Label or Button controls)

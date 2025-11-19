@@ -22,6 +22,8 @@ public class AreaDefinition {
     public String style;
     // Associated screen name
     public String screenName;
+    // Display name for UI elements (e.g., tab labels)
+    public String displayName;
     // Items in this area
     public List<AreaItem> items = new ArrayList<>();
     // Nested child areas (areas within areas)

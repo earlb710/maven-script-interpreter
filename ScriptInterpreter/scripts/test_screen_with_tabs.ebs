@@ -1,0 +1,543 @@
+// Test Script: Screen with 3 Tabs and Master Client Record
+// Description: Demonstrates a screen with a master client detail record above 3 tabs
+//              Tab 1 and Tab 2 have items and buttons with tooltips of different lengths in multiple columns
+//              Tab 3 displays a summary of values from Tab 1 and Tab 2
+// Author: EBS Test Suite
+// Date: 2025-11-18
+
+screen tabTestScreen = {
+    "title": "Master Client Record with Tabs - Test Screen",
+    "width": 900,
+    "height": 700,
+    "maximize": false,
+    "vars": [
+        // Master Client Record Variables (displayed above tabs)
+        {
+            "name": "clientId",
+            "type": "string",
+            "default": "CLT-001",
+            "display": {
+                "type": "textfield",
+                "labelText": "Client ID:",
+                "labelTextAlignment": "left",
+                "promptHelp": "Unique client identifier"
+            }
+        },
+        {
+            "name": "clientName",
+            "type": "string",
+            "default": "Acme Corporation",
+            "display": {
+                "type": "textfield",
+                "labelText": "Client Name:",
+                "labelTextAlignment": "left",
+                "promptHelp": "Full legal name of the client"
+            }
+        },
+        {
+            "name": "clientStatus",
+            "type": "string",
+            "default": "Active",
+            "display": {
+                "type": "combobox",
+                "labelText": "Status:",
+                "labelTextAlignment": "left",
+                "options": ["Active", "Inactive", "Pending", "Suspended"]
+            }
+        },
+        
+        // Tab 1 Variables - Contact Information
+        {
+            "name": "contactName",
+            "type": "string",
+            "default": "John Smith",
+            "display": {
+                "type": "textfield",
+                "labelText": "Contact Name:",
+                "labelTextAlignment": "left",
+                "promptHelp": "Primary contact person name"
+            }
+        },
+        {
+            "name": "email",
+            "type": "string",
+            "default": "john.smith@acme.com",
+            "display": {
+                "type": "textfield",
+                "labelText": "Email:",
+                "labelTextAlignment": "left",
+                "promptHelp": "Contact email address for correspondence"
+            }
+        },
+        {
+            "name": "phone",
+            "type": "string",
+            "default": "555-0123",
+            "display": {
+                "type": "textfield",
+                "labelText": "Phone:",
+                "labelTextAlignment": "left",
+                "promptHelp": "Primary phone number"
+            }
+        },
+        {
+            "name": "extension",
+            "type": "string",
+            "default": "1234",
+            "display": {
+                "type": "textfield",
+                "labelText": "Extension:",
+                "labelTextAlignment": "left",
+                "promptHelp": "Phone extension"
+            }
+        },
+        {
+            "name": "department",
+            "type": "string",
+            "default": "Sales",
+            "display": {
+                "type": "combobox",
+                "labelText": "Department:",
+                "labelTextAlignment": "left",
+                "options": ["Sales", "Support", "Finance", "Operations", "IT"]
+            }
+        },
+        {
+            "name": "preferredContact",
+            "type": "string",
+            "default": "Email",
+            "display": {
+                "type": "choicebox",
+                "labelText": "Preferred Contact:",
+                "labelTextAlignment": "left",
+                "options": ["Email", "Phone", "SMS", "Mail"]
+            }
+        },
+        {
+            "name": "tab1Action",
+            "type": "string",
+            "default": ""
+        },
+        
+        // Tab 2 Variables - Account Details
+        {
+            "name": "accountType",
+            "type": "string",
+            "default": "Premium",
+            "display": {
+                "type": "combobox",
+                "labelText": "Account Type:",
+                "labelTextAlignment": "left",
+                "options": ["Basic", "Standard", "Premium", "Enterprise"]
+            }
+        },
+        {
+            "name": "monthlyBudget",
+            "type": "double",
+            "default": 5000.00,
+            "display": {
+                "type": "textfield",
+                "labelText": "Monthly Budget:",
+                "labelTextAlignment": "left",
+                "promptHelp": "Monthly spending budget in USD"
+            }
+        },
+        {
+            "name": "contractTerm",
+            "type": "int",
+            "default": 12,
+            "display": {
+                "type": "spinner",
+                "min": 1,
+                "max": 60,
+                "labelText": "Contract Term (months):",
+                "labelTextAlignment": "left"
+            }
+        },
+        {
+            "name": "autoRenewal",
+            "type": "bool",
+            "default": true,
+            "display": {
+                "type": "checkbox",
+                "labelText": "Auto-Renewal Enabled:",
+                "labelTextAlignment": "left"
+            }
+        },
+        {
+            "name": "priority",
+            "type": "int",
+            "default": 3,
+            "display": {
+                "type": "slider",
+                "min": 1,
+                "max": 5,
+                "labelText": "Priority Level:",
+                "labelTextAlignment": "left"
+            }
+        },
+        {
+            "name": "accountNotes",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textarea",
+                "labelText": "Account Notes:",
+                "labelTextAlignment": "left",
+                "promptHelp": "Additional notes about this account"
+            }
+        },
+        {
+            "name": "tab2Action",
+            "type": "string",
+            "default": ""
+        },
+        
+        // Tab 3 Variables - Summary (read-only display)
+        {
+            "name": "summaryText",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textarea",
+                "labelText": "Client Summary:",
+                "labelTextAlignment": "left"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainLayout",
+            "type": "vbox",
+            "style": "-fx-spacing: 10; -fx-padding: 15;",
+            "areas": [
+                {
+                    "name": "masterRecord",
+                    "type": "gridpane",
+                    "style": "-fx-hgap: 20; -fx-vgap: 10; -fx-padding: 10; -fx-background-color: #f0f0f0; -fx-border-color: #cccccc; -fx-border-width: 1;",
+                    "items": [
+                        {
+                            "name": "clientIdField",
+                            "varRef": "clientId",
+                            "sequence": 1,
+                            "layoutPos": "0,0",
+                            "prefWidth": "250",
+                            "tooltip": "Short tooltip"
+                        },
+                        {
+                            "name": "clientNameField",
+                            "varRef": "clientName",
+                            "sequence": 2,
+                            "layoutPos": "0,1",
+                            "prefWidth": "250",
+                            "tooltip": "This is a medium length tooltip that provides more information about the client name field"
+                        },
+                        {
+                            "name": "clientStatusField",
+                            "varRef": "clientStatus",
+                            "sequence": 3,
+                            "layoutPos": "0,2",
+                            "prefWidth": "200",
+                            "tooltip": "This is a much longer tooltip that spans multiple lines and provides extensive information about the status field. It demonstrates how tooltips of varying lengths are displayed in the user interface. The status indicates the current state of the client account in the system."
+                        }
+                    ]
+                },
+                {
+                    "name": "tabPane",
+                    "type": "tabpane",
+                    "layout": "fill",
+                    "areas": [
+                        {
+                            "name": "contactTab",
+                            "type": "tab",
+                            "displayName": "Contact Information",
+                            "areas": [
+                                {
+                                    "name": "contactGrid",
+                                    "type": "gridpane",
+                                    "style": "-fx-hgap: 20; -fx-vgap: 15; -fx-padding: 20;",
+                                    "items": [
+                                        {
+                                            "name": "contactNameField",
+                                            "varRef": "contactName",
+                                            "sequence": 1,
+                                            "layoutPos": "0,0",
+                                            "prefWidth": "250",
+                                            "tooltip": "Primary contact person"
+                                        },
+                                        {
+                                            "name": "departmentField",
+                                            "varRef": "department",
+                                            "sequence": 2,
+                                            "layoutPos": "0,1",
+                                            "prefWidth": "250",
+                                            "tooltip": "Select the department this contact belongs to"
+                                        },
+                                        {
+                                            "name": "emailField",
+                                            "varRef": "email",
+                                            "sequence": 3,
+                                            "layoutPos": "1,0",
+                                            "prefWidth": "250",
+                                            "tooltip": "This is the primary email address used for all correspondence with this contact. Make sure it is valid and monitored regularly."
+                                        },
+                                        {
+                                            "name": "phoneField",
+                                            "varRef": "phone",
+                                            "sequence": 4,
+                                            "layoutPos": "1,1",
+                                            "prefWidth": "250",
+                                            "tooltip": "Main phone number"
+                                        },
+                                        {
+                                            "name": "extensionField",
+                                            "varRef": "extension",
+                                            "sequence": 5,
+                                            "layoutPos": "2,0",
+                                            "prefWidth": "150",
+                                            "tooltip": "Extension number for direct dial"
+                                        },
+                                        {
+                                            "name": "preferredContactField",
+                                            "varRef": "preferredContact",
+                                            "sequence": 6,
+                                            "layoutPos": "2,1",
+                                            "prefWidth": "150",
+                                            "tooltip": "This setting determines which communication method will be used by default when contacting this person. The system will respect this preference whenever possible."
+                                        },
+                                        {
+                                            "name": "updateContactButton",
+                                            "sequence": 7,
+                                            "layoutPos": "3,0",
+                                            "display": {
+                                                "type": "button",
+                                                "labelText": "Update Contact",
+                                                "onClick": "tabTestScreen.tab1Action = \"Contact information updated\"; print \"Tab 1: Contact information updated\";"
+                                            },
+                                            "tooltip": "Click to save changes"
+                                        },
+                                        {
+                                            "name": "clearContactButton",
+                                            "sequence": 8,
+                                            "layoutPos": "3,1",
+                                            "display": {
+                                                "type": "button",
+                                                "labelText": "Clear Fields",
+                                                "onClick": "tabTestScreen.contactName = \"\"; tabTestScreen.email = \"\"; tabTestScreen.phone = \"\"; tabTestScreen.extension = \"\"; tabTestScreen.tab1Action = \"Fields cleared\"; print \"Tab 1: Fields cleared\";"
+                                            },
+                                            "tooltip": "This button will clear all the contact information fields in this tab. Use with caution as this action cannot be undone without manually re-entering the data."
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "name": "accountTab",
+                            "type": "tab",
+                            "displayName": "Account Details",
+                            "areas": [
+                                {
+                                    "name": "accountGrid",
+                                    "type": "gridpane",
+                                    "style": "-fx-hgap: 20; -fx-vgap: 15; -fx-padding: 20;",
+                                    "items": [
+                                        {
+                                            "name": "accountTypeField",
+                                            "varRef": "accountType",
+                                            "sequence": 1,
+                                            "layoutPos": "0,0",
+                                            "prefWidth": "250",
+                                            "tooltip": "Account tier level"
+                                        },
+                                        {
+                                            "name": "monthlyBudgetField",
+                                            "varRef": "monthlyBudget",
+                                            "sequence": 2,
+                                            "layoutPos": "0,1",
+                                            "prefWidth": "250",
+                                            "tooltip": "This is the approved monthly spending limit for this account in US Dollars. The system will send alerts when spending approaches or exceeds this limit."
+                                        },
+                                        {
+                                            "name": "contractTermField",
+                                            "varRef": "contractTerm",
+                                            "sequence": 3,
+                                            "layoutPos": "1,0",
+                                            "prefWidth": "200",
+                                            "tooltip": "Contract duration"
+                                        },
+                                        {
+                                            "name": "autoRenewalField",
+                                            "varRef": "autoRenewal",
+                                            "sequence": 4,
+                                            "layoutPos": "1,1",
+                                            "prefWidth": "200",
+                                            "tooltip": "Enable automatic contract renewal at end of term. When enabled, the contract will automatically renew for another term period unless cancelled beforehand."
+                                        },
+                                        {
+                                            "name": "priorityField",
+                                            "varRef": "priority",
+                                            "sequence": 5,
+                                            "layoutPos": "2,0",
+                                            "prefWidth": "250",
+                                            "tooltip": "Service priority (1=Lowest, 5=Highest)"
+                                        },
+                                        {
+                                            "name": "accountNotesField",
+                                            "varRef": "accountNotes",
+                                            "sequence": 6,
+                                            "layoutPos": "3,0",
+                                            "colSpan": 2,
+                                            "prefWidth": "520",
+                                            "prefHeight": "100",
+                                            "tooltip": "Additional account information and special notes"
+                                        },
+                                        {
+                                            "name": "saveAccountButton",
+                                            "sequence": 7,
+                                            "layoutPos": "4,0",
+                                            "display": {
+                                                "type": "button",
+                                                "labelText": "Save Account",
+                                                "onClick": "tabTestScreen.tab2Action = \"Account details saved\"; print \"Tab 2: Account details saved\";"
+                                            },
+                                            "tooltip": "Save account changes"
+                                        },
+                                        {
+                                            "name": "resetAccountButton",
+                                            "sequence": 8,
+                                            "layoutPos": "4,1",
+                                            "display": {
+                                                "type": "button",
+                                                "labelText": "Reset to Defaults",
+                                                "onClick": "tabTestScreen.accountType = \"Premium\"; tabTestScreen.monthlyBudget = 5000.00; tabTestScreen.contractTerm = 12; tabTestScreen.autoRenewal = true; tabTestScreen.priority = 3; tabTestScreen.accountNotes = \"\"; tabTestScreen.tab2Action = \"Reset to defaults\"; print \"Tab 2: Reset to default values\";"
+                                            },
+                                            "tooltip": "This button resets all account detail fields to their default values. Any unsaved changes will be lost. This is useful when you want to start over with fresh default settings."
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "name": "summaryTab",
+                            "type": "tab",
+                            "displayName": "Summary",
+                            "areas": [
+                                {
+                                    "name": "summaryLayout",
+                                    "type": "vbox",
+                                    "style": "-fx-spacing: 15; -fx-padding: 20;",
+                                    "items": [
+                                        {
+                                            "name": "summaryTextField",
+                                            "varRef": "summaryText",
+                                            "sequence": 1,
+                                            "prefWidth": "800",
+                                            "prefHeight": "400",
+                                            "tooltip": "This summary displays all key information from the Contact Information and Account Details tabs in a consolidated view for easy review."
+                                        },
+                                        {
+                                            "name": "refreshSummaryButton",
+                                            "sequence": 2,
+                                            "display": {
+                                                "type": "button",
+                                                "labelText": "Refresh Summary",
+                                                "onClick": "tabTestScreen.summaryText = \"=== CLIENT SUMMARY ===\\n\\nMASTER RECORD:\\n  Client ID: \" + tabTestScreen.clientId + \"\\n  Client Name: \" + tabTestScreen.clientName + \"\\n  Status: \" + tabTestScreen.clientStatus + \"\\n\\nCONTACT INFORMATION:\\n  Name: \" + tabTestScreen.contactName + \"\\n  Email: \" + tabTestScreen.email + \"\\n  Phone: \" + tabTestScreen.phone + \" ext. \" + tabTestScreen.extension + \"\\n  Department: \" + tabTestScreen.department + \"\\n  Preferred Contact: \" + tabTestScreen.preferredContact + \"\\n  Last Action: \" + tabTestScreen.tab1Action + \"\\n\\nACCOUNT DETAILS:\\n  Account Type: \" + tabTestScreen.accountType + \"\\n  Monthly Budget: $\" + tabTestScreen.monthlyBudget + \"\\n  Contract Term: \" + tabTestScreen.contractTerm + \" months\\n  Auto-Renewal: \" + tabTestScreen.autoRenewal + \"\\n  Priority Level: \" + tabTestScreen.priority + \"/5\\n  Last Action: \" + tabTestScreen.tab2Action + \"\\n  Notes: \" + tabTestScreen.accountNotes + \"\\n\\n=== END SUMMARY ===\"; print \"Summary refreshed\";"
+                                            },
+                                            "tooltip": "Click to update the summary with current values from all tabs"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+};
+
+// Print initial information
+print "=========================================";
+print "TEST SCREEN WITH TABS";
+print "=========================================";
+print "";
+print "This screen demonstrates:";
+print "1. A master client detail record displayed above the tabs";
+print "2. Three tabs with different purposes:";
+print "   - Tab 1 (Contact Information): Multi-column layout with contact fields and buttons";
+print "   - Tab 2 (Account Details): Multi-column layout with account settings and buttons";
+print "   - Tab 3 (Summary): Displays consolidated information from Tabs 1 and 2";
+print "3. Tooltips of varying lengths on all fields and buttons";
+print "4. Multiple columns using GridPane layout";
+print "5. Buttons with onClick handlers that execute EBS code";
+print "";
+print "INSTRUCTIONS:";
+print "- The master record (Client ID, Name, Status) is always visible above the tabs";
+print "- Switch between tabs to see different sections";
+print "- Hover over any field or button to see its tooltip";
+print "- Use the buttons in Tabs 1 and 2 to perform actions";
+print "- Click 'Refresh Summary' in Tab 3 to see consolidated data";
+print "";
+
+// Set initial values
+print "INITIAL VALUES:";
+print "Master Record:";
+print "  Client ID: " + tabTestScreen.clientId;
+print "  Client Name: " + tabTestScreen.clientName;
+print "  Status: " + tabTestScreen.clientStatus;
+print "";
+print "Contact Information (Tab 1):";
+print "  Contact Name: " + tabTestScreen.contactName;
+print "  Email: " + tabTestScreen.email;
+print "  Phone: " + tabTestScreen.phone;
+print "  Extension: " + tabTestScreen.extension;
+print "  Department: " + tabTestScreen.department;
+print "  Preferred Contact: " + tabTestScreen.preferredContact;
+print "";
+print "Account Details (Tab 2):";
+print "  Account Type: " + tabTestScreen.accountType;
+print "  Monthly Budget: $" + tabTestScreen.monthlyBudget;
+print "  Contract Term: " + tabTestScreen.contractTerm + " months";
+print "  Auto-Renewal: " + tabTestScreen.autoRenewal;
+print "  Priority: " + tabTestScreen.priority + "/5";
+print "";
+
+// Initialize the summary
+tabTestScreen.summaryText = "Click 'Refresh Summary' button to generate summary of all values";
+
+// Show the screen
+print "Opening test screen...";
+print "";
+screen tabTestScreen show;
+
+// Display final values after screen closes
+print "";
+print "=========================================";
+print "FINAL VALUES (after screen closed):";
+print "=========================================";
+print "Master Record:";
+print "  Client ID: " + tabTestScreen.clientId;
+print "  Client Name: " + tabTestScreen.clientName;
+print "  Status: " + tabTestScreen.clientStatus;
+print "";
+print "Contact Information:";
+print "  Contact Name: " + tabTestScreen.contactName;
+print "  Email: " + tabTestScreen.email;
+print "  Phone: " + tabTestScreen.phone;
+print "  Extension: " + tabTestScreen.extension;
+print "  Department: " + tabTestScreen.department;
+print "  Preferred Contact: " + tabTestScreen.preferredContact;
+print "  Last Action: " + tabTestScreen.tab1Action;
+print "";
+print "Account Details:";
+print "  Account Type: " + tabTestScreen.accountType;
+print "  Monthly Budget: $" + tabTestScreen.monthlyBudget;
+print "  Contract Term: " + tabTestScreen.contractTerm + " months";
+print "  Auto-Renewal: " + tabTestScreen.autoRenewal;
+print "  Priority: " + tabTestScreen.priority + "/5";
+print "  Account Notes: " + tabTestScreen.accountNotes;
+print "  Last Action: " + tabTestScreen.tab2Action;
+print "";
+print "=========================================";
+print "TEST COMPLETED!";
+print "=========================================";
