@@ -1,0 +1,9 @@
+// Test importing from subdirectory with spaces in path
+print "=== Testing Import with Spaces in Path ===";
+
+import "test dir/subdir/helper.ebs";
+
+var msg: string = call greet("World");
+print msg;
+
+print "SUCCESS: Import with spaces in directory name works!";

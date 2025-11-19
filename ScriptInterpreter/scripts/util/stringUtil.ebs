@@ -1,0 +1,7 @@
+// stringUtil.ebs - String utility functions
+
+function toUpper(text: string): string {
+    return call upper(text);
+}
+
+print "stringUtil.ebs loaded";

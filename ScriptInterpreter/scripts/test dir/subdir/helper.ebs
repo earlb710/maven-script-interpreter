@@ -1,0 +1,6 @@
+// helper.ebs in a subdirectory with spaces
+function greet(name: string): string {
+    return "Hello, " + name + "!";
+}
+
+print "helper.ebs loaded from 'test dir/subdir'";
