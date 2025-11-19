@@ -1,5 +1,5 @@
 // helper.ebs in a subdirectory with spaces
-function greet(name: string): string {
+greet(name: string) return string {
     return "Hello, " + name + "!";
 }
 

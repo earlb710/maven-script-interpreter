@@ -1,6 +1,6 @@
 // stringUtil.ebs - String utility functions
 
-function toUpper(text: string): string {
+toUpper(text: string) return string {
     return call upper(text);
 }
 
