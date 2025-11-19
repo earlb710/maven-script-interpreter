@@ -239,16 +239,6 @@ public class TabHandler implements TabOpener {
         }
         return null;
     }
-    
-    /**
-     * Close the given tab
-     * @param tab The tab to close
-     */
-    public void closeTab(Tab tab) {
-        if (tab != null && tabPane.getTabs().contains(tab)) {
-            tabPane.getTabs().remove(tab);
-        }
-    }
 
     private void select(Tab tab, boolean requestFocus) {
         runOnFx(() -> {

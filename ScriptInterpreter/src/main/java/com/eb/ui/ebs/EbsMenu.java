@@ -180,18 +180,7 @@ public class EbsMenu extends MenuBar {
             }
         });
         
-        // Close Tab
-        MenuItem closeTabItem = new MenuItem("Close");
-        closeTabItem.setAccelerator(new KeyCodeCombination(KeyCode.W, KeyCombination.CONTROL_DOWN));
-        closeTabItem.setOnAction(e -> {
-            Tab tab = handler.getSelectedTab();
-            // Only close if it's not the console tab (which is not closable)
-            if (tab != null && tab.isClosable()) {
-                handler.closeTab(tab);
-            }
-        });
-        
-        editMenu.getItems().addAll(cutItem, copyItem, pasteItem, new SeparatorMenuItem(), undoItem, redoItem, new SeparatorMenuItem(), findItem, replaceItem, new SeparatorMenuItem(), toggleLineNumbersItem, new SeparatorMenuItem(), closeTabItem);
+        editMenu.getItems().addAll(cutItem, copyItem, pasteItem, new SeparatorMenuItem(), undoItem, redoItem, new SeparatorMenuItem(), findItem, replaceItem, new SeparatorMenuItem(), toggleLineNumbersItem);
         getMenus().add(editMenu);
 
         Menu toolsMenu = new Menu("Config");
