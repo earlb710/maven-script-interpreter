@@ -233,6 +233,15 @@ public class ScreenFactory {
         }
 
         Scene scene = new Scene(screenRoot, width, height);
+        
+        // Load CSS stylesheets for screen areas and input controls
+        try {
+            scene.getStylesheets().add(ScreenFactory.class.getResource("/css/screen-areas.css").toExternalForm());
+            scene.getStylesheets().add(ScreenFactory.class.getResource("/css/screen-inputs.css").toExternalForm());
+        } catch (Exception e) {
+            System.err.println("Warning: Could not load screen CSS stylesheets: " + e.getMessage());
+        }
+        
         stage.setScene(scene);
 
         return stage;
