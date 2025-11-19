@@ -34,6 +34,16 @@
       "type": "string",
       "description": "Associated screen name"
     },
+    "spacing": {
+      "type": "string",
+      "description": "Spacing between child elements (e.g., '10', '15'). Applies to HBox, VBox, FlowPane, GridPane (as hgap/vgap), and TilePane.",
+      "pattern": "^\\d+(\\.\\d+)?$"
+    },
+    "padding": {
+      "type": "string",
+      "description": "Padding inside the area around its children (e.g., '10', '10 5', '10 5 10 5' for top, right, bottom, left). Applies to all Region types.",
+      "pattern": "^\\d+(\\.\\d+)?(\\s+\\d+(\\.\\d+)?){0,3}$"
+    },
     "items": {
       "type": "array",
       "description": "UI items/controls within this area",
@@ -174,7 +184,9 @@
     {
       "name": "mainContent",
       "type": "vbox",
-      "style": "-fx-padding: 20; -fx-spacing: 10;",
+      "spacing": "10",
+      "padding": "20",
+      "style": "-fx-background-color: #f0f0f0;",
       "items": [
         {
           "name": "titleLabel",
@@ -186,11 +198,13 @@
     {
       "name": "formContainer",
       "type": "vbox",
+      "spacing": "15",
+      "padding": "10 20 10 20",
       "areas": [
         {
           "name": "inputRow1",
           "type": "hbox",
-          "style": "-fx-spacing: 10;",
+          "spacing": "10",
           "items": [
             {
               "name": "field1",
@@ -203,7 +217,7 @@
         {
           "name": "inputRow2",
           "type": "hbox",
-          "style": "-fx-spacing: 10;",
+          "spacing": "10",
           "items": [
             {
               "name": "field2",

@@ -120,6 +120,16 @@ public class AreaContainerFactory {
             }
         }
 
+        // Apply spacing property (for containers that support it)
+        if (areaDef.spacing != null && !areaDef.spacing.isEmpty()) {
+            applySpacing(container, areaDef.spacing);
+        }
+        
+        // Apply padding property (for all Region types)
+        if (areaDef.padding != null && !areaDef.padding.isEmpty()) {
+            applyPadding(container, areaDef.padding);
+        }
+
         // Apply custom style from AreaDefinition (overrides default)
         if (areaDef.style != null && !areaDef.style.isEmpty()) {
             container.setStyle(container.getStyle() + "; " + areaDef.style);
@@ -129,6 +139,83 @@ public class AreaContainerFactory {
         if (areaDef.layout != null && !areaDef.layout.isEmpty()) {
             applyLayoutConfiguration(container, areaDef.layout);
         }
+    }
+
+    /**
+     * Applies spacing property to containers that support it.
+     * Spacing controls the gap between child elements.
+     */
+    private static void applySpacing(Region container, String spacingStr) {
+        try {
+            double spacing = Double.parseDouble(spacingStr.trim());
+            
+            if (container instanceof HBox) {
+                ((HBox) container).setSpacing(spacing);
+            } else if (container instanceof VBox) {
+                ((VBox) container).setSpacing(spacing);
+            } else if (container instanceof FlowPane) {
+                ((FlowPane) container).setHgap(spacing);
+                ((FlowPane) container).setVgap(spacing);
+            } else if (container instanceof TilePane) {
+                ((TilePane) container).setHgap(spacing);
+                ((TilePane) container).setVgap(spacing);
+            } else if (container instanceof GridPane) {
+                ((GridPane) container).setHgap(spacing);
+                ((GridPane) container).setVgap(spacing);
+            }
+            // Other container types don't have a direct spacing property
+        } catch (NumberFormatException e) {
+            // Invalid spacing value - ignore
+            System.err.println("Warning: Invalid spacing value '" + spacingStr + "'");
+        }
+    }
+    
+    /**
+     * Applies padding property to the container.
+     * Padding creates internal space around the children within the container.
+     * Supports formats: "10" (all sides), "10 5" (vertical horizontal), 
+     * "10 5 10 5" (top right bottom left).
+     */
+    private static void applyPadding(Region container, String paddingStr) {
+        javafx.geometry.Insets padding = parseInsets(paddingStr);
+        if (padding != null) {
+            container.setPadding(padding);
+        }
+    }
+    
+    /**
+     * Parses insets string to Insets object.
+     * Supports formats: "10" (all), "10 5" (vertical horizontal), 
+     * "10 5 10 5" (top right bottom left).
+     */
+    private static javafx.geometry.Insets parseInsets(String insetsStr) {
+        if (insetsStr == null || insetsStr.isEmpty()) {
+            return null;
+        }
+        
+        String[] parts = insetsStr.trim().split("\\s+");
+        
+        try {
+            if (parts.length == 1) {
+                double all = Double.parseDouble(parts[0]);
+                return new javafx.geometry.Insets(all);
+            } else if (parts.length == 2) {
+                double vertical = Double.parseDouble(parts[0]);
+                double horizontal = Double.parseDouble(parts[1]);
+                return new javafx.geometry.Insets(vertical, horizontal, vertical, horizontal);
+            } else if (parts.length == 4) {
+                double top = Double.parseDouble(parts[0]);
+                double right = Double.parseDouble(parts[1]);
+                double bottom = Double.parseDouble(parts[2]);
+                double left = Double.parseDouble(parts[3]);
+                return new javafx.geometry.Insets(top, right, bottom, left);
+            }
+        } catch (NumberFormatException e) {
+            // Invalid format - return null
+            System.err.println("Warning: Invalid padding/insets value '" + insetsStr + "'");
+        }
+        
+        return null;
     }
 
     /**

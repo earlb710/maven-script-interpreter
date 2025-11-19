@@ -24,6 +24,10 @@ public class AreaDefinition {
     public String screenName;
     // Display name for UI elements (e.g., tab labels)
     public String displayName;
+    // Spacing between children (for HBox, VBox, FlowPane, GridPane, TilePane)
+    public String spacing;
+    // Padding inside the area (for all Region types)
+    public String padding;
     // Items in this area
     public List<AreaItem> items = new ArrayList<>();
     // Nested child areas (areas within areas)
@@ -37,6 +41,8 @@ public class AreaDefinition {
                ", cssClass='" + cssClass + '\'' +
                ", layout='" + layout + '\'' +
                ", style='" + style + '\'' +
+               ", spacing='" + spacing + '\'' +
+               ", padding='" + padding + '\'' +
                ", items=" + items.size() +
                ", childAreas=" + childAreas.size() +
                '}';
