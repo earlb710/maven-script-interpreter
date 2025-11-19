@@ -327,7 +327,8 @@ public class InterpreterScreen {
                             }
                         };
 
-                        stage = ScreenFactory.createScreen(
+                        // Create ScreenDefinition and use it to create the Stage
+                        ScreenDefinition screenDef = ScreenFactory.createScreenDefinition(
                                 screenName,
                                 screenTitle,
                                 screenWidth,
@@ -339,15 +340,11 @@ public class InterpreterScreen {
                                 onClickHandler, // Pass onClick handler for buttons
                                 context // Pass context to store bound controls for refresh
                         );
+                        stage = screenDef.createScreen();
                     } else {
-                        // Create simple stage without areas
-                        stage = new Stage();
-                        stage.setTitle(screenTitle);
-
-                        // Create a simple scene with a StackPane
-                        StackPane root = new StackPane();
-                        Scene scene = new Scene(root, screenWidth, screenHeight);
-                        stage.setScene(scene);
+                        // Create simple ScreenDefinition without areas
+                        ScreenDefinition screenDef = new ScreenDefinition(screenName, screenTitle, screenWidth, screenHeight);
+                        stage = screenDef.createScreen();
                     }
 
                     if (screenMaximize) {

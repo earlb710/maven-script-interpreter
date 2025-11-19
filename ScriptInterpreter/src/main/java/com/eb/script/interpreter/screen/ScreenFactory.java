@@ -71,6 +71,97 @@ public class ScreenFactory {
     }
 
     /**
+     * Creates a ScreenDefinition with basic parameters.
+     * 
+     * @param screenName The name of the screen
+     * @param title The window title
+     * @param width The window width
+     * @param height The window height
+     * @param areas List of AreaDefinitions containing containers and items
+     * @param metadataProvider Function to retrieve DisplayItem for variables
+     * @return A ScreenDefinition that can be used to create Stage instances
+     */
+    public static ScreenDefinition createScreenDefinition(String screenName, String title, double width, double height,
+            List<AreaDefinition> areas,
+            BiFunction<String, String, DisplayItem> metadataProvider) {
+        return createScreenDefinition(screenName, title, width, height, areas, metadataProvider, null, null, null, null);
+    }
+    
+    /**
+     * Creates a ScreenDefinition with variable binding support.
+     * 
+     * @param screenName The name of the screen
+     * @param title The window title
+     * @param width The window width
+     * @param height The window height
+     * @param areas List of AreaDefinitions containing containers and items
+     * @param metadataProvider Function to retrieve DisplayItem for variables
+     * @param screenVars The ConcurrentHashMap containing screen variables for two-way binding
+     * @return A ScreenDefinition that can be used to create Stage instances
+     */
+    public static ScreenDefinition createScreenDefinition(String screenName, String title, double width, double height,
+            List<AreaDefinition> areas,
+            BiFunction<String, String, DisplayItem> metadataProvider,
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
+        return createScreenDefinition(screenName, title, width, height, areas, metadataProvider, screenVars, null, null, null);
+    }
+    
+    /**
+     * Creates a ScreenDefinition with variable binding and onClick handlers.
+     * 
+     * @param screenName The name of the screen
+     * @param title The window title
+     * @param width The window width
+     * @param height The window height
+     * @param areas List of AreaDefinitions containing containers and items
+     * @param metadataProvider Function to retrieve DisplayItem for variables
+     * @param screenVars The ConcurrentHashMap containing screen variables for two-way binding
+     * @param varTypes The ConcurrentHashMap containing screen variable types for proper type conversion
+     * @param onClickHandler Handler for button onClick events
+     * @return A ScreenDefinition that can be used to create Stage instances
+     */
+    public static ScreenDefinition createScreenDefinition(String screenName, String title, double width, double height,
+            List<AreaDefinition> areas,
+            BiFunction<String, String, DisplayItem> metadataProvider,
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+            java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
+            OnClickHandler onClickHandler) {
+        return createScreenDefinition(screenName, title, width, height, areas, metadataProvider, screenVars, varTypes, onClickHandler, null);
+    }
+    
+    /**
+     * Creates a ScreenDefinition with all parameters including context for bound controls.
+     * 
+     * @param screenName The name of the screen
+     * @param title The window title
+     * @param width The window width
+     * @param height The window height
+     * @param areas List of AreaDefinitions containing containers and items
+     * @param metadataProvider Function to retrieve DisplayItem for variables
+     * @param screenVars The ConcurrentHashMap containing screen variables for two-way binding
+     * @param varTypes The ConcurrentHashMap containing screen variable types for proper type conversion
+     * @param onClickHandler Handler for button onClick events
+     * @param context InterpreterContext to store bound controls for later refresh
+     * @return A ScreenDefinition that can be used to create Stage instances
+     */
+    public static ScreenDefinition createScreenDefinition(String screenName, String title, double width, double height,
+            List<AreaDefinition> areas,
+            BiFunction<String, String, DisplayItem> metadataProvider,
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+            java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
+            OnClickHandler onClickHandler,
+            InterpreterContext context) {
+        ScreenDefinition definition = new ScreenDefinition(screenName, title, width, height);
+        definition.setAreas(areas);
+        definition.setMetadataProvider(metadataProvider);
+        definition.setScreenVars(screenVars);
+        definition.setVarTypes(varTypes);
+        definition.setOnClickHandler(onClickHandler);
+        definition.setContext(context);
+        return definition;
+    }
+
+    /**
      * Creates a complete JavaFX window/screen from area definitions. This
      * method creates containers, adds items, and applies layout properties.
      *

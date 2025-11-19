@@ -1,8 +1,12 @@
 package com.eb.script.interpreter.screen;
 
+import com.eb.script.interpreter.InterpreterContext;
+import com.eb.script.token.DataType;
 import javafx.stage.Stage;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 
 /**
  * ScreenDefinition class for managing screen creation with optional singleton pattern.
@@ -16,6 +20,14 @@ public class ScreenDefinition {
     private double width;
     private double height;
     private boolean singleton;
+    
+    // Complex screen creation parameters
+    private List<AreaDefinition> areas;
+    private BiFunction<String, String, DisplayItem> metadataProvider;
+    private ConcurrentHashMap<String, Object> screenVars;
+    private ConcurrentHashMap<String, DataType> varTypes;
+    private ScreenFactory.OnClickHandler onClickHandler;
+    private InterpreterContext context;
     
     // For singleton pattern: store the single instance
     private Stage singletonStage;
@@ -92,20 +104,38 @@ public class ScreenDefinition {
     }
     
     /**
-     * Helper method to create a new Stage with the given title
+     * Helper method to create a new Stage with the given title.
+     * Uses ScreenFactory if areas are defined, otherwise creates a simple stage.
      */
     private Stage createNewStage(String stageTitle) {
-        Stage stage = new Stage();
-        stage.setTitle(stageTitle);
-        stage.setWidth(width);
-        stage.setHeight(height);
-        
-        // Create a simple scene with a StackPane
-        javafx.scene.layout.StackPane root = new javafx.scene.layout.StackPane();
-        javafx.scene.Scene scene = new javafx.scene.Scene(root, width, height);
-        stage.setScene(scene);
-        
-        return stage;
+        if (areas != null && !areas.isEmpty()) {
+            // Use ScreenFactory to create complex screen with areas
+            return ScreenFactory.createScreen(
+                screenName,
+                stageTitle,
+                width,
+                height,
+                areas,
+                metadataProvider,
+                screenVars,
+                varTypes,
+                onClickHandler,
+                context
+            );
+        } else {
+            // Create simple stage without areas
+            Stage stage = new Stage();
+            stage.setTitle(stageTitle);
+            stage.setWidth(width);
+            stage.setHeight(height);
+            
+            // Create a simple scene with a StackPane
+            javafx.scene.layout.StackPane root = new javafx.scene.layout.StackPane();
+            javafx.scene.Scene scene = new javafx.scene.Scene(root, width, height);
+            stage.setScene(scene);
+            
+            return stage;
+        }
     }
     
     // Setter methods for all fields
@@ -153,6 +183,60 @@ public class ScreenDefinition {
      */
     public void setSingleton(boolean singleton) {
         this.singleton = singleton;
+    }
+    
+    /**
+     * Sets the area definitions for complex screen layout
+     * 
+     * @param areas List of AreaDefinitions containing containers and items
+     */
+    public void setAreas(List<AreaDefinition> areas) {
+        this.areas = areas;
+    }
+    
+    /**
+     * Sets the metadata provider for variable display information
+     * 
+     * @param metadataProvider Function to retrieve DisplayItem for variables (screenName, varName) -> metadata
+     */
+    public void setMetadataProvider(BiFunction<String, String, DisplayItem> metadataProvider) {
+        this.metadataProvider = metadataProvider;
+    }
+    
+    /**
+     * Sets the screen variables map for two-way data binding
+     * 
+     * @param screenVars The ConcurrentHashMap containing screen variables
+     */
+    public void setScreenVars(ConcurrentHashMap<String, Object> screenVars) {
+        this.screenVars = screenVars;
+    }
+    
+    /**
+     * Sets the variable types map for proper type conversion
+     * 
+     * @param varTypes The ConcurrentHashMap containing screen variable types
+     */
+    public void setVarTypes(ConcurrentHashMap<String, DataType> varTypes) {
+        this.varTypes = varTypes;
+    }
+    
+    /**
+     * Sets the onClick handler for button events
+     * 
+     * @param onClickHandler Handler for button onClick events
+     */
+    public void setOnClickHandler(ScreenFactory.OnClickHandler onClickHandler) {
+        this.onClickHandler = onClickHandler;
+    }
+    
+    /**
+     * Sets the interpreter context for storing bound controls
+     * 
+     * @param context InterpreterContext to store bound controls for later refresh
+     */
+    public void setContext(InterpreterContext context) {
+        this.context = context;
     }
     
     // Getter methods for all fields
@@ -211,6 +295,60 @@ public class ScreenDefinition {
         return instanceCounter.get();
     }
     
+    /**
+     * Gets the area definitions
+     * 
+     * @return List of AreaDefinitions
+     */
+    public List<AreaDefinition> getAreas() {
+        return areas;
+    }
+    
+    /**
+     * Gets the metadata provider
+     * 
+     * @return The metadata provider function
+     */
+    public BiFunction<String, String, DisplayItem> getMetadataProvider() {
+        return metadataProvider;
+    }
+    
+    /**
+     * Gets the screen variables map
+     * 
+     * @return The screen variables ConcurrentHashMap
+     */
+    public ConcurrentHashMap<String, Object> getScreenVars() {
+        return screenVars;
+    }
+    
+    /**
+     * Gets the variable types map
+     * 
+     * @return The variable types ConcurrentHashMap
+     */
+    public ConcurrentHashMap<String, DataType> getVarTypes() {
+        return varTypes;
+    }
+    
+    /**
+     * Gets the onClick handler
+     * 
+     * @return The onClick handler
+     */
+    public ScreenFactory.OnClickHandler getOnClickHandler() {
+        return onClickHandler;
+    }
+    
+    /**
+     * Gets the interpreter context
+     * 
+     * @return The interpreter context
+     */
+    public InterpreterContext getContext() {
+        return context;
+    }
+    
     @Override
     public String toString() {
         return "ScreenDefinition{" +
@@ -220,6 +358,10 @@ public class ScreenDefinition {
                 ", height=" + height +
                 ", singleton=" + singleton +
                 ", instances=" + instanceCounter.get() +
+                ", hasAreas=" + (areas != null && !areas.isEmpty()) +
+                ", hasMetadataProvider=" + (metadataProvider != null) +
+                ", hasScreenVars=" + (screenVars != null) +
+                ", hasContext=" + (context != null) +
                 '}';
     }
 }
