@@ -1,0 +1,10 @@
+// circular_c.ebs - File C that imports A (creating A->B->C->A cycle)
+print "Loading file C...";
+
+import "circular_a.ebs";
+
+funcC() {
+    print "Function C executed";
+}
+
+print "File C loaded successfully";

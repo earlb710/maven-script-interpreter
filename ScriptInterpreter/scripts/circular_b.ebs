@@ -1,7 +1,7 @@
-// circular_b.ebs - File B that imports A
+// circular_b.ebs - File B that imports C
 print "Loading file B...";
 
-import "circular_a.ebs";
+import "circular_c.ebs";
 
 funcB() {
     print "Function B executed";

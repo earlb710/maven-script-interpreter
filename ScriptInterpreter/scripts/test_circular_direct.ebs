@@ -1,0 +1,9 @@
+// test_circular_direct.ebs - Test A->B->A circular import
+print "=== Testing Direct Circular Import (A->B->A) ===";
+print "";
+
+// Create temporary files for testing
+import "circular_direct_a.ebs";
+
+print "If you see this, circular import was not detected!";
+print "=== Test Completed ===";

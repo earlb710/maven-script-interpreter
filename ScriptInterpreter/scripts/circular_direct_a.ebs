@@ -1,0 +1,4 @@
+// circular_direct_a.ebs - File A imports B directly
+print "Loading direct_a...";
+import "circular_direct_b.ebs";
+print "direct_a loaded";
