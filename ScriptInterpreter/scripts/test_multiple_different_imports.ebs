@@ -1,0 +1,39 @@
+// test_multiple_different_imports.ebs
+// Tests importing multiple different files (not circular)
+// Dependency graph: Test -> helper_math, helper_string, utils
+
+print "=== Testing Multiple Different Imports ===";
+print "";
+
+print "Importing helper_math.ebs...";
+import "helper_math.ebs";
+
+print "Importing helper_string.ebs...";
+import "helper_string.ebs";
+
+print "Importing utils.ebs...";
+import "utils.ebs";
+
+print "";
+print "Testing imported functions...";
+
+var sum: int = call add(10, 5);
+print "add(10, 5) = " + sum;
+
+var product: int = call multiply(3, 4);
+print "multiply(3, 4) = " + product;
+
+var doubled: int = call multiplyByTwo(8);
+print "multiplyByTwo(8) = " + doubled;
+
+var text: string = call concat("Hello", " World");
+print "concat result: " + text;
+
+print "";
+if sum == 15 && product == 12 && doubled == 16 then {
+    print "SUCCESS: Multiple different imports work correctly!";
+} else {
+    print "ERROR: Some functions did not work as expected";
+}
+
+print "=== Test Completed ===";

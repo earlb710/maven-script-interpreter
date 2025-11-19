@@ -1,6 +1,15 @@
 // test_circular_imports_comprehensive.ebs
 // Comprehensive automated test script for circular import detection
 // This script tests all scenarios and reports pass/fail status
+//
+// NOTE: This is a limited test that only tests scenarios that don't cause
+// script termination. For full testing, run the individual test scripts:
+//   - test_multiple_different_imports.ebs (should pass)
+//   - test_combined_import.ebs (should pass)
+//   - test_deep_import_chain.ebs (should pass)
+//   - test_circular_direct.ebs (should fail with circular error)
+//   - test_circular.ebs (should fail with circular error)
+//   - test_self_import.ebs (should fail with circular error)
 
 print "========================================";
 print "Circular Import Detection Test Suite";

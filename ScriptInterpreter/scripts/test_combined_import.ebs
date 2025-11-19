@@ -1,0 +1,38 @@
+// test_combined_import.ebs
+// Tests importing a file that itself imports other files
+// Dependency graph: Test -> helper_combined -> helper_math, helper_string
+
+print "=== Testing Combined Import ===";
+print "";
+print "This tests importing a file that imports other files (diamond dependency)";
+print "";
+
+print "Importing helper_combined.ebs...";
+import "helper_combined.ebs";
+
+print "";
+print "Testing functions from combined helper...";
+
+var result: string = call calculate(10, 3, "add");
+print result;
+
+var result2: string = call calculate(10, 3, "multiply");
+print result2;
+
+print "";
+print "Testing direct access to imported helpers...";
+
+var sum: int = call add(5, 7);
+print "add(5, 7) = " + sum;
+
+var text: string = call repeat("x", 3);
+print "repeat('x', 3) = " + text;
+
+print "";
+if sum == 12 then {
+    print "SUCCESS: Combined import with diamond dependency works!";
+} else {
+    print "ERROR: Functions did not work as expected";
+}
+
+print "=== Test Completed ===";

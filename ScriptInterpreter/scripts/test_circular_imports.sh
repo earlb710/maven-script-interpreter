@@ -93,20 +93,36 @@ echo ""
 run_success_test "Test 1: Valid Import" "test_valid_import.ebs"
 echo ""
 
-# Test 2: Multiple non-circular imports should work
-run_success_test "Test 2: Multiple Non-Circular Imports" "test_multiple_import.ebs"
+# Test 2: Multiple non-circular imports (same file)
+run_success_test "Test 2: Multiple Non-Circular Imports (Same File)" "test_multiple_import.ebs"
 echo ""
 
-# Test 3: Direct circular import should be detected
-run_failure_test "Test 3: Direct Circular Import (A->B->A)" "test_circular_direct.ebs" "Circular import detected"
+# Test 3: Multiple different imports
+run_success_test "Test 3: Multiple Different Imports" "test_multiple_different_imports.ebs"
 echo ""
 
-# Test 4: Indirect circular import should be detected
-run_failure_test "Test 4: Indirect Circular Import (A->B->C->A)" "test_circular.ebs" "Circular import detected"
+# Test 4: Combined import (diamond dependency)
+run_success_test "Test 4: Combined Import (Diamond Dependency)" "test_combined_import.ebs"
 echo ""
 
-# Test 5: Comprehensive test suite
-run_success_test "Test 5: Comprehensive Test Suite" "test_circular_imports_comprehensive.ebs"
+# Test 5: Deep import chain (A->B->C->D, no cycle)
+run_success_test "Test 5: Deep Import Chain (No Cycle)" "test_deep_import_chain.ebs"
+echo ""
+
+# Test 6: Direct circular import should be detected
+run_failure_test "Test 6: Direct Circular Import (A->B->A)" "test_circular_direct.ebs" "Circular import detected"
+echo ""
+
+# Test 7: Indirect circular import should be detected
+run_failure_test "Test 7: Indirect Circular Import (A->B->C->A)" "test_circular.ebs" "Circular import detected"
+echo ""
+
+# Test 8: Self-import should be detected
+run_failure_test "Test 8: Self-Import Detection" "test_self_import.ebs" "Circular import detected"
+echo ""
+
+# Test 9: Comprehensive test suite
+run_success_test "Test 9: Comprehensive Test Suite" "test_circular_imports_comprehensive.ebs"
 echo ""
 
 # Print summary

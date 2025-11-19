@@ -1,0 +1,13 @@
+// test_self_import.ebs
+// Tests a file importing itself (should fail with circular import error)
+
+print "=== Testing Self-Import Detection ===";
+print "";
+print "Attempting to import a file that imports itself...";
+print "Expected: Circular import error";
+print "";
+
+import "self_import.ebs";
+
+print "ERROR: If you see this, self-import was not detected!";
+print "=== Test Completed ===";
