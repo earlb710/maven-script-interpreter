@@ -1,6 +1,7 @@
 package com.eb.ui.cli;
 
 import com.eb.script.json.Json;
+import com.eb.script.interpreter.Builtins;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -87,6 +88,9 @@ public class JsonSchemaAutocomplete {
             suggestions.addAll(getPropertySuggestions(context));
         } else if (context.expectingValue) {
             // We're expecting a value after a colon
+            // Add builtin suggestions (with # prefix)
+            suggestions.addAll(getBuiltinSuggestions());
+            // Also add enum suggestions for specific properties
             suggestions.addAll(getEnumSuggestions(context));
         }
         
@@ -287,6 +291,15 @@ public class JsonSchemaAutocomplete {
                 }
             }
         }
+    }
+
+    /**
+     * Get builtin function suggestions with # prefix for use in JSON values.
+     */
+    private static List<String> getBuiltinSuggestions() {
+        return Builtins.getBuiltins().stream()
+                .map(name -> "#" + name)
+                .collect(Collectors.toList());
     }
 
     /**
