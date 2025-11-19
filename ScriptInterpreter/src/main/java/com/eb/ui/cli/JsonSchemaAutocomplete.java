@@ -129,17 +129,18 @@ public class JsonSchemaAutocomplete {
             return trimOffset;
         }
         
-        // Look for = followed by { or [
-        int equalsIndex = text.indexOf('=');
-        if (equalsIndex >= 0) {
-            // Find the { or [ after the =
+        // Search backwards for the last occurrence of = followed by { or [
+        // This handles cases like "var x = 10; screen s = {" where we want the second =
+        for (int equalsIndex = text.lastIndexOf('='); equalsIndex >= 0; equalsIndex = text.lastIndexOf('=', equalsIndex - 1)) {
+            // Find the { or [ after this =
             for (int i = equalsIndex + 1; i < text.length(); i++) {
                 char c = text.charAt(i);
                 if (c == '{' || c == '[') {
                     return i;
                 }
-                if (!Character.isWhitespace(c)) {
+                if (!Character.isWhitespace(c) && c != '\n' && c != '\r') {
                     // Found a non-whitespace character that's not { or [
+                    // This = is not followed by JSON, try the previous =
                     break;
                 }
             }
