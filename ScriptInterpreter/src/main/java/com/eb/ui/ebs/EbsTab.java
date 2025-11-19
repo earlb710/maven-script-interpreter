@@ -240,7 +240,7 @@ public class EbsTab extends Tab {
         int start = caretPos;
         while (start > 0) {
             char c = text.charAt(start - 1);
-            if (Character.isLetterOrDigit(c) || c == '_' || c == '.' || c == '"') {
+            if (Character.isLetterOrDigit(c) || c == '_' || c == '.' || c == '"' || c == '#') {
                 start--;
             } else {
                 break;

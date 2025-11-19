@@ -401,7 +401,7 @@ public final class Console {
         int wordStart = caretPos;
         while (wordStart > 0) {
             char c = text.charAt(wordStart - 1);
-            if (Character.isLetterOrDigit(c) || c == '.' || c == '_'|| c == '/' || c == '"') {
+            if (Character.isLetterOrDigit(c) || c == '.' || c == '_'|| c == '/' || c == '"' || c == '#') {
                 wordStart--;
             } else {
                 break;
