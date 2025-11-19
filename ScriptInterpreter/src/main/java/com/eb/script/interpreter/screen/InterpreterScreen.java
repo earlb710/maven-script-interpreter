@@ -496,7 +496,7 @@ public class InterpreterScreen {
     private void invokeScreenCallback(String callbackName, String screenName, String event, int line) throws InterpreterError {
         // Create JSON event data
         Map<String, Object> eventData = new java.util.HashMap<>();
-        eventData.put("screen", screenName);
+        eventData.put("screenName", screenName);
         eventData.put("event", event);
         eventData.put("timestamp", System.currentTimeMillis());
         
@@ -554,7 +554,7 @@ public class InterpreterScreen {
 
         // Create the callback data with output fields
         Map<String, Object> callbackData = new java.util.HashMap<>();
-        callbackData.put("screen", screenName);
+        callbackData.put("screenName", screenName);
         callbackData.put("event", "closed");
         callbackData.put("timestamp", System.currentTimeMillis());
         callbackData.put("fields", outputFields);

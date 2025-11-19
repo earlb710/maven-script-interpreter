@@ -88,7 +88,7 @@ print "Test 3: Screen with callback function (shown event)";
 // Define callback function that receives JSON event data
 handleScreenEvent(eventData: json) {
     print "  Callback invoked!";
-    print "    Screen: " + eventData.screen;
+    print "    Screen: " + eventData.screenName;
     print "    Event: " + eventData.event;
     print "    Timestamp: " + eventData.timestamp;
     
@@ -134,7 +134,7 @@ print "Test 4: Screen with output fields - callback on close";
 // Define callback that handles output fields
 handleOutputFields(data: json) {
     print "  Close callback invoked!";
-    print "    Screen: " + data.screen;
+    print "    Screen: " + data.screenName;
     print "    Event: " + data.event;
     
     if data.event == "closed" {
@@ -223,7 +223,7 @@ print "Test 5: Show screen with both parameters and callback";
 // Define another callback
 handleAdvancedEvent(data: json) {
     print "  Advanced callback invoked!";
-    print "    Screen name: " + data.screen;
+    print "    Screen name: " + data.screenName;
     print "    Event type: " + data.event;
     
     if data.event == "closed" and data.fields != null {
