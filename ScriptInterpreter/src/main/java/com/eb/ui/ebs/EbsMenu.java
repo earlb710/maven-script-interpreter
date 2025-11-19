@@ -264,8 +264,16 @@ public class EbsMenu extends MenuBar {
                 for (String screenName : screenOrder) {
                     javafx.stage.Stage stage = screens.get(screenName);
                     if (stage != null) {
-                        // Show screen name and whether it's currently showing (● visible, ○ minimized)
-                        String status = stage.isShowing() ? "●" : "○";
+                        // Show screen name and whether it's minimized (● visible, ○ minimized)
+                        // Use isIconified() to detect minimized state, and isShowing() to detect if window is open
+                        String status;
+                        if (!stage.isShowing()) {
+                            status = "○"; // Not showing at all
+                        } else if (stage.isIconified()) {
+                            status = "○"; // Minimized/iconified
+                        } else {
+                            status = "●"; // Visible and not minimized
+                        }
                         String label = String.format("%d  %s %s", index, status, screenName);
                         MenuItem item = new MenuItem(label);
                         
@@ -274,6 +282,9 @@ public class EbsMenu extends MenuBar {
                             javafx.application.Platform.runLater(() -> {
                                 if (!stage.isShowing()) {
                                     stage.show();
+                                }
+                                if (stage.isIconified()) {
+                                    stage.setIconified(false);
                                 }
                                 stage.toFront();
                                 stage.requestFocus();
