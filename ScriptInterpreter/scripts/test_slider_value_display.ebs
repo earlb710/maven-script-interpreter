@@ -127,15 +127,15 @@ screen sliderValueScreen = {
     ]
 };
 
-screen.show(sliderValueScreen);
+screen sliderValueScreen show;
 
-println("Slider Value Display Test Screen Loaded!");
-println("Try moving the sliders to see the value display feature.");
-println("");
-println("Note the differences:");
-println("- 'Volume' slider shows current value");
-println("- 'Brightness' slider has showSliderValue:false, no value shown");
-println("- 'Temperature' slider shows value (including negative values)");
-println("- 'Rating' slider has no showSliderValue property, defaults to false");
-println("- 'Opacity' slider shows value with custom styling (blue, bold)");
-println("- 'Speed' slider shows value with custom styling (green, italic)");
+print "Slider Value Display Test Screen Loaded!";
+print "Try moving the sliders to see the value display feature.";
+print "";
+print "Note the differences:";
+print "- 'Volume' slider shows current value";
+print "- 'Brightness' slider has showSliderValue:false, no value shown";
+print "- 'Temperature' slider shows value (including negative values)";
+print "- 'Rating' slider has no showSliderValue property, defaults to false";
+print "- 'Opacity' slider shows value with custom styling (blue, bold)";
+print "- 'Speed' slider shows value with custom styling (green, italic)";
