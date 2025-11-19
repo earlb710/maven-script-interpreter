@@ -250,7 +250,7 @@ screen tabTestScreen = {
                         {
                             "name": "contactTab",
                             "type": "tab",
-                            "screenName": "Contact Information",
+                            "displayName": "Contact Information",
                             "areas": [
                                 {
                                     "name": "contactGrid",
@@ -334,7 +334,7 @@ screen tabTestScreen = {
                         {
                             "name": "accountTab",
                             "type": "tab",
-                            "screenName": "Account Details",
+                            "displayName": "Account Details",
                             "areas": [
                                 {
                                     "name": "accountGrid",
@@ -420,7 +420,7 @@ screen tabTestScreen = {
                         {
                             "name": "summaryTab",
                             "type": "tab",
-                            "screenName": "Summary",
+                            "displayName": "Summary",
                             "areas": [
                                 {
                                     "name": "summaryLayout",

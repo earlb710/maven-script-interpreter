@@ -437,7 +437,7 @@ public class ScreenFactory {
                     scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
                     
                     Tab tab = new Tab();
-                    tab.setText(childArea.screenName != null ? childArea.screenName : childArea.name);
+                    tab.setText(childArea.displayName != null ? childArea.displayName : childArea.name);
                     tab.setContent(scrollPane);
                     tab.setClosable(false); // Tabs not closable by default
                     
@@ -959,6 +959,9 @@ public class ScreenFactory {
         area.style = getStringValue(areaDef, "style", area.areaType.getDefaultStyle());
 
         area.screenName = screenName;
+        
+        // Extract displayName for UI labels (e.g., tab labels)
+        area.displayName = getStringValue(areaDef, "displayName", null);
 
         // Process items in the area
         if (areaDef.containsKey("items")) {
