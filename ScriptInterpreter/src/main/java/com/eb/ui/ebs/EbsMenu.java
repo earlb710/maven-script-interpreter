@@ -191,7 +191,7 @@ public class EbsMenu extends MenuBar {
             }
         });
         
-        editMenu.getItems().addAll(cutItem, copyItem, pasteItem, new SeparatorMenuItem(), undoItem, redoItem, new SeparatorMenuItem(), findItem, replaceItem, new SeparatorMenuItem(), toggleLineNumbersItem, new SeparatorMenuItem(), closeTabItem);
+        editMenu.getItems().addAll(cutItem, copyItem, pasteItem, new SeparatorMenuItem(), undoItem, redoItem, new SeparatorMenuItem(), findItem, replaceItem, new SeparatorMenuItem(), toggleLineNumbersItem, closeTabItem);
         getMenus().add(editMenu);
 
         Menu toolsMenu = new Menu("Config");
