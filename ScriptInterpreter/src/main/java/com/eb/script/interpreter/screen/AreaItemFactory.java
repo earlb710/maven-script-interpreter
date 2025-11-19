@@ -443,7 +443,7 @@ public class AreaItemFactory {
                     sampleText = longestOption;
                     measuringText.setText(sampleText);
                     double textWidth = measuringText.getLayoutBounds().getWidth();
-                    double padding = 40; // Extra padding for dropdown arrow and borders
+                    double padding = 50; // Extra padding for dropdown arrow, borders, and spacing (increased from 40)
                     return textWidth + padding;
                 }
             }

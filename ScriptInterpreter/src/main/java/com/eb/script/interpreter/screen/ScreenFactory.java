@@ -233,6 +233,15 @@ public class ScreenFactory {
         }
 
         Scene scene = new Scene(screenRoot, width, height);
+        
+        // Load CSS stylesheets for screen areas and input controls
+        try {
+            scene.getStylesheets().add(ScreenFactory.class.getResource("/css/screen-areas.css").toExternalForm());
+            scene.getStylesheets().add(ScreenFactory.class.getResource("/css/screen-inputs.css").toExternalForm());
+        } catch (Exception e) {
+            System.err.println("Warning: Could not load screen CSS stylesheets: " + e.getMessage());
+        }
+        
         stage.setScene(scene);
 
         return stage;
@@ -240,7 +249,7 @@ public class ScreenFactory {
     
     /**
      * Setup focus listeners on all controls to update the status bar
-     * with tooltip and min/max information
+     * with item tooltip and min/max information
      */
     private static void setupStatusBarUpdates(List<Node> controls, 
             com.eb.ui.ebs.StatusBar statusBar,
@@ -256,13 +265,14 @@ public class ScreenFactory {
                         // Extract item name from "screenName.itemName"
                         String itemName = fullRef.substring(screenName.length() + 1);
                         
-                        // Get metadata for this item
+                        // Update message with tooltip (prefer tooltip over promptHelp)
+                        String tooltip = (String) control.getProperties().get("itemTooltip");
+                        String message = tooltip != null ? tooltip : "";
+                        statusBar.setMessage(message);
+                        
+                        // Get metadata for min/max info
                         DisplayItem metadata = metadataProvider.apply(screenName, itemName);
                         if (metadata != null) {
-                            // Update message with promptHelp/tooltip
-                            String message = metadata.promptHelp != null ? metadata.promptHelp : "";
-                            statusBar.setMessage(message);
-                            
                             // Update custom with min/max info
                             String minMaxInfo = "";
                             if (metadata.min != null && metadata.max != null) {
@@ -360,6 +370,11 @@ public class ScreenFactory {
                 if (item.name != null && !item.name.isEmpty()) {
                     control.setUserData(screenName + "." + item.name);
                 }
+                
+                // Store tooltip in control's properties for status bar display
+                if (item.tooltip != null && !item.tooltip.isEmpty()) {
+                    control.getProperties().put("itemTooltip", item.tooltip);
+                }
 
                 // If labelText is specified, wrap the control with a label
                 // BUT: Don't wrap Label or Button controls - they display their own text
@@ -379,6 +394,8 @@ public class ScreenFactory {
                         alignmentBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
                         // Add left padding equal to label width plus spacing to align with labeled controls
                         alignmentBox.setPadding(new javafx.geometry.Insets(0, 0, 0, maxLabelWidth + 5));
+                        // Make container pick on bounds so tooltips on child controls work properly
+                        alignmentBox.setPickOnBounds(false);
                         alignmentBox.getChildren().add(control);
                         nodeToAdd = alignmentBox;
                     }
@@ -1417,8 +1434,8 @@ public class ScreenFactory {
     private static Node createLabeledControl(String labelText, String alignment, Node control, double minWidth, DisplayItem metadata) {
         javafx.scene.control.Label label = new javafx.scene.control.Label(labelText);
 
-        // Build label style with right alignment and padding
-        StringBuilder styleBuilder = new StringBuilder("-fx-font-weight: normal; -fx-padding: 0 10 0 0; -fx-alignment: center-right;");
+        // Build label style with right alignment, padding, and default text color
+        StringBuilder styleBuilder = new StringBuilder("-fx-font-weight: normal; -fx-padding: 0 10 0 0; -fx-alignment: center-right; -fx-text-fill: #333333;");
 
         // Apply label styling from metadata
         if (metadata != null) {
@@ -1427,8 +1444,12 @@ public class ScreenFactory {
                 styleBuilder.append(" -fx-font-size: ").append(metadata.labelFontSize).append(";");
             }
 
-            // Apply label color if specified
+            // Apply label color if specified (this will override the default)
             if (metadata.labelColor != null && !metadata.labelColor.isEmpty()) {
+                // Remove default text-fill and apply custom color
+                String currentStyle = styleBuilder.toString();
+                currentStyle = currentStyle.replace("-fx-text-fill: #333333;", "");
+                styleBuilder = new StringBuilder(currentStyle);
                 styleBuilder.append(" -fx-text-fill: ").append(metadata.labelColor).append(";");
             }
 
@@ -1453,6 +1474,8 @@ public class ScreenFactory {
         // Create container based on alignment
         javafx.scene.layout.HBox container = new javafx.scene.layout.HBox(5);
         container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        // Make container pick on bounds so tooltips on child controls work properly
+        container.setPickOnBounds(false);
 
         switch (actualAlignment) {
             case "right":
