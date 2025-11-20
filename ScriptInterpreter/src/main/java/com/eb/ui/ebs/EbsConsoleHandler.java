@@ -42,6 +42,7 @@ public class EbsConsoleHandler extends EbsHandler {
 
     protected final Stage stage;
     protected final Deque<Path> recentFiles = new ArrayDeque<>(); // Most recent at the head
+    private int newScriptSequence = 1; // Sequence number for new script files
 
     public EbsConsoleHandler(Stage stage, RuntimeContext ctx) {
         super(ctx);
@@ -599,5 +600,44 @@ public class EbsConsoleHandler extends EbsHandler {
 
     public void exit() {
         javafx.application.Platform.exit();
+    }
+
+    /**
+     * Generate the next available filename for a new script file.
+     * Format: newScript_x.ebs where x is the sequence number.
+     * Checks if file exists in sandbox and increments until an available name is found.
+     */
+    private String getNextNewScriptFilename() {
+        String filename;
+        Path path;
+        do {
+            filename = "newScript_" + newScriptSequence + ".ebs";
+            path = Util.SANDBOX_ROOT.resolve(filename);
+            newScriptSequence++;
+        } while (Files.exists(path));
+        return filename;
+    }
+
+    /**
+     * Create a new empty script file with a default name "newScript_x.ebs"
+     * where x is an incrementing sequence number.
+     */
+    public void createNewScriptFile() {
+        try {
+            String filename = getNextNewScriptFilename();
+            Path path = Util.SANDBOX_ROOT.resolve(filename);
+            
+            // Create an empty file with a simple comment
+            String defaultContent = "// New EBS Script\n\n";
+            Files.writeString(path, defaultContent, StandardCharsets.UTF_8);
+            
+            // Open the new file in a tab (similar to how openRecent works)
+            submit("/open \"" + path.toString().replace("\\", "\\\\") + "\" rw");
+            
+            // Add to recent files
+            addRecentFile(path);
+        } catch (Exception ex) {
+            submitErrors("Failed to create new script file: " + ex.getMessage());
+        }
     }
 }
