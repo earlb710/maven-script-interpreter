@@ -8,52 +8,26 @@
 print "=== Screen Status Test Starting ===";
 print "";
 
-// Function to set screen status based on selected type
-setScreenStatus() return bool {
-    var string statusType = testScreen.statusType;
-    
-    if statusType = "clean" then
-        call screen.setStatus(screenName="testScreen", status="clean");
-        testScreen.currentStatus = "clean";
-        print "Status set to CLEAN - you can close without confirmation";
-    else if statusType = "changed" then
-        call screen.setStatus(screenName="testScreen", status="changed");
-        testScreen.currentStatus = "changed";
-        print "Status set to CHANGED - closing will show 'Are you sure?' warning";
-    else if statusType = "error" then
-        call screen.setError(screenName="testScreen", errorMessage="This is a test error message");
-        testScreen.currentStatus = "error";
-        print "Status set to ERROR - closing will show error message with 'Are you sure?'";
-    
-    return true;
-}
-
 // Create a simple screen
 screen testScreen = {
     "title": "Screen Status Test",
     "width": 600,
     "height": 400,
-    "sets": [
+    "vars": [
         {
-            "setname": "main",
-            "scope": "visible",
-            "vars": [
-                {
-                    "name": "name",
-                    "type": "string",
-                    "default": "Test User"
-                },
-                {
-                    "name": "statusType",
-                    "type": "string",
-                    "default": "clean"
-                },
-                {
-                    "name": "currentStatus",
-                    "type": "string",
-                    "default": "clean"
-                }
-            ]
+            "name": "name",
+            "type": "string",
+            "default": "Test User"
+        },
+        {
+            "name": "statusType",
+            "type": "string",
+            "default": "clean"
+        },
+        {
+            "name": "currentStatus",
+            "type": "string",
+            "default": "clean"
         }
     ],
     "area": [
@@ -105,6 +79,26 @@ screen testScreen = {
 
 // Show the screen
 screen testScreen show;
+
+// Function to set screen status based on selected type
+setScreenStatus() return bool {
+    var string statusType = testScreen.statusType;
+    
+    if statusType = "clean" then
+        call screen.setStatus(screenName="testScreen", status="clean");
+        testScreen.currentStatus = "clean";
+        print "Status set to CLEAN - you can close without confirmation";
+    else if statusType = "changed" then
+        call screen.setStatus(screenName="testScreen", status="changed");
+        testScreen.currentStatus = "changed";
+        print "Status set to CHANGED - closing will show 'Are you sure?' warning";
+    else if statusType = "error" then
+        call screen.setError(screenName="testScreen", errorMessage="This is a test error message");
+        testScreen.currentStatus = "error";
+        print "Status set to ERROR - closing will show error message with 'Are you sure?'";
+    
+    return true;
+}
 
 print "Screen created. Try changing the status and then closing the screen!";
 print "Instructions:";
