@@ -1,0 +1,117 @@
+// Test script for screen status functionality
+// This script demonstrates:
+// 1. Creating a screen
+// 2. Setting status to CHANGED
+// 3. Setting status to ERROR with a message
+// 4. Trying to close the screen (should show confirmation dialog)
+
+print "=== Screen Status Test Starting ===";
+print "";
+
+// Function to set screen status based on selected type
+setScreenStatus() return bool {
+    var string statusType = testScreen.statusType;
+    
+    if statusType = "clean" then
+        call screen.setStatus(screenName="testScreen", status="clean");
+        testScreen.currentStatus = "clean";
+        print "Status set to CLEAN - you can close without confirmation";
+    else if statusType = "changed" then
+        call screen.setStatus(screenName="testScreen", status="changed");
+        testScreen.currentStatus = "changed";
+        print "Status set to CHANGED - closing will show 'Are you sure?' warning";
+    else if statusType = "error" then
+        call screen.setError(screenName="testScreen", errorMessage="This is a test error message");
+        testScreen.currentStatus = "error";
+        print "Status set to ERROR - closing will show error message with 'Are you sure?'";
+    
+    return true;
+}
+
+// Create a simple screen
+screen testScreen = {
+    "title": "Screen Status Test",
+    "width": 600,
+    "height": 400,
+    "sets": [
+        {
+            "setname": "main",
+            "scope": "visible",
+            "vars": [
+                {
+                    "name": "name",
+                    "type": "string",
+                    "default": "Test User"
+                },
+                {
+                    "name": "statusType",
+                    "type": "string",
+                    "default": "clean"
+                },
+                {
+                    "name": "currentStatus",
+                    "type": "string",
+                    "default": "clean"
+                }
+            ]
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "items": [
+                {
+                    "name": "nameField",
+                    "sequence": 0,
+                    "varRef": "name",
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Name:"
+                    }
+                },
+                {
+                    "name": "statusField",
+                    "sequence": 1,
+                    "varRef": "statusType",
+                    "display": {
+                        "type": "combobox",
+                        "labelText": "Status Type:",
+                        "options": ["clean", "changed", "error"]
+                    }
+                },
+                {
+                    "name": "setStatusBtn",
+                    "sequence": 2,
+                    "display": {
+                        "type": "button",
+                        "promptText": "Set Status",
+                        "onClick": "call setScreenStatus();"
+                    }
+                },
+                {
+                    "name": "currentStatusField",
+                    "sequence": 3,
+                    "varRef": "currentStatus",
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Current Status:"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+// Show the screen
+screen testScreen show;
+
+print "Screen created. Try changing the status and then closing the screen!";
+print "Instructions:";
+print "1. Select a status type from the dropdown";
+print "2. Click 'Set Status' button";
+print "3. Try to close the screen window";
+print "4. See the different confirmation dialogs based on status";
+print "";
+print "=== Screen Status Test Setup Complete ===";
+
