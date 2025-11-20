@@ -2566,6 +2566,152 @@
       ],
       "return_type": "json",
       "example": "<b>var</b> <b>result</b> = <b>call</b> <b>system.winCommand</b>(command=\"cmd.exe\", args=[\"/c\", \"dir\"], timeoutMs=5000);<br><b>print</b> \"Exit code: \" + result.exitCode;<br><b>print</b> \"Output: \" + result.stdout;"
+    },
+    {
+      "function": "str.substring",
+      "short_description": "Extracts a substring from a string",
+      "long_help": "Extracts a substring from the given string starting at beginIndex. If endIndex is provided, extracts up to (but not<br>including) that position. If endIndex is omitted, extracts to the end of the string. Uses Java String.substring() semantics.",
+      "parameters": [
+        {
+          "name": "str",
+          "type": "string"
+        },
+        {
+          "name": "beginIndex",
+          "type": "int"
+        },
+        {
+          "name": "endIndex",
+          "type": "int",
+          "optional": true
+        }
+      ],
+      "return_type": "string",
+      "example": "<b>var</b> <b>text</b> = \"Hello, World!\";<br><b>var</b> <b>sub1</b> = <b>call</b> <b>str.substring</b>(text, 7); <i>// \"World!\"</i><br><b>var</b> <b>sub2</b> = <b>call</b> <b>str.substring</b>(text, 0, 5); <i>// \"Hello\"</i>"
+    },
+    {
+      "function": "str.indexOf",
+      "short_description": "Finds first occurrence of substring",
+      "long_help": "Returns the index of the first occurrence of searchString within str. If fromIndex is provided, starts searching from<br>that position. Returns -1 if not found. Uses Java String.indexOf() semantics.",
+      "parameters": [
+        {
+          "name": "str",
+          "type": "string"
+        },
+        {
+          "name": "searchString",
+          "type": "string"
+        },
+        {
+          "name": "fromIndex",
+          "type": "int",
+          "optional": true
+        }
+      ],
+      "return_type": "int",
+      "example": "<b>var</b> <b>text</b> = \"Hello, World! Hello again!\";<br><b>var</b> <b>idx</b> = <b>call</b> <b>str.indexOf</b>(text, \"World\"); <i>// 7</i><br><b>var</b> <b>idx2</b> = <b>call</b> <b>str.indexOf</b>(text, \"Hello\", 1); <i>// 14</i>"
+    },
+    {
+      "function": "str.lastIndexOf",
+      "short_description": "Finds last occurrence of substring",
+      "long_help": "Returns the index of the last occurrence of searchString within str, searching backwards. If fromIndex is provided,<br>searches backwards from that position. Returns -1 if not found. Uses Java String.lastIndexOf() semantics.",
+      "parameters": [
+        {
+          "name": "str",
+          "type": "string"
+        },
+        {
+          "name": "searchString",
+          "type": "string"
+        },
+        {
+          "name": "fromIndex",
+          "type": "int",
+          "optional": true
+        }
+      ],
+      "return_type": "int",
+      "example": "<b>var</b> <b>text</b> = \"Hello, World! Hello again!\";<br><b>var</b> <b>lastIdx</b> = <b>call</b> <b>str.lastIndexOf</b>(text, \"Hello\"); <i>// 14</i><br><b>var</b> <b>lastL</b> = <b>call</b> <b>str.lastIndexOf</b>(text, \"l\"); <i>// 18</i>"
+    },
+    {
+      "function": "str.charAt",
+      "short_description": "Gets character at specified index",
+      "long_help": "Returns the character at the specified index as a single-character string. Index is zero-based. Throws an error if<br>index is out of bounds. Uses Java String.charAt() semantics.",
+      "parameters": [
+        {
+          "name": "str",
+          "type": "string"
+        },
+        {
+          "name": "index",
+          "type": "int"
+        }
+      ],
+      "return_type": "string",
+      "example": "<b>var</b> <b>text</b> = \"Hello\";<br><b>var</b> <b>firstChar</b> = <b>call</b> <b>str.charAt</b>(text, 0); <i>// \"H\"</i><br><b>var</b> <b>lastChar</b> = <b>call</b> <b>str.charAt</b>(text, 4); <i>// \"o\"</i>"
+    },
+    {
+      "function": "str.replaceAll",
+      "short_description": "Replaces all regex pattern matches",
+      "long_help": "Replaces all occurrences of the regex pattern with the replacement string. Supports full Java regular expression syntax.<br>Use double backslashes for escape sequences. Uses Java String.replaceAll() semantics.",
+      "parameters": [
+        {
+          "name": "str",
+          "type": "string"
+        },
+        {
+          "name": "regex",
+          "type": "string"
+        },
+        {
+          "name": "replacement",
+          "type": "string"
+        }
+      ],
+      "return_type": "string",
+      "example": "<b>var</b> <b>text</b> = \"Hello World\";<br><b>var</b> <b>result</b> = <b>call</b> <b>str.replaceAll</b>(text, \"Hello\", \"Hi\"); <i>// \"Hi World\"</i><br><b>var</b> <b>noDigits</b> = <b>call</b> <b>str.replaceAll</b>(\"abc123\", \"\\\\d\", \"X\"); <i>// \"abcXXX\"</i>"
+    },
+    {
+      "function": "str.lpad",
+      "short_description": "Left-pads string to specified length",
+      "long_help": "Left-pads the string with padChar to reach the specified length. If the string is already at or exceeds the desired<br>length, returns it unchanged. padChar must be a single character.",
+      "parameters": [
+        {
+          "name": "str",
+          "type": "string"
+        },
+        {
+          "name": "length",
+          "type": "int"
+        },
+        {
+          "name": "padChar",
+          "type": "string"
+        }
+      ],
+      "return_type": "string",
+      "example": "<b>var</b> <b>num</b> = \"42\";<br><b>var</b> <b>padded</b> = <b>call</b> <b>str.lpad</b>(num, 5, \"0\"); <i>// \"00042\"</i><br><b>var</b> <b>name</b> = <b>call</b> <b>str.lpad</b>(\"John\", 12, \" \"); <i>// \"        John\"</i>"
+    },
+    {
+      "function": "str.rpad",
+      "short_description": "Right-pads string to specified length",
+      "long_help": "Right-pads the string with padChar to reach the specified length. If the string is already at or exceeds the desired<br>length, returns it unchanged. padChar must be a single character.",
+      "parameters": [
+        {
+          "name": "str",
+          "type": "string"
+        },
+        {
+          "name": "length",
+          "type": "int"
+        },
+        {
+          "name": "padChar",
+          "type": "string"
+        }
+      ],
+      "return_type": "string",
+      "example": "<b>var</b> <b>num</b> = \"42\";<br><b>var</b> <b>padded</b> = <b>call</b> <b>str.rpad</b>(num, 5, \"0\"); <i>// \"42000\"</i><br><b>var</b> <b>name</b> = <b>call</b> <b>str.rpad</b>(\"John\", 12, \" \"); <i>// \"John        \"</i>"
     }
   ]
 }
