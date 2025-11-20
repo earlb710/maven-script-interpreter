@@ -7,14 +7,15 @@
 4. [Variables](#variables)
 5. [Operators](#operators)
 6. [Control Flow](#control-flow)
-7. [Functions](#functions)
-8. [Arrays](#arrays)
-9. [JSON](#json)
-10. [Database Operations](#database-operations)
-11. [Screen/UI Windows](#screenui-windows)
-12. [Built-in Functions](#built-in-functions)
-13. [Comments](#comments)
-14. [Console Commands](#console-commands)
+7. [Code Organization](#code-organization)
+8. [Functions](#functions)
+9. [Arrays](#arrays)
+10. [JSON](#json)
+11. [Database Operations](#database-operations)
+12. [Screen/UI Windows](#screenui-windows)
+13. [Built-in Functions](#built-in-functions)
+14. [Comments](#comments)
+15. [Console Commands](#console-commands)
 
 ---
 
@@ -265,6 +266,45 @@ while i < 10 {
 while true {
     if done then exit;
 }
+```
+
+---
+
+## Code Organization
+
+### Importing Other Scripts
+
+Import other EBS script files to reuse functions and code:
+
+```javascript
+// Import from same directory
+import "helper.ebs";
+
+// Import from subdirectory
+import "util/stringUtil.ebs";
+
+// Import with spaces in path (use quotes)
+import "my utils/helper functions.ebs";
+
+// Single quotes also supported
+import 'lib/database.ebs';
+```
+
+**Import Features:**
+- Supports subdirectory paths using forward slashes (`/`)
+- Handles spaces in directory and file names
+- Both single (`'`) and double (`"`) quotes supported
+- Circular import protection (files imported only once)
+- Import paths are resolved relative to the importing script's directory
+
+**Example:**
+```javascript
+// main.ebs
+import "util/math.ebs";
+import "util/string.ebs";
+
+var result: int = call add(5, 3);
+var text: string = call toUpper("hello");
 ```
 
 ---

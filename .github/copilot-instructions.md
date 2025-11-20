@@ -127,6 +127,22 @@ See `ScriptInterpreter/src/main/java/com/eb/script/syntax_ebnf.txt` for the comp
 
 ## Development Guidelines
 
+### When Creating EBS Example Scripts
+
+**IMPORTANT**: Always verify EBS syntax and available builtins before creating example scripts:
+
+1. **Check Syntax**: Review `EBS_SCRIPT_SYNTAX.md` for correct language syntax
+   - Function definitions: `functionName(params) return returnType { ... }` (no `function` keyword)
+   - Variable declarations, control flow, and other language constructs
+   
+2. **Verify Builtins**: Check `Builtins.java` for available built-in functions
+   - String functions: `string.toUpper`, `string.toLower`, `string.trim`, etc.
+   - Array functions: `array.length`, `array.push`, `array.pop`, etc.
+   - Math functions: `math.abs`, `math.max`, `math.min`, etc.
+   - File I/O, JSON, date/time functions
+   
+3. **Test Before Committing**: Parse and validate example scripts to ensure they work correctly
+
 ### When Adding New Features
 
 1. **Built-in Functions**: Add to `Builtins.java` and register in the interpreter's environment

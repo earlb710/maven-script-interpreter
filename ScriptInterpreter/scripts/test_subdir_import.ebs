@@ -1,0 +1,7 @@
+// Test importing from subdirectory
+print "Testing subdirectory import...";
+
+import "util/stringUtil.ebs";
+
+var result: string = call toUpper("hello");
+print "toUpper('hello') = " + result;
