@@ -272,7 +272,7 @@
       "example": "<b>var</b> <b>files</b> = <b>call</b> <b>file.listFiles</b>(path=\"./data\");\n<b>foreach</b> f <b>in</b> files <b>do</b> {\n  <b>print</b> f;\n}"
     },
     {
-      "function": "string.toString",
+      "function": "str.toString",
       "short_description": "Converts value to string",
       "long_help": "Converts any value to its string representation.",
       "parameters": [
@@ -282,10 +282,10 @@
         }
       ],
       "return_type": "string",
-      "example": "<b>var</b> <b>num</b> = 42;\n<b>var</b> <b>str</b> = <b>call</b> <b>string.toString</b>(value=num);"
+      "example": "<b>var</b> <b>num</b> = 42;\n<b>var</b> <b>str</b> = <b>call</b> <b>str.toString</b>(value=num);"
     },
     {
-      "function": "string.toUpper",
+      "function": "str.toUpper",
       "short_description": "Converts string to uppercase",
       "long_help": "Returns a new string with all characters converted to uppercase.",
       "parameters": [
@@ -295,10 +295,10 @@
         }
       ],
       "return_type": "string",
-      "example": "<b>var</b> <b>upper</b> = <b>call</b> <b>string.toUpper</b>(str=\"hello\");\n<b>print</b> upper; // \"HELLO\""
+      "example": "<b>var</b> <b>upper</b> = <b>call</b> <b>str.toUpper</b>(str=\"hello\");\n<b>print</b> upper; // \"HELLO\""
     },
     {
-      "function": "string.toLower",
+      "function": "str.toLower",
       "short_description": "Converts string to lowercase",
       "long_help": "Returns a new string with all characters converted to lowercase.",
       "parameters": [
@@ -308,10 +308,10 @@
         }
       ],
       "return_type": "string",
-      "example": "<b>var</b> <b>lower</b> = <b>call</b> <b>string.toLower</b>(str=\"WORLD\");\n<b>print</b> lower; // \"world\""
+      "example": "<b>var</b> <b>lower</b> = <b>call</b> <b>str.toLower</b>(str=\"WORLD\");\n<b>print</b> lower; // \"world\""
     },
     {
-      "function": "string.trim",
+      "function": "str.trim",
       "short_description": "Removes whitespace from ends",
       "long_help": "Returns a new string with leading and trailing whitespace removed.",
       "parameters": [
@@ -321,10 +321,10 @@
         }
       ],
       "return_type": "string",
-      "example": "<b>var</b> <b>trimmed</b> = <b>call</b> <b>string.trim</b>(str=\"  hello  \");\n<b>print</b> trimmed; // \"hello\""
+      "example": "<b>var</b> <b>trimmed</b> = <b>call</b> <b>str.trim</b>(str=\"  hello  \");\n<b>print</b> trimmed; // \"hello\""
     },
     {
-      "function": "string.replace",
+      "function": "str.replace",
       "short_description": "Replaces text in string",
       "long_help": "Returns a new string with all occurrences of the target substring replaced with the replacement string.",
       "parameters": [
@@ -342,10 +342,10 @@
         }
       ],
       "return_type": "string",
-      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>string.replace</b>(source=\"hello world\", target=\"world\", replacement=\"there\");<br><b>print</b> result; // \"hello there\""
+      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>str.replace</b>(source=\"hello world\", target=\"world\", replacement=\"there\");<br><b>print</b> result; // \"hello there\""
     },
     {
-      "function": "string.split",
+      "function": "str.split",
       "short_description": "Splits string into array",
       "long_help": "Splits a string into an array of substrings using the specified regex pattern as the delimiter. Returns a JSON array.",
       "parameters": [
@@ -364,10 +364,10 @@
         }
       ],
       "return_type": "json",
-      "example": "<b>var</b> <b>parts</b> = <b>call</b> <b>string.split</b>(text=\"apple,banana,cherry\", regex=\",\");\n<b>foreach</b> part <b>in</b> parts <b>do</b> {\n  <b>print</b> part;\n}"
+      "example": "<b>var</b> <b>parts</b> = <b>call</b> <b>str.split</b>(text=\"apple,banana,cherry\", regex=\",\");\n<b>foreach</b> part <b>in</b> parts <b>do</b> {\n  <b>print</b> part;\n}"
     },
     {
-      "function": "string.join",
+      "function": "str.join",
       "short_description": "Joins array into string",
       "long_help": "Concatenates all elements of a JSON array into a single string, separated by the specified delimiter.",
       "parameters": [
@@ -381,10 +381,10 @@
         }
       ],
       "return_type": "string",
-      "example": "<b>var</b> <b>arr</b> = [\"hello\", \"world\"];\n<b>var</b> <b>joined</b> = <b>call</b> <b>string.join</b>(array=arr, delimiter=\" \");\n<b>print</b> joined; // \"hello world\""
+      "example": "<b>var</b> <b>arr</b> = [\"hello\", \"world\"];\n<b>var</b> <b>joined</b> = <b>call</b> <b>str.join</b>(array=arr, delimiter=\" \");\n<b>print</b> joined; // \"hello world\""
     },
     {
-      "function": "string.contains",
+      "function": "str.contains",
       "short_description": "Checks if string contains substring",
       "long_help": "Returns true if the string contains the specified substring, false otherwise.",
       "parameters": [
@@ -398,10 +398,10 @@
         }
       ],
       "return_type": "bool",
-      "example": "<b>if</b> <b>call</b> <b>string.contains</b>(str=\"hello world\", substring=\"world\") <b>then</b> {\n  <b>print</b> \"Found!\";\n}"
+      "example": "<b>if</b> <b>call</b> <b>str.contains</b>(str=\"hello world\", substring=\"world\") <b>then</b> {\n  <b>print</b> \"Found!\";\n}"
     },
     {
-      "function": "string.startsWith",
+      "function": "str.startsWith",
       "short_description": "Checks if string starts with prefix",
       "long_help": "Returns true if the string starts with the specified prefix, false otherwise.",
       "parameters": [
@@ -415,10 +415,10 @@
         }
       ],
       "return_type": "bool",
-      "example": "<b>if</b> <b>call</b> <b>string.startsWith</b>(str=\"hello\", prefix=\"hel\") <b>then</b> {\n  <b>print</b> \"Starts with hel\";\n}"
+      "example": "<b>if</b> <b>call</b> <b>str.startsWith</b>(str=\"hello\", prefix=\"hel\") <b>then</b> {\n  <b>print</b> \"Starts with hel\";\n}"
     },
     {
-      "function": "string.endsWith",
+      "function": "str.endsWith",
       "short_description": "Checks if string ends with suffix",
       "long_help": "Returns true if the string ends with the specified suffix, false otherwise.",
       "parameters": [
@@ -432,10 +432,10 @@
         }
       ],
       "return_type": "bool",
-      "example": "<b>if</b> <b>call</b> <b>string.endsWith</b>(str=\"hello\", suffix=\"llo\") <b>then</b> {\n  <b>print</b> \"Ends with llo\";\n}"
+      "example": "<b>if</b> <b>call</b> <b>str.endsWith</b>(str=\"hello\", suffix=\"llo\") <b>then</b> {\n  <b>print</b> \"Ends with llo\";\n}"
     },
     {
-      "function": "string.substring",
+      "function": "str.substring",
       "short_description": "Extracts substring",
       "long_help": "Returns a substring of the original string, starting at the specified index and optionally ending at another index.",
       "parameters": [
@@ -453,10 +453,10 @@
         }
       ],
       "return_type": "string",
-      "example": "<b>var</b> <b>sub</b> = <b>call</b> <b>string.substring</b>(str=\"hello world\", startIndex=0, endIndex=5);\n<b>print</b> sub; // \"hello\""
+      "example": "<b>var</b> <b>sub</b> = <b>call</b> <b>str.substring</b>(str=\"hello world\", startIndex=0, endIndex=5);\n<b>print</b> sub; // \"hello\""
     },
     {
-      "function": "string.length",
+      "function": "str.length",
       "short_description": "Returns string length",
       "long_help": "Returns the number of characters in the string.",
       "parameters": [
@@ -466,7 +466,7 @@
         }
       ],
       "return_type": "integer",
-      "example": "<b>var</b> <b>len</b> = <b>call</b> <b>string.length</b>(str=\"hello\");\n<b>print</b> len; // 5"
+      "example": "<b>var</b> <b>len</b> = <b>call</b> <b>str.length</b>(str=\"hello\");\n<b>print</b> len; // 5"
     },
     {
       "function": "json.jsonFromString",
@@ -2017,7 +2017,7 @@
       "example": "<b>var</b> <b>result</b> = <b>call</b> <b>math.tan</b>(angle=0.785);\n<b>print</b> \"Tangent: \" + result;"
     },
     {
-      "function": "string.charAt",
+      "function": "str.charAt",
       "short_description": "Returns character at index",
       "long_help": "Returns the character at the specified index in a string. Index is zero-based.",
       "parameters": [
@@ -2031,10 +2031,10 @@
         }
       ],
       "return_type": "string",
-      "example": "<b>var</b> <b>char</b> = <b>call</b> <b>string.charAt</b>(str=\"Hello\", index=1);\n<b>print</b> char; // Outputs: e"
+      "example": "<b>var</b> <b>char</b> = <b>call</b> <b>str.charAt</b>(str=\"Hello\", index=1);\n<b>print</b> char; // Outputs: e"
     },
     {
-      "function": "string.indexOf",
+      "function": "str.indexOf",
       "short_description": "Finds first occurrence of substring",
       "long_help": "Returns the index of the first occurrence of the specified substring. Returns -1 if not found.",
       "parameters": [
@@ -2048,10 +2048,10 @@
         }
       ],
       "return_type": "integer",
-      "example": "<b>var</b> <b>pos</b> = <b>call</b> <b>string.indexOf</b>(str=\"Hello World\", substring=\"World\");\n<b>print</b> pos; // Outputs: 6"
+      "example": "<b>var</b> <b>pos</b> = <b>call</b> <b>str.indexOf</b>(str=\"Hello World\", substring=\"World\");\n<b>print</b> pos; // Outputs: 6"
     },
     {
-      "function": "string.lastIndexOf",
+      "function": "str.lastIndexOf",
       "short_description": "Finds last occurrence of substring",
       "long_help": "Returns the index of the last occurrence of the specified substring. Returns -1 if not found.",
       "parameters": [
@@ -2065,10 +2065,10 @@
         }
       ],
       "return_type": "integer",
-      "example": "<b>var</b> <b>pos</b> = <b>call</b> <b>string.lastIndexOf</b>(str=\"Hello Hello\", substring=\"Hello\");\n<b>print</b> pos; // Outputs: 6"
+      "example": "<b>var</b> <b>pos</b> = <b>call</b> <b>str.lastIndexOf</b>(str=\"Hello Hello\", substring=\"Hello\");\n<b>print</b> pos; // Outputs: 6"
     },
     {
-      "function": "string.matches",
+      "function": "str.matches",
       "short_description": "Tests string against regex pattern",
       "long_help": "Tests whether the string matches the specified regular expression pattern. Returns true if it matches, false otherwise.",
       "parameters": [
@@ -2082,10 +2082,10 @@
         }
       ],
       "return_type": "bool",
-      "example": "<b>var</b> <b>isEmail</b> = <b>call</b> <b>string.matches</b>(str=\"test@example.com\", pattern=\"^[\\\\w.-]+@[\\\\w.-]+\\\\.\\\\w+$\");"
+      "example": "<b>var</b> <b>isEmail</b> = <b>call</b> <b>str.matches</b>(str=\"test@example.com\", pattern=\"^[\\\\w.-]+@[\\\\w.-]+\\\\.\\\\w+$\");"
     },
     {
-      "function": "string.replaceAll",
+      "function": "str.replaceAll",
       "short_description": "Replaces all pattern matches",
       "long_help": "Replaces all occurrences of the regex pattern with the replacement string.",
       "parameters": [
@@ -2103,7 +2103,7 @@
         }
       ],
       "return_type": "string",
-      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>string.replaceAll</b>(str=\"Hello 123 World 456\", pattern=\"\\\\d+\",<br>replacement=\"NUM\");<br><b>print</b> result; // Outputs: Hello NUM World NUM"
+      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>str.replaceAll</b>(str=\"Hello 123 World 456\", pattern=\"\\\\d+\",<br>replacement=\"NUM\");<br><b>print</b> result; // Outputs: Hello NUM World NUM"
     },
     {
       "function": "system.currentTimeMillis",
@@ -2408,7 +2408,7 @@
       "example": "<b>var</b> <b>data</b> = {\"user\": {\"name\": \"Alice\"}};<br><b>var</b> <b>updated</b> = <b>call</b> <b>json.setStrict</b>(root=data, path=\"user.name\", value=\"Bob\");<br>// Throws error <b>if</b> path doesn't exist"
     },
     {
-      "function": "string.equals",
+      "function": "str.equals",
       "short_description": "Checks if two strings are equal",
       "long_help": "Returns true if the two strings are exactly equal (case-sensitive), false otherwise. Handles null values safely.",
       "parameters": [
@@ -2422,10 +2422,10 @@
         }
       ],
       "return_type": "bool",
-      "example": "<b>if</b> <b>call</b> <b>string.equals</b>(value1=input, value2=\"expected\") <b>then</b> {\n  <b>print</b> \"Match!\";\n}"
+      "example": "<b>if</b> <b>call</b> <b>str.equals</b>(value1=input, value2=\"expected\") <b>then</b> {\n  <b>print</b> \"Match!\";\n}"
     },
     {
-      "function": "string.equalsIgnoreCase",
+      "function": "str.equalsIgnoreCase",
       "short_description": "Checks if strings are equal (case-insensitive)",
       "long_help": "Returns true if the two strings are equal ignoring case differences, false otherwise. Useful for case-insensitive<br>comparisons.",
       "parameters": [
@@ -2439,10 +2439,10 @@
         }
       ],
       "return_type": "bool",
-      "example": "<b>if</b> <b>call</b> <b>string.equalsIgnoreCase</b>(value1=\"Hello\", value2=\"hello\") <b>then</b> {\n  <b>print</b> \"Match!\";\n}"
+      "example": "<b>if</b> <b>call</b> <b>str.equalsIgnoreCase</b>(value1=\"Hello\", value2=\"hello\") <b>then</b> {\n  <b>print</b> \"Match!\";\n}"
     },
     {
-      "function": "string.isBlank",
+      "function": "str.isBlank",
       "short_description": "Checks if string is blank",
       "long_help": "Returns true if the string is null, empty, or contains only whitespace characters, false otherwise.",
       "parameters": [
@@ -2452,10 +2452,10 @@
         }
       ],
       "return_type": "bool",
-      "example": "<b>if</b> <b>call</b> <b>string.isBlank</b>(str=userInput) <b>then</b> {\n  <b>print</b> \"Please enter a value\";\n}"
+      "example": "<b>if</b> <b>call</b> <b>str.isBlank</b>(str=userInput) <b>then</b> {\n  <b>print</b> \"Please enter a value\";\n}"
     },
     {
-      "function": "string.isEmpty",
+      "function": "str.isEmpty",
       "short_description": "Checks if string is empty",
       "long_help": "Returns true if the string is null or has zero length, false otherwise. Unlike isBlank, this does not consider<br>whitespace.",
       "parameters": [
@@ -2465,7 +2465,7 @@
         }
       ],
       "return_type": "bool",
-      "example": "<b>if</b> <b>call</b> <b>string.isEmpty</b>(str=name) <b>then</b> {\n  <b>print</b> \"Name is empty\";\n}"
+      "example": "<b>if</b> <b>call</b> <b>str.isEmpty</b>(str=name) <b>then</b> {\n  <b>print</b> \"Name is empty\";\n}"
     },
     {
       "function": "system.command",
