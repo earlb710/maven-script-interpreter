@@ -36,7 +36,7 @@ screen quickTest = {
                     "display": {
                         "type": "button",
                         "labelText": "Update Value",
-                        "onClick": "testValue = 'Button clicked!'; print 'Value updated';"
+                        "onClick": "quickTest.testValue = 'Button clicked!'; print 'Value updated';"
                     }
                 },
                 {
@@ -45,7 +45,7 @@ screen quickTest = {
                     "display": {
                         "type": "button",
                         "labelText": "Update & Close",
-                        "onClick": "testValue = 'Closing...'; print 'Closing screen'; close screen;"
+                        "onClick": "quickTest.testValue = 'Closing...'; print 'Closing screen'; close screen;"
                     }
                 }
             ]
