@@ -77,8 +77,8 @@ screen testScreen = {
     ]
 };
 
-// Show the screen
-screen testScreen show;
+// Show the screen (using new syntax)
+show screen testScreen;
 
 // Function to set screen status based on selected type
 setScreenStatus() return bool {

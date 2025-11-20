@@ -129,8 +129,8 @@ screen myScreen = {
     ]
 };
 
-// Show the screen
-screen myScreen show;
+// Show the screen (new syntax)
+show screen myScreen;
 
 // Mark screen as changed when user edits data
 call screen.setStatus(screenName="myScreen", status="changed");
