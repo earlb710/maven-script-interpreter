@@ -696,18 +696,22 @@ public class EbsConsoleHandler extends EbsHandler {
 
         if (result.isPresent()) {
             if (result.get() == saveButton) {
-                // Save the file
+                // Save the file to its default path (no dialog)
                 TabContext context = (TabContext) tab.getUserData();
-                if (context != null && context.path != null && Files.exists(context.path)) {
-                    // File already exists, just save
-                    saveHandle(tab);
-                } else {
-                    // File doesn't exist yet, use Save As
-                    chooseSaveAs(tab);
+                if (context != null && context.path != null) {
+                    try {
+                        // Save directly to the path without showing dialog
+                        callBuiltin("file.writeTextFile", context.path.toString(), tab.getEditorText());
+                        tab.markCleanTitle();
+                        addRecentFile(context.path);
+                    } catch (Exception ex) {
+                        submitErrors("Save failed: " + ex.getMessage());
+                        return false; // Don't close if save failed
+                    }
                 }
                 return true; // Close after saving
             } else if (result.get() == saveAsButton) {
-                // Save As
+                // Save As - show file chooser dialog
                 chooseSaveAs(tab);
                 return true; // Close after saving
             } else if (result.get() == dontSaveButton) {

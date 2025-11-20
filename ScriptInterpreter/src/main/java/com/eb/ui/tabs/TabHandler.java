@@ -73,6 +73,9 @@ public class TabHandler implements TabOpener {
                             int removeIndex = change.getFrom();
                             tabPane.getTabs().add(removeIndex, removed);
                             
+                            // Select the tab so it's visible and active
+                            tabPane.getSelectionModel().select(removed);
+                            
                             // Reset flag after re-adding
                             isHandlingClose = false;
                             
@@ -86,8 +89,15 @@ public class TabHandler implements TabOpener {
                                     tabPane.getTabs().remove(ebsTab);
                                     tabBeingRemoved = null;
                                     isHandlingClose = false;
+                                } else {
+                                    // User cancelled - ensure tab is selected and focused
+                                    Platform.runLater(() -> {
+                                        tabPane.getSelectionModel().select(ebsTab);
+                                        if (ebsTab.getContent() != null) {
+                                            ebsTab.getContent().requestFocus();
+                                        }
+                                    });
                                 }
-                                // If user cancelled, tab stays in the list
                             });
                             
                             // Return early to avoid processing other changes
