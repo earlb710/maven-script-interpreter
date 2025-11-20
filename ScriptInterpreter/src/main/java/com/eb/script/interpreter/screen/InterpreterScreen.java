@@ -6,6 +6,7 @@ import com.eb.script.interpreter.statement.StatementKind;
 import com.eb.script.interpreter.statement.ScreenStatement;
 import com.eb.script.interpreter.statement.ScreenShowStatement;
 import com.eb.script.interpreter.statement.ScreenHideStatement;
+import com.eb.script.interpreter.statement.ScreenCloseStatement;
 import com.eb.script.interpreter.screen.DisplayItem.ItemType;
 import com.eb.script.interpreter.screen.AreaDefinition.AreaType;
 import com.eb.script.RuntimeContext;
@@ -603,6 +604,74 @@ public class InterpreterScreen {
                     if (context.getOutput() != null) {
                         context.getOutput().printlnInfo("Screen '" + stmt.name + "' is already hidden");
                     }
+                }
+            });
+
+        } catch (InterpreterError ex) {
+            throw interpreter.error(stmt.getLine(), ex.getLocalizedMessage());
+        } finally {
+            interpreter.environment().popCallStack();
+        }
+    }
+
+    /**
+     * Visit a screen close statement to close a screen (with or without name)
+     */
+    public void visitScreenCloseStatement(ScreenCloseStatement stmt) throws InterpreterError {
+        String screenName = stmt.name;
+        
+        // If no screen name provided, determine from thread context
+        if (screenName == null) {
+            screenName = context.getCurrentScreen();
+            if (screenName == null) {
+                throw interpreter.error(stmt.getLine(), 
+                    "No screen name specified and not executing in a screen context. " +
+                    "Use 'close screen <name>;' to close a specific screen, or call 'close screen;' " +
+                    "from within screen event handlers (e.g., onClick).");
+            }
+        }
+        
+        interpreter.environment().pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Screen %1 close", screenName);
+        try {
+            // Check if screen exists
+            if (!context.getScreens().containsKey(screenName)) {
+                throw interpreter.error(stmt.getLine(), "Screen '" + screenName + "' does not exist.");
+            }
+
+            Stage stage = context.getScreens().get(screenName);
+            if (stage == null) {
+                throw interpreter.error(stmt.getLine(), "Screen '" + screenName + "' is still being initialized. Please try again.");
+            }
+
+            final String finalScreenName = screenName;
+            
+            // Close the screen on JavaFX Application Thread
+            Platform.runLater(() -> {
+                try {
+                    // Collect output fields and invoke callback if set
+                    collectOutputFieldsAndInvokeCallback(finalScreenName, 0);
+                } catch (InterpreterError e) {
+                    if (context.getOutput() != null) {
+                        context.getOutput().printlnError("Error invoking close callback: " + e.getMessage());
+                    }
+                }
+                
+                // Close the stage
+                if (stage.isShowing()) {
+                    stage.close();
+                }
+                
+                // Interrupt and stop the screen thread
+                Thread thread = context.getScreenThreads().get(finalScreenName);
+                if (thread != null && thread.isAlive()) {
+                    thread.interrupt();
+                }
+                
+                // Clean up resources
+                context.remove(finalScreenName);
+                
+                if (context.getOutput() != null) {
+                    context.getOutput().printlnOk("Screen '" + finalScreenName + "' closed");
                 }
             });
 

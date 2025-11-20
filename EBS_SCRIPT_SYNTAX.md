@@ -908,6 +908,23 @@ hide myWindow;
 screen myWindow hide;
 ```
 
+#### Close Screen
+```javascript
+// Close a specific screen by name
+close screen myWindow;
+
+// Close the current screen (from within screen context)
+close screen;
+```
+
+**Note**: Closing a screen will:
+- Destroy the screen window
+- Clean up all screen resources (variables, threads, etc.)
+- Invoke any registered close callback
+- If no screen name is provided, determines the screen from the execution thread context
+- The no-name form must be called from within a screen context (e.g., onClick handlers)
+- If called from console/main thread without a name, an error is thrown
+
 ### Accessing Screen Variables
 
 #### Read Variable
