@@ -307,7 +307,6 @@ public class ScreenFactory {
                         statusBar.setMessage(message);
                         
                         // Get metadata for min/max info
-                        DisplayItem metadata = metadataProvider.apply(screenName, itemName);
                         if (metadata != null) {
                             // Update custom with min/max info
                             String minMaxInfo = "";
