@@ -1,0 +1,63 @@
+// Quick Test: Button onClick Context - Basic Verification
+// This is a minimal test to quickly verify the onClick context fix works
+
+println("Creating test screen with contextual 'close screen;' button...");
+
+screen quickTest = {
+    "title": "Quick Test: onClick Context",
+    "width": 350,
+    "height": 200,
+    "vars": [
+        {
+            "name": "testValue",
+            "type": "string",
+            "default": "Ready to test",
+            "display": {
+                "type": "textfield",
+                "labelText": "Status:"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "main",
+            "type": "vbox",
+            "spacing": "10",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "testValue",
+                    "varRef": "testValue",
+                    "seq": 1
+                },
+                {
+                    "name": "updateButton",
+                    "seq": 2,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Update Value",
+                        "onClick": "testValue = 'Button clicked!'; println('Value updated');"
+                    }
+                },
+                {
+                    "name": "closeButton",
+                    "seq": 3,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Update & Close",
+                        "onClick": "testValue = 'Closing...'; println('Closing screen'); close screen;"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+println("Test screen created successfully!");
+println("");
+println("To test: show screen quickTest;");
+println("");
+println("Expected behavior:");
+println("1. Click 'Update Value' - should update the text field");
+println("2. Click 'Update & Close' - should update field and close screen");
+println("   WITHOUT requiring explicit screen name in 'close screen;' statement");

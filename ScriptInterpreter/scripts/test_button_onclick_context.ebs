@@ -1,0 +1,268 @@
+// Test Script: Button onClick Screen Context
+// Description: Tests that button onClick handlers execute with proper screen context
+//              allowing contextual screen statements like "close screen;" and "hide screen;"
+//              to work without explicit screen names
+// Date: 2025-11-20
+
+println("=== Button onClick Screen Context Test Suite ===");
+println("");
+println("This test demonstrates that onClick handlers can now use screen statements");
+println("without explicit screen names (e.g., 'close screen;' instead of 'close screen myScreen;')");
+println("");
+
+// Test 1: Button that closes screen using contextual statement
+println("Test 1: Creating screen with 'Close' button using contextual 'close screen;' statement");
+screen test1Screen = {
+    "title": "Test 1: Close Screen Context",
+    "width": 400,
+    "height": 250,
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "15",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "instructions",
+                    "seq": 1,
+                    "display": {
+                        "type": "label",
+                        "labelText": "Click the button below to close this screen.\nThe onClick handler uses 'close screen;' without\nexplicitly naming the screen."
+                    }
+                },
+                {
+                    "name": "closeButton",
+                    "seq": 2,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Close This Screen",
+                        "onClick": "println('Executing: close screen;'); close screen;"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+// Test 2: Button that hides screen using contextual statement
+println("Test 2: Creating screen with 'Hide' button using contextual 'hide screen;' statement");
+screen test2Screen = {
+    "title": "Test 2: Hide Screen Context",
+    "width": 400,
+    "height": 250,
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "15",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "instructions",
+                    "seq": 1,
+                    "display": {
+                        "type": "label",
+                        "labelText": "Click the button to hide this screen.\nYou can show it again with: show screen test2Screen;"
+                    }
+                },
+                {
+                    "name": "hideButton",
+                    "seq": 2,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Hide This Screen",
+                        "onClick": "println('Executing: hide screen;'); hide screen;"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+// Test 3: Button with variable manipulation and contextual close
+println("Test 3: Creating screen with counter variable and contextual operations");
+screen test3Screen = {
+    "title": "Test 3: Variable Operations + Close",
+    "width": 450,
+    "height": 350,
+    "vars": [
+        {
+            "name": "counter",
+            "type": "int",
+            "default": 0,
+            "display": {
+                "type": "textfield",
+                "labelText": "Counter:",
+                "alignment": "right"
+            }
+        },
+        {
+            "name": "message",
+            "type": "string",
+            "default": "Click 'Increment' to start",
+            "display": {
+                "type": "textfield",
+                "labelText": "Status:",
+                "alignment": "left"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "15",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "instructions",
+                    "seq": 1,
+                    "display": {
+                        "type": "label",
+                        "labelText": "Test variable manipulation within onClick handlers.\nAll operations use the screen's context automatically."
+                    }
+                },
+                {
+                    "name": "counter",
+                    "varRef": "counter",
+                    "seq": 2
+                },
+                {
+                    "name": "message",
+                    "varRef": "message",
+                    "seq": 3
+                },
+                {
+                    "name": "incrementButton",
+                    "seq": 4,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Increment Counter",
+                        "onClick": "counter = counter + 1; message = 'Counter incremented to ' + counter; println('Counter is now: ' + counter);"
+                    }
+                },
+                {
+                    "name": "resetButton",
+                    "seq": 5,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Reset Counter",
+                        "onClick": "counter = 0; message = 'Counter reset to 0'; println('Counter reset');"
+                    }
+                },
+                {
+                    "name": "closeButton",
+                    "seq": 6,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Close Screen",
+                        "onClick": "println('Final counter value: ' + counter); println('Closing screen...'); close screen;"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+// Test 4: Multiple buttons with different contextual operations
+println("Test 4: Creating screen with multiple contextual operations");
+screen test4Screen = {
+    "title": "Test 4: Multiple Context Operations",
+    "width": 450,
+    "height": 300,
+    "vars": [
+        {
+            "name": "clickCount",
+            "type": "int",
+            "default": 0,
+            "display": {
+                "type": "textfield",
+                "labelText": "Button Clicks:",
+                "alignment": "right"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "15",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "instructions",
+                    "seq": 1,
+                    "display": {
+                        "type": "label",
+                        "labelText": "Each button demonstrates a different contextual operation."
+                    }
+                },
+                {
+                    "name": "clickCount",
+                    "varRef": "clickCount",
+                    "seq": 2
+                },
+                {
+                    "name": "trackButton",
+                    "seq": 3,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Track Clicks",
+                        "onClick": "clickCount = clickCount + 1; println('Button clicked ' + clickCount + ' times');"
+                    }
+                },
+                {
+                    "name": "hideButton",
+                    "seq": 4,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Hide (can show again)",
+                        "onClick": "println('Hiding screen (clicks: ' + clickCount + ')'); hide screen;"
+                    }
+                },
+                {
+                    "name": "closeButton",
+                    "seq": 5,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Close (permanent)",
+                        "onClick": "println('Closing screen (total clicks: ' + clickCount + ')'); close screen;"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+// Display instructions for running tests
+println("");
+println("=== Test Screens Created ===");
+println("");
+println("Four test screens have been created. To run the tests:");
+println("");
+println("1. show screen test1Screen;");
+println("   - Click 'Close This Screen' button");
+println("   - Verifies: onClick can use 'close screen;' contextually");
+println("");
+println("2. show screen test2Screen;");
+println("   - Click 'Hide This Screen' button");
+println("   - Verifies: onClick can use 'hide screen;' contextually");
+println("   - To show again: show screen test2Screen;");
+println("");
+println("3. show screen test3Screen;");
+println("   - Click 'Increment Counter' multiple times");
+println("   - Click 'Reset Counter' to reset");
+println("   - Click 'Close Screen' to close");
+println("   - Verifies: onClick can manipulate variables and close contextually");
+println("");
+println("4. show screen test4Screen;");
+println("   - Click 'Track Clicks' to increment counter");
+println("   - Click 'Hide' to hide (can show again with: show screen test4Screen;)");
+println("   - Click 'Close' to close permanently");
+println("   - Verifies: Multiple contextual operations work correctly");
+println("");
+println("=== Expected Behavior ===");
+println("Before this fix: onClick handlers would fail with 'no screen name specified'");
+println("After this fix: All contextual screen statements work without explicit names");
+println("");
