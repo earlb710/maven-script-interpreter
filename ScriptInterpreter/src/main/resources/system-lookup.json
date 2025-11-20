@@ -215,23 +215,6 @@
       "example": "<b>var</b> <b>success</b> = <b>call</b> <b>file.writeTextFile</b>(path=\"output.txt\", content=\"Hello, World!\");"
     },
     {
-      "function": "file.appendTextFile",
-      "short_description": "Appends text to a file",
-      "long_help": "Appends the given text content to the end of an existing file. Creates the file if it doesn't exist.",
-      "parameters": [
-        {
-          "name": "path",
-          "type": "string"
-        },
-        {
-          "name": "content",
-          "type": "string"
-        }
-      ],
-      "return_type": "bool",
-      "example": "<b>call</b> <b>file.appendTextFile</b>(path=\"log.txt\", content=\"New log entry\\n\");"
-    },
-    {
       "function": "file.exists",
       "short_description": "Checks if file exists",
       "long_help": "Returns true if the specified file or directory exists, false otherwise.",
@@ -243,19 +226,6 @@
       ],
       "return_type": "bool",
       "example": "<b>if</b> <b>call</b> <b>file.exists</b>(path=\"config.json\") <b>then</b> {\n  <b>print</b> \"Config file found\";\n}"
-    },
-    {
-      "function": "file.delete",
-      "short_description": "Deletes a file",
-      "long_help": "Deletes the specified file. Returns true if successful, false if the file doesn't exist or couldn't be deleted.",
-      "parameters": [
-        {
-          "name": "path",
-          "type": "string"
-        }
-      ],
-      "return_type": "bool",
-      "example": "<b>var</b> <b>deleted</b> = <b>call</b> <b>file.delete</b>(path=\"temp.txt\");"
     },
     {
       "function": "file.listFiles",
@@ -433,40 +403,6 @@
       ],
       "return_type": "bool",
       "example": "<b>if</b> <b>call</b> <b>str.endsWith</b>(str=\"hello\", suffix=\"llo\") <b>then</b> {\n  <b>print</b> \"Ends with llo\";\n}"
-    },
-    {
-      "function": "str.substring",
-      "short_description": "Extracts substring",
-      "long_help": "Returns a substring of the original string, starting at the specified index and optionally ending at another index.",
-      "parameters": [
-        {
-          "name": "str",
-          "type": "string"
-        },
-        {
-          "name": "startIndex",
-          "type": "integer"
-        },
-        {
-          "name": "endIndex",
-          "type": "integer"
-        }
-      ],
-      "return_type": "string",
-      "example": "<b>var</b> <b>sub</b> = <b>call</b> <b>str.substring</b>(str=\"hello world\", startIndex=0, endIndex=5);\n<b>print</b> sub; // \"hello\""
-    },
-    {
-      "function": "str.length",
-      "short_description": "Returns string length",
-      "long_help": "Returns the number of characters in the string.",
-      "parameters": [
-        {
-          "name": "str",
-          "type": "string"
-        }
-      ],
-      "return_type": "integer",
-      "example": "<b>var</b> <b>len</b> = <b>call</b> <b>str.length</b>(str=\"hello\");\n<b>print</b> len; // 5"
     },
     {
       "function": "json.jsonFromString",
@@ -667,108 +603,6 @@
       "example": "<b>var</b> <b>errors</b> = <b>call</b> <b>json.validate</b>(schemaName=\"personSchema\", json=myData);<br><b>if</b> <b>call</b> <b>json.isEmpty</b>(value=errors) <b>then</b> {<br>  <b>print</b> \"Valid!\";<br>}"
     },
     {
-      "function": "array.create",
-      "short_description": "Creates a new array",
-      "long_help": "Creates a new array with the specified size. Elements are initialized to null or zero depending on type.",
-      "parameters": [
-        {
-          "name": "size",
-          "type": "integer"
-        },
-        {
-          "name": "type",
-          "type": "string"
-        }
-      ],
-      "return_type": "array",
-      "example": "<b>var</b> <b>arr</b> = <b>call</b> <b>array.create</b>(size=10, type=\"int\");"
-    },
-    {
-      "function": "array.length",
-      "short_description": "Returns array length",
-      "long_help": "Returns the number of elements in the array.",
-      "parameters": [
-        {
-          "name": "array",
-          "type": "array"
-        }
-      ],
-      "return_type": "integer",
-      "example": "<b>var</b> <b>len</b> = <b>call</b> <b>array.length</b>(array=myArray);\n<b>print</b> len;"
-    },
-    {
-      "function": "array.get",
-      "short_description": "Gets element from array",
-      "long_help": "Returns the element at the specified index in the array. Throws an error if the index is out of bounds.",
-      "parameters": [
-        {
-          "name": "array",
-          "type": "array"
-        },
-        {
-          "name": "index",
-          "type": "integer"
-        }
-      ],
-      "return_type": "any",
-      "example": "<b>var</b> <b>item</b> = <b>call</b> <b>array.get</b>(array=myArray, index=0);"
-    },
-    {
-      "function": "array.set",
-      "short_description": "Sets element in array",
-      "long_help": "Sets the value at the specified index in the array. Throws an error if the index is out of bounds.",
-      "parameters": [
-        {
-          "name": "array",
-          "type": "array"
-        },
-        {
-          "name": "index",
-          "type": "integer"
-        },
-        {
-          "name": "value",
-          "type": "json"
-        }
-      ],
-      "return_type": "void",
-      "example": "<b>call</b> <b>array.set</b>(array=myArray, index=0, value=\"Hello\");"
-    },
-    {
-      "function": "array.contains",
-      "short_description": "Checks if array contains value",
-      "long_help": "Returns true if the array contains the specified value, false otherwise.",
-      "parameters": [
-        {
-          "name": "array",
-          "type": "array"
-        },
-        {
-          "name": "value",
-          "type": "json"
-        }
-      ],
-      "return_type": "bool",
-      "example": "<b>if</b> <b>call</b> <b>array.contains</b>(array=numbers, value=42) <b>then</b> {\n  <b>print</b> \"Found!\";\n}"
-    },
-    {
-      "function": "array.indexOf",
-      "short_description": "Finds index of value",
-      "long_help": "Returns the index of the first occurrence of the specified value in the array, or -1 if not found.",
-      "parameters": [
-        {
-          "name": "array",
-          "type": "array"
-        },
-        {
-          "name": "value",
-          "type": "json"
-        }
-      ],
-      "return_type": "integer",
-      "example": "<b>var</b> <b>pos</b> = <b>call</b> <b>array.indexOf</b>(array=items, value=\"apple\");"
-    },
-    {
       "function": "array.sort",
       "short_description": "Sorts array",
       "long_help": "Sorts the elements of the array in place. For ascending order, use ascending=true.",
@@ -784,130 +618,6 @@
       ],
       "return_type": "void",
       "example": "<b>call</b> <b>array.sort</b>(array=numbers, ascending=true);"
-    },
-    {
-      "function": "math.abs",
-      "short_description": "Returns absolute value",
-      "long_help": "Returns the absolute value of the specified number.",
-      "parameters": [
-        {
-          "name": "value",
-          "type": "double"
-        }
-      ],
-      "return_type": "double",
-      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>math.abs</b>(value=-5.5);\n<b>print</b> result; // 5.5"
-    },
-    {
-      "function": "math.round",
-      "short_description": "Rounds to nearest integer",
-      "long_help": "Rounds the specified number to the nearest integer value.",
-      "parameters": [
-        {
-          "name": "value",
-          "type": "double"
-        }
-      ],
-      "return_type": "long",
-      "example": "<b>var</b> <b>rounded</b> = <b>call</b> <b>math.round</b>(value=3.7);\n<b>print</b> rounded; // 4"
-    },
-    {
-      "function": "math.floor",
-      "short_description": "Rounds down to integer",
-      "long_help": "Rounds the specified number down to the nearest integer (towards negative infinity).",
-      "parameters": [
-        {
-          "name": "value",
-          "type": "double"
-        }
-      ],
-      "return_type": "long",
-      "example": "<b>var</b> <b>floored</b> = <b>call</b> <b>math.floor</b>(value=3.9);\n<b>print</b> floored; // 3"
-    },
-    {
-      "function": "math.ceil",
-      "short_description": "Rounds up to integer",
-      "long_help": "Rounds the specified number up to the nearest integer (towards positive infinity).",
-      "parameters": [
-        {
-          "name": "value",
-          "type": "double"
-        }
-      ],
-      "return_type": "long",
-      "example": "<b>var</b> <b>ceiled</b> = <b>call</b> <b>math.ceil</b>(value=3.1);\n<b>print</b> ceiled; // 4"
-    },
-    {
-      "function": "math.pow",
-      "short_description": "Raises to power",
-      "long_help": "Returns the value of the base raised to the specified exponent (base^exponent).",
-      "parameters": [
-        {
-          "name": "base",
-          "type": "double"
-        },
-        {
-          "name": "exponent",
-          "type": "double"
-        }
-      ],
-      "return_type": "double",
-      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>math.pow</b>(base=2.0, exponent=3.0);\n<b>print</b> result; // 8.0"
-    },
-    {
-      "function": "math.sqrt",
-      "short_description": "Returns square root",
-      "long_help": "Returns the square root of the specified number.",
-      "parameters": [
-        {
-          "name": "value",
-          "type": "double"
-        }
-      ],
-      "return_type": "double",
-      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>math.sqrt</b>(value=16.0);\n<b>print</b> result; // 4.0"
-    },
-    {
-      "function": "math.min",
-      "short_description": "Returns minimum value",
-      "long_help": "Returns the smaller of two numeric values.",
-      "parameters": [
-        {
-          "name": "a",
-          "type": "double"
-        },
-        {
-          "name": "b",
-          "type": "double"
-        }
-      ],
-      "return_type": "double",
-      "example": "<b>var</b> <b>min</b> = <b>call</b> <b>math.min</b>(a=5.0, b=3.0);\n<b>print</b> min; // 3.0"
-    },
-    {
-      "function": "math.max",
-      "short_description": "Returns maximum value",
-      "long_help": "Returns the larger of two numeric values.",
-      "parameters": [
-        {
-          "name": "a",
-          "type": "double"
-        },
-        {
-          "name": "b",
-          "type": "double"
-        }
-      ],
-      "return_type": "double",
-      "example": "<b>var</b> <b>max</b> = <b>call</b> <b>math.max</b>(a=5.0, b=3.0);\n<b>print</b> max; // 5.0"
-    },
-    {
-      "function": "math.random",
-      "short_description": "Generates random number",
-      "long_help": "Returns a random double value between 0.0 (inclusive) and 1.0 (exclusive).",
-      "parameters": [],
-      "return_type": "double",
-      "example": "<b>var</b> <b>rand</b> = <b>call</b> <b>math.random</b>();\n<b>print</b> rand;"
     },
     {
       "function": "debug.log",
@@ -967,95 +677,6 @@
       "parameters": [],
       "return_type": "json",
       "example": "<b>var</b> <b>allVars</b> = <b>call</b> <b>debug.vars</b>();\n<b>print</b> allVars;"
-    },
-    {
-      "function": "system.getEnv",
-      "short_description": "Gets environment variable",
-      "long_help": "Returns the value of the specified environment variable, or a default value if not found.",
-      "parameters": [
-        {
-          "name": "name",
-          "type": "string"
-        },
-        {
-          "name": "default",
-          "type": "string"
-        }
-      ],
-      "return_type": "string",
-      "example": "<b>var</b> <b>home</b> = <b>call</b> <b>system.getEnv</b>(name=\"HOME\", default=\"/home/user\");"
-    },
-    {
-      "function": "system.exec",
-      "short_description": "Executes system command",
-      "long_help": "Executes a system command and returns the output. The working directory can be optionally specified.",
-      "parameters": [
-        {
-          "name": "command",
-          "type": "string"
-        },
-        {
-          "name": "cwd",
-          "type": "string"
-        }
-      ],
-      "return_type": "string",
-      "example": "<b>var</b> <b>output</b> = <b>call</b> <b>system.exec</b>(command=\"ls -la\", cwd=\"/tmp\");\n<b>print</b> output;"
-    },
-    {
-      "function": "system.sleep",
-      "short_description": "Pauses execution",
-      "long_help": "Pauses script execution for the specified number of milliseconds.",
-      "parameters": [
-        {
-          "name": "millis",
-          "type": "long"
-        }
-      ],
-      "return_type": "void",
-      "example": "<b>call</b> <b>system.sleep</b>(millis=1000); // Sleep for 1 second"
-    },
-    {
-      "function": "date.now",
-      "short_description": "Returns current date/time",
-      "long_help": "Returns the current date and time as a Date object.",
-      "parameters": [],
-      "return_type": "date",
-      "example": "<b>var</b> <b>now</b> = <b>call</b> <b>date.now</b>();\n<b>print</b> now;"
-    },
-    {
-      "function": "date.format",
-      "short_description": "Formats date as string",
-      "long_help": "Formats a date object as a string using the specified format pattern (Java SimpleDateFormat syntax).",
-      "parameters": [
-        {
-          "name": "date",
-          "type": "date"
-        },
-        {
-          "name": "format",
-          "type": "string"
-        }
-      ],
-      "return_type": "string",
-      "example": "<b>var</b> <b>formatted</b> = <b>call</b> <b>date.format</b>(date=myDate, format=\"yyyy-MM-dd HH:mm:ss\");"
-    },
-    {
-      "function": "date.parse",
-      "short_description": "Parses date from string",
-      "long_help": "Parses a date string using the specified format pattern and returns a Date object.",
-      "parameters": [
-        {
-          "name": "dateString",
-          "type": "string"
-        },
-        {
-          "name": "format",
-          "type": "string"
-        }
-      ],
-      "return_type": "date",
-      "example": "<b>var</b> <b>parsed</b> = <b>call</b> <b>date.parse</b>(dateString=\"2024-01-15\", format=\"yyyy-MM-dd\");"
     },
     {
       "function": "http.get",
@@ -1806,365 +1427,6 @@
       "example": "<b>var</b> <b>h</b> = <b>call</b> <b>file.open</b>(path=\"output.txt\", mode=\"w\");<br><b>call</b> <b>file.writeln</b>(handle=h, text=\"Line 1\");<br><b>call</b> <b>file.writeln</b>(handle=h, text=\"Line 2\");<br><b>call</b> <b>file.close</b>(handle=h);"
     },
     {
-      "function": "file.writeToTextFile",
-      "short_description": "Writes text to a file",
-      "long_help": "Writes text content to a file, creating it if it doesn't exist or overwriting if it does. Similar to file.writeTextFile<br>but different parameter name for compatibility.",
-      "parameters": [
-        {
-          "name": "path",
-          "type": "string"
-        },
-        {
-          "name": "content",
-          "type": "string"
-        }
-      ],
-      "return_type": "bool",
-      "example": "<b>call</b> <b>file.writeToTextFile</b>(path=\"output.txt\", content=\"Hello World\\n\");"
-    },
-    {
-      "function": "file.zip",
-      "short_description": "Adds files to ZIP archive",
-      "long_help": "Adds files to a ZIP archive. Requires an open ZIP file handle in write mode. Can specify source files and their archive<br>paths.",
-      "parameters": [
-        {
-          "name": "handle",
-          "type": "string"
-        },
-        {
-          "name": "sourcepath",
-          "type": "string"
-        },
-        {
-          "name": "archivepath",
-          "type": "string"
-        }
-      ],
-      "return_type": "bool",
-      "example": "<b>var</b> <b>zh</b> = <b>call</b> <b>file.openZip</b>(path=\"archive.zip\", mode=\"w\");<br><b>call</b> <b>file.zip</b>(handle=zh, sourcepath=\"data.txt\", archivepath=\"docs/data.txt\");<br><b>call</b> <b>file.closeZip</b>(handle=zh);"
-    },
-    {
-      "function": "json.fromMap",
-      "short_description": "Converts a map to JSON",
-      "long_help": "Converts a map object to a JSON object. Useful for constructing JSON from key-value pairs.",
-      "parameters": [
-        {
-          "name": "map",
-          "type": "json"
-        }
-      ],
-      "return_type": "json",
-      "example": "<b>var</b> <b>jsonObj</b> = <b>call</b> <b>json.fromMap</b>(map=myMap);"
-    },
-    {
-      "function": "json.parse",
-      "short_description": "Parses a JSON string",
-      "long_help": "Parses a JSON string and returns the resulting JSON object or array. Throws an error if the JSON is malformed.",
-      "parameters": [
-        {
-          "name": "jsonStr",
-          "type": "string"
-        }
-      ],
-      "return_type": "json",
-      "example": "<b>var</b> <b>obj</b> = <b>call</b> <b>json.parse</b>(jsonStr=\"{\\\"name\\\":\\\"John\\\",\\\"age\\\":30}\");\n<b>print</b> obj.name;"
-    },
-    {
-      "function": "json.toMap",
-      "short_description": "Converts JSON to a map",
-      "long_help": "Converts a JSON object to a map. Useful for working with key-value data structures.",
-      "parameters": [
-        {
-          "name": "json",
-          "type": "json"
-        }
-      ],
-      "return_type": "map",
-      "example": "<b>var</b> <b>map</b> = <b>call</b> <b>json.toMap</b>(json=myJsonObj);"
-    },
-    {
-      "function": "json.toString",
-      "short_description": "Converts JSON to string",
-      "long_help": "Converts a JSON object or array to its string representation. Optionally pretty-prints with indentation.",
-      "parameters": [
-        {
-          "name": "json",
-          "type": "json"
-        },
-        {
-          "name": "pretty",
-          "type": "bool"
-        }
-      ],
-      "return_type": "string",
-      "example": "<b>var</b> <b>jsonStr</b> = <b>call</b> <b>json.toString</b>(json=myObj, pretty=true);\n<b>print</b> jsonStr;"
-    },
-    {
-      "function": "math.acos",
-      "short_description": "Returns arc cosine of a value",
-      "long_help": "Returns the arc cosine of the specified value in radians. The value must be between -1 and 1.",
-      "parameters": [
-        {
-          "name": "value",
-          "type": "double"
-        }
-      ],
-      "return_type": "double",
-      "example": "<b>var</b> <b>angle</b> = <b>call</b> <b>math.acos</b>(value=0.5);\n<b>print</b> \"Angle: \" + angle + \" radians\";"
-    },
-    {
-      "function": "math.asin",
-      "short_description": "Returns arc sine of a value",
-      "long_help": "Returns the arc sine of the specified value in radians. The value must be between -1 and 1.",
-      "parameters": [
-        {
-          "name": "value",
-          "type": "double"
-        }
-      ],
-      "return_type": "double",
-      "example": "<b>var</b> <b>angle</b> = <b>call</b> <b>math.asin</b>(value=0.5);\n<b>print</b> \"Angle: \" + angle + \" radians\";"
-    },
-    {
-      "function": "math.atan",
-      "short_description": "Returns arc tangent of a value",
-      "long_help": "Returns the arc tangent of the specified value in radians.",
-      "parameters": [
-        {
-          "name": "value",
-          "type": "double"
-        }
-      ],
-      "return_type": "double",
-      "example": "<b>var</b> <b>angle</b> = <b>call</b> <b>math.atan</b>(value=1.0);\n<b>print</b> \"Angle: \" + angle + \" radians\";"
-    },
-    {
-      "function": "math.cos",
-      "short_description": "Returns cosine of an angle",
-      "long_help": "Returns the cosine of the specified angle in radians.",
-      "parameters": [
-        {
-          "name": "angle",
-          "type": "double"
-        }
-      ],
-      "return_type": "double",
-      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>math.cos</b>(angle=1.57);\n<b>print</b> \"Cosine: \" + result;"
-    },
-    {
-      "function": "math.exp",
-      "short_description": "Returns e raised to a power",
-      "long_help": "Returns Euler's number e raised to the power of the specified value.",
-      "parameters": [
-        {
-          "name": "value",
-          "type": "double"
-        }
-      ],
-      "return_type": "double",
-      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>math.exp</b>(value=2.0);\n<b>print</b> \"e^2 = \" + result;"
-    },
-    {
-      "function": "math.log",
-      "short_description": "Returns natural logarithm",
-      "long_help": "Returns the natural logarithm (base e) of the specified value.",
-      "parameters": [
-        {
-          "name": "value",
-          "type": "double"
-        }
-      ],
-      "return_type": "double",
-      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>math.log</b>(value=10.0);\n<b>print</b> \"ln(10) = \" + result;"
-    },
-    {
-      "function": "math.log10",
-      "short_description": "Returns base-10 logarithm",
-      "long_help": "Returns the base-10 logarithm of the specified value.",
-      "parameters": [
-        {
-          "name": "value",
-          "type": "double"
-        }
-      ],
-      "return_type": "double",
-      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>math.log10</b>(value=100.0);\n<b>print</b> \"log10(100) = \" + result;"
-    },
-    {
-      "function": "math.sin",
-      "short_description": "Returns sine of an angle",
-      "long_help": "Returns the sine of the specified angle in radians.",
-      "parameters": [
-        {
-          "name": "angle",
-          "type": "double"
-        }
-      ],
-      "return_type": "double",
-      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>math.sin</b>(angle=1.57);\n<b>print</b> \"Sine: \" + result;"
-    },
-    {
-      "function": "math.tan",
-      "short_description": "Returns tangent of an angle",
-      "long_help": "Returns the tangent of the specified angle in radians.",
-      "parameters": [
-        {
-          "name": "angle",
-          "type": "double"
-        }
-      ],
-      "return_type": "double",
-      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>math.tan</b>(angle=0.785);\n<b>print</b> \"Tangent: \" + result;"
-    },
-    {
-      "function": "str.charAt",
-      "short_description": "Returns character at index",
-      "long_help": "Returns the character at the specified index in a string. Index is zero-based.",
-      "parameters": [
-        {
-          "name": "str",
-          "type": "string"
-        },
-        {
-          "name": "index",
-          "type": "integer"
-        }
-      ],
-      "return_type": "string",
-      "example": "<b>var</b> <b>char</b> = <b>call</b> <b>str.charAt</b>(str=\"Hello\", index=1);\n<b>print</b> char; // Outputs: e"
-    },
-    {
-      "function": "str.indexOf",
-      "short_description": "Finds first occurrence of substring",
-      "long_help": "Returns the index of the first occurrence of the specified substring. Returns -1 if not found.",
-      "parameters": [
-        {
-          "name": "str",
-          "type": "string"
-        },
-        {
-          "name": "substring",
-          "type": "string"
-        }
-      ],
-      "return_type": "integer",
-      "example": "<b>var</b> <b>pos</b> = <b>call</b> <b>str.indexOf</b>(str=\"Hello World\", substring=\"World\");\n<b>print</b> pos; // Outputs: 6"
-    },
-    {
-      "function": "str.lastIndexOf",
-      "short_description": "Finds last occurrence of substring",
-      "long_help": "Returns the index of the last occurrence of the specified substring. Returns -1 if not found.",
-      "parameters": [
-        {
-          "name": "str",
-          "type": "string"
-        },
-        {
-          "name": "substring",
-          "type": "string"
-        }
-      ],
-      "return_type": "integer",
-      "example": "<b>var</b> <b>pos</b> = <b>call</b> <b>str.lastIndexOf</b>(str=\"Hello Hello\", substring=\"Hello\");\n<b>print</b> pos; // Outputs: 6"
-    },
-    {
-      "function": "str.matches",
-      "short_description": "Tests string against regex pattern",
-      "long_help": "Tests whether the string matches the specified regular expression pattern. Returns true if it matches, false otherwise.",
-      "parameters": [
-        {
-          "name": "str",
-          "type": "string"
-        },
-        {
-          "name": "pattern",
-          "type": "string"
-        }
-      ],
-      "return_type": "bool",
-      "example": "<b>var</b> <b>isEmail</b> = <b>call</b> <b>str.matches</b>(str=\"test@example.com\", pattern=\"^[\\\\w.-]+@[\\\\w.-]+\\\\.\\\\w+$\");"
-    },
-    {
-      "function": "str.replaceAll",
-      "short_description": "Replaces all pattern matches",
-      "long_help": "Replaces all occurrences of the regex pattern with the replacement string.",
-      "parameters": [
-        {
-          "name": "str",
-          "type": "string"
-        },
-        {
-          "name": "pattern",
-          "type": "string"
-        },
-        {
-          "name": "replacement",
-          "type": "string"
-        }
-      ],
-      "return_type": "string",
-      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>str.replaceAll</b>(str=\"Hello 123 World 456\", pattern=\"\\\\d+\",<br>replacement=\"NUM\");<br><b>print</b> result; // Outputs: Hello NUM World NUM"
-    },
-    {
-      "function": "system.currentTimeMillis",
-      "short_description": "Returns current time in milliseconds",
-      "long_help": "Returns the current time in milliseconds since Unix epoch (January 1, 1970 00:00:00 UTC).",
-      "parameters": [],
-      "return_type": "long",
-      "example": "<b>var</b> <b>now</b> = <b>call</b> <b>system.currentTimeMillis</b>();\n<b>print</b> \"Current time: \" + now;"
-    },
-    {
-      "function": "system.props",
-      "short_description": "Returns system properties",
-      "long_help": "Returns a JSON object containing all system properties such as os.name, java.version, user.home, etc.",
-      "parameters": [],
-      "return_type": "json",
-      "example": "<b>var</b> <b>props</b> = <b>call</b> <b>system.props</b>();\n<b>print</b> \"OS: \" + props[\"os.name\"];"
-    },
-    {
-      "function": "system.setprop",
-      "short_description": "Sets a system property",
-      "long_help": "Sets a system property to the specified value. Only affects the current process.",
-      "parameters": [
-        {
-          "name": "key",
-          "type": "string"
-        },
-        {
-          "name": "value",
-          "type": "string"
-        }
-      ],
-      "return_type": "bool",
-      "example": "<b>call</b> <b>system.setprop</b>(key=\"my.custom.prop\", value=\"customValue\");"
-    },
-    {
-      "function": "url.decode",
-      "short_description": "Decodes URL-encoded string",
-      "long_help": "Decodes a URL-encoded string, converting %XX sequences back to characters.",
-      "parameters": [
-        {
-          "name": "encoded",
-          "type": "string"
-        }
-      ],
-      "return_type": "string",
-      "example": "<b>var</b> <b>decoded</b> = <b>call</b> <b>url.decode</b>(encoded=\"Hello%20World%21\");\n<b>print</b> decoded; // Outputs: Hello World!"
-    },
-    {
-      "function": "url.encode",
-      "short_description": "Encodes string for URL",
-      "long_help": "Encodes a string for safe use in URLs, converting special characters to %XX sequences.",
-      "parameters": [
-        {
-          "name": "str",
-          "type": "string"
-        }
-      ],
-      "return_type": "string",
-      "example": "<b>var</b> <b>encoded</b> = <b>call</b> <b>url.encode</b>(str=\"Hello World!\");\n<b>print</b> encoded; // Outputs: Hello+World%21"
-    },
-    {
       "function": "file.appendToTextFile",
       "short_description": "Appends text to a file",
       "long_help": "Appends the specified text content to an existing file. Creates the file if it doesn't exist. The file must be within a<br>safe directory.",
@@ -2856,6 +2118,35 @@
       ],
       "return_type": "bool",
       "example": "<b>call</b> <b>scr.clear</b>(screenName=\"myScreen\");<br><b>print</b> \"Screen has been cleared\";"
+    },
+    {
+      "function": "echo.off",
+      "short_description": "Disables echo mode",
+      "long_help": "Disables echo mode which prevents statements from being printed to the console as they are executed. This is useful for<br>suppressing verbose output during script execution.",
+      "parameters": [],
+      "return_type": "void",
+      "example": "<b>call</b> <b>echo.off</b>();<br>// Statements will no longer be echoed to console"
+    },
+    {
+      "function": "echo.on",
+      "short_description": "Enables echo mode",
+      "long_help": "Enables echo mode which prints statements to the console as they are executed. This is useful for debugging and<br>understanding script flow. Echo mode can be disabled with echo.off.",
+      "parameters": [],
+      "return_type": "void",
+      "example": "<b>call</b> <b>echo.on</b>();<br>// Statements will now be echoed to console"
+    },
+    {
+      "function": "sleep",
+      "short_description": "Pauses execution for specified milliseconds",
+      "long_help": "Pauses the current script execution for the specified number of milliseconds. This is useful for adding delays between<br>operations or waiting for external processes. Returns a status string.",
+      "parameters": [
+        {
+          "name": "millis",
+          "type": "long"
+        }
+      ],
+      "return_type": "string",
+      "example": "<b>call</b> <b>sleep</b>(millis=1000);<br>// Pauses for 1 second<br><b>print</b> \"Resumed after 1 second delay\";"
     }
   ]
 }
