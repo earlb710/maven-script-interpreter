@@ -36,6 +36,7 @@ import com.eb.script.interpreter.statement.ContinueStatement;
 import com.eb.script.interpreter.statement.CursorStatement;
 import com.eb.script.interpreter.statement.DoWhileStatement;
 import com.eb.script.interpreter.statement.ForEachStatement;
+import com.eb.script.interpreter.statement.ForStatement;
 import com.eb.script.interpreter.statement.IfStatement;
 import com.eb.script.interpreter.statement.IndexAssignStatement;
 import com.eb.script.interpreter.statement.OpenCursorStatement;
@@ -1168,6 +1169,50 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 }
             } finally {
                 // nothing
+            }
+        } finally {
+            environment().popCallStack();
+        }
+    }
+
+    @Override
+    public void visitForStatement(ForStatement stmt) throws InterpreterError {
+        environment().pushCallStack(stmt.getLine(), StatementKind.LOOP, "for");
+        try {
+            // Create a new scope for the loop
+            environment().pushEnvironmentValues();
+            try {
+                // Execute initializer
+                if (stmt.initializer != null) {
+                    stmt.initializer.accept(this);
+                }
+
+                // Loop while condition is true
+                while (true) {
+                    // Evaluate condition (if null, treat as true for infinite loop)
+                    if (stmt.condition != null) {
+                        if (!evaluateBoolean(stmt.condition)) {
+                            break;
+                        }
+                    }
+
+                    // Execute body
+                    try {
+                        stmt.body.accept(this);
+                    } catch (ContinueSignal c) {
+                        // Continue to increment
+                    } catch (BreakSignal b) {
+                        // Break out of loop
+                        break;
+                    }
+
+                    // Execute increment
+                    if (stmt.increment != null) {
+                        stmt.increment.accept(this);
+                    }
+                }
+            } finally {
+                environment().popEnvironmentValues();
             }
         } finally {
             environment().popCallStack();

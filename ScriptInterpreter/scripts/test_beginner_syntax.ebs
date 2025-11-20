@@ -1,0 +1,130 @@
+// Test script for beginner-friendly syntax improvements
+// This script demonstrates the new features added to make EBS more accessible
+
+print "=== Testing Beginner-Friendly Syntax Features ===";
+print "";
+
+// ============================================================================
+// TEST 1: Traditional for loop (C-style)
+// ============================================================================
+print "TEST 1: Traditional for loop";
+for (var i: int = 0; i < 5; i = i + 1) {
+    print "  Iteration: " + i;
+}
+print "";
+
+// ============================================================================
+// TEST 2: for loop with compound assignment operator
+// ============================================================================
+print "TEST 2: for loop with += operator";
+for (var j: int = 0; j < 10; j += 2) {
+    print "  Even number: " + j;
+}
+print "";
+
+// ============================================================================
+// TEST 3: Increment and decrement operators
+// ============================================================================
+print "TEST 3: Increment and decrement operators";
+var counter: int = 5;
+print "  Initial counter: " + counter;
+counter++;
+print "  After counter++: " + counter;
+counter--;
+print "  After counter--: " + counter;
+print "";
+
+// ============================================================================
+// TEST 4: Compound assignment operators
+// ============================================================================
+print "TEST 4: Compound assignment operators";
+var x: int = 10;
+print "  Initial x: " + x;
+x += 5;
+print "  After x += 5: " + x;
+x -= 3;
+print "  After x -= 3: " + x;
+x *= 2;
+print "  After x *= 2: " + x;
+x /= 4;
+print "  After x /= 4: " + x;
+print "";
+
+// ============================================================================
+// TEST 5: 'let' keyword as alias for 'var'
+// ============================================================================
+print "TEST 5: Using 'let' keyword (alias for 'var')";
+let name: string = "Alice";
+print "  name = " + name;
+let age: int = 25;
+print "  age = " + age;
+print "";
+
+// ============================================================================
+// TEST 6: 'function' keyword
+// ============================================================================
+print "TEST 6: Using 'function' keyword";
+
+function greet(name: string) return string {
+    return "Hello, " + name + "!";
+}
+
+var greeting = call greet("Bob");
+print "  " + greeting;
+
+function add(a: int, b: int) return int {
+    return a + b;
+}
+
+var sum = call add(10, 20);
+print "  10 + 20 = " + sum;
+print "";
+
+// ============================================================================
+// TEST 7: foreach loop with arrays
+// ============================================================================
+print "TEST 7: foreach loop with arrays";
+var numbers = [1, 2, 3, 4, 5];
+print "  Array contents:";
+foreach num in numbers {
+    print "    " + num;
+}
+print "";
+
+// ============================================================================
+// TEST 8: Complex for loop example
+// ============================================================================
+print "TEST 8: Complex for loop with nested logic";
+for (var i: int = 1; i <= 5; i++) {
+    var result: int = i * i;
+    print "  " + i + " squared = " + result;
+}
+print "";
+
+// ============================================================================
+// TEST 9: Mixing old and new syntax
+// ============================================================================
+print "TEST 9: Mixing traditional and new syntax";
+
+// Traditional while loop
+var count: int = 0;
+while count < 3 {
+    print "  While loop iteration: " + count;
+    count++;
+}
+print "";
+
+// ============================================================================
+// TEST 10: Function without 'function' keyword (backward compatibility)
+// ============================================================================
+print "TEST 10: Function without 'function' keyword (backward compatible)";
+
+multiply(a: int, b: int) return int {
+    return a * b;
+}
+
+var product = call multiply(6, 7);
+print "  6 * 7 = " + product;
+print "";
+
+print "=== All Tests Complete ===";

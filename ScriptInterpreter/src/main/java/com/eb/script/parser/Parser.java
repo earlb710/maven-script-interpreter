@@ -31,6 +31,7 @@ import com.eb.script.interpreter.expression.ArrayLiteralExpression;
 import com.eb.script.interpreter.expression.IndexExpression;
 import com.eb.script.interpreter.expression.LengthExpression;
 import com.eb.script.interpreter.statement.ForEachStatement;
+import com.eb.script.interpreter.statement.ForStatement;
 import com.eb.script.interpreter.statement.IndexAssignStatement;
 import com.eb.script.interpreter.expression.SqlSelectExpression;
 import com.eb.script.interpreter.statement.CursorStatement;
@@ -327,6 +328,8 @@ public class Parser {
             return doWhileStatement();
         } else if (match(EbsTokenType.FOREACH)) {
             return foreachStatement();
+        } else if (match(EbsTokenType.FOR)) {
+            return forStatement();
         } else if (match(EbsTokenType.BREAK)) {
             return breakStatement();
         } else if (match(EbsTokenType.CONTINUE)) {
@@ -351,6 +354,9 @@ public class Parser {
             return openCursorStatement();
         } else if (match(EbsTokenType.CLOSE)) {
             return closeCursorStatement();
+        } else if (match(EbsTokenType.FUNCTION)) {
+            // Optional 'function' keyword before function definitions
+            return functionDeclaration();
         } else if (matchAll(EbsTokenType.IDENTIFIER, EbsTokenType.LBRACE)) {
             EbsToken n = peek();
             advance(2);
@@ -866,6 +872,30 @@ public class Parser {
         return null;
     }
 
+    private Statement functionDeclaration() throws ParseError {
+        // After matching 'function' keyword, parse the function definition
+        // Supports: function name { ... } or function name(...) return type { ... }
+        EbsToken n = consume(EbsTokenType.IDENTIFIER, "Expected function name after 'function'.");
+        String name = (String) n.literal;
+        
+        if (match(EbsTokenType.LBRACE)) {
+            // function name { ... }
+            return block(name);
+        } else if (match(EbsTokenType.RETURN)) {
+            // function name return type { ... }
+            DataType type = blockParameterReturn();
+            consume(EbsTokenType.LBRACE, "Expected { after return type.");
+            BlockStatement bs = block(name);
+            bs.returnType = type;
+            return bs;
+        } else if (match(EbsTokenType.LPAREN)) {
+            // function name(...) [return type] { ... }
+            return blockParameters(name);
+        } else {
+            throw error(peek(), "Expected '{', 'return', or '(' after function name.");
+        }
+    }
+
     private Statement blockParameters(String name) throws ParseError {
         int line = currToken.line;
         List<Parameter> parameters = getBlockParameters();
@@ -895,6 +925,10 @@ public class Parser {
     }
 
     private Statement assignmentStatement() throws ParseError {
+        return assignmentStatement(true);
+    }
+
+    private Statement assignmentStatement(boolean requireSemicolon) throws ParseError {
         // We need to parse an lvalue:
         // either IDENTIFIER, or IDENTIFIER followed by one or more [ index-list ]
         // Also support DOT for screen variable access (screenName.varName)
@@ -916,14 +950,72 @@ public class Parser {
             lvalue = new IndexExpression(name.line, lvalue, indices);
         }
 
-        consume(EbsTokenType.EQUAL, "Expected '=' after variable name or index.");
+        // Check for ++, --, or compound assignment operators
         Expression value;
-        if (check(EbsTokenType.SELECT)) {
-            value = parseSqlSelectFromSource();
+        if (match(EbsTokenType.PLUS_PLUS)) {
+            // i++ becomes i = i + 1
+            value = new BinaryExpression(name.line, lvalue, 
+                new EbsToken(EbsTokenType.PLUS, "+", name.line, 0, 0),
+                new LiteralExpression(EbsTokenType.INTEGER, 1));
+            if (requireSemicolon) {
+                consume(EbsTokenType.SEMICOLON, "Expected ';' after increment.");
+            }
+        } else if (match(EbsTokenType.MINUS_MINUS)) {
+            // i-- becomes i = i - 1
+            value = new BinaryExpression(name.line, lvalue, 
+                new EbsToken(EbsTokenType.MINUS, "-", name.line, 0, 0),
+                new LiteralExpression(EbsTokenType.INTEGER, 1));
+            if (requireSemicolon) {
+                consume(EbsTokenType.SEMICOLON, "Expected ';' after decrement.");
+            }
+        } else if (match(EbsTokenType.PLUS_EQUAL)) {
+            // i += x becomes i = i + x
+            Expression right = expression();
+            value = new BinaryExpression(name.line, lvalue, 
+                new EbsToken(EbsTokenType.PLUS, "+", name.line, 0, 0),
+                right);
+            if (requireSemicolon) {
+                consume(EbsTokenType.SEMICOLON, "Expected ';' after compound assignment.");
+            }
+        } else if (match(EbsTokenType.MINUS_EQUAL)) {
+            // i -= x becomes i = i - x
+            Expression right = expression();
+            value = new BinaryExpression(name.line, lvalue, 
+                new EbsToken(EbsTokenType.MINUS, "-", name.line, 0, 0),
+                right);
+            if (requireSemicolon) {
+                consume(EbsTokenType.SEMICOLON, "Expected ';' after compound assignment.");
+            }
+        } else if (match(EbsTokenType.STAR_EQUAL)) {
+            // i *= x becomes i = i * x
+            Expression right = expression();
+            value = new BinaryExpression(name.line, lvalue, 
+                new EbsToken(EbsTokenType.STAR, "*", name.line, 0, 0),
+                right);
+            if (requireSemicolon) {
+                consume(EbsTokenType.SEMICOLON, "Expected ';' after compound assignment.");
+            }
+        } else if (match(EbsTokenType.SLASH_EQUAL)) {
+            // i /= x becomes i = i / x
+            Expression right = expression();
+            value = new BinaryExpression(name.line, lvalue, 
+                new EbsToken(EbsTokenType.SLASH, "/", name.line, 0, 0),
+                right);
+            if (requireSemicolon) {
+                consume(EbsTokenType.SEMICOLON, "Expected ';' after compound assignment.");
+            }
         } else {
-            value = expression();
+            // Regular assignment
+            consume(EbsTokenType.EQUAL, "Expected '=', '+=', '-=', '*=', '/=', '++', or '--' after variable name or index.");
+            if (check(EbsTokenType.SELECT)) {
+                value = parseSqlSelectFromSource();
+            } else {
+                value = expression();
+            }
+            if (requireSemicolon) {
+                consume(EbsTokenType.SEMICOLON, "Expected ';' after assignment.");
+            }
         }
-        consume(EbsTokenType.SEMICOLON, "Expected ';' after assignment.");
 
         if (value instanceof ArrayLiteralExpression array) {
             array.array = lvalue;
@@ -1307,6 +1399,44 @@ public class Parser {
             idx++;
         }
         return ret;
+    }
+
+    private Statement forStatement() throws ParseError {
+        int line = previous().line; // 'for'
+
+        consume(EbsTokenType.LPAREN, "Expected '(' after 'for'.");
+
+        // Initializer (var declaration or assignment)
+        Statement initializer;
+        if (match(EbsTokenType.SEMICOLON)) {
+            initializer = null;  // No initializer
+        } else if (match(EbsTokenType.VAR)) {
+            initializer = varDeclaration();
+        } else {
+            initializer = assignmentStatement();
+        }
+
+        // Condition
+        Expression condition = null;
+        if (!check(EbsTokenType.SEMICOLON)) {
+            condition = expression();
+        }
+        consume(EbsTokenType.SEMICOLON, "Expected ';' after loop condition.");
+
+        // Increment
+        Statement increment = null;
+        if (!check(EbsTokenType.RPAREN)) {
+            increment = assignmentStatement(false);
+        }
+        consume(EbsTokenType.RPAREN, "Expected ')' after for clauses.");
+
+        // Body
+        consume(EbsTokenType.LBRACE, "Expected '{' to start for body.");
+        loopDepth++;
+        BlockStatement body = (BlockStatement) block();
+        loopDepth--;
+
+        return new ForStatement(line, initializer, condition, increment, body);
     }
 
     private Statement foreachStatement() throws ParseError {
