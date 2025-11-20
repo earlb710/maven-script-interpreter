@@ -545,10 +545,13 @@ public class EbsConsoleHandler extends EbsHandler {
             // Optional: suggest current file name if known
             if (contex != null) {
                 if (contex.path != null) {
-                    if (contex.path.toFile().isFile()) {
-                        fc.setInitialDirectory(contex.path.getParent().toFile());
+                    // Check if parent directory exists and is valid
+                    Path parentDir = contex.path.getParent();
+                    if (parentDir != null && Files.isDirectory(parentDir)) {
+                        fc.setInitialDirectory(parentDir.toFile());
                     } else {
-                        fc.setInitialDirectory(contex.path.toFile());
+                        // Fall back to sandbox root
+                        fc.setInitialDirectory(Util.SANDBOX_ROOT.toFile());
                     }
                     if (contex.path.getFileName() != null) {
                         fc.setInitialFileName(contex.path.getFileName().toString());
@@ -559,13 +562,31 @@ public class EbsConsoleHandler extends EbsHandler {
 
                 File out = fc.showSaveDialog(stage);
                 if (out != null) {
-                    addRecentFile(out.toPath());
-                    FileContext fileContext = new FileContext(null, out.toPath(), "r");
-                    contex.fileContext = fileContext;
-                    if (!fileContext.closed) {
-                        callBuiltin("file.close", fileContext.handle);
+                    // Create a new TabContext with the updated path
+                    Path newPath = out.toPath();
+                    FileContext fileContext = new FileContext(null, newPath, "rw");
+                    TabContext newContext = new TabContext(
+                        newPath.getFileName() != null ? newPath.getFileName().toString() : newPath.toString(),
+                        newPath,
+                        fileContext
+                    );
+                    
+                    // Update the tab's user data
+                    tab.setUserData(newContext);
+                    
+                    // Write the file to the selected path
+                    callBuiltin("file.writeTextFile", newPath.toString(), tab.getEditorText());
+                    
+                    // Add to recent files
+                    addRecentFile(newPath);
+                    
+                    // Mark the tab as clean since we just saved
+                    tab.markCleanTitle();
+                    
+                    // Update tab name to reflect the new filename
+                    if (newPath.getFileName() != null) {
+                        tab.setText(newPath.getFileName().toString());
                     }
-                    callBuiltin("file.writeTextFile", contex.path.toString(), tab.getEditorText());
                 }
             }
         } catch (Exception ex) {

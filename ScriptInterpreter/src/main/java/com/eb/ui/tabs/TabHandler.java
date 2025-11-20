@@ -42,6 +42,7 @@ public class TabHandler implements TabOpener {
     private final TabPane tabPane;
     private final EbsConsoleHandler consoleHandler;
     private Tab tabBeingRemoved = null; // Track tab removal to prevent double-confirmation
+    private boolean isHandlingClose = false; // Prevent recursive listener calls
 
     public TabHandler(EbsConsoleHandler consoleHandler, TabPane tabPane) {
         this.consoleHandler = consoleHandler;
@@ -54,24 +55,37 @@ public class TabHandler implements TabOpener {
      */
     private void setupTabCloseListener() {
         tabPane.getTabs().addListener((javafx.collections.ListChangeListener<Tab>) change -> {
+            // Prevent recursive calls when we re-add or remove tabs
+            if (isHandlingClose) {
+                return;
+            }
+            
             while (change.next()) {
                 if (change.wasRemoved()) {
                     for (Tab removed : change.getRemoved()) {
                         // Only handle if this is an EbsTab with unsaved changes
                         // and we haven't already confirmed this removal
                         if (removed instanceof EbsTab ebsTab && ebsTab.isDirty() && removed != tabBeingRemoved) {
+                            // Set flag to prevent recursive calls
+                            isHandlingClose = true;
+                            
                             // Re-add the tab temporarily
                             int removeIndex = change.getFrom();
                             tabPane.getTabs().add(removeIndex, removed);
+                            
+                            // Reset flag after re-adding
+                            isHandlingClose = false;
                             
                             // Show confirmation dialog
                             Platform.runLater(() -> {
                                 boolean shouldClose = consoleHandler.confirmCloseTab(ebsTab);
                                 if (shouldClose) {
                                     // User confirmed - remove the tab
+                                    isHandlingClose = true;
                                     tabBeingRemoved = ebsTab;
                                     tabPane.getTabs().remove(ebsTab);
                                     tabBeingRemoved = null;
+                                    isHandlingClose = false;
                                 }
                                 // If user cancelled, tab stays in the list
                             });
