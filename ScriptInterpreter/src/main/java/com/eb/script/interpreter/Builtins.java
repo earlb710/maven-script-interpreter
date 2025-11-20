@@ -330,6 +330,26 @@ public final class Builtins {
                 "str.isBlank", DataType.BOOL,
                 newParam("str", DataType.STRING)
         ));
+        
+        // str.substring(str, beginIndex, endIndex?) -> STRING
+        // Extract substring from string. If endIndex is not provided, extracts to end of string.
+        // Uses Java String.substring() semantics.
+        addBuiltin(info(
+                "str.substring", DataType.STRING,
+                newParam("str", DataType.STRING),
+                newParam("beginIndex", DataType.INTEGER),
+                newParam("endIndex", DataType.INTEGER, false) // optional
+        ));
+        
+        // str.indexOf(str, searchString, fromIndex?) -> INTEGER
+        // Find first occurrence of searchString in str, starting from fromIndex (default 0).
+        // Returns -1 if not found. Uses Java String.indexOf() semantics.
+        addBuiltin(info(
+                "str.indexOf", DataType.INTEGER,
+                newParam("str", DataType.STRING),
+                newParam("searchString", DataType.STRING),
+                newParam("fromIndex", DataType.INTEGER, false) // optional
+        ));
 
         addBuiltin(info(
                 "file.exists", DataType.BOOL,
@@ -1069,6 +1089,56 @@ public final class Builtins {
                 String s = (String) args[0];
                 return Util.isBlank(s);
             }
+            
+            //  str.substring(s, beginIndex, endIndex?) -> STRING
+            //  Extract substring from string. If endIndex is not provided, extracts to end of string.
+            //  Mimics Java String.substring() semantics.
+            case "str.substring" -> {
+                String s = (String) args[0];
+                Integer beginIndex = (Integer) args[1];
+                Integer endIndex = (args.length > 2 && args[2] != null) ? (Integer) args[2] : null;
+                
+                if (s == null) {
+                    return null;
+                }
+                if (beginIndex == null) {
+                    throw new InterpreterError("str.substring: beginIndex cannot be null");
+                }
+                
+                try {
+                    if (endIndex == null) {
+                        return s.substring(beginIndex);
+                    } else {
+                        return s.substring(beginIndex, endIndex);
+                    }
+                } catch (IndexOutOfBoundsException ex) {
+                    throw new InterpreterError("str.substring: " + ex.getMessage());
+                }
+            }
+            
+            //  str.indexOf(s, searchString, fromIndex?) -> INTEGER
+            //  Find first occurrence of searchString in s, starting from fromIndex (default 0).
+            //  Returns -1 if not found. Mimics Java String.indexOf() semantics.
+            case "str.indexof" -> {
+                String s = (String) args[0];
+                String searchString = (String) args[1];
+                Integer fromIndex = (args.length > 2 && args[2] != null) ? (Integer) args[2] : null;
+                
+                if (s == null || searchString == null) {
+                    return -1; // null-safe behavior: return -1 if either is null
+                }
+                
+                try {
+                    if (fromIndex == null) {
+                        return s.indexOf(searchString);
+                    } else {
+                        return s.indexOf(searchString, fromIndex);
+                    }
+                } catch (IndexOutOfBoundsException ex) {
+                    throw new InterpreterError("str.indexOf: " + ex.getMessage());
+                }
+            }
+            
             case "file.exists" -> {
                 return BuiltinsFile.exists(env, args);
             }
