@@ -25,6 +25,7 @@ import java.util.prefs.Preferences;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -42,6 +43,7 @@ public class EbsConsoleHandler extends EbsHandler {
 
     protected final Stage stage;
     protected final Deque<Path> recentFiles = new ArrayDeque<>(); // Most recent at the head
+    private int newScriptSequence = 1; // Sequence number for new script files
 
     public EbsConsoleHandler(Stage stage, RuntimeContext ctx) {
         super(ctx);
@@ -543,10 +545,13 @@ public class EbsConsoleHandler extends EbsHandler {
             // Optional: suggest current file name if known
             if (contex != null) {
                 if (contex.path != null) {
-                    if (contex.path.toFile().isFile()) {
-                        fc.setInitialDirectory(contex.path.getParent().toFile());
+                    // Check if parent directory exists and is valid
+                    Path parentDir = contex.path.getParent();
+                    if (parentDir != null && Files.isDirectory(parentDir)) {
+                        fc.setInitialDirectory(parentDir.toFile());
                     } else {
-                        fc.setInitialDirectory(contex.path.toFile());
+                        // Fall back to sandbox root
+                        fc.setInitialDirectory(Util.SANDBOX_ROOT.toFile());
                     }
                     if (contex.path.getFileName() != null) {
                         fc.setInitialFileName(contex.path.getFileName().toString());
@@ -557,13 +562,31 @@ public class EbsConsoleHandler extends EbsHandler {
 
                 File out = fc.showSaveDialog(stage);
                 if (out != null) {
-                    addRecentFile(out.toPath());
-                    FileContext fileContext = new FileContext(null, out.toPath(), "r");
-                    contex.fileContext = fileContext;
-                    if (!fileContext.closed) {
-                        callBuiltin("file.close", fileContext.handle);
+                    // Create a new TabContext with the updated path
+                    Path newPath = out.toPath();
+                    FileContext fileContext = new FileContext(null, newPath, "rw");
+                    TabContext newContext = new TabContext(
+                        newPath.getFileName() != null ? newPath.getFileName().toString() : newPath.toString(),
+                        newPath,
+                        fileContext
+                    );
+                    
+                    // Update the tab's user data
+                    tab.setUserData(newContext);
+                    
+                    // Write the file to the selected path
+                    callBuiltin("file.writeTextFile", newPath.toString(), tab.getEditorText());
+                    
+                    // Add to recent files
+                    addRecentFile(newPath);
+                    
+                    // Mark the tab as clean since we just saved
+                    tab.markCleanTitle();
+                    
+                    // Update tab name to reflect the new filename
+                    if (newPath.getFileName() != null) {
+                        tab.setText(newPath.getFileName().toString());
                     }
-                    callBuiltin("file.writeTextFile", contex.path.toString(), tab.getEditorText());
                 }
             }
         } catch (Exception ex) {
@@ -599,5 +622,110 @@ public class EbsConsoleHandler extends EbsHandler {
 
     public void exit() {
         javafx.application.Platform.exit();
+    }
+
+    /**
+     * Generate the next available filename for a new script file.
+     * Format: newScript_x.ebs where x is the sequence number.
+     * Checks if file exists in sandbox and increments until an available name is found.
+     */
+    private String getNextNewScriptFilename() {
+        String filename;
+        Path path;
+        do {
+            filename = "newScript_" + newScriptSequence + ".ebs";
+            path = Util.SANDBOX_ROOT.resolve(filename);
+            newScriptSequence++;
+        } while (Files.exists(path));
+        return filename;
+    }
+
+    /**
+     * Create a new empty script file with a default name "newScript_x.ebs"
+     * where x is an incrementing sequence number.
+     * The file is NOT created on disk - it exists only in the tab until saved.
+     */
+    public void createNewScriptFile() {
+        try {
+            String filename = getNextNewScriptFilename();
+            Path path = Util.SANDBOX_ROOT.resolve(filename);
+            
+            // DO NOT create the physical file - just create the tab
+            // Create a TabContext with a null fileContext since the file doesn't exist yet
+            TabContext tabContext = new TabContext(filename, path, null);
+            
+            // Create the tab using the tab handler
+            EbsTab newTab = tabHandler.createNewTab(tabContext, true);
+            
+            if (newTab != null) {
+                // Initialize with default content and mark as dirty (unsaved)
+                String defaultContent = "// New EBS Script\n\n";
+                newTab.initializeAsNewFile(defaultContent);
+            }
+        } catch (Exception ex) {
+            submitErrors("Failed to create new script file: " + ex.getMessage());
+        }
+    }
+
+    /**
+     * Show a confirmation dialog when closing a tab with unsaved changes.
+     * Offers options to Save, Save As, Don't Save, or Cancel.
+     * @param tab The tab to potentially close
+     * @return true if the tab should be closed, false if the close should be cancelled
+     */
+    public boolean confirmCloseTab(EbsTab tab) {
+        if (tab == null || !tab.isDirty()) {
+            return true; // No unsaved changes, close is OK
+        }
+
+        // Create custom button types
+        ButtonType saveButton = new ButtonType("Save");
+        ButtonType saveAsButton = new ButtonType("Save As...");
+        ButtonType dontSaveButton = new ButtonType("Don't Save");
+        ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Unsaved Changes");
+        alert.setHeaderText("Do you want to save changes?");
+        alert.setContentText("The file \"" + tab.getText().replace("*", "") + "\" has unsaved changes.");
+        alert.getButtonTypes().setAll(saveButton, saveAsButton, dontSaveButton, cancelButton);
+        alert.initOwner(stage);
+        alert.initModality(Modality.APPLICATION_MODAL);
+
+        var result = alert.showAndWait();
+
+        if (result.isPresent()) {
+            if (result.get() == saveButton) {
+                // Save the file to its default path (no dialog)
+                TabContext context = (TabContext) tab.getUserData();
+                if (context != null && context.path != null) {
+                    try {
+                        // Save directly to the path without showing dialog
+                        callBuiltin("file.writeTextFile", context.path.toString(), tab.getEditorText());
+                        tab.markCleanTitle();
+                        addRecentFile(context.path);
+                    } catch (Exception ex) {
+                        submitErrors("Save failed: " + ex.getMessage());
+                        return false; // Don't close if save failed
+                    }
+                }
+                return true; // Close after saving
+            } else if (result.get() == saveAsButton) {
+                // Save As - show file chooser dialog
+                chooseSaveAs(tab);
+                return true; // Close after saving
+            } else if (result.get() == dontSaveButton) {
+                // Don't save, just close
+                // Mark tab as clean so the close listener doesn't trigger again
+                tab.markCleanTitle();
+                return true;
+            } else {
+                // Cancel was pressed
+                return false;
+            }
+        }
+
+        // Dialog was closed without a selection, treat as cancel
+        return false;
     }
 }
