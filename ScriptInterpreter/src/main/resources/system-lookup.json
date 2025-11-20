@@ -2608,6 +2608,254 @@
       ],
       "return_type": "bool",
       "example": "<b>call</b> <b>scr.closeScreen</b>(screenName=\"myScreen\");<br><br>// Or from within a screen event handler:<br><b>call</b> <b>scr.closeScreen</b>();"
+    },
+    {
+      "function": "scr.setProperty",
+      "short_description": "Sets a property on a screen item",
+      "long_help": "Sets a property value on a specific area item within a screen. The areaItem parameter must be in the format<br>'screenName.itemName'. Supported properties include 'visible', 'editable', 'disabled', 'colSpan', and 'rowSpan'. Returns true on<br>success.",
+      "parameters": [
+        {
+          "name": "areaItem",
+          "type": "string"
+        },
+        {
+          "name": "property",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "type": "any"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>call</b> <b>scr.setProperty</b>(areaItem=\"myScreen.myField\", property=\"visible\", value=true);<br><b>call</b> <b>scr.setProperty</b>(areaItem=\"myScreen.myButton\", property=\"disabled\", value=false);"
+    },
+    {
+      "function": "scr.getProperty",
+      "short_description": "Gets a property from a screen item",
+      "long_help": "Retrieves a property value from a specific area item within a screen. The areaItem parameter must be in the format<br>'screenName.itemName'. Returns the current value of the specified property.",
+      "parameters": [
+        {
+          "name": "areaItem",
+          "type": "string"
+        },
+        {
+          "name": "property",
+          "type": "string"
+        }
+      ],
+      "return_type": "any",
+      "example": "<b>var</b> <b>isVisible</b> = <b>call</b> <b>scr.getProperty</b>(areaItem=\"myScreen.myField\", property=\"visible\");<br><b>print</b> \"Field is visible: \" + isVisible;"
+    },
+    {
+      "function": "scr.getItemList",
+      "short_description": "Gets list of all items in a screen",
+      "long_help": "Returns an array containing the names of all items defined in the specified screen. This includes all fields, buttons, and<br>other UI elements that are part of the screen's areas.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        }
+      ],
+      "return_type": "any",
+      "example": "<b>var</b> <b>items</b> = <b>call</b> <b>scr.getItemList</b>(screenName=\"myScreen\");<br><b>foreach</b> item <b>in</b> items <b>do</b> {<br>  <b>print</b> \"Item: \" + item;<br>}"
+    },
+    {
+      "function": "scr.getScreenItemList",
+      "short_description": "Gets list of screen items",
+      "long_help": "Returns an array containing information about all items in the specified screen. Similar to scr.getItemList but may include<br>additional metadata about each item.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        }
+      ],
+      "return_type": "any",
+      "example": "<b>var</b> <b>items</b> = <b>call</b> <b>scr.getScreenItemList</b>(screenName=\"myScreen\");<br><b>print</b> \"Total items: \" + items.length;"
+    },
+    {
+      "function": "scr.setStatus",
+      "short_description": "Sets the status of a screen",
+      "long_help": "Sets the status of a screen to indicate its current state. Valid status values are 'clean' (no changes), 'changed' (has<br>unsaved changes), or 'error' (contains errors). Returns true on success.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>call</b> <b>scr.setStatus</b>(screenName=\"myScreen\", status=\"changed\");<br><b>call</b> <b>scr.setStatus</b>(screenName=\"myScreen\", status=\"clean\");"
+    },
+    {
+      "function": "scr.getStatus",
+      "short_description": "Gets the status of a screen",
+      "long_help": "Retrieves the current status of a screen. Returns one of 'clean', 'changed', or 'error' indicating the screen's current<br>state.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        }
+      ],
+      "return_type": "string",
+      "example": "<b>var</b> <b>status</b> = <b>call</b> <b>scr.getStatus</b>(screenName=\"myScreen\");<br><b>if</b> status == \"changed\" <b>then</b> {<br>  <b>print</b> \"Screen has unsaved changes\";<br>}"
+    },
+    {
+      "function": "scr.setError",
+      "short_description": "Sets an error message for a screen",
+      "long_help": "Sets an error message for a screen and changes its status to 'error'. The error message can be retrieved later using<br>scr.getError. Returns true on success.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        },
+        {
+          "name": "errorMessage",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>call</b> <b>scr.setError</b>(screenName=\"myScreen\", errorMessage=\"Validation failed: Name is required\");"
+    },
+    {
+      "function": "scr.getError",
+      "short_description": "Gets the error message for a screen",
+      "long_help": "Retrieves the error message associated with a screen. Returns null if no error message has been set.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        }
+      ],
+      "return_type": "string",
+      "example": "<b>var</b> <b>error</b> = <b>call</b> <b>scr.getError</b>(screenName=\"myScreen\");<br><b>if</b> error != null <b>then</b> {<br>  <b>print</b> \"Error: \" + error;<br>}"
+    },
+    {
+      "function": "scr.getItemSource",
+      "short_description": "Gets the data source for a screen item",
+      "long_help": "Returns the current data source for a screen item. The source can be either 'data' (uses the data value) or 'display' (uses<br>the display value).",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        },
+        {
+          "name": "itemName",
+          "type": "string"
+        }
+      ],
+      "return_type": "string",
+      "example": "<b>var</b> <b>source</b> = <b>call</b> <b>scr.getItemSource</b>(screenName=\"myScreen\", itemName=\"myField\");<br><b>print</b> \"Item source: \" + source;"
+    },
+    {
+      "function": "scr.setItemSource",
+      "short_description": "Sets the data source for a screen item",
+      "long_help": "Sets the data source for a screen item. The source parameter must be either 'data' or 'display'. When set to 'data', the<br>item uses its data value; when set to 'display', it uses its display value. Returns true on success.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        },
+        {
+          "name": "itemName",
+          "type": "string"
+        },
+        {
+          "name": "source",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>call</b> <b>scr.setItemSource</b>(screenName=\"myScreen\", itemName=\"myField\", source=\"display\");"
+    },
+    {
+      "function": "scr.getItemStatus",
+      "short_description": "Gets the status of a screen item",
+      "long_help": "Returns the current status of a screen item. The status indicates whether the item has been modified, has errors, or is in<br>its original state.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        },
+        {
+          "name": "itemName",
+          "type": "string"
+        }
+      ],
+      "return_type": "string",
+      "example": "<b>var</b> <b>itemStatus</b> = <b>call</b> <b>scr.getItemStatus</b>(screenName=\"myScreen\", itemName=\"myField\");<br><b>print</b> \"Field status: \" + itemStatus;"
+    },
+    {
+      "function": "scr.resetItemOriginalValue",
+      "short_description": "Resets a screen item to its original value",
+      "long_help": "Resets a specific screen item back to its original value, discarding any changes made. This is useful for implementing<br>'undo' functionality for individual fields. Returns true on success.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        },
+        {
+          "name": "itemName",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>call</b> <b>scr.resetItemOriginalValue</b>(screenName=\"myScreen\", itemName=\"myField\");"
+    },
+    {
+      "function": "scr.checkChanged",
+      "short_description": "Checks if a screen has unsaved changes",
+      "long_help": "Checks whether any items in the screen have been modified from their original values. Returns true if the screen has<br>unsaved changes, false otherwise.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>var</b> <b>hasChanges</b> = <b>call</b> <b>scr.checkChanged</b>(screenName=\"myScreen\");<br><b>if</b> hasChanges <b>then</b> {<br>  <b>print</b> \"Screen has unsaved changes\";<br>}"
+    },
+    {
+      "function": "scr.checkError",
+      "short_description": "Checks if a screen has errors",
+      "long_help": "Checks whether the screen has any errors. Returns true if the screen status is 'error' or if an error message has been<br>set, false otherwise.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>var</b> <b>hasErrors</b> = <b>call</b> <b>scr.checkError</b>(screenName=\"myScreen\");<br><b>if</b> hasErrors <b>then</b> {<br>  <b>print</b> \"Screen has errors\";<br>}"
+    },
+    {
+      "function": "scr.revert",
+      "short_description": "Reverts all changes in a screen",
+      "long_help": "Reverts all items in the screen back to their original values, discarding all unsaved changes. This is useful for<br>implementing a 'cancel' or 'reset' function. Returns true on success.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>call</b> <b>scr.revert</b>(screenName=\"myScreen\");<br><b>print</b> \"All changes have been reverted\";"
+    },
+    {
+      "function": "scr.clear",
+      "short_description": "Clears all values in a screen",
+      "long_help": "Clears all item values in the screen, setting them to their default empty state. This is different from revert, which<br>restores original values. Returns true on success.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>call</b> <b>scr.clear</b>(screenName=\"myScreen\");<br><b>print</b> \"Screen has been cleared\";"
     }
   ]
 }
