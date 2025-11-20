@@ -50,6 +50,8 @@ public class InterpreterContext {
     private final Map<String, String> screenCallbacks = new ConcurrentHashMap<>(); // screenName -> callbackFunctionName
     private final Map<String, String> screenStartupCode = new ConcurrentHashMap<>(); // screenName -> startup EBS code
     private final Map<String, String> screenCleanupCode = new ConcurrentHashMap<>(); // screenName -> cleanup EBS code
+    private final Map<String, String> screenGainFocusCode = new ConcurrentHashMap<>(); // screenName -> gainFocus EBS code
+    private final Map<String, String> screenLostFocusCode = new ConcurrentHashMap<>(); // screenName -> lostFocus EBS code
     private final Set<String> importedFiles = ConcurrentHashMap.newKeySet();  // Global list of all imported files to prevent circular imports and duplicate imports
     private final Map<String, ScreenStatus> screenStatuses = new ConcurrentHashMap<>(); // screenName -> status
     private final Map<String, String> screenErrorMessages = new ConcurrentHashMap<>(); // screenName -> error message
@@ -390,6 +392,8 @@ public class InterpreterContext {
         screenCallbacks.remove(screenName);
         screenStartupCode.remove(screenName);
         screenCleanupCode.remove(screenName);
+        screenGainFocusCode.remove(screenName);
+        screenLostFocusCode.remove(screenName);
         displayMetadata.entrySet().removeIf(entry -> entry.getKey().startsWith(screenName + "."));
         GLOBAL_SCREEN_CREATION_ORDER.remove(screenName);
         screenStatuses.remove(screenName);
@@ -460,6 +464,50 @@ public class InterpreterContext {
             screenCleanupCode.put(screenName, code);
         } else {
             screenCleanupCode.remove(screenName);
+        }
+    }
+
+    /**
+     * Get the gainFocus code for a screen
+     * @param screenName The screen name
+     * @return The gainFocus EBS code, or null if no gainFocus code is set
+     */
+    public String getScreenGainFocusCode(String screenName) {
+        return screenGainFocusCode.get(screenName);
+    }
+
+    /**
+     * Set the gainFocus code for a screen
+     * @param screenName The screen name
+     * @param code The gainFocus EBS code
+     */
+    public void setScreenGainFocusCode(String screenName, String code) {
+        if (code != null && !code.trim().isEmpty()) {
+            screenGainFocusCode.put(screenName, code);
+        } else {
+            screenGainFocusCode.remove(screenName);
+        }
+    }
+
+    /**
+     * Get the lostFocus code for a screen
+     * @param screenName The screen name
+     * @return The lostFocus EBS code, or null if no lostFocus code is set
+     */
+    public String getScreenLostFocusCode(String screenName) {
+        return screenLostFocusCode.get(screenName);
+    }
+
+    /**
+     * Set the lostFocus code for a screen
+     * @param screenName The screen name
+     * @param code The lostFocus EBS code
+     */
+    public void setScreenLostFocusCode(String screenName, String code) {
+        if (code != null && !code.trim().isEmpty()) {
+            screenLostFocusCode.put(screenName, code);
+        } else {
+            screenLostFocusCode.remove(screenName);
         }
     }
 

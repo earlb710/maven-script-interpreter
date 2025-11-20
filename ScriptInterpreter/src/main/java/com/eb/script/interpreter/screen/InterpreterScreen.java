@@ -70,6 +70,9 @@ public class InterpreterScreen {
             // Extract startup and cleanup inline code if present
             String startupCode = config.containsKey("startup") ? String.valueOf(config.get("startup")) : null;
             String cleanupCode = config.containsKey("cleanup") ? String.valueOf(config.get("cleanup")) : null;
+            // Extract gainFocus and lostFocus inline code if present
+            String gainFocusCode = config.containsKey("gainfocus") ? String.valueOf(config.get("gainfocus")) : null;
+            String lostFocusCode = config.containsKey("lostfocus") ? String.valueOf(config.get("lostfocus")) : null;
             
             // Store startup and cleanup code in context
             if (startupCode != null && !startupCode.trim().isEmpty()) {
@@ -77,6 +80,13 @@ public class InterpreterScreen {
             }
             if (cleanupCode != null && !cleanupCode.trim().isEmpty()) {
                 context.setScreenCleanupCode(stmt.name, cleanupCode);
+            }
+            // Store gainFocus and lostFocus code in context
+            if (gainFocusCode != null && !gainFocusCode.trim().isEmpty()) {
+                context.setScreenGainFocusCode(stmt.name, gainFocusCode);
+            }
+            if (lostFocusCode != null && !lostFocusCode.trim().isEmpty()) {
+                context.setScreenLostFocusCode(stmt.name, lostFocusCode);
             }
 
             // Create thread-safe variable storage for this screen
@@ -371,6 +381,34 @@ public class InterpreterScreen {
 
                     if (screenMaximize) {
                         stage.setMaximized(true);
+                    }
+                    
+                    // Set up screen-level focus listeners
+                    String screenGainFocusCode = context.getScreenGainFocusCode(screenName);
+                    String screenLostFocusCode = context.getScreenLostFocusCode(screenName);
+                    
+                    if (screenGainFocusCode != null || screenLostFocusCode != null) {
+                        stage.focusedProperty().addListener((observable, oldValue, newValue) -> {
+                            if (newValue && screenGainFocusCode != null && !screenGainFocusCode.trim().isEmpty()) {
+                                // Window gained focus
+                                try {
+                                    executeScreenInlineCode(screenName, screenGainFocusCode, "gainFocus");
+                                } catch (InterpreterError e) {
+                                    if (context.getOutput() != null) {
+                                        context.getOutput().printlnError("Error executing screen gainFocus code: " + e.getMessage());
+                                    }
+                                }
+                            } else if (!newValue && screenLostFocusCode != null && !screenLostFocusCode.trim().isEmpty()) {
+                                // Window lost focus
+                                try {
+                                    executeScreenInlineCode(screenName, screenLostFocusCode, "lostFocus");
+                                } catch (InterpreterError e) {
+                                    if (context.getOutput() != null) {
+                                        context.getOutput().printlnError("Error executing screen lostFocus code: " + e.getMessage());
+                                    }
+                                }
+                            }
+                        });
                     }
 
                     // Create a thread for this screen
@@ -1151,6 +1189,14 @@ public class InterpreterScreen {
         } else {
             // Use default style from the enum
             area.style = area.areaType.getDefaultStyle();
+        }
+        
+        // Extract gainFocus and lostFocus inline code if present
+        if (areaDef.containsKey("gainfocus")) {
+            area.gainFocus = String.valueOf(areaDef.get("gainfocus"));
+        }
+        if (areaDef.containsKey("lostfocus")) {
+            area.lostFocus = String.valueOf(areaDef.get("lostfocus"));
         }
 
         area.screenName = screenName;

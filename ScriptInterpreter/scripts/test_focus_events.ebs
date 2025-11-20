@@ -1,0 +1,305 @@
+// Test Script: Screen and Area Focus Events
+// Description: Tests gainFocus and lostFocus inline code for screens and areas
+// Date: 2025-11-20
+
+print "=== Screen and Area Focus Events Test ===";
+print "";
+print "This test demonstrates gainFocus and lostFocus inline code execution:";
+print "- Screen-level: execute when window gains/loses focus";
+print "- Area-level: execute when focus enters/leaves an area";
+print "";
+
+// Test 1: Screen-level focus events
+print "Test 1: Creating screen with gainFocus and lostFocus";
+screen testScreenFocus = {
+    "title": "Test: Screen Focus Events",
+    "width": 500,
+    "height": 350,
+    "gainFocus": "print 'SCREEN GAINED FOCUS'; focusCount = focusCount + 1;",
+    "lostFocus": "print 'SCREEN LOST FOCUS';",
+    "vars": [
+        {
+            "name": "focusCount",
+            "type": "int",
+            "default": 0,
+            "display": {
+                "type": "textfield",
+                "labelText": "Focus Count:",
+                "alignment": "right"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "15",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "instructions",
+                    "seq": 1,
+                    "display": {
+                        "type": "label",
+                        "labelText": "Switch to another window and back to test focus events.\nWatch the console output."
+                    }
+                },
+                {
+                    "name": "focusCount",
+                    "varRef": "focusCount",
+                    "seq": 2
+                },
+                {
+                    "name": "closeButton",
+                    "seq": 3,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Close Screen",
+                        "onClick": "close screen;"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+// Test 2: Area-level focus events
+print "Test 2: Creating screen with area focus events";
+screen testAreaFocus = {
+    "title": "Test: Area Focus Events",
+    "width": 600,
+    "height": 400,
+    "vars": [
+        {
+            "name": "area1Status",
+            "type": "string",
+            "default": "Not focused",
+            "display": {
+                "type": "textfield",
+                "labelText": "Area 1 Status:"
+            }
+        },
+        {
+            "name": "area2Status",
+            "type": "string",
+            "default": "Not focused",
+            "display": {
+                "type": "textfield",
+                "labelText": "Area 2 Status:"
+            }
+        },
+        {
+            "name": "field1",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 1:"
+            }
+        },
+        {
+            "name": "field2",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 2:"
+            }
+        },
+        {
+            "name": "field3",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 3:"
+            }
+        },
+        {
+            "name": "field4",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 4:"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "10",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "instructions",
+                    "seq": 1,
+                    "display": {
+                        "type": "label",
+                        "labelText": "Tab between fields in different areas to test area focus events."
+                    }
+                },
+                {
+                    "name": "area1Status",
+                    "varRef": "area1Status",
+                    "seq": 2
+                },
+                {
+                    "name": "area2Status",
+                    "varRef": "area2Status",
+                    "seq": 3
+                }
+            ],
+            "childAreas": [
+                {
+                    "name": "area1",
+                    "type": "vbox",
+                    "spacing": "10",
+                    "padding": "10",
+                    "style": "-fx-border-color: blue; -fx-border-width: 2;",
+                    "gainFocus": "print 'AREA 1 GAINED FOCUS'; area1Status = 'Focused';",
+                    "lostFocus": "print 'AREA 1 LOST FOCUS'; area1Status = 'Not focused';",
+                    "items": [
+                        {
+                            "name": "field1",
+                            "varRef": "field1",
+                            "seq": 1
+                        },
+                        {
+                            "name": "field2",
+                            "varRef": "field2",
+                            "seq": 2
+                        }
+                    ]
+                },
+                {
+                    "name": "area2",
+                    "type": "vbox",
+                    "spacing": "10",
+                    "padding": "10",
+                    "style": "-fx-border-color: green; -fx-border-width: 2;",
+                    "gainFocus": "print 'AREA 2 GAINED FOCUS'; area2Status = 'Focused';",
+                    "lostFocus": "print 'AREA 2 LOST FOCUS'; area2Status = 'Not focused';",
+                    "items": [
+                        {
+                            "name": "field3",
+                            "varRef": "field3",
+                            "seq": 1
+                        },
+                        {
+                            "name": "field4",
+                            "varRef": "field4",
+                            "seq": 2
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+};
+
+// Test 3: Combined screen and area focus
+print "Test 3: Creating screen with both screen and area focus events";
+screen testCombined = {
+    "title": "Test: Combined Focus Events",
+    "width": 550,
+    "height": 350,
+    "gainFocus": "print 'WINDOW FOCUS: gained'; screenFocused = 'Yes';",
+    "lostFocus": "print 'WINDOW FOCUS: lost'; screenFocused = 'No';",
+    "vars": [
+        {
+            "name": "screenFocused",
+            "type": "string",
+            "default": "Unknown",
+            "display": {
+                "type": "textfield",
+                "labelText": "Screen Focused:"
+            }
+        },
+        {
+            "name": "areaLog",
+            "type": "string",
+            "default": "No events yet",
+            "display": {
+                "type": "textfield",
+                "labelText": "Area Log:"
+            }
+        },
+        {
+            "name": "input1",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Input 1:"
+            }
+        },
+        {
+            "name": "input2",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Input 2:"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "10",
+            "padding": "20",
+            "gainFocus": "print 'Main area focus gained'; areaLog = 'Main area focused';",
+            "lostFocus": "print 'Main area focus lost'; areaLog = 'Main area lost focus';",
+            "items": [
+                {
+                    "name": "screenFocused",
+                    "varRef": "screenFocused",
+                    "seq": 1
+                },
+                {
+                    "name": "areaLog",
+                    "varRef": "areaLog",
+                    "seq": 2
+                },
+                {
+                    "name": "input1",
+                    "varRef": "input1",
+                    "seq": 3
+                },
+                {
+                    "name": "input2",
+                    "varRef": "input2",
+                    "seq": 4
+                }
+            ]
+        }
+    ]
+};
+
+print "";
+print "=== Test Screens Created ===";
+print "";
+print "Three test screens have been created:";
+print "";
+print "1. show screen testScreenFocus;";
+print "   - Tests screen-level gainFocus/lostFocus";
+print "   - Switch to another window and back to see events";
+print "";
+print "2. show screen testAreaFocus;";
+print "   - Tests area-level gainFocus/lostFocus";
+print "   - Tab between fields in blue area (Area 1) and green area (Area 2)";
+print "";
+print "3. show screen testCombined;";
+print "   - Tests both screen and area focus events together";
+print "   - Try switching windows and tabbing between fields";
+print "";
+print "=== Expected Behavior ===";
+print "- Screen gainFocus: Executes when window gains focus";
+print "- Screen lostFocus: Executes when window loses focus";
+print "- Area gainFocus: Executes when focus enters area from outside";
+print "- Area lostFocus: Executes when focus leaves area";
+print "- All events have access to screen variables and context";
+print "";

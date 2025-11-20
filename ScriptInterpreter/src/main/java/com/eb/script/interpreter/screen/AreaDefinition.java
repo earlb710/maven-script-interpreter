@@ -32,6 +32,10 @@ public class AreaDefinition {
     public List<AreaItem> items = new ArrayList<>();
     // Nested child areas (areas within areas)
     public List<AreaDefinition> childAreas = new ArrayList<>();
+    // Inline code to execute when focus enters this area
+    public String gainFocus;
+    // Inline code to execute when focus leaves this area
+    public String lostFocus;
     
     @Override
     public String toString() {
