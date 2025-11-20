@@ -29,9 +29,6 @@ public class InterpreterContext {
     private static final ConcurrentHashMap<String, Thread> GLOBAL_SCREEN_THREADS = new ConcurrentHashMap<>();
     private static final List<String> GLOBAL_SCREEN_CREATION_ORDER = new java.util.concurrent.CopyOnWriteArrayList<>();
     private static final Set<String> GLOBAL_SCREENS_BEING_CREATED = ConcurrentHashMap.newKeySet();
-    
-    // Track the current/most recently shown screen for "close screen" without a name
-    private static volatile String CURRENT_SCREEN = null;
 
     private Environment environment;
     private Debugger debug;
@@ -111,19 +108,33 @@ public class InterpreterContext {
     }
 
     /**
-     * Get the current screen name (most recently shown screen)
-     * @return The current screen name, or null if no screen is current
+     * Get the current screen name based on the executing thread context.
+     * If code is executing within a screen thread (thread name starts with "Screen-"),
+     * returns that screen name. Otherwise, returns null.
+     * 
+     * @return The current screen name, or null if not executing in a screen context
      */
     public String getCurrentScreen() {
-        return CURRENT_SCREEN;
+        Thread currentThread = Thread.currentThread();
+        String threadName = currentThread.getName();
+        
+        // Check if we're executing in a screen thread
+        if (threadName != null && threadName.startsWith("Screen-")) {
+            // Extract screen name from thread name "Screen-<screenName>"
+            return threadName.substring(7); // "Screen-".length() = 7
+        }
+        
+        return null;
     }
 
     /**
      * Set the current screen name
      * @param screenName The screen name to set as current
+     * @deprecated Current screen is now determined by thread context, not explicit setting
      */
+    @Deprecated
     public void setCurrentScreen(String screenName) {
-        CURRENT_SCREEN = screenName;
+        // No-op - current screen is now determined by thread context
     }
 
     public Map<String, DisplayItem> getDisplayItem() {
@@ -335,7 +346,6 @@ public class InterpreterContext {
         screenAreaItems.clear();
         screenCallbacks.clear();
         GLOBAL_SCREEN_CREATION_ORDER.clear();
-        CURRENT_SCREEN = null;
     }
 
     public void remove(String screenName) {
@@ -349,11 +359,6 @@ public class InterpreterContext {
         screenCallbacks.remove(screenName);
         displayMetadata.entrySet().removeIf(entry -> entry.getKey().startsWith(screenName + "."));
         GLOBAL_SCREEN_CREATION_ORDER.remove(screenName);
-        
-        // Clear current screen if it's the one being removed
-        if (screenName != null && screenName.equals(CURRENT_SCREEN)) {
-            CURRENT_SCREEN = null;
-        }
     }
 
     /**

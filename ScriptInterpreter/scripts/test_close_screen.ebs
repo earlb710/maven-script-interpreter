@@ -53,38 +53,52 @@ if result1 then {
 }
 
 // ============================================
-// Test Suite 2: Close Current Screen
+// Test Suite 2: Close from onClick Handler
 // ============================================
 print "";
-print "Test Suite 2: Close Current Screen (no name)";
+print "Test Suite 2: Close Screen from onClick (Thread Context)";
 print "----------------------------------------";
 
-// Test 2: Create and close current screen without name
+// Test 2: Create screen with button that closes itself
 totalTests = totalTests + 1;
-print "Test 2: Create screen, show it, and close without name";
+print "Test 2: Screen with close button using onClick";
 
 screen testScreen2 = {
-    "title": "Test Screen 2",
-    "width": 500,
-    "height": 400,
+    "title": "Test Screen 2 - Click Close",
+    "width": 400,
+    "height": 300,
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "items": [
+                {
+                    "name": "closeBtn",
+                    "varref": "closeButton",
+                    "display": {
+                        "type": "button",
+                        "labelText": "Close This Screen",
+                        "onClick": "close screen;"
+                    }
+                }
+            ]
+        }
+    ],
     "vars": [
         {
-            "name": "field1",
+            "name": "closeButton",
             "type": "string",
-            "default": "Test",
-            "display": {"type": "textfield", "labelText": "Field 1"}
+            "default": "Close"
         }
     ]
 };
 
 show screen testScreen2;
-print "Screen testScreen2 shown (now current screen)";
+print "Screen testScreen2 shown with close button";
+print "Click the 'Close This Screen' button to test close screen;";
+print "(Note: This uses thread context from onClick handler)";
 
-// Close without name - should close testScreen2
-close screen;
-print "Current screen closed (no name specified)";
-
-var result2 = call debug.assert(true, "Test 2: Current screen closed successfully");
+var result2 = call debug.assert(true, "Test 2: Screen with onClick close button created");
 if result2 then {
     passedTests = passedTests + 1;
 } else {
@@ -98,9 +112,9 @@ print "";
 print "Test Suite 3: Multiple Screens";
 print "----------------------------------------";
 
-// Test 3: Create multiple screens, verify current screen tracking
+// Test 3: Create multiple screens, close by name
 totalTests = totalTests + 1;
-print "Test 3: Create multiple screens, close current";
+print "Test 3: Create multiple screens, close each by name";
 
 screen testScreen3a = {
     "title": "Test Screen 3A",
@@ -118,11 +132,11 @@ show screen testScreen3a;
 print "Screen testScreen3a shown";
 
 show screen testScreen3b;
-print "Screen testScreen3b shown (now current screen)";
+print "Screen testScreen3b shown";
 
-// Close current screen (should close testScreen3b)
-close screen;
-print "Current screen closed (should be testScreen3b)";
+// Close testScreen3b by name
+close screen testScreen3b;
+print "Screen testScreen3b closed by name";
 
 // Close testScreen3a by name
 close screen testScreen3a;
@@ -187,8 +201,8 @@ if username_ok then {
     }
 }
 
-// Close the screen
-close screen;
+// Close the screen by name
+close screen testScreen4;
 print "Screen testScreen4 closed";
 
 var result4 = call debug.assert(varsOk, "Test 4: Screen variables handled correctly before close");

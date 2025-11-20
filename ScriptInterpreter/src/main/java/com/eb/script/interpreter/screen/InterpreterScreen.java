@@ -467,8 +467,6 @@ public class InterpreterScreen {
             Platform.runLater(() -> {
                 if (!stage.isShowing()) {
                     stage.show();
-                    // Set this as the current screen when shown
-                    context.setCurrentScreen(stmt.name);
                     if (context.getOutput() != null) {
                         context.getOutput().printlnOk("Screen '" + stmt.name + "' shown");
                     }
@@ -622,13 +620,14 @@ public class InterpreterScreen {
     public void visitScreenCloseStatement(ScreenCloseStatement stmt) throws InterpreterError {
         String screenName = stmt.name;
         
-        // If no screen name provided, use the current screen
+        // If no screen name provided, determine from thread context
         if (screenName == null) {
             screenName = context.getCurrentScreen();
             if (screenName == null) {
                 throw interpreter.error(stmt.getLine(), 
-                    "No screen name specified and no current screen is set. " +
-                    "Please provide a screen name: 'close screen <name>;'");
+                    "No screen name specified and not executing in a screen context. " +
+                    "Use 'close screen <name>;' to close a specific screen, or call 'close screen;' " +
+                    "from within screen event handlers (e.g., onClick).");
             }
         }
         

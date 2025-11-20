@@ -913,7 +913,7 @@ screen myWindow hide;
 // Close a specific screen by name
 close screen myWindow;
 
-// Close the current screen (most recently shown)
+// Close the current screen (from within screen context)
 close screen;
 ```
 
@@ -921,8 +921,9 @@ close screen;
 - Destroy the screen window
 - Clean up all screen resources (variables, threads, etc.)
 - Invoke any registered close callback
-- If no screen name is provided, closes the most recently shown screen
-- If no current screen exists and no name is provided, an error is thrown
+- If no screen name is provided, determines the screen from the execution thread context
+- The no-name form must be called from within a screen context (e.g., onClick handlers)
+- If called from console/main thread without a name, an error is thrown
 
 ### Accessing Screen Variables
 
