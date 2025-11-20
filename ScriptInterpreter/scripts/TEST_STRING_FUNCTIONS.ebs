@@ -1,0 +1,316 @@
+// ============================================================================
+// TEST DOCUMENT: New String Builtin Functions
+// ============================================================================
+// This document tests all 7 new string builtin functions added to EBS:
+// - str.substring
+// - str.indexOf
+// - str.lastIndexOf
+// - str.charAt
+// - str.replaceAll
+// - str.lpad
+// - str.rpad
+// ============================================================================
+
+print("====================================================================");
+print("           TEST DOCUMENT: New String Builtin Functions");
+print("====================================================================");
+print("");
+
+// ============================================================================
+// TEST 1: str.substring - Extract substring from string
+// ============================================================================
+print("============================================================");
+print("TEST 1: str.substring");
+print("============================================================");
+
+// Display help for this function
+var help1: string = call system.help("str.substring");
+print(help1);
+print("");
+
+// Test cases
+print("--- Test Cases ---");
+var text1: string = "Hello, World!";
+print("Text: '" + text1 + "'");
+
+var sub1: string = call str.substring(text1, 7);
+print("  str.substring(text1, 7): '" + sub1 + "' (expected: 'World!')");
+call debug.assertEquals("World!", sub1, "substring from index 7 to end");
+
+var sub2: string = call str.substring(text1, 0, 5);
+print("  str.substring(text1, 0, 5): '" + sub2 + "' (expected: 'Hello')");
+call debug.assertEquals("Hello", sub2, "substring from 0 to 5");
+
+var sub3: string = call str.substring(text1, 7, 12);
+print("  str.substring(text1, 7, 12): '" + sub3 + "' (expected: 'World')");
+call debug.assertEquals("World", sub3, "substring from 7 to 12");
+
+print("✓ str.substring tests passed");
+print("");
+
+// ============================================================================
+// TEST 2: str.indexOf - Find first occurrence of substring
+// ============================================================================
+print("============================================================");
+print("TEST 2: str.indexOf");
+print("============================================================");
+
+// Display help for this function
+var help2: string = call system.help("str.indexOf");
+print(help2);
+print("");
+
+// Test cases
+print("--- Test Cases ---");
+var text2: string = "Hello, World! Hello again!";
+print("Text: '" + text2 + "'");
+
+var idx1: int = call str.indexOf(text2, "World");
+print("  str.indexOf(text2, 'World'): " + idx1 + " (expected: 7)");
+call debug.assertEquals(7, idx1, "indexOf 'World' should be 7");
+
+var idx2: int = call str.indexOf(text2, "Hello", 1);
+print("  str.indexOf(text2, 'Hello', 1): " + idx2 + " (expected: 14)");
+call debug.assertEquals(14, idx2, "indexOf 'Hello' from 1 should be 14");
+
+var idx3: int = call str.indexOf(text2, "NotFound");
+print("  str.indexOf(text2, 'NotFound'): " + idx3 + " (expected: -1)");
+call debug.assertEquals(-1, idx3, "indexOf 'NotFound' should be -1");
+
+print("✓ str.indexOf tests passed");
+print("");
+
+// ============================================================================
+// TEST 3: str.lastIndexOf - Find last occurrence of substring
+// ============================================================================
+print("============================================================");
+print("TEST 3: str.lastIndexOf");
+print("============================================================");
+
+// Display help for this function
+var help3: string = call system.help("str.lastIndexOf");
+print(help3);
+print("");
+
+// Test cases
+print("--- Test Cases ---");
+var text3: string = "Hello, World! Hello again!";
+print("Text: '" + text3 + "'");
+
+var lastIdx1: int = call str.lastIndexOf(text3, "Hello");
+print("  str.lastIndexOf(text3, 'Hello'): " + lastIdx1 + " (expected: 14)");
+call debug.assertEquals(14, lastIdx1, "lastIndexOf 'Hello' should be 14");
+
+var lastIdx2: int = call str.lastIndexOf(text3, "l");
+print("  str.lastIndexOf(text3, 'l'): " + lastIdx2 + " (expected: 17)");
+call debug.assertEquals(17, lastIdx2, "lastIndexOf 'l' should be 17");
+
+var lastIdx3: int = call str.lastIndexOf(text3, "xyz");
+print("  str.lastIndexOf(text3, 'xyz'): " + lastIdx3 + " (expected: -1)");
+call debug.assertEquals(-1, lastIdx3, "lastIndexOf 'xyz' should be -1");
+
+print("✓ str.lastIndexOf tests passed");
+print("");
+
+// ============================================================================
+// TEST 4: str.charAt - Get character at specific index
+// ============================================================================
+print("============================================================");
+print("TEST 4: str.charAt");
+print("============================================================");
+
+// Display help for this function
+var help4: string = call system.help("str.charAt");
+print(help4);
+print("");
+
+// Test cases
+print("--- Test Cases ---");
+var text4: string = "Hello";
+print("Text: '" + text4 + "'");
+
+var char1: string = call str.charAt(text4, 0);
+print("  str.charAt(text4, 0): '" + char1 + "' (expected: 'H')");
+call debug.assertEquals("H", char1, "charAt 0 should be 'H'");
+
+var char2: string = call str.charAt(text4, 4);
+print("  str.charAt(text4, 4): '" + char2 + "' (expected: 'o')");
+call debug.assertEquals("o", char2, "charAt 4 should be 'o'");
+
+var text5: string = "Hello World";
+var char3: string = call str.charAt(text5, 5);
+print("  str.charAt('Hello World', 5): '" + char3 + "' (expected: ' ')");
+call debug.assertEquals(" ", char3, "charAt 5 should be space");
+
+print("✓ str.charAt tests passed");
+print("");
+
+// ============================================================================
+// TEST 5: str.replaceAll - Replace all occurrences using regex
+// ============================================================================
+print("============================================================");
+print("TEST 5: str.replaceAll");
+print("============================================================");
+
+// Display help for this function
+var help5: string = call system.help("str.replaceAll");
+print(help5);
+print("");
+
+// Test cases
+print("--- Test Cases ---");
+var text6: string = "Hello World! Hello Everyone!";
+print("Text: '" + text6 + "'");
+
+var replaced1: string = call str.replaceAll(text6, "Hello", "Hi");
+print("  str.replaceAll(text6, 'Hello', 'Hi'): '" + replaced1 + "'");
+print("    (expected: 'Hi World! Hi Everyone!')");
+call debug.assertEquals("Hi World! Hi Everyone!", replaced1, "replace Hello with Hi");
+
+var text7: string = "Phone: 123-456-7890";
+var replaced2: string = call str.replaceAll(text7, "\\d", "X");
+print("  str.replaceAll('" + text7 + "', '\\\\d', 'X'): '" + replaced2 + "'");
+print("    (expected: 'Phone: XXX-XXX-XXXX')");
+call debug.assertEquals("Phone: XXX-XXX-XXXX", replaced2, "replace digits with X");
+
+var text8: string = "Too    many     spaces";
+var replaced3: string = call str.replaceAll(text8, " +", " ");
+print("  str.replaceAll('" + text8 + "', ' +', ' '): '" + replaced3 + "'");
+print("    (expected: 'Too many spaces')");
+call debug.assertEquals("Too many spaces", replaced3, "normalize spaces");
+
+print("✓ str.replaceAll tests passed");
+print("");
+
+// ============================================================================
+// TEST 6: str.lpad - Left-pad string to specified length
+// ============================================================================
+print("============================================================");
+print("TEST 6: str.lpad");
+print("============================================================");
+
+// Display help for this function
+var help6: string = call system.help("str.lpad");
+print(help6);
+print("");
+
+// Test cases
+print("--- Test Cases ---");
+var num1: string = "42";
+print("Text: '" + num1 + "'");
+
+var padded1: string = call str.lpad(num1, 5, "0");
+print("  str.lpad(num1, 5, '0'): '" + padded1 + "' (expected: '00042')");
+call debug.assertEquals("00042", padded1, "lpad with zeros");
+
+var padded2: string = call str.lpad(num1, 8, " ");
+print("  str.lpad(num1, 8, ' '): '" + padded2 + "' (expected: '      42')");
+call debug.assertEquals("      42", padded2, "lpad with spaces");
+
+var name1: string = "John";
+var padded3: string = call str.lpad(name1, 10, " ");
+print("  str.lpad('John', 10, ' '): '" + padded3 + "' (expected: '      John')");
+call debug.assertEquals("      John", padded3, "lpad name with spaces");
+
+print("✓ str.lpad tests passed");
+print("");
+
+// ============================================================================
+// TEST 7: str.rpad - Right-pad string to specified length
+// ============================================================================
+print("============================================================");
+print("TEST 7: str.rpad");
+print("============================================================");
+
+// Display help for this function
+var help7: string = call system.help("str.rpad");
+print(help7);
+print("");
+
+// Test cases
+print("--- Test Cases ---");
+var num2: string = "42";
+print("Text: '" + num2 + "'");
+
+var rpadded1: string = call str.rpad(num2, 5, "0");
+print("  str.rpad(num2, 5, '0'): '" + rpadded1 + "' (expected: '42000')");
+call debug.assertEquals("42000", rpadded1, "rpad with zeros");
+
+var rpadded2: string = call str.rpad(num2, 8, " ");
+print("  str.rpad(num2, 8, ' '): '" + rpadded2 + "' (expected: '42      ')");
+call debug.assertEquals("42      ", rpadded2, "rpad with spaces");
+
+var name2: string = "John";
+var rpadded3: string = call str.rpad(name2, 10, " ");
+print("  str.rpad('John', 10, ' '): '" + rpadded3 + "' (expected: 'John      ')");
+call debug.assertEquals("John      ", rpadded3, "rpad name with spaces");
+
+print("✓ str.rpad tests passed");
+print("");
+
+// ============================================================================
+// INTEGRATION TEST: Using multiple functions together
+// ============================================================================
+print("============================================================");
+print("INTEGRATION TEST: Combined Usage");
+print("============================================================");
+
+print("--- Email Parsing Example ---");
+var email: string = "user.name@example.com";
+print("Email: " + email);
+
+var atPos: int = call str.indexOf(email, "@");
+print("  @ position: " + atPos);
+
+var username: string = call str.substring(email, 0, atPos);
+print("  Username: " + username);
+
+var domain: string = call str.substring(email, atPos + 1);
+print("  Domain: " + domain);
+
+var lastDot: int = call str.lastIndexOf(domain, ".");
+var tld: string = call str.substring(domain, lastDot + 1);
+print("  TLD: " + tld);
+
+call debug.assertEquals("user.name", username, "username extraction");
+call debug.assertEquals("example.com", domain, "domain extraction");
+call debug.assertEquals("com", tld, "TLD extraction");
+
+print("");
+print("--- Table Formatting Example ---");
+print("Name         Age   Score");
+print("------------ ----- -----");
+
+var name3: string = call str.rpad("Alice", 12, " ");
+var age1: string = call str.lpad("30", 5, " ");
+var score1: string = call str.lpad("95", 5, " ");
+print(name3 + " " + age1 + " " + score1);
+
+var name4: string = call str.rpad("Bob", 12, " ");
+var age2: string = call str.lpad("25", 5, " ");
+var score2: string = call str.lpad("88", 5, " ");
+print(name4 + " " + age2 + " " + score2);
+
+print("");
+print("✓ Integration tests passed");
+print("");
+
+// ============================================================================
+// SUMMARY
+// ============================================================================
+print("====================================================================");
+print("                    TEST SUMMARY");
+print("====================================================================");
+print("All 7 new string builtin functions tested successfully:");
+print("  ✓ str.substring   - Extract substring with optional end index");
+print("  ✓ str.indexOf     - Find first occurrence");
+print("  ✓ str.lastIndexOf - Find last occurrence");
+print("  ✓ str.charAt      - Get character at index");
+print("  ✓ str.replaceAll  - Replace with regex patterns");
+print("  ✓ str.lpad        - Left-pad to specified length");
+print("  ✓ str.rpad        - Right-pad to specified length");
+print("");
+print("Each function printed its own help documentation.");
+print("All test assertions passed.");
+print("Integration tests demonstrate practical usage.");
+print("====================================================================");
