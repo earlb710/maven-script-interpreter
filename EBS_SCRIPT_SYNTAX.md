@@ -515,7 +515,7 @@ findMax(a: int, b: int) return int {
 
 #### Fixed-Size Arrays
 
-**Using Typed Arrays:**
+**Using Typed Arrays (Traditional):**
 ```javascript
 var numbers: int[5];           // Array of 5 integers
 var matrix: int[3, 4];         // 2D array: 3 rows, 4 columns
@@ -528,7 +528,17 @@ var items: array[10];          // Generic array of 10 elements
 var grid: array[5, 5];         // 2D generic array (5x5 grid)
 ```
 
-The `array` type is a generic array that can hold any type of value, similar to `json` arrays.
+**Using array.type Syntax (Enhanced):**
+```javascript
+var strings: array.string[5];  // String array
+var ints: array.int[10];       // Integer array
+var nums: array.number[5];     // Number (double) array
+var bytes: array.byte[10];     // Byte array (uses ArrayFixedByte)
+var floats: array.float[5];    // Float array
+var longs: array.long[3];      // Long array
+```
+
+The `array.type` syntax provides an alternative way to declare typed arrays, making the syntax more consistent and explicit.
 
 #### Dynamic Arrays
 
@@ -540,6 +550,13 @@ var items: string[*];          // Dynamic string array
 **Using Generic Array Type:**
 ```javascript
 var collection: array[*];      // Dynamic generic array
+var anyType: array.any[*];     // Explicit any type (same as array)
+```
+
+**Using array.type Syntax:**
+```javascript
+var dynamicStrings: array.string[*];  // Dynamic string array
+var dynamicInts: array.int[*];        // Dynamic integer array
 ```
 
 Dynamic arrays backed by `ArrayDynamic` can grow as needed using `array.expand()`.
@@ -558,16 +575,33 @@ var matrix = [[1, 2], [3, 4], [5, 6]];
 
 | Syntax | Type | Backed By | Usage |
 |--------|------|-----------|-------|
-| `int[10]` | Typed | ArrayFixed | Fixed-size integer array |
-| `string[*]` | Typed | ArrayDynamic | Dynamic string array |
+| `int[10]` | Typed | ArrayFixed | Fixed-size integer array (traditional) |
+| `array.int[10]` | Typed | ArrayFixed | Fixed-size integer array (enhanced) |
+| `array.byte[10]` | Typed | ArrayFixedByte | Byte array with optimized storage |
+| `string[*]` | Typed | ArrayDynamic | Dynamic string array (traditional) |
+| `array.string[*]` | Typed | ArrayDynamic | Dynamic string array (enhanced) |
 | `array[10]` | Generic | ArrayFixed | Fixed-size generic array |
+| `array.any[10]` | Generic | ArrayFixed | Fixed-size generic array (explicit) |
 | `array[*]` | Generic | ArrayDynamic | Dynamic generic array |
 | `json` | JSON | Java List/Map | JSON arrays and objects |
 
-**When to use `array` vs typed arrays:**
-- Use `array` when you need to store mixed types (like integers and strings together)
-- Use typed arrays (`int[10]`, `string[*]`) when all elements are the same type
-- Both work the same way with `ArrayFixed` and `ArrayDynamic` implementations
+### Available array.type Variants
+
+- `array` or `array.any` - Generic array (any type)
+- `array.string` - String array
+- `array.byte` - Byte array (uses ArrayFixedByte for fixed size)
+- `array.int` or `array.integer` - Integer array
+- `array.long` - Long integer array
+- `array.float` - Float array
+- `array.double` or `array.number` - Double/number array
+- `array.bool` or `array.boolean` - Boolean array
+- `array.date` - Date array
+
+**When to use each syntax:**
+- Use `int[10]` for concise traditional syntax
+- Use `array.int[10]` for explicit, consistent syntax across all types
+- Use `array[10]` or `array.any[10]` when you need mixed types
+- All three syntaxes work identically with `ArrayFixed` and `ArrayDynamic` implementations
 
 ### Array Access
 ```javascript

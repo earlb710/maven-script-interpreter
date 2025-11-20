@@ -432,17 +432,75 @@ public class Parser {
             if (t.type.getDataType() != null) {
                 elemType = t.type.getDataType();
             } else {
-                if (t.type == EbsTokenType.DATATYPE) {
-                    elemType = getTokenType((String) t.literal).getDataType();
+                if (t.type == EbsTokenType.DATATYPE || t.type == EbsTokenType.IDENTIFIER) {
+                    String typeName = (String) t.literal;
+                    
+                    // Check if it's a qualified type name like "array.int"
+                    if (typeName.startsWith("array.")) {
+                        String subType = typeName.substring(6); // Remove "array." prefix
+                        switch (subType.toLowerCase()) {
+                            case "any" -> elemType = DataType.ARRAY;
+                            case "string" -> elemType = DataType.STRING;
+                            case "byte" -> elemType = DataType.BYTE;
+                            case "int", "integer" -> elemType = DataType.INTEGER;
+                            case "long" -> elemType = DataType.LONG;
+                            case "float" -> elemType = DataType.FLOAT;
+                            case "double", "number" -> elemType = DataType.DOUBLE;
+                            case "bool", "boolean" -> elemType = DataType.BOOL;
+                            case "date" -> elemType = DataType.DATE;
+                            default -> throw error(t, "Unknown array element type: " + subType);
+                        }
+                    } else {
+                        EbsTokenType tokenType = getTokenType(typeName);
+                        if (tokenType != null && tokenType.getDataType() != null) {
+                            elemType = tokenType.getDataType();
+                        } else {
+                            throw error(t, "Expected type name after ':'.");
+                        }
+                    }
                 } else {
                     throw error(t, "Expected type name after ':'.");
                 }
             }
             advance();
+            
+            // Check for array.type syntax when type is not already qualified
+            // This handles cases where lexer separates array and type (array . int)
+            if (elemType == DataType.ARRAY && match(EbsTokenType.DOT)) {
+                EbsToken subType = peek();
+                String subTypeName = null;
+                
+                // Handle both keyword types (int, string, etc.) and identifiers
+                if (subType.type.getDataType() != null) {
+                    elemType = subType.type.getDataType();
+                    advance();
+                } else if (subType.type == EbsTokenType.IDENTIFIER || subType.type == EbsTokenType.DATATYPE) {
+                    subTypeName = (String) subType.literal;
+                    advance();
+                    
+                    // Map common type names
+                    switch (subTypeName.toLowerCase()) {
+                        case "any" -> elemType = DataType.ARRAY;  // array.any is same as array
+                        case "string" -> elemType = DataType.STRING;
+                        case "byte" -> elemType = DataType.BYTE;
+                        case "int", "integer" -> elemType = DataType.INTEGER;
+                        case "long" -> elemType = DataType.LONG;
+                        case "float" -> elemType = DataType.FLOAT;
+                        case "double", "number" -> elemType = DataType.DOUBLE;
+                        case "bool", "boolean" -> elemType = DataType.BOOL;
+                        case "date" -> elemType = DataType.DATE;
+                        default -> throw error(subType, "Unknown array element type: " + subTypeName);
+                    }
+                } else {
+                    throw error(subType, "Expected type name after 'array.'");
+                }
+            }
+            
             if (check(EbsTokenType.LBRACKET)) {
                 arrayDims = parseArrayDimensions();
             }
         }
+
 
         Expression varInit = null;
 

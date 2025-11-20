@@ -1,0 +1,165 @@
+// Test script for enhanced array.type syntax
+// Tests array, array.any, array.string, array.byte, array.int, array.integer, 
+// array.long, array.float, array.double, array.number
+
+print "=== Testing Enhanced Array.Type Syntax ===";
+print "";
+
+// ============================================================================
+// TEST 1: array (generic, same as before)
+// ============================================================================
+print "TEST 1: array[10] - Generic array";
+var genericArray: array[10];
+genericArray[0] = 100;
+genericArray[1] = "text";
+print "  genericArray[0] = " + genericArray[0];
+print "  genericArray[1] = " + genericArray[1];
+print "";
+
+// ============================================================================
+// TEST 2: array.any (same as array)
+// ============================================================================
+print "TEST 2: array.any[5] - Generic array (explicit 'any')";
+var anyArray: array.any[5];
+anyArray[0] = 42;
+anyArray[1] = "hello";
+anyArray[2] = 3.14;
+print "  anyArray[0] = " + anyArray[0];
+print "  anyArray[1] = " + anyArray[1];
+print "  anyArray[2] = " + anyArray[2];
+print "";
+
+// ============================================================================
+// TEST 3: array.string
+// ============================================================================
+print "TEST 3: array.string[5] - String array";
+var stringArray: array.string[5];
+stringArray[0] = "First";
+stringArray[1] = "Second";
+stringArray[2] = "Third";
+print "  stringArray[0] = " + stringArray[0];
+print "  stringArray[1] = " + stringArray[1];
+print "  stringArray[2] = " + stringArray[2];
+print "";
+
+// ============================================================================
+// TEST 4: array.int and array.integer
+// ============================================================================
+print "TEST 4a: array.int[5] - Integer array";
+var intArray: array.int[5];
+intArray[0] = 10;
+intArray[1] = 20;
+intArray[2] = 30;
+print "  intArray[0] = " + intArray[0];
+print "  intArray[1] = " + intArray[1];
+print "  intArray[2] = " + intArray[2];
+print "";
+
+print "TEST 4b: array.integer[3] - Integer array (alias)";
+var integerArray: array.integer[3];
+integerArray[0] = 100;
+integerArray[1] = 200;
+print "  integerArray[0] = " + integerArray[0];
+print "  integerArray[1] = " + integerArray[1];
+print "";
+
+// ============================================================================
+// TEST 5: array.long
+// ============================================================================
+print "TEST 5: array.long[3] - Long integer array";
+var longArray: array.long[3];
+longArray[0] = 9999999999;
+longArray[1] = 8888888888;
+print "  longArray[0] = " + longArray[0];
+print "  longArray[1] = " + longArray[1];
+print "";
+
+// ============================================================================
+// TEST 6: array.float
+// ============================================================================
+print "TEST 6: array.float[3] - Float array";
+var floatArray: array.float[3];
+floatArray[0] = 3.14;
+floatArray[1] = 2.71;
+print "  floatArray[0] = " + floatArray[0];
+print "  floatArray[1] = " + floatArray[1];
+print "";
+
+// ============================================================================
+// TEST 7: array.double
+// ============================================================================
+print "TEST 7: array.double[3] - Double array";
+var doubleArray: array.double[3];
+doubleArray[0] = 3.14159;
+doubleArray[1] = 2.71828;
+print "  doubleArray[0] = " + doubleArray[0];
+print "  doubleArray[1] = " + doubleArray[1];
+print "";
+
+// ============================================================================
+// TEST 8: array.number (same as double)
+// ============================================================================
+print "TEST 8: array.number[3] - Number array (same as double)";
+var numberArray: array.number[3];
+numberArray[0] = 123.456;
+numberArray[1] = 789.012;
+print "  numberArray[0] = " + numberArray[0];
+print "  numberArray[1] = " + numberArray[1];
+print "";
+
+// ============================================================================
+// TEST 9: array.byte (should use ArrayFixedByte for fixed size)
+// ============================================================================
+print "TEST 9: array.byte[5] - Byte array";
+var byteArray: array.byte[5];
+byteArray[0] = 127;
+byteArray[1] = 64;
+byteArray[2] = 32;
+print "  byteArray[0] = " + byteArray[0];
+print "  byteArray[1] = " + byteArray[1];
+print "  byteArray[2] = " + byteArray[2];
+print "";
+
+// ============================================================================
+// TEST 10: Dynamic arrays with array.type syntax
+// ============================================================================
+print "TEST 10: array.string[*] - Dynamic string array";
+var dynamicStrings: array.string[*];
+call array.expand(dynamicStrings, 3);
+dynamicStrings[0] = "Dynamic";
+dynamicStrings[1] = "String";
+dynamicStrings[2] = "Array";
+print "  dynamicStrings[0] = " + dynamicStrings[0];
+print "  dynamicStrings[1] = " + dynamicStrings[1];
+print "  dynamicStrings[2] = " + dynamicStrings[2];
+print "";
+
+// ============================================================================
+// TEST 11: Multi-dimensional arrays
+// ============================================================================
+print "TEST 11: array.int[3, 4] - 2D integer array";
+var matrix: array.int[3, 4];
+matrix[0, 0] = 1;
+matrix[0, 1] = 2;
+matrix[1, 0] = 3;
+matrix[1, 1] = 4;
+print "  matrix[0, 0] = " + matrix[0, 0];
+print "  matrix[0, 1] = " + matrix[0, 1];
+print "  matrix[1, 0] = " + matrix[1, 0];
+print "  matrix[1, 1] = " + matrix[1, 1];
+print "";
+
+// ============================================================================
+// TEST 12: Comparison - old syntax vs new syntax
+// ============================================================================
+print "TEST 12: Comparing old syntax vs new array.type syntax";
+var oldStyle: int[5];
+var newStyle: array.int[5];
+oldStyle[0] = 99;
+newStyle[0] = 99;
+print "  oldStyle (int[5]) = " + oldStyle[0];
+print "  newStyle (array.int[5]) = " + newStyle[0];
+print "  Both work identically!";
+print "";
+
+print "=== All Enhanced Array.Type Tests Complete ===";
