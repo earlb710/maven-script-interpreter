@@ -94,6 +94,10 @@ Testing and Scripts
 - Use and extend test scripts in `ScriptInterpreter/scripts`.
 - Naming convention: `test_screen_*.ebs`; update the scripts README when adding new tests.
 - Validate cross-screen operations, boundary conditions, and thread-safe variable access.
+- **Before creating EBS scripts**: Always verify correct syntax in `EBS_SCRIPT_SYNTAX.md` and available builtins in `Builtins.java`
+  - Function syntax: `functionName(params) return returnType { ... }` (no `function` keyword)
+  - Builtin functions: Check `Builtins.java` for available functions (e.g., `string.toUpper`, not `upper`)
+  - Test scripts with parser validation before committing
 
 Documentation and Maintenance
 - When changes affect architecture, screen parsing, built-ins, or keywords:
