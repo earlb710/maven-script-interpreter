@@ -780,6 +780,14 @@ public class EbsTab extends Tab {
     }
 
     /**
+     * Check if the tab has unsaved changes.
+     * @return true if the tab has unsaved changes, false otherwise
+     */
+    public boolean isDirty() {
+        return dirty;
+    }
+
+    /**
      * Initialize tab with content for a new (unsaved) file.
      * Marks the tab as dirty to indicate it needs to be saved.
      * @param content Initial content for the file

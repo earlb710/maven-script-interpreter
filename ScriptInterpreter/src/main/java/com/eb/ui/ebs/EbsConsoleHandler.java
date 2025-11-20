@@ -25,6 +25,7 @@ import java.util.prefs.Preferences;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -643,5 +644,61 @@ public class EbsConsoleHandler extends EbsHandler {
         } catch (Exception ex) {
             submitErrors("Failed to create new script file: " + ex.getMessage());
         }
+    }
+
+    /**
+     * Show a confirmation dialog when closing a tab with unsaved changes.
+     * Offers options to Save, Save As, Don't Save, or Cancel.
+     * @param tab The tab to potentially close
+     * @return true if the tab should be closed, false if the close should be cancelled
+     */
+    public boolean confirmCloseTab(EbsTab tab) {
+        if (tab == null || !tab.isDirty()) {
+            return true; // No unsaved changes, close is OK
+        }
+
+        // Create custom button types
+        ButtonType saveButton = new ButtonType("Save");
+        ButtonType saveAsButton = new ButtonType("Save As...");
+        ButtonType dontSaveButton = new ButtonType("Don't Save");
+        ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Unsaved Changes");
+        alert.setHeaderText("Do you want to save changes?");
+        alert.setContentText("The file \"" + tab.getText().replace("*", "") + "\" has unsaved changes.");
+        alert.getButtonTypes().setAll(saveButton, saveAsButton, dontSaveButton, cancelButton);
+        alert.initOwner(stage);
+        alert.initModality(Modality.APPLICATION_MODAL);
+
+        var result = alert.showAndWait();
+
+        if (result.isPresent()) {
+            if (result.get() == saveButton) {
+                // Save the file
+                TabContext context = (TabContext) tab.getUserData();
+                if (context != null && context.path != null && Files.exists(context.path)) {
+                    // File already exists, just save
+                    saveHandle(tab);
+                } else {
+                    // File doesn't exist yet, use Save As
+                    chooseSaveAs(tab);
+                }
+                return true; // Close after saving
+            } else if (result.get() == saveAsButton) {
+                // Save As
+                chooseSaveAs(tab);
+                return true; // Close after saving
+            } else if (result.get() == dontSaveButton) {
+                // Don't save, just close
+                return true;
+            } else {
+                // Cancel was pressed
+                return false;
+            }
+        }
+
+        // Dialog was closed without a selection, treat as cancel
+        return false;
     }
 }

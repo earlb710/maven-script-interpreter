@@ -41,10 +41,48 @@ public class TabHandler implements TabOpener {
     private Charset defaultCharset = StandardCharsets.UTF_8;
     private final TabPane tabPane;
     private final EbsConsoleHandler consoleHandler;
+    private Tab tabBeingRemoved = null; // Track tab removal to prevent double-confirmation
 
     public TabHandler(EbsConsoleHandler consoleHandler, TabPane tabPane) {
         this.consoleHandler = consoleHandler;
         this.tabPane = Objects.requireNonNull(tabPane);
+        setupTabCloseListener();
+    }
+
+    /**
+     * Set up a listener to intercept tab removal and show confirmation for unsaved changes.
+     */
+    private void setupTabCloseListener() {
+        tabPane.getTabs().addListener((javafx.collections.ListChangeListener<Tab>) change -> {
+            while (change.next()) {
+                if (change.wasRemoved()) {
+                    for (Tab removed : change.getRemoved()) {
+                        // Only handle if this is an EbsTab with unsaved changes
+                        // and we haven't already confirmed this removal
+                        if (removed instanceof EbsTab ebsTab && ebsTab.isDirty() && removed != tabBeingRemoved) {
+                            // Re-add the tab temporarily
+                            int removeIndex = change.getFrom();
+                            tabPane.getTabs().add(removeIndex, removed);
+                            
+                            // Show confirmation dialog
+                            Platform.runLater(() -> {
+                                boolean shouldClose = consoleHandler.confirmCloseTab(ebsTab);
+                                if (shouldClose) {
+                                    // User confirmed - remove the tab
+                                    tabBeingRemoved = ebsTab;
+                                    tabPane.getTabs().remove(ebsTab);
+                                    tabBeingRemoved = null;
+                                }
+                                // If user cancelled, tab stays in the list
+                            });
+                            
+                            // Return early to avoid processing other changes
+                            return;
+                        }
+                    }
+                }
+            }
+        });
     }
 
     private Tab findTabByHandle(String handler) {
@@ -246,6 +284,13 @@ public class TabHandler implements TabOpener {
      */
     public void closeTab(Tab tab) {
         if (tab != null && tabPane.getTabs().contains(tab)) {
+            // Check if this is an EbsTab with unsaved changes
+            if (tab instanceof EbsTab ebsTab) {
+                boolean shouldClose = consoleHandler.confirmCloseTab(ebsTab);
+                if (!shouldClose) {
+                    return; // Don't close the tab
+                }
+            }
             tabPane.getTabs().remove(tab);
         }
     }
