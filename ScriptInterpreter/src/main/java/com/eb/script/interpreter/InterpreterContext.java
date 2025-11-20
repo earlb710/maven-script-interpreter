@@ -30,6 +30,9 @@ public class InterpreterContext {
     private static final ConcurrentHashMap<String, Thread> GLOBAL_SCREEN_THREADS = new ConcurrentHashMap<>();
     private static final List<String> GLOBAL_SCREEN_CREATION_ORDER = new java.util.concurrent.CopyOnWriteArrayList<>();
     private static final Set<String> GLOBAL_SCREENS_BEING_CREATED = ConcurrentHashMap.newKeySet();
+    
+    // ThreadLocal to track current screen context for onClick and other event handlers
+    private static final ThreadLocal<String> CURRENT_SCREEN_CONTEXT = new ThreadLocal<>();
 
     private Environment environment;
     private Debugger debug;
@@ -45,6 +48,10 @@ public class InterpreterContext {
     private final Map<String, List<javafx.scene.Node>> screenBoundControls = new ConcurrentHashMap<>();
     private final Map<String, com.eb.ui.ebs.StatusBar> screenStatusBars = new ConcurrentHashMap<>();
     private final Map<String, String> screenCallbacks = new ConcurrentHashMap<>(); // screenName -> callbackFunctionName
+    private final Map<String, String> screenStartupCode = new ConcurrentHashMap<>(); // screenName -> startup EBS code
+    private final Map<String, String> screenCleanupCode = new ConcurrentHashMap<>(); // screenName -> cleanup EBS code
+    private final Map<String, String> screenGainFocusCode = new ConcurrentHashMap<>(); // screenName -> gainFocus EBS code
+    private final Map<String, String> screenLostFocusCode = new ConcurrentHashMap<>(); // screenName -> lostFocus EBS code
     private final Set<String> importedFiles = ConcurrentHashMap.newKeySet();  // Global list of all imported files to prevent circular imports and duplicate imports
     private final Map<String, ScreenStatus> screenStatuses = new ConcurrentHashMap<>(); // screenName -> status
     private final Map<String, String> screenErrorMessages = new ConcurrentHashMap<>(); // screenName -> error message
@@ -112,12 +119,19 @@ public class InterpreterContext {
 
     /**
      * Get the current screen name based on the executing thread context.
-     * If code is executing within a screen thread (thread name starts with "Screen-"),
-     * returns that screen name. Otherwise, returns null.
+     * First checks ThreadLocal for explicitly set screen context (e.g., from onClick handlers),
+     * then falls back to checking if code is executing within a screen thread (thread name starts with "Screen-").
      * 
      * @return The current screen name, or null if not executing in a screen context
      */
     public String getCurrentScreen() {
+        // First check ThreadLocal for explicitly set screen context
+        String contextScreen = CURRENT_SCREEN_CONTEXT.get();
+        if (contextScreen != null) {
+            return contextScreen;
+        }
+        
+        // Fall back to thread name check
         Thread currentThread = Thread.currentThread();
         String threadName = currentThread.getName();
         
@@ -131,13 +145,27 @@ public class InterpreterContext {
     }
 
     /**
-     * Set the current screen name
-     * @param screenName The screen name to set as current
-     * @deprecated Current screen is now determined by thread context, not explicit setting
+     * Set the current screen name for the executing thread.
+     * This is used by onClick handlers and other event handlers that execute on non-screen threads
+     * (e.g., JavaFX Application Thread) to establish screen context.
+     * 
+     * @param screenName The screen name to set as current, or null to clear
      */
-    @Deprecated
     public void setCurrentScreen(String screenName) {
-        // No-op - current screen is now determined by thread context
+        if (screenName != null) {
+            CURRENT_SCREEN_CONTEXT.set(screenName);
+        } else {
+            CURRENT_SCREEN_CONTEXT.remove();
+        }
+    }
+    
+    /**
+     * Clear the current screen context for the executing thread.
+     * Should be called after onClick handlers or other event handlers complete
+     * to prevent context leakage.
+     */
+    public void clearCurrentScreen() {
+        CURRENT_SCREEN_CONTEXT.remove();
     }
 
     public Map<String, DisplayItem> getDisplayItem() {
@@ -362,6 +390,10 @@ public class InterpreterContext {
         screenVarItems.remove(screenName);
         screenAreaItems.remove(screenName);
         screenCallbacks.remove(screenName);
+        screenStartupCode.remove(screenName);
+        screenCleanupCode.remove(screenName);
+        screenGainFocusCode.remove(screenName);
+        screenLostFocusCode.remove(screenName);
         displayMetadata.entrySet().removeIf(entry -> entry.getKey().startsWith(screenName + "."));
         GLOBAL_SCREEN_CREATION_ORDER.remove(screenName);
         screenStatuses.remove(screenName);
@@ -388,6 +420,94 @@ public class InterpreterContext {
             screenCallbacks.put(screenName, callbackName);
         } else {
             screenCallbacks.remove(screenName);
+        }
+    }
+
+    /**
+     * Get the startup code for a screen
+     * @param screenName The screen name
+     * @return The startup EBS code, or null if no startup code is set
+     */
+    public String getScreenStartupCode(String screenName) {
+        return screenStartupCode.get(screenName);
+    }
+
+    /**
+     * Set the startup code for a screen
+     * @param screenName The screen name
+     * @param code The startup EBS code
+     */
+    public void setScreenStartupCode(String screenName, String code) {
+        if (code != null && !code.trim().isEmpty()) {
+            screenStartupCode.put(screenName, code);
+        } else {
+            screenStartupCode.remove(screenName);
+        }
+    }
+
+    /**
+     * Get the cleanup code for a screen
+     * @param screenName The screen name
+     * @return The cleanup EBS code, or null if no cleanup code is set
+     */
+    public String getScreenCleanupCode(String screenName) {
+        return screenCleanupCode.get(screenName);
+    }
+
+    /**
+     * Set the cleanup code for a screen
+     * @param screenName The screen name
+     * @param code The cleanup EBS code
+     */
+    public void setScreenCleanupCode(String screenName, String code) {
+        if (code != null && !code.trim().isEmpty()) {
+            screenCleanupCode.put(screenName, code);
+        } else {
+            screenCleanupCode.remove(screenName);
+        }
+    }
+
+    /**
+     * Get the gainFocus code for a screen
+     * @param screenName The screen name
+     * @return The gainFocus EBS code, or null if no gainFocus code is set
+     */
+    public String getScreenGainFocusCode(String screenName) {
+        return screenGainFocusCode.get(screenName);
+    }
+
+    /**
+     * Set the gainFocus code for a screen
+     * @param screenName The screen name
+     * @param code The gainFocus EBS code
+     */
+    public void setScreenGainFocusCode(String screenName, String code) {
+        if (code != null && !code.trim().isEmpty()) {
+            screenGainFocusCode.put(screenName, code);
+        } else {
+            screenGainFocusCode.remove(screenName);
+        }
+    }
+
+    /**
+     * Get the lostFocus code for a screen
+     * @param screenName The screen name
+     * @return The lostFocus EBS code, or null if no lostFocus code is set
+     */
+    public String getScreenLostFocusCode(String screenName) {
+        return screenLostFocusCode.get(screenName);
+    }
+
+    /**
+     * Set the lostFocus code for a screen
+     * @param screenName The screen name
+     * @param code The lostFocus EBS code
+     */
+    public void setScreenLostFocusCode(String screenName, String code) {
+        if (code != null && !code.trim().isEmpty()) {
+            screenLostFocusCode.put(screenName, code);
+        } else {
+            screenLostFocusCode.remove(screenName);
         }
     }
 

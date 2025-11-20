@@ -1,0 +1,244 @@
+// Test Script: Screen Startup and Cleanup Inline Code
+// Description: Tests that startup and cleanup inline code executes at the right times
+// Date: 2025-11-20
+
+print "=== Screen Startup and Cleanup Test ===";
+print "";
+print "This test demonstrates startup and cleanup inline code execution:";
+print "- 'startup' code runs when screen is first shown";
+print "- 'cleanup' code runs when screen is closed";
+print "";
+
+// Test 1: Basic startup and cleanup
+print "Test 1: Creating screen with startup and cleanup code";
+screen testStartupCleanup = {
+    "title": "Test: Startup and Cleanup",
+    "width": 450,
+    "height": 300,
+    "startup": "print 'STARTUP: Screen is being shown'; message = 'Screen initialized';",
+    "cleanup": "print 'CLEANUP: Screen is being closed'; print 'Final message was: ' + message;",
+    "vars": [
+        {
+            "name": "message",
+            "type": "string",
+            "default": "Not initialized",
+            "display": {
+                "type": "textfield",
+                "labelText": "Message:"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "15",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "instructions",
+                    "seq": 1,
+                    "display": {
+                        "type": "label",
+                        "labelText": "Watch the console output:\n- Startup code runs when screen is first shown\n- Cleanup code runs when screen is closed"
+                    }
+                },
+                {
+                    "name": "message",
+                    "varRef": "message",
+                    "seq": 2
+                },
+                {
+                    "name": "updateButton",
+                    "seq": 3,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Update Message",
+                        "onClick": "message = 'Updated at ' + call date.now(); print 'Message updated';"
+                    }
+                },
+                {
+                    "name": "closeButton",
+                    "seq": 4,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Close Screen",
+                        "onClick": "print 'Closing via button click'; close screen;"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+// Test 2: Startup that modifies multiple variables
+print "Test 2: Creating screen with startup code that sets multiple variables";
+screen testComplexStartup = {
+    "title": "Test: Complex Startup",
+    "width": 500,
+    "height": 350,
+    "startup": "counter = 10; status = 'Initialized by startup'; timestamp = call date.now(); print 'Startup: Set counter=' + counter + ', status=' + status;",
+    "cleanup": "print 'Cleanup: Final state - counter=' + counter + ', status=' + status;",
+    "vars": [
+        {
+            "name": "counter",
+            "type": "int",
+            "default": 0,
+            "display": {
+                "type": "textfield",
+                "labelText": "Counter:",
+                "alignment": "right"
+            }
+        },
+        {
+            "name": "status",
+            "type": "string",
+            "default": "Not initialized",
+            "display": {
+                "type": "textfield",
+                "labelText": "Status:"
+            }
+        },
+        {
+            "name": "timestamp",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Timestamp:"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "15",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "instructions",
+                    "seq": 1,
+                    "display": {
+                        "type": "label",
+                        "labelText": "Startup code initializes all variables.\nClick buttons to modify, then close to see cleanup."
+                    }
+                },
+                {
+                    "name": "counter",
+                    "varRef": "counter",
+                    "seq": 2
+                },
+                {
+                    "name": "status",
+                    "varRef": "status",
+                    "seq": 3
+                },
+                {
+                    "name": "timestamp",
+                    "varRef": "timestamp",
+                    "seq": 4
+                },
+                {
+                    "name": "incrementButton",
+                    "seq": 5,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Increment Counter",
+                        "onClick": "counter = counter + 1; status = 'Counter incremented';"
+                    }
+                },
+                {
+                    "name": "closeButton",
+                    "seq": 6,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Close Screen",
+                        "onClick": "close screen;"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+// Test 3: Screen with only cleanup (no startup)
+print "Test 3: Creating screen with cleanup code only";
+screen testCleanupOnly = {
+    "title": "Test: Cleanup Only",
+    "width": 400,
+    "height": 250,
+    "cleanup": "print 'CLEANUP: Saving data before close...'; print 'Data value was: ' + data;",
+    "vars": [
+        {
+            "name": "data",
+            "type": "string",
+            "default": "Initial data",
+            "display": {
+                "type": "textfield",
+                "labelText": "Data:"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "15",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "instructions",
+                    "seq": 1,
+                    "display": {
+                        "type": "label",
+                        "labelText": "This screen has cleanup code but no startup code.\nModify data and close to see cleanup output."
+                    }
+                },
+                {
+                    "name": "data",
+                    "varRef": "data",
+                    "seq": 2
+                },
+                {
+                    "name": "closeButton",
+                    "seq": 3,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Close Screen",
+                        "onClick": "close screen;"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+print "";
+print "=== Test Screens Created ===";
+print "";
+print "Three test screens have been created:";
+print "";
+print "1. show screen testStartupCleanup;";
+print "   - Has both startup and cleanup code";
+print "   - Watch console for startup message when shown";
+print "   - Watch console for cleanup message when closed";
+print "";
+print "2. show screen testComplexStartup;";
+print "   - Startup initializes multiple variables";
+print "   - Cleanup reports final state of all variables";
+print "";
+print "3. show screen testCleanupOnly;";
+print "   - Has cleanup code only (no startup)";
+print "   - Cleanup logs the final data value";
+print "";
+print "=== Expected Behavior ===";
+print "- Startup code executes ONCE when screen is first shown";
+print "- Cleanup code executes when screen is closed";
+print "- Both have access to screen variables and can use contextual commands";
+print "";
+print "Showing first test screen now...";
+print "";
+
+// Show the first test screen automatically
+show screen testStartupCleanup;

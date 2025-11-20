@@ -756,22 +756,22 @@ public final class Builtins {
         // Screen property builtins
         // ==========================
         addBuiltin(info(
-                "screen.setProperty", DataType.BOOL,
+                "scr.setProperty", DataType.BOOL,
                 newParam("areaItem", DataType.STRING, true), // required; format "screenName.areaItemName"
                 newParam("property", DataType.STRING, true), // required; property name
                 newParam("value", DataType.ANY, true) // required; value to set
         ));
         addBuiltin(info(
-                "screen.getProperty", DataType.ANY,
+                "scr.getProperty", DataType.ANY,
                 newParam("areaItem", DataType.STRING, true), // required; format "screenName.areaItemName"
                 newParam("property", DataType.STRING, true) // required; property name
         ));
         addBuiltin(info(
-                "screen.getItemList", DataType.ANY,
+                "scr.getItemList", DataType.ANY,
                 newParam("screenName", DataType.STRING, true) // required; screen name
         ));
         addBuiltin(info(
-                "screen.getScreenItemList", DataType.ANY,
+                "scr.getScreenItemList", DataType.ANY,
                 newParam("screenName", DataType.STRING, true) // required; screen name
         ));
         addBuiltin(info(
@@ -787,58 +787,58 @@ public final class Builtins {
                 newParam("screenName", DataType.STRING, false) // optional; screen name (if null, uses current screen)
         ));
         addBuiltin(info(
-                "screen.setStatus", DataType.BOOL,
+                "scr.setStatus", DataType.BOOL,
                 newParam("screenName", DataType.STRING, true), // required; screen name
                 newParam("status", DataType.STRING, true) // required; status: "clean", "changed", or "error"
         ));
         addBuiltin(info(
-                "screen.getStatus", DataType.STRING,
+                "scr.getStatus", DataType.STRING,
                 newParam("screenName", DataType.STRING, true) // required; screen name
         ));
         addBuiltin(info(
-                "screen.setError", DataType.BOOL,
+                "scr.setError", DataType.BOOL,
                 newParam("screenName", DataType.STRING, true), // required; screen name
                 newParam("errorMessage", DataType.STRING, true) // required; error message
         ));
         addBuiltin(info(
-                "screen.getError", DataType.STRING,
+                "scr.getError", DataType.STRING,
                 newParam("screenName", DataType.STRING, true) // required; screen name
         ));
         addBuiltin(info(
-                "screen.getItemSource", DataType.STRING,
+                "scr.getItemSource", DataType.STRING,
                 newParam("screenName", DataType.STRING, true), // required; screen name
                 newParam("itemName", DataType.STRING, true) // required; item name (varRef)
         ));
         addBuiltin(info(
-                "screen.setItemSource", DataType.BOOL,
+                "scr.setItemSource", DataType.BOOL,
                 newParam("screenName", DataType.STRING, true), // required; screen name
                 newParam("itemName", DataType.STRING, true), // required; item name (varRef)
                 newParam("source", DataType.STRING, true) // required; source: "data" or "display"
         ));
         addBuiltin(info(
-                "screen.getItemStatus", DataType.STRING,
+                "scr.getItemStatus", DataType.STRING,
                 newParam("screenName", DataType.STRING, true), // required; screen name
                 newParam("itemName", DataType.STRING, true) // required; item name (varRef)
         ));
         addBuiltin(info(
-                "screen.resetItemOriginalValue", DataType.BOOL,
+                "scr.resetItemOriginalValue", DataType.BOOL,
                 newParam("screenName", DataType.STRING, true), // required; screen name
                 newParam("itemName", DataType.STRING, true) // required; item name (varRef)
         ));
         addBuiltin(info(
-                "screen.checkChanged", DataType.BOOL,
+                "scr.checkChanged", DataType.BOOL,
                 newParam("screenName", DataType.STRING, true) // required; screen name
         ));
         addBuiltin(info(
-                "screen.checkError", DataType.BOOL,
+                "scr.checkError", DataType.BOOL,
                 newParam("screenName", DataType.STRING, true) // required; screen name
         ));
         addBuiltin(info(
-                "screen.revert", DataType.BOOL,
+                "scr.revert", DataType.BOOL,
                 newParam("screenName", DataType.STRING, true) // required; screen name
         ));
         addBuiltin(info(
-                "screen.clear", DataType.BOOL,
+                "scr.clear", DataType.BOOL,
                 newParam("screenName", DataType.STRING, true) // required; screen name
         ));
 
@@ -2110,61 +2110,61 @@ public final class Builtins {
             }
 
             // --- Screen property functions ---
-            case "screen.setproperty" -> {
+            case "scr.setproperty" -> {
                 return screenSetProperty(context, args);
             }
-            case "screen.getproperty" -> {
+            case "scr.getproperty" -> {
                 return screenGetProperty(context, args);
             }
-            case "screen.getitemlist" -> {
+            case "scr.getitemlist" -> {
                 return screenGetItemList(context, args);
             }
-            case "screen.getscreenitemlist" -> {
+            case "scr.getscreenitemlist" -> {
                 return screenGetScreenItemList(context, args);
             }
             case "scr.showscreen" -> {
-                return screenShow(context, args);
+                return BuiltinsScreen.screenShow(context, args);
             }
             case "scr.hidescreen" -> {
-                return screenHide(context, args);
+                return BuiltinsScreen.screenHide(context, args);
             }
             case "scr.closescreen" -> {
-                return screenClose(context, args);
+                return BuiltinsScreen.screenClose(context, args);
             }
-            case "screen.setstatus" -> {
+            case "scr.setstatus" -> {
                 return screenSetStatus(context, args);
             }
-            case "screen.getstatus" -> {
+            case "scr.getstatus" -> {
                 return screenGetStatus(context, args);
             }
-            case "screen.seterror" -> {
+            case "scr.seterror" -> {
                 return screenSetError(context, args);
             }
-            case "screen.geterror" -> {
+            case "scr.geterror" -> {
                 return screenGetError(context, args);
             }
-            case "screen.getitemsource" -> {
+            case "scr.getitemsource" -> {
                 return screenGetItemSource(context, args);
             }
-            case "screen.setitemsource" -> {
+            case "scr.setitemsource" -> {
                 return screenSetItemSource(context, args);
             }
-            case "screen.getitemstatus" -> {
+            case "scr.getitemstatus" -> {
                 return screenGetItemStatus(context, args);
             }
-            case "screen.resetitemoriginalvalue" -> {
+            case "scr.resetitemoriginalvalue" -> {
                 return screenResetItemOriginalValue(context, args);
             }
-            case "screen.checkchanged" -> {
+            case "scr.checkchanged" -> {
                 return screenCheckChanged(context, args);
             }
-            case "screen.checkerror" -> {
+            case "scr.checkerror" -> {
                 return screenCheckError(context, args);
             }
-            case "screen.revert" -> {
+            case "scr.revert" -> {
                 return screenRevert(context, args);
             }
-            case "screen.clear" -> {
+            case "scr.clear" -> {
                 return screenClear(context, args);
             }
 
@@ -2476,7 +2476,7 @@ public final class Builtins {
     }
 
     /**
-     * screen.setProperty(screenName.areaItemName, propertyName, value) -> BOOL
+     * scr.setProperty(screenName.areaItemName, propertyName, value) -> BOOL
      * Sets a property on an area item in a screen.
      */
     private static Object screenSetProperty(InterpreterContext context, Object[] args) throws InterpreterError {
@@ -2485,16 +2485,16 @@ public final class Builtins {
         Object value = args[2];
 
         if (areaItemPath == null || areaItemPath.isEmpty()) {
-            throw new InterpreterError("screen.setProperty: areaItem parameter cannot be null or empty");
+            throw new InterpreterError("scr.setProperty: areaItem parameter cannot be null or empty");
         }
         if (propertyName == null || propertyName.isEmpty()) {
-            throw new InterpreterError("screen.setProperty: property parameter cannot be null or empty");
+            throw new InterpreterError("scr.setProperty: property parameter cannot be null or empty");
         }
 
         // Parse the compound key: screenName.areaItemName
         String[] parts = areaItemPath.split("\\.", 2);
         if (parts.length != 2) {
-            throw new InterpreterError("screen.setProperty: areaItem must be in format 'screenName.areaItemName', got: " + areaItemPath);
+            throw new InterpreterError("scr.setProperty: areaItem must be in format 'screenName.areaItemName', got: " + areaItemPath);
         }
 
         String screenName = parts[0];
@@ -2503,7 +2503,7 @@ public final class Builtins {
         // Find the screen and area item
         List<AreaDefinition> areas = context.getScreenAreas(screenName);
         if (areas == null) {
-            throw new InterpreterError("screen.setProperty: screen '" + screenName + "' not found");
+            throw new InterpreterError("scr.setProperty: screen '" + screenName + "' not found");
         }
 
         // Search for the item in all areas
@@ -2516,7 +2516,7 @@ public final class Builtins {
         }
 
         if (targetItem == null) {
-            throw new InterpreterError("screen.setProperty: area item '" + itemName + "' not found in screen '" + screenName + "'");
+            throw new InterpreterError("scr.setProperty: area item '" + itemName + "' not found in screen '" + screenName + "'");
         }
 
         // Set the property on the AreaItem
@@ -2556,7 +2556,7 @@ public final class Builtins {
     }
 
     /**
-     * screen.getProperty(screenName.areaItemName, propertyName) -> ANY Gets a
+     * scr.getProperty(screenName.areaItemName, propertyName) -> ANY Gets a
      * property value from an area item in a screen.
      */
     private static Object screenGetProperty(InterpreterContext context, Object[] args) throws InterpreterError {
@@ -2564,16 +2564,16 @@ public final class Builtins {
         String propertyName = (String) args[1];
 
         if (areaItemPath == null || areaItemPath.isEmpty()) {
-            throw new InterpreterError("screen.getProperty: areaItem parameter cannot be null or empty");
+            throw new InterpreterError("scr.getProperty: areaItem parameter cannot be null or empty");
         }
         if (propertyName == null || propertyName.isEmpty()) {
-            throw new InterpreterError("screen.getProperty: property parameter cannot be null or empty");
+            throw new InterpreterError("scr.getProperty: property parameter cannot be null or empty");
         }
 
         // Parse the compound key: screenName.areaItemName
         String[] parts = areaItemPath.split("\\.", 2);
         if (parts.length != 2) {
-            throw new InterpreterError("screen.getProperty: areaItem must be in format 'screenName.areaItemName', got: " + areaItemPath);
+            throw new InterpreterError("scr.getProperty: areaItem must be in format 'screenName.areaItemName', got: " + areaItemPath);
         }
 
         String screenName = parts[0];
@@ -2582,7 +2582,7 @@ public final class Builtins {
         // Find the screen and area item
         List<AreaDefinition> areas = context.getScreenAreas(screenName);
         if (areas == null) {
-            throw new InterpreterError("screen.getProperty: screen '" + screenName + "' not found");
+            throw new InterpreterError("scr.getProperty: screen '" + screenName + "' not found");
         }
 
         // Search for the item in all areas
@@ -2595,7 +2595,7 @@ public final class Builtins {
         }
 
         if (targetItem == null) {
-            throw new InterpreterError("screen.getProperty: area item '" + itemName + "' not found in screen '" + screenName + "'");
+            throw new InterpreterError("scr.getProperty: area item '" + itemName + "' not found in screen '" + screenName + "'");
         }
 
         // Get the property from the AreaItem
@@ -2603,20 +2603,20 @@ public final class Builtins {
     }
 
     /**
-     * screen.getItemList(screenName) -> ArrayDynamic Returns a list of all item
+     * scr.getItemList(screenName) -> ArrayDynamic Returns a list of all item
      * names in the screen.
      */
     private static Object screenGetItemList(InterpreterContext context, Object[] args) throws InterpreterError {
         String screenName = (String) args[0];
 
         if (screenName == null || screenName.isEmpty()) {
-            throw new InterpreterError("screen.getItemList: screenName parameter cannot be null or empty");
+            throw new InterpreterError("scr.getItemList: screenName parameter cannot be null or empty");
         }
 
         // Find the screen
         Map<String, AreaItem> areas = context.getScreenAreaItems(screenName);
         if (areas == null) {
-            throw new InterpreterError("screen.getItemList: screen '" + screenName + "' not found");
+            throw new InterpreterError("scr.getItemList: screen '" + screenName + "' not found");
         }
 
         // Create a dynamic array to hold the item names
@@ -2631,7 +2631,7 @@ public final class Builtins {
     }
 
     /**
-     * screen.getScreenItemList(screenName) -> ArrayDynamic Returns a list of
+     * scr.getScreenItemList(screenName) -> ArrayDynamic Returns a list of
      * all item names in the screen (same as getItemList). This is an alias for
      * getItemList for clarity.
      */
@@ -2640,53 +2640,8 @@ public final class Builtins {
         return screenGetItemList(context, args);
     }
 
-    /**
-     * scr.showScreen(screenName?) -> BOOL Shows a screen. If screenName is null
-     * or empty, uses the current screen from context. Returns true on success.
-     */
-    private static Object screenShow(InterpreterContext context, Object[] args) throws InterpreterError {
-        String screenName = (args.length > 0 && args[0] != null) ? (String) args[0] : null;
-
-        // If no screen name provided, determine from thread context
-        if (screenName == null || screenName.isEmpty()) {
-            screenName = context.getCurrentScreen();
-            if (screenName == null) {
-                throw new InterpreterError(
-                        "scr.showScreen: No screen name specified and not executing in a screen context. "
-                        + "Provide a screen name or call from within screen event handlers.");
-            }
-        }
-
-        // Check if screen exists
-        if (!context.getScreens().containsKey(screenName)) {
-            throw new InterpreterError("scr.showScreen: Screen '" + screenName + "' does not exist.");
-        }
-
-        javafx.stage.Stage stage = context.getScreens().get(screenName);
-        if (stage == null) {
-            throw new InterpreterError("scr.showScreen: Screen '" + screenName + "' is still being initialized.");
-        }
-
-        final String finalScreenName = screenName;
-
-        // Show the screen on JavaFX Application Thread
-        javafx.application.Platform.runLater(() -> {
-            if (!stage.isShowing()) {
-                stage.show();
-                if (context.getOutput() != null) {
-                    context.getOutput().printlnOk("Screen '" + finalScreenName + "' shown");
-                }
-            } else {
-                if (context.getOutput() != null) {
-                    context.getOutput().printlnInfo("Screen '" + finalScreenName + "' is already showing");
-                }
-            }
-        });
-        return true;
-    }
-
     /* 
-     * screen.setStatus(screenName, status) -> Boolean
+     * scr.setStatus(screenName, status) -> Boolean
      * Sets the status of a screen to "clean", "changed", or "error"
      */
     private static Object screenSetStatus(InterpreterContext context, Object[] args) throws InterpreterError {
@@ -2694,15 +2649,15 @@ public final class Builtins {
         String statusStr = (String) args[1];
 
         if (screenName == null || screenName.isEmpty()) {
-            throw new InterpreterError("screen.setStatus: screenName parameter cannot be null or empty");
+            throw new InterpreterError("scr.setStatus: screenName parameter cannot be null or empty");
         }
         if (statusStr == null || statusStr.isEmpty()) {
-            throw new InterpreterError("screen.setStatus: status parameter cannot be null or empty");
+            throw new InterpreterError("scr.setStatus: status parameter cannot be null or empty");
         }
 
         // Verify screen exists
         if (!context.getScreens().containsKey(screenName.toLowerCase())) {
-            throw new InterpreterError("screen.setStatus: screen '" + screenName + "' not found");
+            throw new InterpreterError("scr.setStatus: screen '" + screenName + "' not found");
         }
 
         // Parse status
@@ -2714,63 +2669,19 @@ public final class Builtins {
 
         return true;
     }
-
-    /**
-     * scr.hideScreen(screenName?) -> BOOL Hides a screen. If screenName is null
-     * or empty, uses the current screen from context. Returns true on success.
-     */
-    private static Object screenHide(InterpreterContext context, Object[] args) throws InterpreterError {
-        String screenName = (args.length > 0 && args[0] != null) ? (String) args[0] : null;
-
-        // If no screen name provided, determine from thread context
-        if (screenName == null || screenName.isEmpty()) {
-            screenName = context.getCurrentScreen();
-            if (screenName == null) {
-                throw new InterpreterError(
-                        "scr.hideScreen: No screen name specified and not executing in a screen context. "
-                        + "Provide a screen name or call from within screen event handlers.");
-            }
-        }
-
-        // Check if screen exists
-        if (!context.getScreens().containsKey(screenName)) {
-            throw new InterpreterError("scr.hideScreen: Screen '" + screenName + "' does not exist.");
-        }
-
-        javafx.stage.Stage stage = context.getScreens().get(screenName);
-        if (stage == null) {
-            throw new InterpreterError("scr.hideScreen: Screen '" + screenName + "' is still being initialized.");
-        }
-
-        final String finalScreenName = screenName;
-
-        // Hide the screen on JavaFX Application Thread
-        javafx.application.Platform.runLater(() -> {
-            boolean wasShowing = stage.isShowing();
-            stage.hide();
-            if (context.getOutput() != null) {
-                if (wasShowing) {
-                    context.getOutput().printlnOk("Screen '" + finalScreenName + "' hidden");
-                } else {
-                    context.getOutput().printlnOk("Screen '" + finalScreenName + "' hidden (was already hidden)");
-                }
-            }
-        });
-        return true;
-    }
-    /* screen.getStatus(screenName) -> String
+    /* scr.getStatus(screenName) -> String
      * Gets the current status of a screen: "clean", "changed", or "error"
      */
     private static Object screenGetStatus(InterpreterContext context, Object[] args) throws InterpreterError {
         String screenName = (String) args[0];
 
         if (screenName == null || screenName.isEmpty()) {
-            throw new InterpreterError("screen.getStatus: screenName parameter cannot be null or empty");
+            throw new InterpreterError("scr.getStatus: screenName parameter cannot be null or empty");
         }
 
         // Verify screen exists
         if (!context.getScreens().containsKey(screenName.toLowerCase())) {
-            throw new InterpreterError("screen.getStatus: screen '" + screenName + "' not found");
+            throw new InterpreterError("scr.getStatus: screen '" + screenName + "' not found");
         }
 
         // Get the status
@@ -2780,7 +2691,7 @@ public final class Builtins {
     }
 
     /**
-     * screen.setError(screenName, errorMessage) -> Boolean Sets an error
+     * scr.setError(screenName, errorMessage) -> Boolean Sets an error
      * message for a screen and automatically sets status to "error"
      */
     private static Object screenSetError(InterpreterContext context, Object[] args) throws InterpreterError {
@@ -2788,12 +2699,12 @@ public final class Builtins {
         String errorMessage = (String) args[1];
 
         if (screenName == null || screenName.isEmpty()) {
-            throw new InterpreterError("screen.setError: screenName parameter cannot be null or empty");
+            throw new InterpreterError("scr.setError: screenName parameter cannot be null or empty");
         }
 
         // Verify screen exists
         if (!context.getScreens().containsKey(screenName.toLowerCase())) {
-            throw new InterpreterError("screen.setError: screen '" + screenName + "' not found");
+            throw new InterpreterError("scr.setError: screen '" + screenName + "' not found");
         }
 
         // Set the error message (this automatically sets status to ERROR)
@@ -2802,73 +2713,19 @@ public final class Builtins {
         return true;
     }
 
-    /**
-     * scr.closeScreen(screenName?) -> BOOL Closes a screen. If screenName is
-     * null or empty, uses the current screen from context. Returns true on
-     * success.
-     */
-    private static Object screenClose(InterpreterContext context, Object[] args) throws InterpreterError {
-        String screenName = (args.length > 0 && args[0] != null) ? (String) args[0] : null;
-
-        // If no screen name provided, determine from thread context
-        if (screenName == null || screenName.isEmpty()) {
-            screenName = context.getCurrentScreen();
-            if (screenName == null) {
-                throw new InterpreterError(
-                        "scr.closeScreen: No screen name specified and not executing in a screen context. "
-                        + "Provide a screen name or call from within screen event handlers.");
-            }
-        }
-
-        // Check if screen exists
-        if (!context.getScreens().containsKey(screenName)) {
-            throw new InterpreterError("scr.closeScreen: Screen '" + screenName + "' does not exist.");
-        }
-
-        javafx.stage.Stage stage = context.getScreens().get(screenName);
-        if (stage == null) {
-            throw new InterpreterError("scr.closeScreen: Screen '" + screenName + "' is still being initialized.");
-        }
-
-        final String finalScreenName = screenName;
-
-        // Close the screen on JavaFX Application Thread
-        javafx.application.Platform.runLater(() -> {
-            // Close the stage
-            if (stage.isShowing()) {
-                stage.close();
-            }
-
-            // Interrupt and stop the screen thread
-            Thread thread = context.getScreenThreads().get(finalScreenName);
-            if (thread != null && thread.isAlive()) {
-                thread.interrupt();
-            }
-
-            // Clean up resources
-            context.remove(finalScreenName);
-
-            if (context.getOutput() != null) {
-                context.getOutput().printlnOk("Screen '" + finalScreenName + "' closed");
-            }
-        });
-
-        return true;
-    }
-
-    /* screen.getError(screenName) -> String
+    /* scr.getError(screenName) -> String
      * Gets the error message for a screen (returns   null { if no   { error }} )
      */
     private static Object screenGetError(InterpreterContext context, Object[] args) throws InterpreterError {
         String screenName = (String) args[0];
 
         if (screenName == null || screenName.isEmpty()) {
-            throw new InterpreterError("screen.getError: screenName parameter cannot be null or empty");
+            throw new InterpreterError("scr.getError: screenName parameter cannot be null or empty");
         }
 
         // Verify screen exists
         if (!context.getScreens().containsKey(screenName.toLowerCase())) {
-            throw new InterpreterError("screen.getError: screen '" + screenName + "' not found");
+            throw new InterpreterError("scr.getError: screen '" + screenName + "' not found");
         }
 
         // Get the error message
@@ -2876,7 +2733,7 @@ public final class Builtins {
     }
 
     /**
-     * screen.getItemSource(screenName, itemName) -> String Gets the source
+     * scr.getItemSource(screenName, itemName) -> String Gets the source
      * property of a screen item: "data" or "display"
      */
     private static Object screenGetItemSource(InterpreterContext context, Object[] args) throws InterpreterError {
@@ -2884,21 +2741,21 @@ public final class Builtins {
         String itemName = (String) args[1];
 
         if (screenName == null || screenName.isEmpty()) {
-            throw new InterpreterError("screen.getItemSource: screenName parameter cannot be null or empty");
+            throw new InterpreterError("scr.getItemSource: screenName parameter cannot be null or empty");
         }
         if (itemName == null || itemName.isEmpty()) {
-            throw new InterpreterError("screen.getItemSource: itemName parameter cannot be null or empty");
+            throw new InterpreterError("scr.getItemSource: itemName parameter cannot be null or empty");
         }
 
         // Verify screen exists
         if (!context.getScreens().containsKey(screenName.toLowerCase())) {
-            throw new InterpreterError("screen.getItemSource: screen '" + screenName + "' not found");
+            throw new InterpreterError("scr.getItemSource: screen '" + screenName + "' not found");
         }
 
         // Get the var item
         Map<String, Var> varItems = context.getScreenVarItems(screenName);
         if (varItems == null) {
-            throw new InterpreterError("screen.getItemSource: no variables defined for screen '" + screenName + "'");
+            throw new InterpreterError("scr.getItemSource: no variables defined for screen '" + screenName + "'");
         }
 
         // Find the variable - try with various key formats
@@ -2918,7 +2775,7 @@ public final class Builtins {
         }
 
         if (var == null) {
-            throw new InterpreterError("screen.getItemSource: item '" + itemName + "' not found in screen '" + screenName + "'");
+            throw new InterpreterError("scr.getItemSource: item '" + itemName + "' not found in screen '" + screenName + "'");
         }
 
         // Get the display item
@@ -2931,7 +2788,7 @@ public final class Builtins {
     }
 
     /**
-     * screen.setItemSource(screenName, itemName, source) -> Boolean Sets the
+     * scr.setItemSource(screenName, itemName, source) -> Boolean Sets the
      * source property of a screen item: "data" or "display"
      */
     private static Object screenSetItemSource(InterpreterContext context, Object[] args) throws InterpreterError {
@@ -2940,30 +2797,30 @@ public final class Builtins {
         String source = (String) args[2];
 
         if (screenName == null || screenName.isEmpty()) {
-            throw new InterpreterError("screen.setItemSource: screenName parameter cannot be null or empty");
+            throw new InterpreterError("scr.setItemSource: screenName parameter cannot be null or empty");
         }
         if (itemName == null || itemName.isEmpty()) {
-            throw new InterpreterError("screen.setItemSource: itemName parameter cannot be null or empty");
+            throw new InterpreterError("scr.setItemSource: itemName parameter cannot be null or empty");
         }
         if (source == null || source.isEmpty()) {
-            throw new InterpreterError("screen.setItemSource: source parameter cannot be null or empty");
+            throw new InterpreterError("scr.setItemSource: source parameter cannot be null or empty");
         }
 
         // Validate source value
         String lowerSource = source.toLowerCase();
         if (!lowerSource.equals("data") && !lowerSource.equals("display")) {
-            throw new InterpreterError("screen.setItemSource: source must be 'data' or 'display', got: " + source);
+            throw new InterpreterError("scr.setItemSource: source must be 'data' or 'display', got: " + source);
         }
 
         // Verify screen exists
         if (!context.getScreens().containsKey(screenName.toLowerCase())) {
-            throw new InterpreterError("screen.setItemSource: screen '" + screenName + "' not found");
+            throw new InterpreterError("scr.setItemSource: screen '" + screenName + "' not found");
         }
 
         // Get the var item
         Map<String, Var> varItems = context.getScreenVarItems(screenName);
         if (varItems == null) {
-            throw new InterpreterError("screen.setItemSource: no variables defined for screen '" + screenName + "'");
+            throw new InterpreterError("scr.setItemSource: no variables defined for screen '" + screenName + "'");
         }
 
         // Find the variable - try with various key formats
@@ -2981,7 +2838,7 @@ public final class Builtins {
         }
 
         if (var == null) {
-            throw new InterpreterError("screen.setItemSource: item '" + itemName + "' not found in screen '" + screenName + "'");
+            throw new InterpreterError("scr.setItemSource: item '" + itemName + "' not found in screen '" + screenName + "'");
         }
 
         // Get or create the display item
@@ -2999,7 +2856,7 @@ public final class Builtins {
     }
 
     /**
-     * screen.getItemStatus(screenName, itemName) -> String Gets the status of a
+     * scr.getItemStatus(screenName, itemName) -> String Gets the status of a
      * screen item: "clean" or "changed" Status is determined by comparing
      * current value to original value
      */
@@ -3008,21 +2865,21 @@ public final class Builtins {
         String itemName = (String) args[1];
 
         if (screenName == null || screenName.isEmpty()) {
-            throw new InterpreterError("screen.getItemStatus: screenName parameter cannot be null or empty");
+            throw new InterpreterError("scr.getItemStatus: screenName parameter cannot be null or empty");
         }
         if (itemName == null || itemName.isEmpty()) {
-            throw new InterpreterError("screen.getItemStatus: itemName parameter cannot be null or empty");
+            throw new InterpreterError("scr.getItemStatus: itemName parameter cannot be null or empty");
         }
 
         // Verify screen exists
         if (!context.getScreens().containsKey(screenName.toLowerCase())) {
-            throw new InterpreterError("screen.getItemStatus: screen '" + screenName + "' not found");
+            throw new InterpreterError("scr.getItemStatus: screen '" + screenName + "' not found");
         }
 
         // Get the var item
         Map<String, Var> varItems = context.getScreenVarItems(screenName);
         if (varItems == null) {
-            throw new InterpreterError("screen.getItemStatus: no variables defined for screen '" + screenName + "'");
+            throw new InterpreterError("scr.getItemStatus: no variables defined for screen '" + screenName + "'");
         }
 
         // Find the variable - try with various key formats
@@ -3040,7 +2897,7 @@ public final class Builtins {
         }
 
         if (var == null) {
-            throw new InterpreterError("screen.getItemStatus: item '" + itemName + "' not found in screen '" + screenName + "'");
+            throw new InterpreterError("scr.getItemStatus: item '" + itemName + "' not found in screen '" + screenName + "'");
         }
 
         // Return the status based on comparison of current value to original value
@@ -3048,7 +2905,7 @@ public final class Builtins {
     }
 
     /**
-     * screen.resetItemOriginalValue(screenName, itemName) -> Boolean Resets the
+     * scr.resetItemOriginalValue(screenName, itemName) -> Boolean Resets the
      * original value to the current value, marking the item as "clean"
      */
     private static Object screenResetItemOriginalValue(InterpreterContext context, Object[] args) throws InterpreterError {
@@ -3056,21 +2913,21 @@ public final class Builtins {
         String itemName = (String) args[1];
 
         if (screenName == null || screenName.isEmpty()) {
-            throw new InterpreterError("screen.resetItemOriginalValue: screenName parameter cannot be null or empty");
+            throw new InterpreterError("scr.resetItemOriginalValue: screenName parameter cannot be null or empty");
         }
         if (itemName == null || itemName.isEmpty()) {
-            throw new InterpreterError("screen.resetItemOriginalValue: itemName parameter cannot be null or empty");
+            throw new InterpreterError("scr.resetItemOriginalValue: itemName parameter cannot be null or empty");
         }
 
         // Verify screen exists
         if (!context.getScreens().containsKey(screenName.toLowerCase())) {
-            throw new InterpreterError("screen.resetItemOriginalValue: screen '" + screenName + "' not found");
+            throw new InterpreterError("scr.resetItemOriginalValue: screen '" + screenName + "' not found");
         }
 
         // Get the var item
         Map<String, Var> varItems = context.getScreenVarItems(screenName);
         if (varItems == null) {
-            throw new InterpreterError("screen.resetItemOriginalValue: no variables defined for screen '" + screenName + "'");
+            throw new InterpreterError("scr.resetItemOriginalValue: no variables defined for screen '" + screenName + "'");
         }
 
         // Find the variable - try with various key formats
@@ -3088,7 +2945,7 @@ public final class Builtins {
         }
 
         if (var == null) {
-            throw new InterpreterError("screen.resetItemOriginalValue: item '" + itemName + "' not found in screen '" + screenName + "'");
+            throw new InterpreterError("scr.resetItemOriginalValue: item '" + itemName + "' not found in screen '" + screenName + "'");
         }
 
         // Reset the original value to the current value
@@ -3098,19 +2955,19 @@ public final class Builtins {
     }
 
     /**
-     * screen.checkChanged(screenName) -> Boolean Checks if any item in the
+     * scr.checkChanged(screenName) -> Boolean Checks if any item in the
      * screen has changed from its original value
      */
     private static Object screenCheckChanged(InterpreterContext context, Object[] args) throws InterpreterError {
         String screenName = (String) args[0];
 
         if (screenName == null || screenName.isEmpty()) {
-            throw new InterpreterError("screen.checkChanged: screenName parameter cannot be null or empty");
+            throw new InterpreterError("scr.checkChanged: screenName parameter cannot be null or empty");
         }
 
         // Verify screen exists
         if (!context.getScreens().containsKey(screenName.toLowerCase())) {
-            throw new InterpreterError("screen.checkChanged: screen '" + screenName + "' not found");
+            throw new InterpreterError("scr.checkChanged: screen '" + screenName + "' not found");
         }
 
         // Get the var items
@@ -3130,19 +2987,19 @@ public final class Builtins {
     }
 
     /**
-     * screen.checkError(screenName) -> Boolean Checks if the screen has an
+     * scr.checkError(screenName) -> Boolean Checks if the screen has an
      * error status
      */
     private static Object screenCheckError(InterpreterContext context, Object[] args) throws InterpreterError {
         String screenName = (String) args[0];
 
         if (screenName == null || screenName.isEmpty()) {
-            throw new InterpreterError("screen.checkError: screenName parameter cannot be null or empty");
+            throw new InterpreterError("scr.checkError: screenName parameter cannot be null or empty");
         }
 
         // Verify screen exists
         if (!context.getScreens().containsKey(screenName.toLowerCase())) {
-            throw new InterpreterError("screen.checkError: screen '" + screenName + "' not found");
+            throw new InterpreterError("scr.checkError: screen '" + screenName + "' not found");
         }
 
         // Get the screen status
@@ -3152,19 +3009,19 @@ public final class Builtins {
     }
 
     /**
-     * screen.revert(screenName) -> Boolean Reverts all items in the screen to
+     * scr.revert(screenName) -> Boolean Reverts all items in the screen to
      * their original values
      */
     private static Object screenRevert(InterpreterContext context, Object[] args) throws InterpreterError {
         String screenName = (String) args[0];
 
         if (screenName == null || screenName.isEmpty()) {
-            throw new InterpreterError("screen.revert: screenName parameter cannot be null or empty");
+            throw new InterpreterError("scr.revert: screenName parameter cannot be null or empty");
         }
 
         // Verify screen exists
         if (!context.getScreens().containsKey(screenName.toLowerCase())) {
-            throw new InterpreterError("screen.revert: screen '" + screenName + "' not found");
+            throw new InterpreterError("scr.revert: screen '" + screenName + "' not found");
         }
 
         // Get the var items and screen vars
@@ -3190,19 +3047,19 @@ public final class Builtins {
     }
 
     /**
-     * screen.clear(screenName) -> Boolean Clears all items in the screen to
+     * scr.clear(screenName) -> Boolean Clears all items in the screen to
      * their default values (usually blank/null)
      */
     private static Object screenClear(InterpreterContext context, Object[] args) throws InterpreterError {
         String screenName = (String) args[0];
 
         if (screenName == null || screenName.isEmpty()) {
-            throw new InterpreterError("screen.clear: screenName parameter cannot be null or empty");
+            throw new InterpreterError("scr.clear: screenName parameter cannot be null or empty");
         }
 
         // Verify screen exists
         if (!context.getScreens().containsKey(screenName.toLowerCase())) {
-            throw new InterpreterError("screen.clear: screen '" + screenName + "' not found");
+            throw new InterpreterError("scr.clear: screen '" + screenName + "' not found");
         }
 
         // Get the var items and screen vars
@@ -3275,21 +3132,21 @@ public final class Builtins {
                 if (value instanceof Boolean) {
                     item.editable = (Boolean) value;
                 } else {
-                    throw new InterpreterError("screen.setProperty: 'editable' property must be a boolean");
+                    throw new InterpreterError("scr.setProperty: 'editable' property must be a boolean");
                 }
             }
             case "disabled" -> {
                 if (value instanceof Boolean) {
                     item.disabled = (Boolean) value;
                 } else {
-                    throw new InterpreterError("screen.setProperty: 'disabled' property must be a boolean");
+                    throw new InterpreterError("scr.setProperty: 'disabled' property must be a boolean");
                 }
             }
             case "visible" -> {
                 if (value instanceof Boolean) {
                     item.visible = (Boolean) value;
                 } else {
-                    throw new InterpreterError("screen.setProperty: 'visible' property must be a boolean");
+                    throw new InterpreterError("scr.setProperty: 'visible' property must be a boolean");
                 }
             }
             case "tooltip" ->
@@ -3304,7 +3161,7 @@ public final class Builtins {
                 } else if (value == null) {
                     item.colSpan = null;
                 } else {
-                    throw new InterpreterError("screen.setProperty: 'colSpan' property must be a number");
+                    throw new InterpreterError("scr.setProperty: 'colSpan' property must be a number");
                 }
             }
             case "rowspan" -> {
@@ -3313,7 +3170,7 @@ public final class Builtins {
                 } else if (value == null) {
                     item.rowSpan = null;
                 } else {
-                    throw new InterpreterError("screen.setProperty: 'rowSpan' property must be a number");
+                    throw new InterpreterError("scr.setProperty: 'rowSpan' property must be a number");
                 }
             }
             case "hgrow" ->
@@ -3339,7 +3196,7 @@ public final class Builtins {
             case "alignment" ->
                 item.alignment = value != null ? String.valueOf(value).toLowerCase() : null;
             default ->
-                throw new InterpreterError("screen.setProperty: unknown property '" + propertyName + "'");
+                throw new InterpreterError("scr.setProperty: unknown property '" + propertyName + "'");
         }
     }
 
@@ -3390,7 +3247,7 @@ public final class Builtins {
             case "alignment" ->
                 item.alignment;
             default ->
-                throw new InterpreterError("screen.getProperty: unknown property '" + propertyName + "'");
+                throw new InterpreterError("scr.getProperty: unknown property '" + propertyName + "'");
         };
     }
 
