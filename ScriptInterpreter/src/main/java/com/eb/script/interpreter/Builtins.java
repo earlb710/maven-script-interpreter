@@ -330,6 +330,75 @@ public final class Builtins {
                 "str.isBlank", DataType.BOOL,
                 newParam("str", DataType.STRING)
         ));
+        
+        // str.substring(str, beginIndex, endIndex?) -> STRING
+        // Extract substring from string. If endIndex is not provided, extracts to end of string.
+        // Uses Java String.substring() semantics.
+        addBuiltin(info(
+                "str.substring", DataType.STRING,
+                newParam("str", DataType.STRING),
+                newParam("beginIndex", DataType.INTEGER),
+                newParam("endIndex", DataType.INTEGER, false) // optional
+        ));
+        
+        // str.indexOf(str, searchString, fromIndex?) -> INTEGER
+        // Find first occurrence of searchString in str, starting from fromIndex (default 0).
+        // Returns -1 if not found. Uses Java String.indexOf() semantics.
+        addBuiltin(info(
+                "str.indexOf", DataType.INTEGER,
+                newParam("str", DataType.STRING),
+                newParam("searchString", DataType.STRING),
+                newParam("fromIndex", DataType.INTEGER, false) // optional
+        ));
+        
+        // str.lastIndexOf(str, searchString, fromIndex?) -> INTEGER
+        // Find last occurrence of searchString in str, searching backwards from fromIndex (default end).
+        // Returns -1 if not found. Uses Java String.lastIndexOf() semantics.
+        addBuiltin(info(
+                "str.lastIndexOf", DataType.INTEGER,
+                newParam("str", DataType.STRING),
+                newParam("searchString", DataType.STRING),
+                newParam("fromIndex", DataType.INTEGER, false) // optional
+        ));
+        
+        // str.charAt(str, index) -> STRING
+        // Returns the character at the specified index as a single-character string.
+        // Uses Java String.charAt() semantics.
+        addBuiltin(info(
+                "str.charAt", DataType.STRING,
+                newParam("str", DataType.STRING),
+                newParam("index", DataType.INTEGER)
+        ));
+        
+        // str.replaceAll(str, regex, replacement) -> STRING
+        // Replaces all occurrences of regex pattern with replacement string.
+        // Uses Java String.replaceAll() semantics (regex-based).
+        addBuiltin(info(
+                "str.replaceAll", DataType.STRING,
+                newParam("str", DataType.STRING),
+                newParam("regex", DataType.STRING),
+                newParam("replacement", DataType.STRING)
+        ));
+        
+        // str.lpad(str, length, padChar) -> STRING
+        // Left-pads the string with padChar to reach the specified length.
+        // If string is already >= length, returns original string unchanged.
+        addBuiltin(info(
+                "str.lpad", DataType.STRING,
+                newParam("str", DataType.STRING),
+                newParam("length", DataType.INTEGER),
+                newParam("padChar", DataType.STRING)
+        ));
+        
+        // str.rpad(str, length, padChar) -> STRING
+        // Right-pads the string with padChar to reach the specified length.
+        // If string is already >= length, returns original string unchanged.
+        addBuiltin(info(
+                "str.rpad", DataType.STRING,
+                newParam("str", DataType.STRING),
+                newParam("length", DataType.INTEGER),
+                newParam("padChar", DataType.STRING)
+        ));
 
         addBuiltin(info(
                 "file.exists", DataType.BOOL,
@@ -1069,6 +1138,197 @@ public final class Builtins {
                 String s = (String) args[0];
                 return Util.isBlank(s);
             }
+            
+            //  str.substring(s, beginIndex, endIndex?) -> STRING
+            //  Extract substring from string. If endIndex is not provided, extracts to end of string.
+            //  Mimics Java String.substring() semantics.
+            case "str.substring" -> {
+                String s = (String) args[0];
+                Integer beginIndex = (Integer) args[1];
+                Integer endIndex = (args.length > 2 && args[2] != null) ? (Integer) args[2] : null;
+                
+                if (s == null) {
+                    return null;
+                }
+                if (beginIndex == null) {
+                    throw new InterpreterError("str.substring: beginIndex cannot be null");
+                }
+                
+                try {
+                    if (endIndex == null) {
+                        return s.substring(beginIndex);
+                    } else {
+                        return s.substring(beginIndex, endIndex);
+                    }
+                } catch (IndexOutOfBoundsException ex) {
+                    throw new InterpreterError("str.substring: " + ex.getMessage());
+                }
+            }
+            
+            //  str.indexOf(s, searchString, fromIndex?) -> INTEGER
+            //  Find first occurrence of searchString in s, starting from fromIndex (default 0).
+            //  Returns -1 if not found. Mimics Java String.indexOf() semantics.
+            case "str.indexof" -> {
+                String s = (String) args[0];
+                String searchString = (String) args[1];
+                Integer fromIndex = (args.length > 2 && args[2] != null) ? (Integer) args[2] : null;
+                
+                if (s == null || searchString == null) {
+                    return -1; // null-safe behavior: return -1 if either is null
+                }
+                
+                try {
+                    if (fromIndex == null) {
+                        return s.indexOf(searchString);
+                    } else {
+                        return s.indexOf(searchString, fromIndex);
+                    }
+                } catch (IndexOutOfBoundsException ex) {
+                    throw new InterpreterError("str.indexOf: " + ex.getMessage());
+                }
+            }
+            
+            //  str.lastIndexOf(s, searchString, fromIndex?) -> INTEGER
+            //  Find last occurrence of searchString in s, searching backwards from fromIndex.
+            //  Returns -1 if not found. Mimics Java String.lastIndexOf() semantics.
+            case "str.lastindexof" -> {
+                String s = (String) args[0];
+                String searchString = (String) args[1];
+                Integer fromIndex = (args.length > 2 && args[2] != null) ? (Integer) args[2] : null;
+                
+                if (s == null || searchString == null) {
+                    return -1; // null-safe behavior: return -1 if either is null
+                }
+                
+                try {
+                    if (fromIndex == null) {
+                        return s.lastIndexOf(searchString);
+                    } else {
+                        return s.lastIndexOf(searchString, fromIndex);
+                    }
+                } catch (IndexOutOfBoundsException ex) {
+                    throw new InterpreterError("str.lastIndexOf: " + ex.getMessage());
+                }
+            }
+            
+            //  str.charAt(s, index) -> STRING
+            //  Returns the character at the specified index as a single-character string.
+            //  Mimics Java String.charAt() semantics.
+            case "str.charat" -> {
+                String s = (String) args[0];
+                Integer index = (Integer) args[1];
+                
+                if (s == null) {
+                    return null;
+                }
+                if (index == null) {
+                    throw new InterpreterError("str.charAt: index cannot be null");
+                }
+                
+                try {
+                    char ch = s.charAt(index);
+                    return String.valueOf(ch);
+                } catch (IndexOutOfBoundsException ex) {
+                    throw new InterpreterError("str.charAt: " + ex.getMessage());
+                }
+            }
+            
+            //  str.replaceAll(s, regex, replacement) -> STRING
+            //  Replaces all occurrences matching regex pattern with replacement string.
+            //  Mimics Java String.replaceAll() semantics (regex-based).
+            case "str.replaceall" -> {
+                String s = (String) args[0];
+                String regex = (String) args[1];
+                String replacement = (String) args[2];
+                
+                if (s == null) {
+                    return null;
+                }
+                if (regex == null || replacement == null) {
+                    throw new InterpreterError("str.replaceAll: regex and replacement cannot be null");
+                }
+                
+                try {
+                    return s.replaceAll(regex, replacement);
+                } catch (java.util.regex.PatternSyntaxException ex) {
+                    throw new InterpreterError("str.replaceAll: Invalid regex - " + ex.getMessage());
+                }
+            }
+            
+            //  str.lpad(s, length, padChar) -> STRING
+            //  Left-pads the string with padChar to reach the specified length.
+            //  If string is already >= length, returns original string unchanged.
+            case "str.lpad" -> {
+                String s = (String) args[0];
+                Integer length = (Integer) args[1];
+                String padChar = (String) args[2];
+                
+                if (s == null) {
+                    return null;
+                }
+                if (length == null) {
+                    throw new InterpreterError("str.lpad: length cannot be null");
+                }
+                if (padChar == null || padChar.isEmpty()) {
+                    throw new InterpreterError("str.lpad: padChar cannot be null or empty");
+                }
+                if (padChar.length() != 1) {
+                    throw new InterpreterError("str.lpad: padChar must be a single character");
+                }
+                
+                // If already at or exceeds desired length, return as-is
+                if (s.length() >= length) {
+                    return s;
+                }
+                
+                // Calculate padding needed
+                int padCount = length - s.length();
+                StringBuilder sb = new StringBuilder(length);
+                char ch = padChar.charAt(0);
+                for (int i = 0; i < padCount; i++) {
+                    sb.append(ch);
+                }
+                sb.append(s);
+                return sb.toString();
+            }
+            
+            //  str.rpad(s, length, padChar) -> STRING
+            //  Right-pads the string with padChar to reach the specified length.
+            //  If string is already >= length, returns original string unchanged.
+            case "str.rpad" -> {
+                String s = (String) args[0];
+                Integer length = (Integer) args[1];
+                String padChar = (String) args[2];
+                
+                if (s == null) {
+                    return null;
+                }
+                if (length == null) {
+                    throw new InterpreterError("str.rpad: length cannot be null");
+                }
+                if (padChar == null || padChar.isEmpty()) {
+                    throw new InterpreterError("str.rpad: padChar cannot be null or empty");
+                }
+                if (padChar.length() != 1) {
+                    throw new InterpreterError("str.rpad: padChar must be a single character");
+                }
+                
+                // If already at or exceeds desired length, return as-is
+                if (s.length() >= length) {
+                    return s;
+                }
+                
+                // Calculate padding needed
+                int padCount = length - s.length();
+                StringBuilder sb = new StringBuilder(length);
+                sb.append(s);
+                char ch = padChar.charAt(0);
+                for (int i = 0; i < padCount; i++) {
+                    sb.append(ch);
+                }
+                return sb.toString();
+            }
+            
             case "file.exists" -> {
                 return BuiltinsFile.exists(env, args);
             }
