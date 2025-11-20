@@ -311,6 +311,8 @@ public class Parser {
             return EbsTokenType.BOOL;
         } else if (EbsTokenType.JSON.contains(str)) {
             return EbsTokenType.JSON;
+        } else if (EbsTokenType.ARRAY.contains(str)) {
+            return EbsTokenType.ARRAY;
         }
         return null;
     }

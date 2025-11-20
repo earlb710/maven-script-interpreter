@@ -1,0 +1,91 @@
+// Test script for new array datatype syntax
+// Tests array[length] and array[*] syntax
+
+print "=== Testing Array Datatype Syntax ===";
+print "";
+
+// ============================================================================
+// TEST 1: Array with fixed length
+// ============================================================================
+print "TEST 1: array[10] - Fixed length array";
+var fixedArray: array[10];
+print "  Created fixed array of length 10";
+fixedArray[0] = 100;
+fixedArray[1] = 200;
+fixedArray[2] = 300;
+print "  fixedArray[0] = " + fixedArray[0];
+print "  fixedArray[1] = " + fixedArray[1];
+print "  fixedArray[2] = " + fixedArray[2];
+print "  Array length: " + fixedArray.length;
+print "";
+
+// ============================================================================
+// TEST 2: Array with dynamic length (no size specified)
+// ============================================================================
+print "TEST 2: array[*] - Dynamic array";
+var dynamicArray: array[*];
+print "  Created dynamic array";
+call array.expand(dynamicArray, 5);
+print "  Expanded to 5 elements";
+dynamicArray[0] = "First";
+dynamicArray[1] = "Second";
+dynamicArray[2] = "Third";
+print "  dynamicArray[0] = " + dynamicArray[0];
+print "  dynamicArray[1] = " + dynamicArray[1];
+print "  dynamicArray[2] = " + dynamicArray[2];
+print "  Array length: " + dynamicArray.length;
+print "";
+
+// ============================================================================
+// TEST 3: Array literal assignment
+// ============================================================================
+print "TEST 3: Array literal with array type";
+var literalArray: array[*] = [10, 20, 30, 40, 50];
+print "  Created array from literal [10, 20, 30, 40, 50]";
+print "  literalArray[0] = " + literalArray[0];
+print "  literalArray[4] = " + literalArray[4];
+print "  Array length: " + literalArray.length;
+print "";
+
+// ============================================================================
+// TEST 4: Multi-dimensional array
+// ============================================================================
+print "TEST 4: array[3, 4] - 2D array";
+var matrix: array[3, 4];
+print "  Created 2D array (3x4 matrix)";
+matrix[0, 0] = 1;
+matrix[0, 1] = 2;
+matrix[1, 0] = 3;
+matrix[1, 1] = 4;
+print "  matrix[0, 0] = " + matrix[0, 0];
+print "  matrix[0, 1] = " + matrix[0, 1];
+print "  matrix[1, 0] = " + matrix[1, 0];
+print "  matrix[1, 1] = " + matrix[1, 1];
+print "";
+
+// ============================================================================
+// TEST 5: Comparison with typed arrays
+// ============================================================================
+print "TEST 5: Comparing array type with typed arrays";
+var intArray: int[5];
+var genericArray: array[5];
+print "  Created int[5] and array[5]";
+intArray[0] = 10;
+genericArray[0] = 10;
+print "  intArray[0] = " + intArray[0];
+print "  genericArray[0] = " + genericArray[0];
+print "";
+
+// ============================================================================
+// TEST 6: Mixed types in array
+// ============================================================================
+print "TEST 6: Mixed types in generic array";
+var mixedArray: array[*] = [1, "two", 3.14, true];
+print "  Created array with mixed types: [1, \"two\", 3.14, true]";
+print "  mixedArray[0] (int) = " + mixedArray[0];
+print "  mixedArray[1] (string) = " + mixedArray[1];
+print "  mixedArray[2] (double) = " + mixedArray[2];
+print "  mixedArray[3] (bool) = " + mixedArray[3];
+print "";
+
+print "=== All Array Datatype Tests Complete ===";

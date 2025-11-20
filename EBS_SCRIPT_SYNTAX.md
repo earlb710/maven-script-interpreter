@@ -59,6 +59,7 @@ print message;
 | `bool` / `boolean` | Boolean value | `true`, `false` |
 | `date` | Date/time value | `now()` |
 | `json` | JSON object/array | `{"key": "value"}` |
+| `array` | Generic array | `array[10]`, `array[*]` |
 
 ### Type Inference
 ```javascript
@@ -513,16 +514,35 @@ findMax(a: int, b: int) return int {
 ### Array Declaration
 
 #### Fixed-Size Arrays
+
+**Using Typed Arrays:**
 ```javascript
 var numbers: int[5];           // Array of 5 integers
 var matrix: int[3, 4];         // 2D array: 3 rows, 4 columns
 var cube: int[2, 3, 4];        // 3D array
 ```
 
-#### Dynamic Arrays
+**Using Generic Array Type:**
 ```javascript
-var items: string[*];          // Dynamic array
+var items: array[10];          // Generic array of 10 elements
+var grid: array[5, 5];         // 2D generic array (5x5 grid)
 ```
+
+The `array` type is a generic array that can hold any type of value, similar to `json` arrays.
+
+#### Dynamic Arrays
+
+**Using Typed Arrays:**
+```javascript
+var items: string[*];          // Dynamic string array
+```
+
+**Using Generic Array Type:**
+```javascript
+var collection: array[*];      // Dynamic generic array
+```
+
+Dynamic arrays backed by `ArrayDynamic` can grow as needed using `array.expand()`.
 
 #### Array Literals
 ```javascript
@@ -533,6 +553,21 @@ var mixed = [1, "two", 3.0, true];
 // Nested arrays
 var matrix = [[1, 2], [3, 4], [5, 6]];
 ```
+
+### Array Type Comparison
+
+| Syntax | Type | Backed By | Usage |
+|--------|------|-----------|-------|
+| `int[10]` | Typed | ArrayFixed | Fixed-size integer array |
+| `string[*]` | Typed | ArrayDynamic | Dynamic string array |
+| `array[10]` | Generic | ArrayFixed | Fixed-size generic array |
+| `array[*]` | Generic | ArrayDynamic | Dynamic generic array |
+| `json` | JSON | Java List/Map | JSON arrays and objects |
+
+**When to use `array` vs typed arrays:**
+- Use `array` when you need to store mixed types (like integers and strings together)
+- Use typed arrays (`int[10]`, `string[*]`) when all elements are the same type
+- Both work the same way with `ArrayFixed` and `ArrayDynamic` implementations
 
 ### Array Access
 ```javascript
@@ -558,8 +593,11 @@ var zeros: int[10];
 call array.fill(zeros, 0);
 
 // Using array.expand (dynamic arrays)
-var dynamic: int[*];
+var dynamic: array[*];
 call array.expand(dynamic, 10);  // Expand to 10 elements
+
+// With literal assignment
+var items: array[*] = [1, "two", 3.0, true];  // Mixed types
 ```
 
 ---
