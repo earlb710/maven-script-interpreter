@@ -48,6 +48,8 @@ public class InterpreterContext {
     private final Map<String, List<javafx.scene.Node>> screenBoundControls = new ConcurrentHashMap<>();
     private final Map<String, com.eb.ui.ebs.StatusBar> screenStatusBars = new ConcurrentHashMap<>();
     private final Map<String, String> screenCallbacks = new ConcurrentHashMap<>(); // screenName -> callbackFunctionName
+    private final Map<String, String> screenStartupCode = new ConcurrentHashMap<>(); // screenName -> startup EBS code
+    private final Map<String, String> screenCleanupCode = new ConcurrentHashMap<>(); // screenName -> cleanup EBS code
     private final Set<String> importedFiles = ConcurrentHashMap.newKeySet();  // Global list of all imported files to prevent circular imports and duplicate imports
     private final Map<String, ScreenStatus> screenStatuses = new ConcurrentHashMap<>(); // screenName -> status
     private final Map<String, String> screenErrorMessages = new ConcurrentHashMap<>(); // screenName -> error message
@@ -386,6 +388,8 @@ public class InterpreterContext {
         screenVarItems.remove(screenName);
         screenAreaItems.remove(screenName);
         screenCallbacks.remove(screenName);
+        screenStartupCode.remove(screenName);
+        screenCleanupCode.remove(screenName);
         displayMetadata.entrySet().removeIf(entry -> entry.getKey().startsWith(screenName + "."));
         GLOBAL_SCREEN_CREATION_ORDER.remove(screenName);
         screenStatuses.remove(screenName);
@@ -412,6 +416,50 @@ public class InterpreterContext {
             screenCallbacks.put(screenName, callbackName);
         } else {
             screenCallbacks.remove(screenName);
+        }
+    }
+
+    /**
+     * Get the startup code for a screen
+     * @param screenName The screen name
+     * @return The startup EBS code, or null if no startup code is set
+     */
+    public String getScreenStartupCode(String screenName) {
+        return screenStartupCode.get(screenName);
+    }
+
+    /**
+     * Set the startup code for a screen
+     * @param screenName The screen name
+     * @param code The startup EBS code
+     */
+    public void setScreenStartupCode(String screenName, String code) {
+        if (code != null && !code.trim().isEmpty()) {
+            screenStartupCode.put(screenName, code);
+        } else {
+            screenStartupCode.remove(screenName);
+        }
+    }
+
+    /**
+     * Get the cleanup code for a screen
+     * @param screenName The screen name
+     * @return The cleanup EBS code, or null if no cleanup code is set
+     */
+    public String getScreenCleanupCode(String screenName) {
+        return screenCleanupCode.get(screenName);
+    }
+
+    /**
+     * Set the cleanup code for a screen
+     * @param screenName The screen name
+     * @param code The cleanup EBS code
+     */
+    public void setScreenCleanupCode(String screenName, String code) {
+        if (code != null && !code.trim().isEmpty()) {
+            screenCleanupCode.put(screenName, code);
+        } else {
+            screenCleanupCode.remove(screenName);
         }
     }
 

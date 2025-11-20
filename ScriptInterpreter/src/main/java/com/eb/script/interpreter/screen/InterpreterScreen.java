@@ -66,6 +66,18 @@ public class InterpreterScreen {
             int width = config.containsKey("width") ? ((Number) config.get("width")).intValue() : 800;
             int height = config.containsKey("height") ? ((Number) config.get("height")).intValue() : 600;
             boolean maximize = config.containsKey("maximize") && Boolean.TRUE.equals(config.get("maximize"));
+            
+            // Extract startup and cleanup inline code if present
+            String startupCode = config.containsKey("startup") ? String.valueOf(config.get("startup")) : null;
+            String cleanupCode = config.containsKey("cleanup") ? String.valueOf(config.get("cleanup")) : null;
+            
+            // Store startup and cleanup code in context
+            if (startupCode != null && !startupCode.trim().isEmpty()) {
+                context.setScreenStartupCode(stmt.name, startupCode);
+            }
+            if (cleanupCode != null && !cleanupCode.trim().isEmpty()) {
+                context.setScreenCleanupCode(stmt.name, cleanupCode);
+            }
 
             // Create thread-safe variable storage for this screen
             ConcurrentHashMap<String, Object> screenVarMap = new java.util.concurrent.ConcurrentHashMap<>();
@@ -528,6 +540,18 @@ public class InterpreterScreen {
                     if (context.getOutput() != null) {
                         context.getOutput().printlnOk("Screen '" + finalScreenName + "' shown");
                     }
+                    
+                    // Execute startup code if present (only on first show)
+                    String startupCode = context.getScreenStartupCode(finalScreenName);
+                    if (startupCode != null && !startupCode.trim().isEmpty()) {
+                        try {
+                            executeScreenInlineCode(finalScreenName, startupCode, "startup");
+                        } catch (InterpreterError e) {
+                            if (context.getOutput() != null) {
+                                context.getOutput().printlnError("Error executing startup code: " + e.getMessage());
+                            }
+                        }
+                    }
                 } else {
                     if (context.getOutput() != null) {
                         context.getOutput().printlnInfo("Screen '" + finalScreenName + "' is already showing");
@@ -815,6 +839,18 @@ public class InterpreterScreen {
      * @param screenName The name of the screen to close
      */
     private void performScreenClose(String screenName) {
+        // Execute cleanup code if present
+        String cleanupCode = context.getScreenCleanupCode(screenName);
+        if (cleanupCode != null && !cleanupCode.trim().isEmpty()) {
+            try {
+                executeScreenInlineCode(screenName, cleanupCode, "cleanup");
+            } catch (InterpreterError e) {
+                if (context.getOutput() != null) {
+                    context.getOutput().printlnError("Error executing cleanup code: " + e.getMessage());
+                }
+            }
+        }
+        
         // Collect output fields and invoke callback if set
         try {
             collectOutputFieldsAndInvokeCallback(screenName, 0);
@@ -1462,6 +1498,37 @@ public class InterpreterScreen {
                     screenVarTypeMap.put(varName, varType);
                 }
             }
+        }
+    }
+    
+    /**
+     * Execute inline EBS code in the context of a screen.
+     * This is used for startup, cleanup, and other screen lifecycle events.
+     * 
+     * @param screenName The name of the screen
+     * @param ebsCode The EBS code to execute
+     * @param eventType The type of event (e.g., "startup", "cleanup") for error messages
+     * @throws InterpreterError if the code fails to parse or execute
+     */
+    private void executeScreenInlineCode(String screenName, String ebsCode, String eventType) throws InterpreterError {
+        try {
+            // Set the screen context before executing inline code
+            context.setCurrentScreen(screenName);
+            try {
+                // Parse and execute the EBS code
+                RuntimeContext eventContext = com.eb.script.parser.Parser.parse(eventType + "_" + screenName, ebsCode);
+                // Execute in the current interpreter context
+                for (com.eb.script.interpreter.statement.Statement s : eventContext.statements) {
+                    interpreter.acceptStatement(s);
+                }
+            } finally {
+                // Always clear the screen context after execution to prevent context leakage
+                context.clearCurrentScreen();
+            }
+        } catch (com.eb.script.parser.ParseError e) {
+            throw new InterpreterError("Failed to parse " + eventType + " code: " + e.getMessage());
+        } catch (java.io.IOException e) {
+            throw new InterpreterError("IO error executing " + eventType + " code: " + e.getMessage());
         }
     }
 }
