@@ -84,18 +84,19 @@ show screen testScreen;
 setScreenStatus() return bool {
     var statusType: string = testScreen.statusType;
     
-    if statusType = "clean" then
+    if statusType = "clean" then {
         call screen.setStatus(screenName="testScreen", status="clean");
         testScreen.currentStatus = "clean";
         print "Status set to CLEAN - you can close without confirmation";
-    else if statusType = "changed" then
+    } else if statusType = "changed" then {
         call screen.setStatus(screenName="testScreen", status="changed");
         testScreen.currentStatus = "changed";
         print "Status set to CHANGED - closing will show 'Are you sure?' warning";
-    else if statusType = "error" then
+    } else if statusType = "error" then {
         call screen.setError(screenName="testScreen", errorMessage="This is a test error message");
         testScreen.currentStatus = "error";
         print "Status set to ERROR - closing will show error message with 'Are you sure?'";
+    }
     
     return true;
 }
