@@ -908,6 +908,22 @@ hide myWindow;
 screen myWindow hide;
 ```
 
+#### Close Screen
+```javascript
+// Close a specific screen by name
+close screen myWindow;
+
+// Close the current screen (most recently shown)
+close screen;
+```
+
+**Note**: Closing a screen will:
+- Destroy the screen window
+- Clean up all screen resources (variables, threads, etc.)
+- Invoke any registered close callback
+- If no screen name is provided, closes the most recently shown screen
+- If no current screen exists and no name is provided, an error is thrown
+
 ### Accessing Screen Variables
 
 #### Read Variable
