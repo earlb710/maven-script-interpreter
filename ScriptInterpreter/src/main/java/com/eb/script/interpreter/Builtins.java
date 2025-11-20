@@ -637,6 +637,12 @@ public final class Builtins {
                 "system.help", DataType.STRING, // returns help text as string
                 newParam("keyword", DataType.STRING, false) // optional keyword/builtin name
         ));
+
+        addBuiltin(info(
+                "sleep", DataType.STRING,
+                newParam("millis", DataType.LONG) // required: milliseconds to sleep
+        ));
+
 // ==========================
 // AI builtins
 // ==========================
@@ -1516,6 +1522,22 @@ public final class Builtins {
                         ? java.lang.System.clearProperty(key)
                         : java.lang.System.setProperty(key, val);
             }
+
+            case "sleep" -> {
+                // Sleep for specified milliseconds
+                final Number millisNum = (Number) args[0];
+                final long millis = (millisNum != null) ? millisNum.longValue() : 0L;
+                if (millis > 0) {
+                    try {
+                        Thread.sleep(millis);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        throw new InterpreterError("sleep interrupted: " + e.getMessage());
+                    }
+                }
+                return ""; // Return empty string (DataType.STRING)
+            }
+
             case "debug.memusage" -> {
                 // Optional unit: "MB" (default), "KB", "B"
                 final String unit = (args.length > 0 && args[0] instanceof String u && !u.isBlank()) ? u : "MB";

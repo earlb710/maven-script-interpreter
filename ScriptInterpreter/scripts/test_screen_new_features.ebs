@@ -36,6 +36,7 @@ screen basicScreen = {
 // Use new syntax: show screen <name>
 show screen basicScreen;
 print "✓ Basic screen shown with new syntax";
+call sleep(2000);
 
 // Use new syntax: hide screen <name>
 hide screen basicScreen;
@@ -70,6 +71,7 @@ screen paramScreen = {
 // Show with parameters (parameters can be used for initialization)
 show screen paramScreen("test", 42);
 print "✓ Screen shown with parameters";
+call sleep(2000);
 
 hide screen paramScreen;
 print "✓ Parameter screen hidden";
@@ -114,6 +116,7 @@ screen callbackScreen = {
 print "Showing screen with callback...";
 show screen callbackScreen callback handleScreenEvent;
 print "✓ Screen shown, callback should have been invoked with 'shown' event";
+call sleep(2000);
 
 hide screen callbackScreen;
 print "✓ Callback screen hidden";
@@ -200,6 +203,7 @@ show screen outputScreen callback handleOutputFields;
 print "✓ Screen shown with callback";
 print "  User should modify fields, then close the screen";
 print "  Callback will collect output and inout fields on close";
+call sleep(3000);
 
 // User can close screen manually, or we can hide it
 hide screen outputScreen;
@@ -245,6 +249,7 @@ screen advancedScreen = {
 print "Showing screen with parameters and callback...";
 show screen advancedScreen("value", 999) callback handleAdvancedEvent;
 print "✓ Screen shown with parameters and callback";
+call sleep(2000);
 
 hide screen advancedScreen;
 print "✓ Advanced screen hidden, callback invoked on close";
@@ -300,6 +305,7 @@ screen multiOutputScreen = {
 
 print "Testing multiple output fields collection...";
 show screen multiOutputScreen callback outputCallback;
+call sleep(2000);
 hide screen multiOutputScreen;
 print "✓ Multiple output fields test completed";
 print "";
@@ -325,6 +331,7 @@ screen noCallbackScreen = {
 
 show screen noCallbackScreen;
 print "✓ Screen shown without callback";
+call sleep(2000);
 
 hide screen noCallbackScreen;
 print "✓ Screen hidden without callback (no callback invoked)";
