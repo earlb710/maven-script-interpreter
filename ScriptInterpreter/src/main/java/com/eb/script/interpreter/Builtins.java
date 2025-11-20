@@ -258,73 +258,73 @@ public final class Builtins {
         // STRING builtins
         // ==========================
         addBuiltin(info(
-                "string.toString", DataType.STRING,
+                "str.toString", DataType.STRING,
                 newParam("str", DataType.STRING)
         ));
         addBuiltin(info(
-                "string.toUpper", DataType.STRING,
+                "str.toUpper", DataType.STRING,
                 newParam("str", DataType.STRING)
         ));
         addBuiltin(info(
-                "string.toLower", DataType.STRING,
+                "str.toLower", DataType.STRING,
                 newParam("str", DataType.STRING)
         ));
         addBuiltin(info(
-                "string.trim", DataType.STRING,
+                "str.trim", DataType.STRING,
                 newParam("str", DataType.STRING)
         ));
         addBuiltin(info(
-                "string.replace", DataType.STRING,
+                "str.replace", DataType.STRING,
                 newParam("source", DataType.STRING),
                 newParam("target", DataType.STRING),
                 newParam("replacement", DataType.STRING)
         ));
-        // string.split(text, regex) -> JSON (List<String>)
+        // str.split(text, regex) -> JSON (List<String>)
         // Uses Java regex; trailing empty strings are preserved (limit = -1).
         addBuiltin(info(
-                "string.split", DataType.JSON,
+                "str.split", DataType.JSON,
                 newParam("text", DataType.STRING),
                 newParam("regex", DataType.STRING),
                 newParam("limit", DataType.INTEGER, false)
         ));
 
         addBuiltin(info(
-                "string.join", DataType.STRING,
+                "str.join", DataType.STRING,
                 newParam("text", DataType.JSON, true),
                 newParam("nl", DataType.STRING)
         ));
 
         addBuiltin(info(
-                "string.contains", DataType.BOOL,
+                "str.contains", DataType.BOOL,
                 newParam("str", DataType.STRING),
                 newParam("sub", DataType.STRING)
         ));
         addBuiltin(info(
-                "string.startsWith", DataType.BOOL,
+                "str.startsWith", DataType.BOOL,
                 newParam("str", DataType.STRING),
                 newParam("prefix", DataType.STRING)
         ));
         addBuiltin(info(
-                "string.endsWith", DataType.BOOL,
+                "str.endsWith", DataType.BOOL,
                 newParam("str", DataType.STRING),
                 newParam("suffix", DataType.STRING)
         ));
         addBuiltin(info(
-                "string.equalsIgnoreCase", DataType.BOOL,
+                "str.equalsIgnoreCase", DataType.BOOL,
                 newParam("value1", DataType.STRING),
                 newParam("value2", DataType.STRING)
         ));
         addBuiltin(info(
-                "string.equals", DataType.BOOL,
+                "str.equals", DataType.BOOL,
                 newParam("value1", DataType.STRING),
                 newParam("value2", DataType.STRING)
         ));
         addBuiltin(info(
-                "string.isEmpty", DataType.BOOL,
+                "str.isEmpty", DataType.BOOL,
                 newParam("str", DataType.STRING)
         ));
         addBuiltin(info(
-                "string.isBlank", DataType.BOOL,
+                "str.isBlank", DataType.BOOL,
                 newParam("str", DataType.STRING)
         ));
 
@@ -873,27 +873,27 @@ public final class Builtins {
                 return root;
             }
 
-            case "string.tostring" -> {
+            case "str.tostring" -> {
                 return (args[0] == null) ? null : String.valueOf(args[0]);
             }
 
-            case "string.toupper" -> {
+            case "str.toupper" -> {
                 String s = (String) args[0];
                 return (s == null) ? null : s.toUpperCase();
             }
 
-            case "string.tolower" -> {
+            case "str.tolower" -> {
                 String s = (String) args[0];
                 return (s == null) ? null : s.toLowerCase();
             }
 
-            case "string.trim" -> {
+            case "str.trim" -> {
                 String s = (String) args[0];
                 return (s == null) ? null : s.trim();
             }
 
-            //  string.replace(source, target, replacement)  -- literal replace (NOT regex)
-            case "string.replace" -> {
+            //  str.replace(source, target, replacement)  -- literal replace (NOT regex)
+            case "str.replace" -> {
                 String s = (String) args[0];
                 String tgt = (String) args[1];
                 String rep = (String) args[2];
@@ -903,8 +903,8 @@ public final class Builtins {
                 return Util.notNull(s).replace(tgt, rep);
             }
 
-            //  string.split(text, regex) -> JSON (List<String>)
-            case "string.split" -> {
+            //  str.split(text, regex) -> JSON (List<String>)
+            case "str.split" -> {
                 String s = (String) args[0];
                 String pattern = (String) args[1];
                 Integer limit = (Integer) args[2];
@@ -923,7 +923,7 @@ public final class Builtins {
                 }
             }
 
-            case "string.join" -> {
+            case "str.join" -> {
                 Object a0 = args[0];
                 String nl = (String) args[1];
 
@@ -931,7 +931,7 @@ public final class Builtins {
                     return null;
                 }
                 if (nl == null) {
-                    throw new InterpreterError("string.join: delimiter cannot be null");
+                    throw new InterpreterError("str.join: delimiter cannot be null");
                 }
 
                 String[] sarray;
@@ -955,14 +955,14 @@ public final class Builtins {
                 } else if (a0 instanceof List<?> list) {
                     sarray = list.stream().map(e -> e == null ? "" : e.toString()).toArray(String[]::new);
                 } else {
-                    throw new InterpreterError("string.join: first argument must be an array/list of strings");
+                    throw new InterpreterError("str.join: first argument must be an array/list of strings");
                 }
 
                 return String.join(nl, sarray);
             }
 
-            //  string.contains(s, sub)
-            case "string.contains" -> {
+            //  str.contains(s, sub)
+            case "str.contains" -> {
                 String s = (String) args[0], sub = (String) args[1];
                 if (s == null || sub == null) {
                     return false;
@@ -970,8 +970,8 @@ public final class Builtins {
                 return s.contains(sub);
             }
 
-            //  string.startsWith(s, prefix)
-            case "string.startswith" -> {
+            //  str.startsWith(s, prefix)
+            case "str.startswith" -> {
                 String s = (String) args[0], p = (String) args[1];
                 if (s == null || p == null) {
                     return false;
@@ -979,8 +979,8 @@ public final class Builtins {
                 return s.startsWith(p);
             }
 
-            //  string.endsWith(s, suffix)
-            case "string.endswith" -> {
+            //  str.endsWith(s, suffix)
+            case "str.endswith" -> {
                 String s = (String) args[0], suf = (String) args[1];
                 if (s == null || suf == null) {
                     return false;
@@ -988,26 +988,26 @@ public final class Builtins {
                 return s.endsWith(suf);
             }
 
-            //  string.equalsIgnoreCase(a, b)
-            case "string.equalsignorecase" -> {
+            //  str.equalsIgnoreCase(a, b)
+            case "str.equalsignorecase" -> {
                 String a = (String) args[0], b = (String) args[1];
                 return Util.strEqIgnore(a, b);
             }
 
-            //  string.equals(a, b)
-            case "string.equals" -> {
+            //  str.equals(a, b)
+            case "str.equals" -> {
                 String a = (String) args[0], b = (String) args[1];
                 return Util.strEq(a, b);
             }
 
-            //  string.isEmpty(s)
-            case "string.isempty" -> {
+            //  str.isEmpty(s)
+            case "str.isempty" -> {
                 String s = (String) args[0];
                 return s != null && s.isEmpty();
             }
 
-            //  string.isBlank(s) : true for null or only-whitespace
-            case "string.isblank" -> {
+            //  str.isBlank(s) : true for null or only-whitespace
+            case "str.isblank" -> {
                 String s = (String) args[0];
                 return Util.isBlank(s);
             }

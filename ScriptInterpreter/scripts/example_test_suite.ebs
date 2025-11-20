@@ -160,14 +160,14 @@ if call debug.assertEquals("world", call string.tolower("WORLD"), "string.tolowe
 }
 
 totalTests = totalTests + 1;
-if call debug.assertEquals("test", call string.trim("  test  "), "string.trim") then {
+if call debug.assertEquals("test", call str.trim("  test  "), "str.trim") then {
     passedTests = passedTests + 1;
 } else {
     failedTests = failedTests + 1;
 }
 
 totalTests = totalTests + 1;
-if call debug.assert(call string.contains("hello world", "world"), "string.contains") then {
+if call debug.assert(call str.contains("hello world", "world"), "str.contains") then {
     passedTests = passedTests + 1;
 } else {
     failedTests = failedTests + 1;

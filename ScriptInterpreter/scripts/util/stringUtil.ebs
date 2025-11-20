@@ -1,7 +1,7 @@
 // stringUtil.ebs - String utility functions
 
 toUpper(text: string) return string {
-    return call string.toUpper(text);
+    return call str.toUpper(text);
 }
 
 print "stringUtil.ebs loaded";

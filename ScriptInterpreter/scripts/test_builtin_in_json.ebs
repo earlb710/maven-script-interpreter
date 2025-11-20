@@ -6,7 +6,7 @@ print "================================";
 
 // This should fail currently - builtin call in JSON literal
 screen testScreen = {
-    "title": #string.toUpper("hello world"),
+    "title": #str.toUpper("hello world"),
     "width": 600,
     "height": 400,
     "vars": []
