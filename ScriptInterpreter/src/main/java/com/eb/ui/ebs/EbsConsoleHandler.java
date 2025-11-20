@@ -533,6 +533,30 @@ public class EbsConsoleHandler extends EbsHandler {
         }
     }
 
+    // Create a new script with auto-generated filename
+    public void createNewScript() {
+        try {
+            // Find next available sequence number
+            int sequence = 1;
+            Path newFilePath;
+            do {
+                newFilePath = Util.SANDBOX_ROOT.resolve("new_script_" + sequence + ".ebs");
+                sequence++;
+            } while (java.nio.file.Files.exists(newFilePath));
+            
+            // Create empty file
+            java.nio.file.Files.createFile(newFilePath);
+            
+            // Add to recent files
+            addRecentFile(newFilePath);
+            
+            // Open the file
+            submit("/open \"" + newFilePath.toString().replace("\\", "\\\\") + "\" rw");
+        } catch (Exception ex) {
+            submitErrors("Failed to create new script: " + ex.getMessage());
+        }
+    }
+
     // Save As… with FileChooser, defaulting to sandbox path
     public void chooseSaveAs(EbsTab tab) {
         try {
