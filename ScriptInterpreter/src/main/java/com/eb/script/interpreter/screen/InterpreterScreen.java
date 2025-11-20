@@ -6,6 +6,7 @@ import com.eb.script.interpreter.statement.StatementKind;
 import com.eb.script.interpreter.statement.ScreenStatement;
 import com.eb.script.interpreter.statement.ScreenShowStatement;
 import com.eb.script.interpreter.statement.ScreenHideStatement;
+import com.eb.script.interpreter.statement.ScreenCloseStatement;
 import com.eb.script.interpreter.screen.DisplayItem.ItemType;
 import com.eb.script.interpreter.screen.AreaDefinition.AreaType;
 import com.eb.script.RuntimeContext;
@@ -581,15 +582,22 @@ public class InterpreterScreen {
     public void visitScreenHideStatement(ScreenHideStatement stmt) throws InterpreterError {
         interpreter.environment().pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Screen %1 hide", stmt.name);
         try {
-            // Check if screen exists (may be null if still being created, but key should be present)
+            // Check if screen exists
             if (!context.getScreens().containsKey(stmt.name)) {
-                throw interpreter.error(stmt.getLine(), "Screen '" + stmt.name + "' does not exist. Create it first with 'screen " + stmt.name + " = {...};'");
+                // Don't error if screen doesn't exist - just log info message
+                if (context.getOutput() != null) {
+                    context.getOutput().printlnInfo("Screen '" + stmt.name + "' does not exist or is already closed");
+                }
+                return;
             }
 
             Stage stage = context.getScreens().get(stmt.name);
             if (stage == null) {
                 // This shouldn't happen with the latch, but handle it gracefully
-                throw interpreter.error(stmt.getLine(), "Screen '" + stmt.name + "' is still being initialized. Please try again.");
+                if (context.getOutput() != null) {
+                    context.getOutput().printlnInfo("Screen '" + stmt.name + "' does not exist or is already closed");
+                }
+                return;
             }
 
             // Hide the screen on JavaFX Application Thread
@@ -606,8 +614,63 @@ public class InterpreterScreen {
                 }
             });
 
-        } catch (InterpreterError ex) {
-            throw interpreter.error(stmt.getLine(), ex.getLocalizedMessage());
+        } finally {
+            interpreter.environment().popCallStack();
+        }
+    }
+
+    /**
+     * Visit a screen close statement to close and dispose a screen
+     */
+    public void visitScreenCloseStatement(ScreenCloseStatement stmt) throws InterpreterError {
+        interpreter.environment().pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Screen %1 close", stmt.name);
+        try {
+            // Check if screen exists
+            if (!context.getScreens().containsKey(stmt.name)) {
+                // Don't error if screen doesn't exist - just log info message
+                if (context.getOutput() != null) {
+                    context.getOutput().printlnInfo("Screen '" + stmt.name + "' does not exist or is already closed");
+                }
+                return;
+            }
+
+            Stage stage = context.getScreens().get(stmt.name);
+            if (stage == null) {
+                // Screen is being created or was already cleaned up
+                if (context.getOutput() != null) {
+                    context.getOutput().printlnInfo("Screen '" + stmt.name + "' does not exist or is already closed");
+                }
+                return;
+            }
+
+            // Close the screen on JavaFX Application Thread
+            Platform.runLater(() -> {
+                try {
+                    // Collect output fields and invoke callback if set
+                    collectOutputFieldsAndInvokeCallback(stmt.name, stmt.getLine());
+                } catch (InterpreterError e) {
+                    if (context.getOutput() != null) {
+                        context.getOutput().printlnError("Error invoking close callback: " + e.getMessage());
+                    }
+                }
+                
+                // Close the stage
+                stage.close();
+                
+                // Interrupt and stop the screen thread
+                Thread thread = context.getScreenThreads().get(stmt.name);
+                if (thread != null && thread.isAlive()) {
+                    thread.interrupt();
+                }
+                
+                // Clean up resources
+                context.remove(stmt.name);
+                
+                if (context.getOutput() != null) {
+                    context.getOutput().printlnOk("Screen '" + stmt.name + "' closed");
+                }
+            });
+
         } finally {
             interpreter.environment().popCallStack();
         }
