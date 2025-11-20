@@ -284,6 +284,41 @@ The `AreaItem` class defines individual UI elements within an area, including th
 |----------|------|-------------|--------|
 | `alignment` | String | Alignment within parent | "center", "top-left", "bottom-right" |
 
+### Event Handlers
+
+| Property | Type | Description | Example |
+|----------|------|-------------|---------|
+| `onValidate` | String | EBS code to validate item value | "if (age < 18) { return false; } return true;" |
+
+The `onValidate` property allows you to specify inline EBS code that validates the item's value whenever it changes. The validation code:
+- Is executed automatically when the control's value changes
+- Must return a boolean value (`true` for valid, `false` for invalid)
+- Has access to all screen variables
+- Causes the control to be marked with a red border when validation fails
+- Can be defined at either the variable's display level or the individual item level
+- Item-level `onValidate` takes precedence over variable-level `onValidate`
+
+**Example: Email validation**
+```javascript
+{
+    "varRef": "email",
+    "sequence": 1,
+    "onValidate": "if (string.length(email) > 0) { var hasAt = string.contains(email, '@'); if (not hasAt) { return false; } } return true;"
+}
+```
+
+**Example: Age range validation**
+```javascript
+{
+    "name": "age",
+    "type": "int",
+    "display": {
+        "type": "textfield",
+        "onValidate": "if (age < 18 or age > 100) { return false; } return true;"
+    }
+}
+```
+
 ### DisplayMetadata Fallback
 
 If `displayMetadata` is not provided for an AreaItem, it will automatically use the DisplayMetadata associated with its `varRef` variable. This allows for centralized configuration with item-specific overrides when needed.
@@ -317,6 +352,45 @@ The `DisplayMetadata` class defines the display properties and behavior for UI i
 | `screenName` | String | Associated screen name | "LoginScreen" |
 | `alignment` | String | Text/content alignment | "left", "center", "right" |
 | `pattern` | String | Regex validation pattern | "^[a-zA-Z0-9]+$" |
+| `onValidate` | String | Inline EBS code for validation | "return age >= 18;" |
+
+### Event Handler Properties
+
+#### onValidate
+
+The `onValidate` property defines inline validation logic for a variable's display. When defined at the variable level in the `display` object, this validation will apply to all instances of that variable unless overridden at the item level.
+
+**Format**: String containing EBS code that must return a boolean value
+**Trigger**: Executed automatically whenever the control's value changes
+**Return Value**: 
+- `true` - Value is valid (removes error styling)
+- `false` - Value is invalid (applies red border)
+
+**Example: Username length validation**
+```javascript
+{
+    "name": "username",
+    "type": "string",
+    "display": {
+        "type": "textfield",
+        "onValidate": "var len = string.length(username); if (len < 3 and len > 0) { return false; } return true;"
+    }
+}
+```
+
+**Example: Numeric range validation**
+```javascript
+{
+    "name": "age",
+    "type": "int",
+    "display": {
+        "type": "spinner",
+        "min": 0,
+        "max": 150,
+        "onValidate": "if (age < 18 or age > 100) { return false; } return true;"
+    }
+}
+```
 
 ### ItemType Enum
 
