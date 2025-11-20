@@ -445,22 +445,37 @@ public class InterpreterScreen {
      * Visit a screen show statement to display a screen
      */
     public void visitScreenShowStatement(ScreenShowStatement stmt) throws InterpreterError {
-        interpreter.environment().pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Screen %1 show", stmt.name);
+        String screenName = stmt.name;
+        
+        // If no screen name provided, determine from thread context
+        if (screenName == null) {
+            screenName = context.getCurrentScreen();
+            if (screenName == null) {
+                throw interpreter.error(stmt.getLine(), 
+                    "No screen name specified and not executing in a screen context. " +
+                    "Use 'show screen <name>;' to show a specific screen, or call 'show screen;' " +
+                    "from within screen event handlers (e.g., onClick).");
+            }
+        }
+        
+        interpreter.environment().pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Screen %1 show", screenName);
         try {
             // Check if screen exists (may be null if still being created, but key should be present)
-            if (!context.getScreens().containsKey(stmt.name)) {
-                throw interpreter.error(stmt.getLine(), "Screen '" + stmt.name + "' does not exist. Create it first with 'screen " + stmt.name + " = {...};'");
+            if (!context.getScreens().containsKey(screenName)) {
+                throw interpreter.error(stmt.getLine(), "Screen '" + screenName + "' does not exist. Create it first with 'screen " + screenName + " = {...};'");
             }
 
-            Stage stage = context.getScreens().get(stmt.name);
+            Stage stage = context.getScreens().get(screenName);
             if (stage == null) {
                 // This shouldn't happen with the latch, but handle it gracefully
-                throw interpreter.error(stmt.getLine(), "Screen '" + stmt.name + "' is still being initialized. Please try again.");
+                throw interpreter.error(stmt.getLine(), "Screen '" + screenName + "' is still being initialized. Please try again.");
             }
 
+            final String finalScreenName = screenName;
+            
             // Store the callback if specified (will be invoked on screen close)
             if (stmt.callbackName != null) {
-                context.setScreenCallback(stmt.name, stmt.callbackName);
+                context.setScreenCallback(finalScreenName, stmt.callbackName);
             }
 
             // Show the screen on JavaFX Application Thread
@@ -468,18 +483,18 @@ public class InterpreterScreen {
                 if (!stage.isShowing()) {
                     stage.show();
                     if (context.getOutput() != null) {
-                        context.getOutput().printlnOk("Screen '" + stmt.name + "' shown");
+                        context.getOutput().printlnOk("Screen '" + finalScreenName + "' shown");
                     }
                 } else {
                     if (context.getOutput() != null) {
-                        context.getOutput().printlnInfo("Screen '" + stmt.name + "' is already showing");
+                        context.getOutput().printlnInfo("Screen '" + finalScreenName + "' is already showing");
                     }
                 }
                 
                 // Invoke callback with "shown" event if specified
                 if (stmt.callbackName != null) {
                     try {
-                        invokeScreenCallback(stmt.callbackName, stmt.name, "shown", stmt.getLine());
+                        invokeScreenCallback(stmt.callbackName, finalScreenName, "shown", stmt.getLine());
                     } catch (InterpreterError e) {
                         if (context.getOutput() != null) {
                             context.getOutput().printlnError("Error invoking callback '" + stmt.callbackName + "': " + e.getMessage());
@@ -580,29 +595,43 @@ public class InterpreterScreen {
      * Visit a screen hide statement to hide a screen
      */
     public void visitScreenHideStatement(ScreenHideStatement stmt) throws InterpreterError {
-        interpreter.environment().pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Screen %1 hide", stmt.name);
+        String screenName = stmt.name;
+        
+        // If no screen name provided, determine from thread context
+        if (screenName == null) {
+            screenName = context.getCurrentScreen();
+            if (screenName == null) {
+                throw interpreter.error(stmt.getLine(), 
+                    "No screen name specified and not executing in a screen context. " +
+                    "Use 'hide screen <name>;' to hide a specific screen, or call 'hide screen;' " +
+                    "from within screen event handlers (e.g., onClick).");
+            }
+        }
+        
+        interpreter.environment().pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Screen %1 hide", screenName);
         try {
             // Check if screen exists (may be null if still being created, but key should be present)
-            if (!context.getScreens().containsKey(stmt.name)) {
-                throw interpreter.error(stmt.getLine(), "Screen '" + stmt.name + "' does not exist. Create it first with 'screen " + stmt.name + " = {...};'");
+            if (!context.getScreens().containsKey(screenName)) {
+                throw interpreter.error(stmt.getLine(), "Screen '" + screenName + "' does not exist. Create it first with 'screen " + screenName + " = {...};'");
             }
 
-            Stage stage = context.getScreens().get(stmt.name);
+            Stage stage = context.getScreens().get(screenName);
             if (stage == null) {
                 // This shouldn't happen with the latch, but handle it gracefully
-                throw interpreter.error(stmt.getLine(), "Screen '" + stmt.name + "' is still being initialized. Please try again.");
+                throw interpreter.error(stmt.getLine(), "Screen '" + screenName + "' is still being initialized. Please try again.");
             }
 
+            final String finalScreenName = screenName;
+            
             // Hide the screen on JavaFX Application Thread
             Platform.runLater(() -> {
-                if (stage.isShowing()) {
-                    stage.hide();
-                    if (context.getOutput() != null) {
-                        context.getOutput().printlnOk("Screen '" + stmt.name + "' hidden");
-                    }
-                } else {
-                    if (context.getOutput() != null) {
-                        context.getOutput().printlnInfo("Screen '" + stmt.name + "' is already hidden");
+                boolean wasShowing = stage.isShowing();
+                stage.hide();
+                if (context.getOutput() != null) {
+                    if (wasShowing) {
+                        context.getOutput().printlnOk("Screen '" + finalScreenName + "' hidden");
+                    } else {
+                        context.getOutput().printlnOk("Screen '" + finalScreenName + "' hidden (was already hidden)");
                     }
                 }
             });
