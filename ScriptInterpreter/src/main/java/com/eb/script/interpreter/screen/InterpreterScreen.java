@@ -329,27 +329,23 @@ public class InterpreterScreen {
                             }
                         };
 
-                        stage = ScreenFactory.createScreen(
+                        // Create ScreenDefinition and use it to create the Stage
+                        ScreenDefinition screenDef = ScreenFactory.createScreenDefinition(
                                 screenName,
                                 screenTitle,
                                 screenWidth,
                                 screenHeight,
                                 areas,
-                                (scrName, varName) -> context.getDisplayItem().get(scrName + "." + varName),
                                 varsMap, // Pass screenVars for binding
                                 varTypesMap, // Pass variable types for proper conversion
                                 onClickHandler, // Pass onClick handler for buttons
-                                context // Pass context to store bound controls for refresh
+                                context // Pass context for accessing display metadata
                         );
+                        stage = screenDef.createScreen();
                     } else {
-                        // Create simple stage without areas
-                        stage = new Stage();
-                        stage.setTitle(screenTitle);
-
-                        // Create a simple scene with a StackPane
-                        StackPane root = new StackPane();
-                        Scene scene = new Scene(root, screenWidth, screenHeight);
-                        stage.setScene(scene);
+                        // Create simple ScreenDefinition without areas
+                        ScreenDefinition screenDef = new ScreenDefinition(screenName, screenTitle, screenWidth, screenHeight);
+                        stage = screenDef.createScreen();
                     }
 
                     if (screenMaximize) {
@@ -376,6 +372,15 @@ public class InterpreterScreen {
 
                     // Set up cleanup when screen is closed
                     stage.setOnCloseRequest(event -> {
+                        // Collect output fields and invoke callback if set
+                        try {
+                            collectOutputFieldsAndInvokeCallback(screenName, 0);
+                        } catch (InterpreterError e) {
+                            if (context.getOutput() != null) {
+                                context.getOutput().printlnError("Error invoking close callback: " + e.getMessage());
+                            }
+                        }
+                        
                         // Interrupt and stop the screen thread
                         Thread thread = context.getScreenThreads().get(screenName);
                         if (thread != null && thread.isAlive()) {
@@ -452,6 +457,11 @@ public class InterpreterScreen {
                 throw interpreter.error(stmt.getLine(), "Screen '" + stmt.name + "' is still being initialized. Please try again.");
             }
 
+            // Store the callback if specified (will be invoked on screen close)
+            if (stmt.callbackName != null) {
+                context.setScreenCallback(stmt.name, stmt.callbackName);
+            }
+
             // Show the screen on JavaFX Application Thread
             Platform.runLater(() -> {
                 if (!stage.isShowing()) {
@@ -464,6 +474,17 @@ public class InterpreterScreen {
                         context.getOutput().printlnInfo("Screen '" + stmt.name + "' is already showing");
                     }
                 }
+                
+                // Invoke callback with "shown" event if specified
+                if (stmt.callbackName != null) {
+                    try {
+                        invokeScreenCallback(stmt.callbackName, stmt.name, "shown", stmt.getLine());
+                    } catch (InterpreterError e) {
+                        if (context.getOutput() != null) {
+                            context.getOutput().printlnError("Error invoking callback '" + stmt.callbackName + "': " + e.getMessage());
+                        }
+                    }
+                }
             });
 
         } catch (InterpreterError ex) {
@@ -471,6 +492,87 @@ public class InterpreterScreen {
         } finally {
             interpreter.environment().popCallStack();
         }
+    }
+    
+    /**
+     * Invoke a screen callback function with screen event data as JSON
+     */
+    private void invokeScreenCallback(String callbackName, String screenName, String event, int line) throws InterpreterError {
+        // Create JSON event data
+        Map<String, Object> eventData = new java.util.HashMap<>();
+        eventData.put("screenName", screenName);
+        eventData.put("event", event);
+        eventData.put("timestamp", System.currentTimeMillis());
+        
+        // Create a call statement to invoke the callback with the JSON data
+        // Build the call: "call callbackName(eventData);"
+        List<com.eb.script.interpreter.statement.Parameter> paramsList = new ArrayList<>();
+        paramsList.add(new com.eb.script.interpreter.statement.Parameter("eventData", DataType.JSON, 
+            new com.eb.script.interpreter.expression.LiteralExpression(DataType.JSON, eventData)));
+        
+        com.eb.script.interpreter.statement.CallStatement callStmt = 
+            new com.eb.script.interpreter.statement.CallStatement(line, callbackName, paramsList);
+        
+        // Execute the call statement
+        interpreter.visitCallStatement(callStmt);
+    }
+
+    /**
+     * Collect all output and inout fields from a screen and invoke callback on close
+     */
+    private void collectOutputFieldsAndInvokeCallback(String screenName, int line) throws InterpreterError {
+        // Check if there's a callback set for this screen
+        String callbackName = context.getScreenCallback(screenName);
+        if (callbackName == null) {
+            return; // No callback, nothing to do
+        }
+
+        // Collect output fields (those with "out" or "inout" scope)
+        Map<String, VarSet> varSets = context.getScreenVarSets(screenName);
+        List<Map<String, Object>> outputFields = new ArrayList<>();
+        
+        if (varSets != null) {
+            for (VarSet varSet : varSets.values()) {
+                // Check if this varSet has output scope (out or inout)
+                if (varSet.isOutput()) {
+                    // Iterate through variables in this set
+                    for (Var var : varSet.getVariables().values()) {
+                        // Get the current value from screenVars
+                        ConcurrentHashMap<String, Object> screenVars = context.getScreenVars(screenName);
+                        if (screenVars != null) {
+                            Object value = screenVars.get(var.getName());
+                            
+                            // Create field object
+                            Map<String, Object> field = new java.util.HashMap<>();
+                            field.put("name", var.getName());
+                            field.put("type", var.getType() != null ? var.getType().toString() : "string");
+                            field.put("value", value);
+                            field.put("scope", varSet.getScope());
+                            
+                            outputFields.add(field);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Create the callback data with output fields
+        Map<String, Object> callbackData = new java.util.HashMap<>();
+        callbackData.put("screenName", screenName);
+        callbackData.put("event", "closed");
+        callbackData.put("timestamp", System.currentTimeMillis());
+        callbackData.put("fields", outputFields);
+        
+        // Invoke the callback with the output fields
+        List<com.eb.script.interpreter.statement.Parameter> paramsList = new ArrayList<>();
+        paramsList.add(new com.eb.script.interpreter.statement.Parameter("eventData", DataType.JSON, 
+            new com.eb.script.interpreter.expression.LiteralExpression(DataType.JSON, callbackData)));
+        
+        com.eb.script.interpreter.statement.CallStatement callStmt = 
+            new com.eb.script.interpreter.statement.CallStatement(line, callbackName, paramsList);
+        
+        // Execute the call statement
+        interpreter.visitCallStatement(callStmt);
     }
 
     /**

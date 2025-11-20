@@ -43,6 +43,7 @@ public class InterpreterContext {
     private final Map<String, Runnable> screenRefreshCallbacks = new ConcurrentHashMap<>();
     private final Map<String, List<javafx.scene.Node>> screenBoundControls = new ConcurrentHashMap<>();
     private final Map<String, com.eb.ui.ebs.StatusBar> screenStatusBars = new ConcurrentHashMap<>();
+    private final Map<String, String> screenCallbacks = new ConcurrentHashMap<>(); // screenName -> callbackFunctionName
     private final Set<String> importedFiles = ConcurrentHashMap.newKeySet();  // Global list of all imported files to prevent circular imports and duplicate imports
 
     // New storage structures for the refactored variable sets
@@ -313,6 +314,7 @@ public class InterpreterContext {
         screenVarSets.clear();
         screenVarItems.clear();
         screenAreaItems.clear();
+        screenCallbacks.clear();
         GLOBAL_SCREEN_CREATION_ORDER.clear();
     }
 
@@ -324,9 +326,32 @@ public class InterpreterContext {
         screenVarSets.remove(screenName);
         screenVarItems.remove(screenName);
         screenAreaItems.remove(screenName);
+        screenCallbacks.remove(screenName);
         displayMetadata.entrySet().removeIf(entry -> entry.getKey().startsWith(screenName + "."));
         GLOBAL_SCREEN_CREATION_ORDER.remove(screenName);
 
+    }
+
+    /**
+     * Get the callback function name for a screen
+     * @param screenName The screen name
+     * @return The callback function name, or null if no callback is set
+     */
+    public String getScreenCallback(String screenName) {
+        return screenCallbacks.get(screenName);
+    }
+
+    /**
+     * Set the callback function name for a screen
+     * @param screenName The screen name
+     * @param callbackName The callback function name
+     */
+    public void setScreenCallback(String screenName, String callbackName) {
+        if (callbackName != null) {
+            screenCallbacks.put(screenName, callbackName);
+        } else {
+            screenCallbacks.remove(screenName);
+        }
     }
 
 }

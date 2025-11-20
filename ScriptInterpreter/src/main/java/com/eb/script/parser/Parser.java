@@ -334,6 +334,10 @@ public class Parser {
             return connectStatement();
         } else if (match(EbsTokenType.SCREEN)) {
             return screenStatement();
+        } else if (match(EbsTokenType.SHOW)) {
+            return showScreenStatement();
+        } else if (match(EbsTokenType.HIDE)) {
+            return hideScreenStatement();
         } else if (match(EbsTokenType.USE)) {
             return useConnectionStatement();
         } else if (matchAll(EbsTokenType.CLOSE, EbsTokenType.CONNECTION)) {
@@ -1443,16 +1447,8 @@ public class Parser {
         EbsToken nameTok = consume(EbsTokenType.IDENTIFIER, "Expected screen name after 'screen'.");
         String screenName = (String) nameTok.literal;
 
-        // 2) Check what follows: '=' (definition), 'show', or 'hide'
-        if (match(EbsTokenType.SHOW)) {
-            // screen <name> show;
-            consume(EbsTokenType.SEMICOLON, "Expected ';' after 'screen <name> show'.");
-            return new ScreenShowStatement(line, screenName);
-        } else if (match(EbsTokenType.HIDE)) {
-            // screen <name> hide;
-            consume(EbsTokenType.SEMICOLON, "Expected ';' after 'screen <name> hide'.");
-            return new ScreenHideStatement(line, screenName);
-        } else if (match(EbsTokenType.EQUAL)) {
+        // 2) Expect '=' for screen definition
+        if (match(EbsTokenType.EQUAL)) {
             // screen <name> = {...};
             // 3) Parse the spec:
             //    - JSON literal ({...}) captured from source
@@ -1472,8 +1468,55 @@ public class Parser {
 
             return new ScreenStatement(line, screenName, spec);
         } else {
-            throw error(peek(), "Expected '=', 'show', or 'hide' after screen name.");
+            throw error(peek(), "Expected '=' after screen name. Use 'show screen <name>' to show or 'hide screen <name>' to hide.");
         }
+    }
+
+    private Statement showScreenStatement() throws ParseError {
+        int line = previous().line; // the 'show' token
+
+        // Expect 'screen' keyword
+        consume(EbsTokenType.SCREEN, "Expected 'screen' after 'show'.");
+
+        // Require screen name
+        EbsToken nameTok = consume(EbsTokenType.IDENTIFIER, "Expected screen name after 'show screen'.");
+        String screenName = (String) nameTok.literal;
+
+        // Check for optional parameters: (param1, param2, ...)
+        List<Expression> parameters = null;
+        if (match(EbsTokenType.LPAREN)) {
+            parameters = new ArrayList<>();
+            if (!check(EbsTokenType.RPAREN)) {
+                do {
+                    parameters.add(expression());
+                } while (match(EbsTokenType.COMMA));
+            }
+            consume(EbsTokenType.RPAREN, "Expected ')' after parameters.");
+        }
+
+        // Check for optional callback: callback name
+        String callbackName = null;
+        if (match(EbsTokenType.CALLBACK)) {
+            EbsToken callbackTok = consume(EbsTokenType.IDENTIFIER, "Expected callback function name after 'callback'.");
+            callbackName = (String) callbackTok.literal;
+        }
+
+        consume(EbsTokenType.SEMICOLON, "Expected ';' after 'show screen <name>'.");
+        return new ScreenShowStatement(line, screenName, parameters, callbackName);
+    }
+
+    private Statement hideScreenStatement() throws ParseError {
+        int line = previous().line; // the 'hide' token
+
+        // Expect 'screen' keyword
+        consume(EbsTokenType.SCREEN, "Expected 'screen' after 'hide'.");
+
+        // Require screen name
+        EbsToken nameTok = consume(EbsTokenType.IDENTIFIER, "Expected screen name after 'hide screen'.");
+        String screenName = (String) nameTok.literal;
+
+        consume(EbsTokenType.SEMICOLON, "Expected ';' after 'hide screen <name>'.");
+        return new ScreenHideStatement(line, screenName);
     }
 
     private SqlSelectExpression parseSqlSelectFromSource() throws ParseError {

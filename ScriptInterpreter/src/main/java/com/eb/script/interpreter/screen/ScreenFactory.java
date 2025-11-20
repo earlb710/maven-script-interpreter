@@ -23,7 +23,6 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 import java.util.*;
-import java.util.function.BiFunction;
 
 /**
  * Factory class for creating complete JavaFX screens/windows from
@@ -71,6 +70,71 @@ public class ScreenFactory {
     }
 
     /**
+     * Creates a ScreenDefinition with basic parameters.
+     * 
+     * @param screenName The name of the screen
+     * @param title The window title
+     * @param width The window width
+     * @param height The window height
+     * @param areas List of AreaDefinitions containing containers and items
+     * @param context InterpreterContext for accessing display metadata
+     * @return A ScreenDefinition that can be used to create Stage instances
+     */
+    public static ScreenDefinition createScreenDefinition(String screenName, String title, double width, double height,
+            List<AreaDefinition> areas,
+            InterpreterContext context) {
+        return createScreenDefinition(screenName, title, width, height, areas, null, null, null, context);
+    }
+    
+    /**
+     * Creates a ScreenDefinition with variable binding support.
+     * 
+     * @param screenName The name of the screen
+     * @param title The window title
+     * @param width The window width
+     * @param height The window height
+     * @param areas List of AreaDefinition containing containers and items
+     * @param screenVars The ConcurrentHashMap containing screen variables for two-way binding
+     * @param context InterpreterContext for accessing display metadata
+     * @return A ScreenDefinition that can be used to create Stage instances
+     */
+    public static ScreenDefinition createScreenDefinition(String screenName, String title, double width, double height,
+            List<AreaDefinition> areas,
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+            InterpreterContext context) {
+        return createScreenDefinition(screenName, title, width, height, areas, screenVars, null, null, context);
+    }
+    
+    /**
+     * Creates a ScreenDefinition with variable binding and onClick handlers.
+     * 
+     * @param screenName The name of the screen
+     * @param title The window title
+     * @param width The window width
+     * @param height The window height
+     * @param areas List of AreaDefinitions containing containers and items
+     * @param screenVars The ConcurrentHashMap containing screen variables for two-way binding
+     * @param varTypes The ConcurrentHashMap containing screen variable types for proper type conversion
+     * @param onClickHandler Handler for button onClick events
+     * @param context InterpreterContext for accessing display metadata
+     * @return A ScreenDefinition that can be used to create Stage instances
+     */
+    public static ScreenDefinition createScreenDefinition(String screenName, String title, double width, double height,
+            List<AreaDefinition> areas,
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+            java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
+            OnClickHandler onClickHandler,
+            InterpreterContext context) {
+        ScreenDefinition definition = new ScreenDefinition(screenName, title, width, height);
+        definition.setAreas(areas);
+        definition.setScreenVars(screenVars);
+        definition.setVarTypes(varTypes);
+        definition.setOnClickHandler(onClickHandler);
+        definition.setContext(context);
+        return definition;
+    }
+
+    /**
      * Creates a complete JavaFX window/screen from area definitions. This
      * method creates containers, adds items, and applies layout properties.
      *
@@ -79,14 +143,13 @@ public class ScreenFactory {
      * @param width The window width
      * @param height The window height
      * @param areas List of AreaDefinitions containing containers and items
-     * @param metadataProvider Function to retrieve DisplayItem for variables
-     * (screenName, varName) -> metadata
+     * @param context InterpreterContext for accessing display metadata
      * @return A Stage representing the complete window
      */
     public static Stage createScreen(String screenName, String title, double width, double height,
             List<AreaDefinition> areas,
-            BiFunction<String, String, DisplayItem> metadataProvider) {
-        return createScreen(screenName, title, width, height, areas, metadataProvider, null, null, null);
+            InterpreterContext context) {
+        return createScreen(screenName, title, width, height, areas, null, null, null, context);
     }
 
     /**
@@ -99,17 +162,16 @@ public class ScreenFactory {
      * @param width The window width
      * @param height The window height
      * @param areas List of AreaDefinitions containing containers and items
-     * @param metadataProvider Function to retrieve DisplayItem for variables
-     * (screenName, varName) -> metadata
      * @param screenVars The ConcurrentHashMap containing screen variables for
      * two-way binding (can be null)
+     * @param context InterpreterContext for accessing display metadata
      * @return A Stage representing the complete window
      */
     public static Stage createScreen(String screenName, String title, double width, double height,
             List<AreaDefinition> areas,
-            BiFunction<String, String, DisplayItem> metadataProvider,
-            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
-        return createScreen(screenName, title, width, height, areas, metadataProvider, screenVars, null, null);
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+            InterpreterContext context) {
+        return createScreen(screenName, title, width, height, areas, screenVars, null, null, context);
     }
 
     /**
@@ -123,48 +185,16 @@ public class ScreenFactory {
      * @param width The window width
      * @param height The window height
      * @param areas List of AreaDefinitions containing containers and items
-     * @param metadataProvider Function to retrieve DisplayItem for variables
-     * (screenName, varName) -> metadata
      * @param screenVars The ConcurrentHashMap containing screen variables for
      * two-way binding (can be null)
      * @param varTypes The ConcurrentHashMap containing screen variable types
      * for proper type conversion (can be null)
      * @param onClickHandler Handler for button onClick events (can be null)
+     * @param context InterpreterContext for accessing display metadata
      * @return A Stage representing the complete window
      */
     public static Stage createScreen(String screenName, String title, double width, double height,
             List<AreaDefinition> areas,
-            BiFunction<String, String, DisplayItem> metadataProvider,
-            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
-            java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
-            OnClickHandler onClickHandler) {
-        return createScreen(screenName, title, width, height, areas, metadataProvider, screenVars, varTypes, onClickHandler, null);
-    }
-
-    /**
-     * Creates a complete JavaFX window/screen from area definitions with
-     * variable binding, onClick handlers, and stores bound controls in the
-     * context for later refresh.
-     *
-     * @param screenName The name of the screen
-     * @param title The window title
-     * @param width The window width
-     * @param height The window height
-     * @param areas List of AreaDefinitions containing containers and items
-     * @param metadataProvider Function to retrieve DisplayItem for variables
-     * (screenName, varName) -> metadata
-     * @param screenVars The ConcurrentHashMap containing screen variables for
-     * two-way binding (can be null)
-     * @param varTypes The ConcurrentHashMap containing screen variable types
-     * for proper type conversion (can be null)
-     * @param onClickHandler Handler for button onClick events (can be null)
-     * @param context InterpreterContext to store bound controls for later
-     * refresh (can be null)
-     * @return A Stage representing the complete window
-     */
-    public static Stage createScreen(String screenName, String title, double width, double height,
-            List<AreaDefinition> areas,
-            BiFunction<String, String, DisplayItem> metadataProvider,
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
             java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
             OnClickHandler onClickHandler,
@@ -183,14 +213,14 @@ public class ScreenFactory {
             rootContainer = new Pane();
         } else if (areas.size() == 1) {
             // Single area - use it as root
-            rootContainer = createAreaWithItems(areas.get(0), screenName, metadataProvider, screenVars, varTypes, onClickHandler, allBoundControls);
+            rootContainer = createAreaWithItems(areas.get(0), screenName, context, screenVars, varTypes, onClickHandler, allBoundControls);
         } else {
             // Multiple areas - arrange in VBox
             VBox root = new VBox();
             root.setSpacing(10);
 
             for (AreaDefinition areaDef : areas) {
-                Region areaContainer = createAreaWithItems(areaDef, screenName, metadataProvider, screenVars, varTypes, onClickHandler, allBoundControls);
+                Region areaContainer = createAreaWithItems(areaDef, screenName, context, screenVars, varTypes, onClickHandler, allBoundControls);
                 root.getChildren().add(areaContainer);
             }
 
@@ -220,7 +250,7 @@ public class ScreenFactory {
         com.eb.ui.ebs.StatusBar statusBar = new com.eb.ui.ebs.StatusBar();
         
         // Add focus listeners to all bound controls to update status bar
-        setupStatusBarUpdates(allBoundControls, statusBar, metadataProvider, screenName);
+        setupStatusBarUpdates(allBoundControls, statusBar, context, screenName);
         
         // Create menu bar for the screen
         javafx.scene.control.MenuBar menuBar = createScreenMenuBar(stage);
@@ -257,7 +287,7 @@ public class ScreenFactory {
      */
     private static void setupStatusBarUpdates(List<Node> controls, 
             com.eb.ui.ebs.StatusBar statusBar,
-            BiFunction<String, String, DisplayItem> metadataProvider,
+            InterpreterContext context,
             String screenName) {
         for (Node control : controls) {
             control.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
@@ -269,6 +299,8 @@ public class ScreenFactory {
                         // Extract item name from "screenName.itemName"
                         String itemName = fullRef.substring(screenName.length() + 1);
                         
+                        // Get metadata for this item from context
+                        DisplayItem metadata = context != null ? context.getDisplayItem().get(screenName + "." + itemName) : null;
                         // Update message with tooltip (prefer tooltip over promptHelp)
                         String tooltip = (String) control.getProperties().get("itemTooltip");
                         String message = tooltip != null ? tooltip : "";
@@ -329,8 +361,8 @@ public class ScreenFactory {
      * Creates a container from AreaDefinition and adds all items to it.
      */
     private static Region createAreaWithItems(AreaDefinition areaDef, String screenName,
-            BiFunction<String, String, DisplayItem> metadataProvider) {
-        return createAreaWithItems(areaDef, screenName, metadataProvider, null, null, null);
+            InterpreterContext context) {
+        return createAreaWithItems(areaDef, screenName, context, null, null, null);
     }
 
     /**
@@ -338,9 +370,9 @@ public class ScreenFactory {
      * variable binding.
      */
     private static Region createAreaWithItems(AreaDefinition areaDef, String screenName,
-            BiFunction<String, String, DisplayItem> metadataProvider,
+            InterpreterContext context,
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
-        return createAreaWithItems(areaDef, screenName, metadataProvider, screenVars, null, null);
+        return createAreaWithItems(areaDef, screenName, context, screenVars, null, null);
     }
 
     /**
@@ -348,12 +380,12 @@ public class ScreenFactory {
      * variable binding and onClick handler.
      */
     private static Region createAreaWithItems(AreaDefinition areaDef, String screenName,
-            BiFunction<String, String, DisplayItem> metadataProvider,
+            InterpreterContext context,
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
             java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
             OnClickHandler onClickHandler) {
         List<Node> boundControls = new ArrayList<>();
-        return createAreaWithItems(areaDef, screenName, metadataProvider, screenVars, varTypes, onClickHandler, boundControls);
+        return createAreaWithItems(areaDef, screenName, context, screenVars, varTypes, onClickHandler, boundControls);
     }
 
     /**
@@ -361,7 +393,7 @@ public class ScreenFactory {
      * variable binding, onClick handler, and control tracking.
      */
     private static Region createAreaWithItems(AreaDefinition areaDef, String screenName,
-            BiFunction<String, String, DisplayItem> metadataProvider,
+            InterpreterContext context,
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
             java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
             OnClickHandler onClickHandler,
@@ -376,15 +408,15 @@ public class ScreenFactory {
                     .toList();
 
             // First pass: Calculate maximum label width for alignment
-            double maxLabelWidth = calculateMaxLabelWidth(sortedItems, screenName, metadataProvider);
+            double maxLabelWidth = calculateMaxLabelWidth(sortedItems, screenName, context);
 
             // Add items to container based on container type
             for (AreaItem item : sortedItems) {
                 // Get metadata for the item
                 // Start with var-level metadata (from vars section), then merge item-level metadata (from area items display)
                 DisplayItem metadata = null;
-                if (item.varRef != null && metadataProvider != null) {
-                    metadata = metadataProvider.apply(screenName, item.varRef);
+                if (item.varRef != null && context != null) {
+                    metadata = context.getDisplayItem().get(screenName + "." + item.varRef);
                 }
                 // If item has its own display metadata, merge it (item-level overwrites var-level)
                 if (item.displayItem != null) {
@@ -477,19 +509,19 @@ public class ScreenFactory {
                         // If Tab has multiple child areas, create a VBox to hold them
                         if (childArea.childAreas.size() == 1) {
                             // Single child area - use it directly
-                            tabContent = createAreaWithItems(childArea.childAreas.get(0), screenName, metadataProvider, screenVars, varTypes, onClickHandler, boundControls);
+                            tabContent = createAreaWithItems(childArea.childAreas.get(0), screenName, context, screenVars, varTypes, onClickHandler, boundControls);
                         } else {
                             // Multiple child areas - wrap in VBox
                             javafx.scene.layout.VBox vbox = new javafx.scene.layout.VBox(10);
                             for (AreaDefinition tabChildArea : childArea.childAreas) {
-                                Region childContent = createAreaWithItems(tabChildArea, screenName, metadataProvider, screenVars, varTypes, onClickHandler, boundControls);
+                                Region childContent = createAreaWithItems(tabChildArea, screenName, context, screenVars, varTypes, onClickHandler, boundControls);
                                 vbox.getChildren().add(childContent);
                             }
                             tabContent = vbox;
                         }
                     } else if (childArea.items != null && !childArea.items.isEmpty()) {
                         // Tab has items directly (no child areas)
-                        tabContent = createAreaWithItems(childArea, screenName, metadataProvider, screenVars, varTypes, onClickHandler, boundControls);
+                        tabContent = createAreaWithItems(childArea, screenName, context, screenVars, varTypes, onClickHandler, boundControls);
                     } else {
                         // Empty tab - create empty pane
                         tabContent = new javafx.scene.layout.Pane();
@@ -520,7 +552,7 @@ public class ScreenFactory {
                     }
                 } else {
                     // Normal nested area handling
-                    Region childContainer = createAreaWithItems(childArea, screenName, metadataProvider, screenVars, varTypes, onClickHandler, boundControls);
+                    Region childContainer = createAreaWithItems(childArea, screenName, context, screenVars, varTypes, onClickHandler, boundControls);
                     
                     // Add the child container to the parent container
                     // Treat child areas as regular nodes
@@ -907,10 +939,10 @@ public class ScreenFactory {
      */
     public static void createAndShowScreen(String screenName, String title, double width, double height,
             List<AreaDefinition> areas,
-            BiFunction<String, String, DisplayItem> metadataProvider,
+            InterpreterContext context,
             boolean maximize) {
         Platform.runLater(() -> {
-            Stage stage = createScreen(screenName, title, width, height, areas, metadataProvider);
+            Stage stage = createScreen(screenName, title, width, height, areas, context);
 
             if (maximize) {
                 stage.setMaximized(true);
@@ -1002,11 +1034,13 @@ public class ScreenFactory {
             }
         }
 
-        // Create metadata provider from map
-        BiFunction<String, String, DisplayItem> metadataProvider
-                = (sName, varName) -> metadataMap.get(varName);
+        // Create a temporary context and populate it with metadata
+        InterpreterContext tempContext = new InterpreterContext();
+        for (Map.Entry<String, DisplayItem> entry : metadataMap.entrySet()) {
+            tempContext.getDisplayItem().put(screenName + "." + entry.getKey(), entry.getValue());
+        }
 
-        return createScreen(screenName, title, width, height, areas, metadataProvider);
+        return createScreen(screenName, title, width, height, areas, tempContext);
     }
 
     /**
@@ -1348,19 +1382,19 @@ public class ScreenFactory {
      *
      * @param items The list of items to check for labels
      * @param screenName The screen name
-     * @param metadataProvider Provider to get metadata for items
+     * @param context InterpreterContext for accessing display metadata
      * @return The maximum label width in pixels
      */
     private static double calculateMaxLabelWidth(List<AreaItem> items, String screenName,
-            BiFunction<String, String, DisplayItem> metadataProvider) {
+            InterpreterContext context) {
         double maxWidth = 100; // Minimum width
         javafx.scene.text.Text measuringText = new javafx.scene.text.Text();
 
         for (AreaItem item : items) {
             // Get metadata with same merge logic as createAreaWithItems
             DisplayItem metadata = null;
-            if (item.varRef != null && metadataProvider != null) {
-                metadata = metadataProvider.apply(screenName, item.varRef);
+            if (item.varRef != null && context != null) {
+                metadata = context.getDisplayItem().get(screenName + "." + item.varRef);
             }
             if (item.displayItem != null) {
                 metadata = mergeDisplayMetadata(metadata, item.displayItem);

@@ -18,6 +18,6 @@ public class ScreenHideStatement extends Statement {
 
     @Override
     public String toString() {
-        return "screen " + name + " hide";
+        return "hide screen " + name;
     }
 }
