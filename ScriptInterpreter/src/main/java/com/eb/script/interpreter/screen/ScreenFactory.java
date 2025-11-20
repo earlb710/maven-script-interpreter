@@ -39,6 +39,19 @@ public class ScreenFactory {
     public interface OnClickHandler {
 
         void execute(String ebsCode) throws InterpreterError;
+        
+        /**
+         * Default method to execute EBS code and return the result.
+         * Can be overridden for custom implementations.
+         * 
+         * @param ebsCode The EBS code to execute
+         * @return The result of executing the code (null by default)
+         * @throws InterpreterError If execution fails
+         */
+        default Object executeWithReturn(String ebsCode) throws InterpreterError {
+            execute(ebsCode);
+            return null;
+        }
     }
 
     private static Map<String, Object> screenSchema;
@@ -570,6 +583,15 @@ public class ScreenFactory {
                     setupVariableBinding(control, item.varRef, screenVars, varTypes, metadata);
                     // Track this control so we can refresh it when variables change
                     boundControls.add(control);
+                }
+                
+                // Set up onValidate handler for input controls
+                String validateCode = item.onValidate;
+                if (validateCode == null && metadata != null) {
+                    validateCode = metadata.onValidate;
+                }
+                if (onClickHandler != null && validateCode != null && !validateCode.isEmpty()) {
+                    setupValidationHandler(control, validateCode, onClickHandler, screenName, context);
                 }
 
                 // Apply item layout properties
@@ -1346,6 +1368,9 @@ public class ScreenFactory {
         item.maxWidth = getStringValue(itemDef, "maxWidth", getStringValue(itemDef, "max_width", null));
         item.maxHeight = getStringValue(itemDef, "maxHeight", getStringValue(itemDef, "max_height", null));
         item.alignment = getStringValue(itemDef, "alignment", null);
+        
+        // Event handlers
+        item.onValidate = getStringValue(itemDef, "onValidate", getStringValue(itemDef, "on_validate", null));
 
         return item;
     }
@@ -1392,6 +1417,9 @@ public class ScreenFactory {
         
         // Extract onClick event handler for buttons
         metadata.onClick = getStringValue(displayDef, "onClick", getStringValue(displayDef, "on_click", null));
+        
+        // Extract onValidate event handler for item validation
+        metadata.onValidate = getStringValue(displayDef, "onValidate", getStringValue(displayDef, "on_validate", null));
         
         // Extract options for selection controls
         if (displayDef.containsKey("options")) {
@@ -1465,6 +1493,7 @@ public class ScreenFactory {
         merged.itemBold = base.itemBold;
         merged.itemItalic = base.itemItalic;
         merged.onClick = base.onClick;
+        merged.onValidate = base.onValidate;
         
         // Override with non-null overlay values
         if (overlay.itemType != null) merged.itemType = overlay.itemType;
@@ -1493,6 +1522,7 @@ public class ScreenFactory {
         if (overlay.itemBold != null) merged.itemBold = overlay.itemBold;
         if (overlay.itemItalic != null) merged.itemItalic = overlay.itemItalic;
         if (overlay.onClick != null) merged.onClick = overlay.onClick;
+        if (overlay.onValidate != null) merged.onValidate = overlay.onValidate;
         
         return merged;
     }
@@ -1822,6 +1852,113 @@ public class ScreenFactory {
             }
         } else if (control instanceof javafx.scene.control.Label) {
             ((javafx.scene.control.Label) control).setText(value != null ? String.valueOf(value) : "");
+        }
+    }
+    
+    /**
+     * Sets up an onValidate event handler for a control.
+     * The validation code is executed when the control value changes.
+     * If the code returns false, the control is marked with an error style.
+     * 
+     * @param control The JavaFX control to validate
+     * @param validateCode The EBS code to execute for validation
+     * @param onClickHandler Handler to execute the EBS code
+     * @param screenName The screen name for context
+     * @param context The interpreter context
+     */
+    private static void setupValidationHandler(Node control, String validateCode,
+            OnClickHandler onClickHandler, String screenName, InterpreterContext context) {
+        if (control == null || validateCode == null || validateCode.isEmpty() || onClickHandler == null) {
+            return;
+        }
+        
+        // Define error style for validation failures
+        final String ERROR_STYLE = "-fx-border-color: red; -fx-border-width: 2;";
+        
+        // Create a validation runner that executes the code and applies styling
+        Runnable validator = () -> {
+            try {
+                // Execute the validation code
+                Object result = onClickHandler.executeWithReturn(validateCode);
+                
+                // Check if result is a boolean and apply styling
+                boolean isValid = true;
+                if (result instanceof Boolean) {
+                    isValid = (Boolean) result;
+                }
+                
+                // Apply or remove error styling based on validation result
+                if (!isValid) {
+                    // Mark control with error style
+                    String currentStyle = control.getStyle();
+                    if (currentStyle == null) {
+                        currentStyle = "";
+                    }
+                    if (!currentStyle.contains("-fx-border-color: red")) {
+                        control.setStyle(currentStyle + " " + ERROR_STYLE);
+                    }
+                } else {
+                    // Remove error styling by removing red border properties
+                    String currentStyle = control.getStyle();
+                    if (currentStyle != null) {
+                        // Remove error border styles
+                        currentStyle = currentStyle.replaceAll("-fx-border-color:\\s*red;?", "");
+                        currentStyle = currentStyle.replaceAll("-fx-border-width:\\s*2;?", "");
+                        control.setStyle(currentStyle.trim());
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Error executing validation code: " + e.getMessage());
+                e.printStackTrace();
+            }
+        };
+        
+        // Attach validator to appropriate control events
+        attachValidationListener(control, validator);
+    }
+    
+    /**
+     * Attaches a validation listener to a control based on its type.
+     * The validator is called whenever the control's value changes.
+     * 
+     * @param control The JavaFX control
+     * @param validator The validation runnable to execute
+     */
+    private static void attachValidationListener(Node control, Runnable validator) {
+        // Handle HBox containing slider (when showSliderValue is true)
+        if (control instanceof javafx.scene.layout.HBox) {
+            javafx.scene.layout.HBox hbox = (javafx.scene.layout.HBox) control;
+            if (!hbox.getChildren().isEmpty() && hbox.getChildren().get(0) instanceof javafx.scene.control.Slider) {
+                javafx.scene.control.Slider slider = (javafx.scene.control.Slider) hbox.getChildren().get(0);
+                slider.valueProperty().addListener((obs, oldVal, newVal) -> validator.run());
+                return;
+            }
+        }
+        
+        if (control instanceof javafx.scene.control.TextField) {
+            ((javafx.scene.control.TextField) control).textProperty().addListener((obs, oldVal, newVal) -> validator.run());
+        } else if (control instanceof javafx.scene.control.TextArea) {
+            ((javafx.scene.control.TextArea) control).textProperty().addListener((obs, oldVal, newVal) -> validator.run());
+        } else if (control instanceof javafx.scene.control.PasswordField) {
+            ((javafx.scene.control.PasswordField) control).textProperty().addListener((obs, oldVal, newVal) -> validator.run());
+        } else if (control instanceof javafx.scene.control.ComboBox) {
+            ((javafx.scene.control.ComboBox<?>) control).valueProperty().addListener((obs, oldVal, newVal) -> validator.run());
+        } else if (control instanceof javafx.scene.control.ChoiceBox) {
+            ((javafx.scene.control.ChoiceBox<?>) control).valueProperty().addListener((obs, oldVal, newVal) -> validator.run());
+        } else if (control instanceof javafx.scene.control.CheckBox) {
+            ((javafx.scene.control.CheckBox) control).selectedProperty().addListener((obs, oldVal, newVal) -> validator.run());
+        } else if (control instanceof javafx.scene.control.RadioButton) {
+            ((javafx.scene.control.RadioButton) control).selectedProperty().addListener((obs, oldVal, newVal) -> validator.run());
+        } else if (control instanceof javafx.scene.control.ToggleButton) {
+            ((javafx.scene.control.ToggleButton) control).selectedProperty().addListener((obs, oldVal, newVal) -> validator.run());
+        } else if (control instanceof javafx.scene.control.Spinner) {
+            ((javafx.scene.control.Spinner<?>) control).valueProperty().addListener((obs, oldVal, newVal) -> validator.run());
+        } else if (control instanceof javafx.scene.control.Slider) {
+            ((javafx.scene.control.Slider) control).valueProperty().addListener((obs, oldVal, newVal) -> validator.run());
+        } else if (control instanceof javafx.scene.control.DatePicker) {
+            ((javafx.scene.control.DatePicker) control).valueProperty().addListener((obs, oldVal, newVal) -> validator.run());
+        } else if (control instanceof javafx.scene.control.ColorPicker) {
+            ((javafx.scene.control.ColorPicker) control).valueProperty().addListener((obs, oldVal, newVal) -> validator.run());
         }
     }
 

@@ -337,26 +337,43 @@ public class InterpreterScreen {
                     if (areas != null && !areas.isEmpty()) {
                         // Create screen with areas using ScreenFactory
                         // Create onClick handler that executes EBS code
-                        ScreenFactory.OnClickHandler onClickHandler = (ebsCode) -> {
-                            try {
-                                // Set the screen context before executing onClick code
-                                // This allows inline code to use screen statements like "close screen;" or "hide screen;"
-                                context.setCurrentScreen(screenName);
+                        ScreenFactory.OnClickHandler onClickHandler = new ScreenFactory.OnClickHandler() {
+                            @Override
+                            public void execute(String ebsCode) throws InterpreterError {
+                                executeCode(ebsCode, false);
+                            }
+                            
+                            @Override
+                            public Object executeWithReturn(String ebsCode) throws InterpreterError {
+                                return executeCode(ebsCode, true);
+                            }
+                            
+                            private Object executeCode(String ebsCode, boolean returnValue) throws InterpreterError {
                                 try {
-                                    // Parse and execute the EBS code
-                                    RuntimeContext clickContext = com.eb.script.parser.Parser.parse("onClick_" + screenName, ebsCode);
-                                    // Execute in the current interpreter context
-                                    for (com.eb.script.interpreter.statement.Statement s : clickContext.statements) {
-                                        interpreter.acceptStatement(s);
+                                    // Set the screen context before executing code
+                                    // This allows inline code to use screen statements like "close screen;" or "hide screen;"
+                                    context.setCurrentScreen(screenName);
+                                    try {
+                                        // Parse and execute the EBS code
+                                        RuntimeContext clickContext = com.eb.script.parser.Parser.parse("inline_" + screenName, ebsCode);
+                                        // Execute in the current interpreter context
+                                        for (com.eb.script.interpreter.statement.Statement s : clickContext.statements) {
+                                            interpreter.acceptStatement(s);
+                                        }
+                                        // If no return statement was executed, return null
+                                        return null;
+                                    } catch (com.eb.script.interpreter.Interpreter.ReturnSignal rs) {
+                                        // Catch return statement and extract the value
+                                        return returnValue ? rs.value : null;
+                                    } finally {
+                                        // Always clear the screen context after execution to prevent context leakage
+                                        context.clearCurrentScreen();
                                     }
-                                } finally {
-                                    // Always clear the screen context after execution to prevent context leakage
-                                    context.clearCurrentScreen();
+                                } catch (com.eb.script.parser.ParseError e) {
+                                    throw new InterpreterError("Failed to parse inline code: " + e.getMessage());
+                                } catch (java.io.IOException e) {
+                                    throw new InterpreterError("IO error executing inline code: " + e.getMessage());
                                 }
-                            } catch (com.eb.script.parser.ParseError e) {
-                                throw new InterpreterError("Failed to parse onClick code: " + e.getMessage());
-                            } catch (java.io.IOException e) {
-                                throw new InterpreterError("IO error executing onClick code: " + e.getMessage());
                             }
                         };
 
