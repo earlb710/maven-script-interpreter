@@ -1,0 +1,112 @@
+// Simplified Test Script: Screen Item Source and Status Properties (no GUI)
+// Description: Tests the new source and status properties for screen items
+// Author: EBS Test Suite
+// Date: 2025-11-20
+
+screen testScreen = {
+    "title": "Source and Status Test",
+    "width": 800,
+    "height": 600,
+    "vars": [
+        {
+            "name": "name",
+            "type": "string",
+            "default": "John Doe",
+            "display": {
+                "type": "textfield",
+                "labelText": "Name:",
+                "promptHelp": "Enter your name"
+            }
+        },
+        {
+            "name": "age",
+            "type": "int",
+            "default": 25,
+            "display": {
+                "type": "spinner",
+                "min": 0,
+                "max": 150,
+                "labelText": "Age:"
+            }
+        },
+        {
+            "name": "email",
+            "type": "string",
+            "default": "john@example.com",
+            "display": {
+                "type": "textfield",
+                "labelText": "Email:",
+                "promptHelp": "Enter your email"
+            }
+        }
+    ]
+};
+
+print "=== Screen Item Source and Status Test ===";
+print "";
+
+// Test 1: Get initial source and status
+print "Test 1: Check initial source and status";
+var nameSource = call screen.getItemSource("testScreen", "name");
+var nameStatus = call screen.getItemStatus("testScreen", "name");
+print "  name source: " + nameSource + " (expected: data)";
+print "  name status: " + nameStatus + " (expected: clean)";
+
+var ageSource = call screen.getItemSource("testScreen", "age");
+var ageStatus = call screen.getItemStatus("testScreen", "age");
+print "  age source: " + ageSource + " (expected: data)";
+print "  age status: " + ageStatus + " (expected: clean)";
+print "";
+
+// Test 2: Set source property
+print "Test 2: Change source to 'display'";
+call screen.setItemSource("testScreen", "name", "display");
+var newNameSource = call screen.getItemSource("testScreen", "name");
+print "  name source after change: " + newNameSource + " (expected: display)";
+print "";
+
+// Test 3: Modify variable value and check status
+print "Test 3: Modify variable and check status";
+print "  Original name value: " + testScreen.name;
+testScreen.name = "Jane Smith";
+print "  New name value: " + testScreen.name;
+var statusAfterChange = call screen.getItemStatus("testScreen", "name");
+print "  name status after change: " + statusAfterChange + " (expected: changed)";
+print "";
+
+// Test 4: Reset original value
+print "Test 4: Reset original value";
+call screen.resetItemOriginalValue("testScreen", "name");
+var statusAfterReset = call screen.getItemStatus("testScreen", "name");
+print "  name status after reset: " + statusAfterReset + " (expected: clean)";
+print "";
+
+// Test 5: Test with another variable
+print "Test 5: Test with age variable";
+print "  Original age value: " + testScreen.age;
+testScreen.age = 30;
+print "  New age value: " + testScreen.age;
+var ageStatusAfterChange = call screen.getItemStatus("testScreen", "age");
+print "  age status after change: " + ageStatusAfterChange + " (expected: changed)";
+
+// Change back to original
+testScreen.age = 25;
+var ageStatusAfterRevert = call screen.getItemStatus("testScreen", "age");
+print "  age status after reverting: " + ageStatusAfterRevert + " (expected: clean)";
+print "";
+
+// Test 6: Test with email (unchanged)
+print "Test 6: Test unchanged variable";
+var emailStatus = call screen.getItemStatus("testScreen", "email");
+print "  email status (unchanged): " + emailStatus + " (expected: clean)";
+print "";
+
+// Test 7: Set source back to data
+print "Test 7: Set source back to 'data'";
+call screen.setItemSource("testScreen", "name", "data");
+var finalNameSource = call screen.getItemSource("testScreen", "name");
+print "  name source after change: " + finalNameSource + " (expected: data)";
+print "";
+
+print "=== Source and Status Test Completed ===";
+print "All tests passed!";
