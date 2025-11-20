@@ -21,6 +21,9 @@ public class Var {
     // Current value
     private Object value;
     
+    // Original value (captured when screen is created or explicitly set)
+    private Object originalValue;
+    
     // Optional display metadata
     private DisplayItem displayItem;
     
@@ -65,6 +68,7 @@ public class Var {
         this.type = type;
         this.defaultValue = defaultValue;
         this.value = defaultValue;
+        this.originalValue = defaultValue;  // Set original value to default initially
     }
     
     // Getters and setters
@@ -101,6 +105,14 @@ public class Var {
         this.value = value;
     }
     
+    public Object getOriginalValue() {
+        return originalValue;
+    }
+    
+    public void setOriginalValue(Object originalValue) {
+        this.originalValue = originalValue;
+    }
+    
     public DisplayItem getDisplayItem() {
         return displayItem;
     }
@@ -126,6 +138,35 @@ public class Var {
             return name != null ? name.toLowerCase() : null;
         }
         return setName.toLowerCase() + "." + name.toLowerCase();
+    }
+    
+    /**
+     * Check if the current value has changed from the original value
+     * @return true if value has changed, false otherwise
+     */
+    public boolean hasChanged() {
+        if (originalValue == null && value == null) {
+            return false;
+        }
+        if (originalValue == null || value == null) {
+            return true;
+        }
+        return !originalValue.equals(value);
+    }
+    
+    /**
+     * Get the status of this variable based on whether it has changed
+     * @return "changed" if value != original, "clean" otherwise
+     */
+    public String getStatus() {
+        return hasChanged() ? "changed" : "clean";
+    }
+    
+    /**
+     * Reset the original value to the current value (marking as clean)
+     */
+    public void resetOriginalValue() {
+        this.originalValue = this.value;
     }
     
     @Override

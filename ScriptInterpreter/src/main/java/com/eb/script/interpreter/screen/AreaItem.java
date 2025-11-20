@@ -62,6 +62,8 @@ public class AreaItem {
     public String maxHeight;
     // Alignment within parent (e.g., "center", "top-left")
     public String alignment;
+    // Source of the value: "data" (original data value) or "display" (formatted display value)
+    public String source = "data";
 
     @Override
     public String toString() {
