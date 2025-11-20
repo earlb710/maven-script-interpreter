@@ -373,22 +373,57 @@ public class InterpreterScreen {
 
                     // Set up cleanup when screen is closed
                     stage.setOnCloseRequest(event -> {
-                        // Collect output fields and invoke callback if set
-                        try {
-                            collectOutputFieldsAndInvokeCallback(screenName, 0);
-                        } catch (InterpreterError e) {
-                            if (context.getOutput() != null) {
-                                context.getOutput().printlnError("Error invoking close callback: " + e.getMessage());
-                            }
-                        }
+                        // Check screen status and show confirmation dialog if needed
+                        ScreenStatus status = context.getScreenStatus(screenName);
                         
-                        // Interrupt and stop the screen thread
-                        Thread thread = context.getScreenThreads().get(screenName);
-                        if (thread != null && thread.isAlive()) {
-                            thread.interrupt();
+                        if (status == ScreenStatus.CHANGED || status == ScreenStatus.ERROR) {
+                            // Consume the event to prevent immediate close
+                            event.consume();
+                            
+                            // Build appropriate message based on status
+                            final String dialogMessage;
+                            final String dialogTitle;
+                            if (status == ScreenStatus.ERROR) {
+                                String errorMsg = context.getScreenErrorMessage(screenName);
+                                String msg = "Screen has an error";
+                                if (errorMsg != null && !errorMsg.isEmpty()) {
+                                    msg += ": " + errorMsg;
+                                }
+                                msg += "\n\nAre you sure?";
+                                dialogMessage = msg;
+                                dialogTitle = "Error - Confirm Close";
+                            } else {
+                                dialogMessage = "Screen has unsaved changes.\n\nAre you sure?";
+                                dialogTitle = "Warning - Confirm Close";
+                            }
+                            
+                            // Show confirmation dialog on JavaFX thread
+                            javafx.application.Platform.runLater(() -> {
+                                javafx.scene.control.Alert confirm = new javafx.scene.control.Alert(
+                                    javafx.scene.control.Alert.AlertType.CONFIRMATION,
+                                    dialogMessage,
+                                    javafx.scene.control.ButtonType.YES,
+                                    javafx.scene.control.ButtonType.NO
+                                );
+                                confirm.setTitle(dialogTitle);
+                                confirm.setHeaderText("Confirm Close");
+                                
+                                java.util.Optional<javafx.scene.control.ButtonType> result = confirm.showAndWait();
+                                if (result.isPresent() && result.get() == javafx.scene.control.ButtonType.YES) {
+                                    // User confirmed - proceed with close
+                                    performScreenClose(screenName);
+                                    // Get the stage from context and close it
+                                    Stage stageToClose = context.getScreens().get(screenName);
+                                    if (stageToClose != null) {
+                                        stageToClose.close();
+                                    }
+                                }
+                                // If NO or dialog closed, do nothing - screen stays open
+                            });
+                        } else {
+                            // Status is CLEAN - close without confirmation
+                            performScreenClose(screenName);
                         }
-                        // Clean up resources
-                        context.remove(screenName);
                     });
 
                     // Store the stage reference
@@ -735,6 +770,30 @@ public class InterpreterScreen {
         }
         
         return false;
+    }
+
+    /**
+     * Perform the actual screen close cleanup operations.
+     * This includes collecting output fields, invoking callbacks, stopping threads, and cleaning up resources.
+     * @param screenName The name of the screen to close
+     */
+    private void performScreenClose(String screenName) {
+        // Collect output fields and invoke callback if set
+        try {
+            collectOutputFieldsAndInvokeCallback(screenName, 0);
+        } catch (InterpreterError e) {
+            if (context.getOutput() != null) {
+                context.getOutput().printlnError("Error invoking close callback: " + e.getMessage());
+            }
+        }
+        
+        // Interrupt and stop the screen thread
+        Thread thread = context.getScreenThreads().get(screenName);
+        if (thread != null && thread.isAlive()) {
+            thread.interrupt();
+        }
+        // Clean up resources
+        context.remove(screenName);
     }
 
     /**

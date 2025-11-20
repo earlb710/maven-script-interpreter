@@ -127,18 +127,18 @@ print currentCount;  // Prints: 0
 myWindow.counter = 42;
 myWindow.message = "Updated!";
 
-// Show the screen
-screen myWindow show;
+// Show the screen (new syntax)
+show screen myWindow;
 
-// Hide the screen
-screen myWindow hide;
+// Hide the screen (new syntax)
+hide screen myWindow;
 
 // Show it again
-screen myWindow show;
+show screen myWindow;
 ```
 
 **Screen Features:**
-- Screens are created but NOT shown automatically - use `screen <name> show;` to display
+- Screens are created but NOT shown automatically - use `show screen <name>;` to display
 - Each screen runs in its own dedicated thread
 - The thread automatically stops when the screen is closed
 - All screen variables are thread-safe (using ConcurrentHashMap)

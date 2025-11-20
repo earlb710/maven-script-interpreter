@@ -896,15 +896,23 @@ screen layoutScreen = {
 
 #### Show Screen
 ```javascript
-show myWindow;
-// or
+// New syntax (preferred)
+show screen myWindow;
+// With parameters
+show screen myWindow("param1", 123);
+// With callback
+show screen myWindow callback handleEvent;
+
+// Legacy syntax (still supported)
 screen myWindow show;
 ```
 
 #### Hide Screen
 ```javascript
-hide myWindow;
-// or
+// New syntax (preferred)
+hide screen myWindow;
+
+// Legacy syntax (still supported)
 screen myWindow hide;
 ```
 
