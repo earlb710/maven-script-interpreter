@@ -6,6 +6,7 @@ import com.eb.script.interpreter.screen.AreaItem;
 import com.eb.script.interpreter.screen.VarSet;
 import com.eb.script.interpreter.screen.Var;
 import com.eb.script.interpreter.screen.ScreenStatus;
+import com.eb.script.interpreter.screen.ScreenConfig;
 import com.eb.util.Debugger;
 import com.eb.script.interpreter.db.DbAdapter;
 import com.eb.script.interpreter.db.DbConnection;
@@ -60,6 +61,9 @@ public class InterpreterContext {
     private final Map<String, Map<String, VarSet>> screenVarSets = new ConcurrentHashMap<>(); // screenName -> (setName -> VarSet)
     private final Map<String, Map<String, Var>> screenVarItems = new ConcurrentHashMap<>(); // screenName -> (setName.varName -> Var)
     private final Map<String, Map<String, AreaItem>> screenAreaItems = new ConcurrentHashMap<>(); // screenName -> (setName.varName -> AreaItem)
+
+    // Screen configurations stored before Stage creation (lazy initialization)
+    private final Map<String, ScreenConfig> screenConfigs = new ConcurrentHashMap<>(); // screenName -> ScreenConfig
 
     private DbAdapter db = new OracleDbAdapter();
     private ScriptArea output;
@@ -346,6 +350,36 @@ public class InterpreterContext {
     }
 
     /**
+     * Get the screen configuration for a screen (before Stage creation).
+     *
+     * @param screenName the name of the screen
+     * @return the ScreenConfig object, or null if not found
+     */
+    public ScreenConfig getScreenConfig(String screenName) {
+        return screenConfigs.get(screenName.toLowerCase());
+    }
+
+    /**
+     * Set the screen configuration for a screen (before Stage creation).
+     *
+     * @param screenName the name of the screen
+     * @param config the ScreenConfig object
+     */
+    public void setScreenConfig(String screenName, ScreenConfig config) {
+        screenConfigs.put(screenName.toLowerCase(), config);
+    }
+
+    /**
+     * Check if a screen configuration exists.
+     *
+     * @param screenName the name of the screen
+     * @return true if the screen configuration exists
+     */
+    public boolean hasScreenConfig(String screenName) {
+        return screenConfigs.containsKey(screenName.toLowerCase());
+    }
+
+    /**
      * Static accessor for global screens map - can be called without instance.
      * This allows direct access to all screens from anywhere in the application.
      *
@@ -379,6 +413,7 @@ public class InterpreterContext {
         GLOBAL_SCREEN_CREATION_ORDER.clear();
         screenStatuses.clear();
         screenErrorMessages.clear();
+        screenConfigs.clear();
     }
 
     public void remove(String screenName) {
@@ -398,6 +433,7 @@ public class InterpreterContext {
         GLOBAL_SCREEN_CREATION_ORDER.remove(screenName);
         screenStatuses.remove(screenName);
         screenErrorMessages.remove(screenName);
+        screenConfigs.remove(screenName);
 
     }
 

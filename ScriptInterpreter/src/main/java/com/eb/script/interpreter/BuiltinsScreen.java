@@ -25,9 +25,14 @@ public class BuiltinsScreen {
             }
         }
 
-        // Check if screen exists
+        // Check if screen configuration exists (might not be created yet)
+        if (!context.hasScreenConfig(screenName) && !context.getScreens().containsKey(screenName)) {
+            throw new InterpreterError("scr.showScreen: Screen '" + screenName + "' does not exist. Use 'show screen " + screenName + ";' statement instead.");
+        }
+
+        // If screen hasn't been created yet, suggest using the statement form
         if (!context.getScreens().containsKey(screenName)) {
-            throw new InterpreterError("scr.showScreen: Screen '" + screenName + "' does not exist.");
+            throw new InterpreterError("scr.showScreen: Screen '" + screenName + "' has not been shown yet. Use 'show screen " + screenName + ";' statement first.");
         }
 
         javafx.stage.Stage stage = context.getScreens().get(screenName);
@@ -70,9 +75,17 @@ public class BuiltinsScreen {
             }
         }
 
-        // Check if screen exists
-        if (!context.getScreens().containsKey(screenName)) {
+        // Check if screen configuration exists
+        if (!context.hasScreenConfig(screenName) && !context.getScreens().containsKey(screenName)) {
             throw new InterpreterError("scr.hideScreen: Screen '" + screenName + "' does not exist.");
+        }
+
+        // If screen hasn't been created yet, nothing to hide
+        if (!context.getScreens().containsKey(screenName)) {
+            if (context.getOutput() != null) {
+                context.getOutput().printlnInfo("Screen '" + screenName + "' is not shown (has not been created yet)");
+            }
+            return true;
         }
 
         javafx.stage.Stage stage = context.getScreens().get(screenName);
@@ -115,9 +128,18 @@ public class BuiltinsScreen {
             }
         }
 
-        // Check if screen exists
-        if (!context.getScreens().containsKey(screenName)) {
+        // Check if screen configuration exists
+        if (!context.hasScreenConfig(screenName) && !context.getScreens().containsKey(screenName)) {
             throw new InterpreterError("scr.closeScreen: Screen '" + screenName + "' does not exist.");
+        }
+
+        // If screen hasn't been created yet, just remove the config
+        if (!context.getScreens().containsKey(screenName)) {
+            context.remove(screenName);
+            if (context.getOutput() != null) {
+                context.getOutput().printlnOk("Screen '" + screenName + "' definition removed (was not shown)");
+            }
+            return true;
         }
 
         javafx.stage.Stage stage = context.getScreens().get(screenName);
