@@ -4,14 +4,14 @@
 //              to work without explicit screen names
 // Date: 2025-11-20
 
-println("=== Button onClick Screen Context Test Suite ===");
-println("");
-println("This test demonstrates that onClick handlers can now use screen statements");
-println("without explicit screen names (e.g., 'close screen;' instead of 'close screen myScreen;')");
-println("");
+print "=== Button onClick Screen Context Test Suite ===";
+print "";
+print "This test demonstrates that onClick handlers can now use screen statements";
+print "without explicit screen names (e.g., 'close screen;' instead of 'close screen myScreen;')";
+print "";
 
 // Test 1: Button that closes screen using contextual statement
-println("Test 1: Creating screen with 'Close' button using contextual 'close screen;' statement");
+print "Test 1: Creating screen with 'Close' button using contextual 'close screen;' statement";
 screen test1Screen = {
     "title": "Test 1: Close Screen Context",
     "width": 400,
@@ -37,7 +37,7 @@ screen test1Screen = {
                     "display": {
                         "type": "button",
                         "labelText": "Close This Screen",
-                        "onClick": "println('Executing: close screen;'); close screen;"
+                        "onClick": "print 'Executing: close screen;'; close screen;"
                     }
                 }
             ]
@@ -46,7 +46,7 @@ screen test1Screen = {
 };
 
 // Test 2: Button that hides screen using contextual statement
-println("Test 2: Creating screen with 'Hide' button using contextual 'hide screen;' statement");
+print "Test 2: Creating screen with 'Hide' button using contextual 'hide screen;' statement";
 screen test2Screen = {
     "title": "Test 2: Hide Screen Context",
     "width": 400,
@@ -72,7 +72,7 @@ screen test2Screen = {
                     "display": {
                         "type": "button",
                         "labelText": "Hide This Screen",
-                        "onClick": "println('Executing: hide screen;'); hide screen;"
+                        "onClick": "print 'Executing: hide screen;'; hide screen;"
                     }
                 }
             ]
@@ -81,7 +81,7 @@ screen test2Screen = {
 };
 
 // Test 3: Button with variable manipulation and contextual close
-println("Test 3: Creating screen with counter variable and contextual operations");
+print "Test 3: Creating screen with counter variable and contextual operations";
 screen test3Screen = {
     "title": "Test 3: Variable Operations + Close",
     "width": 450,
@@ -139,7 +139,7 @@ screen test3Screen = {
                     "display": {
                         "type": "button",
                         "labelText": "Increment Counter",
-                        "onClick": "counter = counter + 1; message = 'Counter incremented to ' + counter; println('Counter is now: ' + counter);"
+                        "onClick": "counter = counter + 1; message = 'Counter incremented to ' + counter; print 'Counter is now: ' + counter;"
                     }
                 },
                 {
@@ -148,7 +148,7 @@ screen test3Screen = {
                     "display": {
                         "type": "button",
                         "labelText": "Reset Counter",
-                        "onClick": "counter = 0; message = 'Counter reset to 0'; println('Counter reset');"
+                        "onClick": "counter = 0; message = 'Counter reset to 0'; print 'Counter reset';"
                     }
                 },
                 {
@@ -157,7 +157,7 @@ screen test3Screen = {
                     "display": {
                         "type": "button",
                         "labelText": "Close Screen",
-                        "onClick": "println('Final counter value: ' + counter); println('Closing screen...'); close screen;"
+                        "onClick": "print 'Final counter value: ' + counter; print 'Closing screen...'; close screen;"
                     }
                 }
             ]
@@ -166,7 +166,7 @@ screen test3Screen = {
 };
 
 // Test 4: Multiple buttons with different contextual operations
-println("Test 4: Creating screen with multiple contextual operations");
+print "Test 4: Creating screen with multiple contextual operations";
 screen test4Screen = {
     "title": "Test 4: Multiple Context Operations",
     "width": 450,
@@ -209,7 +209,7 @@ screen test4Screen = {
                     "display": {
                         "type": "button",
                         "labelText": "Track Clicks",
-                        "onClick": "clickCount = clickCount + 1; println('Button clicked ' + clickCount + ' times');"
+                        "onClick": "clickCount = clickCount + 1; print 'Button clicked ' + clickCount + ' times';"
                     }
                 },
                 {
@@ -218,7 +218,7 @@ screen test4Screen = {
                     "display": {
                         "type": "button",
                         "labelText": "Hide (can show again)",
-                        "onClick": "println('Hiding screen (clicks: ' + clickCount + ')'); hide screen;"
+                        "onClick": "print 'Hiding screen (clicks: ' + clickCount + ')'; hide screen;"
                     }
                 },
                 {
@@ -227,7 +227,7 @@ screen test4Screen = {
                     "display": {
                         "type": "button",
                         "labelText": "Close (permanent)",
-                        "onClick": "println('Closing screen (total clicks: ' + clickCount + ')'); close screen;"
+                        "onClick": "print 'Closing screen (total clicks: ' + clickCount + ')'; close screen;"
                     }
                 }
             ]
@@ -236,33 +236,33 @@ screen test4Screen = {
 };
 
 // Display instructions for running tests
-println("");
-println("=== Test Screens Created ===");
-println("");
-println("Four test screens have been created. To run the tests:");
-println("");
-println("1. show screen test1Screen;");
-println("   - Click 'Close This Screen' button");
-println("   - Verifies: onClick can use 'close screen;' contextually");
-println("");
-println("2. show screen test2Screen;");
-println("   - Click 'Hide This Screen' button");
-println("   - Verifies: onClick can use 'hide screen;' contextually");
-println("   - To show again: show screen test2Screen;");
-println("");
-println("3. show screen test3Screen;");
-println("   - Click 'Increment Counter' multiple times");
-println("   - Click 'Reset Counter' to reset");
-println("   - Click 'Close Screen' to close");
-println("   - Verifies: onClick can manipulate variables and close contextually");
-println("");
-println("4. show screen test4Screen;");
-println("   - Click 'Track Clicks' to increment counter");
-println("   - Click 'Hide' to hide (can show again with: show screen test4Screen;)");
-println("   - Click 'Close' to close permanently");
-println("   - Verifies: Multiple contextual operations work correctly");
-println("");
-println("=== Expected Behavior ===");
-println("Before this fix: onClick handlers would fail with 'no screen name specified'");
-println("After this fix: All contextual screen statements work without explicit names");
-println("");
+print "";
+print "=== Test Screens Created ===";
+print "";
+print "Four test screens have been created. To run the tests:";
+print "";
+print "1. show screen test1Screen;";
+print "   - Click 'Close This Screen' button";
+print "   - Verifies: onClick can use 'close screen;' contextually";
+print "";
+print "2. show screen test2Screen;";
+print "   - Click 'Hide This Screen' button";
+print "   - Verifies: onClick can use 'hide screen;' contextually";
+print "   - To show again: show screen test2Screen;";
+print "";
+print "3. show screen test3Screen;";
+print "   - Click 'Increment Counter' multiple times";
+print "   - Click 'Reset Counter' to reset";
+print "   - Click 'Close Screen' to close";
+print "   - Verifies: onClick can manipulate variables and close contextually";
+print "";
+print "4. show screen test4Screen;";
+print "   - Click 'Track Clicks' to increment counter";
+print "   - Click 'Hide' to hide (can show again with: show screen test4Screen;)";
+print "   - Click 'Close' to close permanently";
+print "   - Verifies: Multiple contextual operations work correctly";
+print "";
+print "=== Expected Behavior ===";
+print "Before this fix: onClick handlers would fail with 'no screen name specified'";
+print "After this fix: All contextual screen statements work without explicit names";
+print "";

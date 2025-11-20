@@ -1,7 +1,7 @@
 // Quick Test: Button onClick Context - Basic Verification
 // This is a minimal test to quickly verify the onClick context fix works
 
-println("Creating test screen with contextual 'close screen;' button...");
+print "Creating test screen with contextual 'close screen;' button...";
 
 screen quickTest = {
     "title": "Quick Test: onClick Context",
@@ -36,7 +36,7 @@ screen quickTest = {
                     "display": {
                         "type": "button",
                         "labelText": "Update Value",
-                        "onClick": "testValue = 'Button clicked!'; println('Value updated');"
+                        "onClick": "testValue = 'Button clicked!'; print 'Value updated';"
                     }
                 },
                 {
@@ -45,7 +45,7 @@ screen quickTest = {
                     "display": {
                         "type": "button",
                         "labelText": "Update & Close",
-                        "onClick": "testValue = 'Closing...'; println('Closing screen'); close screen;"
+                        "onClick": "testValue = 'Closing...'; print 'Closing screen'; close screen;"
                     }
                 }
             ]
@@ -53,11 +53,11 @@ screen quickTest = {
     ]
 };
 
-println("Test screen created successfully!");
-println("");
-println("To test: show screen quickTest;");
-println("");
-println("Expected behavior:");
-println("1. Click 'Update Value' - should update the text field");
-println("2. Click 'Update & Close' - should update field and close screen");
-println("   WITHOUT requiring explicit screen name in 'close screen;' statement");
+print "Test screen created successfully!";
+print "";
+print "To test: show screen quickTest;";
+print "";
+print "Expected behavior:";
+print "1. Click 'Update Value' - should update the text field";
+print "2. Click 'Update & Close' - should update field and close screen";
+print "   WITHOUT requiring explicit screen name in 'close screen;' statement";
