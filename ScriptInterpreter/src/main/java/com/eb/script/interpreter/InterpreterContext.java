@@ -5,6 +5,7 @@ import com.eb.script.interpreter.screen.AreaDefinition;
 import com.eb.script.interpreter.screen.AreaItem;
 import com.eb.script.interpreter.screen.VarSet;
 import com.eb.script.interpreter.screen.Var;
+import com.eb.script.interpreter.screen.ScreenStatus;
 import com.eb.util.Debugger;
 import com.eb.script.interpreter.db.DbAdapter;
 import com.eb.script.interpreter.db.DbConnection;
@@ -45,6 +46,8 @@ public class InterpreterContext {
     private final Map<String, com.eb.ui.ebs.StatusBar> screenStatusBars = new ConcurrentHashMap<>();
     private final Map<String, String> screenCallbacks = new ConcurrentHashMap<>(); // screenName -> callbackFunctionName
     private final Set<String> importedFiles = ConcurrentHashMap.newKeySet();  // Global list of all imported files to prevent circular imports and duplicate imports
+    private final Map<String, ScreenStatus> screenStatuses = new ConcurrentHashMap<>(); // screenName -> status
+    private final Map<String, String> screenErrorMessages = new ConcurrentHashMap<>(); // screenName -> error message
 
     // New storage structures for the refactored variable sets
     private final Map<String, Map<String, VarSet>> screenVarSets = new ConcurrentHashMap<>(); // screenName -> (setName -> VarSet)
@@ -346,6 +349,8 @@ public class InterpreterContext {
         screenAreaItems.clear();
         screenCallbacks.clear();
         GLOBAL_SCREEN_CREATION_ORDER.clear();
+        screenStatuses.clear();
+        screenErrorMessages.clear();
     }
 
     public void remove(String screenName) {
@@ -359,6 +364,9 @@ public class InterpreterContext {
         screenCallbacks.remove(screenName);
         displayMetadata.entrySet().removeIf(entry -> entry.getKey().startsWith(screenName + "."));
         GLOBAL_SCREEN_CREATION_ORDER.remove(screenName);
+        screenStatuses.remove(screenName);
+        screenErrorMessages.remove(screenName);
+
     }
 
     /**
@@ -380,6 +388,52 @@ public class InterpreterContext {
             screenCallbacks.put(screenName, callbackName);
         } else {
             screenCallbacks.remove(screenName);
+        }
+    }
+
+    /**
+     * Get the status of a screen
+     * @param screenName The screen name
+     * @return The screen status, or CLEAN if not set
+     */
+    public ScreenStatus getScreenStatus(String screenName) {
+        return screenStatuses.getOrDefault(screenName.toLowerCase(), ScreenStatus.CLEAN);
+    }
+
+    /**
+     * Set the status of a screen
+     * @param screenName The screen name
+     * @param status The new status
+     */
+    public void setScreenStatus(String screenName, ScreenStatus status) {
+        if (status != null) {
+            screenStatuses.put(screenName.toLowerCase(), status);
+        } else {
+            screenStatuses.put(screenName.toLowerCase(), ScreenStatus.CLEAN);
+        }
+    }
+
+    /**
+     * Get the error message for a screen
+     * @param screenName The screen name
+     * @return The error message, or null if no error
+     */
+    public String getScreenErrorMessage(String screenName) {
+        return screenErrorMessages.get(screenName.toLowerCase());
+    }
+
+    /**
+     * Set the error message for a screen
+     * @param screenName The screen name
+     * @param errorMessage The error message (can be null to clear)
+     */
+    public void setScreenErrorMessage(String screenName, String errorMessage) {
+        if (errorMessage != null && !errorMessage.isEmpty()) {
+            screenErrorMessages.put(screenName.toLowerCase(), errorMessage);
+            // Automatically set status to ERROR when error message is set
+            setScreenStatus(screenName, ScreenStatus.ERROR);
+        } else {
+            screenErrorMessages.remove(screenName.toLowerCase());
         }
     }
 

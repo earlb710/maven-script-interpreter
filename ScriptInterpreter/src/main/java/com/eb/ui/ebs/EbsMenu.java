@@ -32,6 +32,14 @@ public class EbsMenu extends MenuBar {
         handler.loadRecentFiles();
         Menu fileMenu = new Menu("File");
 
+        // --- New Script File ---
+        MenuItem newItem = new MenuItem("New Script File");
+        newItem.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.CONTROL_DOWN));
+        newItem.setOnAction(event -> {
+            handler.createNewScriptFile();
+            refreshRecentMenu();
+        });
+
         // --- Open file… ---
         MenuItem openItem = new MenuItem("Open file…");
         openItem.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_DOWN));
@@ -94,7 +102,7 @@ public class EbsMenu extends MenuBar {
             }
         });
 
-        fileMenu.getItems().addAll(openItem, recentMenu, new SeparatorMenuItem(), exitItem);
+        fileMenu.getItems().addAll(newItem, openItem, recentMenu, new SeparatorMenuItem(), exitItem);
         getMenus().add(fileMenu);
 
         // --- Edit Menu ---

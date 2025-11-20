@@ -41,10 +41,72 @@ public class TabHandler implements TabOpener {
     private Charset defaultCharset = StandardCharsets.UTF_8;
     private final TabPane tabPane;
     private final EbsConsoleHandler consoleHandler;
+    private Tab tabBeingRemoved = null; // Track tab removal to prevent double-confirmation
+    private boolean isHandlingClose = false; // Prevent recursive listener calls
 
     public TabHandler(EbsConsoleHandler consoleHandler, TabPane tabPane) {
         this.consoleHandler = consoleHandler;
         this.tabPane = Objects.requireNonNull(tabPane);
+        setupTabCloseListener();
+    }
+
+    /**
+     * Set up a listener to intercept tab removal and show confirmation for unsaved changes.
+     */
+    private void setupTabCloseListener() {
+        tabPane.getTabs().addListener((javafx.collections.ListChangeListener<Tab>) change -> {
+            // Prevent recursive calls when we re-add or remove tabs
+            if (isHandlingClose) {
+                return;
+            }
+            
+            while (change.next()) {
+                if (change.wasRemoved()) {
+                    for (Tab removed : change.getRemoved()) {
+                        // Only handle if this is an EbsTab with unsaved changes
+                        // and we haven't already confirmed this removal
+                        if (removed instanceof EbsTab ebsTab && ebsTab.isDirty() && removed != tabBeingRemoved) {
+                            // Set flag to prevent recursive calls
+                            isHandlingClose = true;
+                            
+                            // Re-add the tab temporarily
+                            int removeIndex = change.getFrom();
+                            tabPane.getTabs().add(removeIndex, removed);
+                            
+                            // Select the tab so it's visible and active
+                            tabPane.getSelectionModel().select(removed);
+                            
+                            // Reset flag after re-adding
+                            isHandlingClose = false;
+                            
+                            // Show confirmation dialog
+                            Platform.runLater(() -> {
+                                boolean shouldClose = consoleHandler.confirmCloseTab(ebsTab);
+                                if (shouldClose) {
+                                    // User confirmed - remove the tab
+                                    isHandlingClose = true;
+                                    tabBeingRemoved = ebsTab;
+                                    tabPane.getTabs().remove(ebsTab);
+                                    tabBeingRemoved = null;
+                                    isHandlingClose = false;
+                                } else {
+                                    // User cancelled - ensure tab is selected and focused
+                                    Platform.runLater(() -> {
+                                        tabPane.getSelectionModel().select(ebsTab);
+                                        if (ebsTab.getContent() != null) {
+                                            ebsTab.getContent().requestFocus();
+                                        }
+                                    });
+                                }
+                            });
+                            
+                            // Return early to avoid processing other changes
+                            return;
+                        }
+                    }
+                }
+            }
+        });
     }
 
     private Tab findTabByHandle(String handler) {
@@ -246,7 +308,44 @@ public class TabHandler implements TabOpener {
      */
     public void closeTab(Tab tab) {
         if (tab != null && tabPane.getTabs().contains(tab)) {
+            // Check if this is an EbsTab with unsaved changes
+            if (tab instanceof EbsTab ebsTab) {
+                boolean shouldClose = consoleHandler.confirmCloseTab(ebsTab);
+                if (!shouldClose) {
+                    return; // Don't close the tab
+                }
+            }
             tabPane.getTabs().remove(tab);
+        }
+    }
+
+    /**
+     * Create a new tab for a file (even if it doesn't exist yet).
+     * Returns the created EbsTab so the caller can initialize it.
+     * @param context The tab context
+     * @param requestFocus Whether to focus the new tab
+     * @return The created EbsTab, or null if creation failed
+     */
+    public EbsTab createNewTab(TabContext context, boolean requestFocus) {
+        try {
+            Tab tab = new EbsTab(context);
+            
+            // Set the status bar on the tab's handler
+            if (tab instanceof EbsTab ebsTab) {
+                if (ebsTab.getHandler() instanceof com.eb.ui.ebs.EbsHandler ebsHandler) {
+                    com.eb.ui.ebs.StatusBar statusBar = consoleHandler.getStatusBar();
+                    if (statusBar != null) {
+                        ebsHandler.setStatusBar(statusBar);
+                    }
+                }
+            }
+
+            tabPane.getTabs().add(tab);
+            select(tab, requestFocus);
+            return (EbsTab) tab;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
         }
     }
 

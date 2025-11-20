@@ -713,6 +713,22 @@ public final class Builtins {
         addBuiltin(info(
                 "win.closeWindow", DataType.BOOL,
                 newParam("screenName", DataType.STRING, false) // optional; screen name (if null, uses current screen)
+                "screen.setStatus", DataType.BOOL,
+                newParam("screenName", DataType.STRING, true), // required; screen name
+                newParam("status", DataType.STRING, true) // required; status: "clean", "changed", or "error"
+        ));
+        addBuiltin(info(
+                "screen.getStatus", DataType.STRING,
+                newParam("screenName", DataType.STRING, true) // required; screen name
+        ));
+        addBuiltin(info(
+                "screen.setError", DataType.BOOL,
+                newParam("screenName", DataType.STRING, true), // required; screen name
+                newParam("errorMessage", DataType.STRING, true) // required; error message
+        ));
+        addBuiltin(info(
+                "screen.getError", DataType.STRING,
+                newParam("screenName", DataType.STRING, true) // required; screen name
         ));
 
         NAMES = Collections.unmodifiableSet(BUILTINS.keySet());
@@ -1812,6 +1828,17 @@ public final class Builtins {
             }
             case "win.closewindow" -> {
                 return screenClose(context, args);
+            case "screen.setstatus" -> {
+                return screenSetStatus(context, args);
+            }
+            case "screen.getstatus" -> {
+                return screenGetStatus(context, args);
+            }
+            case "screen.seterror" -> {
+                return screenSetError(context, args);
+            }
+            case "screen.geterror" -> {
+                return screenGetError(context, args);
             }
 
             default ->
@@ -2329,6 +2356,31 @@ public final class Builtins {
                 }
             }
         });
+     * screen.setStatus(screenName, status) -> Boolean
+     * Sets the status of a screen to "clean", "changed", or "error"
+     */
+    private static Object screenSetStatus(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (String) args[0];
+        String statusStr = (String) args[1];
+
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("screen.setStatus: screenName parameter cannot be null or empty");
+        }
+        if (statusStr == null || statusStr.isEmpty()) {
+            throw new InterpreterError("screen.setStatus: status parameter cannot be null or empty");
+        }
+
+        // Verify screen exists
+        if (!context.getScreens().containsKey(screenName.toLowerCase())) {
+            throw new InterpreterError("screen.setStatus: screen '" + screenName + "' not found");
+        }
+
+        // Parse status
+        com.eb.script.interpreter.screen.ScreenStatus status = 
+            com.eb.script.interpreter.screen.ScreenStatus.fromString(statusStr);
+        
+        // Set the status
+        context.setScreenStatus(screenName, status);
         
         return true;
     }
@@ -2375,6 +2427,46 @@ public final class Builtins {
                 }
             }
         });
+     * screen.getStatus(screenName) -> String
+     * Gets the current status of a screen: "clean", "changed", or "error"
+     */
+    private static Object screenGetStatus(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (String) args[0];
+
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("screen.getStatus: screenName parameter cannot be null or empty");
+        }
+
+        // Verify screen exists
+        if (!context.getScreens().containsKey(screenName.toLowerCase())) {
+            throw new InterpreterError("screen.getStatus: screen '" + screenName + "' not found");
+        }
+
+        // Get the status
+        com.eb.script.interpreter.screen.ScreenStatus status = context.getScreenStatus(screenName);
+        
+        return status.toString();
+    }
+
+    /**
+     * screen.setError(screenName, errorMessage) -> Boolean
+     * Sets an error message for a screen and automatically sets status to "error"
+     */
+    private static Object screenSetError(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (String) args[0];
+        String errorMessage = (String) args[1];
+
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("screen.setError: screenName parameter cannot be null or empty");
+        }
+
+        // Verify screen exists
+        if (!context.getScreens().containsKey(screenName.toLowerCase())) {
+            throw new InterpreterError("screen.setError: screen '" + screenName + "' not found");
+        }
+
+        // Set the error message (this automatically sets status to ERROR)
+        context.setScreenErrorMessage(screenName, errorMessage);
         
         return true;
     }
@@ -2431,6 +2523,23 @@ public final class Builtins {
         });
         
         return true;
+     * screen.getError(screenName) -> String
+     * Gets the error message for a screen (returns null if no error)
+     */
+    private static Object screenGetError(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (String) args[0];
+
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("screen.getError: screenName parameter cannot be null or empty");
+        }
+
+        // Verify screen exists
+        if (!context.getScreens().containsKey(screenName.toLowerCase())) {
+            throw new InterpreterError("screen.getError: screen '" + screenName + "' not found");
+        }
+
+        // Get the error message
+        return context.getScreenErrorMessage(screenName);
     }
 
     /**

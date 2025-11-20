@@ -32,7 +32,7 @@ Language and Console Rules
   - `java -cp target/classes com.eb.script.Run <script.ebs>`
 
 Screens and Variables
-- Screen windows are NOT shown automatically; require explicit: `screen <name> show;` and support hide/show cycles.
+- Screen windows are NOT shown automatically; require explicit: `show screen <name>;` (new syntax) or `screen <name> show;` (legacy) and support hide/show cycles.
 - Each screen runs in its own thread; variables are thread-safe and accessed via `screenName.varName`.
 - Prefer variable-level DisplayMetadata; AreaItem display can override. If AreaItem omits display, it falls back to the var's metadata.
 

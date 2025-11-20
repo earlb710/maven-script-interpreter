@@ -332,13 +332,88 @@ public class ScreenFactory {
     }
     
     /**
-     * Create a menu bar for screen windows with Edit menu containing Close item
+     * Create a menu bar for screen windows with Edit menu containing Copy/Cut/Paste/Undo/Redo/Close items
      */
     private static javafx.scene.control.MenuBar createScreenMenuBar(Stage stage) {
         javafx.scene.control.MenuBar menuBar = new javafx.scene.control.MenuBar();
         
         // Create Edit menu
         javafx.scene.control.Menu editMenu = new javafx.scene.control.Menu("Edit");
+        
+        // Cut menu item with Ctrl+X
+        javafx.scene.control.MenuItem cutItem = new javafx.scene.control.MenuItem("Cut");
+        cutItem.setAccelerator(new javafx.scene.input.KeyCodeCombination(
+            javafx.scene.input.KeyCode.X, 
+            javafx.scene.input.KeyCombination.CONTROL_DOWN));
+        cutItem.setOnAction(e -> {
+            // Get the focused control and perform cut if it's a text control
+            javafx.scene.Node focusOwner = stage.getScene().getFocusOwner();
+            if (focusOwner instanceof javafx.scene.control.TextField) {
+                ((javafx.scene.control.TextField) focusOwner).cut();
+            } else if (focusOwner instanceof javafx.scene.control.TextArea) {
+                ((javafx.scene.control.TextArea) focusOwner).cut();
+            }
+        });
+        
+        // Copy menu item with Ctrl+C
+        javafx.scene.control.MenuItem copyItem = new javafx.scene.control.MenuItem("Copy");
+        copyItem.setAccelerator(new javafx.scene.input.KeyCodeCombination(
+            javafx.scene.input.KeyCode.C, 
+            javafx.scene.input.KeyCombination.CONTROL_DOWN));
+        copyItem.setOnAction(e -> {
+            // Get the focused control and perform copy if it's a text control
+            javafx.scene.Node focusOwner = stage.getScene().getFocusOwner();
+            if (focusOwner instanceof javafx.scene.control.TextField) {
+                ((javafx.scene.control.TextField) focusOwner).copy();
+            } else if (focusOwner instanceof javafx.scene.control.TextArea) {
+                ((javafx.scene.control.TextArea) focusOwner).copy();
+            }
+        });
+        
+        // Paste menu item with Ctrl+V
+        javafx.scene.control.MenuItem pasteItem = new javafx.scene.control.MenuItem("Paste");
+        pasteItem.setAccelerator(new javafx.scene.input.KeyCodeCombination(
+            javafx.scene.input.KeyCode.V, 
+            javafx.scene.input.KeyCombination.CONTROL_DOWN));
+        pasteItem.setOnAction(e -> {
+            // Get the focused control and perform paste if it's a text control
+            javafx.scene.Node focusOwner = stage.getScene().getFocusOwner();
+            if (focusOwner instanceof javafx.scene.control.TextField) {
+                ((javafx.scene.control.TextField) focusOwner).paste();
+            } else if (focusOwner instanceof javafx.scene.control.TextArea) {
+                ((javafx.scene.control.TextArea) focusOwner).paste();
+            }
+        });
+        
+        // Undo menu item with Ctrl+Z
+        javafx.scene.control.MenuItem undoItem = new javafx.scene.control.MenuItem("Undo");
+        undoItem.setAccelerator(new javafx.scene.input.KeyCodeCombination(
+            javafx.scene.input.KeyCode.Z, 
+            javafx.scene.input.KeyCombination.CONTROL_DOWN));
+        undoItem.setOnAction(e -> {
+            // Get the focused control and perform undo if it's a text control
+            javafx.scene.Node focusOwner = stage.getScene().getFocusOwner();
+            if (focusOwner instanceof javafx.scene.control.TextField) {
+                ((javafx.scene.control.TextField) focusOwner).undo();
+            } else if (focusOwner instanceof javafx.scene.control.TextArea) {
+                ((javafx.scene.control.TextArea) focusOwner).undo();
+            }
+        });
+        
+        // Redo menu item with Ctrl+Y
+        javafx.scene.control.MenuItem redoItem = new javafx.scene.control.MenuItem("Redo");
+        redoItem.setAccelerator(new javafx.scene.input.KeyCodeCombination(
+            javafx.scene.input.KeyCode.Y, 
+            javafx.scene.input.KeyCombination.CONTROL_DOWN));
+        redoItem.setOnAction(e -> {
+            // Get the focused control and perform redo if it's a text control
+            javafx.scene.Node focusOwner = stage.getScene().getFocusOwner();
+            if (focusOwner instanceof javafx.scene.control.TextField) {
+                ((javafx.scene.control.TextField) focusOwner).redo();
+            } else if (focusOwner instanceof javafx.scene.control.TextArea) {
+                ((javafx.scene.control.TextArea) focusOwner).redo();
+            }
+        });
         
         // Close menu item with Ctrl+W
         javafx.scene.control.MenuItem closeItem = new javafx.scene.control.MenuItem("Close");
@@ -350,7 +425,17 @@ public class ScreenFactory {
             stage.close();
         });
         
-        editMenu.getItems().add(closeItem);
+        // Add all menu items to Edit menu with separators
+        editMenu.getItems().addAll(
+            cutItem, 
+            copyItem, 
+            pasteItem, 
+            new javafx.scene.control.SeparatorMenuItem(),
+            undoItem, 
+            redoItem,
+            new javafx.scene.control.SeparatorMenuItem(),
+            closeItem
+        );
         menuBar.getMenus().add(editMenu);
         
         return menuBar;

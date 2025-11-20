@@ -901,6 +901,15 @@ show screen myWindow;
 
 // Show the current screen (from within screen context - e.g., in onClick handler)
 show screen;
+// New syntax (preferred)
+show screen myWindow;
+// With parameters
+show screen myWindow("param1", 123);
+// With callback
+show screen myWindow callback handleEvent;
+
+// Legacy syntax (still supported)
+screen myWindow show;
 ```
 
 **Note**: 
