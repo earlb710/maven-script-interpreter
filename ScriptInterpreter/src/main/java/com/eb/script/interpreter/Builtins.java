@@ -379,6 +379,26 @@ public final class Builtins {
                 newParam("regex", DataType.STRING),
                 newParam("replacement", DataType.STRING)
         ));
+        
+        // str.lpad(str, length, padChar) -> STRING
+        // Left-pads the string with padChar to reach the specified length.
+        // If string is already >= length, returns original string unchanged.
+        addBuiltin(info(
+                "str.lpad", DataType.STRING,
+                newParam("str", DataType.STRING),
+                newParam("length", DataType.INTEGER),
+                newParam("padChar", DataType.STRING)
+        ));
+        
+        // str.rpad(str, length, padChar) -> STRING
+        // Right-pads the string with padChar to reach the specified length.
+        // If string is already >= length, returns original string unchanged.
+        addBuiltin(info(
+                "str.rpad", DataType.STRING,
+                newParam("str", DataType.STRING),
+                newParam("length", DataType.INTEGER),
+                newParam("padChar", DataType.STRING)
+        ));
 
         addBuiltin(info(
                 "file.exists", DataType.BOOL,
@@ -1233,6 +1253,80 @@ public final class Builtins {
                 } catch (java.util.regex.PatternSyntaxException ex) {
                     throw new InterpreterError("str.replaceAll: Invalid regex - " + ex.getMessage());
                 }
+            }
+            
+            //  str.lpad(s, length, padChar) -> STRING
+            //  Left-pads the string with padChar to reach the specified length.
+            //  If string is already >= length, returns original string unchanged.
+            case "str.lpad" -> {
+                String s = (String) args[0];
+                Integer length = (Integer) args[1];
+                String padChar = (String) args[2];
+                
+                if (s == null) {
+                    return null;
+                }
+                if (length == null) {
+                    throw new InterpreterError("str.lpad: length cannot be null");
+                }
+                if (padChar == null || padChar.isEmpty()) {
+                    throw new InterpreterError("str.lpad: padChar cannot be null or empty");
+                }
+                if (padChar.length() != 1) {
+                    throw new InterpreterError("str.lpad: padChar must be a single character");
+                }
+                
+                // If already at or exceeds desired length, return as-is
+                if (s.length() >= length) {
+                    return s;
+                }
+                
+                // Calculate padding needed
+                int padCount = length - s.length();
+                StringBuilder sb = new StringBuilder(length);
+                char ch = padChar.charAt(0);
+                for (int i = 0; i < padCount; i++) {
+                    sb.append(ch);
+                }
+                sb.append(s);
+                return sb.toString();
+            }
+            
+            //  str.rpad(s, length, padChar) -> STRING
+            //  Right-pads the string with padChar to reach the specified length.
+            //  If string is already >= length, returns original string unchanged.
+            case "str.rpad" -> {
+                String s = (String) args[0];
+                Integer length = (Integer) args[1];
+                String padChar = (String) args[2];
+                
+                if (s == null) {
+                    return null;
+                }
+                if (length == null) {
+                    throw new InterpreterError("str.rpad: length cannot be null");
+                }
+                if (padChar == null || padChar.isEmpty()) {
+                    throw new InterpreterError("str.rpad: padChar cannot be null or empty");
+                }
+                if (padChar.length() != 1) {
+                    throw new InterpreterError("str.rpad: padChar must be a single character");
+                }
+                
+                // If already at or exceeds desired length, return as-is
+                if (s.length() >= length) {
+                    return s;
+                }
+                
+                // Calculate padding needed
+                int padCount = length - s.length();
+                StringBuilder sb = new StringBuilder(length);
+                sb.append(s);
+                char ch = padChar.charAt(0);
+                for (int i = 0; i < padCount; i++) {
+                    sb.append(ch);
+                }
+                return sb.toString();
             }
             
             case "file.exists" -> {
