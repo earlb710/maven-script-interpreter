@@ -1,0 +1,121 @@
+// Test script for show/hide/close screen commands without names
+// Based on EBS_SCRIPT_SYNTAX.md examples
+
+// Handler functions that use screen commands without names
+showHandler() {
+    // Show the current screen (unhide if hidden)
+    show screen;
+}
+
+hideHandler() {
+    // Hide the current screen
+    hide screen;
+}
+
+closeHandler() {
+    // Close the current screen
+    close screen;
+}
+
+// Create a demonstration screen with buttons to test each command
+screen demoScreen = {
+    "title": "Screen Commands Test - No Names",
+    "width": 700,
+    "height": 500,
+    "vars": [
+        {
+            "name": "statusMessage",
+            "type": "string",
+            "default": "Click buttons below to test screen commands without names",
+            "display": {
+                "type": "label",
+                "labelText": "Status:"
+            }
+        },
+        {
+            "name": "showBtn",
+            "type": "string",
+            "default": "Show Screen",
+            "display": {
+                "type": "button",
+                "labelText": "Show Current Screen",
+                "onClick": "call showHandler();"
+            }
+        },
+        {
+            "name": "hideBtn",
+            "type": "string",
+            "default": "Hide Screen",
+            "display": {
+                "type": "button",
+                "labelText": "Hide Current Screen",
+                "onClick": "call hideHandler();"
+            }
+        },
+        {
+            "name": "closeBtn",
+            "type": "string",
+            "default": "Close Screen",
+            "display": {
+                "type": "button",
+                "labelText": "Close Current Screen",
+                "onClick": "call closeHandler();"
+            }
+        },
+        {
+            "name": "instructionsLabel",
+            "type": "string",
+            "default": "Test Instructions:",
+            "display": {
+                "type": "label",
+                "labelText": ""
+            }
+        },
+        {
+            "name": "step1",
+            "type": "string",
+            "default": "1. Click 'Hide Current Screen' - screen will disappear",
+            "display": {
+                "type": "label",
+                "labelText": ""
+            }
+        },
+        {
+            "name": "step2",
+            "type": "string",
+            "default": "2. Use console: show screen demoScreen; to bring it back",
+            "display": {
+                "type": "label",
+                "labelText": ""
+            }
+        },
+        {
+            "name": "step3",
+            "type": "string",
+            "default": "3. Or click 'Show Current Screen' from within a handler",
+            "display": {
+                "type": "label",
+                "labelText": ""
+            }
+        },
+        {
+            "name": "step4",
+            "type": "string",
+            "default": "4. Click 'Close Current Screen' - screen will close and free resources",
+            "display": {
+                "type": "label",
+                "labelText": ""
+            }
+        }
+    ]
+};
+
+// Show the screen to start the demonstration
+show screen demoScreen;
+
+// Expected behavior:
+// - show screen; (no name) works from within onClick handlers
+// - hide screen; (no name) works from within onClick handlers
+// - close screen; (no name) works from within onClick handlers
+// - All three commands use context.getCurrentScreen() to determine the screen name
+// - Commands will fail with helpful error if called from main script context

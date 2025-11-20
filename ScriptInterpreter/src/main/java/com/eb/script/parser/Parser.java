@@ -1486,9 +1486,12 @@ public class Parser {
         // Expect 'screen' keyword
         consume(EbsTokenType.SCREEN, "Expected 'screen' after 'show'.");
 
-        // Require screen name
-        EbsToken nameTok = consume(EbsTokenType.IDENTIFIER, "Expected screen name after 'show screen'.");
-        String screenName = (String) nameTok.literal;
+        // Check if there's a screen name or if it's just "show screen;"
+        String screenName = null;
+        if (check(EbsTokenType.IDENTIFIER)) {
+            EbsToken nameTok = advance();
+            screenName = (String) nameTok.literal;
+        }
 
         // Check for optional parameters: (param1, param2, ...)
         List<Expression> parameters = null;
@@ -1509,7 +1512,7 @@ public class Parser {
             callbackName = (String) callbackTok.literal;
         }
 
-        consume(EbsTokenType.SEMICOLON, "Expected ';' after 'show screen <name>'.");
+        consume(EbsTokenType.SEMICOLON, "Expected ';' after 'show screen'.");
         return new ScreenShowStatement(line, screenName, parameters, callbackName);
     }
 
@@ -1519,11 +1522,14 @@ public class Parser {
         // Expect 'screen' keyword
         consume(EbsTokenType.SCREEN, "Expected 'screen' after 'hide'.");
 
-        // Require screen name
-        EbsToken nameTok = consume(EbsTokenType.IDENTIFIER, "Expected screen name after 'hide screen'.");
-        String screenName = (String) nameTok.literal;
+        // Check if there's a screen name or if it's just "hide screen;"
+        String screenName = null;
+        if (check(EbsTokenType.IDENTIFIER)) {
+            EbsToken nameTok = advance();
+            screenName = (String) nameTok.literal;
+        }
 
-        consume(EbsTokenType.SEMICOLON, "Expected ';' after 'hide screen <name>'.");
+        consume(EbsTokenType.SEMICOLON, "Expected ';' after 'hide screen'.");
         return new ScreenHideStatement(line, screenName);
     }
 

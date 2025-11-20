@@ -1,0 +1,103 @@
+// Test script for win.showWindow, win.hideWindow, and win.closeWindow builtin functions
+// These builtins work the same as the keyword versions but can be called from inline code
+
+// Handler functions that use window builtin functions without names
+showBuiltinHandler() {
+    // Show the current screen using builtin function
+    call win.showWindow();
+}
+
+hideBuiltinHandler() {
+    // Hide the current screen using builtin function
+    call win.hideWindow();
+}
+
+closeBuiltinHandler() {
+    // Close the current screen using builtin function
+    call win.closeWindow();
+}
+
+// Create a demonstration screen with buttons to test builtin functions
+screen demoScreen = {
+    "title": "Window Builtin Functions Test",
+    "width": 700,
+    "height": 500,
+    "vars": [
+        {
+            "name": "titleLabel",
+            "type": "string",
+            "default": "Testing win.showWindow, win.hideWindow, win.closeWindow builtins",
+            "display": {
+                "type": "label",
+                "labelText": ""
+            }
+        },
+        {
+            "name": "showBuiltinBtn",
+            "type": "string",
+            "default": "Show (builtin)",
+            "display": {
+                "type": "button",
+                "labelText": "win.showWindow() - Current Screen",
+                "onClick": "call win.showWindow();"
+            }
+        },
+        {
+            "name": "hideBuiltinBtn",
+            "type": "string",
+            "default": "Hide (builtin)",
+            "display": {
+                "type": "button",
+                "labelText": "win.hideWindow() - Current Screen",
+                "onClick": "call win.hideWindow();"
+            }
+        },
+        {
+            "name": "closeBuiltinBtn",
+            "type": "string",
+            "default": "Close (builtin)",
+            "display": {
+                "type": "button",
+                "labelText": "win.closeWindow() - Current Screen",
+                "onClick": "call win.closeWindow();"
+            }
+        },
+        {
+            "name": "infoLabel1",
+            "type": "string",
+            "default": "Note: These buttons use inline calls to win.showWindow/hideWindow/closeWindow",
+            "display": {
+                "type": "label",
+                "labelText": ""
+            }
+        },
+        {
+            "name": "infoLabel2",
+            "type": "string",
+            "default": "The builtin functions work without specifying a screen name",
+            "display": {
+                "type": "label",
+                "labelText": ""
+            }
+        },
+        {
+            "name": "infoLabel3",
+            "type": "string",
+            "default": "when called from within screen event handlers (onClick)",
+            "display": {
+                "type": "label",
+                "labelText": ""
+            }
+        }
+    ]
+};
+
+// Show the screen to start the demonstration
+show screen demoScreen;
+
+// Expected behavior:
+// - win.showWindow() (no args) works from within onClick handlers
+// - win.hideWindow() (no args) works from within onClick handlers
+// - win.closeWindow() (no args) works from within onClick handlers
+// - All three builtins use context.getCurrentScreen() to determine the screen name
+// - Builtins will fail with helpful error if called from main script context

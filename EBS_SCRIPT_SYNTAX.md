@@ -896,6 +896,11 @@ screen layoutScreen = {
 
 #### Show Screen
 ```javascript
+// Show a specific screen by name
+show screen myWindow;
+
+// Show the current screen (from within screen context - e.g., in onClick handler)
+show screen;
 // New syntax (preferred)
 show screen myWindow;
 // With parameters
@@ -907,21 +912,34 @@ show screen myWindow callback handleEvent;
 screen myWindow show;
 ```
 
+**Note**: 
+- Showing a screen will make it visible (unhide if previously hidden)
+- If no screen name is provided, determines the screen from the execution thread context
+- The no-name form must be called from within a screen context (e.g., onClick handlers)
+- If called from console/main thread without a name, an error is thrown
+
 #### Hide Screen
 ```javascript
-// New syntax (preferred)
+// Hide a specific screen by name
 hide screen myWindow;
 
-// Legacy syntax (still supported)
-screen myWindow hide;
+// Hide the current screen (from within screen context - e.g., in onClick handler)
+hide screen;
 ```
+
+**Note**:
+- Hiding a screen makes it invisible but keeps it in memory
+- Screen can be shown again with `show screen <name>;`
+- If no screen name is provided, determines the screen from the execution thread context
+- The no-name form must be called from within a screen context (e.g., onClick handlers)
+- If called from console/main thread without a name, an error is thrown
 
 #### Close Screen
 ```javascript
 // Close a specific screen by name
 close screen myWindow;
 
-// Close the current screen (from within screen context)
+// Close the current screen (from within screen context - e.g., in onClick handler)
 close screen;
 ```
 
