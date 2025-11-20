@@ -1,0 +1,25 @@
+// helper_string.ebs - String helper functions
+// This file is imported by other test files
+
+print "Loading string helpers...";
+
+toUpper(s: string) return string {
+    // Simple uppercase conversion (just a demo)
+    return s;
+}
+
+concat(a: string, b: string) return string {
+    return a + b;
+}
+
+repeat(s: string, n: int) return string {
+    var result: string = "";
+    var i: int = 0;
+    while i < n then {
+        result = result + s;
+        i = i + 1;
+    }
+    return result;
+}
+
+print "String helpers loaded";

@@ -11,10 +11,20 @@
     -fx-background-color: transparent;
 }
 
+.screen-area-pane .label {
+    -fx-text-fill: #333333;
+    -fx-font-weight: normal;
+}
+
 /* StackPane - Center-aligned stacking */
 .screen-area-stackpane {
     -fx-background-color: transparent;
     -fx-alignment: center;
+}
+
+.screen-area-stackpane .label {
+    -fx-text-fill: #333333;
+    -fx-font-weight: normal;
 }
 
 /* AnchorPane - Anchor-based positioning */
@@ -22,9 +32,19 @@
     -fx-background-color: transparent;
 }
 
+.screen-area-anchorpane .label {
+    -fx-text-fill: #333333;
+    -fx-font-weight: normal;
+}
+
 /* BorderPane - Five-region layout */
 .screen-area-borderpane {
     -fx-background-color: transparent;
+}
+
+.screen-area-borderpane .label {
+    -fx-text-fill: #333333;
+    -fx-font-weight: normal;
 }
 
 /* FlowPane - Flowing layout with gaps */
@@ -32,6 +52,11 @@
     -fx-background-color: transparent;
     -fx-hgap: 5;
     -fx-vgap: 5;
+}
+
+.screen-area-flowpane .label {
+    -fx-text-fill: #333333;
+    -fx-font-weight: normal;
 }
 
 /* GridPane - Grid layout with gaps */
@@ -42,12 +67,22 @@
     -fx-padding: 10;
 }
 
+.screen-area-gridpane .label {
+    -fx-text-fill: #333333;
+    -fx-font-weight: normal;
+}
+
 /* HBox - Horizontal box with spacing */
 .screen-area-hbox {
     -fx-background-color: transparent;
     -fx-spacing: 10;
     -fx-alignment: center-left;
     -fx-padding: 5;
+}
+
+.screen-area-hbox .label {
+    -fx-text-fill: #333333;
+    -fx-font-weight: normal;
 }
 
 /* VBox - Vertical box with spacing */
@@ -58,12 +93,22 @@
     -fx-padding: 5;
 }
 
+.screen-area-vbox .label {
+    -fx-text-fill: #333333;
+    -fx-font-weight: normal;
+}
+
 /* TilePane - Tile layout with gaps */
 .screen-area-tilepane {
     -fx-background-color: transparent;
     -fx-hgap: 5;
     -fx-vgap: 5;
     -fx-padding: 5;
+}
+
+.screen-area-tilepane .label {
+    -fx-text-fill: #333333;
+    -fx-font-weight: normal;
 }
 
 /* ==================== Containers ==================== */
@@ -102,21 +147,55 @@
     -fx-background-color: #e0e0e0;
     -fx-background-radius: 5 5 0 0;
     -fx-padding: 5 10 5 10;
+    -fx-border-color: #f0f0f0 #a0a0a0 #a0a0a0 #f0f0f0;
+    -fx-border-width: 1;
+    -fx-border-radius: 5 5 0 0;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 2, 0, 1, 1);
 }
 
 .screen-area-tabpane .tab:selected {
-    -fx-background-color: #ffffff;
+    -fx-background-color: #f5f5f5;
+    -fx-border-color: #a0a0a0 #f0f0f0 #f0f0f0 #a0a0a0;
+    -fx-border-width: 1;
+    -fx-border-radius: 5 5 0 0;
+    -fx-effect: innershadow(gaussian, rgba(0, 0, 0, 0.4), 3, 0, 0, 1);
 }
 
 .screen-area-tabpane .tab-content-area {
-    -fx-background-color: transparent;
+    -fx-background-color: #e0e0e0;
     -fx-padding: 0;
+    -fx-border-color: #d0d0d0 #808080 #808080 #d0d0d0;
+    -fx-border-width: 2;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-border-insets: 0;
+    -fx-effect: innershadow(gaussian, rgba(255, 255, 255, 0.6), 3, 0, 1, 1);
 }
 
 /* Individual Tab */
 .screen-area-tab {
-    -fx-background-color: transparent;
+    -fx-background-color: #ffffff;
     -fx-padding: 10;
+    -fx-border-color: #d0d0d0 #808080 #808080 #d0d0d0;
+    -fx-border-width: 1;
+    -fx-border-insets: 0;
+    -fx-effect: innershadow(gaussian, rgba(255, 255, 255, 0.8), 2, 0, 1, 1);
+}
+
+/* Ensure labels in tabs have visible text color and normal font weight */
+.screen-area-tabpane .label {
+    -fx-text-fill: #333333;
+    -fx-font-weight: normal;
+}
+
+/* Tab header labels should be bold */
+.screen-area-tabpane .tab .tab-label {
+    -fx-font-weight: bold;
+}
+
+.screen-area-tab .label {
+    -fx-text-fill: #333333;
+    -fx-font-weight: normal;
 }
 
 /* Accordion - Collapsible sections */
@@ -383,4 +462,30 @@
 
 .screen-area-slide-in {
     -fx-animation: slideIn 0.3s ease-out;
+}
+
+/* ==================== Status Bar ==================== */
+
+/* Status bar styling with inset border effect */
+.status-bar {
+    -fx-background-color: linear-gradient(to bottom, #f0f0f0, #e0e0e0);
+    -fx-border-style: solid inside, solid inside;
+    -fx-border-width: 1, 1;
+    -fx-border-insets: 0, 1;
+    /* layer 1 (outer):   top    right  bottom  left  */
+    -fx-border-color:    #6a6a6a #f0f0f0 #f4f4f4 #cccccc,
+        /* layer 2 (inner):   top    right  bottom  left  */
+        #7f7f7f #e6e6e6 #ffffff #b6b6b6;
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 11px;
+    -fx-text-fill: #333333;
+    -fx-effect: innershadow(gaussian, rgba(0,0,0,0.15), 2, 0.2, 0, 1);
+}
+
+.status-bar .label {
+    -fx-text-fill: #333333;
+}
+
+.status-bar .separator {
+    -fx-padding: 0 2 0 2;
 }

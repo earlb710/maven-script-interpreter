@@ -22,11 +22,13 @@ import javafx.scene.input.KeyCombination;
 public class EbsMenu extends MenuBar {
 
     public final Menu recentMenu;
+    public final Menu screensMenu;
     public final EbsConsoleHandler handler;
 
     public EbsMenu(EbsConsoleHandler handler) {
         this.handler = handler;
         recentMenu = new Menu("Recent files");
+        screensMenu = new Menu("Screens");
         handler.loadRecentFiles();
         Menu fileMenu = new Menu("File");
 
@@ -178,7 +180,18 @@ public class EbsMenu extends MenuBar {
             }
         });
         
-        editMenu.getItems().addAll(cutItem, copyItem, pasteItem, new SeparatorMenuItem(), undoItem, redoItem, new SeparatorMenuItem(), findItem, replaceItem, new SeparatorMenuItem(), toggleLineNumbersItem);
+        // Close Tab
+        MenuItem closeTabItem = new MenuItem("Close");
+        closeTabItem.setAccelerator(new KeyCodeCombination(KeyCode.W, KeyCombination.CONTROL_DOWN));
+        closeTabItem.setOnAction(e -> {
+            Tab tab = handler.getSelectedTab();
+            // Only close if it's not the console tab (which is not closable)
+            if (tab != null && tab.isClosable()) {
+                handler.closeTab(tab);
+            }
+        });
+        
+        editMenu.getItems().addAll(cutItem, copyItem, pasteItem, new SeparatorMenuItem(), undoItem, redoItem, new SeparatorMenuItem(), findItem, replaceItem, new SeparatorMenuItem(), toggleLineNumbersItem, closeTabItem);
         getMenus().add(editMenu);
 
         Menu toolsMenu = new Menu("Config");
@@ -199,6 +212,12 @@ public class EbsMenu extends MenuBar {
 
         toolsMenu.getItems().addAll(aiSetupItem, safeDirsItem, dbConfigItem);
         getMenus().add(toolsMenu);
+
+        // --- Screens Menu ---
+        refreshScreensMenu();
+        // Refresh screens menu when it's about to be shown
+        screensMenu.setOnShowing(e -> refreshScreensMenu());
+        getMenus().add(screensMenu);
 
     }
 
@@ -236,6 +255,90 @@ public class EbsMenu extends MenuBar {
                 refreshRecentMenu();
             });
             recentMenu.getItems().add(clear);
+        }
+    }
+
+    public final void refreshScreensMenu() {
+        screensMenu.getItems().clear();
+        
+        // Access global static maps directly - no need to go through interpreter
+        try {
+            java.util.List<String> screenOrder = com.eb.script.interpreter.InterpreterContext.getGlobalScreenCreationOrder();
+            java.util.concurrent.ConcurrentHashMap<String, javafx.stage.Stage> screens = com.eb.script.interpreter.InterpreterContext.getGlobalScreens();
+            
+            if (screenOrder.isEmpty()) {
+                MenuItem none = new MenuItem("(No screens created)");
+                none.setDisable(true);
+                screensMenu.getItems().add(none);
+            } else {
+                int index = 1;
+                for (String screenName : screenOrder) {
+                    javafx.stage.Stage stage = screens.get(screenName);
+                    if (stage != null) {
+                        // Show screen name and whether it's minimized (● visible, ○ minimized)
+                        // Use isIconified() to detect minimized state, and isShowing() to detect if window is open
+                        String status;
+                        if (!stage.isShowing()) {
+                            status = "○"; // Not showing at all
+                        } else if (stage.isIconified()) {
+                            status = "○"; // Minimized/iconified
+                        } else {
+                            status = "●"; // Visible and not minimized
+                        }
+                        String label = String.format("%d  %s %s", index, status, screenName);
+                        MenuItem item = new MenuItem(label);
+                        
+                        // When clicked, bring the screen to front or show it if minimized
+                        item.setOnAction(e -> {
+                            javafx.application.Platform.runLater(() -> {
+                                if (!stage.isShowing()) {
+                                    stage.show();
+                                }
+                                if (stage.isIconified()) {
+                                    stage.setIconified(false);
+                                }
+                                stage.toFront();
+                                stage.requestFocus();
+                            });
+                        });
+                        
+                        screensMenu.getItems().add(item);
+                        index++;
+                    }
+                }
+                
+                // Add separator and "Close all screens" option at the bottom
+                screensMenu.getItems().add(new SeparatorMenuItem());
+                MenuItem closeAllItem = new MenuItem("Close all screens");
+                closeAllItem.setOnAction(e -> {
+                    javafx.application.Platform.runLater(() -> {
+                        // Permanently close all screens (not just hide them)
+                        // Create a copy of the list to avoid concurrent modification
+                        java.util.List<String> screensToClose = new java.util.ArrayList<>(screenOrder);
+                        for (String screenName : screensToClose) {
+                            javafx.stage.Stage stage = screens.get(screenName);
+                            if (stage != null) {
+                                // Fire close request event to trigger cleanup
+                                javafx.stage.WindowEvent closeEvent = new javafx.stage.WindowEvent(
+                                    stage, 
+                                    javafx.stage.WindowEvent.WINDOW_CLOSE_REQUEST
+                                );
+                                stage.fireEvent(closeEvent);
+                                // If event wasn't consumed, close the stage
+                                if (!closeEvent.isConsumed()) {
+                                    stage.close();
+                                }
+                            }
+                        }
+                    });
+                });
+                screensMenu.getItems().add(closeAllItem);
+            }
+        } catch (Exception e) {
+            MenuItem error = new MenuItem("(Error accessing screens: " + e.getMessage() + ")");
+            error.setDisable(true);
+            screensMenu.getItems().add(error);
+            e.printStackTrace(); // Log the error for debugging
         }
     }
 

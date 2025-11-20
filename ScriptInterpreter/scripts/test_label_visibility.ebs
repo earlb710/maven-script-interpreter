@@ -1,0 +1,175 @@
+// Test Script: Label Visibility in Tabs
+// Description: Tests that labels are visible on transparent tab backgrounds
+// Author: Test Suite
+// Date: 2025-11-19
+
+screen labelVisibilityTest = {
+    "title": "Label Visibility Test - Tabs with Transparent Backgrounds",
+    "width": 800,
+    "height": 600,
+    "vars": [
+        {
+            "name": "field1",
+            "type": "string",
+            "default": "Value 1",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 1:",
+                "labelTextAlignment": "left",
+                "promptHelp": "This is field 1"
+            }
+        },
+        {
+            "name": "field2",
+            "type": "string",
+            "default": "Value 2",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 2:",
+                "labelTextAlignment": "left",
+                "promptHelp": "This is field 2"
+            }
+        },
+        {
+            "name": "field3",
+            "type": "string",
+            "default": "Value 3",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 3:",
+                "labelTextAlignment": "left",
+                "promptHelp": "This is field 3"
+            }
+        },
+        {
+            "name": "field4",
+            "type": "string",
+            "default": "Value 4",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 4:",
+                "labelTextAlignment": "left",
+                "promptHelp": "This is field 4"
+            }
+        },
+        {
+            "name": "checkbox1",
+            "type": "bool",
+            "default": true,
+            "display": {
+                "type": "checkbox",
+                "labelText": "Enable Option 1:",
+                "labelTextAlignment": "left"
+            }
+        },
+        {
+            "name": "combo1",
+            "type": "string",
+            "default": "Option 1",
+            "display": {
+                "type": "combobox",
+                "labelText": "Select Option:",
+                "labelTextAlignment": "left",
+                "options": ["Option 1", "Option 2", "Option 3"]
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainLayout",
+            "type": "tabpane",
+            "areas": [
+                {
+                    "name": "tab1",
+                    "type": "tab",
+                    "displayName": "Tab 1 - VBox",
+                    "areas": [
+                        {
+                            "name": "vboxLayout",
+                            "type": "vbox",
+                            "style": "-fx-spacing: 15; -fx-padding: 20;",
+                            "items": [
+                                {
+                                    "name": "field1Input",
+                                    "varRef": "field1",
+                                    "sequence": 1,
+                                    "prefWidth": "300"
+                                },
+                                {
+                                    "name": "field2Input",
+                                    "varRef": "field2",
+                                    "sequence": 2,
+                                    "prefWidth": "300"
+                                },
+                                {
+                                    "name": "checkbox1Input",
+                                    "varRef": "checkbox1",
+                                    "sequence": 3
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "tab2",
+                    "type": "tab",
+                    "displayName": "Tab 2 - GridPane",
+                    "areas": [
+                        {
+                            "name": "gridLayout",
+                            "type": "gridpane",
+                            "style": "-fx-hgap: 20; -fx-vgap: 15; -fx-padding: 20;",
+                            "items": [
+                                {
+                                    "name": "field3Input",
+                                    "varRef": "field3",
+                                    "sequence": 1,
+                                    "layoutPos": "0,0",
+                                    "prefWidth": "300"
+                                },
+                                {
+                                    "name": "field4Input",
+                                    "varRef": "field4",
+                                    "sequence": 2,
+                                    "layoutPos": "1,0",
+                                    "prefWidth": "300"
+                                },
+                                {
+                                    "name": "combo1Input",
+                                    "varRef": "combo1",
+                                    "sequence": 3,
+                                    "layoutPos": "0,1",
+                                    "prefWidth": "300"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+};
+
+print "=========================================";
+print "LABEL VISIBILITY TEST";
+print "=========================================";
+print "";
+print "This test verifies that labels are visible on tabs with transparent backgrounds.";
+print "";
+print "INSTRUCTIONS:";
+print "1. Switch between Tab 1 and Tab 2";
+print "2. Verify that all field labels are clearly visible";
+print "3. Check that labels have a dark gray color (#333333)";
+print "4. Ensure labels are aligned properly with their controls";
+print "";
+print "Expected behavior:";
+print "- All labels should be visible with dark gray text";
+print "- Labels should appear to the left of their controls";
+print "- Tab backgrounds should be transparent/white";
+print "";
+
+screen labelVisibilityTest show;
+
+print "";
+print "Test completed!";
+print "=========================================";

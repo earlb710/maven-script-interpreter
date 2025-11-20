@@ -1,0 +1,360 @@
+// Test Script: Area Spacing and Padding Properties
+// Description: Test the new spacing and padding properties for area definitions
+// Author: EBS Test Suite
+// Date: 2025-11-19
+
+// Test 1: Basic VBox with spacing and padding
+screen testBasicSpacingPadding = {
+    "title": "Test 1: Basic VBox Spacing and Padding",
+    "width": 600,
+    "height": 500,
+    "maximize": false,
+    "vars": [
+        {
+            "name": "field1",
+            "type": "string",
+            "default": "Value 1",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 1:",
+                "labelTextAlignment": "left"
+            }
+        },
+        {
+            "name": "field2",
+            "type": "string",
+            "default": "Value 2",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 2:",
+                "labelTextAlignment": "left"
+            }
+        },
+        {
+            "name": "field3",
+            "type": "string",
+            "default": "Value 3",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 3:",
+                "labelTextAlignment": "left"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "20",
+            "padding": "30",
+            "style": "-fx-background-color: #e3f2fd;",
+            "items": [
+                {
+                    "name": "field1Input",
+                    "varRef": "field1",
+                    "sequence": 1,
+                    "prefWidth": "400"
+                },
+                {
+                    "name": "field2Input",
+                    "varRef": "field2",
+                    "sequence": 2,
+                    "prefWidth": "400"
+                },
+                {
+                    "name": "field3Input",
+                    "varRef": "field3",
+                    "sequence": 3,
+                    "prefWidth": "400"
+                }
+            ]
+        }
+    ]
+};
+
+// Test 2: Nested areas with different spacing and padding
+screen testNestedAreas = {
+    "title": "Test 2: Nested Areas with Spacing and Padding",
+    "width": 700,
+    "height": 600,
+    "maximize": false,
+    "vars": [
+        {
+            "name": "title",
+            "type": "string",
+            "default": "Form with Nested Areas",
+            "display": {
+                "type": "label",
+                "labelText": "Form with Nested Areas",
+                "itemFontSize": "18px",
+                "itemBold": true
+            }
+        },
+        {
+            "name": "name",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Name:",
+                "labelTextAlignment": "left"
+            }
+        },
+        {
+            "name": "email",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Email:",
+                "labelTextAlignment": "left"
+            }
+        },
+        {
+            "name": "phone",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Phone:",
+                "labelTextAlignment": "left"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "outerArea",
+            "type": "vbox",
+            "spacing": "20",
+            "padding": "25 35 25 35",
+            "style": "-fx-background-color: #f5f5f5;",
+            "items": [
+                {
+                    "name": "titleLabel",
+                    "varRef": "title",
+                    "sequence": 1
+                }
+            ],
+            "areas": [
+                {
+                    "name": "innerFormArea",
+                    "type": "vbox",
+                    "spacing": "12",
+                    "padding": "20",
+                    "style": "-fx-background-color: white; -fx-border-color: #c0c0c0; -fx-border-width: 1;",
+                    "items": [
+                        {
+                            "name": "nameInput",
+                            "varRef": "name",
+                            "sequence": 1,
+                            "prefWidth": "450"
+                        },
+                        {
+                            "name": "emailInput",
+                            "varRef": "email",
+                            "sequence": 2,
+                            "prefWidth": "450"
+                        },
+                        {
+                            "name": "phoneInput",
+                            "varRef": "phone",
+                            "sequence": 3,
+                            "prefWidth": "450"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+};
+
+// Test 3: HBox with spacing and padding
+screen testHBoxSpacing = {
+    "title": "Test 3: HBox Spacing and Padding",
+    "width": 800,
+    "height": 400,
+    "maximize": false,
+    "vars": [
+        {
+            "name": "col1",
+            "type": "string",
+            "default": "Column 1",
+            "display": {
+                "type": "textfield",
+                "labelText": "Col 1:"
+            }
+        },
+        {
+            "name": "col2",
+            "type": "string",
+            "default": "Column 2",
+            "display": {
+                "type": "textfield",
+                "labelText": "Col 2:"
+            }
+        },
+        {
+            "name": "col3",
+            "type": "string",
+            "default": "Column 3",
+            "display": {
+                "type": "textfield",
+                "labelText": "Col 3:"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "horizontalArea",
+            "type": "hbox",
+            "spacing": "25",
+            "padding": "30 20",
+            "style": "-fx-background-color: #ffe0b2;",
+            "items": [
+                {
+                    "name": "col1Input",
+                    "varRef": "col1",
+                    "sequence": 1,
+                    "prefWidth": "200"
+                },
+                {
+                    "name": "col2Input",
+                    "varRef": "col2",
+                    "sequence": 2,
+                    "prefWidth": "200"
+                },
+                {
+                    "name": "col3Input",
+                    "varRef": "col3",
+                    "sequence": 3,
+                    "prefWidth": "200"
+                }
+            ]
+        }
+    ]
+};
+
+// Test 4: GridPane with spacing and padding
+screen testGridPaneSpacing = {
+    "title": "Test 4: GridPane Spacing and Padding",
+    "width": 700,
+    "height": 500,
+    "maximize": false,
+    "vars": [
+        {
+            "name": "r0c0",
+            "type": "string",
+            "default": "R0C0",
+            "display": {
+                "type": "textfield"
+            }
+        },
+        {
+            "name": "r0c1",
+            "type": "string",
+            "default": "R0C1",
+            "display": {
+                "type": "textfield"
+            }
+        },
+        {
+            "name": "r1c0",
+            "type": "string",
+            "default": "R1C0",
+            "display": {
+                "type": "textfield"
+            }
+        },
+        {
+            "name": "r1c1",
+            "type": "string",
+            "default": "R1C1",
+            "display": {
+                "type": "textfield"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "gridArea",
+            "type": "gridpane",
+            "spacing": "15",
+            "padding": "25",
+            "style": "-fx-background-color: #e1f5fe;",
+            "items": [
+                {
+                    "name": "cell00",
+                    "varRef": "r0c0",
+                    "layoutPos": "0,0",
+                    "prefWidth": "250"
+                },
+                {
+                    "name": "cell01",
+                    "varRef": "r0c1",
+                    "layoutPos": "0,1",
+                    "prefWidth": "250"
+                },
+                {
+                    "name": "cell10",
+                    "varRef": "r1c0",
+                    "layoutPos": "1,0",
+                    "prefWidth": "250"
+                },
+                {
+                    "name": "cell11",
+                    "varRef": "r1c1",
+                    "layoutPos": "1,1",
+                    "prefWidth": "250"
+                }
+            ]
+        }
+    ]
+};
+
+// Run tests
+print "==========================================";
+print "Testing Area Spacing and Padding Properties";
+print "==========================================";
+print "";
+
+print "Test 1: Basic VBox with spacing=20 and padding=30";
+print "  - spacing: 20 pixels between each child";
+print "  - padding: 30 pixels on all sides";
+print "  - background: light blue (#e3f2fd)";
+print "";
+screen testBasicSpacingPadding show;
+
+print "";
+print "Test 2: Nested Areas with different spacing and padding";
+print "  - Outer area: spacing=20, padding=25 35 25 35 (top right bottom left)";
+print "  - Inner area: spacing=12, padding=20";
+print "  - Visual separation with border on inner area";
+print "";
+screen testNestedAreas show;
+
+print "";
+print "Test 3: HBox with spacing=25 and padding=30 20";
+print "  - spacing: 25 pixels between columns";
+print "  - padding: 30 vertical, 20 horizontal";
+print "  - background: light orange (#ffe0b2)";
+print "";
+screen testHBoxSpacing show;
+
+print "";
+print "Test 4: GridPane with spacing=15 and padding=25";
+print "  - spacing: 15 pixels for both hgap and vgap";
+print "  - padding: 25 pixels on all sides";
+print "  - background: light cyan (#e1f5fe)";
+print "";
+screen testGridPaneSpacing show;
+
+print "";
+print "==========================================";
+print "All tests completed successfully!";
+print "==========================================";
+print "";
+print "Visual verification:";
+print "1. Check that spacing between items matches expected values";
+print "2. Check that padding (internal margins) matches expected values";
+print "3. Check that nested areas have independent spacing/padding";
+print "4. Check that different container types (VBox, HBox, GridPane) all work";

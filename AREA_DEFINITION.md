@@ -29,8 +29,12 @@ The `AreaDefinition` class represents a container area within a screen, defining
 | `cssClass` | String | CSS class name from the AreaType enum |
 | `layout` | String | Layout configuration string |
 | `style` | String | CSS style string (defaults to areaType's default) |
+| `spacing` | String | Spacing between child elements (e.g., "10", "15") |
+| `padding` | String | Internal padding around children (e.g., "10", "10 5", "10 5 10 5") |
 | `screenName` | String | Associated screen name |
+| `displayName` | String | Display name for UI elements (e.g., tab labels) |
 | `items` | List\<AreaItem\> | List of items contained in this area |
+| `childAreas` | List\<AreaDefinition\> | Nested child areas for hierarchical layouts |
 
 ### EBS Script Syntax
 
@@ -39,11 +43,130 @@ area: [{
     name: "mainArea",
     type: "vbox",
     layout: "fill",
-    style: "-fx-padding: 20; -fx-spacing: 15;",
+    spacing: "15",
+    padding: "20",
+    style: "-fx-background-color: #f0f0f0;",
     items: [
         // AreaItem definitions
     ]
 }]
+```
+
+### Spacing and Padding Properties
+
+The `spacing` and `padding` properties provide direct control over the layout spacing in area definitions without requiring inline CSS styles.
+
+#### Spacing Property
+
+**Purpose**: Controls the gap between child elements within a container.
+
+**Applies To**: 
+- `HBox` - horizontal spacing between children
+- `VBox` - vertical spacing between children
+- `FlowPane` - horizontal and vertical gaps (hgap and vgap)
+- `GridPane` - horizontal and vertical gaps (hgap and vgap)
+- `TilePane` - horizontal and vertical gaps (hgap and vgap)
+
+**Format**: Single numeric value (e.g., "10", "15", "20")
+
+**Examples**:
+```javascript
+// VBox with 20 pixels between each child
+{
+    name: "listArea",
+    type: "vbox",
+    spacing: "20",
+    items: [...]
+}
+
+// GridPane with 15 pixels between rows and columns
+{
+    name: "formGrid",
+    type: "gridpane",
+    spacing: "15",
+    items: [...]
+}
+```
+
+#### Padding Property
+
+**Purpose**: Controls the internal space around children within a container, creating a margin between the container's edges and its content.
+
+**Applies To**: All Region types (VBox, HBox, GridPane, BorderPane, etc.)
+
+**Formats**:
+- Single value: `"10"` - applies to all sides (top, right, bottom, left)
+- Two values: `"10 5"` - first is vertical (top/bottom), second is horizontal (left/right)
+- Four values: `"10 5 10 5"` - top, right, bottom, left (clockwise from top)
+
+**Examples**:
+```javascript
+// Padding of 30 pixels on all sides
+{
+    name: "mainArea",
+    type: "vbox",
+    padding: "30",
+    items: [...]
+}
+
+// Vertical padding 20px, horizontal padding 30px
+{
+    name: "formArea",
+    type: "vbox",
+    padding: "20 30",
+    items: [...]
+}
+
+// Different padding for each side: top=10, right=20, bottom=10, left=20
+{
+    name: "contentArea",
+    type: "hbox",
+    padding: "10 20 10 20",
+    items: [...]
+}
+```
+
+#### Spacing vs Padding
+
+| Property | Purpose | Scope | Common Use |
+|----------|---------|-------|------------|
+| `spacing` | Gap between children | Between elements | Separate form fields, buttons, list items |
+| `padding` | Internal margin | Around all children | Create breathing room, offset from container edges |
+
+**Combined Example**:
+```javascript
+{
+    name: "formContainer",
+    type: "vbox",
+    spacing: "15",           // 15px between each form field
+    padding: "25 30 25 30",  // 25px top/bottom, 30px left/right margins
+    style: "-fx-background-color: white; -fx-border-color: #cccccc;",
+    items: [
+        { varRef: "field1", sequence: 1 },
+        { varRef: "field2", sequence: 2 },
+        { varRef: "field3", sequence: 3 }
+    ]
+}
+```
+
+#### Relationship with Style Property
+
+The `spacing` and `padding` properties are applied **before** the `style` property, allowing the style to override them if needed. However, it's recommended to use `spacing` and `padding` properties for clarity and maintainability, reserving `style` for other CSS properties.
+
+```javascript
+// Good: Use properties for spacing and padding
+{
+    type: "vbox",
+    spacing: "15",
+    padding: "20",
+    style: "-fx-background-color: #f0f0f0;"
+}
+
+// Less ideal: Mix in style (harder to read and maintain)
+{
+    type: "vbox",
+    style: "-fx-spacing: 15; -fx-padding: 20; -fx-background-color: #f0f0f0;"
+}
 ```
 
 ---
@@ -399,23 +522,33 @@ In this example:
 
 ## Usage Examples
 
-### Example 1: Simple Vertical Layout
+### Example 1: Simple Vertical Layout with Spacing and Padding
 
 ```javascript
 screen "LoginScreen" {
     vars: [{
         name: "username",
         type: "string",
-        display: { type: "textfield", mandatory: true }
+        display: { 
+            type: "textfield", 
+            mandatory: true,
+            labelText: "Username:"
+        }
     }, {
         name: "password",
         type: "string",
-        display: { type: "passwordfield", mandatory: true }
+        display: { 
+            type: "passwordfield", 
+            mandatory: true,
+            labelText: "Password:"
+        }
     }],
     area: [{
         name: "loginForm",
         type: "vbox",
-        style: "-fx-padding: 20; -fx-spacing: 15; -fx-alignment: center;",
+        spacing: "15",
+        padding: "20",
+        style: "-fx-alignment: center; -fx-background-color: #f5f5f5;",
         items: [{
             name: "usernameField",
             varRef: "username",
@@ -433,7 +566,7 @@ screen "LoginScreen" {
 }
 ```
 
-### Example 2: Grid Layout with Spanning
+### Example 2: Grid Layout with Spacing
 
 ```javascript
 screen "FormScreen" {
@@ -450,7 +583,8 @@ screen "FormScreen" {
     area: [{
         name: "formGrid",
         type: "gridpane",
-        style: "-fx-hgap: 10; -fx-vgap: 10; -fx-padding: 20;",
+        spacing: "10",
+        padding: "20",
         items: [{
             varRef: "firstName",
             layoutPos: "0,0",
@@ -491,7 +625,8 @@ screen "DashboardScreen" {
     area: [{
         name: "header",
         type: "hbox",
-        style: "-fx-padding: 10; -fx-background-color: #f0f0f0;",
+        padding: "10",
+        style: "-fx-background-color: #f0f0f0;",
         items: [{
             varRef: "title",
             hgrow: "ALWAYS",
@@ -501,6 +636,7 @@ screen "DashboardScreen" {
     }, {
         name: "mainContent",
         type: "borderpane",
+        padding: "15",
         items: [{
             varRef: "statusMessage",
             layoutPos: "top",
@@ -517,7 +653,51 @@ screen "DashboardScreen" {
 }
 ```
 
-### Example 4: Display-Only Items with Custom Styling
+### Example 4: Nested Areas with Independent Spacing
+
+```javascript
+screen "NestedAreasScreen" {
+    vars: [{
+        name: "title",
+        display: { type: "labeltext" }
+    }, {
+        name: "field1",
+        display: { type: "textfield", labelText: "Field 1:" }
+    }, {
+        name: "field2",
+        display: { type: "textfield", labelText: "Field 2:" }
+    }],
+    area: [{
+        name: "outerContainer",
+        type: "vbox",
+        spacing: "20",
+        padding: "25 30",
+        style: "-fx-background-color: #f5f5f5;",
+        items: [{
+            varRef: "title",
+            sequence: 1
+        }],
+        areas: [{
+            name: "innerForm",
+            type: "vbox",
+            spacing: "12",
+            padding: "15",
+            style: "-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-width: 1;",
+            items: [{
+                varRef: "field1",
+                sequence: 1,
+                prefWidth: "400"
+            }, {
+                varRef: "field2",
+                sequence: 2,
+                prefWidth: "400"
+            }]
+        }]
+    }]
+}
+```
+
+### Example 5: Display-Only Items with Custom Styling
 
 ```javascript
 screen "InfoScreen" {
@@ -534,7 +714,8 @@ screen "InfoScreen" {
     area: [{
         name: "infoArea",
         type: "vbox",
-        style: "-fx-spacing: 20; -fx-padding: 30;",
+        spacing: "20",
+        padding: "30",
         items: [{
             varRef: "welcomeText",
             sequence: 1,
@@ -562,7 +743,30 @@ screen "InfoScreen" {
 
 ## Best Practices
 
-### 1. Layout Selection
+### 1. Use Spacing and Padding Properties
+
+- **Prefer properties over inline CSS**: Use `spacing` and `padding` properties instead of CSS for clarity
+- **Spacing**: Use for consistent gaps between child elements
+- **Padding**: Use to create breathing room around content
+- **Combine both**: Use together for professional, well-spaced layouts
+
+```javascript
+// Good: Clear and maintainable
+{
+    type: "vbox",
+    spacing: "15",
+    padding: "20",
+    style: "-fx-background-color: white;"
+}
+
+// Less ideal: Everything in CSS
+{
+    type: "vbox",
+    style: "-fx-spacing: 15; -fx-padding: 20; -fx-background-color: white;"
+}
+```
+
+### 2. Layout Selection
 
 - **VBOX/HBOX**: Simple linear layouts, forms
 - **GRIDPANE**: Complex forms, tabular data
@@ -570,26 +774,28 @@ screen "InfoScreen" {
 - **STACKPANE**: Overlays, centered content
 - **SCROLLPANE**: Large or dynamic content that may exceed viewport
 
-### 2. Positioning Strategy
+### 3. Positioning Strategy
 
 - Use `sequence` for ordering items within any container
 - Use `layoutPos` for precise positioning in grids and border panes
 - Use `alignment` for fine-tuning placement within containers
 
-### 3. Responsive Design
+### 4. Responsive Design
 
 - Set `hgrow` and `vgrow` to "ALWAYS" for items that should expand
 - Use `prefWidth`/`prefHeight` for initial sizing
 - Set `minWidth`/`minHeight` to prevent items from becoming too small
 - Use `maxWidth`/`maxHeight` to cap maximum sizes
 
-### 4. Spacing and Margins
+### 5. Spacing and Padding Best Practices
 
-- Apply margin to individual items for fine control
-- Use padding for internal spacing within items
-- Configure container-level spacing in the area's `style` property
+- **Use area-level spacing**: Set spacing at the area level for consistent gaps between children
+- **Use area-level padding**: Set padding at the area level to create uniform margins
+- **Item-level margin**: Use item `margin` property for fine-tuned control of individual items
+- **Item-level padding**: Use item `padding` property for internal spacing within specific items
+- **Consistent values**: Use consistent spacing values (e.g., 10, 15, 20) throughout your application
 
-### 5. DisplayMetadata Strategy
+### 6. DisplayMetadata Strategy
 
 - Define common display properties in variable definitions
 - Override at the AreaItem level only when necessary

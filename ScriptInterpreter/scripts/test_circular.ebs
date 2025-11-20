@@ -1,0 +1,7 @@
+// test_circular.ebs - Test script that triggers circular import
+print "=== Testing Circular Import Detection ===";
+
+import "circular_a.ebs";
+
+print "If you see this, circular import was not detected!";
+print "=== Test Completed ===";

@@ -338,11 +338,17 @@
 /* ===== Status bar styling ===== */
 .status-bar {
     -fx-background-color: linear-gradient(to bottom, #f0f0f0, #e0e0e0);
-    -fx-border-color: #c0c0c0;
-    -fx-border-width: 1 0 0 0;
+    -fx-border-style: solid inside, solid inside;
+    -fx-border-width: 1, 1;
+    -fx-border-insets: 0, 1;
+    /* layer 1 (outer):   top    right  bottom  left  */
+    -fx-border-color:    #6a6a6a #f0f0f0 #f4f4f4 #cccccc,
+        /* layer 2 (inner):   top    right  bottom  left  */
+        #7f7f7f #e6e6e6 #ffffff #b6b6b6;
     -fx-font-family: "Segoe UI", Arial, sans-serif;
     -fx-font-size: 11px;
     -fx-text-fill: #333333;
+    -fx-effect: innershadow(gaussian, rgba(0,0,0,0.15), 2, 0.2, 0, 1);
 }
 
 .status-bar .label {

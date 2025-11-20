@@ -1,0 +1,10 @@
+// self_import.ebs - File that imports itself (circular)
+print "Loading self_import...";
+
+import "self_import.ebs";
+
+funcSelf() {
+    print "This should never execute";
+}
+
+print "self_import loaded";

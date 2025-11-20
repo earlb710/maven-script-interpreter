@@ -1,0 +1,26 @@
+// helper_combined.ebs - Combined helpers that imports both math and string
+// This creates a dependency: helper_combined -> helper_math, helper_string
+
+print "Loading combined helpers...";
+
+import "helper_math.ebs";
+import "helper_string.ebs";
+
+// Function that uses both imported helpers
+calculate(a: int, b: int, op: string) return string {
+    var result: int = 0;
+    if op == "add" then {
+        result = call add(a, b);
+    } else {
+        if op == "subtract" then {
+            result = call subtract(a, b);
+        } else {
+            if op == "multiply" then {
+                result = call multiply(a, b);
+            }
+        }
+    }
+    return call concat("Result: ", "" + result);
+}
+
+print "Combined helpers loaded";

@@ -252,8 +252,12 @@ public class ScreenFactory {
         // Add focus listeners to all bound controls to update status bar
         setupStatusBarUpdates(allBoundControls, statusBar, context, screenName);
         
-        // Wrap in BorderPane to add status bar at bottom
+        // Create menu bar for the screen
+        javafx.scene.control.MenuBar menuBar = createScreenMenuBar(stage);
+        
+        // Wrap in BorderPane to add menu bar at top and status bar at bottom
         BorderPane screenRoot = new BorderPane();
+        screenRoot.setTop(menuBar);
         screenRoot.setCenter(scrollPane);
         screenRoot.setBottom(statusBar);
         
@@ -263,6 +267,15 @@ public class ScreenFactory {
         }
 
         Scene scene = new Scene(screenRoot, width, height);
+        
+        // Load CSS stylesheets for screen areas and input controls
+        try {
+            scene.getStylesheets().add(ScreenFactory.class.getResource("/css/screen-areas.css").toExternalForm());
+            scene.getStylesheets().add(ScreenFactory.class.getResource("/css/screen-inputs.css").toExternalForm());
+        } catch (Exception e) {
+            System.err.println("Warning: Could not load screen CSS stylesheets: " + e.getMessage());
+        }
+        
         stage.setScene(scene);
 
         return stage;
@@ -270,7 +283,7 @@ public class ScreenFactory {
     
     /**
      * Setup focus listeners on all controls to update the status bar
-     * with tooltip and min/max information
+     * with item tooltip and min/max information
      */
     private static void setupStatusBarUpdates(List<Node> controls, 
             com.eb.ui.ebs.StatusBar statusBar,
@@ -288,11 +301,14 @@ public class ScreenFactory {
                         
                         // Get metadata for this item from context
                         DisplayItem metadata = context != null ? context.getDisplayItem().get(screenName + "." + itemName) : null;
+                        // Update message with tooltip (prefer tooltip over promptHelp)
+                        String tooltip = (String) control.getProperties().get("itemTooltip");
+                        String message = tooltip != null ? tooltip : "";
+                        statusBar.setMessage(message);
+                        
+                        // Get metadata for min/max info
+                        DisplayItem metadata = metadataProvider.apply(screenName, itemName);
                         if (metadata != null) {
-                            // Update message with promptHelp/tooltip
-                            String message = metadata.promptHelp != null ? metadata.promptHelp : "";
-                            statusBar.setMessage(message);
-                            
                             // Update custom with min/max info
                             String minMaxInfo = "";
                             if (metadata.min != null && metadata.max != null) {
@@ -314,6 +330,31 @@ public class ScreenFactory {
                 }
             });
         }
+    }
+    
+    /**
+     * Create a menu bar for screen windows with Edit menu containing Close item
+     */
+    private static javafx.scene.control.MenuBar createScreenMenuBar(Stage stage) {
+        javafx.scene.control.MenuBar menuBar = new javafx.scene.control.MenuBar();
+        
+        // Create Edit menu
+        javafx.scene.control.Menu editMenu = new javafx.scene.control.Menu("Edit");
+        
+        // Close menu item with Ctrl+W
+        javafx.scene.control.MenuItem closeItem = new javafx.scene.control.MenuItem("Close");
+        closeItem.setAccelerator(new javafx.scene.input.KeyCodeCombination(
+            javafx.scene.input.KeyCode.W, 
+            javafx.scene.input.KeyCombination.CONTROL_DOWN));
+        closeItem.setOnAction(e -> {
+            // Close the screen window
+            stage.close();
+        });
+        
+        editMenu.getItems().add(closeItem);
+        menuBar.getMenus().add(editMenu);
+        
+        return menuBar;
     }
 
     /**
@@ -390,6 +431,11 @@ public class ScreenFactory {
                 if (item.name != null && !item.name.isEmpty()) {
                     control.setUserData(screenName + "." + item.name);
                 }
+                
+                // Store tooltip in control's properties for status bar display
+                if (item.tooltip != null && !item.tooltip.isEmpty()) {
+                    control.getProperties().put("itemTooltip", item.tooltip);
+                }
 
                 // If labelText is specified, wrap the control with a label
                 // BUT: Don't wrap Label or Button controls - they display their own text
@@ -409,6 +455,8 @@ public class ScreenFactory {
                         alignmentBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
                         // Add left padding equal to label width plus spacing to align with labeled controls
                         alignmentBox.setPadding(new javafx.geometry.Insets(0, 0, 0, maxLabelWidth + 5));
+                        // Make container pick on bounds so tooltips on child controls work properly
+                        alignmentBox.setPickOnBounds(false);
                         alignmentBox.getChildren().add(control);
                         nodeToAdd = alignmentBox;
                     }
@@ -1022,6 +1070,12 @@ public class ScreenFactory {
         
         // Extract displayName for UI labels (e.g., tab labels)
         area.displayName = getStringValue(areaDef, "displayName", null);
+        
+        // Extract spacing between children (for containers that support it)
+        area.spacing = getStringValue(areaDef, "spacing", null);
+        
+        // Extract padding inside the area
+        area.padding = getStringValue(areaDef, "padding", null);
 
         // Process items in the area
         if (areaDef.containsKey("items")) {
@@ -1449,8 +1503,8 @@ public class ScreenFactory {
     private static Node createLabeledControl(String labelText, String alignment, Node control, double minWidth, DisplayItem metadata) {
         javafx.scene.control.Label label = new javafx.scene.control.Label(labelText);
 
-        // Build label style with right alignment and padding
-        StringBuilder styleBuilder = new StringBuilder("-fx-font-weight: normal; -fx-padding: 0 10 0 0; -fx-alignment: center-right;");
+        // Build label style with right alignment, padding, and default text color
+        StringBuilder styleBuilder = new StringBuilder("-fx-font-weight: normal; -fx-padding: 0 10 0 0; -fx-alignment: center-right; -fx-text-fill: #333333;");
 
         // Apply label styling from metadata
         if (metadata != null) {
@@ -1459,8 +1513,12 @@ public class ScreenFactory {
                 styleBuilder.append(" -fx-font-size: ").append(metadata.labelFontSize).append(";");
             }
 
-            // Apply label color if specified
+            // Apply label color if specified (this will override the default)
             if (metadata.labelColor != null && !metadata.labelColor.isEmpty()) {
+                // Remove default text-fill and apply custom color
+                String currentStyle = styleBuilder.toString();
+                currentStyle = currentStyle.replace("-fx-text-fill: #333333;", "");
+                styleBuilder = new StringBuilder(currentStyle);
                 styleBuilder.append(" -fx-text-fill: ").append(metadata.labelColor).append(";");
             }
 
@@ -1485,6 +1543,8 @@ public class ScreenFactory {
         // Create container based on alignment
         javafx.scene.layout.HBox container = new javafx.scene.layout.HBox(5);
         container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        // Make container pick on bounds so tooltips on child controls work properly
+        container.setPickOnBounds(false);
 
         switch (actualAlignment) {
             case "right":
@@ -1544,6 +1604,20 @@ public class ScreenFactory {
      * Updates a control's value based on the variable value.
      */
     private static void updateControlFromValue(Node control, Object value, DisplayItem metadata) {
+        // Handle HBox containing slider (when showSliderValue is true)
+        if (control instanceof javafx.scene.layout.HBox) {
+            javafx.scene.layout.HBox hbox = (javafx.scene.layout.HBox) control;
+            // Check if this HBox contains a Slider as its first child
+            if (!hbox.getChildren().isEmpty() && hbox.getChildren().get(0) instanceof javafx.scene.control.Slider) {
+                javafx.scene.control.Slider slider = (javafx.scene.control.Slider) hbox.getChildren().get(0);
+                if (value instanceof Number) {
+                    slider.setValue(((Number) value).doubleValue());
+                    // The value label will be updated automatically via the listener in AreaItemFactory
+                }
+                return;
+            }
+        }
+        
         if (control instanceof javafx.scene.control.TextField) {
             ((javafx.scene.control.TextField) control).setText(value != null ? String.valueOf(value) : "");
         } else if (control instanceof javafx.scene.control.TextArea) {
@@ -1588,6 +1662,19 @@ public class ScreenFactory {
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
             java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
             DisplayItem metadata) {
+        // Handle HBox containing slider (when showSliderValue is true)
+        if (control instanceof javafx.scene.layout.HBox) {
+            javafx.scene.layout.HBox hbox = (javafx.scene.layout.HBox) control;
+            // Check if this HBox contains a Slider as its first child
+            if (!hbox.getChildren().isEmpty() && hbox.getChildren().get(0) instanceof javafx.scene.control.Slider) {
+                javafx.scene.control.Slider slider = (javafx.scene.control.Slider) hbox.getChildren().get(0);
+                slider.valueProperty().addListener((obs, oldVal, newVal) -> {
+                    screenVars.put(varName, newVal.intValue());
+                });
+                return;
+            }
+        }
+        
         if (control instanceof javafx.scene.control.TextField) {
             ((javafx.scene.control.TextField) control).textProperty().addListener((obs, oldVal, newVal) -> {
                 // Convert the string value to the appropriate type if type info is available
