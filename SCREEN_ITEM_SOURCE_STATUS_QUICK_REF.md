@@ -85,10 +85,22 @@ status automatically becomes "clean"
 | `screen.setItemSource` | screenName, itemName, source | Boolean | Set source property |
 | `screen.getItemStatus` | screenName, itemName | String | Get status: "clean" or "changed" |
 | `screen.resetItemOriginalValue` | screenName, itemName | Boolean | Reset to clean state |
+| `screen.checkChanged` | screenName | Boolean | Check if any item changed |
+| `screen.checkError` | screenName | Boolean | Check if screen has error |
+| `screen.revert` | screenName | Boolean | Revert all items to original |
+| `screen.clear` | screenName | Boolean | Clear all items to defaults |
 
 ## Common Patterns
 
-### 1. Check if form is dirty
+### 1. Check if form is dirty (NEW - using screen.checkChanged)
+```ebs
+// Simpler approach using new function
+var isDirty = call screen.checkChanged("myForm");
+if isDirty then
+    print "Form has unsaved changes";
+```
+
+### 2. Check if form is dirty (original approach)
 ```ebs
 isDirty = false;
 var items = call screen.getItemList("myForm");
@@ -101,7 +113,21 @@ while i < items.length {
 }
 ```
 
-### 2. Reset all fields to clean
+### 3. Revert all changes (NEW - using screen.revert)
+```ebs
+// User clicks Cancel button
+call screen.revert("myForm");
+print "All changes reverted to original values";
+```
+
+### 4. Clear form to defaults (NEW - using screen.clear)
+```ebs
+// User clicks Clear/Reset button
+call screen.clear("myForm");
+print "All fields cleared to default values";
+```
+
+### 5. Reset all fields to clean
 ```ebs
 var items = call screen.getItemList("myForm");
 var i = 0;
@@ -111,7 +137,7 @@ while i < items.length {
 }
 ```
 
-### 3. Get list of changed fields
+### 6. Get list of changed fields
 ```ebs
 changedFields = [];
 var items = call screen.getItemList("myForm");
@@ -124,7 +150,35 @@ while i < items.length {
 }
 ```
 
-### 4. Conditional save based on changes
+### 7. Conditional save with error checking (NEW)
+```ebs
+saveForm(formName) {
+    // Check for errors first
+    var hasError = call screen.checkError(formName);
+    if hasError then
+        print "Cannot save: form has errors";
+        return false;
+    
+    // Check if there are changes to save
+    var hasChanges = call screen.checkChanged(formName);
+    if hasChanges then
+        // Perform save operation
+        print "Saving changes...";
+        // Mark all fields as saved
+        var items = call screen.getItemList(formName);
+        var i = 0;
+        while i < items.length {
+            call screen.resetItemOriginalValue(formName, items[i]);
+            i = i + 1;
+        }
+        return true;
+    else
+        print "No changes to save";
+        return true;
+}
+```
+
+### 8. Conditional save based on changes (original)
 ```ebs
 saveForm(formName) {
     var hasChanges = false;

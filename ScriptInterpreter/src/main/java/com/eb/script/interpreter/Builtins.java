@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -742,6 +743,22 @@ public final class Builtins {
                 "screen.resetItemOriginalValue", DataType.BOOL,
                 newParam("screenName", DataType.STRING, true), // required; screen name
                 newParam("itemName", DataType.STRING, true) // required; item name (varRef)
+        ));
+        addBuiltin(info(
+                "screen.checkChanged", DataType.BOOL,
+                newParam("screenName", DataType.STRING, true) // required; screen name
+        ));
+        addBuiltin(info(
+                "screen.checkError", DataType.BOOL,
+                newParam("screenName", DataType.STRING, true) // required; screen name
+        ));
+        addBuiltin(info(
+                "screen.revert", DataType.BOOL,
+                newParam("screenName", DataType.STRING, true) // required; screen name
+        ));
+        addBuiltin(info(
+                "screen.clear", DataType.BOOL,
+                newParam("screenName", DataType.STRING, true) // required; screen name
         ));
 
         NAMES = Collections.unmodifiableSet(BUILTINS.keySet());
@@ -1857,6 +1874,18 @@ public final class Builtins {
             case "screen.resetitemoriginalvalue" -> {
                 return screenResetItemOriginalValue(context, args);
             }
+            case "screen.checkchanged" -> {
+                return screenCheckChanged(context, args);
+            }
+            case "screen.checkerror" -> {
+                return screenCheckError(context, args);
+            }
+            case "screen.revert" -> {
+                return screenRevert(context, args);
+            }
+            case "screen.clear" -> {
+                return screenClear(context, args);
+            }
 
             default ->
                 throw new InterpreterError("Unknown builtin: " + name);
@@ -2643,6 +2672,152 @@ public final class Builtins {
 
         // Reset the original value to the current value
         var.resetOriginalValue();
+
+        return true;
+    }
+
+    /**
+     * screen.checkChanged(screenName) -> Boolean
+     * Checks if any item in the screen has changed from its original value
+     */
+    private static Object screenCheckChanged(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (String) args[0];
+
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("screen.checkChanged: screenName parameter cannot be null or empty");
+        }
+
+        // Verify screen exists
+        if (!context.getScreens().containsKey(screenName.toLowerCase())) {
+            throw new InterpreterError("screen.checkChanged: screen '" + screenName + "' not found");
+        }
+
+        // Get the var items
+        Map<String, Var> varItems = context.getScreenVarItems(screenName);
+        if (varItems == null || varItems.isEmpty()) {
+            return false; // No variables means nothing changed
+        }
+
+        // Check if any variable has changed
+        for (Var var : varItems.values()) {
+            if (var.hasChanged()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * screen.checkError(screenName) -> Boolean
+     * Checks if the screen has an error status
+     */
+    private static Object screenCheckError(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (String) args[0];
+
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("screen.checkError: screenName parameter cannot be null or empty");
+        }
+
+        // Verify screen exists
+        if (!context.getScreens().containsKey(screenName.toLowerCase())) {
+            throw new InterpreterError("screen.checkError: screen '" + screenName + "' not found");
+        }
+
+        // Get the screen status
+        com.eb.script.interpreter.screen.ScreenStatus status = context.getScreenStatus(screenName);
+        
+        return status == com.eb.script.interpreter.screen.ScreenStatus.ERROR;
+    }
+
+    /**
+     * screen.revert(screenName) -> Boolean
+     * Reverts all items in the screen to their original values
+     */
+    private static Object screenRevert(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (String) args[0];
+
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("screen.revert: screenName parameter cannot be null or empty");
+        }
+
+        // Verify screen exists
+        if (!context.getScreens().containsKey(screenName.toLowerCase())) {
+            throw new InterpreterError("screen.revert: screen '" + screenName + "' not found");
+        }
+
+        // Get the var items and screen vars
+        Map<String, Var> varItems = context.getScreenVarItems(screenName);
+        ConcurrentHashMap<String, Object> screenVars = context.getScreenVars(screenName);
+        
+        if (varItems == null || varItems.isEmpty()) {
+            return true; // No variables to revert
+        }
+
+        // Revert each variable to its original value
+        for (Var var : varItems.values()) {
+            Object originalValue = var.getOriginalValue();
+            var.setValue(originalValue);
+            
+            // Update the screen vars map as well
+            if (screenVars != null && var.getName() != null) {
+                screenVars.put(var.getName().toLowerCase(), originalValue);
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * screen.clear(screenName) -> Boolean
+     * Clears all items in the screen to their default values (usually blank/null)
+     */
+    private static Object screenClear(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (String) args[0];
+
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("screen.clear: screenName parameter cannot be null or empty");
+        }
+
+        // Verify screen exists
+        if (!context.getScreens().containsKey(screenName.toLowerCase())) {
+            throw new InterpreterError("screen.clear: screen '" + screenName + "' not found");
+        }
+
+        // Get the var items and screen vars
+        Map<String, Var> varItems = context.getScreenVarItems(screenName);
+        ConcurrentHashMap<String, Object> screenVars = context.getScreenVars(screenName);
+        
+        if (varItems == null || varItems.isEmpty()) {
+            return true; // No variables to clear
+        }
+
+        // Clear each variable to its default value
+        for (Var var : varItems.values()) {
+            Object defaultValue = var.getDefaultValue();
+            
+            // If no default value is set, use appropriate "blank" value based on type
+            if (defaultValue == null) {
+                DataType type = var.getType();
+                if (type == DataType.STRING) {
+                    defaultValue = "";
+                } else if (type == DataType.INTEGER) {
+                    defaultValue = 0;
+                } else if (type == DataType.DOUBLE || type == DataType.FLOAT) {
+                    defaultValue = 0.0;
+                } else if (type == DataType.BOOL) {
+                    defaultValue = false;
+                }
+                // For other types, leave as null
+            }
+            
+            var.setValue(defaultValue);
+            
+            // Update the screen vars map as well
+            if (screenVars != null && var.getName() != null) {
+                screenVars.put(var.getName().toLowerCase(), defaultValue);
+            }
+        }
 
         return true;
     }

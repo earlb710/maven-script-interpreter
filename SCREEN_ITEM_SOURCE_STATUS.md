@@ -110,6 +110,54 @@ Resets the original value to the current value, marking the item as "clean".
 call screen.resetItemOriginalValue("myScreen", "firstName");
 ```
 
+#### 5. screen.checkChanged(screenName)
+**Returns:** Boolean - true if any item has changed
+
+Checks if any item in the screen has changed from its original value.
+
+**Example:**
+```ebs
+var hasChanges = call screen.checkChanged("myScreen");
+if hasChanges then
+    print "Screen has unsaved changes";
+```
+
+#### 6. screen.checkError(screenName)
+**Returns:** Boolean - true if screen has error status
+
+Checks if the screen has an error status.
+
+**Example:**
+```ebs
+var hasError = call screen.checkError("myScreen");
+if hasError then
+    print "Screen has errors";
+```
+
+#### 7. screen.revert(screenName)
+**Returns:** Boolean - true on success
+
+Reverts all items in the screen to their original values.
+
+**Example:**
+```ebs
+// User clicks cancel button
+call screen.revert("myScreen");
+print "All changes reverted";
+```
+
+#### 8. screen.clear(screenName)
+**Returns:** Boolean - true on success
+
+Clears all items in the screen to their default values (usually blank/null).
+
+**Example:**
+```ebs
+// User clicks clear/reset button
+call screen.clear("myScreen");
+print "All fields cleared to defaults";
+```
+
 ### JSON Schema Updates
 
 Updated `display-metadata.json` to include the new properties:
