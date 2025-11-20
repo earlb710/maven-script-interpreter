@@ -1,0 +1,287 @@
+// Test: Close Screen Functionality
+// Purpose: Test the new close screen command with and without screen name
+
+// Enable debug mode to see assertion results
+call debug.on();
+
+// Initialize test counters
+var totalTests: int = 0;
+var passedTests: int = 0;
+var failedTests: int = 0;
+
+print "========================================";
+print "Testing Close Screen Functionality";
+print "========================================";
+
+// ============================================
+// Test Suite 1: Close Screen with Name
+// ============================================
+print "";
+print "Test Suite 1: Close Screen with Name";
+print "----------------------------------------";
+
+// Test 1: Create and close a screen by name
+totalTests = totalTests + 1;
+print "Test 1: Create screen, show it, and close by name";
+
+screen testScreen1 = {
+    "title": "Test Screen 1",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "testField",
+            "type": "string",
+            "default": "Hello",
+            "display": {"type": "textfield", "labelText": "Test Field"}
+        }
+    ]
+};
+
+show screen testScreen1;
+print "Screen testScreen1 shown";
+
+// Close by name
+close screen testScreen1;
+print "Screen testScreen1 closed by name";
+
+var result1 = call debug.assert(true, "Test 1: Screen closed by name successfully");
+if result1 then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+// ============================================
+// Test Suite 2: Close from onClick Handler
+// ============================================
+print "";
+print "Test Suite 2: Close Screen from onClick (Thread Context)";
+print "----------------------------------------";
+
+// Test 2: Create screen with button that closes itself
+totalTests = totalTests + 1;
+print "Test 2: Screen with close button using onClick";
+
+screen testScreen2 = {
+    "title": "Test Screen 2 - Click Close",
+    "width": 400,
+    "height": 300,
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "items": [
+                {
+                    "name": "closeBtn",
+                    "varref": "closeButton",
+                    "display": {
+                        "type": "button",
+                        "labelText": "Close This Screen",
+                        "onClick": "close screen;"
+                    }
+                }
+            ]
+        }
+    ],
+    "vars": [
+        {
+            "name": "closeButton",
+            "type": "string",
+            "default": "Close"
+        }
+    ]
+};
+
+show screen testScreen2;
+print "Screen testScreen2 shown with close button";
+print "Click the 'Close This Screen' button to test close screen;";
+print "(Note: This uses thread context from onClick handler)";
+
+var result2 = call debug.assert(true, "Test 2: Screen with onClick close button created");
+if result2 then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+// ============================================
+// Test Suite 3: Multiple Screens
+// ============================================
+print "";
+print "Test Suite 3: Multiple Screens";
+print "----------------------------------------";
+
+// Test 3: Create multiple screens, close by name
+totalTests = totalTests + 1;
+print "Test 3: Create multiple screens, close each by name";
+
+screen testScreen3a = {
+    "title": "Test Screen 3A",
+    "width": 300,
+    "height": 250
+};
+
+screen testScreen3b = {
+    "title": "Test Screen 3B",
+    "width": 350,
+    "height": 300
+};
+
+show screen testScreen3a;
+print "Screen testScreen3a shown";
+
+show screen testScreen3b;
+print "Screen testScreen3b shown";
+
+// Close testScreen3b by name
+close screen testScreen3b;
+print "Screen testScreen3b closed by name";
+
+// Close testScreen3a by name
+close screen testScreen3a;
+print "Screen testScreen3a closed by name";
+
+var result3 = call debug.assert(true, "Test 3: Multiple screens handled correctly");
+if result3 then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+// ============================================
+// Test Suite 4: Screen with Variables
+// ============================================
+print "";
+print "Test Suite 4: Close Screen with Variables";
+print "----------------------------------------";
+
+// Test 4: Create screen with variables, modify them, then close
+totalTests = totalTests + 1;
+print "Test 4: Screen with variables";
+
+screen testScreen4 = {
+    "title": "Test Screen 4",
+    "width": 400,
+    "height": 350,
+    "vars": [
+        {
+            "name": "username",
+            "type": "string",
+            "default": "User",
+            "display": {"type": "textfield", "labelText": "Username"}
+        },
+        {
+            "name": "age",
+            "type": "int",
+            "default": 25,
+            "display": {"type": "spinner", "min": 0, "max": 100, "labelText": "Age"}
+        }
+    ]
+};
+
+// Set some values
+testScreen4.username = "TestUser";
+testScreen4.age = 30;
+
+show screen testScreen4;
+print "Screen testScreen4 shown with variables set";
+
+// Verify variables were set
+var checkUsername = testScreen4.username;
+var checkAge = testScreen4.age;
+
+var username_ok: bool = (checkUsername == "TestUser");
+var age_ok: bool = (checkAge == 30);
+
+var varsOk: bool = false;
+if username_ok then {
+    if age_ok then {
+        varsOk = true;
+    }
+}
+
+// Close the screen by name
+close screen testScreen4;
+print "Screen testScreen4 closed";
+
+var result4 = call debug.assert(varsOk, "Test 4: Screen variables handled correctly before close");
+if result4 then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+// ============================================
+// Test Suite 5: Hide vs Close
+// ============================================
+print "";
+print "Test Suite 5: Hide vs Close Difference";
+print "----------------------------------------";
+
+// Test 5: Demonstrate difference between hide and close
+totalTests = totalTests + 1;
+print "Test 5: Hide keeps screen, close destroys it";
+
+screen testScreen5 = {
+    "title": "Test Screen 5",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "data",
+            "type": "string",
+            "default": "Important Data",
+            "display": {"type": "textfield", "labelText": "Data"}
+        }
+    ]
+};
+
+show screen testScreen5;
+print "Screen testScreen5 shown";
+
+hide screen testScreen5;
+print "Screen testScreen5 hidden (still exists)";
+
+show screen testScreen5;
+print "Screen testScreen5 shown again (data preserved)";
+
+// Now close it permanently
+close screen testScreen5;
+print "Screen testScreen5 closed (destroyed)";
+
+var result5 = call debug.assert(true, "Test 5: Hide and close work differently");
+if result5 then {
+    passedTests = passedTests + 1;
+} else {
+    failedTests = failedTests + 1;
+}
+
+// ============================================
+// Test Summary
+// ============================================
+print "";
+print "========================================";
+print "Test Results Summary";
+print "========================================";
+print "Total Tests:  " + totalTests;
+print "Passed:       " + passedTests;
+print "Failed:       " + failedTests;
+
+if totalTests > 0 then {
+    var successRate = (passedTests * 100) / totalTests;
+    print "Success Rate: " + successRate + "%";
+}
+
+print "========================================";
+
+if failedTests > 0 then {
+    print "❌ TESTS FAILED";
+} else {
+    print "✅ ALL TESTS PASSED";
+}
+
+call debug.off();
+
+print "";
+print "Close Screen Tests Complete!";

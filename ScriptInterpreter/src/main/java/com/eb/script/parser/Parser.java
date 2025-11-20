@@ -44,6 +44,7 @@ import com.eb.script.interpreter.statement.CloseConnectionStatement;
 import com.eb.script.interpreter.statement.ScreenStatement;
 import com.eb.script.interpreter.statement.ScreenShowStatement;
 import com.eb.script.interpreter.statement.ScreenHideStatement;
+import com.eb.script.interpreter.statement.ScreenCloseStatement;
 import com.eb.script.interpreter.statement.ImportStatement;
 import com.eb.script.token.ebs.EbsTokenType;
 import com.eb.util.Util;
@@ -342,6 +343,8 @@ public class Parser {
             return useConnectionStatement();
         } else if (matchAll(EbsTokenType.CLOSE, EbsTokenType.CONNECTION)) {
             return closeConnectionStatement();
+        } else if (matchAll(EbsTokenType.CLOSE, EbsTokenType.SCREEN)) {
+            return closeScreenStatement();
         } else if (match(EbsTokenType.CURSOR)) {
             return cursorStatement();
         } else if (match(EbsTokenType.OPEN)) {
@@ -1434,7 +1437,12 @@ public class Parser {
     }
 
     private Statement closeConnectionStatement() throws ParseError {
-        int line = previous().line; // 'connection' token line (after 'close')
+        // matchAll(CLOSE, CONNECTION) matched but didn't consume tokens
+        // Need to advance past both CLOSE and CONNECTION
+        advance(); // CLOSE
+        int line = currToken.line; // CONNECTION token line
+        advance(); // CONNECTION
+        
         EbsToken nameTok = consume(EbsTokenType.IDENTIFIER, "Expected connection name after 'close connection'.");
         consume(EbsTokenType.SEMICOLON, "Expected ';' after close connection.");
         return new CloseConnectionStatement(line, (String) nameTok.literal);
@@ -1517,6 +1525,24 @@ public class Parser {
 
         consume(EbsTokenType.SEMICOLON, "Expected ';' after 'hide screen <name>'.");
         return new ScreenHideStatement(line, screenName);
+    }
+
+    private Statement closeScreenStatement() throws ParseError {
+        // matchAll(CLOSE, SCREEN) matched but didn't consume tokens
+        // Need to advance past both CLOSE and SCREEN
+        advance(); // CLOSE
+        int line = currToken.line; // SCREEN token line
+        advance(); // SCREEN
+        
+        // Check if there's a screen name or if it's just "close screen;"
+        String screenName = null;
+        if (check(EbsTokenType.IDENTIFIER)) {
+            EbsToken nameTok = advance();
+            screenName = (String) nameTok.literal;
+        }
+
+        consume(EbsTokenType.SEMICOLON, "Expected ';' after 'close screen'.");
+        return new ScreenCloseStatement(line, screenName);
     }
 
     private SqlSelectExpression parseSqlSelectFromSource() throws ParseError {
