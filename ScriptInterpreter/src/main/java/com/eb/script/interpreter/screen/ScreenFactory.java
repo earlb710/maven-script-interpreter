@@ -645,7 +645,94 @@ public class ScreenFactory {
             }
         }
 
+        // Set up area-level focus listeners if gainFocus or lostFocus code is defined
+        if ((areaDef.gainFocus != null && !areaDef.gainFocus.trim().isEmpty()) 
+            || (areaDef.lostFocus != null && !areaDef.lostFocus.trim().isEmpty())) {
+            setupAreaFocusListeners(container, areaDef, screenName, context, onClickHandler);
+        }
+
         return container;
+    }
+    
+    /**
+     * Sets up focus listeners for an area container to execute gainFocus/lostFocus inline code.
+     * Focus is tracked at the container level - gainFocus triggers when a node inside the area gains focus
+     * and the previous focused node was outside the area (or null). lostFocus triggers when focus moves
+     * from inside the area to outside the area.
+     */
+    private static void setupAreaFocusListeners(Region container, AreaDefinition areaDef, String screenName, InterpreterContext context, OnClickHandler onClickHandler) {
+        // Track whether this area currently has focus
+        final boolean[] areaHasFocus = new boolean[]{false};
+        
+        // Add a listener to the scene's focused property
+        container.sceneProperty().addListener((observable, oldScene, newScene) -> {
+            if (newScene != null) {
+                newScene.focusOwnerProperty().addListener((obs, oldNode, newNode) -> {
+                    // Check if the new focused node is inside this area
+                    boolean newNodeInArea = isNodeInContainer(newNode, container);
+                    // Check if the old focused node was inside this area
+                    boolean oldNodeInArea = isNodeInContainer(oldNode, container);
+                    
+                    // Trigger gainFocus if focus entered the area
+                    if (newNodeInArea && !oldNodeInArea && !areaHasFocus[0]) {
+                        areaHasFocus[0] = true;
+                        if (areaDef.gainFocus != null && !areaDef.gainFocus.trim().isEmpty()) {
+                            Platform.runLater(() -> {
+                                try {
+                                    executeAreaInlineCode(screenName, areaDef.gainFocus, "area_gainFocus", context, onClickHandler);
+                                } catch (InterpreterError e) {
+                                    if (context.getOutput() != null) {
+                                        context.getOutput().printlnError("Error executing area gainFocus code: " + e.getMessage());
+                                    }
+                                }
+                            });
+                        }
+                    }
+                    
+                    // Trigger lostFocus if focus left the area
+                    if (!newNodeInArea && oldNodeInArea && areaHasFocus[0]) {
+                        areaHasFocus[0] = false;
+                        if (areaDef.lostFocus != null && !areaDef.lostFocus.trim().isEmpty()) {
+                            Platform.runLater(() -> {
+                                try {
+                                    executeAreaInlineCode(screenName, areaDef.lostFocus, "area_lostFocus", context, onClickHandler);
+                                } catch (InterpreterError e) {
+                                    if (context.getOutput() != null) {
+                                        context.getOutput().printlnError("Error executing area lostFocus code: " + e.getMessage());
+                                    }
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+        });
+    }
+    
+    /**
+     * Checks if a node is a descendant of a container.
+     */
+    private static boolean isNodeInContainer(Node node, Region container) {
+        if (node == null || container == null) {
+            return false;
+        }
+        Node current = node;
+        while (current != null) {
+            if (current == container) {
+                return true;
+            }
+            current = current.getParent();
+        }
+        return false;
+    }
+    
+    /**
+     * Executes area inline code with proper screen context using the onClick handler.
+     */
+    private static void executeAreaInlineCode(String screenName, String ebsCode, String eventType, InterpreterContext context, OnClickHandler onClickHandler) throws InterpreterError {
+        if (onClickHandler != null) {
+            onClickHandler.execute(ebsCode);
+        }
     }
 
     /**

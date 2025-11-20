@@ -66,6 +66,28 @@ public class InterpreterScreen {
             int width = config.containsKey("width") ? ((Number) config.get("width")).intValue() : 800;
             int height = config.containsKey("height") ? ((Number) config.get("height")).intValue() : 600;
             boolean maximize = config.containsKey("maximize") && Boolean.TRUE.equals(config.get("maximize"));
+            
+            // Extract startup and cleanup inline code if present
+            String startupCode = config.containsKey("startup") ? String.valueOf(config.get("startup")) : null;
+            String cleanupCode = config.containsKey("cleanup") ? String.valueOf(config.get("cleanup")) : null;
+            // Extract gainFocus and lostFocus inline code if present
+            String gainFocusCode = config.containsKey("gainfocus") ? String.valueOf(config.get("gainfocus")) : null;
+            String lostFocusCode = config.containsKey("lostfocus") ? String.valueOf(config.get("lostfocus")) : null;
+            
+            // Store startup and cleanup code in context
+            if (startupCode != null && !startupCode.trim().isEmpty()) {
+                context.setScreenStartupCode(stmt.name, startupCode);
+            }
+            if (cleanupCode != null && !cleanupCode.trim().isEmpty()) {
+                context.setScreenCleanupCode(stmt.name, cleanupCode);
+            }
+            // Store gainFocus and lostFocus code in context
+            if (gainFocusCode != null && !gainFocusCode.trim().isEmpty()) {
+                context.setScreenGainFocusCode(stmt.name, gainFocusCode);
+            }
+            if (lostFocusCode != null && !lostFocusCode.trim().isEmpty()) {
+                context.setScreenLostFocusCode(stmt.name, lostFocusCode);
+            }
 
             // Create thread-safe variable storage for this screen
             ConcurrentHashMap<String, Object> screenVarMap = new java.util.concurrent.ConcurrentHashMap<>();
@@ -317,11 +339,19 @@ public class InterpreterScreen {
                         // Create onClick handler that executes EBS code
                         ScreenFactory.OnClickHandler onClickHandler = (ebsCode) -> {
                             try {
-                                // Parse and execute the EBS code
-                                RuntimeContext clickContext = com.eb.script.parser.Parser.parse("onClick_" + screenName, ebsCode);
-                                // Execute in the current interpreter context
-                                for (com.eb.script.interpreter.statement.Statement s : clickContext.statements) {
-                                    interpreter.acceptStatement(s);
+                                // Set the screen context before executing onClick code
+                                // This allows inline code to use screen statements like "close screen;" or "hide screen;"
+                                context.setCurrentScreen(screenName);
+                                try {
+                                    // Parse and execute the EBS code
+                                    RuntimeContext clickContext = com.eb.script.parser.Parser.parse("onClick_" + screenName, ebsCode);
+                                    // Execute in the current interpreter context
+                                    for (com.eb.script.interpreter.statement.Statement s : clickContext.statements) {
+                                        interpreter.acceptStatement(s);
+                                    }
+                                } finally {
+                                    // Always clear the screen context after execution to prevent context leakage
+                                    context.clearCurrentScreen();
                                 }
                             } catch (com.eb.script.parser.ParseError e) {
                                 throw new InterpreterError("Failed to parse onClick code: " + e.getMessage());
@@ -351,6 +381,34 @@ public class InterpreterScreen {
 
                     if (screenMaximize) {
                         stage.setMaximized(true);
+                    }
+                    
+                    // Set up screen-level focus listeners
+                    String screenGainFocusCode = context.getScreenGainFocusCode(screenName);
+                    String screenLostFocusCode = context.getScreenLostFocusCode(screenName);
+                    
+                    if (screenGainFocusCode != null || screenLostFocusCode != null) {
+                        stage.focusedProperty().addListener((observable, oldValue, newValue) -> {
+                            if (newValue && screenGainFocusCode != null && !screenGainFocusCode.trim().isEmpty()) {
+                                // Window gained focus
+                                try {
+                                    executeScreenInlineCode(screenName, screenGainFocusCode, "gainFocus");
+                                } catch (InterpreterError e) {
+                                    if (context.getOutput() != null) {
+                                        context.getOutput().printlnError("Error executing screen gainFocus code: " + e.getMessage());
+                                    }
+                                }
+                            } else if (!newValue && screenLostFocusCode != null && !screenLostFocusCode.trim().isEmpty()) {
+                                // Window lost focus
+                                try {
+                                    executeScreenInlineCode(screenName, screenLostFocusCode, "lostFocus");
+                                } catch (InterpreterError e) {
+                                    if (context.getOutput() != null) {
+                                        context.getOutput().printlnError("Error executing screen lostFocus code: " + e.getMessage());
+                                    }
+                                }
+                            }
+                        });
                     }
 
                     // Create a thread for this screen
@@ -519,6 +577,18 @@ public class InterpreterScreen {
                     stage.show();
                     if (context.getOutput() != null) {
                         context.getOutput().printlnOk("Screen '" + finalScreenName + "' shown");
+                    }
+                    
+                    // Execute startup code if present (only on first show)
+                    String startupCode = context.getScreenStartupCode(finalScreenName);
+                    if (startupCode != null && !startupCode.trim().isEmpty()) {
+                        try {
+                            executeScreenInlineCode(finalScreenName, startupCode, "startup");
+                        } catch (InterpreterError e) {
+                            if (context.getOutput() != null) {
+                                context.getOutput().printlnError("Error executing startup code: " + e.getMessage());
+                            }
+                        }
                     }
                 } else {
                     if (context.getOutput() != null) {
@@ -807,6 +877,18 @@ public class InterpreterScreen {
      * @param screenName The name of the screen to close
      */
     private void performScreenClose(String screenName) {
+        // Execute cleanup code if present
+        String cleanupCode = context.getScreenCleanupCode(screenName);
+        if (cleanupCode != null && !cleanupCode.trim().isEmpty()) {
+            try {
+                executeScreenInlineCode(screenName, cleanupCode, "cleanup");
+            } catch (InterpreterError e) {
+                if (context.getOutput() != null) {
+                    context.getOutput().printlnError("Error executing cleanup code: " + e.getMessage());
+                }
+            }
+        }
+        
         // Collect output fields and invoke callback if set
         try {
             collectOutputFieldsAndInvokeCallback(screenName, 0);
@@ -1107,6 +1189,14 @@ public class InterpreterScreen {
         } else {
             // Use default style from the enum
             area.style = area.areaType.getDefaultStyle();
+        }
+        
+        // Extract gainFocus and lostFocus inline code if present
+        if (areaDef.containsKey("gainfocus")) {
+            area.gainFocus = String.valueOf(areaDef.get("gainfocus"));
+        }
+        if (areaDef.containsKey("lostfocus")) {
+            area.lostFocus = String.valueOf(areaDef.get("lostfocus"));
         }
 
         area.screenName = screenName;
@@ -1454,6 +1544,37 @@ public class InterpreterScreen {
                     screenVarTypeMap.put(varName, varType);
                 }
             }
+        }
+    }
+    
+    /**
+     * Execute inline EBS code in the context of a screen.
+     * This is used for startup, cleanup, and other screen lifecycle events.
+     * 
+     * @param screenName The name of the screen
+     * @param ebsCode The EBS code to execute
+     * @param eventType The type of event (e.g., "startup", "cleanup") for error messages
+     * @throws InterpreterError if the code fails to parse or execute
+     */
+    private void executeScreenInlineCode(String screenName, String ebsCode, String eventType) throws InterpreterError {
+        try {
+            // Set the screen context before executing inline code
+            context.setCurrentScreen(screenName);
+            try {
+                // Parse and execute the EBS code
+                RuntimeContext eventContext = com.eb.script.parser.Parser.parse(eventType + "_" + screenName, ebsCode);
+                // Execute in the current interpreter context
+                for (com.eb.script.interpreter.statement.Statement s : eventContext.statements) {
+                    interpreter.acceptStatement(s);
+                }
+            } finally {
+                // Always clear the screen context after execution to prevent context leakage
+                context.clearCurrentScreen();
+            }
+        } catch (com.eb.script.parser.ParseError e) {
+            throw new InterpreterError("Failed to parse " + eventType + " code: " + e.getMessage());
+        } catch (java.io.IOException e) {
+            throw new InterpreterError("IO error executing " + eventType + " code: " + e.getMessage());
         }
     }
 }

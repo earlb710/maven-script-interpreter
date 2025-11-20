@@ -1,5 +1,5 @@
 // Comprehensive test script for PR: Support show/hide/close screen commands without names
-// Tests all changes: keyword commands, win.* builtins, and str.* builtins
+// Tests all changes: keyword commands, scr.* builtins, and str.* builtins
 
 // ============================================================================
 // TEST 1: String (str.*) builtin functions
@@ -78,7 +78,7 @@ print "";
 // TEST 2: Screen commands and builtins
 // ============================================================================
 
-print "=== TEST 2: Screen commands and win.* builtins ===";
+print "=== TEST 2: Screen commands and scr.* builtins ===";
 
 // Handler functions that use keyword commands WITHOUT screen names
 keywordShowHandler() {
@@ -98,18 +98,18 @@ keywordCloseHandler() {
 
 // Handler functions that use builtin functions WITHOUT screen names
 builtinShowHandler() {
-    call win.showWindow();
-    print "  builtinShowHandler: executed 'win.showWindow();'";
+    call scr.showWindow();
+    print "  builtinShowHandler: executed 'scr.showWindow();'";
 }
 
 builtinHideHandler() {
-    call win.hideWindow();
-    print "  builtinHideHandler: executed 'win.hideWindow();'";
+    call scr.hideWindow();
+    print "  builtinHideHandler: executed 'scr.hideWindow();'";
 }
 
 builtinCloseHandler() {
-    call win.closeWindow();
-    print "  builtinCloseHandler: executed 'win.closeWindow();'";
+    call scr.closeWindow();
+    print "  builtinCloseHandler: executed 'scr.closeWindow();'";
 }
 
 // Create a comprehensive test screen
@@ -169,7 +169,7 @@ screen testScreen = {
         {
             "name": "section2Label",
             "type": "string",
-            "default": "2. Builtin Functions (win.* without parameters)",
+            "default": "2. Builtin Functions (scr.* without parameters)",
             "display": {
                 "type": "label",
                 "labelText": ""
@@ -181,8 +181,8 @@ screen testScreen = {
             "default": "Show",
             "display": {
                 "type": "button",
-                "labelText": "BUILTIN: win.showWindow()",
-                "onClick": "call win.showWindow();"
+                "labelText": "BUILTIN: scr.showWindow()",
+                "onClick": "call scr.showWindow();"
             }
         },
         {
@@ -191,8 +191,8 @@ screen testScreen = {
             "default": "Hide",
             "display": {
                 "type": "button",
-                "labelText": "BUILTIN: win.hideWindow()",
-                "onClick": "call win.hideWindow();"
+                "labelText": "BUILTIN: scr.hideWindow()",
+                "onClick": "call scr.hideWindow();"
             }
         },
         {
@@ -201,8 +201,8 @@ screen testScreen = {
             "default": "Close",
             "display": {
                 "type": "button",
-                "labelText": "BUILTIN: win.closeWindow()",
-                "onClick": "call win.closeWindow();"
+                "labelText": "BUILTIN: scr.closeWindow()",
+                "onClick": "call scr.closeWindow();"
             }
         },
         {
@@ -220,8 +220,8 @@ screen testScreen = {
             "default": "Show",
             "display": {
                 "type": "button",
-                "labelText": "INLINE: call win.showWindow();",
-                "onClick": "call win.showWindow();"
+                "labelText": "INLINE: call scr.showWindow();",
+                "onClick": "call scr.showWindow();"
             }
         },
         {
@@ -230,8 +230,8 @@ screen testScreen = {
             "default": "Hide",
             "display": {
                 "type": "button",
-                "labelText": "INLINE: call win.hideWindow();",
-                "onClick": "call win.hideWindow();"
+                "labelText": "INLINE: call scr.hideWindow();",
+                "onClick": "call scr.hideWindow();"
             }
         },
         {
@@ -240,8 +240,8 @@ screen testScreen = {
             "default": "Close",
             "display": {
                 "type": "button",
-                "labelText": "INLINE: call win.closeWindow();",
-                "onClick": "call win.closeWindow();"
+                "labelText": "INLINE: call scr.closeWindow();",
+                "onClick": "call scr.closeWindow();"
             }
         },
         {
@@ -334,7 +334,7 @@ print "=== TEST SUMMARY ===";
 print "All changes in this PR have been tested:";
 print "  1. String builtins renamed from string.* to str.* ✓";
 print "  2. Screen keyword commands work without names ✓";
-print "  3. New win.showWindow/hideWindow/closeWindow builtins ✓";
+print "  3. New scr.showWindow/hideWindow/closeWindow builtins ✓";
 print "  4. All work from within screen context (onClick handlers) ✓";
 print "";
 print "Run the application with 'mvn javafx:run' to interact with the test screen.";
