@@ -1,0 +1,320 @@
+// Comprehensive Test Script: All New Screen Source/Status Functions
+// Description: Tests all 8 builtin functions for screen item tracking and management
+// Author: EBS Test Suite
+// Date: 2025-11-20
+//
+// Functions Tested:
+// - Item-Level: getItemSource, setItemSource, getItemStatus, resetItemOriginalValue
+// - Screen-Level: checkChanged, checkError, revert, clear
+
+screen testForm = {
+    "title": "Comprehensive Screen Functions Test",
+    "width": 800,
+    "height": 600,
+    "vars": [
+        {
+            "name": "username",
+            "type": "string",
+            "default": "john_doe",
+            "display": {
+                "type": "textfield",
+                "labelText": "Username:"
+            }
+        },
+        {
+            "name": "email",
+            "type": "string",
+            "default": "john@example.com",
+            "display": {
+                "type": "textfield",
+                "labelText": "Email:"
+            }
+        },
+        {
+            "name": "age",
+            "type": "int",
+            "default": 25,
+            "display": {
+                "type": "spinner",
+                "min": 0,
+                "max": 150,
+                "labelText": "Age:"
+            }
+        },
+        {
+            "name": "active",
+            "type": "bool",
+            "default": true,
+            "display": {
+                "type": "checkbox",
+                "labelText": "Active:"
+            }
+        }
+    ]
+};
+
+print "====================================================================";
+print "  COMPREHENSIVE TEST: All Screen Source/Status Functions";
+print "====================================================================";
+print "";
+
+// ========================================================================
+// PART 1: ITEM-LEVEL FUNCTIONS
+// ========================================================================
+
+print "------------------------------------------------------------------------";
+print "PART 1: ITEM-LEVEL FUNCTIONS";
+print "------------------------------------------------------------------------";
+print "";
+
+// Test 1.1: screen.getItemSource() - Get initial source
+print "Test 1.1: screen.getItemSource() - Get initial source property";
+var usernameSource = call screen.getItemSource("testForm", "username");
+var emailSource = call screen.getItemSource("testForm", "email");
+print "  username source: " + usernameSource + " (expected: data)";
+print "  email source: " + emailSource + " (expected: data)";
+print "  ✓ Test 1.1 PASSED" if usernameSource = "data" and emailSource = "data" else "  ✗ Test 1.1 FAILED";
+print "";
+
+// Test 1.2: screen.setItemSource() - Change source property
+print "Test 1.2: screen.setItemSource() - Change source to 'display'";
+var setResult = call screen.setItemSource("testForm", "username", "display");
+usernameSource = call screen.getItemSource("testForm", "username");
+print "  Set result: " + setResult + " (expected: true)";
+print "  username source after change: " + usernameSource + " (expected: display)";
+print "  ✓ Test 1.2 PASSED" if setResult and usernameSource = "display" else "  ✗ Test 1.2 FAILED";
+print "";
+
+// Test 1.3: screen.getItemStatus() - Get initial status
+print "Test 1.3: screen.getItemStatus() - Get initial status (clean)";
+var usernameStatus = call screen.getItemStatus("testForm", "username");
+var emailStatus = call screen.getItemStatus("testForm", "email");
+print "  username status: " + usernameStatus + " (expected: clean)";
+print "  email status: " + emailStatus + " (expected: clean)";
+print "  ✓ Test 1.3 PASSED" if usernameStatus = "clean" and emailStatus = "clean" else "  ✗ Test 1.3 FAILED";
+print "";
+
+// Test 1.4: Modify value and check status changes
+print "Test 1.4: Modify value and verify status becomes 'changed'";
+print "  Original username: " + testForm.username;
+testForm.username = "jane_smith";
+print "  Modified username: " + testForm.username;
+usernameStatus = call screen.getItemStatus("testForm", "username");
+emailStatus = call screen.getItemStatus("testForm", "email");
+print "  username status: " + usernameStatus + " (expected: changed)";
+print "  email status (unchanged): " + emailStatus + " (expected: clean)";
+print "  ✓ Test 1.4 PASSED" if usernameStatus = "changed" and emailStatus = "clean" else "  ✗ Test 1.4 FAILED";
+print "";
+
+// Test 1.5: screen.resetItemOriginalValue() - Reset to mark as clean
+print "Test 1.5: screen.resetItemOriginalValue() - Mark modified item as clean";
+var resetResult = call screen.resetItemOriginalValue("testForm", "username");
+usernameStatus = call screen.getItemStatus("testForm", "username");
+print "  Reset result: " + resetResult + " (expected: true)";
+print "  username status after reset: " + usernameStatus + " (expected: clean)";
+print "  username value unchanged: " + testForm.username + " (still: jane_smith)";
+print "  ✓ Test 1.5 PASSED" if resetResult and usernameStatus = "clean" else "  ✗ Test 1.5 FAILED";
+print "";
+
+// Test 1.6: Revert manually and check status
+print "Test 1.6: Manual revert - change back to original shows clean";
+testForm.username = "john_doe";
+usernameStatus = call screen.getItemStatus("testForm", "username");
+print "  username reverted to: " + testForm.username;
+print "  username status: " + usernameStatus + " (expected: clean)";
+print "  ✓ Test 1.6 PASSED" if usernameStatus = "clean" else "  ✗ Test 1.6 FAILED";
+print "";
+
+// ========================================================================
+// PART 2: SCREEN-LEVEL FUNCTIONS
+// ========================================================================
+
+print "------------------------------------------------------------------------";
+print "PART 2: SCREEN-LEVEL FUNCTIONS";
+print "------------------------------------------------------------------------";
+print "";
+
+// Test 2.1: screen.checkChanged() - No changes initially
+print "Test 2.1: screen.checkChanged() - Check with no changes";
+var hasChanges = call screen.checkChanged("testForm");
+print "  screen.checkChanged: " + hasChanges + " (expected: false)";
+print "  ✓ Test 2.1 PASSED" if not hasChanges else "  ✗ Test 2.1 FAILED";
+print "";
+
+// Test 2.2: screen.checkChanged() - Detect changes
+print "Test 2.2: screen.checkChanged() - Detect when items are changed";
+testForm.email = "jane@example.com";
+testForm.age = 30;
+print "  Modified email to: " + testForm.email;
+print "  Modified age to: " + testForm.age;
+hasChanges = call screen.checkChanged("testForm");
+print "  screen.checkChanged: " + hasChanges + " (expected: true)";
+print "  ✓ Test 2.2 PASSED" if hasChanges else "  ✗ Test 2.2 FAILED";
+print "";
+
+// Test 2.3: screen.checkError() - No error initially
+print "Test 2.3: screen.checkError() - Check with no error";
+var hasError = call screen.checkError("testForm");
+print "  screen.checkError: " + hasError + " (expected: false)";
+print "  ✓ Test 2.3 PASSED" if not hasError else "  ✗ Test 2.3 FAILED";
+print "";
+
+// Test 2.4: screen.checkError() - Detect error status
+print "Test 2.4: screen.checkError() - Detect when error is set";
+call screen.setError("testForm", "Test validation error");
+hasError = call screen.checkError("testForm");
+print "  Set error message: 'Test validation error'";
+print "  screen.checkError: " + hasError + " (expected: true)";
+print "  ✓ Test 2.4 PASSED" if hasError else "  ✗ Test 2.4 FAILED";
+print "";
+
+// Test 2.5: Clear error status
+print "Test 2.5: Clear error status back to clean";
+call screen.setStatus("testForm", "clean");
+hasError = call screen.checkError("testForm");
+print "  Set status to 'clean'";
+print "  screen.checkError: " + hasError + " (expected: false)";
+print "  ✓ Test 2.5 PASSED" if not hasError else "  ✗ Test 2.5 FAILED";
+print "";
+
+// Test 2.6: screen.revert() - Revert all changes
+print "Test 2.6: screen.revert() - Revert all items to original values";
+print "  Before revert:";
+print "    username: " + testForm.username;
+print "    email: " + testForm.email;
+print "    age: " + testForm.age;
+var revertResult = call screen.revert("testForm");
+print "  Revert result: " + revertResult + " (expected: true)";
+print "  After revert:";
+print "    username: " + testForm.username + " (expected: john_doe)";
+print "    email: " + testForm.email + " (expected: john@example.com)";
+print "    age: " + testForm.age + " (expected: 25)";
+hasChanges = call screen.checkChanged("testForm");
+print "  screen.checkChanged: " + hasChanges + " (expected: false)";
+var revertPassed = revertResult and testForm.username = "john_doe" and testForm.email = "john@example.com" and testForm.age = 25 and not hasChanges;
+print "  ✓ Test 2.6 PASSED" if revertPassed else "  ✗ Test 2.6 FAILED";
+print "";
+
+// Test 2.7: screen.clear() - Clear to defaults
+print "Test 2.7: screen.clear() - Clear all items to default values";
+testForm.username = "modified_user";
+testForm.email = "modified@example.com";
+testForm.age = 99;
+print "  After modifications:";
+print "    username: " + testForm.username;
+print "    email: " + testForm.email;
+print "    age: " + testForm.age;
+var clearResult = call screen.clear("testForm");
+print "  Clear result: " + clearResult + " (expected: true)";
+print "  After clear (back to defaults):";
+print "    username: " + testForm.username + " (expected: john_doe)";
+print "    email: " + testForm.email + " (expected: john@example.com)";
+print "    age: " + testForm.age + " (expected: 25)";
+var clearPassed = clearResult and testForm.username = "john_doe" and testForm.email = "john@example.com" and testForm.age = 25;
+print "  ✓ Test 2.7 PASSED" if clearPassed else "  ✗ Test 2.7 FAILED";
+print "";
+
+// ========================================================================
+// PART 3: INTEGRATION TESTS
+// ========================================================================
+
+print "------------------------------------------------------------------------";
+print "PART 3: INTEGRATION TESTS - Combined Usage Scenarios";
+print "------------------------------------------------------------------------";
+print "";
+
+// Test 3.1: Form validation workflow
+print "Test 3.1: Form validation workflow";
+print "  Scenario: Check errors before saving changes";
+testForm.username = "new_user";
+testForm.email = "new@example.com";
+hasError = call screen.checkError("testForm");
+hasChanges = call screen.checkChanged("testForm");
+print "  Has error: " + hasError + " (expected: false)";
+print "  Has changes: " + hasChanges + " (expected: true)";
+if not hasError and hasChanges then
+    print "  → Form is valid and has changes, ready to save";
+    print "  ✓ Test 3.1 PASSED";
+else
+    print "  ✗ Test 3.1 FAILED";
+print "";
+
+// Test 3.2: Cancel workflow
+print "Test 3.2: Cancel workflow - user clicks cancel button";
+print "  Modified values before cancel:";
+print "    username: " + testForm.username;
+print "    email: " + testForm.email;
+call screen.revert("testForm");
+print "  After revert (cancel):";
+print "    username: " + testForm.username + " (expected: john_doe)";
+print "    email: " + testForm.email + " (expected: john@example.com)";
+var cancelPassed = testForm.username = "john_doe" and testForm.email = "john@example.com";
+print "  ✓ Test 3.2 PASSED" if cancelPassed else "  ✗ Test 3.2 FAILED";
+print "";
+
+// Test 3.3: Save workflow with individual item tracking
+print "Test 3.3: Save workflow - mark saved items as clean";
+testForm.username = "saved_user";
+testForm.email = "saved@example.com";
+print "  Modified username and email";
+var usernameChanged = call screen.getItemStatus("testForm", "username");
+var emailChanged = call screen.getItemStatus("testForm", "email");
+print "  username status: " + usernameChanged + " (expected: changed)";
+print "  email status: " + emailChanged + " (expected: changed)";
+print "  → Simulating save operation...";
+call screen.resetItemOriginalValue("testForm", "username");
+call screen.resetItemOriginalValue("testForm", "email");
+usernameChanged = call screen.getItemStatus("testForm", "username");
+emailChanged = call screen.getItemStatus("testForm", "email");
+hasChanges = call screen.checkChanged("testForm");
+print "  After save (reset original values):";
+print "    username status: " + usernameChanged + " (expected: clean)";
+print "    email status: " + emailChanged + " (expected: clean)";
+print "    screen has changes: " + hasChanges + " (expected: false)";
+var savePassed = usernameChanged = "clean" and emailChanged = "clean" and not hasChanges;
+print "  ✓ Test 3.3 PASSED" if savePassed else "  ✗ Test 3.3 FAILED";
+print "";
+
+// Test 3.4: Source property usage
+print "Test 3.4: Source property management";
+print "  Setting source to 'display' for username field";
+call screen.setItemSource("testForm", "username", "display");
+var source = call screen.getItemSource("testForm", "username");
+print "  username source: " + source + " (expected: display)";
+print "  Setting source back to 'data'";
+call screen.setItemSource("testForm", "username", "data");
+source = call screen.getItemSource("testForm", "username");
+print "  username source: " + source + " (expected: data)";
+var sourcePassed = source = "data";
+print "  ✓ Test 3.4 PASSED" if sourcePassed else "  ✗ Test 3.4 FAILED";
+print "";
+
+// ========================================================================
+// TEST SUMMARY
+// ========================================================================
+
+print "====================================================================";
+print "  TEST SUMMARY";
+print "====================================================================";
+print "";
+print "Item-Level Functions Tested:";
+print "  1. screen.getItemSource(screenName, itemName)";
+print "  2. screen.setItemSource(screenName, itemName, source)";
+print "  3. screen.getItemStatus(screenName, itemName)";
+print "  4. screen.resetItemOriginalValue(screenName, itemName)";
+print "";
+print "Screen-Level Functions Tested:";
+print "  5. screen.checkChanged(screenName)";
+print "  6. screen.checkError(screenName)";
+print "  7. screen.revert(screenName)";
+print "  8. screen.clear(screenName)";
+print "";
+print "Integration Scenarios Tested:";
+print "  - Form validation workflow";
+print "  - Cancel/revert workflow";
+print "  - Save workflow with item tracking";
+print "  - Source property management";
+print "";
+print "====================================================================";
+print "  ALL TESTS COMPLETED";
+print "====================================================================";
