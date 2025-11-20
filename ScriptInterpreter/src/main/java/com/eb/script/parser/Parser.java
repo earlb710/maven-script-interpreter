@@ -517,10 +517,17 @@ public class Parser {
             } else if (elemType == DataType.JSON && (check(EbsTokenType.LBRACE) || check(EbsTokenType.LBRACKET))) {
                 varInit = parseJsonLiteralFromSource();
             } else if (checkAny(EbsTokenType.LBRACE, EbsTokenType.LBRACKET)) {
+                // Allow array literals in these cases:
+                // 1. Variable was declared with array dimensions (varInit is ArrayExpression)
+                // 2. No type specified (type inference from literal)
+                // 3. Array type specified but no dimensions
                 if (varInit instanceof ArrayExpression) {
                     ArrayLiteralExpression arrayInit = parseArrayLiteral();
                     ((ArrayExpression) varInit).initializer = arrayInit;
                     arrayInit.array = varInit;
+                } else if (elemType == null || elemType == DataType.ARRAY) {
+                    // Type inference or generic array - just parse the literal
+                    varInit = parseArrayLiteral();
                 } else {
                     throw error(eq, "Variable not defined as an array, cannot use {} for non-arrays.");
                 }

@@ -1,0 +1,376 @@
+// Comprehensive Test Script Following SPACE_RULES
+// Tests all beginner-friendly syntax improvements: for loops, compound operators,
+// let/function keywords, and enhanced array types
+// 
+// This script demonstrates:
+// - Traditional C-style for loops
+// - Increment/decrement operators (++, --)
+// - Compound assignment operators (+=, -=, *=, /=)
+// - 'let' keyword as alias for 'var'
+// - Optional 'function' keyword
+// - Enhanced array.type syntax
+// - foreach loops
+//
+// Per SPACE_RULES: All syntax verified against EBS_SCRIPT_SYNTAX.md
+
+print "╔════════════════════════════════════════════════════════════════╗";
+print "║  Beginner-Friendly Syntax Test Script                         ║";
+print "║  Testing: for loops, operators, keywords, and array types     ║";
+print "╚════════════════════════════════════════════════════════════════╝";
+print "";
+
+// ============================================================================
+// SECTION 1: Traditional For Loops
+// ============================================================================
+print "═══ SECTION 1: Traditional For Loops ═══";
+print "";
+
+print "Test 1.1: Basic for loop with simple increment";
+for (var i: int = 0; i < 5; i = i + 1) {
+    print "  Loop iteration: " + i;
+}
+print "";
+
+print "Test 1.2: For loop with compound assignment (+=)";
+for (var j: int = 0; j < 10; j += 2) {
+    print "  Even number: " + j;
+}
+print "";
+
+print "Test 1.3: For loop with increment operator (++)";
+for (var k: int = 1; k <= 5; k++) {
+    var square: int = k * k;
+    print "  " + k + " squared = " + square;
+}
+print "";
+
+print "Test 1.4: Countdown with decrement operator (--)";
+for (var n: int = 5; n > 0; n--) {
+    print "  Countdown: " + n;
+}
+print "";
+
+// ============================================================================
+// SECTION 2: Increment and Decrement Operators
+// ============================================================================
+print "═══ SECTION 2: Increment/Decrement Operators ═══";
+print "";
+
+print "Test 2.1: Post-increment operator (++)";
+var count: int = 10;
+print "  Initial value: " + count;
+count++;
+print "  After count++: " + count;
+count++;
+print "  After another count++: " + count;
+print "";
+
+print "Test 2.2: Post-decrement operator (--)";
+var value: int = 20;
+print "  Initial value: " + value;
+value--;
+print "  After value--: " + value;
+value--;
+print "  After another value--: " + value;
+print "";
+
+// ============================================================================
+// SECTION 3: Compound Assignment Operators
+// ============================================================================
+print "═══ SECTION 3: Compound Assignment Operators ═══";
+print "";
+
+print "Test 3.1: Addition assignment (+=)";
+var total: int = 100;
+print "  Initial total: " + total;
+total += 50;
+print "  After total += 50: " + total;
+total += 25;
+print "  After total += 25: " + total;
+print "";
+
+print "Test 3.2: Subtraction assignment (-=)";
+var balance: int = 1000;
+print "  Initial balance: " + balance;
+balance -= 150;
+print "  After balance -= 150: " + balance;
+balance -= 50;
+print "  After balance -= 50: " + balance;
+print "";
+
+print "Test 3.3: Multiplication assignment (*=)";
+var multiplier: int = 5;
+print "  Initial multiplier: " + multiplier;
+multiplier *= 2;
+print "  After multiplier *= 2: " + multiplier;
+multiplier *= 3;
+print "  After multiplier *= 3: " + multiplier;
+print "";
+
+print "Test 3.4: Division assignment (/=)";
+var divisor: int = 100;
+print "  Initial divisor: " + divisor;
+divisor /= 2;
+print "  After divisor /= 2: " + divisor;
+divisor /= 5;
+print "  After divisor /= 5: " + divisor;
+print "";
+
+// ============================================================================
+// SECTION 4: Let Keyword (Alias for var)
+// ============================================================================
+print "═══ SECTION 4: 'let' Keyword ═══";
+print "";
+
+print "Test 4.1: Using 'let' for variable declaration";
+let firstName: string = "Alice";
+let lastName: string = "Johnson";
+let age: int = 30;
+print "  Name: " + firstName + " " + lastName;
+print "  Age: " + age;
+print "";
+
+print "Test 4.2: Mixing 'var' and 'let'";
+var oldStyle: int = 42;
+let newStyle: int = 84;
+print "  oldStyle (var): " + oldStyle;
+print "  newStyle (let): " + newStyle;
+print "  Both keywords work identically!";
+print "";
+
+// ============================================================================
+// SECTION 5: Function Keyword
+// ============================================================================
+print "═══ SECTION 5: Optional 'function' Keyword ═══";
+print "";
+
+print "Test 5.1: Function with 'function' keyword";
+function add(a: int, b: int) return int {
+    return a + b;
+}
+var sum1: int = call add(10, 20);
+print "  add(10, 20) = " + sum1;
+print "";
+
+print "Test 5.2: Function without 'function' keyword (traditional)";
+multiply(x: int, y: int) return int {
+    return x * y;
+}
+var product: int = call multiply(6, 7);
+print "  multiply(6, 7) = " + product;
+print "";
+
+print "Test 5.3: Function with 'function' keyword and string return";
+function greet(name: string) return string {
+    return "Hello, " + name + "!";
+}
+var greeting: string = call greet("Bob");
+print "  " + greeting;
+print "";
+
+// ============================================================================
+// SECTION 6: Generic Array Types
+// ============================================================================
+print "═══ SECTION 6: Generic Array Types ═══";
+print "";
+
+print "Test 6.1: array[length] - Fixed-size generic array";
+var genericArray: array[5];
+genericArray[0] = 100;
+genericArray[1] = "text";
+genericArray[2] = 3.14;
+print "  genericArray[0] (int): " + genericArray[0];
+print "  genericArray[1] (string): " + genericArray[1];
+print "  genericArray[2] (double): " + genericArray[2];
+print "";
+
+print "Test 6.2: array[*] - Dynamic generic array";
+var dynamicGeneric = [1, "two", 3.0, true];
+print "  dynamicGeneric[0]: " + dynamicGeneric[0];
+print "  dynamicGeneric[1]: " + dynamicGeneric[1];
+print "  dynamicGeneric[2]: " + dynamicGeneric[2];
+print "  dynamicGeneric[3]: " + dynamicGeneric[3];
+print "";
+
+print "Test 6.3: array.any[length] - Explicit any type";
+var anyArray: array.any[3];
+anyArray[0] = 42;
+anyArray[1] = "hello";
+print "  anyArray[0]: " + anyArray[0];
+print "  anyArray[1]: " + anyArray[1];
+print "";
+
+// ============================================================================
+// SECTION 7: Enhanced Array.Type Syntax
+// ============================================================================
+print "═══ SECTION 7: Enhanced array.type Syntax ═══";
+print "";
+
+print "Test 7.1: array.string[length]";
+var strings: array.string[3];
+strings[0] = "First";
+strings[1] = "Second";
+strings[2] = "Third";
+print "  strings[0]: " + strings[0];
+print "  strings[1]: " + strings[1];
+print "  strings[2]: " + strings[2];
+print "";
+
+print "Test 7.2: array.int[length]";
+var integers: array.int[4];
+integers[0] = 10;
+integers[1] = 20;
+integers[2] = 30;
+integers[3] = 40;
+print "  integers[0]: " + integers[0];
+print "  integers[3]: " + integers[3];
+print "";
+
+print "Test 7.3: array.double[length] and array.number[length]";
+var doubles: array.double[2];
+doubles[0] = 3.14159;
+doubles[1] = 2.71828;
+var numbers: array.number[2];
+numbers[0] = 123.456;
+numbers[1] = 789.012;
+print "  doubles[0]: " + doubles[0];
+print "  numbers[1]: " + numbers[1];
+print "";
+
+print "Test 7.4: array.byte[length]";
+var bytes: array.byte[3];
+bytes[0] = 127;
+bytes[1] = 64;
+bytes[2] = 32;
+print "  bytes[0]: " + bytes[0];
+print "  bytes[1]: " + bytes[1];
+print "  bytes[2]: " + bytes[2];
+print "";
+
+print "Test 7.5: Dynamic typed arrays with array.type[*]";
+var dynamicStrings: array.string[*];
+call array.expand(dynamicStrings, 3);
+dynamicStrings[0] = "Alpha";
+dynamicStrings[1] = "Beta";
+dynamicStrings[2] = "Gamma";
+print "  dynamicStrings[0]: " + dynamicStrings[0];
+print "  dynamicStrings[2]: " + dynamicStrings[2];
+print "";
+
+// ============================================================================
+// SECTION 8: Multi-Dimensional Arrays
+// ============================================================================
+print "═══ SECTION 8: Multi-Dimensional Arrays ═══";
+print "";
+
+print "Test 8.1: array.int[rows, cols] - 2D array";
+var matrix: array.int[2, 3];
+matrix[0, 0] = 1;
+matrix[0, 1] = 2;
+matrix[0, 2] = 3;
+matrix[1, 0] = 4;
+matrix[1, 1] = 5;
+matrix[1, 2] = 6;
+print "  matrix[0, 0]: " + matrix[0, 0];
+print "  matrix[0, 2]: " + matrix[0, 2];
+print "  matrix[1, 1]: " + matrix[1, 1];
+print "";
+
+// ============================================================================
+// SECTION 9: ForEach Loops
+// ============================================================================
+print "═══ SECTION 9: ForEach Loops ═══";
+print "";
+
+print "Test 9.1: foreach with array literal";
+var primes = [2, 3, 5, 7, 11];
+print "  Prime numbers:";
+foreach prime in primes {
+    print "    " + prime;
+}
+print "";
+
+print "Test 9.2: foreach with string array";
+var colors = ["Red", "Green", "Blue"];
+print "  Colors:";
+foreach color in colors {
+    print "    " + color;
+}
+print "";
+
+// ============================================================================
+// SECTION 10: Combined Example - All Features
+// ============================================================================
+print "═══ SECTION 10: Combined Example ═══";
+print "";
+
+print "Test 10.1: Using all new features together";
+
+// Function with 'function' keyword - accepts any array
+function calculateStats(numbers: string) return string {
+    let sum: int = 0;
+    let count: int = 0;
+    
+    foreach num in numbers {
+        sum += num;
+        count++;
+    }
+    
+    var average: int = sum / count;
+    return "Sum: " + sum + ", Count: " + count + ", Average: " + average;
+}
+
+// Create array with new syntax
+let dataSet = [10, 20, 30, 40, 50];
+
+// Process with for loop using ++ operator
+print "  Processing dataset:";
+for (var i: int = 0; i < dataSet.length; i++) {
+    var doubled: int = dataSet[i] * 2;
+    print "    dataSet[" + i + "] = " + dataSet[i] + " (doubled: " + doubled + ")";
+}
+
+// Get statistics using function
+var stats: string = call calculateStats(dataSet);
+print "  Statistics: " + stats;
+print "";
+
+// ============================================================================
+// SECTION 11: Syntax Comparison
+// ============================================================================
+print "═══ SECTION 11: Syntax Comparison ═══";
+print "";
+
+print "Test 11.1: Traditional vs Enhanced Syntax";
+print "  Traditional array syntax:";
+var oldArray: int[5];
+oldArray[0] = 99;
+print "    int[5] works: " + oldArray[0];
+
+print "  Enhanced array syntax:";
+var newArray: array.int[5];
+newArray[0] = 99;
+print "    array.int[5] works: " + newArray[0];
+
+print "  Both are equivalent and work identically!";
+print "";
+
+// ============================================================================
+// Summary
+// ============================================================================
+print "╔════════════════════════════════════════════════════════════════╗";
+print "║  ✓ All Beginner-Friendly Syntax Tests Completed               ║";
+print "║                                                                ║";
+print "║  Features Tested:                                              ║";
+print "║  • Traditional for loops (C-style)                             ║";
+print "║  • Increment/decrement operators (++, --)                      ║";
+print "║  • Compound assignment operators (+=, -=, *=, /=)              ║";
+print "║  • 'let' keyword as alias for 'var'                            ║";
+print "║  • Optional 'function' keyword                                 ║";
+print "║  • Generic array types (array, array.any)                      ║";
+print "║  • Enhanced array.type syntax (array.string, array.int, etc.)  ║";
+print "║  • Dynamic and multi-dimensional arrays                        ║";
+print "║  • foreach loops                                               ║";
+print "║                                                                ║";
+print "║  All syntax follows SPACE_RULES and EBS_SCRIPT_SYNTAX.md      ║";
+print "╚════════════════════════════════════════════════════════════════╝";
