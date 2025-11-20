@@ -706,16 +706,18 @@ public final class Builtins {
                 newParam("screenName", DataType.STRING, true) // required; screen name
         ));
         addBuiltin(info(
-                "win.showWindow", DataType.BOOL,
+                "scr.showScreen", DataType.BOOL,
                 newParam("screenName", DataType.STRING, false) // optional; screen name (if null, uses current screen)
         ));
         addBuiltin(info(
-                "win.hideWindow", DataType.BOOL,
+                "scr.hideScreen", DataType.BOOL,
                 newParam("screenName", DataType.STRING, false) // optional; screen name (if null, uses current screen)
         ));
         addBuiltin(info(
-                "win.closeWindow", DataType.BOOL,
+                "scr.closeScreen", DataType.BOOL,
                 newParam("screenName", DataType.STRING, false) // optional; screen name (if null, uses current screen)
+        ));
+        addBuiltin(info(
                 "screen.setStatus", DataType.BOOL,
                 newParam("screenName", DataType.STRING, true), // required; screen name
                 newParam("status", DataType.STRING, true) // required; status: "clean", "changed", or "error"
@@ -1860,14 +1862,15 @@ public final class Builtins {
             case "screen.getscreenitemlist" -> {
                 return screenGetScreenItemList(context, args);
             }
-            case "win.showwindow" -> {
+            case "scr.showscreen" -> {
                 return screenShow(context, args);
             }
-            case "win.hidewindow" -> {
+            case "scr.hidescreen" -> {
                 return screenHide(context, args);
             }
-            case "win.closewindow" -> {
+            case "scr.closescreen" -> {
                 return screenClose(context, args);
+            }
             case "screen.setstatus" -> {
                 return screenSetStatus(context, args);
             }
@@ -2368,9 +2371,9 @@ public final class Builtins {
     }
 
     /**
-     * screen.getScreenItemList(screenName) -> ArrayDynamic 
-     * Returns a list of all item names in the screen (same as getItemList).
-     * This is an alias for getItemList for clarity.
+     * screen.getScreenItemList(screenName) -> ArrayDynamic Returns a list of
+     * all item names in the screen (same as getItemList). This is an alias for
+     * getItemList for clarity.
      */
     private static Object screenGetScreenItemList(InterpreterContext context, Object[] args) throws InterpreterError {
         // This is simply an alias for getItemList
@@ -2378,35 +2381,34 @@ public final class Builtins {
     }
 
     /**
-     * win.showWindow(screenName?) -> BOOL
-     * Shows a screen. If screenName is null or empty, uses the current screen from context.
-     * Returns true on success.
+     * scr.showScreen(screenName?) -> BOOL Shows a screen. If screenName is null
+     * or empty, uses the current screen from context. Returns true on success.
      */
     private static Object screenShow(InterpreterContext context, Object[] args) throws InterpreterError {
         String screenName = (args.length > 0 && args[0] != null) ? (String) args[0] : null;
-        
+
         // If no screen name provided, determine from thread context
         if (screenName == null || screenName.isEmpty()) {
             screenName = context.getCurrentScreen();
             if (screenName == null) {
                 throw new InterpreterError(
-                    "win.showWindow: No screen name specified and not executing in a screen context. " +
-                    "Provide a screen name or call from within screen event handlers.");
+                        "scr.showScreen: No screen name specified and not executing in a screen context. "
+                        + "Provide a screen name or call from within screen event handlers.");
             }
         }
-        
+
         // Check if screen exists
         if (!context.getScreens().containsKey(screenName)) {
-            throw new InterpreterError("win.showWindow: Screen '" + screenName + "' does not exist.");
+            throw new InterpreterError("scr.showScreen: Screen '" + screenName + "' does not exist.");
         }
-        
+
         javafx.stage.Stage stage = context.getScreens().get(screenName);
         if (stage == null) {
-            throw new InterpreterError("win.showWindow: Screen '" + screenName + "' is still being initialized.");
+            throw new InterpreterError("scr.showScreen: Screen '" + screenName + "' is still being initialized.");
         }
-        
+
         final String finalScreenName = screenName;
-        
+
         // Show the screen on JavaFX Application Thread
         javafx.application.Platform.runLater(() -> {
             if (!stage.isShowing()) {
@@ -2420,6 +2422,10 @@ public final class Builtins {
                 }
             }
         });
+        return true;
+    }
+
+    /* 
      * screen.setStatus(screenName, status) -> Boolean
      * Sets the status of a screen to "clean", "changed", or "error"
      */
@@ -2440,45 +2446,44 @@ public final class Builtins {
         }
 
         // Parse status
-        com.eb.script.interpreter.screen.ScreenStatus status = 
-            com.eb.script.interpreter.screen.ScreenStatus.fromString(statusStr);
-        
+        com.eb.script.interpreter.screen.ScreenStatus status
+                = com.eb.script.interpreter.screen.ScreenStatus.fromString(statusStr);
+
         // Set the status
         context.setScreenStatus(screenName, status);
-        
+
         return true;
     }
 
     /**
-     * win.hideWindow(screenName?) -> BOOL
-     * Hides a screen. If screenName is null or empty, uses the current screen from context.
-     * Returns true on success.
+     * scr.hideScreen(screenName?) -> BOOL Hides a screen. If screenName is null
+     * or empty, uses the current screen from context. Returns true on success.
      */
     private static Object screenHide(InterpreterContext context, Object[] args) throws InterpreterError {
         String screenName = (args.length > 0 && args[0] != null) ? (String) args[0] : null;
-        
+
         // If no screen name provided, determine from thread context
         if (screenName == null || screenName.isEmpty()) {
             screenName = context.getCurrentScreen();
             if (screenName == null) {
                 throw new InterpreterError(
-                    "win.hideWindow: No screen name specified and not executing in a screen context. " +
-                    "Provide a screen name or call from within screen event handlers.");
+                        "scr.hideScreen: No screen name specified and not executing in a screen context. "
+                        + "Provide a screen name or call from within screen event handlers.");
             }
         }
-        
+
         // Check if screen exists
         if (!context.getScreens().containsKey(screenName)) {
-            throw new InterpreterError("win.hideWindow: Screen '" + screenName + "' does not exist.");
+            throw new InterpreterError("scr.hideScreen: Screen '" + screenName + "' does not exist.");
         }
-        
+
         javafx.stage.Stage stage = context.getScreens().get(screenName);
         if (stage == null) {
-            throw new InterpreterError("win.hideWindow: Screen '" + screenName + "' is still being initialized.");
+            throw new InterpreterError("scr.hideScreen: Screen '" + screenName + "' is still being initialized.");
         }
-        
+
         final String finalScreenName = screenName;
-        
+
         // Hide the screen on JavaFX Application Thread
         javafx.application.Platform.runLater(() -> {
             boolean wasShowing = stage.isShowing();
@@ -2491,7 +2496,9 @@ public final class Builtins {
                 }
             }
         });
-     * screen.getStatus(screenName) -> String
+        return true;
+    }
+    /* screen.getStatus(screenName) -> String
      * Gets the current status of a screen: "clean", "changed", or "error"
      */
     private static Object screenGetStatus(InterpreterContext context, Object[] args) throws InterpreterError {
@@ -2508,13 +2515,13 @@ public final class Builtins {
 
         // Get the status
         com.eb.script.interpreter.screen.ScreenStatus status = context.getScreenStatus(screenName);
-        
+
         return status.toString();
     }
 
     /**
-     * screen.setError(screenName, errorMessage) -> Boolean
-     * Sets an error message for a screen and automatically sets status to "error"
+     * screen.setError(screenName, errorMessage) -> Boolean Sets an error
+     * message for a screen and automatically sets status to "error"
      */
     private static Object screenSetError(InterpreterContext context, Object[] args) throws InterpreterError {
         String screenName = (String) args[0];
@@ -2531,64 +2538,66 @@ public final class Builtins {
 
         // Set the error message (this automatically sets status to ERROR)
         context.setScreenErrorMessage(screenName, errorMessage);
-        
+
         return true;
     }
 
     /**
-     * win.closeWindow(screenName?) -> BOOL
-     * Closes a screen. If screenName is null or empty, uses the current screen from context.
-     * Returns true on success.
+     * scr.closeScreen(screenName?) -> BOOL Closes a screen. If screenName is
+     * null or empty, uses the current screen from context. Returns true on
+     * success.
      */
     private static Object screenClose(InterpreterContext context, Object[] args) throws InterpreterError {
         String screenName = (args.length > 0 && args[0] != null) ? (String) args[0] : null;
-        
+
         // If no screen name provided, determine from thread context
         if (screenName == null || screenName.isEmpty()) {
             screenName = context.getCurrentScreen();
             if (screenName == null) {
                 throw new InterpreterError(
-                    "win.closeWindow: No screen name specified and not executing in a screen context. " +
-                    "Provide a screen name or call from within screen event handlers.");
+                        "scr.closeScreen: No screen name specified and not executing in a screen context. "
+                        + "Provide a screen name or call from within screen event handlers.");
             }
         }
-        
+
         // Check if screen exists
         if (!context.getScreens().containsKey(screenName)) {
-            throw new InterpreterError("win.closeWindow: Screen '" + screenName + "' does not exist.");
+            throw new InterpreterError("scr.closeScreen: Screen '" + screenName + "' does not exist.");
         }
-        
+
         javafx.stage.Stage stage = context.getScreens().get(screenName);
         if (stage == null) {
-            throw new InterpreterError("win.closeWindow: Screen '" + screenName + "' is still being initialized.");
+            throw new InterpreterError("scr.closeScreen: Screen '" + screenName + "' is still being initialized.");
         }
-        
+
         final String finalScreenName = screenName;
-        
+
         // Close the screen on JavaFX Application Thread
         javafx.application.Platform.runLater(() -> {
             // Close the stage
             if (stage.isShowing()) {
                 stage.close();
             }
-            
+
             // Interrupt and stop the screen thread
             Thread thread = context.getScreenThreads().get(finalScreenName);
             if (thread != null && thread.isAlive()) {
                 thread.interrupt();
             }
-            
+
             // Clean up resources
             context.remove(finalScreenName);
-            
+
             if (context.getOutput() != null) {
                 context.getOutput().printlnOk("Screen '" + finalScreenName + "' closed");
             }
         });
-        
+
         return true;
-     * screen.getError(screenName) -> String
-     * Gets the error message for a screen (returns null if no error)
+    }
+
+    /* screen.getError(screenName) -> String
+     * Gets the error message for a screen (returns   null { if no   { error }} )
      */
     private static Object screenGetError(InterpreterContext context, Object[] args) throws InterpreterError {
         String screenName = (String) args[0];
@@ -2607,8 +2616,8 @@ public final class Builtins {
     }
 
     /**
-     * screen.getItemSource(screenName, itemName) -> String
-     * Gets the source property of a screen item: "data" or "display"
+     * screen.getItemSource(screenName, itemName) -> String Gets the source
+     * property of a screen item: "data" or "display"
      */
     private static Object screenGetItemSource(InterpreterContext context, Object[] args) throws InterpreterError {
         String screenName = (String) args[0];
@@ -2635,14 +2644,14 @@ public final class Builtins {
         // Find the variable - try with various key formats
         Var var = null;
         String lowerItemName = itemName.toLowerCase();
-        
+
         // Try direct lookup
         for (Map.Entry<String, Var> entry : varItems.entrySet()) {
             String key = entry.getKey();
             Var v = entry.getValue();
             // Match by key or by variable name
-            if (key.equals(lowerItemName) || key.endsWith("." + lowerItemName) || 
-                (v.getName() != null && v.getName().equalsIgnoreCase(itemName))) {
+            if (key.equals(lowerItemName) || key.endsWith("." + lowerItemName)
+                    || (v.getName() != null && v.getName().equalsIgnoreCase(itemName))) {
                 var = v;
                 break;
             }
@@ -2662,8 +2671,8 @@ public final class Builtins {
     }
 
     /**
-     * screen.setItemSource(screenName, itemName, source) -> Boolean
-     * Sets the source property of a screen item: "data" or "display"
+     * screen.setItemSource(screenName, itemName, source) -> Boolean Sets the
+     * source property of a screen item: "data" or "display"
      */
     private static Object screenSetItemSource(InterpreterContext context, Object[] args) throws InterpreterError {
         String screenName = (String) args[0];
@@ -2700,12 +2709,12 @@ public final class Builtins {
         // Find the variable - try with various key formats
         Var var = null;
         String lowerItemName = itemName.toLowerCase();
-        
+
         for (Map.Entry<String, Var> entry : varItems.entrySet()) {
             String key = entry.getKey();
             Var v = entry.getValue();
-            if (key.equals(lowerItemName) || key.endsWith("." + lowerItemName) || 
-                (v.getName() != null && v.getName().equalsIgnoreCase(itemName))) {
+            if (key.equals(lowerItemName) || key.endsWith("." + lowerItemName)
+                    || (v.getName() != null && v.getName().equalsIgnoreCase(itemName))) {
                 var = v;
                 break;
             }
@@ -2730,9 +2739,9 @@ public final class Builtins {
     }
 
     /**
-     * screen.getItemStatus(screenName, itemName) -> String
-     * Gets the status of a screen item: "clean" or "changed"
-     * Status is determined by comparing current value to original value
+     * screen.getItemStatus(screenName, itemName) -> String Gets the status of a
+     * screen item: "clean" or "changed" Status is determined by comparing
+     * current value to original value
      */
     private static Object screenGetItemStatus(InterpreterContext context, Object[] args) throws InterpreterError {
         String screenName = (String) args[0];
@@ -2759,12 +2768,12 @@ public final class Builtins {
         // Find the variable - try with various key formats
         Var var = null;
         String lowerItemName = itemName.toLowerCase();
-        
+
         for (Map.Entry<String, Var> entry : varItems.entrySet()) {
             String key = entry.getKey();
             Var v = entry.getValue();
-            if (key.equals(lowerItemName) || key.endsWith("." + lowerItemName) || 
-                (v.getName() != null && v.getName().equalsIgnoreCase(itemName))) {
+            if (key.equals(lowerItemName) || key.endsWith("." + lowerItemName)
+                    || (v.getName() != null && v.getName().equalsIgnoreCase(itemName))) {
                 var = v;
                 break;
             }
@@ -2779,8 +2788,8 @@ public final class Builtins {
     }
 
     /**
-     * screen.resetItemOriginalValue(screenName, itemName) -> Boolean
-     * Resets the original value to the current value, marking the item as "clean"
+     * screen.resetItemOriginalValue(screenName, itemName) -> Boolean Resets the
+     * original value to the current value, marking the item as "clean"
      */
     private static Object screenResetItemOriginalValue(InterpreterContext context, Object[] args) throws InterpreterError {
         String screenName = (String) args[0];
@@ -2807,12 +2816,12 @@ public final class Builtins {
         // Find the variable - try with various key formats
         Var var = null;
         String lowerItemName = itemName.toLowerCase();
-        
+
         for (Map.Entry<String, Var> entry : varItems.entrySet()) {
             String key = entry.getKey();
             Var v = entry.getValue();
-            if (key.equals(lowerItemName) || key.endsWith("." + lowerItemName) || 
-                (v.getName() != null && v.getName().equalsIgnoreCase(itemName))) {
+            if (key.equals(lowerItemName) || key.endsWith("." + lowerItemName)
+                    || (v.getName() != null && v.getName().equalsIgnoreCase(itemName))) {
                 var = v;
                 break;
             }
@@ -2829,8 +2838,8 @@ public final class Builtins {
     }
 
     /**
-     * screen.checkChanged(screenName) -> Boolean
-     * Checks if any item in the screen has changed from its original value
+     * screen.checkChanged(screenName) -> Boolean Checks if any item in the
+     * screen has changed from its original value
      */
     private static Object screenCheckChanged(InterpreterContext context, Object[] args) throws InterpreterError {
         String screenName = (String) args[0];
@@ -2861,8 +2870,8 @@ public final class Builtins {
     }
 
     /**
-     * screen.checkError(screenName) -> Boolean
-     * Checks if the screen has an error status
+     * screen.checkError(screenName) -> Boolean Checks if the screen has an
+     * error status
      */
     private static Object screenCheckError(InterpreterContext context, Object[] args) throws InterpreterError {
         String screenName = (String) args[0];
@@ -2878,13 +2887,13 @@ public final class Builtins {
 
         // Get the screen status
         com.eb.script.interpreter.screen.ScreenStatus status = context.getScreenStatus(screenName);
-        
+
         return status == com.eb.script.interpreter.screen.ScreenStatus.ERROR;
     }
 
     /**
-     * screen.revert(screenName) -> Boolean
-     * Reverts all items in the screen to their original values
+     * screen.revert(screenName) -> Boolean Reverts all items in the screen to
+     * their original values
      */
     private static Object screenRevert(InterpreterContext context, Object[] args) throws InterpreterError {
         String screenName = (String) args[0];
@@ -2901,7 +2910,7 @@ public final class Builtins {
         // Get the var items and screen vars
         Map<String, Var> varItems = context.getScreenVarItems(screenName);
         ConcurrentHashMap<String, Object> screenVars = context.getScreenVars(screenName);
-        
+
         if (varItems == null || varItems.isEmpty()) {
             return true; // No variables to revert
         }
@@ -2910,7 +2919,7 @@ public final class Builtins {
         for (Var var : varItems.values()) {
             Object originalValue = var.getOriginalValue();
             var.setValue(originalValue);
-            
+
             // Update the screen vars map as well
             if (screenVars != null && var.getName() != null) {
                 screenVars.put(var.getName().toLowerCase(), originalValue);
@@ -2921,8 +2930,8 @@ public final class Builtins {
     }
 
     /**
-     * screen.clear(screenName) -> Boolean
-     * Clears all items in the screen to their default values (usually blank/null)
+     * screen.clear(screenName) -> Boolean Clears all items in the screen to
+     * their default values (usually blank/null)
      */
     private static Object screenClear(InterpreterContext context, Object[] args) throws InterpreterError {
         String screenName = (String) args[0];
@@ -2939,7 +2948,7 @@ public final class Builtins {
         // Get the var items and screen vars
         Map<String, Var> varItems = context.getScreenVarItems(screenName);
         ConcurrentHashMap<String, Object> screenVars = context.getScreenVars(screenName);
-        
+
         if (varItems == null || varItems.isEmpty()) {
             return true; // No variables to clear
         }
@@ -2947,7 +2956,7 @@ public final class Builtins {
         // Clear each variable to its default value
         for (Var var : varItems.values()) {
             Object defaultValue = var.getDefaultValue();
-            
+
             // If no default value is set, use appropriate "blank" value based on type
             if (defaultValue == null) {
                 DataType type = var.getType();
@@ -2962,9 +2971,9 @@ public final class Builtins {
                 }
                 // For other types, leave as null
             }
-            
+
             var.setValue(defaultValue);
-            
+
             // Update the screen vars map as well
             if (screenVars != null && var.getName() != null) {
                 screenVars.put(var.getName().toLowerCase(), defaultValue);
