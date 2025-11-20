@@ -82,7 +82,7 @@ show screen testScreen;
 
 // Function to set screen status based on selected type
 setScreenStatus() return bool {
-    var string statusType = testScreen.statusType;
+    var statusType: string = testScreen.statusType;
     
     if statusType = "clean" then
         call screen.setStatus(screenName="testScreen", status="clean");
