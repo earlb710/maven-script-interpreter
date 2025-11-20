@@ -317,11 +317,19 @@ public class InterpreterScreen {
                         // Create onClick handler that executes EBS code
                         ScreenFactory.OnClickHandler onClickHandler = (ebsCode) -> {
                             try {
-                                // Parse and execute the EBS code
-                                RuntimeContext clickContext = com.eb.script.parser.Parser.parse("onClick_" + screenName, ebsCode);
-                                // Execute in the current interpreter context
-                                for (com.eb.script.interpreter.statement.Statement s : clickContext.statements) {
-                                    interpreter.acceptStatement(s);
+                                // Set the screen context before executing onClick code
+                                // This allows inline code to use screen statements like "close screen;" or "hide screen;"
+                                context.setCurrentScreen(screenName);
+                                try {
+                                    // Parse and execute the EBS code
+                                    RuntimeContext clickContext = com.eb.script.parser.Parser.parse("onClick_" + screenName, ebsCode);
+                                    // Execute in the current interpreter context
+                                    for (com.eb.script.interpreter.statement.Statement s : clickContext.statements) {
+                                        interpreter.acceptStatement(s);
+                                    }
+                                } finally {
+                                    // Always clear the screen context after execution to prevent context leakage
+                                    context.clearCurrentScreen();
                                 }
                             } catch (com.eb.script.parser.ParseError e) {
                                 throw new InterpreterError("Failed to parse onClick code: " + e.getMessage());

@@ -30,6 +30,9 @@ public class InterpreterContext {
     private static final ConcurrentHashMap<String, Thread> GLOBAL_SCREEN_THREADS = new ConcurrentHashMap<>();
     private static final List<String> GLOBAL_SCREEN_CREATION_ORDER = new java.util.concurrent.CopyOnWriteArrayList<>();
     private static final Set<String> GLOBAL_SCREENS_BEING_CREATED = ConcurrentHashMap.newKeySet();
+    
+    // ThreadLocal to track current screen context for onClick and other event handlers
+    private static final ThreadLocal<String> CURRENT_SCREEN_CONTEXT = new ThreadLocal<>();
 
     private Environment environment;
     private Debugger debug;
@@ -112,12 +115,19 @@ public class InterpreterContext {
 
     /**
      * Get the current screen name based on the executing thread context.
-     * If code is executing within a screen thread (thread name starts with "Screen-"),
-     * returns that screen name. Otherwise, returns null.
+     * First checks ThreadLocal for explicitly set screen context (e.g., from onClick handlers),
+     * then falls back to checking if code is executing within a screen thread (thread name starts with "Screen-").
      * 
      * @return The current screen name, or null if not executing in a screen context
      */
     public String getCurrentScreen() {
+        // First check ThreadLocal for explicitly set screen context
+        String contextScreen = CURRENT_SCREEN_CONTEXT.get();
+        if (contextScreen != null) {
+            return contextScreen;
+        }
+        
+        // Fall back to thread name check
         Thread currentThread = Thread.currentThread();
         String threadName = currentThread.getName();
         
@@ -131,13 +141,27 @@ public class InterpreterContext {
     }
 
     /**
-     * Set the current screen name
-     * @param screenName The screen name to set as current
-     * @deprecated Current screen is now determined by thread context, not explicit setting
+     * Set the current screen name for the executing thread.
+     * This is used by onClick handlers and other event handlers that execute on non-screen threads
+     * (e.g., JavaFX Application Thread) to establish screen context.
+     * 
+     * @param screenName The screen name to set as current, or null to clear
      */
-    @Deprecated
     public void setCurrentScreen(String screenName) {
-        // No-op - current screen is now determined by thread context
+        if (screenName != null) {
+            CURRENT_SCREEN_CONTEXT.set(screenName);
+        } else {
+            CURRENT_SCREEN_CONTEXT.remove();
+        }
+    }
+    
+    /**
+     * Clear the current screen context for the executing thread.
+     * Should be called after onClick handlers or other event handlers complete
+     * to prevent context leakage.
+     */
+    public void clearCurrentScreen() {
+        CURRENT_SCREEN_CONTEXT.remove();
     }
 
     public Map<String, DisplayItem> getDisplayItem() {
