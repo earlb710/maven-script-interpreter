@@ -215,23 +215,6 @@
       "example": "<b>var</b> <b>success</b> = <b>call</b> <b>file.writeTextFile</b>(path=\"output.txt\", content=\"Hello, World!\");"
     },
     {
-      "function": "file.appendTextFile",
-      "short_description": "Appends text to a file",
-      "long_help": "Appends the given text content to the end of an existing file. Creates the file if it doesn't exist.",
-      "parameters": [
-        {
-          "name": "path",
-          "type": "string"
-        },
-        {
-          "name": "content",
-          "type": "string"
-        }
-      ],
-      "return_type": "bool",
-      "example": "<b>call</b> <b>file.appendTextFile</b>(path=\"log.txt\", content=\"New log entry\\n\");"
-    },
-    {
       "function": "file.exists",
       "short_description": "Checks if file exists",
       "long_help": "Returns true if the specified file or directory exists, false otherwise.",
@@ -243,19 +226,6 @@
       ],
       "return_type": "bool",
       "example": "<b>if</b> <b>call</b> <b>file.exists</b>(path=\"config.json\") <b>then</b> {\n  <b>print</b> \"Config file found\";\n}"
-    },
-    {
-      "function": "file.delete",
-      "short_description": "Deletes a file",
-      "long_help": "Deletes the specified file. Returns true if successful, false if the file doesn't exist or couldn't be deleted.",
-      "parameters": [
-        {
-          "name": "path",
-          "type": "string"
-        }
-      ],
-      "return_type": "bool",
-      "example": "<b>var</b> <b>deleted</b> = <b>call</b> <b>file.delete</b>(path=\"temp.txt\");"
     },
     {
       "function": "file.listFiles",
@@ -272,7 +242,7 @@
       "example": "<b>var</b> <b>files</b> = <b>call</b> <b>file.listFiles</b>(path=\"./data\");\n<b>foreach</b> f <b>in</b> files <b>do</b> {\n  <b>print</b> f;\n}"
     },
     {
-      "function": "string.toString",
+      "function": "str.toString",
       "short_description": "Converts value to string",
       "long_help": "Converts any value to its string representation.",
       "parameters": [
@@ -282,10 +252,10 @@
         }
       ],
       "return_type": "string",
-      "example": "<b>var</b> <b>num</b> = 42;\n<b>var</b> <b>str</b> = <b>call</b> <b>string.toString</b>(value=num);"
+      "example": "<b>var</b> <b>num</b> = 42;\n<b>var</b> <b>str</b> = <b>call</b> <b>str.toString</b>(value=num);"
     },
     {
-      "function": "string.toUpper",
+      "function": "str.toUpper",
       "short_description": "Converts string to uppercase",
       "long_help": "Returns a new string with all characters converted to uppercase.",
       "parameters": [
@@ -295,10 +265,10 @@
         }
       ],
       "return_type": "string",
-      "example": "<b>var</b> <b>upper</b> = <b>call</b> <b>string.toUpper</b>(str=\"hello\");\n<b>print</b> upper; // \"HELLO\""
+      "example": "<b>var</b> <b>upper</b> = <b>call</b> <b>str.toUpper</b>(str=\"hello\");\n<b>print</b> upper; // \"HELLO\""
     },
     {
-      "function": "string.toLower",
+      "function": "str.toLower",
       "short_description": "Converts string to lowercase",
       "long_help": "Returns a new string with all characters converted to lowercase.",
       "parameters": [
@@ -308,10 +278,10 @@
         }
       ],
       "return_type": "string",
-      "example": "<b>var</b> <b>lower</b> = <b>call</b> <b>string.toLower</b>(str=\"WORLD\");\n<b>print</b> lower; // \"world\""
+      "example": "<b>var</b> <b>lower</b> = <b>call</b> <b>str.toLower</b>(str=\"WORLD\");\n<b>print</b> lower; // \"world\""
     },
     {
-      "function": "string.trim",
+      "function": "str.trim",
       "short_description": "Removes whitespace from ends",
       "long_help": "Returns a new string with leading and trailing whitespace removed.",
       "parameters": [
@@ -321,10 +291,10 @@
         }
       ],
       "return_type": "string",
-      "example": "<b>var</b> <b>trimmed</b> = <b>call</b> <b>string.trim</b>(str=\"  hello  \");\n<b>print</b> trimmed; // \"hello\""
+      "example": "<b>var</b> <b>trimmed</b> = <b>call</b> <b>str.trim</b>(str=\"  hello  \");\n<b>print</b> trimmed; // \"hello\""
     },
     {
-      "function": "string.replace",
+      "function": "str.replace",
       "short_description": "Replaces text in string",
       "long_help": "Returns a new string with all occurrences of the target substring replaced with the replacement string.",
       "parameters": [
@@ -342,10 +312,10 @@
         }
       ],
       "return_type": "string",
-      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>string.replace</b>(source=\"hello world\", target=\"world\", replacement=\"there\");<br><b>print</b> result; // \"hello there\""
+      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>str.replace</b>(source=\"hello world\", target=\"world\", replacement=\"there\");<br><b>print</b> result; // \"hello there\""
     },
     {
-      "function": "string.split",
+      "function": "str.split",
       "short_description": "Splits string into array",
       "long_help": "Splits a string into an array of substrings using the specified regex pattern as the delimiter. Returns a JSON array.",
       "parameters": [
@@ -364,10 +334,10 @@
         }
       ],
       "return_type": "json",
-      "example": "<b>var</b> <b>parts</b> = <b>call</b> <b>string.split</b>(text=\"apple,banana,cherry\", regex=\",\");\n<b>foreach</b> part <b>in</b> parts <b>do</b> {\n  <b>print</b> part;\n}"
+      "example": "<b>var</b> <b>parts</b> = <b>call</b> <b>str.split</b>(text=\"apple,banana,cherry\", regex=\",\");\n<b>foreach</b> part <b>in</b> parts <b>do</b> {\n  <b>print</b> part;\n}"
     },
     {
-      "function": "string.join",
+      "function": "str.join",
       "short_description": "Joins array into string",
       "long_help": "Concatenates all elements of a JSON array into a single string, separated by the specified delimiter.",
       "parameters": [
@@ -381,10 +351,10 @@
         }
       ],
       "return_type": "string",
-      "example": "<b>var</b> <b>arr</b> = [\"hello\", \"world\"];\n<b>var</b> <b>joined</b> = <b>call</b> <b>string.join</b>(array=arr, delimiter=\" \");\n<b>print</b> joined; // \"hello world\""
+      "example": "<b>var</b> <b>arr</b> = [\"hello\", \"world\"];\n<b>var</b> <b>joined</b> = <b>call</b> <b>str.join</b>(array=arr, delimiter=\" \");\n<b>print</b> joined; // \"hello world\""
     },
     {
-      "function": "string.contains",
+      "function": "str.contains",
       "short_description": "Checks if string contains substring",
       "long_help": "Returns true if the string contains the specified substring, false otherwise.",
       "parameters": [
@@ -398,10 +368,10 @@
         }
       ],
       "return_type": "bool",
-      "example": "<b>if</b> <b>call</b> <b>string.contains</b>(str=\"hello world\", substring=\"world\") <b>then</b> {\n  <b>print</b> \"Found!\";\n}"
+      "example": "<b>if</b> <b>call</b> <b>str.contains</b>(str=\"hello world\", substring=\"world\") <b>then</b> {\n  <b>print</b> \"Found!\";\n}"
     },
     {
-      "function": "string.startsWith",
+      "function": "str.startsWith",
       "short_description": "Checks if string starts with prefix",
       "long_help": "Returns true if the string starts with the specified prefix, false otherwise.",
       "parameters": [
@@ -415,10 +385,10 @@
         }
       ],
       "return_type": "bool",
-      "example": "<b>if</b> <b>call</b> <b>string.startsWith</b>(str=\"hello\", prefix=\"hel\") <b>then</b> {\n  <b>print</b> \"Starts with hel\";\n}"
+      "example": "<b>if</b> <b>call</b> <b>str.startsWith</b>(str=\"hello\", prefix=\"hel\") <b>then</b> {\n  <b>print</b> \"Starts with hel\";\n}"
     },
     {
-      "function": "string.endsWith",
+      "function": "str.endsWith",
       "short_description": "Checks if string ends with suffix",
       "long_help": "Returns true if the string ends with the specified suffix, false otherwise.",
       "parameters": [
@@ -432,41 +402,7 @@
         }
       ],
       "return_type": "bool",
-      "example": "<b>if</b> <b>call</b> <b>string.endsWith</b>(str=\"hello\", suffix=\"llo\") <b>then</b> {\n  <b>print</b> \"Ends with llo\";\n}"
-    },
-    {
-      "function": "string.substring",
-      "short_description": "Extracts substring",
-      "long_help": "Returns a substring of the original string, starting at the specified index and optionally ending at another index.",
-      "parameters": [
-        {
-          "name": "str",
-          "type": "string"
-        },
-        {
-          "name": "startIndex",
-          "type": "integer"
-        },
-        {
-          "name": "endIndex",
-          "type": "integer"
-        }
-      ],
-      "return_type": "string",
-      "example": "<b>var</b> <b>sub</b> = <b>call</b> <b>string.substring</b>(str=\"hello world\", startIndex=0, endIndex=5);\n<b>print</b> sub; // \"hello\""
-    },
-    {
-      "function": "string.length",
-      "short_description": "Returns string length",
-      "long_help": "Returns the number of characters in the string.",
-      "parameters": [
-        {
-          "name": "str",
-          "type": "string"
-        }
-      ],
-      "return_type": "integer",
-      "example": "<b>var</b> <b>len</b> = <b>call</b> <b>string.length</b>(str=\"hello\");\n<b>print</b> len; // 5"
+      "example": "<b>if</b> <b>call</b> <b>str.endsWith</b>(str=\"hello\", suffix=\"llo\") <b>then</b> {\n  <b>print</b> \"Ends with llo\";\n}"
     },
     {
       "function": "json.jsonFromString",
@@ -667,108 +603,6 @@
       "example": "<b>var</b> <b>errors</b> = <b>call</b> <b>json.validate</b>(schemaName=\"personSchema\", json=myData);<br><b>if</b> <b>call</b> <b>json.isEmpty</b>(value=errors) <b>then</b> {<br>  <b>print</b> \"Valid!\";<br>}"
     },
     {
-      "function": "array.create",
-      "short_description": "Creates a new array",
-      "long_help": "Creates a new array with the specified size. Elements are initialized to null or zero depending on type.",
-      "parameters": [
-        {
-          "name": "size",
-          "type": "integer"
-        },
-        {
-          "name": "type",
-          "type": "string"
-        }
-      ],
-      "return_type": "array",
-      "example": "<b>var</b> <b>arr</b> = <b>call</b> <b>array.create</b>(size=10, type=\"int\");"
-    },
-    {
-      "function": "array.length",
-      "short_description": "Returns array length",
-      "long_help": "Returns the number of elements in the array.",
-      "parameters": [
-        {
-          "name": "array",
-          "type": "array"
-        }
-      ],
-      "return_type": "integer",
-      "example": "<b>var</b> <b>len</b> = <b>call</b> <b>array.length</b>(array=myArray);\n<b>print</b> len;"
-    },
-    {
-      "function": "array.get",
-      "short_description": "Gets element from array",
-      "long_help": "Returns the element at the specified index in the array. Throws an error if the index is out of bounds.",
-      "parameters": [
-        {
-          "name": "array",
-          "type": "array"
-        },
-        {
-          "name": "index",
-          "type": "integer"
-        }
-      ],
-      "return_type": "any",
-      "example": "<b>var</b> <b>item</b> = <b>call</b> <b>array.get</b>(array=myArray, index=0);"
-    },
-    {
-      "function": "array.set",
-      "short_description": "Sets element in array",
-      "long_help": "Sets the value at the specified index in the array. Throws an error if the index is out of bounds.",
-      "parameters": [
-        {
-          "name": "array",
-          "type": "array"
-        },
-        {
-          "name": "index",
-          "type": "integer"
-        },
-        {
-          "name": "value",
-          "type": "json"
-        }
-      ],
-      "return_type": "void",
-      "example": "<b>call</b> <b>array.set</b>(array=myArray, index=0, value=\"Hello\");"
-    },
-    {
-      "function": "array.contains",
-      "short_description": "Checks if array contains value",
-      "long_help": "Returns true if the array contains the specified value, false otherwise.",
-      "parameters": [
-        {
-          "name": "array",
-          "type": "array"
-        },
-        {
-          "name": "value",
-          "type": "json"
-        }
-      ],
-      "return_type": "bool",
-      "example": "<b>if</b> <b>call</b> <b>array.contains</b>(array=numbers, value=42) <b>then</b> {\n  <b>print</b> \"Found!\";\n}"
-    },
-    {
-      "function": "array.indexOf",
-      "short_description": "Finds index of value",
-      "long_help": "Returns the index of the first occurrence of the specified value in the array, or -1 if not found.",
-      "parameters": [
-        {
-          "name": "array",
-          "type": "array"
-        },
-        {
-          "name": "value",
-          "type": "json"
-        }
-      ],
-      "return_type": "integer",
-      "example": "<b>var</b> <b>pos</b> = <b>call</b> <b>array.indexOf</b>(array=items, value=\"apple\");"
-    },
-    {
       "function": "array.sort",
       "short_description": "Sorts array",
       "long_help": "Sorts the elements of the array in place. For ascending order, use ascending=true.",
@@ -784,130 +618,6 @@
       ],
       "return_type": "void",
       "example": "<b>call</b> <b>array.sort</b>(array=numbers, ascending=true);"
-    },
-    {
-      "function": "math.abs",
-      "short_description": "Returns absolute value",
-      "long_help": "Returns the absolute value of the specified number.",
-      "parameters": [
-        {
-          "name": "value",
-          "type": "double"
-        }
-      ],
-      "return_type": "double",
-      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>math.abs</b>(value=-5.5);\n<b>print</b> result; // 5.5"
-    },
-    {
-      "function": "math.round",
-      "short_description": "Rounds to nearest integer",
-      "long_help": "Rounds the specified number to the nearest integer value.",
-      "parameters": [
-        {
-          "name": "value",
-          "type": "double"
-        }
-      ],
-      "return_type": "long",
-      "example": "<b>var</b> <b>rounded</b> = <b>call</b> <b>math.round</b>(value=3.7);\n<b>print</b> rounded; // 4"
-    },
-    {
-      "function": "math.floor",
-      "short_description": "Rounds down to integer",
-      "long_help": "Rounds the specified number down to the nearest integer (towards negative infinity).",
-      "parameters": [
-        {
-          "name": "value",
-          "type": "double"
-        }
-      ],
-      "return_type": "long",
-      "example": "<b>var</b> <b>floored</b> = <b>call</b> <b>math.floor</b>(value=3.9);\n<b>print</b> floored; // 3"
-    },
-    {
-      "function": "math.ceil",
-      "short_description": "Rounds up to integer",
-      "long_help": "Rounds the specified number up to the nearest integer (towards positive infinity).",
-      "parameters": [
-        {
-          "name": "value",
-          "type": "double"
-        }
-      ],
-      "return_type": "long",
-      "example": "<b>var</b> <b>ceiled</b> = <b>call</b> <b>math.ceil</b>(value=3.1);\n<b>print</b> ceiled; // 4"
-    },
-    {
-      "function": "math.pow",
-      "short_description": "Raises to power",
-      "long_help": "Returns the value of the base raised to the specified exponent (base^exponent).",
-      "parameters": [
-        {
-          "name": "base",
-          "type": "double"
-        },
-        {
-          "name": "exponent",
-          "type": "double"
-        }
-      ],
-      "return_type": "double",
-      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>math.pow</b>(base=2.0, exponent=3.0);\n<b>print</b> result; // 8.0"
-    },
-    {
-      "function": "math.sqrt",
-      "short_description": "Returns square root",
-      "long_help": "Returns the square root of the specified number.",
-      "parameters": [
-        {
-          "name": "value",
-          "type": "double"
-        }
-      ],
-      "return_type": "double",
-      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>math.sqrt</b>(value=16.0);\n<b>print</b> result; // 4.0"
-    },
-    {
-      "function": "math.min",
-      "short_description": "Returns minimum value",
-      "long_help": "Returns the smaller of two numeric values.",
-      "parameters": [
-        {
-          "name": "a",
-          "type": "double"
-        },
-        {
-          "name": "b",
-          "type": "double"
-        }
-      ],
-      "return_type": "double",
-      "example": "<b>var</b> <b>min</b> = <b>call</b> <b>math.min</b>(a=5.0, b=3.0);\n<b>print</b> min; // 3.0"
-    },
-    {
-      "function": "math.max",
-      "short_description": "Returns maximum value",
-      "long_help": "Returns the larger of two numeric values.",
-      "parameters": [
-        {
-          "name": "a",
-          "type": "double"
-        },
-        {
-          "name": "b",
-          "type": "double"
-        }
-      ],
-      "return_type": "double",
-      "example": "<b>var</b> <b>max</b> = <b>call</b> <b>math.max</b>(a=5.0, b=3.0);\n<b>print</b> max; // 5.0"
-    },
-    {
-      "function": "math.random",
-      "short_description": "Generates random number",
-      "long_help": "Returns a random double value between 0.0 (inclusive) and 1.0 (exclusive).",
-      "parameters": [],
-      "return_type": "double",
-      "example": "<b>var</b> <b>rand</b> = <b>call</b> <b>math.random</b>();\n<b>print</b> rand;"
     },
     {
       "function": "debug.log",
@@ -967,95 +677,6 @@
       "parameters": [],
       "return_type": "json",
       "example": "<b>var</b> <b>allVars</b> = <b>call</b> <b>debug.vars</b>();\n<b>print</b> allVars;"
-    },
-    {
-      "function": "system.getEnv",
-      "short_description": "Gets environment variable",
-      "long_help": "Returns the value of the specified environment variable, or a default value if not found.",
-      "parameters": [
-        {
-          "name": "name",
-          "type": "string"
-        },
-        {
-          "name": "default",
-          "type": "string"
-        }
-      ],
-      "return_type": "string",
-      "example": "<b>var</b> <b>home</b> = <b>call</b> <b>system.getEnv</b>(name=\"HOME\", default=\"/home/user\");"
-    },
-    {
-      "function": "system.exec",
-      "short_description": "Executes system command",
-      "long_help": "Executes a system command and returns the output. The working directory can be optionally specified.",
-      "parameters": [
-        {
-          "name": "command",
-          "type": "string"
-        },
-        {
-          "name": "cwd",
-          "type": "string"
-        }
-      ],
-      "return_type": "string",
-      "example": "<b>var</b> <b>output</b> = <b>call</b> <b>system.exec</b>(command=\"ls -la\", cwd=\"/tmp\");\n<b>print</b> output;"
-    },
-    {
-      "function": "system.sleep",
-      "short_description": "Pauses execution",
-      "long_help": "Pauses script execution for the specified number of milliseconds.",
-      "parameters": [
-        {
-          "name": "millis",
-          "type": "long"
-        }
-      ],
-      "return_type": "void",
-      "example": "<b>call</b> <b>system.sleep</b>(millis=1000); // Sleep for 1 second"
-    },
-    {
-      "function": "date.now",
-      "short_description": "Returns current date/time",
-      "long_help": "Returns the current date and time as a Date object.",
-      "parameters": [],
-      "return_type": "date",
-      "example": "<b>var</b> <b>now</b> = <b>call</b> <b>date.now</b>();\n<b>print</b> now;"
-    },
-    {
-      "function": "date.format",
-      "short_description": "Formats date as string",
-      "long_help": "Formats a date object as a string using the specified format pattern (Java SimpleDateFormat syntax).",
-      "parameters": [
-        {
-          "name": "date",
-          "type": "date"
-        },
-        {
-          "name": "format",
-          "type": "string"
-        }
-      ],
-      "return_type": "string",
-      "example": "<b>var</b> <b>formatted</b> = <b>call</b> <b>date.format</b>(date=myDate, format=\"yyyy-MM-dd HH:mm:ss\");"
-    },
-    {
-      "function": "date.parse",
-      "short_description": "Parses date from string",
-      "long_help": "Parses a date string using the specified format pattern and returns a Date object.",
-      "parameters": [
-        {
-          "name": "dateString",
-          "type": "string"
-        },
-        {
-          "name": "format",
-          "type": "string"
-        }
-      ],
-      "return_type": "date",
-      "example": "<b>var</b> <b>parsed</b> = <b>call</b> <b>date.parse</b>(dateString=\"2024-01-15\", format=\"yyyy-MM-dd\");"
     },
     {
       "function": "http.get",
@@ -1806,365 +1427,6 @@
       "example": "<b>var</b> <b>h</b> = <b>call</b> <b>file.open</b>(path=\"output.txt\", mode=\"w\");<br><b>call</b> <b>file.writeln</b>(handle=h, text=\"Line 1\");<br><b>call</b> <b>file.writeln</b>(handle=h, text=\"Line 2\");<br><b>call</b> <b>file.close</b>(handle=h);"
     },
     {
-      "function": "file.writeToTextFile",
-      "short_description": "Writes text to a file",
-      "long_help": "Writes text content to a file, creating it if it doesn't exist or overwriting if it does. Similar to file.writeTextFile<br>but different parameter name for compatibility.",
-      "parameters": [
-        {
-          "name": "path",
-          "type": "string"
-        },
-        {
-          "name": "content",
-          "type": "string"
-        }
-      ],
-      "return_type": "bool",
-      "example": "<b>call</b> <b>file.writeToTextFile</b>(path=\"output.txt\", content=\"Hello World\\n\");"
-    },
-    {
-      "function": "file.zip",
-      "short_description": "Adds files to ZIP archive",
-      "long_help": "Adds files to a ZIP archive. Requires an open ZIP file handle in write mode. Can specify source files and their archive<br>paths.",
-      "parameters": [
-        {
-          "name": "handle",
-          "type": "string"
-        },
-        {
-          "name": "sourcepath",
-          "type": "string"
-        },
-        {
-          "name": "archivepath",
-          "type": "string"
-        }
-      ],
-      "return_type": "bool",
-      "example": "<b>var</b> <b>zh</b> = <b>call</b> <b>file.openZip</b>(path=\"archive.zip\", mode=\"w\");<br><b>call</b> <b>file.zip</b>(handle=zh, sourcepath=\"data.txt\", archivepath=\"docs/data.txt\");<br><b>call</b> <b>file.closeZip</b>(handle=zh);"
-    },
-    {
-      "function": "json.fromMap",
-      "short_description": "Converts a map to JSON",
-      "long_help": "Converts a map object to a JSON object. Useful for constructing JSON from key-value pairs.",
-      "parameters": [
-        {
-          "name": "map",
-          "type": "json"
-        }
-      ],
-      "return_type": "json",
-      "example": "<b>var</b> <b>jsonObj</b> = <b>call</b> <b>json.fromMap</b>(map=myMap);"
-    },
-    {
-      "function": "json.parse",
-      "short_description": "Parses a JSON string",
-      "long_help": "Parses a JSON string and returns the resulting JSON object or array. Throws an error if the JSON is malformed.",
-      "parameters": [
-        {
-          "name": "jsonStr",
-          "type": "string"
-        }
-      ],
-      "return_type": "json",
-      "example": "<b>var</b> <b>obj</b> = <b>call</b> <b>json.parse</b>(jsonStr=\"{\\\"name\\\":\\\"John\\\",\\\"age\\\":30}\");\n<b>print</b> obj.name;"
-    },
-    {
-      "function": "json.toMap",
-      "short_description": "Converts JSON to a map",
-      "long_help": "Converts a JSON object to a map. Useful for working with key-value data structures.",
-      "parameters": [
-        {
-          "name": "json",
-          "type": "json"
-        }
-      ],
-      "return_type": "map",
-      "example": "<b>var</b> <b>map</b> = <b>call</b> <b>json.toMap</b>(json=myJsonObj);"
-    },
-    {
-      "function": "json.toString",
-      "short_description": "Converts JSON to string",
-      "long_help": "Converts a JSON object or array to its string representation. Optionally pretty-prints with indentation.",
-      "parameters": [
-        {
-          "name": "json",
-          "type": "json"
-        },
-        {
-          "name": "pretty",
-          "type": "bool"
-        }
-      ],
-      "return_type": "string",
-      "example": "<b>var</b> <b>jsonStr</b> = <b>call</b> <b>json.toString</b>(json=myObj, pretty=true);\n<b>print</b> jsonStr;"
-    },
-    {
-      "function": "math.acos",
-      "short_description": "Returns arc cosine of a value",
-      "long_help": "Returns the arc cosine of the specified value in radians. The value must be between -1 and 1.",
-      "parameters": [
-        {
-          "name": "value",
-          "type": "double"
-        }
-      ],
-      "return_type": "double",
-      "example": "<b>var</b> <b>angle</b> = <b>call</b> <b>math.acos</b>(value=0.5);\n<b>print</b> \"Angle: \" + angle + \" radians\";"
-    },
-    {
-      "function": "math.asin",
-      "short_description": "Returns arc sine of a value",
-      "long_help": "Returns the arc sine of the specified value in radians. The value must be between -1 and 1.",
-      "parameters": [
-        {
-          "name": "value",
-          "type": "double"
-        }
-      ],
-      "return_type": "double",
-      "example": "<b>var</b> <b>angle</b> = <b>call</b> <b>math.asin</b>(value=0.5);\n<b>print</b> \"Angle: \" + angle + \" radians\";"
-    },
-    {
-      "function": "math.atan",
-      "short_description": "Returns arc tangent of a value",
-      "long_help": "Returns the arc tangent of the specified value in radians.",
-      "parameters": [
-        {
-          "name": "value",
-          "type": "double"
-        }
-      ],
-      "return_type": "double",
-      "example": "<b>var</b> <b>angle</b> = <b>call</b> <b>math.atan</b>(value=1.0);\n<b>print</b> \"Angle: \" + angle + \" radians\";"
-    },
-    {
-      "function": "math.cos",
-      "short_description": "Returns cosine of an angle",
-      "long_help": "Returns the cosine of the specified angle in radians.",
-      "parameters": [
-        {
-          "name": "angle",
-          "type": "double"
-        }
-      ],
-      "return_type": "double",
-      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>math.cos</b>(angle=1.57);\n<b>print</b> \"Cosine: \" + result;"
-    },
-    {
-      "function": "math.exp",
-      "short_description": "Returns e raised to a power",
-      "long_help": "Returns Euler's number e raised to the power of the specified value.",
-      "parameters": [
-        {
-          "name": "value",
-          "type": "double"
-        }
-      ],
-      "return_type": "double",
-      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>math.exp</b>(value=2.0);\n<b>print</b> \"e^2 = \" + result;"
-    },
-    {
-      "function": "math.log",
-      "short_description": "Returns natural logarithm",
-      "long_help": "Returns the natural logarithm (base e) of the specified value.",
-      "parameters": [
-        {
-          "name": "value",
-          "type": "double"
-        }
-      ],
-      "return_type": "double",
-      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>math.log</b>(value=10.0);\n<b>print</b> \"ln(10) = \" + result;"
-    },
-    {
-      "function": "math.log10",
-      "short_description": "Returns base-10 logarithm",
-      "long_help": "Returns the base-10 logarithm of the specified value.",
-      "parameters": [
-        {
-          "name": "value",
-          "type": "double"
-        }
-      ],
-      "return_type": "double",
-      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>math.log10</b>(value=100.0);\n<b>print</b> \"log10(100) = \" + result;"
-    },
-    {
-      "function": "math.sin",
-      "short_description": "Returns sine of an angle",
-      "long_help": "Returns the sine of the specified angle in radians.",
-      "parameters": [
-        {
-          "name": "angle",
-          "type": "double"
-        }
-      ],
-      "return_type": "double",
-      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>math.sin</b>(angle=1.57);\n<b>print</b> \"Sine: \" + result;"
-    },
-    {
-      "function": "math.tan",
-      "short_description": "Returns tangent of an angle",
-      "long_help": "Returns the tangent of the specified angle in radians.",
-      "parameters": [
-        {
-          "name": "angle",
-          "type": "double"
-        }
-      ],
-      "return_type": "double",
-      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>math.tan</b>(angle=0.785);\n<b>print</b> \"Tangent: \" + result;"
-    },
-    {
-      "function": "string.charAt",
-      "short_description": "Returns character at index",
-      "long_help": "Returns the character at the specified index in a string. Index is zero-based.",
-      "parameters": [
-        {
-          "name": "str",
-          "type": "string"
-        },
-        {
-          "name": "index",
-          "type": "integer"
-        }
-      ],
-      "return_type": "string",
-      "example": "<b>var</b> <b>char</b> = <b>call</b> <b>string.charAt</b>(str=\"Hello\", index=1);\n<b>print</b> char; // Outputs: e"
-    },
-    {
-      "function": "string.indexOf",
-      "short_description": "Finds first occurrence of substring",
-      "long_help": "Returns the index of the first occurrence of the specified substring. Returns -1 if not found.",
-      "parameters": [
-        {
-          "name": "str",
-          "type": "string"
-        },
-        {
-          "name": "substring",
-          "type": "string"
-        }
-      ],
-      "return_type": "integer",
-      "example": "<b>var</b> <b>pos</b> = <b>call</b> <b>string.indexOf</b>(str=\"Hello World\", substring=\"World\");\n<b>print</b> pos; // Outputs: 6"
-    },
-    {
-      "function": "string.lastIndexOf",
-      "short_description": "Finds last occurrence of substring",
-      "long_help": "Returns the index of the last occurrence of the specified substring. Returns -1 if not found.",
-      "parameters": [
-        {
-          "name": "str",
-          "type": "string"
-        },
-        {
-          "name": "substring",
-          "type": "string"
-        }
-      ],
-      "return_type": "integer",
-      "example": "<b>var</b> <b>pos</b> = <b>call</b> <b>string.lastIndexOf</b>(str=\"Hello Hello\", substring=\"Hello\");\n<b>print</b> pos; // Outputs: 6"
-    },
-    {
-      "function": "string.matches",
-      "short_description": "Tests string against regex pattern",
-      "long_help": "Tests whether the string matches the specified regular expression pattern. Returns true if it matches, false otherwise.",
-      "parameters": [
-        {
-          "name": "str",
-          "type": "string"
-        },
-        {
-          "name": "pattern",
-          "type": "string"
-        }
-      ],
-      "return_type": "bool",
-      "example": "<b>var</b> <b>isEmail</b> = <b>call</b> <b>string.matches</b>(str=\"test@example.com\", pattern=\"^[\\\\w.-]+@[\\\\w.-]+\\\\.\\\\w+$\");"
-    },
-    {
-      "function": "string.replaceAll",
-      "short_description": "Replaces all pattern matches",
-      "long_help": "Replaces all occurrences of the regex pattern with the replacement string.",
-      "parameters": [
-        {
-          "name": "str",
-          "type": "string"
-        },
-        {
-          "name": "pattern",
-          "type": "string"
-        },
-        {
-          "name": "replacement",
-          "type": "string"
-        }
-      ],
-      "return_type": "string",
-      "example": "<b>var</b> <b>result</b> = <b>call</b> <b>string.replaceAll</b>(str=\"Hello 123 World 456\", pattern=\"\\\\d+\",<br>replacement=\"NUM\");<br><b>print</b> result; // Outputs: Hello NUM World NUM"
-    },
-    {
-      "function": "system.currentTimeMillis",
-      "short_description": "Returns current time in milliseconds",
-      "long_help": "Returns the current time in milliseconds since Unix epoch (January 1, 1970 00:00:00 UTC).",
-      "parameters": [],
-      "return_type": "long",
-      "example": "<b>var</b> <b>now</b> = <b>call</b> <b>system.currentTimeMillis</b>();\n<b>print</b> \"Current time: \" + now;"
-    },
-    {
-      "function": "system.props",
-      "short_description": "Returns system properties",
-      "long_help": "Returns a JSON object containing all system properties such as os.name, java.version, user.home, etc.",
-      "parameters": [],
-      "return_type": "json",
-      "example": "<b>var</b> <b>props</b> = <b>call</b> <b>system.props</b>();\n<b>print</b> \"OS: \" + props[\"os.name\"];"
-    },
-    {
-      "function": "system.setprop",
-      "short_description": "Sets a system property",
-      "long_help": "Sets a system property to the specified value. Only affects the current process.",
-      "parameters": [
-        {
-          "name": "key",
-          "type": "string"
-        },
-        {
-          "name": "value",
-          "type": "string"
-        }
-      ],
-      "return_type": "bool",
-      "example": "<b>call</b> <b>system.setprop</b>(key=\"my.custom.prop\", value=\"customValue\");"
-    },
-    {
-      "function": "url.decode",
-      "short_description": "Decodes URL-encoded string",
-      "long_help": "Decodes a URL-encoded string, converting %XX sequences back to characters.",
-      "parameters": [
-        {
-          "name": "encoded",
-          "type": "string"
-        }
-      ],
-      "return_type": "string",
-      "example": "<b>var</b> <b>decoded</b> = <b>call</b> <b>url.decode</b>(encoded=\"Hello%20World%21\");\n<b>print</b> decoded; // Outputs: Hello World!"
-    },
-    {
-      "function": "url.encode",
-      "short_description": "Encodes string for URL",
-      "long_help": "Encodes a string for safe use in URLs, converting special characters to %XX sequences.",
-      "parameters": [
-        {
-          "name": "str",
-          "type": "string"
-        }
-      ],
-      "return_type": "string",
-      "example": "<b>var</b> <b>encoded</b> = <b>call</b> <b>url.encode</b>(str=\"Hello World!\");\n<b>print</b> encoded; // Outputs: Hello+World%21"
-    },
-    {
       "function": "file.appendToTextFile",
       "short_description": "Appends text to a file",
       "long_help": "Appends the specified text content to an existing file. Creates the file if it doesn't exist. The file must be within a<br>safe directory.",
@@ -2408,7 +1670,7 @@
       "example": "<b>var</b> <b>data</b> = {\"user\": {\"name\": \"Alice\"}};<br><b>var</b> <b>updated</b> = <b>call</b> <b>json.setStrict</b>(root=data, path=\"user.name\", value=\"Bob\");<br>// Throws error <b>if</b> path doesn't exist"
     },
     {
-      "function": "string.equals",
+      "function": "str.equals",
       "short_description": "Checks if two strings are equal",
       "long_help": "Returns true if the two strings are exactly equal (case-sensitive), false otherwise. Handles null values safely.",
       "parameters": [
@@ -2422,10 +1684,10 @@
         }
       ],
       "return_type": "bool",
-      "example": "<b>if</b> <b>call</b> <b>string.equals</b>(value1=input, value2=\"expected\") <b>then</b> {\n  <b>print</b> \"Match!\";\n}"
+      "example": "<b>if</b> <b>call</b> <b>str.equals</b>(value1=input, value2=\"expected\") <b>then</b> {\n  <b>print</b> \"Match!\";\n}"
     },
     {
-      "function": "string.equalsIgnoreCase",
+      "function": "str.equalsIgnoreCase",
       "short_description": "Checks if strings are equal (case-insensitive)",
       "long_help": "Returns true if the two strings are equal ignoring case differences, false otherwise. Useful for case-insensitive<br>comparisons.",
       "parameters": [
@@ -2439,10 +1701,10 @@
         }
       ],
       "return_type": "bool",
-      "example": "<b>if</b> <b>call</b> <b>string.equalsIgnoreCase</b>(value1=\"Hello\", value2=\"hello\") <b>then</b> {\n  <b>print</b> \"Match!\";\n}"
+      "example": "<b>if</b> <b>call</b> <b>str.equalsIgnoreCase</b>(value1=\"Hello\", value2=\"hello\") <b>then</b> {\n  <b>print</b> \"Match!\";\n}"
     },
     {
-      "function": "string.isBlank",
+      "function": "str.isBlank",
       "short_description": "Checks if string is blank",
       "long_help": "Returns true if the string is null, empty, or contains only whitespace characters, false otherwise.",
       "parameters": [
@@ -2452,10 +1714,10 @@
         }
       ],
       "return_type": "bool",
-      "example": "<b>if</b> <b>call</b> <b>string.isBlank</b>(str=userInput) <b>then</b> {\n  <b>print</b> \"Please enter a value\";\n}"
+      "example": "<b>if</b> <b>call</b> <b>str.isBlank</b>(str=userInput) <b>then</b> {\n  <b>print</b> \"Please enter a value\";\n}"
     },
     {
-      "function": "string.isEmpty",
+      "function": "str.isEmpty",
       "short_description": "Checks if string is empty",
       "long_help": "Returns true if the string is null or has zero length, false otherwise. Unlike isBlank, this does not consider<br>whitespace.",
       "parameters": [
@@ -2465,7 +1727,7 @@
         }
       ],
       "return_type": "bool",
-      "example": "<b>if</b> <b>call</b> <b>string.isEmpty</b>(str=name) <b>then</b> {\n  <b>print</b> \"Name is empty\";\n}"
+      "example": "<b>if</b> <b>call</b> <b>str.isEmpty</b>(str=name) <b>then</b> {\n  <b>print</b> \"Name is empty\";\n}"
     },
     {
       "function": "system.command",
@@ -2566,6 +1828,325 @@
       ],
       "return_type": "json",
       "example": "<b>var</b> <b>result</b> = <b>call</b> <b>system.winCommand</b>(command=\"cmd.exe\", args=[\"/c\", \"dir\"], timeoutMs=5000);<br><b>print</b> \"Exit code: \" + result.exitCode;<br><b>print</b> \"Output: \" + result.stdout;"
+    },
+    {
+      "function": "scr.showScreen",
+      "short_description": "Shows a screen window",
+      "long_help": "Makes a screen window visible on the display. If no screen name is provided, operates on the current screen context (when<br>called from within screen event handlers). The screen must have been previously created using the 'screen' statement. Returns<br>true on success.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string",
+          "optional": true
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>call</b> <b>scr.showScreen</b>(screenName=\"myScreen\");<br><br>// Or from within a screen event handler:<br><b>call</b> <b>scr.showScreen</b>();"
+    },
+    {
+      "function": "scr.hideScreen",
+      "short_description": "Hides a screen window",
+      "long_help": "Hides a screen window from the display without closing it. The screen remains in memory and can be shown again using<br>scr.showScreen. If no screen name is provided, operates on the current screen context (when called from within screen event<br>handlers). Returns true on success.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string",
+          "optional": true
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>call</b> <b>scr.hideScreen</b>(screenName=\"myScreen\");<br><br>// Or from within a screen event handler:<br><b>call</b> <b>scr.hideScreen</b>();"
+    },
+    {
+      "function": "scr.closeScreen",
+      "short_description": "Closes a screen window",
+      "long_help": "Closes a screen window and releases its resources. The screen is removed from memory and any associated event handlers are<br>terminated. If no screen name is provided, operates on the current screen context (when called from within screen event<br>handlers). Returns true on success.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string",
+          "optional": true
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>call</b> <b>scr.closeScreen</b>(screenName=\"myScreen\");<br><br>// Or from within a screen event handler:<br><b>call</b> <b>scr.closeScreen</b>();"
+    },
+    {
+      "function": "scr.setProperty",
+      "short_description": "Sets a property on a screen item",
+      "long_help": "Sets a property value on a specific area item within a screen. The areaItem parameter must be in the format<br>'screenName.itemName'. Supported properties include 'visible', 'editable', 'disabled', 'colSpan', and 'rowSpan'. Returns true on<br>success.",
+      "parameters": [
+        {
+          "name": "areaItem",
+          "type": "string"
+        },
+        {
+          "name": "property",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "type": "any"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>call</b> <b>scr.setProperty</b>(areaItem=\"myScreen.myField\", property=\"visible\", value=true);<br><b>call</b> <b>scr.setProperty</b>(areaItem=\"myScreen.myButton\", property=\"disabled\", value=false);"
+    },
+    {
+      "function": "scr.getProperty",
+      "short_description": "Gets a property from a screen item",
+      "long_help": "Retrieves a property value from a specific area item within a screen. The areaItem parameter must be in the format<br>'screenName.itemName'. Returns the current value of the specified property.",
+      "parameters": [
+        {
+          "name": "areaItem",
+          "type": "string"
+        },
+        {
+          "name": "property",
+          "type": "string"
+        }
+      ],
+      "return_type": "any",
+      "example": "<b>var</b> <b>isVisible</b> = <b>call</b> <b>scr.getProperty</b>(areaItem=\"myScreen.myField\", property=\"visible\");<br><b>print</b> \"Field is visible: \" + isVisible;"
+    },
+    {
+      "function": "scr.getItemList",
+      "short_description": "Gets list of all items in a screen",
+      "long_help": "Returns an array containing the names of all items defined in the specified screen. This includes all fields, buttons, and<br>other UI elements that are part of the screen's areas.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        }
+      ],
+      "return_type": "any",
+      "example": "<b>var</b> <b>items</b> = <b>call</b> <b>scr.getItemList</b>(screenName=\"myScreen\");<br><b>foreach</b> item <b>in</b> items <b>do</b> {<br>  <b>print</b> \"Item: \" + item;<br>}"
+    },
+    {
+      "function": "scr.getScreenItemList",
+      "short_description": "Gets list of screen items",
+      "long_help": "Returns an array containing information about all items in the specified screen. Similar to scr.getItemList but may include<br>additional metadata about each item.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        }
+      ],
+      "return_type": "any",
+      "example": "<b>var</b> <b>items</b> = <b>call</b> <b>scr.getScreenItemList</b>(screenName=\"myScreen\");<br><b>print</b> \"Total items: \" + items.length;"
+    },
+    {
+      "function": "scr.setStatus",
+      "short_description": "Sets the status of a screen",
+      "long_help": "Sets the status of a screen to indicate its current state. Valid status values are 'clean' (no changes), 'changed' (has<br>unsaved changes), or 'error' (contains errors). Returns true on success.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>call</b> <b>scr.setStatus</b>(screenName=\"myScreen\", status=\"changed\");<br><b>call</b> <b>scr.setStatus</b>(screenName=\"myScreen\", status=\"clean\");"
+    },
+    {
+      "function": "scr.getStatus",
+      "short_description": "Gets the status of a screen",
+      "long_help": "Retrieves the current status of a screen. Returns one of 'clean', 'changed', or 'error' indicating the screen's current<br>state.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        }
+      ],
+      "return_type": "string",
+      "example": "<b>var</b> <b>status</b> = <b>call</b> <b>scr.getStatus</b>(screenName=\"myScreen\");<br><b>if</b> status == \"changed\" <b>then</b> {<br>  <b>print</b> \"Screen has unsaved changes\";<br>}"
+    },
+    {
+      "function": "scr.setError",
+      "short_description": "Sets an error message for a screen",
+      "long_help": "Sets an error message for a screen and changes its status to 'error'. The error message can be retrieved later using<br>scr.getError. Returns true on success.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        },
+        {
+          "name": "errorMessage",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>call</b> <b>scr.setError</b>(screenName=\"myScreen\", errorMessage=\"Validation failed: Name is required\");"
+    },
+    {
+      "function": "scr.getError",
+      "short_description": "Gets the error message for a screen",
+      "long_help": "Retrieves the error message associated with a screen. Returns null if no error message has been set.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        }
+      ],
+      "return_type": "string",
+      "example": "<b>var</b> <b>error</b> = <b>call</b> <b>scr.getError</b>(screenName=\"myScreen\");<br><b>if</b> error != null <b>then</b> {<br>  <b>print</b> \"Error: \" + error;<br>}"
+    },
+    {
+      "function": "scr.getItemSource",
+      "short_description": "Gets the data source for a screen item",
+      "long_help": "Returns the current data source for a screen item. The source can be either 'data' (uses the data value) or 'display' (uses<br>the display value).",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        },
+        {
+          "name": "itemName",
+          "type": "string"
+        }
+      ],
+      "return_type": "string",
+      "example": "<b>var</b> <b>source</b> = <b>call</b> <b>scr.getItemSource</b>(screenName=\"myScreen\", itemName=\"myField\");<br><b>print</b> \"Item source: \" + source;"
+    },
+    {
+      "function": "scr.setItemSource",
+      "short_description": "Sets the data source for a screen item",
+      "long_help": "Sets the data source for a screen item. The source parameter must be either 'data' or 'display'. When set to 'data', the<br>item uses its data value; when set to 'display', it uses its display value. Returns true on success.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        },
+        {
+          "name": "itemName",
+          "type": "string"
+        },
+        {
+          "name": "source",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>call</b> <b>scr.setItemSource</b>(screenName=\"myScreen\", itemName=\"myField\", source=\"display\");"
+    },
+    {
+      "function": "scr.getItemStatus",
+      "short_description": "Gets the status of a screen item",
+      "long_help": "Returns the current status of a screen item. The status indicates whether the item has been modified, has errors, or is in<br>its original state.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        },
+        {
+          "name": "itemName",
+          "type": "string"
+        }
+      ],
+      "return_type": "string",
+      "example": "<b>var</b> <b>itemStatus</b> = <b>call</b> <b>scr.getItemStatus</b>(screenName=\"myScreen\", itemName=\"myField\");<br><b>print</b> \"Field status: \" + itemStatus;"
+    },
+    {
+      "function": "scr.resetItemOriginalValue",
+      "short_description": "Resets a screen item to its original value",
+      "long_help": "Resets a specific screen item back to its original value, discarding any changes made. This is useful for implementing<br>'undo' functionality for individual fields. Returns true on success.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        },
+        {
+          "name": "itemName",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>call</b> <b>scr.resetItemOriginalValue</b>(screenName=\"myScreen\", itemName=\"myField\");"
+    },
+    {
+      "function": "scr.checkChanged",
+      "short_description": "Checks if a screen has unsaved changes",
+      "long_help": "Checks whether any items in the screen have been modified from their original values. Returns true if the screen has<br>unsaved changes, false otherwise.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>var</b> <b>hasChanges</b> = <b>call</b> <b>scr.checkChanged</b>(screenName=\"myScreen\");<br><b>if</b> hasChanges <b>then</b> {<br>  <b>print</b> \"Screen has unsaved changes\";<br>}"
+    },
+    {
+      "function": "scr.checkError",
+      "short_description": "Checks if a screen has errors",
+      "long_help": "Checks whether the screen has any errors. Returns true if the screen status is 'error' or if an error message has been<br>set, false otherwise.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>var</b> <b>hasErrors</b> = <b>call</b> <b>scr.checkError</b>(screenName=\"myScreen\");<br><b>if</b> hasErrors <b>then</b> {<br>  <b>print</b> \"Screen has errors\";<br>}"
+    },
+    {
+      "function": "scr.revert",
+      "short_description": "Reverts all changes in a screen",
+      "long_help": "Reverts all items in the screen back to their original values, discarding all unsaved changes. This is useful for<br>implementing a 'cancel' or 'reset' function. Returns true on success.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>call</b> <b>scr.revert</b>(screenName=\"myScreen\");<br><b>print</b> \"All changes have been reverted\";"
+    },
+    {
+      "function": "scr.clear",
+      "short_description": "Clears all values in a screen",
+      "long_help": "Clears all item values in the screen, setting them to their default empty state. This is different from revert, which<br>restores original values. Returns true on success.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>call</b> <b>scr.clear</b>(screenName=\"myScreen\");<br><b>print</b> \"Screen has been cleared\";"
+    },
+    {
+      "function": "echo.off",
+      "short_description": "Disables echo mode",
+      "long_help": "Disables echo mode which prevents statements from being printed to the console as they are executed. This is useful for<br>suppressing verbose output during script execution.",
+      "parameters": [],
+      "return_type": "void",
+      "example": "<b>call</b> <b>echo.off</b>();<br>// Statements will no longer be echoed to console"
+    },
+    {
+      "function": "echo.on",
+      "short_description": "Enables echo mode",
+      "long_help": "Enables echo mode which prints statements to the console as they are executed. This is useful for debugging and<br>understanding script flow. Echo mode can be disabled with echo.off.",
+      "parameters": [],
+      "return_type": "void",
+      "example": "<b>call</b> <b>echo.on</b>();<br>// Statements will now be echoed to console"
+    },
+    {
+      "function": "sleep",
+      "short_description": "Pauses execution for specified milliseconds",
+      "long_help": "Pauses the current script execution for the specified number of milliseconds. This is useful for adding delays between<br>operations or waiting for external processes. Returns a status string.",
+      "parameters": [
+        {
+          "name": "millis",
+          "type": "long"
+        }
+      ],
+      "return_type": "string",
+      "example": "<b>call</b> <b>sleep</b>(millis=1000);<br>// Pauses for 1 second<br><b>print</b> \"Resumed after 1 second delay\";"
     }
   ]
 }
