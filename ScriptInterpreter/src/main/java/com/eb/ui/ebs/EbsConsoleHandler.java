@@ -716,6 +716,8 @@ public class EbsConsoleHandler extends EbsHandler {
                 return true; // Close after saving
             } else if (result.get() == dontSaveButton) {
                 // Don't save, just close
+                // Mark tab as clean so the close listener doesn't trigger again
+                tab.markCleanTitle();
                 return true;
             } else {
                 // Cancel was pressed
