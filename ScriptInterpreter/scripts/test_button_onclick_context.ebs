@@ -139,7 +139,7 @@ screen test3Screen = {
                     "display": {
                         "type": "button",
                         "labelText": "Increment Counter",
-                        "onClick": "counter = counter + 1; message = 'Counter incremented to ' + counter; print 'Counter is now: ' + counter;"
+                        "onClick": "test3Screen.counter = test3Screen.counter + 1; test3Screen.message = 'Counter incremented to ' + test3Screen.counter; print 'Counter is now: ' + test3Screen.counter;"
                     }
                 },
                 {
@@ -148,7 +148,7 @@ screen test3Screen = {
                     "display": {
                         "type": "button",
                         "labelText": "Reset Counter",
-                        "onClick": "counter = 0; message = 'Counter reset to 0'; print 'Counter reset';"
+                        "onClick": "test3Screen.counter = 0; test3Screen.message = 'Counter reset to 0'; print 'Counter reset';"
                     }
                 },
                 {
@@ -157,7 +157,7 @@ screen test3Screen = {
                     "display": {
                         "type": "button",
                         "labelText": "Close Screen",
-                        "onClick": "print 'Final counter value: ' + counter; print 'Closing screen...'; close screen;"
+                        "onClick": "print 'Final counter value: ' + test3Screen.counter; print 'Closing screen...'; close screen;"
                     }
                 }
             ]
@@ -209,7 +209,7 @@ screen test4Screen = {
                     "display": {
                         "type": "button",
                         "labelText": "Track Clicks",
-                        "onClick": "clickCount = clickCount + 1; print 'Button clicked ' + clickCount + ' times';"
+                        "onClick": "test4Screen.clickCount = test4Screen.clickCount + 1; print 'Button clicked ' + test4Screen.clickCount + ' times';"
                     }
                 },
                 {
@@ -218,7 +218,7 @@ screen test4Screen = {
                     "display": {
                         "type": "button",
                         "labelText": "Hide (can show again)",
-                        "onClick": "print 'Hiding screen (clicks: ' + clickCount + ')'; hide screen;"
+                        "onClick": "print 'Hiding screen (clicks: ' + test4Screen.clickCount + ')'; hide screen;"
                     }
                 },
                 {
@@ -227,7 +227,7 @@ screen test4Screen = {
                     "display": {
                         "type": "button",
                         "labelText": "Close (permanent)",
-                        "onClick": "print 'Closing screen (total clicks: ' + clickCount + ')'; close screen;"
+                        "onClick": "print 'Closing screen (total clicks: ' + test4Screen.clickCount + ')'; close screen;"
                     }
                 }
             ]
