@@ -621,21 +621,25 @@ public class EbsConsoleHandler extends EbsHandler {
     /**
      * Create a new empty script file with a default name "newScript_x.ebs"
      * where x is an incrementing sequence number.
+     * The file is NOT created on disk - it exists only in the tab until saved.
      */
     public void createNewScriptFile() {
         try {
             String filename = getNextNewScriptFilename();
             Path path = Util.SANDBOX_ROOT.resolve(filename);
             
-            // Create an empty file with a simple comment
-            String defaultContent = "// New EBS Script\n\n";
-            Files.writeString(path, defaultContent, StandardCharsets.UTF_8);
+            // DO NOT create the physical file - just create the tab
+            // Create a TabContext with a null fileContext since the file doesn't exist yet
+            TabContext tabContext = new TabContext(filename, path, null);
             
-            // Open the new file in a tab (similar to how openRecent works)
-            submit("/open \"" + path.toString().replace("\\", "\\\\") + "\" rw");
+            // Create the tab using the tab handler
+            EbsTab newTab = tabHandler.createNewTab(tabContext, true);
             
-            // Add to recent files
-            addRecentFile(path);
+            if (newTab != null) {
+                // Initialize with default content and mark as dirty (unsaved)
+                String defaultContent = "// New EBS Script\n\n";
+                newTab.initializeAsNewFile(defaultContent);
+            }
         } catch (Exception ex) {
             submitErrors("Failed to create new script file: " + ex.getMessage());
         }

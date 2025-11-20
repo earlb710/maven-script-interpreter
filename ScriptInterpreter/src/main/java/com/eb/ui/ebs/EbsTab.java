@@ -20,6 +20,7 @@ import javafx.scene.control.Tab;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -189,6 +190,16 @@ public class EbsTab extends Tab {
 
     private void loadFile(TabContext tabContext) {
         try {
+            // Check if this is a new file that doesn't exist yet
+            if (!Files.exists(tabContext.path)) {
+                // For new files, don't try to read - we'll set content later via initializeAsNewFile
+                suppressDirty = true;
+                dispArea.replaceText("");
+                outputArea.printlnInfo("New file: " + tabContext.path.getFileName());
+                suppressDirty = false;
+                return;
+            }
+            
             FileData ret = BuiltinsFile.readTextFile(tabContext.path.toString());
             tabContext.fileContext = ret.fileContext;
             suppressDirty = true;
@@ -766,6 +777,18 @@ public class EbsTab extends Tab {
             setText(baseTitle);
             getStyleClass().remove("tab-changed");   // <— add style for this tab only
         }
+    }
+
+    /**
+     * Initialize tab with content for a new (unsaved) file.
+     * Marks the tab as dirty to indicate it needs to be saved.
+     * @param content Initial content for the file
+     */
+    public void initializeAsNewFile(String content) {
+        suppressDirty = true;
+        dispArea.replaceText(content);
+        suppressDirty = false;
+        markDirty();  // Mark as dirty since it's a new unsaved file
     }
 
     // Setup find bar listeners once during initialization

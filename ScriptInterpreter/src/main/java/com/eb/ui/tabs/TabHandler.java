@@ -250,6 +250,36 @@ public class TabHandler implements TabOpener {
         }
     }
 
+    /**
+     * Create a new tab for a file (even if it doesn't exist yet).
+     * Returns the created EbsTab so the caller can initialize it.
+     * @param context The tab context
+     * @param requestFocus Whether to focus the new tab
+     * @return The created EbsTab, or null if creation failed
+     */
+    public EbsTab createNewTab(TabContext context, boolean requestFocus) {
+        try {
+            Tab tab = new EbsTab(context);
+            
+            // Set the status bar on the tab's handler
+            if (tab instanceof EbsTab ebsTab) {
+                if (ebsTab.getHandler() instanceof com.eb.ui.ebs.EbsHandler ebsHandler) {
+                    com.eb.ui.ebs.StatusBar statusBar = consoleHandler.getStatusBar();
+                    if (statusBar != null) {
+                        ebsHandler.setStatusBar(statusBar);
+                    }
+                }
+            }
+
+            tabPane.getTabs().add(tab);
+            select(tab, requestFocus);
+            return (EbsTab) tab;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
     private void select(Tab tab, boolean requestFocus) {
         runOnFx(() -> {
             tabPane.getSelectionModel().select(tab);
