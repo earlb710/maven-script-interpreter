@@ -146,14 +146,14 @@ if call debug.assert(10 != 5, "Inequality: 10 != 5") then {
 print "\n--- Testing String Functions ---";
 
 totalTests = totalTests + 1;
-if call debug.assertEquals("HELLO", call string.toupper("hello"), "string.toupper") then {
+if call debug.assertEquals("HELLO", call str.toUpper("hello"), "str.toUpper") then {
     passedTests = passedTests + 1;
 } else {
     failedTests = failedTests + 1;
 }
 
 totalTests = totalTests + 1;
-if call debug.assertEquals("world", call string.tolower("WORLD"), "string.tolower") then {
+if call debug.assertEquals("world", call str.toLower("WORLD"), "str.toLower") then {
     passedTests = passedTests + 1;
 } else {
     failedTests = failedTests + 1;
@@ -174,28 +174,28 @@ if call debug.assert(call str.contains("hello world", "world"), "str.contains") 
 }
 
 totalTests = totalTests + 1;
-if call debug.assert(call string.startswith("hello", "hel"), "string.startswith") then {
+if call debug.assert(call str.startswith("hello", "hel"), "str.startswith") then {
     passedTests = passedTests + 1;
 } else {
     failedTests = failedTests + 1;
 }
 
 totalTests = totalTests + 1;
-if call debug.assert(call string.endswith("hello", "lo"), "string.endswith") then {
+if call debug.assert(call str.endswith("hello", "lo"), "string.endswith") then {
     passedTests = passedTests + 1;
 } else {
     failedTests = failedTests + 1;
 }
 
 totalTests = totalTests + 1;
-if call debug.assert(call string.isempty(""), "string.isempty on empty string") then {
+if call debug.assert(call str.isempty(""), "string.isempty on empty string") then {
     passedTests = passedTests + 1;
 } else {
     failedTests = failedTests + 1;
 }
 
 totalTests = totalTests + 1;
-if call debug.assert(call string.isblank("   "), "string.isblank on whitespace") then {
+if call debug.assert(call str.isblank("   "), "string.isblank on whitespace") then {
     passedTests = passedTests + 1;
 } else {
     failedTests = failedTests + 1;
