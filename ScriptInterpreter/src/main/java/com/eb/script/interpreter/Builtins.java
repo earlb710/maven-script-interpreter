@@ -702,6 +702,18 @@ public final class Builtins {
                 "screen.getScreenItemList", DataType.ANY,
                 newParam("screenName", DataType.STRING, true) // required; screen name
         ));
+        addBuiltin(info(
+                "win.showWindow", DataType.BOOL,
+                newParam("screenName", DataType.STRING, false) // optional; screen name (if null, uses current screen)
+        ));
+        addBuiltin(info(
+                "win.hideWindow", DataType.BOOL,
+                newParam("screenName", DataType.STRING, false) // optional; screen name (if null, uses current screen)
+        ));
+        addBuiltin(info(
+                "win.closeWindow", DataType.BOOL,
+                newParam("screenName", DataType.STRING, false) // optional; screen name (if null, uses current screen)
+        ));
 
         NAMES = Collections.unmodifiableSet(BUILTINS.keySet());
     }
@@ -1792,6 +1804,15 @@ public final class Builtins {
             case "screen.getscreenitemlist" -> {
                 return screenGetScreenItemList(context, args);
             }
+            case "win.showwindow" -> {
+                return screenShow(context, args);
+            }
+            case "win.hidewindow" -> {
+                return screenHide(context, args);
+            }
+            case "win.closewindow" -> {
+                return screenClose(context, args);
+            }
 
             default ->
                 throw new InterpreterError("Unknown builtin: " + name);
@@ -2263,6 +2284,153 @@ public final class Builtins {
     private static Object screenGetScreenItemList(InterpreterContext context, Object[] args) throws InterpreterError {
         // This is simply an alias for getItemList
         return screenGetItemList(context, args);
+    }
+
+    /**
+     * win.showWindow(screenName?) -> BOOL
+     * Shows a screen. If screenName is null or empty, uses the current screen from context.
+     * Returns true on success.
+     */
+    private static Object screenShow(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (args.length > 0 && args[0] != null) ? (String) args[0] : null;
+        
+        // If no screen name provided, determine from thread context
+        if (screenName == null || screenName.isEmpty()) {
+            screenName = context.getCurrentScreen();
+            if (screenName == null) {
+                throw new InterpreterError(
+                    "win.showWindow: No screen name specified and not executing in a screen context. " +
+                    "Provide a screen name or call from within screen event handlers.");
+            }
+        }
+        
+        // Check if screen exists
+        if (!context.getScreens().containsKey(screenName)) {
+            throw new InterpreterError("win.showWindow: Screen '" + screenName + "' does not exist.");
+        }
+        
+        javafx.stage.Stage stage = context.getScreens().get(screenName);
+        if (stage == null) {
+            throw new InterpreterError("win.showWindow: Screen '" + screenName + "' is still being initialized.");
+        }
+        
+        final String finalScreenName = screenName;
+        
+        // Show the screen on JavaFX Application Thread
+        javafx.application.Platform.runLater(() -> {
+            if (!stage.isShowing()) {
+                stage.show();
+                if (context.getOutput() != null) {
+                    context.getOutput().printlnOk("Screen '" + finalScreenName + "' shown");
+                }
+            } else {
+                if (context.getOutput() != null) {
+                    context.getOutput().printlnInfo("Screen '" + finalScreenName + "' is already showing");
+                }
+            }
+        });
+        
+        return true;
+    }
+
+    /**
+     * win.hideWindow(screenName?) -> BOOL
+     * Hides a screen. If screenName is null or empty, uses the current screen from context.
+     * Returns true on success.
+     */
+    private static Object screenHide(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (args.length > 0 && args[0] != null) ? (String) args[0] : null;
+        
+        // If no screen name provided, determine from thread context
+        if (screenName == null || screenName.isEmpty()) {
+            screenName = context.getCurrentScreen();
+            if (screenName == null) {
+                throw new InterpreterError(
+                    "win.hideWindow: No screen name specified and not executing in a screen context. " +
+                    "Provide a screen name or call from within screen event handlers.");
+            }
+        }
+        
+        // Check if screen exists
+        if (!context.getScreens().containsKey(screenName)) {
+            throw new InterpreterError("win.hideWindow: Screen '" + screenName + "' does not exist.");
+        }
+        
+        javafx.stage.Stage stage = context.getScreens().get(screenName);
+        if (stage == null) {
+            throw new InterpreterError("win.hideWindow: Screen '" + screenName + "' is still being initialized.");
+        }
+        
+        final String finalScreenName = screenName;
+        
+        // Hide the screen on JavaFX Application Thread
+        javafx.application.Platform.runLater(() -> {
+            boolean wasShowing = stage.isShowing();
+            stage.hide();
+            if (context.getOutput() != null) {
+                if (wasShowing) {
+                    context.getOutput().printlnOk("Screen '" + finalScreenName + "' hidden");
+                } else {
+                    context.getOutput().printlnOk("Screen '" + finalScreenName + "' hidden (was already hidden)");
+                }
+            }
+        });
+        
+        return true;
+    }
+
+    /**
+     * win.closeWindow(screenName?) -> BOOL
+     * Closes a screen. If screenName is null or empty, uses the current screen from context.
+     * Returns true on success.
+     */
+    private static Object screenClose(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (args.length > 0 && args[0] != null) ? (String) args[0] : null;
+        
+        // If no screen name provided, determine from thread context
+        if (screenName == null || screenName.isEmpty()) {
+            screenName = context.getCurrentScreen();
+            if (screenName == null) {
+                throw new InterpreterError(
+                    "win.closeWindow: No screen name specified and not executing in a screen context. " +
+                    "Provide a screen name or call from within screen event handlers.");
+            }
+        }
+        
+        // Check if screen exists
+        if (!context.getScreens().containsKey(screenName)) {
+            throw new InterpreterError("win.closeWindow: Screen '" + screenName + "' does not exist.");
+        }
+        
+        javafx.stage.Stage stage = context.getScreens().get(screenName);
+        if (stage == null) {
+            throw new InterpreterError("win.closeWindow: Screen '" + screenName + "' is still being initialized.");
+        }
+        
+        final String finalScreenName = screenName;
+        
+        // Close the screen on JavaFX Application Thread
+        javafx.application.Platform.runLater(() -> {
+            // Close the stage
+            if (stage.isShowing()) {
+                stage.close();
+            }
+            
+            // Interrupt and stop the screen thread
+            Thread thread = context.getScreenThreads().get(finalScreenName);
+            if (thread != null && thread.isAlive()) {
+                thread.interrupt();
+            }
+            
+            // Clean up resources
+            context.remove(finalScreenName);
+            
+            if (context.getOutput() != null) {
+                context.getOutput().printlnOk("Screen '" + finalScreenName + "' closed");
+            }
+        });
+        
+        return true;
     }
 
     /**
