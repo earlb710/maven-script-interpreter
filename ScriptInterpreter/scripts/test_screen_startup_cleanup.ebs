@@ -237,3 +237,8 @@ print "- Startup code executes ONCE when screen is first shown";
 print "- Cleanup code executes when screen is closed";
 print "- Both have access to screen variables and can use contextual commands";
 print "";
+print "Showing first test screen now...";
+print "";
+
+// Show the first test screen automatically
+show screen testStartupCleanup;

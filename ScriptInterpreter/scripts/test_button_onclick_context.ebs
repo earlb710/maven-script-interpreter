@@ -266,3 +266,8 @@ print "=== Expected Behavior ===";
 print "Before this fix: onClick handlers would fail with 'no screen name specified'";
 print "After this fix: All contextual screen statements work without explicit names";
 print "";
+print "Showing first test screen now...";
+print "";
+
+// Show the first test screen automatically
+show screen test1Screen;

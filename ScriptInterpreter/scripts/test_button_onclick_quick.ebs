@@ -55,9 +55,12 @@ screen quickTest = {
 
 print "Test screen created successfully!";
 print "";
-print "To test: show screen quickTest;";
-print "";
 print "Expected behavior:";
 print "1. Click 'Update Value' - should update the text field";
 print "2. Click 'Update & Close' - should update field and close screen";
 print "   WITHOUT requiring explicit screen name in 'close screen;' statement";
+print "";
+print "Showing test screen now...";
+
+// Show the screen automatically
+show screen quickTest;

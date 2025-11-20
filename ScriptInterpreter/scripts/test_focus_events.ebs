@@ -303,3 +303,8 @@ print "- Area gainFocus: Executes when focus enters area from outside";
 print "- Area lostFocus: Executes when focus leaves area";
 print "- All events have access to screen variables and context";
 print "";
+print "Showing first test screen now...";
+print "";
+
+// Show the first test screen automatically
+show screen testScreenFocus;
