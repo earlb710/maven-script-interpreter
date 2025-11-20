@@ -44,6 +44,7 @@ import com.eb.script.interpreter.statement.CloseConnectionStatement;
 import com.eb.script.interpreter.statement.ScreenStatement;
 import com.eb.script.interpreter.statement.ScreenShowStatement;
 import com.eb.script.interpreter.statement.ScreenHideStatement;
+import com.eb.script.interpreter.statement.ScreenCloseStatement;
 import com.eb.script.interpreter.statement.ImportStatement;
 import com.eb.script.token.ebs.EbsTokenType;
 import com.eb.util.Util;
@@ -342,6 +343,8 @@ public class Parser {
             return useConnectionStatement();
         } else if (matchAll(EbsTokenType.CLOSE, EbsTokenType.CONNECTION)) {
             return closeConnectionStatement();
+        } else if (matchAll(EbsTokenType.CLOSE, EbsTokenType.SCREEN)) {
+            return closeScreenStatement();
         } else if (match(EbsTokenType.CURSOR)) {
             return cursorStatement();
         } else if (match(EbsTokenType.OPEN)) {
@@ -1517,6 +1520,22 @@ public class Parser {
 
         consume(EbsTokenType.SEMICOLON, "Expected ';' after 'hide screen <name>'.");
         return new ScreenHideStatement(line, screenName);
+    }
+
+    private Statement closeScreenStatement() throws ParseError {
+        int line = previous().line; // the 'close' token
+
+        // 'screen' keyword already consumed by matchAll
+        
+        // Check if there's a screen name or if it's just "close screen;"
+        String screenName = null;
+        if (check(EbsTokenType.IDENTIFIER)) {
+            EbsToken nameTok = advance();
+            screenName = (String) nameTok.literal;
+        }
+
+        consume(EbsTokenType.SEMICOLON, "Expected ';' after 'close screen'.");
+        return new ScreenCloseStatement(line, screenName);
     }
 
     private SqlSelectExpression parseSqlSelectFromSource() throws ParseError {

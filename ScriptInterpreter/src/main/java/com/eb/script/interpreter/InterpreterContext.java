@@ -29,6 +29,9 @@ public class InterpreterContext {
     private static final ConcurrentHashMap<String, Thread> GLOBAL_SCREEN_THREADS = new ConcurrentHashMap<>();
     private static final List<String> GLOBAL_SCREEN_CREATION_ORDER = new java.util.concurrent.CopyOnWriteArrayList<>();
     private static final Set<String> GLOBAL_SCREENS_BEING_CREATED = ConcurrentHashMap.newKeySet();
+    
+    // Track the current/most recently shown screen for "close screen" without a name
+    private static volatile String CURRENT_SCREEN = null;
 
     private Environment environment;
     private Debugger debug;
@@ -105,6 +108,22 @@ public class InterpreterContext {
 
     public Set<String> getScreensBeingCreated() {
         return GLOBAL_SCREENS_BEING_CREATED;
+    }
+
+    /**
+     * Get the current screen name (most recently shown screen)
+     * @return The current screen name, or null if no screen is current
+     */
+    public String getCurrentScreen() {
+        return CURRENT_SCREEN;
+    }
+
+    /**
+     * Set the current screen name
+     * @param screenName The screen name to set as current
+     */
+    public void setCurrentScreen(String screenName) {
+        CURRENT_SCREEN = screenName;
     }
 
     public Map<String, DisplayItem> getDisplayItem() {
@@ -316,6 +335,7 @@ public class InterpreterContext {
         screenAreaItems.clear();
         screenCallbacks.clear();
         GLOBAL_SCREEN_CREATION_ORDER.clear();
+        CURRENT_SCREEN = null;
     }
 
     public void remove(String screenName) {
@@ -329,7 +349,11 @@ public class InterpreterContext {
         screenCallbacks.remove(screenName);
         displayMetadata.entrySet().removeIf(entry -> entry.getKey().startsWith(screenName + "."));
         GLOBAL_SCREEN_CREATION_ORDER.remove(screenName);
-
+        
+        // Clear current screen if it's the one being removed
+        if (screenName != null && screenName.equals(CURRENT_SCREEN)) {
+            CURRENT_SCREEN = null;
+        }
     }
 
     /**
