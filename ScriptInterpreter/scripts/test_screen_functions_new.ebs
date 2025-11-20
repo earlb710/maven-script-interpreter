@@ -1,0 +1,147 @@
+// Test Script: New Screen Functions - checkChanged, checkError, revert, clear
+// Description: Tests the new builtin functions for screen management
+// Author: EBS Test Suite
+// Date: 2025-11-20
+
+screen testScreen = {
+    "title": "Screen Management Test",
+    "width": 800,
+    "height": 600,
+    "vars": [
+        {
+            "name": "firstName",
+            "type": "string",
+            "default": "John",
+            "display": {
+                "type": "textfield",
+                "labelText": "First Name:"
+            }
+        },
+        {
+            "name": "lastName",
+            "type": "string",
+            "default": "Doe",
+            "display": {
+                "type": "textfield",
+                "labelText": "Last Name:"
+            }
+        },
+        {
+            "name": "age",
+            "type": "int",
+            "default": 30,
+            "display": {
+                "type": "spinner",
+                "min": 0,
+                "max": 150,
+                "labelText": "Age:"
+            }
+        },
+        {
+            "name": "email",
+            "type": "string",
+            "default": "john.doe@example.com",
+            "display": {
+                "type": "textfield",
+                "labelText": "Email:"
+            }
+        }
+    ]
+};
+
+print "=== New Screen Functions Test ===";
+print "";
+
+// Test 1: checkChanged - initially should be false
+print "Test 1: Check if screen has changes (initial state)";
+var hasChanges = call screen.checkChanged("testScreen");
+print "  screen.checkChanged: " + hasChanges + " (expected: false)";
+print "";
+
+// Test 2: Modify a value and check again
+print "Test 2: Modify a value and check for changes";
+testScreen.firstName = "Jane";
+hasChanges = call screen.checkChanged("testScreen");
+print "  Modified firstName to: " + testScreen.firstName;
+print "  screen.checkChanged: " + hasChanges + " (expected: true)";
+print "";
+
+// Test 3: checkError - should be false initially
+print "Test 3: Check if screen has error status";
+var hasError = call screen.checkError("testScreen");
+print "  screen.checkError: " + hasError + " (expected: false)";
+print "";
+
+// Test 4: Set error status and check again
+print "Test 4: Set error status and check";
+call screen.setError("testScreen", "Test error message");
+hasError = call screen.checkError("testScreen");
+print "  screen.checkError: " + hasError + " (expected: true)";
+print "";
+
+// Test 5: Clear error by setting status to clean
+print "Test 5: Clear error status";
+call screen.setStatus("testScreen", "clean");
+hasError = call screen.checkError("testScreen");
+print "  screen.checkError: " + hasError + " (expected: false)";
+print "";
+
+// Test 6: Revert changes
+print "Test 6: Revert all items to original values";
+print "  Before revert - firstName: " + testScreen.firstName;
+call screen.revert("testScreen");
+print "  After revert - firstName: " + testScreen.firstName + " (expected: John)";
+hasChanges = call screen.checkChanged("testScreen");
+print "  screen.checkChanged: " + hasChanges + " (expected: false)";
+print "";
+
+// Test 7: Clear all items
+print "Test 7: Clear all items to default/blank values";
+print "  Before clear:";
+print "    firstName: " + testScreen.firstName;
+print "    age: " + testScreen.age;
+call screen.clear("testScreen");
+print "  After clear:";
+print "    firstName: " + testScreen.firstName + " (expected: John - the default)";
+print "    age: " + testScreen.age + " (expected: 30 - the default)";
+print "";
+
+// Test 8: Clear when defaults are set to blank
+print "Test 8: Modify values, then clear";
+testScreen.firstName = "Modified";
+testScreen.lastName = "Name";
+testScreen.age = 99;
+print "  After modifications:";
+print "    firstName: " + testScreen.firstName;
+print "    lastName: " + testScreen.lastName;
+print "    age: " + testScreen.age;
+call screen.clear("testScreen");
+print "  After clear (back to defaults):";
+print "    firstName: " + testScreen.firstName;
+print "    lastName: " + testScreen.lastName;
+print "    age: " + testScreen.age;
+print "";
+
+// Test 9: Complex workflow
+print "Test 9: Complex workflow - modify, check, revert, check";
+testScreen.firstName = "Alice";
+testScreen.email = "alice@example.com";
+print "  Step 1: Modified firstName and email";
+hasChanges = call screen.checkChanged("testScreen");
+print "    screen.checkChanged: " + hasChanges + " (expected: true)";
+
+call screen.revert("testScreen");
+print "  Step 2: Reverted all changes";
+hasChanges = call screen.checkChanged("testScreen");
+print "    screen.checkChanged: " + hasChanges + " (expected: false)";
+print "    firstName: " + testScreen.firstName + " (expected: John)";
+print "    email: " + testScreen.email + " (expected: john.doe@example.com)";
+print "";
+
+print "=== All Tests Completed ===";
+print "";
+print "Summary of new functions:";
+print "  screen.checkChanged(screenName) - Returns true if any item changed";
+print "  screen.checkError(screenName) - Returns true if screen has error status";
+print "  screen.revert(screenName) - Reverts all items to original values";
+print "  screen.clear(screenName) - Clears all items to default values";
