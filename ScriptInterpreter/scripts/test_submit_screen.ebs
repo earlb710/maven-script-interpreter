@@ -1,0 +1,250 @@
+// Test Script: Submit Screen Functionality
+// Description: Tests the new submit screen statement with callbacks
+// Date: 2025-11-21
+
+print "=== Submit Screen Test ===";
+print "";
+print "This test demonstrates the submit screen functionality:";
+print "- 'submit screen' closes the screen and calls the callback";
+print "- Error is thrown if no callback is set";
+print "- 'close screen' closes without calling callback";
+print "";
+
+// Define callback function to handle screen submission
+handleSubmit(eventData: json) return void {
+    print "";
+    print "=== Callback Invoked: handleSubmit ===";
+    print "Screen Name: " + eventData.screenName;
+    print "Event: " + eventData.event;
+    print "Timestamp: " + eventData.timestamp;
+    
+    // Display collected output fields
+    if (eventData.fields != null) {
+        print "Output Fields:";
+        var i: int = 0;
+        while (i < eventData.fields.length) {
+            var field: json = eventData.fields[i];
+            print "  - " + field.name + " (" + field.type + "): " + field.value;
+            i = i + 1;
+        }
+    }
+    print "=== End Callback ===";
+    print "";
+}
+
+// Test 1: Submit screen with callback
+print "Test 1: Creating screen with callback for submit";
+screen testSubmitWithCallback = {
+    "title": "Test: Submit with Callback",
+    "width": 450,
+    "height": 300,
+    "vars": [
+        {
+            "name": "username",
+            "type": "string",
+            "scope": "inout",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Username:"
+            }
+        },
+        {
+            "name": "email",
+            "type": "string",
+            "scope": "out",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Email:"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "15",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "instructions",
+                    "seq": 1,
+                    "display": {
+                        "type": "label",
+                        "labelText": "Fill in the form and click Submit.\nThe callback will be invoked with output fields."
+                    }
+                },
+                {
+                    "name": "username",
+                    "varRef": "username",
+                    "seq": 2
+                },
+                {
+                    "name": "email",
+                    "varRef": "email",
+                    "seq": 3
+                },
+                {
+                    "name": "submitButton",
+                    "seq": 4,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Submit",
+                        "onClick": "submit screen;"
+                    }
+                },
+                {
+                    "name": "closeButton",
+                    "seq": 5,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Close Without Callback",
+                        "onClick": "close screen;"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+// Test 2: Attempt to submit screen without callback (should error)
+print "Test 2: Creating screen without callback";
+screen testSubmitNoCallback = {
+    "title": "Test: Submit without Callback (Error Expected)",
+    "width": 400,
+    "height": 250,
+    "vars": [
+        {
+            "name": "data",
+            "type": "string",
+            "default": "Some data",
+            "display": {
+                "type": "textfield",
+                "labelText": "Data:"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "15",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "instructions",
+                    "seq": 1,
+                    "display": {
+                        "type": "label",
+                        "labelText": "This screen has no callback.\nClicking Submit should show an error."
+                    }
+                },
+                {
+                    "name": "data",
+                    "varRef": "data",
+                    "seq": 2
+                },
+                {
+                    "name": "submitButton",
+                    "seq": 3,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Submit (Will Error)",
+                        "onClick": "submit screen;"
+                    }
+                },
+                {
+                    "name": "closeButton",
+                    "seq": 4,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Close (No Error)",
+                        "onClick": "close screen;"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+// Test 3: Close screen without callback works fine
+print "Test 3: Creating screen to test close without callback";
+screen testCloseNoCallback = {
+    "title": "Test: Close without Callback (Works)",
+    "width": 400,
+    "height": 250,
+    "vars": [
+        {
+            "name": "info",
+            "type": "string",
+            "default": "Test data",
+            "display": {
+                "type": "textfield",
+                "labelText": "Info:"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "15",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "instructions",
+                    "seq": 1,
+                    "display": {
+                        "type": "label",
+                        "labelText": "This screen can be closed normally.\nClose does not require or invoke callback."
+                    }
+                },
+                {
+                    "name": "info",
+                    "varRef": "info",
+                    "seq": 2
+                },
+                {
+                    "name": "closeButton",
+                    "seq": 3,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Close",
+                        "onClick": "close screen;"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+print "";
+print "=== Test Screens Created ===";
+print "";
+print "Three test screens have been created:";
+print "";
+print "1. show screen testSubmitWithCallback callback handleSubmit;";
+print "   - Has callback set";
+print "   - Submit button will close and invoke callback with output fields";
+print "   - Close button will close without invoking callback";
+print "";
+print "2. show screen testSubmitNoCallback;";
+print "   - No callback set";
+print "   - Submit button will show error (callback required)";
+print "   - Close button will work normally";
+print "";
+print "3. show screen testCloseNoCallback;";
+print "   - No callback set";
+print "   - Close button works without requiring callback";
+print "";
+print "=== Expected Behavior ===";
+print "- 'submit screen' requires callback and invokes it with output fields";
+print "- 'close screen' works without callback and does not invoke it";
+print "- Error is shown when submit is used without callback";
+print "";
+print "Showing first test screen now...";
+print "";
+
+// Show the first test screen with callback
+show screen testSubmitWithCallback callback handleSubmit;
