@@ -67,7 +67,7 @@ public class DisplayItem {
     // Status of the item: "clean" (unchanged) or "changed" (modified from original)
     public String status = "clean";
     // Column definitions for TableView - List of column metadata
-    List<TableColumn> columns;
+    public List<TableColumn> columns;
     
     /**
      * Inner class to define a table column

@@ -99,6 +99,7 @@ public class AreaItemFactory {
             case TABLEVIEW:
                 TableView<java.util.Map<String, Object>> tableView = new TableView<>();
                 tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+                tableView.setPlaceholder(new javafx.scene.control.Label("No data available"));
                 
                 // Create columns based on metadata
                 if (metadata != null && metadata.columns != null && !metadata.columns.isEmpty()) {
@@ -143,6 +144,16 @@ public class AreaItemFactory {
                         
                         tableView.getColumns().add(column);
                     }
+                } else {
+                    // No columns defined - add a placeholder column
+                    TableColumn<java.util.Map<String, Object>, String> placeholderColumn = 
+                        new TableColumn<>("Data");
+                    placeholderColumn.setCellValueFactory(cellData -> 
+                        new javafx.beans.property.SimpleStringProperty(
+                            cellData.getValue().toString()
+                        )
+                    );
+                    tableView.getColumns().add(placeholderColumn);
                 }
                 
                 return tableView;
