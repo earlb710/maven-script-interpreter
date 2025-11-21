@@ -1,0 +1,204 @@
+// Test script for JSON literal initialization feature
+// Tests direct JSON object and array initialization in both declarations and assignments
+// Related PR: Enable JSON literal syntax in assignments and expressions
+
+print "=== Testing JSON Literal Initialization ===";
+print "";
+
+// ============================================================================
+// TEST 1: JSON Object in Declaration
+// ============================================================================
+print "TEST 1: JSON object literal in variable declaration";
+var person1: json = {"name": "Alice", "age": 30, "active": true};
+print "  Created: var person1: json = {\"name\": \"Alice\", \"age\": 30, \"active\": true}";
+print "  Result: " + person1;
+print "";
+
+// ============================================================================
+// TEST 2: JSON Object in Assignment
+// ============================================================================
+print "TEST 2: JSON object literal in assignment statement";
+var person2: json;
+person2 = {"name": "Bob", "age": 25, "active": false};
+print "  Created: var person2: json;";
+print "  Assigned: person2 = {\"name\": \"Bob\", \"age\": 25, \"active\": false}";
+print "  Result: " + person2;
+print "";
+
+// ============================================================================
+// TEST 3: JSON Array in Declaration
+// ============================================================================
+print "TEST 3: JSON array literal in variable declaration";
+var users: json = [
+    {"id": 1, "name": "Charlie"},
+    {"id": 2, "name": "Diana"},
+    {"id": 3, "name": "Eve"}
+];
+print "  Created: var users: json = [{...}, {...}, {...}]";
+print "  Result: " + users;
+print "";
+
+// ============================================================================
+// TEST 4: JSON Array in Assignment
+// ============================================================================
+print "TEST 4: JSON array literal in assignment statement";
+var coordinates: json;
+coordinates = [
+    {"x": 10, "y": 20},
+    {"x": 30, "y": 40}
+];
+print "  Created: var coordinates: json;";
+print "  Assigned: coordinates = [{\"x\": 10, \"y\": 20}, {\"x\": 30, \"y\": 40}]";
+print "  Result: " + coordinates;
+print "";
+
+// ============================================================================
+// TEST 5: Large JSON Array (Employee Data)
+// ============================================================================
+print "TEST 5: Large JSON array with multiple objects";
+var employees: json = [
+    {"id": 1, "name": "John Smith", "department": "Engineering", "position": "Software Engineer", "salary": 85000},
+    {"id": 2, "name": "Jane Doe", "department": "Marketing", "position": "Marketing Manager", "salary": 92000},
+    {"id": 3, "name": "Bob Johnson", "department": "Engineering", "position": "Senior Developer", "salary": 98000},
+    {"id": 4, "name": "Alice Williams", "department": "HR", "position": "HR Coordinator", "salary": 65000},
+    {"id": 5, "name": "Charlie Brown", "department": "Sales", "position": "Sales Representative", "salary": 72000},
+    {"id": 6, "name": "Diana Martinez", "department": "Engineering", "position": "Tech Lead", "salary": 115000},
+    {"id": 7, "name": "Eve Davis", "department": "Finance", "position": "Financial Analyst", "salary": 78000},
+    {"id": 8, "name": "Frank Wilson", "department": "Operations", "position": "Operations Manager", "salary": 95000},
+    {"id": 9, "name": "Grace Lee", "department": "Engineering", "position": "QA Engineer", "salary": 75000},
+    {"id": 10, "name": "Henry Chen", "department": "Marketing", "position": "Content Strategist", "salary": 68000},
+    {"id": 11, "name": "Ivy Taylor", "department": "Engineering", "position": "DevOps Engineer", "salary": 105000},
+    {"id": 12, "name": "Jack Anderson", "department": "Sales", "position": "Sales Manager", "salary": 110000},
+    {"id": 13, "name": "Karen White", "department": "HR", "position": "Recruiter", "salary": 62000},
+    {"id": 14, "name": "Leo Garcia", "department": "Finance", "position": "Accountant", "salary": 70000},
+    {"id": 15, "name": "Maria Rodriguez", "department": "Engineering", "position": "Frontend Developer", "salary": 88000}
+];
+print "  Created: var employees: json = [15 employee objects]";
+print "  Array contains 15 employee records with id, name, department, position, and salary";
+print "";
+
+// ============================================================================
+// TEST 6: Nested JSON Objects
+// ============================================================================
+print "TEST 6: Nested JSON objects";
+var company: json = {
+    "name": "Tech Corp",
+    "founded": 2020,
+    "address": {
+        "street": "123 Main St",
+        "city": "San Francisco",
+        "state": "CA",
+        "zip": "94105"
+    },
+    "employees": [
+        {"name": "Alice", "role": "CEO"},
+        {"name": "Bob", "role": "CTO"}
+    ]
+};
+print "  Created: nested JSON with object and array properties";
+print "  Result: " + company;
+print "";
+
+// ============================================================================
+// TEST 7: JSON Object Reassignment
+// ============================================================================
+print "TEST 7: Reassigning JSON object variable";
+var config: json = {"mode": "development", "debug": true};
+print "  Initial: config = {\"mode\": \"development\", \"debug\": true}";
+print "  Result: " + config;
+config = {"mode": "production", "debug": false, "port": 8080};
+print "  Reassigned: config = {\"mode\": \"production\", \"debug\": false, \"port\": 8080}";
+print "  Result: " + config;
+print "";
+
+// ============================================================================
+// TEST 8: JSON Array Reassignment
+// ============================================================================
+print "TEST 8: Reassigning JSON array variable";
+var items: json = [{"id": 1}, {"id": 2}];
+print "  Initial: items = [{\"id\": 1}, {\"id\": 2}]";
+print "  Result: " + items;
+items = [{"id": 10, "name": "Item 10"}, {"id": 20, "name": "Item 20"}];
+print "  Reassigned: items = [{\"id\": 10, \"name\": \"Item 10\"}, {\"id\": 20, \"name\": \"Item 20\"}]";
+print "  Result: " + items;
+print "";
+
+// ============================================================================
+// TEST 9: Empty JSON Objects and Arrays
+// ============================================================================
+print "TEST 9: Empty JSON objects and arrays";
+var emptyObj: json = {};
+var emptyArr: json = [];
+print "  Created: var emptyObj: json = {}";
+print "  Result: " + emptyObj;
+print "  Created: var emptyArr: json = []";
+print "  Result: " + emptyArr;
+print "";
+
+// ============================================================================
+// TEST 10: JSON with Various Data Types
+// ============================================================================
+print "TEST 10: JSON with various data types";
+var mixed: json = {
+    "integer": 42,
+    "float": 3.14,
+    "string": "hello",
+    "boolean": true,
+    "null": null,
+    "array": [1, 2, 3],
+    "object": {"nested": "value"}
+};
+print "  Created: JSON with int, float, string, bool, null, array, and nested object";
+print "  Result: " + mixed;
+print "";
+
+// ============================================================================
+// TEST 11: Comparison with json.jsonfromstring
+// ============================================================================
+print "TEST 11: Compare direct literal vs json.jsonfromstring";
+var direct: json = {"name": "Direct", "value": 100};
+var jsonString = '{"name": "FromString", "value": 200}';
+var fromString: json = call json.jsonfromstring(jsonString);
+print "  Direct literal: " + direct;
+print "  From string: " + fromString;
+print "";
+
+// ============================================================================
+// TEST 12: JSON Literals as Function Parameters
+// ============================================================================
+print "TEST 12: JSON literals as function parameters";
+var paramData: json = {"param": "value", "count": 5};
+call testFunc(paramData);
+print "";
+
+// ============================================================================
+// TEST 13: Multiple Assignment in Same Script
+// ============================================================================
+print "TEST 13: Multiple JSON assignments in sequence";
+var data: json;
+data = {"step": 1};
+print "  Step 1: " + data;
+data = {"step": 2};
+print "  Step 2: " + data;
+data = {"step": 3, "final": true};
+print "  Step 3: " + data;
+print "";
+
+// ============================================================================
+// TEST 14: Regular Arrays Still Work
+// ============================================================================
+print "TEST 14: Verify regular arrays still work correctly";
+var numbers: array[*] = {1, 2, 3, 4, 5};
+print "  Regular array: {1, 2, 3, 4, 5}";
+print "  Result: " + numbers;
+var matrix: array[*] = {{1, 2}, {3, 4}};
+print "  Nested array: {{1, 2}, {3, 4}}";
+print "  Result: " + matrix;
+print "";
+
+print "=== All JSON Literal Initialization Tests Complete ===";
+
+// Helper function for TEST 12
+testFunc(data: json) return void {
+    print "  Received in function: " + data;
+}

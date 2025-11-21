@@ -725,6 +725,91 @@ public class Parser {
         }
     }
 
+    /**
+     * Helper method to detect if we're looking at a JSON object literal.
+     * JSON objects have the pattern: { "key": value, ... } or { key: value, ... }
+     * whereas array literals have: { value, value, ... }
+     * This method looks ahead to see if there's a COLON at depth 1 before a COMMA or closing brace.
+     */
+    private boolean looksLikeJsonObject() {
+        if (!check(EbsTokenType.LBRACE)) {
+            return false;
+        }
+        
+        // Save current position
+        int savedCurrent = current;
+        EbsToken savedCurrToken = currToken;
+        EbsToken savedPrevToken = prevToken;
+        
+        try {
+            // Skip opening brace
+            advance();
+            int depth = 1;
+            
+            // Look ahead to find a colon at depth 1
+            while (!isAtEnd() && depth > 0) {
+                if (check(EbsTokenType.LBRACE) || check(EbsTokenType.LBRACKET)) {
+                    depth++;
+                    advance();
+                } else if (check(EbsTokenType.RBRACE) || check(EbsTokenType.RBRACKET)) {
+                    depth--;
+                    if (depth == 0) {
+                        // Reached closing brace without finding colon at depth 1
+                        return false;
+                    }
+                    advance();
+                } else if (check(EbsTokenType.COLON) && depth == 1) {
+                    // Found colon at depth 1 - this is a JSON object
+                    return true;
+                } else {
+                    advance();
+                }
+            }
+            
+            return false;
+        } finally {
+            // Restore position
+            current = savedCurrent;
+            currToken = savedCurrToken;
+            prevToken = savedPrevToken;
+        }
+    }
+    
+    /**
+     * Helper method to detect if we're looking at a JSON array (array containing JSON objects).
+     * JSON arrays have the pattern: [ {...}, {...}, ... ]
+     * This method only checks if the first element after '[' is a JSON object.
+     * It's designed to handle the common case where JSON arrays contain homogeneous object elements.
+     * Arrays like [1, 2, 3] or mixed arrays like [{}, 1, 2] are treated as regular array literals.
+     */
+    private boolean looksLikeJsonArray() {
+        if (!check(EbsTokenType.LBRACKET)) {
+            return false;
+        }
+        
+        // Save current position
+        int savedCurrent = current;
+        EbsToken savedCurrToken = currToken;
+        EbsToken savedPrevToken = prevToken;
+        
+        try {
+            // Skip opening bracket
+            advance();
+            
+            // Check if the first element is a JSON object
+            if (check(EbsTokenType.LBRACE)) {
+                return looksLikeJsonObject();
+            }
+            
+            return false;
+        } finally {
+            // Restore position to before the opening bracket
+            current = savedCurrent;
+            currToken = savedCurrToken;
+            prevToken = savedPrevToken;
+        }
+    }
+
     private LiteralExpression parseJsonLiteralFromSource() throws ParseError {
         return parseJsonLiteralFromSource(false);
     }
@@ -1383,7 +1468,14 @@ public class Parser {
             postParseExpressions.add(expr);
             return expr;
         } else if (checkAny(EbsTokenType.LBRACE, EbsTokenType.LBRACKET)) {
-            expr = parseArrayLiteral();
+            // Check if this is a JSON literal (object or array) vs array literal
+            if (check(EbsTokenType.LBRACE) && looksLikeJsonObject()) {
+                expr = parseJsonLiteralFromSource();
+            } else if (check(EbsTokenType.LBRACKET) && looksLikeJsonArray()) {
+                expr = parseJsonLiteralFromSource();
+            } else {
+                expr = parseArrayLiteral();
+            }
             return expr;
         } else if (match(EbsTokenType.QUOTE1)) {
             return primaryString(EbsTokenType.QUOTE1);
@@ -1441,7 +1533,14 @@ public class Parser {
         if (!check(bend)) {
             do {
                 if (checkAny(EbsTokenType.LBRACE, EbsTokenType.LBRACKET)) {
-                    elements.add(parseArrayLiteral());
+                    // Check if this is a JSON literal (object or array) vs array literal
+                    if (check(EbsTokenType.LBRACE) && looksLikeJsonObject()) {
+                        elements.add(parseJsonLiteralFromSource());
+                    } else if (check(EbsTokenType.LBRACKET) && looksLikeJsonArray()) {
+                        elements.add(parseJsonLiteralFromSource());
+                    } else {
+                        elements.add(parseArrayLiteral());
+                    }
                 } else {
                     elements.add(expression());
                 }
