@@ -8,6 +8,7 @@ A powerful script interpreter for the EBS (Earl Bosch Script) language, featurin
 - **Interactive Console**: JavaFX-based IDE with rich text editing
 - **Syntax Highlighting**: Color-coded syntax for better readability
 - **Autocomplete**: Intelligent code completion suggestions for keywords, built-ins, and JSON schemas
+- **Configurable Colors**: Customize console colors via JSON configuration file
 - **Database Integration**: Built-in SQL support with cursors and connections
 - **Array Support**: Multi-dimensional arrays with type safety
 - **JSON Support**: Native JSON parsing, validation, and schema support
@@ -42,6 +43,27 @@ mvn javafx:run
 ```bash
 java -cp target/classes com.eb.script.Run <script-file.ebs>
 ```
+
+### Console Configuration
+
+You can customize the console colors by creating a `console.cfg` file in the root directory. The file uses JSON format to define color properties for different text styles.
+
+Example `console.cfg`:
+```json
+{
+  "colors": {
+    "info": "#e6e6e6",
+    "error": "#ee0000",
+    "warn": "#eeee00",
+    "ok": "#00ee00",
+    "keyword": "#00FFFF",
+    "background": "#000000",
+    "text": "#e6e6e6"
+  }
+}
+```
+
+See [CONSOLE_CONFIG_GUIDE.md](CONSOLE_CONFIG_GUIDE.md) for complete configuration options and examples.
 
 ## Language Overview
 
