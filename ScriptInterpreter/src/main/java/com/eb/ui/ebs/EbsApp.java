@@ -178,29 +178,18 @@ public class EbsApp {
         // Add as stylesheet to parent (higher priority than scene-level)
         if (css != null && !css.isEmpty()) {
             try {
-                // Write CSS to a temporary file
-                java.nio.file.Path tempCss = java.nio.file.Files.createTempFile("console-config-", ".css");
-                java.nio.file.Files.writeString(tempCss, css);
+                // Write CSS to a fixed file in the working directory
+                java.nio.file.Path cssFile = java.nio.file.Paths.get("console-config.css");
+                java.nio.file.Files.writeString(cssFile, css);
                 
-                // Also write to a fixed location for debugging
-                try {
-                    java.nio.file.Path debugCss = java.nio.file.Paths.get("console-config-debug.css");
-                    java.nio.file.Files.writeString(debugCss, css);
-                    System.out.println("DEBUG: CSS also written to: " + debugCss.toAbsolutePath());
-                } catch (Exception e) {
-                    // Ignore debug file errors
-                }
-                
-                // Add the temporary CSS file as a stylesheet to the parent
-                String cssUri = tempCss.toUri().toString();
+                // Load the CSS file as a stylesheet (same approach as other stylesheets)
+                String cssUri = cssFile.toUri().toString();
                 parent.getStylesheets().add(cssUri);
                 
-                System.out.println("Console configuration stylesheet applied to parent: " + cssUri);
+                System.out.println("Console configuration stylesheet applied: " + cssUri);
                 System.out.println("Total parent stylesheets loaded: " + parent.getStylesheets().size());
                 System.out.println("CSS length: " + css.length() + " characters");
                 
-                // Note: The temp file will be cleaned up when the JVM exits
-                tempCss.toFile().deleteOnExit();
             } catch (IOException e) {
                 System.err.println("Warning: Failed to apply console configuration: " + e.getMessage());
                 e.printStackTrace();
