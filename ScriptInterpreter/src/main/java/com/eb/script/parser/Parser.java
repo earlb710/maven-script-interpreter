@@ -778,7 +778,9 @@ public class Parser {
     /**
      * Helper method to detect if we're looking at a JSON array (array containing JSON objects).
      * JSON arrays have the pattern: [ {...}, {...}, ... ]
-     * This method looks ahead to see if the first element after '[' is a JSON object.
+     * This method only checks if the first element after '[' is a JSON object.
+     * It's designed to handle the common case where JSON arrays contain homogeneous object elements.
+     * Arrays like [1, 2, 3] or mixed arrays like [{}, 1, 2] are treated as regular array literals.
      */
     private boolean looksLikeJsonArray() {
         if (!check(EbsTokenType.LBRACKET)) {
@@ -795,11 +797,8 @@ public class Parser {
             advance();
             
             // Check if the first element is a JSON object
-            // Note: looksLikeJsonObject() will save/restore its own state,
-            // and we restore our state in the finally block
             if (check(EbsTokenType.LBRACE)) {
-                boolean result = looksLikeJsonObject();
-                return result;
+                return looksLikeJsonObject();
             }
             
             return false;
