@@ -1174,64 +1174,22 @@ public class InterpreterScreen {
         if (displayDef.containsKey("columns")) {
             Object columnsObj = displayDef.get("columns");
             metadata.columns = new ArrayList<>();
+            
+            List<Object> columnList = null;
             if (columnsObj instanceof ArrayDynamic) {
-                ArrayDynamic array = (ArrayDynamic) columnsObj;
-                for (Object item : array.getAll()) {
-                    if (item instanceof Map) {
-                        @SuppressWarnings("unchecked")
-                        Map<String, Object> colDef = (Map<String, Object>) item;
-                        DisplayItem.TableColumn column = new DisplayItem.TableColumn();
-                        
-                        if (colDef.containsKey("name")) {
-                            column.name = String.valueOf(colDef.get("name"));
-                        }
-                        if (colDef.containsKey("field")) {
-                            column.field = String.valueOf(colDef.get("field"));
-                        }
-                        if (colDef.containsKey("type")) {
-                            column.type = String.valueOf(colDef.get("type"));
-                        }
-                        if (colDef.containsKey("width")) {
-                            Object widthObj = colDef.get("width");
-                            if (widthObj instanceof Number) {
-                                column.width = ((Number) widthObj).intValue();
-                            }
-                        }
-                        if (colDef.containsKey("alignment")) {
-                            column.alignment = String.valueOf(colDef.get("alignment"));
-                        }
-                        
-                        metadata.columns.add(column);
-                    }
-                }
+                columnList = ((ArrayDynamic) columnsObj).getAll();
             } else if (columnsObj instanceof List) {
                 @SuppressWarnings("unchecked")
                 List<Object> list = (List<Object>) columnsObj;
-                for (Object item : list) {
+                columnList = list;
+            }
+            
+            if (columnList != null) {
+                for (Object item : columnList) {
                     if (item instanceof Map) {
                         @SuppressWarnings("unchecked")
                         Map<String, Object> colDef = (Map<String, Object>) item;
-                        DisplayItem.TableColumn column = new DisplayItem.TableColumn();
-                        
-                        if (colDef.containsKey("name")) {
-                            column.name = String.valueOf(colDef.get("name"));
-                        }
-                        if (colDef.containsKey("field")) {
-                            column.field = String.valueOf(colDef.get("field"));
-                        }
-                        if (colDef.containsKey("type")) {
-                            column.type = String.valueOf(colDef.get("type"));
-                        }
-                        if (colDef.containsKey("width")) {
-                            Object widthObj = colDef.get("width");
-                            if (widthObj instanceof Number) {
-                                column.width = ((Number) widthObj).intValue();
-                            }
-                        }
-                        if (colDef.containsKey("alignment")) {
-                            column.alignment = String.valueOf(colDef.get("alignment"));
-                        }
-                        
+                        DisplayItem.TableColumn column = parseTableColumn(colDef);
                         metadata.columns.add(column);
                     }
                 }
@@ -1349,6 +1307,34 @@ public class InterpreterScreen {
         metadata.screenName = screenName;
 
         return metadata;
+    }
+    
+    /**
+     * Helper method to parse a table column definition from JSON
+     */
+    private DisplayItem.TableColumn parseTableColumn(Map<String, Object> colDef) {
+        DisplayItem.TableColumn column = new DisplayItem.TableColumn();
+        
+        if (colDef.containsKey("name")) {
+            column.name = String.valueOf(colDef.get("name"));
+        }
+        if (colDef.containsKey("field")) {
+            column.field = String.valueOf(colDef.get("field"));
+        }
+        if (colDef.containsKey("type")) {
+            column.type = String.valueOf(colDef.get("type"));
+        }
+        if (colDef.containsKey("width")) {
+            Object widthObj = colDef.get("width");
+            if (widthObj instanceof Number) {
+                column.width = ((Number) widthObj).intValue();
+            }
+        }
+        if (colDef.containsKey("alignment")) {
+            column.alignment = String.valueOf(colDef.get("alignment"));
+        }
+        
+        return column;
     }
 
     /**

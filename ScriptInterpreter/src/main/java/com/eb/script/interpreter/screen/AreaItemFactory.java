@@ -123,7 +123,22 @@ public class AreaItemFactory {
                         
                         // Set alignment if specified
                         if (colDef.alignment != null) {
-                            column.setStyle("-fx-alignment: " + colDef.alignment.toUpperCase() + ";");
+                            // Convert alignment to JavaFX CSS format
+                            String cssAlignment;
+                            switch (colDef.alignment.toLowerCase()) {
+                                case "left":
+                                    cssAlignment = "CENTER_LEFT";
+                                    break;
+                                case "right":
+                                    cssAlignment = "CENTER_RIGHT";
+                                    break;
+                                case "center":
+                                    cssAlignment = "CENTER";
+                                    break;
+                                default:
+                                    cssAlignment = "CENTER_LEFT";
+                            }
+                            column.setStyle("-fx-alignment: " + cssAlignment + ";");
                         }
                         
                         tableView.getColumns().add(column);
