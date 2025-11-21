@@ -297,6 +297,12 @@ public class InterpreterScreen {
                                 case DATEPICKER:
                                     item.prefWidth = "200";
                                     break;
+                                case TABLEVIEW:
+                                    item.prefWidth = "800";
+                                    item.prefHeight = "400";
+                                    item.maxWidth = "USE_COMPUTED_SIZE";
+                                    item.hgrow = "ALWAYS";
+                                    break;
                                 default:
                                     // Let other controls use default sizing
                                     break;
