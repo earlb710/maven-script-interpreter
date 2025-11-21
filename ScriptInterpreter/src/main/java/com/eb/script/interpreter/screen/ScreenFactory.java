@@ -1763,6 +1763,10 @@ public class ScreenFactory {
             container.setAlignment(javafx.geometry.Pos.TOP_LEFT);
             container.setPickOnBounds(false);
             container.getChildren().addAll(label, control);
+            
+            // Allow the control (e.g., TableView) to grow vertically within the VBox
+            javafx.scene.layout.VBox.setVgrow(control, javafx.scene.layout.Priority.ALWAYS);
+            
             return container;
         } else {
             // Horizontal layout: original behavior
