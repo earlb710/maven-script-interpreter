@@ -301,7 +301,9 @@ public class InterpreterScreen {
                                     item.prefWidth = "800";
                                     item.prefHeight = "400";
                                     item.maxWidth = "USE_COMPUTED_SIZE";
+                                    item.maxHeight = "USE_COMPUTED_SIZE";
                                     item.hgrow = "ALWAYS";
+                                    item.vgrow = "ALWAYS";
                                     break;
                                 default:
                                     // Let other controls use default sizing
