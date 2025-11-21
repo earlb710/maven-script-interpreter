@@ -1,0 +1,183 @@
+// Test Script: onValidate Property
+// Description: Tests inline validation with visual error feedback (red border)
+// Author: EBS Test Suite
+// Date: 2025-11-21
+// Feature: onValidate property for DisplayItem and AreaItem
+
+screen TestOnValidate = {
+    "title": "onValidate Test - Inline Validation",
+    "width": 700,
+    "height": 550,
+    "vars": [
+        {
+            "name": "username",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "promptHelp": "Enter username (min 3 chars)",
+                "labelText": "Username:",
+                "onValidate": "var len = string.length(username); if (len < 3 and len > 0) { return false; } return true;"
+            }
+        },
+        {
+            "name": "email",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "promptHelp": "Enter email address",
+                "labelText": "Email:"
+            }
+        },
+        {
+            "name": "age",
+            "type": "int",
+            "default": 25,
+            "display": {
+                "type": "textfield",
+                "promptHelp": "Enter age (18-100)",
+                "labelText": "Age:"
+            }
+        },
+        {
+            "name": "password",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "passwordfield",
+                "promptHelp": "Enter password (min 8 chars)",
+                "labelText": "Password:"
+            }
+        },
+        {
+            "name": "country",
+            "type": "string",
+            "default": "USA",
+            "display": {
+                "type": "combobox",
+                "labelText": "Country:",
+                "options": ["USA", "Canada", "UK", "Germany", "France"]
+            }
+        },
+        {
+            "name": "infoTitle",
+            "type": "string",
+            "default": "Validation Rules:",
+            "display": {
+                "type": "labeltext"
+            }
+        },
+        {
+            "name": "info1",
+            "type": "string",
+            "default": "• Username: must be at least 3 characters (validated at variable level)",
+            "display": {
+                "type": "text"
+            }
+        },
+        {
+            "name": "info2",
+            "type": "string",
+            "default": "• Email: must contain @ and . (validated at item level)",
+            "display": {
+                "type": "text"
+            }
+        },
+        {
+            "name": "info3",
+            "type": "string",
+            "default": "• Age: must be between 18 and 100 (validated at item level)",
+            "display": {
+                "type": "text"
+            }
+        },
+        {
+            "name": "info4",
+            "type": "string",
+            "default": "• Password: must be at least 8 characters (validated at item level)",
+            "display": {
+                "type": "text"
+            }
+        },
+        {
+            "name": "info5",
+            "type": "string",
+            "default": "• Items with invalid values show a red border",
+            "display": {
+                "type": "text"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "15",
+            "padding": "20",
+            "items": [
+                {
+                    "varRef": "username",
+                    "sequence": 1,
+                    "prefWidth": "500"
+                },
+                {
+                    "varRef": "email",
+                    "sequence": 2,
+                    "prefWidth": "500",
+                    "onValidate": "if (string.length(email) > 0) { var hasAt = string.contains(email, '@'); var hasDot = string.contains(email, '.'); if (not hasAt or not hasDot) { return false; } } return true;"
+                },
+                {
+                    "varRef": "age",
+                    "sequence": 3,
+                    "prefWidth": "500",
+                    "onValidate": "if (age < 18 or age > 100) { return false; } return true;"
+                },
+                {
+                    "varRef": "password",
+                    "sequence": 4,
+                    "prefWidth": "500",
+                    "onValidate": "var len = string.length(password); if (len > 0 and len < 8) { return false; } return true;"
+                },
+                {
+                    "varRef": "country",
+                    "sequence": 5,
+                    "prefWidth": "500"
+                },
+                {
+                    "varRef": "infoTitle",
+                    "sequence": 6,
+                    "margin": "20 0 10 0"
+                },
+                {
+                    "varRef": "info1",
+                    "sequence": 7
+                },
+                {
+                    "varRef": "info2",
+                    "sequence": 8
+                },
+                {
+                    "varRef": "info3",
+                    "sequence": 9
+                },
+                {
+                    "varRef": "info4",
+                    "sequence": 10
+                },
+                {
+                    "varRef": "info5",
+                    "sequence": 11
+                }
+            ]
+        }
+    ]
+};
+
+show screen TestOnValidate;
+print "onValidate test screen shown.";
+print "Try entering invalid values to see red borders appear:";
+print "- Username with less than 3 characters";
+print "- Email without @ or .";
+print "- Age less than 18 or greater than 100";
+print "- Password with less than 8 characters";
