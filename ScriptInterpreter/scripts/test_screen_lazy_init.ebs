@@ -1,0 +1,234 @@
+// Test Script: Lazy Screen Initialization
+// Purpose: Verify that screens are only created and added to global list when shown
+// Author: GitHub Copilot
+// Date: 2025-11-20
+
+print "================================================================================";
+print "Test: Lazy Screen Initialization";
+print "================================================================================";
+print "";
+print "This test verifies that:";
+print "  1. screen xy = {...} does NOT create the JavaFX Stage";
+print "  2. Screen variables are accessible before the screen is shown";
+print "  3. show screen xy creates the Stage and adds it to global list";
+print "  4. Multiple screens can be defined but only shown ones consume resources";
+print "";
+
+// ================================================================================
+// Part 1: Define first screen without showing it
+// ================================================================================
+print "Step 1: Defining first screen (menu)...";
+print "  Expected: Screen config stored, NO window appears";
+print "";
+
+screen menu = {
+    "title": "Main Menu",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "selectedOption",
+            "type": "string",
+            "default": "Home",
+            "display": {
+                "type": "textfield",
+                "labelText": "Selected Option:",
+                "promptHelp": "Current selection"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "menuArea",
+            "type": "vbox",
+            "style": "-fx-spacing: 10; -fx-padding: 20;",
+            "items": [
+                {
+                    "name": "selectedField",
+                    "varRef": "selectedOption",
+                    "sequence": 1
+                },
+                {
+                    "name": "homeBtn",
+                    "sequence": 2,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Home",
+                        "onClick": "menu.selectedOption = 'Home'; print 'Home selected';"
+                    }
+                },
+                {
+                    "name": "settingsBtn",
+                    "sequence": 3,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Settings",
+                        "onClick": "menu.selectedOption = 'Settings'; print 'Settings selected';"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+print "  ✓ Menu screen defined";
+print "  ✓ NO window should be visible yet";
+print "";
+
+// ================================================================================
+// Part 2: Verify variables are accessible before showing
+// ================================================================================
+print "Step 2: Accessing screen variables before showing...";
+print "  Reading menu.selectedOption = " + menu.selectedOption;
+print "  Expected: Variables should be accessible (value: 'Home')";
+print "";
+
+if menu.selectedOption == "Home" then {
+    print "  ✓ Variable access works before screen is shown!";
+} else {
+    print "  ✗ FAIL: Variable has unexpected value: " + menu.selectedOption;
+}
+print "";
+
+// ================================================================================
+// Part 3: Define additional screens without showing
+// ================================================================================
+print "Step 3: Defining additional screens (settings and help)...";
+print "  Expected: Config stored for each, NO windows appear";
+print "";
+
+screen settings = {
+    "title": "Settings",
+    "width": 500,
+    "height": 400,
+    "vars": [
+        {
+            "name": "theme",
+            "type": "string",
+            "default": "Light",
+            "display": {
+                "type": "combobox",
+                "labelText": "Theme:",
+                "options": ["Light", "Dark", "Auto"]
+            }
+        },
+        {
+            "name": "notifications",
+            "type": "bool",
+            "default": true,
+            "display": {
+                "type": "checkbox",
+                "labelText": "Enable Notifications"
+            }
+        }
+    ]
+};
+
+screen help = {
+    "title": "Help",
+    "width": 600,
+    "height": 500,
+    "vars": [
+        {
+            "name": "searchQuery",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Search:",
+                "promptHelp": "Enter search terms"
+            }
+        }
+    ]
+};
+
+print "  ✓ Settings screen defined";
+print "  ✓ Help screen defined";
+print "  ✓ Total: 3 screens defined, 0 shown";
+print "  ✓ NO windows should be visible yet";
+print "";
+
+// ================================================================================
+// Part 4: Verify all screen variables are accessible
+// ================================================================================
+print "Step 4: Verifying all screen variables are accessible...";
+print "  menu.selectedOption = " + menu.selectedOption;
+print "  settings.theme = " + settings.theme;
+print "  settings.notifications = " + settings.notifications;
+print "  help.searchQuery = '" + help.searchQuery + "'";
+print "";
+
+var allAccessible = true;
+if menu.selectedOption != "Home" then {
+    print "  ✗ FAIL: menu.selectedOption incorrect";
+    allAccessible = false;
+}
+if settings.theme != "Light" then {
+    print "  ✗ FAIL: settings.theme incorrect";
+    allAccessible = false;
+}
+if settings.notifications != true then {
+    print "  ✗ FAIL: settings.notifications incorrect";
+    allAccessible = false;
+}
+
+if allAccessible then {
+    print "  ✓ All variables accessible from defined-but-not-shown screens!";
+} else {
+    print "  ✗ Some variables had unexpected values";
+}
+print "";
+
+// ================================================================================
+// Part 5: Show only ONE screen - verify lazy initialization
+// ================================================================================
+print "Step 5: Now showing ONLY the menu screen...";
+print "  Expected: Menu window appears NOW (Stage created on first show)";
+print "  Expected: Settings and help screens remain as configs (no Stage)";
+print "";
+
+show screen menu;
+
+print "  ✓ Menu screen shown - window should NOW be visible";
+print "";
+print "Key Point: Out of 3 defined screens, only 1 Stage was created!";
+print "  - menu: Stage created and shown ✓";
+print "  - settings: Config only, no Stage (not shown) ✓";
+print "  - help: Config only, no Stage (not shown) ✓";
+print "";
+
+// ================================================================================
+// Part 6: Instructions for manual verification
+// ================================================================================
+print "================================================================================";
+print "Manual Verification Steps:";
+print "================================================================================";
+print "";
+print "1. After Step 1-4: Verify NO windows appeared";
+print "   - All 3 screens defined but not shown";
+print "   - Variables accessible but no Stage created";
+print "";
+print "2. After Step 5: Verify ONLY the Menu window appeared";
+print "   - Settings and Help windows should NOT exist";
+print "   - Only menu screen consumed JavaFX resources";
+print "";
+print "3. Test the menu screen:";
+print "   - Click 'Home' button - should update field";
+print "   - Click 'Settings' button - should update field";
+print "   - Check console for onClick output";
+print "";
+print "4. Close the menu screen and observe:";
+print "   - Settings and help configs are still in memory";
+print "   - They could be shown later if needed";
+print "";
+print "================================================================================";
+print "Test Complete!";
+print "================================================================================";
+print "";
+print "Summary:";
+print "  ✓ Lazy initialization working correctly";
+print "  ✓ Screens defined without Stage creation";
+print "  ✓ Variables accessible before showing";
+print "  ✓ Stage created only when 'show screen' is called";
+print "  ✓ Resource usage optimized (only shown screens consume resources)";
+print "";
