@@ -167,11 +167,6 @@ public class EbsApp {
             return;
         }
         
-        // Debug: Print some key colors from config
-        System.out.println("Config colors - background: " + config.getColor("background") + 
-                          ", info: " + config.getColor("info") +
-                          ", error: " + config.getColor("error"));
-        
         // Generate CSS from configuration
         String css = config.generateCSS();
         
@@ -186,13 +181,8 @@ public class EbsApp {
                 String cssUri = cssFile.toUri().toString();
                 parent.getStylesheets().add(cssUri);
                 
-                System.out.println("Console configuration stylesheet applied: " + cssUri);
-                System.out.println("Total parent stylesheets loaded: " + parent.getStylesheets().size());
-                System.out.println("CSS length: " + css.length() + " characters");
-                
             } catch (IOException e) {
                 System.err.println("Warning: Failed to apply console configuration: " + e.getMessage());
-                e.printStackTrace();
             }
         }
     }

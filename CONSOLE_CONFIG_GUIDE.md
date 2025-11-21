@@ -59,6 +59,8 @@ These properties control the overall appearance of the console:
 | `background` | `#000000` | Console background color |
 | `text` | `#e6e6e6` | Default text color |
 | `caret` | `white` | Text cursor color |
+| `line-cursor` | `#22292a` | Line cursor background (current line highlight) |
+| `line-numbers` | `#808080` | Line number text color |
 
 ## Color Value Formats
 
@@ -90,7 +92,9 @@ Color values can be specified in the following formats:
     "custom": "#eeee90",
     "background": "#000000",
     "text": "#e6e6e6",
-    "caret": "white"
+    "caret": "white",
+    "line-cursor": "#22292a",
+    "line-numbers": "#808080"
   }
 }
 ```
@@ -115,7 +119,9 @@ Color values can be specified in the following formats:
     "custom": "#996600",
     "background": "#ffffff",
     "text": "#000000",
-    "caret": "#000000"
+    "caret": "#000000",
+    "line-cursor": "#e0e0e0",
+    "line-numbers": "#606060"
   }
 }
 ```
@@ -140,7 +146,9 @@ Color values can be specified in the following formats:
     "custom": "#ffff00",
     "background": "#000000",
     "text": "#ffffff",
-    "caret": "#ffff00"
+    "caret": "#ffff00",
+    "line-cursor": "#333333",
+    "line-numbers": "#cccccc"
   }
 }
 ```

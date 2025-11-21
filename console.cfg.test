@@ -16,6 +16,8 @@
     "custom": "#996600",
     "background": "#ffffff",
     "text": "#000000",
-    "caret": "#000000"
+    "caret": "#000000",
+    "line-cursor": "#e0e0e0",
+    "line-numbers": "#606060"
   }
 }
