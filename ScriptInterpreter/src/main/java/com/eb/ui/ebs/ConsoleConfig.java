@@ -168,7 +168,7 @@ public class ConsoleConfig {
                 css.append(".console-in,\n");
                 css.append(".editor-ebs,\n");
                 css.append(".editor-text {\n");
-                css.append("    -fx-background-color: ").append(color).append(";\n");
+                css.append("    -fx-background-color: ").append(color).append(" !important;\n");
                 css.append("}\n\n");
             } else if ("text".equals(className)) {
                 css.append(".console-frame .styled-text-area,\n");
@@ -178,19 +178,19 @@ public class ConsoleConfig {
                 css.append(".console-in,\n");
                 css.append(".editor-ebs,\n");
                 css.append(".editor-text {\n");
-                css.append("    -fx-text-fill: ").append(color).append(";\n");
-                css.append("    -fx-fill: ").append(color).append(";\n");
+                css.append("    -fx-text-fill: ").append(color).append(" !important;\n");
+                css.append("    -fx-fill: ").append(color).append(" !important;\n");
                 css.append("}\n\n");
             } else if ("caret".equals(className)) {
                 css.append(".console-in .caret,\n");
                 css.append(".editor-ebs .caret,\n");
                 css.append(".editor-text .caret {\n");
-                css.append("    -fx-stroke: ").append(color).append(";\n");
+                css.append("    -fx-stroke: ").append(color).append(" !important;\n");
                 css.append("}\n\n");
             } else {
                 // Regular style class
                 css.append(".").append(className).append(" {\n");
-                css.append("    -fx-fill: ").append(color).append(";\n");
+                css.append("    -fx-fill: ").append(color).append(" !important;\n");
                 css.append("}\n\n");
             }
         }

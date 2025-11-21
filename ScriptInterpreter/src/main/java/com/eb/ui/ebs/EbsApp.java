@@ -177,12 +177,17 @@ public class EbsApp {
                 java.nio.file.Files.writeString(tempCss, css);
                 
                 // Add the temporary CSS file as a stylesheet
-                scene.getStylesheets().add(tempCss.toUri().toString());
+                String cssUri = tempCss.toUri().toString();
+                scene.getStylesheets().add(cssUri);
+                
+                System.out.println("Console configuration stylesheet applied: " + cssUri);
+                System.out.println("Total stylesheets loaded: " + scene.getStylesheets().size());
                 
                 // Note: The temp file will be cleaned up when the JVM exits
                 tempCss.toFile().deleteOnExit();
             } catch (IOException e) {
                 System.err.println("Warning: Failed to apply console configuration: " + e.getMessage());
+                e.printStackTrace();
             }
         }
     }
