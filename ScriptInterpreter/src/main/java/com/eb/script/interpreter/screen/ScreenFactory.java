@@ -541,13 +541,16 @@ public class ScreenFactory {
                     // Only wrap input controls, not Label or Button which display their own text
                     if (!(control instanceof javafx.scene.control.Label)
                             && !(control instanceof javafx.scene.control.Button)) {
-                        nodeToAdd = createLabeledControl(metadata.labelText, metadata.labelTextAlignment, control, maxLabelWidth, metadata);
+                        // Use vertical layout for TableView, horizontal for others
+                        boolean useVerticalLayout = (control instanceof javafx.scene.control.TableView);
+                        nodeToAdd = createLabeledControl(metadata.labelText, metadata.labelTextAlignment, control, maxLabelWidth, metadata, useVerticalLayout);
                     }
                 } else {
                     // No label specified - wrap control in HBox with left padding to align with labeled controls
                     // This ensures controls without labels still align properly with labeled controls
                     if (!(control instanceof javafx.scene.control.Label)
-                            && !(control instanceof javafx.scene.control.Button)) {
+                            && !(control instanceof javafx.scene.control.Button)
+                            && !(control instanceof javafx.scene.control.TableView)) {
                         javafx.scene.layout.HBox alignmentBox = new javafx.scene.layout.HBox();
                         alignmentBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
                         // Add left padding equal to label width plus spacing to align with labeled controls
@@ -1703,11 +1706,26 @@ public class ScreenFactory {
      * information
      * @return A container with the label and control
      */
-    private static Node createLabeledControl(String labelText, String alignment, Node control, double minWidth, DisplayItem metadata) {
+    /**
+     * Creates a labeled control by wrapping a control with its label.
+     * For most controls, the label is placed horizontally (on the left).
+     * For TableView and similar large controls, the label is placed vertically (on top).
+     *
+     * @param labelText The text for the label
+     * @param alignment The alignment of the label ("left", "center", "right")
+     * @param control The control to wrap
+     * @param minWidth The minimum width for the label
+     * @param metadata DisplayItem metadata containing styling information
+     * @param useVerticalLayout If true, place label above control (VBox); if false, place label beside control (HBox)
+     * @return The wrapped control with label
+     */
+    private static Node createLabeledControl(String labelText, String alignment, Node control, double minWidth, DisplayItem metadata, boolean useVerticalLayout) {
         javafx.scene.control.Label label = new javafx.scene.control.Label(labelText);
 
-        // Build label style with right alignment, padding, and default text color
-        StringBuilder styleBuilder = new StringBuilder("-fx-font-weight: normal; -fx-padding: 0 10 0 0; -fx-alignment: center-right; -fx-text-fill: #333333;");
+        // Build label style with default styling
+        String defaultAlignment = useVerticalLayout ? "center-left" : "center-right";
+        String defaultPadding = useVerticalLayout ? "0 0 5 0" : "0 10 0 0";  // bottom padding for vertical, right padding for horizontal
+        StringBuilder styleBuilder = new StringBuilder("-fx-font-weight: normal; -fx-padding: " + defaultPadding + "; -fx-alignment: " + defaultAlignment + "; -fx-text-fill: #333333;");
 
         // Apply label styling from metadata
         if (metadata != null) {
@@ -1737,38 +1755,50 @@ public class ScreenFactory {
         }
 
         label.setStyle(styleBuilder.toString());
-        label.setMinWidth(minWidth); // Use calculated minimum width to align labels underneath each other
-        label.setMaxWidth(Region.USE_PREF_SIZE);
+        
+        if (useVerticalLayout) {
+            // Vertical layout: label on top, control below
+            label.setMaxWidth(Double.MAX_VALUE);  // Allow label to stretch full width
+            javafx.scene.layout.VBox container = new javafx.scene.layout.VBox(0);
+            container.setAlignment(javafx.geometry.Pos.TOP_LEFT);
+            container.setPickOnBounds(false);
+            container.getChildren().addAll(label, control);
+            return container;
+        } else {
+            // Horizontal layout: original behavior
+            label.setMinWidth(minWidth); // Use calculated minimum width to align labels underneath each other
+            label.setMaxWidth(Region.USE_PREF_SIZE);
 
-        // Determine alignment (default to left if not specified)
-        String actualAlignment = (alignment != null) ? alignment.toLowerCase() : "left";
+            // Determine alignment (default to left if not specified)
+            String actualAlignment = (alignment != null) ? alignment.toLowerCase() : "left";
 
-        // Create container based on alignment
-        javafx.scene.layout.HBox container = new javafx.scene.layout.HBox(5);
-        container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-        // Make container pick on bounds so tooltips on child controls work properly
-        container.setPickOnBounds(false);
+            // Create container based on alignment
+            javafx.scene.layout.HBox container = new javafx.scene.layout.HBox(5);
+            container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+            // Make container pick on bounds so tooltips on child controls work properly
+            container.setPickOnBounds(false);
 
-        switch (actualAlignment) {
-            case "right":
-                // Control first, then label on the right
-                container.getChildren().addAll(control, label);
-                container.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
-                break;
-            case "center":
-                // Center both
-                container.setAlignment(javafx.geometry.Pos.CENTER);
-                container.getChildren().addAll(label, control);
-                break;
-            case "left":
-            default:
-                // Label first (on the left), then control
-                container.getChildren().addAll(label, control);
-                container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-                break;
+            switch (actualAlignment) {
+                case "right":
+                    // Control first, then label on the right
+                    container.getChildren().addAll(control, label);
+                    container.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
+                    break;
+                case "center":
+                    // Center both
+                    container.setAlignment(javafx.geometry.Pos.CENTER);
+                    container.getChildren().addAll(label, control);
+                    break;
+                case "left":
+                default:
+                    // Label first (on the left), then control
+                    container.getChildren().addAll(label, control);
+                    container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+                    break;
+            }
+
+            return container;
         }
-
-        return container;
     }
 
     /**
