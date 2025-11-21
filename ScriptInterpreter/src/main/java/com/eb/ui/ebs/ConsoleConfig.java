@@ -221,7 +221,9 @@ public class ConsoleConfig {
                 css.append(".text.").append(className).append(",\n");
                 css.append(".styled-text-area .text.").append(className).append(",\n");
                 css.append(".console-out .text.").append(className).append(",\n");
-                css.append(".console-in .text.").append(className).append(" {\n");
+                css.append(".console-in .text.").append(className).append(",\n");
+                css.append(".editor-ebs .text.").append(className).append(",\n");
+                css.append(".editor-text .text.").append(className).append(" {\n");
                 css.append("    -fx-fill: ").append(color).append(" !important;\n");
                 css.append("    -fx-background-color: transparent !important;\n");
                 css.append("}\n\n");
