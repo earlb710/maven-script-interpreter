@@ -96,10 +96,21 @@ public class AreaItemFactory {
                 return choiceBox;
             case LISTVIEW:
                 return new ListView<>();
-            case TABLEVIEW:
+             case TABLEVIEW:
                 TableView<java.util.Map<String, Object>> tableView = new TableView<>();
                 tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
                 tableView.setPlaceholder(new javafx.scene.control.Label("No data available"));
+                
+                // Debug: Check if metadata and columns exist
+                if (metadata == null) {
+                    System.err.println("WARNING: TableView metadata is null");
+                } else if (metadata.columns == null) {
+                    System.err.println("WARNING: TableView columns is null");
+                } else if (metadata.columns.isEmpty()) {
+                    System.err.println("WARNING: TableView columns is empty");
+                } else {
+                    System.out.println("DEBUG: TableView has " + metadata.columns.size() + " columns");
+                }
                 
                 // Create columns based on metadata
                 if (metadata != null && metadata.columns != null && !metadata.columns.isEmpty()) {
