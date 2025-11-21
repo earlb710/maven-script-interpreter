@@ -432,6 +432,7 @@ public class Parser {
         DataType elemType = null;
         RecordType recordType = null;
         Expression[] arrayDims = null;
+        boolean consumedBraces = false; // Track if we consumed braces for record fields
 
         if (match(EbsTokenType.COLON)) {
             EbsToken t = peek();
@@ -450,6 +451,7 @@ public class Parser {
                 recordType = parseRecordFields();
                 
                 consume(EbsTokenType.RBRACE, "Expected '}' after record field definitions.");
+                consumedBraces = true;
             } else if (t.type.getDataType() != null) {
                 elemType = t.type.getDataType();
             } else {
@@ -469,7 +471,11 @@ public class Parser {
                             case "double", "number" -> elemType = DataType.DOUBLE;
                             case "bool", "boolean" -> elemType = DataType.BOOL;
                             case "date" -> elemType = DataType.DATE;
-                            case "record" -> elemType = DataType.RECORD;
+                            case "record" -> {
+                                elemType = DataType.RECORD;
+                                // For array.record, field definitions come after array dimensions
+                                // So don't parse them here, just note we have a record type
+                            }
                             default -> throw error(t, "Unknown array element type: " + subType);
                         }
                     } else {
@@ -485,8 +491,10 @@ public class Parser {
                 }
             }
             // Advance token for non-record types (record already consumed all its tokens)
+            // Also don't advance if we already advanced for array.record case
             if (t.type != EbsTokenType.RECORD && 
-                !(t.literal instanceof String && "record".equals(((String)t.literal).toLowerCase()))) {
+                !(t.literal instanceof String && "record".equals(((String)t.literal).toLowerCase())) &&
+                !(t.literal instanceof String && ((String)t.literal).toLowerCase().startsWith("array.record"))) {
                 advance();
             }
             
@@ -515,7 +523,11 @@ public class Parser {
                         case "double", "number" -> elemType = DataType.DOUBLE;
                         case "bool", "boolean" -> elemType = DataType.BOOL;
                         case "date" -> elemType = DataType.DATE;
-                        case "record" -> elemType = DataType.RECORD;
+                        case "record" -> {
+                            elemType = DataType.RECORD;
+                            // For array.record, field definitions come after array dimensions
+                            // So don't parse them here, just note we have a record type
+                        }
                         default -> throw error(subType, "Unknown array element type: " + subTypeName);
                     }
                 } else {
@@ -523,8 +535,18 @@ public class Parser {
                 }
             }
             
+            // Check for array dimensions after type or after record field definitions
             if (check(EbsTokenType.LBRACKET)) {
                 arrayDims = parseArrayDimensions();
+            }
+            
+            // For array.record with inline field definitions, parse them after dimensions (if any)
+            // Syntax: array.record{...} or array.record[size]{...}
+            // Only do this if we haven't already consumed braces (standalone record case)
+            if (elemType == DataType.RECORD && !consumedBraces && check(EbsTokenType.LBRACE)) {
+                consume(EbsTokenType.LBRACE, "Expected '{' for record field definitions.");
+                recordType = parseRecordFields();
+                consume(EbsTokenType.RBRACE, "Expected '}' after record field definitions.");
             }
         }
 

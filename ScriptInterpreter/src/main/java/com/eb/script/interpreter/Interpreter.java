@@ -279,18 +279,19 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             if (stmt.varType != null) {
                 DataType expectedType = stmt.varType;
                 
-                // Special handling for record types
-                if (expectedType == DataType.RECORD && stmt.recordType != null) {
-                    // Convert and validate the value against the record type
-                    value = stmt.recordType.convertValue(value);
-                    if (!stmt.recordType.validateValue(value)) {
-                        throw error(stmt.getLine(), "Record type mismatch for variable '" + stmt.name + "': value does not match record structure");
-                    }
-                } else if (stmt.initializer instanceof ArrayExpression array) {
+                // Check for array declarations first (including arrays of records)
+                if (stmt.initializer instanceof ArrayExpression array) {
                     // For array declarations, don't convert the array itself
                     // The array already has the correct element type from visitArrayInitExpression
                     if (!Util.checkDataType(array.dataType, value)) {
                         throw error(stmt.getLine(), "Array type mismatch: expected " + expectedType + " for variable '" + stmt.name + "'");
+                    }
+                } else if (expectedType == DataType.RECORD && stmt.recordType != null) {
+                    // Special handling for standalone record types (not arrays)
+                    // Convert and validate the value against the record type
+                    value = stmt.recordType.convertValue(value);
+                    if (!stmt.recordType.validateValue(value)) {
+                        throw error(stmt.getLine(), "Record type mismatch for variable '" + stmt.name + "': value does not match record structure");
                     }
                 } else {
                     // For non-array values, convert to the expected type

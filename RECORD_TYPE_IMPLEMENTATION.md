@@ -128,7 +128,7 @@ person = {
 
 ### Arrays of Records
 ```javascript
-// Dynamic array of records
+// Dynamic array of records (without inline field definitions)
 var employees: array.record[*];
 
 employees = [
@@ -141,7 +141,7 @@ employees = [
 var emp1 = employees[0];
 print "First employee: " + emp1;
 
-// Fixed-size array of records
+// Fixed-size array of records (without inline field definitions)
 var people: array.record[5];
 people[0] = {"firstName": "Alice", "lastName": "Brown", "active": true};
 people[1] = {"firstName": "Charlie", "lastName": "Davis", "active": false};
@@ -153,6 +153,27 @@ while i < employees.length {
     print "Employee " + i + ": " + emp;
     i = i + 1;
 }
+```
+
+### Arrays of Records with Inline Field Definitions
+```javascript
+// Dynamic array with inline record field definitions
+var employees:array.record{name:string, surname:string, age:int};
+
+employees = [
+    {"name": "John", "surname": "Doe", "age": 30},
+    {"name": "Jane", "surname": "Smith", "age": 35}
+];
+
+// Fixed-size array with inline record field definitions
+var people:array.record[10]{firstName:string, lastName:string, active:bool};
+
+people[0] = {"firstName": "Alice", "lastName": "Brown", "active": true};
+people[1] = {"firstName": "Charlie", "lastName": "Davis", "active": false};
+
+// Multiple arrays with different field definitions
+var students:array.record{id:int, name:string, grade:double};
+var products:array.record[5]{sku:string, price:double, inStock:bool};
 ```
 
 ## Known Limitations
@@ -187,6 +208,7 @@ These would require updates to:
 2. `test_record_simple.ebs` - Minimal test case
 3. `test_array_record.ebs` - Tests array.record functionality
 4. `test_enhanced_record.ebs` - Tests compact syntax (no spaces) and field assignments
+5. `test_array_record_inline.ebs` - Tests array.record with inline field definitions
 
 ### Build Status
 ✅ Project compiles successfully with all changes
@@ -195,6 +217,8 @@ These would require updates to:
 ✅ Field assignments work: `a.name="xyz"`
 ✅ Record assignments work with type validation
 ✅ Arrays of records (array.record) work correctly
+✅ **Arrays with inline fields**: `var a:array.record{field:type,...}`
+✅ **Fixed-size arrays with inline fields**: `var a:array.record[10]{field:type,...}`
 ❌ Property access in expressions needs fix
 
 ## Next Steps
