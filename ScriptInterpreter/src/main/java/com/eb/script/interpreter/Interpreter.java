@@ -4,6 +4,7 @@ import com.eb.script.interpreter.screen.InterpreterScreen;
 import com.eb.util.Debugger;
 import com.eb.script.RuntimeContext;
 import com.eb.script.token.DataType;
+import com.eb.script.token.RecordType;
 import com.eb.script.token.ebs.EbsToken;
 import com.eb.util.Util;
 import com.eb.script.interpreter.Builtins.BuiltinInfo;
@@ -39,6 +40,7 @@ import com.eb.script.interpreter.statement.ForEachStatement;
 import com.eb.script.interpreter.statement.ForStatement;
 import com.eb.script.interpreter.statement.IfStatement;
 import com.eb.script.interpreter.statement.IndexAssignStatement;
+import com.eb.script.interpreter.statement.PropertyAssignStatement;
 import com.eb.script.interpreter.statement.OpenCursorStatement;
 import com.eb.script.interpreter.statement.Parameter;
 import com.eb.script.interpreter.statement.ReturnStatement;
@@ -439,7 +441,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     public void visitAssignStatement(AssignStatement stmt) throws InterpreterError {
         Object value = evaluate(stmt.value);
 
-        // Check if this is a screen variable assignment (screen_name.set_name.var_name)
+        // Check if this is a record field assignment or screen variable assignment
         String name = stmt.name.toLowerCase();
         int firstDot = name.indexOf('.');
         int secondDot = firstDot > 0 ? name.indexOf('.', firstDot + 1) : -1;
@@ -465,21 +467,53 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 }
             }
         } else if (firstDot > 0) {
-            // Two-part notation for backward compatibility: screen.varName
-            String screenName = name.substring(0, firstDot);
-            String varName = name.substring(firstDot + 1);
+            // Two-part notation: could be screen.varName or record.field
+            String firstPart = name.substring(0, firstDot);
+            String secondPart = name.substring(firstDot + 1);
 
             // Check if this is a screen variable
-            ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars(screenName);
+            ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars(firstPart);
             if (screenVarMap != null) {
-                if (screenVarMap.containsKey(varName)) {
-                    screenVarMap.put(varName, value);
+                if (screenVarMap.containsKey(secondPart)) {
+                    screenVarMap.put(secondPart, value);
                     // Trigger screen refresh to update UI controls
-                    context.triggerScreenRefresh(screenName);
+                    context.triggerScreenRefresh(firstPart);
                     return;
                 } else {
-                    throw error(stmt.getLine(), "Screen '" + screenName + "' does not have a variable named '" + varName + "'.");
+                    throw error(stmt.getLine(), "Screen '" + firstPart + "' does not have a variable named '" + secondPart + "'.");
                 }
+            }
+            
+            // Not a screen variable - check if it's a record field assignment
+            try {
+                Object recordObj = environment().getEnvironmentValues().get(firstPart);
+                if (recordObj instanceof java.util.Map) {
+                    @SuppressWarnings("unchecked")
+                    java.util.Map<String, Object> record = (java.util.Map<String, Object>) recordObj;
+                    
+                    // Check if the record has type validation
+                    RecordType recordType = environment().getEnvironmentValues().getRecordType(firstPart);
+                    if (recordType != null) {
+                        // Validate the field exists and type matches
+                        if (!recordType.hasField(secondPart)) {
+                            throw error(stmt.getLine(), "Record '" + firstPart + "' does not have a field named '" + secondPart + "'");
+                        }
+                        
+                        DataType fieldType = recordType.getFieldType(secondPart);
+                        value = fieldType.convertValue(value);
+                        if (!fieldType.isDataType(value)) {
+                            throw error(stmt.getLine(), "Type mismatch for field '" + secondPart + "': expected " + fieldType);
+                        }
+                    }
+                    
+                    // Assign the field value
+                    record.put(secondPart, value);
+                    return;
+                } else if (recordObj != null) {
+                    throw error(stmt.getLine(), "Cannot assign to field '" + secondPart + "' of non-record variable '" + firstPart + "'");
+                }
+            } catch (InterpreterError e) {
+                // Variable doesn't exist - will fall through to regular assignment
             }
         }
 
@@ -490,6 +524,13 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         @Override
     public void visitIndexAssignStatement(IndexAssignStatement stmt) throws InterpreterError {
         arrayInterpreter.visitIndexAssignStatement(stmt);
+    }
+
+    @Override
+    public void visitPropertyAssignStatement(PropertyAssignStatement stmt) throws InterpreterError {
+        // This would be used for more complex property assignments
+        // For now, record field assignments are handled in visitAssignStatement
+        throw error(stmt.getLine(), "Property assignment not yet fully implemented");
     }
 
 
@@ -1381,6 +1422,30 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     @Override
     public Object visitCursorNextExpression(com.eb.script.interpreter.expression.CursorNextExpression expr) throws InterpreterError {
         return databaseInterpreter.visitCursorNextExpression(expr);
+    }
+
+    @Override
+    public Object visitPropertyExpression(com.eb.script.interpreter.expression.PropertyExpression expr) throws InterpreterError {
+        Object obj = evaluate(expr.object);
+        
+        if (obj == null) {
+            throw error(expr.getLine(), "Cannot access property '" + expr.propertyName + "' of null");
+        }
+        
+        // Check if the object is a Map (record or JSON object)
+        if (obj instanceof java.util.Map) {
+            @SuppressWarnings("unchecked")
+            java.util.Map<String, Object> map = (java.util.Map<String, Object>) obj;
+            
+            // Check if the property exists
+            if (!map.containsKey(expr.propertyName)) {
+                throw error(expr.getLine(), "Property '" + expr.propertyName + "' does not exist in record");
+            }
+            
+            return map.get(expr.propertyName);
+        }
+        
+        throw error(expr.getLine(), "Cannot access property '" + expr.propertyName + "' on non-record type: " + obj.getClass().getSimpleName());
     }
 
     // --- Helpers ---

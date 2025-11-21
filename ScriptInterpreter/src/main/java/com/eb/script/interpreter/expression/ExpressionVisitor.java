@@ -30,4 +30,6 @@ public interface ExpressionVisitor {
 
     Object visitCursorNextExpression(CursorNextExpression expr) throws InterpreterError;
 
+    Object visitPropertyExpression(PropertyExpression expr) throws InterpreterError;
+
 }

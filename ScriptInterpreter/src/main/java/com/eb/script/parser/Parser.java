@@ -31,6 +31,7 @@ import com.eb.script.interpreter.expression.ArrayExpression;
 import com.eb.script.interpreter.expression.ArrayLiteralExpression;
 import com.eb.script.interpreter.expression.IndexExpression;
 import com.eb.script.interpreter.expression.LengthExpression;
+import com.eb.script.interpreter.expression.PropertyExpression;
 import com.eb.script.interpreter.statement.ForEachStatement;
 import com.eb.script.interpreter.statement.ForStatement;
 import com.eb.script.interpreter.statement.IndexAssignStatement;
@@ -436,7 +437,9 @@ public class Parser {
             EbsToken t = peek();
             
             // Check if this is a record type definition
-            if (t.type == EbsTokenType.RECORD) {
+            // Check both token type and literal value since lexer might categorize it differently
+            if (t.type == EbsTokenType.RECORD || 
+                (t.literal instanceof String && "record".equals(((String)t.literal).toLowerCase()))) {
                 elemType = DataType.RECORD;
                 advance(); // consume 'record'
                 
@@ -480,7 +483,11 @@ public class Parser {
                     throw error(t, "Expected type name after ':'.");
                 }
             }
-            advance();
+            // Advance token for non-record types (record already consumed all its tokens)
+            if (t.type != EbsTokenType.RECORD && 
+                !(t.literal instanceof String && "record".equals(((String)t.literal).toLowerCase()))) {
+                advance();
+            }
             
             // Check for array.type syntax when type is not already qualified
             // This handles cases where lexer separates array and type (array . int)
@@ -1156,14 +1163,15 @@ public class Parser {
     private Statement assignmentStatement(boolean requireSemicolon) throws ParseError {
         // We need to parse an lvalue:
         // either IDENTIFIER, or IDENTIFIER followed by one or more [ index-list ]
-        // Also support DOT for screen variable access (screenName.varName)
+        // Also support DOT for record/screen variable access (recordName.field or screenName.varName)
         EbsToken name = consume(EbsTokenType.IDENTIFIER, "Expected variable name.");
         String varName = (String) name.literal;
         
-        // Check if this is a screen variable access (screenName.varName)
+        // Check if this is a property/field access (recordName.field)
         if (match(EbsTokenType.DOT)) {
             EbsToken fieldName = consume(EbsTokenType.IDENTIFIER, "Expected field name after '.'.");
-            // Treat screen.var as a single variable name with DOT
+            // Treat record.field as a single variable name with DOT for now
+            // The interpreter will handle the property assignment
             varName = varName + "." + fieldName.literal;
         }
         
@@ -1510,10 +1518,12 @@ public class Parser {
                 base = new CursorHasNextExpression(line, base);
             } else if ("next".equals(name) && callEmpty) {
                 base = new CursorNextExpression(line, base);
+            } else if (!callEmpty) {
+                // Property access (e.g., record field access)
+                base = new PropertyExpression(line, base, name);
             } else {
-                // You may decide to allow other dot-names or reject them here.
-                // For now, reject unknown member form to avoid silent acceptance.
-                throw error(prop, "Unknown member '" + name + "'" + (callEmpty ? "()" : ""));
+                // Unknown method call
+                throw error(prop, "Unknown method '" + name + "()'");
             }
         }
 

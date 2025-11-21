@@ -1,0 +1,79 @@
+// Test Script: Record Type Feature
+// Description: Test record type declarations with field types and validation
+// Author: EBS Test Suite
+// Date: 2025-11-21
+
+print "=== Record Type Test ===";
+print "";
+
+// Test 1: Basic record type declaration
+print "Test 1: Basic record type declaration";
+var employee: record { name: string, age: int, salary: double };
+
+// Initialize with JSON object
+employee = {
+    "name": "John Doe",
+    "age": 30,
+    "salary": 75000.50
+};
+
+print "Employee name: " + employee.name;
+print "Employee age: " + employee.age;
+print "Employee salary: " + employee.salary;
+print "";
+
+// Test 2: Record field assignment
+print "Test 2: Record field assignment";
+employee.name = "Jane Smith";
+employee.age = 35;
+employee.salary = 85000.75;
+
+print "Updated employee name: " + employee.name;
+print "Updated employee age: " + employee.age;
+print "Updated employee salary: " + employee.salary;
+print "";
+
+// Test 3: Multiple records
+print "Test 3: Multiple record variables";
+var person: record { firstName: string, lastName: string, active: bool };
+
+person = {
+    "firstName": "Alice",
+    "lastName": "Johnson",
+    "active": true
+};
+
+print "Person: " + person.firstName + " " + person.lastName;
+print "Active: " + person.active;
+print "";
+
+// Test 4: Type conversion
+print "Test 4: Type conversion";
+person.active = "Y";  // Should convert string to bool
+print "Active after string assignment: " + person.active;
+print "";
+
+// Test 5: Using records in calculations
+print "Test 5: Using record fields in calculations";
+var bonus: double = employee.salary * 0.10;
+print "Employee bonus (10%): " + bonus;
+print "";
+
+// Test 6: Record with multiple types
+print "Test 6: Record with multiple field types";
+var product: record { id: int, name: string, price: double, inStock: bool };
+
+product = {
+    "id": 101,
+    "name": "Laptop",
+    "price": 999.99,
+    "inStock": true
+};
+
+print "Product ID: " + product.id;
+print "Product Name: " + product.name;
+print "Product Price: $" + product.price;
+print "In Stock: " + product.inStock;
+print "";
+
+print "=== All Record Type Tests Completed ===";
