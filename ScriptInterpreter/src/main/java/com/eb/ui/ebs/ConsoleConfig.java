@@ -214,6 +214,24 @@ public class ConsoleConfig {
                 css.append(".editor-text .caret {\n");
                 css.append("    -fx-stroke: ").append(color).append(" !important;\n");
                 css.append("}\n\n");
+            } else if ("console-background".equals(className)) {
+                css.append(".console-frame {\n");
+                css.append("    -fx-background-color: ").append(color).append(" !important;\n");
+                css.append("}\n\n");
+            } else if ("tab-background".equals(className)) {
+                css.append(".tab-pane,\n");
+                css.append(".tab-pane .tab-header-area,\n");
+                css.append(".tab-pane .tab-header-background {\n");
+                css.append("    -fx-background-color: ").append(color).append(" !important;\n");
+                css.append("}\n\n");
+            } else if ("tab-label-color".equals(className)) {
+                css.append(".tab-pane .tab .tab-label {\n");
+                css.append("    -fx-text-fill: ").append(color).append(" !important;\n");
+                css.append("}\n\n");
+            } else if ("tab-label-changed-color".equals(className)) {
+                css.append(".tab-pane .tab.changed .tab-label {\n");
+                css.append("    -fx-text-fill: ").append(color).append(" !important;\n");
+                css.append("}\n\n");
             } else {
                 // Regular style class - need to target both regular and RichTextFX .text nodes
                 // Use multiple selectors to cover all possible contexts
