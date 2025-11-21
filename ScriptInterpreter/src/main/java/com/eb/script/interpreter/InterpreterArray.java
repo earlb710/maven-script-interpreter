@@ -389,6 +389,11 @@ public class InterpreterArray {
             list.set(i, value);
         } else if (container instanceof ArrayDef arr) {
             checkBounds(line, i, arr.size() + 1);
+            // Convert value to the array's element type before setting
+            DataType elemType = arr.getDataType();
+            if (elemType != null && value != null) {
+                value = elemType.convertValue(value);
+            }
             arr.set(i, value);
         } else {
             String kind = (container == null) ? "null" : container.getClass().getSimpleName();
