@@ -79,13 +79,20 @@ Features:
 
 ### Basic Record Declaration and Assignment
 ```javascript
+// Syntax with spaces (original)
 var employee: record { name: string, age: int, salary: double };
 
+// Compact syntax without spaces (also supported)
+var person:record{name:string, surname:string, age:int};
+
+// Initialize the record
 employee = {
     "name": "John Doe",
     "age": 30,
     "salary": 75000.50
 };
+
+person = {"name": "Jane", "surname": "Doe", "age": 25};
 ```
 
 ### Record Field Assignment
@@ -94,6 +101,11 @@ employee = {
 employee.name = "Jane Smith";
 employee.age = 35;
 employee.salary = 85000.75;
+
+// Works with compact syntax too
+person.name = "xyz";
+person.surname = "abc";
+person.age = 42;
 ```
 
 ### Type Conversion
@@ -174,10 +186,13 @@ These would require updates to:
 1. `test_record_type.ebs` - Comprehensive test of record features
 2. `test_record_simple.ebs` - Minimal test case
 3. `test_array_record.ebs` - Tests array.record functionality
+4. `test_enhanced_record.ebs` - Tests compact syntax (no spaces) and field assignments
 
 ### Build Status
 ✅ Project compiles successfully with all changes
-✅ Record type declarations parse correctly
+✅ Record type declarations parse correctly (with and without spaces)
+✅ Compact syntax works: `var a:record{name:string, age:int}`
+✅ Field assignments work: `a.name="xyz"`
 ✅ Record assignments work with type validation
 ✅ Arrays of records (array.record) work correctly
 ❌ Property access in expressions needs fix

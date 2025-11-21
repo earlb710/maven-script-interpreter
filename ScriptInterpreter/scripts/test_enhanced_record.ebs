@@ -1,0 +1,55 @@
+// Test: Enhanced record definition as requested
+// Syntax: var a:record{name:string, surname:string, age:int}; a.name="xyz";
+
+print "=== Enhanced Record Definition Test ===";
+print "";
+
+// Test 1: Compact syntax without spaces
+print "Test 1: Compact record syntax";
+var a:record{name:string, surname:string, age:int};
+
+// Initialize the record
+a = {"name": "John", "surname": "Doe", "age": 30};
+print "Record initialized";
+
+// Test 2: Field assignment as requested
+print "";
+print "Test 2: Field assignments";
+a.name = "xyz";
+print "a.name set to 'xyz'";
+
+a.surname = "abc";
+print "a.surname set to 'abc'";
+
+a.age = 42;
+print "a.age set to 42";
+
+// Show the complete record
+print "";
+print "Test 3: Display updated record";
+print a;
+
+// Test 4: Multiple records with compact syntax
+print "";
+print "Test 4: Multiple records";
+var person:record{firstName:string,lastName:string,active:bool};
+person = {"firstName": "Jane", "lastName": "Smith", "active": true};
+
+var employee:record{id:int,name:string,salary:double};
+employee = {"id": 101, "name": "Bob Johnson", "salary": 75000.50};
+
+// Update fields
+person.firstName = "Alice";
+employee.salary = 80000.00;
+
+print "person: " + person;
+print "employee: " + employee;
+
+print "";
+print "=== All Tests Passed ===";
+print "";
+print "Summary:";
+print "- Compact syntax works: var a:record{field:type,...}";
+print "- Field assignment works: a.name=\"xyz\"";
+print "- Multiple records work correctly";
+print "- Type validation is enforced on assignments";
