@@ -72,6 +72,7 @@ public class EbsTab extends Tab {
 
     private List<int[]> lastMatches = java.util.Collections.emptyList(); // each int[]{start,endExclusive}
     private int currentIndex = -1;
+    private boolean suppressFindSearch = false; // avoid automatic search when programmatically setting find field
     
     // autocomplete
     private final AutocompletePopup autocompletePopup;
@@ -803,9 +804,11 @@ public class EbsTab extends Tab {
     private void setupFindListeners() {
         // Live search when typing in find field
         findField.textProperty().addListener((obs, o, n) -> {
-            Platform.runLater(() -> {
-                runSearch();
-            });
+            if (!suppressFindSearch) {
+                Platform.runLater(() -> {
+                    runSearch();
+                });
+            }
         });
         
         // Re-search when checkboxes change
@@ -878,7 +881,11 @@ public class EbsTab extends Tab {
         // Populate find field with current selection
         String selectedText = dispArea.getSelectedText();
         if (selectedText != null && !selectedText.isEmpty()) {
+            suppressFindSearch = true;
             findField.setText(selectedText);
+            suppressFindSearch = false;
+            // Explicitly run search after populating the field
+            runSearch();
         }
         
         Platform.runLater(() -> findField.requestFocus());
