@@ -58,6 +58,8 @@ public class DisplayItem {
     Boolean itemItalic;
     // onClick event handler - EBS code to execute when button is clicked
     String onClick;
+    // onValidate event handler - EBS code to validate item value, expects return true/false
+    String onValidate;
     // Whether to show the current value label for sliders
     Boolean showSliderValue;
     // Source of the value: "data" (original data value) or "display" (formatted display value)
