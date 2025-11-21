@@ -156,7 +156,7 @@ public class EbsApp {
 
     /**
      * Apply console configuration to the scene.
-     * Generates CSS from the configuration and adds it as an inline stylesheet.
+     * Generates CSS from the configuration and adds it as a stylesheet.
      * 
      * @param scene The scene to apply the configuration to
      * @param config The console configuration
@@ -169,11 +169,21 @@ public class EbsApp {
         // Generate CSS from configuration
         String css = config.generateCSS();
         
-        // Add as inline stylesheet (this will override the default console.css)
+        // Add as stylesheet (this will override the default console.css)
         if (css != null && !css.isEmpty()) {
-            // Using data URI to add inline CSS
-            scene.getStylesheets().add("data:text/css;base64," + 
-                java.util.Base64.getEncoder().encodeToString(css.getBytes()));
+            try {
+                // Write CSS to a temporary file
+                java.nio.file.Path tempCss = java.nio.file.Files.createTempFile("console-config-", ".css");
+                java.nio.file.Files.writeString(tempCss, css);
+                
+                // Add the temporary CSS file as a stylesheet
+                scene.getStylesheets().add(tempCss.toUri().toString());
+                
+                // Note: The temp file will be cleaned up when the JVM exits
+                tempCss.toFile().deleteOnExit();
+            } catch (IOException e) {
+                System.err.println("Warning: Failed to apply console configuration: " + e.getMessage());
+            }
         }
     }
 
