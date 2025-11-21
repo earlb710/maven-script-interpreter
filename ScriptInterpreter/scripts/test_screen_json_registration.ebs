@@ -1,0 +1,270 @@
+// Test Script: Screen JSON Variable Registration
+// Purpose: Demonstrate that screen definitions are registered as JSON variables
+//          that can be accessed and manipulated like any other JSON variable
+// Author: GitHub Copilot
+// Date: 2025-11-21
+//
+// Feature: When defining a screen with `screen xyz = {...}`, the JSON configuration
+//          is now registered as a variable 'xyz' that can be accessed using JSON functions.
+//
+// Related PR: Register screen JSON as environment variable on definition
+
+print "================================================================================";
+print "Test: Screen JSON Variable Registration";
+print "================================================================================";
+print "";
+print "This test demonstrates the new feature where screen JSON becomes accessible";
+print "as a variable after screen definition.";
+print "";
+
+// ================================================================================
+// Part 1: Basic Property Access
+// ================================================================================
+print "Part 1: Define screen and access basic JSON properties";
+print "------------------------------------------------------------------------";
+print "";
+
+screen userForm = {
+    "title": "User Registration Form",
+    "width": 500,
+    "height": 400,
+    "maximize": false,
+    "vars": [
+        {
+            "name": "username",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Username:",
+                "promptHelp": "Enter your username"
+            }
+        },
+        {
+            "name": "email",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Email:",
+                "promptHelp": "Enter your email address"
+            }
+        },
+        {
+            "name": "age",
+            "type": "int",
+            "default": 18,
+            "display": {
+                "type": "spinner",
+                "min": 13,
+                "max": 120,
+                "labelText": "Age:"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "formArea",
+            "type": "vbox",
+            "style": "-fx-spacing: 15; -fx-padding: 20;",
+            "items": [
+                {
+                    "name": "usernameField",
+                    "varRef": "username",
+                    "sequence": 1,
+                    "prefWidth": "300"
+                },
+                {
+                    "name": "emailField",
+                    "varRef": "email",
+                    "sequence": 2,
+                    "prefWidth": "300"
+                },
+                {
+                    "name": "ageSpinner",
+                    "varRef": "age",
+                    "sequence": 3,
+                    "prefWidth": "150"
+                }
+            ]
+        }
+    ]
+};
+
+print "✓ Screen 'userForm' defined";
+print "";
+
+// Access basic properties using json.get*
+print "Accessing screen configuration properties:";
+var screenTitle: string = call json.get(userForm, "title");
+print "  Title: " + screenTitle;
+
+var screenWidth: int = call json.getint(userForm, "width");
+print "  Width: " + screenWidth;
+
+var screenHeight: int = call json.getint(userForm, "height");
+print "  Height: " + screenHeight;
+
+var isMaximized: bool = call json.getbool(userForm, "maximize");
+print "  Maximize: " + isMaximized;
+print "";
+
+// ================================================================================
+// Part 2: Accessing Nested JSON Structures (vars array)
+// ================================================================================
+print "Part 2: Access nested JSON structures (vars array)";
+print "------------------------------------------------------------------------";
+print "";
+
+var varsArray: json = call json.get(userForm, "vars");
+print "Retrieved vars array from screen JSON";
+print "";
+
+// Access individual var definitions
+print "Variable definitions in the screen:";
+var usernameVar: json = varsArray[0];
+var usernameVarName: string = call json.get(usernameVar, "name");
+var usernameVarType: string = call json.get(usernameVar, "type");
+print "  [0] name: " + usernameVarName + ", type: " + usernameVarType;
+
+var emailVar: json = varsArray[1];
+var emailVarName: string = call json.get(emailVar, "name");
+var emailVarType: string = call json.get(emailVar, "type");
+print "  [1] name: " + emailVarName + ", type: " + emailVarType;
+
+var ageVar: json = varsArray[2];
+var ageVarName: string = call json.get(ageVar, "name");
+var ageVarType: string = call json.get(ageVar, "type");
+var ageDefault: int = call json.getint(ageVar, "default");
+print "  [2] name: " + ageVarName + ", type: " + ageVarType + ", default: " + ageDefault;
+print "";
+
+// ================================================================================
+// Part 3: Accessing Display Metadata
+// ================================================================================
+print "Part 3: Access display metadata from var definitions";
+print "------------------------------------------------------------------------";
+print "";
+
+var usernameDisplay: json = call json.get(usernameVar, "display");
+var displayType: string = call json.get(usernameDisplay, "type");
+var labelText: string = call json.get(usernameDisplay, "labeltext");
+var promptHelp: string = call json.get(usernameDisplay, "prompthelp");
+
+print "Username field display metadata:";
+print "  Type: " + displayType;
+print "  Label: " + labelText;
+print "  Prompt: " + promptHelp;
+print "";
+
+// ================================================================================
+// Part 4: Accessing Area Definitions
+// ================================================================================
+print "Part 4: Access area definitions from screen JSON";
+print "------------------------------------------------------------------------";
+print "";
+
+var areaArray: json = call json.get(userForm, "area");
+var formArea: json = areaArray[0];
+var areaName: string = call json.get(formArea, "name");
+var areaType: string = call json.get(formArea, "type");
+var areaStyle: string = call json.get(formArea, "style");
+
+print "Form area configuration:";
+print "  Name: " + areaName;
+print "  Type: " + areaType;
+print "  Style: " + areaStyle;
+print "";
+
+// ================================================================================
+// Part 5: Multiple Screens - Each Gets Its Own JSON Variable
+// ================================================================================
+print "Part 5: Define multiple screens, each registered as separate variable";
+print "------------------------------------------------------------------------";
+print "";
+
+screen settingsScreen = {
+    "title": "Settings",
+    "width": 400,
+    "height": 300,
+    "maximize": false
+};
+
+screen aboutScreen = {
+    "title": "About Application",
+    "width": 350,
+    "height": 250,
+    "maximize": false
+};
+
+print "✓ Screen 'settingsScreen' defined";
+print "✓ Screen 'aboutScreen' defined";
+print "";
+
+// Access each screen's JSON independently
+var settingsTitle: string = call json.get(settingsScreen, "title");
+var aboutTitle: string = call json.get(aboutScreen, "title");
+
+print "Independent access to multiple screen JSONs:";
+print "  settingsScreen title: " + settingsTitle;
+print "  aboutScreen title: " + aboutTitle;
+print "";
+
+// ================================================================================
+// Part 6: Practical Use Case - Modify and Redefine
+// ================================================================================
+print "Part 6: Practical use case - examining screen config before showing";
+print "------------------------------------------------------------------------";
+print "";
+
+print "Before showing the screen, you can:";
+print "  1. Inspect the configuration";
+print "  2. Validate properties";
+print "  3. Log screen setup details";
+print "";
+
+print "Example: Checking if userForm is configured correctly...";
+var configWidth: int = call json.getint(userForm, "width");
+var configHeight: int = call json.getint(userForm, "height");
+
+if configWidth < 300 then {
+    print "  ⚠ Warning: Width is less than 300px";
+} else {
+    print "  ✓ Width is acceptable: " + configWidth;
+}
+
+if configHeight < 200 then {
+    print "  ⚠ Warning: Height is less than 200px";
+} else {
+    print "  ✓ Height is acceptable: " + configHeight;
+}
+print "";
+
+// ================================================================================
+// Part 7: Show the Screen (Visual Verification)
+// ================================================================================
+print "Part 7: Display the screen for visual verification";
+print "------------------------------------------------------------------------";
+print "";
+
+print "Showing userForm screen...";
+print "(You can interact with the form to verify all fields are working)";
+print "";
+show screen userForm;
+
+print "";
+print "================================================================================";
+print "✓ All tests completed successfully!";
+print "================================================================================";
+print "";
+print "Summary:";
+print "  • Screen JSON is registered as a variable when defined";
+print "  • Access using: call json.get(screenName, \"property\")";
+print "  • Works with nested structures (vars, area, display metadata)";
+print "  • Multiple screens are independently accessible";
+print "  • Useful for validation and inspection before showing screen";
+print "";
+print "Note: The screen window is now visible. You can:";
+print "  - Enter values in the form fields";
+print "  - Close the window when done testing";
+print "";
