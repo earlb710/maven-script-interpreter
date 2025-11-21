@@ -644,17 +644,6 @@ public class InterpreterScreen {
                         context.getOutput().printlnInfo("Screen '" + finalScreenName + "' is already showing");
                     }
                 }
-                
-                // Invoke callback with "shown" event if specified
-                if (stmt.callbackName != null) {
-                    try {
-                        invokeScreenCallback(stmt.callbackName, finalScreenName, "shown", stmt.getLine());
-                    } catch (InterpreterError e) {
-                        if (context.getOutput() != null) {
-                            context.getOutput().printlnError("Error invoking callback '" + stmt.callbackName + "': " + e.getMessage());
-                        }
-                    }
-                }
             });
 
         } catch (InterpreterError ex) {
