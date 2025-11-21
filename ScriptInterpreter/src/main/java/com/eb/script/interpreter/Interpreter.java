@@ -665,13 +665,11 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
 
             // Check if this is a screen variable
             ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars(screenName);
-            if (screenVarMap != null) {
-                if (screenVarMap.containsKey(varName)) {
-                    return screenVarMap.get(varName);
-                } else {
-                    throw error(expr.line, "Screen '" + screenName + "' does not have a variable named '" + varName + "'.");
-                }
+            if (screenVarMap != null && screenVarMap.containsKey(varName)) {
+                // Found screen variable, return it
+                return screenVarMap.get(varName);
             }
+            // If not a screen variable, fall through to check regular environment variables
         }
 
         // Fall back to regular environment variable

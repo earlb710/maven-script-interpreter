@@ -331,6 +331,10 @@ public class InterpreterScreen {
             
             context.setScreenConfig(stmt.name, screenConfig);
             
+            // Register the screen name as a JSON variable in the environment
+            // This allows the screen JSON to be accessed as a variable (e.g., xyz.title, xyz.width, etc.)
+            interpreter.environment().getEnvironmentValues().define(stmt.name, config);
+            
             // Output confirmation that screen definition was stored
             if (context.getOutput() != null) {
                 context.getOutput().printlnOk("Screen '" + stmt.name + "' defined. Use 'show screen " + stmt.name + ";' to display it.");
