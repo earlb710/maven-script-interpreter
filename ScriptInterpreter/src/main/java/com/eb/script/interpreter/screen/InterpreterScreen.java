@@ -42,11 +42,17 @@ public class InterpreterScreen {
     public void visitScreenStatement(ScreenStatement stmt) throws InterpreterError {
         interpreter.environment().pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Screen %1", stmt.name);
         try {
-            // Check if screen already exists (either as config or as Stage)
-            if (context.hasScreenConfig(stmt.name) || context.getScreens().containsKey(stmt.name)) {
+            // Check if screen has been shown (Stage exists in GLOBAL_SCREENS)
+            if (context.getScreens().containsKey(stmt.name)) {
                 throw interpreter.error(stmt.getLine(), 
-                    "Screen '" + stmt.name + "' already exists. " +
+                    "Screen '" + stmt.name + "' already exists and has been shown. " +
                     "Please close the existing screen first, or use a different screen name.");
+            }
+            
+            // If screen config exists but hasn't been shown, we'll replace it
+            boolean isReplacing = context.hasScreenConfig(stmt.name);
+            if (isReplacing && context.getOutput() != null) {
+                context.getOutput().printlnInfo("Replacing screen definition for '" + stmt.name + "' (screen was not shown yet)");
             }
 
             // Evaluate the spec (should be a JSON object)
