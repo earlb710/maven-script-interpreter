@@ -5,6 +5,7 @@ import com.eb.script.json.Json;
 import com.eb.script.RuntimeContext;
 import com.eb.script.token.Category;
 import com.eb.script.token.DataType;
+import com.eb.script.token.RecordType;
 import com.eb.script.token.ebs.EbsLexer;
 import com.eb.script.token.ebs.EbsToken;
 import com.eb.script.interpreter.expression.Expression;
@@ -428,11 +429,25 @@ public class Parser {
         
         name = consume(EbsTokenType.IDENTIFIER, "Expected variable name.");
         DataType elemType = null;
+        RecordType recordType = null;
         Expression[] arrayDims = null;
 
         if (match(EbsTokenType.COLON)) {
             EbsToken t = peek();
-            if (t.type.getDataType() != null) {
+            
+            // Check if this is a record type definition
+            if (t.type == EbsTokenType.RECORD) {
+                elemType = DataType.RECORD;
+                advance(); // consume 'record'
+                
+                // Expect opening brace for field definitions
+                consume(EbsTokenType.LBRACE, "Expected '{' after 'record' keyword.");
+                
+                // Parse record fields
+                recordType = parseRecordFields();
+                
+                consume(EbsTokenType.RBRACE, "Expected '}' after record field definitions.");
+            } else if (t.type.getDataType() != null) {
                 elemType = t.type.getDataType();
             } else {
                 if (t.type == EbsTokenType.DATATYPE || t.type == EbsTokenType.IDENTIFIER) {
@@ -540,8 +555,63 @@ public class Parser {
         }
 
         consume(EbsTokenType.SEMICOLON, "Expected ';' after variable declaration.");
-        return new VarStatement(name.line, (String) name.literal, elemType, varInit);
+        
+        // Return appropriate VarStatement based on whether it's a record type
+        if (recordType != null) {
+            return new VarStatement(name.line, (String) name.literal, elemType, recordType, varInit);
+        } else {
+            return new VarStatement(name.line, (String) name.literal, elemType, varInit);
+        }
 
+    }
+
+    /**
+     * Parse record field definitions inside { }
+     * Expected format: fieldName: type, fieldName: type, ...
+     */
+    private RecordType parseRecordFields() throws ParseError {
+        RecordType recordType = new RecordType();
+        
+        // Parse field definitions until we hit the closing brace
+        while (!check(EbsTokenType.RBRACE) && !isAtEnd()) {
+            // Parse field name
+            EbsToken fieldName = consume(EbsTokenType.IDENTIFIER, "Expected field name in record definition.");
+            
+            // Expect colon
+            consume(EbsTokenType.COLON, "Expected ':' after field name in record definition.");
+            
+            // Parse field type
+            EbsToken fieldTypeToken = peek();
+            DataType fieldType = null;
+            
+            if (fieldTypeToken.type.getDataType() != null) {
+                fieldType = fieldTypeToken.type.getDataType();
+                advance();
+            } else if (fieldTypeToken.type == EbsTokenType.IDENTIFIER || fieldTypeToken.type == EbsTokenType.DATATYPE) {
+                String typeName = (String) fieldTypeToken.literal;
+                EbsTokenType tokenType = getTokenType(typeName);
+                if (tokenType != null && tokenType.getDataType() != null) {
+                    fieldType = tokenType.getDataType();
+                    advance();
+                } else {
+                    throw error(fieldTypeToken, "Unknown type '" + typeName + "' in record field definition.");
+                }
+            } else {
+                throw error(fieldTypeToken, "Expected type name after ':' in record field definition.");
+            }
+            
+            // Add field to record type
+            recordType.addField((String) fieldName.literal, fieldType);
+            
+            // Check for comma (more fields) or closing brace (end of record)
+            if (check(EbsTokenType.COMMA)) {
+                advance(); // consume comma
+            } else if (!check(EbsTokenType.RBRACE)) {
+                throw error(peek(), "Expected ',' or '}' in record definition.");
+            }
+        }
+        
+        return recordType;
     }
 
     /**

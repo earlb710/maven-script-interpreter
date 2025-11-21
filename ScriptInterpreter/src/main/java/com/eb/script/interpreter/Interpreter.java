@@ -276,7 +276,15 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
 
             if (stmt.varType != null) {
                 DataType expectedType = stmt.varType;
-                if (stmt.initializer instanceof ArrayExpression array) {
+                
+                // Special handling for record types
+                if (expectedType == DataType.RECORD && stmt.recordType != null) {
+                    // Convert and validate the value against the record type
+                    value = stmt.recordType.convertValue(value);
+                    if (!stmt.recordType.validateValue(value)) {
+                        throw error(stmt.getLine(), "Record type mismatch for variable '" + stmt.name + "': value does not match record structure");
+                    }
+                } else if (stmt.initializer instanceof ArrayExpression array) {
                     // For array declarations, don't convert the array itself
                     // The array already has the correct element type from visitArrayInitExpression
                     if (!Util.checkDataType(array.dataType, value)) {
@@ -290,7 +298,13 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                     }
                 }
             }
-            environment().getEnvironmentValues().define(stmt.name, value);
+            
+            // Store the record type metadata with the variable if it's a record
+            if (stmt.recordType != null) {
+                environment().getEnvironmentValues().defineWithRecordType(stmt.name, value, stmt.recordType);
+            } else {
+                environment().getEnvironmentValues().define(stmt.name, value);
+            }
         } finally {
             environment().popCallStack();
         }

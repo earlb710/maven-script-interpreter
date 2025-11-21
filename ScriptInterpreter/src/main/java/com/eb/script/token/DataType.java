@@ -19,7 +19,8 @@ public enum DataType {
     DATE(Date.class),
     BOOL(Boolean.class),
     JSON(Object.class),
-    ARRAY(Object[].class), 
+    ARRAY(Object[].class),
+    RECORD(java.util.Map.class),
     ANY(Comparable.class);
 
     public final Class dataClass;
@@ -63,6 +64,9 @@ public enum DataType {
                 case JSON -> {
                     return new Object[length];
                 }
+                case RECORD -> {
+                    return new Object[length];
+                }
                 case ANY -> {
                     return new Comparable[length];
                 }
@@ -88,6 +92,10 @@ public enum DataType {
             return (value instanceof ArrayDef)
                 || (value instanceof java.util.List)
                 || (value.getClass().isArray());
+        }
+        if (type == RECORD) {
+            // Accept Map objects as records
+            return value instanceof java.util.Map;
         }
         // For other types, allow subclasses (e.g., HashMap instanceof Map)
         return dataClass.isInstance(value);
@@ -176,6 +184,20 @@ public enum DataType {
                 if (value instanceof String s) {
                     String ts = s.trim();
                     if (ts.startsWith("[") && ts.endsWith("]")) {
+                        try {
+                            value = Json.parse(ts);
+                        } catch (RuntimeException ignore) {
+                            // keep original
+                        }
+                    }
+                }
+            }
+            case RECORD -> {
+                // Accept Map objects as records
+                // If given a JSON object string, parse it
+                if (value instanceof String s) {
+                    String ts = s.trim();
+                    if (ts.startsWith("{") && ts.endsWith("}")) {
                         try {
                             value = Json.parse(ts);
                         } catch (RuntimeException ignore) {
