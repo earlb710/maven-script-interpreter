@@ -172,12 +172,17 @@ public class ConsoleConfig {
                 css.append(".console-frame .text-area,\n");
                 css.append(".console-frame .virtualized-scroll-pane,\n");
                 css.append(".console-frame .styled-text-area,\n");
+                css.append(".console-frame .styled-text-area .content,\n");
                 css.append(".console-out,\n");
                 css.append(".console-in .text-area,\n");
                 css.append(".console-in .styled-text-area,\n");
+                css.append(".console-in .styled-text-area .content,\n");
                 css.append(".console-in,\n");
                 css.append(".editor-ebs,\n");
-                css.append(".editor-text {\n");
+                css.append(".editor-ebs .styled-text-area .content,\n");
+                css.append(".editor-text,\n");
+                css.append(".editor-text .styled-text-area .content,\n");
+                css.append(".styled-text-area .content {\n");
                 css.append("    -fx-background-color: ").append(color).append(" !important;\n");
                 css.append("}\n\n");
             } else if ("line-cursor".equals(className)) {
@@ -185,6 +190,9 @@ public class ConsoleConfig {
                 css.append("    -fx-background-color: ").append(color).append(" !important;\n");
                 css.append("}\n\n");
             } else if ("line-numbers".equals(className)) {
+                css.append(".lineno,\n");
+                css.append(".lineno .text,\n");
+                css.append(".linenumbers,\n");
                 css.append(".linenumbers .text {\n");
                 css.append("    -fx-fill: ").append(color).append(" !important;\n");
                 css.append("}\n\n");
