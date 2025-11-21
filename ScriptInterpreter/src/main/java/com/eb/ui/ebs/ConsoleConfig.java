@@ -19,6 +19,7 @@ public class ConsoleConfig {
     private static final String CONFIG_FILE = "console.cfg";
     private final Map<String, Object> config;
     private final Map<String, String> colors;
+    private final boolean loadedFromFile;
     
     /**
      * Load console configuration from console.cfg file.
@@ -30,9 +31,11 @@ public class ConsoleConfig {
         
         if (loadedConfig != null) {
             this.config = loadedConfig;
+            this.loadedFromFile = true;
             loadColors();
         } else {
             this.config = getDefaultConfig();
+            this.loadedFromFile = false;
             loadColors();
         }
     }
@@ -194,7 +197,6 @@ public class ConsoleConfig {
      * @return true if loaded from file, false if using defaults
      */
     public boolean isLoadedFromFile() {
-        Path configPath = Paths.get(CONFIG_FILE);
-        return Files.exists(configPath);
+        return loadedFromFile;
     }
 }
