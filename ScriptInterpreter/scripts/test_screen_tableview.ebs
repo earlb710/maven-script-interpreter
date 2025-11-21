@@ -1,0 +1,109 @@
+// Test Script: TableView for displaying arrays of records
+// Description: Demonstrates displaying multiple records in a table with scrollbar
+// Author: EBS Test Suite
+// Date: 2025-11-21
+
+print "=== TableView Test - Array of Records ===";
+print "";
+print "This test demonstrates displaying an array of records in a table";
+print "with automatic scrollbars when content exceeds visible area.";
+print "";
+
+// Define an array variable to hold employee records
+var employeeData: array[*];
+
+// Create a screen with a TableView to display the employee data
+screen employeeScreen = {
+    "title": "Employee Records - TableView Demo",
+    "width": 900,
+    "height": 600,
+    "maximize": false,
+    "vars": [
+        {
+            "name": "employees",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "tableview",
+                "labelText": "Employee List:",
+                "columns": [
+                    {
+                        "name": "ID",
+                        "field": "id",
+                        "type": "int",
+                        "width": 80,
+                        "alignment": "center"
+                    },
+                    {
+                        "name": "Name",
+                        "field": "name",
+                        "type": "string",
+                        "width": 200,
+                        "alignment": "left"
+                    },
+                    {
+                        "name": "Department",
+                        "field": "department",
+                        "type": "string",
+                        "width": 150,
+                        "alignment": "left"
+                    },
+                    {
+                        "name": "Position",
+                        "field": "position",
+                        "type": "string",
+                        "width": 180,
+                        "alignment": "left"
+                    },
+                    {
+                        "name": "Salary",
+                        "field": "salary",
+                        "type": "double",
+                        "width": 120,
+                        "alignment": "right"
+                    }
+                ]
+            }
+        }
+    ]
+};
+
+print "Creating sample employee data...";
+
+// Create sample employee records as JSON objects
+employeeData = [
+    {"id": 1, "name": "John Smith", "department": "Engineering", "position": "Software Engineer", "salary": 85000},
+    {"id": 2, "name": "Jane Doe", "department": "Marketing", "position": "Marketing Manager", "salary": 92000},
+    {"id": 3, "name": "Bob Johnson", "department": "Engineering", "position": "Senior Developer", "salary": 98000},
+    {"id": 4, "name": "Alice Williams", "department": "HR", "position": "HR Coordinator", "salary": 65000},
+    {"id": 5, "name": "Charlie Brown", "department": "Sales", "position": "Sales Representative", "salary": 72000},
+    {"id": 6, "name": "Diana Martinez", "department": "Engineering", "position": "Tech Lead", "salary": 115000},
+    {"id": 7, "name": "Eve Davis", "department": "Finance", "position": "Financial Analyst", "salary": 78000},
+    {"id": 8, "name": "Frank Wilson", "department": "Operations", "position": "Operations Manager", "salary": 95000},
+    {"id": 9, "name": "Grace Lee", "department": "Engineering", "position": "QA Engineer", "salary": 75000},
+    {"id": 10, "name": "Henry Chen", "department": "Marketing", "position": "Content Strategist", "salary": 68000},
+    {"id": 11, "name": "Ivy Taylor", "department": "Engineering", "position": "DevOps Engineer", "salary": 105000},
+    {"id": 12, "name": "Jack Anderson", "department": "Sales", "position": "Sales Manager", "salary": 110000},
+    {"id": 13, "name": "Karen White", "department": "HR", "position": "Recruiter", "salary": 62000},
+    {"id": 14, "name": "Leo Garcia", "department": "Finance", "position": "Accountant", "salary": 70000},
+    {"id": 15, "name": "Maria Rodriguez", "department": "Engineering", "position": "Frontend Developer", "salary": 88000}
+];
+
+print "Created " + employeeData.length + " employee records";
+print "";
+
+// Bind the array to the screen variable
+employeeScreen.employees = employeeData;
+
+print "Employee data bound to screen.";
+print "The TableView will display all records with automatic scrollbar.";
+print "";
+
+// Show the screen
+print "Displaying employee screen with TableView...";
+screen employeeScreen show;
+
+print "";
+print "Test completed!";
+print "The screen displayed an array of " + employeeData.length + " records in a scrollable table.";
+print "Each record shows ID, Name, Department, Position, and Salary.";

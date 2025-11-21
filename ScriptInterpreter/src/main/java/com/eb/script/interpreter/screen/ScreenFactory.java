@@ -1852,6 +1852,37 @@ public class ScreenFactory {
             }
         } else if (control instanceof javafx.scene.control.Label) {
             ((javafx.scene.control.Label) control).setText(value != null ? String.valueOf(value) : "");
+        } else if (control instanceof javafx.scene.control.TableView) {
+            // Handle TableView - expecting value to be an array/list of Maps
+            @SuppressWarnings("unchecked")
+            javafx.scene.control.TableView<java.util.Map<String, Object>> tableView = 
+                (javafx.scene.control.TableView<java.util.Map<String, Object>>) control;
+            
+            // Clear existing items
+            tableView.getItems().clear();
+            
+            // Add new items if value is a collection
+            if (value instanceof java.util.List) {
+                @SuppressWarnings("unchecked")
+                java.util.List<?> list = (java.util.List<?>) value;
+                for (Object item : list) {
+                    if (item instanceof java.util.Map) {
+                        @SuppressWarnings("unchecked")
+                        java.util.Map<String, Object> mapItem = (java.util.Map<String, Object>) item;
+                        tableView.getItems().add(mapItem);
+                    }
+                }
+            } else if (value instanceof com.eb.script.arrays.ArrayDynamic) {
+                // Handle EBS array type
+                com.eb.script.arrays.ArrayDynamic array = (com.eb.script.arrays.ArrayDynamic) value;
+                for (Object item : array.getAll()) {
+                    if (item instanceof java.util.Map) {
+                        @SuppressWarnings("unchecked")
+                        java.util.Map<String, Object> mapItem = (java.util.Map<String, Object>) item;
+                        tableView.getItems().add(mapItem);
+                    }
+                }
+            }
         }
     }
     

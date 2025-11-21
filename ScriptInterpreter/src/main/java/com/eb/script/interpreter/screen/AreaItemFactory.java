@@ -96,6 +96,41 @@ public class AreaItemFactory {
                 return choiceBox;
             case LISTVIEW:
                 return new ListView<>();
+            case TABLEVIEW:
+                TableView<java.util.Map<String, Object>> tableView = new TableView<>();
+                tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+                
+                // Create columns based on metadata
+                if (metadata != null && metadata.columns != null && !metadata.columns.isEmpty()) {
+                    for (DisplayItem.TableColumn colDef : metadata.columns) {
+                        TableColumn<java.util.Map<String, Object>, String> column = 
+                            new TableColumn<>(colDef.name != null ? colDef.name : colDef.field);
+                        
+                        // Set cell value factory to extract field from the Map
+                        String fieldName = colDef.field;
+                        column.setCellValueFactory(cellData -> {
+                            java.util.Map<String, Object> row = cellData.getValue();
+                            Object value = row.get(fieldName);
+                            return new javafx.beans.property.SimpleStringProperty(
+                                value != null ? String.valueOf(value) : ""
+                            );
+                        });
+                        
+                        // Set column width if specified
+                        if (colDef.width != null && colDef.width > 0) {
+                            column.setPrefWidth(colDef.width);
+                        }
+                        
+                        // Set alignment if specified
+                        if (colDef.alignment != null) {
+                            column.setStyle("-fx-alignment: " + colDef.alignment.toUpperCase() + ";");
+                        }
+                        
+                        tableView.getColumns().add(column);
+                    }
+                }
+                
+                return tableView;
 
             // Numeric Controls
             case SPINNER:
