@@ -38,6 +38,9 @@ public class EbsApp {
         } catch (IOException ignored) {
         }
 
+        // Load console configuration
+        ConsoleConfig consoleConfig = new ConsoleConfig();
+
         // Confirm on exit
         stage.setOnCloseRequest(evt -> {
             Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
@@ -61,6 +64,10 @@ public class EbsApp {
         initUI(root);
         Scene scene = new Scene(root, 1100, 720);
         scene.getStylesheets().add(getClass().getResource("/css/console.css").toExternalForm());
+        
+        // Apply console configuration styles
+        applyConsoleConfig(scene, consoleConfig);
+        
         primaryStage.setScene(scene);
         primaryStage.setTitle("EBS Console");
         primaryStage.show();
@@ -145,6 +152,29 @@ public class EbsApp {
         // Make status bar accessible to handler
         handler.setStatusBar(statusBar);
 
+    }
+
+    /**
+     * Apply console configuration to the scene.
+     * Generates CSS from the configuration and adds it as an inline stylesheet.
+     * 
+     * @param scene The scene to apply the configuration to
+     * @param config The console configuration
+     */
+    private void applyConsoleConfig(Scene scene, ConsoleConfig config) {
+        if (config == null) {
+            return;
+        }
+        
+        // Generate CSS from configuration
+        String css = config.generateCSS();
+        
+        // Add as inline stylesheet (this will override the default console.css)
+        if (css != null && !css.isEmpty()) {
+            // Using data URI to add inline CSS
+            scene.getStylesheets().add("data:text/css;base64," + 
+                java.util.Base64.getEncoder().encodeToString(css.getBytes()));
+        }
     }
 
     // Escape content for a single EBS string literal
