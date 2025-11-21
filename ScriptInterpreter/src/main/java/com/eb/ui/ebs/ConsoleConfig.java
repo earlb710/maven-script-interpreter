@@ -163,16 +163,9 @@ public class ConsoleConfig {
         StringBuilder css = new StringBuilder();
         css.append("/* Generated from console.cfg */\n\n");
         
-        // Debug output
-        System.out.println("\n=== CSS Generation Debug ===");
-        System.out.println("Generating CSS for " + colors.size() + " color properties");
-        
         for (Map.Entry<String, String> entry : colors.entrySet()) {
             String className = entry.getKey();
             String color = entry.getValue();
-            
-            // Debug output for each property
-            System.out.println("  Property: " + className + " = " + color);
             
             // Handle special cases
             if ("background".equals(className)) {
@@ -194,7 +187,7 @@ public class ConsoleConfig {
                 css.append("    -fx-background-color: ").append(color).append(" !important;\n");
                 css.append("}\n\n");
             } else if ("line-cursor".equals(className)) {
-                css.append(".paragraph-box {\n");
+                css.append(".paragraph-box:has-caret {\n");
                 css.append("    -fx-background-color: ").append(color).append(" !important;\n");
                 css.append("}\n\n");
             } else if ("line-numbers".equals(className)) {
@@ -234,18 +227,10 @@ public class ConsoleConfig {
                 css.append("    -fx-fill: ").append(color).append(" !important;\n");
                 css.append("    -fx-background-color: transparent !important;\n");
                 css.append("}\n\n");
-                
-                System.out.println("    Generated selectors for text color with transparent background");
             }
         }
         
-        System.out.println("=== End CSS Generation ===\n");
-        System.out.println("Sample CSS output (first 500 chars):");
-        String cssStr = css.toString();
-        System.out.println(cssStr.substring(0, Math.min(500, cssStr.length())) + "...");
-        System.out.println("\nFull CSS written to console-config.css\n");
-        
-        return cssStr;
+        return css.toString();
     }
     
     /**
