@@ -91,7 +91,7 @@ var jsonString = '[
 
 employeeData = call json.jsonfromstring(jsonString);
 
-print "Created " + call json.length(employeeData) + " employee records";
+print "Created " + employeeData.length + " employee records";
 print "";
 
 // Bind the array to the screen variable
@@ -103,9 +103,9 @@ print "";
 
 // Show the screen
 print "Displaying employee screen with TableView...";
-screen employeeScreen show;
+show screen employeeScreen;
 
 print "";
 print "Test completed!";
-print "The screen displayed an array of " + call json.length(employeeData) + " records in a scrollable table.";
+print "The screen displayed an array of " + employeeData.length + " records in a scrollable table.";
 print "Each record shows ID, Name, Department, Position, and Salary.";
