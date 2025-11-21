@@ -177,7 +177,8 @@ public class ConsoleConfig {
                 css.append(".console-in .styled-text-area,\n");
                 css.append(".console-in,\n");
                 css.append(".editor-ebs,\n");
-                css.append(".editor-text {\n");
+                css.append(".editor-text,\n");
+                css.append(".paragraph-box {\n");
                 css.append("    -fx-background-color: ").append(color).append(" !important;\n");
                 css.append("}\n\n");
             } else if ("text".equals(className)) {
