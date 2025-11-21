@@ -189,8 +189,12 @@ public class ConsoleConfig {
                 css.append("}\n\n");
             } else {
                 // Regular style class - need to target both regular and RichTextFX .text nodes
+                // Use multiple selectors to cover all possible contexts
                 css.append(".").append(className).append(",\n");
-                css.append(".text.").append(className).append(" {\n");
+                css.append(".text.").append(className).append(",\n");
+                css.append(".styled-text-area .text.").append(className).append(",\n");
+                css.append(".console-out .text.").append(className).append(",\n");
+                css.append(".console-in .text.").append(className).append(" {\n");
                 css.append("    -fx-fill: ").append(color).append(" !important;\n");
                 css.append("}\n\n");
             }

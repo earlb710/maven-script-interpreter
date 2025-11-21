@@ -1,21 +1,21 @@
 {
   "colors": {
-    "info": "#00ffff",
-    "comment": "#00ff00",
+    "info": "#000000",
+    "comment": "#006600",
     "error": "#ff0000",
-    "warn": "#ffaa00",
+    "warn": "#ff6600",
     "ok": "#00ff00",
-    "code": "#cccccc",
-    "datatype": "#ff00ff",
-    "data": "#ff69b4",
-    "keyword": "#00ffff",
-    "builtin": "#66cccc",
-    "literal": "#0088ff",
-    "identifier": "#ffffff",
-    "sql": "#00ff99",
-    "custom": "#ffff00",
-    "background": "#1a1a1a",
-    "text": "#f0f0f0",
-    "caret": "#ffff00"
+    "code": "#000000",
+    "datatype": "#9900ff",
+    "data": "#cc0066",
+    "keyword": "#0000ff",
+    "builtin": "#0066cc",
+    "literal": "#0066ff",
+    "identifier": "#000000",
+    "sql": "#009966",
+    "custom": "#996600",
+    "background": "#ffffff",
+    "text": "#000000",
+    "caret": "#000000"
   }
 }
