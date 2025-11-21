@@ -541,13 +541,16 @@ public class ScreenFactory {
                     // Only wrap input controls, not Label or Button which display their own text
                     if (!(control instanceof javafx.scene.control.Label)
                             && !(control instanceof javafx.scene.control.Button)) {
-                        nodeToAdd = createLabeledControl(metadata.labelText, metadata.labelTextAlignment, control, maxLabelWidth, metadata);
+                        // Use vertical layout for TableView, horizontal for others
+                        boolean useVerticalLayout = (control instanceof javafx.scene.control.TableView);
+                        nodeToAdd = createLabeledControl(metadata.labelText, metadata.labelTextAlignment, control, maxLabelWidth, metadata, useVerticalLayout);
                     }
                 } else {
                     // No label specified - wrap control in HBox with left padding to align with labeled controls
                     // This ensures controls without labels still align properly with labeled controls
                     if (!(control instanceof javafx.scene.control.Label)
-                            && !(control instanceof javafx.scene.control.Button)) {
+                            && !(control instanceof javafx.scene.control.Button)
+                            && !(control instanceof javafx.scene.control.TableView)) {
                         javafx.scene.layout.HBox alignmentBox = new javafx.scene.layout.HBox();
                         alignmentBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
                         // Add left padding equal to label width plus spacing to align with labeled controls
@@ -1483,6 +1486,8 @@ public class ScreenFactory {
         merged.labelText = base.labelText;
         merged.labelTextAlignment = base.labelTextAlignment;
         merged.options = base.options;
+        merged.columns = base.columns;
+        merged.displayRecords = base.displayRecords;
         merged.labelColor = base.labelColor;
         merged.labelBold = base.labelBold;
         merged.labelItalic = base.labelItalic;
@@ -1512,6 +1517,8 @@ public class ScreenFactory {
         if (overlay.labelText != null) merged.labelText = overlay.labelText;
         if (overlay.labelTextAlignment != null) merged.labelTextAlignment = overlay.labelTextAlignment;
         if (overlay.options != null) merged.options = overlay.options;
+        if (overlay.columns != null) merged.columns = overlay.columns;
+        if (overlay.displayRecords != null) merged.displayRecords = overlay.displayRecords;
         if (overlay.labelColor != null) merged.labelColor = overlay.labelColor;
         if (overlay.labelBold != null) merged.labelBold = overlay.labelBold;
         if (overlay.labelItalic != null) merged.labelItalic = overlay.labelItalic;
@@ -1701,11 +1708,26 @@ public class ScreenFactory {
      * information
      * @return A container with the label and control
      */
-    private static Node createLabeledControl(String labelText, String alignment, Node control, double minWidth, DisplayItem metadata) {
+    /**
+     * Creates a labeled control by wrapping a control with its label.
+     * For most controls, the label is placed horizontally (on the left).
+     * For TableView and similar large controls, the label is placed vertically (on top).
+     *
+     * @param labelText The text for the label
+     * @param alignment The alignment of the label ("left", "center", "right")
+     * @param control The control to wrap
+     * @param minWidth The minimum width for the label
+     * @param metadata DisplayItem metadata containing styling information
+     * @param useVerticalLayout If true, place label above control (VBox); if false, place label beside control (HBox)
+     * @return The wrapped control with label
+     */
+    private static Node createLabeledControl(String labelText, String alignment, Node control, double minWidth, DisplayItem metadata, boolean useVerticalLayout) {
         javafx.scene.control.Label label = new javafx.scene.control.Label(labelText);
 
-        // Build label style with right alignment, padding, and default text color
-        StringBuilder styleBuilder = new StringBuilder("-fx-font-weight: normal; -fx-padding: 0 10 0 0; -fx-alignment: center-right; -fx-text-fill: #333333;");
+        // Build label style with default styling
+        String defaultAlignment = useVerticalLayout ? "center-left" : "center-right";
+        String defaultPadding = useVerticalLayout ? "0 0 5 0" : "0 10 0 0";  // bottom padding for vertical, right padding for horizontal
+        StringBuilder styleBuilder = new StringBuilder("-fx-font-weight: normal; -fx-padding: " + defaultPadding + "; -fx-alignment: " + defaultAlignment + "; -fx-text-fill: #333333;");
 
         // Apply label styling from metadata
         if (metadata != null) {
@@ -1735,38 +1757,54 @@ public class ScreenFactory {
         }
 
         label.setStyle(styleBuilder.toString());
-        label.setMinWidth(minWidth); // Use calculated minimum width to align labels underneath each other
-        label.setMaxWidth(Region.USE_PREF_SIZE);
+        
+        if (useVerticalLayout) {
+            // Vertical layout: label on top, control below
+            label.setMaxWidth(Double.MAX_VALUE);  // Allow label to stretch full width
+            javafx.scene.layout.VBox container = new javafx.scene.layout.VBox(0);
+            container.setAlignment(javafx.geometry.Pos.TOP_LEFT);
+            container.setPickOnBounds(false);
+            container.getChildren().addAll(label, control);
+            
+            // Allow the control (e.g., TableView) to grow vertically within the VBox
+            javafx.scene.layout.VBox.setVgrow(control, javafx.scene.layout.Priority.ALWAYS);
+            
+            return container;
+        } else {
+            // Horizontal layout: original behavior
+            label.setMinWidth(minWidth); // Use calculated minimum width to align labels underneath each other
+            label.setMaxWidth(Region.USE_PREF_SIZE);
 
-        // Determine alignment (default to left if not specified)
-        String actualAlignment = (alignment != null) ? alignment.toLowerCase() : "left";
+            // Determine alignment (default to left if not specified)
+            String actualAlignment = (alignment != null) ? alignment.toLowerCase() : "left";
 
-        // Create container based on alignment
-        javafx.scene.layout.HBox container = new javafx.scene.layout.HBox(5);
-        container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-        // Make container pick on bounds so tooltips on child controls work properly
-        container.setPickOnBounds(false);
+            // Create container based on alignment
+            javafx.scene.layout.HBox container = new javafx.scene.layout.HBox(5);
+            container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+            // Make container pick on bounds so tooltips on child controls work properly
+            container.setPickOnBounds(false);
 
-        switch (actualAlignment) {
-            case "right":
-                // Control first, then label on the right
-                container.getChildren().addAll(control, label);
-                container.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
-                break;
-            case "center":
-                // Center both
-                container.setAlignment(javafx.geometry.Pos.CENTER);
-                container.getChildren().addAll(label, control);
-                break;
-            case "left":
-            default:
-                // Label first (on the left), then control
-                container.getChildren().addAll(label, control);
-                container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-                break;
+            switch (actualAlignment) {
+                case "right":
+                    // Control first, then label on the right
+                    container.getChildren().addAll(control, label);
+                    container.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
+                    break;
+                case "center":
+                    // Center both
+                    container.setAlignment(javafx.geometry.Pos.CENTER);
+                    container.getChildren().addAll(label, control);
+                    break;
+                case "left":
+                default:
+                    // Label first (on the left), then control
+                    container.getChildren().addAll(label, control);
+                    container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+                    break;
+            }
+
+            return container;
         }
-
-        return container;
     }
 
     /**
@@ -1852,6 +1890,37 @@ public class ScreenFactory {
             }
         } else if (control instanceof javafx.scene.control.Label) {
             ((javafx.scene.control.Label) control).setText(value != null ? String.valueOf(value) : "");
+        } else if (control instanceof javafx.scene.control.TableView) {
+            // Handle TableView - expecting value to be an array/list of Maps
+            @SuppressWarnings("unchecked")
+            javafx.scene.control.TableView<java.util.Map<String, Object>> tableView = 
+                (javafx.scene.control.TableView<java.util.Map<String, Object>>) control;
+            
+            // Clear existing items
+            tableView.getItems().clear();
+            
+            // Add new items if value is a collection
+            if (value instanceof java.util.List) {
+                @SuppressWarnings("unchecked")
+                java.util.List<?> list = (java.util.List<?>) value;
+                for (Object item : list) {
+                    if (item instanceof java.util.Map) {
+                        @SuppressWarnings("unchecked")
+                        java.util.Map<String, Object> mapItem = (java.util.Map<String, Object>) item;
+                        tableView.getItems().add(mapItem);
+                    }
+                }
+            } else if (value instanceof com.eb.script.arrays.ArrayDynamic) {
+                // Handle EBS array type
+                com.eb.script.arrays.ArrayDynamic array = (com.eb.script.arrays.ArrayDynamic) value;
+                for (Object item : array.getAll()) {
+                    if (item instanceof java.util.Map) {
+                        @SuppressWarnings("unchecked")
+                        java.util.Map<String, Object> mapItem = (java.util.Map<String, Object>) item;
+                        tableView.getItems().add(mapItem);
+                    }
+                }
+            }
         }
     }
     
@@ -1984,23 +2053,69 @@ public class ScreenFactory {
         }
         
         if (control instanceof javafx.scene.control.TextField) {
-            ((javafx.scene.control.TextField) control).textProperty().addListener((obs, oldVal, newVal) -> {
+            javafx.scene.control.TextField textField = (javafx.scene.control.TextField) control;
+            textField.textProperty().addListener((obs, oldVal, newVal) -> {
+                // Apply case transformation if specified
+                String transformedValue = newVal;
+                if (metadata != null && metadata.caseFormat != null) {
+                    if ("upper".equals(metadata.caseFormat)) {
+                        transformedValue = newVal.toUpperCase();
+                    } else if ("lower".equals(metadata.caseFormat)) {
+                        transformedValue = newVal.toLowerCase();
+                    }
+                    // "mixed" or any other value means no transformation
+                    
+                    // Update the text field if transformation occurred
+                    if (!transformedValue.equals(newVal)) {
+                        // Save cursor position
+                        int caretPosition = textField.getCaretPosition();
+                        textField.setText(transformedValue);
+                        // Restore cursor position (adjust if text changed length)
+                        int newCaretPosition = Math.min(caretPosition, transformedValue.length());
+                        textField.positionCaret(newCaretPosition);
+                        return; // Listener will be called again with transformed value
+                    }
+                }
+                
                 // Convert the string value to the appropriate type if type info is available
-                Object convertedValue = newVal;
+                Object convertedValue = transformedValue;
                 if (varTypes != null && varTypes.containsKey(varName)) {
                     DataType type = varTypes.get(varName);
                     try {
-                        convertedValue = type.convertValue(newVal);
+                        convertedValue = type.convertValue(transformedValue);
                     } catch (Exception e) {
                         // If conversion fails, keep as string
-                        System.err.println("Warning: Could not convert '" + newVal + "' to " + type + " for variable '" + varName + "'");
+                        System.err.println("Warning: Could not convert '" + transformedValue + "' to " + type + " for variable '" + varName + "'");
                     }
                 }
                 screenVars.put(varName, convertedValue);
             });
         } else if (control instanceof javafx.scene.control.TextArea) {
-            ((javafx.scene.control.TextArea) control).textProperty().addListener((obs, oldVal, newVal) -> {
-                screenVars.put(varName, newVal);
+            javafx.scene.control.TextArea textArea = (javafx.scene.control.TextArea) control;
+            textArea.textProperty().addListener((obs, oldVal, newVal) -> {
+                // Apply case transformation if specified
+                String transformedValue = newVal;
+                if (metadata != null && metadata.caseFormat != null) {
+                    if ("upper".equals(metadata.caseFormat)) {
+                        transformedValue = newVal.toUpperCase();
+                    } else if ("lower".equals(metadata.caseFormat)) {
+                        transformedValue = newVal.toLowerCase();
+                    }
+                    // "mixed" or any other value means no transformation
+                    
+                    // Update the text area if transformation occurred
+                    if (!transformedValue.equals(newVal)) {
+                        // Save cursor position
+                        int caretPosition = textArea.getCaretPosition();
+                        textArea.setText(transformedValue);
+                        // Restore cursor position (adjust if text changed length)
+                        int newCaretPosition = Math.min(caretPosition, transformedValue.length());
+                        textArea.positionCaret(newCaretPosition);
+                        return; // Listener will be called again with transformed value
+                    }
+                }
+                
+                screenVars.put(varName, transformedValue);
             });
         } else if (control instanceof javafx.scene.control.CheckBox) {
             ((javafx.scene.control.CheckBox) control).selectedProperty().addListener((obs, oldVal, newVal) -> {

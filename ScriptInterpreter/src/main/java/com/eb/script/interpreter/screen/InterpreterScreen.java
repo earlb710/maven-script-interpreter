@@ -219,6 +219,7 @@ public class InterpreterScreen {
                         
                         // Find which set this variable belongs to by checking varItemsMap
                         String setName = null;
+                        Var currentVar = null;
                         for (Map.Entry<String, Var> entry : varItemsMap.entrySet()) {
                             String key = entry.getKey(); // format: "setname.varname"
                             Var var = entry.getValue();
@@ -226,6 +227,7 @@ public class InterpreterScreen {
                             if (key.endsWith("." + varName) && var.getName().equalsIgnoreCase(varName)) {
                                 // Extract setname from the key
                                 setName = key.substring(0, key.lastIndexOf("."));
+                                currentVar = var;
                                 break;
                             }
                         }
@@ -278,10 +280,26 @@ public class InterpreterScreen {
                             switch (item.displayItem.itemType) {
                                 case TEXTFIELD:
                                 case PASSWORDFIELD:
-                                    item.prefWidth = "300";
+                                    // Calculate width based on minChar/maxChar if available
+                                    if (currentVar != null && (currentVar.getMinChar() != null || currentVar.getMaxChar() != null)) {
+                                        // Use maxChar if available, otherwise minChar
+                                        Integer charCount = currentVar.getMaxChar() != null ? currentVar.getMaxChar() : currentVar.getMinChar();
+                                        // Approximate 8 pixels per character + 20 for padding
+                                        int calculatedWidth = (charCount * 8) + 20;
+                                        item.prefWidth = String.valueOf(Math.max(calculatedWidth, 80)); // Minimum 80 pixels
+                                    } else {
+                                        item.prefWidth = "300";
+                                    }
                                     break;
                                 case TEXTAREA:
-                                    item.prefWidth = "400";
+                                    // Calculate width based on maxChar if available
+                                    if (currentVar != null && currentVar.getMaxChar() != null) {
+                                        // Approximate 8 pixels per character + 20 for padding
+                                        int calculatedWidth = (currentVar.getMaxChar() * 8) + 20;
+                                        item.prefWidth = String.valueOf(Math.max(calculatedWidth, 200)); // Minimum 200 pixels
+                                    } else {
+                                        item.prefWidth = "400";
+                                    }
                                     item.prefHeight = "100";
                                     break;
                                 case SLIDER:
@@ -296,6 +314,23 @@ public class InterpreterScreen {
                                     break;
                                 case DATEPICKER:
                                     item.prefWidth = "200";
+                                    break;
+                                case TABLEVIEW:
+                                    item.prefWidth = "800";
+                                    item.maxWidth = "USE_COMPUTED_SIZE";
+                                    item.hgrow = "ALWAYS";
+                                    
+                                    // If displayRecords is specified, use fixed height; otherwise allow growth
+                                    if (item.displayItem != null && item.displayItem.displayRecords != null && item.displayItem.displayRecords > 0) {
+                                        // Fixed height mode - displayRecords specifies exact number of visible rows
+                                        // Don't set prefHeight/maxHeight here - AreaItemFactory will handle it
+                                        item.vgrow = "NEVER";
+                                    } else {
+                                        // Dynamic height mode - TableView can grow with available space
+                                        item.prefHeight = "400";
+                                        item.maxHeight = "USE_COMPUTED_SIZE";
+                                        item.vgrow = "ALWAYS";
+                                    }
                                     break;
                                 default:
                                     // Let other controls use default sizing
@@ -1170,6 +1205,45 @@ public class InterpreterScreen {
             }
         }
 
+        // Extract columns for TableView
+        if (displayDef.containsKey("columns")) {
+            Object columnsObj = displayDef.get("columns");
+            metadata.columns = new ArrayList<>();
+            
+            List<Object> columnList = null;
+            if (columnsObj instanceof ArrayDynamic) {
+                columnList = ((ArrayDynamic) columnsObj).getAll();
+            } else if (columnsObj instanceof List) {
+                @SuppressWarnings("unchecked")
+                List<Object> list = (List<Object>) columnsObj;
+                columnList = list;
+            }
+            
+            if (columnList != null) {
+                for (Object item : columnList) {
+                    if (item instanceof Map) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> colDef = (Map<String, Object>) item;
+                        DisplayItem.TableColumn column = parseTableColumn(colDef);
+                        metadata.columns.add(column);
+                    }
+                }
+            }
+        }
+        
+        // Extract displayRecords for TableView height calculation
+        if (displayDef.containsKey("displayRecords")) {
+            Object displayRecordsObj = displayDef.get("displayRecords");
+            if (displayRecordsObj instanceof Number) {
+                metadata.displayRecords = ((Number) displayRecordsObj).intValue();
+            }
+        } else if (displayDef.containsKey("displayrecords")) {
+            Object displayRecordsObj = displayDef.get("displayrecords");
+            if (displayRecordsObj instanceof Number) {
+                metadata.displayRecords = ((Number) displayRecordsObj).intValue();
+            }
+        }
+
         // Extract label styling properties (for the label wrapper text)
         if (displayDef.containsKey("labelColor")) {
             metadata.labelColor = String.valueOf(displayDef.get("labelColor"));
@@ -1281,6 +1355,34 @@ public class InterpreterScreen {
         metadata.screenName = screenName;
 
         return metadata;
+    }
+    
+    /**
+     * Helper method to parse a table column definition from JSON
+     */
+    private DisplayItem.TableColumn parseTableColumn(Map<String, Object> colDef) {
+        DisplayItem.TableColumn column = new DisplayItem.TableColumn();
+        
+        if (colDef.containsKey("name")) {
+            column.name = String.valueOf(colDef.get("name"));
+        }
+        if (colDef.containsKey("field")) {
+            column.field = String.valueOf(colDef.get("field"));
+        }
+        if (colDef.containsKey("type")) {
+            column.type = String.valueOf(colDef.get("type"));
+        }
+        if (colDef.containsKey("width")) {
+            Object widthObj = colDef.get("width");
+            if (widthObj instanceof Number) {
+                column.width = ((Number) widthObj).intValue();
+            }
+        }
+        if (colDef.containsKey("alignment")) {
+            column.alignment = String.valueOf(colDef.get("alignment"));
+        }
+        
+        return column;
     }
 
     /**
@@ -1618,6 +1720,35 @@ public class InterpreterScreen {
                 String varName = varDef.containsKey("name") ? String.valueOf(varDef.get("name")).toLowerCase() : null;
                 String varTypeStr = varDef.containsKey("type") ? String.valueOf(varDef.get("type")).toLowerCase() : null;
                 Object defaultValue = varDef.get("default");
+                
+                // Extract minChar and maxChar if present
+                Integer minChar = null;
+                Integer maxChar = null;
+                if (varDef.containsKey("minChar")) {
+                    Object minCharObj = varDef.get("minChar");
+                    if (minCharObj instanceof Number) {
+                        minChar = ((Number) minCharObj).intValue();
+                    }
+                }
+                if (varDef.containsKey("maxChar")) {
+                    Object maxCharObj = varDef.get("maxChar");
+                    if (maxCharObj instanceof Number) {
+                        maxChar = ((Number) maxCharObj).intValue();
+                    }
+                }
+                
+                // Extract case property if present
+                String textCase = null;
+                if (varDef.containsKey("case")) {
+                    Object caseObj = varDef.get("case");
+                    if (caseObj != null) {
+                        String caseStr = String.valueOf(caseObj).toLowerCase();
+                        // Validate case value
+                        if (caseStr.equals("upper") || caseStr.equals("lower") || caseStr.equals("mixed")) {
+                            textCase = caseStr;
+                        }
+                    }
+                }
 
                 if (varName == null || varName.isEmpty()) {
                     throw interpreter.error(line, "Variable definition in screen '" + screenName + "' must have a 'name' property.");
@@ -1642,6 +1773,9 @@ public class InterpreterScreen {
                 Var var = new Var(varName, varType, defaultValue);
                 var.setValue(value);
                 var.setSetName(setName);
+                var.setMinChar(minChar);
+                var.setMaxChar(maxChar);
+                var.setTextCase(textCase);
 
                 // Process optional display metadata
                 if (varDef.containsKey("display")) {
@@ -1652,6 +1786,12 @@ public class InterpreterScreen {
 
                         // Parse and store display metadata
                         DisplayItem displayItem = parseDisplayItem(displayDef, screenName);
+                        
+                        // Copy textCase from Var to DisplayItem if not already set
+                        if (displayItem.caseFormat == null && textCase != null) {
+                            displayItem.caseFormat = textCase;
+                        }
+                        
                         var.setDisplayItem(displayItem);
                         
                         // Store display metadata with the old key format for backward compatibility

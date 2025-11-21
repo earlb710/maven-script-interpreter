@@ -66,6 +66,37 @@ public class DisplayItem {
     public String source = "data";
     // Status of the item: "clean" (unchanged) or "changed" (modified from original)
     public String status = "clean";
+    // Column definitions for TableView - List of column metadata
+    public List<TableColumn> columns;
+    // Number of records to display in TableView (for height calculation)
+    public Integer displayRecords;
+    
+    /**
+     * Inner class to define a table column
+     */
+    public static class TableColumn {
+        public String name;        // Column name/header
+        public String field;       // Field name in the record (JSON key)
+        public String type;        // Data type: "string", "int", "double", "bool"
+        public Integer width;      // Column width (optional)
+        public String alignment;   // Text alignment: "left", "center", "right"
+        
+        public TableColumn() {}
+        
+        public TableColumn(String name, String field) {
+            this.name = name;
+            this.field = field;
+            this.type = "string";
+            this.alignment = "left";
+        }
+        
+        public TableColumn(String name, String field, String type) {
+            this.name = name;
+            this.field = field;
+            this.type = type;
+            this.alignment = "left";
+        }
+    }
     
     @Override
     public String toString() {
@@ -112,6 +143,8 @@ public class DisplayItem {
                   "-fx-padding: 2; -fx-background-color: white; -fx-border-color: #cccccc; -fx-border-width: 1;"),
         LISTVIEW("listview", "screen-item-listview",
                  "-fx-border-color: #cccccc; -fx-border-width: 1;"),
+        TABLEVIEW("tableview", "screen-item-tableview",
+                  "-fx-border-color: #cccccc; -fx-border-width: 1;"),
         
         // Numeric Controls
         SPINNER("spinner", "screen-item-spinner",

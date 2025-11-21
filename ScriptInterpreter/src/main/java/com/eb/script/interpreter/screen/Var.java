@@ -30,6 +30,15 @@ public class Var {
     // Reference to the set this variable belongs to
     private String setName;
     
+    // Minimum character length for input controls
+    private Integer minChar;
+    
+    // Maximum character length for input controls
+    private Integer maxChar;
+    
+    // Text case transformation: "upper", "lower", or "mixed" (optional)
+    private String textCase;
+    
     /**
      * Default constructor
      */
@@ -127,6 +136,30 @@ public class Var {
     
     public void setSetName(String setName) {
         this.setName = setName;
+    }
+    
+    public Integer getMinChar() {
+        return minChar;
+    }
+    
+    public void setMinChar(Integer minChar) {
+        this.minChar = minChar;
+    }
+    
+    public Integer getMaxChar() {
+        return maxChar;
+    }
+    
+    public void setMaxChar(Integer maxChar) {
+        this.maxChar = maxChar;
+    }
+    
+    public String getTextCase() {
+        return textCase;
+    }
+    
+    public void setTextCase(String textCase) {
+        this.textCase = textCase;
     }
     
     /**

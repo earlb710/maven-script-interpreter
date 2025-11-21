@@ -96,6 +96,76 @@ public class AreaItemFactory {
                 return choiceBox;
             case LISTVIEW:
                 return new ListView<>();
+             case TABLEVIEW:
+                TableView<java.util.Map<String, Object>> tableView = new TableView<>();
+                tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+                tableView.setPlaceholder(new javafx.scene.control.Label("No data available"));
+                
+                // Calculate height based on displayRecords if specified
+                if (metadata != null && metadata.displayRecords != null && metadata.displayRecords > 0) {
+                    // Row height is approximately 25-30 pixels, header is ~30 pixels
+                    // Use 28 pixels per row + 32 for header + 2 for borders
+                    double calculatedHeight = (metadata.displayRecords * 28.0) + 34.0;
+                    // When displayRecords is specified, fix the height to show exactly that many records
+                    tableView.setPrefHeight(calculatedHeight);
+                    tableView.setMinHeight(calculatedHeight);
+                    tableView.setMaxHeight(calculatedHeight);
+                }
+                
+                // Create columns based on metadata
+                if (metadata != null && metadata.columns != null && !metadata.columns.isEmpty()) {
+                    for (DisplayItem.TableColumn colDef : metadata.columns) {
+                        TableColumn<java.util.Map<String, Object>, String> column = 
+                            new TableColumn<>(colDef.name != null ? colDef.name : colDef.field);
+                        
+                        // Set cell value factory to extract field from the Map
+                        String fieldName = colDef.field;
+                        column.setCellValueFactory(cellData -> {
+                            java.util.Map<String, Object> row = cellData.getValue();
+                            Object value = row.get(fieldName);
+                            return new javafx.beans.property.SimpleStringProperty(
+                                value != null ? String.valueOf(value) : ""
+                            );
+                        });
+                        
+                        // Set column width if specified, otherwise let it auto-calculate
+                        if (colDef.width != null && colDef.width > 0) {
+                            column.setPrefWidth(colDef.width);
+                        } else {
+                            // Calculate minimum width based on column name
+                            // Approximate 8 pixels per character + 20 for padding
+                            String headerText = colDef.name != null ? colDef.name : colDef.field;
+                            if (headerText != null) {
+                                double minWidth = (headerText.length() * 8.0) + 20.0;
+                                column.setMinWidth(Math.max(minWidth, 60.0)); // At least 60 pixels
+                            }
+                        }
+                        
+                        // Set alignment if specified
+                        if (colDef.alignment != null) {
+                            // Convert alignment to JavaFX CSS format
+                            String cssAlignment;
+                            switch (colDef.alignment.toLowerCase()) {
+                                case "left":
+                                    cssAlignment = "CENTER_LEFT";
+                                    break;
+                                case "right":
+                                    cssAlignment = "CENTER_RIGHT";
+                                    break;
+                                case "center":
+                                    cssAlignment = "CENTER";
+                                    break;
+                                default:
+                                    cssAlignment = "CENTER_LEFT";
+                            }
+                            column.setStyle("-fx-alignment: " + cssAlignment + ";");
+                        }
+                        
+                        tableView.getColumns().add(column);
+                    }
+                }
+                
+                return tableView;
 
             // Numeric Controls
             case SPINNER:
