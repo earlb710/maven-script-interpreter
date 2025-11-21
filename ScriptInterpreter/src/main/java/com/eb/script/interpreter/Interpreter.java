@@ -274,15 +274,19 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             Object value = evaluate(stmt.initializer);
 
             if (stmt.varType != null) {
-                value = stmt.varType.convertValue(value);
-
                 DataType expectedType = stmt.varType;
                 if (stmt.initializer instanceof ArrayExpression array) {
+                    // For array declarations, don't convert the array itself
+                    // The array already has the correct element type from visitArrayInitExpression
                     if (!Util.checkDataType(array.dataType, value)) {
                         throw error(stmt.getLine(), "Array type mismatch: expected " + expectedType + " for variable '" + stmt.name + "'");
                     }
-                } else if (!Util.checkDataType(expectedType, value)) {
-                    throw error(stmt.getLine(), "Type mismatch: expected " + expectedType + " for variable '" + stmt.name + "'");
+                } else {
+                    // For non-array values, convert to the expected type
+                    value = stmt.varType.convertValue(value);
+                    if (!Util.checkDataType(expectedType, value)) {
+                        throw error(stmt.getLine(), "Type mismatch: expected " + expectedType + " for variable '" + stmt.name + "'");
+                    }
                 }
             }
             environment().getEnvironmentValues().define(stmt.name, value);
