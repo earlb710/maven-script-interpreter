@@ -101,17 +101,6 @@ public class AreaItemFactory {
                 tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
                 tableView.setPlaceholder(new javafx.scene.control.Label("No data available"));
                 
-                // Debug: Check if metadata and columns exist
-                if (metadata == null) {
-                    System.err.println("WARNING: TableView metadata is null");
-                } else if (metadata.columns == null) {
-                    System.err.println("WARNING: TableView columns is null");
-                } else if (metadata.columns.isEmpty()) {
-                    System.err.println("WARNING: TableView columns is empty");
-                } else {
-                    System.out.println("DEBUG: TableView has " + metadata.columns.size() + " columns");
-                }
-                
                 // Create columns based on metadata
                 if (metadata != null && metadata.columns != null && !metadata.columns.isEmpty()) {
                     for (DisplayItem.TableColumn colDef : metadata.columns) {
@@ -155,16 +144,6 @@ public class AreaItemFactory {
                         
                         tableView.getColumns().add(column);
                     }
-                } else {
-                    // No columns defined - add a placeholder column
-                    TableColumn<java.util.Map<String, Object>, String> placeholderColumn = 
-                        new TableColumn<>("Data");
-                    placeholderColumn.setCellValueFactory(cellData -> 
-                        new javafx.beans.property.SimpleStringProperty(
-                            cellData.getValue().toString()
-                        )
-                    );
-                    tableView.getColumns().add(placeholderColumn);
                 }
                 
                 return tableView;

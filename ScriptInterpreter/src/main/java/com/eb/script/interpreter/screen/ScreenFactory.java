@@ -1483,6 +1483,7 @@ public class ScreenFactory {
         merged.labelText = base.labelText;
         merged.labelTextAlignment = base.labelTextAlignment;
         merged.options = base.options;
+        merged.columns = base.columns;
         merged.labelColor = base.labelColor;
         merged.labelBold = base.labelBold;
         merged.labelItalic = base.labelItalic;
@@ -1512,6 +1513,7 @@ public class ScreenFactory {
         if (overlay.labelText != null) merged.labelText = overlay.labelText;
         if (overlay.labelTextAlignment != null) merged.labelTextAlignment = overlay.labelTextAlignment;
         if (overlay.options != null) merged.options = overlay.options;
+        if (overlay.columns != null) merged.columns = overlay.columns;
         if (overlay.labelColor != null) merged.labelColor = overlay.labelColor;
         if (overlay.labelBold != null) merged.labelBold = overlay.labelBold;
         if (overlay.labelItalic != null) merged.labelItalic = overlay.labelItalic;

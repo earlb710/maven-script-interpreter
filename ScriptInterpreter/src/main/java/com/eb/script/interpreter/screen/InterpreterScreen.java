@@ -1179,20 +1179,15 @@ public class InterpreterScreen {
         // Extract columns for TableView
         if (displayDef.containsKey("columns")) {
             Object columnsObj = displayDef.get("columns");
-            System.out.println("DEBUG: Found 'columns' key in displayDef, value type: " + 
-                (columnsObj != null ? columnsObj.getClass().getName() : "null"));
-            
             metadata.columns = new ArrayList<>();
             
             List<Object> columnList = null;
             if (columnsObj instanceof ArrayDynamic) {
                 columnList = ((ArrayDynamic) columnsObj).getAll();
-                System.out.println("DEBUG: Columns is ArrayDynamic with " + columnList.size() + " items");
             } else if (columnsObj instanceof List) {
                 @SuppressWarnings("unchecked")
                 List<Object> list = (List<Object>) columnsObj;
                 columnList = list;
-                System.out.println("DEBUG: Columns is List with " + columnList.size() + " items");
             }
             
             if (columnList != null) {
@@ -1202,13 +1197,9 @@ public class InterpreterScreen {
                         Map<String, Object> colDef = (Map<String, Object>) item;
                         DisplayItem.TableColumn column = parseTableColumn(colDef);
                         metadata.columns.add(column);
-                        System.out.println("DEBUG: Added column: " + column.name + " (field: " + column.field + ")");
                     }
                 }
             }
-            System.out.println("DEBUG: Total columns parsed: " + metadata.columns.size());
-        } else {
-            System.out.println("DEBUG: No 'columns' key found in displayDef");
         }
 
         // Extract label styling properties (for the label wrapper text)
