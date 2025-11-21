@@ -98,31 +98,42 @@ public class InterpreterArray {
             return DataType.ARRAY;  // Generic array for empty literals
         }
         
-        // Evaluate first non-null element to determine type
+        // Evaluate all elements to check if they're all the same type
+        DataType inferredType = null;
+        
         for (Expression element : expr.elements) {
             if (element != null) {
                 Object value = interpreter.evaluate(element);
                 if (value != null) {
-                    // Return the DataType that matches this value
+                    // Determine the type of this element
+                    DataType elementType = null;
                     if (value instanceof Integer || value instanceof Long) {
-                        return DataType.INTEGER;
+                        elementType = DataType.INTEGER;
                     } else if (value instanceof Float || value instanceof Double) {
-                        return DataType.DOUBLE;
+                        elementType = DataType.DOUBLE;
                     } else if (value instanceof Boolean) {
-                        return DataType.BOOL;
+                        elementType = DataType.BOOL;
                     } else if (value instanceof String) {
-                        return DataType.STRING;
+                        elementType = DataType.STRING;
                     } else if (value instanceof Byte) {
-                        return DataType.BYTE;
+                        elementType = DataType.BYTE;
                     } else if (value instanceof ArrayDef) {
+                        elementType = DataType.ARRAY;
+                    }
+                    
+                    // Check consistency with previous elements
+                    if (inferredType == null) {
+                        inferredType = elementType;
+                    } else if (elementType != null && inferredType != elementType) {
+                        // Mixed types detected - use generic array
                         return DataType.ARRAY;
                     }
                 }
             }
         }
         
-        // Default to generic array if we can't infer
-        return DataType.ARRAY;
+        // Return the inferred type, or generic if we couldn't determine
+        return inferredType != null ? inferredType : DataType.ARRAY;
     }
 
     /**
