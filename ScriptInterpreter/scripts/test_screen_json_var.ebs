@@ -1,0 +1,91 @@
+// Test Script: Screen JSON Variable Registration
+// Description: Test that screen definitions are registered as JSON variables
+// Author: EBS Test Suite
+// Date: 2025-11-21
+
+print "Test: Screen JSON Variable Registration";
+print "========================================";
+print "";
+
+// Define a simple screen
+screen testScreen = {
+    "title": "Test Screen",
+    "width": 600,
+    "height": 400,
+    "maximize": false,
+    "vars": [
+        {
+            "name": "username",
+            "type": "string",
+            "default": "John",
+            "display": {
+                "type": "textfield",
+                "labelText": "Username:",
+                "promptHelp": "Enter username"
+            }
+        },
+        {
+            "name": "age",
+            "type": "int",
+            "default": 25,
+            "display": {
+                "type": "spinner",
+                "min": 0,
+                "max": 120,
+                "labelText": "Age:"
+            }
+        }
+    ]
+};
+
+print "Screen definition created successfully.";
+print "";
+
+// Test: Access the screen JSON as a variable
+print "Test 1: Access screen JSON properties";
+print "--------------------------------------";
+var title: string = call json.get(testScreen, "title");
+print "Screen title: " + title;
+var width: int = call json.getint(testScreen, "width");
+print "Screen width: " + width;
+var height: int = call json.getint(testScreen, "height");
+print "Screen height: " + height;
+var maximize: bool = call json.getbool(testScreen, "maximize");
+print "Screen maximize: " + maximize;
+print "";
+
+// Test: Access nested properties (vars array)
+print "Test 2: Access vars array";
+print "-------------------------";
+var varsArray: json = call json.get(testScreen, "vars");
+print "Vars is a JSON array with screen variable definitions";
+print "";
+
+// Test: Access first var in array directly
+print "Test 3: Access first var properties";
+print "------------------------------------";
+var firstVar: json = varsArray[0];
+var firstName: string = call json.get(firstVar, "name");
+print "First var name: " + firstName;
+var firstType: string = call json.get(firstVar, "type");
+print "First var type: " + firstType;
+var firstDefault: string = call json.get(firstVar, "default");
+print "First var default: " + firstDefault;
+print "";
+
+// Test: Access second var in array directly
+print "Test 4: Access second var properties";
+print "-------------------------------------";
+var secondVar: json = varsArray[1];
+var secondName: string = call json.get(secondVar, "name");
+print "Second var name: " + secondName;
+var secondType: string = call json.get(secondVar, "type");
+print "Second var type: " + secondType;
+var secondDefault: int = call json.getint(secondVar, "default");
+print "Second var default: " + secondDefault;
+print "";
+
+print "All tests passed!";
+print "";
+print "The screen JSON has been successfully registered as a variable.";
+print "You can access it using: call json.get(testScreen, \"propertyName\")";

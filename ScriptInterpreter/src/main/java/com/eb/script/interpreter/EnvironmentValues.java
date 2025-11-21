@@ -24,7 +24,7 @@ public class EnvironmentValues {
         values.clear();
     }
 
-    void define(String name, Object value) {
+    public void define(String name, Object value) {
         values.put(name, value);
     }
 
