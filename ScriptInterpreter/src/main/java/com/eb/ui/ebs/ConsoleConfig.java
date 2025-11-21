@@ -188,8 +188,9 @@ public class ConsoleConfig {
                 css.append("    -fx-stroke: ").append(color).append(" !important;\n");
                 css.append("}\n\n");
             } else {
-                // Regular style class
-                css.append(".").append(className).append(" {\n");
+                // Regular style class - need to target both regular and RichTextFX .text nodes
+                css.append(".").append(className).append(",\n");
+                css.append(".text.").append(className).append(" {\n");
                 css.append("    -fx-fill: ").append(color).append(" !important;\n");
                 css.append("}\n\n");
             }
