@@ -78,7 +78,9 @@ public class InterpreterArray {
             }
 
         } else {
-            target = new ArrayDynamic(DataType.STRING);
+            // No target specified - infer type from literal elements
+            DataType inferredType = inferArrayTypeFromLiteral(expr);
+            target = new ArrayDynamic(inferredType);
         }
 
         // Recursively copy content, converting leaf strings and expanding as needed
@@ -86,6 +88,41 @@ public class InterpreterArray {
 
         // Return the target for chaining if needed
         return target;
+    }
+    
+    /**
+     * Infer the element type from an array literal's elements
+     */
+    private DataType inferArrayTypeFromLiteral(ArrayLiteralExpression expr) throws InterpreterError {
+        if (expr.elements == null || expr.elements.length == 0) {
+            return DataType.ARRAY;  // Generic array for empty literals
+        }
+        
+        // Evaluate first non-null element to determine type
+        for (Expression element : expr.elements) {
+            if (element != null) {
+                Object value = interpreter.evaluate(element);
+                if (value != null) {
+                    // Return the DataType that matches this value
+                    if (value instanceof Integer || value instanceof Long) {
+                        return DataType.INTEGER;
+                    } else if (value instanceof Float || value instanceof Double) {
+                        return DataType.DOUBLE;
+                    } else if (value instanceof Boolean) {
+                        return DataType.BOOL;
+                    } else if (value instanceof String) {
+                        return DataType.STRING;
+                    } else if (value instanceof Byte) {
+                        return DataType.BYTE;
+                    } else if (value instanceof ArrayDef) {
+                        return DataType.ARRAY;
+                    }
+                }
+            }
+        }
+        
+        // Default to generic array if we can't infer
+        return DataType.ARRAY;
     }
 
     /**
