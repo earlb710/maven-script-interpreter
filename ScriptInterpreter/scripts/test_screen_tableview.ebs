@@ -70,8 +70,8 @@ screen employeeScreen = {
 
 print "Creating sample employee data...";
 
-// Create sample employee records as JSON objects
-employeeData = [
+// Create sample employee records as JSON array using jsonfromstring
+var jsonString = '[
     {"id": 1, "name": "John Smith", "department": "Engineering", "position": "Software Engineer", "salary": 85000},
     {"id": 2, "name": "Jane Doe", "department": "Marketing", "position": "Marketing Manager", "salary": 92000},
     {"id": 3, "name": "Bob Johnson", "department": "Engineering", "position": "Senior Developer", "salary": 98000},
@@ -87,9 +87,11 @@ employeeData = [
     {"id": 13, "name": "Karen White", "department": "HR", "position": "Recruiter", "salary": 62000},
     {"id": 14, "name": "Leo Garcia", "department": "Finance", "position": "Accountant", "salary": 70000},
     {"id": 15, "name": "Maria Rodriguez", "department": "Engineering", "position": "Frontend Developer", "salary": 88000}
-];
+]';
 
-print "Created " + employeeData.length + " employee records";
+employeeData = call json.jsonfromstring(jsonString);
+
+print "Created " + call json.length(employeeData) + " employee records";
 print "";
 
 // Bind the array to the screen variable
@@ -105,5 +107,5 @@ screen employeeScreen show;
 
 print "";
 print "Test completed!";
-print "The screen displayed an array of " + employeeData.length + " records in a scrollable table.";
+print "The screen displayed an array of " + call json.length(employeeData) + " records in a scrollable table.";
 print "Each record shows ID, Name, Department, Position, and Salary.";
