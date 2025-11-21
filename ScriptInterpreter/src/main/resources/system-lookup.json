@@ -1927,6 +1927,13 @@
         },
         {
           "name": "replacement",
+          "type": "string"
+        }
+      ],
+      "return_type": "string",
+      "example": "<b>var</b> <b>text</b> = \"Hello World\";<br><b>var</b> <b>result</b> = <b>call</b> <b>str.replaceAll</b>(text, \"Hello\", \"Hi\"); <i>// \"Hi World\"</i><br><b>var</b> <b>noDigits</b> = <b>call</b> <b>str.replaceAll</b>(\"abc123\", \"\\\\d\", \"X\"); <i>// \"abcXXX\"</i>"
+    },
+    {
       "function": "scr.showScreen",
       "short_description": "Shows a screen window",
       "long_help": "Makes a screen window visible on the display. If no screen name is provided, operates on the current screen context (when<br>called from within screen event handlers). The screen must have been previously created using the 'screen' statement. Returns<br>true on success.",
@@ -2107,7 +2114,7 @@
         }
       ],
       "return_type": "string",
-      "example": "<b>var</b> <b>text</b> = \"Hello World\";<br><b>var</b> <b>result</b> = <b>call</b> <b>str.replaceAll</b>(text, \"Hello\", \"Hi\"); <i>// \"Hi World\"</i><br><b>var</b> <b>noDigits</b> = <b>call</b> <b>str.replaceAll</b>(\"abc123\", \"\\\\d\", \"X\"); <i>// \"abcXXX\"</i>"
+      "example": "<b>var</b> <b>source</b> = <b>call</b> <b>scr.getItemSource</b>(screenName=\"myScreen\", itemName=\"myField\");<br><b>print</b> \"Item source: \" + source;"
     },
     {
       "function": "str.lpad",
@@ -2149,8 +2156,7 @@
         }
       ],
       "return_type": "string",
-      "example": "<b>var</b> <b>num</b> = \"42\";<br><b>var</b> <b>padded</b> = <b>call</b> <b>str.rpad</b>(num, 5, \"0\"); <i>// \"42000\"</i><br><b>var</b> <b>name</b> = <b>call</b> <b>str.rpad</b>(\"John\", 12, \" \"); <i>// \"John        \"</i>",
-      "example": "<b>var</b> <b>source</b> = <b>call</b> <b>scr.getItemSource</b>(screenName=\"myScreen\", itemName=\"myField\");<br><b>print</b> \"Item source: \" + source;"
+      "example": "<b>var</b> <b>num</b> = \"42\";<br><b>var</b> <b>padded</b> = <b>call</b> <b>str.rpad</b>(num, 5, \"0\"); <i>// \"42000\"</i><br><b>var</b> <b>name</b> = <b>call</b> <b>str.rpad</b>(\"John\", 12, \" \"); <i>// \"John        \"</i>"
     },
     {
       "function": "scr.setItemSource",

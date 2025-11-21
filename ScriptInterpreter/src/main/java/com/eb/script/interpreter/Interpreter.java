@@ -49,6 +49,7 @@ import com.eb.script.interpreter.statement.ScreenStatement;
 import com.eb.script.interpreter.statement.ScreenShowStatement;
 import com.eb.script.interpreter.statement.ScreenHideStatement;
 import com.eb.script.interpreter.statement.ScreenCloseStatement;
+import com.eb.script.interpreter.statement.ScreenSubmitStatement;
 import com.eb.script.interpreter.statement.ImportStatement;
 import com.eb.script.token.ebs.EbsTokenType;
 import com.eb.script.interpreter.statement.ConnectStatement;
@@ -1251,6 +1252,11 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     @Override
     public void visitScreenCloseStatement(ScreenCloseStatement stmt) throws InterpreterError {
         screenInterpreter.visitScreenCloseStatement(stmt);
+    }
+
+    @Override
+    public void visitScreenSubmitStatement(ScreenSubmitStatement stmt) throws InterpreterError {
+        screenInterpreter.visitScreenSubmitStatement(stmt);
     }
 
     @Override

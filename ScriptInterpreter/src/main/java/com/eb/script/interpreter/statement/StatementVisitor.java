@@ -52,6 +52,8 @@ public interface StatementVisitor {
 
     void visitScreenCloseStatement(ScreenCloseStatement stmt) throws InterpreterError;
 
+    void visitScreenSubmitStatement(ScreenSubmitStatement stmt) throws InterpreterError;
+
     void visitImportStatement(ImportStatement stmt) throws InterpreterError;
 
 }
