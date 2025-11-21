@@ -307,7 +307,7 @@ print "";
 print "Test 10.1: Using all new features together";
 
 // Function with 'function' keyword - accepts any array
-function calculateStats(numbers: string) return string {
+function calculateStats(numbers: array) return string {
     let sum: int = 0;
     let count: int = 0;
     

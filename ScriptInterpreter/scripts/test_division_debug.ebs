@@ -1,0 +1,14 @@
+// Test division issue
+print "Testing division after ++";
+
+let count: int = 0;
+print "count initial: " + count;
+
+count++;
+print "count after ++: " + count;
+
+let sum: int = 150;
+print "sum: " + sum;
+
+var average: int = sum / count;
+print "average: " + average;
