@@ -2149,7 +2149,7 @@
         }
       ],
       "return_type": "string",
-      "example": "<b>var</b> <b>num</b> = \"42\";<br><b>var</b> <b>padded</b> = <b>call</b> <b>str.rpad</b>(num, 5, \"0\"); <i>// \"42000\"</i><br><b>var</b> <b>name</b> = <b>call</b> <b>str.rpad</b>(\"John\", 12, \" \"); <i>// \"John        \"</i>"
+      "example": "<b>var</b> <b>num</b> = \"42\";<br><b>var</b> <b>padded</b> = <b>call</b> <b>str.rpad</b>(num, 5, \"0\"); <i>// \"42000\"</i><br><b>var</b> <b>name</b> = <b>call</b> <b>str.rpad</b>(\"John\", 12, \" \"); <i>// \"John        \"</i>",
       "example": "<b>var</b> <b>source</b> = <b>call</b> <b>scr.getItemSource</b>(screenName=\"myScreen\", itemName=\"myField\");<br><b>print</b> \"Item source: \" + source;"
     },
     {
