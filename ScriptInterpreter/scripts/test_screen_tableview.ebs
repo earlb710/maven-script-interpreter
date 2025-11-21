@@ -9,8 +9,8 @@ print "This test demonstrates displaying an array of records in a table";
 print "with automatic scrollbars when content exceeds visible area.";
 print "";
 
-// Define an array variable to hold employee records
-var employeeData: array[*];
+// Define a JSON array variable to hold employee records
+var employeeData: json;
 
 // Create a screen with a TableView to display the employee data
 screen employeeScreen = {
