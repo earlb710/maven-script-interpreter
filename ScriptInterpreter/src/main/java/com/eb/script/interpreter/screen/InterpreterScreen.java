@@ -415,12 +415,7 @@ public class InterpreterScreen {
                                     throw new InterpreterError("IO error executing inline code: " + e.getMessage());
                                 }
                             }
-                        } catch (com.eb.script.parser.ParseError e) {
-                            throw new InterpreterError("Failed to parse onClick code: " + e.getMessage());
-                        } catch (java.io.IOException e) {
-                            throw new InterpreterError("IO error executing onClick code: " + e.getMessage());
-                        }
-                    };
+                        };
 
                     // Create ScreenDefinition and use it to create the Stage
                     ScreenDefinition screenDef = ScreenFactory.createScreenDefinition(
