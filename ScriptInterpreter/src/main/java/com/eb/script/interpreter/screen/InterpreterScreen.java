@@ -7,6 +7,7 @@ import com.eb.script.interpreter.statement.ScreenStatement;
 import com.eb.script.interpreter.statement.ScreenShowStatement;
 import com.eb.script.interpreter.statement.ScreenHideStatement;
 import com.eb.script.interpreter.statement.ScreenCloseStatement;
+import com.eb.script.interpreter.statement.ScreenSubmitStatement;
 import com.eb.script.interpreter.screen.DisplayItem.ItemType;
 import com.eb.script.interpreter.screen.AreaDefinition.AreaType;
 import com.eb.script.RuntimeContext;
@@ -845,12 +846,84 @@ public class InterpreterScreen {
             
             // Close the screen on JavaFX Application Thread
             Platform.runLater(() -> {
+                // Close the stage
+                if (stage.isShowing()) {
+                    stage.close();
+                }
+                
+                // Interrupt and stop the screen thread
+                Thread thread = context.getScreenThreads().get(finalScreenName);
+                if (thread != null && thread.isAlive()) {
+                    thread.interrupt();
+                }
+                
+                // Clean up resources
+                context.remove(finalScreenName);
+                
+                if (context.getOutput() != null) {
+                    context.getOutput().printlnOk("Screen '" + finalScreenName + "' closed");
+                }
+            });
+
+        } catch (InterpreterError ex) {
+            throw interpreter.error(stmt.getLine(), ex.getLocalizedMessage());
+        } finally {
+            interpreter.environment().popCallStack();
+        }
+    }
+
+    /**
+     * Visit a screen submit statement to submit (close with callback) a screen
+     */
+    public void visitScreenSubmitStatement(ScreenSubmitStatement stmt) throws InterpreterError {
+        String screenName = stmt.name;
+        
+        // If no screen name provided, determine from thread context
+        if (screenName == null) {
+            screenName = context.getCurrentScreen();
+            if (screenName == null) {
+                throw interpreter.error(stmt.getLine(), 
+                    "No screen name specified and not executing in a screen context. " +
+                    "Use 'submit screen <name>;' to submit a specific screen, or call 'submit screen;' " +
+                    "from within screen event handlers (e.g., onClick).");
+            }
+        }
+        
+        interpreter.environment().pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Screen %1 submit", screenName);
+        try {
+            // Check if screen config or stage exists
+            if (!context.hasScreenConfig(screenName) && !context.getScreens().containsKey(screenName)) {
+                throw interpreter.error(stmt.getLine(), "Screen '" + screenName + "' does not exist.");
+            }
+
+            // Check if there's a callback set for this screen
+            String callbackName = context.getScreenCallback(screenName);
+            if (callbackName == null) {
+                throw interpreter.error(stmt.getLine(), 
+                    "Cannot submit screen '" + screenName + "': No callback was specified when the screen was shown. " +
+                    "Use 'show screen " + screenName + " callback <functionName>;' to set a callback.");
+            }
+
+            // If stage doesn't exist yet, cannot submit
+            if (!context.getScreens().containsKey(screenName)) {
+                throw interpreter.error(stmt.getLine(), "Screen '" + screenName + "' has not been shown yet.");
+            }
+
+            Stage stage = context.getScreens().get(screenName);
+            if (stage == null) {
+                throw interpreter.error(stmt.getLine(), "Screen '" + screenName + "' is still being initialized. Please try again.");
+            }
+
+            final String finalScreenName = screenName;
+            
+            // Submit the screen on JavaFX Application Thread
+            Platform.runLater(() -> {
                 try {
-                    // Collect output fields and invoke callback if set
+                    // Collect output fields and invoke callback
                     collectOutputFieldsAndInvokeCallback(finalScreenName, 0);
                 } catch (InterpreterError e) {
                     if (context.getOutput() != null) {
-                        context.getOutput().printlnError("Error invoking close callback: " + e.getMessage());
+                        context.getOutput().printlnError("Error invoking submit callback: " + e.getMessage());
                     }
                 }
                 
@@ -869,7 +942,7 @@ public class InterpreterScreen {
                 context.remove(finalScreenName);
                 
                 if (context.getOutput() != null) {
-                    context.getOutput().printlnOk("Screen '" + finalScreenName + "' closed");
+                    context.getOutput().printlnOk("Screen '" + finalScreenName + "' submitted");
                 }
             });
 

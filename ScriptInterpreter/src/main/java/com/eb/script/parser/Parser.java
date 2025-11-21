@@ -45,6 +45,7 @@ import com.eb.script.interpreter.statement.ScreenStatement;
 import com.eb.script.interpreter.statement.ScreenShowStatement;
 import com.eb.script.interpreter.statement.ScreenHideStatement;
 import com.eb.script.interpreter.statement.ScreenCloseStatement;
+import com.eb.script.interpreter.statement.ScreenSubmitStatement;
 import com.eb.script.interpreter.statement.ImportStatement;
 import com.eb.script.token.ebs.EbsTokenType;
 import com.eb.util.Util;
@@ -339,6 +340,8 @@ public class Parser {
             return showScreenStatement();
         } else if (match(EbsTokenType.HIDE)) {
             return hideScreenStatement();
+        } else if (matchAll(EbsTokenType.SUBMIT, EbsTokenType.SCREEN)) {
+            return submitScreenStatement();
         } else if (match(EbsTokenType.USE)) {
             return useConnectionStatement();
         } else if (matchAll(EbsTokenType.CLOSE, EbsTokenType.CONNECTION)) {
@@ -1549,6 +1552,24 @@ public class Parser {
 
         consume(EbsTokenType.SEMICOLON, "Expected ';' after 'close screen'.");
         return new ScreenCloseStatement(line, screenName);
+    }
+
+    private Statement submitScreenStatement() throws ParseError {
+        // matchAll(SUBMIT, SCREEN) matched but didn't consume tokens
+        // Need to advance past both SUBMIT and SCREEN
+        advance(); // SUBMIT
+        int line = currToken.line; // SCREEN token line
+        advance(); // SCREEN
+        
+        // Check if there's a screen name or if it's just "submit screen;"
+        String screenName = null;
+        if (check(EbsTokenType.IDENTIFIER)) {
+            EbsToken nameTok = advance();
+            screenName = (String) nameTok.literal;
+        }
+
+        consume(EbsTokenType.SEMICOLON, "Expected ';' after 'submit screen'.");
+        return new ScreenSubmitStatement(line, screenName);
     }
 
     private SqlSelectExpression parseSqlSelectFromSource() throws ParseError {
