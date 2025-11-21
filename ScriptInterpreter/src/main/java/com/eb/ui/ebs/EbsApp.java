@@ -167,6 +167,11 @@ public class EbsApp {
             return;
         }
         
+        // Debug: Print some key colors from config
+        System.out.println("Config colors - background: " + config.getColor("background") + 
+                          ", info: " + config.getColor("info") +
+                          ", error: " + config.getColor("error"));
+        
         // Generate CSS from configuration
         String css = config.generateCSS();
         
@@ -177,12 +182,22 @@ public class EbsApp {
                 java.nio.file.Path tempCss = java.nio.file.Files.createTempFile("console-config-", ".css");
                 java.nio.file.Files.writeString(tempCss, css);
                 
+                // Also write to a fixed location for debugging
+                try {
+                    java.nio.file.Path debugCss = java.nio.file.Paths.get("console-config-debug.css");
+                    java.nio.file.Files.writeString(debugCss, css);
+                    System.out.println("DEBUG: CSS also written to: " + debugCss.toAbsolutePath());
+                } catch (Exception e) {
+                    // Ignore debug file errors
+                }
+                
                 // Add the temporary CSS file as a stylesheet to the parent
                 String cssUri = tempCss.toUri().toString();
                 parent.getStylesheets().add(cssUri);
                 
                 System.out.println("Console configuration stylesheet applied to parent: " + cssUri);
                 System.out.println("Total parent stylesheets loaded: " + parent.getStylesheets().size());
+                System.out.println("CSS length: " + css.length() + " characters");
                 
                 // Note: The temp file will be cleaned up when the JVM exits
                 tempCss.toFile().deleteOnExit();
