@@ -794,15 +794,17 @@ public class Parser {
             // Skip opening bracket
             advance();
             
-            // Skip whitespace/comments if any (the lexer handles this)
             // Check if the first element is a JSON object
+            // Note: looksLikeJsonObject() will save/restore its own state,
+            // and we restore our state in the finally block
             if (check(EbsTokenType.LBRACE)) {
-                return looksLikeJsonObject();
+                boolean result = looksLikeJsonObject();
+                return result;
             }
             
             return false;
         } finally {
-            // Restore position
+            // Restore position to before the opening bracket
             current = savedCurrent;
             currToken = savedCurrToken;
             prevToken = savedPrevToken;
