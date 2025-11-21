@@ -38,9 +38,6 @@ public class EbsApp {
         } catch (IOException ignored) {
         }
 
-        // Load console configuration
-        ConsoleConfig consoleConfig = new ConsoleConfig();
-
         // Confirm on exit
         stage.setOnCloseRequest(evt -> {
             Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
@@ -61,12 +58,15 @@ public class EbsApp {
         console = new Console(handler);
 
         BorderPane root = new BorderPane();
+        
+        // Load and apply console configuration to root BEFORE initUI
+        ConsoleConfig consoleConfig = new ConsoleConfig();
+        applyConsoleConfig(root, consoleConfig);
+        
         initUI(root);
+        
         Scene scene = new Scene(root, 1100, 720);
         scene.getStylesheets().add(getClass().getResource("/css/console.css").toExternalForm());
-        
-        // Apply console configuration styles
-        applyConsoleConfig(scene, consoleConfig);
         
         primaryStage.setScene(scene);
         primaryStage.setTitle("EBS Console");
@@ -155,13 +155,14 @@ public class EbsApp {
     }
 
     /**
-     * Apply console configuration to the scene.
-     * Generates CSS from the configuration and adds it as a stylesheet.
+     * Apply console configuration to the root parent.
+     * Generates CSS from the configuration and adds it as a stylesheet to the parent.
+     * Parent-level stylesheets have higher priority than Scene-level stylesheets.
      * 
-     * @param scene The scene to apply the configuration to
+     * @param parent The parent node to apply the configuration to
      * @param config The console configuration
      */
-    private void applyConsoleConfig(Scene scene, ConsoleConfig config) {
+    private void applyConsoleConfig(javafx.scene.Parent parent, ConsoleConfig config) {
         if (config == null) {
             return;
         }
@@ -169,19 +170,19 @@ public class EbsApp {
         // Generate CSS from configuration
         String css = config.generateCSS();
         
-        // Add as stylesheet (this will override the default console.css)
+        // Add as stylesheet to parent (higher priority than scene-level)
         if (css != null && !css.isEmpty()) {
             try {
                 // Write CSS to a temporary file
                 java.nio.file.Path tempCss = java.nio.file.Files.createTempFile("console-config-", ".css");
                 java.nio.file.Files.writeString(tempCss, css);
                 
-                // Add the temporary CSS file as a stylesheet
+                // Add the temporary CSS file as a stylesheet to the parent
                 String cssUri = tempCss.toUri().toString();
-                scene.getStylesheets().add(cssUri);
+                parent.getStylesheets().add(cssUri);
                 
-                System.out.println("Console configuration stylesheet applied: " + cssUri);
-                System.out.println("Total stylesheets loaded: " + scene.getStylesheets().size());
+                System.out.println("Console configuration stylesheet applied to parent: " + cssUri);
+                System.out.println("Total parent stylesheets loaded: " + parent.getStylesheets().size());
                 
                 // Note: The temp file will be cleaned up when the JVM exits
                 tempCss.toFile().deleteOnExit();
