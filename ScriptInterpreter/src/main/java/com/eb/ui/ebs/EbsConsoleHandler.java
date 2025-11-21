@@ -268,10 +268,10 @@ public class EbsConsoleHandler extends EbsHandler {
 
     private void displayDetailedHelp(ScriptArea output, String itemName) {
         try {
-            // Load system-lookup.json from resources
-            InputStream is = getClass().getClassLoader().getResourceAsStream("system-lookup.json");
+            // Load help-lookup.json from resources
+            InputStream is = getClass().getClassLoader().getResourceAsStream("help-lookup.json");
             if (is == null) {
-                output.printlnWarn("Help system not available (system-lookup.json not found)");
+                output.printlnWarn("Help system not available (help-lookup.json not found)");
                 return;
             }
             

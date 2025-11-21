@@ -2356,10 +2356,10 @@ public final class Builtins {
      */
     private static String getDetailedHelp(String itemName) {
         try {
-            // Load system-lookup.json from resources
-            java.io.InputStream is = Builtins.class.getClassLoader().getResourceAsStream("system-lookup.json");
+            // Load help-lookup.json from resources
+            java.io.InputStream is = Builtins.class.getClassLoader().getResourceAsStream("help-lookup.json");
             if (is == null) {
-                return "Help system not available (system-lookup.json not found)";
+                return "Help system not available (help-lookup.json not found)";
             }
 
             String jsonContent = new String(is.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
