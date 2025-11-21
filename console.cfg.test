@@ -18,6 +18,10 @@
     "text": "#000000",
     "caret": "#000000",
     "line-cursor": "#e0e0e0",
-    "line-numbers": "#606060"
+    "line-numbers": "#606060",
+    "console-background": "#f5f5f5",
+    "tab-background": "#e0e0e0",
+    "tab-label-color": "#333333",
+    "tab-label-changed-color": "#ff6600"
   }
 }
