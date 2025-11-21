@@ -68,6 +68,8 @@ public class DisplayItem {
     public String status = "clean";
     // Column definitions for TableView - List of column metadata
     public List<TableColumn> columns;
+    // Number of records to display in TableView (for height calculation)
+    public Integer displayRecords;
     
     /**
      * Inner class to define a table column

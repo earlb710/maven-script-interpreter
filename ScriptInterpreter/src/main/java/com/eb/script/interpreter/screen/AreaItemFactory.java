@@ -101,6 +101,15 @@ public class AreaItemFactory {
                 tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
                 tableView.setPlaceholder(new javafx.scene.control.Label("No data available"));
                 
+                // Calculate preferred height based on displayRecords if specified
+                if (metadata != null && metadata.displayRecords != null && metadata.displayRecords > 0) {
+                    // Row height is approximately 25-30 pixels, header is ~30 pixels
+                    // Use 28 pixels per row + 32 for header + 2 for borders
+                    double calculatedHeight = (metadata.displayRecords * 28.0) + 34.0;
+                    tableView.setPrefHeight(calculatedHeight);
+                    tableView.setMinHeight(calculatedHeight);
+                }
+                
                 // Create columns based on metadata
                 if (metadata != null && metadata.columns != null && !metadata.columns.isEmpty()) {
                     for (DisplayItem.TableColumn colDef : metadata.columns) {
@@ -117,9 +126,17 @@ public class AreaItemFactory {
                             );
                         });
                         
-                        // Set column width if specified
+                        // Set column width if specified, otherwise let it auto-calculate
                         if (colDef.width != null && colDef.width > 0) {
                             column.setPrefWidth(colDef.width);
+                        } else {
+                            // Calculate minimum width based on column name
+                            // Approximate 8 pixels per character + 20 for padding
+                            String headerText = colDef.name != null ? colDef.name : colDef.field;
+                            if (headerText != null) {
+                                double minWidth = (headerText.length() * 8.0) + 20.0;
+                                column.setMinWidth(Math.max(minWidth, 60.0)); // At least 60 pixels
+                            }
                         }
                         
                         // Set alignment if specified

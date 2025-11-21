@@ -26,6 +26,7 @@ screen employeeScreen = {
             "display": {
                 "type": "tableview",
                 "labelText": "Employee List:",
+                "displayRecords": 10,
                 "columns": [
                     {
                         "name": "ID",

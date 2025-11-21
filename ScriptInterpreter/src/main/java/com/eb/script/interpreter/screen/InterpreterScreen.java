@@ -1203,6 +1203,19 @@ public class InterpreterScreen {
                 }
             }
         }
+        
+        // Extract displayRecords for TableView height calculation
+        if (displayDef.containsKey("displayRecords")) {
+            Object displayRecordsObj = displayDef.get("displayRecords");
+            if (displayRecordsObj instanceof Number) {
+                metadata.displayRecords = ((Number) displayRecordsObj).intValue();
+            }
+        } else if (displayDef.containsKey("displayrecords")) {
+            Object displayRecordsObj = displayDef.get("displayrecords");
+            if (displayRecordsObj instanceof Number) {
+                metadata.displayRecords = ((Number) displayRecordsObj).intValue();
+            }
+        }
 
         // Extract label styling properties (for the label wrapper text)
         if (displayDef.containsKey("labelColor")) {
