@@ -490,21 +490,13 @@
 
 /* ==================== Animations ==================== */
 
-@keyframes pulse {
-    0% {
-        -fx-scale-x: 1;
-        -fx-scale-y: 1;
-    }
-    50% {
-        -fx-scale-x: 1.05;
-        -fx-scale-y: 1.05;
-    }
-    100% {
-        -fx-scale-x: 1;
-        -fx-scale-y: 1;
-    }
-}
+/* Note: JavaFX CSS does not support @keyframes animations.
+ * For animations, use JavaFX transitions in Java code instead.
+ * Example: ScaleTransition for pulse effect
+ */
 
 .screen-input-pulse {
-    -fx-animation: pulse 0.5s ease-in-out;
+    /* Pulse effect - implement using ScaleTransition in Java code */
+    -fx-scale-x: 1;
+    -fx-scale-y: 1;
 }

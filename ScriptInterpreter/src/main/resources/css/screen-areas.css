@@ -434,34 +434,19 @@
 
 /* ==================== Animation Classes ==================== */
 
-/* Fade in animation */
-@keyframes fadeIn {
-    from {
-        -fx-opacity: 0;
-    }
-    to {
-        -fx-opacity: 1;
-    }
-}
+/* Note: JavaFX CSS does not support @keyframes animations.
+ * For animations, use JavaFX transitions in Java code instead.
+ * Example: FadeTransition, TranslateTransition, etc.
+ */
 
 .screen-area-fade-in {
-    -fx-animation: fadeIn 0.3s ease-in;
-}
-
-/* Slide in animation */
-@keyframes slideIn {
-    from {
-        -fx-translate-y: -20;
-        -fx-opacity: 0;
-    }
-    to {
-        -fx-translate-y: 0;
-        -fx-opacity: 1;
-    }
+    /* Fade in effect - implement using FadeTransition in Java code */
+    -fx-opacity: 1;
 }
 
 .screen-area-slide-in {
-    -fx-animation: slideIn 0.3s ease-out;
+    /* Slide in effect - implement using TranslateTransition in Java code */
+    -fx-opacity: 1;
 }
 
 /* ==================== Status Bar ==================== */
