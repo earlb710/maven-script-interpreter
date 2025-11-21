@@ -1,0 +1,21 @@
+{
+  "colors": {
+    "info": "#00ffff",
+    "comment": "#00ff00",
+    "error": "#ff0000",
+    "warn": "#ffaa00",
+    "ok": "#00ff00",
+    "code": "#cccccc",
+    "datatype": "#ff00ff",
+    "data": "#ff69b4",
+    "keyword": "#00ffff",
+    "builtin": "#66cccc",
+    "literal": "#0088ff",
+    "identifier": "#ffffff",
+    "sql": "#00ff99",
+    "custom": "#ffff00",
+    "background": "#1a1a1a",
+    "text": "#f0f0f0",
+    "caret": "#ffff00"
+  }
+}
