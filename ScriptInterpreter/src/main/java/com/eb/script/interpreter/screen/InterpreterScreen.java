@@ -299,11 +299,20 @@ public class InterpreterScreen {
                                     break;
                                 case TABLEVIEW:
                                     item.prefWidth = "800";
-                                    item.prefHeight = "400";
                                     item.maxWidth = "USE_COMPUTED_SIZE";
-                                    item.maxHeight = "USE_COMPUTED_SIZE";
                                     item.hgrow = "ALWAYS";
-                                    item.vgrow = "ALWAYS";
+                                    
+                                    // If displayRecords is specified, use fixed height; otherwise allow growth
+                                    if (item.displayItem != null && item.displayItem.displayRecords != null && item.displayItem.displayRecords > 0) {
+                                        // Fixed height mode - displayRecords specifies exact number of visible rows
+                                        // Don't set prefHeight/maxHeight here - AreaItemFactory will handle it
+                                        item.vgrow = "NEVER";
+                                    } else {
+                                        // Dynamic height mode - TableView can grow with available space
+                                        item.prefHeight = "400";
+                                        item.maxHeight = "USE_COMPUTED_SIZE";
+                                        item.vgrow = "ALWAYS";
+                                    }
                                     break;
                                 default:
                                     // Let other controls use default sizing

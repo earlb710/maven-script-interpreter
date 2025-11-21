@@ -101,13 +101,15 @@ public class AreaItemFactory {
                 tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
                 tableView.setPlaceholder(new javafx.scene.control.Label("No data available"));
                 
-                // Calculate preferred height based on displayRecords if specified
+                // Calculate height based on displayRecords if specified
                 if (metadata != null && metadata.displayRecords != null && metadata.displayRecords > 0) {
                     // Row height is approximately 25-30 pixels, header is ~30 pixels
                     // Use 28 pixels per row + 32 for header + 2 for borders
                     double calculatedHeight = (metadata.displayRecords * 28.0) + 34.0;
+                    // When displayRecords is specified, fix the height to show exactly that many records
                     tableView.setPrefHeight(calculatedHeight);
                     tableView.setMinHeight(calculatedHeight);
+                    tableView.setMaxHeight(calculatedHeight);
                 }
                 
                 // Create columns based on metadata
