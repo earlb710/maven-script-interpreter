@@ -1736,6 +1736,19 @@ public class InterpreterScreen {
                         maxChar = ((Number) maxCharObj).intValue();
                     }
                 }
+                
+                // Extract case property if present
+                String textCase = null;
+                if (varDef.containsKey("case")) {
+                    Object caseObj = varDef.get("case");
+                    if (caseObj != null) {
+                        String caseStr = String.valueOf(caseObj).toLowerCase();
+                        // Validate case value
+                        if (caseStr.equals("upper") || caseStr.equals("lower") || caseStr.equals("mixed")) {
+                            textCase = caseStr;
+                        }
+                    }
+                }
 
                 if (varName == null || varName.isEmpty()) {
                     throw interpreter.error(line, "Variable definition in screen '" + screenName + "' must have a 'name' property.");
@@ -1762,6 +1775,7 @@ public class InterpreterScreen {
                 var.setSetName(setName);
                 var.setMinChar(minChar);
                 var.setMaxChar(maxChar);
+                var.setTextCase(textCase);
 
                 // Process optional display metadata
                 if (varDef.containsKey("display")) {
@@ -1772,6 +1786,12 @@ public class InterpreterScreen {
 
                         // Parse and store display metadata
                         DisplayItem displayItem = parseDisplayItem(displayDef, screenName);
+                        
+                        // Copy textCase from Var to DisplayItem if not already set
+                        if (displayItem.caseFormat == null && textCase != null) {
+                            displayItem.caseFormat = textCase;
+                        }
+                        
                         var.setDisplayItem(displayItem);
                         
                         // Store display metadata with the old key format for backward compatibility

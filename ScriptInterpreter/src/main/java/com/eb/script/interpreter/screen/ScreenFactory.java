@@ -2053,23 +2053,69 @@ public class ScreenFactory {
         }
         
         if (control instanceof javafx.scene.control.TextField) {
-            ((javafx.scene.control.TextField) control).textProperty().addListener((obs, oldVal, newVal) -> {
+            javafx.scene.control.TextField textField = (javafx.scene.control.TextField) control;
+            textField.textProperty().addListener((obs, oldVal, newVal) -> {
+                // Apply case transformation if specified
+                String transformedValue = newVal;
+                if (metadata != null && metadata.caseFormat != null) {
+                    if ("upper".equals(metadata.caseFormat)) {
+                        transformedValue = newVal.toUpperCase();
+                    } else if ("lower".equals(metadata.caseFormat)) {
+                        transformedValue = newVal.toLowerCase();
+                    }
+                    // "mixed" or any other value means no transformation
+                    
+                    // Update the text field if transformation occurred
+                    if (!transformedValue.equals(newVal)) {
+                        // Save cursor position
+                        int caretPosition = textField.getCaretPosition();
+                        textField.setText(transformedValue);
+                        // Restore cursor position (adjust if text changed length)
+                        int newCaretPosition = Math.min(caretPosition, transformedValue.length());
+                        textField.positionCaret(newCaretPosition);
+                        return; // Listener will be called again with transformed value
+                    }
+                }
+                
                 // Convert the string value to the appropriate type if type info is available
-                Object convertedValue = newVal;
+                Object convertedValue = transformedValue;
                 if (varTypes != null && varTypes.containsKey(varName)) {
                     DataType type = varTypes.get(varName);
                     try {
-                        convertedValue = type.convertValue(newVal);
+                        convertedValue = type.convertValue(transformedValue);
                     } catch (Exception e) {
                         // If conversion fails, keep as string
-                        System.err.println("Warning: Could not convert '" + newVal + "' to " + type + " for variable '" + varName + "'");
+                        System.err.println("Warning: Could not convert '" + transformedValue + "' to " + type + " for variable '" + varName + "'");
                     }
                 }
                 screenVars.put(varName, convertedValue);
             });
         } else if (control instanceof javafx.scene.control.TextArea) {
-            ((javafx.scene.control.TextArea) control).textProperty().addListener((obs, oldVal, newVal) -> {
-                screenVars.put(varName, newVal);
+            javafx.scene.control.TextArea textArea = (javafx.scene.control.TextArea) control;
+            textArea.textProperty().addListener((obs, oldVal, newVal) -> {
+                // Apply case transformation if specified
+                String transformedValue = newVal;
+                if (metadata != null && metadata.caseFormat != null) {
+                    if ("upper".equals(metadata.caseFormat)) {
+                        transformedValue = newVal.toUpperCase();
+                    } else if ("lower".equals(metadata.caseFormat)) {
+                        transformedValue = newVal.toLowerCase();
+                    }
+                    // "mixed" or any other value means no transformation
+                    
+                    // Update the text area if transformation occurred
+                    if (!transformedValue.equals(newVal)) {
+                        // Save cursor position
+                        int caretPosition = textArea.getCaretPosition();
+                        textArea.setText(transformedValue);
+                        // Restore cursor position (adjust if text changed length)
+                        int newCaretPosition = Math.min(caretPosition, transformedValue.length());
+                        textArea.positionCaret(newCaretPosition);
+                        return; // Listener will be called again with transformed value
+                    }
+                }
+                
+                screenVars.put(varName, transformedValue);
             });
         } else if (control instanceof javafx.scene.control.CheckBox) {
             ((javafx.scene.control.CheckBox) control).selectedProperty().addListener((obs, oldVal, newVal) -> {
