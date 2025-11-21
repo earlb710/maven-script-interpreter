@@ -1,0 +1,53 @@
+// Test Script: array.record - Array of Records
+// Description: Test array.record syntax for arrays of record objects
+// Author: EBS Test Suite
+// Date: 2025-11-21
+
+print "=== Array.Record Test ===";
+print "";
+
+// Test 1: Declare array of records with dynamic size
+print "Test 1: Dynamic array of records";
+var employees: array.record[*];
+
+// Initialize with array of JSON objects (Maps)
+employees = [
+    {"name": "John Doe", "age": 30, "salary": 75000.50},
+    {"name": "Jane Smith", "age": 35, "salary": 85000.75},
+    {"name": "Bob Johnson", "age": 28, "salary": 65000.00}
+];
+
+print "Number of employees: " + employees.length;
+print "";
+
+// Test 2: Access individual records
+print "Test 2: Accessing individual records";
+var emp1 = employees[0];
+print "Employee 1: " + emp1;
+print "";
+
+// Test 3: Fixed-size array of records
+print "Test 3: Fixed-size array of records";
+var people: array.record[5];
+
+// Initialize first few elements
+people[0] = {"firstName": "Alice", "lastName": "Brown", "active": true};
+people[1] = {"firstName": "Charlie", "lastName": "Davis", "active": false};
+people[2] = {"firstName": "Diana", "lastName": "Wilson", "active": true};
+
+print "Person 0: " + people[0];
+print "Person 1: " + people[1];
+print "Person 2: " + people[2];
+print "";
+
+// Test 4: Loop through array of records
+print "Test 4: Iterating through array of records";
+var i: int = 0;
+while i < employees.length {
+    var emp = employees[i];
+    print "Employee " + i + ": " + emp;
+    i = i + 1;
+}
+print "";
+
+print "=== Array.Record Tests Completed ===";

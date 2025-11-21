@@ -469,6 +469,7 @@ public class Parser {
                             case "double", "number" -> elemType = DataType.DOUBLE;
                             case "bool", "boolean" -> elemType = DataType.BOOL;
                             case "date" -> elemType = DataType.DATE;
+                            case "record" -> elemType = DataType.RECORD;
                             default -> throw error(t, "Unknown array element type: " + subType);
                         }
                     } else {
@@ -514,6 +515,7 @@ public class Parser {
                         case "double", "number" -> elemType = DataType.DOUBLE;
                         case "bool", "boolean" -> elemType = DataType.BOOL;
                         case "date" -> elemType = DataType.DATE;
+                        case "record" -> elemType = DataType.RECORD;
                         default -> throw error(subType, "Unknown array element type: " + subTypeName);
                     }
                 } else {

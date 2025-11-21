@@ -1,7 +1,7 @@
 # Record Type Implementation Summary
 
 ## Overview
-This implementation adds record types to the EBS scripting language, allowing structured data with typed fields.
+This implementation adds record types to the EBS scripting language, allowing structured data with typed fields. It also supports arrays of records using the `array.record` syntax.
 
 ## What Was Implemented
 
@@ -9,6 +9,7 @@ This implementation adds record types to the EBS scripting language, allowing st
 - Added `RECORD` to the DataType enum
 - Implements proper type checking via `isDataType()` and `convertValue()`
 - Records are stored as Java `Map<String, Object>`
+- Supports arrays of records with `array.record` type
 
 ### 2. RecordType Class
 **File**: `ScriptInterpreter/src/main/java/com/eb/script/token/RecordType.java`
@@ -27,10 +28,15 @@ Features:
 - Parses record field definitions: `record { field: type, field: type, ... }`
 - Creates `RecordType` objects with field metadata
 - Handles record type in var statements
+- Supports `array.record` syntax for arrays of records
 
 Syntax:
 ```javascript
 var employee: record { name: string, age: int, salary: double };
+
+// Array of records
+var employees: array.record[*];  // Dynamic array
+var people: array.record[10];    // Fixed-size array
 ```
 
 ### 4. VarStatement Extensions
@@ -48,6 +54,12 @@ Features:
 - `visitAssignStatement`: Handles record field assignments with type validation
 - `visitPropertyExpression`: Extracts field values from record objects
 - Type checking ensures assigned values match declared field types
+
+### 6. Util Updates
+**File**: `ScriptInterpreter/src/main/java/com/eb/util/Util.java`
+
+- Added RECORD case to `checkDataType()` for array element type validation
+- Ensures arrays of records are properly validated
 
 ###  6. Property Expression
 **File**: `ScriptInterpreter/src/main/java/com/eb/script/interpreter/expression/PropertyExpression.java`
@@ -102,6 +114,35 @@ person = {
 };
 ```
 
+### Arrays of Records
+```javascript
+// Dynamic array of records
+var employees: array.record[*];
+
+employees = [
+    {"name": "John Doe", "age": 30, "salary": 75000.50},
+    {"name": "Jane Smith", "age": 35, "salary": 85000.75},
+    {"name": "Bob Johnson", "age": 28, "salary": 65000.00}
+];
+
+// Access individual records
+var emp1 = employees[0];
+print "First employee: " + emp1;
+
+// Fixed-size array of records
+var people: array.record[5];
+people[0] = {"firstName": "Alice", "lastName": "Brown", "active": true};
+people[1] = {"firstName": "Charlie", "lastName": "Davis", "active": false};
+
+// Iterate through array
+var i: int = 0;
+while i < employees.length {
+    var emp = employees[i];
+    print "Employee " + i + ": " + emp;
+    i = i + 1;
+}
+```
+
 ## Known Limitations
 
 ### 1. Property Access in Expressions
@@ -129,12 +170,16 @@ These would require updates to:
 
 ### Test Scripts Created
 1. `test_record_type.ebs` - Comprehensive test of record features
+### Test Scripts Created
+1. `test_record_type.ebs` - Comprehensive test of record features
 2. `test_record_simple.ebs` - Minimal test case
+3. `test_array_record.ebs` - Tests array.record functionality
 
 ### Build Status
 ✅ Project compiles successfully with all changes
 ✅ Record type declarations parse correctly
 ✅ Record assignments work with type validation
+✅ Arrays of records (array.record) work correctly
 ❌ Property access in expressions needs fix
 
 ## Next Steps
