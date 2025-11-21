@@ -68,7 +68,7 @@ public class ConsoleConfig {
             if (parsed instanceof Map) {
                 @SuppressWarnings("unchecked")
                 Map<String, Object> configMap = (Map<String, Object>) parsed;
-                System.out.println("Loaded console configuration from: " + configPath.toAbsolutePath());
+                System.out.println("Loaded console configuration from " + CONFIG_FILE);
                 return configMap;
             } else {
                 System.err.println("Invalid console.cfg format: expected JSON object");
@@ -182,7 +182,8 @@ public class ConsoleConfig {
                 css.append(".editor-ebs .styled-text-area .content,\n");
                 css.append(".editor-text,\n");
                 css.append(".editor-text .styled-text-area .content,\n");
-                css.append(".styled-text-area .content {\n");
+                css.append(".styled-text-area .content,\n");
+                css.append(".lineno {\n");
                 css.append("    -fx-background-color: ").append(color).append(" !important;\n");
                 css.append("}\n\n");
             } else if ("line-cursor".equals(className)) {
