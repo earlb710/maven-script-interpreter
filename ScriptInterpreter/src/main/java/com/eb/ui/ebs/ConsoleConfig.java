@@ -42,13 +42,23 @@ public class ConsoleConfig {
     
     /**
      * Load the configuration file from the root directory.
+     * Searches in current directory and parent directory.
      * @return Map containing configuration, or null if loading fails
      */
     private Map<String, Object> loadConfigFile() {
         try {
+            // Try current directory first
             Path configPath = Paths.get(CONFIG_FILE);
+            
+            // If not found in current directory, try parent directory
+            if (!Files.exists(configPath)) {
+                configPath = Paths.get("..", CONFIG_FILE);
+            }
+            
+            // If still not found, report and use defaults
             if (!Files.exists(configPath)) {
                 System.out.println("Console config file not found: " + CONFIG_FILE + ", using defaults.");
+                System.out.println("Searched in: " + Paths.get("").toAbsolutePath() + " and parent directory");
                 return null;
             }
             
@@ -58,7 +68,7 @@ public class ConsoleConfig {
             if (parsed instanceof Map) {
                 @SuppressWarnings("unchecked")
                 Map<String, Object> configMap = (Map<String, Object>) parsed;
-                System.out.println("Loaded console configuration from: " + CONFIG_FILE);
+                System.out.println("Loaded console configuration from: " + configPath.toAbsolutePath());
                 return configMap;
             } else {
                 System.err.println("Invalid console.cfg format: expected JSON object");
