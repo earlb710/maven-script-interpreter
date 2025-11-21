@@ -219,6 +219,7 @@ public class InterpreterScreen {
                         
                         // Find which set this variable belongs to by checking varItemsMap
                         String setName = null;
+                        Var currentVar = null;
                         for (Map.Entry<String, Var> entry : varItemsMap.entrySet()) {
                             String key = entry.getKey(); // format: "setname.varname"
                             Var var = entry.getValue();
@@ -226,6 +227,7 @@ public class InterpreterScreen {
                             if (key.endsWith("." + varName) && var.getName().equalsIgnoreCase(varName)) {
                                 // Extract setname from the key
                                 setName = key.substring(0, key.lastIndexOf("."));
+                                currentVar = var;
                                 break;
                             }
                         }
@@ -278,10 +280,26 @@ public class InterpreterScreen {
                             switch (item.displayItem.itemType) {
                                 case TEXTFIELD:
                                 case PASSWORDFIELD:
-                                    item.prefWidth = "300";
+                                    // Calculate width based on minChar/maxChar if available
+                                    if (currentVar != null && (currentVar.getMinChar() != null || currentVar.getMaxChar() != null)) {
+                                        // Use maxChar if available, otherwise minChar
+                                        Integer charCount = currentVar.getMaxChar() != null ? currentVar.getMaxChar() : currentVar.getMinChar();
+                                        // Approximate 8 pixels per character + 20 for padding
+                                        int calculatedWidth = (charCount * 8) + 20;
+                                        item.prefWidth = String.valueOf(Math.max(calculatedWidth, 80)); // Minimum 80 pixels
+                                    } else {
+                                        item.prefWidth = "300";
+                                    }
                                     break;
                                 case TEXTAREA:
-                                    item.prefWidth = "400";
+                                    // Calculate width based on maxChar if available
+                                    if (currentVar != null && currentVar.getMaxChar() != null) {
+                                        // Approximate 8 pixels per character + 20 for padding
+                                        int calculatedWidth = (currentVar.getMaxChar() * 8) + 20;
+                                        item.prefWidth = String.valueOf(Math.max(calculatedWidth, 200)); // Minimum 200 pixels
+                                    } else {
+                                        item.prefWidth = "400";
+                                    }
                                     item.prefHeight = "100";
                                     break;
                                 case SLIDER:
@@ -1702,6 +1720,22 @@ public class InterpreterScreen {
                 String varName = varDef.containsKey("name") ? String.valueOf(varDef.get("name")).toLowerCase() : null;
                 String varTypeStr = varDef.containsKey("type") ? String.valueOf(varDef.get("type")).toLowerCase() : null;
                 Object defaultValue = varDef.get("default");
+                
+                // Extract minChar and maxChar if present
+                Integer minChar = null;
+                Integer maxChar = null;
+                if (varDef.containsKey("minChar")) {
+                    Object minCharObj = varDef.get("minChar");
+                    if (minCharObj instanceof Number) {
+                        minChar = ((Number) minCharObj).intValue();
+                    }
+                }
+                if (varDef.containsKey("maxChar")) {
+                    Object maxCharObj = varDef.get("maxChar");
+                    if (maxCharObj instanceof Number) {
+                        maxChar = ((Number) maxCharObj).intValue();
+                    }
+                }
 
                 if (varName == null || varName.isEmpty()) {
                     throw interpreter.error(line, "Variable definition in screen '" + screenName + "' must have a 'name' property.");
@@ -1726,6 +1760,8 @@ public class InterpreterScreen {
                 Var var = new Var(varName, varType, defaultValue);
                 var.setValue(value);
                 var.setSetName(setName);
+                var.setMinChar(minChar);
+                var.setMaxChar(maxChar);
 
                 // Process optional display metadata
                 if (varDef.containsKey("display")) {
