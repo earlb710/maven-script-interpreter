@@ -57,12 +57,20 @@ public class ArrayFixedByte implements ArrayDef<Byte, byte[]> {
 
     @Override
     public void set(int index, Byte value) {
-        elements[index] = value;
+        if (value == null) {
+            elements[index] = 0;
+        } else {
+            elements[index] = value;
+        }
     }
 
     @Override
     public void add(Byte value) {
-        elements[addIdx++] = value;
+        if (value == null) {
+            elements[addIdx++] = 0;
+        } else {
+            elements[addIdx++] = value;
+        }
     }
 
     @Override

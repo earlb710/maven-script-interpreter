@@ -18,11 +18,13 @@ public enum EbsTokenType implements LexerToken {
     // Symbols
     SEMICOLON(";"), LBRACE("{"), RBRACE("}"), COLON(":"), COMMA(","), DOT("."), LPAREN("("), RPAREN(")"), LBRACKET("["), RBRACKET("]"),
     // Keywords
-    VAR(PrintStyle.KEYWORD, Category.KEYWORD, "var"), PRINT(PrintStyle.KEYWORD, Category.KEYWORD, "print"), CALL(PrintStyle.KEYWORD, Category.KEYWORD, "call", "#"), RETURN(PrintStyle.KEYWORD, Category.KEYWORD, "return"),
+    VAR(PrintStyle.KEYWORD, Category.KEYWORD, "var", "let"), PRINT(PrintStyle.KEYWORD, Category.KEYWORD, "print"), CALL(PrintStyle.KEYWORD, Category.KEYWORD, "call", "#"), RETURN(PrintStyle.KEYWORD, Category.KEYWORD, "return"),
     IMPORT(PrintStyle.KEYWORD, Category.KEYWORD, "import"),
+    FUNCTION(PrintStyle.KEYWORD, Category.KEYWORD, "function"),
     // Conditional
     IF(PrintStyle.KEYWORD, Category.KEYWORD, "if"), THEN(PrintStyle.KEYWORD, Category.KEYWORD, "then"), ELSE(PrintStyle.KEYWORD, Category.KEYWORD, "else"),
     // Loop
+    FOR(PrintStyle.KEYWORD, Category.KEYWORD, "for"),
     FOREACH(PrintStyle.KEYWORD, Category.KEYWORD, "foreach"), IN(PrintStyle.KEYWORD, Category.KEYWORD, "in"),
     WHILE(PrintStyle.KEYWORD, Category.KEYWORD, "while"), DO(PrintStyle.KEYWORD, Category.KEYWORD, "do"), BREAK(PrintStyle.KEYWORD, Category.KEYWORD, "break", "exit"), CONTINUE(PrintStyle.KEYWORD, Category.KEYWORD, "continue"),
     // Comments
@@ -32,6 +34,7 @@ public enum EbsTokenType implements LexerToken {
     BYTE(PrintStyle.DATA, DataType.BYTE, "byte"), INTEGER(PrintStyle.DATA, DataType.INTEGER, "int", "integer"), LONG(PrintStyle.DATA, DataType.LONG, "long"), FLOAT(PrintStyle.DATA, DataType.FLOAT, "float"), DOUBLE(PrintStyle.DATA, DataType.DOUBLE, "double"),
     STRING(PrintStyle.DATA, DataType.STRING, "string"), DATE(PrintStyle.DATA, DataType.DATE, "date"), BOOL(PrintStyle.DATA, DataType.BOOL, "bool", "boolean"),
     JSON(PrintStyle.DATA, DataType.JSON, "json"),
+    ARRAY(PrintStyle.DATA, DataType.ARRAY, "array"),
     // Identifiers
     IDENTIFIER(PrintStyle.INFO, ""),
     BUILTIN(PrintStyle.BUILTIN, ""),
@@ -49,6 +52,8 @@ public enum EbsTokenType implements LexerToken {
     BOOL_OR(Category.OPERATOR, "or", "||"),
     // Operators
     PLUS(Category.OPERATOR, "+"), MINUS(Category.OPERATOR, "-"), STAR(Category.OPERATOR, "*"), SLASH(Category.OPERATOR, "/"), EQUAL(Category.OPERATOR, "="), CARET(Category.OPERATOR, "^"),
+    PLUS_PLUS(Category.OPERATOR, "++"), MINUS_MINUS(Category.OPERATOR, "--"),
+    PLUS_EQUAL(Category.OPERATOR, "+="), MINUS_EQUAL(Category.OPERATOR, "-="), STAR_EQUAL(Category.OPERATOR, "*="), SLASH_EQUAL(Category.OPERATOR, "/="),
     // --- SQL keywords ---
     CONNECT(PrintStyle.SQL, Category.KEYWORD, "connect"),
     USE(PrintStyle.SQL, Category.KEYWORD, "use"),

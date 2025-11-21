@@ -59,7 +59,12 @@ public class EbsLexer extends Lexer<EbsTokenType> {
                 }
                 default -> {
                     addToken(t, ret.tokenString);
-                    advance(ret.tokenString.length());
+                    // Lexer already advances current by 1 for 2-char tokens, so only advance by remaining length
+                    int advanceAmount = ret.tokenString.length();
+                    if (advanceAmount > 1) {
+                        advanceAmount = 1; // Lexer already advanced by 1, so only advance by 1 more
+                    }
+                    advance(advanceAmount);
                 }
             }
         } else {

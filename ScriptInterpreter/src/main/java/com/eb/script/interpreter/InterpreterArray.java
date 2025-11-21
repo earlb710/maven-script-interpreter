@@ -78,7 +78,9 @@ public class InterpreterArray {
             }
 
         } else {
-            target = new ArrayDynamic(DataType.STRING);
+            // No target specified - infer type from literal elements
+            DataType inferredType = inferArrayTypeFromLiteral(expr);
+            target = new ArrayDynamic(inferredType);
         }
 
         // Recursively copy content, converting leaf strings and expanding as needed
@@ -86,6 +88,52 @@ public class InterpreterArray {
 
         // Return the target for chaining if needed
         return target;
+    }
+    
+    /**
+     * Infer the element type from an array literal's elements
+     */
+    private DataType inferArrayTypeFromLiteral(ArrayLiteralExpression expr) throws InterpreterError {
+        if (expr.elements == null || expr.elements.length == 0) {
+            return DataType.ARRAY;  // Generic array for empty literals
+        }
+        
+        // Evaluate all elements to check if they're all the same type
+        DataType inferredType = null;
+        
+        for (Expression element : expr.elements) {
+            if (element != null) {
+                Object value = interpreter.evaluate(element);
+                if (value != null) {
+                    // Determine the type of this element
+                    DataType elementType = null;
+                    if (value instanceof Integer || value instanceof Long) {
+                        elementType = DataType.INTEGER;
+                    } else if (value instanceof Float || value instanceof Double) {
+                        elementType = DataType.DOUBLE;
+                    } else if (value instanceof Boolean) {
+                        elementType = DataType.BOOL;
+                    } else if (value instanceof String) {
+                        elementType = DataType.STRING;
+                    } else if (value instanceof Byte) {
+                        elementType = DataType.BYTE;
+                    } else if (value instanceof ArrayDef) {
+                        elementType = DataType.ARRAY;
+                    }
+                    
+                    // Check consistency with previous elements
+                    if (inferredType == null) {
+                        inferredType = elementType;
+                    } else if (elementType != null && inferredType != elementType) {
+                        // Mixed types detected - use generic array
+                        return DataType.ARRAY;
+                    }
+                }
+            }
+        }
+        
+        // Return the inferred type, or generic if we couldn't determine
+        return inferredType != null ? inferredType : DataType.ARRAY;
     }
 
     /**
@@ -389,6 +437,11 @@ public class InterpreterArray {
             list.set(i, value);
         } else if (container instanceof ArrayDef arr) {
             checkBounds(line, i, arr.size() + 1);
+            // Convert value to the array's element type before setting
+            DataType elemType = arr.getDataType();
+            if (elemType != null && value != null) {
+                value = elemType.convertValue(value);
+            }
             arr.set(i, value);
         } else {
             String kind = (container == null) ? "null" : container.getClass().getSimpleName();

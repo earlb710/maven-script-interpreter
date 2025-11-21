@@ -24,6 +24,8 @@ public interface StatementVisitor {
 
     void visitForEachStatement(ForEachStatement stmt) throws InterpreterError;
 
+    void visitForStatement(ForStatement stmt) throws InterpreterError;
+
     void visitBreakStatement(BreakStatement stmt) throws InterpreterError;
 
     void visitContinueStatement(ContinueStatement stmt) throws InterpreterError;

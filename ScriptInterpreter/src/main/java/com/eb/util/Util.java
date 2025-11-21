@@ -70,6 +70,8 @@ public class Util {
             return switch (expectedType) {
                 case BOOL ->
                     array.getDataType() == DataType.BOOL;
+                case BYTE ->
+                    array.getDataType() == DataType.BYTE;
                 case INTEGER, LONG ->
                     array.getDataType() == DataType.INTEGER || array.getDataType() == DataType.LONG;
                 case FLOAT, DOUBLE ->
@@ -91,6 +93,8 @@ public class Util {
             return switch (expectedType) {
                 case BOOL ->
                     value instanceof Boolean;
+                case BYTE ->
+                    value instanceof Byte;
                 case INTEGER, LONG ->
                     value instanceof Integer || value instanceof Long;
                 case FLOAT, DOUBLE ->

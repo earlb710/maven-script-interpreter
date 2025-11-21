@@ -59,6 +59,7 @@ print message;
 | `bool` / `boolean` | Boolean value | `true`, `false` |
 | `date` | Date/time value | `now()` |
 | `json` | JSON object/array | `{"key": "value"}` |
+| `array` | Generic array | `array[10]`, `array[*]` |
 
 ### Type Inference
 ```javascript
@@ -82,19 +83,23 @@ if empty == null then {
 
 ### Declaration
 ```javascript
-// With explicit type
+// With explicit type using 'var'
 var name: string;
 var count: int = 0;
 var price: double = 19.99;
 
+// Using 'let' keyword (alias for 'var')
+let message: string = "Hello";
+let total: int = 100;
+
 // Type inference
-var message = "Hello";
-var total = 100;
+var autoType = "Hello";  // Inferred as string
+let autoNum = 42;        // Inferred as int
 
 // Multiple declarations
 var x: int;
 var y: int = 5;
-var z = 10;
+let z = 10;
 ```
 
 ### Assignment
@@ -102,6 +107,22 @@ var z = 10;
 name = "Alice";
 count = count + 1;
 price = price * 1.1;
+```
+
+### Compound Assignment Operators
+```javascript
+var x: int = 10;
+x += 5;   // Equivalent to: x = x + 5
+x -= 3;   // Equivalent to: x = x - 3
+x *= 2;   // Equivalent to: x = x * 2
+x /= 4;   // Equivalent to: x = x / 4
+```
+
+### Increment and Decrement Operators
+```javascript
+var count: int = 0;
+count++;  // Equivalent to: count = count + 1
+count--;  // Equivalent to: count = count - 1
 ```
 
 ### Scope
@@ -129,6 +150,22 @@ var c = 10 * 5;      // Multiplication: 50
 var d = 10 / 5;      // Division: 2
 var e = 10 ^ 2;      // Exponentiation: 100
 var f = -a;          // Unary negation: -15
+```
+
+### Assignment Operators
+```javascript
+var x = 10;          // Simple assignment
+x += 5;              // Add and assign: x = x + 5
+x -= 3;              // Subtract and assign: x = x - 3
+x *= 2;              // Multiply and assign: x = x * 2
+x /= 4;              // Divide and assign: x = x / 4
+```
+
+### Increment and Decrement Operators
+```javascript
+var count = 0;
+count++;             // Post-increment: count = count + 1
+count--;             // Post-decrement: count = count - 1
 ```
 
 ### Comparison Operators
@@ -220,13 +257,13 @@ if x > 0 then print "positive";
 ```javascript
 while count < 10 {
     print count;
-    count = count + 1;
+    count++;
 }
 
 // Alternative with 'then'
 while count < 10 then {
     print count;
-    count = count + 1;
+    count++;
 }
 ```
 
@@ -238,20 +275,83 @@ while (hasMore) {
 }
 ```
 
+### For Loops
+
+#### Traditional For Loop (C-style)
+```javascript
+for (var i: int = 0; i < 10; i++) {
+    print i;
+}
+
+// With compound assignment
+for (var i: int = 0; i < 20; i += 2) {
+    print "Even number: " + i;
+}
+
+// Multiple statements in body
+for (var i: int = 1; i <= 5; i++) {
+    var square: int = i * i;
+    print i + " squared = " + square;
+}
+```
+
+#### For Loop Parts
+- **Initializer**: Executed once before loop starts (can be `var` declaration or assignment)
+- **Condition**: Evaluated before each iteration; loop continues while true
+- **Increment**: Executed after each iteration
+
+```javascript
+// All parts are optional
+for (;;) {
+    // Infinite loop
+    if count > 100 then break;
+    count++;
+}
+```
+
+### ForEach Loops
+
+#### Iterate Over Arrays
+```javascript
+var numbers = [1, 2, 3, 4, 5];
+foreach num in numbers {
+    print num;
+}
+
+// With parentheses
+foreach (item in items) {
+    print item;
+}
+```
+
+#### Iterate Over Strings
+```javascript
+var text = "Hello";
+foreach char in text {
+    print char;  // Prints each character
+}
+```
+
 ### Do-While Loops
 ```javascript
 do {
     print count;
-    count = count + 1;
+    count++;
 } while (count < 10);
 ```
 
 ### Break and Continue
 ```javascript
 // Break: exit loop
-while true {
-    if count > 100 then break;
-    count = count + 1;
+for (var i: int = 0; i < 100; i++) {
+    if i > 10 then break;
+    print i;
+}
+
+// Continue: skip to next iteration
+for (var i: int = 0; i < 10; i++) {
+    if i == 5 then continue;
+    print i;  // Won't print 5
 }
 
 // Continue: skip to next iteration
@@ -313,9 +413,17 @@ var text: string = call toUpper("hello");
 
 ### Function Declaration
 
+EBS supports function declarations with or without the optional `function` keyword. Both styles are equivalent.
+
 #### Basic Function
 ```javascript
+// Without 'function' keyword (traditional)
 greet {
+    print "Hello!";
+}
+
+// With 'function' keyword (beginner-friendly)
+function greet {
     print "Hello!";
 }
 
@@ -324,7 +432,13 @@ call greet;
 
 #### Function with Return Type
 ```javascript
+// Without 'function' keyword
 getValue return int {
+    return 42;
+}
+
+// With 'function' keyword
+function getValue return int {
     return 42;
 }
 
@@ -333,7 +447,13 @@ var x = call getValue();
 
 #### Function with Parameters
 ```javascript
+// Without 'function' keyword
 add(a: int, b: int) return int {
+    return a + b;
+}
+
+// With 'function' keyword
+function add(a: int, b: int) return int {
     return a + b;
 }
 
@@ -342,7 +462,7 @@ var sum = call add(5, 3);
 
 #### Function with Default Parameters
 ```javascript
-greet(name: string = "World") return string {
+function greet(name: string = "World") return string {
     return "Hello, " + name + "!";
 }
 
@@ -394,16 +514,52 @@ findMax(a: int, b: int) return int {
 ### Array Declaration
 
 #### Fixed-Size Arrays
+
+**Using Typed Arrays (Traditional):**
 ```javascript
 var numbers: int[5];           // Array of 5 integers
 var matrix: int[3, 4];         // 2D array: 3 rows, 4 columns
 var cube: int[2, 3, 4];        // 3D array
 ```
 
-#### Dynamic Arrays
+**Using Generic Array Type:**
 ```javascript
-var items: string[*];          // Dynamic array
+var items: array[10];          // Generic array of 10 elements
+var grid: array[5, 5];         // 2D generic array (5x5 grid)
 ```
+
+**Using array.type Syntax (Enhanced):**
+```javascript
+var strings: array.string[5];  // String array
+var ints: array.int[10];       // Integer array
+var nums: array.number[5];     // Number (double) array
+var bytes: array.byte[10];     // Byte array (uses ArrayFixedByte)
+var floats: array.float[5];    // Float array
+var longs: array.long[3];      // Long array
+```
+
+The `array.type` syntax provides an alternative way to declare typed arrays, making the syntax more consistent and explicit.
+
+#### Dynamic Arrays
+
+**Using Typed Arrays:**
+```javascript
+var items: string[*];          // Dynamic string array
+```
+
+**Using Generic Array Type:**
+```javascript
+var collection: array[*];      // Dynamic generic array
+var anyType: array.any[*];     // Explicit any type (same as array)
+```
+
+**Using array.type Syntax:**
+```javascript
+var dynamicStrings: array.string[*];  // Dynamic string array
+var dynamicInts: array.int[*];        // Dynamic integer array
+```
+
+Dynamic arrays backed by `ArrayDynamic` can grow as needed using `array.expand()`.
 
 #### Array Literals
 ```javascript
@@ -414,6 +570,38 @@ var mixed = [1, "two", 3.0, true];
 // Nested arrays
 var matrix = [[1, 2], [3, 4], [5, 6]];
 ```
+
+### Array Type Comparison
+
+| Syntax | Type | Backed By | Usage |
+|--------|------|-----------|-------|
+| `int[10]` | Typed | ArrayFixed | Fixed-size integer array (traditional) |
+| `array.int[10]` | Typed | ArrayFixed | Fixed-size integer array (enhanced) |
+| `array.byte[10]` | Typed | ArrayFixedByte | Byte array with optimized storage |
+| `string[*]` | Typed | ArrayDynamic | Dynamic string array (traditional) |
+| `array.string[*]` | Typed | ArrayDynamic | Dynamic string array (enhanced) |
+| `array[10]` | Generic | ArrayFixed | Fixed-size generic array |
+| `array.any[10]` | Generic | ArrayFixed | Fixed-size generic array (explicit) |
+| `array[*]` | Generic | ArrayDynamic | Dynamic generic array |
+| `json` | JSON | Java List/Map | JSON arrays and objects |
+
+### Available array.type Variants
+
+- `array` or `array.any` - Generic array (any type)
+- `array.string` - String array
+- `array.byte` - Byte array (uses ArrayFixedByte for fixed size)
+- `array.int` or `array.integer` - Integer array
+- `array.long` - Long integer array
+- `array.float` - Float array
+- `array.double` or `array.number` - Double/number array
+- `array.bool` or `array.boolean` - Boolean array
+- `array.date` - Date array
+
+**When to use each syntax:**
+- Use `int[10]` for concise traditional syntax
+- Use `array.int[10]` for explicit, consistent syntax across all types
+- Use `array[10]` or `array.any[10]` when you need mixed types
+- All three syntaxes work identically with `ArrayFixed` and `ArrayDynamic` implementations
 
 ### Array Access
 ```javascript
@@ -439,8 +627,11 @@ var zeros: int[10];
 call array.fill(zeros, 0);
 
 // Using array.expand (dynamic arrays)
-var dynamic: int[*];
+var dynamic: array[*];
 call array.expand(dynamic, 10);  // Expand to 10 elements
+
+// With literal assignment
+var items: array[*] = [1, "two", 3.0, true];  // Mixed types
 ```
 
 ---
