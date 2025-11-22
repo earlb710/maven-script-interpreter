@@ -64,6 +64,14 @@ public class EbsHandler implements Handler {
     public StatusBar getStatusBar() {
         return statusBar;
     }
+    
+    /**
+     * Get the interpreter instance for this handler
+     * @return The interpreter
+     */
+    public Interpreter getInterpreter() {
+        return interpreter;
+    }
 
     @Override
     public Object callBuiltin(String builtin, Object... args) throws InterpreterError {

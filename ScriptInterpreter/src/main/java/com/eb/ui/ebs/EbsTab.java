@@ -16,6 +16,7 @@ import com.eb.util.Debugger;
 import com.eb.util.Util;
 import javafx.application.Platform;
 import javafx.scene.control.Tab;
+import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -557,6 +558,9 @@ public class EbsTab extends Tab {
             // Offload execution to avoid freezing the UI if scripts are long
             Thread t = new Thread(() -> {
                 try {
+                    // Clear all previous script setups before running
+                    cleanupBeforeRun();
+                    
                     // Submit to the current console/handler (prints go to console).
                     handler.submit(src);
 
@@ -1078,6 +1082,76 @@ public class EbsTab extends Tab {
                 String position = String.format("(%d,%d)", columnPos + 1, currentParagraph + 1);
                 statusBar.setCustom(position);
             }
+        }
+    }
+    
+    /**
+     * Clean up all previous script setups before running the script.
+     * This includes:
+     * - Closing all open screens (windows)
+     * - Clearing the environment (variables, call stack)
+     * - Clearing the interpreter context (screen definitions, database connections)
+     * - Clearing the runtime context (parsed statements and blocks)
+     */
+    private void cleanupBeforeRun() {
+        try {
+            if (handler instanceof EbsHandler) {
+                EbsHandler ebsHandler = (EbsHandler) handler;
+                
+                // Get the interpreter and its context
+                com.eb.script.interpreter.Interpreter interpreter = ebsHandler.getInterpreter();
+                com.eb.script.interpreter.InterpreterContext interpreterContext = interpreter.getContext();
+                
+                // Close all open screens on the JavaFX Application Thread
+                java.util.concurrent.ConcurrentHashMap<String, Stage> screens = interpreterContext.getScreens();
+                if (!screens.isEmpty()) {
+                    // Create a list of screen names to avoid concurrent modification
+                    java.util.List<String> screenNames = new java.util.ArrayList<>(screens.keySet());
+                    
+                    Platform.runLater(() -> {
+                        for (String screenName : screenNames) {
+                            Stage stage = screens.get(screenName);
+                            if (stage != null && stage.isShowing()) {
+                                try {
+                                    stage.close();
+                                } catch (Exception ex) {
+                                    outputArea.printlnWarn("Warning: Error closing screen '" + screenName + "': " + ex.getMessage());
+                                }
+                            }
+                            
+                            // Interrupt and stop the screen thread if it exists
+                            Thread thread = interpreterContext.getScreenThreads().get(screenName);
+                            if (thread != null && thread.isAlive()) {
+                                try {
+                                    thread.interrupt();
+                                } catch (Exception ex) {
+                                    // Ignore thread interruption errors
+                                }
+                            }
+                        }
+                    });
+                    
+                    // Wait a moment for screens to close
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+                
+                // Clear the interpreter context (screens, variables, etc.)
+                interpreterContext.clear();
+                
+                // Clear the environment (variables, call stack, opened files)
+                context.environment.clear();
+                
+                // Clear the runtime context (parsed statements and blocks)
+                context.blocks.clear();
+                context.statements = null;
+            }
+        } catch (Exception ex) {
+            // Log the error but don't prevent the script from running
+            outputArea.printlnWarn("Warning: Error during cleanup: " + ex.getMessage());
         }
     }
     
