@@ -7,8 +7,45 @@ print "=== Console Configuration Color Editor ===";
 print "";
 
 // Read the console.cfg file
+// Try multiple possible paths since the script can be run from different directories
 print "Reading console.cfg...";
-var configContent: string = call file.readtextfile("console.cfg");
+var configContent: string = "";
+var configPath: string = "";
+
+// Try path 1: Current directory (when run from repo root)
+if call file.exists("console.cfg") then {
+    configPath = "console.cfg";
+    configContent = call file.readtextfile(configPath);
+} else {
+    // Try path 2: Parent directory (when run from ScriptInterpreter)
+    if call file.exists("../console.cfg") then {
+        configPath = "../console.cfg";
+        configContent = call file.readtextfile(configPath);
+    } else {
+        // Try path 3: Two levels up (when run from scripts/test)
+        if call file.exists("../../console.cfg") then {
+            configPath = "../../console.cfg";
+            configContent = call file.readtextfile(configPath);
+        } else {
+            // Try path 4: Three levels up (when run from ScriptInterpreter/scripts/test)
+            if call file.exists("../../../console.cfg") then {
+                configPath = "../../../console.cfg";
+                configContent = call file.readtextfile(configPath);
+            } else {
+                print "ERROR: Cannot find console.cfg file!";
+                print "Please run this script from one of these locations:";
+                print "  1. Repository root directory";
+                print "  2. ScriptInterpreter directory";
+                print "  3. ScriptInterpreter/scripts directory";
+                print "";
+                print "Or ensure console.cfg exists in the repository root.";
+                return;
+            }
+        }
+    }
+}
+
+print "File found at: " + configPath;
 print "File content read successfully";
 print "";
 
