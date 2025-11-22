@@ -232,6 +232,10 @@ public class ConsoleConfig {
                 css.append(".tab-pane .tab.changed .tab-label {\n");
                 css.append("    -fx-text-fill: ").append(color).append(" !important;\n");
                 css.append("}\n\n");
+            } else if ("tab-label-background".equals(className)) {
+                css.append(".tab-pane .tab {\n");
+                css.append("    -fx-background-color: ").append(color).append(" !important;\n");
+                css.append("}\n\n");
             } else {
                 // Regular style class - need to target both regular and RichTextFX .text nodes
                 // Use multiple selectors to cover all possible contexts
