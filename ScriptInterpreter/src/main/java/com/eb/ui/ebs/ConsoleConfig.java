@@ -229,7 +229,7 @@ public class ConsoleConfig {
                 css.append("    -fx-text-fill: ").append(color).append(" !important;\n");
                 css.append("}\n\n");
             } else if ("tab-label-changed-color".equals(className)) {
-                css.append(".tab-pane .tab.changed .tab-label {\n");
+                css.append(".tab-pane .tab.tab-changed .tab-label {\n");
                 css.append("    -fx-text-fill: ").append(color).append(" !important;\n");
                 css.append("}\n\n");
             } else if ("tab-label-background".equals(className)) {
