@@ -1089,6 +1089,7 @@ public class EbsTab extends Tab {
      * Clean up all previous script setups before running the script.
      * This includes:
      * - Closing all open screens (windows)
+     * - Closing database connections
      * - Clearing the environment (variables, call stack)
      * - Clearing the interpreter context (screen definitions, database connections)
      * - Clearing the runtime context (parsed statements and blocks)
@@ -1138,6 +1139,23 @@ public class EbsTab extends Tab {
                         Thread.currentThread().interrupt();
                     }
                 }
+                
+                // Close all database connections before clearing
+                java.util.Map<String, com.eb.script.interpreter.db.DbConnection> connections = interpreterContext.getConnections();
+                for (java.util.Map.Entry<String, com.eb.script.interpreter.db.DbConnection> entry : connections.entrySet()) {
+                    try {
+                        com.eb.script.interpreter.db.DbConnection conn = entry.getValue();
+                        if (conn != null) {
+                            conn.close();
+                        }
+                    } catch (Exception ex) {
+                        // Ignore errors closing connections - they may already be closed
+                    }
+                }
+                connections.clear();
+                
+                // Clear cursor specs
+                interpreterContext.getCursorSpecs().clear();
                 
                 // Clear the interpreter context (screens, variables, etc.)
                 interpreterContext.clear();
