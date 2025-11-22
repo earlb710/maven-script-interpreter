@@ -1,0 +1,29 @@
+// test_valid_imports.ebs
+// Test that valid imports still work correctly
+
+print "=== Testing Valid Imports ===";
+print "";
+
+import "helper_math.ebs";
+import "helper_string.ebs";
+
+print "";
+print "Testing imported functions...";
+
+var sum: int = call add(10, 5);
+print "add(10, 5) = " + sum;
+
+var product: int = call multiply(3, 4);
+print "multiply(3, 4) = " + product;
+
+var text: string = call concat("Hello", " World");
+print "concat result: " + text;
+
+print "";
+if sum == 15 && product == 12 then {
+    print "SUCCESS: Valid imports work correctly!";
+} else {
+    print "ERROR: Some functions did not work as expected";
+}
+
+print "=== Test Completed ===";

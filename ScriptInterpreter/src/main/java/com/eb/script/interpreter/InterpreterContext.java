@@ -65,6 +65,12 @@ public class InterpreterContext {
     // Screen configurations stored before Stage creation (lazy initialization)
     private final Map<String, ScreenConfig> screenConfigs = new ConcurrentHashMap<>(); // screenName -> ScreenConfig
 
+    // Track declared function names to prevent overwrites (functionName -> source file/script name)
+    private final Map<String, String> declaredFunctions = new ConcurrentHashMap<>();
+    
+    // Track declared screen names to prevent overwrites (screenName -> source file/script name)
+    private final Map<String, String> declaredScreens = new ConcurrentHashMap<>();
+
     private DbAdapter db = new OracleDbAdapter();
     private ScriptArea output;
 
@@ -414,6 +420,8 @@ public class InterpreterContext {
         screenStatuses.clear();
         screenErrorMessages.clear();
         screenConfigs.clear();
+        declaredFunctions.clear();
+        declaredScreens.clear();
     }
 
     public void remove(String screenName) {
@@ -591,6 +599,26 @@ public class InterpreterContext {
         } else {
             screenErrorMessages.remove(screenName.toLowerCase());
         }
+    }
+
+    /**
+     * Get the map of declared functions (functionName -> source file/script name).
+     * Used to track and prevent function name conflicts across imports.
+     * 
+     * @return the declared functions map
+     */
+    public Map<String, String> getDeclaredFunctions() {
+        return declaredFunctions;
+    }
+
+    /**
+     * Get the map of declared screens (screenName -> source file/script name).
+     * Used to track and prevent screen name conflicts across imports.
+     * 
+     * @return the declared screens map
+     */
+    public Map<String, String> getDeclaredScreens() {
+        return declaredScreens;
     }
 
 }

@@ -76,6 +76,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     private InterpreterDatabase databaseInterpreter;
     private InterpreterArray arrayInterpreter;
     private RuntimeContext currentRuntime;  // Store current runtime context for import resolution
+    private String currentImportFile;  // Track which import file is currently being processed
 
     public Interpreter() {
         this.context = new InterpreterContext();
@@ -98,6 +99,14 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
 
     public String currentConnection() {
         return context.getCurrentConnection();
+    }
+    
+    public RuntimeContext getCurrentRuntime() {
+        return currentRuntime;
+    }
+    
+    public String getCurrentImportFile() {
+        return currentImportFile;
     }
 
     // Convenience accessors for frequently used context fields
@@ -178,6 +187,14 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         
         // Register this interpreter in the environment for cleanup
         environment().setCurrentInterpreter(this);
+        
+        // Register all functions from the current script BEFORE any imports are processed
+        // This ensures we can detect conflicts when imports are executed
+        if (runtime.blocks != null) {
+            for (String functionName : runtime.blocks.keySet()) {
+                context.getDeclaredFunctions().put(functionName, runtime.name);
+            }
+        }
 
         // Set the source directory as safe for file operations during this execution
         if (runtime.sourcePath != null) {
@@ -1290,16 +1307,38 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             String importedScript = Files.readString(importPath, StandardCharsets.UTF_8);
             RuntimeContext importContext = Parser.parse(importPath.getFileName().toString(), importedScript);
             
-            // Execute the imported script in the current environment
-            for (Statement s : importContext.statements) {
-                s.accept(this);
+            // Set the current import file so that screen/function declarations know their source
+            String previousImportFile = currentImportFile;
+            currentImportFile = stmt.filename;
+            
+            try {
+                // Execute the imported script in the current environment
+                for (Statement s : importContext.statements) {
+                    s.accept(this);
+                }
+            } finally {
+                // Restore previous import file context
+                currentImportFile = previousImportFile;
             }
             
             // Register imported blocks/functions in the current runtime context
             if (importContext.blocks != null && currentRuntime != null) {
                 for (Map.Entry<String, BlockStatement> entry : importContext.blocks.entrySet()) {
+                    String functionName = entry.getKey();
+                    
+                    // Check if this function name was already declared
+                    if (context.getDeclaredFunctions().containsKey(functionName)) {
+                        String existingSource = context.getDeclaredFunctions().get(functionName);
+                        throw error(stmt.getLine(), 
+                            "Function '" + functionName + "' is already declared in " + existingSource + 
+                            " and cannot be overwritten by import from " + stmt.filename);
+                    }
+                    
+                    // Register this function as declared from the imported file
+                    context.getDeclaredFunctions().put(functionName, stmt.filename);
+                    
                     // Store blocks so they can be called later
-                    currentRuntime.blocks.put(entry.getKey(), entry.getValue());
+                    currentRuntime.blocks.put(functionName, entry.getValue());
                 }
             }
             

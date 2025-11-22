@@ -1,0 +1,17 @@
+// test_screen_in_current_then_import.ebs
+// Test where current script defines a screen, then imports a file with the same screen name
+
+print "=== Testing Screen Defined in Current Script, Then Imported ===";
+
+screen myScreen = {
+    "title": "My Screen from current script",
+    "width": 400,
+    "height": 300,
+    "sets": []
+};
+
+print "Screen defined in current script";
+
+import "helper_with_myscreen.ebs";
+
+print "This should not be reached!";

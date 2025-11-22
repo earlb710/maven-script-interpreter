@@ -1,0 +1,11 @@
+// helper_with_myscreen.ebs
+print "Loading helper_with_myscreen...";
+
+screen myScreen = {
+    "title": "My Screen from helper",
+    "width": 600,
+    "height": 400,
+    "sets": []
+};
+
+print "helper_with_myscreen loaded";

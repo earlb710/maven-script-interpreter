@@ -50,11 +50,25 @@ public class InterpreterScreen {
                     "Please close the existing screen first, or use a different screen name.");
             }
             
-            // If screen config exists but hasn't been shown, we'll replace it
-            boolean isReplacing = context.hasScreenConfig(stmt.name);
-            if (isReplacing && context.getOutput() != null) {
-                context.getOutput().printlnInfo("Replacing screen definition for '" + stmt.name + "' (screen was not shown yet)");
+            // Check if this screen name was already declared (even if not shown yet)
+            if (context.getDeclaredScreens().containsKey(stmt.name)) {
+                String existingSource = context.getDeclaredScreens().get(stmt.name);
+                throw interpreter.error(stmt.getLine(), 
+                    "Screen '" + stmt.name + "' is already declared in " + existingSource + 
+                    " and cannot be overwritten");
             }
+            
+            // Register this screen as declared
+            // If currently processing an import, use the import file name; otherwise use the current runtime context name
+            String sourceName;
+            if (interpreter.getCurrentImportFile() != null) {
+                sourceName = interpreter.getCurrentImportFile();
+            } else if (interpreter.getCurrentRuntime() != null) {
+                sourceName = interpreter.getCurrentRuntime().name;
+            } else {
+                sourceName = "unknown";
+            }
+            context.getDeclaredScreens().put(stmt.name, sourceName);
 
             // Evaluate the spec (should be a JSON object)
             Object spec = interpreter.evaluate(stmt.spec);
