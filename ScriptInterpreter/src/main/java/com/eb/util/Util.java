@@ -80,6 +80,8 @@ public class Util {
                     array.getDataType() == DataType.STRING;
                 case DATE ->
                     array.getDataType() == DataType.DATE;
+                case RECORD ->
+                    array.getDataType() == DataType.RECORD;
                 case JSON ->
                     true;
                 case ANY ->

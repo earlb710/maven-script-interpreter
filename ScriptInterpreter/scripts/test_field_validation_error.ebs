@@ -1,0 +1,10 @@
+// Simple test for undeclared field validation
+// Testing: var product:record{sku:string, price:double, inStock:bool} = {...with extra z field...}
+
+var product:record{sku:string, price:double, inStock:bool};
+
+print "Attempting to assign record with undeclared field 'z'...";
+product = {"sku": "XYZ789", "price": "49.99", "inStock": "Y", "z": 1};
+
+print "Assignment succeeded (should not reach here if validation works)";
+print product;

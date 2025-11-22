@@ -1,0 +1,25 @@
+// Test compact record syntax as requested
+print "Testing compact record syntax";
+
+var a:record{name:string, surname:string, age:int};
+
+a = {"name": "John", "surname": "Doe", "age": 30};
+
+print "Initial values:";
+print "Name: " + a.name;
+print "Surname: " + a.surname;  
+print "Age: " + a.age;
+
+// Test field assignment
+a.name = "Jane";
+a.surname = "Smith";
+a.age = 25;
+
+print "";
+print "After assignments:";
+print "Name: " + a.name;
+print "Surname: " + a.surname;
+print "Age: " + a.age;
+
+print "";
+print "Test completed successfully!";

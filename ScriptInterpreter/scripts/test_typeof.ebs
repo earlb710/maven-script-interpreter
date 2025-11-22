@@ -1,0 +1,71 @@
+// Test: typeof keyword for type aliases
+print "=== Typeof Keyword Test ===";
+print "";
+
+// Test 1: Type alias for array.record
+print "Test 1: Type alias for array.record";
+atype typeof array.record{
+    id: int,
+    department: record {
+        name: string,
+        location: string
+    }
+};
+
+var employees:atype;
+employees = [
+    {
+        "id": 101,
+        "department": {
+            "name": "Engineering",
+            "location": "Building A"
+        }
+    },
+    {
+        "id": 102,
+        "department": {
+            "name": "Sales",
+            "location": "Building B"
+        }
+    }
+];
+
+print "Employees array length: " + employees.length;
+print "Employee 0: " + employees[0];
+print "Employee 1: " + employees[1];
+print "";
+
+// Test 2: Type alias for simple record
+print "Test 2: Type alias for simple record";
+personType typeof record{name: string, age: int, active: bool};
+
+var person:personType;
+person = {"name": "John Doe", "age": 30, "active": true};
+
+print "Person: " + person;
+print "";
+
+// Test 3: Type alias for array of integers
+print "Test 3: Type alias for array of integers";
+intArray typeof array.int[10];
+
+var numbers:intArray;
+numbers = [1, 2, 3, 4, 5];
+
+print "Numbers: " + numbers;
+print "";
+
+// Test 4: Field assignment with type alias
+print "Test 4: Field assignment with type alias";
+person.name = "Jane Smith";
+person.age = 35;
+
+print "Updated person: " + person;
+print "";
+
+// Test 5: Verification
+print "Test 5: Verification";
+print "Employees array final state: " + employees.length + " employees";
+print "";
+
+print "=== All Typeof Tests Completed ===";

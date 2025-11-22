@@ -1,0 +1,4 @@
+var products:array.record[5]{sku:string, price:double, inStock:bool};
+print "Declared fields: sku, price, inStock";
+products[0] = {"sku": "ABC123", "price": 29.99, "inStock": true, "z":1};
+print "Assignment succeeded (should have failed)";

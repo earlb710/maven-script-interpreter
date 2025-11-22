@@ -1,0 +1,7 @@
+// Exact test from comment (with initialization first)
+var a:record{name:string, surname:string, age:int}; 
+a = {"name": "", "surname": "", "age": 0};  // Initialize first
+a.name="xyz";
+
+print "Assignment successful!";
+print a;

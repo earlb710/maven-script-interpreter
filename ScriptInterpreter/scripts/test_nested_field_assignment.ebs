@@ -1,0 +1,45 @@
+// Test: Field assignment on nested records
+print "=== Nested Record Field Assignment Test ===";
+print "";
+
+var person:record{
+    name: string,
+    age: int,
+    address: record {
+        street: string,
+        city: string,
+        zip: string
+    }
+};
+
+// Initialize
+person = {
+    "name": "John Doe",
+    "age": 30,
+    "address": {
+        "street": "123 Main St",
+        "city": "New York",
+        "zip": "10001"
+    }
+};
+
+print "Initial person: " + person;
+print "";
+
+// Test field assignment on top-level field
+person.name = "Jane Doe";
+person.age = 35;
+
+print "After top-level field updates:";
+print "Person: " + person;
+print "";
+
+// Test field assignment on nested record field
+person.address.city = "Boston";
+person.address.zip = "02101";
+
+print "After nested field updates:";
+print "Person: " + person;
+print "";
+
+print "Test completed!";

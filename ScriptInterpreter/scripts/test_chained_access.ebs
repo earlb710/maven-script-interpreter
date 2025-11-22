@@ -1,0 +1,58 @@
+// Test chained property access with arrays and nested records
+
+// Define array of records with nested records
+var employees:array.record{
+    id: int,
+    name: string,
+    department: record {
+        name: string,
+        location: string
+    }
+};
+
+// Initialize array
+employees = [
+    {
+        "id": 101,
+        "name": "John Doe",
+        "department": {
+            "name": "Engineering",
+            "location": "Building A"
+        }
+    },
+    {
+        "id": 102,
+        "name": "Jane Smith",
+        "department": {
+            "name": "Sales",
+            "location": "Building B"
+        }
+    }
+];
+
+print "Initial employees:";
+print employees;
+
+// Test 1: Simple array element access
+print "\nTest 1: Access array element field";
+print "employees[0].name should work already:";
+// employees[0].name - this should already work for reading
+
+// Test 2: Chained property access through nested records
+print "\nTest 2: Access nested field in array element";
+print "employees[0].department.name:";
+// employees[0].department.name - this needs to be implemented
+
+// Test 3: Assignment to nested field
+print "\nTest 3: Assign to nested field";
+employees[0].department.name = "ABC";
+print "After assignment, employees[0].department.name = 'ABC':";
+print employees[0];
+
+// Test 4: Assignment to simple field still works
+print "\nTest 4: Assign to simple field";
+employees[1].name = "Jane Doe";
+print "After assignment, employees[1].name = 'Jane Doe':";
+print employees[1];
+
+print "\nAll tests complete!";

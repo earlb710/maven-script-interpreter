@@ -1,0 +1,12 @@
+// Test single record type conversion
+print "=== Single Record Validation Test ===";
+print "";
+
+var product:record{sku:string, price:double, inStock:bool};
+
+product = {"sku": "XYZ789", "price": "49.99", "inStock": "Y"};
+
+print "Product: " + product;
+print "";
+print "Expected: inStock should be true (boolean), not \"Y\" (string)";
+print "Expected: price should be 49.99 (number), not \"49.99\" (string)";

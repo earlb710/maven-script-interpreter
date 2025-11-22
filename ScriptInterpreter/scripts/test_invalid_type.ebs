@@ -1,0 +1,11 @@
+// Test validation with invalid type
+print "=== Invalid Type Test ===";
+print "";
+
+var product:record{sku:string, price:double, inStock:bool};
+
+// This should fail validation - inStock should be bool but we're giving a number
+product = {"sku": "XYZ789", "price": 49.99, "inStock": 123};
+
+print "Product: " + product;
+print "If you see this, validation didn't work!";

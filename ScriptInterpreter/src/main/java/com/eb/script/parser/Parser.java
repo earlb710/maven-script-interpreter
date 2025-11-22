@@ -5,6 +5,7 @@ import com.eb.script.json.Json;
 import com.eb.script.RuntimeContext;
 import com.eb.script.token.Category;
 import com.eb.script.token.DataType;
+import com.eb.script.token.RecordType;
 import com.eb.script.token.ebs.EbsLexer;
 import com.eb.script.token.ebs.EbsToken;
 import com.eb.script.interpreter.expression.Expression;
@@ -30,9 +31,12 @@ import com.eb.script.interpreter.expression.ArrayExpression;
 import com.eb.script.interpreter.expression.ArrayLiteralExpression;
 import com.eb.script.interpreter.expression.IndexExpression;
 import com.eb.script.interpreter.expression.LengthExpression;
+import com.eb.script.interpreter.expression.PropertyExpression;
 import com.eb.script.interpreter.statement.ForEachStatement;
 import com.eb.script.interpreter.statement.ForStatement;
 import com.eb.script.interpreter.statement.IndexAssignStatement;
+import com.eb.script.interpreter.statement.TypedefStatement;
+import com.eb.script.interpreter.TypeRegistry;
 import com.eb.script.interpreter.expression.SqlSelectExpression;
 import com.eb.script.interpreter.statement.CursorStatement;
 import com.eb.script.interpreter.statement.OpenCursorStatement;
@@ -48,6 +52,7 @@ import com.eb.script.interpreter.statement.ScreenHideStatement;
 import com.eb.script.interpreter.statement.ScreenCloseStatement;
 import com.eb.script.interpreter.statement.ScreenSubmitStatement;
 import com.eb.script.interpreter.statement.ImportStatement;
+import com.eb.script.interpreter.statement.TypedefStatement;
 import com.eb.script.token.ebs.EbsTokenType;
 import com.eb.util.Util;
 import java.io.IOException;
@@ -323,6 +328,9 @@ public class Parser {
             return importStatement();
         } else if (match(EbsTokenType.VAR)) {
             return varDeclaration();
+        } else if (matchAll(EbsTokenType.IDENTIFIER, EbsTokenType.TYPEOF)) {
+            // Type alias definition: typename typeof type_definition
+            return typedefStatement();
         } else if (match(EbsTokenType.IF)) {
             return ifStatement();
         } else if (match(EbsTokenType.WHILE)) {
@@ -428,11 +436,29 @@ public class Parser {
         
         name = consume(EbsTokenType.IDENTIFIER, "Expected variable name.");
         DataType elemType = null;
+        RecordType recordType = null;
         Expression[] arrayDims = null;
+        boolean consumedBraces = false; // Track if we consumed braces for record fields
 
         if (match(EbsTokenType.COLON)) {
             EbsToken t = peek();
-            if (t.type.getDataType() != null) {
+            
+            // Check if this is a record type definition
+            // Check both token type and literal value since lexer might categorize it differently
+            if (t.type == EbsTokenType.RECORD || 
+                (t.literal instanceof String && "record".equals(((String)t.literal).toLowerCase()))) {
+                elemType = DataType.RECORD;
+                advance(); // consume 'record'
+                
+                // Expect opening brace for field definitions
+                consume(EbsTokenType.LBRACE, "Expected '{' after 'record' keyword.");
+                
+                // Parse record fields
+                recordType = parseRecordFields();
+                
+                consume(EbsTokenType.RBRACE, "Expected '}' after record field definitions.");
+                consumedBraces = true;
+            } else if (t.type.getDataType() != null) {
                 elemType = t.type.getDataType();
             } else {
                 if (t.type == EbsTokenType.DATATYPE || t.type == EbsTokenType.IDENTIFIER) {
@@ -451,21 +477,104 @@ public class Parser {
                             case "double", "number" -> elemType = DataType.DOUBLE;
                             case "bool", "boolean" -> elemType = DataType.BOOL;
                             case "date" -> elemType = DataType.DATE;
+                            case "record" -> {
+                                elemType = DataType.RECORD;
+                                // For array.record, field definitions come after array dimensions
+                                // So don't parse them here, just note we have a record type
+                            }
                             default -> throw error(t, "Unknown array element type: " + subType);
                         }
                     } else {
-                        EbsTokenType tokenType = getTokenType(typeName);
-                        if (tokenType != null && tokenType.getDataType() != null) {
-                            elemType = tokenType.getDataType();
+                        // Check if it's a type alias
+                        TypeRegistry.TypeAlias alias = TypeRegistry.getTypeAlias(typeName);
+                        if (alias != null) {
+                            // Use the aliased type
+                            elemType = alias.dataType;
+                            recordType = alias.recordType;
+                            
+                            // For array type aliases, we'll handle them specially below
+                            // Just set a flag to indicate this is from an alias
+                            boolean isAliasedArray = alias.isArray;
+                            Integer aliasedArraySize = alias.arraySize;
+                            
+                            // Advance the token
+                            advance();
+                            
+                            // If this is an array alias, we need to create the array expression
+                            if (isAliasedArray) {
+                                // Build array dimensions expression
+                                if (aliasedArraySize != null) {
+                                    Expression dimExpr = new LiteralExpression(DataType.INTEGER, aliasedArraySize);
+                                    arrayDims = new Expression[]{dimExpr};
+                                    
+                                    // Create ArrayExpression with dimensions
+                                    ArrayExpression varInit = new ArrayExpression(name.line, elemType, arrayDims, null);
+                                    
+                                    // Check for assignment
+                                    if (match(EbsTokenType.EQUAL)) {
+                                        Expression actualInit = expression();
+                                        
+                                        if (actualInit instanceof ArrayLiteralExpression) {
+                                            varInit.initializer = (ArrayLiteralExpression) actualInit;
+                                            ((ArrayLiteralExpression) actualInit).array = varInit;
+                                        } else if (actualInit instanceof ArrayExpression) {
+                                            varInit = (ArrayExpression) actualInit;
+                                        }
+                                    }
+                                    
+                                    consume(EbsTokenType.SEMICOLON, "Expected ';' after variable declaration.");
+                                    
+                                    // Return appropriate VarStatement
+                                    if (recordType != null) {
+                                        return new VarStatement(name.line, (String) name.literal, elemType, recordType, varInit);
+                                    } else {
+                                        return new VarStatement(name.line, (String) name.literal, elemType, varInit);
+                                    }
+                                } else {
+                                    // Dynamic array - no dimensions, just handle assignment
+                                    Expression varInit = null;
+                                    if (match(EbsTokenType.EQUAL)) {
+                                        varInit = expression();
+                                    }
+                                    
+                                    consume(EbsTokenType.SEMICOLON, "Expected ';' after variable declaration.");
+                                    
+                                    // Return appropriate VarStatement
+                                    if (recordType != null) {
+                                        return new VarStatement(name.line, (String) name.literal, elemType, recordType, varInit);
+                                    } else {
+                                        return new VarStatement(name.line, (String) name.literal, elemType, varInit);
+                                    }
+                                }
+                            }
+                            // For non-array aliases, we've set the type info
+                            // Don't advance again - already advanced at line 501
                         } else {
-                            throw error(t, "Expected type name after ':'.");
+                            EbsTokenType tokenType = getTokenType(typeName);
+                            if (tokenType != null && tokenType.getDataType() != null) {
+                                elemType = tokenType.getDataType();
+                            } else {
+                                throw error(t, "Expected type name after ':'.");
+                            }
                         }
                     }
                 } else {
                     throw error(t, "Expected type name after ':'.");
                 }
             }
-            advance();
+            // Advance token for non-record types and non-aliases (record already consumed all its tokens)
+            // Also don't advance if we already advanced for array.record case or type alias
+            // Check if we haven't already processed this as a type alias
+            boolean isAlias = (t.type == EbsTokenType.IDENTIFIER || t.type == EbsTokenType.DATATYPE) &&
+                             t.literal instanceof String &&
+                             TypeRegistry.hasTypeAlias((String) t.literal);
+            
+            if (t.type != EbsTokenType.RECORD && 
+                !(t.literal instanceof String && "record".equals(((String)t.literal).toLowerCase())) &&
+                !(t.literal instanceof String && ((String)t.literal).toLowerCase().startsWith("array.record")) &&
+                !isAlias) {
+                advance();
+            }
             
             // Check for array.type syntax when type is not already qualified
             // This handles cases where lexer separates array and type (array . int)
@@ -492,6 +601,11 @@ public class Parser {
                         case "double", "number" -> elemType = DataType.DOUBLE;
                         case "bool", "boolean" -> elemType = DataType.BOOL;
                         case "date" -> elemType = DataType.DATE;
+                        case "record" -> {
+                            elemType = DataType.RECORD;
+                            // For array.record, field definitions come after array dimensions
+                            // So don't parse them here, just note we have a record type
+                        }
                         default -> throw error(subType, "Unknown array element type: " + subTypeName);
                     }
                 } else {
@@ -499,8 +613,18 @@ public class Parser {
                 }
             }
             
+            // Check for array dimensions after type or after record field definitions
             if (check(EbsTokenType.LBRACKET)) {
                 arrayDims = parseArrayDimensions();
+            }
+            
+            // For array.record with inline field definitions, parse them after dimensions (if any)
+            // Syntax: array.record{...} or array.record[size]{...}
+            // Only do this if we haven't already consumed braces (standalone record case)
+            if (elemType == DataType.RECORD && !consumedBraces && check(EbsTokenType.LBRACE)) {
+                consume(EbsTokenType.LBRACE, "Expected '{' for record field definitions.");
+                recordType = parseRecordFields();
+                consume(EbsTokenType.RBRACE, "Expected '}' after record field definitions.");
             }
         }
 
@@ -518,6 +642,9 @@ public class Parser {
                 // Parse SQL SELECT and produce an expression node
                 varInit = parseSqlSelectFromSource();
             } else if (elemType == DataType.JSON && (check(EbsTokenType.LBRACE) || check(EbsTokenType.LBRACKET))) {
+                varInit = parseJsonLiteralFromSource();
+            } else if (elemType == DataType.RECORD && check(EbsTokenType.LBRACE)) {
+                // For record types, parse JSON object literal
                 varInit = parseJsonLiteralFromSource();
             } else if (checkAny(EbsTokenType.LBRACE, EbsTokenType.LBRACKET)) {
                 // Allow array literals in these cases:
@@ -540,8 +667,223 @@ public class Parser {
         }
 
         consume(EbsTokenType.SEMICOLON, "Expected ';' after variable declaration.");
-        return new VarStatement(name.line, (String) name.literal, elemType, varInit);
+        
+        // Return appropriate VarStatement based on whether it's a record type
+        if (recordType != null) {
+            return new VarStatement(name.line, (String) name.literal, elemType, recordType, varInit);
+        } else {
+            return new VarStatement(name.line, (String) name.literal, elemType, varInit);
+        }
 
+    }
+
+    /**
+     * Parse typedef statement: typename typeof type_definition
+     * Examples:
+     *   atype typeof array.record{id: int, name: string}
+     *   personType typeof record{name: string, age: int}
+     *   intArray typeof array.int[10]
+     */
+    private Statement typedefStatement() throws ParseError {
+        // Get the type name - matchAll only checks, doesn't consume
+        EbsToken typeName = peek();
+        advance(); // consume the type name
+        
+        // Consume 'typeof' keyword
+        consume(EbsTokenType.TYPEOF, "Expected 'typeof' in type definition.");
+        
+        // Parse the type definition (similar to varDeclaration logic)
+        DataType elemType = null;
+        RecordType recordType = null;
+        boolean isArray = false;
+        Integer arraySize = null;
+        Expression arrayInit = null;
+        
+        // Check for array.type syntax
+        if (check(EbsTokenType.ARRAY) || check(EbsTokenType.IDENTIFIER) || check(EbsTokenType.DATATYPE)) {
+            EbsToken typeToken = peek();
+            
+            // Check if it's "array" keyword or identifier starting with "array"
+            boolean isArrayToken = typeToken.type == EbsTokenType.ARRAY ||
+                                  (typeToken.literal instanceof String && ((String) typeToken.literal).toLowerCase().startsWith("array"));
+            
+            if (isArrayToken) {
+                isArray = true;
+                advance(); // consume 'array'
+                
+                // Expect dot
+                if (check(EbsTokenType.DOT)) {
+                    advance();
+                } else {
+                    throw error(typeToken, "Expected '.' after 'array' in type definition.");
+                }
+                
+                // Parse element type
+                EbsToken elemTypeToken = peek();
+                
+                // Check if element type is 'record'
+                if (elemTypeToken.type == EbsTokenType.RECORD || 
+                    (elemTypeToken.literal instanceof String && "record".equals(((String)elemTypeToken.literal).toLowerCase()))) {
+                    elemType = DataType.RECORD;
+                    advance(); // consume 'record'
+                    
+                    // Check for field definitions
+                    if (check(EbsTokenType.LBRACKET)) {
+                        // Has dimensions: array.record[size] or array.record[*]
+                        advance(); // consume '['
+                        if (check(EbsTokenType.STAR)) {
+                            advance(); // dynamic array
+                            arraySize = null;
+                        } else {
+                            EbsToken sizeToken = consume(EbsTokenType.INTEGER, "Expected array size or '*'.");
+                            arraySize = (Integer) sizeToken.literal;
+                        }
+                        consume(EbsTokenType.RBRACKET, "Expected ']' after array dimension.");
+                    }
+                    
+                    // Parse record fields if present
+                    if (check(EbsTokenType.LBRACE)) {
+                        advance(); // consume '{'
+                        recordType = parseRecordFields();
+                        consume(EbsTokenType.RBRACE, "Expected '}' after record field definitions.");
+                    }
+                } else {
+                    // Regular type
+                    if (elemTypeToken.type.getDataType() != null) {
+                        elemType = elemTypeToken.type.getDataType();
+                        advance();
+                    } else if (elemTypeToken.type == EbsTokenType.IDENTIFIER || elemTypeToken.type == EbsTokenType.DATATYPE) {
+                        String typeLiteral = (String) elemTypeToken.literal;
+                        EbsTokenType tokenType = getTokenType(typeLiteral);
+                        if (tokenType != null && tokenType.getDataType() != null) {
+                            elemType = tokenType.getDataType();
+                            advance();
+                        } else {
+                            throw error(elemTypeToken, "Unknown type '" + typeLiteral + "' in type definition.");
+                        }
+                    }
+                    
+                    // Parse array dimensions if present
+                    if (check(EbsTokenType.LBRACKET)) {
+                        advance(); // consume '['
+                        if (check(EbsTokenType.STAR)) {
+                            advance(); // dynamic array
+                            arraySize = null;
+                        } else {
+                            EbsToken sizeToken = consume(EbsTokenType.INTEGER, "Expected array size or '*'.");
+                            arraySize = (Integer) sizeToken.literal;
+                        }
+                        consume(EbsTokenType.RBRACKET, "Expected ']' after array dimension.");
+                    }
+                }
+            } else if (typeToken.type == EbsTokenType.RECORD || 
+                      (typeToken.literal instanceof String && "record".equals(((String)typeToken.literal).toLowerCase()))) {
+                // Standalone record type
+                elemType = DataType.RECORD;
+                advance(); // consume 'record'
+                
+                // Parse record fields
+                if (check(EbsTokenType.LBRACE)) {
+                    advance(); // consume '{'
+                    recordType = parseRecordFields();
+                    consume(EbsTokenType.RBRACE, "Expected '}' after record field definitions.");
+                }
+            } else {
+                // Simple type
+                if (typeToken.type.getDataType() != null) {
+                    elemType = typeToken.type.getDataType();
+                    advance();
+                } else {
+                    throw error(typeToken, "Expected type name in type definition.");
+                }
+            }
+        }
+        
+        consume(EbsTokenType.SEMICOLON, "Expected ';' after type definition.");
+        
+        // Register the type alias immediately during parsing (not during execution)
+        // This allows subsequent variable declarations to use the type alias
+        TypeRegistry.TypeAlias alias = new TypeRegistry.TypeAlias(
+            (String) typeName.literal,
+            elemType,
+            recordType,
+            isArray,
+            arraySize
+        );
+        TypeRegistry.registerTypeAlias(alias);
+        
+        // Create TypedefStatement
+        if (isArray) {
+            return new TypedefStatement(typeName.line, (String) typeName.literal, elemType, recordType, arraySize);
+        } else if (recordType != null) {
+            return new TypedefStatement(typeName.line, (String) typeName.literal, recordType);
+        } else {
+            return new TypedefStatement(typeName.line, (String) typeName.literal, elemType);
+        }
+    }
+
+    /**
+     * Parse record field definitions inside { }
+     * Expected format: fieldName: type, fieldName: type, ...
+     * Supports nested records: fieldName: record { ... }
+     */
+    private RecordType parseRecordFields() throws ParseError {
+        RecordType recordType = new RecordType();
+        
+        // Parse field definitions until we hit the closing brace
+        while (!check(EbsTokenType.RBRACE) && !isAtEnd()) {
+            // Parse field name
+            EbsToken fieldName = consume(EbsTokenType.IDENTIFIER, "Expected field name in record definition.");
+            
+            // Expect colon
+            consume(EbsTokenType.COLON, "Expected ':' after field name in record definition.");
+            
+            // Parse field type
+            EbsToken fieldTypeToken = peek();
+            DataType fieldType = null;
+            RecordType nestedRecordType = null;
+            
+            // Check if this is a nested record type
+            if (fieldTypeToken.type == EbsTokenType.RECORD || 
+                (fieldTypeToken.literal instanceof String && "record".equals(((String)fieldTypeToken.literal).toLowerCase()))) {
+                // This is a nested record - parse it recursively
+                advance(); // consume 'record'
+                consume(EbsTokenType.LBRACE, "Expected '{' after 'record' keyword in nested record definition.");
+                nestedRecordType = parseRecordFields(); // Recursive call
+                consume(EbsTokenType.RBRACE, "Expected '}' after nested record field definitions.");
+                fieldType = DataType.RECORD;
+            } else if (fieldTypeToken.type.getDataType() != null) {
+                fieldType = fieldTypeToken.type.getDataType();
+                advance();
+            } else if (fieldTypeToken.type == EbsTokenType.IDENTIFIER || fieldTypeToken.type == EbsTokenType.DATATYPE) {
+                String typeName = (String) fieldTypeToken.literal;
+                EbsTokenType tokenType = getTokenType(typeName);
+                if (tokenType != null && tokenType.getDataType() != null) {
+                    fieldType = tokenType.getDataType();
+                    advance();
+                } else {
+                    throw error(fieldTypeToken, "Unknown type '" + typeName + "' in record field definition.");
+                }
+            } else {
+                throw error(fieldTypeToken, "Expected type name after ':' in record field definition.");
+            }
+            
+            // Add field to record type
+            if (nestedRecordType != null) {
+                recordType.addNestedRecord((String) fieldName.literal, nestedRecordType);
+            } else {
+                recordType.addField((String) fieldName.literal, fieldType);
+            }
+            
+            // Check for comma (more fields) or closing brace (end of record)
+            if (check(EbsTokenType.COMMA)) {
+                advance(); // consume comma
+            } else if (!check(EbsTokenType.RBRACE)) {
+                throw error(peek(), "Expected ',' or '}' in record definition.");
+            }
+        }
+        
+        return recordType;
     }
 
     /**
@@ -1085,24 +1427,36 @@ public class Parser {
 
     private Statement assignmentStatement(boolean requireSemicolon) throws ParseError {
         // We need to parse an lvalue:
-        // either IDENTIFIER, or IDENTIFIER followed by one or more [ index-list ]
-        // Also support DOT for screen variable access (screenName.varName)
+        // either IDENTIFIER, or IDENTIFIER followed by one or more [ index-list ] and/or .property
+        // Supports: variable, array[0], record.field, array[0].field, array[0].field.nested, etc.
         EbsToken name = consume(EbsTokenType.IDENTIFIER, "Expected variable name.");
         String varName = (String) name.literal;
         
-        // Check if this is a screen variable access (screenName.varName)
-        if (match(EbsTokenType.DOT)) {
-            EbsToken fieldName = consume(EbsTokenType.IDENTIFIER, "Expected field name after '.'.");
-            // Treat screen.var as a single variable name with DOT
-            varName = varName + "." + fieldName.literal;
-        }
-        
         Expression lvalue = new VariableExpression(name.line, varName);
 
-        // Attach any number of bracketed index-suffixes to the variable
-        while (check(EbsTokenType.LBRACKET)) {
-            Expression[] indices = parseIndexList();
-            lvalue = new IndexExpression(name.line, lvalue, indices);
+        // Attach any number of bracketed index-suffixes and property accesses to the variable
+        // This allows: array[0], array[0].field, array[0].field.nested, array[0][1].field, etc.
+        while (check(EbsTokenType.LBRACKET) || check(EbsTokenType.DOT)) {
+            if (check(EbsTokenType.LBRACKET)) {
+                // Parse the index list (parseIndexList will consume the '[')
+                Expression[] indices = parseIndexList();
+                lvalue = new IndexExpression(name.line, lvalue, indices);
+            } else if (match(EbsTokenType.DOT)) {
+                // Property access
+                EbsToken propToken = consume(EbsTokenType.IDENTIFIER, "Expected property name after '.'.");
+                String propName = (String) propToken.literal;
+                
+                // The lexer may have combined multiple dot-separated identifiers into one
+                // (e.g., "department.name" as a single token). Split them and create nested PropertyExpressions.
+                if (propName.contains(".")) {
+                    String[] parts = propName.split("\\.");
+                    for (String part : parts) {
+                        lvalue = new PropertyExpression(name.line, lvalue, part);
+                    }
+                } else {
+                    lvalue = new PropertyExpression(name.line, lvalue, propName);
+                }
+            }
         }
 
         // Check for ++, --, or compound assignment operators
@@ -1178,7 +1532,11 @@ public class Parser {
 
         if (lvalue instanceof VariableExpression ve) {
             return new AssignStatement(name.line, (String) name.literal, value);
+        } else if (lvalue instanceof PropertyExpression pe) {
+            // Property assignment (e.g., record.field or array[0].field)
+            return new IndexAssignStatement(name.line, lvalue, value);
         } else {
+            // Index assignment (e.g., array[0])
             return new IndexAssignStatement(name.line, lvalue, value);
         }
     }
@@ -1440,10 +1798,12 @@ public class Parser {
                 base = new CursorHasNextExpression(line, base);
             } else if ("next".equals(name) && callEmpty) {
                 base = new CursorNextExpression(line, base);
+            } else if (!callEmpty) {
+                // Property access (e.g., record field access)
+                base = new PropertyExpression(line, base, name);
             } else {
-                // You may decide to allow other dot-names or reject them here.
-                // For now, reject unknown member form to avoid silent acceptance.
-                throw error(prop, "Unknown member '" + name + "'" + (callEmpty ? "()" : ""));
+                // Unknown method call
+                throw error(prop, "Unknown method '" + name + "()'");
             }
         }
 

@@ -1,0 +1,17 @@
+// Simple test for type conversion in array.record
+print "=== Simple Validation Test ===";
+print "";
+
+var products:array.record{sku:string, price:double, inStock:bool};
+
+print "Before assignment";
+
+products = [
+    {"sku": "XYZ789", "price": "49.99", "inStock": "Y"}
+];
+
+print "After assignment";
+print "Product 0: " + products[0];
+print "";
+print "Expected: inStock should be true (boolean), not \"Y\" (string)";
+print "Expected: price should be 49.99 (number), not \"49.99\" (string)";

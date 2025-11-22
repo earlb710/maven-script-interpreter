@@ -1,0 +1,18 @@
+// Test field assignment only (no reading)
+print "Testing field assignment";
+
+var a:record{name:string, surname:string, age:int};
+
+a = {"name": "Initial", "surname": "Name", "age": 0};
+
+print "Record initialized";
+
+// Field assignments
+a.name = "xyz";
+a.surname = "abc";
+a.age = 42;
+
+print "Field assignments completed";
+
+// Verify by printing the whole record
+print a;

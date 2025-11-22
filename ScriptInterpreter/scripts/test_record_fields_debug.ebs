@@ -1,0 +1,3 @@
+var product:record{sku:string, price:double};
+product = {"sku": "ABC123", "price": 29.99};
+print "Simple record works";

@@ -8,6 +8,7 @@ import com.eb.script.interpreter.expression.ArrayExpression;
 import com.eb.script.interpreter.expression.ArrayLiteralExpression;
 import com.eb.script.interpreter.expression.Expression;
 import com.eb.script.interpreter.expression.IndexExpression;
+import com.eb.script.interpreter.expression.PropertyExpression;
 import com.eb.script.interpreter.expression.VariableExpression;
 import com.eb.script.interpreter.statement.IndexAssignStatement;
 import com.eb.script.interpreter.statement.StatementKind;
@@ -207,8 +208,39 @@ public class InterpreterArray {
      * Visit an index assignment statement to set array elements
      */
     public void visitIndexAssignStatement(IndexAssignStatement stmt) throws InterpreterError {
+        // Handle PropertyExpression (e.g., record.field = value or array[0].field = value)
+        if (stmt.target instanceof PropertyExpression propExpr) {
+            // Evaluate the object being accessed
+            Object obj = interpreter.evaluate(propExpr.object);
+            
+            if (obj == null) {
+                throw interpreter.error(stmt.getLine(), "Cannot access property '" + propExpr.propertyName + "' of null");
+            }
+            
+            // Check if the object is a Map (record or JSON object)
+            if (obj instanceof java.util.Map) {
+                @SuppressWarnings("unchecked")
+                java.util.Map<String, Object> map = (java.util.Map<String, Object>) obj;
+                
+                // Check if the property exists
+                if (!map.containsKey(propExpr.propertyName)) {
+                    throw interpreter.error(stmt.getLine(), "Property '" + propExpr.propertyName + "' does not exist in record");
+                }
+                
+                // Evaluate the value to assign
+                Object value = interpreter.evaluate(stmt.value);
+                
+                // Assign the property value
+                map.put(propExpr.propertyName, value);
+                return;
+            }
+            
+            throw interpreter.error(stmt.getLine(), "Cannot access property '" + propExpr.propertyName + "' on non-record type: " + obj.getClass().getSimpleName());
+        }
+        
+        // Handle IndexExpression (original logic)
         if (!(stmt.target instanceof IndexExpression idxExpr)) {
-            throw interpreter.error(stmt.getLine(), "Internal error: index assignment target is not an index expression.");
+            throw interpreter.error(stmt.getLine(), "Internal error: index assignment target is not an index or property expression.");
         }
 
         // Evaluate the container (up to the last dimension) and the final index
@@ -229,6 +261,26 @@ public class InterpreterArray {
         // Set at last index
         int last = idx[idx.length - 1];
         Object rhs = interpreter.evaluate(stmt.value);
+
+        // Check if we need to validate against a record type
+        // Extract the root variable name from the IndexExpression
+        String varName = null;
+        if (idxExpr.target instanceof VariableExpression varExpr) {
+            varName = varExpr.name;
+        }
+        
+        // If we have a variable name, check if it has a record type metadata
+        if (varName != null) {
+            com.eb.script.token.RecordType recordType = interpreter.environment().getEnvironmentValues().getRecordType(varName);
+            if (recordType != null && rhs instanceof java.util.Map) {
+                // Validate the value against the record type
+                if (!recordType.validateValue(rhs)) {
+                    throw interpreter.error(stmt.getLine(), "Invalid value for record type: validation failed");
+                }
+                // Convert the value to the correct types
+                rhs = recordType.convertValue(rhs);
+            }
+        }
 
         setIndexed(container, last, rhs, stmt.getLine());
     }

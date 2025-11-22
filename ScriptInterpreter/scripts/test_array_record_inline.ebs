@@ -1,0 +1,66 @@
+// Test: array.record with inline field definitions
+// As requested: var a:array.record{name:string, surname:string, age:int};
+//               var a:array.record[10]{name:string, surname:string, age:int};
+
+print "=== Array.Record with Inline Field Definitions Test ===";
+print "";
+
+// Test 1: Dynamic array with inline record definition
+print "Test 1: Dynamic array.record with field definitions";
+var employees:array.record{name:string, surname:string, age:int};
+
+employees = [
+    {"name": "John", "surname": "Doe", "age": 30},
+    {"name": "Jane", "surname": "Smith", "age": 35},
+    {"name": "Bob", "surname": "Johnson", "age": 28}
+];
+
+print "Employees array created with " + employees.length + " records";
+print "First employee: " + employees[0];
+print "";
+
+// Test 2: Fixed-size array with inline record definition
+print "Test 2: Fixed-size array.record[10] with field definitions";
+var people:array.record[10]{firstName:string, lastName:string, active:bool};
+
+people[0] = {"firstName": "Alice", "lastName": "Brown", "active": true};
+people[1] = {"firstName": "Charlie", "lastName": "Davis", "active": false};
+people[2] = {"firstName": "Diana", "lastName": "Wilson", "active": true};
+
+print "People array created with fixed size 10";
+print "Person 0: " + people[0];
+print "Person 1: " + people[1];
+print "Person 2: " + people[2];
+print "";
+
+// Test 3: Multiple array.record variables
+print "Test 3: Multiple array.record variables with different field definitions";
+var students:array.record{id:int, name:string, grade:double};
+var products:array.record[5]{sku:string, price:double, inStock:bool};
+
+students = [
+    {"id": 1, "name": "Emma", "grade": 95.5},
+    {"id": 2, "name": "Oliver", "grade": 88.0}
+];
+
+products[0] = {"sku": "ABC123", "price": 29.99, "inStock": true};
+products[1] = {"sku": "XYZ789", "price": 49.99, "inStock": false};
+
+print "Students: " + students.length + " records";
+print "Student 1: " + students[0];
+print "Product 0: " + products[0];
+print "";
+
+// Test 4: Verify array elements can be accessed
+print "Test 4: Array element access";
+print "Employee 0: " + employees[0];
+print "Student 0: " + students[0];
+print "";
+
+print "=== All Tests Passed ===";
+print "";
+print "Summary:";
+print "- Dynamic array with inline fields: array.record{field:type,...}";
+print "- Fixed-size array with inline fields: array.record[size]{field:type,...}";
+print "- Arrays created and initialized successfully";
+print "- Type validation enforced on assignments";

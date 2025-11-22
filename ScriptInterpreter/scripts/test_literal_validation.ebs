@@ -1,0 +1,59 @@
+// Test: Literal assignment validation for array.record with inline field definitions
+// Request: Check that literal assignment is validated against record definition
+
+print "=== Literal Assignment Validation Test ===";
+print "";
+
+// Test 1: Valid assignment - all fields match
+print "Test 1: Valid literal assignment";
+var employees:array.record{name:string, surname:string, age:int};
+
+employees = [
+    {"name": "John", "surname": "Doe", "age": 30},
+    {"name": "Jane", "surname": "Smith", "age": 35}
+];
+
+print "Valid assignment succeeded";
+print "Employee 0: " + employees[0];
+print "";
+
+// Test 2: Assignment with missing field (should still work - fields can be optional)
+print "Test 2: Assignment with missing field";
+var people:array.record{firstName:string, lastName:string, age:int};
+
+people = [
+    {"firstName": "Alice", "lastName": "Brown"},  // age missing
+    {"firstName": "Bob", "age": 25}  // lastName missing
+];
+
+print "Assignment with missing fields succeeded";
+print "Person 0: " + people[0];
+print "";
+
+// Test 3: Assignment with extra field (should work - JSON allows extra fields)
+print "Test 3: Assignment with extra fields";
+var students:array.record{id:int, name:string};
+
+students = [
+    {"id": 1, "name": "Charlie", "grade": 95},  // grade is extra
+    {"id": 2, "name": "Diana", "active": true}  // active is extra
+];
+
+print "Assignment with extra fields succeeded";
+print "Student 0: " + students[0];
+print "";
+
+// Test 4: Type conversion validation
+print "Test 4: Type conversion";
+var products:array.record{sku:string, price:double, inStock:bool};
+
+products = [
+    {"sku": "ABC123", "price": 29.99, "inStock": true},
+    {"sku": "XYZ789", "price": "49.99", "inStock": "Y"}  // Should convert string to number and bool
+];
+
+print "Type conversion succeeded";
+print "Product 1: " + products[1];
+print "";
+
+print "=== All Validation Tests Completed ===";

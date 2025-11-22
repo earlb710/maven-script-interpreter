@@ -1,0 +1,11 @@
+// Simple record test
+print "Testing record field access";
+
+var employee: record { name: string, age: int };
+
+employee = {
+    "name": "John",
+    "age": 30
+};
+
+print employee.name;
