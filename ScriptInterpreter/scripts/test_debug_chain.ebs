@@ -1,0 +1,41 @@
+// Debug test for chained property access
+
+var employees:array.record{
+    id: int,
+    name: string,
+    department: record {
+        name: string,
+        location: string
+    }
+};
+
+employees = [
+    {
+        "id": 101,
+        "name": "John Doe",
+        "department": {
+            "name": "Engineering",
+            "location": "Building A"
+        }
+    }
+];
+
+print "Initial employees:";
+print employees;
+print "";
+
+// Test simple field assignment first
+print "Test: employees[0].name = 'John Smith'";
+employees[0].name = "John Smith";
+print "After assignment:";
+print employees[0];
+print "";
+
+// Test nested field assignment
+print "Test: employees[0].department.name = 'ABC'";
+employees[0].department.name = "ABC";
+print "After assignment:";
+print employees[0];
+print "";
+
+print "Done!";

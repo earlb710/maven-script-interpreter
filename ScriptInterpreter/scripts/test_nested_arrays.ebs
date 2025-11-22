@@ -1,0 +1,36 @@
+// Test chained property access with nested arrays
+
+// Define array of records where one field is also an array
+var employees:array.record{
+    id: int,
+    name: string,
+    departments: array.record{
+        name: string,
+        location: string
+    }
+};
+
+// Initialize
+employees = [
+    {
+        "id": 101,
+        "name": "John Doe",
+        "departments": [
+            {"name": "Engineering", "location": "Building A"},
+            {"name": "Research", "location": "Building B"}
+        ]
+    }
+];
+
+print "Initial:";
+print employees[0];
+print "";
+
+// Test: employees[0].departments[0].name = "XYZ"
+print "Test: employees[0].departments[0].name = 'XYZ'";
+employees[0].departments[0].name = "XYZ";
+print "After assignment:";
+print employees[0];
+print "";
+
+print "Done!";

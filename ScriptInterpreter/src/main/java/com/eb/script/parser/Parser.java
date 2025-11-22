@@ -1427,25 +1427,36 @@ public class Parser {
 
     private Statement assignmentStatement(boolean requireSemicolon) throws ParseError {
         // We need to parse an lvalue:
-        // either IDENTIFIER, or IDENTIFIER followed by one or more [ index-list ]
-        // Also support DOT for record/screen variable access (recordName.field or screenName.varName)
+        // either IDENTIFIER, or IDENTIFIER followed by one or more [ index-list ] and/or .property
+        // Supports: variable, array[0], record.field, array[0].field, array[0].field.nested, etc.
         EbsToken name = consume(EbsTokenType.IDENTIFIER, "Expected variable name.");
         String varName = (String) name.literal;
         
-        // Check if this is a property/field access (recordName.field)
-        if (match(EbsTokenType.DOT)) {
-            EbsToken fieldName = consume(EbsTokenType.IDENTIFIER, "Expected field name after '.'.");
-            // Treat record.field as a single variable name with DOT for now
-            // The interpreter will handle the property assignment
-            varName = varName + "." + fieldName.literal;
-        }
-        
         Expression lvalue = new VariableExpression(name.line, varName);
 
-        // Attach any number of bracketed index-suffixes to the variable
-        while (check(EbsTokenType.LBRACKET)) {
-            Expression[] indices = parseIndexList();
-            lvalue = new IndexExpression(name.line, lvalue, indices);
+        // Attach any number of bracketed index-suffixes and property accesses to the variable
+        // This allows: array[0], array[0].field, array[0].field.nested, array[0][1].field, etc.
+        while (check(EbsTokenType.LBRACKET) || check(EbsTokenType.DOT)) {
+            if (check(EbsTokenType.LBRACKET)) {
+                // Parse the index list (parseIndexList will consume the '[')
+                Expression[] indices = parseIndexList();
+                lvalue = new IndexExpression(name.line, lvalue, indices);
+            } else if (match(EbsTokenType.DOT)) {
+                // Property access
+                EbsToken propToken = consume(EbsTokenType.IDENTIFIER, "Expected property name after '.'.");
+                String propName = (String) propToken.literal;
+                
+                // The lexer may have combined multiple dot-separated identifiers into one
+                // (e.g., "department.name" as a single token). Split them and create nested PropertyExpressions.
+                if (propName.contains(".")) {
+                    String[] parts = propName.split("\\.");
+                    for (String part : parts) {
+                        lvalue = new PropertyExpression(name.line, lvalue, part);
+                    }
+                } else {
+                    lvalue = new PropertyExpression(name.line, lvalue, propName);
+                }
+            }
         }
 
         // Check for ++, --, or compound assignment operators
@@ -1521,7 +1532,11 @@ public class Parser {
 
         if (lvalue instanceof VariableExpression ve) {
             return new AssignStatement(name.line, (String) name.literal, value);
+        } else if (lvalue instanceof PropertyExpression pe) {
+            // Property assignment (e.g., record.field or array[0].field)
+            return new IndexAssignStatement(name.line, lvalue, value);
         } else {
+            // Index assignment (e.g., array[0])
             return new IndexAssignStatement(name.line, lvalue, value);
         }
     }
