@@ -88,151 +88,180 @@ screen colorEditorScreen = {
         {
             "name": "info",
             "type": "string",
-            "default": infoColor,
+            "default": "#000000",
             "display": {"type": "colorpicker", "labelText": "Info Color:"}
         },
         {
             "name": "comment",
             "type": "string",
-            "default": commentColor,
+            "default": "#000000",
             "display": {"type": "colorpicker", "labelText": "Comment Color:"}
         },
         {
             "name": "error",
             "type": "string",
-            "default": errorColor,
+            "default": "#000000",
             "display": {"type": "colorpicker", "labelText": "Error Color:"}
         },
         {
             "name": "warn",
             "type": "string",
-            "default": warnColor,
+            "default": "#000000",
             "display": {"type": "colorpicker", "labelText": "Warn Color:"}
         },
         {
             "name": "ok",
             "type": "string",
-            "default": okColor,
+            "default": "#000000",
             "display": {"type": "colorpicker", "labelText": "OK Color:"}
         },
         {
             "name": "code",
             "type": "string",
-            "default": codeColor,
+            "default": "#000000",
             "display": {"type": "colorpicker", "labelText": "Code Color:"}
         },
         {
             "name": "datatype",
             "type": "string",
-            "default": datatypeColor,
+            "default": "#000000",
             "display": {"type": "colorpicker", "labelText": "Datatype Color:"}
         },
         {
             "name": "data",
             "type": "string",
-            "default": dataColor,
+            "default": "#000000",
             "display": {"type": "colorpicker", "labelText": "Data Color:"}
         },
         {
             "name": "keyword",
             "type": "string",
-            "default": keywordColor,
+            "default": "#000000",
             "display": {"type": "colorpicker", "labelText": "Keyword Color:"}
         },
         {
             "name": "builtin",
             "type": "string",
-            "default": builtinColor,
+            "default": "#000000",
             "display": {"type": "colorpicker", "labelText": "Builtin Color:"}
         },
         {
             "name": "literal",
             "type": "string",
-            "default": literalColor,
+            "default": "#000000",
             "display": {"type": "colorpicker", "labelText": "Literal Color:"}
         },
         {
             "name": "identifier",
             "type": "string",
-            "default": identifierColor,
+            "default": "#000000",
             "display": {"type": "colorpicker", "labelText": "Identifier Color:"}
         },
         {
             "name": "sql",
             "type": "string",
-            "default": sqlColor,
+            "default": "#000000",
             "display": {"type": "colorpicker", "labelText": "SQL Color:"}
         },
         {
             "name": "custom",
             "type": "string",
-            "default": customColor,
+            "default": "#000000",
             "display": {"type": "colorpicker", "labelText": "Custom Color:"}
         },
         {
             "name": "background",
             "type": "string",
-            "default": backgroundColor,
+            "default": "#000000",
             "display": {"type": "colorpicker", "labelText": "Background Color:"}
         },
         {
             "name": "text",
             "type": "string",
-            "default": textColor,
+            "default": "#000000",
             "display": {"type": "colorpicker", "labelText": "Text Color:"}
         },
         {
             "name": "caret",
             "type": "string",
-            "default": caretColor,
+            "default": "#000000",
             "display": {"type": "colorpicker", "labelText": "Caret Color:"}
         },
         {
             "name": "lineCursor",
             "type": "string",
-            "default": lineCursorColor,
+            "default": "#000000",
             "display": {"type": "colorpicker", "labelText": "Line Cursor Color:"}
         },
         {
             "name": "lineNumbers",
             "type": "string",
-            "default": lineNumbersColor,
+            "default": "#000000",
             "display": {"type": "colorpicker", "labelText": "Line Numbers Color:"}
         },
         {
             "name": "consoleBackground",
             "type": "string",
-            "default": consoleBackgroundColor,
+            "default": "#000000",
             "display": {"type": "colorpicker", "labelText": "Console Background:"}
         },
         {
             "name": "tabBackground",
             "type": "string",
-            "default": tabBackgroundColor,
+            "default": "#000000",
             "display": {"type": "colorpicker", "labelText": "Tab Background:"}
         },
         {
             "name": "tabLabelColor",
             "type": "string",
-            "default": tabLabelColor,
+            "default": "#000000",
             "display": {"type": "colorpicker", "labelText": "Tab Label Color:"}
         },
         {
             "name": "tabLabelChangedColor",
             "type": "string",
-            "default": tabLabelChangedColor,
+            "default": "#000000",
             "display": {"type": "colorpicker", "labelText": "Tab Label Changed:"}
         },
         {
             "name": "tabLabelBackground",
             "type": "string",
-            "default": tabLabelBackgroundColor,
+            "default": "#000000",
             "display": {"type": "colorpicker", "labelText": "Tab Label Background:"}
         }
     ]
 };
 
 print "Color editor screen created successfully";
+print "";
+
+// Set the color values from console.cfg
+print "Setting color values from console.cfg...";
+colorEditorScreen.info = infoColor;
+colorEditorScreen.comment = commentColor;
+colorEditorScreen.error = errorColor;
+colorEditorScreen.warn = warnColor;
+colorEditorScreen.ok = okColor;
+colorEditorScreen.code = codeColor;
+colorEditorScreen.datatype = datatypeColor;
+colorEditorScreen.data = dataColor;
+colorEditorScreen.keyword = keywordColor;
+colorEditorScreen.builtin = builtinColor;
+colorEditorScreen.literal = literalColor;
+colorEditorScreen.identifier = identifierColor;
+colorEditorScreen.sql = sqlColor;
+colorEditorScreen.custom = customColor;
+colorEditorScreen.background = backgroundColor;
+colorEditorScreen.text = textColor;
+colorEditorScreen.caret = caretColor;
+colorEditorScreen.lineCursor = lineCursorColor;
+colorEditorScreen.lineNumbers = lineNumbersColor;
+colorEditorScreen.consoleBackground = consoleBackgroundColor;
+colorEditorScreen.tabBackground = tabBackgroundColor;
+colorEditorScreen.tabLabelColor = tabLabelColor;
+colorEditorScreen.tabLabelChangedColor = tabLabelChangedColor;
+colorEditorScreen.tabLabelBackground = tabLabelBackgroundColor;
+print "Color values set successfully";
 print "";
 
 // Show the screen
