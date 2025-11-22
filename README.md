@@ -102,7 +102,7 @@ var numbers = [1, 2, 3, 4, 5];
 print numbers[0];  // Access elements
 print numbers.length;  // Get length
 
-// Type aliases (typedef)
+// Type aliases (typeof keyword)
 personType typeof record{name: string, age: int};
 var person: personType;
 person = {"name": "Alice", "age": 30};

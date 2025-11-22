@@ -485,13 +485,7 @@ employee.salary = 80000.00;
 Define aliases for records with nested structures:
 
 ```javascript
-// Record with nested record
-addressType typeof record{
-    street: string,
-    city: string,
-    zipCode: string
-};
-
+// Define a record type with nested record structure
 customerType typeof record{
     id: int,
     name: string,
@@ -516,9 +510,9 @@ customer = {
 // Print the customer record
 print customer;
 
-// Update nested fields
-customer.address.city = "Shelbyville";
-customer.address.zipCode = "54321";
+// Update top-level fields
+customer.id = 1002;
+customer.name = "New Corp";
 ```
 
 #### Array of Records Type Aliases
@@ -594,9 +588,10 @@ print companyData[1];      // Second department
 - Defined at parse time, allowing subsequent code to use them immediately
 - Type aliases can be used for variable declarations just like built-in types
 - Support all data types: primitives, arrays, records, and nested combinations
-- Fixed-size arrays use `[size]` syntax (e.g., `array.int[10]`)
-- Dynamic-size arrays of records don't specify size (e.g., `array.record{...}`)
-- Record fields can be updated using assignment (e.g., `person.name = "value"`)
+- **Array sizing**:
+  - Fixed-size primitive arrays: Use `[size]` syntax (e.g., `array.int[10]`)
+  - Dynamic arrays of records: Omit size specifier (e.g., `array.record{...}`)
+- **Record field updates**: Top-level fields can be updated using assignment (e.g., `person.name = "value"`)
 - Access whole records/arrays for reading (e.g., `print person`)
 
 **Benefits:**
