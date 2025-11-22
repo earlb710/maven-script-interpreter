@@ -1436,7 +1436,19 @@ public class Parser {
         EbsToken name = consume(EbsTokenType.IDENTIFIER, "Expected variable name.");
         String varName = (String) name.literal;
         
-        Expression lvalue = new VariableExpression(name.line, varName);
+        // The lexer may have combined dot-separated identifiers into one token
+        // (e.g., "customer.address.city" as a single IDENTIFIER token)
+        // Split them and create nested PropertyExpressions
+        Expression lvalue;
+        if (varName.contains(".")) {
+            String[] parts = varName.split("\\.");
+            lvalue = new VariableExpression(name.line, parts[0]);
+            for (int i = 1; i < parts.length; i++) {
+                lvalue = new PropertyExpression(name.line, lvalue, parts[i]);
+            }
+        } else {
+            lvalue = new VariableExpression(name.line, varName);
+        }
 
         // Attach any number of bracketed index-suffixes and property accesses to the variable
         // This allows: array[0], array[0].field, array[0].field.nested, array[0][1].field, etc.
