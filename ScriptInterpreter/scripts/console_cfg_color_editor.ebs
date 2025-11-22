@@ -1,6 +1,6 @@
-// Test Script: Console Configuration Color Editor
+// Utility Script: Console Configuration Color Editor
 // Description: Reads console.cfg, creates a screen with color pickers for all colors
-// Author: EBS Test Suite
+// Author: EBS Script Collection
 // Date: 2025-11-22
 
 print "=== Console Configuration Color Editor ===";
@@ -330,4 +330,4 @@ print "tabLabelChangedColor: " + colorEditorScreen.tabLabelChangedColor;
 print "tabLabelBackground: " + colorEditorScreen.tabLabelBackground;
 
 print "";
-print "Console configuration color editor test completed!";
+print "Console configuration color editor completed!";
