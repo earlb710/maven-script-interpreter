@@ -17,17 +17,17 @@ if call file.exists("console.cfg") then {
     configPath = "console.cfg";
     configContent = call file.readtextfile(configPath);
 } else {
-    // Try path 2: Parent directory (when run from ScriptInterpreter)
+    // Try path 2: One level up (when run from ScriptInterpreter/)
     if call file.exists("../console.cfg") then {
         configPath = "../console.cfg";
         configContent = call file.readtextfile(configPath);
     } else {
-        // Try path 3: Two levels up (when run from scripts/test)
+        // Try path 3: Two levels up (when run from ScriptInterpreter/scripts/)
         if call file.exists("../../console.cfg") then {
             configPath = "../../console.cfg";
             configContent = call file.readtextfile(configPath);
         } else {
-            // Try path 4: Three levels up (when run from ScriptInterpreter/scripts/test)
+            // Try path 4: Three levels up (when run from ScriptInterpreter/scripts/test/)
             if call file.exists("../../../console.cfg") then {
                 configPath = "../../../console.cfg";
                 configContent = call file.readtextfile(configPath);
@@ -37,6 +37,7 @@ if call file.exists("console.cfg") then {
                 print "  1. Repository root directory";
                 print "  2. ScriptInterpreter directory";
                 print "  3. ScriptInterpreter/scripts directory";
+                print "  4. ScriptInterpreter/scripts/test directory";
                 print "";
                 print "Or ensure console.cfg exists in the repository root.";
                 return;
