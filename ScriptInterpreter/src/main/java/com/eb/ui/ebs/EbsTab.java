@@ -1109,42 +1109,50 @@ public class EbsTab extends Tab {
                     // Create a list of screen names to avoid concurrent modification
                     java.util.List<String> screenNames = new java.util.ArrayList<>(screens.keySet());
                     
+                    // Use a CountDownLatch to ensure screens are closed before continuing
+                    final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
+                    
                     Platform.runLater(() -> {
-                        for (String screenName : screenNames) {
-                            Stage stage = screens.get(screenName);
-                            if (stage != null && stage.isShowing()) {
-                                try {
-                                    stage.close();
-                                } catch (Exception ex) {
-                                    outputArea.printlnWarn("Warning: Error closing screen '" + screenName + "': " + ex.getMessage());
+                        try {
+                            for (String screenName : screenNames) {
+                                Stage stage = screens.get(screenName);
+                                if (stage != null && stage.isShowing()) {
+                                    try {
+                                        stage.close();
+                                    } catch (Exception ex) {
+                                        outputArea.printlnWarn("Warning: Error closing screen '" + screenName + "': " + ex.getMessage());
+                                    }
+                                }
+                                
+                                // Interrupt and stop the screen thread if it exists
+                                Thread thread = interpreterContext.getScreenThreads().get(screenName);
+                                if (thread != null && thread.isAlive()) {
+                                    try {
+                                        thread.interrupt();
+                                    } catch (Exception ex) {
+                                        // Ignore thread interruption errors
+                                    }
                                 }
                             }
-                            
-                            // Interrupt and stop the screen thread if it exists
-                            Thread thread = interpreterContext.getScreenThreads().get(screenName);
-                            if (thread != null && thread.isAlive()) {
-                                try {
-                                    thread.interrupt();
-                                } catch (Exception ex) {
-                                    // Ignore thread interruption errors
-                                }
-                            }
+                        } finally {
+                            latch.countDown();
                         }
                     });
                     
-                    // Wait a moment for screens to close
+                    // Wait for screen closing to complete (with timeout to prevent indefinite blocking)
                     try {
-                        Thread.sleep(100);
+                        latch.await(2, java.util.concurrent.TimeUnit.SECONDS);
                     } catch (InterruptedException ex) {
                         Thread.currentThread().interrupt();
                     }
                 }
                 
                 // Close all database connections before clearing
+                // Create a copy of the connections to avoid concurrent modification
                 java.util.Map<String, com.eb.script.interpreter.db.DbConnection> connections = interpreterContext.getConnections();
-                for (java.util.Map.Entry<String, com.eb.script.interpreter.db.DbConnection> entry : connections.entrySet()) {
+                java.util.List<com.eb.script.interpreter.db.DbConnection> connectionsList = new java.util.ArrayList<>(connections.values());
+                for (com.eb.script.interpreter.db.DbConnection conn : connectionsList) {
                     try {
-                        com.eb.script.interpreter.db.DbConnection conn = entry.getValue();
                         if (conn != null) {
                             conn.close();
                         }
