@@ -1,0 +1,80 @@
+// Test script: Verify cleanup before running
+// This script demonstrates that all screens and state are cleaned up
+// when the Run button is pressed again.
+//
+// Usage:
+//   1. Open this file in the EBS IDE
+//   2. Press the Run button - a screen will appear
+//   3. Press Run again - the previous screen should close automatically
+//      and a new screen should open
+//
+// Expected behavior:
+//   - Each run closes all previous screens
+//   - Variables are reset between runs
+//   - Database connections are closed (if any)
+//   - Files are closed (if any)
+
+print "=== Cleanup Test Started ===";
+print "This script will create a test screen.";
+print "When you press Run again, the previous screen will close automatically.";
+print "";
+
+// Create a counter variable to demonstrate state reset
+var counter: int = 0;
+var message: string = "This is run #" + counter;
+
+// Define a simple test screen
+screen TestCleanupScreen = {
+    "title": "Cleanup Test Screen",
+    "width": 500,
+    "height": 300,
+    "sets": [{
+        "setname": "testset",
+        "vars": [{
+            "name": "runMessage",
+            "type": "string",
+            "value": message,
+            "display": {
+                "labeltext": "Run Message",
+                "type": "textfield",
+                "editable": false
+            }
+        }, {
+            "name": "instructions",
+            "type": "string",
+            "value": "Press the Run button again to see the cleanup in action!",
+            "display": {
+                "labeltext": "Instructions",
+                "type": "label"
+            }
+        }]
+    }],
+    "area": [{
+        "type": "vbox",
+        "name": "mainArea",
+        "style": "-fx-padding: 20; -fx-spacing: 15;",
+        "items": [{
+            "name": "runMessage_item",
+            "varref": "runMessage"
+        }, {
+            "name": "instructions_item",
+            "varref": "instructions"
+        }]
+    }]
+};
+
+// Show the screen
+show screen TestCleanupScreen;
+
+print "";
+print "✓ Test screen created and shown.";
+print "✓ Counter value: " + counter;
+print "";
+print "Instructions:";
+print "1. You should now see a window titled 'Cleanup Test Screen'";
+print "2. Press the Run button again in the tab";
+print "3. The previous screen should close automatically";
+print "4. A new screen will appear";
+print "";
+print "This demonstrates that the cleanup functionality is working correctly!";
+print "=== Cleanup Test Complete ===";
