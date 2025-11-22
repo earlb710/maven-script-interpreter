@@ -1090,7 +1090,7 @@ public class EbsTab extends Tab {
      * This includes:
      * - Closing all open screens (windows)
      * - Closing database connections
-     * - Clearing the environment (variables, call stack)
+     * - Clearing the environment (variables, call stack, opened files)
      * - Clearing the interpreter context (screen definitions, database connections)
      * - Clearing the runtime context (parsed statements and blocks)
      */
@@ -1107,7 +1107,7 @@ public class EbsTab extends Tab {
                 java.util.concurrent.ConcurrentHashMap<String, Stage> screens = interpreterContext.getScreens();
                 if (!screens.isEmpty()) {
                     // Create a list of screen names to avoid concurrent modification
-                    java.util.List<String> screenNames = new java.util.ArrayList<>(screens.keySet());
+                    List<String> screenNames = new ArrayList<>(screens.keySet());
                     
                     // Use a CountDownLatch to ensure screens are closed before continuing
                     final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
@@ -1150,7 +1150,7 @@ public class EbsTab extends Tab {
                 // Close all database connections before clearing
                 // Create a copy of the connections to avoid concurrent modification
                 java.util.Map<String, com.eb.script.interpreter.db.DbConnection> connections = interpreterContext.getConnections();
-                java.util.List<com.eb.script.interpreter.db.DbConnection> connectionsList = new java.util.ArrayList<>(connections.values());
+                List<com.eb.script.interpreter.db.DbConnection> connectionsList = new ArrayList<>(connections.values());
                 for (com.eb.script.interpreter.db.DbConnection conn : connectionsList) {
                     try {
                         if (conn != null) {
@@ -1160,12 +1160,12 @@ public class EbsTab extends Tab {
                         // Ignore errors closing connections - they may already be closed
                     }
                 }
-                connections.clear();
                 
-                // Clear cursor specs
-                interpreterContext.getCursorSpecs().clear();
+                // Close all opened files before clearing the environment
+                context.environment.closeAllOpenFiles();
                 
                 // Clear the interpreter context (screens, variables, etc.)
+                // This will also clear connections and cursor specs
                 interpreterContext.clear();
                 
                 // Clear the environment (variables, call stack, opened files)
