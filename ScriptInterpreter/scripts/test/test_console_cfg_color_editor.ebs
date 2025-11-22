@@ -23,32 +23,58 @@ var colors: json = call json.getobject(config, "colors");
 print "Colors object retrieved";
 print "";
 
+// Extract all color values into variables
+var infoColor: string = call json.getstring(colors, "info");
+var commentColor: string = call json.getstring(colors, "comment");
+var errorColor: string = call json.getstring(colors, "error");
+var warnColor: string = call json.getstring(colors, "warn");
+var okColor: string = call json.getstring(colors, "ok");
+var codeColor: string = call json.getstring(colors, "code");
+var datatypeColor: string = call json.getstring(colors, "datatype");
+var dataColor: string = call json.getstring(colors, "data");
+var keywordColor: string = call json.getstring(colors, "keyword");
+var builtinColor: string = call json.getstring(colors, "builtin");
+var literalColor: string = call json.getstring(colors, "literal");
+var identifierColor: string = call json.getstring(colors, "identifier");
+var sqlColor: string = call json.getstring(colors, "sql");
+var customColor: string = call json.getstring(colors, "custom");
+var backgroundColor: string = call json.getstring(colors, "background");
+var textColor: string = call json.getstring(colors, "text");
+var caretColor: string = call json.getstring(colors, "caret");
+var lineCursorColor: string = call json.getstring(colors, "line-cursor");
+var lineNumbersColor: string = call json.getstring(colors, "line-numbers");
+var consoleBackgroundColor: string = call json.getstring(colors, "console-background");
+var tabBackgroundColor: string = call json.getstring(colors, "tab-background");
+var tabLabelColor: string = call json.getstring(colors, "tab-label-color");
+var tabLabelChangedColor: string = call json.getstring(colors, "tab-label-changed-color");
+var tabLabelBackgroundColor: string = call json.getstring(colors, "tab-label-background");
+
 // Display all available colors
 print "Available colors in console.cfg:";
-print "- info: " + call json.getstring(colors, "info");
-print "- comment: " + call json.getstring(colors, "comment");
-print "- error: " + call json.getstring(colors, "error");
-print "- warn: " + call json.getstring(colors, "warn");
-print "- ok: " + call json.getstring(colors, "ok");
-print "- code: " + call json.getstring(colors, "code");
-print "- datatype: " + call json.getstring(colors, "datatype");
-print "- data: " + call json.getstring(colors, "data");
-print "- keyword: " + call json.getstring(colors, "keyword");
-print "- builtin: " + call json.getstring(colors, "builtin");
-print "- literal: " + call json.getstring(colors, "literal");
-print "- identifier: " + call json.getstring(colors, "identifier");
-print "- sql: " + call json.getstring(colors, "sql");
-print "- custom: " + call json.getstring(colors, "custom");
-print "- background: " + call json.getstring(colors, "background");
-print "- text: " + call json.getstring(colors, "text");
-print "- caret: " + call json.getstring(colors, "caret");
-print "- line-cursor: " + call json.getstring(colors, "line-cursor");
-print "- line-numbers: " + call json.getstring(colors, "line-numbers");
-print "- console-background: " + call json.getstring(colors, "console-background");
-print "- tab-background: " + call json.getstring(colors, "tab-background");
-print "- tab-label-color: " + call json.getstring(colors, "tab-label-color");
-print "- tab-label-changed-color: " + call json.getstring(colors, "tab-label-changed-color");
-print "- tab-label-background: " + call json.getstring(colors, "tab-label-background");
+print "- info: " + infoColor;
+print "- comment: " + commentColor;
+print "- error: " + errorColor;
+print "- warn: " + warnColor;
+print "- ok: " + okColor;
+print "- code: " + codeColor;
+print "- datatype: " + datatypeColor;
+print "- data: " + dataColor;
+print "- keyword: " + keywordColor;
+print "- builtin: " + builtinColor;
+print "- literal: " + literalColor;
+print "- identifier: " + identifierColor;
+print "- sql: " + sqlColor;
+print "- custom: " + customColor;
+print "- background: " + backgroundColor;
+print "- text: " + textColor;
+print "- caret: " + caretColor;
+print "- line-cursor: " + lineCursorColor;
+print "- line-numbers: " + lineNumbersColor;
+print "- console-background: " + consoleBackgroundColor;
+print "- tab-background: " + tabBackgroundColor;
+print "- tab-label-color: " + tabLabelColor;
+print "- tab-label-changed-color: " + tabLabelChangedColor;
+print "- tab-label-background: " + tabLabelBackgroundColor;
 print "";
 
 // Create a screen with color pickers for each color
@@ -62,145 +88,145 @@ screen colorEditorScreen = {
         {
             "name": "info",
             "type": "string",
-            "default": call json.getstring(colors, "info"),
+            "default": infoColor,
             "display": {"type": "colorpicker", "labelText": "Info Color:"}
         },
         {
             "name": "comment",
             "type": "string",
-            "default": call json.getstring(colors, "comment"),
+            "default": commentColor,
             "display": {"type": "colorpicker", "labelText": "Comment Color:"}
         },
         {
             "name": "error",
             "type": "string",
-            "default": call json.getstring(colors, "error"),
+            "default": errorColor,
             "display": {"type": "colorpicker", "labelText": "Error Color:"}
         },
         {
             "name": "warn",
             "type": "string",
-            "default": call json.getstring(colors, "warn"),
+            "default": warnColor,
             "display": {"type": "colorpicker", "labelText": "Warn Color:"}
         },
         {
             "name": "ok",
             "type": "string",
-            "default": call json.getstring(colors, "ok"),
+            "default": okColor,
             "display": {"type": "colorpicker", "labelText": "OK Color:"}
         },
         {
             "name": "code",
             "type": "string",
-            "default": call json.getstring(colors, "code"),
+            "default": codeColor,
             "display": {"type": "colorpicker", "labelText": "Code Color:"}
         },
         {
             "name": "datatype",
             "type": "string",
-            "default": call json.getstring(colors, "datatype"),
+            "default": datatypeColor,
             "display": {"type": "colorpicker", "labelText": "Datatype Color:"}
         },
         {
             "name": "data",
             "type": "string",
-            "default": call json.getstring(colors, "data"),
+            "default": dataColor,
             "display": {"type": "colorpicker", "labelText": "Data Color:"}
         },
         {
             "name": "keyword",
             "type": "string",
-            "default": call json.getstring(colors, "keyword"),
+            "default": keywordColor,
             "display": {"type": "colorpicker", "labelText": "Keyword Color:"}
         },
         {
             "name": "builtin",
             "type": "string",
-            "default": call json.getstring(colors, "builtin"),
+            "default": builtinColor,
             "display": {"type": "colorpicker", "labelText": "Builtin Color:"}
         },
         {
             "name": "literal",
             "type": "string",
-            "default": call json.getstring(colors, "literal"),
+            "default": literalColor,
             "display": {"type": "colorpicker", "labelText": "Literal Color:"}
         },
         {
             "name": "identifier",
             "type": "string",
-            "default": call json.getstring(colors, "identifier"),
+            "default": identifierColor,
             "display": {"type": "colorpicker", "labelText": "Identifier Color:"}
         },
         {
             "name": "sql",
             "type": "string",
-            "default": call json.getstring(colors, "sql"),
+            "default": sqlColor,
             "display": {"type": "colorpicker", "labelText": "SQL Color:"}
         },
         {
             "name": "custom",
             "type": "string",
-            "default": call json.getstring(colors, "custom"),
+            "default": customColor,
             "display": {"type": "colorpicker", "labelText": "Custom Color:"}
         },
         {
             "name": "background",
             "type": "string",
-            "default": call json.getstring(colors, "background"),
+            "default": backgroundColor,
             "display": {"type": "colorpicker", "labelText": "Background Color:"}
         },
         {
             "name": "text",
             "type": "string",
-            "default": call json.getstring(colors, "text"),
+            "default": textColor,
             "display": {"type": "colorpicker", "labelText": "Text Color:"}
         },
         {
             "name": "caret",
             "type": "string",
-            "default": call json.getstring(colors, "caret"),
+            "default": caretColor,
             "display": {"type": "colorpicker", "labelText": "Caret Color:"}
         },
         {
             "name": "lineCursor",
             "type": "string",
-            "default": call json.getstring(colors, "line-cursor"),
+            "default": lineCursorColor,
             "display": {"type": "colorpicker", "labelText": "Line Cursor Color:"}
         },
         {
             "name": "lineNumbers",
             "type": "string",
-            "default": call json.getstring(colors, "line-numbers"),
+            "default": lineNumbersColor,
             "display": {"type": "colorpicker", "labelText": "Line Numbers Color:"}
         },
         {
             "name": "consoleBackground",
             "type": "string",
-            "default": call json.getstring(colors, "console-background"),
+            "default": consoleBackgroundColor,
             "display": {"type": "colorpicker", "labelText": "Console Background:"}
         },
         {
             "name": "tabBackground",
             "type": "string",
-            "default": call json.getstring(colors, "tab-background"),
+            "default": tabBackgroundColor,
             "display": {"type": "colorpicker", "labelText": "Tab Background:"}
         },
         {
             "name": "tabLabelColor",
             "type": "string",
-            "default": call json.getstring(colors, "tab-label-color"),
+            "default": tabLabelColor,
             "display": {"type": "colorpicker", "labelText": "Tab Label Color:"}
         },
         {
             "name": "tabLabelChangedColor",
             "type": "string",
-            "default": call json.getstring(colors, "tab-label-changed-color"),
+            "default": tabLabelChangedColor,
             "display": {"type": "colorpicker", "labelText": "Tab Label Changed:"}
         },
         {
             "name": "tabLabelBackground",
             "type": "string",
-            "default": call json.getstring(colors, "tab-label-background"),
+            "default": tabLabelBackgroundColor,
             "display": {"type": "colorpicker", "labelText": "Tab Label Background:"}
         }
     ]
