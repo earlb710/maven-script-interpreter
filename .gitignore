@@ -37,3 +37,6 @@ jdk-*/
 # Test artifacts
 ScriptInterpreter/test-images/
 ScriptInterpreter/test-images-resized/
+
+# Generated console configuration CSS
+console-config.css

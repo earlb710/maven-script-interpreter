@@ -58,9 +58,16 @@ public class EbsApp {
         console = new Console(handler);
 
         BorderPane root = new BorderPane();
+        
+        // Load and apply console configuration to root BEFORE initUI
+        ConsoleConfig consoleConfig = new ConsoleConfig();
+        applyConsoleConfig(root, consoleConfig);
+        
         initUI(root);
+        
         Scene scene = new Scene(root, 1100, 720);
         scene.getStylesheets().add(getClass().getResource("/css/console.css").toExternalForm());
+        
         primaryStage.setScene(scene);
         primaryStage.setTitle("EBS Console");
         primaryStage.show();
@@ -145,6 +152,39 @@ public class EbsApp {
         // Make status bar accessible to handler
         handler.setStatusBar(statusBar);
 
+    }
+
+    /**
+     * Apply console configuration to the root parent.
+     * Generates CSS from the configuration and adds it as a stylesheet to the parent.
+     * Parent-level stylesheets have higher priority than Scene-level stylesheets.
+     * 
+     * @param parent The parent node to apply the configuration to
+     * @param config The console configuration
+     */
+    private void applyConsoleConfig(javafx.scene.Parent parent, ConsoleConfig config) {
+        if (config == null) {
+            return;
+        }
+        
+        // Generate CSS from configuration
+        String css = config.generateCSS();
+        
+        // Add as stylesheet to parent (higher priority than scene-level)
+        if (css != null && !css.isEmpty()) {
+            try {
+                // Write CSS to a fixed file in the working directory
+                java.nio.file.Path cssFile = java.nio.file.Paths.get("console-config.css");
+                java.nio.file.Files.writeString(cssFile, css);
+                
+                // Load the CSS file as a stylesheet (same approach as other stylesheets)
+                String cssUri = cssFile.toUri().toString();
+                parent.getStylesheets().add(cssUri);
+                
+            } catch (IOException e) {
+                System.err.println("Warning: Failed to apply console configuration: " + e.getMessage());
+            }
+        }
     }
 
     // Escape content for a single EBS string literal

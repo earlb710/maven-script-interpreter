@@ -1,0 +1,28 @@
+{
+  "colors": {
+    "info": "#000000",
+    "comment": "#006600",
+    "error": "#ff0000",
+    "warn": "#ff6600",
+    "ok": "#00ff00",
+    "code": "#000000",
+    "datatype": "#9900ff",
+    "data": "#cc0066",
+    "keyword": "#0000ff",
+    "builtin": "#0066cc",
+    "literal": "#0066ff",
+    "identifier": "#000000",
+    "sql": "#009966",
+    "custom": "#996600",
+    "background": "#ffffff",
+    "text": "#000000",
+    "caret": "#000000",
+    "line-cursor": "#e0e0e0",
+    "line-numbers": "#606060",
+    "console-background": "#f5f5f5",
+    "tab-background": "#e0e0e0",
+    "tab-label-color": "#333333",
+    "tab-label-changed-color": "#ff6600",
+    "tab-label-background": "#d0d0d0"
+  }
+}
