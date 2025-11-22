@@ -631,9 +631,9 @@ response1 = {
 // Print the response
 print response1;
 
-// Update nested fields
-response1.data.username = "bob";
+// Update top-level fields
 response1.status = 201;
+response1.message = "Created";
 ```
 
 ---
