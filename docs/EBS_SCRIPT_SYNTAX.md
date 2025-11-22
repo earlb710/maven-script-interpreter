@@ -413,7 +413,12 @@ Define reusable type aliases for complex types using the `typeof` keyword. Type 
 
 #### Basic Syntax
 ```javascript
+// Generic syntax
 typeName typeof type_definition;
+
+// Concrete example
+personType typeof record{name: string, age: int};
+var person: personType;
 ```
 
 #### Simple Type Aliases
@@ -447,8 +452,8 @@ intArray typeof array.int[10];
 
 var numbers: intArray;
 numbers = [1, 2, 3, 4, 5];
-print numbers[0];  // 1
-print numbers.length;  // 10 (array size)
+print numbers[0];     // 1
+print numbers.length; // 10 (array size, remaining elements are null)
 ```
 
 #### Record Type Aliases
@@ -510,7 +515,7 @@ customer = {
 // Print the customer record
 print customer;
 
-// Update top-level fields
+// Update top-level fields (nested field updates like customer.address.city are not supported)
 customer.id = 1002;
 customer.name = "New Corp";
 ```
