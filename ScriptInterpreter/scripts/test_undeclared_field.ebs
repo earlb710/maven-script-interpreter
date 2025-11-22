@@ -1,0 +1,8 @@
+// Test undeclared field validation in record types
+// This should produce an error because "z" is not declared in the record
+
+print "Test 1: Undeclared field in record assignment";
+var product:record{sku:string, price:double, inStock:bool};
+product = {"sku": "XYZ789", "price": "49.99", "inStock": "Y", "z": 1};
+
+print "If you see this, the error was not caught!";

@@ -114,9 +114,9 @@ public class RecordType {
             
             DataType expectedType = fields.get(fieldName);
             if (expectedType == null) {
-                // Field not defined in record type - could allow or reject
-                // For now, allow extra fields (flexible)
-                continue;
+                // Field not defined in record type - reject undeclared fields
+                System.err.println("Error: Field '" + fieldName + "' is not declared in record type");
+                return false;
             }
             
             // Check if this field is a nested record
@@ -159,14 +159,18 @@ public class RecordType {
             Object fieldValue = entry.getValue();
             
             DataType expectedType = fields.get(fieldName);
-            if (expectedType != null) {
-                // Check if this field is a nested record
-                if (expectedType == DataType.RECORD && nestedRecords.containsKey(fieldName)) {
-                    RecordType nestedType = nestedRecords.get(fieldName);
-                    fieldValue = nestedType.convertValue(fieldValue);
-                } else {
-                    fieldValue = expectedType.convertValue(fieldValue);
-                }
+            if (expectedType == null) {
+                // Field not declared - skip undeclared fields
+                // Validation will catch this error
+                continue;
+            }
+            
+            // Check if this field is a nested record
+            if (expectedType == DataType.RECORD && nestedRecords.containsKey(fieldName)) {
+                RecordType nestedType = nestedRecords.get(fieldName);
+                fieldValue = nestedType.convertValue(fieldValue);
+            } else {
+                fieldValue = expectedType.convertValue(fieldValue);
             }
             
             converted.put(fieldName, fieldValue);
