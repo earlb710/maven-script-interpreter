@@ -1,0 +1,3 @@
+var products:array.record[5];
+products[0] = {"sku": "ABC123", "price": 29.99};
+print "Array without inline fields works";

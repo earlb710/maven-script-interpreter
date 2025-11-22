@@ -1,0 +1,2 @@
+var products:array.record[2]{sku:string, price:double};
+print "Array declared successfully";

@@ -1,0 +1,10 @@
+// Test that undeclared fields are rejected in array element assignments
+var products:array.record[5]{sku:string, price:double, inStock:bool};
+
+// This should succeed
+products[0] = {"sku": "ABC123", "price": 29.99, "inStock": true};
+print "Valid assignment succeeded";
+
+// This should fail due to undeclared field 'z'
+products[1] = {"sku": "XYZ789", "price": 49.99, "inStock": true, "z": 1};
+print "This line should not be reached";

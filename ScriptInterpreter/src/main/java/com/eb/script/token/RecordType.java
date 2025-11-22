@@ -112,7 +112,8 @@ public class RecordType {
             String fieldName = entry.getKey();
             Object fieldValue = entry.getValue();
             
-            DataType expectedType = fields.get(fieldName);
+            // Use case-insensitive lookup for field types
+            DataType expectedType = getFieldTypeIgnoreCase(fieldName);
             if (expectedType == null) {
                 // Field not defined in record type - reject undeclared fields
                 System.err.println("Error: Field '" + fieldName + "' is not declared in record type");
@@ -120,9 +121,9 @@ public class RecordType {
             }
             
             // Check if this field is a nested record
-            if (expectedType == DataType.RECORD && nestedRecords.containsKey(fieldName)) {
-                RecordType nestedType = nestedRecords.get(fieldName);
-                if (!nestedType.validateValue(fieldValue)) {
+            if (expectedType == DataType.RECORD) {
+                RecordType nestedType = getNestedRecordTypeIgnoreCase(fieldName);
+                if (nestedType != null && !nestedType.validateValue(fieldValue)) {
                     return false;
                 }
             } else {
@@ -133,6 +134,40 @@ public class RecordType {
         }
         
         return true;
+    }
+    
+    /**
+     * Get field type with case-insensitive lookup
+     */
+    private DataType getFieldTypeIgnoreCase(String name) {
+        // Try exact match first
+        if (fields.containsKey(name)) {
+            return fields.get(name);
+        }
+        // Try case-insensitive match
+        for (Map.Entry<String, DataType> entry : fields.entrySet()) {
+            if (entry.getKey().equalsIgnoreCase(name)) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Get nested record type with case-insensitive lookup
+     */
+    private RecordType getNestedRecordTypeIgnoreCase(String name) {
+        // Try exact match first
+        if (nestedRecords.containsKey(name)) {
+            return nestedRecords.get(name);
+        }
+        // Try case-insensitive match
+        for (Map.Entry<String, RecordType> entry : nestedRecords.entrySet()) {
+            if (entry.getKey().equalsIgnoreCase(name)) {
+                return entry.getValue();
+            }
+        }
+        return null;
     }
     
     /**
@@ -158,7 +193,8 @@ public class RecordType {
             String fieldName = entry.getKey();
             Object fieldValue = entry.getValue();
             
-            DataType expectedType = fields.get(fieldName);
+            // Use case-insensitive lookup for field types
+            DataType expectedType = getFieldTypeIgnoreCase(fieldName);
             if (expectedType == null) {
                 // Field not declared - skip undeclared fields
                 // Validation will catch this error
@@ -166,9 +202,11 @@ public class RecordType {
             }
             
             // Check if this field is a nested record
-            if (expectedType == DataType.RECORD && nestedRecords.containsKey(fieldName)) {
-                RecordType nestedType = nestedRecords.get(fieldName);
-                fieldValue = nestedType.convertValue(fieldValue);
+            if (expectedType == DataType.RECORD) {
+                RecordType nestedType = getNestedRecordTypeIgnoreCase(fieldName);
+                if (nestedType != null) {
+                    fieldValue = nestedType.convertValue(fieldValue);
+                }
             } else {
                 fieldValue = expectedType.convertValue(fieldValue);
             }

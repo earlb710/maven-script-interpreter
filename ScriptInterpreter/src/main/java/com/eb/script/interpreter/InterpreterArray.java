@@ -262,6 +262,26 @@ public class InterpreterArray {
         int last = idx[idx.length - 1];
         Object rhs = interpreter.evaluate(stmt.value);
 
+        // Check if we need to validate against a record type
+        // Extract the root variable name from the IndexExpression
+        String varName = null;
+        if (idxExpr.target instanceof VariableExpression varExpr) {
+            varName = varExpr.name;
+        }
+        
+        // If we have a variable name, check if it has a record type metadata
+        if (varName != null) {
+            com.eb.script.token.RecordType recordType = interpreter.environment().getEnvironmentValues().getRecordType(varName);
+            if (recordType != null && rhs instanceof java.util.Map) {
+                // Validate the value against the record type
+                if (!recordType.validateValue(rhs)) {
+                    throw interpreter.error(stmt.getLine(), "Invalid value for record type: validation failed");
+                }
+                // Convert the value to the correct types
+                rhs = recordType.convertValue(rhs);
+            }
+        }
+
         setIndexed(container, last, rhs, stmt.getLine());
     }
 
