@@ -1,0 +1,333 @@
+// Utility Script: Console Configuration Color Editor
+// Description: Reads console.cfg, creates a screen with color pickers for all colors
+// Author: EBS Script Collection
+// Date: 2025-11-22
+
+print "=== Console Configuration Color Editor ===";
+print "";
+
+// Read the console.cfg file
+// Try multiple possible paths since the script can be run from different directories
+print "Reading console.cfg...";
+var configContent: string = "";
+var configPath: string = "";
+
+// Try path 1: Current directory (when run from repo root)
+if call file.exists("console.cfg") then {
+    configPath = "console.cfg";
+    configContent = call file.readtextfile(configPath);
+} else {
+    // Try path 2: One level up (when run from ScriptInterpreter/)
+    if call file.exists("../console.cfg") then {
+        configPath = "../console.cfg";
+        configContent = call file.readtextfile(configPath);
+    } else {
+        // Try path 3: Two levels up (when run from ScriptInterpreter/scripts/)
+        if call file.exists("../../console.cfg") then {
+            configPath = "../../console.cfg";
+            configContent = call file.readtextfile(configPath);
+        } else {
+            print "ERROR: Cannot find console.cfg file!";
+            print "Please run this script from one of these locations:";
+            print "  1. Repository root directory";
+            print "  2. ScriptInterpreter directory";
+            print "  3. ScriptInterpreter/scripts directory";
+            print "";
+            print "Or ensure console.cfg exists in the repository root.";
+            return;
+        }
+    }
+}
+
+print "File found at: " + configPath;
+print "File content read successfully";
+print "";
+
+// Parse the JSON content
+print "Parsing JSON configuration...";
+var config: json = call json.jsonfromstring(configContent);
+print "JSON parsed successfully";
+print "";
+
+// Get the colors object
+var colors: json = call json.getobject(config, "colors");
+print "Colors object retrieved";
+print "";
+
+// Extract all color values into variables
+var infoColor: string = call json.getstring(colors, "info");
+var commentColor: string = call json.getstring(colors, "comment");
+var errorColor: string = call json.getstring(colors, "error");
+var warnColor: string = call json.getstring(colors, "warn");
+var okColor: string = call json.getstring(colors, "ok");
+var codeColor: string = call json.getstring(colors, "code");
+var datatypeColor: string = call json.getstring(colors, "datatype");
+var dataColor: string = call json.getstring(colors, "data");
+var keywordColor: string = call json.getstring(colors, "keyword");
+var builtinColor: string = call json.getstring(colors, "builtin");
+var literalColor: string = call json.getstring(colors, "literal");
+var identifierColor: string = call json.getstring(colors, "identifier");
+var sqlColor: string = call json.getstring(colors, "sql");
+var customColor: string = call json.getstring(colors, "custom");
+var backgroundColor: string = call json.getstring(colors, "background");
+var textColor: string = call json.getstring(colors, "text");
+var caretColor: string = call json.getstring(colors, "caret");
+var lineCursorColor: string = call json.getstring(colors, "line-cursor");
+var lineNumbersColor: string = call json.getstring(colors, "line-numbers");
+var consoleBackgroundColor: string = call json.getstring(colors, "console-background");
+var tabBackgroundColor: string = call json.getstring(colors, "tab-background");
+var tabLabelColor: string = call json.getstring(colors, "tab-label-color");
+var tabLabelChangedColor: string = call json.getstring(colors, "tab-label-changed-color");
+var tabLabelBackgroundColor: string = call json.getstring(colors, "tab-label-background");
+
+// Display all available colors
+print "Available colors in console.cfg:";
+print "- info: " + infoColor;
+print "- comment: " + commentColor;
+print "- error: " + errorColor;
+print "- warn: " + warnColor;
+print "- ok: " + okColor;
+print "- code: " + codeColor;
+print "- datatype: " + datatypeColor;
+print "- data: " + dataColor;
+print "- keyword: " + keywordColor;
+print "- builtin: " + builtinColor;
+print "- literal: " + literalColor;
+print "- identifier: " + identifierColor;
+print "- sql: " + sqlColor;
+print "- custom: " + customColor;
+print "- background: " + backgroundColor;
+print "- text: " + textColor;
+print "- caret: " + caretColor;
+print "- line-cursor: " + lineCursorColor;
+print "- line-numbers: " + lineNumbersColor;
+print "- console-background: " + consoleBackgroundColor;
+print "- tab-background: " + tabBackgroundColor;
+print "- tab-label-color: " + tabLabelColor;
+print "- tab-label-changed-color: " + tabLabelChangedColor;
+print "- tab-label-background: " + tabLabelBackgroundColor;
+print "";
+
+// Create a screen with color pickers for each color
+print "Creating color editor screen...";
+screen colorEditorScreen = {
+    "title": "Console Configuration Color Editor",
+    "width": 800,
+    "height": 900,
+    "maximize": false,
+    "vars": [
+        {
+            "name": "info",
+            "type": "string",
+            "default": "#000000",
+            "display": {"type": "colorpicker", "labelText": "Info Color:"}
+        },
+        {
+            "name": "comment",
+            "type": "string",
+            "default": "#000000",
+            "display": {"type": "colorpicker", "labelText": "Comment Color:"}
+        },
+        {
+            "name": "error",
+            "type": "string",
+            "default": "#000000",
+            "display": {"type": "colorpicker", "labelText": "Error Color:"}
+        },
+        {
+            "name": "warn",
+            "type": "string",
+            "default": "#000000",
+            "display": {"type": "colorpicker", "labelText": "Warn Color:"}
+        },
+        {
+            "name": "ok",
+            "type": "string",
+            "default": "#000000",
+            "display": {"type": "colorpicker", "labelText": "OK Color:"}
+        },
+        {
+            "name": "code",
+            "type": "string",
+            "default": "#000000",
+            "display": {"type": "colorpicker", "labelText": "Code Color:"}
+        },
+        {
+            "name": "datatype",
+            "type": "string",
+            "default": "#000000",
+            "display": {"type": "colorpicker", "labelText": "Datatype Color:"}
+        },
+        {
+            "name": "data",
+            "type": "string",
+            "default": "#000000",
+            "display": {"type": "colorpicker", "labelText": "Data Color:"}
+        },
+        {
+            "name": "keyword",
+            "type": "string",
+            "default": "#000000",
+            "display": {"type": "colorpicker", "labelText": "Keyword Color:"}
+        },
+        {
+            "name": "builtin",
+            "type": "string",
+            "default": "#000000",
+            "display": {"type": "colorpicker", "labelText": "Builtin Color:"}
+        },
+        {
+            "name": "literal",
+            "type": "string",
+            "default": "#000000",
+            "display": {"type": "colorpicker", "labelText": "Literal Color:"}
+        },
+        {
+            "name": "identifier",
+            "type": "string",
+            "default": "#000000",
+            "display": {"type": "colorpicker", "labelText": "Identifier Color:"}
+        },
+        {
+            "name": "sql",
+            "type": "string",
+            "default": "#000000",
+            "display": {"type": "colorpicker", "labelText": "SQL Color:"}
+        },
+        {
+            "name": "custom",
+            "type": "string",
+            "default": "#000000",
+            "display": {"type": "colorpicker", "labelText": "Custom Color:"}
+        },
+        {
+            "name": "background",
+            "type": "string",
+            "default": "#000000",
+            "display": {"type": "colorpicker", "labelText": "Background Color:"}
+        },
+        {
+            "name": "text",
+            "type": "string",
+            "default": "#000000",
+            "display": {"type": "colorpicker", "labelText": "Text Color:"}
+        },
+        {
+            "name": "caret",
+            "type": "string",
+            "default": "#000000",
+            "display": {"type": "colorpicker", "labelText": "Caret Color:"}
+        },
+        {
+            "name": "lineCursor",
+            "type": "string",
+            "default": "#000000",
+            "display": {"type": "colorpicker", "labelText": "Line Cursor Color:"}
+        },
+        {
+            "name": "lineNumbers",
+            "type": "string",
+            "default": "#000000",
+            "display": {"type": "colorpicker", "labelText": "Line Numbers Color:"}
+        },
+        {
+            "name": "consoleBackground",
+            "type": "string",
+            "default": "#000000",
+            "display": {"type": "colorpicker", "labelText": "Console Background:"}
+        },
+        {
+            "name": "tabBackground",
+            "type": "string",
+            "default": "#000000",
+            "display": {"type": "colorpicker", "labelText": "Tab Background:"}
+        },
+        {
+            "name": "tabLabelColor",
+            "type": "string",
+            "default": "#000000",
+            "display": {"type": "colorpicker", "labelText": "Tab Label Color:"}
+        },
+        {
+            "name": "tabLabelChangedColor",
+            "type": "string",
+            "default": "#000000",
+            "display": {"type": "colorpicker", "labelText": "Tab Label Changed:"}
+        },
+        {
+            "name": "tabLabelBackground",
+            "type": "string",
+            "default": "#000000",
+            "display": {"type": "colorpicker", "labelText": "Tab Label Background:"}
+        }
+    ]
+};
+
+print "Color editor screen created successfully";
+print "";
+
+// Set the color values from console.cfg
+print "Setting color values from console.cfg...";
+colorEditorScreen.info = infoColor;
+colorEditorScreen.comment = commentColor;
+colorEditorScreen.error = errorColor;
+colorEditorScreen.warn = warnColor;
+colorEditorScreen.ok = okColor;
+colorEditorScreen.code = codeColor;
+colorEditorScreen.datatype = datatypeColor;
+colorEditorScreen.data = dataColor;
+colorEditorScreen.keyword = keywordColor;
+colorEditorScreen.builtin = builtinColor;
+colorEditorScreen.literal = literalColor;
+colorEditorScreen.identifier = identifierColor;
+colorEditorScreen.sql = sqlColor;
+colorEditorScreen.custom = customColor;
+colorEditorScreen.background = backgroundColor;
+colorEditorScreen.text = textColor;
+colorEditorScreen.caret = caretColor;
+colorEditorScreen.lineCursor = lineCursorColor;
+colorEditorScreen.lineNumbers = lineNumbersColor;
+colorEditorScreen.consoleBackground = consoleBackgroundColor;
+colorEditorScreen.tabBackground = tabBackgroundColor;
+colorEditorScreen.tabLabelColor = tabLabelColor;
+colorEditorScreen.tabLabelChangedColor = tabLabelChangedColor;
+colorEditorScreen.tabLabelBackground = tabLabelBackgroundColor;
+print "Color values set successfully";
+print "";
+
+// Show the screen
+print "Displaying color editor screen...";
+print "You can now edit the colors using the color pickers.";
+print "";
+show screen colorEditorScreen;
+
+// After the screen is closed, display the updated values
+print "";
+print "=== Updated Color Values ===";
+print "info: " + colorEditorScreen.info;
+print "comment: " + colorEditorScreen.comment;
+print "error: " + colorEditorScreen.error;
+print "warn: " + colorEditorScreen.warn;
+print "ok: " + colorEditorScreen.ok;
+print "code: " + colorEditorScreen.code;
+print "datatype: " + colorEditorScreen.datatype;
+print "data: " + colorEditorScreen.data;
+print "keyword: " + colorEditorScreen.keyword;
+print "builtin: " + colorEditorScreen.builtin;
+print "literal: " + colorEditorScreen.literal;
+print "identifier: " + colorEditorScreen.identifier;
+print "sql: " + colorEditorScreen.sql;
+print "custom: " + colorEditorScreen.custom;
+print "background: " + colorEditorScreen.background;
+print "text: " + colorEditorScreen.text;
+print "caret: " + colorEditorScreen.caret;
+print "lineCursor: " + colorEditorScreen.lineCursor;
+print "lineNumbers: " + colorEditorScreen.lineNumbers;
+print "consoleBackground: " + colorEditorScreen.consoleBackground;
+print "tabBackground: " + colorEditorScreen.tabBackground;
+print "tabLabelColor: " + colorEditorScreen.tabLabelColor;
+print "tabLabelChangedColor: " + colorEditorScreen.tabLabelChangedColor;
+print "tabLabelBackground: " + colorEditorScreen.tabLabelBackground;
+
+print "";
+print "Console configuration color editor completed!";

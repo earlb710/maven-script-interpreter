@@ -1,0 +1,143 @@
+/* Generated from console.cfg */
+
+.info,
+.text.info,
+.styled-text-area .text.info,
+.console-out .text.info,
+.console-in .text.info {
+    -fx-fill: #e6e6e6 !important;
+}
+
+.comment,
+.text.comment,
+.styled-text-area .text.comment,
+.console-out .text.comment,
+.console-in .text.comment {
+    -fx-fill: #ffffcc !important;
+}
+
+.error,
+.text.error,
+.styled-text-area .text.error,
+.console-out .text.error,
+.console-in .text.error {
+    -fx-fill: #ee0000 !important;
+}
+
+.warn,
+.text.warn,
+.styled-text-area .text.warn,
+.console-out .text.warn,
+.console-in .text.warn {
+    -fx-fill: #eeee00 !important;
+}
+
+.ok,
+.text.ok,
+.styled-text-area .text.ok,
+.console-out .text.ok,
+.console-in .text.ok {
+    -fx-fill: #00ee00 !important;
+}
+
+.code,
+.text.code,
+.styled-text-area .text.code,
+.console-out .text.code,
+.console-in .text.code {
+    -fx-fill: white !important;
+}
+
+.datatype,
+.text.datatype,
+.styled-text-area .text.datatype,
+.console-out .text.datatype,
+.console-in .text.datatype {
+    -fx-fill: #D070FF !important;
+}
+
+.data,
+.text.data,
+.styled-text-area .text.data,
+.console-out .text.data,
+.console-in .text.data {
+    -fx-fill: pink !important;
+}
+
+.keyword,
+.text.keyword,
+.styled-text-area .text.keyword,
+.console-out .text.keyword,
+.console-in .text.keyword {
+    -fx-fill: #00FFFF !important;
+}
+
+.builtin,
+.text.builtin,
+.styled-text-area .text.builtin,
+.console-out .text.builtin,
+.console-in .text.builtin {
+    -fx-fill: #99e0e0 !important;
+}
+
+.literal,
+.text.literal,
+.styled-text-area .text.literal,
+.console-out .text.literal,
+.console-in .text.literal {
+    -fx-fill: blue !important;
+}
+
+.identifier,
+.text.identifier,
+.styled-text-area .text.identifier,
+.console-out .text.identifier,
+.console-in .text.identifier {
+    -fx-fill: white !important;
+}
+
+.sql,
+.text.sql,
+.styled-text-area .text.sql,
+.console-out .text.sql,
+.console-in .text.sql {
+    -fx-fill: #00ee66 !important;
+}
+
+.custom,
+.text.custom,
+.styled-text-area .text.custom,
+.console-out .text.custom,
+.console-in .text.custom {
+    -fx-fill: #eeee90 !important;
+}
+
+.console-frame .text-area,
+.console-frame .virtualized-scroll-pane,
+.console-frame .styled-text-area,
+.console-out,
+.console-in .text-area,
+.console-in .styled-text-area,
+.console-in,
+.editor-ebs,
+.editor-text {
+    -fx-background-color: #FFFF00 !important;
+}
+
+.console-frame .styled-text-area,
+.console-out,
+.console-in .text-area,
+.console-in .styled-text-area,
+.console-in,
+.editor-ebs,
+.editor-text {
+    -fx-text-fill: #e6e6e6 !important;
+    -fx-fill: #e6e6e6 !important;
+}
+
+.console-in .caret,
+.editor-ebs .caret,
+.editor-text .caret {
+    -fx-stroke: white !important;
+}
+
