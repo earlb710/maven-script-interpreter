@@ -602,6 +602,7 @@ public class Parser {
     /**
      * Parse record field definitions inside { }
      * Expected format: fieldName: type, fieldName: type, ...
+     * Supports nested records: fieldName: record { ... }
      */
     private RecordType parseRecordFields() throws ParseError {
         RecordType recordType = new RecordType();
@@ -617,8 +618,18 @@ public class Parser {
             // Parse field type
             EbsToken fieldTypeToken = peek();
             DataType fieldType = null;
+            RecordType nestedRecordType = null;
             
-            if (fieldTypeToken.type.getDataType() != null) {
+            // Check if this is a nested record type
+            if (fieldTypeToken.type == EbsTokenType.RECORD || 
+                (fieldTypeToken.literal instanceof String && "record".equals(((String)fieldTypeToken.literal).toLowerCase()))) {
+                // This is a nested record - parse it recursively
+                advance(); // consume 'record'
+                consume(EbsTokenType.LBRACE, "Expected '{' after 'record' keyword in nested record definition.");
+                nestedRecordType = parseRecordFields(); // Recursive call
+                consume(EbsTokenType.RBRACE, "Expected '}' after nested record field definitions.");
+                fieldType = DataType.RECORD;
+            } else if (fieldTypeToken.type.getDataType() != null) {
                 fieldType = fieldTypeToken.type.getDataType();
                 advance();
             } else if (fieldTypeToken.type == EbsTokenType.IDENTIFIER || fieldTypeToken.type == EbsTokenType.DATATYPE) {
@@ -635,7 +646,11 @@ public class Parser {
             }
             
             // Add field to record type
-            recordType.addField((String) fieldName.literal, fieldType);
+            if (nestedRecordType != null) {
+                recordType.addNestedRecord((String) fieldName.literal, nestedRecordType);
+            } else {
+                recordType.addField((String) fieldName.literal, fieldType);
+            }
             
             // Check for comma (more fields) or closing brace (end of record)
             if (check(EbsTokenType.COMMA)) {

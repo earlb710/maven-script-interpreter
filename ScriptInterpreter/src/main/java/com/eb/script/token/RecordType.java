@@ -6,19 +6,24 @@ import java.util.Map;
 /**
  * Represents a record type definition with named fields and their types.
  * Used for structured data with type validation.
+ * Supports nested records (records within records).
  * 
  * @author Earl Bosch
  */
 public class RecordType {
     
-    // Field definitions: field name -> field type
+    // Field definitions: field name -> field type (for primitive types)
     private final Map<String, DataType> fields;
+    
+    // Nested record definitions: field name -> nested RecordType (for record types)
+    private final Map<String, RecordType> nestedRecords;
     
     /**
      * Create a new record type with no fields
      */
     public RecordType() {
         this.fields = new LinkedHashMap<>();
+        this.nestedRecords = new LinkedHashMap<>();
     }
     
     /**
@@ -27,6 +32,7 @@ public class RecordType {
      */
     public RecordType(Map<String, DataType> fields) {
         this.fields = new LinkedHashMap<>(fields);
+        this.nestedRecords = new LinkedHashMap<>();
     }
     
     /**
@@ -39,12 +45,32 @@ public class RecordType {
     }
     
     /**
+     * Add a nested record field to this record type
+     * @param name Field name
+     * @param recordType Nested record type definition
+     */
+    public void addNestedRecord(String name, RecordType recordType) {
+        nestedRecords.put(name, recordType);
+        // Also mark in fields map that this is a RECORD type
+        fields.put(name, DataType.RECORD);
+    }
+    
+    /**
      * Get the type of a specific field
      * @param name Field name
      * @return DataType of the field, or null if field doesn't exist
      */
     public DataType getFieldType(String name) {
         return fields.get(name);
+    }
+    
+    /**
+     * Get the nested record type for a specific field
+     * @param name Field name
+     * @return RecordType of the nested record, or null if field doesn't exist or isn't a record
+     */
+    public RecordType getNestedRecordType(String name) {
+        return nestedRecords.get(name);
     }
     
     /**
@@ -93,8 +119,16 @@ public class RecordType {
                 continue;
             }
             
-            if (!expectedType.isDataType(fieldValue)) {
-                return false;
+            // Check if this field is a nested record
+            if (expectedType == DataType.RECORD && nestedRecords.containsKey(fieldName)) {
+                RecordType nestedType = nestedRecords.get(fieldName);
+                if (!nestedType.validateValue(fieldValue)) {
+                    return false;
+                }
+            } else {
+                if (!expectedType.isDataType(fieldValue)) {
+                    return false;
+                }
             }
         }
         
@@ -126,7 +160,13 @@ public class RecordType {
             
             DataType expectedType = fields.get(fieldName);
             if (expectedType != null) {
-                fieldValue = expectedType.convertValue(fieldValue);
+                // Check if this field is a nested record
+                if (expectedType == DataType.RECORD && nestedRecords.containsKey(fieldName)) {
+                    RecordType nestedType = nestedRecords.get(fieldName);
+                    fieldValue = nestedType.convertValue(fieldValue);
+                } else {
+                    fieldValue = expectedType.convertValue(fieldValue);
+                }
             }
             
             converted.put(fieldName, fieldValue);
@@ -143,7 +183,15 @@ public class RecordType {
             if (!first) {
                 sb.append(", ");
             }
-            sb.append(entry.getKey()).append(": ").append(entry.getValue());
+            sb.append(entry.getKey()).append(": ");
+            
+            // If this field is a nested record, use its RecordType string representation
+            if (entry.getValue() == DataType.RECORD && nestedRecords.containsKey(entry.getKey())) {
+                sb.append(nestedRecords.get(entry.getKey()).toString());
+            } else {
+                sb.append(entry.getValue());
+            }
+            
             first = false;
         }
         sb.append(" }");
@@ -155,11 +203,11 @@ public class RecordType {
         if (this == obj) return true;
         if (!(obj instanceof RecordType)) return false;
         RecordType other = (RecordType) obj;
-        return fields.equals(other.fields);
+        return fields.equals(other.fields) && nestedRecords.equals(other.nestedRecords);
     }
     
     @Override
     public int hashCode() {
-        return fields.hashCode();
+        return fields.hashCode() * 31 + nestedRecords.hashCode();
     }
 }

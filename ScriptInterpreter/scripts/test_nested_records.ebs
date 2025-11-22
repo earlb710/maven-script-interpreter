@@ -1,0 +1,125 @@
+// Test: Nested records (records within records)
+print "=== Nested Records Test ===";
+print "";
+
+// Test 1: Simple nested record
+print "Test 1: Simple nested record";
+var person:record{
+    name: string,
+    age: int,
+    address: record {
+        street: string,
+        city: string,
+        zipCode: string
+    }
+};
+
+person = {
+    "name": "John Doe",
+    "age": 30,
+    "address": {
+        "street": "123 Main St",
+        "city": "New York",
+        "zipCode": "10001"
+    }
+};
+
+print "Person: " + person;
+print "";
+
+// Test 2: Multiple levels of nesting
+print "Test 2: Multiple levels of nesting";
+var employee:record{
+    id: int,
+    name: string,
+    contact: record {
+        email: string,
+        phone: string,
+        address: record {
+            street: string,
+            city: string,
+            state: string,
+            zip: string
+        }
+    },
+    salary: double
+};
+
+employee = {
+    "id": 1001,
+    "name": "Jane Smith",
+    "contact": {
+        "email": "jane@example.com",
+        "phone": "555-1234",
+        "address": {
+            "street": "456 Oak Ave",
+            "city": "Boston",
+            "state": "MA",
+            "zip": "02101"
+        }
+    },
+    "salary": 95000.50
+};
+
+print "Employee: " + employee;
+print "";
+
+// Test 3: Type conversion in nested records
+print "Test 3: Type conversion in nested records";
+var product:record{
+    sku: string,
+    price: double,
+    supplier: record {
+        name: string,
+        rating: int
+    }
+};
+
+product = {
+    "sku": "ABC123",
+    "price": "49.99",  // String should convert to double
+    "supplier": {
+        "name": "Acme Corp",
+        "rating": "5"  // String should convert to int
+    }
+};
+
+print "Product: " + product;
+print "";
+
+// Test 4: Array of records with nested records
+print "Test 4: Array of records with nested records";
+var employees:array.record{
+    id: int,
+    name: string,
+    department: record {
+        name: string,
+        location: string
+    }
+};
+
+employees = [
+    {
+        "id": 101,
+        "name": "Alice Brown",
+        "department": {
+            "name": "Engineering",
+            "location": "Building A"
+        }
+    },
+    {
+        "id": 102,
+        "name": "Bob Wilson",
+        "department": {
+            "name": "Sales",
+            "location": "Building B"
+        }
+    }
+];
+
+print "Employees array length: " + employees.length;
+print "First employee: " + employees[0];
+print "Second employee: " + employees[1];
+print "";
+
+print "=== All Nested Record Tests Completed ===";
