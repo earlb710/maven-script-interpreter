@@ -106,7 +106,7 @@ print numbers.length;  // Get length
 personType typeof record{name: string, age: int};
 var person: personType;
 person = {"name": "Alice", "age": 30};
-print person.name;  // "Alice"
+print person;  // Print the record
 
 // Database operations
 connect db = "jdbc:oracle:thin:@localhost:1521:xe";

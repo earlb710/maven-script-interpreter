@@ -428,13 +428,18 @@ personType typeof record{name: string, age: int};
 var person: personType;
 person = {"name": "John Doe", "age": 30};
 
-print person.name;  // "John Doe"
-print person.age;   // 30
+// Print the whole record
+print person;  // Displays: {"name": "John Doe", "age": 30}
+
+// Modify fields using assignment
+person.name = "Jane Smith";
+person.age = 35;
+print person;  // Displays updated values
 ```
 
 #### Array Type Aliases
 
-Define aliases for array types (fixed-size or dynamic):
+Define aliases for array types (fixed-size):
 
 ```javascript
 // Fixed-size array alias
@@ -443,13 +448,7 @@ intArray typeof array.int[10];
 var numbers: intArray;
 numbers = [1, 2, 3, 4, 5];
 print numbers[0];  // 1
-
-// Dynamic array alias
-stringList typeof array.string[*];
-
-var names: stringList;
-names = ["Alice", "Bob", "Charlie"];
-print names.length;  // 3
+print numbers.length;  // 10 (array size)
 ```
 
 #### Record Type Aliases
@@ -473,8 +472,12 @@ employee = {
     "active": true
 };
 
-print employee.name;    // "Alice Smith"
-print employee.salary;  // 75000.0
+// Print the employee record
+print employee;
+
+// Update employee fields
+employee.name = "Alice Johnson";
+employee.salary = 80000.00;
 ```
 
 #### Nested Record Type Aliases
@@ -510,7 +513,12 @@ customer = {
     }
 };
 
-print customer.address.city;  // "Springfield"
+// Print the customer record
+print customer;
+
+// Update nested fields
+customer.address.city = "Shelbyville";
+customer.address.zipCode = "54321";
 ```
 
 #### Array of Records Type Aliases
@@ -532,9 +540,10 @@ employees = [
     {"id": 3, "name": "Charlie", "department": "Marketing"}
 ];
 
-print employees.length;        // 3
-print employees[0].name;       // "Alice"
-print employees[1].department; // "Sales"
+// Array operations
+print employees.length;  // 3
+print employees[0];      // First employee record
+print employees[1];      // Second employee record
 ```
 
 #### Array of Records with Nested Structures
@@ -572,8 +581,10 @@ companyData = [
     }
 ];
 
-print companyData[0].department.name;     // "Engineering"
-print companyData[1].department.manager;  // "Jane Smith"
+// Access array elements
+print companyData.length;  // 2
+print companyData[0];      // First department
+print companyData[1];      // Second department
 ```
 
 #### Type Alias Features
@@ -583,7 +594,10 @@ print companyData[1].department.manager;  // "Jane Smith"
 - Defined at parse time, allowing subsequent code to use them immediately
 - Type aliases can be used for variable declarations just like built-in types
 - Support all data types: primitives, arrays, records, and nested combinations
-- Array size can be fixed (`[10]`) or dynamic (`[*]`)
+- Fixed-size arrays use `[size]` syntax (e.g., `array.int[10]`)
+- Dynamic-size arrays of records don't specify size (e.g., `array.record{...}`)
+- Record fields can be updated using assignment (e.g., `person.name = "value"`)
+- Access whole records/arrays for reading (e.g., `print person`)
 
 **Benefits:**
 - **Code Reusability**: Define complex types once, use them many times
@@ -619,7 +633,12 @@ response1 = {
     }
 };
 
-print response1.data.username;  // "alice"
+// Print the response
+print response1;
+
+// Update nested fields
+response1.data.username = "bob";
+response1.status = 201;
 ```
 
 ---
