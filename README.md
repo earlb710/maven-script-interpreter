@@ -10,6 +10,7 @@ A powerful script interpreter for the EBS (Earl Bosch Script) language, featurin
 - **Autocomplete**: Intelligent code completion suggestions for keywords, built-ins, and JSON schemas
 - **Configurable Colors**: Customize console colors via JSON configuration file
 - **Database Integration**: Built-in SQL support with cursors and connections
+- **Type Aliases**: Define reusable type aliases for complex types with the `typeof` keyword
 - **Array Support**: Multi-dimensional arrays with type safety
 - **JSON Support**: Native JSON parsing, validation, and schema support
 - **File I/O**: Built-in file operations
@@ -100,6 +101,12 @@ print message;
 var numbers = [1, 2, 3, 4, 5];
 print numbers[0];  // Access elements
 print numbers.length;  // Get length
+
+// Type aliases (typedef)
+personType typeof record{name: string, age: int};
+var person: personType;
+person = {"name": "Alice", "age": 30};
+print person.name;  // "Alice"
 
 // Database operations
 connect db = "jdbc:oracle:thin:@localhost:1521:xe";
@@ -227,6 +234,7 @@ The autocomplete automatically detects JSON content and provides schema-aware su
 
 ## Documentation
 
+- **[EBS Script Syntax Reference](docs/EBS_SCRIPT_SYNTAX.md)** - Complete language syntax guide including type aliases (typeof)
 - **[Architecture & Flow Documentation](ARCHITECTURE.md)** - Comprehensive documentation of the system architecture, data flow, and internal workings
 - **[Class Tree Lister](CLASS_TREE_LISTER.md)** - Utility for analyzing the project's class hierarchy
 - **[Syntax Reference](ScriptInterpreter/src/main/java/com/eb/script/syntax_ebnf.txt)** - EBNF grammar specification

@@ -407,6 +407,221 @@ var result: int = call add(5, 3);
 var text: string = call toUpper("hello");
 ```
 
+### Type Aliases (typeof)
+
+Define reusable type aliases for complex types using the `typeof` keyword. Type aliases are globally accessible throughout the script and can simplify variable declarations for complex types.
+
+#### Basic Syntax
+```javascript
+typeName typeof type_definition;
+```
+
+#### Simple Type Aliases
+
+Define aliases for basic data types:
+
+```javascript
+// Alias for a simple record type
+personType typeof record{name: string, age: int};
+
+// Use the type alias in variable declaration
+var person: personType;
+person = {"name": "John Doe", "age": 30};
+
+print person.name;  // "John Doe"
+print person.age;   // 30
+```
+
+#### Array Type Aliases
+
+Define aliases for array types (fixed-size or dynamic):
+
+```javascript
+// Fixed-size array alias
+intArray typeof array.int[10];
+
+var numbers: intArray;
+numbers = [1, 2, 3, 4, 5];
+print numbers[0];  // 1
+
+// Dynamic array alias
+stringList typeof array.string[*];
+
+var names: stringList;
+names = ["Alice", "Bob", "Charlie"];
+print names.length;  // 3
+```
+
+#### Record Type Aliases
+
+Define aliases for structured record types:
+
+```javascript
+// Simple record with multiple fields
+employeeType typeof record{
+    id: int,
+    name: string,
+    salary: double,
+    active: bool
+};
+
+var employee: employeeType;
+employee = {
+    "id": 101,
+    "name": "Alice Smith",
+    "salary": 75000.00,
+    "active": true
+};
+
+print employee.name;    // "Alice Smith"
+print employee.salary;  // 75000.0
+```
+
+#### Nested Record Type Aliases
+
+Define aliases for records with nested structures:
+
+```javascript
+// Record with nested record
+addressType typeof record{
+    street: string,
+    city: string,
+    zipCode: string
+};
+
+customerType typeof record{
+    id: int,
+    name: string,
+    address: record{
+        street: string,
+        city: string,
+        zipCode: string
+    }
+};
+
+var customer: customerType;
+customer = {
+    "id": 1001,
+    "name": "Tech Corp",
+    "address": {
+        "street": "123 Main St",
+        "city": "Springfield",
+        "zipCode": "12345"
+    }
+};
+
+print customer.address.city;  // "Springfield"
+```
+
+#### Array of Records Type Aliases
+
+Define aliases for arrays of structured data:
+
+```javascript
+// Array of records (dynamic size)
+employeeListType typeof array.record{
+    id: int,
+    name: string,
+    department: string
+};
+
+var employees: employeeListType;
+employees = [
+    {"id": 1, "name": "Alice", "department": "Engineering"},
+    {"id": 2, "name": "Bob", "department": "Sales"},
+    {"id": 3, "name": "Charlie", "department": "Marketing"}
+];
+
+print employees.length;        // 3
+print employees[0].name;       // "Alice"
+print employees[1].department; // "Sales"
+```
+
+#### Array of Records with Nested Structures
+
+Combine arrays and nested records in type aliases:
+
+```javascript
+// Complex nested structure
+companyDataType typeof array.record{
+    id: int,
+    department: record{
+        name: string,
+        location: string,
+        manager: string
+    }
+};
+
+var companyData: companyDataType;
+companyData = [
+    {
+        "id": 101,
+        "department": {
+            "name": "Engineering",
+            "location": "Building A",
+            "manager": "John Doe"
+        }
+    },
+    {
+        "id": 102,
+        "department": {
+            "name": "Sales",
+            "location": "Building B",
+            "manager": "Jane Smith"
+        }
+    }
+];
+
+print companyData[0].department.name;     // "Engineering"
+print companyData[1].department.manager;  // "Jane Smith"
+```
+
+#### Type Alias Features
+
+**Key Characteristics:**
+- Type aliases are **global** and accessible throughout the entire script
+- Defined at parse time, allowing subsequent code to use them immediately
+- Type aliases can be used for variable declarations just like built-in types
+- Support all data types: primitives, arrays, records, and nested combinations
+- Array size can be fixed (`[10]`) or dynamic (`[*]`)
+
+**Benefits:**
+- **Code Reusability**: Define complex types once, use them many times
+- **Maintainability**: Update type definitions in one place
+- **Readability**: Descriptive type names make code more understandable
+- **Type Safety**: Enforce consistent structure across variables
+
+**Example Use Case:**
+```javascript
+// Define a type for API response data
+apiResponseType typeof record{
+    status: int,
+    message: string,
+    data: record{
+        userId: int,
+        username: string,
+        email: string
+    }
+};
+
+// Use the type alias multiple times
+var response1: apiResponseType;
+var response2: apiResponseType;
+var response3: apiResponseType;
+
+response1 = {
+    "status": 200,
+    "message": "Success",
+    "data": {
+        "userId": 42,
+        "username": "alice",
+        "email": "alice@example.com"
+    }
+};
+
+print response1.data.username;  // "alice"
+```
+
 ---
 
 ## Functions
