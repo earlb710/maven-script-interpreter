@@ -190,6 +190,9 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         
         // Register all functions from the current script BEFORE any imports are processed
         // This ensures we can detect conflicts when imports are executed
+        // NOTE: This enforces strict no-overwrite semantics - if a function name exists in the current
+        // script, no import can declare a function with the same name, and vice versa.
+        // This is stricter than traditional import semantics but is the desired behavior per requirements.
         if (runtime.blocks != null) {
             for (String functionName : runtime.blocks.keySet()) {
                 context.getDeclaredFunctions().put(functionName, runtime.name);
@@ -1322,11 +1325,14 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             }
             
             // Register imported blocks/functions in the current runtime context
+            // Check for conflicts to enforce strict no-overwrite semantics
             if (importContext.blocks != null && currentRuntime != null) {
                 for (Map.Entry<String, BlockStatement> entry : importContext.blocks.entrySet()) {
                     String functionName = entry.getKey();
                     
-                    // Check if this function name was already declared
+                    // Check if this function name was already declared (in current script or previous import)
+                    // This enforces the requirement that no function name can be reused across the current
+                    // script and any imports, preventing all forms of overwriting
                     if (context.getDeclaredFunctions().containsKey(functionName)) {
                         String existingSource = context.getDeclaredFunctions().get(functionName);
                         throw error(stmt.getLine(), 

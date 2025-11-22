@@ -51,6 +51,8 @@ public class InterpreterScreen {
             }
             
             // Check if this screen name was already declared (even if not shown yet)
+            // This enforces strict no-overwrite semantics - once a screen name is declared
+            // (either in current script or any import), it cannot be redeclared
             if (context.getDeclaredScreens().containsKey(stmt.name)) {
                 String existingSource = context.getDeclaredScreens().get(stmt.name);
                 throw interpreter.error(stmt.getLine(), 
