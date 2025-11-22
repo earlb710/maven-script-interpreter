@@ -1,0 +1,12 @@
+// test_simple_duplicate.ebs
+// Simple test for duplicate function detection
+
+print "Starting test...";
+
+import "helper_duplicate1.ebs";
+
+print "After first import";
+
+import "helper_duplicate2.ebs";
+
+print "After second import - should not reach here!";

@@ -23,6 +23,9 @@ public class Run {
 //                String name = reader.readLine();
 //                System.out.println("Hello, " + name + "!");
             }
+        } catch (InterpreterError e) {
+            System.err.println("Error: " + e.getMessage());
+            System.exit(1);
         } catch (Interpreter.ReturnSignal e) {
             System.out.println("Return:" + e.value);
         } catch (Interpreter.BreakSignal e) {

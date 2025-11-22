@@ -1,0 +1,12 @@
+// test_comprehensive_conflicts.ebs
+// Comprehensive test for all conflict scenarios
+
+print "=== Comprehensive Conflict Detection Tests ===";
+print "";
+
+print "Test 1: Importing two files with same function name";
+import "helper_duplicate1.ebs";
+// This should fail on the next import
+import "helper_duplicate2.ebs";
+
+print "This line should never be reached!";
