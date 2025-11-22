@@ -21,6 +21,7 @@ public enum EbsTokenType implements LexerToken {
     VAR(PrintStyle.KEYWORD, Category.KEYWORD, "var", "let"), PRINT(PrintStyle.KEYWORD, Category.KEYWORD, "print"), CALL(PrintStyle.KEYWORD, Category.KEYWORD, "call", "#"), RETURN(PrintStyle.KEYWORD, Category.KEYWORD, "return"),
     IMPORT(PrintStyle.KEYWORD, Category.KEYWORD, "import"),
     FUNCTION(PrintStyle.KEYWORD, Category.KEYWORD, "function"),
+    TYPEOF(PrintStyle.KEYWORD, Category.KEYWORD, "typeof"),
     // Conditional
     IF(PrintStyle.KEYWORD, Category.KEYWORD, "if"), THEN(PrintStyle.KEYWORD, Category.KEYWORD, "then"), ELSE(PrintStyle.KEYWORD, Category.KEYWORD, "else"),
     // Loop

@@ -53,6 +53,7 @@ import com.eb.script.interpreter.statement.ScreenHideStatement;
 import com.eb.script.interpreter.statement.ScreenCloseStatement;
 import com.eb.script.interpreter.statement.ScreenSubmitStatement;
 import com.eb.script.interpreter.statement.ImportStatement;
+import com.eb.script.interpreter.statement.TypedefStatement;
 import com.eb.script.token.ebs.EbsTokenType;
 import com.eb.script.interpreter.statement.ConnectStatement;
 import com.eb.script.parser.Parser;
@@ -1396,6 +1397,28 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             throw error(stmt.getLine(), "Failed to read import file: " + e.getMessage());
         } catch (ParseError e) {
             throw error(stmt.getLine(), "Failed to parse import file: " + e.getMessage());
+        } finally {
+            environment().popCallStack();
+        }
+    }
+    
+    @Override
+    public void visitTypedefStatement(TypedefStatement stmt) throws InterpreterError {
+        environment().pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Typedef %1", stmt.typeName);
+        try {
+            // Register the type alias in the global type registry
+            TypeRegistry.TypeAlias alias = new TypeRegistry.TypeAlias(
+                stmt.typeName,
+                stmt.dataType,
+                stmt.recordType,
+                stmt.isArray,
+                stmt.arraySize
+            );
+            TypeRegistry.registerTypeAlias(alias);
+            
+            if (context.getOutput() != null) {
+                context.getOutput().printlnOk("Type alias defined: " + stmt.typeName + " = " + alias.toString());
+            }
         } finally {
             environment().popCallStack();
         }

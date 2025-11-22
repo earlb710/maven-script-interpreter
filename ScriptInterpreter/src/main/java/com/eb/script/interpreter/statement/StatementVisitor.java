@@ -58,4 +58,6 @@ public interface StatementVisitor {
 
     void visitPropertyAssignStatement(PropertyAssignStatement stmt) throws InterpreterError;
 
+    void visitTypedefStatement(TypedefStatement stmt) throws InterpreterError;
+
 }

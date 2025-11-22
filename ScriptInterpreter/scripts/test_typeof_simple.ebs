@@ -1,0 +1,13 @@
+// Simple test for typeof
+print "Test 1: Define type alias";
+
+// Define a simple record type alias
+personType typeof record{name: string, age: int};
+
+print "Type alias defined";
+
+// Try to use it
+var person:personType;
+person = {"name": "John", "age": 30};
+
+print "Person: " + person;
