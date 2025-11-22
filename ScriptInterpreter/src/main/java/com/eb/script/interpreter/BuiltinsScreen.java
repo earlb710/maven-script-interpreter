@@ -184,6 +184,39 @@ public class BuiltinsScreen {
     }
 
     /**
+     * scr.showWindow() -> BOOL Shows the current screen window.
+     * This is a convenience method that always uses the current screen context.
+     * Must be called from within a screen context (e.g., onClick handler).
+     * Returns true on success.
+     */
+    public static Object screenShowWindow(InterpreterContext context, Object[] args) throws InterpreterError {
+        // Always use current screen context - no screen name parameter
+        return screenShow(context, new Object[0]);
+    }
+
+    /**
+     * scr.hideWindow() -> BOOL Hides the current screen window.
+     * This is a convenience method that always uses the current screen context.
+     * Must be called from within a screen context (e.g., onClick handler).
+     * Returns true on success.
+     */
+    public static Object screenHideWindow(InterpreterContext context, Object[] args) throws InterpreterError {
+        // Always use current screen context - no screen name parameter
+        return screenHide(context, new Object[0]);
+    }
+
+    /**
+     * scr.closeWindow() -> BOOL Closes the current screen window.
+     * This is a convenience method that always uses the current screen context.
+     * Must be called from within a screen context (e.g., onClick handler).
+     * Returns true on success.
+     */
+    public static Object screenCloseWindow(InterpreterContext context, Object[] args) throws InterpreterError {
+        // Always use current screen context - no screen name parameter
+        return screenClose(context, new Object[0]);
+    }
+
+    /**
      * scr.setProperty(screenName.areaItemName, propertyName, value) -> BOOL
      * Sets a property on an area item in a screen.
      */
