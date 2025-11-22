@@ -1,0 +1,12 @@
+// test_duplicate_function_import1.ebs
+// Test script that imports files with duplicate function names
+
+print "=== Testing Duplicate Function Names in Imports ===";
+
+import "helper_duplicate1.ebs";
+import "helper_duplicate2.ebs";
+
+var result: int = call testFunc(5);
+print "testFunc(5) = " + result;
+
+print "=== Test Completed ===";

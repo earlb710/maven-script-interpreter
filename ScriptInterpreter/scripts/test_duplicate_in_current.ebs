@@ -1,0 +1,16 @@
+// test_duplicate_in_current.ebs
+// Test where current script defines a function, then imports a file with the same function
+
+print "=== Testing Function Defined in Current Script, Then Imported ===";
+
+myFunc(x: int) return int {
+    print "Called myFunc from current script";
+    return x * 10;
+}
+
+import "helper_with_myfunc.ebs";
+
+var result: int = call myFunc(5);
+print "myFunc(5) = " + result;
+
+print "=== Test Completed ===";

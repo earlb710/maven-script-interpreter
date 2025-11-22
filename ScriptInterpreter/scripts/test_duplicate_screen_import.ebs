@@ -1,0 +1,9 @@
+// test_duplicate_screen_import.ebs
+// Test script that imports files with duplicate screen names
+
+print "=== Testing Duplicate Screen Names in Imports ===";
+
+import "helper_screen1.ebs";
+import "helper_screen2.ebs";
+
+print "=== Test Completed ===";

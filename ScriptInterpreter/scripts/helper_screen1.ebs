@@ -1,0 +1,11 @@
+// helper_screen1.ebs
+print "Loading helper_screen1...";
+
+screen testScreen = {
+    "title": "Test Screen from helper_screen1",
+    "width": 400,
+    "height": 300,
+    "sets": []
+};
+
+print "helper_screen1 loaded";

@@ -1,0 +1,9 @@
+// helper_duplicate2.ebs
+print "Loading helper_duplicate2...";
+
+testFunc(x: int) return int {
+    print "Called testFunc from helper_duplicate2";
+    return x * 3;
+}
+
+print "helper_duplicate2 loaded";

@@ -1,0 +1,9 @@
+// helper_with_myfunc.ebs
+print "Loading helper_with_myfunc...";
+
+myFunc(x: int) return int {
+    print "Called myFunc from helper_with_myfunc";
+    return x * 20;
+}
+
+print "helper_with_myfunc loaded";
