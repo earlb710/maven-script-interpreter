@@ -787,18 +787,6 @@ public final class Builtins {
                 newParam("screenName", DataType.STRING, false) // optional; screen name (if null, uses current screen)
         ));
         addBuiltin(info(
-                "scr.showWindow", DataType.BOOL
-                // no parameters; always uses current screen context
-        ));
-        addBuiltin(info(
-                "scr.hideWindow", DataType.BOOL
-                // no parameters; always uses current screen context
-        ));
-        addBuiltin(info(
-                "scr.closeWindow", DataType.BOOL
-                // no parameters; always uses current screen context
-        ));
-        addBuiltin(info(
                 "scr.setStatus", DataType.BOOL,
                 newParam("screenName", DataType.STRING, true), // required; screen name
                 newParam("status", DataType.STRING, true) // required; status: "clean", "changed", or "error"
@@ -2142,15 +2130,6 @@ public final class Builtins {
             }
             case "scr.closescreen" -> {
                 return BuiltinsScreen.screenClose(context, args);
-            }
-            case "scr.showwindow" -> {
-                return BuiltinsScreen.screenShowWindow(context, args);
-            }
-            case "scr.hidewindow" -> {
-                return BuiltinsScreen.screenHideWindow(context, args);
-            }
-            case "scr.closewindow" -> {
-                return BuiltinsScreen.screenCloseWindow(context, args);
             }
             case "scr.setstatus" -> {
                 return BuiltinsScreen.screenSetStatus(context, args);
