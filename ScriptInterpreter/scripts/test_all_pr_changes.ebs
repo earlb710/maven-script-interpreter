@@ -98,18 +98,18 @@ keywordCloseHandler() {
 
 // Handler functions that use builtin functions WITHOUT screen names
 builtinShowHandler() {
-    call scr.showWindow();
-    print "  builtinShowHandler: executed 'scr.showWindow();'";
+    call scr.showScreen();
+    print "  builtinShowHandler: executed 'scr.showScreen();'";
 }
 
 builtinHideHandler() {
-    call scr.hideWindow();
-    print "  builtinHideHandler: executed 'scr.hideWindow();'";
+    call scr.hideScreen();
+    print "  builtinHideHandler: executed 'scr.hideScreen();'";
 }
 
 builtinCloseHandler() {
-    call scr.closeWindow();
-    print "  builtinCloseHandler: executed 'scr.closeWindow();'";
+    call scr.closeScreen();
+    print "  builtinCloseHandler: executed 'scr.closeScreen();'";
 }
 
 // Create a comprehensive test screen
@@ -181,8 +181,8 @@ screen testScreen = {
             "default": "Show",
             "display": {
                 "type": "button",
-                "labelText": "BUILTIN: scr.showWindow()",
-                "onClick": "call scr.showWindow();"
+                "labelText": "BUILTIN: scr.showScreen()",
+                "onClick": "call scr.showScreen();"
             }
         },
         {
@@ -191,8 +191,8 @@ screen testScreen = {
             "default": "Hide",
             "display": {
                 "type": "button",
-                "labelText": "BUILTIN: scr.hideWindow()",
-                "onClick": "call scr.hideWindow();"
+                "labelText": "BUILTIN: scr.hideScreen()",
+                "onClick": "call scr.hideScreen();"
             }
         },
         {
@@ -201,8 +201,8 @@ screen testScreen = {
             "default": "Close",
             "display": {
                 "type": "button",
-                "labelText": "BUILTIN: scr.closeWindow()",
-                "onClick": "call scr.closeWindow();"
+                "labelText": "BUILTIN: scr.closeScreen()",
+                "onClick": "call scr.closeScreen();"
             }
         },
         {
@@ -220,8 +220,8 @@ screen testScreen = {
             "default": "Show",
             "display": {
                 "type": "button",
-                "labelText": "INLINE: call scr.showWindow();",
-                "onClick": "call scr.showWindow();"
+                "labelText": "INLINE: call scr.showScreen();",
+                "onClick": "call scr.showScreen();"
             }
         },
         {
@@ -230,8 +230,8 @@ screen testScreen = {
             "default": "Hide",
             "display": {
                 "type": "button",
-                "labelText": "INLINE: call scr.hideWindow();",
-                "onClick": "call scr.hideWindow();"
+                "labelText": "INLINE: call scr.hideScreen();",
+                "onClick": "call scr.hideScreen();"
             }
         },
         {
@@ -240,8 +240,8 @@ screen testScreen = {
             "default": "Close",
             "display": {
                 "type": "button",
-                "labelText": "INLINE: call scr.closeWindow();",
-                "onClick": "call scr.closeWindow();"
+                "labelText": "INLINE: call scr.closeScreen();",
+                "onClick": "call scr.closeScreen();"
             }
         },
         {
@@ -334,7 +334,7 @@ print "=== TEST SUMMARY ===";
 print "All changes in this PR have been tested:";
 print "  1. String builtins renamed from string.* to str.* ✓";
 print "  2. Screen keyword commands work without names ✓";
-print "  3. New scr.showWindow/hideWindow/closeWindow builtins ✓";
+print "  3. Screen builtins (scr.showScreen/hideScreen/closeScreen) work without parameters ✓";
 print "  4. All work from within screen context (onClick handlers) ✓";
 print "";
 print "Run the application with 'mvn javafx:run' to interact with the test screen.";
