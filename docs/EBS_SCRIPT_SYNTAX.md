@@ -515,9 +515,11 @@ customer = {
 // Print the customer record
 print customer;
 
-// Update top-level fields (nested field updates like customer.address.city are not supported)
+// Update fields (including nested fields)
 customer.id = 1002;
 customer.name = "New Corp";
+customer.address.city = "Shelbyville";
+customer.address.zipCode = "54321";
 ```
 
 #### Array of Records Type Aliases
@@ -596,7 +598,10 @@ print companyData[1];      // Second department
 - **Array sizing**:
   - Fixed-size primitive arrays: Use `[size]` syntax (e.g., `array.int[10]`)
   - Dynamic arrays of records: Omit size specifier (e.g., `array.record{...}`)
-- **Record field updates**: Top-level fields can be updated using assignment (e.g., `person.name = "value"`)
+- **Record field updates**: Fields can be updated using assignment, including nested fields
+  - Top-level: `person.name = "value"`
+  - Nested: `customer.address.city = "value"`
+  - Case-insensitive property access (e.g., `zipCode` and `zipcode` both work)
 - Access whole records/arrays for reading (e.g., `print person`)
 
 **Benefits:**
@@ -636,9 +641,11 @@ response1 = {
 // Print the response
 print response1;
 
-// Update top-level fields
+// Update fields (including nested fields)
 response1.status = 201;
 response1.message = "Created";
+response1.data.username = "bob";
+response1.data.email = "bob@example.com";
 ```
 
 ---
