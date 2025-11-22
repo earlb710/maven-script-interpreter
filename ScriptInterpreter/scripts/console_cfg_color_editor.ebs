@@ -27,21 +27,14 @@ if call file.exists("console.cfg") then {
             configPath = "../../console.cfg";
             configContent = call file.readtextfile(configPath);
         } else {
-            // Try path 4: Three levels up (when run from ScriptInterpreter/scripts/test/)
-            if call file.exists("../../../console.cfg") then {
-                configPath = "../../../console.cfg";
-                configContent = call file.readtextfile(configPath);
-            } else {
-                print "ERROR: Cannot find console.cfg file!";
-                print "Please run this script from one of these locations:";
-                print "  1. Repository root directory";
-                print "  2. ScriptInterpreter directory";
-                print "  3. ScriptInterpreter/scripts directory";
-                print "  4. ScriptInterpreter/scripts/test directory";
-                print "";
-                print "Or ensure console.cfg exists in the repository root.";
-                return;
-            }
+            print "ERROR: Cannot find console.cfg file!";
+            print "Please run this script from one of these locations:";
+            print "  1. Repository root directory";
+            print "  2. ScriptInterpreter directory";
+            print "  3. ScriptInterpreter/scripts directory";
+            print "";
+            print "Or ensure console.cfg exists in the repository root.";
+            return;
         }
     }
 }
