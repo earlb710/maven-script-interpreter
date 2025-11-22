@@ -519,6 +519,36 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         }
 
         // Fall back to regular environment variable assignment
+        // But first check if this variable has a recordType for validation
+        RecordType recordType = environment().getEnvironmentValues().getRecordType(stmt.name);
+        if (recordType != null) {
+            // Variable has a record type - validate the value
+            if (value instanceof ArrayDef) {
+                // It's an array of records - validate each element
+                ArrayDef<?, ?> arrayDef = (ArrayDef<?, ?>) value;
+                
+                // Iterate through the array and validate/convert each element
+                for (int i = 0; i < arrayDef.size(); i++) {
+                    Object element = arrayDef.get(i);
+                    if (element != null) {
+                        Object converted = recordType.convertValue(element);
+                        if (!recordType.validateValue(converted)) {
+                            throw error(stmt.getLine(), "Array element " + i + " does not match record structure for '" + stmt.name + "'");
+                        }
+                        // Update the element with the converted value
+                        @SuppressWarnings("unchecked")
+                        ArrayDef<Object, ?> typedArray = (ArrayDef<Object, ?>) arrayDef;
+                        typedArray.set(i, converted);
+                    }
+                }
+            } else {
+                // It's a single record - validate it
+                value = recordType.convertValue(value);
+                if (!recordType.validateValue(value)) {
+                    throw error(stmt.getLine(), "Value does not match record structure for '" + stmt.name + "'");
+                }
+            }
+        }
         environment().getEnvironmentValues().assign(stmt.name, value);
     }
 

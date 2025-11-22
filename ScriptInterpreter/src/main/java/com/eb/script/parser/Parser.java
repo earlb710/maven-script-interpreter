@@ -565,6 +565,9 @@ public class Parser {
                 varInit = parseSqlSelectFromSource();
             } else if (elemType == DataType.JSON && (check(EbsTokenType.LBRACE) || check(EbsTokenType.LBRACKET))) {
                 varInit = parseJsonLiteralFromSource();
+            } else if (elemType == DataType.RECORD && check(EbsTokenType.LBRACE)) {
+                // For record types, parse JSON object literal
+                varInit = parseJsonLiteralFromSource();
             } else if (checkAny(EbsTokenType.LBRACE, EbsTokenType.LBRACKET)) {
                 // Allow array literals in these cases:
                 // 1. Variable was declared with array dimensions (varInit is ArrayExpression)

@@ -1,0 +1,10 @@
+// Test with "true" instead of "Y"
+print "=== Test with true keyword ===";
+print "";
+
+var product:record{sku:string, price:double, inStock:bool} = {"sku": "XYZ789", "price": "49.99", "inStock": "true"};
+
+print "Product: " + product;
+print "";
+print "Expected: inStock should be true (boolean)";
+print "Expected: price should be 49.99 (number)";
