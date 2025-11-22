@@ -1233,7 +1233,11 @@ public class Parser {
 
     private Statement returnStatment() throws ParseError {
         int line = previous().line;
-        Expression value = expression();
+        Expression value = null;
+        // Check if there's a semicolon immediately after return (return;)
+        if (!check(EbsTokenType.SEMICOLON)) {
+            value = expression();
+        }
         Statement ret = new ReturnStatement(line, value);
         consume(EbsTokenType.SEMICOLON, "Expected ';' after return value.");
         return ret;

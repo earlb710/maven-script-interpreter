@@ -720,7 +720,9 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
 
     @Override
     public Object visitReturnStatement(ReturnStatement stmt) throws InterpreterError {
-        throw new ReturnSignal(evaluate(stmt.value));
+        // If value is null (return;), return null
+        Object returnValue = (stmt.value != null) ? evaluate(stmt.value) : null;
+        throw new ReturnSignal(returnValue);
     }
 
     // --- Expression Visitors ---
