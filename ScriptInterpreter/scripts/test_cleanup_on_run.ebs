@@ -19,10 +19,6 @@ print "This script will create a test screen.";
 print "When you press Run again, the previous screen will close automatically.";
 print "";
 
-// Create a counter variable to demonstrate state reset
-var counter: int = 0;
-var message: string = "This is run #" + counter;
-
 // Define a simple test screen
 screen TestCleanupScreen = {
     "title": "Cleanup Test Screen",
@@ -31,20 +27,20 @@ screen TestCleanupScreen = {
     "sets": [{
         "setname": "testset",
         "vars": [{
-            "name": "runMessage",
+            "name": "testMessage",
             "type": "string",
-            "value": message,
+            "default": "Screen created successfully!",
             "display": {
-                "labeltext": "Run Message",
+                "labeltext": "Status:",
                 "type": "textfield",
                 "editable": false
             }
         }, {
             "name": "instructions",
             "type": "string",
-            "value": "Press the Run button again to see the cleanup in action!",
+            "default": "Press the Run button again to see the cleanup in action!",
             "display": {
-                "labeltext": "Instructions",
+                "labeltext": "Instructions:",
                 "type": "label"
             }
         }]
@@ -54,8 +50,8 @@ screen TestCleanupScreen = {
         "name": "mainArea",
         "style": "-fx-padding: 20; -fx-spacing: 15;",
         "items": [{
-            "name": "runMessage_item",
-            "varref": "runMessage"
+            "name": "testMessage_item",
+            "varref": "testMessage"
         }, {
             "name": "instructions_item",
             "varref": "instructions"
@@ -68,7 +64,6 @@ show screen TestCleanupScreen;
 
 print "";
 print "✓ Test screen created and shown.";
-print "✓ Counter value: " + counter;
 print "";
 print "Instructions:";
 print "1. You should now see a window titled 'Cleanup Test Screen'";
