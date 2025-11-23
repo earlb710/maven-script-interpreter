@@ -1,0 +1,15 @@
+// Test script to verify Unicode character handling in the lexer
+// This script contains various Unicode characters including smart quotes
+
+var message: string = "Hello World";
+var smartQuote: string = "Test";  // This has a smart quote character
+var regularQuote: string = "Normal quote";
+
+// Test with special characters in comments
+// Special chars: "" '' – —
+
+println("Testing Unicode character handling...");
+println("Message: " + message);
+println("Smart quote test: " + smartQuote);
+println("Regular quote: " + regularQuote);
+println("✓ Unicode test completed successfully!");
