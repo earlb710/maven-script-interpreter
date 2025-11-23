@@ -1721,6 +1721,35 @@ public class InterpreterScreen {
     }
     
     /**
+     * Resolve variable references in JSON values.
+     * If a string value starts with '$', it's treated as a reference to a script variable.
+     * For example, "$myVar" will be replaced with the value of the script variable 'myVar'.
+     * 
+     * @param value The value to resolve (can be any type)
+     * @param line The line number for error reporting
+     * @return The resolved value (unchanged if not a $ reference, or the variable's value if it is)
+     * @throws InterpreterError if the variable doesn't exist
+     */
+    private Object resolveVariableReference(Object value, int line) throws InterpreterError {
+        if (value instanceof String) {
+            String strValue = (String) value;
+            if (strValue.startsWith("$") && strValue.length() > 1) {
+                // Extract variable name (everything after $)
+                String varName = strValue.substring(1);
+                
+                // Try to get the variable value from the environment
+                try {
+                    return interpreter.environment().get(varName);
+                } catch (InterpreterError e) {
+                    // Re-throw with more context about the $ reference
+                    throw interpreter.error(line, "Variable reference '$" + varName + "' not found in scope");
+                }
+            }
+        }
+        return value;
+    }
+    
+    /**
      * Helper method to process a list of variable definitions
      */
     private void processVariableList(List varsList, String setName, String screenName, int line,
@@ -1736,6 +1765,9 @@ public class InterpreterScreen {
                 String varName = varDef.containsKey("name") ? String.valueOf(varDef.get("name")).toLowerCase() : null;
                 String varTypeStr = varDef.containsKey("type") ? String.valueOf(varDef.get("type")).toLowerCase() : null;
                 Object defaultValue = varDef.get("default");
+                
+                // Resolve variable references (e.g., "$myVar" -> value of myVar)
+                defaultValue = resolveVariableReference(defaultValue, line);
                 
                 // Extract minChar and maxChar if present
                 Integer minChar = null;

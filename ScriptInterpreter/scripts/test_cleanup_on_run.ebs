@@ -19,7 +19,10 @@ print "This script will create a test screen.";
 print "When you press Run again, the previous screen will close automatically.";
 print "";
 
-// Define a simple test screen
+// Create a message variable to demonstrate $variable reference in JSON
+var dynamicMessage: string = "This message is set from a script variable using $!";
+
+// Define a simple test screen with $variable reference
 screen TestCleanupScreen = {
     "title": "Cleanup Test Screen",
     "width": 500,
@@ -29,9 +32,9 @@ screen TestCleanupScreen = {
         "vars": [{
             "name": "testMessage",
             "type": "string",
-            "default": "Screen created successfully!",
+            "default": "$dynamicMessage",
             "display": {
-                "labeltext": "Status:",
+                "labeltext": "Dynamic Message:",
                 "type": "textfield",
                 "editable": false
             }
