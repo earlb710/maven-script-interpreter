@@ -1,0 +1,103 @@
+// Example script demonstrating type casting functionality
+// Shows how to use explicit type casting with format: type(value)
+
+print "=== Type Casting Examples ===\n\n";
+
+// Example 1: Converting strings to numbers
+print "1. String to Number Conversions:\n";
+var strNum: string = "42";
+var intVal: int = int(strNum);
+print "   int('42') = ";
+print intVal;
+print "\n";
+
+var strFloat: string = "3.14";
+var floatVal: float = float(strFloat);
+print "   float('3.14') = ";
+print floatVal;
+print "\n\n";
+
+// Example 2: Converting numbers to strings
+print "2. Number to String Conversions:\n";
+var number: int = 123;
+var strValue: string = string(number);
+print "   string(123) = '";
+print strValue;
+print "'\n\n";
+
+// Example 3: Converting between numeric types
+print "3. Numeric Type Conversions:\n";
+var intNum: int = 42;
+var longNum: long = long(intNum);
+var doubleNum: double = double(intNum);
+print "   long(42) = ";
+print longNum;
+print "\n";
+print "   double(42) = ";
+print doubleNum;
+print "\n\n";
+
+// Example 4: Float to integer (truncation)
+print "4. Float to Integer (truncation):\n";
+var pi: float = 3.14159;
+var truncated: int = int(pi);
+print "   int(3.14159) = ";
+print truncated;
+print " (truncated)\n\n";
+
+// Example 5: Boolean conversions
+print "5. Boolean Conversions:\n";
+var boolStr: string = "true";
+var boolVal: bool = boolean(boolStr);
+print "   boolean('true') = ";
+print boolVal;
+print "\n";
+var boolToStr: string = string(true);
+print "   string(true) = '";
+print boolToStr;
+print "'\n\n";
+
+// Example 6: Byte conversions
+print "6. Byte Conversions:\n";
+var asciiCode: int = 65;
+var byteVal: byte = byte(asciiCode);
+print "   byte(65) = ";
+print byteVal;
+print " (ASCII 'A')\n\n";
+
+// Example 7: Casting in expressions
+print "7. Casting in Expressions:\n";
+var str1: string = "10";
+var str2: string = "20";
+var sum: int = int(str1) + int(str2);
+print "   int('10') + int('20') = ";
+print sum;
+print "\n\n";
+
+// Example 8: Casting in conditionals
+print "8. Casting in Conditionals:\n";
+var numStr: string = "15";
+if int(numStr) > 10 then {
+    print "   int('15') > 10: true\n";
+}
+print "\n";
+
+// Example 9: Chained conversions
+print "9. Chained Conversions:\n";
+var original: string = "99";
+var converted: int = int(original);
+var backToStr: string = string(converted);
+print "   '99' -> int -> string = '";
+print backToStr;
+print "'\n\n";
+
+// Example 10: Complex expression with multiple casts
+print "10. Complex Expression:\n";
+var a: int = 5;
+var b: int = 2;
+var result: double = double(a) / double(b);
+print "   double(5) / double(2) = ";
+print result;
+print "\n\n";
+
+print "=== All Examples Completed ===\n";

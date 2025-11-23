@@ -5,6 +5,7 @@ A powerful script interpreter for the EBS (Earl Bosch Script) language, featurin
 ## Features
 
 - **Custom Scripting Language**: Full-featured scripting language with familiar syntax
+- **Type Casting**: Explicit type conversions with `int()`, `string()`, `float()`, `double()`, `byte()`, `long()`, `boolean()`
 - **Interactive Console**: JavaFX-based IDE with rich text editing
 - **Syntax Highlighting**: Color-coded syntax for better readability
 - **Autocomplete**: Intelligent code completion suggestions for keywords, built-ins, and JSON schemas
@@ -123,6 +124,53 @@ use db {
 }
 close connection db;
 ```
+
+### Type Casting
+
+The language supports explicit type casting for all data types. Use the format `type(value)` to cast values:
+
+```javascript
+// String to number conversions
+var strNum: string = "42";
+var intVal: int = int(strNum);
+var floatVal: float = float("3.14");
+var longVal: long = long("999999999");
+
+// Number to string conversions
+var numStr: string = string(123);
+
+// Between numeric types
+var wholeNum: int = int(3.14);  // 3 (truncation)
+var decimalNum: double = double(42);  // 42.0
+
+// Boolean conversions
+var flag: bool = boolean("true");
+var flagStr: string = string(false);
+
+// Byte conversions
+var byteVal: byte = byte(65);
+
+// Casting in expressions
+var str1: string = "10";
+var str2: string = "20";
+var sum: int = int(str1) + int(str2);  // 30
+
+// Casting in conditionals
+if int("15") > 10 then {
+    print "Condition met";
+}
+```
+
+**Supported cast types:**
+- `int()` or `integer()` - Convert to integer
+- `long()` - Convert to long integer
+- `float()` - Convert to floating point
+- `double()` - Convert to double precision
+- `string()` - Convert to string
+- `byte()` - Convert to byte
+- `boolean()` or `bool()` - Convert to boolean
+
+See `scripts/test/test_type_casting.ebs` for more examples.
 
 ### UI Screens
 
