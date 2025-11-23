@@ -6,6 +6,7 @@ A powerful script interpreter for the EBS (Earl Bosch Script) language, featurin
 
 - **Custom Scripting Language**: Full-featured scripting language with familiar syntax
 - **Type Casting**: Explicit type conversions with `int()`, `string()`, `float()`, `double()`, `byte()`, `long()`, `boolean()`
+- **typeof Operator**: Get the type of any variable or expression at runtime (e.g., `typeof a` returns `"string"`)
 - **Interactive Console**: JavaFX-based IDE with rich text editing
 - **Syntax Highlighting**: Color-coded syntax for better readability
 - **Autocomplete**: Intelligent code completion suggestions for keywords, built-ins, and JSON schemas
@@ -171,6 +172,43 @@ if int("15") > 10 then {
 - `boolean()` or `bool()` - Convert to boolean
 
 See `scripts/test/test_type_casting.ebs` for more examples.
+
+### typeof Operator
+
+The `typeof` operator returns the type of a variable or expression as a string:
+
+```javascript
+// Simple types
+var a: string = "xyz";
+print typeof a;  // Output: string
+
+var num: int = 42;
+print typeof num;  // Output: int
+
+// Record types - shows full structure
+var b: record {x: string, y: int};
+b = {"x": "hello", "y": 42};
+print typeof b;  // Output: record {x:string, y:int}
+
+// Works with all types
+var flag: bool = true;
+print typeof flag;  // Output: bool
+
+// Can be used in conditionals
+if typeof a == "string" then {
+    print "a is a string";
+}
+
+// Works with cast expressions
+print typeof int("42");  // Output: int
+```
+
+**Supported for all types:**
+- Primitive types: `string`, `int`, `long`, `float`, `double`, `bool`, `byte`
+- Complex types: `array`, `json`, `date`, `record`
+- For records, displays the complete structure with field names and types
+
+See `scripts/test/test_typeof_operator.ebs` for more examples.
 
 ### UI Screens
 
