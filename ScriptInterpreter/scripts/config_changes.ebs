@@ -108,16 +108,15 @@ print "- tab-label-changed-color: " + tabLabelChangedColor;
 print "- tab-label-background: " + tabLabelBackgroundColor;
 print "";
 
-// Build the screen configuration using $var references with grouped areas
-print "Building color editor screen configuration with grouped areas...";
+// Build the screen configuration using $var references
+print "Building color editor screen configuration...";
 
 // Create the screen with $var references (no quotes around $variables)
-// Group colors into logical categories using areas with visual borders
 print "Creating color editor screen with colors from console.cfg...";
 screen colorEditorScreen = {
     "title": "Console Configuration Color Editor",
-    "width": 850,
-    "height": 950,
+    "width": 800,
+    "height": 900,
     "maximize": false,
     "vars": [
         {
@@ -337,79 +336,73 @@ screen colorEditorScreen = {
             }
         }
     ],
-    "area": [
-        {
-            "name": "mainArea",
-            "type": "vbox",
-            "style": "-fx-spacing: 10; -fx-padding: 10;",
-            "childAreas": [
-                {
-                    "name": "consoleColorsArea",
-                    "type": "vbox",
-                    "groupBorder": "line",
-                    "groupBorderColor": "#4a9eff",
-                    "title": "Console Colors",
-                    "style": "-fx-spacing: 5; -fx-padding: 10;",
-                    "items": [
-                        {"name": "info_item", "varref": "info"},
-                        {"name": "comment_item", "varref": "comment"},
-                        {"name": "error_item", "varref": "error"},
-                        {"name": "warn_item", "varref": "warn"},
-                        {"name": "ok_item", "varref": "ok"}
-                    ]
-                },
-                {
-                    "name": "syntaxColorsArea",
-                    "type": "vbox",
-                    "groupBorder": "line",
-                    "groupBorderColor": "#ff9933",
-                    "title": "Syntax Colors",
-                    "style": "-fx-spacing: 5; -fx-padding: 10;",
-                    "items": [
-                        {"name": "code_item", "varref": "code"},
-                        {"name": "datatype_item", "varref": "datatype"},
-                        {"name": "data_item", "varref": "data"},
-                        {"name": "keyword_item", "varref": "keyword"},
-                        {"name": "builtin_item", "varref": "builtin"},
-                        {"name": "literal_item", "varref": "literal"},
-                        {"name": "identifier_item", "varref": "identifier"},
-                        {"name": "sql_item", "varref": "sql"},
-                        {"name": "custom_item", "varref": "custom"}
-                    ]
-                },
-                {
-                    "name": "editorColorsArea",
-                    "type": "vbox",
-                    "groupBorder": "line",
-                    "groupBorderColor": "#66cc66",
-                    "title": "Editor Colors",
-                    "style": "-fx-spacing: 5; -fx-padding: 10;",
-                    "items": [
-                        {"name": "background_item", "varref": "background"},
-                        {"name": "text_item", "varref": "text"},
-                        {"name": "caret_item", "varref": "caret"},
-                        {"name": "lineCursor_item", "varref": "lineCursor"},
-                        {"name": "lineNumbers_item", "varref": "lineNumbers"},
-                        {"name": "consoleBackground_item", "varref": "consoleBackground"}
-                    ]
-                },
-                {
-                    "name": "tabColorsArea",
-                    "type": "vbox",
-                    "groupBorder": "line",
-                    "groupBorderColor": "#cc66cc",
-                    "title": "Tab Colors",
-                    "style": "-fx-spacing: 5; -fx-padding: 10;",
-                    "items": [
-                        {"name": "tabBackground_item", "varref": "tabBackground"},
-                        {"name": "tabLabelColor_item", "varref": "tabLabelColor"},
-                        {"name": "tabLabelChangedColor_item", "varref": "tabLabelChangedColor"},
-                        {"name": "tabLabelBackground_item", "varref": "tabLabelBackground"}
-                    ]
-                }
-            ]
-        }
-    ]
+    "area": [{
+        "name": "mainArea",
+        "type": "vbox",
+        "style": "-fx-spacing: 10; -fx-padding: 10;",
+        "childAreas": [
+            {
+                "name": "consoleColorsArea",
+                "type": "vbox",
+                "groupBorder": "line",
+                "groupBorderColor": "#4a9eff",
+                "style": "-fx-spacing: 5; -fx-padding: 10;",
+                "items": [
+                    {"name": "info_item", "varref": "info"},
+                    {"name": "comment_item", "varref": "comment"},
+                    {"name": "error_item", "varref": "error"},
+                    {"name": "warn_item", "varref": "warn"},
+                    {"name": "ok_item", "varref": "ok"}
+                ]
+            },
+            {
+                "name": "syntaxColorsArea",
+                "type": "vbox",
+                "groupBorder": "line",
+                "groupBorderColor": "#ff9933",
+                "style": "-fx-spacing: 5; -fx-padding: 10;",
+                "items": [
+                    {"name": "code_item", "varref": "code"},
+                    {"name": "datatype_item", "varref": "datatype"},
+                    {"name": "data_item", "varref": "data"},
+                    {"name": "keyword_item", "varref": "keyword"},
+                    {"name": "builtin_item", "varref": "builtin"},
+                    {"name": "literal_item", "varref": "literal"},
+                    {"name": "identifier_item", "varref": "identifier"},
+                    {"name": "sql_item", "varref": "sql"},
+                    {"name": "custom_item", "varref": "custom"}
+                ]
+            },
+            {
+                "name": "editorColorsArea",
+                "type": "vbox",
+                "groupBorder": "line",
+                "groupBorderColor": "#66cc66",
+                "style": "-fx-spacing: 5; -fx-padding: 10;",
+                "items": [
+                    {"name": "background_item", "varref": "background"},
+                    {"name": "text_item", "varref": "text"},
+                    {"name": "caret_item", "varref": "caret"},
+                    {"name": "lineCursor_item", "varref": "lineCursor"},
+                    {"name": "lineNumbers_item", "varref": "lineNumbers"},
+                    {"name": "consoleBackground_item", "varref": "consoleBackground"}
+                ]
+            },
+            {
+                "name": "tabColorsArea",
+                "type": "vbox",
+                "groupBorder": "line",
+                "groupBorderColor": "#cc66cc",
+                "style": "-fx-spacing: 5; -fx-padding: 10;",
+                "items": [
+                    {"name": "tabBackground_item", "varref": "tabBackground"},
+                    {"name": "tabLabelColor_item", "varref": "tabLabelColor"},
+                    {"name": "tabLabelChangedColor_item", "varref": "tabLabelChangedColor"},
+                    {"name": "tabLabelBackground_item", "varref": "tabLabelBackground"}
+                ]
+            }
+        ]
+    }]
 };
 
 print "Color editor screen created successfully";
@@ -424,37 +417,30 @@ show screen colorEditorScreen;
 // After the screen is closed, display the updated values
 print "";
 print "=== Updated Color Values ===";
-print "Console Colors:";
-print "  info: " + colorEditorScreen.info;
-print "  comment: " + colorEditorScreen.comment;
-print "  error: " + colorEditorScreen.error;
-print "  warn: " + colorEditorScreen.warn;
-print "  ok: " + colorEditorScreen.ok;
-print "";
-print "Syntax Colors:";
-print "  code: " + colorEditorScreen.code;
-print "  datatype: " + colorEditorScreen.datatype;
-print "  data: " + colorEditorScreen.data;
-print "  keyword: " + colorEditorScreen.keyword;
-print "  builtin: " + colorEditorScreen.builtin;
-print "  literal: " + colorEditorScreen.literal;
-print "  identifier: " + colorEditorScreen.identifier;
-print "  sql: " + colorEditorScreen.sql;
-print "  custom: " + colorEditorScreen.custom;
-print "";
-print "Editor Colors:";
-print "  background: " + colorEditorScreen.background;
-print "  text: " + colorEditorScreen.text;
-print "  caret: " + colorEditorScreen.caret;
-print "  lineCursor: " + colorEditorScreen.lineCursor;
-print "  lineNumbers: " + colorEditorScreen.lineNumbers;
-print "  consoleBackground: " + colorEditorScreen.consoleBackground;
-print "";
-print "Tab Colors:";
-print "  tabBackground: " + colorEditorScreen.tabBackground;
-print "  tabLabelColor: " + colorEditorScreen.tabLabelColor;
-print "  tabLabelChangedColor: " + colorEditorScreen.tabLabelChangedColor;
-print "  tabLabelBackground: " + colorEditorScreen.tabLabelBackground;
+print "info: " + colorEditorScreen.info;
+print "comment: " + colorEditorScreen.comment;
+print "error: " + colorEditorScreen.error;
+print "warn: " + colorEditorScreen.warn;
+print "ok: " + colorEditorScreen.ok;
+print "code: " + colorEditorScreen.code;
+print "datatype: " + colorEditorScreen.datatype;
+print "data: " + colorEditorScreen.data;
+print "keyword: " + colorEditorScreen.keyword;
+print "builtin: " + colorEditorScreen.builtin;
+print "literal: " + colorEditorScreen.literal;
+print "identifier: " + colorEditorScreen.identifier;
+print "sql: " + colorEditorScreen.sql;
+print "custom: " + colorEditorScreen.custom;
+print "background: " + colorEditorScreen.background;
+print "text: " + colorEditorScreen.text;
+print "caret: " + colorEditorScreen.caret;
+print "lineCursor: " + colorEditorScreen.lineCursor;
+print "lineNumbers: " + colorEditorScreen.lineNumbers;
+print "consoleBackground: " + colorEditorScreen.consoleBackground;
+print "tabBackground: " + colorEditorScreen.tabBackground;
+print "tabLabelColor: " + colorEditorScreen.tabLabelColor;
+print "tabLabelChangedColor: " + colorEditorScreen.tabLabelChangedColor;
+print "tabLabelBackground: " + colorEditorScreen.tabLabelBackground;
 
 print "";
 print "Console configuration color editor completed!";
