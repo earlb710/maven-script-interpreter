@@ -219,25 +219,45 @@ public class RecordType {
     
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("record { ");
+        StringBuilder sb = new StringBuilder("record {");
         boolean first = true;
         for (Map.Entry<String, DataType> entry : fields.entrySet()) {
             if (!first) {
                 sb.append(", ");
             }
-            sb.append(entry.getKey()).append(": ");
+            sb.append(entry.getKey()).append(":");
             
             // If this field is a nested record, use its RecordType string representation
             if (entry.getValue() == DataType.RECORD && nestedRecords.containsKey(entry.getKey())) {
                 sb.append(nestedRecords.get(entry.getKey()).toString());
             } else {
-                sb.append(entry.getValue());
+                sb.append(getTypeName(entry.getValue()));
             }
             
             first = false;
         }
-        sb.append(" }");
+        sb.append("}");
         return sb.toString();
+    }
+    
+    /**
+     * Get a lowercase type name for display
+     */
+    private String getTypeName(DataType type) {
+        switch (type) {
+            case BYTE: return "byte";
+            case INTEGER: return "int";
+            case LONG: return "long";
+            case FLOAT: return "float";
+            case DOUBLE: return "double";
+            case STRING: return "string";
+            case DATE: return "date";
+            case BOOL: return "bool";
+            case JSON: return "json";
+            case ARRAY: return "array";
+            case RECORD: return "record";
+            default: return type.toString().toLowerCase();
+        }
     }
     
     @Override

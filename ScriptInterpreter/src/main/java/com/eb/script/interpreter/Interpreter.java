@@ -787,6 +787,23 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
 
     @Override
     public Object visitUnaryExpression(UnaryExpression expr) throws InterpreterError {
+        // Special handling for typeof operator
+        if (expr.operator.type == EbsTokenType.TYPEOF) {
+            // If the operand is a variable, we can look up its record type metadata
+            if (expr.right instanceof VariableExpression) {
+                VariableExpression varExpr = (VariableExpression) expr.right;
+                String varName = varExpr.name;
+                Object value = evaluate(expr.right);
+                RecordType recordType = environment().getEnvironmentValues().getRecordType(varName);
+                return getTypeString(value, recordType);
+            } else {
+                // For other expressions, just evaluate and get the runtime type
+                Object value = evaluate(expr.right);
+                return getTypeString(value, null);
+            }
+        }
+        
+        // For other unary operators, evaluate the right side first
         Object right = evaluate(expr.right);
 
         switch (expr.operator.type) {
@@ -1564,6 +1581,94 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     }
 
     // --- Helpers ---
+
+    /**
+     * Get the type string representation for a value.
+     * For records, if recordType metadata is available, return the full structure.
+     * Otherwise, return the basic type name.
+     */
+    private String getTypeString(Object value, RecordType recordType) {
+        if (value == null) {
+            return "null";
+        }
+        
+        // If we have record type metadata, use it to construct the full type string
+        if (recordType != null) {
+            return recordType.toString();
+        }
+        
+        // Otherwise, determine type from the runtime value
+        if (value instanceof String) {
+            return "string";
+        } else if (value instanceof Integer) {
+            return "int";
+        } else if (value instanceof Long) {
+            return "long";
+        } else if (value instanceof Float) {
+            return "float";
+        } else if (value instanceof Double) {
+            return "double";
+        } else if (value instanceof Boolean) {
+            return "bool";
+        } else if (value instanceof Byte) {
+            return "byte";
+        } else if (value instanceof java.util.Map) {
+            // It's a record/JSON but we don't have metadata
+            // Try to infer the structure from the runtime value
+            @SuppressWarnings("unchecked")
+            java.util.Map<String, Object> map = (java.util.Map<String, Object>) value;
+            StringBuilder sb = new StringBuilder("record {");
+            boolean first = true;
+            for (java.util.Map.Entry<String, Object> entry : map.entrySet()) {
+                if (!first) {
+                    sb.append(", ");
+                }
+                first = false;
+                sb.append(entry.getKey()).append(": ");
+                sb.append(getSimpleTypeName(entry.getValue()));
+            }
+            sb.append("}");
+            return sb.toString();
+        } else if (value instanceof java.util.List) {
+            return "array";
+        } else if (value instanceof ArrayDef) {
+            return "array";
+        } else if (value instanceof LocalDateTime || value instanceof LocalDate) {
+            return "date";
+        }
+        
+        return value.getClass().getSimpleName().toLowerCase();
+    }
+    
+    /**
+     * Get a simple type name for a value (used when inferring record field types)
+     */
+    private String getSimpleTypeName(Object value) {
+        if (value == null) {
+            return "any";
+        } else if (value instanceof String) {
+            return "string";
+        } else if (value instanceof Integer) {
+            return "int";
+        } else if (value instanceof Long) {
+            return "long";
+        } else if (value instanceof Float) {
+            return "float";
+        } else if (value instanceof Double) {
+            return "double";
+        } else if (value instanceof Boolean) {
+            return "bool";
+        } else if (value instanceof Byte) {
+            return "byte";
+        } else if (value instanceof java.util.Map) {
+            return "record";
+        } else if (value instanceof java.util.List || value instanceof ArrayDef) {
+            return "array";
+        } else if (value instanceof LocalDateTime || value instanceof LocalDate) {
+            return "date";
+        }
+        return "any";
+    }
 
     private Object evalBuiltin(CallStatement c) throws InterpreterError {
         String name = c.name;

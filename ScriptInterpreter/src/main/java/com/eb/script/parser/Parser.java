@@ -1756,7 +1756,8 @@ public class Parser {
 
     private Expression unary() throws ParseError {
         // Include BANG only if your lexer supports it
-        if (match(EbsTokenType.MINUS, EbsTokenType.PLUS, EbsTokenType.BOOL_BANG)) {
+        // Also include TYPEOF as a unary operator to get the type of an expression
+        if (match(EbsTokenType.MINUS, EbsTokenType.PLUS, EbsTokenType.BOOL_BANG, EbsTokenType.TYPEOF)) {
             EbsToken operator = previous();
             Expression right = unary();
             return new UnaryExpression(currToken.line, operator, right);
