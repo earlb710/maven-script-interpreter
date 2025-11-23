@@ -1711,9 +1711,11 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             }
             
             // Add array size information
-            if (isFixed && size > 0) {
+            if (isFixed) {
+                // Always show size for fixed arrays, even if 0
                 sb.append("[").append(size).append("]");
             } else {
+                // Dynamic arrays show empty brackets
                 sb.append("[]");
             }
             
@@ -1758,6 +1760,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             sb.append("}");
             return sb.toString();
         } else if (value instanceof java.util.List) {
+            // Plain List (not ArrayDef) - ArrayDef arrays are handled above
             return "array";
         } else if (value instanceof LocalDateTime || value instanceof LocalDate) {
             return "date";
