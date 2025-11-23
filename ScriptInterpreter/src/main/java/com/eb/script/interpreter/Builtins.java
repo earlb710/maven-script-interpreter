@@ -404,6 +404,14 @@ public final class Builtins {
                 newParam("length", DataType.INTEGER),
                 newParam("padChar", DataType.STRING)
         ));
+        
+        // str.charArray(str) -> ARRAY (int[])
+        // Returns an array of integer character codes for each character in the string.
+        // Each character's Unicode code point is returned as an int.
+        addBuiltin(info(
+                "str.charArray", DataType.ARRAY,
+                newParam("str", DataType.STRING)
+        ));
 
         addBuiltin(info(
                 "file.exists", DataType.BOOL,
@@ -1332,6 +1340,29 @@ public final class Builtins {
                     sb.append(ch);
                 }
                 return sb.toString();
+            }
+            
+            //  str.charArray(s) -> ARRAY (int[])
+            //  Returns an array of integer character codes (Unicode code points) for each character in the string.
+            //  Each character is converted to its integer Unicode value.
+            case "str.chararray" -> {
+                String s = (String) args[0];
+                
+                if (s == null) {
+                    return null;
+                }
+                
+                // Create an integer array with the character codes
+                int length = s.length();
+                Integer[] charCodes = new Integer[length];
+                
+                for (int i = 0; i < length; i++) {
+                    charCodes[i] = (int) s.charAt(i);
+                }
+                
+                // Wrap in an ArrayFixed to return as an EBS array
+                ArrayFixed result = new ArrayFixed(DataType.INTEGER, charCodes);
+                return result;
             }
             
             case "file.exists" -> {
