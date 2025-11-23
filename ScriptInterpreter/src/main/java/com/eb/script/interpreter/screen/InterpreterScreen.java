@@ -1734,14 +1734,14 @@ public class InterpreterScreen {
         // Handle VariableReference objects created by JSON parser
         if (value instanceof com.eb.script.json.Json.VariableReference) {
             com.eb.script.json.Json.VariableReference varRef = (com.eb.script.json.Json.VariableReference) value;
-            String varName = varRef.variableName;
+            String varName = varRef.variableName.toLowerCase(); // All variable names are case-insensitive and stored in lowercase
             
             // Try to get the variable value from the environment
             try {
                 return interpreter.environment().get(varName);
             } catch (InterpreterError e) {
                 // Re-throw with more context about the $ reference
-                throw interpreter.error(line, "Variable reference '$" + varName + "' not found in scope");
+                throw interpreter.error(line, "Variable reference '$" + varRef.variableName + "' not found in scope");
             }
         }
         
@@ -1750,14 +1750,14 @@ public class InterpreterScreen {
             String strValue = (String) value;
             if (strValue.startsWith("$") && strValue.length() > 1) {
                 // Extract variable name (everything after $)
-                String varName = strValue.substring(1);
+                String varName = strValue.substring(1).toLowerCase(); // All variable names are case-insensitive and stored in lowercase
                 
                 // Try to get the variable value from the environment
                 try {
                     return interpreter.environment().get(varName);
                 } catch (InterpreterError e) {
                     // Re-throw with more context about the $ reference
-                    throw interpreter.error(line, "Variable reference '$" + varName + "' not found in scope");
+                    throw interpreter.error(line, "Variable reference '$" + strValue.substring(1) + "' not found in scope");
                 }
             }
         }
