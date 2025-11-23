@@ -654,6 +654,62 @@ response1.data.username = "bob";
 response1.data.email = "bob@example.com";
 ```
 
+#### Mixed Chain Access Patterns
+
+The language supports complex **mixed chains** of array indexing `[index]` and property access `.property` for both reading and writing operations. This enables flexible navigation through nested data structures.
+
+**Supported Patterns:**
+
+```javascript
+// Basic array[index].property
+employees[0].name = "Alice Smith";
+employees[1].email = "bob@example.com";
+
+// Nested properties: array[index].property.nestedProperty
+companies[0].address.city = "New Springfield";
+companies[1].address.street = "789 Pine Blvd";
+
+// Multiple array elements with nested properties
+dataset[0].info.title = "Updated First";
+dataset[2].info.description = "Updated Description";
+
+// Case-insensitive property access in chains
+people[0].firstname = "Jane";                        // Works with firstName
+people[0].contactinfo.emailaddress = "jane@example.com";  // Works with contactInfo.emailAddress
+```
+
+**Examples in Loops:**
+
+```javascript
+// Update multiple elements sequentially
+employeeType typeof array.record{
+    id: int,
+    name: string,
+    email: string
+};
+
+var employees: employeeType;
+employees = [
+    {"id": 1, "name": "Alice", "email": "alice@example.com"},
+    {"id": 2, "name": "Bob", "email": "bob@example.com"},
+    {"id": 3, "name": "Charlie", "email": "charlie@example.com"}
+];
+
+// Update all employee IDs in a loop
+for (var i: int = 0; i < employees.length; i++) {
+    employees[i].id = employees[i].id + 1000;
+}
+
+// Result: IDs become 1001, 1002, 1003
+```
+
+**Key Points:**
+- Mix `[index]` and `.property` access freely in assignment chains
+- Works with typedef arrays (`array.record`) for structured data
+- Case-insensitive property names throughout the chain
+- Full support for nested records within array elements
+- See `test_mixed_chain_access.ebs` for comprehensive examples
+
 ---
 
 ## Functions
