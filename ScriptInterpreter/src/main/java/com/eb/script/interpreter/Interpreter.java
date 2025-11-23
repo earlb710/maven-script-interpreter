@@ -68,6 +68,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -542,6 +543,21 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         // Fall back to regular environment variable assignment
         // But first check if this variable has a recordType for validation
         RecordType recordType = environment().getEnvironmentValues().getRecordType(stmt.name);
+        
+        // Check if we just performed a record() cast and should store the inferred RecordType
+        RecordType inferredRecordType = context.getLastInferredRecordType();
+        if (inferredRecordType != null) {
+            // Clear it immediately to prevent accidental reuse
+            context.clearLastInferredRecordType();
+            
+            // Use the inferred RecordType for this assignment
+            recordType = inferredRecordType;
+            
+            // Store the RecordType metadata with the variable
+            environment().getEnvironmentValues().defineWithRecordType(stmt.name, value, recordType);
+            return;
+        }
+        
         if (recordType != null) {
             // Variable has a record type - validate the value
             if (value instanceof ArrayDef) {
@@ -1571,12 +1587,94 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         // Evaluate the value to be cast
         Object value = evaluate(expr.value);
         
-        // Use DataType.convertValue() to perform the actual conversion
+        // Special handling for RECORD casting
+        if (expr.targetType == DataType.RECORD) {
+            // Validate that the value is a Map (not an array/List)
+            if (value instanceof java.util.List || value instanceof ArrayDef) {
+                throw error(expr.getLine(), "Cannot cast JSON array to record. Only JSON objects (maps) can be cast to record type.");
+            }
+            
+            if (!(value instanceof java.util.Map)) {
+                String typeName = (value == null) ? "null" : value.getClass().getSimpleName();
+                throw error(expr.getLine(), "Cannot cast " + typeName + " to record. Only JSON objects (maps) can be cast to record type.");
+            }
+            
+            // Infer RecordType from the Map structure
+            @SuppressWarnings("unchecked")
+            java.util.Map<String, Object> map = (java.util.Map<String, Object>) value;
+            RecordType inferredType = inferRecordType(map);
+            
+            // Store the inferred RecordType in a thread-local or context for later retrieval
+            // For now, we'll use the lastInferredRecordType field
+            context.setLastInferredRecordType(inferredType);
+            
+            return value;
+        }
+        
+        // Use DataType.convertValue() to perform the actual conversion for other types
         try {
             Object converted = expr.targetType.convertValue(value);
             return converted;
         } catch (Exception e) {
             throw error(expr.getLine(), "Cannot cast value '" + value + "' to type " + expr.targetType + ": " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Infer a RecordType from a Map's structure by examining its keys and values.
+     */
+    private RecordType inferRecordType(java.util.Map<String, Object> map) {
+        RecordType recordType = new RecordType();
+        
+        for (java.util.Map.Entry<String, Object> entry : map.entrySet()) {
+            String fieldName = entry.getKey();
+            Object fieldValue = entry.getValue();
+            
+            // Infer the DataType for this field
+            DataType fieldType = inferDataType(fieldValue);
+            
+            // If the field is itself a record (nested Map), recurse
+            if (fieldType == DataType.RECORD && fieldValue instanceof java.util.Map) {
+                @SuppressWarnings("unchecked")
+                java.util.Map<String, Object> nestedMap = (java.util.Map<String, Object>) fieldValue;
+                RecordType nestedRecordType = inferRecordType(nestedMap);
+                recordType.addNestedRecord(fieldName, nestedRecordType);
+            } else {
+                recordType.addField(fieldName, fieldType);
+            }
+        }
+        
+        return recordType;
+    }
+    
+    /**
+     * Infer DataType from a runtime value.
+     */
+    private DataType inferDataType(Object value) {
+        if (value == null) {
+            return DataType.STRING; // Default to STRING for null
+        } else if (value instanceof String) {
+            return DataType.STRING;
+        } else if (value instanceof Integer) {
+            return DataType.INTEGER;
+        } else if (value instanceof Long) {
+            return DataType.LONG;
+        } else if (value instanceof Float) {
+            return DataType.FLOAT;
+        } else if (value instanceof Double) {
+            return DataType.DOUBLE;
+        } else if (value instanceof Boolean) {
+            return DataType.BOOL;
+        } else if (value instanceof Byte) {
+            return DataType.BYTE;
+        } else if (value instanceof java.util.Map) {
+            return DataType.RECORD;
+        } else if (value instanceof java.util.List || value instanceof ArrayDef) {
+            return DataType.ARRAY;
+        } else if (value instanceof java.time.LocalDateTime || value instanceof java.time.LocalDate || value instanceof Date) {
+            return DataType.DATE;
+        } else {
+            return DataType.STRING; // Default to STRING for unknown types
         }
     }
 

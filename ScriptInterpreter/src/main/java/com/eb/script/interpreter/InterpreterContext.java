@@ -12,6 +12,7 @@ import com.eb.script.interpreter.db.DbAdapter;
 import com.eb.script.interpreter.db.DbConnection;
 import com.eb.script.interpreter.db.OracleDbAdapter;
 import com.eb.script.token.DataType;
+import com.eb.script.token.RecordType;
 import com.eb.ui.cli.ScriptArea;
 import javafx.stage.Stage;
 import java.util.Deque;
@@ -73,6 +74,10 @@ public class InterpreterContext {
 
     private DbAdapter db = new OracleDbAdapter();
     private ScriptArea output;
+    
+    // Store the last inferred RecordType from a record() cast
+    // This is used to associate RecordType metadata with cast expressions
+    private RecordType lastInferredRecordType;
 
     public InterpreterContext() {
     }
@@ -208,6 +213,34 @@ public class InterpreterContext {
 
     public void setOutput(ScriptArea output) {
         this.output = output;
+    }
+    
+    /**
+     * Get the last inferred RecordType from a record() cast.
+     * This is used to associate RecordType metadata with cast expressions.
+     * 
+     * @return the last inferred RecordType, or null if none
+     */
+    public RecordType getLastInferredRecordType() {
+        return lastInferredRecordType;
+    }
+    
+    /**
+     * Set the last inferred RecordType from a record() cast.
+     * This is used to associate RecordType metadata with cast expressions.
+     * 
+     * @param recordType the inferred RecordType to store
+     */
+    public void setLastInferredRecordType(RecordType recordType) {
+        this.lastInferredRecordType = recordType;
+    }
+    
+    /**
+     * Clear the last inferred RecordType.
+     * Should be called after the RecordType has been consumed.
+     */
+    public void clearLastInferredRecordType() {
+        this.lastInferredRecordType = null;
     }
 
     /**
