@@ -210,6 +210,38 @@ print typeof int("42");  // Output: int
 
 See `scripts/test/test_typeof_operator.ebs` for more examples.
 
+### String Functions
+
+The language provides comprehensive string manipulation functions. A useful function is `str.charArray()` which returns character codes:
+
+```javascript
+// Get character codes from a string
+var text: string = "Hello";
+var codes = call str.charArray(text);
+print codes;  // Output: [72, 101, 108, 108, 111]
+
+// Access individual character codes
+print codes[0];  // Output: 72 (character 'H')
+print codes[1];  // Output: 101 (character 'e')
+
+// Use with string length
+print codes.length;  // Output: 5
+
+// Check ASCII values
+var letter: string = "A";
+var letterCodes = call str.charArray(letter);
+print letterCodes[0];  // Output: 65 (ASCII code for 'A')
+```
+
+**Use cases for `str.charArray()`:**
+- Character analysis and validation
+- Custom encoding/decoding operations
+- Character-by-character processing
+- ASCII/Unicode value checking
+- String transformation algorithms
+
+See `scripts/test/test_str_chararray.ebs` for more examples.
+
 ### UI Screens
 
 Create interactive UI windows with thread-safe variables:
@@ -427,6 +459,7 @@ The interpreter includes numerous built-in functions:
 ### String Operations
 - `substring()`, `length()`, `indexOf()`, `replace()`, `split()`
 - `toUpperCase()`, `toLowerCase()`, `trim()`
+- `str.charArray()` - Returns an array of integer character codes (Unicode code points) for each character in a string
 
 ### Array Operations
 - `push()`, `pop()`, `shift()`, `unshift()`

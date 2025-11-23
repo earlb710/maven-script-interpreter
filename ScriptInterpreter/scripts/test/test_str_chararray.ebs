@@ -1,0 +1,106 @@
+// Example script demonstrating str.charArray() builtin
+// Shows how to get character codes (Unicode code points) from strings
+
+print "=== str.charArray() Examples ===\n\n";
+
+// Example 1: Basic usage with ASCII text
+print "1. Basic ASCII String:\n";
+var text1: string = "Hello";
+var codes1 = call str.charArray(text1);
+print "   String: '";
+print text1;
+print "'\n";
+print "   Character codes: ";
+print codes1;
+print "\n";
+print "   First char 'H' = ";
+print codes1[0];
+print " (ASCII 72)\n\n";
+
+// Example 2: Numbers as string
+print "2. Numeric String:\n";
+var text2: string = "123";
+var codes2 = call str.charArray(text2);
+print "   String: '";
+print text2;
+print "'\n";
+print "   Character codes: ";
+print codes2;
+print "\n";
+print "   '1' = 49, '2' = 50, '3' = 51\n\n";
+
+// Example 3: Special characters
+print "3. Special Characters:\n";
+var text3: string = "A@1";
+var codes3 = call str.charArray(text3);
+print "   String: '";
+print text3;
+print "'\n";
+print "   Character codes: ";
+print codes3;
+print "\n";
+print "   'A' = 65, '@' = 64, '1' = 49\n\n";
+
+// Example 4: Empty string
+print "4. Empty String:\n";
+var text4: string = "";
+var codes4 = call str.charArray(text4);
+print "   String: ''\n";
+print "   Character codes: ";
+print codes4;
+print " (empty array)\n\n";
+
+// Example 5: Using array length
+print "5. String Length via Character Array:\n";
+var text5: string = "Test";
+var codes5 = call str.charArray(text5);
+print "   String: '";
+print text5;
+print "'\n";
+print "   Number of characters: ";
+print codes5.length;
+print "\n\n";
+
+// Example 6: Uppercase vs Lowercase
+print "6. Case Difference:\n";
+var upper: string = "A";
+var lower: string = "a";
+var upperCodes = call str.charArray(upper);
+var lowerCodes = call str.charArray(lower);
+print "   'A' = ";
+print upperCodes[0];
+print "\n";
+print "   'a' = ";
+print lowerCodes[0];
+print "\n";
+print "   Difference: ";
+print lowerCodes[0] - upperCodes[0];
+print " (ASCII difference between upper and lower case)\n\n";
+
+// Example 7: Iteration through codes
+print "7. Processing Each Character Code:\n";
+var word: string = "OK";
+var wordCodes = call str.charArray(word);
+print "   String: '";
+print word;
+print "'\n";
+print "   Character 0 ('O'): ";
+print wordCodes[0];
+print "\n";
+print "   Character 1 ('K'): ";
+print wordCodes[1];
+print "\n\n";
+
+// Example 8: Space and punctuation
+print "8. Space and Punctuation:\n";
+var text8: string = "Hi!";
+var codes8 = call str.charArray(text8);
+print "   String: '";
+print text8;
+print "'\n";
+print "   Character codes: ";
+print codes8;
+print "\n";
+print "   Space = 32, '!' = 33\n\n";
+
+print "=== All Examples Completed ===\n";
