@@ -77,7 +77,8 @@ public class InterpreterContext {
     
     // Store the last inferred RecordType from a record() cast
     // This is used to associate RecordType metadata with cast expressions
-    private RecordType lastInferredRecordType;
+    // Using ThreadLocal for thread-safety in case of concurrent script execution
+    private final ThreadLocal<RecordType> lastInferredRecordType = new ThreadLocal<>();
 
     public InterpreterContext() {
     }
@@ -218,29 +219,32 @@ public class InterpreterContext {
     /**
      * Get the last inferred RecordType from a record() cast.
      * This is used to associate RecordType metadata with cast expressions.
+     * Thread-safe using ThreadLocal.
      * 
-     * @return the last inferred RecordType, or null if none
+     * @return the last inferred RecordType for the current thread, or null if none
      */
     public RecordType getLastInferredRecordType() {
-        return lastInferredRecordType;
+        return lastInferredRecordType.get();
     }
     
     /**
      * Set the last inferred RecordType from a record() cast.
      * This is used to associate RecordType metadata with cast expressions.
+     * Thread-safe using ThreadLocal.
      * 
-     * @param recordType the inferred RecordType to store
+     * @param recordType the inferred RecordType to store for the current thread
      */
     public void setLastInferredRecordType(RecordType recordType) {
-        this.lastInferredRecordType = recordType;
+        lastInferredRecordType.set(recordType);
     }
     
     /**
      * Clear the last inferred RecordType.
      * Should be called after the RecordType has been consumed.
+     * Thread-safe using ThreadLocal.
      */
     public void clearLastInferredRecordType() {
-        this.lastInferredRecordType = null;
+        lastInferredRecordType.remove();
     }
 
     /**
