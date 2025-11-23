@@ -1,0 +1,182 @@
+// Test script for mixed chains of [index] and .property access
+// Demonstrates various patterns of combining array indexing with property access
+
+print "=== Mixed Chain Access Test ===";
+print "";
+
+// Test 1: Basic array[index].property pattern
+print "Test 1: Basic array[index].property";
+employeeType typeof array.record{
+    id: int,
+    name: string,
+    email: string
+};
+
+var employees: employeeType;
+employees = [
+    {"id": 1, "name": "Alice", "email": "alice@example.com"},
+    {"id": 2, "name": "Bob", "email": "bob@example.com"},
+    {"id": 3, "name": "Charlie", "email": "charlie@example.com"}
+];
+
+print "Before:";
+print "employees[0] = " + employees[0];
+print "employees[1] = " + employees[1];
+
+employees[0].name = "Alice Smith";
+employees[1].email = "bob.new@example.com";
+employees[2].id = 999;
+
+print "After:";
+print "employees[0] = " + employees[0];
+print "employees[1] = " + employees[1];
+print "employees[2] = " + employees[2];
+print "";
+
+// Test 2: Nested record with array[index].property.nestedProperty
+print "Test 2: Nested property access array[index].property.nestedProperty";
+companyType typeof array.record{
+    id: int,
+    name: string,
+    address: record{
+        street: string,
+        city: string,
+        zipCode: string
+    }
+};
+
+var companies: companyType;
+companies = [
+    {
+        "id": 101,
+        "name": "Tech Corp",
+        "address": {
+            "street": "123 Main St",
+            "city": "Springfield",
+            "zipCode": "12345"
+        }
+    },
+    {
+        "id": 102,
+        "name": "Data Inc",
+        "address": {
+            "street": "456 Oak Ave",
+            "city": "Shelbyville",
+            "zipCode": "54321"
+        }
+    }
+];
+
+print "Before:";
+print companies[0];
+print companies[1];
+
+companies[0].address.city = "New Springfield";
+companies[0].address.zipCode = "99999";
+companies[1].address.street = "789 Pine Blvd";
+companies[1].name = "Data Solutions Inc";
+
+print "After:";
+print companies[0];
+print companies[1];
+print "";
+
+// Test 3: Multiple levels with different indices
+print "Test 3: Multiple array indices with properties";
+dataType typeof array.record{
+    id: int,
+    info: record{
+        title: string,
+        description: string
+    }
+};
+
+var dataset: dataType;
+dataset = [
+    {
+        "id": 1,
+        "info": {
+            "title": "First Item",
+            "description": "Description 1"
+        }
+    },
+    {
+        "id": 2,
+        "info": {
+            "title": "Second Item",
+            "description": "Description 2"
+        }
+    },
+    {
+        "id": 3,
+        "info": {
+            "title": "Third Item",
+            "description": "Description 3"
+        }
+    }
+];
+
+print "Before:";
+print dataset[0];
+print dataset[2];
+
+dataset[0].info.title = "Updated First";
+dataset[2].info.description = "Updated Description 3";
+dataset[1].id = 222;
+
+print "After:";
+print dataset[0];
+print dataset[2];
+print dataset[1];
+print "";
+
+// Test 4: Case-insensitive property access in chains
+print "Test 4: Case-insensitive property access";
+personType typeof array.record{
+    firstName: string,
+    lastName: string,
+    contactInfo: record{
+        emailAddress: string,
+        phoneNumber: string
+    }
+};
+
+var people: personType;
+people = [
+    {
+        "firstName": "John",
+        "lastName": "Doe",
+        "contactInfo": {
+            "emailAddress": "john@example.com",
+            "phoneNumber": "555-1234"
+        }
+    }
+];
+
+print "Before:";
+print people[0];
+
+// Use lowercase property names (case-insensitive)
+people[0].firstname = "Jane";
+people[0].lastname = "Smith";
+people[0].contactinfo.emailaddress = "jane@example.com";
+people[0].contactinfo.phonenumber = "555-9999";
+
+print "After:";
+print people[0];
+print "";
+
+// Test 5: Update multiple elements in sequence
+print "Test 5: Sequential updates to different array elements";
+for (var i: int = 0; i < employees.length; i++) {
+    var currentId: int = employees[i].id;
+    employees[i].id = currentId + 1000;
+}
+
+print "Updated employee IDs:";
+print "employees[0] = " + employees[0];
+print "employees[1] = " + employees[1];
+print "employees[2] = " + employees[2];
+print "";
+
+print "=== All Mixed Chain Access Tests Completed Successfully ===";

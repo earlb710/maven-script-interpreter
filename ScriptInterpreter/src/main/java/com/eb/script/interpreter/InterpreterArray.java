@@ -210,8 +210,8 @@ public class InterpreterArray {
     public void visitIndexAssignStatement(IndexAssignStatement stmt) throws InterpreterError {
         // Handle PropertyExpression (e.g., record.field = value or array[0].field = value)
         if (stmt.target instanceof PropertyExpression propExpr) {
-            // Evaluate the object being accessed
-            Object obj = interpreter.evaluate(propExpr.object);
+            // Navigate through nested PropertyExpressions to get the parent object
+            Object obj = evaluatePropertyChain(propExpr.object, stmt.getLine());
             
             if (obj == null) {
                 throw interpreter.error(stmt.getLine(), "Cannot access property '" + propExpr.propertyName + "' of null");
@@ -222,16 +222,17 @@ public class InterpreterArray {
                 @SuppressWarnings("unchecked")
                 java.util.Map<String, Object> map = (java.util.Map<String, Object>) obj;
                 
-                // Check if the property exists
-                if (!map.containsKey(propExpr.propertyName)) {
+                // Find the actual key (case-insensitive)
+                String actualKey = findMapKey(map, propExpr.propertyName);
+                if (actualKey == null) {
                     throw interpreter.error(stmt.getLine(), "Property '" + propExpr.propertyName + "' does not exist in record");
                 }
                 
                 // Evaluate the value to assign
                 Object value = interpreter.evaluate(stmt.value);
                 
-                // Assign the property value
-                map.put(propExpr.propertyName, value);
+                // Assign the property value using the actual key
+                map.put(actualKey, value);
                 return;
             }
             
@@ -286,6 +287,64 @@ public class InterpreterArray {
     }
 
     // ========== Helper Methods ==========
+    
+    /**
+     * Evaluate a property chain to get the final object.
+     * Handles nested PropertyExpressions like customer.address for customer.address.city assignment.
+     * @param expr The expression to evaluate (can be VariableExpression, PropertyExpression, or IndexExpression)
+     * @param line Line number for error reporting
+     * @return The evaluated object
+     */
+    private Object evaluatePropertyChain(Expression expr, int line) throws InterpreterError {
+        if (expr instanceof PropertyExpression propExpr) {
+            // Recursively evaluate the parent object
+            Object parent = evaluatePropertyChain(propExpr.object, line);
+            
+            if (parent == null) {
+                throw interpreter.error(line, "Cannot access property '" + propExpr.propertyName + "' of null");
+            }
+            
+            // Get the property from the parent
+            if (parent instanceof java.util.Map) {
+                @SuppressWarnings("unchecked")
+                java.util.Map<String, Object> map = (java.util.Map<String, Object>) parent;
+                
+                // Find the actual key (case-insensitive)
+                String actualKey = findMapKey(map, propExpr.propertyName);
+                if (actualKey == null) {
+                    throw interpreter.error(line, "Property '" + propExpr.propertyName + "' does not exist in record");
+                }
+                
+                return map.get(actualKey);
+            }
+            
+            throw interpreter.error(line, "Cannot access property '" + propExpr.propertyName + "' on non-record type: " + parent.getClass().getSimpleName());
+        }
+        
+        // For other expression types (VariableExpression, IndexExpression), use the normal evaluator
+        return interpreter.evaluate(expr);
+    }
+    
+    /**
+     * Find a key in a map using case-insensitive comparison.
+     * Returns the actual key from the map, or null if not found.
+     */
+    private String findMapKey(java.util.Map<String, Object> map, String key) {
+        // First try exact match
+        if (map.containsKey(key)) {
+            return key;
+        }
+        
+        // Try case-insensitive match
+        String lowerKey = key.toLowerCase();
+        for (String mapKey : map.keySet()) {
+            if (mapKey.toLowerCase().equals(lowerKey)) {
+                return mapKey;
+            }
+        }
+        
+        return null;
+    }
 
     /**
      * Create a child ArrayDef under a given parent slot

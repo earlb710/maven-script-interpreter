@@ -407,6 +407,309 @@ var result: int = call add(5, 3);
 var text: string = call toUpper("hello");
 ```
 
+### Type Aliases (typeof)
+
+Define reusable type aliases for complex types using the `typeof` keyword. Type aliases are globally accessible throughout the script and can simplify variable declarations for complex types.
+
+#### Basic Syntax
+```javascript
+// Generic syntax
+typeName typeof type_definition;
+
+// Concrete example
+personType typeof record{name: string, age: int};
+var person: personType;
+```
+
+#### Simple Type Aliases
+
+Define aliases for basic data types:
+
+```javascript
+// Alias for a simple record type
+personType typeof record{name: string, age: int};
+
+// Use the type alias in variable declaration
+var person: personType;
+person = {"name": "John Doe", "age": 30};
+
+// Print the whole record
+print person;  // Displays: {"name": "John Doe", "age": 30}
+
+// Modify fields using assignment
+person.name = "Jane Smith";
+person.age = 35;
+print person;  // Displays updated values
+```
+
+#### Array Type Aliases
+
+Define aliases for array types (fixed-size):
+
+```javascript
+// Fixed-size array alias
+intArray typeof array.int[10];
+
+var numbers: intArray;
+numbers = [1, 2, 3, 4, 5];
+print numbers[0];     // 1
+print numbers.length; // 10 (array size, remaining elements are null)
+```
+
+#### Record Type Aliases
+
+Define aliases for structured record types:
+
+```javascript
+// Simple record with multiple fields
+employeeType typeof record{
+    id: int,
+    name: string,
+    salary: double,
+    active: bool
+};
+
+var employee: employeeType;
+employee = {
+    "id": 101,
+    "name": "Alice Smith",
+    "salary": 75000.00,
+    "active": true
+};
+
+// Print the employee record
+print employee;
+
+// Update employee fields
+employee.name = "Alice Johnson";
+employee.salary = 80000.00;
+```
+
+#### Nested Record Type Aliases
+
+Define aliases for records with nested structures:
+
+```javascript
+// Define a record type with nested record structure
+customerType typeof record{
+    id: int,
+    name: string,
+    address: record{
+        street: string,
+        city: string,
+        zipCode: string
+    }
+};
+
+var customer: customerType;
+customer = {
+    "id": 1001,
+    "name": "Tech Corp",
+    "address": {
+        "street": "123 Main St",
+        "city": "Springfield",
+        "zipCode": "12345"
+    }
+};
+
+// Print the customer record
+print customer;
+
+// Update fields (including nested fields)
+customer.id = 1002;
+customer.name = "New Corp";
+customer.address.city = "Shelbyville";
+customer.address.zipCode = "54321";
+```
+
+#### Array of Records Type Aliases
+
+Define aliases for arrays of structured data:
+
+```javascript
+// Array of records (dynamic size)
+employeeListType typeof array.record{
+    id: int,
+    name: string,
+    department: string
+};
+
+var employees: employeeListType;
+employees = [
+    {"id": 1, "name": "Alice", "department": "Engineering"},
+    {"id": 2, "name": "Bob", "department": "Sales"},
+    {"id": 3, "name": "Charlie", "department": "Marketing"}
+];
+
+// Array operations
+print employees.length;  // 3
+print employees[0];      // First employee record
+print employees[1];      // Second employee record
+```
+
+#### Array of Records with Nested Structures
+
+Combine arrays and nested records in type aliases:
+
+```javascript
+// Complex nested structure
+companyDataType typeof array.record{
+    id: int,
+    department: record{
+        name: string,
+        location: string,
+        manager: string
+    }
+};
+
+var companyData: companyDataType;
+companyData = [
+    {
+        "id": 101,
+        "department": {
+            "name": "Engineering",
+            "location": "Building A",
+            "manager": "John Doe"
+        }
+    },
+    {
+        "id": 102,
+        "department": {
+            "name": "Sales",
+            "location": "Building B",
+            "manager": "Jane Smith"
+        }
+    }
+];
+
+// Access array elements
+print companyData.length;  // 2
+print companyData[0];      // First department
+print companyData[1];      // Second department
+
+// Update nested fields in array elements
+companyData[0].department.name = "Research & Development";
+companyData[0].department.location = "Building C";
+companyData[1].department.manager = "New Manager";
+```
+
+#### Type Alias Features
+
+**Key Characteristics:**
+- Type aliases are **global** and accessible throughout the entire script
+- Defined at parse time, allowing subsequent code to use them immediately
+- Type aliases can be used for variable declarations just like built-in types
+- Support all data types: primitives, arrays, records, and nested combinations
+- **Array sizing**:
+  - Fixed-size primitive arrays: Use `[size]` syntax (e.g., `array.int[10]`)
+  - Dynamic arrays of records: Omit size specifier (e.g., `array.record{...}`)
+- **Record field updates**: Fields can be updated using assignment, including nested fields
+  - Top-level: `person.name = "value"`
+  - Nested: `customer.address.city = "value"`
+  - Array elements: `employees[0].address.city = "value"`
+  - Case-insensitive property access (e.g., `zipCode` and `zipcode` both work)
+- Access whole records/arrays for reading (e.g., `print person`)
+
+**Benefits:**
+- **Code Reusability**: Define complex types once, use them many times
+- **Maintainability**: Update type definitions in one place
+- **Readability**: Descriptive type names make code more understandable
+- **Type Safety**: Enforce consistent structure across variables
+
+**Example Use Case:**
+```javascript
+// Define a type for API response data
+apiResponseType typeof record{
+    status: int,
+    message: string,
+    data: record{
+        userId: int,
+        username: string,
+        email: string
+    }
+};
+
+// Use the type alias multiple times
+var response1: apiResponseType;
+var response2: apiResponseType;
+var response3: apiResponseType;
+
+response1 = {
+    "status": 200,
+    "message": "Success",
+    "data": {
+        "userId": 42,
+        "username": "alice",
+        "email": "alice@example.com"
+    }
+};
+
+// Print the response
+print response1;
+
+// Update fields (including nested fields)
+response1.status = 201;
+response1.message = "Created";
+response1.data.username = "bob";
+response1.data.email = "bob@example.com";
+```
+
+#### Mixed Chain Access Patterns
+
+The language supports complex **mixed chains** of array indexing `[index]` and property access `.property` for both reading and writing operations. This enables flexible navigation through nested data structures.
+
+**Supported Patterns:**
+
+```javascript
+// Basic array[index].property
+employees[0].name = "Alice Smith";
+employees[1].email = "bob@example.com";
+
+// Nested properties: array[index].property.nestedProperty
+companies[0].address.city = "New Springfield";
+companies[1].address.street = "789 Pine Blvd";
+
+// Multiple array elements with nested properties
+dataset[0].info.title = "Updated First";
+dataset[2].info.description = "Updated Description";
+
+// Case-insensitive property access in chains
+people[0].firstname = "Jane";                        // Works with firstName
+people[0].contactinfo.emailaddress = "jane@example.com";  // Works with contactInfo.emailAddress
+```
+
+**Examples in Loops:**
+
+```javascript
+// Update multiple elements sequentially
+employeeType typeof array.record{
+    id: int,
+    name: string,
+    email: string
+};
+
+var employees: employeeType;
+employees = [
+    {"id": 1, "name": "Alice", "email": "alice@example.com"},
+    {"id": 2, "name": "Bob", "email": "bob@example.com"},
+    {"id": 3, "name": "Charlie", "email": "charlie@example.com"}
+];
+
+// Update all employee IDs in a loop
+for (var i: int = 0; i < employees.length; i++) {
+    employees[i].id = employees[i].id + 1000;
+}
+
+// Result: IDs become 1001, 1002, 1003
+```
+
+**Key Points:**
+- Mix `[index]` and `.property` access freely in assignment chains
+- Works with typedef arrays (`array.record`) for structured data
+- Case-insensitive property names throughout the chain
+- Full support for nested records within array elements
+- See `test_mixed_chain_access.ebs` for comprehensive examples
+
 ---
 
 ## Functions
