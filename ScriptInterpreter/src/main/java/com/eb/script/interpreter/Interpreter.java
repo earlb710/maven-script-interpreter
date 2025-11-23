@@ -1624,7 +1624,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                     sb.append(", ");
                 }
                 first = false;
-                sb.append(entry.getKey()).append(": ");
+                sb.append(entry.getKey()).append(":");
                 sb.append(getSimpleTypeName(entry.getValue()));
             }
             sb.append("}");
