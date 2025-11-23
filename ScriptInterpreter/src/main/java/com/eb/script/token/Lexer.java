@@ -119,31 +119,38 @@ public abstract class Lexer<T extends LexerToken> {
         LexerToken t = null;
         String retString = "";
         if (!isAtEnd()) {
-            LexerToken[] t1 = charTokens[c];
-            if (t1 != null) {
-                char c2 = peekNext();
-                t = t1[c2];
-                if (t == null) {
+            // Check if character is within valid ASCII range for charTokens/charStyles arrays
+            if (c < 128) {
+                LexerToken[] t1 = charTokens[c];
+                if (t1 != null) {
+                    char c2 = peekNext();
+                    if (c2 < 128) {
+                        t = t1[c2];
+                    }
+                    if (t == null) {
+                        t = charTokens[0][c];
+                        if (t != null) {
+                            retString = new String(new char[]{c});
+                        }
+                    } else {
+                        retString = new String(new char[]{c, c2});
+                        current++;
+                    }
+                } else {
                     t = charTokens[0][c];
                     if (t != null) {
                         retString = new String(new char[]{c});
                     }
-                } else {
-                    retString = new String(new char[]{c, c2});
-                    current++;
                 }
-            } else {
-                t = charTokens[0][c];
-                if (t != null) {
-                    retString = new String(new char[]{c});
+                if (t == null) {
+                    String s1 = charStyles[c];
+                    if (s1 != null) {
+                        return new ReturnToken(s1, new String(new char[]{c}));
+                    }
                 }
             }
-            if (t == null) {
-                String s1 = charStyles[c];
-                if (s1 != null) {
-                    return new ReturnToken(s1, new String(new char[]{c}));
-                }
-            }
+            // If character is outside ASCII range (>= 128), return null token
+            // This allows the lexer to handle it as an identifier or string character
         }
         return new ReturnToken(t, retString);
     }

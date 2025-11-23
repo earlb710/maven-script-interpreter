@@ -264,6 +264,11 @@ public final class Builtins {
                 "str.toString", DataType.STRING,
                 newParam("str", DataType.STRING)
         ));
+        // Alias: string.tostring (accepts any type, converts to string)
+        addBuiltin(info(
+                "string.tostring", DataType.STRING,
+                newParam("value", DataType.STRING, true) // accepts any type
+        ));
         addBuiltin(info(
                 "str.toUpper", DataType.STRING,
                 newParam("str", DataType.STRING)
@@ -1000,7 +1005,7 @@ public final class Builtins {
                 return root;
             }
 
-            case "str.tostring" -> {
+            case "str.tostring", "string.tostring" -> {
                 return (args[0] == null) ? null : String.valueOf(args[0]);
             }
 

@@ -1,0 +1,78 @@
+// Test script: Verify cleanup before running
+// This script demonstrates that all screens and state are cleaned up
+// when the Run button is pressed again.
+//
+// Usage:
+//   1. Open this file in the EBS IDE
+//   2. Press the Run button - a screen will appear
+//   3. Press Run again - the previous screen should close automatically
+//      and a new screen should open
+//
+// Expected behavior:
+//   - Each run closes all previous screens
+//   - Variables are reset between runs
+//   - Database connections are closed (if any)
+//   - Files are closed (if any)
+
+print "=== Cleanup Test Started ===";
+print "This script will create a test screen.";
+print "When you press Run again, the previous screen will close automatically.";
+print "";
+
+// Create a message variable to demonstrate $variable reference in JSON
+var dynamicMessage: string = "This message is set from a script variable using $!";
+
+// Define a simple test screen with $variable reference (without quotes)
+screen TestCleanupScreen = {
+    "title": "Cleanup Test Screen",
+    "width": 500,
+    "height": 300,
+    "sets": [{
+        "setname": "testset",
+        "vars": [{
+            "name": "testMessage",
+            "type": "string",
+            "default": $dynamicMessage,
+            "display": {
+                "labeltext": "Dynamic Message:",
+                "type": "textfield",
+                "editable": false
+            }
+        }, {
+            "name": "instructions",
+            "type": "string",
+            "default": "Press the Run button again to see the cleanup in action!",
+            "display": {
+                "labeltext": "Instructions:",
+                "type": "label"
+            }
+        }]
+    }],
+    "area": [{
+        "type": "vbox",
+        "name": "mainArea",
+        "style": "-fx-padding: 20; -fx-spacing: 15;",
+        "items": [{
+            "name": "testMessage_item",
+            "varref": "testMessage"
+        }, {
+            "name": "instructions_item",
+            "varref": "instructions"
+        }]
+    }]
+};
+
+// Show the screen
+show screen TestCleanupScreen;
+
+print "";
+print "✓ Test screen created and shown.";
+print "";
+print "Instructions:";
+print "1. You should now see a window titled 'Cleanup Test Screen'";
+print "2. Press the Run button again in the tab";
+print "3. The previous screen should close automatically";
+print "4. A new screen will appear";
+print "";
+print "This demonstrates that the cleanup functionality is working correctly!";
+print "=== Cleanup Test Complete ===";

@@ -71,6 +71,8 @@ public final class Json {
                 readNull();
                 yield null;
             }
+            case '$' ->
+                readVariableReference();
             default ->
                 readNumber();
         };
@@ -199,6 +201,35 @@ public final class Json {
         if (!match("null")) {
             throw error("Invalid null");
         }
+    }
+    
+    private VariableReference readVariableReference() {
+        // Expect '$' followed by an identifier
+        if (peek() != '$') {
+            throw error("Expected '$' for variable reference");
+        }
+        next(); // consume '$'
+        
+        // Read the variable name (identifier)
+        int start = i;
+        if (eof() || !isIdentifierStart(peek())) {
+            throw error("Expected variable name after '$'");
+        }
+        
+        while (!eof() && isIdentifierPart(peek())) {
+            next();
+        }
+        
+        String varName = s.substring(start, i);
+        return new VariableReference(varName);
+    }
+    
+    private boolean isIdentifierStart(char c) {
+        return Character.isLetter(c) || c == '_';
+    }
+    
+    private boolean isIdentifierPart(char c) {
+        return Character.isLetterOrDigit(c) || c == '_';
     }
 
     private Number readNumber() {
@@ -1226,6 +1257,24 @@ public final class Json {
 
         public JsonPathException(String message) {
             super(message);
+        }
+    }
+    
+    /**
+     * Marker class to represent a variable reference in JSON (e.g., $myVar).
+     * This allows distinguishing between literal values and variable references
+     * during JSON parsing.
+     */
+    public static final class VariableReference {
+        public final String variableName;
+        
+        public VariableReference(String variableName) {
+            this.variableName = variableName;
+        }
+        
+        @Override
+        public String toString() {
+            return "$" + variableName;
         }
     }
 }

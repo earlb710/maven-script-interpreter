@@ -1721,6 +1721,36 @@ public class InterpreterScreen {
     }
     
     /**
+     * Resolve variable references in JSON values.
+     * Handles both VariableReference objects (from unquoted $var in JSON)
+     * and string values starting with '$' (for backward compatibility).
+     * 
+     * @param value The value to resolve (can be any type)
+     * @param line The line number for error reporting
+     * @return The resolved value (unchanged if not a $ reference, or the variable's value if it is)
+     * @throws InterpreterError if the variable doesn't exist
+     */
+    private Object resolveVariableReference(Object value, int line) throws InterpreterError {
+        // Handle VariableReference objects created by JSON parser (unquoted $variable syntax)
+        if (value instanceof com.eb.script.json.Json.VariableReference) {
+            com.eb.script.json.Json.VariableReference varRef = (com.eb.script.json.Json.VariableReference) value;
+            String varName = varRef.variableName.toLowerCase(); // All variable names are case-insensitive and stored in lowercase
+            
+            // Try to get the variable value from the environment
+            try {
+                return interpreter.environment().get(varName);
+            } catch (InterpreterError e) {
+                // Re-throw with more context about the $ reference
+                throw interpreter.error(line, "Variable reference '$" + varRef.variableName + "' not found in scope");
+            }
+        }
+        
+        // Quoted strings (e.g., "$userName") are treated as literal strings, not variable references
+        // Only unquoted $variable syntax (handled above as VariableReference) resolves to variable values
+        return value;
+    }
+    
+    /**
      * Helper method to process a list of variable definitions
      */
     private void processVariableList(List varsList, String setName, String screenName, int line,
@@ -1736,6 +1766,9 @@ public class InterpreterScreen {
                 String varName = varDef.containsKey("name") ? String.valueOf(varDef.get("name")).toLowerCase() : null;
                 String varTypeStr = varDef.containsKey("type") ? String.valueOf(varDef.get("type")).toLowerCase() : null;
                 Object defaultValue = varDef.get("default");
+                
+                // Resolve variable references (e.g., "$myVar" -> value of myVar)
+                defaultValue = resolveVariableReference(defaultValue, line);
                 
                 // Extract minChar and maxChar if present
                 Integer minChar = null;

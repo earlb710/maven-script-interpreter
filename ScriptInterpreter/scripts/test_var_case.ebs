@@ -1,0 +1,20 @@
+// Test case sensitivity with $variable references in JSON
+// All variable names are case-insensitive and stored in lowercase
+
+var userName: string = "Alice Johnson";
+var userAge: int = 30;
+
+println("Variable names are case-insensitive:");
+println("  userName = '" + userName + "'");
+println("  userAge = " + userAge);
+println("");
+
+// Test JSON with $variable references (should work with any case)
+var config: string = {
+    "user": $userName,
+    "age": $userAge,
+    "welcome": "Hello " + $userName
+};
+
+println("JSON config created successfully with $variable references");
+println("Config: " + config);

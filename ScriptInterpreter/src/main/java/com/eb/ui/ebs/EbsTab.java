@@ -16,6 +16,7 @@ import com.eb.util.Debugger;
 import com.eb.util.Util;
 import javafx.application.Platform;
 import javafx.scene.control.Tab;
+import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -557,6 +558,9 @@ public class EbsTab extends Tab {
             // Offload execution to avoid freezing the UI if scripts are long
             Thread t = new Thread(() -> {
                 try {
+                    // Clear all previous script setups before running
+                    cleanupBeforeRun();
+                    
                     // Submit to the current console/handler (prints go to console).
                     handler.submit(src);
 
@@ -1078,6 +1082,102 @@ public class EbsTab extends Tab {
                 String position = String.format("(%d,%d)", columnPos + 1, currentParagraph + 1);
                 statusBar.setCustom(position);
             }
+        }
+    }
+    
+    /**
+     * Clean up all previous script setups before running the script.
+     * This includes:
+     * - Closing all open screens (windows)
+     * - Closing database connections
+     * - Clearing the environment (variables, call stack, opened files)
+     * - Clearing the interpreter context (screen definitions, database connections)
+     * - Clearing the runtime context (parsed statements and blocks)
+     */
+    private void cleanupBeforeRun() {
+        try {
+            if (handler instanceof EbsHandler) {
+                EbsHandler ebsHandler = (EbsHandler) handler;
+                
+                // Get the interpreter and its context
+                com.eb.script.interpreter.Interpreter interpreter = ebsHandler.getInterpreter();
+                com.eb.script.interpreter.InterpreterContext interpreterContext = interpreter.getContext();
+                
+                // Close all open screens on the JavaFX Application Thread
+                java.util.concurrent.ConcurrentHashMap<String, Stage> screens = interpreterContext.getScreens();
+                if (!screens.isEmpty()) {
+                    // Create a list of screen names to avoid concurrent modification
+                    List<String> screenNames = new ArrayList<>(screens.keySet());
+                    
+                    // Use a CountDownLatch to ensure screens are closed before continuing
+                    final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
+                    
+                    Platform.runLater(() -> {
+                        try {
+                            for (String screenName : screenNames) {
+                                Stage stage = screens.get(screenName);
+                                if (stage != null && stage.isShowing()) {
+                                    try {
+                                        stage.close();
+                                    } catch (Exception ex) {
+                                        outputArea.printlnWarn("Warning: Error closing screen '" + screenName + "': " + ex.getMessage());
+                                    }
+                                }
+                                
+                                // Interrupt and stop the screen thread if it exists
+                                Thread thread = interpreterContext.getScreenThreads().get(screenName);
+                                if (thread != null && thread.isAlive()) {
+                                    try {
+                                        thread.interrupt();
+                                    } catch (Exception ex) {
+                                        // Ignore thread interruption errors
+                                    }
+                                }
+                            }
+                        } finally {
+                            latch.countDown();
+                        }
+                    });
+                    
+                    // Wait for screen closing to complete (with timeout to prevent indefinite blocking)
+                    try {
+                        latch.await(2, java.util.concurrent.TimeUnit.SECONDS);
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+                
+                // Close all database connections before clearing
+                // Create a copy of the connections to avoid concurrent modification
+                java.util.Map<String, com.eb.script.interpreter.db.DbConnection> connections = interpreterContext.getConnections();
+                List<com.eb.script.interpreter.db.DbConnection> connectionsList = new ArrayList<>(connections.values());
+                for (com.eb.script.interpreter.db.DbConnection conn : connectionsList) {
+                    try {
+                        if (conn != null) {
+                            conn.close();
+                        }
+                    } catch (Exception ex) {
+                        // Ignore errors closing connections - they may already be closed
+                    }
+                }
+                
+                // Close all opened files before clearing the environment
+                context.environment.closeAllOpenFiles();
+                
+                // Clear the interpreter context (screens, variables, etc.)
+                // This will also clear connections and cursor specs
+                interpreterContext.clear();
+                
+                // Clear the environment (variables, call stack, opened files)
+                context.environment.clear();
+                
+                // Clear the runtime context (parsed statements and blocks)
+                context.blocks.clear();
+                context.statements = null;
+            }
+        } catch (Exception ex) {
+            // Log the error but don't prevent the script from running
+            outputArea.printlnWarn("Warning: Error during cleanup: " + ex.getMessage());
         }
     }
     

@@ -952,6 +952,60 @@ var person: json = {
 var numbers: json = [1, 2, 3, 4, 5];
 ```
 
+### Variable References in JSON (`$variable`)
+
+You can reference EBS script variables directly in JSON using the `$` prefix **without quotes**:
+
+```javascript
+// Define script variables
+var userName: string = "Alice";
+var userAge: int = 30;
+var isActive: bool = true;
+
+// Use $variable references in JSON (no quotes)
+var person: json = {
+    "name": $userName,        // References the userName variable
+    "age": $userAge,          // References the userAge variable
+    "active": $isActive       // References the isActive variable
+};
+
+// Result: {"name": "Alice", "age": 30, "active": true}
+```
+
+**Important Notes:**
+- `$variable` (without quotes) = variable reference - resolves to the variable's value
+- `"$variable"` (with quotes) = literal string - the text "$variable"
+- Variable references work with any data type (string, int, bool, arrays, JSON objects, etc.)
+- Variables must exist in scope or an error will be thrown
+- This feature works in screen definitions, JSON objects, and anywhere JSON is used
+
+**Example in Screen Definition:**
+```javascript
+var defaultName: string = "Guest";
+var defaultAge: int = 18;
+
+screen myScreen = {
+    "title": "User Form",
+    "vars": [{
+        "name": "userName",
+        "type": "string",
+        "default": $defaultName,    // No quotes - references defaultName
+        "display": {
+            "type": "textfield",
+            "labelText": "Name:"
+        }
+    }, {
+        "name": "userAge",
+        "type": "int",
+        "default": $defaultAge,     // No quotes - references defaultAge
+        "display": {
+            "type": "spinner",
+            "labelText": "Age:"
+        }
+    }]
+};
+```
+
 ### JSON Access and Manipulation
 
 #### Get Values
@@ -1105,6 +1159,47 @@ screen myWindow = {
     ]
 };
 ```
+
+#### Dynamic Screen with Variable References
+
+You can use `$variable` references (without quotes) to set default values dynamically:
+
+```javascript
+// Define script variables
+var defaultUserName: string = "Guest";
+var defaultAge: int = 25;
+var appTitle: string = "Dynamic Form";
+
+screen dynamicScreen = {
+    "title": $appTitle,           // Dynamic title from variable
+    "width": 800,
+    "height": 600,
+    "vars": [
+        {
+            "name": "userName",
+            "type": "string",
+            "default": $defaultUserName,    // No quotes - references variable
+            "display": {
+                "type": "textfield",
+                "labelText": "User Name:"
+            }
+        },
+        {
+            "name": "age",
+            "type": "int",
+            "default": $defaultAge,         // No quotes - references variable
+            "display": {
+                "type": "spinner",
+                "labelText": "Age:",
+                "min": 0,
+                "max": 120
+            }
+        }
+    ]
+};
+```
+
+**Note:** Use `$variable` without quotes to reference script variables. With quotes (`"$variable"`), it's treated as a literal string. See the [JSON Variable References](#variable-references-in-json-variable) section for more details.
 
 #### Screen with Multiple Controls
 ```javascript
