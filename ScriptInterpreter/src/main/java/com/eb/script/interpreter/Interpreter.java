@@ -1549,6 +1549,20 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         throw error(expr.getLine(), "Cannot access property '" + expr.propertyName + "' on non-record type: " + obj.getClass().getSimpleName());
     }
 
+    @Override
+    public Object visitCastExpression(com.eb.script.interpreter.expression.CastExpression expr) throws InterpreterError {
+        // Evaluate the value to be cast
+        Object value = evaluate(expr.value);
+        
+        // Use DataType.convertValue() to perform the actual conversion
+        try {
+            Object converted = expr.targetType.convertValue(value);
+            return converted;
+        } catch (Exception e) {
+            throw error(expr.getLine(), "Cannot cast value '" + value + "' to type " + expr.targetType + ": " + e.getMessage());
+        }
+    }
+
     // --- Helpers ---
 
     private Object evalBuiltin(CallStatement c) throws InterpreterError {
