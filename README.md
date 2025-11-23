@@ -172,6 +172,53 @@ show screen myWindow;
   - Property names like `varRef`, `VarRef`, or `varref` are all treated identically
   - Keys are normalized to lowercase (`promptHelp` → `prompttext`)
   - String values preserve their original casing
+- **Variable References in JSON**: Use `$variable` (without quotes) to reference script variables in JSON
+  - Example: `"default": $myVar` references the script variable `myVar`
+  - With quotes (`"$myVar"`), it's treated as a literal string
+  - See [EBS_SCRIPT_SYNTAX.md](docs/EBS_SCRIPT_SYNTAX.md) for details
+
+### Dynamic Screen Values with `$variable`
+
+You can use `$variable` references (without quotes) to create dynamic screens:
+
+```javascript
+// Define script variables
+var userName: string = "Alice";
+var userAge: int = 30;
+var windowTitle: string = "User Profile";
+
+// Use $variable references in screen definition (no quotes)
+screen profileScreen = {
+    "title": $windowTitle,        // Dynamic title
+    "width": 800,
+    "height": 600,
+    "vars": [{
+        "name": "name",
+        "type": "string",
+        "default": $userName,     // References userName variable
+        "display": {
+            "type": "textfield",
+            "labelText": "Name:"
+        }
+    }, {
+        "name": "age",
+        "type": "int",
+        "default": $userAge,      // References userAge variable
+        "display": {
+            "type": "spinner",
+            "labelText": "Age:"
+        }
+    }]
+};
+
+show screen profileScreen;
+```
+
+**Important:** 
+- Use `$variable` **without quotes** to reference variables
+- With quotes (`"$variable"`), it's a literal string, not a reference
+- Variables must exist in scope when the screen is defined
+- Works with any data type (string, int, bool, arrays, JSON objects, etc.)
 
 ### Console Commands
 
