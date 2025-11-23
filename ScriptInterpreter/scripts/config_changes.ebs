@@ -335,74 +335,7 @@ screen colorEditorScreen = {
                 "labelText": "Tab Label Background:"
             }
         }
-    ],
-    "area": [{
-        "name": "mainArea",
-        "type": "vbox",
-        "style": "-fx-spacing: 10; -fx-padding: 10;",
-        "childAreas": [
-            {
-                "name": "consoleColorsArea",
-                "type": "vbox",
-                "groupBorder": "line",
-                "groupBorderColor": "#4a9eff",
-                "style": "-fx-spacing: 5; -fx-padding: 10;",
-                "items": [
-                    {"name": "info_item", "varref": "info"},
-                    {"name": "comment_item", "varref": "comment"},
-                    {"name": "error_item", "varref": "error"},
-                    {"name": "warn_item", "varref": "warn"},
-                    {"name": "ok_item", "varref": "ok"}
-                ]
-            },
-            {
-                "name": "syntaxColorsArea",
-                "type": "vbox",
-                "groupBorder": "line",
-                "groupBorderColor": "#ff9933",
-                "style": "-fx-spacing: 5; -fx-padding: 10;",
-                "items": [
-                    {"name": "code_item", "varref": "code"},
-                    {"name": "datatype_item", "varref": "datatype"},
-                    {"name": "data_item", "varref": "data"},
-                    {"name": "keyword_item", "varref": "keyword"},
-                    {"name": "builtin_item", "varref": "builtin"},
-                    {"name": "literal_item", "varref": "literal"},
-                    {"name": "identifier_item", "varref": "identifier"},
-                    {"name": "sql_item", "varref": "sql"},
-                    {"name": "custom_item", "varref": "custom"}
-                ]
-            },
-            {
-                "name": "editorColorsArea",
-                "type": "vbox",
-                "groupBorder": "line",
-                "groupBorderColor": "#66cc66",
-                "style": "-fx-spacing: 5; -fx-padding: 10;",
-                "items": [
-                    {"name": "background_item", "varref": "background"},
-                    {"name": "text_item", "varref": "text"},
-                    {"name": "caret_item", "varref": "caret"},
-                    {"name": "lineCursor_item", "varref": "lineCursor"},
-                    {"name": "lineNumbers_item", "varref": "lineNumbers"},
-                    {"name": "consoleBackground_item", "varref": "consoleBackground"}
-                ]
-            },
-            {
-                "name": "tabColorsArea",
-                "type": "vbox",
-                "groupBorder": "line",
-                "groupBorderColor": "#cc66cc",
-                "style": "-fx-spacing: 5; -fx-padding: 10;",
-                "items": [
-                    {"name": "tabBackground_item", "varref": "tabBackground"},
-                    {"name": "tabLabelColor_item", "varref": "tabLabelColor"},
-                    {"name": "tabLabelChangedColor_item", "varref": "tabLabelChangedColor"},
-                    {"name": "tabLabelBackground_item", "varref": "tabLabelBackground"}
-                ]
-            }
-        ]
-    }]
+    ]
 };
 
 print "Color editor screen created successfully";
