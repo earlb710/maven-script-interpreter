@@ -1402,6 +1402,47 @@ public class InterpreterScreen {
     }
 
     /**
+     * Helper method to get a value from a map with case-insensitive key lookup.
+     * Returns null if key is not found.
+     */
+    private Object getCaseInsensitive(Map<String, Object> map, String key) {
+        if (map == null || key == null) {
+            return null;
+        }
+        // First try exact match
+        if (map.containsKey(key)) {
+            return map.get(key);
+        }
+        // Try case-insensitive match
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            if (entry.getKey().equalsIgnoreCase(key)) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Helper method to check if a map contains a key (case-insensitive).
+     */
+    private boolean containsKeyCaseInsensitive(Map<String, Object> map, String key) {
+        if (map == null || key == null) {
+            return false;
+        }
+        // First try exact match
+        if (map.containsKey(key)) {
+            return true;
+        }
+        // Try case-insensitive match
+        for (String mapKey : map.keySet()) {
+            if (mapKey.equalsIgnoreCase(key)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Helper method to parse area definition from JSON
      */
     private AreaDefinition parseAreaDefinition(Map<String, Object> areaDef, String screenName, int line) throws InterpreterError {
@@ -1525,11 +1566,10 @@ public class InterpreterScreen {
                             item.layoutPos = String.valueOf(itemDef.get("relative_pos"));
                         }
 
-                        // Check for both camelCase and lowercase versions of varRef
-                        if (itemDef.containsKey("varref")) {
-                            item.varRef = String.valueOf(itemDef.get("varref")).toLowerCase();
-                        } else if (itemDef.containsKey("var_ref")) {
-                            item.varRef = String.valueOf(itemDef.get("var_ref")).toLowerCase();
+                        // Check for varRef with case-insensitive lookup
+                        Object varRefValue = getCaseInsensitive(itemDef, "varref");
+                        if (varRefValue != null) {
+                            item.varRef = String.valueOf(varRefValue).toLowerCase();
                         }
 
                         // Process optional display metadata for the item
