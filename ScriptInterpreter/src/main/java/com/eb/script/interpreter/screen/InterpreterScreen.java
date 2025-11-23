@@ -149,6 +149,19 @@ public class InterpreterScreen {
                             
                             // Create VarSet
                             VarSet varSet = new VarSet(setName, scope);
+                            
+                            // Set groupBorder property if present
+                            if (setDef.containsKey("groupBorder")) {
+                                String groupBorder = String.valueOf(setDef.get("groupBorder"));
+                                varSet.setGroupBorder(groupBorder);
+                            }
+                            
+                            // Set groupBorderColor property if present
+                            if (setDef.containsKey("groupBorderColor")) {
+                                String groupBorderColor = String.valueOf(setDef.get("groupBorderColor"));
+                                varSet.setGroupBorderColor(groupBorderColor);
+                            }
+                            
                             varSetsMap.put(setName.toLowerCase(), varSet);
                             
                             // Process vars within this set
@@ -219,146 +232,194 @@ public class InterpreterScreen {
                 }
 
                 if (!varsWithDisplay.isEmpty()) {
-                    // Create a default VBox area with items for all displayed variables
+                    // Create root VBox area
                     AreaDefinition defaultArea = new AreaDefinition();
                     defaultArea.areaType = AreaDefinition.AreaType.VBOX;
                     defaultArea.name = "default";
                     defaultArea.screenName = stmt.name;
                     defaultArea.style = "-fx-spacing: 10; -fx-padding: 10;";
-
+                    
+                    // Group variables by set for organized display
+                    java.util.Map<String, java.util.List<String>> varsBySet = new java.util.LinkedHashMap<>();
                     for (String varName : varsWithDisplay) {
-                        // Get the display metadata for this variable
-                        DisplayItem varDisplayItem = context.getDisplayItem().get(stmt.name + "." + varName);
-                        
-                        // Get the variable type to determine numeric vs string
-                        DataType varType = screenVarTypeMap.get(varName);
-                        
-                        // Find which set this variable belongs to by checking varItemsMap
-                        String setName = null;
-                        Var currentVar = null;
+                        // Find which set this variable belongs to
+                        String setName = "default";
                         for (Map.Entry<String, Var> entry : varItemsMap.entrySet()) {
                             String key = entry.getKey(); // format: "setname.varname"
                             Var var = entry.getValue();
-                            // Check if this is our variable by comparing the var name part
                             if (key.endsWith("." + varName) && var.getName().equalsIgnoreCase(varName)) {
-                                // Extract setname from the key
                                 setName = key.substring(0, key.lastIndexOf("."));
-                                currentVar = var;
                                 break;
                             }
                         }
+                        varsBySet.computeIfAbsent(setName, k -> new java.util.ArrayList<>()).add(varName);
+                    }
+                    
+                    // Create child areas for each set (if grouping is enabled)
+                    for (Map.Entry<String, java.util.List<String>> setEntry : varsBySet.entrySet()) {
+                        String setName = setEntry.getKey();
+                        java.util.List<String> setVars = setEntry.getValue();
                         
-                        // If we couldn't find the set, default to "default"
-                        if (setName == null) {
-                            setName = "default";
-                        }
+                        // Get VarSet to check for groupBorder settings
+                        VarSet varSet = varSetsMap.get(setName.toLowerCase());
+                        boolean hasGrouping = varSet != null && varSet.getGroupBorder() != null 
+                            && !varSet.getGroupBorder().equals("none");
                         
-                        // Only add labelText if explicitly specified - don't generate from variable name
-                        // Set default alignment based on control type and variable type
-                        if (varDisplayItem != null) {
-                            // Add colon to labelText if specified and doesn't have one
-                            if (varDisplayItem.labelText != null && !varDisplayItem.labelText.isEmpty() 
-                                && !varDisplayItem.labelText.endsWith(":")) {
-                                varDisplayItem.labelText = varDisplayItem.labelText + ":";
+                        // Create child area for this set if grouping is enabled
+                        AreaDefinition setArea;
+                        if (hasGrouping) {
+                            setArea = new AreaDefinition();
+                            setArea.areaType = AreaDefinition.AreaType.VBOX;
+                            setArea.name = "group_" + setName;
+                            setArea.screenName = stmt.name;
+                            setArea.style = "-fx-spacing: 5; -fx-padding: 10;";
+                            
+                            // Set border style and color
+                            String borderStyle = createBorderStyle(varSet.getGroupBorder(), varSet.getGroupBorderColor());
+                            if (borderStyle != null && !borderStyle.isEmpty()) {
+                                setArea.style = setArea.style + " " + borderStyle;
                             }
                             
-                            // Set default alignment based on control type and variable type if not specified
-                            if (varDisplayItem.alignment == null || varDisplayItem.alignment.isEmpty()) {
-                                // Numeric fields should be right-aligned by default
-                                // String fields (including TextField with string type) should be left-aligned
-                                if (isNumericControl(varDisplayItem.itemType, varType)) {
-                                    varDisplayItem.alignment = "right";
-                                } else {
-                                    // Explicitly set left alignment for string/text fields
-                                    varDisplayItem.alignment = "left";
+                            // Use set name as title for the group
+                            setArea.title = setName;
+                        } else {
+                            // No grouping, add directly to default area
+                            setArea = defaultArea;
+                        }
+
+                        for (String varName : setVars) {
+                            // Get the display metadata for this variable
+                            DisplayItem varDisplayItem = context.getDisplayItem().get(stmt.name + "." + varName);
+                            
+                            // Get the variable type to determine numeric vs string
+                            DataType varType = screenVarTypeMap.get(varName);
+                            
+                            // Find the current var for character limits
+                            Var currentVar = null;
+                            for (Map.Entry<String, Var> entry : varItemsMap.entrySet()) {
+                                String key = entry.getKey();
+                                Var var = entry.getValue();
+                                if (key.endsWith("." + varName) && var.getName().equalsIgnoreCase(varName)) {
+                                    currentVar = var;
+                                    break;
                                 }
                             }
                             
-                            // Set default label text alignment if not specified
-                            if (varDisplayItem.labelTextAlignment == null || varDisplayItem.labelTextAlignment.isEmpty()) {
-                                varDisplayItem.labelTextAlignment = "left";
-                            }
-                        }
-
-                        // Create a single item for the input control (label will be added by ScreenFactory)
-                        AreaItem item = new AreaItem();
-                        item.name = varName;  // Use just the variable name
-                        item.varRef = varName;
-                        item.sequence = defaultArea.items.size();
-                        item.displayItem = varDisplayItem;
-
-                        // Set sizing to fit content, not stretch to screen width
-                        item.maxWidth = "USE_PREF_SIZE";
-                        item.hgrow = "NEVER";
-
-                        // Set reasonable preferred widths based on item type
-                        if (item.displayItem != null) {
-                            switch (item.displayItem.itemType) {
-                                case TEXTFIELD:
-                                case PASSWORDFIELD:
-                                    // Calculate width based on minChar/maxChar if available
-                                    if (currentVar != null && (currentVar.getMinChar() != null || currentVar.getMaxChar() != null)) {
-                                        // Use maxChar if available, otherwise minChar
-                                        Integer charCount = currentVar.getMaxChar() != null ? currentVar.getMaxChar() : currentVar.getMinChar();
-                                        // Approximate 8 pixels per character + 20 for padding
-                                        int calculatedWidth = (charCount * 8) + 20;
-                                        item.prefWidth = String.valueOf(Math.max(calculatedWidth, 80)); // Minimum 80 pixels
+                            // Only add labelText if explicitly specified - don't generate from variable name
+                            // Set default alignment based on control type and variable type
+                            if (varDisplayItem != null) {
+                                // Add colon to labelText if specified and doesn't have one
+                                if (varDisplayItem.labelText != null && !varDisplayItem.labelText.isEmpty() 
+                                    && !varDisplayItem.labelText.endsWith(":")) {
+                                    varDisplayItem.labelText = varDisplayItem.labelText + ":";
+                                }
+                                
+                                // Set default alignment based on control type and variable type if not specified
+                                if (varDisplayItem.alignment == null || varDisplayItem.alignment.isEmpty()) {
+                                    // Numeric fields should be right-aligned by default
+                                    // String fields (including TextField with string type) should be left-aligned
+                                    if (isNumericControl(varDisplayItem.itemType, varType)) {
+                                        varDisplayItem.alignment = "right";
                                     } else {
+                                        // Explicitly set left alignment for string/text fields
+                                        varDisplayItem.alignment = "left";
+                                    }
+                                }
+                                
+                                // Set default label text alignment if not specified
+                                if (varDisplayItem.labelTextAlignment == null || varDisplayItem.labelTextAlignment.isEmpty()) {
+                                    varDisplayItem.labelTextAlignment = "left";
+                                }
+                            }
+
+                            // Create a single item for the input control (label will be added by ScreenFactory)
+                            AreaItem item = new AreaItem();
+                            item.name = varName;  // Use just the variable name
+                            item.varRef = varName;
+                            item.sequence = setArea.items.size();
+                            item.displayItem = varDisplayItem;
+
+                            // Set sizing to fit content, not stretch to screen width
+                            item.maxWidth = "USE_PREF_SIZE";
+                            item.hgrow = "NEVER";
+
+                            // Set reasonable preferred widths based on item type
+                            if (item.displayItem != null) {
+                                switch (item.displayItem.itemType) {
+                                    case TEXTFIELD:
+                                    case PASSWORDFIELD:
+                                        // Calculate width based on minChar/maxChar if available
+                                        if (currentVar != null && (currentVar.getMinChar() != null || currentVar.getMaxChar() != null)) {
+                                            // Use maxChar if available, otherwise minChar
+                                            Integer charCount = currentVar.getMaxChar() != null ? currentVar.getMaxChar() : currentVar.getMinChar();
+                                            // Approximate 8 pixels per character + 20 for padding
+                                            int calculatedWidth = (charCount * 8) + 20;
+                                            item.prefWidth = String.valueOf(Math.max(calculatedWidth, 80)); // Minimum 80 pixels
+                                        } else {
+                                            item.prefWidth = "300";
+                                        }
+                                        break;
+                                    case TEXTAREA:
+                                        // Calculate width based on maxChar if available
+                                        if (currentVar != null && currentVar.getMaxChar() != null) {
+                                            // Approximate 8 pixels per character + 20 for padding
+                                            int calculatedWidth = (currentVar.getMaxChar() * 8) + 20;
+                                            item.prefWidth = String.valueOf(Math.max(calculatedWidth, 200)); // Minimum 200 pixels
+                                        } else {
+                                            item.prefWidth = "400";
+                                        }
+                                        item.prefHeight = "100";
+                                        break;
+                                    case SLIDER:
                                         item.prefWidth = "300";
-                                    }
-                                    break;
-                                case TEXTAREA:
-                                    // Calculate width based on maxChar if available
-                                    if (currentVar != null && currentVar.getMaxChar() != null) {
-                                        // Approximate 8 pixels per character + 20 for padding
-                                        int calculatedWidth = (currentVar.getMaxChar() * 8) + 20;
-                                        item.prefWidth = String.valueOf(Math.max(calculatedWidth, 200)); // Minimum 200 pixels
-                                    } else {
-                                        item.prefWidth = "400";
-                                    }
-                                    item.prefHeight = "100";
-                                    break;
-                                case SLIDER:
-                                    item.prefWidth = "300";
-                                    break;
-                                case COMBOBOX:
-                                case CHOICEBOX:
-                                    item.prefWidth = "200";
-                                    break;
-                                case COLORPICKER:
-                                    item.prefWidth = "200";
-                                    break;
-                                case DATEPICKER:
-                                    item.prefWidth = "200";
-                                    break;
-                                case TABLEVIEW:
-                                    item.prefWidth = "800";
-                                    item.maxWidth = "USE_COMPUTED_SIZE";
-                                    item.hgrow = "ALWAYS";
-                                    
-                                    // If displayRecords is specified, use fixed height; otherwise allow growth
-                                    if (item.displayItem != null && item.displayItem.displayRecords != null && item.displayItem.displayRecords > 0) {
-                                        // Fixed height mode - displayRecords specifies exact number of visible rows
-                                        // Don't set prefHeight/maxHeight here - AreaItemFactory will handle it
-                                        item.vgrow = "NEVER";
-                                    } else {
-                                        // Dynamic height mode - TableView can grow with available space
-                                        item.prefHeight = "400";
-                                        item.maxHeight = "USE_COMPUTED_SIZE";
-                                        item.vgrow = "ALWAYS";
-                                    }
-                                    break;
-                                default:
-                                    // Let other controls use default sizing
-                                    break;
+                                        break;
+                                    case COMBOBOX:
+                                    case CHOICEBOX:
+                                        item.prefWidth = "200";
+                                        break;
+                                    case COLORPICKER:
+                                        item.prefWidth = "200";
+                                        break;
+                                    case DATEPICKER:
+                                        item.prefWidth = "200";
+                                        break;
+                                    case TABLEVIEW:
+                                        item.prefWidth = "800";
+                                        item.maxWidth = "USE_COMPUTED_SIZE";
+                                        item.hgrow = "ALWAYS";
+                                        
+                                        // If displayRecords is specified, use fixed height; otherwise allow growth
+                                        if (item.displayItem != null && item.displayItem.displayRecords != null && item.displayItem.displayRecords > 0) {
+                                            // Fixed height mode - displayRecords specifies exact number of visible rows
+                                            // Don't set prefHeight/maxHeight here - AreaItemFactory will handle it
+                                            item.vgrow = "NEVER";
+                                        } else {
+                                            // Dynamic height mode - TableView can grow with available space
+                                            item.prefHeight = "400";
+                                            item.maxHeight = "USE_COMPUTED_SIZE";
+                                            item.vgrow = "ALWAYS";
+                                        }
+                                        break;
+                                    default:
+                                        // Let other controls use default sizing
+                                        break;
+                                }
                             }
-                        }
 
-                        defaultArea.items.add(item);
+                            setArea.items.add(item);
+                            
+                            // Register item in areaItemsMap with format "setname.itemname" for screen.getItemList
+                            String itemKey = setName + "." + item.name;
+                            areaItemsMap.put(itemKey.toLowerCase(), item);
+                        }
                         
-                        // Register item in areaItemsMap with format "setname.itemname" for screen.getItemList
-                        String itemKey = setName + "." + item.name;
-                        areaItemsMap.put(itemKey.toLowerCase(), item);
+                        // If this is a grouped child area, add it to default area's child areas
+                        if (hasGrouping && setArea != defaultArea) {
+                            if (defaultArea.childAreas == null) {
+                                defaultArea.childAreas = new java.util.ArrayList<>();
+                            }
+                            defaultArea.childAreas.add(setArea);
+                        }
                     }
 
                     java.util.List<AreaDefinition> areas = new java.util.ArrayList<>();
@@ -1050,6 +1111,39 @@ public class InterpreterScreen {
         }
         
         return false;
+    }
+    
+    /**
+     * Create a CSS border style string based on groupBorder type and color.
+     * @param borderType The type of border: none, raised, inset, lowered, line
+     * @param borderColor The color of the border in hex format (optional)
+     * @return CSS style string for the border, or null if borderType is "none"
+     */
+    private String createBorderStyle(String borderType, String borderColor) {
+        if (borderType == null || borderType.equalsIgnoreCase("none")) {
+            return null;
+        }
+        
+        // Default border color if not specified
+        String color = (borderColor != null && !borderColor.isEmpty()) ? borderColor : "#808080";
+        
+        // Create border style based on type
+        switch (borderType.toLowerCase()) {
+            case "line":
+                return "-fx-border-color: " + color + "; -fx-border-width: 1px; -fx-border-radius: 5px;";
+            case "raised":
+                // Simulate raised effect with gradient
+                return "-fx-border-color: derive(" + color + ", 40%) " + color + " " + color + " derive(" + color + ", 40%); " +
+                       "-fx-border-width: 2px; -fx-border-style: solid; -fx-border-radius: 5px;";
+            case "lowered":
+            case "inset":
+                // Simulate inset/lowered effect with gradient (opposite of raised)
+                return "-fx-border-color: " + color + " derive(" + color + ", 40%) derive(" + color + ", 40%) " + color + "; " +
+                       "-fx-border-width: 2px; -fx-border-style: solid; -fx-border-radius: 5px;";
+            default:
+                // Default to simple line border
+                return "-fx-border-color: " + color + "; -fx-border-width: 1px; -fx-border-radius: 5px;";
+        }
     }
 
     /**

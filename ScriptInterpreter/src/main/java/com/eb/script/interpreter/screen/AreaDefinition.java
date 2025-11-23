@@ -24,6 +24,8 @@ public class AreaDefinition {
     public String screenName;
     // Display name for UI elements (e.g., tab labels)
     public String displayName;
+    // Title for titled containers (e.g., TitledPane, group headers)
+    public String title;
     // Spacing between children (for HBox, VBox, FlowPane, GridPane, TilePane)
     public String spacing;
     // Padding inside the area (for all Region types)
@@ -45,6 +47,7 @@ public class AreaDefinition {
                ", cssClass='" + cssClass + '\'' +
                ", layout='" + layout + '\'' +
                ", style='" + style + '\'' +
+               ", title='" + title + '\'' +
                ", spacing='" + spacing + '\'' +
                ", padding='" + padding + '\'' +
                ", items=" + items.size() +

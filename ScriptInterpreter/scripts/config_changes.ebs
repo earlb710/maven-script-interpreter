@@ -108,232 +108,261 @@ print "- tab-label-changed-color: " + tabLabelChangedColor;
 print "- tab-label-background: " + tabLabelBackgroundColor;
 print "";
 
-// Build the screen configuration using $var references
-print "Building color editor screen configuration...";
+// Build the screen configuration using $var references with grouped sets
+print "Building color editor screen configuration with grouped sets...";
 
 // Create the screen with $var references (no quotes around $variables)
+// Group colors into logical categories with visual borders
 print "Creating color editor screen with colors from console.cfg...";
 screen colorEditorScreen = {
     "title": "Console Configuration Color Editor",
-    "width": 800,
-    "height": 900,
+    "width": 850,
+    "height": 950,
     "maximize": false,
-    "vars": [
+    "sets": [
         {
-            "name": "info",
-            "type": "string",
-            "default": $infoColor,
-            "display": {
-                "type": "colorpicker",
-                "labelText": "Info Color:"
-            }
+            "setname": "ConsoleColors",
+            "groupBorder": "line",
+            "groupBorderColor": "#4a9eff",
+            "vars": [
+                {
+                    "name": "info",
+                    "type": "string",
+                    "default": $infoColor,
+                    "display": {
+                        "type": "colorpicker",
+                        "labelText": "Info Color:"
+                    }
+                },
+                {
+                    "name": "comment",
+                    "type": "string",
+                    "default": $commentColor,
+                    "display": {
+                        "type": "colorpicker",
+                        "labelText": "Comment Color:"
+                    }
+                },
+                {
+                    "name": "error",
+                    "type": "string",
+                    "default": $errorColor,
+                    "display": {
+                        "type": "colorpicker",
+                        "labelText": "Error Color:"
+                    }
+                },
+                {
+                    "name": "warn",
+                    "type": "string",
+                    "default": $warnColor,
+                    "display": {
+                        "type": "colorpicker",
+                        "labelText": "Warn Color:"
+                    }
+                },
+                {
+                    "name": "ok",
+                    "type": "string",
+                    "default": $okColor,
+                    "display": {
+                        "type": "colorpicker",
+                        "labelText": "OK Color:"
+                    }
+                }
+            ]
         },
         {
-            "name": "comment",
-            "type": "string",
-            "default": $commentColor,
-            "display": {
-                "type": "colorpicker",
-                "labelText": "Comment Color:"
-            }
+            "setname": "SyntaxColors",
+            "groupBorder": "line",
+            "groupBorderColor": "#ff9933",
+            "vars": [
+                {
+                    "name": "code",
+                    "type": "string",
+                    "default": $codeColor,
+                    "display": {
+                        "type": "colorpicker",
+                        "labelText": "Code Color:"
+                    }
+                },
+                {
+                    "name": "datatype",
+                    "type": "string",
+                    "default": $datatypeColor,
+                    "display": {
+                        "type": "colorpicker",
+                        "labelText": "Datatype Color:"
+                    }
+                },
+                {
+                    "name": "data",
+                    "type": "string",
+                    "default": $dataColor,
+                    "display": {
+                        "type": "colorpicker",
+                        "labelText": "Data Color:"
+                    }
+                },
+                {
+                    "name": "keyword",
+                    "type": "string",
+                    "default": $keywordColor,
+                    "display": {
+                        "type": "colorpicker",
+                        "labelText": "Keyword Color:"
+                    }
+                },
+                {
+                    "name": "builtin",
+                    "type": "string",
+                    "default": $builtinColor,
+                    "display": {
+                        "type": "colorpicker",
+                        "labelText": "Builtin Color:"
+                    }
+                },
+                {
+                    "name": "literal",
+                    "type": "string",
+                    "default": $literalColor,
+                    "display": {
+                        "type": "colorpicker",
+                        "labelText": "Literal Color:"
+                    }
+                },
+                {
+                    "name": "identifier",
+                    "type": "string",
+                    "default": $identifierColor,
+                    "display": {
+                        "type": "colorpicker",
+                        "labelText": "Identifier Color:"
+                    }
+                },
+                {
+                    "name": "sql",
+                    "type": "string",
+                    "default": $sqlColor,
+                    "display": {
+                        "type": "colorpicker",
+                        "labelText": "SQL Color:"
+                    }
+                },
+                {
+                    "name": "custom",
+                    "type": "string",
+                    "default": $customColor,
+                    "display": {
+                        "type": "colorpicker",
+                        "labelText": "Custom Color:"
+                    }
+                }
+            ]
         },
         {
-            "name": "error",
-            "type": "string",
-            "default": $errorColor,
-            "display": {
-                "type": "colorpicker",
-                "labelText": "Error Color:"
-            }
+            "setname": "EditorColors",
+            "groupBorder": "line",
+            "groupBorderColor": "#66cc66",
+            "vars": [
+                {
+                    "name": "background",
+                    "type": "string",
+                    "default": $backgroundColor,
+                    "display": {
+                        "type": "colorpicker",
+                        "labelText": "Background Color:"
+                    }
+                },
+                {
+                    "name": "text",
+                    "type": "string",
+                    "default": $textColor,
+                    "display": {
+                        "type": "colorpicker",
+                        "labelText": "Text Color:"
+                    }
+                },
+                {
+                    "name": "caret",
+                    "type": "string",
+                    "default": $caretColor,
+                    "display": {
+                        "type": "colorpicker",
+                        "labelText": "Caret Color:"
+                    }
+                },
+                {
+                    "name": "lineCursor",
+                    "type": "string",
+                    "default": $lineCursorColor,
+                    "display": {
+                        "type": "colorpicker",
+                        "labelText": "Line Cursor Color:"
+                    }
+                },
+                {
+                    "name": "lineNumbers",
+                    "type": "string",
+                    "default": $lineNumbersColor,
+                    "display": {
+                        "type": "colorpicker",
+                        "labelText": "Line Numbers Color:"
+                    }
+                },
+                {
+                    "name": "consoleBackground",
+                    "type": "string",
+                    "default": $consoleBackgroundColor,
+                    "display": {
+                        "type": "colorpicker",
+                        "labelText": "Console Background:"
+                    }
+                }
+            ]
         },
         {
-            "name": "warn",
-            "type": "string",
-            "default": $warnColor,
-            "display": {
-                "type": "colorpicker",
-                "labelText": "Warn Color:"
-            }
-        },
-        {
-            "name": "ok",
-            "type": "string",
-            "default": $okColor,
-            "display": {
-                "type": "colorpicker",
-                "labelText": "OK Color:"
-            }
-        },
-        {
-            "name": "code",
-            "type": "string",
-            "default": $codeColor,
-            "display": {
-                "type": "colorpicker",
-                "labelText": "Code Color:"
-            }
-        },
-        {
-            "name": "datatype",
-            "type": "string",
-            "default": $datatypeColor,
-            "display": {
-                "type": "colorpicker",
-                "labelText": "Datatype Color:"
-            }
-        },
-        {
-            "name": "data",
-            "type": "string",
-            "default": $dataColor,
-            "display": {
-                "type": "colorpicker",
-                "labelText": "Data Color:"
-            }
-        },
-        {
-            "name": "keyword",
-            "type": "string",
-            "default": $keywordColor,
-            "display": {
-                "type": "colorpicker",
-                "labelText": "Keyword Color:"
-            }
-        },
-        {
-            "name": "builtin",
-            "type": "string",
-            "default": $builtinColor,
-            "display": {
-                "type": "colorpicker",
-                "labelText": "Builtin Color:"
-            }
-        },
-        {
-            "name": "literal",
-            "type": "string",
-            "default": $literalColor,
-            "display": {
-                "type": "colorpicker",
-                "labelText": "Literal Color:"
-            }
-        },
-        {
-            "name": "identifier",
-            "type": "string",
-            "default": $identifierColor,
-            "display": {
-                "type": "colorpicker",
-                "labelText": "Identifier Color:"
-            }
-        },
-        {
-            "name": "sql",
-            "type": "string",
-            "default": $sqlColor,
-            "display": {
-                "type": "colorpicker",
-                "labelText": "SQL Color:"
-            }
-        },
-        {
-            "name": "custom",
-            "type": "string",
-            "default": $customColor,
-            "display": {
-                "type": "colorpicker",
-                "labelText": "Custom Color:"
-            }
-        },
-        {
-            "name": "background",
-            "type": "string",
-            "default": $backgroundColor,
-            "display": {
-                "type": "colorpicker",
-                "labelText": "Background Color:"
-            }
-        },
-        {
-            "name": "text",
-            "type": "string",
-            "default": $textColor,
-            "display": {
-                "type": "colorpicker",
-                "labelText": "Text Color:"
-            }
-        },
-        {
-            "name": "caret",
-            "type": "string",
-            "default": $caretColor,
-            "display": {
-                "type": "colorpicker",
-                "labelText": "Caret Color:"
-            }
-        },
-        {
-            "name": "lineCursor",
-            "type": "string",
-            "default": $lineCursorColor,
-            "display": {
-                "type": "colorpicker",
-                "labelText": "Line Cursor Color:"
-            }
-        },
-        {
-            "name": "lineNumbers",
-            "type": "string",
-            "default": $lineNumbersColor,
-            "display": {
-                "type": "colorpicker",
-                "labelText": "Line Numbers Color:"
-            }
-        },
-        {
-            "name": "consoleBackground",
-            "type": "string",
-            "default": $consoleBackgroundColor,
-            "display": {
-                "type": "colorpicker",
-                "labelText": "Console Background:"
-            }
-        },
-        {
-            "name": "tabBackground",
-            "type": "string",
-            "default": $tabBackgroundColor,
-            "display": {
-                "type": "colorpicker",
-                "labelText": "Tab Background:"
-            }
-        },
-        {
-            "name": "tabLabelColor",
-            "type": "string",
-            "default": $tabLabelColor,
-            "display": {
-                "type": "colorpicker",
-                "labelText": "Tab Label Color:"
-            }
-        },
-        {
-            "name": "tabLabelChangedColor",
-            "type": "string",
-            "default": $tabLabelChangedColor,
-            "display": {
-                "type": "colorpicker",
-                "labelText": "Tab Label Changed:"
-            }
-        },
-        {
-            "name": "tabLabelBackground",
-            "type": "string",
-            "default": $tabLabelBackgroundColor,
-            "display": {
-                "type": "colorpicker",
-                "labelText": "Tab Label Background:"
-            }
+            "setname": "TabColors",
+            "groupBorder": "line",
+            "groupBorderColor": "#cc66cc",
+            "vars": [
+                {
+                    "name": "tabBackground",
+                    "type": "string",
+                    "default": $tabBackgroundColor,
+                    "display": {
+                        "type": "colorpicker",
+                        "labelText": "Tab Background:"
+                    }
+                },
+                {
+                    "name": "tabLabelColor",
+                    "type": "string",
+                    "default": $tabLabelColor,
+                    "display": {
+                        "type": "colorpicker",
+                        "labelText": "Tab Label Color:"
+                    }
+                },
+                {
+                    "name": "tabLabelChangedColor",
+                    "type": "string",
+                    "default": $tabLabelChangedColor,
+                    "display": {
+                        "type": "colorpicker",
+                        "labelText": "Tab Label Changed:"
+                    }
+                },
+                {
+                    "name": "tabLabelBackground",
+                    "type": "string",
+                    "default": $tabLabelBackgroundColor,
+                    "display": {
+                        "type": "colorpicker",
+                        "labelText": "Tab Label Background:"
+                    }
+                }
+            ]
         }
     ]
 };
@@ -350,30 +379,37 @@ show screen colorEditorScreen;
 // After the screen is closed, display the updated values
 print "";
 print "=== Updated Color Values ===";
-print "info: " + colorEditorScreen.info;
-print "comment: " + colorEditorScreen.comment;
-print "error: " + colorEditorScreen.error;
-print "warn: " + colorEditorScreen.warn;
-print "ok: " + colorEditorScreen.ok;
-print "code: " + colorEditorScreen.code;
-print "datatype: " + colorEditorScreen.datatype;
-print "data: " + colorEditorScreen.data;
-print "keyword: " + colorEditorScreen.keyword;
-print "builtin: " + colorEditorScreen.builtin;
-print "literal: " + colorEditorScreen.literal;
-print "identifier: " + colorEditorScreen.identifier;
-print "sql: " + colorEditorScreen.sql;
-print "custom: " + colorEditorScreen.custom;
-print "background: " + colorEditorScreen.background;
-print "text: " + colorEditorScreen.text;
-print "caret: " + colorEditorScreen.caret;
-print "lineCursor: " + colorEditorScreen.lineCursor;
-print "lineNumbers: " + colorEditorScreen.lineNumbers;
-print "consoleBackground: " + colorEditorScreen.consoleBackground;
-print "tabBackground: " + colorEditorScreen.tabBackground;
-print "tabLabelColor: " + colorEditorScreen.tabLabelColor;
-print "tabLabelChangedColor: " + colorEditorScreen.tabLabelChangedColor;
-print "tabLabelBackground: " + colorEditorScreen.tabLabelBackground;
+print "Console Colors:";
+print "  info: " + colorEditorScreen.ConsoleColors.info;
+print "  comment: " + colorEditorScreen.ConsoleColors.comment;
+print "  error: " + colorEditorScreen.ConsoleColors.error;
+print "  warn: " + colorEditorScreen.ConsoleColors.warn;
+print "  ok: " + colorEditorScreen.ConsoleColors.ok;
+print "";
+print "Syntax Colors:";
+print "  code: " + colorEditorScreen.SyntaxColors.code;
+print "  datatype: " + colorEditorScreen.SyntaxColors.datatype;
+print "  data: " + colorEditorScreen.SyntaxColors.data;
+print "  keyword: " + colorEditorScreen.SyntaxColors.keyword;
+print "  builtin: " + colorEditorScreen.SyntaxColors.builtin;
+print "  literal: " + colorEditorScreen.SyntaxColors.literal;
+print "  identifier: " + colorEditorScreen.SyntaxColors.identifier;
+print "  sql: " + colorEditorScreen.SyntaxColors.sql;
+print "  custom: " + colorEditorScreen.SyntaxColors.custom;
+print "";
+print "Editor Colors:";
+print "  background: " + colorEditorScreen.EditorColors.background;
+print "  text: " + colorEditorScreen.EditorColors.text;
+print "  caret: " + colorEditorScreen.EditorColors.caret;
+print "  lineCursor: " + colorEditorScreen.EditorColors.lineCursor;
+print "  lineNumbers: " + colorEditorScreen.EditorColors.lineNumbers;
+print "  consoleBackground: " + colorEditorScreen.EditorColors.consoleBackground;
+print "";
+print "Tab Colors:";
+print "  tabBackground: " + colorEditorScreen.TabColors.tabBackground;
+print "  tabLabelColor: " + colorEditorScreen.TabColors.tabLabelColor;
+print "  tabLabelChangedColor: " + colorEditorScreen.TabColors.tabLabelChangedColor;
+print "  tabLabelBackground: " + colorEditorScreen.TabColors.tabLabelBackground;
 
 print "";
 print "Console configuration color editor completed!";

@@ -130,6 +130,11 @@ public class AreaContainerFactory {
             applyPadding(container, areaDef.padding);
         }
 
+        // Apply title property (for TitledPane)
+        if (areaDef.title != null && !areaDef.title.isEmpty() && container instanceof TitledPane) {
+            ((TitledPane) container).setText(areaDef.title);
+        }
+
         // Apply custom style from AreaDefinition (overrides default)
         if (areaDef.style != null && !areaDef.style.isEmpty()) {
             container.setStyle(container.getStyle() + "; " + areaDef.style);

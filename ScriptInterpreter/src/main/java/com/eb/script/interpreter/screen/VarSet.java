@@ -17,6 +17,12 @@ public class VarSet {
     // Values: "visible" (default), "internal", "in"/"parameterIn", "out"/"parameterOut", "inout"
     private String scope;
     
+    // Group border style: none, raised, inset, lowered, line (default: none)
+    private String groupBorder;
+    
+    // Group border color in hex format (e.g., "#4a9eff")
+    private String groupBorderColor;
+    
     // Map of variables in this set, keyed by lowercase varName
     private Map<String, Var> variables;
     
@@ -26,6 +32,8 @@ public class VarSet {
     public VarSet() {
         this.variables = new HashMap<>();
         this.scope = "visible"; // Default to visible
+        this.groupBorder = "none"; // Default to no border
+        this.groupBorderColor = null; // Default to no color
     }
     
     /**
@@ -64,6 +72,22 @@ public class VarSet {
     
     public void setScope(String scope) {
         this.scope = normalizeScope(scope);
+    }
+    
+    public String getGroupBorder() {
+        return groupBorder;
+    }
+    
+    public void setGroupBorder(String groupBorder) {
+        this.groupBorder = groupBorder;
+    }
+    
+    public String getGroupBorderColor() {
+        return groupBorderColor;
+    }
+    
+    public void setGroupBorderColor(String groupBorderColor) {
+        this.groupBorderColor = groupBorderColor;
     }
     
     /**
@@ -148,6 +172,8 @@ public class VarSet {
         return "VarSet{" +
                 "setName='" + setName + '\'' +
                 ", scope='" + scope + '\'' +
+                ", groupBorder='" + groupBorder + '\'' +
+                ", groupBorderColor='" + groupBorderColor + '\'' +
                 ", variables=" + variables.size() +
                 '}';
     }
