@@ -300,6 +300,12 @@ public class Parser {
         return null;
     }
 
+    /**
+     * Convert a type name string to its corresponding EbsTokenType.
+     * This helper method maps type name strings to token types, supporting
+     * common type name variants (e.g., "int" and "integer", "bool" and "boolean").
+     * Order doesn't matter as each type has distinct non-overlapping string patterns.
+     */
     private EbsTokenType getTokenType(String str) {
         str = str.toLowerCase();
         if (EbsTokenType.BYTE.contains(str)) {
@@ -1836,7 +1842,8 @@ public class Parser {
         Expression expr = null;
         
         // Check for type casting: int(value), string(value), etc.
-        // The lexer tokenizes type names as DATATYPE tokens
+        // When type keywords like 'int', 'string' appear in source code, the lexer
+        // adds them to the keywords map as DATATYPE tokens via addKeywords()
         if (check(EbsTokenType.DATATYPE)) {
             EbsToken typeToken = advance();
             String typeName = (String) typeToken.literal;
@@ -1855,7 +1862,7 @@ public class Parser {
                 return new CastExpression(typeToken.line, dataType, valueExpr);
             } else {
                 // Type name not followed by parentheses - this is an error in expression context
-                throw error(typeToken, "Unexpected type name '" + typeName + "' in expression. Did you mean to use it for casting with parentheses?");
+                throw error(typeToken, "Unexpected type name '" + typeName + "' in expression context. Use " + typeName + "(...) for type casting.");
             }
         } else if (match(EbsTokenType.INTEGER, EbsTokenType.LONG, EbsTokenType.FLOAT, EbsTokenType.DOUBLE, EbsTokenType.DATE, EbsTokenType.BOOL_TRUE, EbsTokenType.BOOL_FALSE, EbsTokenType.NULL)) {
             expr = new LiteralExpression(type, previous().literal);
