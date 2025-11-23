@@ -1690,7 +1690,37 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             return "null";
         }
         
-        // If we have record type metadata, use it to construct the full type string
+        // Check for arrays first, as they may contain records
+        if (value instanceof ArrayDef) {
+            // Get detailed array type information
+            ArrayDef<?, ?> arrayDef = (ArrayDef<?, ?>) value;
+            DataType elementType = arrayDef.getDataType();
+            boolean isFixed = arrayDef.isFixed();
+            int size = arrayDef.size();
+            
+            // Build the array type string
+            StringBuilder sb = new StringBuilder("array.");
+            
+            // Add element type
+            if (elementType == DataType.RECORD && recordType != null) {
+                // For arrays of records, show the record structure
+                sb.append(recordType.toString());
+            } else {
+                // For primitive types, use the lowercase type name
+                sb.append(getDataTypeName(elementType));
+            }
+            
+            // Add array size information
+            if (isFixed && size > 0) {
+                sb.append("[").append(size).append("]");
+            } else {
+                sb.append("[]");
+            }
+            
+            return sb.toString();
+        }
+        
+        // If we have record type metadata and it's not an array, use it to construct the full type string
         if (recordType != null) {
             return recordType.toString();
         }
@@ -1729,8 +1759,6 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             return sb.toString();
         } else if (value instanceof java.util.List) {
             return "array";
-        } else if (value instanceof ArrayDef) {
-            return "array";
         } else if (value instanceof LocalDateTime || value instanceof LocalDate) {
             return "date";
         }
@@ -1766,6 +1794,29 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             return "date";
         }
         return "any";
+    }
+    
+    /**
+     * Get a lowercase type name from a DataType enum value.
+     */
+    private String getDataTypeName(DataType type) {
+        if (type == null) {
+            return "any";
+        }
+        return switch (type) {
+            case BYTE -> "byte";
+            case INTEGER -> "int";
+            case LONG -> "long";
+            case FLOAT -> "float";
+            case DOUBLE -> "double";
+            case STRING -> "string";
+            case DATE -> "date";
+            case BOOL -> "bool";
+            case JSON -> "json";
+            case ARRAY -> "array";
+            case RECORD -> "record";
+            default -> "any";
+        };
     }
 
     private Object evalBuiltin(CallStatement c) throws InterpreterError {
