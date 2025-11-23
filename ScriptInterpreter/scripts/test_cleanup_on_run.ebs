@@ -22,7 +22,7 @@ print "";
 // Create a message variable to demonstrate $variable reference in JSON
 var dynamicMessage: string = "This message is set from a script variable using $!";
 
-// Define a simple test screen with $variable reference
+// Define a simple test screen with $variable reference (without quotes)
 screen TestCleanupScreen = {
     "title": "Cleanup Test Screen",
     "width": 500,
@@ -32,7 +32,7 @@ screen TestCleanupScreen = {
         "vars": [{
             "name": "testMessage",
             "type": "string",
-            "default": "$dynamicMessage",
+            "default": $dynamicMessage,
             "display": {
                 "labeltext": "Dynamic Message:",
                 "type": "textfield",

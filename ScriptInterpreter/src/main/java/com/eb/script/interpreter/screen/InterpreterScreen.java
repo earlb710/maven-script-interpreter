@@ -1722,8 +1722,8 @@ public class InterpreterScreen {
     
     /**
      * Resolve variable references in JSON values.
-     * If a string value starts with '$', it's treated as a reference to a script variable.
-     * For example, "$myVar" will be replaced with the value of the script variable 'myVar'.
+     * Handles both VariableReference objects (from unquoted $var in JSON)
+     * and string values starting with '$' (for backward compatibility).
      * 
      * @param value The value to resolve (can be any type)
      * @param line The line number for error reporting
@@ -1731,6 +1731,21 @@ public class InterpreterScreen {
      * @throws InterpreterError if the variable doesn't exist
      */
     private Object resolveVariableReference(Object value, int line) throws InterpreterError {
+        // Handle VariableReference objects created by JSON parser
+        if (value instanceof com.eb.script.json.Json.VariableReference) {
+            com.eb.script.json.Json.VariableReference varRef = (com.eb.script.json.Json.VariableReference) value;
+            String varName = varRef.variableName;
+            
+            // Try to get the variable value from the environment
+            try {
+                return interpreter.environment().get(varName);
+            } catch (InterpreterError e) {
+                // Re-throw with more context about the $ reference
+                throw interpreter.error(line, "Variable reference '$" + varName + "' not found in scope");
+            }
+        }
+        
+        // For backward compatibility, also handle string values starting with $
         if (value instanceof String) {
             String strValue = (String) value;
             if (strValue.startsWith("$") && strValue.length() > 1) {
