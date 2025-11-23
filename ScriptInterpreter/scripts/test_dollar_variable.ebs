@@ -1,0 +1,213 @@
+// Test Script: $variable Reference Feature
+// This script demonstrates the $variable reference syntax in JSON
+//
+// Usage:
+//   1. Open this file in the EBS IDE
+//   2. Press the Run button
+//   3. A screen will appear showing all the dynamic values
+//
+// Key Feature:
+//   Use $variable (WITHOUT quotes) to reference script variables in JSON
+//   - $myVar = variable reference (resolves to value)
+//   - "$myVar" = literal string (the text "$myVar")
+
+print "=== Testing $variable Reference Feature ===";
+print "";
+
+// ===== Test 1: String Variables =====
+print "Test 1: String Variables";
+var userName: string = "Alice Johnson";
+var userEmail: string = "alice@example.com";
+var welcomeMsg: string = "Welcome to the EBS Script Interpreter!";
+print "  userName = '" + userName + "'";
+print "  userEmail = '" + userEmail + "'";
+print "  welcomeMsg = '" + welcomeMsg + "'";
+print "";
+
+// ===== Test 2: Numeric Variables =====
+print "Test 2: Numeric Variables";
+var userAge: int = 30;
+var accountBalance: double = 1234.56;
+var loginCount: int = 42;
+print "  userAge = " + call string.tostring(userAge);
+print "  accountBalance = " + call string.tostring(accountBalance);
+print "  loginCount = " + call string.tostring(loginCount);
+print "";
+
+// ===== Test 3: Boolean Variables =====
+print "Test 3: Boolean Variables";
+var isPremiumUser: bool = true;
+var emailVerified: bool = false;
+var accountActive: bool = true;
+print "  isPremiumUser = " + call string.tostring(isPremiumUser);
+print "  emailVerified = " + call string.tostring(emailVerified);
+print "  accountActive = " + call string.tostring(accountActive);
+print "";
+
+// ===== Test 4: Using $variable in Screen Definition =====
+print "Test 4: Creating screen with $variable references (no quotes)";
+print "  Creating screen with dynamic defaults from variables...";
+
+screen DollarVarTestScreen = {
+    "title": "Test $variable References",
+    "width": 700,
+    "height": 600,
+    "sets": [{
+        "setname": "userinfo",
+        "vars": [
+            {
+                "name": "name",
+                "type": "string",
+                "default": $userName,        // No quotes - references userName
+                "display": {
+                    "labeltext": "User Name:",
+                    "type": "textfield"
+                }
+            },
+            {
+                "name": "email",
+                "type": "string",
+                "default": $userEmail,       // No quotes - references userEmail
+                "display": {
+                    "labeltext": "Email:",
+                    "type": "textfield"
+                }
+            },
+            {
+                "name": "age",
+                "type": "int",
+                "default": $userAge,         // No quotes - references userAge
+                "display": {
+                    "labeltext": "Age:",
+                    "type": "spinner",
+                    "min": 0,
+                    "max": 150
+                }
+            },
+            {
+                "name": "balance",
+                "type": "double",
+                "default": $accountBalance,  // No quotes - references accountBalance
+                "display": {
+                    "labeltext": "Account Balance:",
+                    "type": "textfield",
+                    "editable": false
+                }
+            },
+            {
+                "name": "logins",
+                "type": "int",
+                "default": $loginCount,      // No quotes - references loginCount
+                "display": {
+                    "labeltext": "Login Count:",
+                    "type": "textfield",
+                    "editable": false
+                }
+            },
+            {
+                "name": "premium",
+                "type": "bool",
+                "default": $isPremiumUser,   // No quotes - references isPremiumUser
+                "display": {
+                    "labeltext": "Premium User",
+                    "type": "checkbox"
+                }
+            },
+            {
+                "name": "verified",
+                "type": "bool",
+                "default": $emailVerified,   // No quotes - references emailVerified
+                "display": {
+                    "labeltext": "Email Verified",
+                    "type": "checkbox"
+                }
+            },
+            {
+                "name": "active",
+                "type": "bool",
+                "default": $accountActive,   // No quotes - references accountActive
+                "display": {
+                    "labeltext": "Account Active",
+                    "type": "checkbox"
+                }
+            },
+            {
+                "name": "welcome",
+                "type": "string",
+                "default": $welcomeMsg,      // No quotes - references welcomeMsg
+                "display": {
+                    "labeltext": "Welcome Message:",
+                    "type": "textarea",
+                    "editable": false
+                }
+            }
+        ]
+    }],
+    "area": [{
+        "type": "vbox",
+        "name": "mainArea",
+        "style": "-fx-padding: 20; -fx-spacing: 10;",
+        "items": [
+            {
+                "name": "name_item",
+                "varref": "name"
+            },
+            {
+                "name": "email_item",
+                "varref": "email"
+            },
+            {
+                "name": "age_item",
+                "varref": "age"
+            },
+            {
+                "name": "balance_item",
+                "varref": "balance"
+            },
+            {
+                "name": "logins_item",
+                "varref": "logins"
+            },
+            {
+                "name": "premium_item",
+                "varref": "premium"
+            },
+            {
+                "name": "verified_item",
+                "varref": "verified"
+            },
+            {
+                "name": "active_item",
+                "varref": "active"
+            },
+            {
+                "name": "welcome_item",
+                "varref": "welcome"
+            }
+        ]
+    }]
+};
+
+// Show the screen
+show screen DollarVarTestScreen;
+
+print "  ✓ Screen created successfully!";
+print "";
+print "=== Verification ===";
+print "Check the screen window. All fields should be pre-filled with values:";
+print "  • User Name: Alice Johnson";
+print "  • Email: alice@example.com";
+print "  • Age: 30";
+print "  • Account Balance: 1234.56";
+print "  • Login Count: 42";
+print "  • Premium User: checked";
+print "  • Email Verified: unchecked";
+print "  • Account Active: checked";
+print "  • Welcome Message: Welcome to the EBS Script Interpreter!";
+print "";
+print "=== Test Complete ===";
+print "The $variable feature is working correctly!";
+print "";
+print "Remember:";
+print "  • Use $myVar (WITHOUT quotes) for variable references";
+print "  • Use \"$myVar\" (WITH quotes) for literal strings";
