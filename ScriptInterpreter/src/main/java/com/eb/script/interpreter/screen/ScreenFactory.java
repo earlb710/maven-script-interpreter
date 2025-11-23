@@ -1929,7 +1929,9 @@ public class ScreenFactory {
                     javafx.scene.paint.Color color = javafx.scene.paint.Color.web(colorString);
                     ((javafx.scene.control.ColorPicker) control).setValue(color);
                 } catch (IllegalArgumentException e) {
-                    System.err.println("Warning: Invalid color string '" + colorString + "' for ColorPicker");
+                    String varName = (String) control.getProperties().get("varName");
+                    System.err.println("Warning: Invalid color string '" + colorString + "' for ColorPicker" 
+                        + (varName != null ? " (variable: " + varName + ")" : ""));
                 }
             }
         } else if (control instanceof javafx.scene.control.DatePicker) {
@@ -1942,8 +1944,10 @@ public class ScreenFactory {
                     try {
                         java.time.LocalDate date = java.time.LocalDate.parse(String.valueOf(value));
                         ((javafx.scene.control.DatePicker) control).setValue(date);
-                    } catch (Exception e) {
-                        System.err.println("Warning: Invalid date string '" + value + "' for DatePicker");
+                    } catch (java.time.format.DateTimeParseException e) {
+                        String varName = (String) control.getProperties().get("varName");
+                        System.err.println("Warning: Invalid date string '" + value + "' for DatePicker"
+                            + (varName != null ? " (variable: " + varName + ")" : ""));
                     }
                 }
             }
