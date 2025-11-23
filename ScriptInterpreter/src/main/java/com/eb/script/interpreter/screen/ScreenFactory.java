@@ -1921,6 +1921,32 @@ public class ScreenFactory {
                     }
                 }
             }
+        } else if (control instanceof javafx.scene.control.ColorPicker) {
+            // Handle ColorPicker - value should be a color string (e.g., "#ff0000", "red", etc.)
+            if (value != null) {
+                String colorString = String.valueOf(value);
+                try {
+                    javafx.scene.paint.Color color = javafx.scene.paint.Color.web(colorString);
+                    ((javafx.scene.control.ColorPicker) control).setValue(color);
+                } catch (IllegalArgumentException e) {
+                    System.err.println("Warning: Invalid color string '" + colorString + "' for ColorPicker");
+                }
+            }
+        } else if (control instanceof javafx.scene.control.DatePicker) {
+            // Handle DatePicker - value should be a LocalDate or date string
+            if (value != null) {
+                if (value instanceof java.time.LocalDate) {
+                    ((javafx.scene.control.DatePicker) control).setValue((java.time.LocalDate) value);
+                } else {
+                    // Try to parse as string
+                    try {
+                        java.time.LocalDate date = java.time.LocalDate.parse(String.valueOf(value));
+                        ((javafx.scene.control.DatePicker) control).setValue(date);
+                    } catch (Exception e) {
+                        System.err.println("Warning: Invalid date string '" + value + "' for DatePicker");
+                    }
+                }
+            }
         }
     }
     
@@ -2148,9 +2174,28 @@ public class ScreenFactory {
             choiceBox.valueProperty().addListener((obs, oldVal, newVal) -> {
                 screenVars.put(varName, newVal);
             });
+        } else if (control instanceof javafx.scene.control.ColorPicker) {
+            javafx.scene.control.ColorPicker colorPicker = (javafx.scene.control.ColorPicker) control;
+            colorPicker.valueProperty().addListener((obs, oldVal, newVal) -> {
+                // Convert Color to web string format (e.g., "#ff0000")
+                if (newVal != null) {
+                    String colorString = String.format("#%02x%02x%02x",
+                        (int) (newVal.getRed() * 255),
+                        (int) (newVal.getGreen() * 255),
+                        (int) (newVal.getBlue() * 255));
+                    screenVars.put(varName, colorString);
+                } else {
+                    screenVars.put(varName, null);
+                }
+            });
+        } else if (control instanceof javafx.scene.control.DatePicker) {
+            javafx.scene.control.DatePicker datePicker = (javafx.scene.control.DatePicker) control;
+            datePicker.valueProperty().addListener((obs, oldVal, newVal) -> {
+                screenVars.put(varName, newVal);
+            });
         }
     }
-
+    
     /**
      * Refreshes all bound controls by updating their values from the screenVars
      * map. This is called after onClick handlers execute to reflect variable
