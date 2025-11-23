@@ -586,6 +586,11 @@ companyData = [
 print companyData.length;  // 2
 print companyData[0];      // First department
 print companyData[1];      // Second department
+
+// Update nested fields in array elements
+companyData[0].department.name = "Research & Development";
+companyData[0].department.location = "Building C";
+companyData[1].department.manager = "New Manager";
 ```
 
 #### Type Alias Features
@@ -601,6 +606,7 @@ print companyData[1];      // Second department
 - **Record field updates**: Fields can be updated using assignment, including nested fields
   - Top-level: `person.name = "value"`
   - Nested: `customer.address.city = "value"`
+  - Array elements: `employees[0].address.city = "value"`
   - Case-insensitive property access (e.g., `zipCode` and `zipcode` both work)
 - Access whole records/arrays for reading (e.g., `print person`)
 
