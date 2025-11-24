@@ -212,14 +212,17 @@ public class InterpreterArray {
         // Handle PropertyExpression (e.g., record.field = value or array[0].field = value)
         if (stmt.target instanceof PropertyExpression propExpr) {
             // Check if this is a screen variable assignment (screenName.varName = value)
+            // Note: Screen and variable names are case-insensitive (normalized to lowercase by lexer)
             if (propExpr.object instanceof VariableExpression varExpr) {
                 // Null safety checks
                 if (varExpr.name != null && propExpr.propertyName != null) {
+                    // Normalize to lowercase for case-insensitive lookup
                     String screenName = varExpr.name.toLowerCase();
                     ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars(screenName);
                     
                     if (screenVarMap != null) {
                         // This is a screen variable assignment
+                        // Normalize to lowercase for case-insensitive lookup
                         String varName = propExpr.propertyName.toLowerCase();
                         
                         // Check if the variable exists in the screen
@@ -234,7 +237,7 @@ public class InterpreterArray {
                             context.triggerScreenRefresh(screenName);
                             return;
                         } else {
-                            throw interpreter.error(stmt.getLine(), "Screen '" + screenName + "' does not have a variable named '" + propExpr.propertyName + "'.");
+                            throw interpreter.error(stmt.getLine(), "Screen '" + screenName + "' does not have a variable named '" + varName + "'.");
                         }
                     }
                 }
