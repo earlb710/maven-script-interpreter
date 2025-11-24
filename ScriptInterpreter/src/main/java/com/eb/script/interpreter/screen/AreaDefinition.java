@@ -34,6 +34,8 @@ public class AreaDefinition {
     public String groupLabelText;
     // Group label alignment: left, center, right (default: left)
     public String groupLabelAlignment;
+    // Group label offset: top, on, bottom (default: on) - controls vertical position relative to border
+    public String groupLabelOffset;
     // Spacing between children (for HBox, VBox, FlowPane, GridPane, TilePane)
     public String spacing;
     // Padding inside the area (for all Region types)
@@ -60,6 +62,7 @@ public class AreaDefinition {
                ", groupBorderColor='" + groupBorderColor + '\'' +
                ", groupLabelText='" + groupLabelText + '\'' +
                ", groupLabelAlignment='" + groupLabelAlignment + '\'' +
+               ", groupLabelOffset='" + groupLabelOffset + '\'' +
                ", spacing='" + spacing + '\'' +
                ", padding='" + padding + '\'' +
                ", items=" + items.size() +

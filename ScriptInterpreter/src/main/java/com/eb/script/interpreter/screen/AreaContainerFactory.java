@@ -149,7 +149,7 @@ public class AreaContainerFactory {
             
             // Add group label if specified
             if (areaDef.groupLabelText != null && !areaDef.groupLabelText.isEmpty()) {
-                addGroupLabel(container, areaDef.groupLabelText, areaDef.groupLabelAlignment, areaDef.groupBorderColor);
+                addGroupLabel(container, areaDef.groupLabelText, areaDef.groupLabelAlignment, areaDef.groupBorderColor, areaDef.groupLabelOffset);
             }
         }
 
@@ -193,16 +193,17 @@ public class AreaContainerFactory {
     }
     
     /**
-     * Adds a group label to a container. The label is positioned at the top of the container
-     * with the specified alignment. The label sits on top of the border.
+     * Adds a group label to a container. The label is positioned relative to the border
+     * with the specified alignment and offset. Also adjusts container padding based on offset.
      * @param container The container to add the label to
      * @param labelText The text for the label
      * @param alignment The alignment: left, center, right (default: left)
      * @param borderColor The border color to use for label styling (optional)
+     * @param offset The vertical offset: top, on, bottom (default: on)
      */
-    private static void addGroupLabel(Region container, String labelText, String alignment, String borderColor) {
+    private static void addGroupLabel(Region container, String labelText, String alignment, String borderColor, String offset) {
         // Create a label with the group text
-        javafx.scene.control.Label label = new javafx.scene.control.Label(labelText);
+        Label label = new Label(labelText);
         
         // Style the label
         String labelColor = (borderColor != null && !borderColor.isEmpty()) ? borderColor : "#808080";
@@ -213,47 +214,161 @@ public class AreaContainerFactory {
         
         // Position label based on alignment
         String alignmentValue = (alignment != null) ? alignment.toLowerCase() : "left";
-        label.setTranslateY(-10); // Move label up to sit on the border
         
-        switch (alignmentValue) {
-            case "center":
-                label.setTranslateX(0);
-                label.setAlignment(Pos.CENTER);
-                if (container instanceof Pane) {
-                    StackPane.setAlignment(label, Pos.TOP_CENTER);
-                }
-                break;
-            case "right":
-                label.setTranslateX(-10);
-                label.setAlignment(Pos.CENTER_RIGHT);
-                if (container instanceof Pane) {
-                    StackPane.setAlignment(label, Pos.TOP_RIGHT);
-                }
-                break;
-            case "left":
-            default:
-                label.setTranslateX(10);
-                label.setAlignment(Pos.CENTER_LEFT);
-                if (container instanceof Pane) {
-                    StackPane.setAlignment(label, Pos.TOP_LEFT);
-                }
-                break;
-        }
+        // Determine vertical offset based on offset parameter
+        String offsetValue = (offset != null) ? offset.toLowerCase() : "on";
+        double translateY = getVerticalOffset(offsetValue, label);
+        
+        // Adjust container padding based on offset to prevent unnecessary space
+        adjustPaddingForLabelOffset(container, offsetValue);
         
         // Add the label to the container
-        // For VBox/HBox, insert at the beginning
+        // For VBox/HBox, insert at the beginning with proper alignment
         if (container instanceof VBox) {
-            ((VBox) container).getChildren().add(0, label);
+            HBox labelWrapper = createAlignedLabelWrapper(label, alignmentValue, translateY);
+            ((VBox) container).getChildren().add(0, labelWrapper);
         } else if (container instanceof HBox) {
-            ((HBox) container).getChildren().add(0, label);
+            HBox labelWrapper = createAlignedLabelWrapper(label, alignmentValue, translateY);
+            ((HBox) container).getChildren().add(0, labelWrapper);
         } else if (container instanceof Pane) {
+            // For Pane, use translateX to position the label
+            label.setTranslateY(translateY);
+            switch (alignmentValue) {
+                case "center":
+                    label.setTranslateX(0);
+                    label.setAlignment(Pos.CENTER);
+                    break;
+                case "right":
+                    label.setTranslateX(-10);
+                    label.setAlignment(Pos.CENTER_RIGHT);
+                    break;
+                case "left":
+                default:
+                    label.setTranslateX(10);
+                    label.setAlignment(Pos.CENTER_LEFT);
+                    break;
+            }
             ((Pane) container).getChildren().add(label);
         } else if (container instanceof StackPane) {
+            label.setTranslateY(translateY);
             ((StackPane) container).getChildren().add(label);
             StackPane.setAlignment(label, 
                 alignmentValue.equals("center") ? Pos.TOP_CENTER :
                 alignmentValue.equals("right") ? Pos.TOP_RIGHT : Pos.TOP_LEFT);
         }
+    }
+    
+    /**
+     * Adjusts container padding based on label offset to prevent unnecessary vertical space.
+     * Modifies the container's style directly to ensure padding takes effect even if
+     * style properties are set.
+     * For 'top' offset: adds top padding for space between border and label above.
+     * For 'on' offset: no extra padding since label sits on border.
+     * For 'bottom' offset: adds bottom padding for space between border and label below.
+     * @param container The container to adjust padding for
+     * @param offset The label offset value: "top", "on", or "bottom"
+     */
+    private static void adjustPaddingForLabelOffset(Region container, String offset) {
+        javafx.geometry.Insets currentPadding = container.getPadding();
+        if (currentPadding == null) {
+            currentPadding = new javafx.geometry.Insets(0);
+        }
+        
+        double topPadding = currentPadding.getTop();
+        double bottomPadding = currentPadding.getBottom();
+        
+        switch (offset) {
+            case "top":
+                // For top offset, add extra top padding to create space between border and label above
+                topPadding = Math.max(currentPadding.getTop(), 20);
+                break;
+            case "on":
+                // For on offset, no extra padding - label sits on border, content can be close
+                // Keep original padding or use minimal if none set
+                topPadding = Math.max(currentPadding.getTop(), 2);
+                break;
+            case "bottom":
+                // For bottom offset, add extra bottom padding to create space between content and label below
+                bottomPadding = Math.max(currentPadding.getBottom(), 20);
+                break;
+            default:
+                return; // No adjustment for unknown offsets
+        }
+        
+        // Remove any existing -fx-padding declarations from the style string
+        String currentStyle = container.getStyle();
+        if (currentStyle == null) {
+            currentStyle = "";
+        }
+        
+        // Remove existing -fx-padding declarations (case-insensitive)
+        currentStyle = currentStyle.replaceAll("(?i)-fx-padding\\s*:\\s*[^;]+;?", "");
+        
+        // Apply new padding via style to ensure it takes effect
+        String paddingStyle = String.format("-fx-padding: %.0fpx %.0fpx %.0fpx %.0fpx;",
+            topPadding,
+            currentPadding.getRight(),
+            bottomPadding,
+            currentPadding.getLeft());
+        
+        container.setStyle(currentStyle + " " + paddingStyle);
+    }
+    
+    /**
+     * Determines the vertical offset (translateY) value based on the offset parameter.
+     * More negative values move the label up, less negative values move it down.
+     * All offsets now use dynamic font height calculation for consistent positioning.
+     * @param offset The offset value: "top", "on", "bottom"
+     * @param label The label to calculate font height from (for dynamic positioning)
+     * @return The translateY value in pixels
+     */
+    private static double getVerticalOffset(String offset, Label label) {
+        // Calculate font height from the label
+        javafx.scene.text.Font font = label.getFont();
+        double fontHeight = font.getSize(); // Approximate font height
+        
+        switch (offset) {
+            case "top":
+                // Position above the border - dynamic based on font height
+                return -8 - fontHeight;
+            case "bottom":
+                return -8; // Position slightly above the border baseline
+            case "on":
+            default:
+                // Default: border goes through label - uses half font height
+                return -8 - (fontHeight / 2);
+        }
+    }
+    
+    /**
+     * Creates an HBox wrapper for a label with the specified alignment and vertical offset.
+     * This wrapper allows proper horizontal alignment of labels within VBox/HBox containers.
+     * @param label The label to wrap
+     * @param alignmentValue The alignment value: "left", "center", or "right"
+     * @param translateY The vertical offset in pixels
+     * @return An HBox containing the label with proper alignment
+     */
+    private static HBox createAlignedLabelWrapper(Label label, String alignmentValue, double translateY) {
+        HBox labelWrapper = new HBox(label);
+        labelWrapper.setTranslateY(translateY);
+        
+        // Set the alignment of the wrapper HBox based on alignment value
+        Pos wrapperAlignment;
+        switch (alignmentValue) {
+            case "center":
+                wrapperAlignment = Pos.CENTER;
+                break;
+            case "right":
+                wrapperAlignment = Pos.CENTER_RIGHT;
+                break;
+            case "left":
+            default:
+                wrapperAlignment = Pos.CENTER_LEFT;
+                break;
+        }
+        labelWrapper.setAlignment(wrapperAlignment);
+        
+        return labelWrapper;
     }
 
     /**
