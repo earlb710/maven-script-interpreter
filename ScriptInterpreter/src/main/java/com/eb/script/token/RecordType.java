@@ -1,7 +1,9 @@
 package com.eb.script.token;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Represents a record type definition with named fields and their types.
@@ -108,16 +110,15 @@ public class RecordType {
         Map<String, Object> record = (Map<String, Object>) value;
         
         // First, check that all required fields from the RecordType definition exist in the JSON
+        // Create a case-insensitive set of JSON field names for O(1) lookup
+        Set<String> jsonFieldsLowerCase = new HashSet<>();
+        for (String jsonField : record.keySet()) {
+            jsonFieldsLowerCase.add(jsonField.toLowerCase());
+        }
+        
+        // Check each required field exists in the JSON
         for (String requiredField : fields.keySet()) {
-            boolean found = false;
-            // Check case-insensitively
-            for (String jsonField : record.keySet()) {
-                if (jsonField.equalsIgnoreCase(requiredField)) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
+            if (!jsonFieldsLowerCase.contains(requiredField.toLowerCase())) {
                 System.err.println("Error: Required field '" + requiredField + "' is missing from JSON object");
                 return false;
             }
