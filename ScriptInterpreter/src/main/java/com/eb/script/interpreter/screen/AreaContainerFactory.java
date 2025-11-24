@@ -275,18 +275,21 @@ public class AreaContainerFactory {
         javafx.geometry.Insets newPadding;
         switch (offset) {
             case "top":
-                // For top offset, add padding at top for the border and label
+                // For top offset, ensure adequate top padding for the border and label space
+                // Use at least 20px to accommodate the label above the border
                 newPadding = new javafx.geometry.Insets(
-                    Math.max(currentPadding.getTop(), 15), // Ensure minimum top padding for border
+                    Math.max(currentPadding.getTop(), 20),
                     currentPadding.getRight(),
                     currentPadding.getBottom(),
                     currentPadding.getLeft()
                 );
                 break;
             case "on":
-                // For on offset, reduce top padding slightly since label sits on border
+                // For on offset, reduce top padding significantly since label sits on border
+                // Use minimal padding (2-3px) since the label overlaps the border
+                double reducedTop = Math.min(currentPadding.getTop() * 0.3, 3);
                 newPadding = new javafx.geometry.Insets(
-                    Math.max(currentPadding.getTop() * 0.5, 5), // Reduce but keep minimum
+                    Math.max(reducedTop, 2), // Very minimal top padding
                     currentPadding.getRight(),
                     currentPadding.getBottom(),
                     currentPadding.getLeft()
