@@ -755,10 +755,21 @@ public class ScreenFactory {
         
         // Log debug information for this container if debug mode is enabled
         if (isDebugMode()) {
-            String containerContext = String.format("Created container: %s (type: %s)", 
+            StringBuilder contextBuilder = new StringBuilder();
+            contextBuilder.append(String.format("Created container: %s (type: %s)", 
                 areaDef.name != null ? areaDef.name : "<unnamed>",
-                areaDef.areaType != null ? areaDef.areaType : "<none>");
-            logNodeDebug(container, containerContext);
+                areaDef.areaType != null ? areaDef.areaType.toString().toLowerCase() : "<none>"));
+            
+            // Add groupBorder info if present
+            if (areaDef.groupBorder != null && !areaDef.groupBorder.isEmpty() && !areaDef.groupBorder.equalsIgnoreCase("none")) {
+                contextBuilder.append(String.format(" [groupBorder: %s", areaDef.groupBorder));
+                if (areaDef.groupBorderColor != null && !areaDef.groupBorderColor.isEmpty()) {
+                    contextBuilder.append(String.format(", color: %s", areaDef.groupBorderColor));
+                }
+                contextBuilder.append("]");
+            }
+            
+            logNodeDebug(container, contextBuilder.toString());
         }
 
         // Sort items by sequence

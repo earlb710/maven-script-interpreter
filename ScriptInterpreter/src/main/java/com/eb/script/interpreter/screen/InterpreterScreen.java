@@ -1485,14 +1485,16 @@ public class InterpreterScreen {
             area.title = String.valueOf(areaDef.get("title"));
         }
         
-        // Extract groupBorder property (for visual grouping)
-        if (areaDef.containsKey("groupBorder")) {
-            area.groupBorder = String.valueOf(areaDef.get("groupBorder"));
+        // Extract groupBorder property (for visual grouping) - case-insensitive
+        Object groupBorderObj = getCaseInsensitive(areaDef, "groupBorder");
+        if (groupBorderObj != null) {
+            area.groupBorder = String.valueOf(groupBorderObj);
         }
         
-        // Extract groupBorderColor property (for visual grouping)
-        if (areaDef.containsKey("groupBorderColor")) {
-            area.groupBorderColor = String.valueOf(areaDef.get("groupBorderColor"));
+        // Extract groupBorderColor property (for visual grouping) - case-insensitive
+        Object groupBorderColorObj = getCaseInsensitive(areaDef, "groupBorderColor");
+        if (groupBorderColorObj != null) {
+            area.groupBorderColor = String.valueOf(groupBorderColorObj);
         }
         
         // Extract spacing property
