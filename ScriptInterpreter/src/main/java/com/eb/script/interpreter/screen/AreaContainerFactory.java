@@ -194,7 +194,7 @@ public class AreaContainerFactory {
     
     /**
      * Adds a group label to a container. The label is positioned relative to the border
-     * with the specified alignment and offset.
+     * with the specified alignment and offset. Also adjusts container padding based on offset.
      * @param container The container to add the label to
      * @param labelText The text for the label
      * @param alignment The alignment: left, center, right (default: left)
@@ -218,6 +218,9 @@ public class AreaContainerFactory {
         // Determine vertical offset based on offset parameter
         String offsetValue = (offset != null) ? offset.toLowerCase() : "on";
         double translateY = getVerticalOffset(offsetValue);
+        
+        // Adjust container padding based on offset to prevent unnecessary space
+        adjustPaddingForLabelOffset(container, offsetValue);
         
         // Add the label to the container
         // For VBox/HBox, insert at the beginning with proper alignment
@@ -253,6 +256,49 @@ public class AreaContainerFactory {
                 alignmentValue.equals("center") ? Pos.TOP_CENTER :
                 alignmentValue.equals("right") ? Pos.TOP_RIGHT : Pos.TOP_LEFT);
         }
+    }
+    
+    /**
+     * Adjusts container padding based on label offset to prevent unnecessary vertical space.
+     * For 'top' offset: adds top padding for the border.
+     * For 'on' and 'bottom': reduces top padding since label doesn't take up as much space.
+     * @param container The container to adjust padding for
+     * @param offset The label offset value: "top", "on", or "bottom"
+     */
+    private static void adjustPaddingForLabelOffset(Region container, String offset) {
+        javafx.geometry.Insets currentPadding = container.getPadding();
+        if (currentPadding == null) {
+            currentPadding = new javafx.geometry.Insets(0);
+        }
+        
+        javafx.geometry.Insets newPadding;
+        switch (offset) {
+            case "top":
+                // For top offset, add padding at top for the border and label
+                newPadding = new javafx.geometry.Insets(
+                    Math.max(currentPadding.getTop(), 15), // Ensure minimum top padding for border
+                    currentPadding.getRight(),
+                    currentPadding.getBottom(),
+                    currentPadding.getLeft()
+                );
+                break;
+            case "on":
+                // For on offset, reduce top padding slightly since label sits on border
+                newPadding = new javafx.geometry.Insets(
+                    Math.max(currentPadding.getTop() * 0.5, 5), // Reduce but keep minimum
+                    currentPadding.getRight(),
+                    currentPadding.getBottom(),
+                    currentPadding.getLeft()
+                );
+                break;
+            case "bottom":
+            default:
+                // For bottom offset, minimal top padding adjustment
+                newPadding = currentPadding;
+                break;
+        }
+        
+        container.setPadding(newPadding);
     }
     
     /**
