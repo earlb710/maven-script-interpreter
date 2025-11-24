@@ -2,6 +2,8 @@
 // Description: A screen with updatable fields for client information using individual fields that map to array.record
 // Fields: client name, surname, age, id (3 clients)
 
+print "DEBUG: Starting screen definition...";
+
 screen clientScreen = {
     "title": "Client Information - Multiple Clients",
     "width": 650,
@@ -150,12 +152,17 @@ screen clientScreen = {
     ]
 };
 
+print "DEBUG: Screen definition complete.";
+print "DEBUG: Screen has " + json.stringify(clientScreen).length + " characters in JSON.";
+
 // Initialize array with 3 client records
+print "DEBUG: Initializing clients array...";
 clientScreen.clients = [
     {"clientName": "", "surname": "", "age": 18, "clientId": ""},
     {"clientName": "", "surname": "", "age": 18, "clientId": ""},
     {"clientName": "", "surname": "", "age": 18, "clientId": ""}
 ];
+print "DEBUG: Clients array initialized with " + clientScreen.clients.length + " elements.";
 
 // Display initial values
 print "Client Information Screen";
@@ -236,7 +243,13 @@ print "  ID: " + clientScreen.clients[2].clientId;
 print "";
 print "Displaying client screen...";
 print "The screen allows updating all client fields for 3 clients.";
+print "DEBUG: About to call 'show screen clientScreen'...";
+print "DEBUG: Screen title: " + clientScreen.title;
+print "DEBUG: Screen width: " + clientScreen.width;
+print "DEBUG: Screen height: " + clientScreen.height;
+print "DEBUG: Calling show screen now...";
 show screen clientScreen;
+print "DEBUG: show screen call returned.";
 
 print "";
 print "Client screen is now displayed and ready for input!";
