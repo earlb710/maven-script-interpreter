@@ -202,7 +202,7 @@ public class AreaContainerFactory {
      */
     private static void addGroupLabel(Region container, String labelText, String alignment, String borderColor) {
         // Create a label with the group text
-        javafx.scene.control.Label label = new javafx.scene.control.Label(labelText);
+        Label label = new Label(labelText);
         
         // Style the label
         String labelColor = (borderColor != null && !borderColor.isEmpty()) ? borderColor : "#808080";
@@ -257,13 +257,24 @@ public class AreaContainerFactory {
      * @param alignmentValue The alignment value: "left", "center", or "right"
      * @return An HBox containing the label with proper alignment
      */
-    private static HBox createAlignedLabelWrapper(javafx.scene.control.Label label, String alignmentValue) {
+    private static HBox createAlignedLabelWrapper(Label label, String alignmentValue) {
         HBox labelWrapper = new HBox(label);
         labelWrapper.setTranslateY(-10); // Move wrapper up to sit on the border
         
         // Set the alignment of the wrapper HBox based on alignment value
-        Pos wrapperAlignment = alignmentValue.equals("center") ? Pos.CENTER :
-                               alignmentValue.equals("right") ? Pos.CENTER_RIGHT : Pos.CENTER_LEFT;
+        Pos wrapperAlignment;
+        switch (alignmentValue) {
+            case "center":
+                wrapperAlignment = Pos.CENTER;
+                break;
+            case "right":
+                wrapperAlignment = Pos.CENTER_RIGHT;
+                break;
+            case "left":
+            default:
+                wrapperAlignment = Pos.CENTER_LEFT;
+                break;
+        }
         labelWrapper.setAlignment(wrapperAlignment);
         
         return labelWrapper;
