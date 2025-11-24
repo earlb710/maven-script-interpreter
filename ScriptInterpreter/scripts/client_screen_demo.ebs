@@ -16,7 +16,8 @@ screen clientInfoScreen = {
             "display": {
                 "type": "textfield",
                 "labelText": "Client 1 - Name:",
-                "promptText": "Enter client name"
+                "promptText": "Enter client name",
+                "seq": 1
             }
         },
         {
@@ -26,7 +27,8 @@ screen clientInfoScreen = {
             "display": {
                 "type": "textfield",
                 "labelText": "Surname:",
-                "promptText": "Enter last name"
+                "promptText": "Enter last name",
+                "seq": 2
             }
         },
         {
@@ -37,7 +39,8 @@ screen clientInfoScreen = {
                 "type": "spinner",
                 "min": 0,
                 "max": 150,
-                "labelText": "Age:"
+                "labelText": "Age:",
+                "seq": 3
             }
         },
         {
@@ -47,7 +50,8 @@ screen clientInfoScreen = {
             "display": {
                 "type": "textfield",
                 "labelText": "Client ID:",
-                "promptText": "e.g., CLT-001"
+                "promptText": "e.g., CLT-001",
+                "seq": 4
             }
         },
         // Client 2 fields
@@ -58,7 +62,8 @@ screen clientInfoScreen = {
             "display": {
                 "type": "textfield",
                 "labelText": "Client 2 - Name:",
-                "promptText": "Enter client name"
+                "promptText": "Enter client name",
+                "seq": 5
             }
         },
         {
@@ -68,7 +73,8 @@ screen clientInfoScreen = {
             "display": {
                 "type": "textfield",
                 "labelText": "Surname:",
-                "promptText": "Enter last name"
+                "promptText": "Enter last name",
+                "seq": 6
             }
         },
         {
@@ -79,7 +85,8 @@ screen clientInfoScreen = {
                 "type": "spinner",
                 "min": 0,
                 "max": 150,
-                "labelText": "Age:"
+                "labelText": "Age:",
+                "seq": 7
             }
         },
         {
@@ -89,7 +96,8 @@ screen clientInfoScreen = {
             "display": {
                 "type": "textfield",
                 "labelText": "Client ID:",
-                "promptText": "e.g., CLT-002"
+                "promptText": "e.g., CLT-002",
+                "seq": 8
             }
         },
         // Client 3 fields
@@ -100,7 +108,8 @@ screen clientInfoScreen = {
             "display": {
                 "type": "textfield",
                 "labelText": "Client 3 - Name:",
-                "promptText": "Enter client name"
+                "promptText": "Enter client name",
+                "seq": 9
             }
         },
         {
@@ -110,7 +119,8 @@ screen clientInfoScreen = {
             "display": {
                 "type": "textfield",
                 "labelText": "Surname:",
-                "promptText": "Enter last name"
+                "promptText": "Enter last name",
+                "seq": 10
             }
         },
         {
@@ -121,7 +131,8 @@ screen clientInfoScreen = {
                 "type": "spinner",
                 "min": 0,
                 "max": 150,
-                "labelText": "Age:"
+                "labelText": "Age:",
+                "seq": 11
             }
         },
         {
@@ -131,7 +142,8 @@ screen clientInfoScreen = {
             "display": {
                 "type": "textfield",
                 "labelText": "Client ID:",
-                "promptText": "e.g., CLT-003"
+                "promptText": "e.g., CLT-003",
+                "seq": 12
             }
         }
     ]
