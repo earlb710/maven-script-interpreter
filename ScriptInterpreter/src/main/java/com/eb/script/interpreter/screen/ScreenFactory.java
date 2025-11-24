@@ -769,6 +769,9 @@ public class ScreenFactory {
                 if (areaDef.groupBorderWidth != null && !areaDef.groupBorderWidth.isEmpty()) {
                     contextBuilder.append(String.format(", width: %s", areaDef.groupBorderWidth));
                 }
+                if (areaDef.groupBorderInsets != null && !areaDef.groupBorderInsets.isEmpty()) {
+                    contextBuilder.append(String.format(", insets: %s", areaDef.groupBorderInsets));
+                }
                 contextBuilder.append("]");
             }
             

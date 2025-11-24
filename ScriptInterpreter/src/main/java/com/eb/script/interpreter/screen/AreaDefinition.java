@@ -32,6 +32,8 @@ public class AreaDefinition {
     public String groupBorderColor;
     // Group border width in pixels (e.g., "2" or "2px") - default varies by border type
     public String groupBorderWidth;
+    // Group border insets in pixels (e.g., "5" for all sides, or "5 10" for top/bottom and left/right, or "5 10 5 10" for top, right, bottom, left)
+    public String groupBorderInsets;
     // Group label text (displayed inside/on the group border)
     public String groupLabelText;
     // Group label alignment: left, center, right (default: left)
@@ -63,6 +65,7 @@ public class AreaDefinition {
                ", groupBorder='" + groupBorder + '\'' +
                ", groupBorderColor='" + groupBorderColor + '\'' +
                ", groupBorderWidth='" + groupBorderWidth + '\'' +
+               ", groupBorderInsets='" + groupBorderInsets + '\'' +
                ", groupLabelText='" + groupLabelText + '\'' +
                ", groupLabelAlignment='" + groupLabelAlignment + '\'' +
                ", groupLabelOffset='" + groupLabelOffset + '\'' +
