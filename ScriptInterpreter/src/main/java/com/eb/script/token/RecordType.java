@@ -107,7 +107,23 @@ public class RecordType {
         @SuppressWarnings("unchecked")
         Map<String, Object> record = (Map<String, Object>) value;
         
-        // Check that all fields in the record match the defined types
+        // First, check that all required fields from the RecordType definition exist in the JSON
+        for (String requiredField : fields.keySet()) {
+            boolean found = false;
+            // Check case-insensitively
+            for (String jsonField : record.keySet()) {
+                if (jsonField.equalsIgnoreCase(requiredField)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                System.err.println("Error: Required field '" + requiredField + "' is missing from JSON object");
+                return false;
+            }
+        }
+        
+        // Then, check that all fields in the record match the defined types
         for (Map.Entry<String, Object> entry : record.entrySet()) {
             String fieldName = entry.getKey();
             Object fieldValue = entry.getValue();
