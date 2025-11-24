@@ -15,6 +15,7 @@ import com.eb.script.interpreter.statement.StatementKind;
 import com.eb.script.token.DataType;
 
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * InterpreterArray handles all array-related interpreter operations.
@@ -211,9 +212,9 @@ public class InterpreterArray {
         // Handle PropertyExpression (e.g., record.field = value or array[0].field = value)
         if (stmt.target instanceof PropertyExpression propExpr) {
             // Check if this is a screen variable assignment (screenName.varName = value)
-            if (propExpr.object instanceof com.eb.script.interpreter.expression.VariableExpression varExpr) {
+            if (propExpr.object instanceof VariableExpression varExpr) {
                 String screenName = varExpr.name.toLowerCase();
-                java.util.concurrent.ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars(screenName);
+                ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars(screenName);
                 
                 if (screenVarMap != null) {
                     // This is a screen variable assignment
@@ -224,6 +225,9 @@ public class InterpreterArray {
                     
                     // Assign the value to the screen variable
                     screenVarMap.put(varName, value);
+                    
+                    // Trigger screen refresh to update UI controls
+                    context.triggerScreenRefresh(screenName);
                     return;
                 }
             }
