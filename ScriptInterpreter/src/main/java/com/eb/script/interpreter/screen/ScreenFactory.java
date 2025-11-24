@@ -436,6 +436,21 @@ public class ScreenFactory {
             java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
             OnClickHandler onClickHandler,
             InterpreterContext context) {
+        // Log debug mode state at the start of createScreen for troubleshooting
+        if (isDebugMode()) {
+            System.out.println("\n[DEBUG] createScreen() called with debug mode ENABLED");
+            System.out.println("[DEBUG] Thread: " + Thread.currentThread().getName());
+            System.out.println("[DEBUG] Screen: " + screenName);
+            System.out.println("[DEBUG] Areas count: " + (areas != null ? areas.size() : 0));
+            if (areas != null && !areas.isEmpty()) {
+                for (AreaDefinition area : areas) {
+                    System.out.println("[DEBUG]   - Area: " + area.name + 
+                        " (childAreas: " + (area.childAreas != null ? area.childAreas.size() : 0) + 
+                        ", items: " + (area.items != null ? area.items.size() : 0) + ")");
+                }
+            }
+        }
+        
         Stage stage = new Stage();
         stage.setTitle(title);
 
