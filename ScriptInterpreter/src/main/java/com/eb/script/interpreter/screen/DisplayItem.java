@@ -70,6 +70,8 @@ public class DisplayItem {
     public List<TableColumn> columns;
     // Number of records to display in TableView (for height calculation)
     public Integer displayRecords;
+    // Sequence number for ordering display items (lower numbers appear first)
+    public Integer seq;
     
     /**
      * Inner class to define a table column

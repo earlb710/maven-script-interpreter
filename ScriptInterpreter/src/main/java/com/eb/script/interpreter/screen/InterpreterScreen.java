@@ -226,7 +226,17 @@ public class InterpreterScreen {
                     defaultArea.screenName = stmt.name;
                     defaultArea.style = "-fx-spacing: 10; -fx-padding: 10;";
 
-                    for (String varName : varsWithDisplay) {
+                    // Sort variables by their seq field if present
+                    List<String> sortedVarsWithDisplay = new ArrayList<>(varsWithDisplay);
+                    sortedVarsWithDisplay.sort((v1, v2) -> {
+                        DisplayItem d1 = context.getDisplayItem().get(stmt.name + "." + v1);
+                        DisplayItem d2 = context.getDisplayItem().get(stmt.name + "." + v2);
+                        Integer seq1 = (d1 != null && d1.seq != null) ? d1.seq : Integer.MAX_VALUE;
+                        Integer seq2 = (d2 != null && d2.seq != null) ? d2.seq : Integer.MAX_VALUE;
+                        return seq1.compareTo(seq2);
+                    });
+
+                    for (String varName : sortedVarsWithDisplay) {
                         // Get the display metadata for this variable
                         DisplayItem varDisplayItem = context.getDisplayItem().get(stmt.name + "." + varName);
                         
@@ -284,7 +294,10 @@ public class InterpreterScreen {
                         AreaItem item = new AreaItem();
                         item.name = varName;  // Use just the variable name
                         item.varRef = varName;
-                        item.sequence = defaultArea.items.size();
+                        // Use seq from displayItem if available, otherwise use current size
+                        item.sequence = (varDisplayItem != null && varDisplayItem.seq != null) 
+                            ? varDisplayItem.seq 
+                            : defaultArea.items.size();
                         item.displayItem = varDisplayItem;
 
                         // Set sizing to fit content, not stretch to screen width
@@ -1323,6 +1336,19 @@ public class InterpreterScreen {
             metadata.labelFontSize = String.valueOf(displayDef.get("labelFontSize"));
         } else if (displayDef.containsKey("labelfontsize")) {
             metadata.labelFontSize = String.valueOf(displayDef.get("labelfontsize"));
+        }
+        
+        // Extract sequence number for ordering
+        if (displayDef.containsKey("seq")) {
+            Object seqObj = displayDef.get("seq");
+            if (seqObj instanceof Number) {
+                metadata.seq = ((Number) seqObj).intValue();
+            }
+        } else if (displayDef.containsKey("sequence")) {
+            Object seqObj = displayDef.get("sequence");
+            if (seqObj instanceof Number) {
+                metadata.seq = ((Number) seqObj).intValue();
+            }
         }
 
         // Extract item/control styling properties (for the control itself)
