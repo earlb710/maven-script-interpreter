@@ -217,7 +217,7 @@ public class AreaContainerFactory {
         
         // Determine vertical offset based on offset parameter
         String offsetValue = (offset != null) ? offset.toLowerCase() : "on";
-        double translateY = getVerticalOffset(offsetValue);
+        double translateY = getVerticalOffset(offsetValue, label);
         
         // Adjust container padding based on offset to prevent unnecessary space
         adjustPaddingForLabelOffset(container, offsetValue);
@@ -317,18 +317,24 @@ public class AreaContainerFactory {
     /**
      * Determines the vertical offset (translateY) value based on the offset parameter.
      * More negative values move the label up, less negative values move it down.
+     * For 'top' offset, the position is calculated dynamically based on font height.
      * @param offset The offset value: "top", "on", "bottom"
+     * @param label The label to calculate font height from (for dynamic positioning)
      * @return The translateY value in pixels
      */
-    private static double getVerticalOffset(String offset) {
+    private static double getVerticalOffset(String offset, Label label) {
         switch (offset) {
             case "top":
-                return -30; // Position above the border (more negative = up)
+                // Position above the border - dynamic based on font height
+                // Calculate font height from the label
+                javafx.scene.text.Font font = label.getFont();
+                double fontHeight = font.getSize(); // Approximate font height
+                return -5 - fontHeight;
             case "bottom":
-                return -10; // Position below the border (less negative = down)
+                return -5; // Position below the border
             case "on":
             default:
-                return -20; // Default: border goes through label
+                return -10; // Default: border goes through label
         }
     }
     
