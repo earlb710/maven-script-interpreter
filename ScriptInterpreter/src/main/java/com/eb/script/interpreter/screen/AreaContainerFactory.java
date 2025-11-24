@@ -263,12 +263,12 @@ public class AreaContainerFactory {
     private static double getVerticalOffset(String offset) {
         switch (offset) {
             case "top":
-                return -2; // Position above the border, just touching
+                return -30; // Position above the border, just touching (more negative = up)
             case "bottom":
-                return -18; // Position below the border, just touching
+                return -10; // Position below the border, just touching (less negative = down)
             case "on":
             default:
-                return -10; // Default: sit on the border line (border goes through label)
+                return -20; // Default: sit on the border line (border goes through label)
         }
     }
     
