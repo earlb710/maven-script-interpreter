@@ -12,6 +12,7 @@ import com.eb.script.interpreter.db.DbAdapter;
 import com.eb.script.interpreter.db.DbConnection;
 import com.eb.script.interpreter.db.OracleDbAdapter;
 import com.eb.script.token.DataType;
+import com.eb.script.token.RecordType;
 import com.eb.ui.cli.ScriptArea;
 import javafx.stage.Stage;
 import java.util.Deque;
@@ -73,6 +74,11 @@ public class InterpreterContext {
 
     private DbAdapter db = new OracleDbAdapter();
     private ScriptArea output;
+    
+    // Store the last inferred RecordType from a record() cast
+    // This is used to associate RecordType metadata with cast expressions
+    // Using ThreadLocal for thread-safety in case of concurrent script execution
+    private final ThreadLocal<RecordType> lastInferredRecordType = new ThreadLocal<>();
 
     public InterpreterContext() {
     }
@@ -208,6 +214,37 @@ public class InterpreterContext {
 
     public void setOutput(ScriptArea output) {
         this.output = output;
+    }
+    
+    /**
+     * Get the last inferred RecordType from a record() cast.
+     * This is used to associate RecordType metadata with cast expressions.
+     * Thread-safe using ThreadLocal.
+     * 
+     * @return the last inferred RecordType for the current thread, or null if none
+     */
+    public RecordType getLastInferredRecordType() {
+        return lastInferredRecordType.get();
+    }
+    
+    /**
+     * Set the last inferred RecordType from a record() cast.
+     * This is used to associate RecordType metadata with cast expressions.
+     * Thread-safe using ThreadLocal.
+     * 
+     * @param recordType the inferred RecordType to store for the current thread
+     */
+    public void setLastInferredRecordType(RecordType recordType) {
+        lastInferredRecordType.set(recordType);
+    }
+    
+    /**
+     * Clear the last inferred RecordType.
+     * Should be called after the RecordType has been consumed.
+     * Thread-safe using ThreadLocal.
+     */
+    public void clearLastInferredRecordType() {
+        lastInferredRecordType.remove();
     }
 
     /**

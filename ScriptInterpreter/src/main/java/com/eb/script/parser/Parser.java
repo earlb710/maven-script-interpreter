@@ -32,6 +32,7 @@ import com.eb.script.interpreter.expression.ArrayLiteralExpression;
 import com.eb.script.interpreter.expression.IndexExpression;
 import com.eb.script.interpreter.expression.LengthExpression;
 import com.eb.script.interpreter.expression.PropertyExpression;
+import com.eb.script.interpreter.expression.CastExpression;
 import com.eb.script.interpreter.statement.ForEachStatement;
 import com.eb.script.interpreter.statement.ForStatement;
 import com.eb.script.interpreter.statement.IndexAssignStatement;
@@ -299,9 +300,17 @@ public class Parser {
         return null;
     }
 
+    /**
+     * Convert a type name string to its corresponding EbsTokenType.
+     * This helper method maps type name strings to token types, supporting
+     * common type name variants (e.g., "int" and "integer", "bool" and "boolean").
+     * Order doesn't matter as each type has distinct non-overlapping string patterns.
+     */
     private EbsTokenType getTokenType(String str) {
         str = str.toLowerCase();
-        if (EbsTokenType.INTEGER.contains(str)) {
+        if (EbsTokenType.BYTE.contains(str)) {
+            return EbsTokenType.BYTE;
+        } else if (EbsTokenType.INTEGER.contains(str)) {
             return EbsTokenType.INTEGER;
         } else if (EbsTokenType.LONG.contains(str)) {
             return EbsTokenType.LONG;
@@ -319,6 +328,8 @@ public class Parser {
             return EbsTokenType.JSON;
         } else if (EbsTokenType.ARRAY.contains(str)) {
             return EbsTokenType.ARRAY;
+        } else if (EbsTokenType.RECORD.contains(str)) {
+            return EbsTokenType.RECORD;
         }
         return null;
     }
@@ -1745,7 +1756,8 @@ public class Parser {
 
     private Expression unary() throws ParseError {
         // Include BANG only if your lexer supports it
-        if (match(EbsTokenType.MINUS, EbsTokenType.PLUS, EbsTokenType.BOOL_BANG)) {
+        // Also include TYPEOF as a unary operator to get the type of an expression
+        if (match(EbsTokenType.MINUS, EbsTokenType.PLUS, EbsTokenType.BOOL_BANG, EbsTokenType.TYPEOF)) {
             EbsToken operator = previous();
             Expression right = unary();
             return new UnaryExpression(currToken.line, operator, right);
@@ -1829,7 +1841,31 @@ public class Parser {
     private Expression primary() throws ParseError {
         EbsTokenType type = peek().type;
         Expression expr = null;
-        if (match(EbsTokenType.INTEGER, EbsTokenType.LONG, EbsTokenType.FLOAT, EbsTokenType.DOUBLE, EbsTokenType.DATE, EbsTokenType.BOOL_TRUE, EbsTokenType.BOOL_FALSE, EbsTokenType.NULL)) {
+        
+        // Check for type casting: int(value), string(value), etc.
+        // When type keywords like 'int', 'string' appear in source code, the lexer
+        // adds them to the keywords map as DATATYPE tokens via addKeywords()
+        if (check(EbsTokenType.DATATYPE)) {
+            EbsToken typeToken = advance();
+            String typeName = (String) typeToken.literal;
+            
+            // Check if this is a cast expression (type followed by parentheses)
+            if (check(EbsTokenType.LPAREN)) {
+                // Determine the DataType from the type name string
+                DataType dataType = getDataTypeFromString(typeName);
+                if (dataType == null) {
+                    throw error(typeToken, "Unknown type name '" + typeName + "'");
+                }
+                
+                consume(EbsTokenType.LPAREN, "Expected '(' after type name for cast.");
+                Expression valueExpr = expression();
+                consume(EbsTokenType.RPAREN, "Expected ')' after cast expression.");
+                return new CastExpression(typeToken.line, dataType, valueExpr);
+            } else {
+                // Type name not followed by parentheses - this is an error in expression context
+                throw error(typeToken, "Unexpected type name '" + typeName + "' in expression context. Use " + typeName + "(...) for type casting.");
+            }
+        } else if (match(EbsTokenType.INTEGER, EbsTokenType.LONG, EbsTokenType.FLOAT, EbsTokenType.DOUBLE, EbsTokenType.DATE, EbsTokenType.BOOL_TRUE, EbsTokenType.BOOL_FALSE, EbsTokenType.NULL)) {
             expr = new LiteralExpression(type, previous().literal);
         } else if (match(EbsTokenType.IDENTIFIER)) {
             EbsToken p = previous();
@@ -2447,6 +2483,31 @@ public class Parser {
     private ParseError error(String message) {
         message = "Parse error : " + message;
         return new ParseError(message);
+    }
+
+    /**
+     * Convert a type name string to a DataType enum value.
+     * Supports common type name variants (e.g., "int" and "integer", "bool" and "boolean")
+     */
+    private DataType getDataTypeFromString(String typeName) {
+        if (typeName == null) {
+            return null;
+        }
+        String lower = typeName.toLowerCase();
+        return switch (lower) {
+            case "byte" -> DataType.BYTE;
+            case "int", "integer" -> DataType.INTEGER;
+            case "long" -> DataType.LONG;
+            case "float" -> DataType.FLOAT;
+            case "double" -> DataType.DOUBLE;
+            case "string" -> DataType.STRING;
+            case "date" -> DataType.DATE;
+            case "bool", "boolean" -> DataType.BOOL;
+            case "json" -> DataType.JSON;
+            case "array" -> DataType.ARRAY;
+            case "record" -> DataType.RECORD;
+            default -> null;
+        };
     }
 
 }

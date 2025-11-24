@@ -1,7 +1,9 @@
 package com.eb.script.token;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Represents a record type definition with named fields and their types.
@@ -107,7 +109,22 @@ public class RecordType {
         @SuppressWarnings("unchecked")
         Map<String, Object> record = (Map<String, Object>) value;
         
-        // Check that all fields in the record match the defined types
+        // First, check that all required fields from the RecordType definition exist in the JSON
+        // Create a case-insensitive set of JSON field names for O(1) lookup
+        Set<String> jsonFieldsLowerCase = new HashSet<>();
+        for (String jsonField : record.keySet()) {
+            jsonFieldsLowerCase.add(jsonField.toLowerCase());
+        }
+        
+        // Check each required field exists in the JSON
+        for (String requiredField : fields.keySet()) {
+            if (!jsonFieldsLowerCase.contains(requiredField.toLowerCase())) {
+                System.err.println("Error: Required field '" + requiredField + "' is missing from JSON object");
+                return false;
+            }
+        }
+        
+        // Then, check that all fields in the record match the defined types
         for (Map.Entry<String, Object> entry : record.entrySet()) {
             String fieldName = entry.getKey();
             Object fieldValue = entry.getValue();
@@ -219,25 +236,45 @@ public class RecordType {
     
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("record { ");
+        StringBuilder sb = new StringBuilder("record {");
         boolean first = true;
         for (Map.Entry<String, DataType> entry : fields.entrySet()) {
             if (!first) {
                 sb.append(", ");
             }
-            sb.append(entry.getKey()).append(": ");
+            sb.append(entry.getKey()).append(":");
             
             // If this field is a nested record, use its RecordType string representation
             if (entry.getValue() == DataType.RECORD && nestedRecords.containsKey(entry.getKey())) {
                 sb.append(nestedRecords.get(entry.getKey()).toString());
             } else {
-                sb.append(entry.getValue());
+                sb.append(getTypeName(entry.getValue()));
             }
             
             first = false;
         }
-        sb.append(" }");
+        sb.append("}");
         return sb.toString();
+    }
+    
+    /**
+     * Get a lowercase type name for display
+     */
+    private String getTypeName(DataType type) {
+        switch (type) {
+            case BYTE: return "byte";
+            case INTEGER: return "int";
+            case LONG: return "long";
+            case FLOAT: return "float";
+            case DOUBLE: return "double";
+            case STRING: return "string";
+            case DATE: return "date";
+            case BOOL: return "bool";
+            case JSON: return "json";
+            case ARRAY: return "array";
+            case RECORD: return "record";
+            default: return type.toString().toLowerCase();
+        }
     }
     
     @Override

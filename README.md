@@ -5,6 +5,8 @@ A powerful script interpreter for the EBS (Earl Bosch Script) language, featurin
 ## Features
 
 - **Custom Scripting Language**: Full-featured scripting language with familiar syntax
+- **Type Casting**: Explicit type conversions with `int()`, `string()`, `float()`, `double()`, `byte()`, `long()`, `boolean()`
+- **typeof Operator**: Get the type of any variable or expression at runtime (e.g., `typeof a` returns `"string"`)
 - **Interactive Console**: JavaFX-based IDE with rich text editing
 - **Syntax Highlighting**: Color-coded syntax for better readability
 - **Autocomplete**: Intelligent code completion suggestions for keywords, built-ins, and JSON schemas
@@ -123,6 +125,122 @@ use db {
 }
 close connection db;
 ```
+
+### Type Casting
+
+The language supports explicit type casting for all data types. Use the format `type(value)` to cast values:
+
+```javascript
+// String to number conversions
+var strNum: string = "42";
+var intVal: int = int(strNum);
+var floatVal: float = float("3.14");
+var longVal: long = long("999999999");
+
+// Number to string conversions
+var numStr: string = string(123);
+
+// Between numeric types
+var wholeNum: int = int(3.14);  // 3 (truncation)
+var decimalNum: double = double(42);  // 42.0
+
+// Boolean conversions
+var flag: bool = boolean("true");
+var flagStr: string = string(false);
+
+// Byte conversions
+var byteVal: byte = byte(65);
+
+// Casting in expressions
+var str1: string = "10";
+var str2: string = "20";
+var sum: int = int(str1) + int(str2);  // 30
+
+// Casting in conditionals
+if int("15") > 10 then {
+    print "Condition met";
+}
+```
+
+**Supported cast types:**
+- `int()` or `integer()` - Convert to integer
+- `long()` - Convert to long integer
+- `float()` - Convert to floating point
+- `double()` - Convert to double precision
+- `string()` - Convert to string
+- `byte()` - Convert to byte
+- `boolean()` or `bool()` - Convert to boolean
+
+See `scripts/test/test_type_casting.ebs` for more examples.
+
+### typeof Operator
+
+The `typeof` operator returns the type of a variable or expression as a string:
+
+```javascript
+// Simple types
+var a: string = "xyz";
+print typeof a;  // Output: string
+
+var num: int = 42;
+print typeof num;  // Output: int
+
+// Record types - shows full structure
+var b: record {x: string, y: int};
+b = {"x": "hello", "y": 42};
+print typeof b;  // Output: record {x:string, y:int}
+
+// Works with all types
+var flag: bool = true;
+print typeof flag;  // Output: bool
+
+// Can be used in conditionals
+if typeof a == "string" then {
+    print "a is a string";
+}
+
+// Works with cast expressions
+print typeof int("42");  // Output: int
+```
+
+**Supported for all types:**
+- Primitive types: `string`, `int`, `long`, `float`, `double`, `bool`, `byte`
+- Complex types: `array`, `json`, `date`, `record`
+- For records, displays the complete structure with field names and types
+
+See `scripts/test/test_typeof_operator.ebs` for more examples.
+
+### String Functions
+
+The language provides comprehensive string manipulation functions. A useful function is `str.charArray()` which returns character codes:
+
+```javascript
+// Get character codes from a string
+var text: string = "Hello";
+var codes = call str.charArray(text);
+print codes;  // Output: [72, 101, 108, 108, 111]
+
+// Access individual character codes
+print codes[0];  // Output: 72 (character 'H')
+print codes[1];  // Output: 101 (character 'e')
+
+// Use with string length
+print codes.length;  // Output: 5
+
+// Check ASCII values
+var letter: string = "A";
+var letterCodes = call str.charArray(letter);
+print letterCodes[0];  // Output: 65 (ASCII code for 'A')
+```
+
+**Use cases for `str.charArray()`:**
+- Character analysis and validation
+- Custom encoding/decoding operations
+- Character-by-character processing
+- ASCII/Unicode value checking
+- String transformation algorithms
+
+See `scripts/test/test_str_chararray.ebs` for more examples.
 
 ### UI Screens
 
@@ -341,6 +459,7 @@ The interpreter includes numerous built-in functions:
 ### String Operations
 - `substring()`, `length()`, `indexOf()`, `replace()`, `split()`
 - `toUpperCase()`, `toLowerCase()`, `trim()`
+- `str.charArray()` - Returns an array of integer character codes (Unicode code points) for each character in a string
 
 ### Array Operations
 - `push()`, `pop()`, `shift()`, `unshift()`

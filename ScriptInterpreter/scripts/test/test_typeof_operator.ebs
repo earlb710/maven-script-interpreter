@@ -1,0 +1,108 @@
+// Example script demonstrating the typeof operator
+// Shows how to get the type of variables at runtime
+
+print "=== typeof Operator Examples ===\n\n";
+
+// Example 1: Simple types
+print "1. Simple Types:\n";
+var str: string = "hello world";
+var num: int = 42;
+var flag: bool = true;
+
+print "   var str: string = \"hello world\"\n";
+print "   typeof str = ";
+print typeof str;
+print "\n";
+
+print "   var num: int = 42\n";
+print "   typeof num = ";
+print typeof num;
+print "\n";
+
+print "   var flag: bool = true\n";
+print "   typeof flag = ";
+print typeof flag;
+print "\n\n";
+
+// Example 2: Numeric types
+print "2. Numeric Types:\n";
+var intVal: int = 100;
+var longVal: long = 999999999;
+var floatVal: float = 3.14;
+var doubleVal: double = 2.718;
+var byteVal: byte = 65;
+
+print "   int: ";
+print typeof intVal;
+print "\n";
+print "   long: ";
+print typeof longVal;
+print "\n";
+print "   float: ";
+print typeof floatVal;
+print "\n";
+print "   double: ";
+print typeof doubleVal;
+print "\n";
+print "   byte: ";
+print typeof byteVal;
+print "\n\n";
+
+// Example 3: Record types
+print "3. Record Types:\n";
+var person: record {name: string, age: int};
+person = {"name": "Alice", "age": 30};
+
+print "   var person: record {name: string, age: int}\n";
+print "   person = {\"name\": \"Alice\", \"age\": 30}\n";
+print "   typeof person = ";
+print typeof person;
+print "\n\n";
+
+// Example 4: Nested records
+print "4. Nested Records:\n";
+var address: record {street: string, city: string};
+address = {"street": "123 Main St", "city": "Springfield"};
+
+print "   var address: record {street: string, city: string}\n";
+print "   typeof address = ";
+print typeof address;
+print "\n\n";
+
+// Example 5: Arrays
+print "5. Arrays:\n";
+var numbers: int[5];
+numbers[0] = 1;
+numbers[1] = 2;
+
+print "   var numbers: int[5]\n";
+print "   typeof numbers = ";
+print typeof numbers;
+print "\n\n";
+
+// Example 6: Using typeof in expressions
+print "6. Using typeof in expressions:\n";
+var val1: int = 10;
+var val2: string = "hello";
+
+if typeof val1 == "int" then {
+    print "   val1 is an integer\n";
+}
+
+if typeof val2 == "string" then {
+    print "   val2 is a string\n";
+}
+print "\n";
+
+// Example 7: typeof with cast expressions
+print "7. typeof with type casting:\n";
+var strNum: string = "42";
+print "   var strNum: string = \"42\"\n";
+print "   typeof strNum = ";
+print typeof strNum;
+print "\n";
+print "   typeof int(strNum) = ";
+print typeof int(strNum);
+print "\n\n";
+
+print "=== All Examples Completed ===\n";

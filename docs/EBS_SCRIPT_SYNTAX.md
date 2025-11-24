@@ -69,6 +69,94 @@ var ratio = 3.14;         // Inferred as double
 var flag = true;          // Inferred as bool
 ```
 
+### Type Casting
+Explicitly convert values between types using type casting syntax: `type(value)`
+
+#### Basic Type Casting
+```javascript
+// String to numeric types
+var num: int = int("42");                 // String to int
+var bigNum: long = long("9999999999");    // String to long
+var decimal: float = float("3.14");       // String to float
+var precise: double = double("3.14159");  // String to double
+var small: byte = byte("127");            // String to byte
+
+// Numeric to string
+var text: string = string(123);           // Int to string
+var floatText: string = string(3.14);     // Float to string
+
+// String to boolean
+var flag: bool = boolean("true");         // String to boolean
+var flag2: bool = bool("false");          // Alternative syntax
+
+// Numeric conversions
+var truncated: int = int(3.14);           // Double to int (truncates): 3
+var asFloat: float = float(42);           // Int to float: 42.0
+var asDouble: double = double(3.14f);     // Float to double
+```
+
+#### Type Casting in Expressions
+```javascript
+// Arithmetic with casting
+var sum: int = int("10") + int("20");     // Result: 30
+
+// Conditionals with casting
+if double(x) / double(y) > 0.5 then {
+    print "Ratio exceeds threshold";
+}
+
+// Chained conversions
+var result: string = string(int("99"));   // "99" -> 99 -> "99"
+```
+
+#### Record Casting from JSON
+Cast JSON objects to records with automatic type inference:
+
+```javascript
+// Auto-inferred record type
+var jsonData: json = {"name": "Alice", "age": 30};
+var person = record(jsonData);
+print typeof person;  // Output: record {name:string, age:int}
+
+// Explicit record type with validation
+var userData: json = {"name": "Bob", "age": 25, "email": "bob@example.com"};
+var user: record {name: string, age: int} = record(userData);
+// Extra fields in JSON are allowed, only required fields are validated
+
+// Nested records
+var data: json = {"user": "Charlie", "settings": {"theme": "dark", "volume": 80}};
+var config = record(data);
+print typeof config;  // Output: record {user:string, settings:record}
+
+// Error handling
+var invalidData: json = {"name": "Diana"};  // Missing 'age' field
+var employee: record {name: string, age: int} = record(invalidData);
+// Error: Required field 'age' is missing from JSON object
+
+// Arrays are rejected
+var arrayData: json = [1, 2, 3];
+var rec = record(arrayData);
+// Error: Cannot cast JSON array to record. Only JSON objects (maps) can be cast to record type.
+```
+
+**Record Casting Features:**
+- Automatically infers RecordType from JSON structure
+- Validates required fields when explicit type is provided
+- Extra fields in JSON are allowed
+- Supports nested records
+- Case-insensitive field matching
+- Clear error messages for validation failures
+
+#### Supported Type Aliases
+- `int()` / `integer()` - Integer casting
+- `long()` - Long integer casting
+- `float()` - Float casting
+- `double()` - Double casting
+- `string()` - String casting
+- `byte()` - Byte casting
+- `boolean()` / `bool()` - Boolean casting
+- `record()` - JSON to record casting
+
 ### Null Values
 ```javascript
 var empty = null;
@@ -189,6 +277,90 @@ if count > 0 and count < 100 then {
     print "In range";
 }
 ```
+
+### typeof Operator
+Get the type of any variable or expression at runtime as a string.
+
+#### Basic Usage
+```javascript
+// Simple types
+var name: string = "Alice";
+print typeof name;  // Output: string
+
+var count: int = 42;
+print typeof count;  // Output: int
+
+var price: double = 19.99;
+print typeof price;  // Output: double
+
+var active: bool = true;
+print typeof active;  // Output: bool
+```
+
+#### typeof with Records
+```javascript
+// Record with explicit type
+var person: record {name: string, age: int};
+person = {"name": "Bob", "age": 30};
+print typeof person;  // Output: record {name:string, age:int}
+
+// Record from JSON casting
+var data: json = {"id": 123, "email": "user@example.com"};
+var rec = record(data);
+print typeof rec;  // Output: record {id:int, email:string}
+```
+
+#### typeof with Arrays
+```javascript
+// Fixed-size arrays
+var numbers: int[5];
+print typeof numbers;  // Output: array.int[5]
+
+var bytes: byte[10];
+print typeof bytes;  // Output: array.byte[10]
+
+// Dynamic arrays
+var items: string[];
+print typeof items;  // Output: array.string[]
+
+// Arrays of records
+var people: array.record[3]{name: string, age: int};
+print typeof people;  // Output: array.record[3] {name:string, age:int}
+
+var users: array.record[]{id: int, email: string};
+print typeof users;  // Output: array.record[] {id:int, email:string}
+```
+
+#### typeof in Conditionals
+```javascript
+// Type checking
+if typeof value == "string" then {
+    print "Value is a string";
+}
+
+// Dynamic type handling
+if typeof data == "record" then {
+    print "Processing record";
+} else if typeof data == "array" then {
+    print "Processing array";
+}
+```
+
+#### typeof with Expressions
+```javascript
+// Get type of expression result
+print typeof (10 + 20);           // Output: int
+print typeof ("Hello" + " World"); // Output: string
+print typeof (3.14 * 2);          // Output: double
+print typeof int("42");            // Output: int
+```
+
+**typeof Output Formats:**
+- Primitive types: `string`, `int`, `long`, `float`, `double`, `bool`, `byte`
+- Complex types: `json`, `date`, `array`
+- Records: `record {field:type, field:type, ...}`
+- Arrays: `array.type[size]` or `array.type[]`
+- Array of records: `array.record[size] {field:type, ...}` or `array.record[] {field:type, ...}`
 
 ### String Concatenation
 ```javascript
@@ -1588,7 +1760,54 @@ call string.equals(text1, text2);
 call string.equalsignorecase(text1, text2);
 call string.isempty(text);
 call string.isblank(text);
+
+// Character operations
+call str.charArray(text);  // Returns int[] array of Unicode code points
 ```
+
+#### str.charArray() - Character Code Array
+Returns an integer array containing the Unicode code point for each character in a string.
+
+```javascript
+// Basic usage
+var text: string = "Hello";
+var codes = call str.charArray(text);
+print codes;  // Output: [72, 101, 108, 108, 111]
+
+// Access individual character codes
+print codes[0];  // Output: 72 (character 'H')
+print codes[1];  // Output: 101 (character 'e')
+
+// Works with all character types
+var special: string = "A@1";
+var specialCodes = call str.charArray(special);
+print specialCodes;  // Output: [65, 64, 49]
+
+// Empty string returns empty array
+var empty: string = "";
+var emptyCodes = call str.charArray(empty);
+print emptyCodes;  // Output: []
+
+// Unicode characters
+var unicode: string = "Ωμ";  
+var unicodeCodes = call str.charArray(unicode);
+// Returns Unicode code points for Greek characters
+
+// Use in loops for character processing
+var word: string = "Code";
+var charCodes = call str.charArray(word);
+foreach code in charCodes {
+    print "Code: " + string(code);
+}
+```
+
+**Features:**
+- Returns `int[]` array of Unicode code points
+- Works with ASCII, Unicode, and special characters
+- Returns empty array for empty strings
+- Useful for character-level string analysis
+- Can be used for custom encoding/decoding operations
+
 
 ### JSON Functions
 ```javascript

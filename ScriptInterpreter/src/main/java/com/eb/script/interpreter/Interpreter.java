@@ -68,6 +68,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -542,6 +543,21 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         // Fall back to regular environment variable assignment
         // But first check if this variable has a recordType for validation
         RecordType recordType = environment().getEnvironmentValues().getRecordType(stmt.name);
+        
+        // Check if we just performed a record() cast and should store the inferred RecordType
+        RecordType inferredRecordType = context.getLastInferredRecordType();
+        if (inferredRecordType != null) {
+            // Clear it immediately to prevent accidental reuse
+            context.clearLastInferredRecordType();
+            
+            // Use the inferred RecordType for this assignment
+            recordType = inferredRecordType;
+            
+            // Store the RecordType metadata with the variable
+            environment().getEnvironmentValues().defineWithRecordType(stmt.name, value, recordType);
+            return;
+        }
+        
         if (recordType != null) {
             // Variable has a record type - validate the value
             if (value instanceof ArrayDef) {
@@ -787,6 +803,23 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
 
     @Override
     public Object visitUnaryExpression(UnaryExpression expr) throws InterpreterError {
+        // Special handling for typeof operator
+        if (expr.operator.type == EbsTokenType.TYPEOF) {
+            // If the operand is a variable, we can look up its record type metadata
+            if (expr.right instanceof VariableExpression) {
+                VariableExpression varExpr = (VariableExpression) expr.right;
+                String varName = varExpr.name;
+                Object value = evaluate(expr.right);
+                RecordType recordType = environment().getEnvironmentValues().getRecordType(varName);
+                return getTypeString(value, recordType);
+            } else {
+                // For other expressions, just evaluate and get the runtime type
+                Object value = evaluate(expr.right);
+                return getTypeString(value, null);
+            }
+        }
+        
+        // For other unary operators, evaluate the right side first
         Object right = evaluate(expr.right);
 
         switch (expr.operator.type) {
@@ -1549,7 +1582,264 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         throw error(expr.getLine(), "Cannot access property '" + expr.propertyName + "' on non-record type: " + obj.getClass().getSimpleName());
     }
 
+    @Override
+    public Object visitCastExpression(com.eb.script.interpreter.expression.CastExpression expr) throws InterpreterError {
+        // Evaluate the value to be cast
+        Object value = evaluate(expr.value);
+        
+        // Special handling for RECORD casting
+        if (expr.targetType == DataType.RECORD) {
+            // Validate that the value is a Map (not an array/List)
+            if (value instanceof java.util.List || value instanceof ArrayDef) {
+                throw error(expr.getLine(), "Cannot cast JSON array to record. Only JSON objects (maps) can be cast to record type.");
+            }
+            
+            if (!(value instanceof java.util.Map)) {
+                String typeName = (value == null) ? "null" : value.getClass().getSimpleName();
+                throw error(expr.getLine(), "Cannot cast " + typeName + " to record. Only JSON objects (maps) can be cast to record type.");
+            }
+            
+            // Infer RecordType from the Map structure
+            @SuppressWarnings("unchecked")
+            java.util.Map<String, Object> map = (java.util.Map<String, Object>) value;
+            RecordType inferredType = inferRecordType(map);
+            
+            // Store the inferred RecordType in a thread-local or context for later retrieval
+            // For now, we'll use the lastInferredRecordType field
+            context.setLastInferredRecordType(inferredType);
+            
+            return value;
+        }
+        
+        // Use DataType.convertValue() to perform the actual conversion for other types
+        try {
+            Object converted = expr.targetType.convertValue(value);
+            return converted;
+        } catch (Exception e) {
+            throw error(expr.getLine(), "Cannot cast value '" + value + "' to type " + expr.targetType + ": " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Infer a RecordType from a Map's structure by examining its keys and values.
+     */
+    private RecordType inferRecordType(java.util.Map<String, Object> map) {
+        RecordType recordType = new RecordType();
+        
+        for (java.util.Map.Entry<String, Object> entry : map.entrySet()) {
+            String fieldName = entry.getKey();
+            Object fieldValue = entry.getValue();
+            
+            // Infer the DataType for this field
+            DataType fieldType = inferDataType(fieldValue);
+            
+            // If the field is itself a record (nested Map), recurse
+            if (fieldType == DataType.RECORD && fieldValue instanceof java.util.Map) {
+                @SuppressWarnings("unchecked")
+                java.util.Map<String, Object> nestedMap = (java.util.Map<String, Object>) fieldValue;
+                RecordType nestedRecordType = inferRecordType(nestedMap);
+                recordType.addNestedRecord(fieldName, nestedRecordType);
+            } else {
+                recordType.addField(fieldName, fieldType);
+            }
+        }
+        
+        return recordType;
+    }
+    
+    /**
+     * Infer DataType from a runtime value.
+     */
+    private DataType inferDataType(Object value) {
+        if (value == null) {
+            return DataType.STRING; // Default to STRING for null
+        } else if (value instanceof String) {
+            return DataType.STRING;
+        } else if (value instanceof Integer) {
+            return DataType.INTEGER;
+        } else if (value instanceof Long) {
+            return DataType.LONG;
+        } else if (value instanceof Float) {
+            return DataType.FLOAT;
+        } else if (value instanceof Double) {
+            return DataType.DOUBLE;
+        } else if (value instanceof Boolean) {
+            return DataType.BOOL;
+        } else if (value instanceof Byte) {
+            return DataType.BYTE;
+        } else if (value instanceof java.util.Map) {
+            return DataType.RECORD;
+        } else if (value instanceof java.util.List || value instanceof ArrayDef) {
+            return DataType.ARRAY;
+        } else if (value instanceof java.time.LocalDateTime || value instanceof java.time.LocalDate || value instanceof Date) {
+            return DataType.DATE;
+        } else {
+            return DataType.STRING; // Default to STRING for unknown types
+        }
+    }
+
     // --- Helpers ---
+
+    /**
+     * Get the type string representation for a value.
+     * For records, if recordType metadata is available, return the full structure.
+     * Otherwise, return the basic type name.
+     */
+    private String getTypeString(Object value, RecordType recordType) {
+        if (value == null) {
+            return "null";
+        }
+        
+        // Check for arrays first, as they may contain records
+        if (value instanceof ArrayDef) {
+            // Get detailed array type information
+            ArrayDef<?, ?> arrayDef = (ArrayDef<?, ?>) value;
+            DataType elementType = arrayDef.getDataType();
+            boolean isFixed = arrayDef.isFixed();
+            int size = arrayDef.size();
+            
+            // Build the array type string
+            StringBuilder sb = new StringBuilder("array.");
+            
+            // Add element type
+            if (elementType == DataType.RECORD && recordType != null) {
+                // For arrays of records, format as: array.record[size] {fields}
+                sb.append("record");
+                
+                // Add array size information after "record"
+                if (isFixed) {
+                    // Always show size for fixed arrays, even if 0
+                    sb.append("[").append(size).append("]");
+                } else {
+                    // Dynamic arrays show empty brackets
+                    sb.append("[]");
+                }
+                
+                // Add the record structure (just the fields part)
+                // RecordType.toString() returns "record {fields}", so we strip "record " prefix
+                String recordStr = recordType.toString();
+                String recordPrefix = "record ";
+                if (recordStr.startsWith(recordPrefix)) {
+                    sb.append(" ").append(recordStr.substring(recordPrefix.length()));
+                } else {
+                    sb.append(" ").append(recordStr);
+                }
+            } else {
+                // For primitive types, use the lowercase type name
+                sb.append(getDataTypeName(elementType));
+                
+                // Add array size information
+                if (isFixed) {
+                    // Always show size for fixed arrays, even if 0
+                    sb.append("[").append(size).append("]");
+                } else {
+                    // Dynamic arrays show empty brackets
+                    sb.append("[]");
+                }
+            }
+            
+            return sb.toString();
+        }
+        
+        // If we have record type metadata and it's not an array, use it to construct the full type string
+        if (recordType != null) {
+            return recordType.toString();
+        }
+        
+        // Otherwise, determine type from the runtime value
+        if (value instanceof String) {
+            return "string";
+        } else if (value instanceof Integer) {
+            return "int";
+        } else if (value instanceof Long) {
+            return "long";
+        } else if (value instanceof Float) {
+            return "float";
+        } else if (value instanceof Double) {
+            return "double";
+        } else if (value instanceof Boolean) {
+            return "bool";
+        } else if (value instanceof Byte) {
+            return "byte";
+        } else if (value instanceof java.util.Map) {
+            // It's a record/JSON but we don't have metadata
+            // Try to infer the structure from the runtime value
+            @SuppressWarnings("unchecked")
+            java.util.Map<String, Object> map = (java.util.Map<String, Object>) value;
+            StringBuilder sb = new StringBuilder("record {");
+            boolean first = true;
+            for (java.util.Map.Entry<String, Object> entry : map.entrySet()) {
+                if (!first) {
+                    sb.append(", ");
+                }
+                first = false;
+                sb.append(entry.getKey()).append(":");
+                sb.append(getSimpleTypeName(entry.getValue()));
+            }
+            sb.append("}");
+            return sb.toString();
+        } else if (value instanceof java.util.List) {
+            // Plain List (not ArrayDef) - ArrayDef arrays are handled above
+            return "array";
+        } else if (value instanceof LocalDateTime || value instanceof LocalDate) {
+            return "date";
+        }
+        
+        return value.getClass().getSimpleName().toLowerCase();
+    }
+    
+    /**
+     * Get a simple type name for a value (used when inferring record field types)
+     */
+    private String getSimpleTypeName(Object value) {
+        if (value == null) {
+            return "any";
+        } else if (value instanceof String) {
+            return "string";
+        } else if (value instanceof Integer) {
+            return "int";
+        } else if (value instanceof Long) {
+            return "long";
+        } else if (value instanceof Float) {
+            return "float";
+        } else if (value instanceof Double) {
+            return "double";
+        } else if (value instanceof Boolean) {
+            return "bool";
+        } else if (value instanceof Byte) {
+            return "byte";
+        } else if (value instanceof java.util.Map) {
+            return "record";
+        } else if (value instanceof java.util.List || value instanceof ArrayDef) {
+            return "array";
+        } else if (value instanceof LocalDateTime || value instanceof LocalDate) {
+            return "date";
+        }
+        return "any";
+    }
+    
+    /**
+     * Get a lowercase type name from a DataType enum value.
+     */
+    private String getDataTypeName(DataType type) {
+        if (type == null) {
+            return "any";
+        }
+        return switch (type) {
+            case BYTE -> "byte";
+            case INTEGER -> "int";
+            case LONG -> "long";
+            case FLOAT -> "float";
+            case DOUBLE -> "double";
+            case STRING -> "string";
+            case DATE -> "date";
+            case BOOL -> "bool";
+            case JSON -> "json";
+            case ARRAY -> "array";
+            case RECORD -> "record";
+            default -> "any";
+        };
+    }
 
     private Object evalBuiltin(CallStatement c) throws InterpreterError {
         String name = c.name;

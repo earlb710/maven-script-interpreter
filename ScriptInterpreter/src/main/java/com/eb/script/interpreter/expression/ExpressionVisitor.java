@@ -32,4 +32,6 @@ public interface ExpressionVisitor {
 
     Object visitPropertyExpression(PropertyExpression expr) throws InterpreterError;
 
+    Object visitCastExpression(CastExpression expr) throws InterpreterError;
+
 }
