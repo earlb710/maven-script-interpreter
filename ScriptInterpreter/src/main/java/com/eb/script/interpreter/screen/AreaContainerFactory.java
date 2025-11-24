@@ -283,7 +283,7 @@ public class AreaContainerFactory {
                 break;
             case "on":
                 // For on offset, reduce top padding significantly since label sits on border
-                // Use minimal padding (2-3px) since the label overlaps the border
+                // Use minimal padding (2px) since the label overlaps the border
                 topPadding = 2; // Fixed minimal value for clarity
                 break;
             case "bottom":
@@ -292,14 +292,23 @@ public class AreaContainerFactory {
                 return; // Exit without changes
         }
         
-        // Apply padding via style to ensure it takes effect after other style settings
-        String paddingStyle = String.format("-fx-padding: %fpx %fpx %fpx %fpx;",
+        // Remove any existing -fx-padding declarations from the style string
+        String currentStyle = container.getStyle();
+        if (currentStyle == null) {
+            currentStyle = "";
+        }
+        
+        // Remove existing -fx-padding declarations (case-insensitive)
+        currentStyle = currentStyle.replaceAll("(?i)-fx-padding\\s*:\\s*[^;]+;?", "");
+        
+        // Apply new padding via style to ensure it takes effect
+        String paddingStyle = String.format("-fx-padding: %.0fpx %.0fpx %.0fpx %.0fpx;",
             topPadding,
             currentPadding.getRight(),
             currentPadding.getBottom(),
             currentPadding.getLeft());
         
-        container.setStyle(container.getStyle() + " " + paddingStyle);
+        container.setStyle(currentStyle + " " + paddingStyle);
     }
     
     /**
