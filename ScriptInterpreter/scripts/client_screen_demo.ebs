@@ -6,12 +6,121 @@
 screen clientInfoScreen = {
     "title": "Client Information Manager - Multiple Clients",
     "width": 650,
-    "height": 750,
+    "height": 800,
     "vars": [
         {
             "name": "clients",
             "type": "array.record",
             "default": {"clientName": "", "surname": "", "age": 25, "clientId": ""}
+        }
+    ],
+    "areas": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "20",
+            "padding": "20",
+            "items": [
+                // Client 0 section
+                {
+                    "type": "label",
+                    "text": "Client 1:",
+                    "style": "-fx-font-weight: bold; -fx-font-size: 14px;"
+                },
+                {
+                    "type": "textfield",
+                    "bindVar": "clients[0].clientName",
+                    "labelText": "Client Name:",
+                    "promptText": "Enter client name"
+                },
+                {
+                    "type": "textfield",
+                    "bindVar": "clients[0].surname",
+                    "labelText": "Surname:",
+                    "promptText": "Enter last name"
+                },
+                {
+                    "type": "spinner",
+                    "bindVar": "clients[0].age",
+                    "labelText": "Age:",
+                    "min": 0,
+                    "max": 150
+                },
+                {
+                    "type": "textfield",
+                    "bindVar": "clients[0].clientId",
+                    "labelText": "Client ID:",
+                    "promptText": "e.g., CLT-001"
+                },
+                {
+                    "type": "separator"
+                },
+                // Client 1 section
+                {
+                    "type": "label",
+                    "text": "Client 2:",
+                    "style": "-fx-font-weight: bold; -fx-font-size: 14px;"
+                },
+                {
+                    "type": "textfield",
+                    "bindVar": "clients[1].clientName",
+                    "labelText": "Client Name:",
+                    "promptText": "Enter client name"
+                },
+                {
+                    "type": "textfield",
+                    "bindVar": "clients[1].surname",
+                    "labelText": "Surname:",
+                    "promptText": "Enter last name"
+                },
+                {
+                    "type": "spinner",
+                    "bindVar": "clients[1].age",
+                    "labelText": "Age:",
+                    "min": 0,
+                    "max": 150
+                },
+                {
+                    "type": "textfield",
+                    "bindVar": "clients[1].clientId",
+                    "labelText": "Client ID:",
+                    "promptText": "e.g., CLT-002"
+                },
+                {
+                    "type": "separator"
+                },
+                // Client 2 section
+                {
+                    "type": "label",
+                    "text": "Client 3:",
+                    "style": "-fx-font-weight: bold; -fx-font-size: 14px;"
+                },
+                {
+                    "type": "textfield",
+                    "bindVar": "clients[2].clientName",
+                    "labelText": "Client Name:",
+                    "promptText": "Enter client name"
+                },
+                {
+                    "type": "textfield",
+                    "bindVar": "clients[2].surname",
+                    "labelText": "Surname:",
+                    "promptText": "Enter last name"
+                },
+                {
+                    "type": "spinner",
+                    "bindVar": "clients[2].age",
+                    "labelText": "Age:",
+                    "min": 0,
+                    "max": 150
+                },
+                {
+                    "type": "textfield",
+                    "bindVar": "clients[2].clientId",
+                    "labelText": "Client ID:",
+                    "promptText": "e.g., CLT-003"
+                }
+            ]
         }
     ]
 };

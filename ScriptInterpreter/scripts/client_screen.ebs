@@ -4,13 +4,122 @@
 
 screen clientScreen = {
     "title": "Client Information - Multiple Clients",
-    "width": 600,
-    "height": 700,
+    "width": 650,
+    "height": 750,
     "vars": [
         {
             "name": "clients",
             "type": "array.record",
             "default": {"clientName": "", "surname": "", "age": 18, "clientId": ""}
+        }
+    ],
+    "areas": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "20",
+            "padding": "20",
+            "items": [
+                // Client 0 section
+                {
+                    "type": "label",
+                    "text": "Client 1:",
+                    "style": "-fx-font-weight: bold; -fx-font-size: 14px;"
+                },
+                {
+                    "type": "textfield",
+                    "bindVar": "clients[0].clientName",
+                    "labelText": "Client Name:",
+                    "promptText": "Enter client name"
+                },
+                {
+                    "type": "textfield",
+                    "bindVar": "clients[0].surname",
+                    "labelText": "Surname:",
+                    "promptText": "Enter surname"
+                },
+                {
+                    "type": "spinner",
+                    "bindVar": "clients[0].age",
+                    "labelText": "Age:",
+                    "min": 0,
+                    "max": 150
+                },
+                {
+                    "type": "textfield",
+                    "bindVar": "clients[0].clientId",
+                    "labelText": "Client ID:",
+                    "promptText": "Enter client ID"
+                },
+                {
+                    "type": "separator"
+                },
+                // Client 1 section
+                {
+                    "type": "label",
+                    "text": "Client 2:",
+                    "style": "-fx-font-weight: bold; -fx-font-size: 14px;"
+                },
+                {
+                    "type": "textfield",
+                    "bindVar": "clients[1].clientName",
+                    "labelText": "Client Name:",
+                    "promptText": "Enter client name"
+                },
+                {
+                    "type": "textfield",
+                    "bindVar": "clients[1].surname",
+                    "labelText": "Surname:",
+                    "promptText": "Enter surname"
+                },
+                {
+                    "type": "spinner",
+                    "bindVar": "clients[1].age",
+                    "labelText": "Age:",
+                    "min": 0,
+                    "max": 150
+                },
+                {
+                    "type": "textfield",
+                    "bindVar": "clients[1].clientId",
+                    "labelText": "Client ID:",
+                    "promptText": "Enter client ID"
+                },
+                {
+                    "type": "separator"
+                },
+                // Client 2 section
+                {
+                    "type": "label",
+                    "text": "Client 3:",
+                    "style": "-fx-font-weight: bold; -fx-font-size: 14px;"
+                },
+                {
+                    "type": "textfield",
+                    "bindVar": "clients[2].clientName",
+                    "labelText": "Client Name:",
+                    "promptText": "Enter client name"
+                },
+                {
+                    "type": "textfield",
+                    "bindVar": "clients[2].surname",
+                    "labelText": "Surname:",
+                    "promptText": "Enter surname"
+                },
+                {
+                    "type": "spinner",
+                    "bindVar": "clients[2].age",
+                    "labelText": "Age:",
+                    "min": 0,
+                    "max": 150
+                },
+                {
+                    "type": "textfield",
+                    "bindVar": "clients[2].clientId",
+                    "labelText": "Client ID:",
+                    "promptText": "Enter client ID"
+                }
+            ]
         }
     ]
 };
