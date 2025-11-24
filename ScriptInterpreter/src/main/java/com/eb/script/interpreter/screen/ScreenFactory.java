@@ -1406,7 +1406,13 @@ public class ScreenFactory {
             List<AreaDefinition> areas,
             InterpreterContext context,
             boolean maximize) {
+        // Capture debug mode state from current thread before switching to JavaFX thread
+        boolean debugModeEnabled = getDebugModeForInheritance();
+        
         Platform.runLater(() -> {
+            // Set debug mode on JavaFX Application Thread
+            setDebugModeForThread(debugModeEnabled);
+            
             Stage stage = createScreen(screenName, title, width, height, areas, context);
 
             if (maximize) {
