@@ -15,9 +15,11 @@ A basic client information screen with the following updatable fields:
 ```bash
 cd ScriptInterpreter
 mvn javafx:run
-# Then load the script: /open scripts/client_screen.ebs
-# Press Ctrl+Enter to run
 ```
+
+Then in the interactive console:
+- Type the command: `/open scripts/client_screen.ebs`
+- Press `Ctrl+Enter` to execute the script
 
 **Features:**
 - All fields are mandatory
@@ -37,9 +39,11 @@ An enhanced version of the client screen with interactive demonstrations of:
 ```bash
 cd ScriptInterpreter
 mvn javafx:run
-# Then load the script: /open scripts/client_screen_demo.ebs
-# Press Ctrl+Enter to run
 ```
+
+Then in the interactive console:
+- Type the command: `/open scripts/client_screen_demo.ebs`
+- Press `Ctrl+Enter` to execute the script
 
 **Features:**
 - All features from `client_screen.ebs`

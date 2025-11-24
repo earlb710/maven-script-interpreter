@@ -14,7 +14,7 @@ screen clientInfoScreen = {
             "display": {
                 "type": "textfield",
                 "labelText": "Client Name:",
-                "promptText": "Enter client first name",
+                "promptText": "Enter client name",
                 "mandatory": true
             }
         },
@@ -48,7 +48,7 @@ screen clientInfoScreen = {
             "display": {
                 "type": "textfield",
                 "labelText": "Client ID:",
-                "promptText": "e.g., CLT-001",
+                "promptText": "Enter client ID (e.g., CLT-001)",
                 "mandatory": true,
                 "caseFormat": "upper"
             }
