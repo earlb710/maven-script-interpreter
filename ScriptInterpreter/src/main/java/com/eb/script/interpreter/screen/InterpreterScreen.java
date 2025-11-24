@@ -1859,10 +1859,10 @@ public class InterpreterScreen {
                 // Special handling for array.record: default is a template, not the array value
                 if (isArrayType && elementType == DataType.RECORD && defaultValue != null) {
                     // For array.record, default should be a single record (template)
-                    // Store it as the template and initialize value as empty array
-                    recordTemplate = defaultValue;
+                    // Convert the template using elementType to ensure proper validation
+                    recordTemplate = elementType.convertValue(defaultValue);
                     // Initialize as empty ArrayList for array types
-                    value = new java.util.ArrayList<>();
+                    value = new ArrayList<>();
                 } else if (varType != null && value != null) {
                     // For other types, convert normally
                     value = varType.convertValue(value);
