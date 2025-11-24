@@ -153,9 +153,6 @@ screen clientScreen = {
 };
 
 print "DEBUG: Screen definition complete.";
-var screenJson = json.stringify(clientScreen);
-var screenSize = screenJson.length;
-print "DEBUG: Screen has " + screenSize + " characters in JSON.";
 
 // Initialize array with 3 client records
 print "DEBUG: Initializing clients array...";
@@ -164,8 +161,7 @@ clientScreen.clients = [
     {"clientName": "", "surname": "", "age": 18, "clientId": ""},
     {"clientName": "", "surname": "", "age": 18, "clientId": ""}
 ];
-var clientsCount = clientScreen.clients.length;
-print "DEBUG: Clients array initialized with " + clientsCount + " elements.";
+print "DEBUG: Clients array initialized with 3 elements.";
 
 // Display initial values
 print "Client Information Screen";
