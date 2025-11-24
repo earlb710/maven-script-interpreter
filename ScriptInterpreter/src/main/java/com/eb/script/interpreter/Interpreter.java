@@ -1703,20 +1703,38 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             
             // Add element type
             if (elementType == DataType.RECORD && recordType != null) {
-                // For arrays of records, show the record structure
-                sb.append(recordType.toString());
+                // For arrays of records, format as: array.record[size] {fields}
+                sb.append("record");
+                
+                // Add array size information after "record"
+                if (isFixed) {
+                    // Always show size for fixed arrays, even if 0
+                    sb.append("[").append(size).append("]");
+                } else {
+                    // Dynamic arrays show empty brackets
+                    sb.append("[]");
+                }
+                
+                // Add the record structure (just the fields part)
+                // RecordType.toString() returns "record {fields}", so we strip "record " prefix
+                String recordStr = recordType.toString();
+                if (recordStr.startsWith("record ")) {
+                    sb.append(" ").append(recordStr.substring(7)); // Skip "record "
+                } else {
+                    sb.append(" ").append(recordStr);
+                }
             } else {
                 // For primitive types, use the lowercase type name
                 sb.append(getDataTypeName(elementType));
-            }
-            
-            // Add array size information
-            if (isFixed) {
-                // Always show size for fixed arrays, even if 0
-                sb.append("[").append(size).append("]");
-            } else {
-                // Dynamic arrays show empty brackets
-                sb.append("[]");
+                
+                // Add array size information
+                if (isFixed) {
+                    // Always show size for fixed arrays, even if 0
+                    sb.append("[").append(size).append("]");
+                } else {
+                    // Dynamic arrays show empty brackets
+                    sb.append("[]");
+                }
             }
             
             return sb.toString();
