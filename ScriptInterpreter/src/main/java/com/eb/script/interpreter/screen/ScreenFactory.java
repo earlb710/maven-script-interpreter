@@ -19,6 +19,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
@@ -57,6 +59,9 @@ public class ScreenFactory {
     private static Map<String, Object> screenSchema;
     private static Map<String, Object> areaSchema;
     private static Map<String, Object> displayMetadataSchema;
+    
+    // Debug mode flag - toggleable with Ctrl+D
+    private static boolean debugMode = false;
 
     static {
         try {
@@ -79,6 +84,99 @@ public class ScreenFactory {
             }
         } catch (Exception e) {
             System.err.println("Warning: Failed to load JSON schemas: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Toggle debug mode on or off.
+     */
+    private static void toggleDebugMode() {
+        debugMode = !debugMode;
+        System.out.println("=".repeat(80));
+        System.out.println("DEBUG MODE: " + (debugMode ? "ENABLED" : "DISABLED"));
+        System.out.println("=".repeat(80));
+    }
+    
+    /**
+     * Log debug information about a JavaFX Node and its properties.
+     * Only logs when debug mode is enabled.
+     */
+    private static void logNodeDebug(Node node, String context) {
+        if (!debugMode) {
+            return;
+        }
+        
+        StringBuilder log = new StringBuilder();
+        log.append("\n[DEBUG] ").append(context).append("\n");
+        log.append("  Type: ").append(node.getClass().getSimpleName()).append("\n");
+        log.append("  ID: ").append(node.getId() != null ? node.getId() : "<none>").append("\n");
+        log.append("  Style: ").append(node.getStyle() != null && !node.getStyle().isEmpty() ? node.getStyle() : "<none>").append("\n");
+        log.append("  StyleClass: ").append(node.getStyleClass()).append("\n");
+        log.append("  UserData: ").append(node.getUserData() != null ? node.getUserData() : "<none>").append("\n");
+        
+        // Log layout bounds if available
+        if (node.getLayoutBounds() != null) {
+            log.append("  LayoutBounds: ").append(node.getLayoutBounds()).append("\n");
+        }
+        
+        // Log visibility and managed state
+        log.append("  Visible: ").append(node.isVisible()).append("\n");
+        log.append("  Managed: ").append(node.isManaged()).append("\n");
+        
+        // Log properties map if not empty
+        if (!node.getProperties().isEmpty()) {
+            log.append("  Properties: ").append(node.getProperties()).append("\n");
+        }
+        
+        // Log specific control properties
+        if (node instanceof javafx.scene.control.Control) {
+            javafx.scene.control.Control control = (javafx.scene.control.Control) node;
+            if (control.getTooltip() != null) {
+                log.append("  Tooltip: ").append(control.getTooltip().getText()).append("\n");
+            }
+        }
+        
+        // Log Region-specific properties
+        if (node instanceof Region) {
+            Region region = (Region) node;
+            log.append("  Padding: ").append(region.getPadding()).append("\n");
+            log.append("  Background: ").append(region.getBackground() != null ? "set" : "none").append("\n");
+            log.append("  Border: ").append(region.getBorder() != null ? "set" : "none").append("\n");
+        }
+        
+        System.out.println(log.toString());
+    }
+    
+    /**
+     * Recursively log all nodes in a scene graph.
+     * Only logs when debug mode is enabled.
+     */
+    private static void logSceneGraph(Node node, int depth, String path) {
+        if (!debugMode) {
+            return;
+        }
+        
+        String indent = "  ".repeat(depth);
+        String nodeInfo = String.format("%s[%s] %s", 
+            indent,
+            node.getClass().getSimpleName(),
+            node.getId() != null ? "id=" + node.getId() : ""
+        );
+        
+        if (node.getStyle() != null && !node.getStyle().isEmpty()) {
+            nodeInfo += " style=\"" + node.getStyle() + "\"";
+        }
+        
+        System.out.println(nodeInfo);
+        
+        // Recurse for containers
+        if (node instanceof javafx.scene.Parent) {
+            javafx.scene.Parent parent = (javafx.scene.Parent) node;
+            int childIndex = 0;
+            for (Node child : parent.getChildrenUnmodifiable()) {
+                logSceneGraph(child, depth + 1, path + "/" + childIndex);
+                childIndex++;
+            }
         }
     }
 
@@ -280,6 +378,22 @@ public class ScreenFactory {
         }
 
         Scene scene = new Scene(screenRoot, width, height);
+        
+        // Add Ctrl+D key handler to toggle debug mode
+        scene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == KeyCode.D && event.isControlDown()) {
+                toggleDebugMode();
+                if (debugMode) {
+                    // Log the entire scene graph when debug mode is enabled
+                    System.out.println("\n" + "=".repeat(80));
+                    System.out.println("SCENE GRAPH for: " + screenName);
+                    System.out.println("=".repeat(80));
+                    logSceneGraph(screenRoot, 0, "/");
+                    System.out.println("=".repeat(80));
+                }
+                event.consume(); // Prevent the event from propagating further
+            }
+        });
         
         // Load CSS stylesheets for screen areas and input controls
         try {
@@ -497,6 +611,14 @@ public class ScreenFactory {
             List<Node> boundControls) {
         // Create the container using AreaContainerFactory
         Region container = AreaContainerFactory.createContainer(areaDef);
+        
+        // Log debug information for this container if debug mode is enabled
+        if (debugMode) {
+            String containerContext = String.format("Created container: %s (type: %s)", 
+                areaDef.name != null ? areaDef.name : "<unnamed>",
+                areaDef.areaType != null ? areaDef.areaType : "<none>");
+            logNodeDebug(container, containerContext);
+        }
 
         // Sort items by sequence
         if (areaDef.items != null && !areaDef.items.isEmpty()) {
@@ -602,6 +724,15 @@ public class ScreenFactory {
 
                 // Add item to container based on container type
                 addItemToContainer(container, nodeToAdd, item, areaDef.areaType);
+                
+                // Log debug information for this item if debug mode is enabled
+                if (debugMode) {
+                    String itemContext = String.format("Created item: %s (varRef: %s) in area: %s", 
+                        item.name != null ? item.name : "<unnamed>",
+                        item.varRef != null ? item.varRef : "<none>",
+                        areaDef.name != null ? areaDef.name : "<unnamed>");
+                    logNodeDebug(nodeToAdd, itemContext);
+                }
             }
         }
 
