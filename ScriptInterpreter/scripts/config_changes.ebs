@@ -346,6 +346,8 @@ screen colorEditorScreen = {
                 "type": "vbox",
                 "groupBorder": "line",
                 "groupBorderColor": "#4a9eff",
+                "groupLabelText": "Console Colors",
+                "groupLabelAlignment": "left",
                 "style": "-fx-spacing: 5; -fx-padding: 10;",
                 "items": [
                     {"name": "info_item", "varref": "info"},
@@ -360,6 +362,8 @@ screen colorEditorScreen = {
                 "type": "vbox",
                 "groupBorder": "line",
                 "groupBorderColor": "#ff9933",
+                "groupLabelText": "Syntax Colors",
+                "groupLabelAlignment": "left",
                 "style": "-fx-spacing: 5; -fx-padding: 10;",
                 "items": [
                     {"name": "code_item", "varref": "code"},
@@ -378,6 +382,8 @@ screen colorEditorScreen = {
                 "type": "vbox",
                 "groupBorder": "line",
                 "groupBorderColor": "#66cc66",
+                "groupLabelText": "Editor Colors",
+                "groupLabelAlignment": "left",
                 "style": "-fx-spacing: 5; -fx-padding: 10;",
                 "items": [
                     {"name": "background_item", "varref": "background"},
@@ -393,6 +399,8 @@ screen colorEditorScreen = {
                 "type": "vbox",
                 "groupBorder": "line",
                 "groupBorderColor": "#cc66cc",
+                "groupLabelText": "Tab Colors",
+                "groupLabelAlignment": "left",
                 "style": "-fx-spacing: 5; -fx-padding: 10;",
                 "items": [
                     {"name": "tabBackground_item", "varref": "tabBackground"},

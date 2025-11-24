@@ -1497,6 +1497,18 @@ public class InterpreterScreen {
             area.groupBorderColor = String.valueOf(groupBorderColorObj);
         }
         
+        // Extract groupLabelText property (for visual grouping) - case-insensitive
+        Object groupLabelTextObj = getCaseInsensitive(areaDef, "groupLabelText");
+        if (groupLabelTextObj != null) {
+            area.groupLabelText = String.valueOf(groupLabelTextObj);
+        }
+        
+        // Extract groupLabelAlignment property (for visual grouping) - case-insensitive
+        Object groupLabelAlignmentObj = getCaseInsensitive(areaDef, "groupLabelAlignment");
+        if (groupLabelAlignmentObj != null) {
+            area.groupLabelAlignment = String.valueOf(groupLabelAlignmentObj);
+        }
+        
         // Extract spacing property
         if (areaDef.containsKey("spacing")) {
             area.spacing = String.valueOf(areaDef.get("spacing"));
