@@ -210,6 +210,24 @@ public class InterpreterArray {
     public void visitIndexAssignStatement(IndexAssignStatement stmt) throws InterpreterError {
         // Handle PropertyExpression (e.g., record.field = value or array[0].field = value)
         if (stmt.target instanceof PropertyExpression propExpr) {
+            // Check if this is a screen variable assignment (screenName.varName = value)
+            if (propExpr.object instanceof com.eb.script.interpreter.expression.VariableExpression varExpr) {
+                String screenName = varExpr.name.toLowerCase();
+                java.util.concurrent.ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars(screenName);
+                
+                if (screenVarMap != null) {
+                    // This is a screen variable assignment
+                    String varName = propExpr.propertyName.toLowerCase();
+                    
+                    // Evaluate the value to assign
+                    Object value = interpreter.evaluate(stmt.value);
+                    
+                    // Assign the value to the screen variable
+                    screenVarMap.put(varName, value);
+                    return;
+                }
+            }
+            
             // Navigate through nested PropertyExpressions to get the parent object
             Object obj = evaluatePropertyChain(propExpr.object, stmt.getLine());
             
