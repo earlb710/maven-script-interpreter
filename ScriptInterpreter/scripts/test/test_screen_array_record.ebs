@@ -1,0 +1,207 @@
+// Test Script: Array.Record Type in Screen Variables
+// Description: Test that screen variables support the array.record data type
+//              where the default is a template record used to initialize new entries
+// Author: EBS Test Suite
+// Date: 2025-11-24
+
+print "=== Screen Array.Record Type Test ===";
+print "";
+
+// Test 1: Basic array.record type in screen var
+print "Test 1: Basic array.record type in screen variable";
+screen personScreen = {
+    "title": "Person Array Record Test",
+    "width": 600,
+    "height": 400,
+    "vars": [
+        {
+            "name": "people",
+            "type": "array.record",
+            "default": {"name": "Template", "age": 0}
+        }
+    ]
+};
+
+print "Screen defined successfully";
+print "People array (should be empty initially): " + personScreen.people;
+print "People array length: " + personScreen.people.length;
+print "";
+
+// Test 2: Assign array of records to the variable
+print "Test 2: Assign array of records";
+personScreen.people = [
+    {"name": "John Doe", "age": 30},
+    {"name": "Jane Smith", "age": 35},
+    {"name": "Bob Johnson", "age": 28}
+];
+
+print "People array after assignment: " + personScreen.people;
+print "People array length: " + personScreen.people.length;
+print "First person name: " + personScreen.people[0].name;
+print "First person age: " + personScreen.people[0].age;
+print "Second person name: " + personScreen.people[1].name;
+print "";
+
+// Test 3: Multiple array.record variables in screen
+print "Test 3: Multiple array.record variables in screen";
+screen dataScreen = {
+    "title": "Multiple Array Records Test",
+    "width": 700,
+    "height": 500,
+    "vars": [
+        {
+            "name": "employees",
+            "type": "array.record",
+            "default": {"id": 0, "name": "", "salary": 0.0}
+        },
+        {
+            "name": "departments",
+            "type": "array.record",
+            "default": {"id": 0, "name": "", "budget": 0}
+        }
+    ]
+};
+
+print "Data screen defined successfully";
+print "Employees array (empty): " + dataScreen.employees;
+print "Departments array (empty): " + dataScreen.departments;
+print "";
+
+// Assign data
+dataScreen.employees = [
+    {"id": 1, "name": "Alice Brown", "salary": 75000},
+    {"id": 2, "name": "Charlie Davis", "salary": 65000}
+];
+
+dataScreen.departments = [
+    {"id": 10, "name": "Engineering", "budget": 500000},
+    {"id": 20, "name": "Marketing", "budget": 300000}
+];
+
+print "After assignment:";
+print "Employees: " + dataScreen.employees;
+print "Employee 1 name: " + dataScreen.employees[0].name;
+print "Employee 1 salary: " + dataScreen.employees[0].salary;
+print "";
+print "Departments: " + dataScreen.departments;
+print "Department 1 name: " + dataScreen.departments[0].name;
+print "Department 1 budget: " + dataScreen.departments[0].budget;
+print "";
+
+// Test 4: Mix array.record with other types
+print "Test 4: Mix array.record with other primitive types";
+screen mixedScreen = {
+    "title": "Mixed Types Test",
+    "width": 600,
+    "height": 400,
+    "vars": [
+        {
+            "name": "title",
+            "type": "string",
+            "default": "Employee List"
+        },
+        {
+            "name": "count",
+            "type": "int",
+            "default": 0
+        },
+        {
+            "name": "items",
+            "type": "array.record",
+            "default": {"id": 0, "label": ""}
+        },
+        {
+            "name": "isActive",
+            "type": "bool",
+            "default": true
+        }
+    ]
+};
+
+print "Title (string): " + mixedScreen.title;
+print "Count (int): " + mixedScreen.count;
+print "Items (array.record, empty): " + mixedScreen.items;
+print "Is Active (bool): " + mixedScreen.isActive;
+print "";
+
+// Assign array data
+mixedScreen.items = [
+    {"id": 1, "label": "First Item"},
+    {"id": 2, "label": "Second Item"},
+    {"id": 3, "label": "Third Item"}
+];
+
+mixedScreen.count = mixedScreen.items.length;
+
+print "After assignment:";
+print "Count: " + mixedScreen.count;
+print "Items: " + mixedScreen.items;
+print "First item label: " + mixedScreen.items[0].label;
+print "";
+
+// Test 5: Array.record with nested structure in template
+print "Test 5: Array.record with nested structure in template";
+screen configScreen = {
+    "title": "Nested Template Test",
+    "width": 600,
+    "height": 400,
+    "vars": [
+        {
+            "name": "configs",
+            "type": "array.record",
+            "default": {
+                "appName": "DefaultApp",
+                "version": "1.0",
+                "settings": {
+                    "theme": "light",
+                    "autoSave": false
+                }
+            }
+        }
+    ]
+};
+
+print "Configs array (empty): " + configScreen.configs;
+
+// Assign array with nested records
+configScreen.configs = [
+    {
+        "appName": "MyApp",
+        "version": "2.0",
+        "settings": {
+            "theme": "dark",
+            "autoSave": true
+        }
+    }
+];
+
+print "After assignment: " + configScreen.configs;
+print "First config app name: " + configScreen.configs[0].appName;
+print "First config settings: " + configScreen.configs[0].settings;
+print "";
+
+// Test 6: Array.record with null default
+print "Test 6: Array.record with null default (should initialize empty)";
+screen emptyScreen = {
+    "title": "Empty Template Test",
+    "width": 600,
+    "height": 400,
+    "vars": [
+        {
+            "name": "data",
+            "type": "array.record",
+            "default": null
+        }
+    ]
+};
+
+print "Data array with null template: " + emptyScreen.data;
+// Assign records anyway
+emptyScreen.data = [
+    {"key": "value1"},
+    {"key": "value2"}
+];
+print "After assignment: " + emptyScreen.data;
+print "";
+
+print "=== All Screen Array.Record Type Tests Completed Successfully ===";

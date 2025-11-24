@@ -39,6 +39,15 @@ public class Var {
     // Text case transformation: "upper", "lower", or "mixed" (optional)
     private String textCase;
     
+    // Flag to indicate if this is an array type (e.g., array.record)
+    private boolean isArrayType;
+    
+    // For array types, this holds the element type (e.g., RECORD for array.record)
+    private DataType elementType;
+    
+    // For array.record, this holds the template record used to initialize new elements
+    private Object recordTemplate;
+    
     /**
      * Default constructor
      */
@@ -202,6 +211,54 @@ public class Var {
         this.originalValue = this.value;
     }
     
+    /**
+     * Check if this is an array type variable
+     * @return true if array type, false otherwise
+     */
+    public boolean isArrayType() {
+        return isArrayType;
+    }
+    
+    /**
+     * Set whether this is an array type variable
+     * @param isArrayType true if array type
+     */
+    public void setArrayType(boolean isArrayType) {
+        this.isArrayType = isArrayType;
+    }
+    
+    /**
+     * Get the element type for array variables
+     * @return the element DataType, or null if not an array
+     */
+    public DataType getElementType() {
+        return elementType;
+    }
+    
+    /**
+     * Set the element type for array variables
+     * @param elementType the element DataType
+     */
+    public void setElementType(DataType elementType) {
+        this.elementType = elementType;
+    }
+    
+    /**
+     * Get the record template for array.record variables
+     * @return the template record, or null if not array.record
+     */
+    public Object getRecordTemplate() {
+        return recordTemplate;
+    }
+    
+    /**
+     * Set the record template for array.record variables
+     * @param recordTemplate the template record
+     */
+    public void setRecordTemplate(Object recordTemplate) {
+        this.recordTemplate = recordTemplate;
+    }
+    
     @Override
     public String toString() {
         return "Var{" +
@@ -211,6 +268,8 @@ public class Var {
                 ", value=" + value +
                 ", setName='" + setName + '\'' +
                 ", hasDisplay=" + (displayItem != null) +
+                ", isArrayType=" + isArrayType +
+                (isArrayType ? ", elementType=" + elementType : "") +
                 '}';
     }
 }

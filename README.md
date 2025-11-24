@@ -267,6 +267,11 @@ screen myWindow = {
             "name": "user",
             "type": "record",
             "default": {"name": "John", "email": "john@example.com"}
+        },
+        {
+            "name": "employees",
+            "type": "array.record",
+            "default": {"id": 0, "name": "", "salary": 0.0}  // Template for new records
         }
     ]
 };
@@ -285,6 +290,19 @@ print myWindow.user.email;  // Prints: john@example.com
 
 // Update record values
 myWindow.user = {"name": "Jane", "email": "jane@example.com"};
+
+// Array.record variables - default is a template for new records
+print myWindow.employees;  // Initially empty: []
+
+// Assign array of records
+myWindow.employees = [
+    {"id": 1, "name": "Alice", "salary": 75000},
+    {"id": 2, "name": "Bob", "salary": 65000}
+];
+
+// Access array elements
+print myWindow.employees[0].name;  // Prints: Alice
+print myWindow.employees.length;   // Prints: 2
 
 // Show the screen (new syntax)
 show screen myWindow;
@@ -305,9 +323,13 @@ show screen myWindow;
 - Assign to variables via `screen_name.var_name = value` (e.g., `myWindow.counter = 10`)
 - Variable assignments do not trigger screen display
 - Multiple screens can be created and managed independently
-- **Supported Variable Types**: `int`, `long`, `float`, `double`, `string`, `bool`, `byte`, `date`, `json`, and `record`
+- **Supported Variable Types**: `int`, `long`, `float`, `double`, `string`, `bool`, `byte`, `date`, `json`, `record`, and `array.record`
   - Record types allow storing structured data with multiple fields
   - Access record fields: `screenName.varName.fieldName`
+  - **Array.record types** store arrays of records with a template for new entries
+    - Default value is a single record (template), not an array
+    - Variable initializes as empty array and can be populated with records
+    - Example: `"type": "array.record", "default": {"id": 0, "name": ""}`
 - **Case-Insensitive JSON Keys**: Screen definition JSON uses case-insensitive key lookup
   - Property names like `varRef`, `VarRef`, or `varref` are all treated identically
   - Keys are normalized to lowercase (`promptHelp` → `prompttext`)
