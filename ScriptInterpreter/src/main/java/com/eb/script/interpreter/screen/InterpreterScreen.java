@@ -1117,6 +1117,8 @@ public class InterpreterScreen {
                 return DataType.BYTE;
             case "json":
                 return DataType.JSON;
+            case "record":
+                return DataType.RECORD;
             default:
                 return null;
         }
