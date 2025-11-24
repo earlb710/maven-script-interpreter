@@ -213,22 +213,30 @@ public class InterpreterArray {
         if (stmt.target instanceof PropertyExpression propExpr) {
             // Check if this is a screen variable assignment (screenName.varName = value)
             if (propExpr.object instanceof VariableExpression varExpr) {
-                String screenName = varExpr.name.toLowerCase();
-                ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars(screenName);
-                
-                if (screenVarMap != null) {
-                    // This is a screen variable assignment
-                    String varName = propExpr.propertyName.toLowerCase();
+                // Null safety checks
+                if (varExpr.name != null && propExpr.propertyName != null) {
+                    String screenName = varExpr.name.toLowerCase();
+                    ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars(screenName);
                     
-                    // Evaluate the value to assign
-                    Object value = interpreter.evaluate(stmt.value);
-                    
-                    // Assign the value to the screen variable
-                    screenVarMap.put(varName, value);
-                    
-                    // Trigger screen refresh to update UI controls
-                    context.triggerScreenRefresh(screenName);
-                    return;
+                    if (screenVarMap != null) {
+                        // This is a screen variable assignment
+                        String varName = propExpr.propertyName.toLowerCase();
+                        
+                        // Check if the variable exists in the screen
+                        if (screenVarMap.containsKey(varName)) {
+                            // Evaluate the value to assign
+                            Object value = interpreter.evaluate(stmt.value);
+                            
+                            // Assign the value to the screen variable
+                            screenVarMap.put(varName, value);
+                            
+                            // Trigger screen refresh to update UI controls
+                            context.triggerScreenRefresh(screenName);
+                            return;
+                        } else {
+                            throw interpreter.error(stmt.getLine(), "Screen '" + screenName + "' does not have a variable named '" + propExpr.propertyName + "'.");
+                        }
+                    }
                 }
             }
             
