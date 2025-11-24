@@ -15,6 +15,7 @@ import com.eb.script.interpreter.statement.StatementKind;
 import com.eb.script.token.DataType;
 
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * InterpreterArray handles all array-related interpreter operations.
@@ -210,6 +211,38 @@ public class InterpreterArray {
     public void visitIndexAssignStatement(IndexAssignStatement stmt) throws InterpreterError {
         // Handle PropertyExpression (e.g., record.field = value or array[0].field = value)
         if (stmt.target instanceof PropertyExpression propExpr) {
+            // Check if this is a screen variable assignment (screenName.varName = value)
+            // Note: Screen and variable names are case-insensitive (normalized to lowercase by lexer)
+            if (propExpr.object instanceof VariableExpression varExpr) {
+                // Null safety checks
+                if (varExpr.name != null && propExpr.propertyName != null) {
+                    // Normalize to lowercase for case-insensitive lookup
+                    String screenName = varExpr.name.toLowerCase();
+                    ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars(screenName);
+                    
+                    if (screenVarMap != null) {
+                        // This is a screen variable assignment
+                        // Normalize to lowercase for case-insensitive lookup
+                        String varName = propExpr.propertyName.toLowerCase();
+                        
+                        // Check if the variable exists in the screen
+                        if (screenVarMap.containsKey(varName)) {
+                            // Evaluate the value to assign
+                            Object value = interpreter.evaluate(stmt.value);
+                            
+                            // Assign the value to the screen variable
+                            screenVarMap.put(varName, value);
+                            
+                            // Trigger screen refresh to update UI controls
+                            context.triggerScreenRefresh(screenName);
+                            return;
+                        } else {
+                            throw interpreter.error(stmt.getLine(), "Screen '" + screenName + "' does not have a variable named '" + varName + "'.");
+                        }
+                    }
+                }
+            }
+            
             // Navigate through nested PropertyExpressions to get the parent object
             Object obj = evaluatePropertyChain(propExpr.object, stmt.getLine());
             
@@ -335,10 +368,10 @@ public class InterpreterArray {
             return key;
         }
         
-        // Try case-insensitive match
-        String lowerKey = key.toLowerCase();
+        // Try case-insensitive match using ROOT locale for consistent behavior
+        String lowerKey = key.toLowerCase(java.util.Locale.ROOT);
         for (String mapKey : map.keySet()) {
-            if (mapKey.toLowerCase().equals(lowerKey)) {
+            if (mapKey != null && mapKey.toLowerCase(java.util.Locale.ROOT).equals(lowerKey)) {
                 return mapKey;
             }
         }

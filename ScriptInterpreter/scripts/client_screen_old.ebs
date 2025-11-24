@@ -1,0 +1,218 @@
+// Client Information Screen
+// Description: A screen with updatable fields for client information using array.record
+// Fields: client name, surname, age, id (3 clients using array.record with proper area items)
+
+screen clientScreen = {
+    "title": "Client Information - Multiple Clients",
+    "width": 650,
+    "height": 750,
+    "vars": [
+        {
+            "name": "clients",
+            "type": "array.record",
+            "default": {"clientName": "", "surname": "", "age": 18, "clientId": ""}
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "20",
+            "padding": "20",
+            "items": [
+                // Client 1 section
+                {
+                    "type": "label",
+                    "text": "Client 1:",
+                    "style": "-fx-font-weight: bold; -fx-font-size: 14px;",
+                    "seq": 1
+                },
+                {
+                    "type": "textfield",
+                    "varref": "clients[0].clientName",
+                    "labelText": "Client Name:",
+                    "promptText": "Enter client name",
+                    "seq": 2
+                },
+                {
+                    "type": "textfield",
+                    "varref": "clients[0].surname",
+                    "labelText": "Surname:",
+                    "promptText": "Enter surname",
+                    "seq": 3
+                },
+                {
+                    "type": "spinner",
+                    "varref": "clients[0].age",
+                    "labelText": "Age:",
+                    "min": 0,
+                    "max": 150,
+                    "seq": 4
+                },
+                {
+                    "type": "textfield",
+                    "varref": "clients[0].clientId",
+                    "labelText": "Client ID:",
+                    "promptText": "Enter client ID",
+                    "seq": 5
+                },
+                {
+                    "type": "separator",
+                    "seq": 6
+                },
+                // Client 2 section
+                {
+                    "type": "label",
+                    "text": "Client 2:",
+                    "style": "-fx-font-weight: bold; -fx-font-size: 14px;",
+                    "seq": 7
+                },
+                {
+                    "type": "textfield",
+                    "varref": "clients[1].clientName",
+                    "labelText": "Client Name:",
+                    "promptText": "Enter client name",
+                    "seq": 8
+                },
+                {
+                    "type": "textfield",
+                    "varref": "clients[1].surname",
+                    "labelText": "Surname:",
+                    "promptText": "Enter surname",
+                    "seq": 9
+                },
+                {
+                    "type": "spinner",
+                    "varref": "clients[1].age",
+                    "labelText": "Age:",
+                    "min": 0,
+                    "max": 150,
+                    "seq": 10
+                },
+                {
+                    "type": "textfield",
+                    "varref": "clients[1].clientId",
+                    "labelText": "Client ID:",
+                    "promptText": "Enter client ID",
+                    "seq": 11
+                },
+                {
+                    "type": "separator",
+                    "seq": 12
+                },
+                // Client 3 section
+                {
+                    "type": "label",
+                    "text": "Client 3:",
+                    "style": "-fx-font-weight: bold; -fx-font-size: 14px;",
+                    "seq": 13
+                },
+                {
+                    "type": "textfield",
+                    "varref": "clients[2].clientName",
+                    "labelText": "Client Name:",
+                    "promptText": "Enter client name",
+                    "seq": 14
+                },
+                {
+                    "type": "textfield",
+                    "varref": "clients[2].surname",
+                    "labelText": "Surname:",
+                    "promptText": "Enter surname",
+                    "seq": 15
+                },
+                {
+                    "type": "spinner",
+                    "varref": "clients[2].age",
+                    "labelText": "Age:",
+                    "min": 0,
+                    "max": 150,
+                    "seq": 16
+                },
+                {
+                    "type": "textfield",
+                    "varref": "clients[2].clientId",
+                    "labelText": "Client ID:",
+                    "promptText": "Enter client ID",
+                    "seq": 17
+                }
+            ]
+        }
+    ]
+};
+
+// Initialize with 3 client records
+clientScreen.clients = [
+    {"clientName": "", "surname": "", "age": 18, "clientId": ""},
+    {"clientName": "", "surname": "", "age": 18, "clientId": ""},
+    {"clientName": "", "surname": "", "age": 18, "clientId": ""}
+];
+
+// Display initial values for all 3 clients
+print "Client Information Screen";
+print "=========================";
+print "";
+print "Client 1:";
+print "  Name: " + clientScreen.clients[0].clientName;
+print "  Surname: " + clientScreen.clients[0].surname;
+print "  Age: " + clientScreen.clients[0].age;
+print "  ID: " + clientScreen.clients[0].clientId;
+print "";
+print "Client 2:";
+print "  Name: " + clientScreen.clients[1].clientName;
+print "  Surname: " + clientScreen.clients[1].surname;
+print "  Age: " + clientScreen.clients[1].age;
+print "  ID: " + clientScreen.clients[1].clientId;
+print "";
+print "Client 3:";
+print "  Name: " + clientScreen.clients[2].clientName;
+print "  Surname: " + clientScreen.clients[2].surname;
+print "  Age: " + clientScreen.clients[2].age;
+print "  ID: " + clientScreen.clients[2].clientId;
+
+// Example: Set some sample values for all 3 clients
+clientScreen.clients[0].clientName = "John";
+clientScreen.clients[0].surname = "Doe";
+clientScreen.clients[0].age = 30;
+clientScreen.clients[0].clientId = "CLT-12345";
+
+clientScreen.clients[1].clientName = "Jane";
+clientScreen.clients[1].surname = "Smith";
+clientScreen.clients[1].age = 28;
+clientScreen.clients[1].clientId = "CLT-12346";
+
+clientScreen.clients[2].clientName = "Bob";
+clientScreen.clients[2].surname = "Johnson";
+clientScreen.clients[2].age = 45;
+clientScreen.clients[2].clientId = "CLT-12347";
+
+print "";
+print "Sample values set:";
+print "";
+print "Client 1:";
+print "  Name: " + clientScreen.clients[0].clientName;
+print "  Surname: " + clientScreen.clients[0].surname;
+print "  Age: " + clientScreen.clients[0].age;
+print "  ID: " + clientScreen.clients[0].clientId;
+print "";
+print "Client 2:";
+print "  Name: " + clientScreen.clients[1].clientName;
+print "  Surname: " + clientScreen.clients[1].surname;
+print "  Age: " + clientScreen.clients[1].age;
+print "  ID: " + clientScreen.clients[1].clientId;
+print "";
+print "Client 3:";
+print "  Name: " + clientScreen.clients[2].clientName;
+print "  Surname: " + clientScreen.clients[2].surname;
+print "  Age: " + clientScreen.clients[2].age;
+print "  ID: " + clientScreen.clients[2].clientId;
+
+// Show the screen for user interaction
+print "";
+print "Displaying client screen...";
+print "The screen allows updating all client fields for 3 clients.";
+show screen clientScreen;
+
+print "";
+print "Client screen is now displayed and ready for input!";
+

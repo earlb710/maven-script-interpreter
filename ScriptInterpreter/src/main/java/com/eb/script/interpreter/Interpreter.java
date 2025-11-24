@@ -1560,6 +1560,23 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
 
     @Override
     public Object visitPropertyExpression(com.eb.script.interpreter.expression.PropertyExpression expr) throws InterpreterError {
+        // Check if this is a screen variable access pattern (screenName.varName)
+        if (expr.object instanceof com.eb.script.interpreter.expression.VariableExpression varExpr) {
+            String screenName = varExpr.name.toLowerCase(java.util.Locale.ROOT);
+            ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars(screenName);
+            
+            if (screenVarMap != null) {
+                // This might be a screen variable access
+                String varName = expr.propertyName.toLowerCase(java.util.Locale.ROOT);
+                if (screenVarMap.containsKey(varName)) {
+                    // This is a screen variable - return it
+                    return screenVarMap.get(varName);
+                }
+                // If the variable doesn't exist in the screen, fall through to normal property access
+                // This allows accessing properties of the screen config JSON if needed
+            }
+        }
+        
         Object obj = evaluate(expr.object);
         
         if (obj == null) {
@@ -1571,15 +1588,37 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             @SuppressWarnings("unchecked")
             java.util.Map<String, Object> map = (java.util.Map<String, Object>) obj;
             
-            // Check if the property exists
-            if (!map.containsKey(expr.propertyName)) {
+            // Find the actual key (case-insensitive)
+            String actualKey = findMapKey(map, expr.propertyName);
+            if (actualKey == null) {
                 throw error(expr.getLine(), "Property '" + expr.propertyName + "' does not exist in record");
             }
             
-            return map.get(expr.propertyName);
+            return map.get(actualKey);
         }
         
         throw error(expr.getLine(), "Cannot access property '" + expr.propertyName + "' on non-record type: " + obj.getClass().getSimpleName());
+    }
+    
+    /**
+     * Find a key in a map using case-insensitive comparison.
+     * Returns the actual key from the map, or null if not found.
+     */
+    private String findMapKey(java.util.Map<String, Object> map, String key) {
+        // First try exact match
+        if (map.containsKey(key)) {
+            return key;
+        }
+        
+        // Try case-insensitive match using ROOT locale for consistent behavior
+        String lowerKey = key.toLowerCase(java.util.Locale.ROOT);
+        for (String mapKey : map.keySet()) {
+            if (mapKey != null && mapKey.toLowerCase(java.util.Locale.ROOT).equals(lowerKey)) {
+                return mapKey;
+            }
+        }
+        
+        return null;
     }
 
     @Override

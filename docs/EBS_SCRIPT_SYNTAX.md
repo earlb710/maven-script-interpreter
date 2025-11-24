@@ -43,6 +43,24 @@ print message;
 - Blocks use curly braces `{ }`
 - Comments start with `//` and extend to end of line
 
+### Case Insensitivity
+**Important**: EBS is case-insensitive for all identifiers (variables, functions, screens).
+
+```javascript
+// These all refer to the same variable
+var userName = "Alice";
+print USERNAME;      // Works: prints "Alice"
+print UserName;      // Works: prints "Alice"
+print username;      // Works: prints "Alice"
+
+// Screen names are also case-insensitive
+screen myScreen = { "title": "Example" };
+show screen MyScreen;    // Works
+show screen MYSCREEN;    // Works
+```
+
+All identifiers are normalized to lowercase internally, so `myVariable`, `MyVariable`, and `MYVARIABLE` all refer to the same entity. However, string values remain case-sensitive.
+
 ---
 
 ## Data Types
@@ -2072,10 +2090,13 @@ Ctrl+Enter             Execute the script in the editor
 ## Language Features
 
 ### Case Sensitivity
-- **Keywords**: Case-sensitive (`var`, `if`, `while`, etc.)
-- **Identifiers**: Case-sensitive (variable and function names)
+- **Keywords**: Case-insensitive, normalized to lowercase by lexer (`var`, `VAR`, and `Var` all work)
+- **Identifiers**: Case-insensitive, normalized to lowercase (variable, function, and screen names)
+  - `myVariable`, `MyVariable`, and `MYVARIABLE` all refer to the same variable
+  - Screen names: `clientScreen`, `ClientScreen`, and `CLIENTSCREEN` all refer to the same screen
+  - Variable names: `userName`, `UserName`, and `USERNAME` all refer to the same variable
 - **Screen JSON**: Keys are case-insensitive, normalized to lowercase
-- **String values**: Case-sensitive
+- **String values**: Case-sensitive (string content preserves original case)
 
 ### Type Coercion
 ```javascript
