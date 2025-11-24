@@ -213,42 +213,48 @@ public class AreaContainerFactory {
         
         // Position label based on alignment
         String alignmentValue = (alignment != null) ? alignment.toLowerCase() : "left";
-        label.setTranslateY(-10); // Move label up to sit on the border
-        
-        switch (alignmentValue) {
-            case "center":
-                label.setTranslateX(0);
-                label.setAlignment(Pos.CENTER);
-                if (container instanceof Pane) {
-                    StackPane.setAlignment(label, Pos.TOP_CENTER);
-                }
-                break;
-            case "right":
-                label.setTranslateX(-10);
-                label.setAlignment(Pos.CENTER_RIGHT);
-                if (container instanceof Pane) {
-                    StackPane.setAlignment(label, Pos.TOP_RIGHT);
-                }
-                break;
-            case "left":
-            default:
-                label.setTranslateX(10);
-                label.setAlignment(Pos.CENTER_LEFT);
-                if (container instanceof Pane) {
-                    StackPane.setAlignment(label, Pos.TOP_LEFT);
-                }
-                break;
-        }
         
         // Add the label to the container
-        // For VBox/HBox, insert at the beginning
+        // For VBox/HBox, insert at the beginning with proper alignment
         if (container instanceof VBox) {
-            ((VBox) container).getChildren().add(0, label);
+            // Wrap the label in an HBox to control its horizontal alignment
+            HBox labelWrapper = new HBox(label);
+            labelWrapper.setTranslateY(-10); // Move wrapper up to sit on the border
+            // Set the alignment of the wrapper HBox
+            Pos wrapperAlignment = alignmentValue.equals("center") ? Pos.CENTER :
+                                   alignmentValue.equals("right") ? Pos.CENTER_RIGHT : Pos.CENTER_LEFT;
+            labelWrapper.setAlignment(wrapperAlignment);
+            ((VBox) container).getChildren().add(0, labelWrapper);
         } else if (container instanceof HBox) {
-            ((HBox) container).getChildren().add(0, label);
+            // For HBox, wrap the label in an HBox to control its horizontal alignment
+            HBox labelWrapper = new HBox(label);
+            labelWrapper.setTranslateY(-10); // Move wrapper up to sit on the border
+            // Set the alignment of the wrapper HBox
+            Pos wrapperAlignment = alignmentValue.equals("center") ? Pos.CENTER :
+                                   alignmentValue.equals("right") ? Pos.CENTER_RIGHT : Pos.CENTER_LEFT;
+            labelWrapper.setAlignment(wrapperAlignment);
+            ((HBox) container).getChildren().add(0, labelWrapper);
         } else if (container instanceof Pane) {
+            // For Pane, use translateX to position the label
+            label.setTranslateY(-10); // Move label up to sit on the border
+            switch (alignmentValue) {
+                case "center":
+                    label.setTranslateX(0);
+                    label.setAlignment(Pos.CENTER);
+                    break;
+                case "right":
+                    label.setTranslateX(-10);
+                    label.setAlignment(Pos.CENTER_RIGHT);
+                    break;
+                case "left":
+                default:
+                    label.setTranslateX(10);
+                    label.setAlignment(Pos.CENTER_LEFT);
+                    break;
+            }
             ((Pane) container).getChildren().add(label);
         } else if (container instanceof StackPane) {
+            label.setTranslateY(-10); // Move label up to sit on the border
             ((StackPane) container).getChildren().add(label);
             StackPane.setAlignment(label, 
                 alignmentValue.equals("center") ? Pos.TOP_CENTER :
