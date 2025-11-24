@@ -329,12 +329,12 @@ public class AreaContainerFactory {
                 // Calculate font height from the label
                 javafx.scene.text.Font font = label.getFont();
                 double fontHeight = font.getSize(); // Approximate font height
-                return -fontHeight;
+                return -3 - fontHeight;
             case "bottom":
-                return 0; // Position at the border baseline
+                return -3; // Position slightly above the border baseline
             case "on":
             default:
-                return -5; // Default: border goes through label
+                return -8; // Default: border goes through label
         }
     }
     
