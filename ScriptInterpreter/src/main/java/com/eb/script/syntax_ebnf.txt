@@ -11,8 +11,9 @@ keywords   = "var" | "print" | "call" | "return" | "if" | "then" | "else" | "whi
            | "connect" | "use" | "cursor" | "open" | "close" | "connection"
            | "select" | "from" | "where" | "order" | "by" | "group" | "having"
            | "screen" | "show" | "hide"
-           | "length" | "size" ;
-datatypes  = "byte" | "int" | "integer" | "long" | "float" | "double" | "string" | "date" | "bool" | "boolean" | "json" ;
+           | "length" | "size" 
+           | "typeof" ;                  (* typeof operator for runtime type inspection *)
+datatypes  = "byte" | "int" | "integer" | "long" | "float" | "double" | "string" | "date" | "bool" | "boolean" | "json" | "record" ;
 operators  = "+" | "-" | "*" | "/" | "^" | "=" | "!" | ">" | "<" | ">=" | "<=" | "==" | "!=" 
            | "and" | "or" | "&&" | "||" 
            | "=>" | "=<" ;
@@ -120,14 +121,19 @@ logicalAnd   = relation  ( "and" relation  )* ;
 relation     = addition ( ( "==" | "!=" | ">" | ">=" | "<" | "<=" ) addition )? ;
 addition     = multiplication ( ( "+" | "-" ) multiplication )* ;
 multiplication = unary ( ( "*" | "/" ) unary )* ;
-unary        = ( "+" | "-" | "!" ) unary | exponentiation ;
+unary        = ( "+" | "-" | "!" | "typeof" ) unary | exponentiation ;
 exponentiation = postfix ( "^" exponentiation )? ;   (* right-associative *)
 primary      = literal
              | identifier
              | "(" expression ")"
              | callAsExpression
              | arrayLiteral
+             | castExpression         (* type casting: type(expression) *)
              ;
+
+castExpression
+             = datatypes "(" expression ")" ;
+             (* Examples: int("42"), string(123), record(jsonData) *)
 
 callAsExpression
              = "call" qualifiedName ( "(" callArgList? ")" )? ;
