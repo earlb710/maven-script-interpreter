@@ -1,202 +1,202 @@
 // Client Information Screen - Interactive Demo
-// Description: Demonstrates how to create and interact with a client information screen
+// Description: Demonstrates how to create and interact with a client information screen using array.record
 // Features: Programmatic field updates, data validation display, and field access examples
-// Supports 3 clients with individual fields
+// Supports 3 clients using array.record
 
 screen clientInfoScreen = {
     "title": "Client Information Manager - Multiple Clients",
     "width": 650,
     "height": 800,
     "vars": [
-        // Client 1 fields
         {
-            "name": "client1Name",
-            "type": "string",
-            "default": "",
-            "display": {
-                "type": "textfield",
-                "labelText": "Client 1 - Name:",
-                "promptText": "Enter client name",
-                "seq": 1
-            }
-        },
+            "name": "clients",
+            "type": "array.record",
+            "default": {"clientName": "", "surname": "", "age": 25, "clientId": ""}
+        }
+    ],
+    "area": [
         {
-            "name": "client1Surname",
-            "type": "string",
-            "default": "",
-            "display": {
-                "type": "textfield",
-                "labelText": "Surname:",
-                "promptText": "Enter last name",
-                "seq": 2
-            }
-        },
-        {
-            "name": "client1Age",
-            "type": "int",
-            "default": 25,
-            "display": {
-                "type": "spinner",
-                "min": 0,
-                "max": 150,
-                "labelText": "Age:",
-                "seq": 3
-            }
-        },
-        {
-            "name": "client1Id",
-            "type": "string",
-            "default": "",
-            "display": {
-                "type": "textfield",
-                "labelText": "Client ID:",
-                "promptText": "e.g., CLT-001",
-                "seq": 4
-            }
-        },
-        // Client 2 fields
-        {
-            "name": "client2Name",
-            "type": "string",
-            "default": "",
-            "display": {
-                "type": "textfield",
-                "labelText": "Client 2 - Name:",
-                "promptText": "Enter client name",
-                "seq": 5
-            }
-        },
-        {
-            "name": "client2Surname",
-            "type": "string",
-            "default": "",
-            "display": {
-                "type": "textfield",
-                "labelText": "Surname:",
-                "promptText": "Enter last name",
-                "seq": 6
-            }
-        },
-        {
-            "name": "client2Age",
-            "type": "int",
-            "default": 25,
-            "display": {
-                "type": "spinner",
-                "min": 0,
-                "max": 150,
-                "labelText": "Age:",
-                "seq": 7
-            }
-        },
-        {
-            "name": "client2Id",
-            "type": "string",
-            "default": "",
-            "display": {
-                "type": "textfield",
-                "labelText": "Client ID:",
-                "promptText": "e.g., CLT-002",
-                "seq": 8
-            }
-        },
-        // Client 3 fields
-        {
-            "name": "client3Name",
-            "type": "string",
-            "default": "",
-            "display": {
-                "type": "textfield",
-                "labelText": "Client 3 - Name:",
-                "promptText": "Enter client name",
-                "seq": 9
-            }
-        },
-        {
-            "name": "client3Surname",
-            "type": "string",
-            "default": "",
-            "display": {
-                "type": "textfield",
-                "labelText": "Surname:",
-                "promptText": "Enter last name",
-                "seq": 10
-            }
-        },
-        {
-            "name": "client3Age",
-            "type": "int",
-            "default": 25,
-            "display": {
-                "type": "spinner",
-                "min": 0,
-                "max": 150,
-                "labelText": "Age:",
-                "seq": 11
-            }
-        },
-        {
-            "name": "client3Id",
-            "type": "string",
-            "default": "",
-            "display": {
-                "type": "textfield",
-                "labelText": "Client ID:",
-                "promptText": "e.g., CLT-003",
-                "seq": 12
-            }
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "20",
+            "padding": "20",
+            "items": [
+                // Client 1 section
+                {
+                    "type": "label",
+                    "text": "Client 1:",
+                    "style": "-fx-font-weight: bold; -fx-font-size: 14px;",
+                    "seq": 1
+                },
+                {
+                    "type": "textfield",
+                    "varref": "clients[0].clientName",
+                    "labelText": "Client Name:",
+                    "promptText": "Enter client name",
+                    "seq": 2
+                },
+                {
+                    "type": "textfield",
+                    "varref": "clients[0].surname",
+                    "labelText": "Surname:",
+                    "promptText": "Enter last name",
+                    "seq": 3
+                },
+                {
+                    "type": "spinner",
+                    "varref": "clients[0].age",
+                    "labelText": "Age:",
+                    "min": 0,
+                    "max": 150,
+                    "seq": 4
+                },
+                {
+                    "type": "textfield",
+                    "varref": "clients[0].clientId",
+                    "labelText": "Client ID:",
+                    "promptText": "e.g., CLT-001",
+                    "seq": 5
+                },
+                {
+                    "type": "separator",
+                    "seq": 6
+                },
+                // Client 2 section
+                {
+                    "type": "label",
+                    "text": "Client 2:",
+                    "style": "-fx-font-weight: bold; -fx-font-size: 14px;",
+                    "seq": 7
+                },
+                {
+                    "type": "textfield",
+                    "varref": "clients[1].clientName",
+                    "labelText": "Client Name:",
+                    "promptText": "Enter client name",
+                    "seq": 8
+                },
+                {
+                    "type": "textfield",
+                    "varref": "clients[1].surname",
+                    "labelText": "Surname:",
+                    "promptText": "Enter last name",
+                    "seq": 9
+                },
+                {
+                    "type": "spinner",
+                    "varref": "clients[1].age",
+                    "labelText": "Age:",
+                    "min": 0,
+                    "max": 150,
+                    "seq": 10
+                },
+                {
+                    "type": "textfield",
+                    "varref": "clients[1].clientId",
+                    "labelText": "Client ID:",
+                    "promptText": "e.g., CLT-002",
+                    "seq": 11
+                },
+                {
+                    "type": "separator",
+                    "seq": 12
+                },
+                // Client 3 section
+                {
+                    "type": "label",
+                    "text": "Client 3:",
+                    "style": "-fx-font-weight: bold; -fx-font-size: 14px;",
+                    "seq": 13
+                },
+                {
+                    "type": "textfield",
+                    "varref": "clients[2].clientName",
+                    "labelText": "Client Name:",
+                    "promptText": "Enter client name",
+                    "seq": 14
+                },
+                {
+                    "type": "textfield",
+                    "varref": "clients[2].surname",
+                    "labelText": "Surname:",
+                    "promptText": "Enter last name",
+                    "seq": 15
+                },
+                {
+                    "type": "spinner",
+                    "varref": "clients[2].age",
+                    "labelText": "Age:",
+                    "min": 0,
+                    "max": 150,
+                    "seq": 16
+                },
+                {
+                    "type": "textfield",
+                    "varref": "clients[2].clientId",
+                    "labelText": "Client ID:",
+                    "promptText": "e.g., CLT-003",
+                    "seq": 17
+                }
+            ]
         }
     ]
 };
 
 // ===============================================
-// Demo Section: Working with Multiple Clients
+// Demo Section: Working with Multiple Clients using array.record
 // ===============================================
 
 print "===========================================";
 print " Client Information Screen Demo";
-print " Multiple Clients (Individual Fields)";
+print " Multiple Clients (array.record)";
 print "===========================================";
 print "";
+
+// Initialize with 3 client records
+clientInfoScreen.clients = [
+    {"clientName": "", "surname": "", "age": 25, "clientId": ""},
+    {"clientName": "", "surname": "", "age": 25, "clientId": ""},
+    {"clientName": "", "surname": "", "age": 25, "clientId": ""}
+];
 
 // 1. Display initial (empty) values for all 3 clients
 print "1. Initial field values for all clients:";
 print "";
 print "   Client 1:";
-print "     Name: '" + clientInfoScreen.client1Name + "'";
-print "     Surname: '" + clientInfoScreen.client1Surname + "'";
-print "     Age: " + clientInfoScreen.client1Age;
-print "     ID: '" + clientInfoScreen.client1Id + "'";
+print "     Name: '" + clientInfoScreen.clients[0].clientName + "'";
+print "     Surname: '" + clientInfoScreen.clients[0].surname + "'";
+print "     Age: " + clientInfoScreen.clients[0].age;
+print "     ID: '" + clientInfoScreen.clients[0].clientId + "'";
 print "";
 print "   Client 2:";
-print "     Name: '" + clientInfoScreen.client2Name + "'";
-print "     Surname: '" + clientInfoScreen.client2Surname + "'";
-print "     Age: " + clientInfoScreen.client2Age;
-print "     ID: '" + clientInfoScreen.client2Id + "'";
+print "     Name: '" + clientInfoScreen.clients[1].clientName + "'";
+print "     Surname: '" + clientInfoScreen.clients[1].surname + "'";
+print "     Age: " + clientInfoScreen.clients[1].age;
+print "     ID: '" + clientInfoScreen.clients[1].clientId + "'";
 print "";
 print "   Client 3:";
-print "     Name: '" + clientInfoScreen.client3Name + "'";
-print "     Surname: '" + clientInfoScreen.client3Surname + "'";
-print "     Age: " + clientInfoScreen.client3Age;
-print "     ID: '" + clientInfoScreen.client3Id + "'";
+print "     Name: '" + clientInfoScreen.clients[2].clientName + "'";
+print "     Surname: '" + clientInfoScreen.clients[2].surname + "'";
+print "     Age: " + clientInfoScreen.clients[2].age;
+print "     ID: '" + clientInfoScreen.clients[2].clientId + "'";
 print "";
 
-// 2. Set example data for all 3 clients
-print "2. Setting example client data for all 3 clients...";
-clientInfoScreen.client1Name = "John";
-clientInfoScreen.client1Surname = "Smith";
-clientInfoScreen.client1Age = 35;
-clientInfoScreen.client1Id = "CLT-12345";
+// 2. Set example data for all 3 clients using array.record access
+print "2. Setting example client data for all 3 clients using array.record...";
+clientInfoScreen.clients[0].clientName = "John";
+clientInfoScreen.clients[0].surname = "Smith";
+clientInfoScreen.clients[0].age = 35;
+clientInfoScreen.clients[0].clientId = "CLT-12345";
 
-clientInfoScreen.client2Name = "Alice";
-clientInfoScreen.client2Surname = "Johnson";
-clientInfoScreen.client2Age = 28;
-clientInfoScreen.client2Id = "CLT-54321";
+clientInfoScreen.clients[1].clientName = "Alice";
+clientInfoScreen.clients[1].surname = "Johnson";
+clientInfoScreen.clients[1].age = 28;
+clientInfoScreen.clients[1].clientId = "CLT-54321";
 
-clientInfoScreen.client3Name = "Bob";
-clientInfoScreen.client3Surname = "Williams";
-clientInfoScreen.client3Age = 42;
-clientInfoScreen.client3Id = "CLT-99999";
+clientInfoScreen.clients[2].clientName = "Bob";
+clientInfoScreen.clients[2].surname = "Williams";
+clientInfoScreen.clients[2].age = 42;
+clientInfoScreen.clients[2].clientId = "CLT-99999";
 
 print "   Data set successfully for all clients!";
 print "";
@@ -205,22 +205,22 @@ print "";
 print "3. Current field values for all clients:";
 print "";
 print "   Client 1:";
-print "     Name: " + clientInfoScreen.client1Name;
-print "     Surname: " + clientInfoScreen.client1Surname;
-print "     Age: " + clientInfoScreen.client1Age;
-print "     ID: " + clientInfoScreen.client1Id;
+print "     Name: " + clientInfoScreen.clients[0].clientName;
+print "     Surname: " + clientInfoScreen.clients[0].surname;
+print "     Age: " + clientInfoScreen.clients[0].age;
+print "     ID: " + clientInfoScreen.clients[0].clientId;
 print "";
 print "   Client 2:";
-print "     Name: " + clientInfoScreen.client2Name;
-print "     Surname: " + clientInfoScreen.client2Surname;
-print "     Age: " + clientInfoScreen.client2Age;
-print "     ID: " + clientInfoScreen.client2Id;
+print "     Name: " + clientInfoScreen.clients[1].clientName;
+print "     Surname: " + clientInfoScreen.clients[1].surname;
+print "     Age: " + clientInfoScreen.clients[1].age;
+print "     ID: " + clientInfoScreen.clients[1].clientId;
 print "";
 print "   Client 3:";
-print "     Name: " + clientInfoScreen.client3Name;
-print "     Surname: " + clientInfoScreen.client3Surname;
-print "     Age: " + clientInfoScreen.client3Age;
-print "     ID: " + clientInfoScreen.client3Id;
+print "     Name: " + clientInfoScreen.clients[2].clientName;
+print "     Surname: " + clientInfoScreen.clients[2].surname;
+print "     Age: " + clientInfoScreen.clients[2].age;
+print "     ID: " + clientInfoScreen.clients[2].clientId;
 print "";
 
 // 4. Create formatted display of all client information
@@ -230,37 +230,37 @@ print "   CLIENT INFORMATION RECORDS";
 print "   ==================================";
 print "";
 print "   CLIENT 1:";
-print "   Name:      " + clientInfoScreen.client1Name + " " + clientInfoScreen.client1Surname;
-print "   Age:       " + clientInfoScreen.client1Age + " years old";
-print "   Client ID: " + clientInfoScreen.client1Id;
+print "   Name:      " + clientInfoScreen.clients[0].clientName + " " + clientInfoScreen.clients[0].surname;
+print "   Age:       " + clientInfoScreen.clients[0].age + " years old";
+print "   Client ID: " + clientInfoScreen.clients[0].clientId;
 print "";
 print "   CLIENT 2:";
-print "   Name:      " + clientInfoScreen.client2Name + " " + clientInfoScreen.client2Surname;
-print "   Age:       " + clientInfoScreen.client2Age + " years old";
-print "   Client ID: " + clientInfoScreen.client2Id;
+print "   Name:      " + clientInfoScreen.clients[1].clientName + " " + clientInfoScreen.clients[1].surname;
+print "   Age:       " + clientInfoScreen.clients[1].age + " years old";
+print "   Client ID: " + clientInfoScreen.clients[1].clientId;
 print "";
 print "   CLIENT 3:";
-print "   Name:      " + clientInfoScreen.client3Name + " " + clientInfoScreen.client3Surname;
-print "   Age:       " + clientInfoScreen.client3Age + " years old";
-print "   Client ID: " + clientInfoScreen.client3Id;
+print "   Name:      " + clientInfoScreen.clients[2].clientName + " " + clientInfoScreen.clients[2].surname;
+print "   Age:       " + clientInfoScreen.clients[2].age + " years old";
+print "   Client ID: " + clientInfoScreen.clients[2].clientId;
 print "   ==================================";
 print "";
 
-// 5. Update client ages (birthdays!)
-print "5. Updating client ages (birthdays!)...";
-clientInfoScreen.client1Age = clientInfoScreen.client1Age + 1;
-clientInfoScreen.client2Age = clientInfoScreen.client2Age + 1;
-clientInfoScreen.client3Age = clientInfoScreen.client3Age + 1;
+// 5. Update client ages (birthdays!) using array.record access
+print "5. Updating client ages (birthdays!) using array.record access...";
+clientInfoScreen.clients[0].age = clientInfoScreen.clients[0].age + 1;
+clientInfoScreen.clients[1].age = clientInfoScreen.clients[1].age + 1;
+clientInfoScreen.clients[2].age = clientInfoScreen.clients[2].age + 1;
 print "   Happy Birthday to all clients!";
-print "   Client 1 new age: " + clientInfoScreen.client1Age;
-print "   Client 2 new age: " + clientInfoScreen.client2Age;
-print "   Client 3 new age: " + clientInfoScreen.client3Age;
+print "   Client 1 new age: " + clientInfoScreen.clients[0].age;
+print "   Client 2 new age: " + clientInfoScreen.clients[1].age;
+print "   Client 3 new age: " + clientInfoScreen.clients[2].age;
 print "";
 
 // 6. Show the screen for user interaction
-print "6. Displaying client information screen...";
+print "6. Displaying client information screen with array.record...";
 print "   The screen is now shown and ready for user input.";
-print "   All fields for all 3 clients are updatable.";
+print "   All fields for all 3 clients are updatable through the UI.";
 print "";
 show screen clientInfoScreen;
 
@@ -268,10 +268,12 @@ show screen clientInfoScreen;
 print "===========================================";
 print " Screen displayed successfully!";
 print " Users can now edit all client fields.";
+print " Using array.record: clients[0-2]";
 print "===========================================";
 print "";
 print "Features:";
-print "- 3 client records with individual fields";
-print "- Each client has: name, surname, age, clientId";
+print "- 3 client records using array.record structure";
+print "- Each client has: clientName, surname, age, clientId";
 print "- All fields are updatable and validated";
 print "- UI controls automatically update with data changes";
+print "- Access via clients[index].propertyName";
