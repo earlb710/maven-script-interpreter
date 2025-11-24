@@ -1755,8 +1755,13 @@ public class InterpreterScreen {
         }
 
         // Process nested child areas (areas within areas)
-        if (areaDef.containsKey("areas")) {
-            Object areasObj = areaDef.get("areas");
+        // Check for both "areas" and "childAreas" (case-insensitive)
+        Object areasObj = getCaseInsensitive(areaDef, "areas");
+        if (areasObj == null) {
+            areasObj = getCaseInsensitive(areaDef, "childAreas");
+        }
+        
+        if (areasObj != null) {
             List<Object> areasList = null;
 
             // Handle both List and ArrayDynamic (JSON always uses ArrayDynamic)
