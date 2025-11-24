@@ -261,7 +261,8 @@ public class AreaContainerFactory {
     /**
      * Adjusts container padding based on label offset to prevent unnecessary vertical space.
      * For 'top' offset: adds top padding for the border.
-     * For 'on' and 'bottom': reduces top padding since label doesn't take up as much space.
+     * For 'on' offset: reduces top padding since label doesn't take up as much internal space.
+     * For 'bottom' offset: no adjustment (padding unchanged).
      * @param container The container to adjust padding for
      * @param offset The label offset value: "top", "on", or "bottom"
      */
@@ -293,7 +294,7 @@ public class AreaContainerFactory {
                 break;
             case "bottom":
             default:
-                // For bottom offset, minimal top padding adjustment
+                // For bottom offset, no adjustment needed - keep current padding
                 newPadding = currentPadding;
                 break;
         }
