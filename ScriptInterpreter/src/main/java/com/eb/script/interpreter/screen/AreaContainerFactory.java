@@ -317,24 +317,26 @@ public class AreaContainerFactory {
     /**
      * Determines the vertical offset (translateY) value based on the offset parameter.
      * More negative values move the label up, less negative values move it down.
-     * For 'top' offset, the position is calculated dynamically based on font height.
+     * All offsets now use dynamic font height calculation for consistent positioning.
      * @param offset The offset value: "top", "on", "bottom"
      * @param label The label to calculate font height from (for dynamic positioning)
      * @return The translateY value in pixels
      */
     private static double getVerticalOffset(String offset, Label label) {
+        // Calculate font height from the label
+        javafx.scene.text.Font font = label.getFont();
+        double fontHeight = font.getSize(); // Approximate font height
+        
         switch (offset) {
             case "top":
                 // Position above the border - dynamic based on font height
-                // Calculate font height from the label
-                javafx.scene.text.Font font = label.getFont();
-                double fontHeight = font.getSize(); // Approximate font height
-                return -3 - fontHeight;
+                return -5 - fontHeight;
             case "bottom":
-                return -3; // Position slightly above the border baseline
+                return -5; // Position slightly above the border baseline
             case "on":
             default:
-                return -8; // Default: border goes through label
+                // Default: border goes through label - uses half font height
+                return -5 - (fontHeight / 2);
         }
     }
     
