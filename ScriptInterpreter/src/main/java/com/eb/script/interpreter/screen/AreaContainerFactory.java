@@ -217,22 +217,10 @@ public class AreaContainerFactory {
         // Add the label to the container
         // For VBox/HBox, insert at the beginning with proper alignment
         if (container instanceof VBox) {
-            // Wrap the label in an HBox to control its horizontal alignment
-            HBox labelWrapper = new HBox(label);
-            labelWrapper.setTranslateY(-10); // Move wrapper up to sit on the border
-            // Set the alignment of the wrapper HBox
-            Pos wrapperAlignment = alignmentValue.equals("center") ? Pos.CENTER :
-                                   alignmentValue.equals("right") ? Pos.CENTER_RIGHT : Pos.CENTER_LEFT;
-            labelWrapper.setAlignment(wrapperAlignment);
+            HBox labelWrapper = createAlignedLabelWrapper(label, alignmentValue);
             ((VBox) container).getChildren().add(0, labelWrapper);
         } else if (container instanceof HBox) {
-            // For HBox, wrap the label in an HBox to control its horizontal alignment
-            HBox labelWrapper = new HBox(label);
-            labelWrapper.setTranslateY(-10); // Move wrapper up to sit on the border
-            // Set the alignment of the wrapper HBox
-            Pos wrapperAlignment = alignmentValue.equals("center") ? Pos.CENTER :
-                                   alignmentValue.equals("right") ? Pos.CENTER_RIGHT : Pos.CENTER_LEFT;
-            labelWrapper.setAlignment(wrapperAlignment);
+            HBox labelWrapper = createAlignedLabelWrapper(label, alignmentValue);
             ((HBox) container).getChildren().add(0, labelWrapper);
         } else if (container instanceof Pane) {
             // For Pane, use translateX to position the label
@@ -260,6 +248,25 @@ public class AreaContainerFactory {
                 alignmentValue.equals("center") ? Pos.TOP_CENTER :
                 alignmentValue.equals("right") ? Pos.TOP_RIGHT : Pos.TOP_LEFT);
         }
+    }
+    
+    /**
+     * Creates an HBox wrapper for a label with the specified alignment.
+     * This wrapper allows proper horizontal alignment of labels within VBox/HBox containers.
+     * @param label The label to wrap
+     * @param alignmentValue The alignment value: "left", "center", or "right"
+     * @return An HBox containing the label with proper alignment
+     */
+    private static HBox createAlignedLabelWrapper(javafx.scene.control.Label label, String alignmentValue) {
+        HBox labelWrapper = new HBox(label);
+        labelWrapper.setTranslateY(-10); // Move wrapper up to sit on the border
+        
+        // Set the alignment of the wrapper HBox based on alignment value
+        Pos wrapperAlignment = alignmentValue.equals("center") ? Pos.CENTER :
+                               alignmentValue.equals("right") ? Pos.CENTER_RIGHT : Pos.CENTER_LEFT;
+        labelWrapper.setAlignment(wrapperAlignment);
+        
+        return labelWrapper;
     }
 
     /**
