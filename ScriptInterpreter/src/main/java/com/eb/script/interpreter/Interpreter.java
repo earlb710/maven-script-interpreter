@@ -1571,15 +1571,37 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             @SuppressWarnings("unchecked")
             java.util.Map<String, Object> map = (java.util.Map<String, Object>) obj;
             
-            // Check if the property exists
-            if (!map.containsKey(expr.propertyName)) {
+            // Find the actual key (case-insensitive)
+            String actualKey = findMapKey(map, expr.propertyName);
+            if (actualKey == null) {
                 throw error(expr.getLine(), "Property '" + expr.propertyName + "' does not exist in record");
             }
             
-            return map.get(expr.propertyName);
+            return map.get(actualKey);
         }
         
         throw error(expr.getLine(), "Cannot access property '" + expr.propertyName + "' on non-record type: " + obj.getClass().getSimpleName());
+    }
+    
+    /**
+     * Find a key in a map using case-insensitive comparison.
+     * Returns the actual key from the map, or null if not found.
+     */
+    private String findMapKey(java.util.Map<String, Object> map, String key) {
+        // First try exact match
+        if (map.containsKey(key)) {
+            return key;
+        }
+        
+        // Try case-insensitive match
+        String lowerKey = key.toLowerCase();
+        for (String mapKey : map.keySet()) {
+            if (mapKey.toLowerCase().equals(lowerKey)) {
+                return mapKey;
+            }
+        }
+        
+        return null;
     }
 
     @Override
