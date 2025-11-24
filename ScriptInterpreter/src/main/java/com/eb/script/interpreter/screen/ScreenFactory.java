@@ -62,7 +62,13 @@ public class ScreenFactory {
     private static Map<String, Object> displayMetadataSchema;
     
     // Debug mode flag - per-thread (per EBS tab), toggleable with Ctrl+D
-    private static final ThreadLocal<Boolean> debugMode = ThreadLocal.withInitial(() -> false);
+    // Using InheritableThreadLocal so child threads (like interpreter threads) inherit the debug state
+    private static final InheritableThreadLocal<Boolean> debugMode = new InheritableThreadLocal<Boolean>() {
+        @Override
+        protected Boolean initialValue() {
+            return false;
+        }
+    };
 
     static {
         try {
@@ -153,7 +159,25 @@ public class ScreenFactory {
      * Check if debug mode is enabled for the current thread.
      */
     private static boolean isDebugMode() {
-        return debugMode.get();
+        Boolean mode = debugMode.get();
+        return mode != null && mode;
+    }
+    
+    /**
+     * Get debug mode state for the current thread (for inheritance to child threads).
+     * Public method that can be called from other classes.
+     */
+    public static boolean getDebugModeForInheritance() {
+        Boolean mode = debugMode.get();
+        return mode != null && mode;
+    }
+    
+    /**
+     * Set debug mode for the current thread.
+     * Public method that can be called from other classes to explicitly set debug state.
+     */
+    public static void setDebugModeForThread(boolean enabled) {
+        debugMode.set(enabled);
     }
     
     /**
