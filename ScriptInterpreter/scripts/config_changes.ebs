@@ -348,6 +348,7 @@ screen colorEditorScreen = {
                 "groupBorderColor": "#4a9eff",
                 "groupLabelText": "Console Colors",
                 "groupLabelAlignment": "left",
+                "groupLabelOffset": "bottom",
                 "style": "-fx-spacing: 5; -fx-padding: 10;",
                 "items": [
                     {"name": "info_item", "varref": "info"},
@@ -384,6 +385,7 @@ screen colorEditorScreen = {
                 "groupBorderColor": "#66cc66",
                 "groupLabelText": "Editor Colors",
                 "groupLabelAlignment": "left",
+                "groupLabelOffset": "top",
                 "style": "-fx-spacing: 5; -fx-padding: 10;",
                 "items": [
                     {"name": "background_item", "varref": "background"},
