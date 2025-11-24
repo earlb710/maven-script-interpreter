@@ -1718,8 +1718,9 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 // Add the record structure (just the fields part)
                 // RecordType.toString() returns "record {fields}", so we strip "record " prefix
                 String recordStr = recordType.toString();
-                if (recordStr.startsWith("record ")) {
-                    sb.append(" ").append(recordStr.substring(7)); // Skip "record "
+                String recordPrefix = "record ";
+                if (recordStr.startsWith(recordPrefix)) {
+                    sb.append(" ").append(recordStr.substring(recordPrefix.length()));
                 } else {
                     sb.append(" ").append(recordStr);
                 }
