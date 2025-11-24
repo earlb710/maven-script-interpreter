@@ -13,7 +13,7 @@ screen clientScreen = {
             "default": {"clientName": "", "surname": "", "age": 18, "clientId": ""}
         }
     ],
-    "areas": [
+    "area": [
         {
             "name": "mainArea",
             "type": "vbox",

@@ -14,7 +14,7 @@ screen clientInfoScreen = {
             "default": {"clientName": "", "surname": "", "age": 25, "clientId": ""}
         }
     ],
-    "areas": [
+    "area": [
         {
             "name": "mainArea",
             "type": "vbox",
