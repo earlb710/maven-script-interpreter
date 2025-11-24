@@ -24,6 +24,16 @@ public class AreaDefinition {
     public String screenName;
     // Display name for UI elements (e.g., tab labels)
     public String displayName;
+    // Title for titled containers (e.g., TitledPane, group headers)
+    public String title;
+    // Group border style: none, raised, inset, lowered, line (default: none)
+    public String groupBorder;
+    // Group border color in hex format (e.g., "#4a9eff")
+    public String groupBorderColor;
+    // Group label text (displayed inside/on the group border)
+    public String groupLabelText;
+    // Group label alignment: left, center, right (default: left)
+    public String groupLabelAlignment;
     // Spacing between children (for HBox, VBox, FlowPane, GridPane, TilePane)
     public String spacing;
     // Padding inside the area (for all Region types)
@@ -45,6 +55,11 @@ public class AreaDefinition {
                ", cssClass='" + cssClass + '\'' +
                ", layout='" + layout + '\'' +
                ", style='" + style + '\'' +
+               ", title='" + title + '\'' +
+               ", groupBorder='" + groupBorder + '\'' +
+               ", groupBorderColor='" + groupBorderColor + '\'' +
+               ", groupLabelText='" + groupLabelText + '\'' +
+               ", groupLabelAlignment='" + groupLabelAlignment + '\'' +
                ", spacing='" + spacing + '\'' +
                ", padding='" + padding + '\'' +
                ", items=" + items.size() +

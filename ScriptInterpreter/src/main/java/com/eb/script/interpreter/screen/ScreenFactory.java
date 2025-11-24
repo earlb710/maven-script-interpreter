@@ -10,6 +10,7 @@ import com.eb.script.json.Json;
 import com.eb.script.json.JsonSchema;
 import com.eb.script.json.JsonValidate;
 import com.eb.script.token.DataType;
+import com.eb.ui.cli.ScriptArea;
 import com.eb.util.Util;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -19,6 +20,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
@@ -57,6 +60,15 @@ public class ScreenFactory {
     private static Map<String, Object> screenSchema;
     private static Map<String, Object> areaSchema;
     private static Map<String, Object> displayMetadataSchema;
+    
+    // Debug mode flag - per-thread (per EBS tab), toggleable with Ctrl+D
+    // Using InheritableThreadLocal so child threads (like interpreter threads) inherit the debug state
+    private static final InheritableThreadLocal<Boolean> debugMode = new InheritableThreadLocal<Boolean>() {
+        @Override
+        protected Boolean initialValue() {
+            return false;
+        }
+    };
 
     static {
         try {
@@ -79,6 +91,218 @@ public class ScreenFactory {
             }
         } catch (Exception e) {
             System.err.println("Warning: Failed to load JSON schemas: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Toggle debug mode on or off for the current thread.
+     * Can be called from outside (e.g., from EBS tabs) to enable debug mode
+     * even before running any scripts.
+     * 
+     * @param outputArea The output area to display the toggle message (optional)
+     * @return The new debug mode state
+     */
+    public static boolean toggleDebugModeForThread(ScriptArea outputArea) {
+        boolean newDebugMode = !debugMode.get();
+        debugMode.set(newDebugMode);
+        
+        String message = "DEBUG MODE: " + (newDebugMode ? "ENABLED" : "DISABLED") + " (Thread: " + Thread.currentThread().getName() + ")";
+        
+        // Print to console
+        System.out.println("=".repeat(80));
+        System.out.println(message);
+        System.out.println("=".repeat(80));
+        
+        // Show message in output area if available
+        if (outputArea != null) {
+            Platform.runLater(() -> {
+                if (newDebugMode) {
+                    outputArea.printlnInfo(message);
+                } else {
+                    outputArea.printlnWarn(message);
+                }
+            });
+        }
+        
+        return newDebugMode;
+    }
+    
+    /**
+     * Toggle debug mode on or off for the current thread.
+     * 
+     * @param screenName The name of the screen (optional, for status bar message)
+     * @param context The interpreter context (optional, for status bar access)
+     */
+    private static void toggleDebugMode(String screenName, InterpreterContext context) {
+        boolean newDebugMode = !debugMode.get();
+        debugMode.set(newDebugMode);
+        
+        String message = "DEBUG MODE: " + (newDebugMode ? "ENABLED" : "DISABLED") + " (Thread: " + Thread.currentThread().getName() + ")";
+        
+        // Print to console
+        System.out.println("=".repeat(80));
+        System.out.println(message);
+        System.out.println("=".repeat(80));
+        
+        // Show message in status bar if available
+        if (context != null && screenName != null) {
+            com.eb.ui.ebs.StatusBar statusBar = context.getScreenStatusBars().get(screenName);
+            if (statusBar != null) {
+                Platform.runLater(() -> {
+                    statusBar.setMessage(message);
+                });
+            }
+        }
+    }
+    
+    /**
+     * Check if debug mode is enabled for the current thread.
+     */
+    private static boolean isDebugMode() {
+        Boolean mode = debugMode.get();
+        return mode != null && mode;
+    }
+    
+    /**
+     * Get debug mode state for the current thread (for inheritance to child threads).
+     * Public method that can be called from other classes.
+     */
+    public static boolean getDebugModeForInheritance() {
+        Boolean mode = debugMode.get();
+        return mode != null && mode;
+    }
+    
+    /**
+     * Set debug mode for the current thread.
+     * Public method that can be called from other classes to explicitly set debug state.
+     */
+    public static void setDebugModeForThread(boolean enabled) {
+        debugMode.set(enabled);
+    }
+    
+    /**
+     * Log debug information about a JavaFX Node and its properties.
+     * Only logs when debug mode is enabled.
+     */
+    private static void logNodeDebug(Node node, String context) {
+        if (!isDebugMode()) {
+            return;
+        }
+        
+        StringBuilder log = new StringBuilder();
+        log.append("\n").append("=".repeat(80)).append("\n");
+        log.append("[DEBUG] ").append(context).append("\n");
+        log.append("=".repeat(80)).append("\n");
+        
+        // JavaFX Node Type
+        log.append("JavaFX Type:  ").append(node.getClass().getSimpleName()).append("\n");
+        
+        // ID (often used for CSS selection)
+        if (node.getId() != null && !node.getId().isEmpty()) {
+            log.append("ID:           ").append(node.getId()).append("\n");
+        }
+        
+        // UserData (often contains screen name reference)
+        if (node.getUserData() != null) {
+            log.append("UserData:     ").append(node.getUserData()).append("\n");
+        }
+        
+        // Style (inline CSS)
+        if (node.getStyle() != null && !node.getStyle().isEmpty()) {
+            log.append("Style:        ").append(node.getStyle()).append("\n");
+        }
+        
+        // StyleClass (CSS class names)
+        if (!node.getStyleClass().isEmpty()) {
+            log.append("StyleClass:   ").append(node.getStyleClass()).append("\n");
+        }
+        
+        // Control-specific properties (text content, prompt, etc.)
+        if (node instanceof javafx.scene.control.Labeled) {
+            javafx.scene.control.Labeled labeled = (javafx.scene.control.Labeled) node;
+            if (labeled.getText() != null && !labeled.getText().isEmpty()) {
+                log.append("Text:         ").append(labeled.getText()).append("\n");
+            }
+        }
+        if (node instanceof javafx.scene.control.TextInputControl) {
+            javafx.scene.control.TextInputControl textInput = (javafx.scene.control.TextInputControl) node;
+            if (textInput.getPromptText() != null && !textInput.getPromptText().isEmpty()) {
+                log.append("PromptText:   ").append(textInput.getPromptText()).append("\n");
+            }
+        }
+        
+        // Tooltip
+        if (node instanceof javafx.scene.control.Control) {
+            javafx.scene.control.Control control = (javafx.scene.control.Control) node;
+            if (control.getTooltip() != null && control.getTooltip().getText() != null) {
+                log.append("Tooltip:      ").append(control.getTooltip().getText()).append("\n");
+            }
+        }
+        
+        // Visibility state
+        log.append("Visible:      ").append(node.isVisible() ? "YES" : "NO").append("\n");
+        log.append("Managed:      ").append(node.isManaged() ? "YES" : "NO").append("\n");
+        
+        // Region-specific properties (padding, background, border)
+        if (node instanceof Region) {
+            Region region = (Region) node;
+            if (region.getPadding() != null && !region.getPadding().equals(Insets.EMPTY)) {
+                log.append("Padding:      ").append(region.getPadding()).append("\n");
+            }
+            if (region.getBackground() != null) {
+                log.append("Background:   SET\n");
+            }
+            if (region.getBorder() != null) {
+                log.append("Border:       SET\n");
+            }
+        }
+        
+        // Layout bounds (size and position)
+        if (node.getLayoutBounds() != null) {
+            log.append("LayoutBounds: ").append(String.format("width=%.1f, height=%.1f", 
+                node.getLayoutBounds().getWidth(), 
+                node.getLayoutBounds().getHeight())).append("\n");
+        }
+        
+        // Custom properties map (if any)
+        if (!node.getProperties().isEmpty()) {
+            log.append("Properties:   ").append(node.getProperties()).append("\n");
+        }
+        
+        log.append("=".repeat(80)).append("\n");
+        System.out.println(log.toString());
+    }
+    
+    /**
+     * Recursively log all nodes in a scene graph.
+     * Only logs when debug mode is enabled.
+     */
+    private static void logSceneGraph(Node node, int depth, String path) {
+        if (!isDebugMode()) {
+            return;
+        }
+        
+        String indent = "  ".repeat(depth);
+        String nodeInfo = String.format("%s[%s] %s", 
+            indent,
+            node.getClass().getSimpleName(),
+            node.getId() != null ? "id=" + node.getId() : ""
+        );
+        
+        if (node.getStyle() != null && !node.getStyle().isEmpty()) {
+            nodeInfo += " style=\"" + node.getStyle() + "\"";
+        }
+        
+        System.out.println(nodeInfo);
+        
+        // Recurse for containers
+        if (node instanceof javafx.scene.Parent) {
+            javafx.scene.Parent parent = (javafx.scene.Parent) node;
+            int childIndex = 0;
+            for (Node child : parent.getChildrenUnmodifiable()) {
+                logSceneGraph(child, depth + 1, path + "/" + childIndex);
+                childIndex++;
+            }
         }
     }
 
@@ -212,6 +436,21 @@ public class ScreenFactory {
             java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
             OnClickHandler onClickHandler,
             InterpreterContext context) {
+        // Log debug mode state at the start of createScreen for troubleshooting
+        if (isDebugMode()) {
+            System.out.println("\n[DEBUG] createScreen() called with debug mode ENABLED");
+            System.out.println("[DEBUG] Thread: " + Thread.currentThread().getName());
+            System.out.println("[DEBUG] Screen: " + screenName);
+            System.out.println("[DEBUG] Areas count: " + (areas != null ? areas.size() : 0));
+            if (areas != null && !areas.isEmpty()) {
+                for (AreaDefinition area : areas) {
+                    System.out.println("[DEBUG]   - Area: " + area.name + 
+                        " (childAreas: " + (area.childAreas != null ? area.childAreas.size() : 0) + 
+                        ", items: " + (area.items != null ? area.items.size() : 0) + ")");
+                }
+            }
+        }
+        
         Stage stage = new Stage();
         stage.setTitle(title);
 
@@ -280,6 +519,22 @@ public class ScreenFactory {
         }
 
         Scene scene = new Scene(screenRoot, width, height);
+        
+        // Add Ctrl+D key handler to toggle debug mode (per-thread)
+        scene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == KeyCode.D && event.isControlDown()) {
+                toggleDebugMode(screenName, context);
+                if (isDebugMode()) {
+                    // Log the entire scene graph when debug mode is enabled
+                    System.out.println("\n" + "=".repeat(80));
+                    System.out.println("SCENE GRAPH for: " + screenName);
+                    System.out.println("=".repeat(80));
+                    logSceneGraph(screenRoot, 0, "/");
+                    System.out.println("=".repeat(80));
+                }
+                event.consume(); // Prevent the event from propagating further
+            }
+        });
         
         // Load CSS stylesheets for screen areas and input controls
         try {
@@ -497,6 +752,25 @@ public class ScreenFactory {
             List<Node> boundControls) {
         // Create the container using AreaContainerFactory
         Region container = AreaContainerFactory.createContainer(areaDef);
+        
+        // Log debug information for this container if debug mode is enabled
+        if (isDebugMode()) {
+            StringBuilder contextBuilder = new StringBuilder();
+            contextBuilder.append(String.format("Created container: %s (type: %s)", 
+                areaDef.name != null ? areaDef.name : "<unnamed>",
+                areaDef.areaType != null ? areaDef.areaType.toString().toLowerCase() : "<none>"));
+            
+            // Add groupBorder info if present
+            if (areaDef.groupBorder != null && !areaDef.groupBorder.isEmpty() && !areaDef.groupBorder.equalsIgnoreCase("none")) {
+                contextBuilder.append(String.format(" [groupBorder: %s", areaDef.groupBorder));
+                if (areaDef.groupBorderColor != null && !areaDef.groupBorderColor.isEmpty()) {
+                    contextBuilder.append(String.format(", color: %s", areaDef.groupBorderColor));
+                }
+                contextBuilder.append("]");
+            }
+            
+            logNodeDebug(container, contextBuilder.toString());
+        }
 
         // Sort items by sequence
         if (areaDef.items != null && !areaDef.items.isEmpty()) {
@@ -522,6 +796,18 @@ public class ScreenFactory {
 
                 // Create the item using AreaItemFactory
                 Node control = AreaItemFactory.createItem(item, metadata);
+                
+                // Log debug information for this item if debug mode is enabled
+                if (isDebugMode()) {
+                    String itemType = metadata != null && metadata.itemType != null ? metadata.itemType.toString() : "UNKNOWN";
+                    String labelText = metadata != null && metadata.labelText != null ? metadata.labelText : "<no label>";
+                    String itemContext = String.format("Created item: %s (type: %s, varRef: %s, label: \"%s\")", 
+                        item.name != null ? item.name : "<unnamed>",
+                        itemType,
+                        item.varRef != null ? item.varRef : "<none>",
+                        labelText);
+                    logNodeDebug(control, itemContext);
+                }
                 
                 // Store item metadata in control's user data for later retrieval by screen.setProperty/getProperty
                 // Format: "screenName.itemName"
@@ -602,6 +888,15 @@ public class ScreenFactory {
 
                 // Add item to container based on container type
                 addItemToContainer(container, nodeToAdd, item, areaDef.areaType);
+                
+                // Log debug information for this item if debug mode is enabled
+                if (isDebugMode()) {
+                    String itemContext = String.format("Created item: %s (varRef: %s) in area: %s", 
+                        item.name != null ? item.name : "<unnamed>",
+                        item.varRef != null ? item.varRef : "<none>",
+                        areaDef.name != null ? areaDef.name : "<unnamed>");
+                    logNodeDebug(nodeToAdd, itemContext);
+                }
             }
         }
 
@@ -1137,7 +1432,13 @@ public class ScreenFactory {
             List<AreaDefinition> areas,
             InterpreterContext context,
             boolean maximize) {
+        // Capture debug mode state from current thread before switching to JavaFX thread
+        boolean debugModeEnabled = getDebugModeForInheritance();
+        
         Platform.runLater(() -> {
+            // Set debug mode on JavaFX Application Thread
+            setDebugModeForThread(debugModeEnabled);
+            
             Stage stage = createScreen(screenName, title, width, height, areas, context);
 
             if (maximize) {

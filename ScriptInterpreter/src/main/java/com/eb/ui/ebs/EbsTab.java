@@ -119,7 +119,11 @@ public class EbsTab extends Tab {
                 return;
             }
             
-            if (e.isControlDown() && e.getCode() == KeyCode.L) {
+            if (e.isControlDown() && e.getCode() == KeyCode.D) {
+                // Toggle debug mode for this thread
+                com.eb.script.interpreter.screen.ScreenFactory.toggleDebugModeForThread(outputArea);
+                e.consume();
+            } else if (e.isControlDown() && e.getCode() == KeyCode.L) {
                 dispArea.toggleLineNumbers();   // <— turns line numbers on/off
                 e.consume();                    // prevent further handling of the keystroke
             } else if (e.getCode() == KeyCode.SPACE && e.isControlDown()) {
@@ -163,7 +167,11 @@ public class EbsTab extends Tab {
         });
 
         outputArea.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
-            if (e.isControlDown() && e.getCode() == KeyCode.L) {
+            if (e.isControlDown() && e.getCode() == KeyCode.D) {
+                // Toggle debug mode for this thread
+                com.eb.script.interpreter.screen.ScreenFactory.toggleDebugModeForThread(outputArea);
+                e.consume();
+            } else if (e.isControlDown() && e.getCode() == KeyCode.L) {
                 outputArea.toggleLineNumbers();   // <— turns line numbers on/off
                 e.consume();                    // prevent further handling of the keystroke
             } else if (e.isControlDown() && e.getCode() == KeyCode.F) {

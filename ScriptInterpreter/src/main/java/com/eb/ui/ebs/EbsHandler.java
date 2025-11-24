@@ -89,6 +89,13 @@ public class EbsHandler implements Handler {
     @Override
     public void submit(String... lines) throws IOException, ParseError, InterpreterError {
         ScriptArea output = env.getOutputArea();
+        
+        // Copy debug mode state from current thread (UI thread) to this thread before interpreting
+        // This ensures that if debug mode was enabled via Ctrl+D in the editor, it will be active
+        // during script interpretation and screen creation
+        boolean debugModeEnabled = com.eb.script.interpreter.screen.ScreenFactory.getDebugModeForInheritance();
+        com.eb.script.interpreter.screen.ScreenFactory.setDebugModeForThread(debugModeEnabled);
+        
         for (String line : lines) {
             if (line != null && !line.isBlank()) {
                 List<EbsToken> tokens = new EbsLexer().tokenize(line);

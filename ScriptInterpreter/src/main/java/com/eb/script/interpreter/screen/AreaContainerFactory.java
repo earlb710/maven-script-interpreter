@@ -130,14 +130,129 @@ public class AreaContainerFactory {
             applyPadding(container, areaDef.padding);
         }
 
+        // Apply title property (for TitledPane)
+        if (areaDef.title != null && !areaDef.title.isEmpty() && container instanceof TitledPane) {
+            ((TitledPane) container).setText(areaDef.title);
+        }
+
         // Apply custom style from AreaDefinition (overrides default)
         if (areaDef.style != null && !areaDef.style.isEmpty()) {
             container.setStyle(container.getStyle() + "; " + areaDef.style);
+        }
+        
+        // Apply groupBorder styling if specified
+        if (areaDef.groupBorder != null && !areaDef.groupBorder.isEmpty() && !areaDef.groupBorder.equalsIgnoreCase("none")) {
+            String borderStyle = createBorderStyle(areaDef.groupBorder, areaDef.groupBorderColor);
+            if (borderStyle != null && !borderStyle.isEmpty()) {
+                container.setStyle(container.getStyle() + "; " + borderStyle);
+            }
+            
+            // Add group label if specified
+            if (areaDef.groupLabelText != null && !areaDef.groupLabelText.isEmpty()) {
+                addGroupLabel(container, areaDef.groupLabelText, areaDef.groupLabelAlignment, areaDef.groupBorderColor);
+            }
         }
 
         // Apply layout configuration if provided
         if (areaDef.layout != null && !areaDef.layout.isEmpty()) {
             applyLayoutConfiguration(container, areaDef.layout);
+        }
+    }
+    
+    /**
+     * Create a CSS border style string based on groupBorder type and color.
+     * @param borderType The type of border: none, raised, inset, lowered, line
+     * @param borderColor The color of the border in hex format (optional)
+     * @return CSS style string for the border, or null if borderType is "none"
+     */
+    private static String createBorderStyle(String borderType, String borderColor) {
+        if (borderType == null || borderType.equalsIgnoreCase("none")) {
+            return null;
+        }
+        
+        // Default border color if not specified
+        String color = (borderColor != null && !borderColor.isEmpty()) ? borderColor : "#808080";
+        
+        // Create border style based on type
+        switch (borderType.toLowerCase()) {
+            case "line":
+                return "-fx-border-color: " + color + "; -fx-border-width: 1px; -fx-border-radius: 5px";
+            case "raised":
+                // Simulate raised effect with gradient
+                return "-fx-border-color: derive(" + color + ", 40%) " + color + " " + color + " derive(" + color + ", 40%); " +
+                       "-fx-border-width: 2px; -fx-border-style: solid; -fx-border-radius: 5px";
+            case "lowered":
+            case "inset":
+                // Simulate inset/lowered effect with gradient (opposite of raised)
+                return "-fx-border-color: " + color + " derive(" + color + ", 40%) derive(" + color + ", 40%) " + color + "; " +
+                       "-fx-border-width: 2px; -fx-border-style: solid; -fx-border-radius: 5px";
+            default:
+                // Default to simple line border
+                return "-fx-border-color: " + color + "; -fx-border-width: 1px; -fx-border-radius: 5px";
+        }
+    }
+    
+    /**
+     * Adds a group label to a container. The label is positioned at the top of the container
+     * with the specified alignment. The label sits on top of the border.
+     * @param container The container to add the label to
+     * @param labelText The text for the label
+     * @param alignment The alignment: left, center, right (default: left)
+     * @param borderColor The border color to use for label styling (optional)
+     */
+    private static void addGroupLabel(Region container, String labelText, String alignment, String borderColor) {
+        // Create a label with the group text
+        javafx.scene.control.Label label = new javafx.scene.control.Label(labelText);
+        
+        // Style the label
+        String labelColor = (borderColor != null && !borderColor.isEmpty()) ? borderColor : "#808080";
+        label.setStyle("-fx-text-fill: " + labelColor + "; " +
+                      "-fx-font-weight: bold; " +
+                      "-fx-padding: 0 5 0 5; " +
+                      "-fx-background-color: white;");
+        
+        // Position label based on alignment
+        String alignmentValue = (alignment != null) ? alignment.toLowerCase() : "left";
+        label.setTranslateY(-10); // Move label up to sit on the border
+        
+        switch (alignmentValue) {
+            case "center":
+                label.setTranslateX(0);
+                label.setAlignment(Pos.CENTER);
+                if (container instanceof Pane) {
+                    StackPane.setAlignment(label, Pos.TOP_CENTER);
+                }
+                break;
+            case "right":
+                label.setTranslateX(-10);
+                label.setAlignment(Pos.CENTER_RIGHT);
+                if (container instanceof Pane) {
+                    StackPane.setAlignment(label, Pos.TOP_RIGHT);
+                }
+                break;
+            case "left":
+            default:
+                label.setTranslateX(10);
+                label.setAlignment(Pos.CENTER_LEFT);
+                if (container instanceof Pane) {
+                    StackPane.setAlignment(label, Pos.TOP_LEFT);
+                }
+                break;
+        }
+        
+        // Add the label to the container
+        // For VBox/HBox, insert at the beginning
+        if (container instanceof VBox) {
+            ((VBox) container).getChildren().add(0, label);
+        } else if (container instanceof HBox) {
+            ((HBox) container).getChildren().add(0, label);
+        } else if (container instanceof Pane) {
+            ((Pane) container).getChildren().add(label);
+        } else if (container instanceof StackPane) {
+            ((StackPane) container).getChildren().add(label);
+            StackPane.setAlignment(label, 
+                alignmentValue.equals("center") ? Pos.TOP_CENTER :
+                alignmentValue.equals("right") ? Pos.TOP_RIGHT : Pos.TOP_LEFT);
         }
     }
 

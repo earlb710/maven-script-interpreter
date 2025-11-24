@@ -108,138 +108,310 @@ print "- tab-label-changed-color: " + tabLabelChangedColor;
 print "- tab-label-background: " + tabLabelBackgroundColor;
 print "";
 
-// Build the screen configuration dynamically with actual color values
+// Build the screen configuration using $var references
 print "Building color editor screen configuration...";
 
-// Create the screen definition JSON
-var screenConfig: json = call json.jsonfromstring("{\"title\": \"Console Configuration Color Editor\", \"width\": 800, \"height\": 900, \"maximize\": false, \"vars\": []}");
-
-// Build vars array with color picker definitions
-// Use json.add to add each var definition to the vars array path
-
-// Info color
-var infoVar: json = call json.jsonfromstring("{\"name\": \"info\", \"type\": \"string\", \"default\": \"\", \"display\": {\"type\": \"colorpicker\", \"labelText\": \"Info Color:\"}}");
-infoVar = call json.set(infoVar, "default", infoColor);
-screenConfig = call json.add(screenConfig, "vars", infoVar);
-
-// Comment color
-var commentVar: json = call json.jsonfromstring("{\"name\": \"comment\", \"type\": \"string\", \"default\": \"\", \"display\": {\"type\": \"colorpicker\", \"labelText\": \"Comment Color:\"}}");
-commentVar = call json.set(commentVar, "default", commentColor);
-screenConfig = call json.add(screenConfig, "vars", commentVar);
-
-// Error color
-var errorVar: json = call json.jsonfromstring("{\"name\": \"error\", \"type\": \"string\", \"default\": \"\", \"display\": {\"type\": \"colorpicker\", \"labelText\": \"Error Color:\"}}");
-errorVar = call json.set(errorVar, "default", errorColor);
-screenConfig = call json.add(screenConfig, "vars", errorVar);
-
-// Warn color
-var warnVar: json = call json.jsonfromstring("{\"name\": \"warn\", \"type\": \"string\", \"default\": \"\", \"display\": {\"type\": \"colorpicker\", \"labelText\": \"Warn Color:\"}}");
-warnVar = call json.set(warnVar, "default", warnColor);
-screenConfig = call json.add(screenConfig, "vars", warnVar);
-
-// OK color
-var okVar: json = call json.jsonfromstring("{\"name\": \"ok\", \"type\": \"string\", \"default\": \"\", \"display\": {\"type\": \"colorpicker\", \"labelText\": \"OK Color:\"}}");
-okVar = call json.set(okVar, "default", okColor);
-screenConfig = call json.add(screenConfig, "vars", okVar);
-
-// Code color
-var codeVar: json = call json.jsonfromstring("{\"name\": \"code\", \"type\": \"string\", \"default\": \"\", \"display\": {\"type\": \"colorpicker\", \"labelText\": \"Code Color:\"}}");
-codeVar = call json.set(codeVar, "default", codeColor);
-screenConfig = call json.add(screenConfig, "vars", codeVar);
-
-// Datatype color
-var datatypeVar: json = call json.jsonfromstring("{\"name\": \"datatype\", \"type\": \"string\", \"default\": \"\", \"display\": {\"type\": \"colorpicker\", \"labelText\": \"Datatype Color:\"}}");
-datatypeVar = call json.set(datatypeVar, "default", datatypeColor);
-screenConfig = call json.add(screenConfig, "vars", datatypeVar);
-
-// Data color
-var dataVar: json = call json.jsonfromstring("{\"name\": \"data\", \"type\": \"string\", \"default\": \"\", \"display\": {\"type\": \"colorpicker\", \"labelText\": \"Data Color:\"}}");
-dataVar = call json.set(dataVar, "default", dataColor);
-screenConfig = call json.add(screenConfig, "vars", dataVar);
-
-// Keyword color
-var keywordVar: json = call json.jsonfromstring("{\"name\": \"keyword\", \"type\": \"string\", \"default\": \"\", \"display\": {\"type\": \"colorpicker\", \"labelText\": \"Keyword Color:\"}}");
-keywordVar = call json.set(keywordVar, "default", keywordColor);
-screenConfig = call json.add(screenConfig, "vars", keywordVar);
-
-// Builtin color
-var builtinVar: json = call json.jsonfromstring("{\"name\": \"builtin\", \"type\": \"string\", \"default\": \"\", \"display\": {\"type\": \"colorpicker\", \"labelText\": \"Builtin Color:\"}}");
-builtinVar = call json.set(builtinVar, "default", builtinColor);
-screenConfig = call json.add(screenConfig, "vars", builtinVar);
-
-// Literal color
-var literalVar: json = call json.jsonfromstring("{\"name\": \"literal\", \"type\": \"string\", \"default\": \"\", \"display\": {\"type\": \"colorpicker\", \"labelText\": \"Literal Color:\"}}");
-literalVar = call json.set(literalVar, "default", literalColor);
-screenConfig = call json.add(screenConfig, "vars", literalVar);
-
-// Identifier color
-var identifierVar: json = call json.jsonfromstring("{\"name\": \"identifier\", \"type\": \"string\", \"default\": \"\", \"display\": {\"type\": \"colorpicker\", \"labelText\": \"Identifier Color:\"}}");
-identifierVar = call json.set(identifierVar, "default", identifierColor);
-screenConfig = call json.add(screenConfig, "vars", identifierVar);
-
-// SQL color
-var sqlVar: json = call json.jsonfromstring("{\"name\": \"sql\", \"type\": \"string\", \"default\": \"\", \"display\": {\"type\": \"colorpicker\", \"labelText\": \"SQL Color:\"}}");
-sqlVar = call json.set(sqlVar, "default", sqlColor);
-screenConfig = call json.add(screenConfig, "vars", sqlVar);
-
-// Custom color
-var customVar: json = call json.jsonfromstring("{\"name\": \"custom\", \"type\": \"string\", \"default\": \"\", \"display\": {\"type\": \"colorpicker\", \"labelText\": \"Custom Color:\"}}");
-customVar = call json.set(customVar, "default", customColor);
-screenConfig = call json.add(screenConfig, "vars", customVar);
-
-// Background color
-var backgroundVar: json = call json.jsonfromstring("{\"name\": \"background\", \"type\": \"string\", \"default\": \"\", \"display\": {\"type\": \"colorpicker\", \"labelText\": \"Background Color:\"}}");
-backgroundVar = call json.set(backgroundVar, "default", backgroundColor);
-screenConfig = call json.add(screenConfig, "vars", backgroundVar);
-
-// Text color
-var textVar: json = call json.jsonfromstring("{\"name\": \"text\", \"type\": \"string\", \"default\": \"\", \"display\": {\"type\": \"colorpicker\", \"labelText\": \"Text Color:\"}}");
-textVar = call json.set(textVar, "default", textColor);
-screenConfig = call json.add(screenConfig, "vars", textVar);
-
-// Caret color
-var caretVar: json = call json.jsonfromstring("{\"name\": \"caret\", \"type\": \"string\", \"default\": \"\", \"display\": {\"type\": \"colorpicker\", \"labelText\": \"Caret Color:\"}}");
-caretVar = call json.set(caretVar, "default", caretColor);
-screenConfig = call json.add(screenConfig, "vars", caretVar);
-
-// Line cursor color
-var lineCursorVar: json = call json.jsonfromstring("{\"name\": \"lineCursor\", \"type\": \"string\", \"default\": \"\", \"display\": {\"type\": \"colorpicker\", \"labelText\": \"Line Cursor Color:\"}}");
-lineCursorVar = call json.set(lineCursorVar, "default", lineCursorColor);
-screenConfig = call json.add(screenConfig, "vars", lineCursorVar);
-
-// Line numbers color
-var lineNumbersVar: json = call json.jsonfromstring("{\"name\": \"lineNumbers\", \"type\": \"string\", \"default\": \"\", \"display\": {\"type\": \"colorpicker\", \"labelText\": \"Line Numbers Color:\"}}");
-lineNumbersVar = call json.set(lineNumbersVar, "default", lineNumbersColor);
-screenConfig = call json.add(screenConfig, "vars", lineNumbersVar);
-
-// Console background color
-var consoleBackgroundVar: json = call json.jsonfromstring("{\"name\": \"consoleBackground\", \"type\": \"string\", \"default\": \"\", \"display\": {\"type\": \"colorpicker\", \"labelText\": \"Console Background:\"}}");
-consoleBackgroundVar = call json.set(consoleBackgroundVar, "default", consoleBackgroundColor);
-screenConfig = call json.add(screenConfig, "vars", consoleBackgroundVar);
-
-// Tab background color
-var tabBackgroundVar: json = call json.jsonfromstring("{\"name\": \"tabBackground\", \"type\": \"string\", \"default\": \"\", \"display\": {\"type\": \"colorpicker\", \"labelText\": \"Tab Background:\"}}");
-tabBackgroundVar = call json.set(tabBackgroundVar, "default", tabBackgroundColor);
-screenConfig = call json.add(screenConfig, "vars", tabBackgroundVar);
-
-// Tab label color
-var tabLabelColorVar: json = call json.jsonfromstring("{\"name\": \"tabLabelColor\", \"type\": \"string\", \"default\": \"\", \"display\": {\"type\": \"colorpicker\", \"labelText\": \"Tab Label Color:\"}}");
-tabLabelColorVar = call json.set(tabLabelColorVar, "default", tabLabelColor);
-screenConfig = call json.add(screenConfig, "vars", tabLabelColorVar);
-
-// Tab label changed color
-var tabLabelChangedColorVar: json = call json.jsonfromstring("{\"name\": \"tabLabelChangedColor\", \"type\": \"string\", \"default\": \"\", \"display\": {\"type\": \"colorpicker\", \"labelText\": \"Tab Label Changed:\"}}");
-tabLabelChangedColorVar = call json.set(tabLabelChangedColorVar, "default", tabLabelChangedColor);
-screenConfig = call json.add(screenConfig, "vars", tabLabelChangedColorVar);
-
-// Tab label background color
-var tabLabelBackgroundVar: json = call json.jsonfromstring("{\"name\": \"tabLabelBackground\", \"type\": \"string\", \"default\": \"\", \"display\": {\"type\": \"colorpicker\", \"labelText\": \"Tab Label Background:\"}}");
-tabLabelBackgroundVar = call json.set(tabLabelBackgroundVar, "default", tabLabelBackgroundColor);
-screenConfig = call json.add(screenConfig, "vars", tabLabelBackgroundVar);
-
-// Create the screen with the dynamically built configuration
+// Create the screen with $var references (no quotes around $variables)
 print "Creating color editor screen with colors from console.cfg...";
-screen colorEditorScreen = screenConfig;
+screen colorEditorScreen = {
+    "title": "Console Configuration Color Editor",
+    "width": 800,
+    "height": 900,
+    "maximize": false,
+    "vars": [
+        {
+            "name": "info",
+            "type": "string",
+            "default": $infoColor,
+            "display": {
+                "type": "colorpicker",
+                "labelText": "Info Color:"
+            }
+        },
+        {
+            "name": "comment",
+            "type": "string",
+            "default": $commentColor,
+            "display": {
+                "type": "colorpicker",
+                "labelText": "Comment Color:"
+            }
+        },
+        {
+            "name": "error",
+            "type": "string",
+            "default": $errorColor,
+            "display": {
+                "type": "colorpicker",
+                "labelText": "Error Color:"
+            }
+        },
+        {
+            "name": "warn",
+            "type": "string",
+            "default": $warnColor,
+            "display": {
+                "type": "colorpicker",
+                "labelText": "Warn Color:"
+            }
+        },
+        {
+            "name": "ok",
+            "type": "string",
+            "default": $okColor,
+            "display": {
+                "type": "colorpicker",
+                "labelText": "OK Color:"
+            }
+        },
+        {
+            "name": "code",
+            "type": "string",
+            "default": $codeColor,
+            "display": {
+                "type": "colorpicker",
+                "labelText": "Code Color:"
+            }
+        },
+        {
+            "name": "datatype",
+            "type": "string",
+            "default": $datatypeColor,
+            "display": {
+                "type": "colorpicker",
+                "labelText": "Datatype Color:"
+            }
+        },
+        {
+            "name": "data",
+            "type": "string",
+            "default": $dataColor,
+            "display": {
+                "type": "colorpicker",
+                "labelText": "Data Color:"
+            }
+        },
+        {
+            "name": "keyword",
+            "type": "string",
+            "default": $keywordColor,
+            "display": {
+                "type": "colorpicker",
+                "labelText": "Keyword Color:"
+            }
+        },
+        {
+            "name": "builtin",
+            "type": "string",
+            "default": $builtinColor,
+            "display": {
+                "type": "colorpicker",
+                "labelText": "Builtin Color:"
+            }
+        },
+        {
+            "name": "literal",
+            "type": "string",
+            "default": $literalColor,
+            "display": {
+                "type": "colorpicker",
+                "labelText": "Literal Color:"
+            }
+        },
+        {
+            "name": "identifier",
+            "type": "string",
+            "default": $identifierColor,
+            "display": {
+                "type": "colorpicker",
+                "labelText": "Identifier Color:"
+            }
+        },
+        {
+            "name": "sql",
+            "type": "string",
+            "default": $sqlColor,
+            "display": {
+                "type": "colorpicker",
+                "labelText": "SQL Color:"
+            }
+        },
+        {
+            "name": "custom",
+            "type": "string",
+            "default": $customColor,
+            "display": {
+                "type": "colorpicker",
+                "labelText": "Custom Color:"
+            }
+        },
+        {
+            "name": "background",
+            "type": "string",
+            "default": $backgroundColor,
+            "display": {
+                "type": "colorpicker",
+                "labelText": "Background Color:"
+            }
+        },
+        {
+            "name": "text",
+            "type": "string",
+            "default": $textColor,
+            "display": {
+                "type": "colorpicker",
+                "labelText": "Text Color:"
+            }
+        },
+        {
+            "name": "caret",
+            "type": "string",
+            "default": $caretColor,
+            "display": {
+                "type": "colorpicker",
+                "labelText": "Caret Color:"
+            }
+        },
+        {
+            "name": "lineCursor",
+            "type": "string",
+            "default": $lineCursorColor,
+            "display": {
+                "type": "colorpicker",
+                "labelText": "Line Cursor Color:"
+            }
+        },
+        {
+            "name": "lineNumbers",
+            "type": "string",
+            "default": $lineNumbersColor,
+            "display": {
+                "type": "colorpicker",
+                "labelText": "Line Numbers Color:"
+            }
+        },
+        {
+            "name": "consoleBackground",
+            "type": "string",
+            "default": $consoleBackgroundColor,
+            "display": {
+                "type": "colorpicker",
+                "labelText": "Console Background:"
+            }
+        },
+        {
+            "name": "tabBackground",
+            "type": "string",
+            "default": $tabBackgroundColor,
+            "display": {
+                "type": "colorpicker",
+                "labelText": "Tab Background:"
+            }
+        },
+        {
+            "name": "tabLabelColor",
+            "type": "string",
+            "default": $tabLabelColor,
+            "display": {
+                "type": "colorpicker",
+                "labelText": "Tab Label Color:"
+            }
+        },
+        {
+            "name": "tabLabelChangedColor",
+            "type": "string",
+            "default": $tabLabelChangedColor,
+            "display": {
+                "type": "colorpicker",
+                "labelText": "Tab Label Changed:"
+            }
+        },
+        {
+            "name": "tabLabelBackground",
+            "type": "string",
+            "default": $tabLabelBackgroundColor,
+            "display": {
+                "type": "colorpicker",
+                "labelText": "Tab Label Background:"
+            }
+        }
+    ],
+    "area": [{
+        "name": "mainArea",
+        "type": "vbox",
+        "style": "-fx-spacing: 10; -fx-padding: 10;",
+        "childAreas": [
+            {
+                "name": "consoleColorsArea",
+                "type": "vbox",
+                "groupBorder": "line",
+                "groupBorderColor": "#4a9eff",
+                "groupLabelText": "Console Colors",
+                "groupLabelAlignment": "left",
+                "style": "-fx-spacing: 5; -fx-padding: 10;",
+                "items": [
+                    {"name": "info_item", "varref": "info"},
+                    {"name": "comment_item", "varref": "comment"},
+                    {"name": "error_item", "varref": "error"},
+                    {"name": "warn_item", "varref": "warn"},
+                    {"name": "ok_item", "varref": "ok"}
+                ]
+            },
+            {
+                "name": "syntaxColorsArea",
+                "type": "vbox",
+                "groupBorder": "line",
+                "groupBorderColor": "#ff9933",
+                "groupLabelText": "Syntax Colors",
+                "groupLabelAlignment": "left",
+                "style": "-fx-spacing: 5; -fx-padding: 10;",
+                "items": [
+                    {"name": "code_item", "varref": "code"},
+                    {"name": "datatype_item", "varref": "datatype"},
+                    {"name": "data_item", "varref": "data"},
+                    {"name": "keyword_item", "varref": "keyword"},
+                    {"name": "builtin_item", "varref": "builtin"},
+                    {"name": "literal_item", "varref": "literal"},
+                    {"name": "identifier_item", "varref": "identifier"},
+                    {"name": "sql_item", "varref": "sql"},
+                    {"name": "custom_item", "varref": "custom"}
+                ]
+            },
+            {
+                "name": "editorColorsArea",
+                "type": "vbox",
+                "groupBorder": "line",
+                "groupBorderColor": "#66cc66",
+                "groupLabelText": "Editor Colors",
+                "groupLabelAlignment": "left",
+                "style": "-fx-spacing: 5; -fx-padding: 10;",
+                "items": [
+                    {"name": "background_item", "varref": "background"},
+                    {"name": "text_item", "varref": "text"},
+                    {"name": "caret_item", "varref": "caret"},
+                    {"name": "lineCursor_item", "varref": "lineCursor"},
+                    {"name": "lineNumbers_item", "varref": "lineNumbers"},
+                    {"name": "consoleBackground_item", "varref": "consoleBackground"}
+                ]
+            },
+            {
+                "name": "tabColorsArea",
+                "type": "vbox",
+                "groupBorder": "line",
+                "groupBorderColor": "#cc66cc",
+                "groupLabelText": "Tab Colors",
+                "groupLabelAlignment": "left",
+                "style": "-fx-spacing: 5; -fx-padding: 10;",
+                "items": [
+                    {"name": "tabBackground_item", "varref": "tabBackground"},
+                    {"name": "tabLabelColor_item", "varref": "tabLabelColor"},
+                    {"name": "tabLabelChangedColor_item", "varref": "tabLabelChangedColor"},
+                    {"name": "tabLabelBackground_item", "varref": "tabLabelBackground"}
+                ]
+            }
+        ]
+    }]
+};
 
 print "Color editor screen created successfully";
 print "";

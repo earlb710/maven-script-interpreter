@@ -1430,6 +1430,47 @@ public class InterpreterScreen {
     }
 
     /**
+     * Helper method to get a value from a map with case-insensitive key lookup.
+     * Returns null if key is not found.
+     */
+    private Object getCaseInsensitive(Map<String, Object> map, String key) {
+        if (map == null || key == null) {
+            return null;
+        }
+        // First try exact match
+        if (map.containsKey(key)) {
+            return map.get(key);
+        }
+        // Try case-insensitive match
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            if (entry.getKey().equalsIgnoreCase(key)) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Helper method to check if a map contains a key (case-insensitive).
+     */
+    private boolean containsKeyCaseInsensitive(Map<String, Object> map, String key) {
+        if (map == null || key == null) {
+            return false;
+        }
+        // First try exact match
+        if (map.containsKey(key)) {
+            return true;
+        }
+        // Try case-insensitive match
+        for (String mapKey : map.keySet()) {
+            if (mapKey.equalsIgnoreCase(key)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Helper method to parse area definition from JSON
      */
     private AreaDefinition parseAreaDefinition(Map<String, Object> areaDef, String screenName, int line) throws InterpreterError {
@@ -1465,6 +1506,45 @@ public class InterpreterScreen {
         } else {
             // Use default style from the enum
             area.style = area.areaType.getDefaultStyle();
+        }
+        
+        // Extract title property (for titled containers)
+        if (areaDef.containsKey("title")) {
+            area.title = String.valueOf(areaDef.get("title"));
+        }
+        
+        // Extract groupBorder property (for visual grouping) - case-insensitive
+        Object groupBorderObj = getCaseInsensitive(areaDef, "groupBorder");
+        if (groupBorderObj != null) {
+            area.groupBorder = String.valueOf(groupBorderObj);
+        }
+        
+        // Extract groupBorderColor property (for visual grouping) - case-insensitive
+        Object groupBorderColorObj = getCaseInsensitive(areaDef, "groupBorderColor");
+        if (groupBorderColorObj != null) {
+            area.groupBorderColor = String.valueOf(groupBorderColorObj);
+        }
+        
+        // Extract groupLabelText property (for visual grouping) - case-insensitive
+        Object groupLabelTextObj = getCaseInsensitive(areaDef, "groupLabelText");
+        if (groupLabelTextObj != null) {
+            area.groupLabelText = String.valueOf(groupLabelTextObj);
+        }
+        
+        // Extract groupLabelAlignment property (for visual grouping) - case-insensitive
+        Object groupLabelAlignmentObj = getCaseInsensitive(areaDef, "groupLabelAlignment");
+        if (groupLabelAlignmentObj != null) {
+            area.groupLabelAlignment = String.valueOf(groupLabelAlignmentObj);
+        }
+        
+        // Extract spacing property
+        if (areaDef.containsKey("spacing")) {
+            area.spacing = String.valueOf(areaDef.get("spacing"));
+        }
+        
+        // Extract padding property
+        if (areaDef.containsKey("padding")) {
+            area.padding = String.valueOf(areaDef.get("padding"));
         }
         
         // Extract gainFocus and lostFocus inline code if present
@@ -1528,11 +1608,10 @@ public class InterpreterScreen {
                             item.layoutPos = String.valueOf(itemDef.get("relative_pos"));
                         }
 
-                        // Check for both camelCase and lowercase versions of varRef
-                        if (itemDef.containsKey("varref")) {
-                            item.varRef = String.valueOf(itemDef.get("varref")).toLowerCase();
-                        } else if (itemDef.containsKey("var_ref")) {
-                            item.varRef = String.valueOf(itemDef.get("var_ref")).toLowerCase();
+                        // Check for varRef with case-insensitive lookup
+                        Object varRefValue = getCaseInsensitive(itemDef, "varref");
+                        if (varRefValue != null) {
+                            item.varRef = String.valueOf(varRefValue).toLowerCase();
                         }
 
                         // Process optional display metadata for the item
@@ -1718,8 +1797,13 @@ public class InterpreterScreen {
         }
 
         // Process nested child areas (areas within areas)
-        if (areaDef.containsKey("areas")) {
-            Object areasObj = areaDef.get("areas");
+        // Check for both "areas" and "childAreas" (case-insensitive)
+        Object areasObj = getCaseInsensitive(areaDef, "areas");
+        if (areasObj == null) {
+            areasObj = getCaseInsensitive(areaDef, "childAreas");
+        }
+        
+        if (areasObj != null) {
             List<Object> areasList = null;
 
             // Handle both List and ArrayDynamic (JSON always uses ArrayDynamic)
