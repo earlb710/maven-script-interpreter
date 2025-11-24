@@ -193,14 +193,6 @@ public class AreaContainerFactory {
     }
     
     /**
-     * Adds a group label to a container. The label is positioned at the top of the container
-     * with the specified alignment. The label sits on top of the border.
-     * @param container The container to add the label to
-     * @param labelText The text for the label
-     * @param alignment The alignment: left, center, right (default: left)
-     * @param borderColor The border color to use for label styling (optional)
-     */
-    /**
      * Adds a group label to a container. The label is positioned relative to the border
      * with the specified alignment and offset.
      * @param container The container to add the label to
