@@ -1,86 +1,92 @@
 // Client Information Screen
 // Description: A screen with updatable fields for client information
-// Fields: client name, surname, age, id
+// Fields: client name, surname, age, id (3 clients using array.record)
 
 screen clientScreen = {
-    "title": "Client Information",
+    "title": "Client Information - Multiple Clients",
     "width": 600,
-    "height": 400,
+    "height": 700,
     "vars": [
         {
-            "name": "clientName",
-            "type": "string",
-            "default": "",
-            "display": {
-                "type": "textfield",
-                "labelText": "Client Name:",
-                "promptText": "Enter client name",
-                "mandatory": true
-            }
-        },
-        {
-            "name": "surname",
-            "type": "string",
-            "default": "",
-            "display": {
-                "type": "textfield",
-                "labelText": "Surname:",
-                "promptText": "Enter surname",
-                "mandatory": true
-            }
-        },
-        {
-            "name": "age",
-            "type": "int",
-            "default": 18,
-            "display": {
-                "type": "spinner",
-                "min": 0,
-                "max": 150,
-                "labelText": "Age:",
-                "mandatory": true
-            }
-        },
-        {
-            "name": "clientId",
-            "type": "string",
-            "default": "",
-            "display": {
-                "type": "textfield",
-                "labelText": "Client ID:",
-                "promptText": "Enter client ID",
-                "mandatory": true
-            }
+            "name": "clients",
+            "type": "array.record",
+            "default": {"clientName": "", "surname": "", "age": 18, "clientId": ""}
         }
     ]
 };
 
-// Display initial values
+// Initialize with 3 client records
+clientScreen.clients = [
+    {"clientName": "", "surname": "", "age": 18, "clientId": ""},
+    {"clientName": "", "surname": "", "age": 18, "clientId": ""},
+    {"clientName": "", "surname": "", "age": 18, "clientId": ""}
+];
+
+// Display initial values for all 3 clients
 print "Client Information Screen";
 print "=========================";
-print "Client Name: " + clientScreen.clientName;
-print "Surname: " + clientScreen.surname;
-print "Age: " + clientScreen.age;
-print "Client ID: " + clientScreen.clientId;
+print "";
+print "Client 0:";
+print "  Client Name: " + clientScreen.clients[0].clientName;
+print "  Surname: " + clientScreen.clients[0].surname;
+print "  Age: " + clientScreen.clients[0].age;
+print "  Client ID: " + clientScreen.clients[0].clientId;
+print "";
+print "Client 1:";
+print "  Client Name: " + clientScreen.clients[1].clientName;
+print "  Surname: " + clientScreen.clients[1].surname;
+print "  Age: " + clientScreen.clients[1].age;
+print "  Client ID: " + clientScreen.clients[1].clientId;
+print "";
+print "Client 2:";
+print "  Client Name: " + clientScreen.clients[2].clientName;
+print "  Surname: " + clientScreen.clients[2].surname;
+print "  Age: " + clientScreen.clients[2].age;
+print "  Client ID: " + clientScreen.clients[2].clientId;
 
-// Example: Set some sample values
-clientScreen.clientName = "John";
-clientScreen.surname = "Doe";
-clientScreen.age = 30;
-clientScreen.clientId = "CLT-12345";
+// Example: Set some sample values for all 3 clients
+clientScreen.clients[0].clientName = "John";
+clientScreen.clients[0].surname = "Doe";
+clientScreen.clients[0].age = 30;
+clientScreen.clients[0].clientId = "CLT-12345";
+
+clientScreen.clients[1].clientName = "Jane";
+clientScreen.clients[1].surname = "Smith";
+clientScreen.clients[1].age = 28;
+clientScreen.clients[1].clientId = "CLT-12346";
+
+clientScreen.clients[2].clientName = "Bob";
+clientScreen.clients[2].surname = "Johnson";
+clientScreen.clients[2].age = 45;
+clientScreen.clients[2].clientId = "CLT-12347";
 
 print "";
 print "Sample values set:";
-print "Client Name: " + clientScreen.clientName;
-print "Surname: " + clientScreen.surname;
-print "Age: " + clientScreen.age;
-print "Client ID: " + clientScreen.clientId;
+print "";
+print "Client 0:";
+print "  Client Name: " + clientScreen.clients[0].clientName;
+print "  Surname: " + clientScreen.clients[0].surname;
+print "  Age: " + clientScreen.clients[0].age;
+print "  Client ID: " + clientScreen.clients[0].clientId;
+print "";
+print "Client 1:";
+print "  Client Name: " + clientScreen.clients[1].clientName;
+print "  Surname: " + clientScreen.clients[1].surname;
+print "  Age: " + clientScreen.clients[1].age;
+print "  Client ID: " + clientScreen.clients[1].clientId;
+print "";
+print "Client 2:";
+print "  Client Name: " + clientScreen.clients[2].clientName;
+print "  Surname: " + clientScreen.clients[2].surname;
+print "  Age: " + clientScreen.clients[2].age;
+print "  Client ID: " + clientScreen.clients[2].clientId;
 
 // Show the screen for user interaction
 print "";
 print "Displaying client screen...";
-print "The screen allows updating all client fields.";
+print "The screen allows updating all client fields for 3 clients.";
 show screen clientScreen;
 
 print "";
 print "Client screen is now displayed and ready for input!";
+

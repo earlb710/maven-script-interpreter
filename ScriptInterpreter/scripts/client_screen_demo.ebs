@@ -1,142 +1,152 @@
 // Client Information Screen - Interactive Demo
 // Description: Demonstrates how to create and interact with a client information screen
 // Features: Programmatic field updates, data validation display, and field access examples
+// Now supports 3 clients using array.record
 
 screen clientInfoScreen = {
-    "title": "Client Information Manager",
+    "title": "Client Information Manager - Multiple Clients",
     "width": 650,
-    "height": 450,
+    "height": 750,
     "vars": [
         {
-            "name": "clientName",
-            "type": "string",
-            "default": "",
-            "display": {
-                "type": "textfield",
-                "labelText": "Client Name:",
-                "promptText": "Enter client name",
-                "mandatory": true
-            }
-        },
-        {
-            "name": "surname",
-            "type": "string",
-            "default": "",
-            "display": {
-                "type": "textfield",
-                "labelText": "Surname:",
-                "promptText": "Enter client last name",
-                "mandatory": true
-            }
-        },
-        {
-            "name": "age",
-            "type": "int",
-            "default": 25,
-            "display": {
-                "type": "spinner",
-                "min": 0,
-                "max": 150,
-                "labelText": "Age:",
-                "mandatory": true
-            }
-        },
-        {
-            "name": "clientId",
-            "type": "string",
-            "default": "",
-            "display": {
-                "type": "textfield",
-                "labelText": "Client ID:",
-                "promptText": "Enter client ID (e.g., CLT-001)",
-                "mandatory": true,
-                "caseFormat": "upper"
-            }
+            "name": "clients",
+            "type": "array.record",
+            "default": {"clientName": "", "surname": "", "age": 25, "clientId": ""}
         }
     ]
 };
 
+// Initialize with 3 client records
+clientInfoScreen.clients = [
+    {"clientName": "", "surname": "", "age": 25, "clientId": ""},
+    {"clientName": "", "surname": "", "age": 25, "clientId": ""},
+    {"clientName": "", "surname": "", "age": 25, "clientId": ""}
+];
+
 // ===============================================
-// Demo Section: Working with Client Information
+// Demo Section: Working with Multiple Clients
 // ===============================================
 
 print "===========================================";
 print " Client Information Screen Demo";
+print " Multiple Clients (array.record)";
 print "===========================================";
 print "";
 
-// 1. Display initial (empty) values
-print "1. Initial field values:";
-print "   Client Name: '" + clientInfoScreen.clientName + "'";
-print "   Surname: '" + clientInfoScreen.surname + "'";
-print "   Age: " + clientInfoScreen.age;
-print "   Client ID: '" + clientInfoScreen.clientId + "'";
+// 1. Display initial (empty) values for all 3 clients
+print "1. Initial field values for all clients:";
+print "";
+print "   Client 0:";
+print "     Client Name: '" + clientInfoScreen.clients[0].clientName + "'";
+print "     Surname: '" + clientInfoScreen.clients[0].surname + "'";
+print "     Age: " + clientInfoScreen.clients[0].age;
+print "     Client ID: '" + clientInfoScreen.clients[0].clientId + "'";
+print "";
+print "   Client 1:";
+print "     Client Name: '" + clientInfoScreen.clients[1].clientName + "'";
+print "     Surname: '" + clientInfoScreen.clients[1].surname + "'";
+print "     Age: " + clientInfoScreen.clients[1].age;
+print "     Client ID: '" + clientInfoScreen.clients[1].clientId + "'";
+print "";
+print "   Client 2:";
+print "     Client Name: '" + clientInfoScreen.clients[2].clientName + "'";
+print "     Surname: '" + clientInfoScreen.clients[2].surname + "'";
+print "     Age: " + clientInfoScreen.clients[2].age;
+print "     Client ID: '" + clientInfoScreen.clients[2].clientId + "'";
 print "";
 
-// 2. Set some example client data
-print "2. Setting example client data...";
-clientInfoScreen.clientName = "John";
-clientInfoScreen.surname = "Smith";
-clientInfoScreen.age = 35;
-clientInfoScreen.clientId = "CLT-12345";
+// 2. Set example data for all 3 clients
+print "2. Setting example client data for all 3 clients...";
+clientInfoScreen.clients[0].clientName = "John";
+clientInfoScreen.clients[0].surname = "Smith";
+clientInfoScreen.clients[0].age = 35;
+clientInfoScreen.clients[0].clientId = "CLT-12345";
 
-print "   Data set successfully!";
+clientInfoScreen.clients[1].clientName = "Alice";
+clientInfoScreen.clients[1].surname = "Johnson";
+clientInfoScreen.clients[1].age = 28;
+clientInfoScreen.clients[1].clientId = "CLT-54321";
+
+clientInfoScreen.clients[2].clientName = "Bob";
+clientInfoScreen.clients[2].surname = "Williams";
+clientInfoScreen.clients[2].age = 42;
+clientInfoScreen.clients[2].clientId = "CLT-99999";
+
+print "   Data set successfully for all clients!";
 print "";
 
-// 3. Display updated values
-print "3. Current field values:";
-print "   Client Name: " + clientInfoScreen.clientName;
-print "   Surname: " + clientInfoScreen.surname;
-print "   Age: " + clientInfoScreen.age;
-print "   Client ID: " + clientInfoScreen.clientId;
+// 3. Display updated values for all clients
+print "3. Current field values for all clients:";
+print "";
+print "   Client 0:";
+print "     Client Name: " + clientInfoScreen.clients[0].clientName;
+print "     Surname: " + clientInfoScreen.clients[0].surname;
+print "     Age: " + clientInfoScreen.clients[0].age;
+print "     Client ID: " + clientInfoScreen.clients[0].clientId;
+print "";
+print "   Client 1:";
+print "     Client Name: " + clientInfoScreen.clients[1].clientName;
+print "     Surname: " + clientInfoScreen.clients[1].surname;
+print "     Age: " + clientInfoScreen.clients[1].age;
+print "     Client ID: " + clientInfoScreen.clients[1].clientId;
+print "";
+print "   Client 2:";
+print "     Client Name: " + clientInfoScreen.clients[2].clientName;
+print "     Surname: " + clientInfoScreen.clients[2].surname;
+print "     Age: " + clientInfoScreen.clients[2].age;
+print "     Client ID: " + clientInfoScreen.clients[2].clientId;
 print "";
 
-// 4. Create a formatted display of client information
-print "4. Formatted client record:";
+// 4. Create formatted display of all client information
+print "4. Formatted client records:";
 print "   ==================================";
-print "   CLIENT INFORMATION RECORD";
-print "   ==================================";
-print "   Name:      " + clientInfoScreen.clientName + " " + clientInfoScreen.surname;
-print "   Age:       " + clientInfoScreen.age + " years old";
-print "   Client ID: " + clientInfoScreen.clientId;
+print "   CLIENT INFORMATION RECORDS";
 print "   ==================================";
 print "";
-
-// 5. Update client age
-print "5. Updating client age (birthday!)...";
-var newAge: int = clientInfoScreen.age + 1;
-clientInfoScreen.age = newAge;
-print "   Happy Birthday! New age: " + clientInfoScreen.age;
+print "   CLIENT 0:";
+print "   Name:      " + clientInfoScreen.clients[0].clientName + " " + clientInfoScreen.clients[0].surname;
+print "   Age:       " + clientInfoScreen.clients[0].age + " years old";
+print "   Client ID: " + clientInfoScreen.clients[0].clientId;
+print "";
+print "   CLIENT 1:";
+print "   Name:      " + clientInfoScreen.clients[1].clientName + " " + clientInfoScreen.clients[1].surname;
+print "   Age:       " + clientInfoScreen.clients[1].age + " years old";
+print "   Client ID: " + clientInfoScreen.clients[1].clientId;
+print "";
+print "   CLIENT 2:";
+print "   Name:      " + clientInfoScreen.clients[2].clientName + " " + clientInfoScreen.clients[2].surname;
+print "   Age:       " + clientInfoScreen.clients[2].age + " years old";
+print "   Client ID: " + clientInfoScreen.clients[2].clientId;
+print "   ==================================";
 print "";
 
-// 6. Demonstrate field validation with different data
-print "6. Testing with different client data:";
-clientInfoScreen.clientName = "Alice";
-clientInfoScreen.surname = "Johnson";
-clientInfoScreen.age = 28;
-clientInfoScreen.clientId = "CLT-54321";
-
-print "   Updated to:";
-print "   - Name: " + clientInfoScreen.clientName + " " + clientInfoScreen.surname;
-print "   - Age: " + clientInfoScreen.age;
-print "   - ID: " + clientInfoScreen.clientId;
+// 5. Update client ages (birthdays!)
+print "5. Updating client ages (birthdays!)...";
+clientInfoScreen.clients[0].age = clientInfoScreen.clients[0].age + 1;
+clientInfoScreen.clients[1].age = clientInfoScreen.clients[1].age + 1;
+clientInfoScreen.clients[2].age = clientInfoScreen.clients[2].age + 1;
+print "   Happy Birthday to all clients!";
+print "   Client 0 new age: " + clientInfoScreen.clients[0].age;
+print "   Client 1 new age: " + clientInfoScreen.clients[1].age;
+print "   Client 2 new age: " + clientInfoScreen.clients[2].age;
 print "";
 
-// 7. Show the screen for user interaction
-print "7. Displaying client information screen...";
+// 6. Show the screen for user interaction
+print "6. Displaying client information screen...";
 print "   The screen is now shown and ready for user input.";
-print "   All fields are updatable and include validation.";
+print "   All fields for all 3 clients are updatable and include validation.";
 print "";
 show screen clientInfoScreen;
 
-// 8. Final message
+// 7. Final message
 print "===========================================";
 print " Screen displayed successfully!";
 print " Users can now edit all client fields.";
 print "===========================================";
 print "";
 print "Features:";
-print "- Client Name: Text field with mandatory validation";
-print "- Surname: Text field with mandatory validation";
-print "- Age: Spinner control (0-150) with mandatory validation";
-print "- Client ID: Text field with uppercase formatting";
+print "- 3 client records stored in array.record";
+print "- Access via clients[0], clients[1], clients[2]";
+print "- Each client has: clientName, surname, age, clientId";
+print "- All fields are updatable and validated";
+
