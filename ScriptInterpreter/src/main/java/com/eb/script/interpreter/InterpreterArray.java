@@ -368,10 +368,10 @@ public class InterpreterArray {
             return key;
         }
         
-        // Try case-insensitive match
-        String lowerKey = key.toLowerCase();
+        // Try case-insensitive match using ROOT locale for consistent behavior
+        String lowerKey = key.toLowerCase(java.util.Locale.ROOT);
         for (String mapKey : map.keySet()) {
-            if (mapKey.toLowerCase().equals(lowerKey)) {
+            if (mapKey != null && mapKey.toLowerCase(java.util.Locale.ROOT).equals(lowerKey)) {
                 return mapKey;
             }
         }
