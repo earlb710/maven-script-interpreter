@@ -166,43 +166,86 @@ public class ScreenFactory {
         }
         
         StringBuilder log = new StringBuilder();
-        log.append("\n[DEBUG] ").append(context).append("\n");
-        log.append("  Type: ").append(node.getClass().getSimpleName()).append("\n");
-        log.append("  ID: ").append(node.getId() != null ? node.getId() : "<none>").append("\n");
-        log.append("  Style: ").append(node.getStyle() != null && !node.getStyle().isEmpty() ? node.getStyle() : "<none>").append("\n");
-        log.append("  StyleClass: ").append(node.getStyleClass()).append("\n");
-        log.append("  UserData: ").append(node.getUserData() != null ? node.getUserData() : "<none>").append("\n");
+        log.append("\n").append("=".repeat(80)).append("\n");
+        log.append("[DEBUG] ").append(context).append("\n");
+        log.append("=".repeat(80)).append("\n");
         
-        // Log layout bounds if available
-        if (node.getLayoutBounds() != null) {
-            log.append("  LayoutBounds: ").append(node.getLayoutBounds()).append("\n");
+        // JavaFX Node Type
+        log.append("JavaFX Type:  ").append(node.getClass().getSimpleName()).append("\n");
+        
+        // ID (often used for CSS selection)
+        if (node.getId() != null && !node.getId().isEmpty()) {
+            log.append("ID:           ").append(node.getId()).append("\n");
         }
         
-        // Log visibility and managed state
-        log.append("  Visible: ").append(node.isVisible()).append("\n");
-        log.append("  Managed: ").append(node.isManaged()).append("\n");
-        
-        // Log properties map if not empty
-        if (!node.getProperties().isEmpty()) {
-            log.append("  Properties: ").append(node.getProperties()).append("\n");
+        // UserData (often contains screen name reference)
+        if (node.getUserData() != null) {
+            log.append("UserData:     ").append(node.getUserData()).append("\n");
         }
         
-        // Log specific control properties
-        if (node instanceof javafx.scene.control.Control) {
-            javafx.scene.control.Control control = (javafx.scene.control.Control) node;
-            if (control.getTooltip() != null) {
-                log.append("  Tooltip: ").append(control.getTooltip().getText()).append("\n");
+        // Style (inline CSS)
+        if (node.getStyle() != null && !node.getStyle().isEmpty()) {
+            log.append("Style:        ").append(node.getStyle()).append("\n");
+        }
+        
+        // StyleClass (CSS class names)
+        if (!node.getStyleClass().isEmpty()) {
+            log.append("StyleClass:   ").append(node.getStyleClass()).append("\n");
+        }
+        
+        // Control-specific properties (text content, prompt, etc.)
+        if (node instanceof javafx.scene.control.Labeled) {
+            javafx.scene.control.Labeled labeled = (javafx.scene.control.Labeled) node;
+            if (labeled.getText() != null && !labeled.getText().isEmpty()) {
+                log.append("Text:         ").append(labeled.getText()).append("\n");
+            }
+        }
+        if (node instanceof javafx.scene.control.TextInputControl) {
+            javafx.scene.control.TextInputControl textInput = (javafx.scene.control.TextInputControl) node;
+            if (textInput.getPromptText() != null && !textInput.getPromptText().isEmpty()) {
+                log.append("PromptText:   ").append(textInput.getPromptText()).append("\n");
             }
         }
         
-        // Log Region-specific properties
-        if (node instanceof Region) {
-            Region region = (Region) node;
-            log.append("  Padding: ").append(region.getPadding()).append("\n");
-            log.append("  Background: ").append(region.getBackground() != null ? "set" : "none").append("\n");
-            log.append("  Border: ").append(region.getBorder() != null ? "set" : "none").append("\n");
+        // Tooltip
+        if (node instanceof javafx.scene.control.Control) {
+            javafx.scene.control.Control control = (javafx.scene.control.Control) node;
+            if (control.getTooltip() != null && control.getTooltip().getText() != null) {
+                log.append("Tooltip:      ").append(control.getTooltip().getText()).append("\n");
+            }
         }
         
+        // Visibility state
+        log.append("Visible:      ").append(node.isVisible() ? "YES" : "NO").append("\n");
+        log.append("Managed:      ").append(node.isManaged() ? "YES" : "NO").append("\n");
+        
+        // Region-specific properties (padding, background, border)
+        if (node instanceof Region) {
+            Region region = (Region) node;
+            if (region.getPadding() != null && !region.getPadding().equals(Insets.EMPTY)) {
+                log.append("Padding:      ").append(region.getPadding()).append("\n");
+            }
+            if (region.getBackground() != null) {
+                log.append("Background:   SET\n");
+            }
+            if (region.getBorder() != null) {
+                log.append("Border:       SET\n");
+            }
+        }
+        
+        // Layout bounds (size and position)
+        if (node.getLayoutBounds() != null) {
+            log.append("LayoutBounds: ").append(String.format("width=%.1f, height=%.1f", 
+                node.getLayoutBounds().getWidth(), 
+                node.getLayoutBounds().getHeight())).append("\n");
+        }
+        
+        // Custom properties map (if any)
+        if (!node.getProperties().isEmpty()) {
+            log.append("Properties:   ").append(node.getProperties()).append("\n");
+        }
+        
+        log.append("=".repeat(80)).append("\n");
         System.out.println(log.toString());
     }
     
@@ -703,6 +746,18 @@ public class ScreenFactory {
 
                 // Create the item using AreaItemFactory
                 Node control = AreaItemFactory.createItem(item, metadata);
+                
+                // Log debug information for this item if debug mode is enabled
+                if (isDebugMode()) {
+                    String itemType = metadata != null && metadata.itemType != null ? metadata.itemType.toString() : "UNKNOWN";
+                    String labelText = metadata != null && metadata.labelText != null ? metadata.labelText : "<no label>";
+                    String itemContext = String.format("Created item: %s (type: %s, varRef: %s, label: \"%s\")", 
+                        item.name != null ? item.name : "<unnamed>",
+                        itemType,
+                        item.varRef != null ? item.varRef : "<none>",
+                        labelText);
+                    logNodeDebug(control, itemContext);
+                }
                 
                 // Store item metadata in control's user data for later retrieval by screen.setProperty/getProperty
                 // Format: "screenName.itemName"
