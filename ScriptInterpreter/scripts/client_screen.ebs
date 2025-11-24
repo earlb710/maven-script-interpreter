@@ -1,0 +1,86 @@
+// Client Information Screen
+// Description: A screen with updatable fields for client information
+// Fields: client name, surname, age, id
+
+screen clientScreen = {
+    "title": "Client Information",
+    "width": 600,
+    "height": 400,
+    "vars": [
+        {
+            "name": "clientName",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Client Name:",
+                "promptText": "Enter client name",
+                "mandatory": true
+            }
+        },
+        {
+            "name": "surname",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Surname:",
+                "promptText": "Enter surname",
+                "mandatory": true
+            }
+        },
+        {
+            "name": "age",
+            "type": "int",
+            "default": 18,
+            "display": {
+                "type": "spinner",
+                "min": 0,
+                "max": 150,
+                "labelText": "Age:",
+                "mandatory": true
+            }
+        },
+        {
+            "name": "clientId",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Client ID:",
+                "promptText": "Enter client ID",
+                "mandatory": true
+            }
+        }
+    ]
+};
+
+// Display initial values
+print "Client Information Screen";
+print "=========================";
+print "Client Name: " + clientScreen.clientName;
+print "Surname: " + clientScreen.surname;
+print "Age: " + clientScreen.age;
+print "Client ID: " + clientScreen.clientId;
+
+// Example: Set some sample values
+clientScreen.clientName = "John";
+clientScreen.surname = "Doe";
+clientScreen.age = 30;
+clientScreen.clientId = "CLT-12345";
+
+print "";
+print "Sample values set:";
+print "Client Name: " + clientScreen.clientName;
+print "Surname: " + clientScreen.surname;
+print "Age: " + clientScreen.age;
+print "Client ID: " + clientScreen.clientId;
+
+// Show the screen for user interaction
+print "";
+print "Displaying client screen...";
+print "The screen allows updating all client fields.";
+show screen clientScreen;
+
+print "";
+print "Client screen is now displayed and ready for input!";

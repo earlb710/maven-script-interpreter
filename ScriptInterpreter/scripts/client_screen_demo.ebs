@@ -1,0 +1,142 @@
+// Client Information Screen - Interactive Demo
+// Description: Demonstrates how to create and interact with a client information screen
+// Features: Programmatic field updates, data validation display, and field access examples
+
+screen clientInfoScreen = {
+    "title": "Client Information Manager",
+    "width": 650,
+    "height": 450,
+    "vars": [
+        {
+            "name": "clientName",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Client Name:",
+                "promptText": "Enter client first name",
+                "mandatory": true
+            }
+        },
+        {
+            "name": "surname",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Surname:",
+                "promptText": "Enter client last name",
+                "mandatory": true
+            }
+        },
+        {
+            "name": "age",
+            "type": "int",
+            "default": 25,
+            "display": {
+                "type": "spinner",
+                "min": 0,
+                "max": 150,
+                "labelText": "Age:",
+                "mandatory": true
+            }
+        },
+        {
+            "name": "clientId",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Client ID:",
+                "promptText": "e.g., CLT-001",
+                "mandatory": true,
+                "caseFormat": "upper"
+            }
+        }
+    ]
+};
+
+// ===============================================
+// Demo Section: Working with Client Information
+// ===============================================
+
+print "===========================================";
+print " Client Information Screen Demo";
+print "===========================================";
+print "";
+
+// 1. Display initial (empty) values
+print "1. Initial field values:";
+print "   Client Name: '" + clientInfoScreen.clientName + "'";
+print "   Surname: '" + clientInfoScreen.surname + "'";
+print "   Age: " + clientInfoScreen.age;
+print "   Client ID: '" + clientInfoScreen.clientId + "'";
+print "";
+
+// 2. Set some example client data
+print "2. Setting example client data...";
+clientInfoScreen.clientName = "John";
+clientInfoScreen.surname = "Smith";
+clientInfoScreen.age = 35;
+clientInfoScreen.clientId = "CLT-12345";
+
+print "   Data set successfully!";
+print "";
+
+// 3. Display updated values
+print "3. Current field values:";
+print "   Client Name: " + clientInfoScreen.clientName;
+print "   Surname: " + clientInfoScreen.surname;
+print "   Age: " + clientInfoScreen.age;
+print "   Client ID: " + clientInfoScreen.clientId;
+print "";
+
+// 4. Create a formatted display of client information
+print "4. Formatted client record:";
+print "   ==================================";
+print "   CLIENT INFORMATION RECORD";
+print "   ==================================";
+print "   Name:      " + clientInfoScreen.clientName + " " + clientInfoScreen.surname;
+print "   Age:       " + clientInfoScreen.age + " years old";
+print "   Client ID: " + clientInfoScreen.clientId;
+print "   ==================================";
+print "";
+
+// 5. Update client age
+print "5. Updating client age (birthday!)...";
+var newAge: int = clientInfoScreen.age + 1;
+clientInfoScreen.age = newAge;
+print "   Happy Birthday! New age: " + clientInfoScreen.age;
+print "";
+
+// 6. Demonstrate field validation with different data
+print "6. Testing with different client data:";
+clientInfoScreen.clientName = "Alice";
+clientInfoScreen.surname = "Johnson";
+clientInfoScreen.age = 28;
+clientInfoScreen.clientId = "CLT-54321";
+
+print "   Updated to:";
+print "   - Name: " + clientInfoScreen.clientName + " " + clientInfoScreen.surname;
+print "   - Age: " + clientInfoScreen.age;
+print "   - ID: " + clientInfoScreen.clientId;
+print "";
+
+// 7. Show the screen for user interaction
+print "7. Displaying client information screen...";
+print "   The screen is now shown and ready for user input.";
+print "   All fields are updatable and include validation.";
+print "";
+show screen clientInfoScreen;
+
+// 8. Final message
+print "===========================================";
+print " Screen displayed successfully!";
+print " Users can now edit all client fields.";
+print "===========================================";
+print "";
+print "Features:";
+print "- Client Name: Text field with mandatory validation";
+print "- Surname: Text field with mandatory validation";
+print "- Age: Spinner control (0-150) with mandatory validation";
+print "- Client ID: Text field with uppercase formatting";
