@@ -257,18 +257,19 @@ public class AreaContainerFactory {
     
     /**
      * Determines the vertical offset (translateY) value based on the offset parameter.
+     * More negative values move the label up, less negative values move it down.
      * @param offset The offset value: "top", "on", "bottom"
      * @return The translateY value in pixels
      */
     private static double getVerticalOffset(String offset) {
         switch (offset) {
             case "top":
-                return -30; // Position above the border, just touching (more negative = up)
+                return -30; // Position above the border (more negative = up)
             case "bottom":
-                return -10; // Position below the border, just touching (less negative = down)
+                return -10; // Position below the border (less negative = down)
             case "on":
             default:
-                return -20; // Default: sit on the border line (border goes through label)
+                return -20; // Default: border goes through label
         }
     }
     
