@@ -260,6 +260,8 @@ public class AreaContainerFactory {
     
     /**
      * Adjusts container padding based on label offset to prevent unnecessary vertical space.
+     * Modifies the container's style directly to ensure padding takes effect even if
+     * style properties are set.
      * For 'top' offset: adds top padding for the border.
      * For 'on' offset: reduces top padding since label doesn't take up as much internal space.
      * For 'bottom' offset: no adjustment (padding unchanged).
@@ -272,37 +274,32 @@ public class AreaContainerFactory {
             currentPadding = new javafx.geometry.Insets(0);
         }
         
-        javafx.geometry.Insets newPadding;
+        double topPadding;
         switch (offset) {
             case "top":
                 // For top offset, ensure adequate top padding for the border and label space
                 // Use at least 20px to accommodate the label above the border
-                newPadding = new javafx.geometry.Insets(
-                    Math.max(currentPadding.getTop(), 20),
-                    currentPadding.getRight(),
-                    currentPadding.getBottom(),
-                    currentPadding.getLeft()
-                );
+                topPadding = Math.max(currentPadding.getTop(), 20);
                 break;
             case "on":
                 // For on offset, reduce top padding significantly since label sits on border
                 // Use minimal padding (2-3px) since the label overlaps the border
-                double reducedTop = Math.min(currentPadding.getTop() * 0.3, 3);
-                newPadding = new javafx.geometry.Insets(
-                    Math.max(reducedTop, 2), // Very minimal top padding
-                    currentPadding.getRight(),
-                    currentPadding.getBottom(),
-                    currentPadding.getLeft()
-                );
+                topPadding = 2; // Fixed minimal value for clarity
                 break;
             case "bottom":
             default:
                 // For bottom offset, no adjustment needed - keep current padding
-                newPadding = currentPadding;
-                break;
+                return; // Exit without changes
         }
         
-        container.setPadding(newPadding);
+        // Apply padding via style to ensure it takes effect after other style settings
+        String paddingStyle = String.format("-fx-padding: %fpx %fpx %fpx %fpx;",
+            topPadding,
+            currentPadding.getRight(),
+            currentPadding.getBottom(),
+            currentPadding.getLeft());
+        
+        container.setStyle(container.getStyle() + " " + paddingStyle);
     }
     
     /**
