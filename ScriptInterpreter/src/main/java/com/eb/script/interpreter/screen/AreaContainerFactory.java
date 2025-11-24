@@ -330,13 +330,13 @@ public class AreaContainerFactory {
         switch (offset) {
             case "top":
                 // Position above the border - dynamic based on font height
-                return -5 - fontHeight;
+                return -8 - fontHeight;
             case "bottom":
-                return -5; // Position slightly above the border baseline
+                return -8; // Position slightly above the border baseline
             case "on":
             default:
                 // Default: border goes through label - uses half font height
-                return -5 - (fontHeight / 2);
+                return -8 - (fontHeight / 2);
         }
     }
     
