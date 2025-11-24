@@ -149,7 +149,7 @@ public class AreaContainerFactory {
             
             // Add group label if specified
             if (areaDef.groupLabelText != null && !areaDef.groupLabelText.isEmpty()) {
-                addGroupLabel(container, areaDef.groupLabelText, areaDef.groupLabelAlignment, areaDef.groupBorderColor);
+                addGroupLabel(container, areaDef.groupLabelText, areaDef.groupLabelAlignment, areaDef.groupBorderColor, areaDef.groupLabelOffset);
             }
         }
 
@@ -200,7 +200,16 @@ public class AreaContainerFactory {
      * @param alignment The alignment: left, center, right (default: left)
      * @param borderColor The border color to use for label styling (optional)
      */
-    private static void addGroupLabel(Region container, String labelText, String alignment, String borderColor) {
+    /**
+     * Adds a group label to a container. The label is positioned relative to the border
+     * with the specified alignment and offset.
+     * @param container The container to add the label to
+     * @param labelText The text for the label
+     * @param alignment The alignment: left, center, right (default: left)
+     * @param borderColor The border color to use for label styling (optional)
+     * @param offset The vertical offset: top, on, bottom (default: on)
+     */
+    private static void addGroupLabel(Region container, String labelText, String alignment, String borderColor, String offset) {
         // Create a label with the group text
         Label label = new Label(labelText);
         
@@ -214,17 +223,21 @@ public class AreaContainerFactory {
         // Position label based on alignment
         String alignmentValue = (alignment != null) ? alignment.toLowerCase() : "left";
         
+        // Determine vertical offset based on offset parameter
+        String offsetValue = (offset != null) ? offset.toLowerCase() : "on";
+        double translateY = getVerticalOffset(offsetValue);
+        
         // Add the label to the container
         // For VBox/HBox, insert at the beginning with proper alignment
         if (container instanceof VBox) {
-            HBox labelWrapper = createAlignedLabelWrapper(label, alignmentValue);
+            HBox labelWrapper = createAlignedLabelWrapper(label, alignmentValue, translateY);
             ((VBox) container).getChildren().add(0, labelWrapper);
         } else if (container instanceof HBox) {
-            HBox labelWrapper = createAlignedLabelWrapper(label, alignmentValue);
+            HBox labelWrapper = createAlignedLabelWrapper(label, alignmentValue, translateY);
             ((HBox) container).getChildren().add(0, labelWrapper);
         } else if (container instanceof Pane) {
             // For Pane, use translateX to position the label
-            label.setTranslateY(-10); // Move label up to sit on the border
+            label.setTranslateY(translateY);
             switch (alignmentValue) {
                 case "center":
                     label.setTranslateX(0);
@@ -242,7 +255,7 @@ public class AreaContainerFactory {
             }
             ((Pane) container).getChildren().add(label);
         } else if (container instanceof StackPane) {
-            label.setTranslateY(-10); // Move label up to sit on the border
+            label.setTranslateY(translateY);
             ((StackPane) container).getChildren().add(label);
             StackPane.setAlignment(label, 
                 alignmentValue.equals("center") ? Pos.TOP_CENTER :
@@ -251,15 +264,33 @@ public class AreaContainerFactory {
     }
     
     /**
-     * Creates an HBox wrapper for a label with the specified alignment.
+     * Determines the vertical offset (translateY) value based on the offset parameter.
+     * @param offset The offset value: "top", "on", "bottom"
+     * @return The translateY value in pixels
+     */
+    private static double getVerticalOffset(String offset) {
+        switch (offset) {
+            case "top":
+                return 0; // Position at the top of the border (inside)
+            case "bottom":
+                return -20; // Position below the border line
+            case "on":
+            default:
+                return -10; // Default: sit on the border line
+        }
+    }
+    
+    /**
+     * Creates an HBox wrapper for a label with the specified alignment and vertical offset.
      * This wrapper allows proper horizontal alignment of labels within VBox/HBox containers.
      * @param label The label to wrap
      * @param alignmentValue The alignment value: "left", "center", or "right"
+     * @param translateY The vertical offset in pixels
      * @return An HBox containing the label with proper alignment
      */
-    private static HBox createAlignedLabelWrapper(Label label, String alignmentValue) {
+    private static HBox createAlignedLabelWrapper(Label label, String alignmentValue, double translateY) {
         HBox labelWrapper = new HBox(label);
-        labelWrapper.setTranslateY(-10); // Move wrapper up to sit on the border
+        labelWrapper.setTranslateY(translateY);
         
         // Set the alignment of the wrapper HBox based on alignment value
         Pos wrapperAlignment;

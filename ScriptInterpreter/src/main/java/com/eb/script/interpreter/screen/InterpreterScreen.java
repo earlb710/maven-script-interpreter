@@ -1537,6 +1537,12 @@ public class InterpreterScreen {
             area.groupLabelAlignment = String.valueOf(groupLabelAlignmentObj);
         }
         
+        // Extract groupLabelOffset property (for visual grouping) - case-insensitive
+        Object groupLabelOffsetObj = getCaseInsensitive(areaDef, "groupLabelOffset");
+        if (groupLabelOffsetObj != null) {
+            area.groupLabelOffset = String.valueOf(groupLabelOffsetObj);
+        }
+        
         // Extract spacing property
         if (areaDef.containsKey("spacing")) {
             area.spacing = String.valueOf(areaDef.get("spacing"));
