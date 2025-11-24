@@ -1,0 +1,158 @@
+// Test Script: Record Type in Screen Variables
+// Description: Test that screen variables support the record data type
+// Author: EBS Test Suite
+// Date: 2025-11-24
+
+print "=== Screen Record Type Test ===";
+print "";
+
+// Test 1: Basic record type in screen var
+print "Test 1: Basic record type in screen variable";
+screen personScreen = {
+    "title": "Person Record Test",
+    "width": 600,
+    "height": 400,
+    "vars": [
+        {
+            "name": "person",
+            "type": "record",
+            "default": {"name": "John Doe", "age": 30}
+        }
+    ]
+};
+
+print "Screen defined successfully";
+print "Person record: " + personScreen.person;
+print "Person name: " + personScreen.person.name;
+print "Person age: " + personScreen.person.age;
+print "";
+
+// Test 2: Update record field values
+print "Test 2: Update record field values";
+personScreen.person = {"name": "Jane Smith", "age": 35};
+print "Updated person record: " + personScreen.person;
+print "Updated person name: " + personScreen.person.name;
+print "Updated person age: " + personScreen.person.age;
+print "";
+
+// Test 3: Multiple record variables in screen
+print "Test 3: Multiple record variables in screen";
+screen dataScreen = {
+    "title": "Multiple Records Test",
+    "width": 700,
+    "height": 500,
+    "vars": [
+        {
+            "name": "employee",
+            "type": "record",
+            "default": {"id": 1, "name": "Alice", "salary": 75000}
+        },
+        {
+            "name": "department",
+            "type": "record",
+            "default": {"id": 10, "name": "Engineering", "budget": 500000}
+        }
+    ]
+};
+
+print "Employee record: " + dataScreen.employee;
+print "Employee ID: " + dataScreen.employee.id;
+print "Employee name: " + dataScreen.employee.name;
+print "Employee salary: " + dataScreen.employee.salary;
+print "";
+print "Department record: " + dataScreen.department;
+print "Department ID: " + dataScreen.department.id;
+print "Department name: " + dataScreen.department.name;
+print "Department budget: " + dataScreen.department.budget;
+print "";
+
+// Test 4: Record with nested structure
+print "Test 4: Record with nested structure";
+screen configScreen = {
+    "title": "Nested Record Test",
+    "width": 600,
+    "height": 400,
+    "vars": [
+        {
+            "name": "config",
+            "type": "record",
+            "default": {
+                "appName": "TestApp",
+                "version": "1.0",
+                "settings": {
+                    "theme": "dark",
+                    "autoSave": true
+                }
+            }
+        }
+    ]
+};
+
+print "Config record: " + configScreen.config;
+print "App name: " + configScreen.config.appName;
+print "Version: " + configScreen.config.version;
+print "Settings: " + configScreen.config.settings;
+print "";
+
+// Test 5: Record variable with null/empty default
+print "Test 5: Record with null default";
+screen emptyScreen = {
+    "title": "Empty Record Test",
+    "width": 600,
+    "height": 400,
+    "vars": [
+        {
+            "name": "data",
+            "type": "record",
+            "default": null
+        }
+    ]
+};
+
+print "Empty record (null): " + emptyScreen.data;
+// Assign a value
+emptyScreen.data = {"key": "value", "count": 42};
+print "After assignment: " + emptyScreen.data;
+print "Key field: " + emptyScreen.data.key;
+print "Count field: " + emptyScreen.data.count;
+print "";
+
+// Test 6: Mix record with other types
+print "Test 6: Mix record with other primitive types";
+screen mixedScreen = {
+    "title": "Mixed Types Test",
+    "width": 600,
+    "height": 400,
+    "vars": [
+        {
+            "name": "title",
+            "type": "string",
+            "default": "User Profile"
+        },
+        {
+            "name": "userId",
+            "type": "int",
+            "default": 12345
+        },
+        {
+            "name": "user",
+            "type": "record",
+            "default": {"username": "jdoe", "email": "jdoe@example.com"}
+        },
+        {
+            "name": "isActive",
+            "type": "bool",
+            "default": true
+        }
+    ]
+};
+
+print "Title (string): " + mixedScreen.title;
+print "User ID (int): " + mixedScreen.userId;
+print "User (record): " + mixedScreen.user;
+print "User username: " + mixedScreen.user.username;
+print "User email: " + mixedScreen.user.email;
+print "Is Active (bool): " + mixedScreen.isActive;
+print "";
+
+print "=== All Screen Record Type Tests Completed Successfully ===";

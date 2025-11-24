@@ -1096,7 +1096,15 @@ public class InterpreterScreen {
             return null;
         }
 
-        switch (typeStr.toLowerCase()) {
+        // Handle array.type syntax (e.g., "array.record")
+        String lowerType = typeStr.toLowerCase();
+        if (lowerType.startsWith("array.")) {
+            // For array types, we return ARRAY as the base type
+            // The element type will be handled separately
+            return DataType.ARRAY;
+        }
+
+        switch (lowerType) {
             case "int":
             case "integer":
                 return DataType.INTEGER;
@@ -1117,9 +1125,29 @@ public class InterpreterScreen {
                 return DataType.BYTE;
             case "json":
                 return DataType.JSON;
+            case "record":
+                return DataType.RECORD;
             default:
                 return null;
         }
+    }
+
+    /**
+     * Helper method to parse the element type from array type strings (e.g., "array.record" -> RECORD)
+     */
+    private DataType parseElementType(String typeStr) {
+        if (typeStr == null) {
+            return null;
+        }
+        
+        String lowerType = typeStr.toLowerCase();
+        if (lowerType.startsWith("array.")) {
+            // Extract the element type (e.g., "array.record" -> "record")
+            String elementTypeStr = lowerType.substring(6); // Skip "array."
+            return parseDataType(elementTypeStr);
+        }
+        
+        return null;
     }
 
     /**
@@ -1805,7 +1833,19 @@ public class InterpreterScreen {
 
                 // Convert type string to DataType
                 DataType varType = null;
+                DataType elementType = null;
+                boolean isArrayType = false;
+                
                 if (varTypeStr != null) {
+                    // Check if it's an array type (e.g., "array.record")
+                    if (varTypeStr.toLowerCase().startsWith("array.")) {
+                        isArrayType = true;
+                        elementType = parseElementType(varTypeStr);
+                        if (elementType == null) {
+                            throw interpreter.error(line, "Unknown element type in '" + varTypeStr + "' for variable '" + varName + "' in screen '" + screenName + "'.");
+                        }
+                    }
+                    
                     varType = parseDataType(varTypeStr);
                     if (varType == null) {
                         throw interpreter.error(line, "Unknown type '" + varTypeStr + "' for variable '" + varName + "' in screen '" + screenName + "'.");
@@ -1814,7 +1854,17 @@ public class InterpreterScreen {
 
                 // Convert and set the default value
                 Object value = defaultValue;
-                if (varType != null && value != null) {
+                Object recordTemplate = null;
+                
+                // Special handling for array.record: default is a template, not the array value
+                if (isArrayType && elementType == DataType.RECORD && defaultValue != null) {
+                    // For array.record, default should be a single record (template)
+                    // Convert the template using elementType to ensure proper validation
+                    recordTemplate = elementType.convertValue(defaultValue);
+                    // Initialize as empty ArrayList for array types
+                    value = new ArrayList<>();
+                } else if (varType != null && value != null) {
+                    // For other types, convert normally
                     value = varType.convertValue(value);
                 }
 
@@ -1825,6 +1875,15 @@ public class InterpreterScreen {
                 var.setMinChar(minChar);
                 var.setMaxChar(maxChar);
                 var.setTextCase(textCase);
+                
+                // Set array-specific properties
+                if (isArrayType) {
+                    var.setArrayType(true);
+                    var.setElementType(elementType);
+                    if (recordTemplate != null) {
+                        var.setRecordTemplate(recordTemplate);
+                    }
+                }
 
                 // Process optional display metadata
                 if (varDef.containsKey("display")) {
