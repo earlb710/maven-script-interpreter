@@ -142,7 +142,7 @@ public class AreaContainerFactory {
         
         // Apply groupBorder styling if specified
         if (areaDef.groupBorder != null && !areaDef.groupBorder.isEmpty() && !areaDef.groupBorder.equalsIgnoreCase("none")) {
-            String borderStyle = createBorderStyle(areaDef.groupBorder, areaDef.groupBorderColor);
+            String borderStyle = createBorderStyle(areaDef.groupBorder, areaDef.groupBorderColor, areaDef.groupBorderWidth);
             if (borderStyle != null && !borderStyle.isEmpty()) {
                 container.setStyle(container.getStyle() + "; " + borderStyle);
             }
@@ -160,12 +160,13 @@ public class AreaContainerFactory {
     }
     
     /**
-     * Create a CSS border style string based on groupBorder type and color.
+     * Create a CSS border style string based on groupBorder type, color, and width.
      * @param borderType The type of border: none, raised, inset, lowered, line
      * @param borderColor The color of the border in hex format (optional)
+     * @param borderWidth The width of the border in pixels (optional, e.g., "2" or "2px")
      * @return CSS style string for the border, or null if borderType is "none"
      */
-    private static String createBorderStyle(String borderType, String borderColor) {
+    private static String createBorderStyle(String borderType, String borderColor, String borderWidth) {
         if (borderType == null || borderType.equalsIgnoreCase("none")) {
             return null;
         }
@@ -173,22 +174,38 @@ public class AreaContainerFactory {
         // Default border color if not specified
         String color = (borderColor != null && !borderColor.isEmpty()) ? borderColor : "#808080";
         
+        // Parse border width - handle various formats (e.g., "2", "2px", "2 px")
+        String width;
+        if (borderWidth != null && !borderWidth.isEmpty()) {
+            // Extract numeric value and normalize to px
+            String numericValue = borderWidth.replaceAll("[^0-9.]", "").trim();
+            if (!numericValue.isEmpty()) {
+                width = numericValue + "px";
+            } else {
+                // Invalid width, use default
+                width = borderType.toLowerCase().equals("line") ? "1px" : "2px";
+            }
+        } else {
+            // Default width: 1px for line, 2px for raised/lowered/inset
+            width = borderType.toLowerCase().equals("line") ? "1px" : "2px";
+        }
+        
         // Create border style based on type
         switch (borderType.toLowerCase()) {
             case "line":
-                return "-fx-border-color: " + color + "; -fx-border-width: 1px; -fx-border-radius: 5px";
+                return "-fx-border-color: " + color + "; -fx-border-width: " + width + "; -fx-border-radius: 5px";
             case "raised":
                 // Simulate raised effect with gradient
                 return "-fx-border-color: derive(" + color + ", 40%) " + color + " " + color + " derive(" + color + ", 40%); " +
-                       "-fx-border-width: 2px; -fx-border-style: solid; -fx-border-radius: 5px";
+                       "-fx-border-width: " + width + "; -fx-border-style: solid; -fx-border-radius: 5px";
             case "lowered":
             case "inset":
                 // Simulate inset/lowered effect with gradient (opposite of raised)
                 return "-fx-border-color: " + color + " derive(" + color + ", 40%) derive(" + color + ", 40%) " + color + "; " +
-                       "-fx-border-width: 2px; -fx-border-style: solid; -fx-border-radius: 5px";
+                       "-fx-border-width: " + width + "; -fx-border-style: solid; -fx-border-radius: 5px";
             default:
                 // Default to simple line border
-                return "-fx-border-color: " + color + "; -fx-border-width: 1px; -fx-border-radius: 5px";
+                return "-fx-border-color: " + color + "; -fx-border-width: " + width + "; -fx-border-radius: 5px";
         }
     }
     

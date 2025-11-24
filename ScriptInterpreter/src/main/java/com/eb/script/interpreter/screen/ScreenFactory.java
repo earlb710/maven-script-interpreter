@@ -766,6 +766,9 @@ public class ScreenFactory {
                 if (areaDef.groupBorderColor != null && !areaDef.groupBorderColor.isEmpty()) {
                     contextBuilder.append(String.format(", color: %s", areaDef.groupBorderColor));
                 }
+                if (areaDef.groupBorderWidth != null && !areaDef.groupBorderWidth.isEmpty()) {
+                    contextBuilder.append(String.format(", width: %s", areaDef.groupBorderWidth));
+                }
                 contextBuilder.append("]");
             }
             

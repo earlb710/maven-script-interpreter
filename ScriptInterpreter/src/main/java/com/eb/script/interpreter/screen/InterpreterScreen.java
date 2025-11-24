@@ -1551,6 +1551,12 @@ public class InterpreterScreen {
             area.groupBorderColor = String.valueOf(groupBorderColorObj);
         }
         
+        // Extract groupBorderWidth property (for visual grouping) - case-insensitive
+        Object groupBorderWidthObj = getCaseInsensitive(areaDef, "groupBorderWidth");
+        if (groupBorderWidthObj != null) {
+            area.groupBorderWidth = String.valueOf(groupBorderWidthObj);
+        }
+        
         // Extract groupLabelText property (for visual grouping) - case-insensitive
         Object groupLabelTextObj = getCaseInsensitive(areaDef, "groupLabelText");
         if (groupLabelTextObj != null) {
