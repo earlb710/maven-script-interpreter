@@ -1560,6 +1560,23 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
 
     @Override
     public Object visitPropertyExpression(com.eb.script.interpreter.expression.PropertyExpression expr) throws InterpreterError {
+        // Check if this is a screen variable access pattern (screenName.varName)
+        if (expr.object instanceof com.eb.script.interpreter.expression.VariableExpression varExpr) {
+            String screenName = varExpr.name.toLowerCase(java.util.Locale.ROOT);
+            ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars(screenName);
+            
+            if (screenVarMap != null) {
+                // This might be a screen variable access
+                String varName = expr.propertyName.toLowerCase(java.util.Locale.ROOT);
+                if (screenVarMap.containsKey(varName)) {
+                    // This is a screen variable - return it
+                    return screenVarMap.get(varName);
+                }
+                // If the variable doesn't exist in the screen, fall through to normal property access
+                // This allows accessing properties of the screen config JSON if needed
+            }
+        }
+        
         Object obj = evaluate(expr.object);
         
         if (obj == null) {
