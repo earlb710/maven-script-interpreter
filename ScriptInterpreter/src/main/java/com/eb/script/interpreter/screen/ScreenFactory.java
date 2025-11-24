@@ -10,6 +10,7 @@ import com.eb.script.json.Json;
 import com.eb.script.json.JsonSchema;
 import com.eb.script.json.JsonValidate;
 import com.eb.script.token.DataType;
+import com.eb.ui.cli.ScriptArea;
 import com.eb.util.Util;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -60,8 +61,8 @@ public class ScreenFactory {
     private static Map<String, Object> areaSchema;
     private static Map<String, Object> displayMetadataSchema;
     
-    // Debug mode flag - toggleable with Ctrl+D
-    private static boolean debugMode = false;
+    // Debug mode flag - per-thread (per EBS tab), toggleable with Ctrl+D
+    private static final ThreadLocal<Boolean> debugMode = ThreadLocal.withInitial(() -> false);
 
     static {
         try {
@@ -88,13 +89,71 @@ public class ScreenFactory {
     }
     
     /**
-     * Toggle debug mode on or off.
+     * Toggle debug mode on or off for the current thread.
+     * Can be called from outside (e.g., from EBS tabs) to enable debug mode
+     * even before running any scripts.
+     * 
+     * @param outputArea The output area to display the toggle message (optional)
+     * @return The new debug mode state
      */
-    private static void toggleDebugMode() {
-        debugMode = !debugMode;
+    public static boolean toggleDebugModeForThread(ScriptArea outputArea) {
+        boolean newDebugMode = !debugMode.get();
+        debugMode.set(newDebugMode);
+        
+        String message = "DEBUG MODE: " + (newDebugMode ? "ENABLED" : "DISABLED") + " (Thread: " + Thread.currentThread().getName() + ")";
+        
+        // Print to console
         System.out.println("=".repeat(80));
-        System.out.println("DEBUG MODE: " + (debugMode ? "ENABLED" : "DISABLED"));
+        System.out.println(message);
         System.out.println("=".repeat(80));
+        
+        // Show message in output area if available
+        if (outputArea != null) {
+            Platform.runLater(() -> {
+                if (newDebugMode) {
+                    outputArea.printlnInfo(message);
+                } else {
+                    outputArea.printlnWarn(message);
+                }
+            });
+        }
+        
+        return newDebugMode;
+    }
+    
+    /**
+     * Toggle debug mode on or off for the current thread.
+     * 
+     * @param screenName The name of the screen (optional, for status bar message)
+     * @param context The interpreter context (optional, for status bar access)
+     */
+    private static void toggleDebugMode(String screenName, InterpreterContext context) {
+        boolean newDebugMode = !debugMode.get();
+        debugMode.set(newDebugMode);
+        
+        String message = "DEBUG MODE: " + (newDebugMode ? "ENABLED" : "DISABLED") + " (Thread: " + Thread.currentThread().getName() + ")";
+        
+        // Print to console
+        System.out.println("=".repeat(80));
+        System.out.println(message);
+        System.out.println("=".repeat(80));
+        
+        // Show message in status bar if available
+        if (context != null && screenName != null) {
+            com.eb.ui.ebs.StatusBar statusBar = context.getScreenStatusBars().get(screenName);
+            if (statusBar != null) {
+                Platform.runLater(() -> {
+                    statusBar.setMessage(message);
+                });
+            }
+        }
+    }
+    
+    /**
+     * Check if debug mode is enabled for the current thread.
+     */
+    private static boolean isDebugMode() {
+        return debugMode.get();
     }
     
     /**
@@ -102,7 +161,7 @@ public class ScreenFactory {
      * Only logs when debug mode is enabled.
      */
     private static void logNodeDebug(Node node, String context) {
-        if (!debugMode) {
+        if (!isDebugMode()) {
             return;
         }
         
@@ -152,7 +211,7 @@ public class ScreenFactory {
      * Only logs when debug mode is enabled.
      */
     private static void logSceneGraph(Node node, int depth, String path) {
-        if (!debugMode) {
+        if (!isDebugMode()) {
             return;
         }
         
@@ -379,11 +438,11 @@ public class ScreenFactory {
 
         Scene scene = new Scene(screenRoot, width, height);
         
-        // Add Ctrl+D key handler to toggle debug mode
+        // Add Ctrl+D key handler to toggle debug mode (per-thread)
         scene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
             if (event.getCode() == KeyCode.D && event.isControlDown()) {
-                toggleDebugMode();
-                if (debugMode) {
+                toggleDebugMode(screenName, context);
+                if (isDebugMode()) {
                     // Log the entire scene graph when debug mode is enabled
                     System.out.println("\n" + "=".repeat(80));
                     System.out.println("SCENE GRAPH for: " + screenName);
@@ -613,7 +672,7 @@ public class ScreenFactory {
         Region container = AreaContainerFactory.createContainer(areaDef);
         
         // Log debug information for this container if debug mode is enabled
-        if (debugMode) {
+        if (isDebugMode()) {
             String containerContext = String.format("Created container: %s (type: %s)", 
                 areaDef.name != null ? areaDef.name : "<unnamed>",
                 areaDef.areaType != null ? areaDef.areaType : "<none>");
@@ -726,7 +785,7 @@ public class ScreenFactory {
                 addItemToContainer(container, nodeToAdd, item, areaDef.areaType);
                 
                 // Log debug information for this item if debug mode is enabled
-                if (debugMode) {
+                if (isDebugMode()) {
                     String itemContext = String.format("Created item: %s (varRef: %s) in area: %s", 
                         item.name != null ? item.name : "<unnamed>",
                         item.varRef != null ? item.varRef : "<none>",
