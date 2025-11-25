@@ -1586,6 +1586,18 @@ public class InterpreterScreen {
         if (areaDef.containsKey("lostfocus")) {
             area.lostFocus = String.valueOf(areaDef.get("lostfocus"));
         }
+        
+        // Extract numberOfRecords property for multi-record areas
+        Object numberOfRecordsObj = getCaseInsensitive(areaDef, "numberOfRecords");
+        if (numberOfRecordsObj != null && numberOfRecordsObj instanceof Number) {
+            area.numberOfRecords = ((Number) numberOfRecordsObj).intValue();
+        }
+        
+        // Extract recordRef property for multi-record areas
+        Object recordRefObj = getCaseInsensitive(areaDef, "recordRef");
+        if (recordRefObj != null) {
+            area.recordRef = String.valueOf(recordRefObj);
+        }
 
         area.screenName = screenName;
 
@@ -1791,12 +1803,6 @@ public class InterpreterScreen {
 
                         if (itemDef.containsKey("alignment")) {
                             item.alignment = String.valueOf(itemDef.get("alignment")).toLowerCase();
-                        }
-
-                        // Parse numberOfRecords property for multi-item templates
-                        Object numberOfRecordsObj = getCaseInsensitive(itemDef, "numberOfRecords");
-                        if (numberOfRecordsObj != null && numberOfRecordsObj instanceof Number) {
-                            item.numberOfRecords = ((Number) numberOfRecordsObj).intValue();
                         }
 
                         // Store in screenAreaItems map by item name (for screen.getProperty/setProperty)

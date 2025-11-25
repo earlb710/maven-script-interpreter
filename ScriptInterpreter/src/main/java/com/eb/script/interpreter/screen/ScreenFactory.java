@@ -774,8 +774,8 @@ public class ScreenFactory {
 
         // Sort items by sequence
         if (areaDef.items != null && !areaDef.items.isEmpty()) {
-            // First, expand any items that have numberOfRecords set
-            List<AreaItem> expandedItems = expandMultiRecordItems(areaDef.items);
+            // First, expand any items if area has numberOfRecords set
+            List<AreaItem> expandedItems = expandMultiRecordItems(areaDef.items, areaDef.numberOfRecords, areaDef.recordRef);
             
             List<AreaItem> sortedItems = expandedItems.stream()
                     .sorted(Comparator.comparingInt(item -> item.sequence))
@@ -2859,38 +2859,38 @@ public class ScreenFactory {
     }
     
     /**
-     * Expands items that have numberOfRecords set into multiple items.
-     * For each item with numberOfRecords > 1, creates N copies of the item where:
-     * - The varRef is expanded with array index (e.g., "client.name" becomes "clients[0].clientName")
+     * Expands items when the area has numberOfRecords set.
+     * For each item in the area, creates N copies where:
+     * - The varRef is combined with recordRef and expanded with array index 
+     *   (e.g., with recordRef="clients" and varRef="age", becomes "clients[0].age")
      * - The labelText is expanded with record number (e.g., "Name:" becomes "Client 1 - Name:")
      * - The name is made unique (e.g., "clientNameField" becomes "clientNameField_0")
      * - The sequence is calculated to keep items grouped by record (all fields for record 0, then record 1, etc.)
      * 
      * @param items The original list of items
+     * @param numberOfRecords The number of records to expand to (from area level)
+     * @param recordRef The record reference/array name (from area level)
      * @return A new list with expanded items
      */
-    private static List<AreaItem> expandMultiRecordItems(List<AreaItem> items) {
+    private static List<AreaItem> expandMultiRecordItems(List<AreaItem> items, Integer numberOfRecords, String recordRef) {
         List<AreaItem> expandedItems = new ArrayList<>();
         
-        // First, find the maximum sequence among items that will be expanded
-        // This is used to calculate proper sequence values that group items by record
-        int maxSeq = 0;
-        for (AreaItem item : items) {
-            if (item.numberOfRecords != null && item.numberOfRecords > 1) {
-                maxSeq = Math.max(maxSeq, item.sequence);
-            }
+        // If no expansion needed, return items as-is
+        if (numberOfRecords == null || numberOfRecords <= 1 || recordRef == null || recordRef.isEmpty()) {
+            return new ArrayList<>(items);
         }
         
+        // Find the maximum sequence among items for proper grouping
+        int maxSeq = 0;
         for (AreaItem item : items) {
-            if (item.numberOfRecords != null && item.numberOfRecords > 1) {
-                // Expand this item into multiple items
-                for (int i = 0; i < item.numberOfRecords; i++) {
-                    AreaItem expandedItem = createExpandedItem(item, i, item.numberOfRecords, maxSeq);
-                    expandedItems.add(expandedItem);
-                }
-            } else {
-                // No expansion needed, add as-is
-                expandedItems.add(item);
+            maxSeq = Math.max(maxSeq, item.sequence);
+        }
+        
+        // Expand each item for each record
+        for (int i = 0; i < numberOfRecords; i++) {
+            for (AreaItem item : items) {
+                AreaItem expandedItem = createExpandedItem(item, i, numberOfRecords, maxSeq, recordRef);
+                expandedItems.add(expandedItem);
             }
         }
         
@@ -2903,10 +2903,11 @@ public class ScreenFactory {
      * @param template The template item to copy from
      * @param index The record index (0-based)
      * @param totalRecords The total number of records
-     * @param maxSequence The maximum sequence number among expandable items
+     * @param maxSequence The maximum sequence number among items
+     * @param recordRef The record reference/array name to combine with varRef
      * @return A new AreaItem with expanded varRef, name, and labelText
      */
-    private static AreaItem createExpandedItem(AreaItem template, int index, int totalRecords, int maxSequence) {
+    private static AreaItem createExpandedItem(AreaItem template, int index, int totalRecords, int maxSequence, String recordRef) {
         AreaItem item = new AreaItem();
         
         // Copy all properties from template
@@ -2937,17 +2938,16 @@ public class ScreenFactory {
         item.alignment = template.alignment;
         item.onValidate = template.onValidate;
         item.source = template.source;
-        // Don't copy numberOfRecords - expanded items don't need to be expanded again
         
         // Expand the name to be unique for each record
         if (template.name != null) {
             item.name = template.name + "_" + index;
         }
         
-        // Expand the varRef to include the array index
-        // e.g., "clients.clientName" becomes "clients[0].clientName"
+        // Expand the varRef by combining recordRef with the item's varRef and adding the index
+        // e.g., recordRef="clients", varRef="age" becomes "clients[0].age"
         if (template.varRef != null) {
-            item.varRef = expandVarRefWithIndex(template.varRef, index);
+            item.varRef = expandVarRefWithRecordRef(template.varRef, recordRef, index);
         }
         
         // Clone and expand the displayItem
@@ -2963,36 +2963,29 @@ public class ScreenFactory {
     }
     
     /**
-     * Expands a varRef with an array index.
+     * Expands a varRef by combining it with recordRef and adding an array index.
      * Examples:
-     * - "clients.clientName" -> "clients[0].clientName"
-     * - "clients.age" -> "clients[0].age"
+     * - recordRef="clients", varRef="age", index=0 -> "clients[0].age"
+     * - recordRef="clients", varRef="clientName", index=1 -> "clients[1].clientName"
      * 
-     * The varRef is expected to be in the format "arrayName.fieldName" which gets
-     * expanded to "arrayName[index].fieldName".
-     * 
-     * @param varRef The original variable reference
+     * @param varRef The field name (e.g., "age", "clientName")
+     * @param recordRef The record/array reference (e.g., "clients")
      * @param index The array index (0-based)
      * @return The expanded variable reference
      */
-    private static String expandVarRefWithIndex(String varRef, int index) {
+    private static String expandVarRefWithRecordRef(String varRef, String recordRef, int index) {
         if (varRef == null || varRef.isEmpty()) {
             return varRef;
         }
         
-        // Find the first dot which separates array name from field name
-        // Using dotIndex > 0 to ensure we have a valid non-empty array name
-        // (dotIndex == 0 would mean empty array name which is invalid)
-        int dotIndex = varRef.indexOf('.');
-        if (dotIndex > 0) {
-            // Has a dot - split into arrayName and fieldName
-            String arrayName = varRef.substring(0, dotIndex);
-            String fieldName = varRef.substring(dotIndex + 1);
-            return arrayName + "[" + index + "]." + fieldName;
-        } else {
-            // No dot - just add the index to the end
+        // Validate recordRef - if null or empty, just return varRef with index
+        if (recordRef == null || recordRef.isEmpty()) {
             return varRef + "[" + index + "]";
         }
+        
+        // Combine recordRef with varRef and add the index
+        // Result: "recordRef[index].varRef"
+        return recordRef + "[" + index + "]." + varRef;
     }
     
     /**

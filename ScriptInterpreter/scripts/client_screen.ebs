@@ -1,6 +1,6 @@
 // Client Information Screen
 // Description: A screen displaying client information using array.record with numberOfRecords for dynamic item generation
-// Fields: client name, surname, age, id (3 clients - dynamically generated using numberOfRecords)
+// Fields: client name, surname, age, id (3 clients - dynamically generated using numberOfRecords at area level)
 
 print "DEBUG: Starting screen definition...";
 
@@ -21,12 +21,13 @@ screen clientScreen = {
             "type": "vbox",
             "spacing": "15",
             "padding": "20",
+            "numberOfRecords": 3,
+            "recordRef": "clients",
             "items": [
                 {
                     "name": "clientNameField",
-                    "varRef": "clients.clientName",
+                    "varRef": "clientName",
                     "seq": 1,
-                    "numberOfRecords": 3,
                     "display": {
                         "type": "textfield",
                         "labelText": "Client - Name:",
@@ -35,9 +36,8 @@ screen clientScreen = {
                 },
                 {
                     "name": "clientSurnameField",
-                    "varRef": "clients.surname",
+                    "varRef": "surname",
                     "seq": 2,
-                    "numberOfRecords": 3,
                     "display": {
                         "type": "textfield",
                         "labelText": "Client - Surname:",
@@ -46,9 +46,8 @@ screen clientScreen = {
                 },
                 {
                     "name": "clientAgeField",
-                    "varRef": "clients.age",
+                    "varRef": "age",
                     "seq": 3,
-                    "numberOfRecords": 3,
                     "display": {
                         "type": "spinner",
                         "labelText": "Client - Age:",
@@ -58,9 +57,8 @@ screen clientScreen = {
                 },
                 {
                     "name": "clientIdField",
-                    "varRef": "clients.clientId",
+                    "varRef": "clientId",
                     "seq": 4,
-                    "numberOfRecords": 3,
                     "display": {
                         "type": "textfield",
                         "labelText": "Client - ID:",

@@ -66,10 +66,6 @@ public class AreaItem {
     public String onValidate;
     // Source of the value: "data" (original data value) or "display" (formatted display value)
     public String source = "data";
-    // Number of records - when set, the item becomes a template that is duplicated for each record
-    // varRef will be expanded with index (e.g., "client.name" becomes "client[0].name", "client[1].name", etc.)
-    // Labels will be expanded with record number (e.g., "Client - Name:" becomes "Client 1 - Name:", "Client 2 - Name:", etc.)
-    public Integer numberOfRecords;
 
     @Override
     public String toString() {
@@ -94,7 +90,6 @@ public class AreaItem {
                 + ", prefWidth='" + prefWidth + '\''
                 + ", prefHeight='" + prefHeight + '\''
                 + ", alignment='" + alignment + '\''
-                + ", numberOfRecords=" + numberOfRecords
                 + '}';
     }
 }
