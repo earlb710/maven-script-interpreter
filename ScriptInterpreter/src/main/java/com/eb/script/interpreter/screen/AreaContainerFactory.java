@@ -220,10 +220,16 @@ public class AreaContainerFactory {
                 return "-fx-border-color: derive(" + color + ", 60%) derive(" + color + ", -40%) derive(" + color + ", -40%) derive(" + color + ", 60%); " +
                        "-fx-border-width: " + width + "; -fx-border-style: solid; -fx-border-radius: 5px" + insets;
             case "lowered":
-            case "inset":
-                // Simulate inset/lowered effect: darker shadow on top/left, brighter border on bottom/right
+                // Simulate lowered effect: darker shadow on top/left, brighter border on bottom/right
                 return "-fx-border-color: derive(" + color + ", -40%) derive(" + color + ", 60%) derive(" + color + ", 60%) derive(" + color + ", -40%); " +
                        "-fx-border-width: " + width + "; -fx-border-style: solid; -fx-border-radius: 5px" + insets;
+            case "inset":
+                // Inset effect: combination of lowered (outer) and raised (inner) - creates a beveled inset look
+                // Outer border is lowered (darker top/left, brighter bottom/right)
+                // Inner border is raised (brighter top/left, darker bottom/right)
+                return "-fx-border-color: derive(" + color + ", -40%) derive(" + color + ", 60%) derive(" + color + ", 60%) derive(" + color + ", -40%), " +
+                       "derive(" + color + ", 60%) derive(" + color + ", -40%) derive(" + color + ", -40%) derive(" + color + ", 60%); " +
+                       "-fx-border-width: " + width + " " + width + "; -fx-border-style: solid; -fx-border-radius: 5px" + insets;
             default:
                 // Default to simple line border
                 return "-fx-border-color: " + color + "; -fx-border-width: " + width + "; -fx-border-radius: 5px" + insets;
