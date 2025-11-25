@@ -359,6 +359,7 @@ screen colorEditorScreen = {
         "name": "rootArea",
         "type": "vbox",
         "style": "-fx-spacing: 4; -fx-padding: 4;",
+        "background": "#efefef",
         "areas": [
             {
                 "name": "profileArea",
@@ -384,7 +385,9 @@ screen colorEditorScreen = {
                                 "groupBorder": "lowered",
                                 "groupBorderColor": "#ffffff",
                                 "groupBorderWidth": "2",
-                                "groupLabelColor": "#cccccc",
+                                "groupBorderRadius": "4",
+                                "groupLabelColor": "#444444",
+                                "groupLabelBackground": "#efefef",
                                 "groupLabelText": "Console Colors",
                                 "groupLabelAlignment": "left",
                                 "groupLabelOffset": "on",
@@ -404,6 +407,8 @@ screen colorEditorScreen = {
                                 "groupBorderColor": "#ffffff",
                                 "groupBorderWidth": "2",
                                 "groupLabelText": "Editor Colors",
+                                "groupLabelColor": "#444444",
+                                "groupLabelBackground": "#efefef",
                                 "groupLabelAlignment": "left",
                                 "groupLabelOffset": "on",
                                 "style": "-fx-spacing: 5; -fx-padding: 10;",
@@ -430,6 +435,8 @@ screen colorEditorScreen = {
                                 "groupBorderColor": "#ffffff",
                                 "groupBorderWidth": "2",
                                 "groupLabelText": "Syntax Colors",
+                                "groupLabelColor": "#444444",
+                                "groupLabelBackground": "#efefef",
                                 "groupLabelAlignment": "left",
                                 "style": "-fx-spacing: 5; -fx-padding: 10;",
                                 "items": [
@@ -451,6 +458,8 @@ screen colorEditorScreen = {
                                 "groupBorderColor": "#ffffff",
                                 "groupBorderWidth": "2",
                                 "groupLabelText": "Tab Colors",
+                                "groupLabelColor": "#444444",
+                                "groupLabelBackground": "#efefef",
                                 "groupLabelAlignment": "left",
                                 "style": "-fx-spacing: 5; -fx-padding: 10;",
                                 "items": [
