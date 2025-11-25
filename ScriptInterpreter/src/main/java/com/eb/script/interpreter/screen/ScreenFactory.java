@@ -2127,7 +2127,8 @@ public class ScreenFactory {
         }
 
         // Initialize control with current variable value
-        Object currentValue = screenVars.get(varName);
+        // Handle complex varRef expressions like "clients[0].clientName"
+        Object currentValue = resolveVarRefValue(varName, screenVars);
         updateControlFromValue(control, currentValue, metadata);
 
         // Set up listener on the control to update the variable when control changes
@@ -2138,6 +2139,98 @@ public class ScreenFactory {
         control.getProperties().put("screenVars", screenVars);
         control.getProperties().put("varTypes", varTypes);
         control.getProperties().put("metadata", metadata);
+    }
+
+    /**
+     * Resolves a varRef value, handling both simple variable names and complex
+     * expressions with array element access like "clients[0].clientName".
+     */
+    private static Object resolveVarRefValue(String varRef, 
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
+        if (varRef == null || screenVars == null) {
+            return null;
+        }
+        
+        // Check if this is a simple variable name (no array access or property access)
+        if (!varRef.contains("[") && !varRef.contains(".")) {
+            return screenVars.get(varRef.toLowerCase());
+        }
+        
+        // Handle complex expressions like "clients[0].clientName"
+        // Extract the base variable name (everything before the first '[' or '.')
+        int bracketPos = varRef.indexOf('[');
+        int dotPos = varRef.indexOf('.');
+        int splitPos;
+        
+        if (bracketPos >= 0 && dotPos >= 0) {
+            splitPos = Math.min(bracketPos, dotPos);
+        } else if (bracketPos >= 0) {
+            splitPos = bracketPos;
+        } else if (dotPos >= 0) {
+            splitPos = dotPos;
+        } else {
+            // No complex access, just a simple variable
+            return screenVars.get(varRef.toLowerCase());
+        }
+        
+        String baseVarName = varRef.substring(0, splitPos).toLowerCase();
+        String path = varRef.substring(splitPos);
+        
+        // Get the base variable from screenVars
+        Object baseValue = screenVars.get(baseVarName);
+        if (baseValue == null) {
+            return null;
+        }
+        
+        // Use Json.getValue to navigate the path
+        return Json.getValue(baseValue, path);
+    }
+
+    /**
+     * Sets a value for a varRef, handling both simple variable names and complex
+     * expressions with array element access like "clients[0].clientName".
+     */
+    private static void setVarRefValue(String varRef, Object value,
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
+        if (varRef == null || screenVars == null) {
+            return;
+        }
+        
+        // Check if this is a simple variable name (no array access or property access)
+        if (!varRef.contains("[") && !varRef.contains(".")) {
+            screenVars.put(varRef.toLowerCase(), value);
+            return;
+        }
+        
+        // Handle complex expressions like "clients[0].clientName"
+        // Extract the base variable name (everything before the first '[' or '.')
+        int bracketPos = varRef.indexOf('[');
+        int dotPos = varRef.indexOf('.');
+        int splitPos;
+        
+        if (bracketPos >= 0 && dotPos >= 0) {
+            splitPos = Math.min(bracketPos, dotPos);
+        } else if (bracketPos >= 0) {
+            splitPos = bracketPos;
+        } else if (dotPos >= 0) {
+            splitPos = dotPos;
+        } else {
+            // No complex access, just a simple variable
+            screenVars.put(varRef.toLowerCase(), value);
+            return;
+        }
+        
+        String baseVarName = varRef.substring(0, splitPos).toLowerCase();
+        String path = varRef.substring(splitPos);
+        
+        // Get the base variable from screenVars
+        Object baseValue = screenVars.get(baseVarName);
+        if (baseValue == null) {
+            return;
+        }
+        
+        // Use Json.setValue to set the value at the path
+        Json.setValue(baseValue, path, value);
     }
 
     /**
@@ -2377,7 +2470,7 @@ public class ScreenFactory {
             if (!hbox.getChildren().isEmpty() && hbox.getChildren().get(0) instanceof javafx.scene.control.Slider) {
                 javafx.scene.control.Slider slider = (javafx.scene.control.Slider) hbox.getChildren().get(0);
                 slider.valueProperty().addListener((obs, oldVal, newVal) -> {
-                    screenVars.put(varName, newVal.intValue());
+                    setVarRefValue(varName, newVal.intValue(), screenVars);
                 });
                 return;
             }
@@ -2419,7 +2512,7 @@ public class ScreenFactory {
                         System.err.println("Warning: Could not convert '" + transformedValue + "' to " + type + " for variable '" + varName + "'");
                     }
                 }
-                screenVars.put(varName, convertedValue);
+                setVarRefValue(varName, convertedValue, screenVars);
             });
         } else if (control instanceof javafx.scene.control.TextArea) {
             javafx.scene.control.TextArea textArea = (javafx.scene.control.TextArea) control;
@@ -2446,15 +2539,15 @@ public class ScreenFactory {
                     }
                 }
                 
-                screenVars.put(varName, transformedValue);
+                setVarRefValue(varName, transformedValue, screenVars);
             });
         } else if (control instanceof javafx.scene.control.CheckBox) {
             ((javafx.scene.control.CheckBox) control).selectedProperty().addListener((obs, oldVal, newVal) -> {
-                screenVars.put(varName, newVal);
+                setVarRefValue(varName, newVal, screenVars);
             });
         } else if (control instanceof javafx.scene.control.Slider) {
             ((javafx.scene.control.Slider) control).valueProperty().addListener((obs, oldVal, newVal) -> {
-                screenVars.put(varName, newVal.intValue());
+                setVarRefValue(varName, newVal.intValue(), screenVars);
             });
         } else if (control instanceof javafx.scene.control.Spinner) {
             @SuppressWarnings("unchecked")
@@ -2463,7 +2556,7 @@ public class ScreenFactory {
             if (spinner.getValueFactory() != null) {
                 spinner.valueProperty().addListener((obs, oldVal, newVal) -> {
                     if (newVal != null) {
-                        screenVars.put(varName, newVal);
+                        setVarRefValue(varName, newVal, screenVars);
                     }
                 });
             }
@@ -2471,13 +2564,13 @@ public class ScreenFactory {
             @SuppressWarnings("unchecked")
             javafx.scene.control.ComboBox<String> comboBox = (javafx.scene.control.ComboBox<String>) control;
             comboBox.valueProperty().addListener((obs, oldVal, newVal) -> {
-                screenVars.put(varName, newVal);
+                setVarRefValue(varName, newVal, screenVars);
             });
         } else if (control instanceof javafx.scene.control.ChoiceBox) {
             @SuppressWarnings("unchecked")
             javafx.scene.control.ChoiceBox<String> choiceBox = (javafx.scene.control.ChoiceBox<String>) control;
             choiceBox.valueProperty().addListener((obs, oldVal, newVal) -> {
-                screenVars.put(varName, newVal);
+                setVarRefValue(varName, newVal, screenVars);
             });
         } else if (control instanceof javafx.scene.control.ColorPicker) {
             javafx.scene.control.ColorPicker colorPicker = (javafx.scene.control.ColorPicker) control;
@@ -2488,15 +2581,15 @@ public class ScreenFactory {
                         (int) (newVal.getRed() * 255),
                         (int) (newVal.getGreen() * 255),
                         (int) (newVal.getBlue() * 255));
-                    screenVars.put(varName, colorString);
+                    setVarRefValue(varName, colorString, screenVars);
                 } else {
-                    screenVars.put(varName, null);
+                    setVarRefValue(varName, null, screenVars);
                 }
             });
         } else if (control instanceof javafx.scene.control.DatePicker) {
             javafx.scene.control.DatePicker datePicker = (javafx.scene.control.DatePicker) control;
             datePicker.valueProperty().addListener((obs, oldVal, newVal) -> {
-                screenVars.put(varName, newVal);
+                setVarRefValue(varName, newVal, screenVars);
             });
         }
     }
