@@ -216,13 +216,13 @@ public class AreaContainerFactory {
             case "line":
                 return "-fx-border-color: " + color + "; -fx-border-width: " + width + "; -fx-border-radius: 5px" + insets;
             case "raised":
-                // Simulate raised effect with gradient
-                return "-fx-border-color: derive(" + color + ", 40%) " + color + " " + color + " derive(" + color + ", 40%); " +
+                // Simulate raised effect: brighter border on top/left, darker shadow on bottom/right
+                return "-fx-border-color: derive(" + color + ", 60%) derive(" + color + ", -40%) derive(" + color + ", -40%) derive(" + color + ", 60%); " +
                        "-fx-border-width: " + width + "; -fx-border-style: solid; -fx-border-radius: 5px" + insets;
             case "lowered":
             case "inset":
-                // Simulate inset/lowered effect with gradient (opposite of raised)
-                return "-fx-border-color: " + color + " derive(" + color + ", 40%) derive(" + color + ", 40%) " + color + "; " +
+                // Simulate inset/lowered effect: darker shadow on top/left, brighter border on bottom/right
+                return "-fx-border-color: derive(" + color + ", -40%) derive(" + color + ", 60%) derive(" + color + ", 60%) derive(" + color + ", -40%); " +
                        "-fx-border-width: " + width + "; -fx-border-style: solid; -fx-border-radius: 5px" + insets;
             default:
                 // Default to simple line border

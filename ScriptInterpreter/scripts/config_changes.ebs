@@ -349,8 +349,9 @@ screen colorEditorScreen = {
                     {
                         "name": "consoleColorsArea",
                         "type": "vbox",
-                        "groupBorder": "line",
+                        "groupBorder": "lowered",
                         "groupBorderColor": "#4a9eff",
+                        "groupBorderWidth": "2",
                         "groupLabelText": "Console Colors",
                         "groupLabelAlignment": "left",
                         "groupLabelOffset": "bottom",
@@ -366,8 +367,9 @@ screen colorEditorScreen = {
                     {
                         "name": "editorColorsArea",
                         "type": "vbox",
-                        "groupBorder": "line",
+                        "groupBorder": "lowered",
                         "groupBorderColor": "#66cc66",
+                        "groupBorderWidth": "2",
                         "groupLabelText": "Editor Colors",
                         "groupLabelAlignment": "left",
                         "groupLabelOffset": "top",
@@ -391,8 +393,9 @@ screen colorEditorScreen = {
                     {
                         "name": "syntaxColorsArea",
                         "type": "vbox",
-                        "groupBorder": "line",
+                        "groupBorder": "lowered",
                         "groupBorderColor": "#ff9933",
+                        "groupBorderWidth": "2",
                         "groupLabelText": "Syntax Colors",
                         "groupLabelAlignment": "left",
                         "style": "-fx-spacing: 5; -fx-padding: 10;",
@@ -411,8 +414,9 @@ screen colorEditorScreen = {
                     {
                         "name": "tabColorsArea",
                         "type": "vbox",
-                        "groupBorder": "line",
+                        "groupBorder": "lowered",
                         "groupBorderColor": "#cc66cc",
+                        "groupBorderWidth": "2",
                         "groupLabelText": "Tab Colors",
                         "groupLabelAlignment": "left",
                         "style": "-fx-spacing: 5; -fx-padding: 10;",
