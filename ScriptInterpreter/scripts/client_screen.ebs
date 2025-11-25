@@ -214,12 +214,12 @@ screen clientScreen = {
 
 print "DEBUG: Screen definition complete.";
 
-// Initialize array with data from the display variables
-print "DEBUG: Initializing clients array with data from display variables...";
+// Initialize array with literal data (matching the display variable defaults)
+print "DEBUG: Initializing clients array with sample data...";
 clientScreen.clients = [
-    {"clientName": clientScreen.client1Name, "surname": clientScreen.client1Surname, "age": clientScreen.client1Age, "clientId": clientScreen.client1Id},
-    {"clientName": clientScreen.client2Name, "surname": clientScreen.client2Surname, "age": clientScreen.client2Age, "clientId": clientScreen.client2Id},
-    {"clientName": clientScreen.client3Name, "surname": clientScreen.client3Surname, "age": clientScreen.client3Age, "clientId": clientScreen.client3Id}
+    {"clientName": "John", "surname": "Doe", "age": 30, "clientId": "CLT-12345"},
+    {"clientName": "Jane", "surname": "Smith", "age": 28, "clientId": "CLT-12346"},
+    {"clientName": "Bob", "surname": "Johnson", "age": 45, "clientId": "CLT-12347"}
 ];
 print "DEBUG: Clients array initialized with 3 elements.";
 
