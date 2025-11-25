@@ -364,9 +364,11 @@ screen colorEditorScreen = {
             {
                 "name": "profileArea",
                 "type": "hbox",
-                "style": "-fx-spacing: 4; -fx-padding: 4;",
+                "style": "-fx-spacing: 4; -fx-padding: 4; -fx-alignment: CENTER_LEFT;",
                 "items": [
-                    {"name": "profile_item", "varref": "profile"}
+                    {"name": "profile_item", "varref": "profile"},
+                    {"name": "addProfileBtn", "type": "button", "labelText": "+", "style": "-fx-min-width: 30;", "onClick": "var newName: string = call system.inputDialog(\"Add Profile\", \"Enter new profile name:\", \"\"); if newName != \"\" then { var options: string[] = colorEditorScreen.profile.options; var exists: bool = false; for var i: int = 0; i < options.length then { if options[i] == newName then { exists = true; } i = i + 1; } if exists then { call system.alertDialog(\"Profile '\" + newName + \"' already exists.\", \"Duplicate Name\", \"warning\"); } else { call array.push(colorEditorScreen.profile.options, newName); colorEditorScreen.profile = newName; } }"},
+                    {"name": "removeProfileBtn", "type": "button", "labelText": "-", "style": "-fx-min-width: 30;", "onClick": "if colorEditorScreen.profile == \"default\" then { call system.alertDialog(\"Cannot delete the default profile.\", \"Delete Profile\", \"warning\"); } else { var confirmed: bool = call system.confirmDialog(\"Are you sure you want to delete profile '\" + colorEditorScreen.profile + \"'?\", \"Delete Profile\", \"Confirm Delete\"); if confirmed then { var options: string[] = colorEditorScreen.profile.options; var newOptions: string[] = []; for var i: int = 0; i < options.length then { if options[i] != colorEditorScreen.profile then { call array.push(newOptions, options[i]); } i = i + 1; } colorEditorScreen.profile.options = newOptions; colorEditorScreen.profile = \"default\"; } }"}
                 ]
             },
             {
