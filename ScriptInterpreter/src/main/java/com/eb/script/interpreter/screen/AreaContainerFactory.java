@@ -154,7 +154,7 @@ public class AreaContainerFactory {
             
             // Add group label if specified
             if (areaDef.groupLabelText != null && !areaDef.groupLabelText.isEmpty()) {
-                addGroupLabel(container, areaDef.groupLabelText, areaDef.groupLabelAlignment, areaDef.groupBorderColor, areaDef.groupLabelOffset, areaDef.groupLabelColor, areaDef.groupLabelBackground);
+                addGroupLabel(container, areaDef.groupLabelText, areaDef.groupLabelAlignment, areaDef.groupBorderColor, areaDef.groupLabelOffset, areaDef.groupLabelColor, areaDef.groupLabelBackground, areaDef.groupBorderWidth);
             }
         }
 
@@ -272,8 +272,9 @@ public class AreaContainerFactory {
      * @param offset The vertical offset: top, on, bottom (default: on)
      * @param labelColor The text color for the label (optional, defaults to borderColor or #808080)
      * @param labelBackground The background color for the label (optional, defaults to white)
+     * @param borderWidth The border width for offset calculations (optional, defaults to 2px)
      */
-    private static void addGroupLabel(Region container, String labelText, String alignment, String borderColor, String offset, String labelColor, String labelBackground) {
+    private static void addGroupLabel(Region container, String labelText, String alignment, String borderColor, String offset, String labelColor, String labelBackground, String borderWidth) {
         // Create a label with the group text
         Label label = new Label(labelText);
         
@@ -300,7 +301,7 @@ public class AreaContainerFactory {
         
         // Determine vertical offset based on offset parameter
         String offsetValue = (offset != null) ? offset.toLowerCase() : "on";
-        double translateY = getVerticalOffset(offsetValue, label);
+        double translateY = getVerticalOffset(offsetValue, label, borderWidth);
         
         // Adjust container padding based on offset to prevent unnecessary space
         adjustPaddingForLabelOffset(container, offsetValue);
@@ -403,20 +404,34 @@ public class AreaContainerFactory {
      * All offsets now use dynamic font height calculation for consistent positioning.
      * @param offset The offset value: "top", "on", "bottom"
      * @param label The label to calculate font height from (for dynamic positioning)
+     * @param borderWidth The border width for offset calculations (optional, defaults to 2px)
      * @return The translateY value in pixels
      */
-    private static double getVerticalOffset(String offset, Label label) {
+    private static double getVerticalOffset(String offset, Label label, String borderWidth) {
         // Calculate font height from the label
         javafx.scene.text.Font font = label.getFont();
         double fontHeight = font.getSize(); // Approximate font height
         
+        // Parse border width to get half border width
+        double halfBorderWidth = 1.0; // Default half of 2px
+        if (borderWidth != null && !borderWidth.isEmpty()) {
+            String numericValue = borderWidth.replaceAll("[^0-9.]", "").trim();
+            if (!numericValue.isEmpty()) {
+                try {
+                    halfBorderWidth = Double.parseDouble(numericValue) / 2.0;
+                } catch (NumberFormatException e) {
+                    halfBorderWidth = 1.0; // Default to half of 2px
+                }
+            }
+        }
+        
         switch (offset) {
             case "top":
-                // Position above the border - dynamic based on font height (moved 3px up from -8)
-                return -11 - fontHeight;
+                // Position above the border - subtract half border width
+                return -11 - fontHeight - halfBorderWidth;
             case "bottom":
-                // Position slightly above the border baseline (moved 2px down from -8)
-                return -6;
+                // Position below the border - add half border width
+                return -6 + halfBorderWidth;
             case "on":
             default:
                 // Default: border goes through label - uses half font height
