@@ -1,7 +1,5 @@
 // Client Information Screen
-// Description: A screen displaying client information with editable fields
-// Note: The clients array.record stores the data, but the screen uses individual
-//       display variables because varRef doesn't support array element access
+// Description: A screen displaying client information using array.record with direct field references
 // Fields: client name, surname, age, id (3 clients)
 
 print "DEBUG: Starting screen definition...";
@@ -15,129 +13,6 @@ screen clientScreen = {
             "name": "clients",
             "type": "array.record",
             "default": {"clientName": "", "surname": "", "age": 18, "clientId": ""}
-        },
-        {
-            "name": "client1Name",
-            "type": "string",
-            "default": "John",
-            "display": {
-                "type": "textfield",
-                "labelText": "Client 1 - Name:",
-                "promptText": "Enter client name"
-            }
-        },
-        {
-            "name": "client1Surname",
-            "type": "string",
-            "default": "Doe",
-            "display": {
-                "type": "textfield",
-                "labelText": "Client 1 - Surname:",
-                "promptText": "Enter surname"
-            }
-        },
-        {
-            "name": "client1Age",
-            "type": "int",
-            "default": 30,
-            "display": {
-                "type": "spinner",
-                "labelText": "Client 1 - Age:",
-                "min": 0,
-                "max": 150
-            }
-        },
-        {
-            "name": "client1Id",
-            "type": "string",
-            "default": "CLT-12345",
-            "display": {
-                "type": "textfield",
-                "labelText": "Client 1 - ID:",
-                "promptText": "Enter client ID"
-            }
-        },
-        {
-            "name": "client2Name",
-            "type": "string",
-            "default": "Jane",
-            "display": {
-                "type": "textfield",
-                "labelText": "Client 2 - Name:",
-                "promptText": "Enter client name"
-            }
-        },
-        {
-            "name": "client2Surname",
-            "type": "string",
-            "default": "Smith",
-            "display": {
-                "type": "textfield",
-                "labelText": "Client 2 - Surname:",
-                "promptText": "Enter surname"
-            }
-        },
-        {
-            "name": "client2Age",
-            "type": "int",
-            "default": 28,
-            "display": {
-                "type": "spinner",
-                "labelText": "Client 2 - Age:",
-                "min": 0,
-                "max": 150
-            }
-        },
-        {
-            "name": "client2Id",
-            "type": "string",
-            "default": "CLT-12346",
-            "display": {
-                "type": "textfield",
-                "labelText": "Client 2 - ID:",
-                "promptText": "Enter client ID"
-            }
-        },
-        {
-            "name": "client3Name",
-            "type": "string",
-            "default": "Bob",
-            "display": {
-                "type": "textfield",
-                "labelText": "Client 3 - Name:",
-                "promptText": "Enter client name"
-            }
-        },
-        {
-            "name": "client3Surname",
-            "type": "string",
-            "default": "Johnson",
-            "display": {
-                "type": "textfield",
-                "labelText": "Client 3 - Surname:",
-                "promptText": "Enter surname"
-            }
-        },
-        {
-            "name": "client3Age",
-            "type": "int",
-            "default": 45,
-            "display": {
-                "type": "spinner",
-                "labelText": "Client 3 - Age:",
-                "min": 0,
-                "max": 150
-            }
-        },
-        {
-            "name": "client3Id",
-            "type": "string",
-            "default": "CLT-12347",
-            "display": {
-                "type": "textfield",
-                "labelText": "Client 3 - ID:",
-                "promptText": "Enter client ID"
-            }
         }
     ],
     "area": [
@@ -149,63 +24,126 @@ screen clientScreen = {
             "items": [
                 {
                     "name": "client1NameField",
-                    "varRef": "client1Name",
-                    "seq": 1
+                    "varRef": "clients[0].clientName",
+                    "seq": 1,
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Client 1 - Name:",
+                        "promptText": "Enter client name"
+                    }
                 },
                 {
                     "name": "client1SurnameField",
-                    "varRef": "client1Surname",
-                    "seq": 2
+                    "varRef": "clients[0].surname",
+                    "seq": 2,
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Client 1 - Surname:",
+                        "promptText": "Enter surname"
+                    }
                 },
                 {
                     "name": "client1AgeField",
-                    "varRef": "client1Age",
-                    "seq": 3
+                    "varRef": "clients[0].age",
+                    "seq": 3,
+                    "display": {
+                        "type": "spinner",
+                        "labelText": "Client 1 - Age:",
+                        "min": 0,
+                        "max": 150
+                    }
                 },
                 {
                     "name": "client1IdField",
-                    "varRef": "client1Id",
-                    "seq": 4
+                    "varRef": "clients[0].clientId",
+                    "seq": 4,
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Client 1 - ID:",
+                        "promptText": "Enter client ID"
+                    }
                 },
                 {
                     "name": "client2NameField",
-                    "varRef": "client2Name",
-                    "seq": 5
+                    "varRef": "clients[1].clientName",
+                    "seq": 5,
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Client 2 - Name:",
+                        "promptText": "Enter client name"
+                    }
                 },
                 {
                     "name": "client2SurnameField",
-                    "varRef": "client2Surname",
-                    "seq": 6
+                    "varRef": "clients[1].surname",
+                    "seq": 6,
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Client 2 - Surname:",
+                        "promptText": "Enter surname"
+                    }
                 },
                 {
                     "name": "client2AgeField",
-                    "varRef": "client2Age",
-                    "seq": 7
+                    "varRef": "clients[1].age",
+                    "seq": 7,
+                    "display": {
+                        "type": "spinner",
+                        "labelText": "Client 2 - Age:",
+                        "min": 0,
+                        "max": 150
+                    }
                 },
                 {
                     "name": "client2IdField",
-                    "varRef": "client2Id",
-                    "seq": 8
+                    "varRef": "clients[1].clientId",
+                    "seq": 8,
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Client 2 - ID:",
+                        "promptText": "Enter client ID"
+                    }
                 },
                 {
                     "name": "client3NameField",
-                    "varRef": "client3Name",
-                    "seq": 9
+                    "varRef": "clients[2].clientName",
+                    "seq": 9,
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Client 3 - Name:",
+                        "promptText": "Enter client name"
+                    }
                 },
                 {
                     "name": "client3SurnameField",
-                    "varRef": "client3Surname",
-                    "seq": 10
+                    "varRef": "clients[2].surname",
+                    "seq": 10,
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Client 3 - Surname:",
+                        "promptText": "Enter surname"
+                    }
                 },
                 {
                     "name": "client3AgeField",
-                    "varRef": "client3Age",
-                    "seq": 11
+                    "varRef": "clients[2].age",
+                    "seq": 11,
+                    "display": {
+                        "type": "spinner",
+                        "labelText": "Client 3 - Age:",
+                        "min": 0,
+                        "max": 150
+                    }
                 },
                 {
                     "name": "client3IdField",
-                    "varRef": "client3Id",
-                    "seq": 12
+                    "varRef": "clients[2].clientId",
+                    "seq": 12,
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Client 3 - ID:",
+                        "promptText": "Enter client ID"
+                    }
                 }
             ]
         }
