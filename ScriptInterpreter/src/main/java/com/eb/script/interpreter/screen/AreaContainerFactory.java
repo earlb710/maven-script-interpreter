@@ -243,19 +243,15 @@ public class AreaContainerFactory {
                 return "-fx-border-color: derive(" + color + ", -40%) derive(" + color + ", 60%) derive(" + color + ", 60%) derive(" + color + ", -40%); " +
                        "-fx-border-width: " + width + "; -fx-border-style: solid; -fx-border-radius: " + radius + "; -fx-background-radius: " + radius + insets;
             case "inset":
-                // Inset effect: double border with lowered outer and raised inner (beveled pressed-in look)
-                // Outer border: darker top/left, brighter bottom/right (lowered)
-                // Inner border: brighter top/left, darker bottom/right (raised)
-                return "-fx-border-color: derive(" + color + ", -40%) derive(" + color + ", 60%) derive(" + color + ", 60%) derive(" + color + ", -40%), " +
-                       "derive(" + color + ", 60%) derive(" + color + ", -40%) derive(" + color + ", -40%) derive(" + color + ", 60%); " +
-                       "-fx-border-width: " + width + " " + width + "; -fx-border-style: solid; -fx-border-radius: " + radius + "; -fx-background-radius: " + radius + insets;
+                // Inset effect: use JavaFX built-in inset border style
+                // Per user's example: -fx-border-color for sides, -fx-border-style: inset
+                return "-fx-border-color: black " + color + " " + color + " black; " +
+                       "-fx-border-width: " + width + "; -fx-border-style: solid; -fx-border-radius: " + radius + "; -fx-background-radius: " + radius + insets;
             case "outset":
-                // Outset effect: double border with raised outer and lowered inner (beveled popped-out look)
-                // Outer border: brighter top/left, darker bottom/right (raised)
-                // Inner border: darker top/left, brighter bottom/right (lowered)
-                return "-fx-border-color: derive(" + color + ", 60%) derive(" + color + ", -40%) derive(" + color + ", -40%) derive(" + color + ", 60%), " +
-                       "derive(" + color + ", -40%) derive(" + color + ", 60%) derive(" + color + ", 60%) derive(" + color + ", -40%); " +
-                       "-fx-border-width: " + width + " " + width + "; -fx-border-style: solid; -fx-border-radius: " + radius + "; -fx-background-radius: " + radius + insets;
+                // Outset effect: use JavaFX built-in outset border style
+                // Per user's example: -fx-border-color for sides, -fx-border-style: outset
+                return "-fx-border-color: " + color + " black black " + color + "; " +
+                       "-fx-border-width: " + width + "; -fx-border-style: solid; -fx-border-radius: " + radius + "; -fx-background-radius: " + radius + insets;
             default:
                 // Default to simple line border
                 return "-fx-border-color: " + color + "; -fx-border-width: " + width + "; -fx-border-radius: " + radius + "; -fx-background-radius: " + radius + insets;
