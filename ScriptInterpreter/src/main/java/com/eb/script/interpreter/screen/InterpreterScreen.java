@@ -1563,6 +1563,12 @@ public class InterpreterScreen {
             area.groupBorderInsets = String.valueOf(groupBorderInsetsObj);
         }
         
+        // Extract groupBorderRadius property (for visual grouping) - case-insensitive
+        Object groupBorderRadiusObj = getCaseInsensitive(areaDef, "groupBorderRadius");
+        if (groupBorderRadiusObj != null) {
+            area.groupBorderRadius = String.valueOf(groupBorderRadiusObj);
+        }
+        
         // Extract groupLabelText property (for visual grouping) - case-insensitive
         Object groupLabelTextObj = getCaseInsensitive(areaDef, "groupLabelText");
         if (groupLabelTextObj != null) {
@@ -1579,6 +1585,18 @@ public class InterpreterScreen {
         Object groupLabelOffsetObj = getCaseInsensitive(areaDef, "groupLabelOffset");
         if (groupLabelOffsetObj != null) {
             area.groupLabelOffset = String.valueOf(groupLabelOffsetObj);
+        }
+        
+        // Extract groupLabelColor property (for visual grouping) - case-insensitive
+        Object groupLabelColorObj = getCaseInsensitive(areaDef, "groupLabelColor");
+        if (groupLabelColorObj != null) {
+            area.groupLabelColor = String.valueOf(groupLabelColorObj);
+        }
+        
+        // Extract groupLabelBackground property (for visual grouping) - case-insensitive
+        Object groupLabelBackgroundObj = getCaseInsensitive(areaDef, "groupLabelBackground");
+        if (groupLabelBackgroundObj != null) {
+            area.groupLabelBackground = String.valueOf(groupLabelBackgroundObj);
         }
         
         // Extract spacing property
