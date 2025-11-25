@@ -2176,62 +2176,113 @@ public class ScreenFactory {
         String baseVarName = varRef.substring(0, splitPos).toLowerCase();
         String path = varRef.substring(splitPos);
         
-        // Lowercase the property names in the path for case-insensitive lookup
-        // Convert ".clientName" to ".clientname" while preserving array indices
-        path = lowercasePathProperties(path);
-        
         // Get the base variable from screenVars
         Object baseValue = screenVars.get(baseVarName);
         if (baseValue == null) {
             return null;
         }
         
-        // Use Json.getValue to navigate the path
-        return Json.getValue(baseValue, path);
+        // Use case-insensitive navigation through the path
+        return navigatePathCaseInsensitive(baseValue, path);
     }
 
     /**
-     * Lowercases property names in a JSON path while preserving array indices.
-     * E.g., "[0].clientName" -> "[0].clientname"
+     * Navigates a path like "[0].clientName" through an object/array structure
+     * with case-insensitive property name matching.
      */
-    private static String lowercasePathProperties(String path) {
-        if (path == null || path.isEmpty()) {
-            return path;
+    private static Object navigatePathCaseInsensitive(Object root, String path) {
+        if (path == null || path.isEmpty() || root == null) {
+            return root;
         }
         
-        StringBuilder result = new StringBuilder();
+        Object current = root;
         int i = 0;
         int n = path.length();
         
-        while (i < n) {
+        while (i < n && current != null) {
             char c = path.charAt(i);
             
+            if (c == '.') {
+                i++;
+                continue;
+            }
+            
             if (c == '[') {
-                // Copy array index as-is: [0], [1], etc.
-                result.append(c);
-                i++;
+                // Array index access
+                i++; // skip '['
+                int start = i;
                 while (i < n && path.charAt(i) != ']') {
-                    result.append(path.charAt(i));
                     i++;
                 }
-                if (i < n) {
-                    result.append(path.charAt(i)); // append ']'
-                    i++;
+                String indexStr = path.substring(start, i);
+                i++; // skip ']'
+                
+                try {
+                    int index = Integer.parseInt(indexStr);
+                    if (current instanceof com.eb.script.arrays.ArrayDef) {
+                        com.eb.script.arrays.ArrayDef<?, ?> arr = (com.eb.script.arrays.ArrayDef<?, ?>) current;
+                        if (index >= 0 && index < arr.size()) {
+                            current = arr.get(index);
+                        } else {
+                            return null;
+                        }
+                    } else if (current instanceof java.util.List) {
+                        java.util.List<?> list = (java.util.List<?>) current;
+                        if (index >= 0 && index < list.size()) {
+                            current = list.get(index);
+                        } else {
+                            return null;
+                        }
+                    } else {
+                        return null;
+                    }
+                } catch (NumberFormatException e) {
+                    return null;
                 }
-            } else if (c == '.') {
-                result.append(c);
-                i++;
             } else {
-                // Property name - lowercase it
+                // Property name
                 int start = i;
                 while (i < n && path.charAt(i) != '.' && path.charAt(i) != '[') {
                     i++;
                 }
-                result.append(path.substring(start, i).toLowerCase());
+                String propName = path.substring(start, i);
+                
+                if (current instanceof java.util.Map) {
+                    @SuppressWarnings("unchecked")
+                    java.util.Map<String, Object> map = (java.util.Map<String, Object>) current;
+                    // Case-insensitive key lookup
+                    current = getMapValueCaseInsensitive(map, propName);
+                } else {
+                    return null;
+                }
             }
         }
         
-        return result.toString();
+        return current;
+    }
+
+    /**
+     * Gets a value from a map using case-insensitive key matching.
+     */
+    private static Object getMapValueCaseInsensitive(java.util.Map<String, Object> map, String key) {
+        if (map == null || key == null) {
+            return null;
+        }
+        
+        // First try exact match
+        if (map.containsKey(key)) {
+            return map.get(key);
+        }
+        
+        // Try case-insensitive match
+        String lowerKey = key.toLowerCase();
+        for (java.util.Map.Entry<String, Object> entry : map.entrySet()) {
+            if (entry.getKey() != null && entry.getKey().toLowerCase().equals(lowerKey)) {
+                return entry.getValue();
+            }
+        }
+        
+        return null;
     }
 
     /**
@@ -2271,17 +2322,154 @@ public class ScreenFactory {
         String baseVarName = varRef.substring(0, splitPos).toLowerCase();
         String path = varRef.substring(splitPos);
         
-        // Lowercase the property names in the path for case-insensitive lookup
-        path = lowercasePathProperties(path);
-        
         // Get the base variable from screenVars
         Object baseValue = screenVars.get(baseVarName);
         if (baseValue == null) {
             return;
         }
         
-        // Use Json.setValue to set the value at the path
-        Json.setValue(baseValue, path, value);
+        // Use case-insensitive navigation to set the value
+        setPathValueCaseInsensitive(baseValue, path, value);
+    }
+
+    /**
+     * Sets a value at a path like "[0].clientName" through an object/array structure
+     * with case-insensitive property name matching.
+     */
+    private static void setPathValueCaseInsensitive(Object root, String path, Object value) {
+        if (path == null || path.isEmpty() || root == null) {
+            return;
+        }
+        
+        Object current = root;
+        int i = 0;
+        int n = path.length();
+        String lastPropName = null;
+        Object lastContainer = null;
+        int lastArrayIndex = -1;
+        
+        while (i < n && current != null) {
+            char c = path.charAt(i);
+            
+            if (c == '.') {
+                i++;
+                continue;
+            }
+            
+            if (c == '[') {
+                // Array index access
+                i++; // skip '['
+                int start = i;
+                while (i < n && path.charAt(i) != ']') {
+                    i++;
+                }
+                String indexStr = path.substring(start, i);
+                i++; // skip ']'
+                
+                try {
+                    int index = Integer.parseInt(indexStr);
+                    
+                    // Check if this is the last segment
+                    if (i >= n || (path.charAt(i) == '.' && isLastPropertySegment(path, i + 1))) {
+                        // This might be the parent - save for potential update
+                        lastContainer = current;
+                        lastArrayIndex = index;
+                        lastPropName = null;
+                    }
+                    
+                    if (current instanceof com.eb.script.arrays.ArrayDef) {
+                        com.eb.script.arrays.ArrayDef<?, ?> arr = (com.eb.script.arrays.ArrayDef<?, ?>) current;
+                        if (index >= 0 && index < arr.size()) {
+                            current = arr.get(index);
+                        } else {
+                            return;
+                        }
+                    } else if (current instanceof java.util.List) {
+                        java.util.List<?> list = (java.util.List<?>) current;
+                        if (index >= 0 && index < list.size()) {
+                            current = list.get(index);
+                        } else {
+                            return;
+                        }
+                    } else {
+                        return;
+                    }
+                } catch (NumberFormatException e) {
+                    return;
+                }
+            } else {
+                // Property name
+                int start = i;
+                while (i < n && path.charAt(i) != '.' && path.charAt(i) != '[') {
+                    i++;
+                }
+                String propName = path.substring(start, i);
+                
+                // Check if this is the last segment
+                if (i >= n) {
+                    // This is the final property to set
+                    if (current instanceof java.util.Map) {
+                        @SuppressWarnings("unchecked")
+                        java.util.Map<String, Object> map = (java.util.Map<String, Object>) current;
+                        setMapValueCaseInsensitive(map, propName, value);
+                    }
+                    return;
+                }
+                
+                if (current instanceof java.util.Map) {
+                    @SuppressWarnings("unchecked")
+                    java.util.Map<String, Object> map = (java.util.Map<String, Object>) current;
+                    lastContainer = map;
+                    lastPropName = propName;
+                    lastArrayIndex = -1;
+                    current = getMapValueCaseInsensitive(map, propName);
+                } else {
+                    return;
+                }
+            }
+        }
+    }
+
+    /**
+     * Checks if the remaining path is just a single property name (the last segment).
+     */
+    private static boolean isLastPropertySegment(String path, int start) {
+        int n = path.length();
+        for (int i = start; i < n; i++) {
+            char c = path.charAt(i);
+            if (c == '.' || c == '[') {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Sets a value in a map using case-insensitive key matching.
+     * If key exists (any case), updates that key. Otherwise, adds with the provided key.
+     */
+    private static void setMapValueCaseInsensitive(java.util.Map<String, Object> map, String key, Object value) {
+        if (map == null || key == null) {
+            return;
+        }
+        
+        // First try exact match
+        if (map.containsKey(key)) {
+            map.put(key, value);
+            return;
+        }
+        
+        // Try case-insensitive match
+        String lowerKey = key.toLowerCase();
+        for (String existingKey : map.keySet()) {
+            if (existingKey != null && existingKey.toLowerCase().equals(lowerKey)) {
+                map.put(existingKey, value);
+                return;
+            }
+        }
+        
+        // No existing key found, add with provided key
+        map.put(key, value);
     }
 
     /**
