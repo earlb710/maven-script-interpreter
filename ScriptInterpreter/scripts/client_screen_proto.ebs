@@ -1,0 +1,125 @@
+// Client Information Screen
+// Description: A screen displaying client information using array.record with direct field references
+// Fields: client name, surname, age, id (3 clients)
+
+print "DEBUG: Starting screen definition...";
+
+screen clientScreen = {
+    "title": "Client Information - Multiple Clients",
+    "width": 650,
+    "height": 750,
+    "vars": [
+        {
+            "name": "clients",
+            "type": "array.record",
+            "default": {"clientName": "", "surname": "", "age": 18, "clientId": ""}
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "10",
+            "padding": "10",
+            "childAreas": [
+            {
+                "name": "clientRecords",
+                "recordRef": "clients"
+                "numberOfRecords":3
+                "type": "vbox",
+                "groupBorder": "line",
+                "groupLabelText": "Clients",
+                "groupLabelAlignment": "left",
+                "groupLabelOffset": "bottom",
+                "spacing": "5",
+                "padding": "5",
+                "items": [{
+                    "name": "clientNameField",
+                    "varRef": "clientName",
+                    "seq": 1,
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Client - Name:",
+                        "promptText": "Enter client name"
+                    }
+                },
+                {
+                    "name": "clientSurnameField",
+                    "varRef": "surname",
+                    "seq": 2,
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Client - Surname:",
+                        "promptText": "Enter surname"
+                    }
+                },
+                {
+                    "name": "clientAgeField",
+                    "varRef": "age",
+                    "seq": 3,
+                    "display": {
+                        "type": "spinner",
+                        "labelText": "Client - Age:",
+                        "min": 0,
+                        "max": 150
+                    }
+                },
+                {
+                    "name": "clientIdField",
+                    "varRef": "clientId",
+                    "seq": 4,
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Client - ID:",
+                        "promptText": "Enter client ID"
+                    }
+                }]
+            }]
+        }
+    ]
+};
+
+print "DEBUG: Screen definition complete.";
+
+// Initialize array with literal data (matching the display variable defaults)
+print "DEBUG: Initializing clients array with sample data...";
+clientScreen.clients = [
+    {"clientName": "John", "surname": "Doe", "age": 30, "clientId": "CLT-12345"},
+    {"clientName": "Jane", "surname": "Smith", "age": 28, "clientId": "CLT-12346"},
+    {"clientName": "Bob", "surname": "Johnson", "age": 45, "clientId": "CLT-12347"}
+];
+print "DEBUG: Clients array initialized with 3 elements.";
+
+// Display values from array.record
+print "Client Information Screen";
+print "=========================";
+print "";
+print "Client 1:";
+print "  Name: " + clientScreen.clients[0].clientName;
+print "  Surname: " + clientScreen.clients[0].surname;
+print "  Age: " + clientScreen.clients[0].age;
+print "  ID: " + clientScreen.clients[0].clientId;
+print "";
+print "Client 2:";
+print "  Name: " + clientScreen.clients[1].clientName;
+print "  Surname: " + clientScreen.clients[1].surname;
+print "  Age: " + clientScreen.clients[1].age;
+print "  ID: " + clientScreen.clients[1].clientId;
+print "";
+print "Client 3:";
+print "  Name: " + clientScreen.clients[2].clientName;
+print "  Surname: " + clientScreen.clients[2].surname;
+print "  Age: " + clientScreen.clients[2].age;
+print "  ID: " + clientScreen.clients[2].clientId;
+
+// Show the screen
+print "";
+print "Displaying client screen...";
+print "The screen allows updating all client fields for 3 clients.";
+print "DEBUG: About to call 'show screen clientScreen'...";
+print "DEBUG: Calling show screen now...";
+show screen clientScreen;
+print "DEBUG: show screen call returned.";
+
+print "";
+print "Client screen is now displayed and ready for input!";
