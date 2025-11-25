@@ -860,6 +860,184 @@ public class BuiltinsScreen {
     }
 
     /**
+     * scr.getAreaProperty(screenName.areaName, propertyName) -> ANY
+     * Gets a property value from an area definition in a screen.
+     */
+    public static Object screenGetAreaProperty(InterpreterContext context, Object[] args) throws InterpreterError {
+        String areaPath = (String) args[0];
+        String propertyName = (String) args[1];
+
+        if (areaPath == null || areaPath.isEmpty()) {
+            throw new InterpreterError("scr.getAreaProperty: area parameter cannot be null or empty");
+        }
+        if (propertyName == null || propertyName.isEmpty()) {
+            throw new InterpreterError("scr.getAreaProperty: property parameter cannot be null or empty");
+        }
+
+        // Parse the compound key: screenName.areaName
+        String[] parts = areaPath.split("\\.", 2);
+        if (parts.length != 2) {
+            throw new InterpreterError("scr.getAreaProperty: area must be in format 'screenName.areaName', got: " + areaPath);
+        }
+
+        String screenName = parts[0];
+        String areaName = parts[1].toLowerCase();
+
+        // Find the screen areas
+        List<AreaDefinition> areas = context.getScreenAreas(screenName);
+        if (areas == null) {
+            throw new InterpreterError("scr.getAreaProperty: screen '" + screenName + "' not found");
+        }
+
+        // Search for the area by name
+        AreaDefinition targetArea = findAreaByName(areas, areaName);
+        if (targetArea == null) {
+            throw new InterpreterError("scr.getAreaProperty: area '" + areaName + "' not found in screen '" + screenName + "'");
+        }
+
+        // Get the property from the AreaDefinition
+        return getAreaDefinitionProperty(targetArea, propertyName);
+    }
+
+    /**
+     * scr.setAreaProperty(screenName.areaName, propertyName, value) -> BOOL
+     * Sets a property value on an area definition in a screen.
+     */
+    public static Object screenSetAreaProperty(InterpreterContext context, Object[] args) throws InterpreterError {
+        String areaPath = (String) args[0];
+        String propertyName = (String) args[1];
+        Object value = args[2];
+
+        if (areaPath == null || areaPath.isEmpty()) {
+            throw new InterpreterError("scr.setAreaProperty: area parameter cannot be null or empty");
+        }
+        if (propertyName == null || propertyName.isEmpty()) {
+            throw new InterpreterError("scr.setAreaProperty: property parameter cannot be null or empty");
+        }
+
+        // Parse the compound key: screenName.areaName
+        String[] parts = areaPath.split("\\.", 2);
+        if (parts.length != 2) {
+            throw new InterpreterError("scr.setAreaProperty: area must be in format 'screenName.areaName', got: " + areaPath);
+        }
+
+        String screenName = parts[0];
+        String areaName = parts[1].toLowerCase();
+
+        // Find the screen areas
+        List<AreaDefinition> areas = context.getScreenAreas(screenName);
+        if (areas == null) {
+            throw new InterpreterError("scr.setAreaProperty: screen '" + screenName + "' not found");
+        }
+
+        // Search for the area by name
+        AreaDefinition targetArea = findAreaByName(areas, areaName);
+        if (targetArea == null) {
+            throw new InterpreterError("scr.setAreaProperty: area '" + areaName + "' not found in screen '" + screenName + "'");
+        }
+
+        // Set the property on the AreaDefinition
+        setAreaDefinitionProperty(targetArea, propertyName, value);
+
+        return Boolean.TRUE;
+    }
+
+    /**
+     * Helper method to recursively find an area by name.
+     */
+    private static AreaDefinition findAreaByName(List<AreaDefinition> areas, String areaName) {
+        for (AreaDefinition area : areas) {
+            if (area.name != null && area.name.toLowerCase().equals(areaName)) {
+                return area;
+            }
+            // Recursively search in child areas
+            if (!area.childAreas.isEmpty()) {
+                AreaDefinition found = findAreaByName(area.childAreas, areaName);
+                if (found != null) {
+                    return found;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Helper method to get a property from an AreaDefinition.
+     */
+    private static Object getAreaDefinitionProperty(AreaDefinition area, String propertyName) throws InterpreterError {
+        String propLower = propertyName.toLowerCase();
+        
+        return switch (propLower) {
+            case "name" -> area.name;
+            case "type" -> area.type;
+            case "areatype" -> area.areaType != null ? area.areaType.getTypeName() : null;
+            case "cssclass" -> area.cssClass;
+            case "layout" -> area.layout;
+            case "style" -> area.style;
+            case "screenname" -> area.screenName;
+            case "displayname" -> area.displayName;
+            case "title" -> area.title;
+            case "groupborder" -> area.groupBorder;
+            case "groupbordercolor" -> area.groupBorderColor;
+            case "grouplabeltext" -> area.groupLabelText;
+            case "grouplabelalignment" -> area.groupLabelAlignment;
+            case "grouplabeloffset" -> area.groupLabelOffset;
+            case "spacing" -> area.spacing;
+            case "padding" -> area.padding;
+            case "gainfocus" -> area.gainFocus;
+            case "lostfocus" -> area.lostFocus;
+            case "numberofrecords" -> area.numberOfRecords;
+            case "recordref" -> area.recordRef;
+            default -> throw new InterpreterError("scr.getAreaProperty: unknown property '" + propertyName + "'");
+        };
+    }
+
+    /**
+     * Helper method to set a property on an AreaDefinition.
+     */
+    private static void setAreaDefinitionProperty(AreaDefinition area, String propertyName, Object value) throws InterpreterError {
+        String propLower = propertyName.toLowerCase();
+        
+        switch (propLower) {
+            case "name" -> area.name = value != null ? String.valueOf(value) : null;
+            case "type" -> {
+                area.type = value != null ? String.valueOf(value) : null;
+                if (area.type != null) {
+                    area.areaType = AreaDefinition.AreaType.fromString(area.type);
+                    area.cssClass = area.areaType.getCssClass();
+                }
+            }
+            case "cssclass" -> area.cssClass = value != null ? String.valueOf(value) : null;
+            case "layout" -> area.layout = value != null ? String.valueOf(value) : null;
+            case "style" -> area.style = value != null ? String.valueOf(value) : null;
+            case "displayname" -> area.displayName = value != null ? String.valueOf(value) : null;
+            case "title" -> area.title = value != null ? String.valueOf(value) : null;
+            case "groupborder" -> area.groupBorder = value != null ? String.valueOf(value) : null;
+            case "groupbordercolor" -> area.groupBorderColor = value != null ? String.valueOf(value) : null;
+            case "grouplabeltext" -> area.groupLabelText = value != null ? String.valueOf(value) : null;
+            case "grouplabelalignment" -> area.groupLabelAlignment = value != null ? String.valueOf(value) : null;
+            case "grouplabeloffset" -> area.groupLabelOffset = value != null ? String.valueOf(value) : null;
+            case "spacing" -> area.spacing = value != null ? String.valueOf(value) : null;
+            case "padding" -> area.padding = value != null ? String.valueOf(value) : null;
+            case "gainfocus" -> area.gainFocus = value != null ? String.valueOf(value) : null;
+            case "lostfocus" -> area.lostFocus = value != null ? String.valueOf(value) : null;
+            case "numberofrecords" -> {
+                if (value == null) {
+                    area.numberOfRecords = null;
+                } else if (value instanceof Number) {
+                    area.numberOfRecords = ((Number) value).intValue();
+                } else {
+                    throw new InterpreterError("scr.setAreaProperty: 'numberOfRecords' property must be a number");
+                }
+            }
+            case "recordref" -> area.recordRef = value != null ? String.valueOf(value) : null;
+            case "screenname", "areatype" -> 
+                throw new InterpreterError("scr.setAreaProperty: property '" + propertyName + "' is read-only");
+            default -> throw new InterpreterError("scr.setAreaProperty: unknown property '" + propertyName + "'");
+        }
+    }
+
+    /**
      * Helper method to recursively find an item by name in an area definition.
      */
     private static AreaItem findItemInArea(InterpreterContext context, AreaDefinition area, String itemName) {

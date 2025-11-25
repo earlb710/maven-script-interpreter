@@ -345,6 +345,39 @@ MULTI-RECORD AREA EXPANSION
    - clients[2].age with label "Client 3 - Age:"
 *)
 
+AREA PROPERTY BUILTINS
+----------------------
+(* Built-in functions for getting and setting area properties at runtime:
+
+   scr.getAreaProperty(area, property) -> ANY
+     Gets a property value from an area definition.
+     - area: string in format "screenName.areaName"
+     - property: property name (case-insensitive)
+     
+     Supported properties:
+       name, type, areaType, cssClass, layout, style, screenName, displayName,
+       title, groupBorder, groupBorderColor, groupLabelText, groupLabelAlignment,
+       groupLabelOffset, spacing, padding, gainFocus, lostFocus, 
+       numberOfRecords, recordRef
+     
+     Example:
+       var numRecords = #scr.getAreaProperty("myScreen.clientsArea", "numberOfRecords");
+       var spacing = #scr.getAreaProperty("myScreen.mainArea", "spacing");
+
+   scr.setAreaProperty(area, property, value) -> BOOL
+     Sets a property value on an area definition.
+     - area: string in format "screenName.areaName"
+     - property: property name (case-insensitive)
+     - value: value to set
+     
+     Note: screenName and areaType are read-only properties.
+     
+     Example:
+       #scr.setAreaProperty("myScreen.clientsArea", "numberOfRecords", 5);
+       #scr.setAreaProperty("myScreen.mainArea", "spacing", "20");
+       #scr.setAreaProperty("myScreen.clientsArea", "recordRef", "employees");
+*)
+
 COMMENTS
 --------
 lineComment  = "//" .* ("\n"|EOF) ;       (* Parser ignores these via the COMMENT token *)
