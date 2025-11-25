@@ -224,18 +224,18 @@ public class AreaContainerFactory {
                 return "-fx-border-color: derive(" + color + ", -40%) derive(" + color + ", 60%) derive(" + color + ", 60%) derive(" + color + ", -40%); " +
                        "-fx-border-width: " + width + "; -fx-border-style: solid; -fx-border-radius: 5px" + insets;
             case "inset":
-                // Inset effect: double border with lowered outer and lowered inner (pressed-in look)
+                // Inset effect: double border with lowered outer and raised inner (beveled pressed-in look)
                 // Outer border: darker top/left, brighter bottom/right (lowered)
-                // Inner border: darker top/left, brighter bottom/right (lowered) - creates pressed-in appearance
+                // Inner border: brighter top/left, darker bottom/right (raised)
                 return "-fx-border-color: derive(" + color + ", -40%) derive(" + color + ", 60%) derive(" + color + ", 60%) derive(" + color + ", -40%), " +
-                       "derive(" + color + ", -60%) derive(" + color + ", 40%) derive(" + color + ", 40%) derive(" + color + ", -60%); " +
+                       "derive(" + color + ", 60%) derive(" + color + ", -40%) derive(" + color + ", -40%) derive(" + color + ", 60%); " +
                        "-fx-border-width: " + width + " " + width + "; -fx-border-style: solid; -fx-border-radius: 5px" + insets;
             case "outset":
-                // Outset effect: double border with raised outer and raised inner (popped-out look)
+                // Outset effect: double border with raised outer and lowered inner (beveled popped-out look)
                 // Outer border: brighter top/left, darker bottom/right (raised)
-                // Inner border: brighter top/left, darker bottom/right (raised) - creates popped-out appearance
+                // Inner border: darker top/left, brighter bottom/right (lowered)
                 return "-fx-border-color: derive(" + color + ", 60%) derive(" + color + ", -40%) derive(" + color + ", -40%) derive(" + color + ", 60%), " +
-                       "derive(" + color + ", 40%) derive(" + color + ", -60%) derive(" + color + ", -60%) derive(" + color + ", 40%); " +
+                       "derive(" + color + ", -40%) derive(" + color + ", 60%) derive(" + color + ", 60%) derive(" + color + ", -40%); " +
                        "-fx-border-width: " + width + " " + width + "; -fx-border-style: solid; -fx-border-radius: 5px" + insets;
             default:
                 // Default to simple line border
