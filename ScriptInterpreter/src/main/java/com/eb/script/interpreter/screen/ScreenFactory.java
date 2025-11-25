@@ -2981,6 +2981,8 @@ public class ScreenFactory {
         }
         
         // Find the first dot which separates array name from field name
+        // Using dotIndex > 0 to ensure we have a valid non-empty array name
+        // (dotIndex == 0 would mean empty array name which is invalid)
         int dotIndex = varRef.indexOf('.');
         if (dotIndex > 0) {
             // Has a dot - split into arrayName and fieldName
@@ -2996,11 +2998,13 @@ public class ScreenFactory {
     /**
      * Expands a label text with the record number.
      * Examples:
-     * - "Name:" with recordNumber 1 -> "Client 1 - Name:"
+     * - "Name:" with recordNumber 1 -> "Record 1 - Name:"
      * - "Client - Name:" with recordNumber 2 -> "Client 2 - Name:"
+     * - "Employee - ID:" with recordNumber 3 -> "Employee 3 - ID:"
      * 
-     * The pattern inserts the record number after "Client" if present,
-     * otherwise prepends "Record N - " to the label.
+     * The pattern handles labels in the format "EntityName - FieldLabel" by inserting
+     * the record number after the entity name. If no such pattern is found, it prepends
+     * "Record N - " to the label.
      * 
      * @param labelText The original label text
      * @param recordNumber The record number (1-based)
@@ -3011,20 +3015,22 @@ public class ScreenFactory {
             return labelText;
         }
         
-        // Check if the label already contains "Client N" pattern (where N might be a placeholder)
-        // Pattern: "Client X - " where X could be empty, a number, or nothing
-        java.util.regex.Pattern clientPattern = java.util.regex.Pattern.compile(
-            "^(Client)\\s*(?:\\d+)?\\s*-\\s*(.+)$", 
+        // Check if the label follows the pattern "EntityName - FieldLabel" or "EntityName N - FieldLabel"
+        // This pattern matches any word/entity name, followed by optional spaces, optional number,
+        // a dash, and the rest of the label
+        // Examples: "Client - Name:", "Employee - ID:", "Client 1 - Name:"
+        java.util.regex.Pattern entityPattern = java.util.regex.Pattern.compile(
+            "^(\\w+)\\s*(?:\\d+)?\\s*-\\s*(.+)$", 
             java.util.regex.Pattern.CASE_INSENSITIVE
         );
-        java.util.regex.Matcher clientMatcher = clientPattern.matcher(labelText);
+        java.util.regex.Matcher entityMatcher = entityPattern.matcher(labelText);
         
-        if (clientMatcher.matches()) {
-            // Replace with the actual record number
-            return clientMatcher.group(1) + " " + recordNumber + " - " + clientMatcher.group(2);
+        if (entityMatcher.matches()) {
+            // Replace with the actual record number, keeping the entity name
+            return entityMatcher.group(1) + " " + recordNumber + " - " + entityMatcher.group(2);
         }
         
-        // If no "Client X -" pattern, prepend "Record N - "
+        // If no "EntityName - Field" pattern, prepend "Record N - "
         return "Record " + recordNumber + " - " + labelText;
     }
     
@@ -3069,6 +3075,8 @@ public class ScreenFactory {
         clone.seq = source.seq;
         
         // Clone options list if present
+        // Note: This creates a shallow copy which is safe because options is a List<String>
+        // and strings are immutable in Java
         if (source.options != null) {
             clone.options = new ArrayList<>(source.options);
         }
