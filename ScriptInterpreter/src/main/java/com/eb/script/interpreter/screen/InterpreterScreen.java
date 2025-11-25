@@ -1693,6 +1693,10 @@ public class InterpreterScreen {
                                 // Parse display metadata for this specific item
                                 item.displayItem = parseDisplayItem(displayDef, screenName);
                             }
+                        } else if (itemDef.containsKey("type") && !itemDef.containsKey("varref") && !itemDef.containsKey("varRef")) {
+                            // If item has a direct "type" property (e.g., button, label) without a varRef,
+                            // treat the item definition itself as the display definition
+                            item.displayItem = parseDisplayItem(itemDef, screenName);
                         }
                         // If displayItem is not set here, it will remain null
                         // and the consuming code should fall back to using varRef's DisplayItem
