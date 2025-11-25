@@ -412,10 +412,11 @@ public class AreaContainerFactory {
         
         switch (offset) {
             case "top":
-                // Position above the border - dynamic based on font height
-                return -8 - fontHeight;
+                // Position above the border - dynamic based on font height (moved 3px up from -8)
+                return -11 - fontHeight;
             case "bottom":
-                return -8; // Position slightly above the border baseline
+                // Position slightly above the border baseline (moved 2px down from -8)
+                return -6;
             case "on":
             default:
                 // Default: border goes through label - uses half font height
