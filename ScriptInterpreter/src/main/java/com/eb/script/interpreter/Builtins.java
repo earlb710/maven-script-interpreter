@@ -854,6 +854,11 @@ public final class Builtins {
                 "scr.clear", DataType.BOOL,
                 newParam("screenName", DataType.STRING, true) // required; screen name
         ));
+        addBuiltin(info(
+                "scr.getVarReference", DataType.STRING,
+                newParam("screenName", DataType.STRING, true), // required; screen name
+                newParam("itemName", DataType.STRING, true) // required; item name
+        ));
 
         NAMES = Collections.unmodifiableSet(BUILTINS.keySet());
     }
@@ -2202,6 +2207,9 @@ public final class Builtins {
             }
             case "scr.clear" -> {
                 return BuiltinsScreen.screenClear(context, args);
+            }
+            case "scr.getvarreference" -> {
+                return BuiltinsScreen.screenGetVarReference(context, args);
             }
 
             default ->

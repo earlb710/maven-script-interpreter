@@ -809,6 +809,57 @@ public class BuiltinsScreen {
     }
 
     /**
+     * scr.getVarReference(screenName, itemName) -> String
+     * Gets the varRef property of a screen area item.
+     * Returns the variable reference string (e.g., "clients[0].clientName") or null if not set.
+     */
+    public static Object screenGetVarReference(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (String) args[0];
+        String itemName = (String) args[1];
+
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("scr.getVarReference: screenName parameter cannot be null or empty");
+        }
+        if (itemName == null || itemName.isEmpty()) {
+            throw new InterpreterError("scr.getVarReference: itemName parameter cannot be null or empty");
+        }
+
+        // Verify screen exists
+        if (!context.getScreens().containsKey(screenName.toLowerCase())) {
+            throw new InterpreterError("scr.getVarReference: screen '" + screenName + "' not found");
+        }
+
+        // Get the area items for this screen
+        Map<String, AreaItem> areaItems = context.getScreenAreaItems(screenName);
+        if (areaItems == null || areaItems.isEmpty()) {
+            throw new InterpreterError("scr.getVarReference: no area items defined for screen '" + screenName + "'");
+        }
+
+        // Find the area item - try with various key formats
+        AreaItem item = null;
+        String lowerItemName = itemName.toLowerCase();
+
+        // Try direct lookup
+        for (Map.Entry<String, AreaItem> entry : areaItems.entrySet()) {
+            String key = entry.getKey();
+            AreaItem ai = entry.getValue();
+            // Match by key or by item name
+            if (key.equals(lowerItemName) || key.endsWith("." + lowerItemName)
+                    || (ai.name != null && ai.name.equalsIgnoreCase(itemName))) {
+                item = ai;
+                break;
+            }
+        }
+
+        if (item == null) {
+            throw new InterpreterError("scr.getVarReference: item '" + itemName + "' not found in screen '" + screenName + "'");
+        }
+
+        // Return the varRef (may be null)
+        return item.varRef;
+    }
+
+    /**
      * Helper method to recursively find an item by name in an area definition.
      */
     private static AreaItem findItemInArea(InterpreterContext context, AreaDefinition area, String itemName) {
