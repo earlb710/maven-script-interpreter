@@ -2176,6 +2176,10 @@ public class ScreenFactory {
         String baseVarName = varRef.substring(0, splitPos).toLowerCase();
         String path = varRef.substring(splitPos);
         
+        // Lowercase the property names in the path for case-insensitive lookup
+        // Convert ".clientName" to ".clientname" while preserving array indices
+        path = lowercasePathProperties(path);
+        
         // Get the base variable from screenVars
         Object baseValue = screenVars.get(baseVarName);
         if (baseValue == null) {
@@ -2184,6 +2188,50 @@ public class ScreenFactory {
         
         // Use Json.getValue to navigate the path
         return Json.getValue(baseValue, path);
+    }
+
+    /**
+     * Lowercases property names in a JSON path while preserving array indices.
+     * E.g., "[0].clientName" -> "[0].clientname"
+     */
+    private static String lowercasePathProperties(String path) {
+        if (path == null || path.isEmpty()) {
+            return path;
+        }
+        
+        StringBuilder result = new StringBuilder();
+        int i = 0;
+        int n = path.length();
+        
+        while (i < n) {
+            char c = path.charAt(i);
+            
+            if (c == '[') {
+                // Copy array index as-is: [0], [1], etc.
+                result.append(c);
+                i++;
+                while (i < n && path.charAt(i) != ']') {
+                    result.append(path.charAt(i));
+                    i++;
+                }
+                if (i < n) {
+                    result.append(path.charAt(i)); // append ']'
+                    i++;
+                }
+            } else if (c == '.') {
+                result.append(c);
+                i++;
+            } else {
+                // Property name - lowercase it
+                int start = i;
+                while (i < n && path.charAt(i) != '.' && path.charAt(i) != '[') {
+                    i++;
+                }
+                result.append(path.substring(start, i).toLowerCase());
+            }
+        }
+        
+        return result.toString();
     }
 
     /**
@@ -2222,6 +2270,9 @@ public class ScreenFactory {
         
         String baseVarName = varRef.substring(0, splitPos).toLowerCase();
         String path = varRef.substring(splitPos);
+        
+        // Lowercase the property names in the path for case-insensitive lookup
+        path = lowercasePathProperties(path);
         
         // Get the base variable from screenVars
         Object baseValue = screenVars.get(baseVarName);
