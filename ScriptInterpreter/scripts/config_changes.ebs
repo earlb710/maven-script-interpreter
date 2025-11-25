@@ -54,6 +54,14 @@ var colors: json = call json.getobject(config, "colors");
 print "Colors object retrieved";
 print "";
 
+// Get the profile name (default to "default" if not present)
+var profileName: string = call json.getstring(config, "profile");
+if profileName == "" then {
+    profileName = "default";
+}
+print "Profile: " + profileName;
+print "";
+
 // Extract all color values into variables
 var infoColor: string = call json.getstring(colors, "info");
 var commentColor: string = call json.getstring(colors, "comment");
@@ -116,9 +124,20 @@ print "Creating color editor screen with colors from console.cfg...";
 screen colorEditorScreen = {
     "title": "Console Configuration Color Editor",
     "width": 1000,
-    "height": 600,
+    "height": 650,
     "maximize": false,
     "vars": [
+        {
+            "name": "profile",
+            "type": "string",
+            "default": $profileName,
+            "display": {
+                "type": "combobox",
+                "labelText": "Profile:",
+                "labelTextAlignment": "left",
+                "options": ["default", "dark", "light", "custom"]
+            }
+        },
         {
             "name": "info",
             "type": "string",
@@ -337,94 +356,109 @@ screen colorEditorScreen = {
         }
     ],
     "area": [{
-        "name": "mainArea",
-        "type": "hbox",
-        "style": "-fx-spacing: 15; -fx-padding: 10;",
+        "name": "rootArea",
+        "type": "vbox",
+        "style": "-fx-spacing: 10; -fx-padding: 10;",
         "areas": [
             {
-                "name": "leftColumn",
-                "type": "vbox",
-                "style": "-fx-spacing: 10;",
-                "areas": [
-                    {
-                        "name": "consoleColorsArea",
-                        "type": "vbox",
-                        "groupBorder": "lowered",
-                        "groupBorderColor": "#4a9eff",
-                        "groupBorderWidth": "2",
-                        "groupLabelText": "Console Colors",
-                        "groupLabelAlignment": "left",
-                        "groupLabelOffset": "bottom",
-                        "style": "-fx-spacing: 5; -fx-padding: 10;",
-                        "items": [
-                            {"name": "info_item", "varref": "info"},
-                            {"name": "comment_item", "varref": "comment"},
-                            {"name": "error_item", "varref": "error"},
-                            {"name": "warn_item", "varref": "warn"},
-                            {"name": "ok_item", "varref": "ok"}
-                        ]
-                    },
-                    {
-                        "name": "editorColorsArea",
-                        "type": "vbox",
-                        "groupBorder": "lowered",
-                        "groupBorderColor": "#66cc66",
-                        "groupBorderWidth": "2",
-                        "groupLabelText": "Editor Colors",
-                        "groupLabelAlignment": "left",
-                        "groupLabelOffset": "top",
-                        "style": "-fx-spacing: 5; -fx-padding: 10;",
-                        "items": [
-                            {"name": "background_item", "varref": "background"},
-                            {"name": "text_item", "varref": "text"},
-                            {"name": "caret_item", "varref": "caret"},
-                            {"name": "lineCursor_item", "varref": "lineCursor"},
-                            {"name": "lineNumbers_item", "varref": "lineNumbers"},
-                            {"name": "consoleBackground_item", "varref": "consoleBackground"}
-                        ]
-                    }
+                "name": "profileArea",
+                "type": "hbox",
+                "style": "-fx-spacing: 10; -fx-padding: 5;",
+                "items": [
+                    {"name": "profile_item", "varref": "profile"}
                 ]
             },
             {
-                "name": "rightColumn",
-                "type": "vbox",
-                "style": "-fx-spacing: 10;",
+                "name": "mainArea",
+                "type": "hbox",
+                "style": "-fx-spacing: 15;",
                 "areas": [
                     {
-                        "name": "syntaxColorsArea",
+                        "name": "leftColumn",
                         "type": "vbox",
-                        "groupBorder": "lowered",
-                        "groupBorderColor": "#ff9933",
-                        "groupBorderWidth": "2",
-                        "groupLabelText": "Syntax Colors",
-                        "groupLabelAlignment": "left",
-                        "style": "-fx-spacing: 5; -fx-padding: 10;",
-                        "items": [
-                            {"name": "code_item", "varref": "code"},
-                            {"name": "datatype_item", "varref": "datatype"},
-                            {"name": "data_item", "varref": "data"},
-                            {"name": "keyword_item", "varref": "keyword"},
-                            {"name": "builtin_item", "varref": "builtin"},
-                            {"name": "literal_item", "varref": "literal"},
-                            {"name": "identifier_item", "varref": "identifier"},
-                            {"name": "sql_item", "varref": "sql"},
-                            {"name": "custom_item", "varref": "custom"}
+                        "style": "-fx-spacing: 10;",
+                        "areas": [
+                            {
+                                "name": "consoleColorsArea",
+                                "type": "vbox",
+                                "groupBorder": "lowered",
+                                "groupBorderColor": "#4a9eff",
+                                "groupBorderWidth": "2",
+                                "groupLabelText": "Console Colors",
+                                "groupLabelAlignment": "left",
+                                "groupLabelOffset": "bottom",
+                                "style": "-fx-spacing: 5; -fx-padding: 10;",
+                                "items": [
+                                    {"name": "info_item", "varref": "info"},
+                                    {"name": "comment_item", "varref": "comment"},
+                                    {"name": "error_item", "varref": "error"},
+                                    {"name": "warn_item", "varref": "warn"},
+                                    {"name": "ok_item", "varref": "ok"}
+                                ]
+                            },
+                            {
+                                "name": "editorColorsArea",
+                                "type": "vbox",
+                                "groupBorder": "lowered",
+                                "groupBorderColor": "#66cc66",
+                                "groupBorderWidth": "2",
+                                "groupLabelText": "Editor Colors",
+                                "groupLabelAlignment": "left",
+                                "groupLabelOffset": "top",
+                                "style": "-fx-spacing: 5; -fx-padding: 10;",
+                                "items": [
+                                    {"name": "background_item", "varref": "background"},
+                                    {"name": "text_item", "varref": "text"},
+                                    {"name": "caret_item", "varref": "caret"},
+                                    {"name": "lineCursor_item", "varref": "lineCursor"},
+                                    {"name": "lineNumbers_item", "varref": "lineNumbers"},
+                                    {"name": "consoleBackground_item", "varref": "consoleBackground"}
+                                ]
+                            }
                         ]
                     },
                     {
-                        "name": "tabColorsArea",
+                        "name": "rightColumn",
                         "type": "vbox",
-                        "groupBorder": "lowered",
-                        "groupBorderColor": "#cc66cc",
-                        "groupBorderWidth": "2",
-                        "groupLabelText": "Tab Colors",
-                        "groupLabelAlignment": "left",
-                        "style": "-fx-spacing: 5; -fx-padding: 10;",
-                        "items": [
-                            {"name": "tabBackground_item", "varref": "tabBackground"},
-                            {"name": "tabLabelColor_item", "varref": "tabLabelColor"},
-                            {"name": "tabLabelChangedColor_item", "varref": "tabLabelChangedColor"},
-                            {"name": "tabLabelBackground_item", "varref": "tabLabelBackground"}
+                        "style": "-fx-spacing: 10;",
+                        "areas": [
+                            {
+                                "name": "syntaxColorsArea",
+                                "type": "vbox",
+                                "groupBorder": "lowered",
+                                "groupBorderColor": "#ff9933",
+                                "groupBorderWidth": "2",
+                                "groupLabelText": "Syntax Colors",
+                                "groupLabelAlignment": "left",
+                                "style": "-fx-spacing: 5; -fx-padding: 10;",
+                                "items": [
+                                    {"name": "code_item", "varref": "code"},
+                                    {"name": "datatype_item", "varref": "datatype"},
+                                    {"name": "data_item", "varref": "data"},
+                                    {"name": "keyword_item", "varref": "keyword"},
+                                    {"name": "builtin_item", "varref": "builtin"},
+                                    {"name": "literal_item", "varref": "literal"},
+                                    {"name": "identifier_item", "varref": "identifier"},
+                                    {"name": "sql_item", "varref": "sql"},
+                                    {"name": "custom_item", "varref": "custom"}
+                                ]
+                            },
+                            {
+                                "name": "tabColorsArea",
+                                "type": "vbox",
+                                "groupBorder": "lowered",
+                                "groupBorderColor": "#cc66cc",
+                                "groupBorderWidth": "2",
+                                "groupLabelText": "Tab Colors",
+                                "groupLabelAlignment": "left",
+                                "style": "-fx-spacing: 5; -fx-padding: 10;",
+                                "items": [
+                                    {"name": "tabBackground_item", "varref": "tabBackground"},
+                                    {"name": "tabLabelColor_item", "varref": "tabLabelColor"},
+                                    {"name": "tabLabelChangedColor_item", "varref": "tabLabelChangedColor"},
+                                    {"name": "tabLabelBackground_item", "varref": "tabLabelBackground"}
+                                ]
+                            }
                         ]
                     }
                 ]
@@ -443,6 +477,9 @@ print "";
 show screen colorEditorScreen;
 
 // After the screen is closed, display the updated values
+print "";
+print "=== Updated Configuration ===";
+print "profile: " + colorEditorScreen.profile;
 print "";
 print "=== Updated Color Values ===";
 print "info: " + colorEditorScreen.info;
