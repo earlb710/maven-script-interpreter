@@ -1177,9 +1177,10 @@ public class InterpreterScreen {
     private DisplayItem parseDisplayItem(Map<String, Object> displayDef, String screenName) {
         DisplayItem metadata = new DisplayItem();
 
-        // Extract display type and convert to enum
-        if (displayDef.containsKey("type")) {
-            metadata.type = String.valueOf(displayDef.get("type")).toLowerCase();
+        // Extract display type and convert to enum (case-insensitive lookup)
+        Object typeObj = getCaseInsensitive(displayDef, "type");
+        if (typeObj != null) {
+            metadata.type = String.valueOf(typeObj).toLowerCase();
             metadata.itemType = ItemType.fromString(metadata.type);
         } else {
             metadata.itemType = ItemType.TEXTFIELD; // Default to textfield
@@ -1693,7 +1694,8 @@ public class InterpreterScreen {
                                 // Parse display metadata for this specific item
                                 item.displayItem = parseDisplayItem(displayDef, screenName);
                             }
-                        } else if (itemDef.containsKey("type") && !itemDef.containsKey("varref") && !itemDef.containsKey("varRef")) {
+                        } else if (getCaseInsensitive(itemDef, "type") != null && 
+                                   getCaseInsensitive(itemDef, "varref") == null) {
                             // If item has a direct "type" property (e.g., button, label) without a varRef,
                             // treat the item definition itself as the display definition
                             item.displayItem = parseDisplayItem(itemDef, screenName);
