@@ -358,12 +358,12 @@ screen colorEditorScreen = {
     "area": [{
         "name": "rootArea",
         "type": "vbox",
-        "style": "-fx-spacing: 10; -fx-padding: 10;",
+        "style": "-fx-spacing: 4; -fx-padding: 4;",
         "areas": [
             {
                 "name": "profileArea",
                 "type": "hbox",
-                "style": "-fx-spacing: 10; -fx-padding: 5;",
+                "style": "-fx-spacing: 4; -fx-padding: 4;",
                 "items": [
                     {"name": "profile_item", "varref": "profile"}
                 ]
@@ -381,12 +381,13 @@ screen colorEditorScreen = {
                             {
                                 "name": "consoleColorsArea",
                                 "type": "vbox",
-                                "groupBorder": "inset",
-                                "groupBorderColor": "#4a9eff",
+                                "groupBorder": "lowered",
+                                "groupBorderColor": "#ffffff",
                                 "groupBorderWidth": "2",
+                                "groupLabelColor": "#cccccc",
                                 "groupLabelText": "Console Colors",
                                 "groupLabelAlignment": "left",
-                                "groupLabelOffset": "bottom",
+                                "groupLabelOffset": "on",
                                 "style": "-fx-spacing: 5; -fx-padding: 10;",
                                 "items": [
                                     {"name": "info_item", "varref": "info"},
@@ -399,12 +400,12 @@ screen colorEditorScreen = {
                             {
                                 "name": "editorColorsArea",
                                 "type": "vbox",
-                                "groupBorder": "inset",
-                                "groupBorderColor": "#66cc66",
+                                "groupBorder": "lowered",
+                                "groupBorderColor": "#ffffff",
                                 "groupBorderWidth": "2",
                                 "groupLabelText": "Editor Colors",
                                 "groupLabelAlignment": "left",
-                                "groupLabelOffset": "top",
+                                "groupLabelOffset": "on",
                                 "style": "-fx-spacing: 5; -fx-padding: 10;",
                                 "items": [
                                     {"name": "background_item", "varref": "background"},
@@ -425,8 +426,8 @@ screen colorEditorScreen = {
                             {
                                 "name": "syntaxColorsArea",
                                 "type": "vbox",
-                                "groupBorder": "inset",
-                                "groupBorderColor": "#ff9933",
+                                "groupBorder": "lowered",
+                                "groupBorderColor": "#ffffff",
                                 "groupBorderWidth": "2",
                                 "groupLabelText": "Syntax Colors",
                                 "groupLabelAlignment": "left",
@@ -446,8 +447,8 @@ screen colorEditorScreen = {
                             {
                                 "name": "tabColorsArea",
                                 "type": "vbox",
-                                "groupBorder": "inset",
-                                "groupBorderColor": "#cc66cc",
+                                "groupBorder": "lowered",
+                                "groupBorderColor": "#ffffff",
                                 "groupBorderWidth": "2",
                                 "groupLabelText": "Tab Colors",
                                 "groupLabelAlignment": "left",
