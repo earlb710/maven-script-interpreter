@@ -161,7 +161,7 @@ public class AreaContainerFactory {
     
     /**
      * Create a CSS border style string based on groupBorder type, color, width, and insets.
-     * @param borderType The type of border: none, raised, inset, lowered, line
+     * @param borderType The type of border: none, raised, lowered, inset, outset, line
      * @param borderColor The color of the border in hex format (optional)
      * @param borderWidth The width of the border in pixels (optional, e.g., "2" or "2px")
      * @param borderInsets The insets for the border (optional, e.g., "5" for all sides, "5 10" for top/bottom and left/right, or "5 10 5 10" for top, right, bottom, left)
@@ -224,11 +224,18 @@ public class AreaContainerFactory {
                 return "-fx-border-color: derive(" + color + ", -40%) derive(" + color + ", 60%) derive(" + color + ", 60%) derive(" + color + ", -40%); " +
                        "-fx-border-width: " + width + "; -fx-border-style: solid; -fx-border-radius: 5px" + insets;
             case "inset":
-                // Inset effect: combination of lowered (outer) and raised (inner) - creates a beveled inset look
-                // Outer border is lowered (darker top/left, brighter bottom/right)
-                // Inner border is raised (brighter top/left, darker bottom/right)
+                // Inset effect: double border with lowered outer and lowered inner (pressed-in look)
+                // Outer border: darker top/left, brighter bottom/right (lowered)
+                // Inner border: darker top/left, brighter bottom/right (lowered) - creates pressed-in appearance
                 return "-fx-border-color: derive(" + color + ", -40%) derive(" + color + ", 60%) derive(" + color + ", 60%) derive(" + color + ", -40%), " +
-                       "derive(" + color + ", 60%) derive(" + color + ", -40%) derive(" + color + ", -40%) derive(" + color + ", 60%); " +
+                       "derive(" + color + ", -60%) derive(" + color + ", 40%) derive(" + color + ", 40%) derive(" + color + ", -60%); " +
+                       "-fx-border-width: " + width + " " + width + "; -fx-border-style: solid; -fx-border-radius: 5px" + insets;
+            case "outset":
+                // Outset effect: double border with raised outer and raised inner (popped-out look)
+                // Outer border: brighter top/left, darker bottom/right (raised)
+                // Inner border: brighter top/left, darker bottom/right (raised) - creates popped-out appearance
+                return "-fx-border-color: derive(" + color + ", 60%) derive(" + color + ", -40%) derive(" + color + ", -40%) derive(" + color + ", 60%), " +
+                       "derive(" + color + ", 40%) derive(" + color + ", -60%) derive(" + color + ", -60%) derive(" + color + ", 40%); " +
                        "-fx-border-width: " + width + " " + width + "; -fx-border-style: solid; -fx-border-radius: 5px" + insets;
             default:
                 // Default to simple line border

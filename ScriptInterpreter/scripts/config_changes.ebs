@@ -381,7 +381,7 @@ screen colorEditorScreen = {
                             {
                                 "name": "consoleColorsArea",
                                 "type": "vbox",
-                                "groupBorder": "lowered",
+                                "groupBorder": "inset",
                                 "groupBorderColor": "#4a9eff",
                                 "groupBorderWidth": "2",
                                 "groupLabelText": "Console Colors",
@@ -399,7 +399,7 @@ screen colorEditorScreen = {
                             {
                                 "name": "editorColorsArea",
                                 "type": "vbox",
-                                "groupBorder": "lowered",
+                                "groupBorder": "inset",
                                 "groupBorderColor": "#66cc66",
                                 "groupBorderWidth": "2",
                                 "groupLabelText": "Editor Colors",
@@ -425,7 +425,7 @@ screen colorEditorScreen = {
                             {
                                 "name": "syntaxColorsArea",
                                 "type": "vbox",
-                                "groupBorder": "lowered",
+                                "groupBorder": "inset",
                                 "groupBorderColor": "#ff9933",
                                 "groupBorderWidth": "2",
                                 "groupLabelText": "Syntax Colors",
@@ -446,7 +446,7 @@ screen colorEditorScreen = {
                             {
                                 "name": "tabColorsArea",
                                 "type": "vbox",
-                                "groupBorder": "lowered",
+                                "groupBorder": "inset",
                                 "groupBorderColor": "#cc66cc",
                                 "groupBorderWidth": "2",
                                 "groupLabelText": "Tab Colors",
