@@ -283,6 +283,68 @@ SCREEN CONFIGURATION
    hide screen myForm;
 *)
 
+AREA DEFINITION PROPERTIES
+--------------------------
+(* Area definitions support the following properties:
+   - name: string             - Required. Unique identifier for the area
+   - type: string             - Container type (vbox, hbox, gridpane, flowpane, etc.)
+   - layout: string           - Layout configuration (e.g., 'fill' to maximize space)
+   - style: string            - JavaFX CSS style string
+   - spacing: string          - Spacing between child elements (e.g., '10', '15')
+   - padding: string          - Padding inside the area (e.g., '10', '10 5 10 5')
+   - items: array             - UI items/controls within this area
+   - areas: array             - Nested child areas for hierarchical layouts
+   - numberOfRecords: number  - For multi-record expansion (see below)
+   - recordRef: string        - Array variable reference for multi-record expansion
+*)
+
+MULTI-RECORD AREA EXPANSION
+---------------------------
+(* Areas can automatically expand template items for array-backed data using:
+   - numberOfRecords: number  - Number of records to generate (e.g., 3)
+   - recordRef: string        - Array variable name (e.g., "clients")
+   
+   When both are set, each item in the area is duplicated N times:
+   - varRef is expanded: "age" becomes "clients[0].age", "clients[1].age", etc.
+   - labelText is expanded: "Client - Name:" becomes "Client 1 - Name:", "Client 2 - Name:", etc.
+   - item names are made unique: "fieldName" becomes "fieldName_0", "fieldName_1", etc.
+   
+   Example:
+   screen clientForm = {
+     vars: [
+       { name: "clients", type: "array.record", default: { name: "", age: 0 } }
+     ],
+     area: [
+       {
+         name: "clientsArea",
+         type: "vbox",
+         numberOfRecords: 3,
+         recordRef: "clients",
+         items: [
+           {
+             name: "clientNameField",
+             varRef: "name",
+             display: { type: "textfield", labelText: "Client - Name:" }
+           },
+           {
+             name: "clientAgeField", 
+             varRef: "age",
+             display: { type: "spinner", labelText: "Client - Age:" }
+           }
+         ]
+       }
+     ]
+   };
+   
+   This expands to 6 items total (2 items × 3 records):
+   - clients[0].name with label "Client 1 - Name:"
+   - clients[0].age with label "Client 1 - Age:"
+   - clients[1].name with label "Client 2 - Name:"
+   - clients[1].age with label "Client 2 - Age:"
+   - clients[2].name with label "Client 3 - Name:"
+   - clients[2].age with label "Client 3 - Age:"
+*)
+
 COMMENTS
 --------
 lineComment  = "//" .* ("\n"|EOF) ;       (* Parser ignores these via the COMMENT token *)
