@@ -46,6 +46,8 @@ public class AreaDefinition {
     public String groupLabelColor;
     // Group label background color in hex format (e.g., "#ffffff") - defaults to "white"
     public String groupLabelBackground;
+    // Area background color in hex format (e.g., "#f0f0f0") - optional background color for the area
+    public String areaBackground;
     // Spacing between children (for HBox, VBox, FlowPane, GridPane, TilePane)
     public String spacing;
     // Padding inside the area (for all Region types)
@@ -78,6 +80,7 @@ public class AreaDefinition {
                ", groupLabelOffset='" + groupLabelOffset + '\'' +
                ", groupLabelColor='" + groupLabelColor + '\'' +
                ", groupLabelBackground='" + groupLabelBackground + '\'' +
+               ", areaBackground='" + areaBackground + '\'' +
                ", spacing='" + spacing + '\'' +
                ", padding='" + padding + '\'' +
                ", items=" + items.size() +

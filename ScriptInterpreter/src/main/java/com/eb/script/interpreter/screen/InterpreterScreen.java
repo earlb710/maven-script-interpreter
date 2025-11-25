@@ -1599,6 +1599,12 @@ public class InterpreterScreen {
             area.groupLabelBackground = String.valueOf(groupLabelBackgroundObj);
         }
         
+        // Extract areaBackground property - case-insensitive
+        Object areaBackgroundObj = getCaseInsensitive(areaDef, "areaBackground");
+        if (areaBackgroundObj != null) {
+            area.areaBackground = String.valueOf(areaBackgroundObj);
+        }
+        
         // Extract spacing property
         if (areaDef.containsKey("spacing")) {
             area.spacing = String.valueOf(areaDef.get("spacing"));
