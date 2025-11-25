@@ -774,7 +774,10 @@ public class ScreenFactory {
 
         // Sort items by sequence
         if (areaDef.items != null && !areaDef.items.isEmpty()) {
-            List<AreaItem> sortedItems = areaDef.items.stream()
+            // First, expand any items that have numberOfRecords set
+            List<AreaItem> expandedItems = expandMultiRecordItems(areaDef.items);
+            
+            List<AreaItem> sortedItems = expandedItems.stream()
                     .sorted(Comparator.comparingInt(item -> item.sequence))
                     .toList();
 
@@ -2853,6 +2856,238 @@ public class ScreenFactory {
                 updateControlFromValue(control, currentValue, metadata);
             }
         }
+    }
+    
+    /**
+     * Expands items that have numberOfRecords set into multiple items.
+     * For each item with numberOfRecords > 1, creates N copies of the item where:
+     * - The varRef is expanded with array index (e.g., "client.name" becomes "clients[0].clientName")
+     * - The labelText is expanded with record number (e.g., "Name:" becomes "Client 1 - Name:")
+     * - The name is made unique (e.g., "clientNameField" becomes "clientNameField_0")
+     * - The sequence is calculated to keep items grouped by record (all fields for record 0, then record 1, etc.)
+     * 
+     * @param items The original list of items
+     * @return A new list with expanded items
+     */
+    private static List<AreaItem> expandMultiRecordItems(List<AreaItem> items) {
+        List<AreaItem> expandedItems = new ArrayList<>();
+        
+        // First, find the maximum sequence among items that will be expanded
+        // This is used to calculate proper sequence values that group items by record
+        int maxSeq = 0;
+        for (AreaItem item : items) {
+            if (item.numberOfRecords != null && item.numberOfRecords > 1) {
+                maxSeq = Math.max(maxSeq, item.sequence);
+            }
+        }
+        
+        for (AreaItem item : items) {
+            if (item.numberOfRecords != null && item.numberOfRecords > 1) {
+                // Expand this item into multiple items
+                for (int i = 0; i < item.numberOfRecords; i++) {
+                    AreaItem expandedItem = createExpandedItem(item, i, item.numberOfRecords, maxSeq);
+                    expandedItems.add(expandedItem);
+                }
+            } else {
+                // No expansion needed, add as-is
+                expandedItems.add(item);
+            }
+        }
+        
+        return expandedItems;
+    }
+    
+    /**
+     * Creates an expanded copy of an item for a specific record index.
+     * 
+     * @param template The template item to copy from
+     * @param index The record index (0-based)
+     * @param totalRecords The total number of records
+     * @param maxSequence The maximum sequence number among expandable items
+     * @return A new AreaItem with expanded varRef, name, and labelText
+     */
+    private static AreaItem createExpandedItem(AreaItem template, int index, int totalRecords, int maxSequence) {
+        AreaItem item = new AreaItem();
+        
+        // Copy all properties from template
+        // Sequence calculation groups items by record index, then by original sequence within each record
+        // Example: seq 1-4 for record 0, seq 5-8 for record 1, etc.
+        // Formula: index * (maxSequence + 1) + template.sequence
+        // This ensures all items for record 0 come before record 1, etc.
+        item.sequence = index * (maxSequence + 1) + template.sequence;
+        item.layoutPos = template.layoutPos;
+        item.editable = template.editable;
+        item.disabled = template.disabled;
+        item.visible = template.visible;
+        item.tooltip = template.tooltip;
+        item.textColor = template.textColor;
+        item.backgroundColor = template.backgroundColor;
+        item.colSpan = template.colSpan;
+        item.rowSpan = template.rowSpan;
+        item.hgrow = template.hgrow;
+        item.vgrow = template.vgrow;
+        item.margin = template.margin;
+        item.padding = template.padding;
+        item.prefWidth = template.prefWidth;
+        item.prefHeight = template.prefHeight;
+        item.minWidth = template.minWidth;
+        item.minHeight = template.minHeight;
+        item.maxWidth = template.maxWidth;
+        item.maxHeight = template.maxHeight;
+        item.alignment = template.alignment;
+        item.onValidate = template.onValidate;
+        item.source = template.source;
+        // Don't copy numberOfRecords - expanded items don't need to be expanded again
+        
+        // Expand the name to be unique for each record
+        if (template.name != null) {
+            item.name = template.name + "_" + index;
+        }
+        
+        // Expand the varRef to include the array index
+        // e.g., "clients.clientName" becomes "clients[0].clientName"
+        if (template.varRef != null) {
+            item.varRef = expandVarRefWithIndex(template.varRef, index);
+        }
+        
+        // Clone and expand the displayItem
+        if (template.displayItem != null) {
+            item.displayItem = cloneDisplayItem(template.displayItem);
+            // Expand the labelText with record number (1-based)
+            if (item.displayItem.labelText != null && !item.displayItem.labelText.isEmpty()) {
+                item.displayItem.labelText = expandLabelWithRecordNumber(item.displayItem.labelText, index + 1);
+            }
+        }
+        
+        return item;
+    }
+    
+    /**
+     * Expands a varRef with an array index.
+     * Examples:
+     * - "clients.clientName" -> "clients[0].clientName"
+     * - "clients.age" -> "clients[0].age"
+     * 
+     * The varRef is expected to be in the format "arrayName.fieldName" which gets
+     * expanded to "arrayName[index].fieldName".
+     * 
+     * @param varRef The original variable reference
+     * @param index The array index (0-based)
+     * @return The expanded variable reference
+     */
+    private static String expandVarRefWithIndex(String varRef, int index) {
+        if (varRef == null || varRef.isEmpty()) {
+            return varRef;
+        }
+        
+        // Find the first dot which separates array name from field name
+        int dotIndex = varRef.indexOf('.');
+        if (dotIndex > 0) {
+            // Has a dot - split into arrayName and fieldName
+            String arrayName = varRef.substring(0, dotIndex);
+            String fieldName = varRef.substring(dotIndex + 1);
+            return arrayName + "[" + index + "]." + fieldName;
+        } else {
+            // No dot - just add the index to the end
+            return varRef + "[" + index + "]";
+        }
+    }
+    
+    /**
+     * Expands a label text with the record number.
+     * Examples:
+     * - "Name:" with recordNumber 1 -> "Client 1 - Name:"
+     * - "Client - Name:" with recordNumber 2 -> "Client 2 - Name:"
+     * 
+     * The pattern inserts the record number after "Client" if present,
+     * otherwise prepends "Record N - " to the label.
+     * 
+     * @param labelText The original label text
+     * @param recordNumber The record number (1-based)
+     * @return The expanded label text
+     */
+    private static String expandLabelWithRecordNumber(String labelText, int recordNumber) {
+        if (labelText == null || labelText.isEmpty()) {
+            return labelText;
+        }
+        
+        // Check if the label already contains "Client N" pattern (where N might be a placeholder)
+        // Pattern: "Client X - " where X could be empty, a number, or nothing
+        java.util.regex.Pattern clientPattern = java.util.regex.Pattern.compile(
+            "^(Client)\\s*(?:\\d+)?\\s*-\\s*(.+)$", 
+            java.util.regex.Pattern.CASE_INSENSITIVE
+        );
+        java.util.regex.Matcher clientMatcher = clientPattern.matcher(labelText);
+        
+        if (clientMatcher.matches()) {
+            // Replace with the actual record number
+            return clientMatcher.group(1) + " " + recordNumber + " - " + clientMatcher.group(2);
+        }
+        
+        // If no "Client X -" pattern, prepend "Record N - "
+        return "Record " + recordNumber + " - " + labelText;
+    }
+    
+    /**
+     * Creates a clone of a DisplayItem.
+     * 
+     * @param source The source DisplayItem to clone
+     * @return A new DisplayItem with copied properties
+     */
+    private static DisplayItem cloneDisplayItem(DisplayItem source) {
+        DisplayItem clone = new DisplayItem();
+        
+        clone.itemType = source.itemType;
+        clone.type = source.type;
+        clone.cssClass = source.cssClass;
+        clone.mandatory = source.mandatory;
+        clone.caseFormat = source.caseFormat;
+        clone.min = source.min;
+        clone.max = source.max;
+        clone.style = source.style;
+        clone.screenName = source.screenName;
+        clone.alignment = source.alignment;
+        clone.pattern = source.pattern;
+        clone.promptHelp = source.promptHelp;
+        clone.labelText = source.labelText;
+        clone.labelTextAlignment = source.labelTextAlignment;
+        clone.labelColor = source.labelColor;
+        clone.labelBold = source.labelBold;
+        clone.labelItalic = source.labelItalic;
+        clone.labelFontSize = source.labelFontSize;
+        clone.itemFontSize = source.itemFontSize;
+        clone.maxLength = source.maxLength;
+        clone.itemColor = source.itemColor;
+        clone.itemBold = source.itemBold;
+        clone.itemItalic = source.itemItalic;
+        clone.onClick = source.onClick;
+        clone.onValidate = source.onValidate;
+        clone.showSliderValue = source.showSliderValue;
+        clone.source = source.source;
+        clone.status = source.status;
+        clone.displayRecords = source.displayRecords;
+        clone.seq = source.seq;
+        
+        // Clone options list if present
+        if (source.options != null) {
+            clone.options = new ArrayList<>(source.options);
+        }
+        
+        // Clone columns list if present
+        if (source.columns != null) {
+            clone.columns = new ArrayList<>();
+            for (DisplayItem.TableColumn col : source.columns) {
+                DisplayItem.TableColumn colClone = new DisplayItem.TableColumn();
+                colClone.name = col.name;
+                colClone.field = col.field;
+                colClone.type = col.type;
+                colClone.width = col.width;
+                colClone.alignment = col.alignment;
+                clone.columns.add(colClone);
+            }
+        }
+        
+        return clone;
     }
 
     // Schema validation methods

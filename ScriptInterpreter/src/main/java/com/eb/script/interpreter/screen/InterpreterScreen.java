@@ -1793,6 +1793,12 @@ public class InterpreterScreen {
                             item.alignment = String.valueOf(itemDef.get("alignment")).toLowerCase();
                         }
 
+                        // Parse numberOfRecords property for multi-item templates
+                        Object numberOfRecordsObj = getCaseInsensitive(itemDef, "numberOfRecords");
+                        if (numberOfRecordsObj != null && numberOfRecordsObj instanceof Number) {
+                            item.numberOfRecords = ((Number) numberOfRecordsObj).intValue();
+                        }
+
                         // Store in screenAreaItems map by item name (for screen.getProperty/setProperty)
                         if (item.name != null && !item.name.isEmpty()) {
                             Map<String, AreaItem> areaItemsMap = context.getScreenAreaItems(screenName);
