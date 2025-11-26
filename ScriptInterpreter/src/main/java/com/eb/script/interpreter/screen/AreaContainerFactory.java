@@ -120,16 +120,6 @@ public class AreaContainerFactory {
             }
         }
 
-        // Apply spacing property (for containers that support it)
-        if (areaDef.spacing != null && !areaDef.spacing.isEmpty()) {
-            applySpacing(container, areaDef.spacing);
-        }
-        
-        // Apply padding property (for all Region types)
-        if (areaDef.padding != null && !areaDef.padding.isEmpty()) {
-            applyPadding(container, areaDef.padding);
-        }
-
         // Apply title property (for TitledPane)
         if (areaDef.title != null && !areaDef.title.isEmpty() && container instanceof TitledPane) {
             ((TitledPane) container).setText(areaDef.title);
@@ -156,6 +146,18 @@ public class AreaContainerFactory {
             if (areaDef.groupLabelText != null && !areaDef.groupLabelText.isEmpty()) {
                 addGroupLabel(container, areaDef.groupLabelText, areaDef.groupLabelAlignment, areaDef.groupBorderColor, areaDef.groupLabelOffset, areaDef.groupLabelColor, areaDef.groupLabelBackground, areaDef.groupBorderWidth);
             }
+        }
+
+        // Apply spacing property AFTER custom style so user-specified spacing takes precedence
+        // This must come after appendStyle calls to override any -fx-spacing in the style string
+        if (areaDef.spacing != null && !areaDef.spacing.isEmpty()) {
+            applySpacing(container, areaDef.spacing);
+        }
+        
+        // Apply padding property AFTER custom style so user-specified padding takes precedence
+        // This must come after appendStyle calls to override any -fx-padding in the style string
+        if (areaDef.padding != null && !areaDef.padding.isEmpty()) {
+            applyPadding(container, areaDef.padding);
         }
 
         // Apply layout configuration if provided
