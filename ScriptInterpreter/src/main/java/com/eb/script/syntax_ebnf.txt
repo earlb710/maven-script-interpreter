@@ -345,6 +345,36 @@ MULTI-RECORD AREA EXPANSION
    - clients[2].age with label "Client 3 - Age:"
 *)
 
+ITEM PROPERTY BUILTINS
+----------------------
+(* Built-in functions for getting and setting item properties at runtime:
+
+   scr.getProperty(item, property) -> ANY
+     Gets a property value from an area item.
+     - item: string in format "screenName.itemName"
+     - property: property name (case-insensitive)
+     
+     Supported properties:
+       editable, disabled, visible, tooltip, textColor, backgroundColor,
+       colSpan, rowSpan, hgrow, vgrow, margin, padding,
+       prefWidth, prefHeight, minWidth, minHeight, maxWidth, maxHeight, alignment
+     
+     Example:
+       var isVisible = #scr.getProperty("myScreen.clientNameField", "visible");
+       var tooltip = #scr.getProperty("myScreen.ageField", "tooltip");
+
+   scr.setProperty(item, property, value) -> BOOL
+     Sets a property value on an area item.
+     - item: string in format "screenName.itemName"
+     - property: property name (case-insensitive)
+     - value: value to set
+     
+     Example:
+       #scr.setProperty("myScreen.clientNameField", "visible", false);
+       #scr.setProperty("myScreen.ageField", "tooltip", "Enter client age");
+       #scr.setProperty("myScreen.nameField", "textColor", "#FF0000");
+*)
+
 AREA PROPERTY BUILTINS
 ----------------------
 (* Built-in functions for getting and setting area properties at runtime:
