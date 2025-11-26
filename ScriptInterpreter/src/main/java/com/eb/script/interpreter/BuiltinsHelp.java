@@ -259,7 +259,7 @@ public class BuiltinsHelp {
             Thread.currentThread().interrupt();
             throw new InterpreterError("system.alertDialog interrupted: " + e.getMessage());
         }
-        return true;
+        return null; // Message dialog returns nothing
     }
 
     // --- Helper methods ---
