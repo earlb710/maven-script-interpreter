@@ -943,6 +943,200 @@ public class BuiltinsScreen {
     }
 
     /**
+     * scr.setItemChoiceOptions(screenName, itemName, optionsMap) -> Boolean
+     * Sets the choice options for a ChoiceBox or ComboBox screen item using a map.
+     * The map keys are display text (shown to users), and values are data values (stored when selected).
+     */
+    public static Object screenSetItemChoiceOptions(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (String) args[0];
+        String itemName = (String) args[1];
+        Object optionsMapArg = args[2];
+
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("scr.setItemChoiceOptions: screenName parameter cannot be null or empty");
+        }
+        if (itemName == null || itemName.isEmpty()) {
+            throw new InterpreterError("scr.setItemChoiceOptions: itemName parameter cannot be null or empty");
+        }
+        if (optionsMapArg == null) {
+            throw new InterpreterError("scr.setItemChoiceOptions: optionsMap parameter cannot be null");
+        }
+        if (!(optionsMapArg instanceof Map)) {
+            throw new InterpreterError("scr.setItemChoiceOptions: optionsMap parameter must be a map, got: " + optionsMapArg.getClass().getSimpleName());
+        }
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> optionsMap = (Map<String, Object>) optionsMapArg;
+
+        // Verify screen exists
+        if (!context.getScreens().containsKey(screenName.toLowerCase())) {
+            throw new InterpreterError("scr.setItemChoiceOptions: screen '" + screenName + "' not found");
+        }
+
+        // Get the area items for this screen
+        Map<String, AreaItem> areaItems = context.getScreenAreaItems(screenName);
+        if (areaItems == null || areaItems.isEmpty()) {
+            throw new InterpreterError("scr.setItemChoiceOptions: no area items defined for screen '" + screenName + "'");
+        }
+
+        // Find the area item
+        AreaItem item = null;
+        String lowerItemName = itemName.toLowerCase();
+
+        for (Map.Entry<String, AreaItem> entry : areaItems.entrySet()) {
+            String key = entry.getKey();
+            AreaItem ai = entry.getValue();
+            if (key.equals(lowerItemName) || key.endsWith("." + lowerItemName)
+                    || (ai.name != null && ai.name.equalsIgnoreCase(itemName))) {
+                item = ai;
+                break;
+            }
+        }
+
+        if (item == null) {
+            throw new InterpreterError("scr.setItemChoiceOptions: item '" + itemName + "' not found in screen '" + screenName + "'");
+        }
+
+        // Get or create the display item
+        DisplayItem displayItem = item.displayItem;
+        if (displayItem == null) {
+            displayItem = new DisplayItem();
+            item.displayItem = displayItem;
+        }
+
+        // Convert the map to String values and store in optionsMap
+        java.util.LinkedHashMap<String, String> convertedOptionsMap = new java.util.LinkedHashMap<>();
+        for (Map.Entry<String, Object> entry : optionsMap.entrySet()) {
+            convertedOptionsMap.put(entry.getKey(), String.valueOf(entry.getValue()));
+        }
+        displayItem.setOptionsMap(convertedOptionsMap);
+
+        // Also update the JavaFX control on the UI thread
+        final String finalScreenName = screenName;
+        final String finalItemName = itemName;
+        final java.util.Map<String, String> finalOptionsMap = convertedOptionsMap;
+
+        javafx.application.Platform.runLater(() -> {
+            try {
+                java.util.List<javafx.scene.Node> controls = context.getScreenBoundControls().get(finalScreenName);
+                if (controls != null) {
+                    String targetUserData = finalScreenName + "." + finalItemName;
+                    for (javafx.scene.Node control : controls) {
+                        Object userData = control.getUserData();
+                        if (targetUserData.equals(userData)) {
+                            if (control instanceof javafx.scene.control.ChoiceBox) {
+                                @SuppressWarnings("unchecked")
+                                javafx.scene.control.ChoiceBox<String> choiceBox = (javafx.scene.control.ChoiceBox<String>) control;
+                                // Store the current selection
+                                String currentValue = choiceBox.getValue();
+                                // Clear and add new items (keys from the map)
+                                choiceBox.getItems().clear();
+                                choiceBox.getItems().addAll(finalOptionsMap.keySet());
+                                // Store the optionsMap in the control's properties
+                                choiceBox.getProperties().put("optionsMap", finalOptionsMap);
+                                // Restore selection if the key is still in the new options
+                                if (currentValue != null && finalOptionsMap.containsKey(currentValue)) {
+                                    choiceBox.setValue(currentValue);
+                                }
+                            } else if (control instanceof javafx.scene.control.ComboBox) {
+                                @SuppressWarnings("unchecked")
+                                javafx.scene.control.ComboBox<String> comboBox = (javafx.scene.control.ComboBox<String>) control;
+                                // Store the current selection
+                                String currentValue = comboBox.getValue();
+                                // Clear and add new items (keys from the map)
+                                comboBox.getItems().clear();
+                                comboBox.getItems().addAll(finalOptionsMap.keySet());
+                                // Store the optionsMap in the control's properties
+                                comboBox.getProperties().put("optionsMap", finalOptionsMap);
+                                // Restore selection if the key is still in the new options
+                                if (currentValue != null && finalOptionsMap.containsKey(currentValue)) {
+                                    comboBox.setValue(currentValue);
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Error setting choice options on control: " + e.getMessage());
+                e.printStackTrace();
+            }
+        });
+
+        return Boolean.TRUE;
+    }
+
+    /**
+     * scr.getItemChoiceOptions(screenName, itemName) -> Map
+     * Gets the choice options for a ChoiceBox or ComboBox screen item.
+     * Returns a map where keys are display text and values are data values.
+     */
+    public static Object screenGetItemChoiceOptions(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (String) args[0];
+        String itemName = (String) args[1];
+
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("scr.getItemChoiceOptions: screenName parameter cannot be null or empty");
+        }
+        if (itemName == null || itemName.isEmpty()) {
+            throw new InterpreterError("scr.getItemChoiceOptions: itemName parameter cannot be null or empty");
+        }
+
+        // Verify screen exists
+        if (!context.getScreens().containsKey(screenName.toLowerCase())) {
+            throw new InterpreterError("scr.getItemChoiceOptions: screen '" + screenName + "' not found");
+        }
+
+        // Get the area items for this screen
+        Map<String, AreaItem> areaItems = context.getScreenAreaItems(screenName);
+        if (areaItems == null || areaItems.isEmpty()) {
+            throw new InterpreterError("scr.getItemChoiceOptions: no area items defined for screen '" + screenName + "'");
+        }
+
+        // Find the area item
+        AreaItem item = null;
+        String lowerItemName = itemName.toLowerCase();
+
+        for (Map.Entry<String, AreaItem> entry : areaItems.entrySet()) {
+            String key = entry.getKey();
+            AreaItem ai = entry.getValue();
+            if (key.equals(lowerItemName) || key.endsWith("." + lowerItemName)
+                    || (ai.name != null && ai.name.equalsIgnoreCase(itemName))) {
+                item = ai;
+                break;
+            }
+        }
+
+        if (item == null) {
+            throw new InterpreterError("scr.getItemChoiceOptions: item '" + itemName + "' not found in screen '" + screenName + "'");
+        }
+
+        // Get the display item
+        DisplayItem displayItem = item.displayItem;
+        if (displayItem == null) {
+            return new java.util.LinkedHashMap<String, String>();
+        }
+
+        // Return the optionsMap if present, or convert options to a map
+        Map<String, String> optionsMap = displayItem.getOptionsMap();
+        if (optionsMap != null && !optionsMap.isEmpty()) {
+            return optionsMap;
+        } else {
+            List<String> options = displayItem.getOptions();
+            if (options != null && !options.isEmpty()) {
+                // Convert options list to map where key=value (display text is same as data value)
+                java.util.LinkedHashMap<String, String> result = new java.util.LinkedHashMap<>();
+                for (String option : options) {
+                    result.put(option, option);
+                }
+                return result;
+            }
+        }
+
+        return new java.util.LinkedHashMap<String, String>();
+    }
+
+    /**
      * Helper method to recursively find an area by name.
      */
     private static AreaDefinition findAreaByName(List<AreaDefinition> areas, String areaName) {

@@ -1248,13 +1248,22 @@ public class InterpreterScreen {
         // Extract options for selection controls (ComboBox, ChoiceBox, ListView)
         if (displayDef.containsKey("options")) {
             Object optionsObj = displayDef.get("options");
-            metadata.options = new ArrayList<>();
-            if (optionsObj instanceof ArrayDynamic) {
+            if (optionsObj instanceof Map) {
+                // Handle Map type: keys are display text, values are data values
+                @SuppressWarnings("unchecked")
+                Map<String, Object> map = (Map<String, Object>) optionsObj;
+                metadata.optionsMap = new java.util.LinkedHashMap<>();
+                for (Map.Entry<String, Object> entry : map.entrySet()) {
+                    metadata.optionsMap.put(entry.getKey(), String.valueOf(entry.getValue()));
+                }
+            } else if (optionsObj instanceof ArrayDynamic) {
+                metadata.options = new ArrayList<>();
                 ArrayDynamic array = (ArrayDynamic) optionsObj;
                 for (Object item : array.getAll()) {
                     metadata.options.add(String.valueOf(item));
                 }
             } else if (optionsObj instanceof List) {
+                metadata.options = new ArrayList<>();
                 @SuppressWarnings("unchecked")
                 List<Object> list = (List<Object>) optionsObj;
                 for (Object item : list) {

@@ -67,13 +67,21 @@ public class ControlUpdater {
             if (value != null) {
                 @SuppressWarnings("unchecked")
                 ComboBox<String> comboBox = (ComboBox<String>) control;
-                comboBox.setValue(String.valueOf(value));
+                @SuppressWarnings("unchecked")
+                java.util.Map<String, String> optionsMap = 
+                    (java.util.Map<String, String>) comboBox.getProperties().get("optionsMap");
+                String valueToDisplay = getDisplayTextForDataValue(String.valueOf(value), optionsMap);
+                comboBox.setValue(valueToDisplay);
             }
         } else if (control instanceof ChoiceBox) {
             if (value != null) {
                 @SuppressWarnings("unchecked")
                 ChoiceBox<String> choiceBox = (ChoiceBox<String>) control;
-                choiceBox.setValue(String.valueOf(value));
+                @SuppressWarnings("unchecked")
+                java.util.Map<String, String> optionsMap = 
+                    (java.util.Map<String, String>) choiceBox.getProperties().get("optionsMap");
+                String valueToDisplay = getDisplayTextForDataValue(String.valueOf(value), optionsMap);
+                choiceBox.setValue(valueToDisplay);
             }
         } else if (control instanceof Label) {
             ((Label) control).setText(value != null ? String.valueOf(value) : "");
@@ -165,6 +173,30 @@ public class ControlUpdater {
                 }
             }
         }
+    }
+    
+    /**
+     * Gets the display text (map key) for a given data value (map value) from an optionsMap.
+     * If optionsMap is null or the value is not found, returns the original data value.
+     * 
+     * @param dataValue The data value to look up
+     * @param optionsMap The map of display text (key) to data value (value), or null
+     * @return The display text for the data value, or the original data value if not found
+     */
+    private static String getDisplayTextForDataValue(String dataValue, java.util.Map<String, String> optionsMap) {
+        if (optionsMap == null || dataValue == null) {
+            return dataValue;
+        }
+        
+        // Find the display text (key) for this data value (value)
+        for (java.util.Map.Entry<String, String> entry : optionsMap.entrySet()) {
+            if (entry.getValue().equals(dataValue)) {
+                return entry.getKey();
+            }
+        }
+        
+        // Value not found in map, return original
+        return dataValue;
     }
     
     /**

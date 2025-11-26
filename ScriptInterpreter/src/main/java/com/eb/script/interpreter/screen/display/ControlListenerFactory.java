@@ -203,25 +203,49 @@ public class ControlListenerFactory {
     
     /**
      * Adds a listener to a ComboBox control.
+     * Supports optionsMap for mapping display text to data values.
      */
     private static void addComboBoxListener(Node control, String varName,
             ConcurrentHashMap<String, Object> screenVars) {
         @SuppressWarnings("unchecked")
         ComboBox<String> comboBox = (ComboBox<String>) control;
         comboBox.valueProperty().addListener((obs, oldVal, newVal) -> {
-            VarRefResolver.setVarRefValue(varName, newVal, screenVars);
+            Object valueToStore = newVal;
+            
+            // Check if optionsMap is present to get the data value
+            @SuppressWarnings("unchecked")
+            java.util.Map<String, String> optionsMap = 
+                (java.util.Map<String, String>) comboBox.getProperties().get("optionsMap");
+            if (optionsMap != null && newVal != null && optionsMap.containsKey(newVal)) {
+                // Use the data value (map value) instead of display text (map key)
+                valueToStore = optionsMap.get(newVal);
+            }
+            
+            VarRefResolver.setVarRefValue(varName, valueToStore, screenVars);
         });
     }
     
     /**
      * Adds a listener to a ChoiceBox control.
+     * Supports optionsMap for mapping display text to data values.
      */
     private static void addChoiceBoxListener(Node control, String varName,
             ConcurrentHashMap<String, Object> screenVars) {
         @SuppressWarnings("unchecked")
         ChoiceBox<String> choiceBox = (ChoiceBox<String>) control;
         choiceBox.valueProperty().addListener((obs, oldVal, newVal) -> {
-            VarRefResolver.setVarRefValue(varName, newVal, screenVars);
+            Object valueToStore = newVal;
+            
+            // Check if optionsMap is present to get the data value
+            @SuppressWarnings("unchecked")
+            java.util.Map<String, String> optionsMap = 
+                (java.util.Map<String, String>) choiceBox.getProperties().get("optionsMap");
+            if (optionsMap != null && newVal != null && optionsMap.containsKey(newVal)) {
+                // Use the data value (map value) instead of display text (map key)
+                valueToStore = optionsMap.get(newVal);
+            }
+            
+            VarRefResolver.setVarRefValue(varName, valueToStore, screenVars);
         });
     }
     

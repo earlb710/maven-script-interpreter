@@ -875,6 +875,17 @@ public final class Builtins {
                 newParam("property", DataType.STRING, true), // required; property name
                 newParam("value", DataType.ANY, true) // required; value to set
         ));
+        addBuiltin(info(
+                "scr.setItemChoiceOptions", DataType.BOOL,
+                newParam("screenName", DataType.STRING, true), // required; screen name
+                newParam("itemName", DataType.STRING, true), // required; item name
+                newParam("optionsMap", DataType.ANY, true) // required; map of display text to data values
+        ));
+        addBuiltin(info(
+                "scr.getItemChoiceOptions", DataType.ANY,
+                newParam("screenName", DataType.STRING, true), // required; screen name
+                newParam("itemName", DataType.STRING, true) // required; item name
+        ));
 
         NAMES = Collections.unmodifiableSet(BUILTINS.keySet());
     }
@@ -996,6 +1007,8 @@ public final class Builtins {
             case "scr.getvarreference" -> BuiltinsScreen.screenGetVarReference(context, args);
             case "scr.getareaproperty" -> BuiltinsScreen.screenGetAreaProperty(context, args);
             case "scr.setareaproperty" -> BuiltinsScreen.screenSetAreaProperty(context, args);
+            case "scr.setitemchoiceoptions" -> BuiltinsScreen.screenSetItemChoiceOptions(context, args);
+            case "scr.getitemchoiceoptions" -> BuiltinsScreen.screenGetItemChoiceOptions(context, args);
             default -> throw new InterpreterError("Unknown screen builtin: " + name);
         };
     }

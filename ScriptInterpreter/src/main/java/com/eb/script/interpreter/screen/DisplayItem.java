@@ -1,7 +1,9 @@
 package com.eb.script.interpreter.screen;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Container class for screen display item metadata, input item types, area types, and related definitions.
@@ -38,6 +40,9 @@ public class DisplayItem {
     String labelTextAlignment;
     // Options/values for selection controls (ComboBox, ChoiceBox, ListView)
     List<String> options;
+    // Options map for selection controls where keys are display text and values are data values
+    // When populated, the display text is shown to users but the data value is stored
+    Map<String, String> optionsMap;
     // Label text color
     String labelColor;
     // Label text bold flag
@@ -114,10 +119,44 @@ public class DisplayItem {
                ", pattern='" + pattern + '\'' +
                ", promptHelp='" + promptHelp + '\'' +
                ", options=" + options +
+               ", optionsMap=" + optionsMap +
                ", labelColor='" + labelColor + '\'' +
                ", labelBold=" + labelBold +
                ", labelItalic=" + labelItalic +
                '}';
+    }
+    
+    /**
+     * Gets the options list for selection controls.
+     * @return The list of option strings, or null if not set
+     */
+    public List<String> getOptions() {
+        return options;
+    }
+    
+    /**
+     * Sets the options list for selection controls.
+     * @param options The list of option strings
+     */
+    public void setOptions(List<String> options) {
+        this.options = options;
+    }
+    
+    /**
+     * Gets the optionsMap for selection controls.
+     * The map keys are display text (shown to users) and values are data values (stored when selected).
+     * @return The options map, or null if not set
+     */
+    public Map<String, String> getOptionsMap() {
+        return optionsMap;
+    }
+    
+    /**
+     * Sets the optionsMap for selection controls.
+     * @param optionsMap The map of display text to data values
+     */
+    public void setOptionsMap(Map<String, String> optionsMap) {
+        this.optionsMap = optionsMap;
     }
     
     /**
