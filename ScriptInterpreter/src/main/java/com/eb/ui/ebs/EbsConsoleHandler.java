@@ -3,7 +3,7 @@ package com.eb.ui.ebs;
 import com.eb.script.RuntimeContext;
 import com.eb.script.arrays.ArrayDynamic;
 import com.eb.script.file.FileContext;
-import com.eb.script.interpreter.Builtins;
+import com.eb.script.interpreter.builtins.Builtins;
 import com.eb.script.interpreter.InterpreterError;
 import com.eb.script.json.Json;
 import com.eb.script.parser.ParseError;

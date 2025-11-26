@@ -1,6 +1,6 @@
 package com.eb.script.token.ebs;
 
-import com.eb.script.interpreter.Builtins;
+import com.eb.script.interpreter.builtins.Builtins;
 import com.eb.script.token.Lexer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;

@@ -1,6 +1,6 @@
 package com.eb.script.parser;
 
-import com.eb.script.interpreter.Builtins;
+import com.eb.script.interpreter.builtins.Builtins;
 import com.eb.script.json.Json;
 import com.eb.script.RuntimeContext;
 import com.eb.script.token.Category;

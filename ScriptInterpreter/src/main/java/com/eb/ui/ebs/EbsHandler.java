@@ -1,7 +1,7 @@
 package com.eb.ui.ebs;
 
 import com.eb.script.RuntimeContext;
-import com.eb.script.interpreter.Builtins;
+import com.eb.script.interpreter.builtins.Builtins;
 import com.eb.script.interpreter.Environment;
 import com.eb.script.interpreter.Interpreter;
 import com.eb.script.interpreter.InterpreterError;

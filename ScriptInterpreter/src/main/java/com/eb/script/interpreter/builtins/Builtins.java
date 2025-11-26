@@ -1,6 +1,8 @@
-package com.eb.script.interpreter;
+package com.eb.script.interpreter.builtins;
 
-import com.eb.script.file.BuiltinsFile;
+import com.eb.script.interpreter.Environment;
+import com.eb.script.interpreter.InterpreterContext;
+import com.eb.script.interpreter.InterpreterError;
 import com.eb.script.json.Json;
 import com.eb.script.token.DataType;
 import com.eb.util.Util;

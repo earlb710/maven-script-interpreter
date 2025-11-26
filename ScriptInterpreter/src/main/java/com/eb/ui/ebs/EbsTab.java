@@ -3,7 +3,7 @@ package com.eb.ui.ebs;
 
 import com.eb.ui.tabs.*;
 import com.eb.script.RuntimeContext;
-import com.eb.script.file.BuiltinsFile;
+import com.eb.script.interpreter.builtins.BuiltinsFile;
 import com.eb.script.file.FileData;
 import com.eb.script.token.ebs.EbsLexer;
 import com.eb.script.token.ebs.EbsToken;

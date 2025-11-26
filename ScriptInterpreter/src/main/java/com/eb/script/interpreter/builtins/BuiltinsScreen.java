@@ -1,4 +1,7 @@
-package com.eb.script.interpreter;
+package com.eb.script.interpreter.builtins;
+
+import com.eb.script.interpreter.InterpreterContext;
+import com.eb.script.interpreter.InterpreterError;
 
 import com.eb.script.arrays.ArrayDynamic;
 import com.eb.script.interpreter.screen.AreaDefinition;

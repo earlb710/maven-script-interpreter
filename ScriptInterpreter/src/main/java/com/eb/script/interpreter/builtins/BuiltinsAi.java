@@ -1,4 +1,6 @@
-package com.eb.script.interpreter;
+package com.eb.script.interpreter.builtins;
+
+import com.eb.script.interpreter.InterpreterError;
 
 import com.eb.script.arrays.ArrayDef;
 import com.eb.script.arrays.ArrayDynamic;

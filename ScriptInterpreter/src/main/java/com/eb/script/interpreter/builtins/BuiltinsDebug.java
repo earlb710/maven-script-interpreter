@@ -1,4 +1,7 @@
-package com.eb.script.interpreter;
+package com.eb.script.interpreter.builtins;
+
+import com.eb.script.interpreter.Environment;
+import com.eb.script.interpreter.InterpreterError;
 
 import com.eb.script.token.Category;
 import com.eb.script.token.ebs.EbsTokenType;
