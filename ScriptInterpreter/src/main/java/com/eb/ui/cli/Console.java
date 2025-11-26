@@ -174,6 +174,7 @@ public final class Console {
         bottom.setPadding(new Insets(3));
         inputScroller.setMaxWidth(Double.MAX_VALUE);
         inputEvents();
+        outputEvents();
         
         // Add cursor position tracking for console input area
         setupCursorTracking(inputArea);
@@ -301,6 +302,31 @@ public final class Console {
         inputArea.setOnMouseClicked(e -> {
             if (autocompletePopup.isShowing()) {
                 autocompletePopup.hide();
+            }
+        });
+    }
+    
+    private void outputEvents() {
+        // Key handling for output area:
+        //   • Ctrl+F opens find bar
+        //   • Escape closes find bar
+        outputArea.addEventHandler(KeyEvent.KEY_PRESSED, e -> {
+            // Find: Ctrl+F
+            if (e.getCode() == KeyCode.F && e.isControlDown()) {
+                if (findBar.isVisible()) {
+                    hideFind();
+                } else {
+                    showFind();
+                }
+                e.consume();
+                return;
+            }
+            
+            // Close find bar: Escape
+            if (e.getCode() == KeyCode.ESCAPE && findBar.isVisible()) {
+                hideFind();
+                e.consume();
+                return;
             }
         });
     }
