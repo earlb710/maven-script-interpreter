@@ -252,8 +252,11 @@ public class ConsoleConfig {
             }
         }
         
-        // Always add find highlighting styles - these override all other text styles
-        // to ensure search matches are readable with black text on yellow/amber background
+        // Find highlighting styles - these override all other text styles
+        // to ensure search matches are readable. Uses configurable colors.
+        String findHighlightColor = colors.getOrDefault("find-highlight-color", "#000000");
+        String findHighlightBackground = colors.getOrDefault("find-highlight-background", "#ddb107");
+        
         css.append("/* Find highlighting - overrides syntax highlighting for readability */\n");
         css.append(".find-hit,\n");
         css.append(".text.find-hit,\n");
@@ -262,8 +265,8 @@ public class ConsoleConfig {
         css.append(".console-in .text.find-hit,\n");
         css.append(".editor-ebs .text.find-hit,\n");
         css.append(".editor-text .text.find-hit {\n");
-        css.append("    -fx-fill: #000000 !important;\n");
-        css.append("    -rtfx-background-color: #ddb107 !important;\n");
+        css.append("    -fx-fill: ").append(findHighlightColor).append(" !important;\n");
+        css.append("    -rtfx-background-color: ").append(findHighlightBackground).append(" !important;\n");
         css.append("}\n\n");
         
         css.append(".find-current,\n");
@@ -273,7 +276,7 @@ public class ConsoleConfig {
         css.append(".console-in .text.find-current,\n");
         css.append(".editor-ebs .text.find-current,\n");
         css.append(".editor-text .text.find-current {\n");
-        css.append("    -fx-fill: #000000 !important;\n");
+        css.append("    -fx-fill: ").append(findHighlightColor).append(" !important;\n");
         css.append("    -fx-font-weight: bold !important;\n");
         css.append("    -rtfx-background-color: #ffff00 !important;\n");
         css.append("}\n\n");
