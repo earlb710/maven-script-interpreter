@@ -425,8 +425,8 @@ screen colorEditorScreen = {
                 "style": "-fx-spacing: 4; -fx-padding: 4; -fx-alignment: CENTER_LEFT;",
                 "items": [
                     {"name": "profile_item", "varref": "profile"},
-                    {"name": "addProfileBtn", "type": "button", "labelText": "+", "style": "-fx-min-width: 30;", "tooltip": "Add a new profile", "onClick": "var newName: string = call system.inputDialog(\"Add Profile\", \"Enter new profile name:\", \"\"); if newName != \"\" then { call system.alertDialog(\"Profile '\" + newName + \"' would be added. (Profile management requires restart)\", \"Add Profile\", \"info\"); }"},
-                    {"name": "removeProfileBtn", "type": "button", "labelText": "-", "style": "-fx-min-width: 30;", "tooltip": "Remove current profile", "onClick": "if colorEditorScreen.profile == \"default\" then { call system.alertDialog(\"Cannot delete the default profile.\", \"Delete Profile\", \"warning\"); } else { call system.alertDialog(\"Profile '\" + colorEditorScreen.profile + \"' would be removed. (Profile management requires restart)\", \"Remove Profile\", \"info\"); }"}
+                    {"name": "addProfileBtn", "type": "button", "labelText": "+", "style": "-fx-min-width: 30;", "tooltip": "Add a new profile", "onClick": "print \"Add profile clicked\";"},
+                    {"name": "removeProfileBtn", "type": "button", "labelText": "-", "style": "-fx-min-width: 30;", "tooltip": "Remove current profile", "onClick": "print \"Remove profile clicked\";"}
                 ]
             },
             {
