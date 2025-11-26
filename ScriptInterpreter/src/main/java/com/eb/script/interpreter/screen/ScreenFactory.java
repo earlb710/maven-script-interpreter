@@ -6,6 +6,7 @@ import com.eb.script.file.FileData;
 import com.eb.script.interpreter.InterpreterContext;
 import com.eb.script.interpreter.InterpreterError;
 import com.eb.script.interpreter.screen.AreaDefinition.AreaType;
+import com.eb.script.interpreter.screen.data.DataBindingManager;
 import com.eb.script.interpreter.screen.data.VarRefResolver;
 import com.eb.script.interpreter.screen.display.ControlListenerFactory;
 import com.eb.script.interpreter.screen.display.ControlUpdater;
@@ -2134,13 +2135,14 @@ public class ScreenFactory {
      * @param varName The variable name
      * @param screenVars The map containing screen variables
      * @param metadata The DisplayItem metadata for the control
+     * @deprecated Use DataBindingManager.setupBinding() instead
      */
     private static void setupVariableBinding(Node control, String varName,
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
             java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
             DisplayItem metadata) {
-        // Delegate to the ControlListenerFactory in the display layer
-        ControlListenerFactory.setupVariableBinding(control, varName, screenVars, varTypes, metadata);
+        // Delegate to DataBindingManager in the data layer
+        DataBindingManager.setupBinding(control, varName, screenVars, varTypes, metadata);
     }
 
     /**
@@ -2267,12 +2269,12 @@ public class ScreenFactory {
      * Refreshes all bound controls by updating their values from the screenVars
      * map. This is called after onClick handlers execute to reflect variable
      * changes in the UI.
-     * @deprecated Use ControlUpdater.refreshBoundControls() instead
+     * @deprecated Use DataBindingManager.refreshBoundControls() instead
      */
     private static void refreshBoundControls(List<Node> boundControls,
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
-        // Delegate to ControlUpdater in the display layer
-        ControlUpdater.refreshBoundControls(boundControls, screenVars);
+        // Delegate to DataBindingManager in the data layer
+        DataBindingManager.refreshBoundControls(boundControls, screenVars);
     }
     
     /**
