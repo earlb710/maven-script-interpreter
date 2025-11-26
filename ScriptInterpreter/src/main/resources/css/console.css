@@ -253,17 +253,25 @@
     -fx-font-size: 12px;
 }
 
-/* background for all matches */
-.find-hit {
+/* background for all matches - black text ensures readability on yellow background */
+.find-hit,
+.text.find-hit,
+.styled-text-area .text.find-hit,
+.editor-ebs .text.find-hit,
+.editor-text .text.find-hit {
     -fx-fill: #000000;
     -rtfx-background-color: #ddb107; /* stronger amber */
 }
 
-/* background for current match (selected) */
-.find-current {
+/* background for current match (selected) - black text ensures readability on yellow background */
+.find-current,
+.text.find-current,
+.styled-text-area .text.find-current,
+.editor-ebs .text.find-current,
+.editor-text .text.find-current {
     -fx-fill: #000000;
     -fx-font-weight: bold;
-    -rtfx-background-color: #eedd58; /* light yellow */
+    -rtfx-background-color: #ffff00; /* bright yellow for current match */
 }
 
 /* find bar container (optional styling) */

@@ -13,12 +13,17 @@ import java.util.List;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
 import javafx.scene.control.Tab;
+import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -49,6 +54,16 @@ public final class Console {
     private final Handler handler;
     // autocomplete
     private final AutocompletePopup autocompletePopup;
+    
+    // Find bar components
+    private HBox findBar;
+    private TextField findField;
+    private CheckBox chkCase, chkWord, chkRegex;
+    private Button btnNext, btnPrev, btnClose;
+    private Label lblCount;
+    private List<int[]> lastMatches = java.util.Collections.emptyList();
+    private int currentIndex = -1;
+    private boolean suppressFindSearch = false;
 
     public Console(Handler handler) {
         this.handler = handler;
@@ -97,6 +112,31 @@ public final class Console {
         outputFrame.getStyleClass().addAll("console-frame", "bevel-lowered");
         outputFrame.setPadding(new Insets(0));
 
+        // ---- Find bar ----
+        findField = new TextField();
+        findField.setPromptText("Find");
+        
+        chkCase = new CheckBox("Aa");
+        chkWord = new CheckBox("Word");
+        chkRegex = new CheckBox("Regex");
+        
+        btnPrev = new Button("Prev");
+        btnNext = new Button("Next");
+        btnClose = new Button("Close");
+        lblCount = new Label("");
+        
+        findBar = new HBox(8, new Label("Find:"),
+                findField, chkCase, chkWord, chkRegex,
+                btnPrev, btnNext,
+                lblCount, btnClose);
+        findBar.getStyleClass().add("find-bar");
+        findBar.setVisible(false);
+        findBar.setManaged(false);
+        findBar.setAlignment(Pos.CENTER_LEFT);
+        findBar.setFillHeight(false);
+        
+        setupFindListeners();
+
         // ---- Multiline input area (RichTextFX) ----
         inputArea = new ScriptArea();
         inputArea.getStyleClass().clear();
@@ -134,11 +174,16 @@ public final class Console {
         bottom.setPadding(new Insets(3));
         inputScroller.setMaxWidth(Double.MAX_VALUE);
         inputEvents();
+        outputEvents();
         
         // Add cursor position tracking for console input area
         setupCursorTracking(inputArea);
         
-        BorderPane content = new BorderPane(outputFrame);
+        // Layout with find bar above output
+        VBox top = new VBox(4, findBar, outputFrame);
+        VBox.setVgrow(outputFrame, Priority.ALWAYS);
+        
+        BorderPane content = new BorderPane(top);
         content.setBottom(bottom);
 
         Tab t = new Tab("Console", content);
@@ -155,6 +200,7 @@ public final class Console {
 //   • Ctrl+Up / Ctrl+Down navigate history (anywhere in buffer)
 //   • Plain Up/Down behave normally (cursor movement)
 //   • Ctrl+Space triggers autocomplete
+//   • Ctrl+F opens find bar
         inputArea.addEventHandler(KeyEvent.KEY_PRESSED, e -> {
             // First check if autocomplete popup wants to handle the event
             if (autocompletePopup.handleKeyEvent(e)) {
@@ -170,6 +216,24 @@ public final class Console {
             // Autocomplete: Ctrl+Space
             if (e.getCode() == KeyCode.SPACE && e.isControlDown()) {
                 showAutocomplete();
+                e.consume();
+                return;
+            }
+            
+            // Find: Ctrl+F
+            if (e.getCode() == KeyCode.F && e.isControlDown()) {
+                if (findBar.isVisible()) {
+                    hideFind();
+                } else {
+                    showFind();
+                }
+                e.consume();
+                return;
+            }
+            
+            // Close find bar: Escape
+            if (e.getCode() == KeyCode.ESCAPE && findBar.isVisible()) {
+                hideFind();
                 e.consume();
                 return;
             }
@@ -238,6 +302,31 @@ public final class Console {
         inputArea.setOnMouseClicked(e -> {
             if (autocompletePopup.isShowing()) {
                 autocompletePopup.hide();
+            }
+        });
+    }
+    
+    private void outputEvents() {
+        // Key handling for output area:
+        //   • Ctrl+F opens find bar
+        //   • Escape closes find bar
+        outputArea.addEventHandler(KeyEvent.KEY_PRESSED, e -> {
+            // Find: Ctrl+F
+            if (e.getCode() == KeyCode.F && e.isControlDown()) {
+                if (findBar.isVisible()) {
+                    hideFind();
+                } else {
+                    showFind();
+                }
+                e.consume();
+                return;
+            }
+            
+            // Close find bar: Escape
+            if (e.getCode() == KeyCode.ESCAPE && findBar.isVisible()) {
+                hideFind();
+                e.consume();
+                return;
             }
         });
     }
@@ -488,6 +577,177 @@ public final class Console {
                 String position = String.format("(%d,%d)", columnPos + 1, currentParagraph + 1);
                 statusBar.setCustom(position);
             }
+        }
+    }
+    
+    // ---- Find bar methods ----
+    
+    private void setupFindListeners() {
+        // Live search when typing in find field
+        findField.textProperty().addListener((obs, o, n) -> {
+            if (!suppressFindSearch) {
+                Platform.runLater(() -> runSearch());
+            }
+        });
+        
+        // Re-search when checkboxes change
+        chkCase.selectedProperty().addListener((obs, o, n) -> Platform.runLater(() -> runSearch()));
+        chkWord.selectedProperty().addListener((obs, o, n) -> Platform.runLater(() -> runSearch()));
+        chkRegex.selectedProperty().addListener((obs, o, n) -> Platform.runLater(() -> runSearch()));
+        
+        // Button actions
+        btnNext.setOnAction(e -> Platform.runLater(() -> gotoNext()));
+        btnPrev.setOnAction(e -> Platform.runLater(() -> gotoPrev()));
+        btnClose.setOnAction(e -> Platform.runLater(() -> hideFind()));
+        
+        // Handle keyboard events on find bar
+        findBar.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
+            if (e.getCode() == KeyCode.ESCAPE) {
+                hideFind();
+                e.consume();
+            } else if (e.getCode() == KeyCode.ENTER) {
+                gotoNext();
+                e.consume();
+            }
+        });
+    }
+    
+    private void showFind() {
+        findBar.setVisible(true);
+        findBar.setManaged(true);
+        Platform.runLater(() -> findField.requestFocus());
+    }
+    
+    private void hideFind() {
+        clearHighlights();
+        findBar.setVisible(false);
+        findBar.setManaged(false);
+        lastMatches = java.util.Collections.emptyList();
+        currentIndex = -1;
+    }
+    
+    private void runSearch() {
+        clearHighlights();
+        currentIndex = -1;
+        String q = findField.getText();
+        if (q == null || q.isEmpty()) {
+            lblCount.setText("");
+            return;
+        }
+
+        boolean cs = chkCase.isSelected();
+        boolean ww = chkWord.isSelected();
+        boolean rx = chkRegex.isSelected();
+
+        String text = outputArea.getText();
+        ArrayList<int[]> hits = new ArrayList<>();
+
+        try {
+            java.util.regex.Pattern pat;
+            if (rx) {
+                int flags = cs ? 0 : java.util.regex.Pattern.CASE_INSENSITIVE;
+                pat = java.util.regex.Pattern.compile(q, flags);
+            } else {
+                String literal = java.util.regex.Pattern.quote(q);
+                String pattern = ww ? "\\b" + literal + "\\b" : literal;
+                int flags = cs ? 0 : java.util.regex.Pattern.CASE_INSENSITIVE;
+                pat = java.util.regex.Pattern.compile(pattern, flags);
+            }
+            java.util.regex.Matcher m = pat.matcher(text);
+            while (m.find()) {
+                hits.add(new int[]{m.start(), m.end()});
+            }
+        } catch (Exception ex) {
+            // invalid regex; show nothing
+        }
+
+        lastMatches = hits;
+        
+        if (hits.isEmpty()) {
+            lblCount.setText("0 matches");
+            return;
+        }
+
+        currentIndex = 0;
+        int[] cur = hits.get(currentIndex);
+        selectCurrent(cur);
+        updateCountLabel();
+
+        // Highlight all matches
+        for (int[] r : hits) {
+            outputArea.addStyleToRange(r[0], r[1], "find-hit");
+        }
+        // Emphasize current
+        outputArea.addStyleToRange(cur[0], cur[1], "find-current");
+    }
+    
+    private void selectCurrent(int[] r) {
+        outputArea.selectRange(r[0], r[1]);
+        outputArea.moveTo(r[1]);
+        
+        // Scroll to center the match in the viewport
+        int paragraph = outputArea.getCurrentParagraph();
+        int visibleParagraphs = outputArea.getVisibleParagraphs().size();
+        int offset = visibleParagraphs / 2;
+        int targetParagraph = Math.max(0, paragraph - offset);
+        
+        outputArea.showParagraphAtTop(targetParagraph);
+    }
+    
+    private void gotoNext() {
+        if (lastMatches.isEmpty()) {
+            return;
+        }
+        clearCurrentEmphasis();
+        currentIndex = (currentIndex + 1) % lastMatches.size();
+        int[] cur = lastMatches.get(currentIndex);
+        selectCurrent(cur);
+        updateCountLabel();
+        outputArea.addStyleToRange(cur[0], cur[1], "find-current");
+    }
+    
+    private void gotoPrev() {
+        if (lastMatches.isEmpty()) {
+            return;
+        }
+        clearCurrentEmphasis();
+        currentIndex = (currentIndex - 1 + lastMatches.size()) % lastMatches.size();
+        int[] cur = lastMatches.get(currentIndex);
+        selectCurrent(cur);
+        updateCountLabel();
+        outputArea.addStyleToRange(cur[0], cur[1], "find-current");
+    }
+    
+    private void clearCurrentEmphasis() {
+        if (currentIndex >= 0 && currentIndex < lastMatches.size()) {
+            int[] prev = lastMatches.get(currentIndex);
+            outputArea.removeStyleFromRange(prev[0], prev[1], "find-current");
+        }
+    }
+    
+    private void updateCountLabel() {
+        if (lastMatches.isEmpty()) {
+            lblCount.setText("0 matches");
+        } else {
+            lblCount.setText((currentIndex + 1) + "/" + lastMatches.size() + " matches");
+        }
+    }
+    
+    private void clearHighlights() {
+        for (int[] r : lastMatches) {
+            outputArea.removeStyleFromRange(r[0], r[1], "find-hit");
+            outputArea.removeStyleFromRange(r[0], r[1], "find-current");
+        }
+    }
+    
+    /**
+     * Public method to show find bar from menu
+     */
+    public void showFindFromMenu() {
+        if (findBar.isVisible()) {
+            hideFind();
+        } else {
+            showFind();
         }
     }
 }
