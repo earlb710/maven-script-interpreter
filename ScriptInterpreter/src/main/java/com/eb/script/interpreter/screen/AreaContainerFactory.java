@@ -638,22 +638,25 @@ public class AreaContainerFactory {
         }
         
         // Create a regex pattern to find and replace the property
-        // Pattern matches the property name followed by optional whitespace, colon, optional whitespace, value, and optional semicolon
+        // Pattern explanation:
+        // - (?i) = case-insensitive matching
+        // - Pattern.quote(property) = escaped property name (e.g., "-fx-spacing")
+        // - \\s* = optional whitespace
+        // - : = literal colon separator
+        // - \\s* = optional whitespace after colon
+        // - [^;]+ = one or more characters that are not semicolons (the value)
+        // - ;? = optional trailing semicolon
         String propertyPattern = "(?i)" + java.util.regex.Pattern.quote(property) + "\\s*:\\s*[^;]+;?";
         
         // Remove any existing declaration of this property
         String cleanedStyle = currentStyle.replaceAll(propertyPattern, "").trim();
         
-        // Clean up any double semicolons or leading/trailing semicolons that might result
-        while (cleanedStyle.contains(";;")) {
-            cleanedStyle = cleanedStyle.replace(";;", ";");
-        }
-        while (cleanedStyle.startsWith(";")) {
-            cleanedStyle = cleanedStyle.substring(1).trim();
-        }
-        while (cleanedStyle.endsWith(";")) {
-            cleanedStyle = cleanedStyle.substring(0, cleanedStyle.length() - 1).trim();
-        }
+        // Clean up malformed CSS: multiple semicolons, leading/trailing semicolons
+        // Use regex for efficient bulk cleanup
+        cleanedStyle = cleanedStyle.replaceAll(";+", ";")  // Replace multiple semicolons with single
+                                   .replaceAll("^;+", "")   // Remove leading semicolons
+                                   .replaceAll(";+$", "")   // Remove trailing semicolons
+                                   .trim();
         
         // Build the new property declaration
         String newProperty = property + ": " + value;
