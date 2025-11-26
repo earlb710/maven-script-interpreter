@@ -516,23 +516,7 @@ public class AreaItemFactory {
         } else {
             // For ChoiceBox and ComboBox, use options data to determine size if available
             if ((metadata.itemType == ItemType.CHOICEBOX || metadata.itemType == ItemType.COMBOBOX)) {
-                String longestOption = "";
-                
-                // Check optionsMap first (keys are display text)
-                if (metadata.optionsMap != null && !metadata.optionsMap.isEmpty()) {
-                    for (String option : metadata.optionsMap.keySet()) {
-                        if (option != null && option.length() > longestOption.length()) {
-                            longestOption = option;
-                        }
-                    }
-                } else if (metadata.options != null && !metadata.options.isEmpty()) {
-                    // Fall back to options list
-                    for (String option : metadata.options) {
-                        if (option != null && option.length() > longestOption.length()) {
-                            longestOption = option;
-                        }
-                    }
-                }
+                String longestOption = getLongestDisplayOption(metadata);
                 
                 if (!longestOption.isEmpty()) {
                     sampleText = longestOption;
@@ -628,6 +612,39 @@ public class AreaItemFactory {
             default:
                 return 20; // Default fallback
         }
+    }
+    
+    /**
+     * Gets the longest display option text from metadata.
+     * Checks optionsMap first (using keys as display text), then falls back to options list.
+     * 
+     * @param metadata The DisplayItem metadata containing options or optionsMap
+     * @return The longest option text, or empty string if no options are available
+     */
+    private static String getLongestDisplayOption(DisplayItem metadata) {
+        String longestOption = "";
+        
+        if (metadata == null) {
+            return longestOption;
+        }
+        
+        // Check optionsMap first (keys are display text)
+        if (metadata.optionsMap != null && !metadata.optionsMap.isEmpty()) {
+            for (String option : metadata.optionsMap.keySet()) {
+                if (option != null && option.length() > longestOption.length()) {
+                    longestOption = option;
+                }
+            }
+        } else if (metadata.options != null && !metadata.options.isEmpty()) {
+            // Fall back to options list
+            for (String option : metadata.options) {
+                if (option != null && option.length() > longestOption.length()) {
+                    longestOption = option;
+                }
+            }
+        }
+        
+        return longestOption;
     }
 
     /**

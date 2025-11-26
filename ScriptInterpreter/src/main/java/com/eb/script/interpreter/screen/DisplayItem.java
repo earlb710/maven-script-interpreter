@@ -119,6 +119,7 @@ public class DisplayItem {
                ", pattern='" + pattern + '\'' +
                ", promptHelp='" + promptHelp + '\'' +
                ", options=" + options +
+               ", optionsMap=" + optionsMap +
                ", labelColor='" + labelColor + '\'' +
                ", labelBold=" + labelBold +
                ", labelItalic=" + labelItalic +
