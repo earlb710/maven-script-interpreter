@@ -252,6 +252,32 @@ public class ConsoleConfig {
             }
         }
         
+        // Always add find highlighting styles - these override all other text styles
+        // to ensure search matches are readable with black text on yellow/amber background
+        css.append("/* Find highlighting - overrides syntax highlighting for readability */\n");
+        css.append(".find-hit,\n");
+        css.append(".text.find-hit,\n");
+        css.append(".styled-text-area .text.find-hit,\n");
+        css.append(".console-out .text.find-hit,\n");
+        css.append(".console-in .text.find-hit,\n");
+        css.append(".editor-ebs .text.find-hit,\n");
+        css.append(".editor-text .text.find-hit {\n");
+        css.append("    -fx-fill: #000000 !important;\n");
+        css.append("    -rtfx-background-color: #ddb107 !important;\n");
+        css.append("}\n\n");
+        
+        css.append(".find-current,\n");
+        css.append(".text.find-current,\n");
+        css.append(".styled-text-area .text.find-current,\n");
+        css.append(".console-out .text.find-current,\n");
+        css.append(".console-in .text.find-current,\n");
+        css.append(".editor-ebs .text.find-current,\n");
+        css.append(".editor-text .text.find-current {\n");
+        css.append("    -fx-fill: #000000 !important;\n");
+        css.append("    -fx-font-weight: bold !important;\n");
+        css.append("    -rtfx-background-color: #eedd58 !important;\n");
+        css.append("}\n\n");
+        
         return css.toString();
     }
     
