@@ -131,7 +131,7 @@ screen testChoiceOptions = {
                     "display": {
                         "type": "button",
                         "labelText": "Show Current Values",
-                        "onClick": "testChoiceOptions.currentCountryValue = testChoiceOptions.selectedCountry; testChoiceOptions.currentCategoryValue = testChoiceOptions.selectedCategory; print 'Country: ' + testChoiceOptions.selectedCountry + ', Category: ' + testChoiceOptions.selectedCategory;"
+                        "onClick": "testChoiceOptions.currentCountryValue = testChoiceOptions.selectedCountry; testChoiceOptions.currentCategoryValue = testChoiceOptions.selectedCategory; print \"Country: \" + testChoiceOptions.selectedCountry + \", Category: \" + testChoiceOptions.selectedCategory;"
                     }
                 },
                 {
@@ -140,7 +140,7 @@ screen testChoiceOptions = {
                     "display": {
                         "type": "button",
                         "labelText": "Change Dynamic Options",
-                        "onClick": "var newOptions:map = {'Option A': 'optA', 'Option B': 'optB', 'Option C': 'optC'}; call scr.setItemChoiceOptions('testChoiceOptions', 'dynamicChoiceField', newOptions); print 'Dynamic options updated!';"
+                        "onClick": "var newOptions:map = {\"Option A\": \"optA\", \"Option B\": \"optB\", \"Option C\": \"optC\"}; call scr.setItemChoiceOptions(\"testChoiceOptions\", \"dynamicChoiceField\", newOptions); print \"Dynamic options updated!\";"
                     }
                 },
                 {
@@ -149,7 +149,7 @@ screen testChoiceOptions = {
                     "display": {
                         "type": "button",
                         "labelText": "Get Country Options",
-                        "onClick": "var opts = call scr.getItemChoiceOptions('testChoiceOptions', 'countryField'); print 'Current country options: ' + opts;"
+                        "onClick": "var opts = call scr.getItemChoiceOptions(\"testChoiceOptions\", \"countryField\"); print \"Current country options: \" + opts;"
                     }
                 },
                 {
@@ -158,7 +158,7 @@ screen testChoiceOptions = {
                     "display": {
                         "type": "button",
                         "labelText": "Close",
-                        "onClick": "call scr.closeScreen('testChoiceOptions');"
+                        "onClick": "call scr.closeScreen(\"testChoiceOptions\");"
                     }
                 }
             ]
