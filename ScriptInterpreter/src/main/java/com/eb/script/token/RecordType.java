@@ -273,6 +273,7 @@ public class RecordType {
             case JSON: return "json";
             case ARRAY: return "array";
             case RECORD: return "record";
+            case MAP: return "map";
             default: return type.toString().toLowerCase();
         }
     }

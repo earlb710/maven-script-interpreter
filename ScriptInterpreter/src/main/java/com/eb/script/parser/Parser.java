@@ -334,6 +334,8 @@ public class Parser {
             return EbsTokenType.ARRAY;
         } else if (EbsTokenType.RECORD.contains(str)) {
             return EbsTokenType.RECORD;
+        } else if (EbsTokenType.MAP.contains(str)) {
+            return EbsTokenType.MAP;
         }
         return null;
     }
@@ -659,6 +661,9 @@ public class Parser {
                 // Parse SQL SELECT and produce an expression node
                 varInit = parseSqlSelectFromSource();
             } else if (elemType == DataType.JSON && (check(EbsTokenType.LBRACE) || check(EbsTokenType.LBRACKET))) {
+                varInit = parseJsonLiteralFromSource();
+            } else if (elemType == DataType.MAP && check(EbsTokenType.LBRACE)) {
+                // For map types, parse JSON object literal (maps only accept objects, not arrays)
                 varInit = parseJsonLiteralFromSource();
             } else if (elemType == DataType.RECORD && check(EbsTokenType.LBRACE)) {
                 // For record types, parse JSON object literal
@@ -2625,6 +2630,7 @@ public class Parser {
             case "json" -> DataType.JSON;
             case "array" -> DataType.ARRAY;
             case "record" -> DataType.RECORD;
+            case "map" -> DataType.MAP;
             default -> null;
         };
     }

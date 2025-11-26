@@ -5,7 +5,7 @@ A powerful script interpreter for the EBS (Earl Bosch Script) language, featurin
 ## Features
 
 - **Custom Scripting Language**: Full-featured scripting language with familiar syntax
-- **Type Casting**: Explicit type conversions with `int()`, `string()`, `float()`, `double()`, `byte()`, `long()`, `boolean()`
+- **Type Casting**: Explicit type conversions with `int()`, `string()`, `float()`, `double()`, `byte()`, `long()`, `boolean()`, `record()`, `map()`
 - **typeof Operator**: Get the type of any variable or expression at runtime (e.g., `typeof a` returns `"string"`)
 - **Exception Handling**: Robust error handling with `try-exceptions-when` syntax to catch specific or any errors
 - **Interactive Console**: JavaFX-based IDE with rich text editing
@@ -79,6 +79,7 @@ var name: string = "World";
 var count: int = 42;
 var items: int[5];  // Fixed-size array
 var data: json = {"key": "value"};
+var settings: map = {"theme": "dark", "volume": 80};  // Map type
 
 // Control flow
 if count > 40 then {
@@ -171,6 +172,8 @@ if int("15") > 10 then {
 - `string()` - Convert to string
 - `byte()` - Convert to byte
 - `boolean()` or `bool()` - Convert to boolean
+- `record()` - Cast JSON object to record with type inference
+- `map()` - Cast JSON object to map (key-value store)
 
 See `scripts/test/test_type_casting.ebs` for more examples.
 
@@ -206,7 +209,7 @@ print typeof int("42");  // Output: int
 
 **Supported for all types:**
 - Primitive types: `string`, `int`, `long`, `float`, `double`, `bool`, `byte`
-- Complex types: `array`, `json`, `date`, `record`
+- Complex types: `array`, `json`, `map`, `date`, `record`
 - For records, displays the complete structure with field names and types
 
 See `scripts/test/test_typeof_operator.ebs` for more examples.
@@ -274,6 +277,39 @@ try {
 - Multiple handlers can be specified for different error types
 - `ANY_ERROR` should typically be placed last as it catches all errors
 - Try blocks can be nested for granular error handling
+### Map Type
+
+The `map` type provides a flexible key-value store where keys are strings and values can be any type. Maps are backed by JSON objects and are ideal for dynamic data storage.
+
+```javascript
+// Declare a map variable
+var config: map = {"host": "localhost", "port": 8080, "debug": true};
+
+// Cast JSON to map
+var jsonData: json = {"name": "Alice", "age": 30, "city": "NYC"};
+var userMap = map(jsonData);
+
+// Access values using json functions
+var name = call json.get(userMap, "name");       // "Alice"
+var age = call json.getint(userMap, "age");      // 30
+
+// Modify and add values
+call json.set(userMap, "city", "Los Angeles");   // Update existing
+call json.set(userMap, "country", "USA");        // Add new key
+
+// Nested maps
+var nested: json = {"user": {"name": "Bob", "settings": {"theme": "dark"}}};
+var nestedMap = map(nested);
+```
+
+**Map vs Record vs JSON:**
+| Type | Use Case |
+|------|----------|
+| `map` | Flexible key-value store, no schema required |
+| `record` | Type-safe access with predefined field names and types |
+| `json` | Any JSON structure including arrays, objects, and primitives |
+
+See `scripts/test/test_map_type.ebs` for more examples.
 
 ### String Functions
 
@@ -583,6 +619,11 @@ The interpreter includes numerous built-in functions:
 
 ### Date/Time
 - `now()`, `dateFormat()`, `parseDate()`
+
+### Dialog Functions
+- `system.inputDialog(title, headerText?, defaultValue?)` - Prompts user for text input, returns the entered string
+- `system.confirmDialog(message, title?, headerText?)` - Shows YES/NO confirmation dialog, returns boolean
+- `system.alertDialog(message, title?, alertType?)` - Shows message dialog with OK button (alertType: "info", "warning", "error")
 
 ## Database Support
 

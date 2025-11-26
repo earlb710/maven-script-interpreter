@@ -1746,26 +1746,27 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         // Evaluate the value to be cast
         Object value = evaluate(expr.value);
         
-        // Special handling for RECORD casting
-        if (expr.targetType == DataType.RECORD) {
+        // Special handling for RECORD and MAP casting (both require JSON objects)
+        if (expr.targetType == DataType.RECORD || expr.targetType == DataType.MAP) {
+            String targetTypeName = (expr.targetType == DataType.RECORD) ? "record" : "map";
+            
             // Validate that the value is a Map (not an array/List)
             if (value instanceof java.util.List || value instanceof ArrayDef) {
-                throw error(expr.getLine(), "Cannot cast JSON array to record. Only JSON objects (maps) can be cast to record type.");
+                throw error(expr.getLine(), "Cannot cast JSON array to " + targetTypeName + ". Only JSON objects can be cast to " + targetTypeName + " type.");
             }
             
             if (!(value instanceof java.util.Map)) {
                 String typeName = (value == null) ? "null" : value.getClass().getSimpleName();
-                throw error(expr.getLine(), "Cannot cast " + typeName + " to record. Only JSON objects (maps) can be cast to record type.");
+                throw error(expr.getLine(), "Cannot cast " + typeName + " to " + targetTypeName + ". Only JSON objects can be cast to " + targetTypeName + " type.");
             }
             
-            // Infer RecordType from the Map structure
-            @SuppressWarnings("unchecked")
-            java.util.Map<String, Object> map = (java.util.Map<String, Object>) value;
-            RecordType inferredType = inferRecordType(map);
-            
-            // Store the inferred RecordType in a thread-local or context for later retrieval
-            // For now, we'll use the lastInferredRecordType field
-            context.setLastInferredRecordType(inferredType);
+            // For RECORD type, infer and store the RecordType metadata
+            if (expr.targetType == DataType.RECORD) {
+                @SuppressWarnings("unchecked")
+                java.util.Map<String, Object> map = (java.util.Map<String, Object>) value;
+                RecordType inferredType = inferRecordType(map);
+                context.setLastInferredRecordType(inferredType);
+            }
             
             return value;
         }
@@ -1996,6 +1997,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             case JSON -> "json";
             case ARRAY -> "array";
             case RECORD -> "record";
+            case MAP -> "map";
             default -> "any";
         };
     }

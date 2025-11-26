@@ -77,6 +77,7 @@ All identifiers are normalized to lowercase internally, so `myVariable`, `MyVari
 | `bool` / `boolean` | Boolean value | `true`, `false` |
 | `date` | Date/time value | `now()` |
 | `json` | JSON object/array | `{"key": "value"}` |
+| `map` | Key-value map (JSON objects only) | `{"key": "value"}` |
 | `array` | Generic array | `array[10]`, `array[*]` |
 
 ### Type Inference
@@ -165,6 +166,48 @@ var rec = record(arrayData);
 - Case-insensitive field matching
 - Clear error messages for validation failures
 
+#### Map Type and JSON to Map Casting
+The `map` type represents a key-value store where keys are strings and values can be any type. Maps are backed by JSON objects and can only be created from JSON objects (not arrays).
+
+```javascript
+// Declare a map variable
+var myMap: map = {"key1": "value1", "key2": 123, "key3": true};
+
+// Cast JSON object to map
+var jsonData: json = {"name": "Alice", "age": 30, "city": "New York"};
+var personMap = map(jsonData);
+
+// Access and modify map values using json functions
+var name = call json.get(personMap, "name");          // "Alice"
+var age = call json.getint(personMap, "age");         // 30
+call json.set(personMap, "city", "Los Angeles");      // Modify value
+call json.set(personMap, "country", "USA");           // Add new key
+
+// Nested maps
+var nestedJson: json = {
+    "person": {
+        "name": "Bob",
+        "address": {"street": "123 Main St", "zip": "12345"}
+    }
+};
+var nestedMap = map(nestedJson);
+
+// Error: JSON arrays cannot be cast to map
+var arrayData: json = [1, 2, 3];
+var badCast = map(arrayData);
+// Error: Cannot cast JSON array to map. Only JSON objects can be cast to map type.
+```
+
+**Map vs Record vs JSON:**
+- **map**: A flexible key-value store. No predefined field structure. JSON objects only.
+- **record**: A structured type with predefined field names and types. Provides type validation.
+- **json**: Can hold any JSON value including objects, arrays, strings, numbers, booleans, or null.
+
+**When to use each:**
+- Use `map` when you need a flexible key-value store with string keys
+- Use `record` when you need type-safe access to known fields
+- Use `json` when you need to work with any JSON structure including arrays
+
 #### Supported Type Aliases
 - `int()` / `integer()` - Integer casting
 - `long()` - Long integer casting
@@ -174,6 +217,7 @@ var rec = record(arrayData);
 - `byte()` - Byte casting
 - `boolean()` / `bool()` - Boolean casting
 - `record()` - JSON to record casting
+- `map()` - JSON object to map casting
 
 ### Null Values
 ```javascript
@@ -1947,6 +1991,109 @@ call system.setproperty(name, value);
 
 // Help system
 call system.help();
+
+// Dialog functions
+var userInput = call system.inputDialog(title, headerText?, defaultValue?);
+var confirmed = call system.confirmDialog(message, title?, headerText?);
+call system.alertDialog(message, title?, alertType?);
+```
+
+#### Dialog Functions
+
+EBS provides built-in dialog functions for user interaction:
+
+##### system.inputDialog(title, headerText?, defaultValue?)
+Shows an input dialog that prompts the user for text input.
+
+**Parameters:**
+- `title` (string, required): The dialog window title
+- `headerText` (string, optional): Header text displayed above the input field
+- `defaultValue` (string, optional): Default value pre-filled in the input field
+
+**Returns:** String - the text entered by the user, or empty string if cancelled
+
+```javascript
+// Basic input dialog
+var name = call system.inputDialog("Enter Name");
+
+// With header text
+var email = call system.inputDialog("Contact Info", "Please enter your email address");
+
+// With default value
+var username = call system.inputDialog("Username", "Enter your username", "guest");
+
+// Example usage
+var userInput = call system.inputDialog("Search", "Enter search term:", "");
+if userInput != "" then {
+    print "Searching for: " + userInput;
+}
+```
+
+##### system.confirmDialog(message, title?, headerText?)
+Shows a confirmation dialog with YES and NO buttons. Returns a boolean indicating the user's choice.
+
+**Parameters:**
+- `message` (string, required): The confirmation message to display
+- `title` (string, optional): The dialog window title (default: "Confirm")
+- `headerText` (string, optional): Header text displayed above the message
+
+**Returns:** Boolean - `true` if user clicks YES, `false` if user clicks NO or closes the dialog
+
+```javascript
+// Basic confirmation
+var confirmed = call system.confirmDialog("Are you sure?");
+if confirmed then {
+    print "User confirmed";
+}
+
+// With custom title
+var deleteConfirmed = call system.confirmDialog("Delete this file?", "Confirm Delete");
+
+// With header text
+var saveConfirmed = call system.confirmDialog(
+    "Do you want to save changes?",
+    "Save Changes",
+    "You have unsaved modifications"
+);
+
+// Example: Confirm before destructive action
+var proceed = call system.confirmDialog("This action cannot be undone. Continue?", "Warning");
+if proceed then {
+    // Perform the action
+    print "Action executed";
+} else {
+    print "Action cancelled";
+}
+```
+
+##### system.alertDialog(message, title?, alertType?)
+Shows a message dialog with only an OK button. Used to display information, warnings, or errors to the user.
+
+**Parameters:**
+- `message` (string, required): The message to display
+- `title` (string, optional): The dialog window title (default: "Alert")
+- `alertType` (string, optional): The type of alert - "info", "warning", or "error" (default: "info")
+
+**Returns:** Nothing (void)
+
+```javascript
+// Basic information alert
+call system.alertDialog("Operation completed successfully");
+
+// With custom title
+call system.alertDialog("File saved", "Success");
+
+// Warning alert
+call system.alertDialog("Disk space is running low", "Warning", "warning");
+
+// Error alert
+call system.alertDialog("Failed to connect to database", "Error", "error");
+
+// Information alert (explicit)
+call system.alertDialog("Welcome to the application!", "Welcome", "info");
+
+// Example: Show completion message
+call system.alertDialog("Export completed. 150 records exported.", "Export Complete", "info");
 ```
 
 ### Screen Functions

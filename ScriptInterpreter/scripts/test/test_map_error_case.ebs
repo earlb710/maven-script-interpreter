@@ -1,0 +1,11 @@
+// Test error case: JSON array cannot be cast to map
+print "Testing error case: JSON array to map cast";
+print "";
+
+// This should fail with an error
+var jsonArray: json = [1, 2, 3];
+print "JSON array created: " + jsonArray;
+
+// This cast should fail because arrays cannot be converted to maps
+var badCast = map(jsonArray);
+print "This should not be printed";

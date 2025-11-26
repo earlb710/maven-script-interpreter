@@ -392,8 +392,8 @@ screen colorEditorScreen = {
                                 "groupLabelBackground": "#efefef",
                                 "groupLabelText": "Console Colors",
                                 "groupLabelAlignment": "left",
-                                "groupLabelOffset": "on",
-                                "style": "-fx-spacing: 5; -fx-padding: 10;",
+                                "groupLabelOffset": "bottom",
+                                "style": "-fx-spacing: 5; -fx-padding: 5;",
                                 "items": [
                                     {"name": "info_item", "varref": "info"},
                                     {"name": "comment_item", "varref": "comment"},
@@ -412,8 +412,8 @@ screen colorEditorScreen = {
                                 "groupLabelColor": "#444444",
                                 "groupLabelBackground": "#efefef",
                                 "groupLabelAlignment": "left",
-                                "groupLabelOffset": "on",
-                                "style": "-fx-spacing: 5; -fx-padding: 10;",
+                                "groupLabelOffset": "bottom",
+                                "style": "-fx-spacing: 5; -fx-padding: 5;",
                                 "items": [
                                     {"name": "background_item", "varref": "background"},
                                     {"name": "text_item", "varref": "text"},
@@ -440,7 +440,8 @@ screen colorEditorScreen = {
                                 "groupLabelColor": "#444444",
                                 "groupLabelBackground": "#efefef",
                                 "groupLabelAlignment": "left",
-                                "style": "-fx-spacing: 5; -fx-padding: 10;",
+                                "groupLabelOffset": "bottom",
+                                "style": "-fx-spacing: 5; -fx-padding: 5;",
                                 "items": [
                                     {"name": "code_item", "varref": "code"},
                                     {"name": "datatype_item", "varref": "datatype"},
@@ -463,7 +464,8 @@ screen colorEditorScreen = {
                                 "groupLabelColor": "#444444",
                                 "groupLabelBackground": "#efefef",
                                 "groupLabelAlignment": "left",
-                                "style": "-fx-spacing: 5; -fx-padding: 10;",
+                                "groupLabelOffset": "bottom",
+                                "style": "-fx-spacing: 5; -fx-padding: 5;",
                                 "items": [
                                     {"name": "tabBackground_item", "varref": "tabBackground"},
                                     {"name": "tabLabelColor_item", "varref": "tabLabelColor"},
