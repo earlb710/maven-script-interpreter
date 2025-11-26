@@ -53,7 +53,9 @@ import com.eb.script.interpreter.statement.ScreenHideStatement;
 import com.eb.script.interpreter.statement.ScreenCloseStatement;
 import com.eb.script.interpreter.statement.ScreenSubmitStatement;
 import com.eb.script.interpreter.statement.ImportStatement;
-import com.eb.script.interpreter.statement.TypedefStatement;
+import com.eb.script.interpreter.statement.TryStatement;
+import com.eb.script.interpreter.statement.ExceptionHandler;
+import com.eb.script.interpreter.ErrorType;
 import com.eb.script.token.ebs.EbsTokenType;
 import com.eb.util.Util;
 import java.io.IOException;
@@ -166,16 +168,18 @@ public class Parser {
                     c.setBlockStatement(b);
                 }
                 try {
-                    if (b != null && b.parameters != null) {
+                    if (b != null && b.parameters != null && b.parameters.length > 0) {
                         Parameter[] parameters = matchParameters(b.parameters, c.parameters);
-                        c.parameters = parameters;
-                        Statement[] paramInit = new Statement[parameters.length];
-                        int pidx = 0;
-                        for (Parameter p : parameters) {
-                            paramInit[pidx] = new VarStatement(c.getLine(), p.name, p.paramType, p.value);
-                            pidx++;
+                        if (parameters != null) {
+                            c.parameters = parameters;
+                            Statement[] paramInit = new Statement[parameters.length];
+                            int pidx = 0;
+                            for (Parameter p : parameters) {
+                                paramInit[pidx] = new VarStatement(c.getLine(), p.name, p.paramType, p.value);
+                                pidx++;
+                            }
+                            c.paramInit = paramInit;
                         }
-                        c.paramInit = paramInit;
                     }
                 } catch (ParseError ex) {
                     throw new ParseError(ex.getMessage() + " in call to " + c.name + " on line " + c.getLine());
@@ -358,6 +362,8 @@ public class Parser {
             return breakStatement();
         } else if (match(EbsTokenType.CONTINUE)) {
             return continueStatement();
+        } else if (match(EbsTokenType.TRY)) {
+            return tryStatement();
         } else if (match(EbsTokenType.CONNECT)) {
             return connectStatement();
         } else if (match(EbsTokenType.SCREEN)) {
@@ -1417,21 +1423,61 @@ public class Parser {
         int line = currToken.line;
         List<Parameter> parameters = getBlockParameters();
         DataType type = blockParameterReturn();
+        BlockStatement bs;
         if (type != null) {
             consume(EbsTokenType.LBRACE, "Expected '{' after return.");
             List<Statement> s = getBlockStatements();
-            return new BlockStatement(line, name, parameters, s, type);
+            bs = new BlockStatement(line, name, parameters, s, type);
         } else {
             consume(EbsTokenType.LBRACE, "Expected '{' after parameters.");
             List<Statement> s = getBlockStatements();
-            return new BlockStatement(line, name, parameters, s);
+            bs = new BlockStatement(line, name, parameters, s);
         }
+        
+        // Check for optional exceptions block after function
+        parseOptionalExceptionHandlers(bs);
+        
+        return bs;
     }
 
     private BlockStatement block(String name) throws ParseError {
         int line = currToken.line;
         List<Statement> s = getBlockStatements();
-        return new BlockStatement(line, name, s);
+        BlockStatement bs = new BlockStatement(line, name, s);
+        
+        // Check for optional exceptions block after named block
+        parseOptionalExceptionHandlers(bs);
+        
+        return bs;
+    }
+    
+    /**
+     * Parse optional exception handlers after a named block or function.
+     * Syntax:
+     *   myFunction() {
+     *       // code
+     *   } exceptions {
+     *       when ERROR_TYPE { handler }
+     *   }
+     */
+    private void parseOptionalExceptionHandlers(BlockStatement block) throws ParseError {
+        // Check if there's an 'exceptions' keyword following this block
+        if (match(EbsTokenType.EXCEPTIONS)) {
+            consume(EbsTokenType.LBRACE, "Expected '{' after 'exceptions'.");
+            
+            List<ExceptionHandler> handlers = new ArrayList<>();
+            while (!check(EbsTokenType.RBRACE) && !isAtEnd()) {
+                handlers.add(parseExceptionHandler());
+            }
+            
+            consume(EbsTokenType.RBRACE, "Expected '}' to close exceptions block.");
+            
+            if (handlers.isEmpty()) {
+                throw error(peek(), "At least one 'when' handler is required in exceptions block.");
+            }
+            
+            block.setExceptionHandlers(handlers);
+        }
     }
 
     private Statement printStatement() throws ParseError {
@@ -1667,6 +1713,79 @@ public class Parser {
         }
         consume(EbsTokenType.SEMICOLON, "Expected ';' after continue.");
         return new ContinueStatement(line);
+    }
+
+    /**
+     * Parse a try-exceptions statement.
+     * Syntax:
+     *   try {
+     *       statements
+     *   } exceptions {
+     *       when ERROR_TYPE { handler statements }
+     *       when ERROR_TYPE(errorVar) { handler statements }
+     *   }
+     */
+    private Statement tryStatement() throws ParseError {
+        int line = previous().line; // the 'try' token we just matched
+
+        // Parse the try block
+        consume(EbsTokenType.LBRACE, "Expected '{' after 'try'.");
+        BlockStatement tryBlock = (BlockStatement) block();
+
+        // Require 'exceptions' keyword
+        consume(EbsTokenType.EXCEPTIONS, "Expected 'exceptions' after try block.");
+
+        // Parse the exceptions block
+        consume(EbsTokenType.LBRACE, "Expected '{' after 'exceptions'.");
+
+        // Parse exception handlers (when clauses)
+        List<ExceptionHandler> handlers = new ArrayList<>();
+        while (!check(EbsTokenType.RBRACE) && !isAtEnd()) {
+            handlers.add(parseExceptionHandler());
+        }
+
+        consume(EbsTokenType.RBRACE, "Expected '}' to close exceptions block.");
+
+        if (handlers.isEmpty()) {
+            throw error(peek(), "At least one 'when' handler is required in exceptions block.");
+        }
+
+        return new TryStatement(line, tryBlock, handlers);
+    }
+
+    /**
+     * Parse a single exception handler (when clause).
+     * Syntax:
+     *   when ERROR_TYPE { statements }
+     *   when ERROR_TYPE(errorVar) { statements }
+     */
+    private ExceptionHandler parseExceptionHandler() throws ParseError {
+        consume(EbsTokenType.WHEN, "Expected 'when' keyword in exception handler.");
+
+        // Parse error type (e.g., IO_ERROR, ANY_ERROR)
+        EbsToken errorTypeToken = consume(EbsTokenType.IDENTIFIER, "Expected error type name after 'when'.");
+        String errorTypeName = (String) errorTypeToken.literal;
+
+        // Validate the error type
+        ErrorType errorType = ErrorType.fromName(errorTypeName);
+        if (errorType == null) {
+            throw error(errorTypeToken, "Unknown error type '" + errorTypeName + "'. " +
+                "Valid error types: " + ErrorType.getAllErrorTypeNames());
+        }
+
+        // Check for optional error variable: when ERROR_TYPE(varName)
+        String errorVarName = null;
+        if (match(EbsTokenType.LPAREN)) {
+            EbsToken varNameToken = consume(EbsTokenType.IDENTIFIER, "Expected variable name in exception handler.");
+            errorVarName = (String) varNameToken.literal;
+            consume(EbsTokenType.RPAREN, "Expected ')' after error variable name.");
+        }
+
+        // Parse the handler block
+        consume(EbsTokenType.LBRACE, "Expected '{' after error type.");
+        BlockStatement handlerBlock = (BlockStatement) block();
+
+        return new ExceptionHandler(errorType, errorVarName, handlerBlock);
     }
 
     private Expression expression() throws ParseError {

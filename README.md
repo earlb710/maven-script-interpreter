@@ -7,6 +7,7 @@ A powerful script interpreter for the EBS (Earl Bosch Script) language, featurin
 - **Custom Scripting Language**: Full-featured scripting language with familiar syntax
 - **Type Casting**: Explicit type conversions with `int()`, `string()`, `float()`, `double()`, `byte()`, `long()`, `boolean()`, `record()`, `map()`
 - **typeof Operator**: Get the type of any variable or expression at runtime (e.g., `typeof a` returns `"string"`)
+- **Exception Handling**: Robust error handling with `try-exceptions-when` syntax to catch specific or any errors
 - **Interactive Console**: JavaFX-based IDE with rich text editing
 - **Syntax Highlighting**: Color-coded syntax for better readability
 - **Autocomplete**: Intelligent code completion suggestions for keywords, built-ins, and JSON schemas
@@ -213,6 +214,69 @@ print typeof int("42");  // Output: int
 
 See `scripts/test/test_typeof_operator.ebs` for more examples.
 
+### Exception Handling
+
+The language supports robust error handling with `try-exceptions-when` syntax. This allows you to catch specific types of errors or use `ANY_ERROR` to catch all errors:
+
+```javascript
+// Basic exception handling
+try {
+    var result = 10 / 0;  // Will throw MATH_ERROR
+} exceptions {
+    when MATH_ERROR {
+        print "Cannot divide by zero!";
+    }
+    when ANY_ERROR {
+        print "An unexpected error occurred";
+    }
+}
+
+// Capture error message in a variable
+try {
+    var data = #file.read("missing.txt");
+} exceptions {
+    when IO_ERROR(msg) {
+        print "File error: " + msg;
+    }
+}
+
+// Multiple specific handlers
+try {
+    // Some risky operation
+    var result = processData();
+} exceptions {
+    when DB_ERROR {
+        print "Database error occurred";
+    }
+    when TYPE_ERROR {
+        print "Type conversion failed";
+    }
+    when ANY_ERROR(errorMsg) {
+        print "Unexpected error: " + errorMsg;
+    }
+}
+```
+
+**Available Error Types:**
+- `ANY_ERROR` - Catches any error (catch-all handler, should typically be last)
+- `IO_ERROR` - File I/O operations, streams, paths
+- `DB_ERROR` - Database connection and query errors
+- `TYPE_ERROR` - Type conversion and casting errors
+- `NULL_ERROR` - Null pointer or null value errors
+- `INDEX_ERROR` - Array index out of bounds errors
+- `MATH_ERROR` - Division by zero, arithmetic errors
+- `PARSE_ERROR` - JSON parsing, date parsing errors
+- `NETWORK_ERROR` - HTTP and network connection errors
+- `NOT_FOUND_ERROR` - Variable or function not found errors
+- `ACCESS_ERROR` - Permission or access denied errors
+- `VALIDATION_ERROR` - Validation errors
+
+**Key Features:**
+- Error handlers are checked in order - the first matching handler is executed
+- Use `when ERROR_TYPE(varName)` to capture the error message in a variable
+- Multiple handlers can be specified for different error types
+- `ANY_ERROR` should typically be placed last as it catches all errors
+- Try blocks can be nested for granular error handling
 ### Map Type
 
 The `map` type provides a flexible key-value store where keys are strings and values can be any type. Maps are backed by JSON objects and are ideal for dynamic data storage.

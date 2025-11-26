@@ -54,6 +54,8 @@ import com.eb.script.interpreter.statement.ScreenCloseStatement;
 import com.eb.script.interpreter.statement.ScreenSubmitStatement;
 import com.eb.script.interpreter.statement.ImportStatement;
 import com.eb.script.interpreter.statement.TypedefStatement;
+import com.eb.script.interpreter.statement.TryStatement;
+import com.eb.script.interpreter.statement.ExceptionHandler;
 import com.eb.script.token.ebs.EbsTokenType;
 import com.eb.script.interpreter.statement.ConnectStatement;
 import com.eb.script.parser.Parser;
@@ -461,6 +463,87 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     }
 
     @Override
+    public void visitTryStatement(TryStatement stmt) throws InterpreterError {
+        environment().pushCallStack(stmt.getLine(), StatementKind.TRY_CATCH, "Try");
+        try {
+            // Execute the try block
+            stmt.tryBlock.accept(this);
+        } catch (InterpreterError e) {
+            // An error occurred - try to find a matching exception handler
+            EbsScriptException scriptException;
+            if (e instanceof EbsScriptException) {
+                scriptException = (EbsScriptException) e;
+            } else {
+                scriptException = EbsScriptException.fromInterpreterError(stmt.getLine(), e);
+            }
+            
+            // Find and execute a matching handler, or re-throw if none found
+            if (!executeMatchingHandler(stmt.handlers, scriptException)) {
+                throw e;
+            }
+        } catch (RuntimeException e) {
+            // Handle Java runtime exceptions (like BreakSignal, ContinueSignal, ReturnSignal)
+            // These are control flow signals and should not be caught by exception handlers
+            if (isControlFlowSignal(e)) {
+                throw e;
+            }
+            
+            // For other runtime exceptions, try to find a matching handler
+            EbsScriptException scriptException = new EbsScriptException(stmt.getLine(), 
+                ErrorType.ANY_ERROR, "Runtime error: " + e.getMessage(), e);
+            
+            // Find and execute a matching handler, or wrap and re-throw if none found
+            if (!executeMatchingHandler(stmt.handlers, scriptException)) {
+                throw error(stmt.getLine(), "Unhandled runtime exception: " + e.getMessage());
+            }
+        } finally {
+            environment().popCallStack();
+        }
+    }
+    
+    /**
+     * Check if an exception is a control flow signal that should not be caught by exception handlers.
+     */
+    private boolean isControlFlowSignal(RuntimeException e) {
+        return e instanceof BreakSignal || e instanceof ContinueSignal || e instanceof ReturnSignal;
+    }
+    
+    /**
+     * Find a matching exception handler and execute it.
+     * @return true if a handler was found and executed, false otherwise
+     */
+    private boolean executeMatchingHandler(ExceptionHandler[] handlers, EbsScriptException exception) throws InterpreterError {
+        // Find a matching handler
+        ExceptionHandler matchingHandler = null;
+        for (ExceptionHandler handler : handlers) {
+            if (handler.canHandle(exception.getErrorType())) {
+                matchingHandler = handler;
+                break;
+            }
+        }
+        
+        if (matchingHandler == null) {
+            return false;
+        }
+        
+        // Execute the handler block
+        environment().pushEnvironmentValues();
+        try {
+            // If the handler has an error variable, define it with the error message
+            if (matchingHandler.errorVarName != null) {
+                environment().getEnvironmentValues().define(matchingHandler.errorVarName, exception.getMessage());
+            }
+            
+            // Execute the handler block
+            matchingHandler.handlerBlock.accept(this);
+        } finally {
+            environment().popEnvironmentValues();
+        }
+        
+        return true;
+    }
+
+    @Override
     public void visitAssignStatement(AssignStatement stmt) throws InterpreterError {
         Object value = evaluate(stmt.value);
 
@@ -657,6 +740,43 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 // This is an anonymous block - propagate the return signal up
                 throw r;
             }
+        } catch (InterpreterError e) {
+            // Check if this block has exception handlers
+            if (stmt.hasExceptionHandlers()) {
+                // Try to find a matching handler
+                EbsScriptException scriptException;
+                if (e instanceof EbsScriptException) {
+                    scriptException = (EbsScriptException) e;
+                } else {
+                    scriptException = EbsScriptException.fromInterpreterError(stmt.getLine(), e);
+                }
+                
+                if (executeMatchingHandler(stmt.exceptionHandlers, scriptException)) {
+                    // Exception was handled, continue normal execution
+                    return null;
+                }
+            }
+            // No handler found or no handlers defined - re-throw
+            throw e;
+        } catch (RuntimeException e) {
+            // Check if this block has exception handlers for runtime exceptions
+            if (stmt.hasExceptionHandlers()) {
+                // Don't catch control flow signals
+                if (isControlFlowSignal(e)) {
+                    throw e;
+                }
+                
+                EbsScriptException scriptException = new EbsScriptException(stmt.getLine(), 
+                    ErrorType.ANY_ERROR, "Runtime error: " + e.getMessage(), e);
+                
+                if (executeMatchingHandler(stmt.exceptionHandlers, scriptException)) {
+                    // Exception was handled, continue normal execution
+                    return null;
+                }
+                // No handler found - wrap and re-throw
+                throw error(stmt.getLine(), "Unhandled runtime exception: " + e.getMessage());
+            }
+            throw e;
         } finally {
             // POP the frame even on errors/returns
             environment().popCallStack();

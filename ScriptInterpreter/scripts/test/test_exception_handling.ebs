@@ -1,0 +1,595 @@
+// Extensive test script for exception handling functionality
+// Tests the try-exceptions-when syntax with various error types and scenarios
+
+print "============================================================";
+print "          EXCEPTION HANDLING TEST SUITE";
+print "============================================================\n";
+
+var testsPassed:int = 0;
+var testsFailed:int = 0;
+
+// ============================================================
+// TEST 1: Basic ANY_ERROR handler
+// ============================================================
+print "TEST 1: Basic ANY_ERROR handler";
+print "-------------------------------------------------------------";
+var test1Result:string = "FAILED";
+try {
+    var x:int = 10 / 0;
+    print "  ERROR: Should have thrown exception";
+} exceptions {
+    when ANY_ERROR {
+        test1Result = "PASSED";
+        print "  Caught error with ANY_ERROR handler";
+    }
+}
+print "  Result: " + test1Result + "\n";
+if test1Result == "PASSED" then {
+    testsPassed = testsPassed + 1;
+} else {
+    testsFailed = testsFailed + 1;
+}
+
+// ============================================================
+// TEST 2: MATH_ERROR - Division by zero
+// ============================================================
+print "TEST 2: MATH_ERROR - Division by zero";
+print "-------------------------------------------------------------";
+var test2Result:string = "FAILED";
+try {
+    var dividend:int = 100;
+    var divisor:int = 0;
+    var result = dividend / divisor;
+    print "  ERROR: Division by zero should throw";
+} exceptions {
+    when MATH_ERROR {
+        test2Result = "PASSED";
+        print "  Caught MATH_ERROR for division by zero";
+    }
+    when ANY_ERROR {
+        print "  Caught with ANY_ERROR (expected MATH_ERROR)";
+    }
+}
+print "  Result: " + test2Result + "\n";
+if test2Result == "PASSED" then {
+    testsPassed = testsPassed + 1;
+} else {
+    testsFailed = testsFailed + 1;
+}
+
+// ============================================================
+// TEST 3: Error message capture with variable
+// ============================================================
+print "TEST 3: Error message capture with variable";
+print "-------------------------------------------------------------";
+var test3Result:string = "FAILED";
+var capturedMessage:string = "";
+try {
+    var badDiv = 1 / 0;
+} exceptions {
+    when MATH_ERROR(errorMsg) {
+        capturedMessage = errorMsg;
+        if capturedMessage != "" then {
+            test3Result = "PASSED";
+        }
+        print "  Captured error message: " + errorMsg;
+    }
+}
+print "  Result: " + test3Result + "\n";
+if test3Result == "PASSED" then {
+    testsPassed = testsPassed + 1;
+} else {
+    testsFailed = testsFailed + 1;
+}
+
+// ============================================================
+// TEST 4: Multiple handlers - first match wins
+// ============================================================
+print "TEST 4: Multiple handlers - first match wins";
+print "-------------------------------------------------------------";
+var test4Result:string = "FAILED";
+var handlerTriggered:string = "";
+try {
+    var x = 50 / 0;
+} exceptions {
+    when MATH_ERROR {
+        handlerTriggered = "MATH_ERROR";
+        print "  First handler (MATH_ERROR) triggered";
+    }
+    when ANY_ERROR {
+        handlerTriggered = "ANY_ERROR";
+        print "  Second handler (ANY_ERROR) triggered - should NOT happen";
+    }
+}
+if handlerTriggered == "MATH_ERROR" then {
+    test4Result = "PASSED";
+}
+print "  Result: " + test4Result + "\n";
+if test4Result == "PASSED" then {
+    testsPassed = testsPassed + 1;
+} else {
+    testsFailed = testsFailed + 1;
+}
+
+// ============================================================
+// TEST 5: Nested try-exceptions blocks
+// ============================================================
+print "TEST 5: Nested try-exceptions blocks";
+print "-------------------------------------------------------------";
+var test5Result:string = "FAILED";
+var outerCaught:bool = false;
+var innerCaught:bool = false;
+try {
+    print "  Entering outer try block";
+    try {
+        print "  Entering inner try block";
+        var x = 1 / 0;
+    } exceptions {
+        when MATH_ERROR {
+            innerCaught = true;
+            print "  Inner MATH_ERROR caught";
+        }
+    }
+    print "  After inner try-catch";
+} exceptions {
+    when ANY_ERROR {
+        outerCaught = true;
+        print "  Outer ANY_ERROR caught - should NOT happen";
+    }
+}
+if (innerCaught == true && outerCaught == false) {
+    test5Result = "PASSED";
+}
+print "  Result: " + test5Result + "\n";
+if test5Result == "PASSED" then {
+    testsPassed = testsPassed + 1;
+} else {
+    testsFailed = testsFailed + 1;
+}
+
+// ============================================================
+// TEST 6: Code continues after handled exception
+// ============================================================
+print "TEST 6: Code continues after handled exception";
+print "-------------------------------------------------------------";
+var test6Result:string = "FAILED";
+var afterTry:bool = false;
+try {
+    var x = 1 / 0;
+} exceptions {
+    when ANY_ERROR {
+        print "  Exception handled";
+    }
+}
+afterTry = true;
+print "  Code after try-catch executed";
+if afterTry == true then {
+    test6Result = "PASSED";
+}
+print "  Result: " + test6Result + "\n";
+if test6Result == "PASSED" then {
+    testsPassed = testsPassed + 1;
+} else {
+    testsFailed = testsFailed + 1;
+}
+
+// ============================================================
+// TEST 7: No exception - normal execution
+// ============================================================
+print "TEST 7: No exception - normal execution";
+print "-------------------------------------------------------------";
+var test7Result:string = "FAILED";
+var normalValue:int = 0;
+var handlerExecuted:bool = false;
+try {
+    normalValue = 10 + 5;
+    print "  Computed value: " + normalValue;
+} exceptions {
+    when ANY_ERROR {
+        handlerExecuted = true;
+        print "  ERROR: Handler should not execute";
+    }
+}
+if (normalValue == 15 && handlerExecuted == false) {
+    test7Result = "PASSED";
+}
+print "  Result: " + test7Result + "\n";
+if test7Result == "PASSED" then {
+    testsPassed = testsPassed + 1;
+} else {
+    testsFailed = testsFailed + 1;
+}
+
+// ============================================================
+// TEST 8: Variables defined in try block are scoped
+// ============================================================
+print "TEST 8: Try block scoping";
+print "-------------------------------------------------------------";
+var test8Result:string = "PASSED";
+var outerVar:int = 100;
+try {
+    outerVar = 200;
+    print "  Modified outer variable to: " + outerVar;
+} exceptions {
+    when ANY_ERROR {
+        print "  No error expected";
+    }
+}
+if outerVar == 200 then {
+    print "  Outer variable correctly modified: " + outerVar;
+} else {
+    test8Result = "FAILED";
+    print "  ERROR: Outer variable not modified correctly";
+}
+print "  Result: " + test8Result + "\n";
+if test8Result == "PASSED" then {
+    testsPassed = testsPassed + 1;
+} else {
+    testsFailed = testsFailed + 1;
+}
+
+// ============================================================
+// TEST 9: Multiple error types with specific handlers
+// ============================================================
+print "TEST 9: Handler order - specific before ANY_ERROR";
+print "-------------------------------------------------------------";
+var test9Result:string = "FAILED";
+var specificHandlerCalled:bool = false;
+var anyHandlerCalled:bool = false;
+try {
+    // Force a math error
+    var x = 99 / 0;
+} exceptions {
+    when IO_ERROR {
+        print "  IO_ERROR handler - should not trigger";
+    }
+    when DB_ERROR {
+        print "  DB_ERROR handler - should not trigger";
+    }
+    when MATH_ERROR {
+        specificHandlerCalled = true;
+        print "  MATH_ERROR handler triggered correctly";
+    }
+    when ANY_ERROR {
+        anyHandlerCalled = true;
+        print "  ANY_ERROR handler - should not trigger";
+    }
+}
+if (specificHandlerCalled == true && anyHandlerCalled == false) {
+    test9Result = "PASSED";
+}
+print "  Result: " + test9Result + "\n";
+if test9Result == "PASSED" then {
+    testsPassed = testsPassed + 1;
+} else {
+    testsFailed = testsFailed + 1;
+}
+
+// ============================================================
+// TEST 10: Sequential try blocks
+// ============================================================
+print "TEST 10: Try blocks can be sequential";
+print "-------------------------------------------------------------";
+var test10Result:string = "FAILED";
+var firstCaught:bool = false;
+var secondCaught:bool = false;
+
+try {
+    var x = 1 / 0;
+} exceptions {
+    when ANY_ERROR {
+        firstCaught = true;
+        print "  First try-catch handled";
+    }
+}
+
+try {
+    var y = 2 / 0;
+} exceptions {
+    when ANY_ERROR {
+        secondCaught = true;
+        print "  Second try-catch handled";
+    }
+}
+
+if (firstCaught == true && secondCaught == true) {
+    test10Result = "PASSED";
+}
+print "  Result: " + test10Result + "\n";
+if test10Result == "PASSED" then {
+    testsPassed = testsPassed + 1;
+} else {
+    testsFailed = testsFailed + 1;
+}
+
+// ============================================================
+// TEST 11: Error variable with different error types
+// ============================================================
+print "TEST 11: Error variable captures message";
+print "-------------------------------------------------------------";
+var test11Result:string = "FAILED";
+var msg1:string = "";
+var msg2:string = "";
+
+try {
+    var x = 10 / 0;
+} exceptions {
+    when MATH_ERROR(e) {
+        msg1 = e;
+        print "  First error: " + e;
+    }
+}
+
+try {
+    var y = 20 / 0;
+} exceptions {
+    when ANY_ERROR(e) {
+        msg2 = e;
+        print "  Second error: " + e;
+    }
+}
+
+if (msg1 != "" && msg2 != "") {
+    test11Result = "PASSED";
+}
+print "  Result: " + test11Result + "\n";
+if test11Result == "PASSED" then {
+    testsPassed = testsPassed + 1;
+} else {
+    testsFailed = testsFailed + 1;
+}
+
+// ============================================================
+// TEST 12: Try with loop inside
+// ============================================================
+print "TEST 12: Try block with loop";
+print "-------------------------------------------------------------";
+var test12Result:string = "FAILED";
+var loopCount:int = 0;
+var errorCaught:bool = false;
+
+try {
+    var i:int = 0;
+    while i < 5 {
+        loopCount = loopCount + 1;
+        i = i + 1;
+        if i == 3 then {
+            var x = 1 / 0;
+        }
+    }
+} exceptions {
+    when ANY_ERROR {
+        errorCaught = true;
+        print "  Error caught at loop iteration " + loopCount;
+    }
+}
+
+if (loopCount == 3 && errorCaught == true) {
+    test12Result = "PASSED";
+}
+print "  Result: " + test12Result + "\n";
+if test12Result == "PASSED" then {
+    testsPassed = testsPassed + 1;
+} else {
+    testsFailed = testsFailed + 1;
+}
+
+// ============================================================
+// TEST 13: Complex arithmetic expressions
+// ============================================================
+print "TEST 13: Complex expressions in try block";
+print "-------------------------------------------------------------";
+var test13Result:string = "FAILED";
+var computedValue:int = 0;
+
+try {
+    var a:int = 10;
+    var b:int = 5;
+    var c:int = 2;
+    computedValue = (a + b) * c;
+    print "  Computed: (10 + 5) * 2 = " + computedValue;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  Unexpected error: " + msg;
+    }
+}
+
+if computedValue == 30 then {
+    test13Result = "PASSED";
+}
+print "  Result: " + test13Result + "\n";
+if test13Result == "PASSED" then {
+    testsPassed = testsPassed + 1;
+} else {
+    testsFailed = testsFailed + 1;
+}
+
+// ============================================================
+// TEST 14: Deeply nested try blocks (3 levels)
+// ============================================================
+print "TEST 14: Three-level nested try blocks";
+print "-------------------------------------------------------------";
+var test14Result:string = "FAILED";
+var level1:bool = false;
+var level2:bool = false;
+var level3:bool = false;
+
+try {
+    print "  Level 1: entering";
+    level1 = true;
+    try {
+        print "  Level 2: entering";
+        level2 = true;
+        try {
+            print "  Level 3: entering";
+            level3 = true;
+            var x = 1 / 0;
+        } exceptions {
+            when MATH_ERROR {
+                print "  Level 3: caught MATH_ERROR";
+            }
+        }
+        print "  Level 2: after inner try";
+    } exceptions {
+        when ANY_ERROR {
+            print "  Level 2: caught error - should NOT happen";
+            level2 = false;
+        }
+    }
+    print "  Level 1: after middle try";
+} exceptions {
+    when ANY_ERROR {
+        print "  Level 1: caught error - should NOT happen";
+        level1 = false;
+    }
+}
+
+if (level1 == true && level2 == true && level3 == true) {
+    test14Result = "PASSED";
+}
+print "  Result: " + test14Result + "\n";
+if test14Result == "PASSED" then {
+    testsPassed = testsPassed + 1;
+} else {
+    testsFailed = testsFailed + 1;
+}
+
+// ============================================================
+// TEST 15: All error type handlers recognized
+// ============================================================
+print "TEST 15: All error types are valid syntax";
+print "-------------------------------------------------------------";
+var test15Result:string = "PASSED";
+
+try {
+    var x:int = 42;
+} exceptions {
+    when IO_ERROR { print "  io"; }
+    when DB_ERROR { print "  db"; }
+    when TYPE_ERROR { print "  type"; }
+    when NULL_ERROR { print "  null"; }
+    when INDEX_ERROR { print "  index"; }
+    when MATH_ERROR { print "  math"; }
+    when PARSE_ERROR { print "  parse"; }
+    when NETWORK_ERROR { print "  network"; }
+    when NOT_FOUND_ERROR { print "  not found"; }
+    when ACCESS_ERROR { print "  access"; }
+    when VALIDATION_ERROR { print "  validation"; }
+    when ANY_ERROR { print "  any"; }
+}
+print "  All 12 error types recognized in syntax";
+print "  Result: " + test15Result + "\n";
+if test15Result == "PASSED" then {
+    testsPassed = testsPassed + 1;
+} else {
+    testsFailed = testsFailed + 1;
+}
+
+// ============================================================
+// TEST 16: Function with exceptions (no try keyword)
+// ============================================================
+print "TEST 16: Function with exceptions (no try keyword)";
+print "-------------------------------------------------------------";
+var test16Result:string = "FAILED";
+var funcExceptionCaught:bool = false;
+
+riskyFunction(a:int, b:int) return int {
+    return a / b;
+} exceptions {
+    when MATH_ERROR {
+        funcExceptionCaught = true;
+        print "  Exception caught inside function!";
+    }
+}
+
+#riskyFunction(10, 0);
+if funcExceptionCaught == true then {
+    test16Result = "PASSED";
+}
+print "  Result: " + test16Result + "\n";
+if test16Result == "PASSED" then {
+    testsPassed = testsPassed + 1;
+} else {
+    testsFailed = testsFailed + 1;
+}
+
+// ============================================================
+// TEST 17: Named block with exceptions (no try keyword)
+// ============================================================
+print "TEST 17: Named block with exceptions (no try keyword)";
+print "-------------------------------------------------------------";
+var test17Result:string = "FAILED";
+var blockExceptionCaught:bool = false;
+
+riskyBlock {
+    var x = 100 / 0;
+} exceptions {
+    when MATH_ERROR(msg) {
+        blockExceptionCaught = true;
+        print "  Block caught error: " + msg;
+    }
+}
+
+#riskyBlock();
+if blockExceptionCaught == true then {
+    test17Result = "PASSED";
+}
+print "  Result: " + test17Result + "\n";
+if test17Result == "PASSED" then {
+    testsPassed = testsPassed + 1;
+} else {
+    testsFailed = testsFailed + 1;
+}
+
+// ============================================================
+// TEST 18: Function with multiple exception handlers
+// ============================================================
+print "TEST 18: Function with multiple handlers";
+print "-------------------------------------------------------------";
+var test18Result:string = "FAILED";
+var multiHandlerCaught:string = "";
+
+multiHandlerFunc() {
+    var x = 50 / 0;
+} exceptions {
+    when IO_ERROR {
+        multiHandlerCaught = "IO";
+    }
+    when MATH_ERROR {
+        multiHandlerCaught = "MATH";
+        print "  Correct handler (MATH_ERROR) triggered";
+    }
+    when ANY_ERROR {
+        multiHandlerCaught = "ANY";
+    }
+}
+
+#multiHandlerFunc();
+if multiHandlerCaught == "MATH" then {
+    test18Result = "PASSED";
+}
+print "  Result: " + test18Result + "\n";
+if test18Result == "PASSED" then {
+    testsPassed = testsPassed + 1;
+} else {
+    testsFailed = testsFailed + 1;
+}
+
+// ============================================================
+// TEST SUMMARY
+// ============================================================
+print "============================================================";
+print "                    TEST SUMMARY";
+print "============================================================";
+print "Tests Passed: " + testsPassed;
+print "Tests Failed: " + testsFailed;
+var totalTests:int = testsPassed + testsFailed;
+print "Total Tests:  " + totalTests;
+print "";
+
+if testsFailed == 0 then {
+    print "★★★ ALL TESTS PASSED! ★★★";
+} else {
+    print "⚠ SOME TESTS FAILED - Review output above";
+}
+print "============================================================";
