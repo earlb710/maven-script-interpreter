@@ -337,13 +337,20 @@ The `AreaItem` class defines individual UI elements within an area, including th
 
 | Property | Type | Description | Example Values |
 |----------|------|-------------|----------------|
-| `promptHelp` | String | Placeholder text | "Enter username..." |
 | `editable` | Boolean | Whether editable | true, false |
 | `disabled` | Boolean | Disabled state | true, false |
 | `visible` | Boolean | Visibility | true, false |
 | `tooltip` | String | Hover tooltip | "Username must be alphanumeric" |
 | `textColor` | String | Text color | "#333333", "red" |
 | `backgroundColor` | String | Background color | "#FFFFFF", "lightblue" |
+
+### Data Source Properties
+
+| Property | Type | Description | Values |
+|----------|------|-------------|--------|
+| `source` | String | Source of the value | "data" (original data value), "display" (formatted display value) |
+
+**Note:** `promptHelp` (placeholder text) is a DisplayItem property, not an AreaItem property. Set it in the variable's `display` definition or in the item's `displayItem` override.
 
 ### Layout Properties
 
