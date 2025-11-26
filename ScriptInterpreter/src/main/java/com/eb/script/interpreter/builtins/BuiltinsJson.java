@@ -1,4 +1,6 @@
-package com.eb.script.interpreter;
+package com.eb.script.interpreter.builtins;
+
+import com.eb.script.interpreter.InterpreterError;
 
 import com.eb.script.json.Json;
 import com.eb.script.json.JsonSchema;

@@ -1,4 +1,4 @@
-package com.eb.script.interpreter;
+package com.eb.script.interpreter.builtins;
 
 import com.eb.ui.ebs.AiChatModelSetupDialog;
 import javafx.application.Platform;

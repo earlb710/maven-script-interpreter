@@ -1,10 +1,11 @@
-package com.eb.script.file;
+package com.eb.script.interpreter.builtins;
 
 import com.eb.script.file.FileContext;
-import com.eb.script.arrays.ArrayDef;
-import com.eb.script.arrays.ArrayFixedByte;
+import com.eb.script.file.FileData;
 import com.eb.script.interpreter.Environment;
 import com.eb.script.interpreter.InterpreterError;
+import com.eb.script.arrays.ArrayDef;
+import com.eb.script.arrays.ArrayFixedByte;
 import com.eb.ui.cli.ScriptArea;
 import com.eb.util.ClassTreeLister;
 import com.eb.util.Util;

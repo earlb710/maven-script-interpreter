@@ -1,6 +1,6 @@
 package com.eb.ui.ebs;
 
-import com.eb.script.interpreter.AiFunctions;
+import com.eb.script.interpreter.builtins.AiFunctions;
 import com.eb.ui.tabs.TabContext;
 import java.nio.file.Path;
 import java.util.Deque;

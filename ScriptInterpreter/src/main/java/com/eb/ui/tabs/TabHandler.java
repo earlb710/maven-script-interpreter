@@ -1,7 +1,7 @@
 // package com.eb.ui.tabs;  // adjust to your project
 package com.eb.ui.tabs;
 
-import com.eb.script.interpreter.Builtins;
+import com.eb.script.interpreter.builtins.Builtins;
 import com.eb.script.interpreter.InterpreterError;
 import com.eb.ui.ebs.EbsStyled;
 import com.eb.ui.cli.ScriptArea;

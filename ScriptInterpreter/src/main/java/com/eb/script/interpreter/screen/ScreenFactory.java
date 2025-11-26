@@ -1,7 +1,7 @@
 package com.eb.script.interpreter.screen;
 
 import com.eb.script.arrays.ArrayDef;
-import com.eb.script.file.BuiltinsFile;
+import com.eb.script.interpreter.builtins.BuiltinsFile;
 import com.eb.script.file.FileData;
 import com.eb.script.interpreter.InterpreterContext;
 import com.eb.script.interpreter.InterpreterError;

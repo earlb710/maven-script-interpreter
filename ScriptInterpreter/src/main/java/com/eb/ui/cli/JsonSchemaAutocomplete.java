@@ -1,7 +1,7 @@
 package com.eb.ui.cli;
 
 import com.eb.script.json.Json;
-import com.eb.script.interpreter.Builtins;
+import com.eb.script.interpreter.builtins.Builtins;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;

@@ -1,6 +1,6 @@
 package com.eb.ui.cli;
 
-import com.eb.script.interpreter.Builtins;
+import com.eb.script.interpreter.builtins.Builtins;
 import com.eb.script.interpreter.statement.Parameter;
 import com.eb.script.token.Category;
 import com.eb.script.token.DataType;
