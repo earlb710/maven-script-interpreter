@@ -556,6 +556,11 @@ The interpreter includes numerous built-in functions:
 ### Date/Time
 - `now()`, `dateFormat()`, `parseDate()`
 
+### Dialog Functions
+- `system.inputDialog(title, headerText?, defaultValue?)` - Prompts user for text input, returns the entered string
+- `system.confirmDialog(message, title?, headerText?)` - Shows YES/NO confirmation dialog, returns boolean
+- `system.alertDialog(message, title?, alertType?)` - Shows message dialog with OK button (alertType: "info", "warning", "error")
+
 ## Database Support
 
 The interpreter includes built-in database support with:

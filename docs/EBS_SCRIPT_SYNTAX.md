@@ -1991,6 +1991,109 @@ call system.setproperty(name, value);
 
 // Help system
 call system.help();
+
+// Dialog functions
+var userInput = call system.inputDialog(title, headerText?, defaultValue?);
+var confirmed = call system.confirmDialog(message, title?, headerText?);
+call system.alertDialog(message, title?, alertType?);
+```
+
+#### Dialog Functions
+
+EBS provides built-in dialog functions for user interaction:
+
+##### system.inputDialog(title, headerText?, defaultValue?)
+Shows an input dialog that prompts the user for text input.
+
+**Parameters:**
+- `title` (string, required): The dialog window title
+- `headerText` (string, optional): Header text displayed above the input field
+- `defaultValue` (string, optional): Default value pre-filled in the input field
+
+**Returns:** String - the text entered by the user, or empty string if cancelled
+
+```javascript
+// Basic input dialog
+var name = call system.inputDialog("Enter Name");
+
+// With header text
+var email = call system.inputDialog("Contact Info", "Please enter your email address");
+
+// With default value
+var username = call system.inputDialog("Username", "Enter your username", "guest");
+
+// Example usage
+var userInput = call system.inputDialog("Search", "Enter search term:", "");
+if userInput != "" then {
+    print "Searching for: " + userInput;
+}
+```
+
+##### system.confirmDialog(message, title?, headerText?)
+Shows a confirmation dialog with YES and NO buttons. Returns a boolean indicating the user's choice.
+
+**Parameters:**
+- `message` (string, required): The confirmation message to display
+- `title` (string, optional): The dialog window title (default: "Confirm")
+- `headerText` (string, optional): Header text displayed above the message
+
+**Returns:** Boolean - `true` if user clicks YES, `false` if user clicks NO or closes the dialog
+
+```javascript
+// Basic confirmation
+var confirmed = call system.confirmDialog("Are you sure?");
+if confirmed then {
+    print "User confirmed";
+}
+
+// With custom title
+var deleteConfirmed = call system.confirmDialog("Delete this file?", "Confirm Delete");
+
+// With header text
+var saveConfirmed = call system.confirmDialog(
+    "Do you want to save changes?",
+    "Save Changes",
+    "You have unsaved modifications"
+);
+
+// Example: Confirm before destructive action
+var proceed = call system.confirmDialog("This action cannot be undone. Continue?", "Warning");
+if proceed then {
+    // Perform the action
+    print "Action executed";
+} else {
+    print "Action cancelled";
+}
+```
+
+##### system.alertDialog(message, title?, alertType?)
+Shows a message dialog with only an OK button. Used to display information, warnings, or errors to the user.
+
+**Parameters:**
+- `message` (string, required): The message to display
+- `title` (string, optional): The dialog window title (default: "Alert")
+- `alertType` (string, optional): The type of alert - "info", "warning", or "error" (default: "info")
+
+**Returns:** Nothing (void)
+
+```javascript
+// Basic information alert
+call system.alertDialog("Operation completed successfully");
+
+// With custom title
+call system.alertDialog("File saved", "Success");
+
+// Warning alert
+call system.alertDialog("Disk space is running low", "Warning", "warning");
+
+// Error alert
+call system.alertDialog("Failed to connect to database", "Error", "error");
+
+// Information alert (explicit)
+call system.alertDialog("Welcome to the application!", "Welcome", "info");
+
+// Example: Show completion message
+call system.alertDialog("Export completed. 150 records exported.", "Export Complete", "info");
 ```
 
 ### Screen Functions
