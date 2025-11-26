@@ -200,22 +200,8 @@ public enum DataType {
                     }
                 }
             }
-            case RECORD -> {
-                // Accept Map objects as records
-                // If given a JSON object string, parse it
-                if (value instanceof String s) {
-                    String ts = s.trim();
-                    if (ts.startsWith("{") && ts.endsWith("}")) {
-                        try {
-                            value = Json.parse(ts);
-                        } catch (RuntimeException ignore) {
-                            // keep original
-                        }
-                    }
-                }
-            }
-            case MAP -> {
-                // Accept Map objects as maps
+            case RECORD, MAP -> {
+                // Accept Map objects as records/maps
                 // If given a JSON object string, parse it
                 if (value instanceof String s) {
                     String ts = s.trim();
