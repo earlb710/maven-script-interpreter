@@ -62,9 +62,9 @@ public enum ErrorType {
         if (name == null) {
             return null;
         }
-        String upperName = name.toUpperCase();
+        // Use case-insensitive comparison directly against enum names
         for (ErrorType type : values()) {
-            if (type.name.equals(upperName)) {
+            if (type.name.equalsIgnoreCase(name)) {
                 return type;
             }
         }
@@ -76,6 +76,21 @@ public enum ErrorType {
      */
     public static boolean isValidErrorType(String name) {
         return fromName(name) != null;
+    }
+    
+    /**
+     * Get a comma-separated list of all valid error type names.
+     * Useful for error messages.
+     */
+    public static String getAllErrorTypeNames() {
+        StringBuilder sb = new StringBuilder();
+        for (ErrorType type : values()) {
+            if (sb.length() > 0) {
+                sb.append(", ");
+            }
+            sb.append(type.name);
+        }
+        return sb.toString();
     }
     
     @Override

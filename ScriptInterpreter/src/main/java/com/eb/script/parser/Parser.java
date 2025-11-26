@@ -1723,8 +1723,7 @@ public class Parser {
         ErrorType errorType = ErrorType.fromName(errorTypeName);
         if (errorType == null) {
             throw error(errorTypeToken, "Unknown error type '" + errorTypeName + "'. " +
-                "Valid error types: ANY_ERROR, IO_ERROR, DB_ERROR, TYPE_ERROR, NULL_ERROR, " +
-                "INDEX_ERROR, MATH_ERROR, PARSE_ERROR, NETWORK_ERROR, NOT_FOUND_ERROR, ACCESS_ERROR, VALIDATION_ERROR");
+                "Valid error types: " + ErrorType.getAllErrorTypeNames());
         }
 
         // Check for optional error variable: when ERROR_TYPE(varName)

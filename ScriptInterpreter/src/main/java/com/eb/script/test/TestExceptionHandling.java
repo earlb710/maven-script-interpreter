@@ -7,11 +7,18 @@ import com.eb.script.interpreter.InterpreterError;
 import com.eb.script.parser.ParseError;
 import com.eb.script.parser.Parser;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+
 /**
- * Simple test for exception handling parsing.
+ * Test for exception handling parsing.
  * This tests that the parser can correctly parse the try-exceptions syntax.
+ * Note: Runtime execution tests are not included as they require JavaFX environment.
  */
 public class TestExceptionHandling {
+    
+    private static int passedTests = 0;
+    private static int failedTests = 0;
     
     public static void main(String[] args) {
         System.out.println("=== Testing Exception Handling Parsing ===\n");
@@ -83,7 +90,48 @@ public class TestExceptionHandling {
             }
             """);
         
-        System.out.println("\n=== All parsing tests completed ===");
+        // Test 6: All error types are recognized
+        testParsing("All error types", """
+            try {
+                var x = 1;
+            } exceptions {
+                when IO_ERROR { print "io"; }
+                when DB_ERROR { print "db"; }
+                when TYPE_ERROR { print "type"; }
+                when NULL_ERROR { print "null"; }
+                when INDEX_ERROR { print "index"; }
+                when MATH_ERROR { print "math"; }
+                when PARSE_ERROR { print "parse"; }
+                when NETWORK_ERROR { print "network"; }
+                when NOT_FOUND_ERROR { print "not found"; }
+                when ACCESS_ERROR { print "access"; }
+                when VALIDATION_ERROR { print "validation"; }
+                when ANY_ERROR { print "any"; }
+            }
+            """);
+        
+        // Test 7: Try without exceptions should fail
+        testParsingFails("Try without exceptions", """
+            try {
+                var x = 10;
+            }
+            """);
+        
+        // Test 8: Empty exceptions block should fail
+        testParsingFails("Empty exceptions block", """
+            try {
+                var x = 10;
+            } exceptions {
+            }
+            """);
+        
+        System.out.println("\n=== Parsing Test Summary ===");
+        System.out.println("Passed: " + passedTests);
+        System.out.println("Failed: " + failedTests);
+        
+        if (failedTests > 0) {
+            System.exit(1);
+        }
     }
     
     private static void testParsing(String testName, String script) {
@@ -91,8 +139,10 @@ public class TestExceptionHandling {
         try {
             RuntimeContext runtime = Parser.parse("test", script);
             System.out.println("  ✓ Parsing succeeded");
+            passedTests++;
         } catch (Exception e) {
             System.out.println("  ✗ Parsing failed: " + e.getMessage());
+            failedTests++;
         }
     }
     
@@ -101,8 +151,10 @@ public class TestExceptionHandling {
         try {
             RuntimeContext runtime = Parser.parse("test", script);
             System.out.println("  ✗ Parsing should have failed but succeeded");
+            failedTests++;
         } catch (Exception e) {
             System.out.println("  ✓ Parsing failed as expected: " + e.getMessage());
+            passedTests++;
         }
     }
 }

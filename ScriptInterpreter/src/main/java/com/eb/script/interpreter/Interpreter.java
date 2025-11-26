@@ -477,37 +477,14 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 scriptException = EbsScriptException.fromInterpreterError(stmt.getLine(), e);
             }
             
-            // Find a matching handler
-            ExceptionHandler matchingHandler = null;
-            for (ExceptionHandler handler : stmt.handlers) {
-                if (handler.canHandle(scriptException.getErrorType())) {
-                    matchingHandler = handler;
-                    break;
-                }
-            }
-            
-            if (matchingHandler == null) {
-                // No matching handler - re-throw the original exception
+            // Find and execute a matching handler, or re-throw if none found
+            if (!executeMatchingHandler(stmt.handlers, scriptException)) {
                 throw e;
-            }
-            
-            // Execute the handler block
-            environment().pushEnvironmentValues();
-            try {
-                // If the handler has an error variable, define it with the error message
-                if (matchingHandler.errorVarName != null) {
-                    environment().getEnvironmentValues().define(matchingHandler.errorVarName, scriptException.getMessage());
-                }
-                
-                // Execute the handler block
-                matchingHandler.handlerBlock.accept(this);
-            } finally {
-                environment().popEnvironmentValues();
             }
         } catch (RuntimeException e) {
             // Handle Java runtime exceptions (like BreakSignal, ContinueSignal, ReturnSignal)
-            // These should not be caught by exception handlers - they are control flow signals
-            if (e instanceof BreakSignal || e instanceof ContinueSignal || e instanceof ReturnSignal) {
+            // These are control flow signals and should not be caught by exception handlers
+            if (isControlFlowSignal(e)) {
                 throw e;
             }
             
@@ -515,36 +492,55 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             EbsScriptException scriptException = new EbsScriptException(stmt.getLine(), 
                 ErrorType.ANY_ERROR, "Runtime error: " + e.getMessage(), e);
             
-            // Find a matching handler
-            ExceptionHandler matchingHandler = null;
-            for (ExceptionHandler handler : stmt.handlers) {
-                if (handler.canHandle(scriptException.getErrorType())) {
-                    matchingHandler = handler;
-                    break;
-                }
-            }
-            
-            if (matchingHandler == null) {
-                // No matching handler - wrap and re-throw
+            // Find and execute a matching handler, or wrap and re-throw if none found
+            if (!executeMatchingHandler(stmt.handlers, scriptException)) {
                 throw error(stmt.getLine(), "Unhandled runtime exception: " + e.getMessage());
-            }
-            
-            // Execute the handler block
-            environment().pushEnvironmentValues();
-            try {
-                // If the handler has an error variable, define it with the error message
-                if (matchingHandler.errorVarName != null) {
-                    environment().getEnvironmentValues().define(matchingHandler.errorVarName, scriptException.getMessage());
-                }
-                
-                // Execute the handler block
-                matchingHandler.handlerBlock.accept(this);
-            } finally {
-                environment().popEnvironmentValues();
             }
         } finally {
             environment().popCallStack();
         }
+    }
+    
+    /**
+     * Check if an exception is a control flow signal that should not be caught by exception handlers.
+     */
+    private boolean isControlFlowSignal(RuntimeException e) {
+        return e instanceof BreakSignal || e instanceof ContinueSignal || e instanceof ReturnSignal;
+    }
+    
+    /**
+     * Find a matching exception handler and execute it.
+     * @return true if a handler was found and executed, false otherwise
+     */
+    private boolean executeMatchingHandler(ExceptionHandler[] handlers, EbsScriptException exception) throws InterpreterError {
+        // Find a matching handler
+        ExceptionHandler matchingHandler = null;
+        for (ExceptionHandler handler : handlers) {
+            if (handler.canHandle(exception.getErrorType())) {
+                matchingHandler = handler;
+                break;
+            }
+        }
+        
+        if (matchingHandler == null) {
+            return false;
+        }
+        
+        // Execute the handler block
+        environment().pushEnvironmentValues();
+        try {
+            // If the handler has an error variable, define it with the error message
+            if (matchingHandler.errorVarName != null) {
+                environment().getEnvironmentValues().define(matchingHandler.errorVarName, exception.getMessage());
+            }
+            
+            // Execute the handler block
+            matchingHandler.handlerBlock.accept(this);
+        } finally {
+            environment().popEnvironmentValues();
+        }
+        
+        return true;
     }
 
     @Override
