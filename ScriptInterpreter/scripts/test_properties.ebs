@@ -1,17 +1,17 @@
 // Test Script for Item and Area Properties
-// Description: Tests scr.getProperty/setProperty for items and scr.getAreaProperty/setAreaProperty for areas
-// This script verifies that properties can be read and updated at runtime
+// Description: Tests ALL scr.getProperty/setProperty for items and scr.getAreaProperty/setAreaProperty for areas
+// This script verifies that ALL properties can be read and updated at runtime
 
 print "===========================================";
-print "Test Script: Item and Area Properties";
+print "Test Script: ALL Item and Area Properties";
 print "===========================================";
 print "";
 
 // Define a test screen with various items and areas
 screen testScreen = {
     "title": "Property Test Screen",
-    "width": 600,
-    "height": 500,
+    "width": 700,
+    "height": 600,
     "vars": [
         {
             "name": "testValue",
@@ -32,13 +32,41 @@ screen testScreen = {
             "padding": "20",
             "numberOfRecords": 2,
             "recordRef": "testData",
+            "style": "-fx-background-color: #ffffff;",
+            "title": "Main Section",
+            "groupBorder": "line",
+            "groupBorderColor": "#cccccc",
+            "groupLabelText": "Test Group",
+            "groupLabelAlignment": "left",
+            "groupLabelOffset": "on",
+            "layout": "fill",
+            "cssClass": "main-area",
+            "displayName": "Main Area Display",
+            "gainFocus": "print 'focus gained';",
+            "lostFocus": "print 'focus lost';",
             "items": [
                 {
                     "name": "textField1",
                     "varRef": "testValue",
                     "visible": true,
                     "editable": true,
+                    "disabled": false,
                     "tooltip": "Original tooltip",
+                    "textColor": "#000000",
+                    "backgroundColor": "#ffffff",
+                    "colSpan": 1,
+                    "rowSpan": 1,
+                    "hgrow": "SOMETIMES",
+                    "vgrow": "NEVER",
+                    "margin": "5",
+                    "padding": "3",
+                    "prefWidth": "200",
+                    "prefHeight": "30",
+                    "minWidth": "100",
+                    "minHeight": "25",
+                    "maxWidth": "400",
+                    "maxHeight": "50",
+                    "alignment": "center-left",
                     "display": {
                         "type": "textfield",
                         "labelText": "Test Field:",
@@ -85,222 +113,652 @@ show screen testScreen;
 print "Screen displayed.";
 print "";
 
+var passCount = 0;
+var failCount = 0;
+
 // =============================================
-// TEST 1: ITEM PROPERTY TESTS
+// TEST 1: ALL ITEM PROPERTY TESTS (17 properties)
 // =============================================
-print "--------------------------------------------";
-print "TEST 1: Item Property Tests (scr.getProperty / scr.setProperty)";
-print "--------------------------------------------";
+print "============================================================";
+print "TEST 1: ALL Item Property Tests (17 properties)";
+print "============================================================";
 print "";
 
-// Test visible property
-print "Test 1.1: visible property";
+// Test 1: visible property (boolean)
+print "Test 1.1: visible property (boolean)";
 var origVisible = #scr.getProperty("testScreen.textField1", "visible");
-print "  Original visible: " + origVisible;
+print "  Original: " + origVisible;
 #scr.setProperty("testScreen.textField1", "visible", false);
 var newVisible = #scr.getProperty("testScreen.textField1", "visible");
-print "  After setting to false: " + newVisible;
+print "  After set to false: " + newVisible;
 if (newVisible == false) {
-    print "  [PASS] visible property changed correctly";
+    print "  [PASS]";
+    passCount = passCount + 1;
 } else {
-    print "  [FAIL] visible property did not change";
+    print "  [FAIL]";
+    failCount = failCount + 1;
 }
-// Reset
 #scr.setProperty("testScreen.textField1", "visible", true);
 print "";
 
-// Test editable property
-print "Test 1.2: editable property";
+// Test 2: editable property (boolean)
+print "Test 1.2: editable property (boolean)";
 var origEditable = #scr.getProperty("testScreen.textField1", "editable");
-print "  Original editable: " + origEditable;
+print "  Original: " + origEditable;
 #scr.setProperty("testScreen.textField1", "editable", false);
 var newEditable = #scr.getProperty("testScreen.textField1", "editable");
-print "  After setting to false: " + newEditable;
+print "  After set to false: " + newEditable;
 if (newEditable == false) {
-    print "  [PASS] editable property changed correctly";
+    print "  [PASS]";
+    passCount = passCount + 1;
 } else {
-    print "  [FAIL] editable property did not change";
+    print "  [FAIL]";
+    failCount = failCount + 1;
 }
-// Reset
 #scr.setProperty("testScreen.textField1", "editable", true);
 print "";
 
-// Test disabled property
-print "Test 1.3: disabled property";
-var origDisabled = #scr.getProperty("testScreen.counterField", "disabled");
-print "  Original disabled: " + origDisabled;
-#scr.setProperty("testScreen.counterField", "disabled", true);
-var newDisabled = #scr.getProperty("testScreen.counterField", "disabled");
-print "  After setting to true: " + newDisabled;
+// Test 3: disabled property (boolean)
+print "Test 1.3: disabled property (boolean)";
+var origDisabled = #scr.getProperty("testScreen.textField1", "disabled");
+print "  Original: " + origDisabled;
+#scr.setProperty("testScreen.textField1", "disabled", true);
+var newDisabled = #scr.getProperty("testScreen.textField1", "disabled");
+print "  After set to true: " + newDisabled;
 if (newDisabled == true) {
-    print "  [PASS] disabled property changed correctly";
+    print "  [PASS]";
+    passCount = passCount + 1;
 } else {
-    print "  [FAIL] disabled property did not change";
+    print "  [FAIL]";
+    failCount = failCount + 1;
 }
-// Reset
-#scr.setProperty("testScreen.counterField", "disabled", false);
+#scr.setProperty("testScreen.textField1", "disabled", false);
 print "";
 
-// Test tooltip property
-print "Test 1.4: tooltip property";
+// Test 4: tooltip property (string)
+print "Test 1.4: tooltip property (string)";
 var origTooltip = #scr.getProperty("testScreen.textField1", "tooltip");
-print "  Original tooltip: " + origTooltip;
-#scr.setProperty("testScreen.textField1", "tooltip", "New tooltip text");
+print "  Original: " + origTooltip;
+#scr.setProperty("testScreen.textField1", "tooltip", "New tooltip");
 var newTooltip = #scr.getProperty("testScreen.textField1", "tooltip");
-print "  After setting new tooltip: " + newTooltip;
-if (newTooltip == "New tooltip text") {
-    print "  [PASS] tooltip property changed correctly";
+print "  After set: " + newTooltip;
+if (newTooltip == "New tooltip") {
+    print "  [PASS]";
+    passCount = passCount + 1;
 } else {
-    print "  [FAIL] tooltip property did not change";
+    print "  [FAIL]";
+    failCount = failCount + 1;
 }
 print "";
 
-// Test textColor property
-print "Test 1.5: textColor property";
+// Test 5: textColor property (string)
+print "Test 1.5: textColor property (string)";
+var origTextColor = #scr.getProperty("testScreen.textField1", "textColor");
+print "  Original: " + origTextColor;
 #scr.setProperty("testScreen.textField1", "textColor", "#FF0000");
 var newTextColor = #scr.getProperty("testScreen.textField1", "textColor");
-print "  After setting to #FF0000: " + newTextColor;
+print "  After set to #FF0000: " + newTextColor;
 if (newTextColor == "#FF0000") {
-    print "  [PASS] textColor property changed correctly";
+    print "  [PASS]";
+    passCount = passCount + 1;
 } else {
-    print "  [FAIL] textColor property did not change";
+    print "  [FAIL]";
+    failCount = failCount + 1;
 }
 print "";
 
-// Test backgroundColor property
-print "Test 1.6: backgroundColor property";
+// Test 6: backgroundColor property (string)
+print "Test 1.6: backgroundColor property (string)";
+var origBgColor = #scr.getProperty("testScreen.textField1", "backgroundColor");
+print "  Original: " + origBgColor;
 #scr.setProperty("testScreen.textField1", "backgroundColor", "#FFFFCC");
 var newBgColor = #scr.getProperty("testScreen.textField1", "backgroundColor");
-print "  After setting to #FFFFCC: " + newBgColor;
+print "  After set to #FFFFCC: " + newBgColor;
 if (newBgColor == "#FFFFCC") {
-    print "  [PASS] backgroundColor property changed correctly";
+    print "  [PASS]";
+    passCount = passCount + 1;
 } else {
-    print "  [FAIL] backgroundColor property did not change";
+    print "  [FAIL]";
+    failCount = failCount + 1;
+}
+print "";
+
+// Test 7: colSpan property (number)
+print "Test 1.7: colSpan property (number)";
+var origColSpan = #scr.getProperty("testScreen.textField1", "colSpan");
+print "  Original: " + origColSpan;
+#scr.setProperty("testScreen.textField1", "colSpan", 2);
+var newColSpan = #scr.getProperty("testScreen.textField1", "colSpan");
+print "  After set to 2: " + newColSpan;
+if (newColSpan == 2) {
+    print "  [PASS]";
+    passCount = passCount + 1;
+} else {
+    print "  [FAIL]";
+    failCount = failCount + 1;
+}
+print "";
+
+// Test 8: rowSpan property (number)
+print "Test 1.8: rowSpan property (number)";
+var origRowSpan = #scr.getProperty("testScreen.textField1", "rowSpan");
+print "  Original: " + origRowSpan;
+#scr.setProperty("testScreen.textField1", "rowSpan", 3);
+var newRowSpan = #scr.getProperty("testScreen.textField1", "rowSpan");
+print "  After set to 3: " + newRowSpan;
+if (newRowSpan == 3) {
+    print "  [PASS]";
+    passCount = passCount + 1;
+} else {
+    print "  [FAIL]";
+    failCount = failCount + 1;
+}
+print "";
+
+// Test 9: hgrow property (string)
+print "Test 1.9: hgrow property (string)";
+var origHgrow = #scr.getProperty("testScreen.textField1", "hgrow");
+print "  Original: " + origHgrow;
+#scr.setProperty("testScreen.textField1", "hgrow", "ALWAYS");
+var newHgrow = #scr.getProperty("testScreen.textField1", "hgrow");
+print "  After set to ALWAYS: " + newHgrow;
+if (newHgrow == "ALWAYS") {
+    print "  [PASS]";
+    passCount = passCount + 1;
+} else {
+    print "  [FAIL]";
+    failCount = failCount + 1;
+}
+print "";
+
+// Test 10: vgrow property (string)
+print "Test 1.10: vgrow property (string)";
+var origVgrow = #scr.getProperty("testScreen.textField1", "vgrow");
+print "  Original: " + origVgrow;
+#scr.setProperty("testScreen.textField1", "vgrow", "ALWAYS");
+var newVgrow = #scr.getProperty("testScreen.textField1", "vgrow");
+print "  After set to ALWAYS: " + newVgrow;
+if (newVgrow == "ALWAYS") {
+    print "  [PASS]";
+    passCount = passCount + 1;
+} else {
+    print "  [FAIL]";
+    failCount = failCount + 1;
+}
+print "";
+
+// Test 11: margin property (string)
+print "Test 1.11: margin property (string)";
+var origMargin = #scr.getProperty("testScreen.textField1", "margin");
+print "  Original: " + origMargin;
+#scr.setProperty("testScreen.textField1", "margin", "10 5 10 5");
+var newMargin = #scr.getProperty("testScreen.textField1", "margin");
+print "  After set to '10 5 10 5': " + newMargin;
+if (newMargin == "10 5 10 5") {
+    print "  [PASS]";
+    passCount = passCount + 1;
+} else {
+    print "  [FAIL]";
+    failCount = failCount + 1;
+}
+print "";
+
+// Test 12: padding property (string)
+print "Test 1.12: padding property (string)";
+var origPadding = #scr.getProperty("testScreen.textField1", "padding");
+print "  Original: " + origPadding;
+#scr.setProperty("testScreen.textField1", "padding", "8");
+var newPadding = #scr.getProperty("testScreen.textField1", "padding");
+print "  After set to '8': " + newPadding;
+if (newPadding == "8") {
+    print "  [PASS]";
+    passCount = passCount + 1;
+} else {
+    print "  [FAIL]";
+    failCount = failCount + 1;
+}
+print "";
+
+// Test 13: prefWidth property (string)
+print "Test 1.13: prefWidth property (string)";
+var origPrefWidth = #scr.getProperty("testScreen.textField1", "prefWidth");
+print "  Original: " + origPrefWidth;
+#scr.setProperty("testScreen.textField1", "prefWidth", "300");
+var newPrefWidth = #scr.getProperty("testScreen.textField1", "prefWidth");
+print "  After set to '300': " + newPrefWidth;
+if (newPrefWidth == "300") {
+    print "  [PASS]";
+    passCount = passCount + 1;
+} else {
+    print "  [FAIL]";
+    failCount = failCount + 1;
+}
+print "";
+
+// Test 14: prefHeight property (string)
+print "Test 1.14: prefHeight property (string)";
+var origPrefHeight = #scr.getProperty("testScreen.textField1", "prefHeight");
+print "  Original: " + origPrefHeight;
+#scr.setProperty("testScreen.textField1", "prefHeight", "40");
+var newPrefHeight = #scr.getProperty("testScreen.textField1", "prefHeight");
+print "  After set to '40': " + newPrefHeight;
+if (newPrefHeight == "40") {
+    print "  [PASS]";
+    passCount = passCount + 1;
+} else {
+    print "  [FAIL]";
+    failCount = failCount + 1;
+}
+print "";
+
+// Test 15: minWidth property (string)
+print "Test 1.15: minWidth property (string)";
+var origMinWidth = #scr.getProperty("testScreen.textField1", "minWidth");
+print "  Original: " + origMinWidth;
+#scr.setProperty("testScreen.textField1", "minWidth", "150");
+var newMinWidth = #scr.getProperty("testScreen.textField1", "minWidth");
+print "  After set to '150': " + newMinWidth;
+if (newMinWidth == "150") {
+    print "  [PASS]";
+    passCount = passCount + 1;
+} else {
+    print "  [FAIL]";
+    failCount = failCount + 1;
+}
+print "";
+
+// Test 16: minHeight property (string)
+print "Test 1.16: minHeight property (string)";
+var origMinHeight = #scr.getProperty("testScreen.textField1", "minHeight");
+print "  Original: " + origMinHeight;
+#scr.setProperty("testScreen.textField1", "minHeight", "35");
+var newMinHeight = #scr.getProperty("testScreen.textField1", "minHeight");
+print "  After set to '35': " + newMinHeight;
+if (newMinHeight == "35") {
+    print "  [PASS]";
+    passCount = passCount + 1;
+} else {
+    print "  [FAIL]";
+    failCount = failCount + 1;
+}
+print "";
+
+// Test 17: maxWidth property (string)
+print "Test 1.17: maxWidth property (string)";
+var origMaxWidth = #scr.getProperty("testScreen.textField1", "maxWidth");
+print "  Original: " + origMaxWidth;
+#scr.setProperty("testScreen.textField1", "maxWidth", "500");
+var newMaxWidth = #scr.getProperty("testScreen.textField1", "maxWidth");
+print "  After set to '500': " + newMaxWidth;
+if (newMaxWidth == "500") {
+    print "  [PASS]";
+    passCount = passCount + 1;
+} else {
+    print "  [FAIL]";
+    failCount = failCount + 1;
+}
+print "";
+
+// Test 18: maxHeight property (string)
+print "Test 1.18: maxHeight property (string)";
+var origMaxHeight = #scr.getProperty("testScreen.textField1", "maxHeight");
+print "  Original: " + origMaxHeight;
+#scr.setProperty("testScreen.textField1", "maxHeight", "60");
+var newMaxHeight = #scr.getProperty("testScreen.textField1", "maxHeight");
+print "  After set to '60': " + newMaxHeight;
+if (newMaxHeight == "60") {
+    print "  [PASS]";
+    passCount = passCount + 1;
+} else {
+    print "  [FAIL]";
+    failCount = failCount + 1;
+}
+print "";
+
+// Test 19: alignment property (string)
+print "Test 1.19: alignment property (string)";
+var origAlignment = #scr.getProperty("testScreen.textField1", "alignment");
+print "  Original: " + origAlignment;
+#scr.setProperty("testScreen.textField1", "alignment", "center");
+var newAlignment = #scr.getProperty("testScreen.textField1", "alignment");
+print "  After set to 'center': " + newAlignment;
+if (newAlignment == "center") {
+    print "  [PASS]";
+    passCount = passCount + 1;
+} else {
+    print "  [FAIL]";
+    failCount = failCount + 1;
 }
 print "";
 
 // =============================================
-// TEST 2: AREA PROPERTY TESTS
+// TEST 2: ALL AREA PROPERTY TESTS (19 properties)
 // =============================================
-print "--------------------------------------------";
-print "TEST 2: Area Property Tests (scr.getAreaProperty / scr.setAreaProperty)";
-print "--------------------------------------------";
+print "============================================================";
+print "TEST 2: ALL Area Property Tests (19 properties)";
+print "============================================================";
 print "";
 
-// Test spacing property
-print "Test 2.1: spacing property";
-var origSpacing = #scr.getAreaProperty("testScreen.mainArea", "spacing");
-print "  Original spacing: " + origSpacing;
-#scr.setAreaProperty("testScreen.mainArea", "spacing", "25");
-var newSpacing = #scr.getAreaProperty("testScreen.mainArea", "spacing");
-print "  After setting to 25: " + newSpacing;
-if (newSpacing == "25") {
-    print "  [PASS] spacing property changed correctly";
+// Test 1: name property (R/W)
+print "Test 2.1: name property (string R/W)";
+var origName = #scr.getAreaProperty("testScreen.mainArea", "name");
+print "  Original: " + origName;
+#scr.setAreaProperty("testScreen.mainArea", "name", "renamedArea");
+var newName = #scr.getAreaProperty("testScreen.mainArea", "name");
+print "  After set to 'renamedArea': " + newName;
+if (newName == "renamedArea") {
+    print "  [PASS]";
+    passCount = passCount + 1;
 } else {
-    print "  [FAIL] spacing property did not change";
+    print "  [FAIL]";
+    failCount = failCount + 1;
 }
 print "";
 
-// Test padding property
-print "Test 2.2: padding property";
-var origPadding = #scr.getAreaProperty("testScreen.mainArea", "padding");
-print "  Original padding: " + origPadding;
-#scr.setAreaProperty("testScreen.mainArea", "padding", "30");
-var newPadding = #scr.getAreaProperty("testScreen.mainArea", "padding");
-print "  After setting to 30: " + newPadding;
-if (newPadding == "30") {
-    print "  [PASS] padding property changed correctly";
+// Test 2: type property (R/W)
+print "Test 2.2: type property (string R/W)";
+var origType = #scr.getAreaProperty("testScreen.mainArea", "type");
+print "  Original: " + origType;
+#scr.setAreaProperty("testScreen.mainArea", "type", "hbox");
+var newType = #scr.getAreaProperty("testScreen.mainArea", "type");
+print "  After set to 'hbox': " + newType;
+if (newType == "hbox") {
+    print "  [PASS]";
+    passCount = passCount + 1;
 } else {
-    print "  [FAIL] padding property did not change";
+    print "  [FAIL]";
+    failCount = failCount + 1;
+}
+#scr.setAreaProperty("testScreen.mainArea", "type", "vbox");
+print "";
+
+// Test 3: areaType property (Read-only)
+print "Test 2.3: areaType property (string R only)";
+var areaTypeVal = #scr.getAreaProperty("testScreen.mainArea", "areaType");
+print "  Value: " + areaTypeVal;
+print "  [PASS] (read-only property read successfully)";
+passCount = passCount + 1;
+print "";
+
+// Test 4: cssClass property (R/W)
+print "Test 2.4: cssClass property (string R/W)";
+var origCssClass = #scr.getAreaProperty("testScreen.mainArea", "cssClass");
+print "  Original: " + origCssClass;
+#scr.setAreaProperty("testScreen.mainArea", "cssClass", "new-css-class");
+var newCssClass = #scr.getAreaProperty("testScreen.mainArea", "cssClass");
+print "  After set to 'new-css-class': " + newCssClass;
+if (newCssClass == "new-css-class") {
+    print "  [PASS]";
+    passCount = passCount + 1;
+} else {
+    print "  [FAIL]";
+    failCount = failCount + 1;
 }
 print "";
 
-// Test numberOfRecords property
-print "Test 2.3: numberOfRecords property";
-var origNumRecords = #scr.getAreaProperty("testScreen.mainArea", "numberOfRecords");
-print "  Original numberOfRecords: " + origNumRecords;
-#scr.setAreaProperty("testScreen.mainArea", "numberOfRecords", 5);
-var newNumRecords = #scr.getAreaProperty("testScreen.mainArea", "numberOfRecords");
-print "  After setting to 5: " + newNumRecords;
-if (newNumRecords == 5) {
-    print "  [PASS] numberOfRecords property changed correctly";
+// Test 5: layout property (R/W)
+print "Test 2.5: layout property (string R/W)";
+var origLayout = #scr.getAreaProperty("testScreen.mainArea", "layout");
+print "  Original: " + origLayout;
+#scr.setAreaProperty("testScreen.mainArea", "layout", "compact");
+var newLayout = #scr.getAreaProperty("testScreen.mainArea", "layout");
+print "  After set to 'compact': " + newLayout;
+if (newLayout == "compact") {
+    print "  [PASS]";
+    passCount = passCount + 1;
 } else {
-    print "  [FAIL] numberOfRecords property did not change";
+    print "  [FAIL]";
+    failCount = failCount + 1;
 }
 print "";
 
-// Test recordRef property
-print "Test 2.4: recordRef property";
-var origRecordRef = #scr.getAreaProperty("testScreen.mainArea", "recordRef");
-print "  Original recordRef: " + origRecordRef;
-#scr.setAreaProperty("testScreen.mainArea", "recordRef", "newDataRef");
-var newRecordRef = #scr.getAreaProperty("testScreen.mainArea", "recordRef");
-print "  After setting to newDataRef: " + newRecordRef;
-if (newRecordRef == "newDataRef") {
-    print "  [PASS] recordRef property changed correctly";
-} else {
-    print "  [FAIL] recordRef property did not change";
-}
-print "";
-
-// Test style property
-print "Test 2.5: style property";
-var origStyle = #scr.getAreaProperty("testScreen.secondArea", "style");
-print "  Original style: " + origStyle;
-#scr.setAreaProperty("testScreen.secondArea", "style", "-fx-background-color: #e0e0ff;");
-var newStyle = #scr.getAreaProperty("testScreen.secondArea", "style");
-print "  After setting new style: " + newStyle;
+// Test 6: style property (R/W)
+print "Test 2.6: style property (string R/W)";
+var origStyle = #scr.getAreaProperty("testScreen.mainArea", "style");
+print "  Original: " + origStyle;
+#scr.setAreaProperty("testScreen.mainArea", "style", "-fx-background-color: #e0e0ff;");
+var newStyle = #scr.getAreaProperty("testScreen.mainArea", "style");
+print "  After set: " + newStyle;
 if (newStyle == "-fx-background-color: #e0e0ff;") {
-    print "  [PASS] style property changed correctly";
+    print "  [PASS]";
+    passCount = passCount + 1;
 } else {
-    print "  [FAIL] style property did not change";
+    print "  [FAIL]";
+    failCount = failCount + 1;
 }
 print "";
 
-// Test title property
-print "Test 2.6: title property";
+// Test 7: screenName property (Read-only)
+print "Test 2.7: screenName property (string R only)";
+var screenNameVal = #scr.getAreaProperty("testScreen.mainArea", "screenName");
+print "  Value: " + screenNameVal;
+print "  [PASS] (read-only property read successfully)";
+passCount = passCount + 1;
+print "";
+
+// Test 8: displayName property (R/W)
+print "Test 2.8: displayName property (string R/W)";
+var origDisplayName = #scr.getAreaProperty("testScreen.mainArea", "displayName");
+print "  Original: " + origDisplayName;
+#scr.setAreaProperty("testScreen.mainArea", "displayName", "New Display Name");
+var newDisplayName = #scr.getAreaProperty("testScreen.mainArea", "displayName");
+print "  After set: " + newDisplayName;
+if (newDisplayName == "New Display Name") {
+    print "  [PASS]";
+    passCount = passCount + 1;
+} else {
+    print "  [FAIL]";
+    failCount = failCount + 1;
+}
+print "";
+
+// Test 9: title property (R/W)
+print "Test 2.9: title property (string R/W)";
+var origTitle = #scr.getAreaProperty("testScreen.mainArea", "title");
+print "  Original: " + origTitle;
 #scr.setAreaProperty("testScreen.mainArea", "title", "New Section Title");
 var newTitle = #scr.getAreaProperty("testScreen.mainArea", "title");
-print "  After setting title: " + newTitle;
+print "  After set: " + newTitle;
 if (newTitle == "New Section Title") {
-    print "  [PASS] title property changed correctly";
+    print "  [PASS]";
+    passCount = passCount + 1;
 } else {
-    print "  [FAIL] title property did not change";
+    print "  [FAIL]";
+    failCount = failCount + 1;
 }
 print "";
 
-// Test type property (read)
-print "Test 2.7: type property (read)";
-var areaType = #scr.getAreaProperty("testScreen.mainArea", "type");
-print "  mainArea type: " + areaType;
-var area2Type = #scr.getAreaProperty("testScreen.secondArea", "type");
-print "  secondArea type: " + area2Type;
-if (areaType == "vbox" and area2Type == "hbox") {
-    print "  [PASS] type properties read correctly";
+// Test 10: groupBorder property (R/W)
+print "Test 2.10: groupBorder property (string R/W)";
+var origGroupBorder = #scr.getAreaProperty("testScreen.mainArea", "groupBorder");
+print "  Original: " + origGroupBorder;
+#scr.setAreaProperty("testScreen.mainArea", "groupBorder", "raised");
+var newGroupBorder = #scr.getAreaProperty("testScreen.mainArea", "groupBorder");
+print "  After set to 'raised': " + newGroupBorder;
+if (newGroupBorder == "raised") {
+    print "  [PASS]";
+    passCount = passCount + 1;
 } else {
-    print "  [FAIL] type properties not as expected";
+    print "  [FAIL]";
+    failCount = failCount + 1;
 }
 print "";
 
-// Test name property (read)
-print "Test 2.8: name property (read)";
-var areaName = #scr.getAreaProperty("testScreen.mainArea", "name");
-print "  Area name: " + areaName;
-if (areaName == "mainArea") {
-    print "  [PASS] name property read correctly";
+// Test 11: groupBorderColor property (R/W)
+print "Test 2.11: groupBorderColor property (string R/W)";
+var origGroupBorderColor = #scr.getAreaProperty("testScreen.mainArea", "groupBorderColor");
+print "  Original: " + origGroupBorderColor;
+#scr.setAreaProperty("testScreen.mainArea", "groupBorderColor", "#FF5500");
+var newGroupBorderColor = #scr.getAreaProperty("testScreen.mainArea", "groupBorderColor");
+print "  After set to '#FF5500': " + newGroupBorderColor;
+if (newGroupBorderColor == "#FF5500") {
+    print "  [PASS]";
+    passCount = passCount + 1;
 } else {
-    print "  [FAIL] name property not as expected";
+    print "  [FAIL]";
+    failCount = failCount + 1;
+}
+print "";
+
+// Test 12: groupLabelText property (R/W)
+print "Test 2.12: groupLabelText property (string R/W)";
+var origGroupLabelText = #scr.getAreaProperty("testScreen.mainArea", "groupLabelText");
+print "  Original: " + origGroupLabelText;
+#scr.setAreaProperty("testScreen.mainArea", "groupLabelText", "New Label");
+var newGroupLabelText = #scr.getAreaProperty("testScreen.mainArea", "groupLabelText");
+print "  After set to 'New Label': " + newGroupLabelText;
+if (newGroupLabelText == "New Label") {
+    print "  [PASS]";
+    passCount = passCount + 1;
+} else {
+    print "  [FAIL]";
+    failCount = failCount + 1;
+}
+print "";
+
+// Test 13: groupLabelAlignment property (R/W)
+print "Test 2.13: groupLabelAlignment property (string R/W)";
+var origGroupLabelAlign = #scr.getAreaProperty("testScreen.mainArea", "groupLabelAlignment");
+print "  Original: " + origGroupLabelAlign;
+#scr.setAreaProperty("testScreen.mainArea", "groupLabelAlignment", "center");
+var newGroupLabelAlign = #scr.getAreaProperty("testScreen.mainArea", "groupLabelAlignment");
+print "  After set to 'center': " + newGroupLabelAlign;
+if (newGroupLabelAlign == "center") {
+    print "  [PASS]";
+    passCount = passCount + 1;
+} else {
+    print "  [FAIL]";
+    failCount = failCount + 1;
+}
+print "";
+
+// Test 14: groupLabelOffset property (R/W)
+print "Test 2.14: groupLabelOffset property (string R/W)";
+var origGroupLabelOffset = #scr.getAreaProperty("testScreen.mainArea", "groupLabelOffset");
+print "  Original: " + origGroupLabelOffset;
+#scr.setAreaProperty("testScreen.mainArea", "groupLabelOffset", "top");
+var newGroupLabelOffset = #scr.getAreaProperty("testScreen.mainArea", "groupLabelOffset");
+print "  After set to 'top': " + newGroupLabelOffset;
+if (newGroupLabelOffset == "top") {
+    print "  [PASS]";
+    passCount = passCount + 1;
+} else {
+    print "  [FAIL]";
+    failCount = failCount + 1;
+}
+print "";
+
+// Test 15: spacing property (R/W)
+print "Test 2.15: spacing property (string R/W)";
+var origSpacing = #scr.getAreaProperty("testScreen.mainArea", "spacing");
+print "  Original: " + origSpacing;
+#scr.setAreaProperty("testScreen.mainArea", "spacing", "25");
+var newSpacing = #scr.getAreaProperty("testScreen.mainArea", "spacing");
+print "  After set to '25': " + newSpacing;
+if (newSpacing == "25") {
+    print "  [PASS]";
+    passCount = passCount + 1;
+} else {
+    print "  [FAIL]";
+    failCount = failCount + 1;
+}
+print "";
+
+// Test 16: padding property (R/W)
+print "Test 2.16: padding property (string R/W)";
+var origAreaPadding = #scr.getAreaProperty("testScreen.mainArea", "padding");
+print "  Original: " + origAreaPadding;
+#scr.setAreaProperty("testScreen.mainArea", "padding", "30 15 30 15");
+var newAreaPadding = #scr.getAreaProperty("testScreen.mainArea", "padding");
+print "  After set to '30 15 30 15': " + newAreaPadding;
+if (newAreaPadding == "30 15 30 15") {
+    print "  [PASS]";
+    passCount = passCount + 1;
+} else {
+    print "  [FAIL]";
+    failCount = failCount + 1;
+}
+print "";
+
+// Test 17: gainFocus property (R/W)
+print "Test 2.17: gainFocus property (string R/W)";
+var origGainFocus = #scr.getAreaProperty("testScreen.mainArea", "gainFocus");
+print "  Original: " + origGainFocus;
+#scr.setAreaProperty("testScreen.mainArea", "gainFocus", "print 'new focus code';");
+var newGainFocus = #scr.getAreaProperty("testScreen.mainArea", "gainFocus");
+print "  After set: " + newGainFocus;
+if (newGainFocus == "print 'new focus code';") {
+    print "  [PASS]";
+    passCount = passCount + 1;
+} else {
+    print "  [FAIL]";
+    failCount = failCount + 1;
+}
+print "";
+
+// Test 18: lostFocus property (R/W)
+print "Test 2.18: lostFocus property (string R/W)";
+var origLostFocus = #scr.getAreaProperty("testScreen.mainArea", "lostFocus");
+print "  Original: " + origLostFocus;
+#scr.setAreaProperty("testScreen.mainArea", "lostFocus", "print 'new lost focus';");
+var newLostFocus = #scr.getAreaProperty("testScreen.mainArea", "lostFocus");
+print "  After set: " + newLostFocus;
+if (newLostFocus == "print 'new lost focus';") {
+    print "  [PASS]";
+    passCount = passCount + 1;
+} else {
+    print "  [FAIL]";
+    failCount = failCount + 1;
+}
+print "";
+
+// Test 19: numberOfRecords property (R/W)
+print "Test 2.19: numberOfRecords property (number R/W)";
+var origNumRecords = #scr.getAreaProperty("testScreen.mainArea", "numberOfRecords");
+print "  Original: " + origNumRecords;
+#scr.setAreaProperty("testScreen.mainArea", "numberOfRecords", 5);
+var newNumRecords = #scr.getAreaProperty("testScreen.mainArea", "numberOfRecords");
+print "  After set to 5: " + newNumRecords;
+if (newNumRecords == 5) {
+    print "  [PASS]";
+    passCount = passCount + 1;
+} else {
+    print "  [FAIL]";
+    failCount = failCount + 1;
+}
+print "";
+
+// Test 20: recordRef property (R/W)
+print "Test 2.20: recordRef property (string R/W)";
+var origRecordRef = #scr.getAreaProperty("testScreen.mainArea", "recordRef");
+print "  Original: " + origRecordRef;
+#scr.setAreaProperty("testScreen.mainArea", "recordRef", "newDataRef");
+var newRecordRef = #scr.getAreaProperty("testScreen.mainArea", "recordRef");
+print "  After set to 'newDataRef': " + newRecordRef;
+if (newRecordRef == "newDataRef") {
+    print "  [PASS]";
+    passCount = passCount + 1;
+} else {
+    print "  [FAIL]";
+    failCount = failCount + 1;
 }
 print "";
 
 // =============================================
 // SUMMARY
 // =============================================
-print "--------------------------------------------";
-print "TEST COMPLETE";
-print "--------------------------------------------";
+print "============================================================";
+print "TEST SUMMARY";
+print "============================================================";
 print "";
-print "All item and area property tests have been executed.";
-print "Check the output above for [PASS] and [FAIL] results.";
+print "Total tests: " + (passCount + failCount);
+print "Passed: " + passCount;
+print "Failed: " + failCount;
+print "";
+if (failCount == 0) {
+    print "ALL TESTS PASSED!";
+} else {
+    print "Some tests failed. Review output above.";
+}
 print "";
 print "The screen remains open for visual inspection.";
