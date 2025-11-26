@@ -67,13 +67,45 @@ public class ControlUpdater {
             if (value != null) {
                 @SuppressWarnings("unchecked")
                 ComboBox<String> comboBox = (ComboBox<String>) control;
-                comboBox.setValue(String.valueOf(value));
+                String valueToDisplay = String.valueOf(value);
+                
+                // Check if optionsMap is present to get the display text
+                @SuppressWarnings("unchecked")
+                java.util.Map<String, String> optionsMap = 
+                    (java.util.Map<String, String>) comboBox.getProperties().get("optionsMap");
+                if (optionsMap != null) {
+                    // Find the display text (key) for this data value (value)
+                    for (java.util.Map.Entry<String, String> entry : optionsMap.entrySet()) {
+                        if (entry.getValue().equals(valueToDisplay)) {
+                            valueToDisplay = entry.getKey();
+                            break;
+                        }
+                    }
+                }
+                
+                comboBox.setValue(valueToDisplay);
             }
         } else if (control instanceof ChoiceBox) {
             if (value != null) {
                 @SuppressWarnings("unchecked")
                 ChoiceBox<String> choiceBox = (ChoiceBox<String>) control;
-                choiceBox.setValue(String.valueOf(value));
+                String valueToDisplay = String.valueOf(value);
+                
+                // Check if optionsMap is present to get the display text
+                @SuppressWarnings("unchecked")
+                java.util.Map<String, String> optionsMap = 
+                    (java.util.Map<String, String>) choiceBox.getProperties().get("optionsMap");
+                if (optionsMap != null) {
+                    // Find the display text (key) for this data value (value)
+                    for (java.util.Map.Entry<String, String> entry : optionsMap.entrySet()) {
+                        if (entry.getValue().equals(valueToDisplay)) {
+                            valueToDisplay = entry.getKey();
+                            break;
+                        }
+                    }
+                }
+                
+                choiceBox.setValue(valueToDisplay);
             }
         } else if (control instanceof Label) {
             ((Label) control).setText(value != null ? String.valueOf(value) : "");

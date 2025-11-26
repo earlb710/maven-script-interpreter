@@ -1,7 +1,9 @@
 package com.eb.script.interpreter.screen;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Container class for screen display item metadata, input item types, area types, and related definitions.
@@ -38,6 +40,9 @@ public class DisplayItem {
     String labelTextAlignment;
     // Options/values for selection controls (ComboBox, ChoiceBox, ListView)
     List<String> options;
+    // Options map for selection controls where keys are display text and values are data values
+    // When populated, the display text is shown to users but the data value is stored
+    Map<String, String> optionsMap;
     // Label text color
     String labelColor;
     // Label text bold flag

@@ -83,14 +83,24 @@ public class AreaItemFactory {
             case COMBOBOX:
                 ComboBox<String> comboBox = new ComboBox<>();
                 // Populate with options if available
-                if (metadata != null && metadata.options != null && !metadata.options.isEmpty()) {
+                // If optionsMap is present, use the keys (display text) for display
+                if (metadata != null && metadata.optionsMap != null && !metadata.optionsMap.isEmpty()) {
+                    comboBox.getItems().addAll(metadata.optionsMap.keySet());
+                    // Store the optionsMap in the control's properties for value binding
+                    comboBox.getProperties().put("optionsMap", metadata.optionsMap);
+                } else if (metadata != null && metadata.options != null && !metadata.options.isEmpty()) {
                     comboBox.getItems().addAll(metadata.options);
                 }
                 return comboBox;
             case CHOICEBOX:
                 ChoiceBox<String> choiceBox = new ChoiceBox<>();
                 // Populate with options if available
-                if (metadata != null && metadata.options != null && !metadata.options.isEmpty()) {
+                // If optionsMap is present, use the keys (display text) for display
+                if (metadata != null && metadata.optionsMap != null && !metadata.optionsMap.isEmpty()) {
+                    choiceBox.getItems().addAll(metadata.optionsMap.keySet());
+                    // Store the optionsMap in the control's properties for value binding
+                    choiceBox.getProperties().put("optionsMap", metadata.optionsMap);
+                } else if (metadata != null && metadata.options != null && !metadata.options.isEmpty()) {
                     choiceBox.getItems().addAll(metadata.options);
                 }
                 return choiceBox;
@@ -505,15 +515,25 @@ public class AreaItemFactory {
             charCount = metadata.maxLength;
         } else {
             // For ChoiceBox and ComboBox, use options data to determine size if available
-            if ((metadata.itemType == ItemType.CHOICEBOX || metadata.itemType == ItemType.COMBOBOX) 
-                    && metadata.options != null && !metadata.options.isEmpty()) {
-                // Find the longest option to use as the basis for width calculation
+            if ((metadata.itemType == ItemType.CHOICEBOX || metadata.itemType == ItemType.COMBOBOX)) {
                 String longestOption = "";
-                for (String option : metadata.options) {
-                    if (option != null && option.length() > longestOption.length()) {
-                        longestOption = option;
+                
+                // Check optionsMap first (keys are display text)
+                if (metadata.optionsMap != null && !metadata.optionsMap.isEmpty()) {
+                    for (String option : metadata.optionsMap.keySet()) {
+                        if (option != null && option.length() > longestOption.length()) {
+                            longestOption = option;
+                        }
+                    }
+                } else if (metadata.options != null && !metadata.options.isEmpty()) {
+                    // Fall back to options list
+                    for (String option : metadata.options) {
+                        if (option != null && option.length() > longestOption.length()) {
+                            longestOption = option;
+                        }
                     }
                 }
+                
                 if (!longestOption.isEmpty()) {
                     sampleText = longestOption;
                     measuringText.setText(sampleText);

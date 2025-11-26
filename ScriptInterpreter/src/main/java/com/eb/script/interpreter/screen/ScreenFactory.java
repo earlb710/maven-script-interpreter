@@ -1746,7 +1746,15 @@ public class ScreenFactory {
         // Extract options for selection controls
         if (displayDef.containsKey("options")) {
             Object optionsObj = displayDef.get("options");
-            if (optionsObj instanceof java.util.List) {
+            if (optionsObj instanceof java.util.Map) {
+                // Handle Map type: keys are display text, values are data values
+                @SuppressWarnings("unchecked")
+                java.util.Map<String, Object> map = (java.util.Map<String, Object>) optionsObj;
+                metadata.optionsMap = new java.util.LinkedHashMap<>();
+                for (java.util.Map.Entry<String, Object> entry : map.entrySet()) {
+                    metadata.optionsMap.put(entry.getKey(), String.valueOf(entry.getValue()));
+                }
+            } else if (optionsObj instanceof java.util.List) {
                 metadata.options = new ArrayList<>();
                 for (Object opt : (java.util.List<?>) optionsObj) {
                     metadata.options.add(String.valueOf(opt));
@@ -1805,6 +1813,7 @@ public class ScreenFactory {
         merged.labelText = base.labelText;
         merged.labelTextAlignment = base.labelTextAlignment;
         merged.options = base.options;
+        merged.optionsMap = base.optionsMap;
         merged.columns = base.columns;
         merged.displayRecords = base.displayRecords;
         merged.labelColor = base.labelColor;
@@ -1836,6 +1845,7 @@ public class ScreenFactory {
         if (overlay.labelText != null) merged.labelText = overlay.labelText;
         if (overlay.labelTextAlignment != null) merged.labelTextAlignment = overlay.labelTextAlignment;
         if (overlay.options != null) merged.options = overlay.options;
+        if (overlay.optionsMap != null) merged.optionsMap = overlay.optionsMap;
         if (overlay.columns != null) merged.columns = overlay.columns;
         if (overlay.displayRecords != null) merged.displayRecords = overlay.displayRecords;
         if (overlay.labelColor != null) merged.labelColor = overlay.labelColor;
@@ -2491,6 +2501,13 @@ public class ScreenFactory {
         // and strings are immutable in Java
         if (source.options != null) {
             clone.options = new ArrayList<>(source.options);
+        }
+        
+        // Clone optionsMap if present
+        // Note: This creates a shallow copy which is safe because optionsMap is a Map<String, String>
+        // and strings are immutable in Java
+        if (source.optionsMap != null) {
+            clone.optionsMap = new java.util.LinkedHashMap<>(source.optionsMap);
         }
         
         // Clone columns list if present
