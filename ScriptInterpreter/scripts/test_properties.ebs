@@ -444,7 +444,8 @@ print "Test 2.1: name property (string R/W)";
 var origName = #scr.getAreaProperty("testScreen.mainArea", "name");
 print "  Original: " + origName;
 #scr.setAreaProperty("testScreen.mainArea", "name", "renamedArea");
-var newName = #scr.getAreaProperty("testScreen.mainArea", "name");
+// After renaming, we need to use the NEW name to find the area
+var newName = #scr.getAreaProperty("testScreen.renamedArea", "name");
 print "  After set to 'renamedArea': " + newName;
 if (newName == "renamedArea") {
     print "  [PASS]";
@@ -453,6 +454,8 @@ if (newName == "renamedArea") {
     print "  [FAIL]";
     failCount = failCount + 1;
 }
+// Reset name back to original for subsequent tests
+#scr.setAreaProperty("testScreen.renamedArea", "name", "mainArea");
 print "";
 
 // Test 2: type property (R/W)
