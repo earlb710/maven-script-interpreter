@@ -77,6 +77,7 @@ All identifiers are normalized to lowercase internally, so `myVariable`, `MyVari
 | `bool` / `boolean` | Boolean value | `true`, `false` |
 | `date` | Date/time value | `now()` |
 | `json` | JSON object/array | `{"key": "value"}` |
+| `map` | Key-value map (JSON objects only) | `{"key": "value"}` |
 | `array` | Generic array | `array[10]`, `array[*]` |
 
 ### Type Inference
@@ -165,6 +166,48 @@ var rec = record(arrayData);
 - Case-insensitive field matching
 - Clear error messages for validation failures
 
+#### Map Type and JSON to Map Casting
+The `map` type represents a key-value store where keys are strings and values can be any type. Maps are backed by JSON objects and can only be created from JSON objects (not arrays).
+
+```javascript
+// Declare a map variable
+var myMap: map = {"key1": "value1", "key2": 123, "key3": true};
+
+// Cast JSON object to map
+var jsonData: json = {"name": "Alice", "age": 30, "city": "New York"};
+var personMap = map(jsonData);
+
+// Access and modify map values using json functions
+var name = call json.get(personMap, "name");          // "Alice"
+var age = call json.getint(personMap, "age");         // 30
+call json.set(personMap, "city", "Los Angeles");      // Modify value
+call json.set(personMap, "country", "USA");           // Add new key
+
+// Nested maps
+var nestedJson: json = {
+    "person": {
+        "name": "Bob",
+        "address": {"street": "123 Main St", "zip": "12345"}
+    }
+};
+var nestedMap = map(nestedJson);
+
+// Error: JSON arrays cannot be cast to map
+var arrayData: json = [1, 2, 3];
+var badCast = map(arrayData);
+// Error: Cannot cast JSON array to map. Only JSON objects can be cast to map type.
+```
+
+**Map vs Record vs JSON:**
+- **map**: A flexible key-value store. No predefined field structure. JSON objects only.
+- **record**: A structured type with predefined field names and types. Provides type validation.
+- **json**: Can hold any JSON value including objects, arrays, strings, numbers, booleans, or null.
+
+**When to use each:**
+- Use `map` when you need a flexible key-value store with string keys
+- Use `record` when you need type-safe access to known fields
+- Use `json` when you need to work with any JSON structure including arrays
+
 #### Supported Type Aliases
 - `int()` / `integer()` - Integer casting
 - `long()` - Long integer casting
@@ -174,6 +217,7 @@ var rec = record(arrayData);
 - `byte()` - Byte casting
 - `boolean()` / `bool()` - Boolean casting
 - `record()` - JSON to record casting
+- `map()` - JSON object to map casting
 
 ### Null Values
 ```javascript

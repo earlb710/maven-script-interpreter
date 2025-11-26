@@ -1650,6 +1650,22 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             return value;
         }
         
+        // Special handling for MAP casting (JSON object to map)
+        if (expr.targetType == DataType.MAP) {
+            // Validate that the value is a Map (not an array/List)
+            if (value instanceof java.util.List || value instanceof ArrayDef) {
+                throw error(expr.getLine(), "Cannot cast JSON array to map. Only JSON objects can be cast to map type.");
+            }
+            
+            if (!(value instanceof java.util.Map)) {
+                String typeName = (value == null) ? "null" : value.getClass().getSimpleName();
+                throw error(expr.getLine(), "Cannot cast " + typeName + " to map. Only JSON objects can be cast to map type.");
+            }
+            
+            // Return the map as-is (maps don't have type metadata like records)
+            return value;
+        }
+        
         // Use DataType.convertValue() to perform the actual conversion for other types
         try {
             Object converted = expr.targetType.convertValue(value);
@@ -1876,6 +1892,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             case JSON -> "json";
             case ARRAY -> "array";
             case RECORD -> "record";
+            case MAP -> "map";
             default -> "any";
         };
     }

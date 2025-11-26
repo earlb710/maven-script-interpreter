@@ -1,0 +1,74 @@
+// Test map type and JSON to map casting
+print "Testing map type";
+print "";
+
+// Test 1: Declare a map variable and assign a JSON object
+print "Test 1: Basic map declaration and assignment";
+var myMap: map = {"key1": "value1", "key2": "value2", "key3": 123};
+print "myMap created successfully";
+print "";
+
+// Test 2: Cast JSON to map
+print "Test 2: JSON to map casting";
+var jsonData: json = {"name": "Alice", "age": 30, "city": "New York"};
+print "Original JSON: " + jsonData;
+var mapFromJson = map(jsonData);
+print "Cast to map: " + mapFromJson;
+print "";
+
+// Test 3: Access map values using json functions
+print "Test 3: Access map values using json functions";
+var name = call json.get(mapFromJson, "name");
+var age = call json.getint(mapFromJson, "age");
+print "name: " + name;
+print "age: " + age;
+print "";
+
+// Test 4: Modify map values
+print "Test 4: Modify map values";
+call json.set(mapFromJson, "city", "Los Angeles");
+call json.set(mapFromJson, "country", "USA");
+print "Modified map: " + mapFromJson;
+print "";
+
+// Test 5: Nested JSON to map casting
+print "Test 5: Nested JSON object";
+var nestedJson: json = {
+    "person": {
+        "name": "Bob",
+        "address": {
+            "street": "123 Main St",
+            "zip": "12345"
+        }
+    },
+    "count": 5
+};
+var nestedMap = map(nestedJson);
+print "Nested map created successfully";
+var personName = call json.get(call json.get(nestedMap, "person"), "name");
+print "Person name from nested map: " + personName;
+print "";
+
+// Test 6: Empty map
+print "Test 6: Empty map";
+var emptyMap: map = {};
+print "Empty map created: " + emptyMap;
+print "";
+
+// Test 7: Map with various value types
+print "Test 7: Map with various value types";
+var mixedMap: map = {
+    "stringVal": "hello",
+    "intVal": 42,
+    "boolVal": true,
+    "doubleVal": 3.14,
+    "nullVal": null
+};
+print "Mixed map created successfully";
+print "stringVal: " + call json.get(mixedMap, "stringVal");
+print "intVal: " + call json.getint(mixedMap, "intVal");
+print "boolVal: " + call json.getbool(mixedMap, "boolVal");
+print "doubleVal: " + call json.getdouble(mixedMap, "doubleVal");
+print "";
+
+print "All map type tests completed successfully!";
