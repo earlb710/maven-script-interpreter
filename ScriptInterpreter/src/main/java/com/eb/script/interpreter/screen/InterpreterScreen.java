@@ -1623,6 +1623,18 @@ public class InterpreterScreen {
         if (areaDef.containsKey("lostfocus")) {
             area.lostFocus = String.valueOf(areaDef.get("lostfocus"));
         }
+        
+        // Extract numberOfRecords property for multi-record areas
+        Object numberOfRecordsObj = getCaseInsensitive(areaDef, "numberOfRecords");
+        if (numberOfRecordsObj != null && numberOfRecordsObj instanceof Number) {
+            area.numberOfRecords = ((Number) numberOfRecordsObj).intValue();
+        }
+        
+        // Extract recordRef property for multi-record areas
+        Object recordRefObj = getCaseInsensitive(areaDef, "recordRef");
+        if (recordRefObj != null) {
+            area.recordRef = String.valueOf(recordRefObj);
+        }
 
         area.screenName = screenName;
 

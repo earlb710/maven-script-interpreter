@@ -44,6 +44,15 @@
       "description": "Padding inside the area around its children (e.g., '10', '10 5', '10 5 10 5' for top, right, bottom, left). Applies to all Region types.",
       "pattern": "^\\d+(\\.\\d+)?(\\s+\\d+(\\.\\d+)?){0,3}$"
     },
+    "numberOfRecords": {
+      "type": "integer",
+      "description": "Number of records to generate for dynamic multi-record areas. When set with recordRef, items are expanded into multiple copies with indexed varRefs (e.g., varRef='age' becomes 'clients[0].age', 'clients[1].age', etc.) and numbered labels (e.g., 'Client - Name:' becomes 'Client 1 - Name:', 'Client 2 - Name:', etc.).",
+      "minimum": 1
+    },
+    "recordRef": {
+      "type": "string",
+      "description": "Array variable reference for multi-record expansion. Used with numberOfRecords to specify the array variable name that item varRefs will be prefixed with (e.g., recordRef='clients' combined with item varRef='age' expands to 'clients[N].age')."
+    },
     "items": {
       "type": "array",
       "description": "UI items/controls within this area",
@@ -226,6 +235,36 @@
               "prefWidth": "200"
             }
           ]
+        }
+      ]
+    },
+    {
+      "name": "clientsArea",
+      "type": "vbox",
+      "spacing": "15",
+      "padding": "20",
+      "numberOfRecords": 3,
+      "recordRef": "clients",
+      "items": [
+        {
+          "name": "clientNameField",
+          "varRef": "clientName",
+          "sequence": 1,
+          "display": {
+            "type": "textfield",
+            "labelText": "Client - Name:"
+          }
+        },
+        {
+          "name": "clientAgeField",
+          "varRef": "age",
+          "sequence": 2,
+          "display": {
+            "type": "spinner",
+            "labelText": "Client - Age:",
+            "min": 0,
+            "max": 150
+          }
         }
       ]
     }

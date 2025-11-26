@@ -60,6 +60,12 @@ public class AreaDefinition {
     public String gainFocus;
     // Inline code to execute when focus leaves this area
     public String lostFocus;
+    // Number of records - when set, all items in this area become templates that are duplicated for each record
+    // Items' varRef will be expanded with index (e.g., with recordRef="clients" and varRef="age", becomes "clients[0].age")
+    public Integer numberOfRecords;
+    // Record reference - the array variable name to use when expanding items (e.g., "clients")
+    // Combined with item's varRef to form full reference (e.g., recordRef="clients" + varRef="age" -> "clients[N].age")
+    public String recordRef;
     
     @Override
     public String toString() {
@@ -83,6 +89,8 @@ public class AreaDefinition {
                ", areaBackground='" + areaBackground + '\'' +
                ", spacing='" + spacing + '\'' +
                ", padding='" + padding + '\'' +
+               ", numberOfRecords=" + numberOfRecords +
+               ", recordRef='" + recordRef + '\'' +
                ", items=" + items.size() +
                ", childAreas=" + childAreas.size() +
                '}';

@@ -880,6 +880,17 @@ public final class Builtins {
                 newParam("screenName", DataType.STRING, true), // required; screen name
                 newParam("itemName", DataType.STRING, true) // required; item name
         ));
+        addBuiltin(info(
+                "scr.getAreaProperty", DataType.ANY,
+                newParam("area", DataType.STRING, true), // required; format "screenName.areaName"
+                newParam("property", DataType.STRING, true) // required; property name
+        ));
+        addBuiltin(info(
+                "scr.setAreaProperty", DataType.BOOL,
+                newParam("area", DataType.STRING, true), // required; format "screenName.areaName"
+                newParam("property", DataType.STRING, true), // required; property name
+                newParam("value", DataType.ANY, true) // required; value to set
+        ));
 
         NAMES = Collections.unmodifiableSet(BUILTINS.keySet());
     }
@@ -2330,6 +2341,12 @@ public final class Builtins {
             }
             case "scr.getvarreference" -> {
                 return BuiltinsScreen.screenGetVarReference(context, args);
+            }
+            case "scr.getareaproperty" -> {
+                return BuiltinsScreen.screenGetAreaProperty(context, args);
+            }
+            case "scr.setareaproperty" -> {
+                return BuiltinsScreen.screenSetAreaProperty(context, args);
             }
 
             default ->
