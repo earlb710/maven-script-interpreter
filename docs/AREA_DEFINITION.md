@@ -21,6 +21,8 @@ The `AreaDefinition` class represents a container area within a screen, defining
 
 ### Properties
 
+#### Core Properties
+
 | Property | Type | Description |
 |----------|------|-------------|
 | `name` | String | Unique identifier for the area |
@@ -29,10 +31,56 @@ The `AreaDefinition` class represents a container area within a screen, defining
 | `cssClass` | String | CSS class name from the AreaType enum |
 | `layout` | String | Layout configuration string |
 | `style` | String | CSS style string (defaults to areaType's default) |
-| `spacing` | String | Spacing between child elements (e.g., "10", "15") |
-| `padding` | String | Internal padding around children (e.g., "10", "10 5", "10 5 10 5") |
 | `screenName` | String | Associated screen name |
 | `displayName` | String | Display name for UI elements (e.g., tab labels) |
+| `title` | String | Title for titled containers (e.g., TitledPane, group headers) |
+
+#### Layout Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `spacing` | String | Spacing between child elements (e.g., "10", "15") |
+| `padding` | String | Internal padding around children (e.g., "10", "10 5", "10 5 10 5") |
+| `areaBackground` | String | Area background color in hex format (e.g., "#f0f0f0") |
+
+#### Group Border Properties
+
+| Property | Type | Description | Default |
+|----------|------|-------------|---------|
+| `groupBorder` | String | Border style: none, raised, inset, lowered, line | none |
+| `groupBorderColor` | String | Border color in hex format (e.g., "#4a9eff") | #808080 |
+| `groupBorderWidth` | String | Border width in pixels (e.g., "2" or "2px") | 2px (1px for line) |
+| `groupBorderInsets` | String | Border insets (e.g., "5", "5 10", "5 10 5 10") | - |
+| `groupBorderRadius` | String | Border corner radius (e.g., "5" or "5px") | 5px |
+
+#### Group Label Properties
+
+| Property | Type | Description | Default |
+|----------|------|-------------|---------|
+| `groupLabelText` | String | Label text displayed on/near the group border | - |
+| `groupLabelAlignment` | String | Label alignment: left, center, right | left |
+| `groupLabelOffset` | String | Vertical position: top, on, bottom | on |
+| `groupLabelColor` | String | Label text color in hex format (e.g., "#4a9eff") | groupBorderColor |
+| `groupLabelBackground` | String | Label background color (e.g., "#ffffff") | white |
+
+#### Event Handler Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `gainFocus` | String | Inline EBS code to execute when focus enters this area |
+| `lostFocus` | String | Inline EBS code to execute when focus leaves this area |
+
+#### Multi-Record Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `numberOfRecords` | Integer | Number of records - items become templates duplicated for each record |
+| `recordRef` | String | Array variable name for expanding items (e.g., "clients") |
+
+#### Container Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
 | `items` | List\<AreaItem\> | List of items contained in this area |
 | `childAreas` | List\<AreaDefinition\> | Nested child areas for hierarchical layouts |
 
@@ -48,6 +96,60 @@ area: [{
     style: "-fx-background-color: #f0f0f0;",
     items: [
         // AreaItem definitions
+    ]
+}]
+```
+
+### Group Border Example
+
+```javascript
+area: [{
+    name: "personalInfo",
+    type: "vbox",
+    groupBorder: "line",
+    groupBorderColor: "#4a9eff",
+    groupBorderWidth: "2",
+    groupBorderInsets: "10 15 10 15",
+    groupBorderRadius: "8",
+    groupLabelText: "Personal Information",
+    groupLabelAlignment: "left",
+    groupLabelOffset: "on",
+    groupLabelColor: "#4a9eff",
+    groupLabelBackground: "white",
+    areaBackground: "#f8f9fa",
+    spacing: "10",
+    padding: "15",
+    items: [
+        { varRef: "firstName", sequence: 1 },
+        { varRef: "lastName", sequence: 2 }
+    ]
+}]
+```
+
+### Focus Event Handler Example
+
+```javascript
+area: [{
+    name: "formSection",
+    type: "vbox",
+    gainFocus: "println('Focus entered form section');",
+    lostFocus: "println('Focus left form section');",
+    items: [...]
+}]
+```
+
+### Multi-Record Area Example
+
+```javascript
+area: [{
+    name: "clientList",
+    type: "vbox",
+    numberOfRecords: 5,
+    recordRef: "clients",
+    items: [
+        // Items will be duplicated 5 times with varRef expanded:
+        // clients[0].name, clients[1].name, etc.
+        { varRef: "name", sequence: 1, display: { labelText: "Client - Name:" } }
     ]
 }]
 ```
@@ -235,13 +337,20 @@ The `AreaItem` class defines individual UI elements within an area, including th
 
 | Property | Type | Description | Example Values |
 |----------|------|-------------|----------------|
-| `promptHelp` | String | Placeholder text | "Enter username..." |
 | `editable` | Boolean | Whether editable | true, false |
 | `disabled` | Boolean | Disabled state | true, false |
 | `visible` | Boolean | Visibility | true, false |
 | `tooltip` | String | Hover tooltip | "Username must be alphanumeric" |
 | `textColor` | String | Text color | "#333333", "red" |
 | `backgroundColor` | String | Background color | "#FFFFFF", "lightblue" |
+
+### Data Source Properties
+
+| Property | Type | Description | Values |
+|----------|------|-------------|--------|
+| `source` | String | Source of the value | "data" (original data value), "display" (formatted display value) |
+
+**Note:** `promptHelp` (placeholder text) is a DisplayItem property, not an AreaItem property. Set it in the variable's `display` definition or in the item's `displayItem` override.
 
 ### Layout Properties
 
