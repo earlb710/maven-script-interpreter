@@ -133,6 +133,9 @@ public class EbsLexer extends Lexer<EbsTokenType> {
             start = startIdent;
             current--;
             EbsTokenType t = keywords.get(text);
+            if (t == null) {
+                t = operators.get(text);
+            }
             if (t != null) {
                 addToken(t, text);
             } else {
