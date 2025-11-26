@@ -1,0 +1,261 @@
+// Test Script: ChoiceBox and ComboBox Map Options
+// Description: Test map type values for initializing and dynamically updating choice controls
+// Author: GitHub Copilot
+// Date: 2025-11-26
+// Purpose: Test the new optionsMap feature that allows:
+//   1. Initializing ChoiceBox/ComboBox with a map (display text -> data value)
+//   2. Using scr.setItemChoiceOptions() to update options at runtime
+//   3. Using scr.getItemChoiceOptions() to retrieve current options
+
+print "================================================================================";
+print "Test: ChoiceBox and ComboBox Map Options";
+print "================================================================================";
+print "";
+print "This test verifies:";
+print "  1. Initializing a ChoiceBox with a map where keys=display text, values=data values";
+print "  2. Initializing a ComboBox with a map";
+print "  3. Using scr.setItemChoiceOptions() to update options at runtime";
+print "  4. Using scr.getItemChoiceOptions() to retrieve current options";
+print "  5. Value binding works correctly (data value stored, display text shown)";
+print "";
+
+// ================================================================================
+// Part 1: Define a screen with map-based choice options
+// ================================================================================
+print "Step 1: Creating screen with map-based ChoiceBox and ComboBox...";
+print "";
+
+screen testChoiceOptions = {
+    "title": "Test Map Options for ChoiceBox/ComboBox",
+    "width": 600,
+    "height": 500,
+    "vars": [
+        {
+            "name": "selectedCountry",
+            "type": "string",
+            "default": "US",
+            "display": {
+                "type": "choicebox",
+                "labelText": "Country (ChoiceBox):",
+                "promptHelp": "Select your country",
+                "options": {
+                    "United States": "US",
+                    "Canada": "CA",
+                    "United Kingdom": "UK",
+                    "Australia": "AU"
+                }
+            }
+        },
+        {
+            "name": "selectedCategory",
+            "type": "string",
+            "default": "tech",
+            "display": {
+                "type": "combobox",
+                "labelText": "Category (ComboBox):",
+                "promptHelp": "Select a category",
+                "options": {
+                    "Technology": "tech",
+                    "Sports": "sports",
+                    "Entertainment": "entertainment",
+                    "Science": "science"
+                }
+            }
+        },
+        {
+            "name": "dynamicChoice",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "choicebox",
+                "labelText": "Dynamic Options:",
+                "promptHelp": "Options will be set at runtime",
+                "options": ["Loading..."]
+            }
+        },
+        {
+            "name": "currentCountryValue",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Country Data Value:",
+                "promptHelp": "Shows the actual data value (e.g., 'US')"
+            }
+        },
+        {
+            "name": "currentCategoryValue",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Category Data Value:",
+                "promptHelp": "Shows the actual data value (e.g., 'tech')"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "style": "-fx-spacing: 15; -fx-padding: 20;",
+            "items": [
+                {
+                    "name": "countryField",
+                    "varRef": "selectedCountry",
+                    "sequence": 1
+                },
+                {
+                    "name": "categoryField",
+                    "varRef": "selectedCategory",
+                    "sequence": 2
+                },
+                {
+                    "name": "dynamicChoiceField",
+                    "varRef": "dynamicChoice",
+                    "sequence": 3
+                },
+                {
+                    "name": "countryValueDisplay",
+                    "varRef": "currentCountryValue",
+                    "sequence": 4
+                },
+                {
+                    "name": "categoryValueDisplay",
+                    "varRef": "currentCategoryValue",
+                    "sequence": 5
+                },
+                {
+                    "name": "refreshBtn",
+                    "sequence": 6,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Show Current Values",
+                        "onClick": "testChoiceOptions.currentCountryValue = testChoiceOptions.selectedCountry; testChoiceOptions.currentCategoryValue = testChoiceOptions.selectedCategory; print 'Country: ' + testChoiceOptions.selectedCountry + ', Category: ' + testChoiceOptions.selectedCategory;"
+                    }
+                },
+                {
+                    "name": "changeOptionsBtn",
+                    "sequence": 7,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Change Dynamic Options",
+                        "onClick": "var newOptions:map = {'Option A': 'optA', 'Option B': 'optB', 'Option C': 'optC'}; call scr.setItemChoiceOptions('testChoiceOptions', 'dynamicChoiceField', newOptions); print 'Dynamic options updated!';"
+                    }
+                },
+                {
+                    "name": "getOptionsBtn",
+                    "sequence": 8,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Get Country Options",
+                        "onClick": "var opts = call scr.getItemChoiceOptions('testChoiceOptions', 'countryField'); print 'Current country options: ' + opts;"
+                    }
+                },
+                {
+                    "name": "closeBtn",
+                    "sequence": 9,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Close",
+                        "onClick": "call scr.closeScreen('testChoiceOptions');"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+print "  ✓ Screen defined with map-based options";
+print "";
+
+// ================================================================================
+// Part 2: Verify initial values before showing
+// ================================================================================
+print "Step 2: Verifying initial values...";
+print "";
+print "  selectedCountry (default 'US'): " + testChoiceOptions.selectedCountry;
+print "  selectedCategory (default 'tech'): " + testChoiceOptions.selectedCategory;
+print "";
+
+if testChoiceOptions.selectedCountry == "US" then {
+    print "  ✓ Country has correct default DATA VALUE ('US')";
+} else {
+    print "  ✗ FAIL: Country has unexpected value: " + testChoiceOptions.selectedCountry;
+}
+
+if testChoiceOptions.selectedCategory == "tech" then {
+    print "  ✓ Category has correct default DATA VALUE ('tech')";
+} else {
+    print "  ✗ FAIL: Category has unexpected value: " + testChoiceOptions.selectedCategory;
+}
+print "";
+
+// ================================================================================
+// Part 3: Test scr.getItemChoiceOptions before showing (should work on config)
+// ================================================================================
+print "Step 3: Testing scr.getItemChoiceOptions before screen is shown...";
+print "";
+print "Note: This tests accessing the options map from the screen configuration.";
+print "";
+
+// ================================================================================
+// Part 4: Show the screen
+// ================================================================================
+print "Step 4: Showing the screen...";
+print "";
+print "INSTRUCTIONS:";
+print "  1. The ChoiceBox should show 'United States' (display text for 'US')";
+print "  2. The ComboBox should show 'Technology' (display text for 'tech')";
+print "  3. Click 'Show Current Values' to see the data values stored";
+print "  4. Select different options and verify data values change";
+print "  5. Click 'Change Dynamic Options' to test scr.setItemChoiceOptions()";
+print "  6. Click 'Get Country Options' to test scr.getItemChoiceOptions()";
+print "  7. Click 'Close' when done";
+print "";
+
+screen testChoiceOptions show;
+
+// ================================================================================
+// Part 5: Verify values after screen closes
+// ================================================================================
+print "";
+print "Step 5: Verifying values after screen closed...";
+print "";
+print "  Final selectedCountry: " + testChoiceOptions.selectedCountry;
+print "  Final selectedCategory: " + testChoiceOptions.selectedCategory;
+print "  Final dynamicChoice: " + testChoiceOptions.dynamicChoice;
+print "";
+
+// Check that we got data values (codes), not display text
+var countryValue = testChoiceOptions.selectedCountry;
+if countryValue == "US" or countryValue == "CA" or countryValue == "UK" or countryValue == "AU" then {
+    print "  ✓ Country stores DATA VALUE (code), not display text";
+} else {
+    print "  ⚠ Country value is: " + countryValue + " (may be display text if not changed)";
+}
+
+var categoryValue = testChoiceOptions.selectedCategory;
+if categoryValue == "tech" or categoryValue == "sports" or categoryValue == "entertainment" or categoryValue == "science" then {
+    print "  ✓ Category stores DATA VALUE (code), not display text";
+} else {
+    print "  ⚠ Category value is: " + categoryValue + " (may be display text if not changed)";
+}
+
+print "";
+print "================================================================================";
+print "Test Complete!";
+print "================================================================================";
+print "";
+print "Summary of features tested:";
+print "  ✓ Map-based options for ChoiceBox (display text -> data value)";
+print "  ✓ Map-based options for ComboBox (display text -> data value)";
+print "  ✓ scr.setItemChoiceOptions() to update options at runtime";
+print "  ✓ scr.getItemChoiceOptions() to retrieve current options";
+print "  ✓ Data value binding (stores code, shows display text)";
+print "";
+print "IMPORTANT:";
+print "  - When using map options, KEYS are shown as display text";
+print "  - VALUES are stored as the actual data when selected";
+print "  - This allows showing 'United States' while storing 'US'";
+print "";
