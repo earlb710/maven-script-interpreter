@@ -1177,9 +1177,10 @@ public class InterpreterScreen {
     private DisplayItem parseDisplayItem(Map<String, Object> displayDef, String screenName) {
         DisplayItem metadata = new DisplayItem();
 
-        // Extract display type and convert to enum
-        if (displayDef.containsKey("type")) {
-            metadata.type = String.valueOf(displayDef.get("type")).toLowerCase();
+        // Extract display type and convert to enum (case-insensitive lookup)
+        Object typeObj = getCaseInsensitive(displayDef, "type");
+        if (typeObj != null) {
+            metadata.type = String.valueOf(typeObj).toLowerCase();
             metadata.itemType = ItemType.fromString(metadata.type);
         } else {
             metadata.itemType = ItemType.TEXTFIELD; // Default to textfield
@@ -1551,6 +1552,24 @@ public class InterpreterScreen {
             area.groupBorderColor = String.valueOf(groupBorderColorObj);
         }
         
+        // Extract groupBorderWidth property (for visual grouping) - case-insensitive
+        Object groupBorderWidthObj = getCaseInsensitive(areaDef, "groupBorderWidth");
+        if (groupBorderWidthObj != null) {
+            area.groupBorderWidth = String.valueOf(groupBorderWidthObj);
+        }
+        
+        // Extract groupBorderInsets property (for visual grouping) - case-insensitive
+        Object groupBorderInsetsObj = getCaseInsensitive(areaDef, "groupBorderInsets");
+        if (groupBorderInsetsObj != null) {
+            area.groupBorderInsets = String.valueOf(groupBorderInsetsObj);
+        }
+        
+        // Extract groupBorderRadius property (for visual grouping) - case-insensitive
+        Object groupBorderRadiusObj = getCaseInsensitive(areaDef, "groupBorderRadius");
+        if (groupBorderRadiusObj != null) {
+            area.groupBorderRadius = String.valueOf(groupBorderRadiusObj);
+        }
+        
         // Extract groupLabelText property (for visual grouping) - case-insensitive
         Object groupLabelTextObj = getCaseInsensitive(areaDef, "groupLabelText");
         if (groupLabelTextObj != null) {
@@ -1567,6 +1586,24 @@ public class InterpreterScreen {
         Object groupLabelOffsetObj = getCaseInsensitive(areaDef, "groupLabelOffset");
         if (groupLabelOffsetObj != null) {
             area.groupLabelOffset = String.valueOf(groupLabelOffsetObj);
+        }
+        
+        // Extract groupLabelColor property (for visual grouping) - case-insensitive
+        Object groupLabelColorObj = getCaseInsensitive(areaDef, "groupLabelColor");
+        if (groupLabelColorObj != null) {
+            area.groupLabelColor = String.valueOf(groupLabelColorObj);
+        }
+        
+        // Extract groupLabelBackground property (for visual grouping) - case-insensitive
+        Object groupLabelBackgroundObj = getCaseInsensitive(areaDef, "groupLabelBackground");
+        if (groupLabelBackgroundObj != null) {
+            area.groupLabelBackground = String.valueOf(groupLabelBackgroundObj);
+        }
+        
+        // Extract areaBackground property - case-insensitive
+        Object areaBackgroundObj = getCaseInsensitive(areaDef, "areaBackground");
+        if (areaBackgroundObj != null) {
+            area.areaBackground = String.valueOf(areaBackgroundObj);
         }
         
         // Extract spacing property
@@ -1657,6 +1694,11 @@ public class InterpreterScreen {
                                 // Parse display metadata for this specific item
                                 item.displayItem = parseDisplayItem(displayDef, screenName);
                             }
+                        } else if (getCaseInsensitive(itemDef, "type") != null && 
+                                   getCaseInsensitive(itemDef, "varref") == null) {
+                            // If item has a direct "type" property (e.g., button, label) without a varRef,
+                            // treat the item definition itself as the display definition
+                            item.displayItem = parseDisplayItem(itemDef, screenName);
                         }
                         // If displayItem is not set here, it will remain null
                         // and the consuming code should fall back to using varRef's DisplayItem

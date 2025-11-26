@@ -766,6 +766,12 @@ public class ScreenFactory {
                 if (areaDef.groupBorderColor != null && !areaDef.groupBorderColor.isEmpty()) {
                     contextBuilder.append(String.format(", color: %s", areaDef.groupBorderColor));
                 }
+                if (areaDef.groupBorderWidth != null && !areaDef.groupBorderWidth.isEmpty()) {
+                    contextBuilder.append(String.format(", width: %s", areaDef.groupBorderWidth));
+                }
+                if (areaDef.groupBorderInsets != null && !areaDef.groupBorderInsets.isEmpty()) {
+                    contextBuilder.append(String.format(", insets: %s", areaDef.groupBorderInsets));
+                }
                 contextBuilder.append("]");
             }
             
@@ -1639,6 +1645,10 @@ public class ScreenFactory {
                 Map<String, Object> displayDef = (Map<String, Object>) displayObj;
                 item.displayItem = parseDisplayItem(displayDef, screenName);
             }
+        } else if (itemDef.containsKey("type") && item.varRef == null) {
+            // If item has a direct "type" property (e.g., button, label) without a varRef,
+            // treat the item definition itself as the display definition
+            item.displayItem = parseDisplayItem(itemDef, screenName);
         }
 
         // UI properties

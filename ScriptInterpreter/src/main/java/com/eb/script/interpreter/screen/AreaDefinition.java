@@ -30,12 +30,24 @@ public class AreaDefinition {
     public String groupBorder;
     // Group border color in hex format (e.g., "#4a9eff")
     public String groupBorderColor;
+    // Group border width in pixels (e.g., "2" or "2px") - default varies by border type
+    public String groupBorderWidth;
+    // Group border insets in pixels (e.g., "5" for all sides, or "5 10" for top/bottom and left/right, or "5 10 5 10" for top, right, bottom, left)
+    public String groupBorderInsets;
+    // Group border radius in pixels (e.g., "5" or "5px") - default is 5px
+    public String groupBorderRadius;
     // Group label text (displayed inside/on the group border)
     public String groupLabelText;
     // Group label alignment: left, center, right (default: left)
     public String groupLabelAlignment;
     // Group label offset: top, on, bottom (default: on) - controls vertical position relative to border
     public String groupLabelOffset;
+    // Group label text color in hex format (e.g., "#4a9eff") - defaults to groupBorderColor
+    public String groupLabelColor;
+    // Group label background color in hex format (e.g., "#ffffff") - defaults to "white"
+    public String groupLabelBackground;
+    // Area background color in hex format (e.g., "#f0f0f0") - optional background color for the area
+    public String areaBackground;
     // Spacing between children (for HBox, VBox, FlowPane, GridPane, TilePane)
     public String spacing;
     // Padding inside the area (for all Region types)
@@ -60,9 +72,15 @@ public class AreaDefinition {
                ", title='" + title + '\'' +
                ", groupBorder='" + groupBorder + '\'' +
                ", groupBorderColor='" + groupBorderColor + '\'' +
+               ", groupBorderWidth='" + groupBorderWidth + '\'' +
+               ", groupBorderInsets='" + groupBorderInsets + '\'' +
+               ", groupBorderRadius='" + groupBorderRadius + '\'' +
                ", groupLabelText='" + groupLabelText + '\'' +
                ", groupLabelAlignment='" + groupLabelAlignment + '\'' +
                ", groupLabelOffset='" + groupLabelOffset + '\'' +
+               ", groupLabelColor='" + groupLabelColor + '\'' +
+               ", groupLabelBackground='" + groupLabelBackground + '\'' +
+               ", areaBackground='" + areaBackground + '\'' +
                ", spacing='" + spacing + '\'' +
                ", padding='" + padding + '\'' +
                ", items=" + items.size() +

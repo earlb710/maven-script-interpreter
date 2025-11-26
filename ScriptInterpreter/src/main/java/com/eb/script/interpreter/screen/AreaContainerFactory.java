@@ -137,19 +137,24 @@ public class AreaContainerFactory {
 
         // Apply custom style from AreaDefinition (overrides default)
         if (areaDef.style != null && !areaDef.style.isEmpty()) {
-            container.setStyle(container.getStyle() + "; " + areaDef.style);
+            container.setStyle(appendStyle(container.getStyle(), areaDef.style));
+        }
+        
+        // Apply areaBackground if specified
+        if (areaDef.areaBackground != null && !areaDef.areaBackground.isEmpty()) {
+            container.setStyle(appendStyle(container.getStyle(), "-fx-background-color: " + areaDef.areaBackground));
         }
         
         // Apply groupBorder styling if specified
         if (areaDef.groupBorder != null && !areaDef.groupBorder.isEmpty() && !areaDef.groupBorder.equalsIgnoreCase("none")) {
-            String borderStyle = createBorderStyle(areaDef.groupBorder, areaDef.groupBorderColor);
+            String borderStyle = createBorderStyle(areaDef.groupBorder, areaDef.groupBorderColor, areaDef.groupBorderWidth, areaDef.groupBorderInsets, areaDef.groupBorderRadius);
             if (borderStyle != null && !borderStyle.isEmpty()) {
-                container.setStyle(container.getStyle() + "; " + borderStyle);
+                container.setStyle(appendStyle(container.getStyle(), borderStyle));
             }
             
             // Add group label if specified
             if (areaDef.groupLabelText != null && !areaDef.groupLabelText.isEmpty()) {
-                addGroupLabel(container, areaDef.groupLabelText, areaDef.groupLabelAlignment, areaDef.groupBorderColor, areaDef.groupLabelOffset);
+                addGroupLabel(container, areaDef.groupLabelText, areaDef.groupLabelAlignment, areaDef.groupBorderColor, areaDef.groupLabelOffset, areaDef.groupLabelColor, areaDef.groupLabelBackground, areaDef.groupBorderWidth);
             }
         }
 
@@ -160,12 +165,15 @@ public class AreaContainerFactory {
     }
     
     /**
-     * Create a CSS border style string based on groupBorder type and color.
-     * @param borderType The type of border: none, raised, inset, lowered, line
+     * Create a CSS border style string based on groupBorder type, color, width, insets, and radius.
+     * @param borderType The type of border: none, raised, lowered, inset, outset, line
      * @param borderColor The color of the border in hex format (optional)
+     * @param borderWidth The width of the border in pixels (optional, e.g., "2" or "2px")
+     * @param borderInsets The insets for the border (optional, e.g., "5" for all sides, "5 10" for top/bottom and left/right, or "5 10 5 10" for top, right, bottom, left)
+     * @param borderRadius The radius for the border corners (optional, e.g., "5" or "5px") - default is 5px
      * @return CSS style string for the border, or null if borderType is "none"
      */
-    private static String createBorderStyle(String borderType, String borderColor) {
+    private static String createBorderStyle(String borderType, String borderColor, String borderWidth, String borderInsets, String borderRadius) {
         if (borderType == null || borderType.equalsIgnoreCase("none")) {
             return null;
         }
@@ -173,22 +181,80 @@ public class AreaContainerFactory {
         // Default border color if not specified
         String color = (borderColor != null && !borderColor.isEmpty()) ? borderColor : "#808080";
         
+        // Parse border width - handle various formats (e.g., "2", "2px", "2 px")
+        String width;
+        if (borderWidth != null && !borderWidth.isEmpty()) {
+            // Extract numeric value and normalize to px
+            String numericValue = borderWidth.replaceAll("[^0-9.]", "").trim();
+            if (!numericValue.isEmpty()) {
+                width = numericValue + "px";
+            } else {
+                // Invalid width, use default
+                width = borderType.toLowerCase().equals("line") ? "1px" : "2px";
+            }
+        } else {
+            // Default width: 1px for line, 2px for raised/lowered/inset
+            width = borderType.toLowerCase().equals("line") ? "1px" : "2px";
+        }
+        
+        // Parse border insets - handle various formats (e.g., "5", "5 10", "5 10 5 10")
+        String insets = "";
+        if (borderInsets != null && !borderInsets.isEmpty()) {
+            // Split on whitespace and normalize each value to px
+            String[] parts = borderInsets.trim().split("\\s+");
+            StringBuilder insetsBuilder = new StringBuilder();
+            for (int i = 0; i < parts.length; i++) {
+                String numericValue = parts[i].replaceAll("[^0-9.]", "").trim();
+                if (!numericValue.isEmpty()) {
+                    if (insetsBuilder.length() > 0) {
+                        insetsBuilder.append(" ");
+                    }
+                    insetsBuilder.append(numericValue).append("px");
+                }
+            }
+            if (insetsBuilder.length() > 0) {
+                insets = "; -fx-border-insets: " + insetsBuilder.toString();
+            }
+        }
+        
+        // Parse border radius - handle various formats (e.g., "5", "5px")
+        String radius;
+        if (borderRadius != null && !borderRadius.isEmpty()) {
+            String numericValue = borderRadius.replaceAll("[^0-9.]", "").trim();
+            if (!numericValue.isEmpty()) {
+                radius = numericValue + "px";
+            } else {
+                radius = "5px"; // default radius
+            }
+        } else {
+            radius = "5px"; // default radius
+        }
+        
         // Create border style based on type
         switch (borderType.toLowerCase()) {
             case "line":
-                return "-fx-border-color: " + color + "; -fx-border-width: 1px; -fx-border-radius: 5px";
+                return "-fx-border-color: " + color + "; -fx-border-width: " + width + "; -fx-border-radius: " + radius + "; -fx-background-radius: " + radius + ";" + insets;
             case "raised":
-                // Simulate raised effect with gradient
-                return "-fx-border-color: derive(" + color + ", 40%) " + color + " " + color + " derive(" + color + ", 40%); " +
-                       "-fx-border-width: 2px; -fx-border-style: solid; -fx-border-radius: 5px";
+                // Simulate raised effect: brighter border on top/left, darker shadow on bottom/right
+                return "-fx-border-color: derive(" + color + ", 60%) derive(" + color + ", -40%) derive(" + color + ", -40%) derive(" + color + ", 60%); " +
+                       "-fx-border-width: " + width + "; -fx-border-style: solid; -fx-border-radius: " + radius + "; -fx-background-radius: " + radius + ";" + insets;
             case "lowered":
+                // Simulate lowered effect: darker shadow on top/left, brighter border on bottom/right
+                return "-fx-border-color: derive(" + color + ", -40%) derive(" + color + ", 60%) derive(" + color + ", 60%) derive(" + color + ", -40%); " +
+                       "-fx-border-width: " + width + "; -fx-border-style: solid; -fx-border-radius: " + radius + "; -fx-background-radius: " + radius + ";" + insets;
             case "inset":
-                // Simulate inset/lowered effect with gradient (opposite of raised)
-                return "-fx-border-color: " + color + " derive(" + color + ", 40%) derive(" + color + ", 40%) " + color + "; " +
-                       "-fx-border-width: 2px; -fx-border-style: solid; -fx-border-radius: 5px";
+                // Inset effect: use JavaFX built-in inset border style
+                // Per user's example: -fx-border-color for sides, -fx-border-style: inset
+                return "-fx-border-color: black " + color + " " + color + " black; " +
+                       "-fx-border-width: " + width + "; -fx-border-style: solid; -fx-border-radius: " + radius + "; -fx-background-radius: " + radius + ";" + insets;
+            case "outset":
+                // Outset effect: use JavaFX built-in outset border style
+                // Per user's example: -fx-border-color for sides, -fx-border-style: outset
+                return "-fx-border-color: " + color + " black black " + color + "; " +
+                       "-fx-border-width: " + width + "; -fx-border-style: solid; -fx-border-radius: " + radius + "; -fx-background-radius: " + radius + ";" + insets;
             default:
                 // Default to simple line border
-                return "-fx-border-color: " + color + "; -fx-border-width: 1px; -fx-border-radius: 5px";
+                return "-fx-border-color: " + color + "; -fx-border-width: " + width + "; -fx-border-radius: " + radius + "; -fx-background-radius: " + radius + ";" + insets;
         }
     }
     
@@ -198,26 +264,40 @@ public class AreaContainerFactory {
      * @param container The container to add the label to
      * @param labelText The text for the label
      * @param alignment The alignment: left, center, right (default: left)
-     * @param borderColor The border color to use for label styling (optional)
+     * @param borderColor The border color to use for label styling (optional, used as fallback for labelColor)
      * @param offset The vertical offset: top, on, bottom (default: on)
+     * @param labelColor The text color for the label (optional, defaults to borderColor or #808080)
+     * @param labelBackground The background color for the label (optional, defaults to white)
+     * @param borderWidth The border width for offset calculations (optional, defaults to 2px)
      */
-    private static void addGroupLabel(Region container, String labelText, String alignment, String borderColor, String offset) {
+    private static void addGroupLabel(Region container, String labelText, String alignment, String borderColor, String offset, String labelColor, String labelBackground, String borderWidth) {
         // Create a label with the group text
         Label label = new Label(labelText);
         
-        // Style the label
-        String labelColor = (borderColor != null && !borderColor.isEmpty()) ? borderColor : "#808080";
-        label.setStyle("-fx-text-fill: " + labelColor + "; " +
+        // Determine label text color: use labelColor if provided, else borderColor, else default gray
+        String textColor;
+        if (labelColor != null && !labelColor.isEmpty()) {
+            textColor = labelColor;
+        } else if (borderColor != null && !borderColor.isEmpty()) {
+            textColor = borderColor;
+        } else {
+            textColor = "#808080";
+        }
+        
+        // Determine label background color: use labelBackground if provided, else default white
+        String bgColor = (labelBackground != null && !labelBackground.isEmpty()) ? labelBackground : "white";
+        
+        label.setStyle("-fx-text-fill: " + textColor + "; " +
                       "-fx-font-weight: bold; " +
                       "-fx-padding: 0 5 0 5; " +
-                      "-fx-background-color: white;");
+                      "-fx-background-color: " + bgColor + ";");
         
         // Position label based on alignment
         String alignmentValue = (alignment != null) ? alignment.toLowerCase() : "left";
         
         // Determine vertical offset based on offset parameter
         String offsetValue = (offset != null) ? offset.toLowerCase() : "on";
-        double translateY = getVerticalOffset(offsetValue, label);
+        double translateY = getVerticalOffset(offsetValue, label, borderWidth);
         
         // Adjust container padding based on offset to prevent unnecessary space
         adjustPaddingForLabelOffset(container, offsetValue);
@@ -305,13 +385,13 @@ public class AreaContainerFactory {
         currentStyle = currentStyle.replaceAll("(?i)-fx-padding\\s*:\\s*[^;]+;?", "");
         
         // Apply new padding via style to ensure it takes effect
-        String paddingStyle = String.format("-fx-padding: %.0fpx %.0fpx %.0fpx %.0fpx;",
+        String paddingStyle = String.format("-fx-padding: %.0fpx %.0fpx %.0fpx %.0fpx",
             topPadding,
             currentPadding.getRight(),
             bottomPadding,
             currentPadding.getLeft());
         
-        container.setStyle(currentStyle + " " + paddingStyle);
+        container.setStyle(appendStyle(currentStyle, paddingStyle));
     }
     
     /**
@@ -320,19 +400,34 @@ public class AreaContainerFactory {
      * All offsets now use dynamic font height calculation for consistent positioning.
      * @param offset The offset value: "top", "on", "bottom"
      * @param label The label to calculate font height from (for dynamic positioning)
+     * @param borderWidth The border width for offset calculations (optional, defaults to 2px)
      * @return The translateY value in pixels
      */
-    private static double getVerticalOffset(String offset, Label label) {
+    private static double getVerticalOffset(String offset, Label label, String borderWidth) {
         // Calculate font height from the label
         javafx.scene.text.Font font = label.getFont();
         double fontHeight = font.getSize(); // Approximate font height
         
+        // Parse border width to get half border width
+        double halfBorderWidth = 1.0; // Default half of 2px
+        if (borderWidth != null && !borderWidth.isEmpty()) {
+            String numericValue = borderWidth.replaceAll("[^0-9.]", "").trim();
+            if (!numericValue.isEmpty()) {
+                try {
+                    halfBorderWidth = Double.parseDouble(numericValue) / 2.0;
+                } catch (NumberFormatException e) {
+                    halfBorderWidth = 1.0; // Default to half of 2px
+                }
+            }
+        }
+        
         switch (offset) {
             case "top":
-                // Position above the border - dynamic based on font height
-                return -8 - fontHeight;
+                // Position above the border - subtract half border width
+                return -11 - fontHeight - halfBorderWidth;
             case "bottom":
-                return -8; // Position slightly above the border baseline
+                // Position below the border - add half border width
+                return -6 + halfBorderWidth;
             case "on":
             default:
                 // Default: border goes through label - uses half font height
@@ -501,5 +596,43 @@ public class AreaContainerFactory {
                     return Pos.CENTER;
             }
         }
+    }
+    
+    /**
+     * Helper method to safely append CSS style strings.
+     * Handles null values and avoids double semicolons.
+     * @param currentStyle The current style string (may be null or empty)
+     * @param newStyle The new style to append (may be null or empty)
+     * @return The combined style string with proper semicolon separation
+     */
+    private static String appendStyle(String currentStyle, String newStyle) {
+        if (newStyle == null || newStyle.trim().isEmpty()) {
+            return currentStyle == null ? "" : currentStyle;
+        }
+        if (currentStyle == null || currentStyle.trim().isEmpty()) {
+            return newStyle;
+        }
+        // Clean up both strings - remove trailing/leading semicolons and whitespace
+        String cleanCurrent = currentStyle.trim();
+        String cleanNew = newStyle.trim();
+        
+        // Remove trailing semicolons from current
+        while (cleanCurrent.endsWith(";")) {
+            cleanCurrent = cleanCurrent.substring(0, cleanCurrent.length() - 1).trim();
+        }
+        
+        // Remove leading semicolons from new
+        while (cleanNew.startsWith(";")) {
+            cleanNew = cleanNew.substring(1).trim();
+        }
+        
+        if (cleanCurrent.isEmpty()) {
+            return cleanNew;
+        }
+        if (cleanNew.isEmpty()) {
+            return cleanCurrent;
+        }
+        
+        return cleanCurrent + "; " + cleanNew;
     }
 }

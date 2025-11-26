@@ -724,6 +724,27 @@ public final class Builtins {
         ));
 
         addBuiltin(info(
+                "system.inputDialog", DataType.STRING, // returns the input text or empty string if cancelled
+                newParam("title", DataType.STRING, true),      // required: dialog title
+                newParam("headerText", DataType.STRING, false), // optional: header text
+                newParam("defaultValue", DataType.STRING, false) // optional: default input value
+        ));
+
+        addBuiltin(info(
+                "system.confirmDialog", DataType.BOOL, // returns true if confirmed, false if cancelled
+                newParam("message", DataType.STRING, true),     // required: confirmation message
+                newParam("title", DataType.STRING, false),      // optional: dialog title
+                newParam("headerText", DataType.STRING, false)  // optional: header text
+        ));
+
+        addBuiltin(info(
+                "system.alertDialog", DataType.BOOL, // returns true when acknowledged
+                newParam("message", DataType.STRING, true),     // required: alert message
+                newParam("title", DataType.STRING, false),      // optional: dialog title (defaults to "Alert")
+                newParam("alertType", DataType.STRING, false)   // optional: info, warning, error (defaults to info)
+        ));
+
+        addBuiltin(info(
                 "sleep", DataType.STRING,
                 newParam("millis", DataType.LONG) // required: milliseconds to sleep
         ));
@@ -2083,6 +2104,105 @@ public final class Builtins {
                 //                result.put("builtins", builtins);
                 return text;
             }
+            
+            // --- system.inputDialog(title, headerText?, defaultValue?) ---
+            case "system.inputdialog" -> {
+                String title = args.length > 0 && args[0] != null ? args[0].toString() : "Input";
+                String headerText = args.length > 1 && args[1] != null ? args[1].toString() : null;
+                String defaultValue = args.length > 2 && args[2] != null ? args[2].toString() : "";
+                
+                // Use JavaFX TextInputDialog
+                final java.util.concurrent.atomic.AtomicReference<String> resultRef = new java.util.concurrent.atomic.AtomicReference<>("");
+                final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
+                
+                javafx.application.Platform.runLater(() -> {
+                    javafx.scene.control.TextInputDialog dialog = new javafx.scene.control.TextInputDialog(defaultValue);
+                    dialog.setTitle(title);
+                    if (headerText != null && !headerText.isEmpty()) {
+                        dialog.setHeaderText(headerText);
+                    }
+                    dialog.setContentText("Enter value:");
+                    
+                    java.util.Optional<String> result = dialog.showAndWait();
+                    resultRef.set(result.orElse(""));
+                    latch.countDown();
+                });
+                
+                try {
+                    latch.await();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new InterpreterError("system.inputDialog interrupted: " + e.getMessage());
+                }
+                return resultRef.get();
+            }
+            
+            // --- system.confirmDialog(message, title?, headerText?) ---
+            case "system.confirmdialog" -> {
+                String message = args.length > 0 && args[0] != null ? args[0].toString() : "Are you sure?";
+                String title = args.length > 1 && args[1] != null ? args[1].toString() : "Confirm";
+                String headerText = args.length > 2 && args[2] != null ? args[2].toString() : null;
+                
+                final java.util.concurrent.atomic.AtomicBoolean resultRef = new java.util.concurrent.atomic.AtomicBoolean(false);
+                final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
+                
+                javafx.application.Platform.runLater(() -> {
+                    javafx.scene.control.Alert confirm = new javafx.scene.control.Alert(
+                        javafx.scene.control.Alert.AlertType.CONFIRMATION,
+                        message,
+                        javafx.scene.control.ButtonType.YES,
+                        javafx.scene.control.ButtonType.NO
+                    );
+                    confirm.setTitle(title);
+                    if (headerText != null && !headerText.isEmpty()) {
+                        confirm.setHeaderText(headerText);
+                    }
+                    
+                    java.util.Optional<javafx.scene.control.ButtonType> result = confirm.showAndWait();
+                    resultRef.set(result.isPresent() && result.get() == javafx.scene.control.ButtonType.YES);
+                    latch.countDown();
+                });
+                
+                try {
+                    latch.await();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new InterpreterError("system.confirmDialog interrupted: " + e.getMessage());
+                }
+                return resultRef.get();
+            }
+            
+            // --- system.alertDialog(message, title?, alertType?) ---
+            case "system.alertdialog" -> {
+                String message = args.length > 0 && args[0] != null ? args[0].toString() : "";
+                String title = args.length > 1 && args[1] != null ? args[1].toString() : "Alert";
+                String alertTypeStr = args.length > 2 && args[2] != null ? args[2].toString().toLowerCase() : "info";
+                
+                javafx.scene.control.Alert.AlertType alertType;
+                switch (alertTypeStr) {
+                    case "warning" -> alertType = javafx.scene.control.Alert.AlertType.WARNING;
+                    case "error" -> alertType = javafx.scene.control.Alert.AlertType.ERROR;
+                    default -> alertType = javafx.scene.control.Alert.AlertType.INFORMATION;
+                }
+                
+                final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
+                
+                javafx.application.Platform.runLater(() -> {
+                    javafx.scene.control.Alert alert = new javafx.scene.control.Alert(alertType, message);
+                    alert.setTitle(title);
+                    alert.showAndWait();
+                    latch.countDown();
+                });
+                
+                try {
+                    latch.await();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new InterpreterError("system.alertDialog interrupted: " + e.getMessage());
+                }
+                return true;
+            }
+            
             // --- AI: ai.complete(system?, user, maxTokens?, temperature?) ---
             case "ai.complete" -> {
                 String system = args.length > 0 && args[0] != null ? args[0].toString() : null;

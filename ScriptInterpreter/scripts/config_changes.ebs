@@ -54,6 +54,14 @@ var colors: json = call json.getobject(config, "colors");
 print "Colors object retrieved";
 print "";
 
+// Get the profile name (default to "default" if not present)
+var profileName: string = call json.getstring(config, "profile");
+if profileName == "" then {
+    profileName = "default";
+}
+print "Profile: " + profileName;
+print "";
+
 // Extract all color values into variables
 var infoColor: string = call json.getstring(colors, "info");
 var commentColor: string = call json.getstring(colors, "comment");
@@ -115,10 +123,21 @@ print "Building color editor screen configuration...";
 print "Creating color editor screen with colors from console.cfg...";
 screen colorEditorScreen = {
     "title": "Console Configuration Color Editor",
-    "width": 800,
-    "height": 900,
+    "width": 1000,
+    "height": 650,
     "maximize": false,
     "vars": [
+        {
+            "name": "profile",
+            "type": "string",
+            "default": $profileName,
+            "display": {
+                "type": "combobox",
+                "labelText": "Profile:",
+                "labelTextAlignment": "left",
+                "options": ["default", "dark", "light", "custom"]
+            }
+        },
         {
             "name": "info",
             "type": "string",
@@ -337,78 +356,123 @@ screen colorEditorScreen = {
         }
     ],
     "area": [{
-        "name": "mainArea",
+        "name": "rootArea",
         "type": "vbox",
-        "style": "-fx-spacing: 10; -fx-padding: 10;",
-        "childAreas": [
+        "style": "-fx-spacing: 4; -fx-padding: 4;",
+        "background": "#efefef",
+        "areas": [
             {
-                "name": "consoleColorsArea",
-                "type": "vbox",
-                "groupBorder": "line",
-                "groupBorderColor": "#4a9eff",
-                "groupLabelText": "Console Colors",
-                "groupLabelAlignment": "left",
-                "groupLabelOffset": "bottom",
-                "style": "-fx-spacing: 5; -fx-padding: 10;",
+                "name": "profileArea",
+                "type": "hbox",
+                "style": "-fx-spacing: 4; -fx-padding: 4; -fx-alignment: CENTER_LEFT;",
                 "items": [
-                    {"name": "info_item", "varref": "info"},
-                    {"name": "comment_item", "varref": "comment"},
-                    {"name": "error_item", "varref": "error"},
-                    {"name": "warn_item", "varref": "warn"},
-                    {"name": "ok_item", "varref": "ok"}
+                    {"name": "profile_item", "varref": "profile"},
+                    {"name": "addProfileBtn", "type": "button", "labelText": "+", "style": "-fx-min-width: 30;", "onClick": "var newName: string = call system.inputDialog(\"Add Profile\", \"Enter new profile name:\", \"\"); if newName != \"\" then { var options: string[] = colorEditorScreen.profile.options; var exists: bool = false; for var i: int = 0; i < options.length then { if options[i] == newName then { exists = true; } i = i + 1; } if exists then { call system.alertDialog(\"Profile '\" + newName + \"' already exists.\", \"Duplicate Name\", \"warning\"); } else { call array.push(colorEditorScreen.profile.options, newName); colorEditorScreen.profile = newName; } }"},
+                    {"name": "removeProfileBtn", "type": "button", "labelText": "-", "style": "-fx-min-width: 30;", "onClick": "if colorEditorScreen.profile == \"default\" then { call system.alertDialog(\"Cannot delete the default profile.\", \"Delete Profile\", \"warning\"); } else { var confirmed: bool = call system.confirmDialog(\"Are you sure you want to delete profile '\" + colorEditorScreen.profile + \"'?\", \"Delete Profile\", \"Confirm Delete\"); if confirmed then { var options: string[] = colorEditorScreen.profile.options; var newOptions: string[] = []; for var i: int = 0; i < options.length then { if options[i] != colorEditorScreen.profile then { call array.push(newOptions, options[i]); } i = i + 1; } colorEditorScreen.profile.options = newOptions; colorEditorScreen.profile = \"default\"; } }"}
                 ]
             },
             {
-                "name": "syntaxColorsArea",
-                "type": "vbox",
-                "groupBorder": "line",
-                "groupBorderColor": "#ff9933",
-                "groupLabelText": "Syntax Colors",
-                "groupLabelAlignment": "left",
-                "style": "-fx-spacing: 5; -fx-padding: 10;",
-                "items": [
-                    {"name": "code_item", "varref": "code"},
-                    {"name": "datatype_item", "varref": "datatype"},
-                    {"name": "data_item", "varref": "data"},
-                    {"name": "keyword_item", "varref": "keyword"},
-                    {"name": "builtin_item", "varref": "builtin"},
-                    {"name": "literal_item", "varref": "literal"},
-                    {"name": "identifier_item", "varref": "identifier"},
-                    {"name": "sql_item", "varref": "sql"},
-                    {"name": "custom_item", "varref": "custom"}
-                ]
-            },
-            {
-                "name": "editorColorsArea",
-                "type": "vbox",
-                "groupBorder": "line",
-                "groupBorderColor": "#66cc66",
-                "groupLabelText": "Editor Colors",
-                "groupLabelAlignment": "left",
-                "groupLabelOffset": "top",
-                "style": "-fx-spacing: 5; -fx-padding: 10;",
-                "items": [
-                    {"name": "background_item", "varref": "background"},
-                    {"name": "text_item", "varref": "text"},
-                    {"name": "caret_item", "varref": "caret"},
-                    {"name": "lineCursor_item", "varref": "lineCursor"},
-                    {"name": "lineNumbers_item", "varref": "lineNumbers"},
-                    {"name": "consoleBackground_item", "varref": "consoleBackground"}
-                ]
-            },
-            {
-                "name": "tabColorsArea",
-                "type": "vbox",
-                "groupBorder": "line",
-                "groupBorderColor": "#cc66cc",
-                "groupLabelText": "Tab Colors",
-                "groupLabelAlignment": "left",
-                "style": "-fx-spacing: 5; -fx-padding: 10;",
-                "items": [
-                    {"name": "tabBackground_item", "varref": "tabBackground"},
-                    {"name": "tabLabelColor_item", "varref": "tabLabelColor"},
-                    {"name": "tabLabelChangedColor_item", "varref": "tabLabelChangedColor"},
-                    {"name": "tabLabelBackground_item", "varref": "tabLabelBackground"}
+                "name": "mainArea",
+                "type": "hbox",
+                "style": "-fx-spacing: 15;",
+                "areas": [
+                    {
+                        "name": "leftColumn",
+                        "type": "vbox",
+                        "style": "-fx-spacing: 10;",
+                        "areas": [
+                            {
+                                "name": "consoleColorsArea",
+                                "type": "vbox",
+                                "groupBorder": "lowered",
+                                "groupBorderColor": "#ffffff",
+                                "groupBorderWidth": "2",
+                                "groupBorderRadius": "4",
+                                "groupLabelColor": "#444444",
+                                "groupLabelBackground": "#efefef",
+                                "groupLabelText": "Console Colors",
+                                "groupLabelAlignment": "left",
+                                "groupLabelOffset": "on",
+                                "style": "-fx-spacing: 5; -fx-padding: 10;",
+                                "items": [
+                                    {"name": "info_item", "varref": "info"},
+                                    {"name": "comment_item", "varref": "comment"},
+                                    {"name": "error_item", "varref": "error"},
+                                    {"name": "warn_item", "varref": "warn"},
+                                    {"name": "ok_item", "varref": "ok"}
+                                ]
+                            },
+                            {
+                                "name": "editorColorsArea",
+                                "type": "vbox",
+                                "groupBorder": "lowered",
+                                "groupBorderColor": "#ffffff",
+                                "groupBorderWidth": "2",
+                                "groupLabelText": "Editor Colors",
+                                "groupLabelColor": "#444444",
+                                "groupLabelBackground": "#efefef",
+                                "groupLabelAlignment": "left",
+                                "groupLabelOffset": "on",
+                                "style": "-fx-spacing: 5; -fx-padding: 10;",
+                                "items": [
+                                    {"name": "background_item", "varref": "background"},
+                                    {"name": "text_item", "varref": "text"},
+                                    {"name": "caret_item", "varref": "caret"},
+                                    {"name": "lineCursor_item", "varref": "lineCursor"},
+                                    {"name": "lineNumbers_item", "varref": "lineNumbers"},
+                                    {"name": "consoleBackground_item", "varref": "consoleBackground"}
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "rightColumn",
+                        "type": "vbox",
+                        "style": "-fx-spacing: 10;",
+                        "areas": [
+                            {
+                                "name": "syntaxColorsArea",
+                                "type": "vbox",
+                                "groupBorder": "lowered",
+                                "groupBorderColor": "#ffffff",
+                                "groupBorderWidth": "2",
+                                "groupLabelText": "Syntax Colors",
+                                "groupLabelColor": "#444444",
+                                "groupLabelBackground": "#efefef",
+                                "groupLabelAlignment": "left",
+                                "style": "-fx-spacing: 5; -fx-padding: 10;",
+                                "items": [
+                                    {"name": "code_item", "varref": "code"},
+                                    {"name": "datatype_item", "varref": "datatype"},
+                                    {"name": "data_item", "varref": "data"},
+                                    {"name": "keyword_item", "varref": "keyword"},
+                                    {"name": "builtin_item", "varref": "builtin"},
+                                    {"name": "literal_item", "varref": "literal"},
+                                    {"name": "identifier_item", "varref": "identifier"},
+                                    {"name": "sql_item", "varref": "sql"},
+                                    {"name": "custom_item", "varref": "custom"}
+                                ]
+                            },
+                            {
+                                "name": "tabColorsArea",
+                                "type": "vbox",
+                                "groupBorder": "lowered",
+                                "groupBorderColor": "#ffffff",
+                                "groupBorderWidth": "2",
+                                "groupLabelText": "Tab Colors",
+                                "groupLabelColor": "#444444",
+                                "groupLabelBackground": "#efefef",
+                                "groupLabelAlignment": "left",
+                                "style": "-fx-spacing: 5; -fx-padding: 10;",
+                                "items": [
+                                    {"name": "tabBackground_item", "varref": "tabBackground"},
+                                    {"name": "tabLabelColor_item", "varref": "tabLabelColor"},
+                                    {"name": "tabLabelChangedColor_item", "varref": "tabLabelChangedColor"},
+                                    {"name": "tabLabelBackground_item", "varref": "tabLabelBackground"}
+                                ]
+                            }
+                        ]
+                    }
                 ]
             }
         ]
@@ -425,6 +489,9 @@ print "";
 show screen colorEditorScreen;
 
 // After the screen is closed, display the updated values
+print "";
+print "=== Updated Configuration ===";
+print "profile: " + colorEditorScreen.profile;
 print "";
 print "=== Updated Color Values ===";
 print "info: " + colorEditorScreen.info;
