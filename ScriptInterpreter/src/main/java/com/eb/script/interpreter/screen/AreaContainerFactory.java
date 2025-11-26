@@ -213,7 +213,9 @@ public class AreaContainerFactory {
                 }
             }
             if (insetsBuilder.length() > 0) {
-                insets = "; -fx-border-insets: " + insetsBuilder.toString();
+                String insetsValue = insetsBuilder.toString();
+                // Apply both border-insets and background-insets for proper visual alignment
+                insets = "; -fx-border-insets: " + insetsValue + "; -fx-background-insets: " + insetsValue;
             }
         }
         
@@ -469,6 +471,8 @@ public class AreaContainerFactory {
     /**
      * Applies spacing property to containers that support it.
      * Spacing controls the gap between child elements.
+     * Also updates the CSS style to ensure the spacing value takes precedence
+     * over any default CSS spacing values.
      */
     private static void applySpacing(Region container, String spacingStr) {
         try {
@@ -476,17 +480,30 @@ public class AreaContainerFactory {
             
             if (container instanceof HBox) {
                 ((HBox) container).setSpacing(spacing);
+                // Also update CSS to override any default -fx-spacing in the style
+                updateStyleProperty(container, "-fx-spacing", spacing + "px");
             } else if (container instanceof VBox) {
                 ((VBox) container).setSpacing(spacing);
+                // Also update CSS to override any default -fx-spacing in the style
+                updateStyleProperty(container, "-fx-spacing", spacing + "px");
             } else if (container instanceof FlowPane) {
                 ((FlowPane) container).setHgap(spacing);
                 ((FlowPane) container).setVgap(spacing);
+                // Update CSS for hgap and vgap
+                updateStyleProperty(container, "-fx-hgap", spacing + "px");
+                updateStyleProperty(container, "-fx-vgap", spacing + "px");
             } else if (container instanceof TilePane) {
                 ((TilePane) container).setHgap(spacing);
                 ((TilePane) container).setVgap(spacing);
+                // Update CSS for hgap and vgap
+                updateStyleProperty(container, "-fx-hgap", spacing + "px");
+                updateStyleProperty(container, "-fx-vgap", spacing + "px");
             } else if (container instanceof GridPane) {
                 ((GridPane) container).setHgap(spacing);
                 ((GridPane) container).setVgap(spacing);
+                // Update CSS for hgap and vgap
+                updateStyleProperty(container, "-fx-hgap", spacing + "px");
+                updateStyleProperty(container, "-fx-vgap", spacing + "px");
             }
             // Other container types don't have a direct spacing property
         } catch (NumberFormatException e) {
@@ -500,11 +517,17 @@ public class AreaContainerFactory {
      * Padding creates internal space around the children within the container.
      * Supports formats: "10" (all sides), "10 5" (vertical horizontal), 
      * "10 5 10 5" (top right bottom left).
+     * Also updates the CSS style to ensure the padding value takes precedence
+     * over any default CSS padding values.
      */
     private static void applyPadding(Region container, String paddingStr) {
         javafx.geometry.Insets padding = parseInsets(paddingStr);
         if (padding != null) {
             container.setPadding(padding);
+            // Also update CSS to override any default -fx-padding in the style
+            String paddingCss = String.format("%.0fpx %.0fpx %.0fpx %.0fpx",
+                padding.getTop(), padding.getRight(), padding.getBottom(), padding.getLeft());
+            updateStyleProperty(container, "-fx-padding", paddingCss);
         }
     }
     
@@ -595,6 +618,51 @@ public class AreaContainerFactory {
                 default:
                     return Pos.CENTER;
             }
+        }
+    }
+    
+    /**
+     * Helper method to update or add a CSS property in the container's style string.
+     * If the property already exists, it is replaced with the new value.
+     * If it doesn't exist, it is added to the style string.
+     * This ensures that user-specified values override any default CSS values.
+     * 
+     * @param container The container whose style to update
+     * @param property The CSS property name (e.g., "-fx-spacing", "-fx-padding")
+     * @param value The value to set (e.g., "10px", "5px 10px")
+     */
+    private static void updateStyleProperty(Region container, String property, String value) {
+        String currentStyle = container.getStyle();
+        if (currentStyle == null) {
+            currentStyle = "";
+        }
+        
+        // Create a regex pattern to find and replace the property
+        // Pattern matches the property name followed by optional whitespace, colon, optional whitespace, value, and optional semicolon
+        String propertyPattern = "(?i)" + java.util.regex.Pattern.quote(property) + "\\s*:\\s*[^;]+;?";
+        
+        // Remove any existing declaration of this property
+        String cleanedStyle = currentStyle.replaceAll(propertyPattern, "").trim();
+        
+        // Clean up any double semicolons or leading/trailing semicolons that might result
+        while (cleanedStyle.contains(";;")) {
+            cleanedStyle = cleanedStyle.replace(";;", ";");
+        }
+        while (cleanedStyle.startsWith(";")) {
+            cleanedStyle = cleanedStyle.substring(1).trim();
+        }
+        while (cleanedStyle.endsWith(";")) {
+            cleanedStyle = cleanedStyle.substring(0, cleanedStyle.length() - 1).trim();
+        }
+        
+        // Build the new property declaration
+        String newProperty = property + ": " + value;
+        
+        // Append the new property to the cleaned style
+        if (cleanedStyle.isEmpty()) {
+            container.setStyle(newProperty);
+        } else {
+            container.setStyle(cleanedStyle + "; " + newProperty);
         }
     }
     
