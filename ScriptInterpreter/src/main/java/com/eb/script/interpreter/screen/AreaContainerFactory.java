@@ -357,7 +357,15 @@ public class AreaContainerFactory {
         double topPadding = currentPadding.getTop();
         double bottomPadding = currentPadding.getBottom();
         
-        switch (offset) {
+        // Extract base offset type (ignore any +/- adjustments for padding calculation)
+        String baseOffset = offset;
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("^(top|bottom|on)", java.util.regex.Pattern.CASE_INSENSITIVE);
+        java.util.regex.Matcher matcher = pattern.matcher(offset);
+        if (matcher.find()) {
+            baseOffset = matcher.group(1).toLowerCase();
+        }
+        
+        switch (baseOffset) {
             case "top":
                 // For top offset, add extra top padding to create space between border and label above
                 topPadding = Math.max(currentPadding.getTop(), 20);
@@ -398,7 +406,8 @@ public class AreaContainerFactory {
      * Determines the vertical offset (translateY) value based on the offset parameter.
      * More negative values move the label up, less negative values move it down.
      * All offsets now use dynamic font height calculation for consistent positioning.
-     * @param offset The offset value: "top", "on", "bottom"
+     * Supports additional pixel adjustments with format: "top-3", "bottom+3", etc.
+     * @param offset The offset value: "top", "on", "bottom" optionally followed by +/- adjustment
      * @param label The label to calculate font height from (for dynamic positioning)
      * @param borderWidth The border width for offset calculations (optional, defaults to 2px)
      * @return The translateY value in pixels
@@ -421,18 +430,45 @@ public class AreaContainerFactory {
             }
         }
         
-        switch (offset) {
+        // Parse offset to extract base type and optional pixel adjustment
+        // Format: "top", "bottom", "on" or "top-3", "bottom+3", "on+5", etc.
+        String baseOffset = offset;
+        double extraAdjustment = 0.0;
+        
+        // Check for adjustment pattern: base type followed by + or - and a number
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("^(top|bottom|on)([+-]\\d+(?:\\.\\d+)?)?$", java.util.regex.Pattern.CASE_INSENSITIVE);
+        java.util.regex.Matcher matcher = pattern.matcher(offset);
+        if (matcher.matches()) {
+            baseOffset = matcher.group(1).toLowerCase();
+            String adjustmentStr = matcher.group(2);
+            if (adjustmentStr != null && !adjustmentStr.isEmpty()) {
+                try {
+                    extraAdjustment = Double.parseDouble(adjustmentStr);
+                } catch (NumberFormatException e) {
+                    extraAdjustment = 0.0;
+                }
+            }
+        }
+        
+        double baseY;
+        switch (baseOffset) {
             case "top":
                 // Position above the border - subtract half border width
-                return -11 - fontHeight - halfBorderWidth;
+                baseY = -11 - fontHeight - halfBorderWidth;
+                break;
             case "bottom":
                 // Position below the border - add half border width
-                return -6 + halfBorderWidth;
+                baseY = -6 + halfBorderWidth;
+                break;
             case "on":
             default:
                 // Default: border goes through label - uses half font height
-                return -8 - (fontHeight / 2);
+                baseY = -8 - (fontHeight / 2);
+                break;
         }
+        
+        // Apply extra adjustment (negative moves up, positive moves down)
+        return baseY + extraAdjustment;
     }
     
     /**
