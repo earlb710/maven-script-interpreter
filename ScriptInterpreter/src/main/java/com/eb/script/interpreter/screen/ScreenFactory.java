@@ -9,6 +9,7 @@ import com.eb.script.interpreter.screen.AreaDefinition.AreaType;
 import com.eb.script.interpreter.screen.data.VarRefResolver;
 import com.eb.script.interpreter.screen.display.ControlListenerFactory;
 import com.eb.script.interpreter.screen.display.ControlUpdater;
+import com.eb.script.interpreter.screen.display.DisplayValidator;
 import com.eb.script.json.Json;
 import com.eb.script.json.JsonSchema;
 import com.eb.script.json.JsonValidate;
@@ -2228,56 +2229,12 @@ public class ScreenFactory {
      * @param onClickHandler Handler to execute the EBS code
      * @param screenName The screen name for context
      * @param context The interpreter context
+     * @deprecated Use DisplayValidator.setupValidationHandler() instead
      */
     private static void setupValidationHandler(Node control, String validateCode,
             OnClickHandler onClickHandler, String screenName, InterpreterContext context) {
-        if (control == null || validateCode == null || validateCode.isEmpty() || onClickHandler == null) {
-            return;
-        }
-        
-        // Define error style for validation failures
-        final String ERROR_STYLE = "-fx-border-color: red; -fx-border-width: 2;";
-        
-        // Create a validation runner that executes the code and applies styling
-        Runnable validator = () -> {
-            try {
-                // Execute the validation code
-                Object result = onClickHandler.executeWithReturn(validateCode);
-                
-                // Check if result is a boolean and apply styling
-                boolean isValid = true;
-                if (result instanceof Boolean) {
-                    isValid = (Boolean) result;
-                }
-                
-                // Apply or remove error styling based on validation result
-                if (!isValid) {
-                    // Mark control with error style
-                    String currentStyle = control.getStyle();
-                    if (currentStyle == null) {
-                        currentStyle = "";
-                    }
-                    if (!currentStyle.contains("-fx-border-color: red")) {
-                        control.setStyle(currentStyle + " " + ERROR_STYLE);
-                    }
-                } else {
-                    // Remove error styling by removing red border properties
-                    String currentStyle = control.getStyle();
-                    if (currentStyle != null) {
-                        // Remove error border styles
-                        currentStyle = currentStyle.replaceAll("-fx-border-color:\\s*red;?", "");
-                        currentStyle = currentStyle.replaceAll("-fx-border-width:\\s*2;?", "");
-                        control.setStyle(currentStyle.trim());
-                    }
-                }
-            } catch (Exception e) {
-                System.err.println("Error executing validation code: " + e.getMessage());
-                e.printStackTrace();
-            }
-        };
-        
-        // Attach validator to appropriate control events
-        attachValidationListener(control, validator);
+        // Delegate to DisplayValidator in the display layer
+        DisplayValidator.setupValidationHandler(control, validateCode, onClickHandler, screenName, context);
     }
     
     /**
@@ -2286,43 +2243,11 @@ public class ScreenFactory {
      * 
      * @param control The JavaFX control
      * @param validator The validation runnable to execute
+     * @deprecated Use DisplayValidator.attachValidationListener() instead
      */
     private static void attachValidationListener(Node control, Runnable validator) {
-        // Handle HBox containing slider (when showSliderValue is true)
-        if (control instanceof javafx.scene.layout.HBox) {
-            javafx.scene.layout.HBox hbox = (javafx.scene.layout.HBox) control;
-            if (!hbox.getChildren().isEmpty() && hbox.getChildren().get(0) instanceof javafx.scene.control.Slider) {
-                javafx.scene.control.Slider slider = (javafx.scene.control.Slider) hbox.getChildren().get(0);
-                slider.valueProperty().addListener((obs, oldVal, newVal) -> validator.run());
-                return;
-            }
-        }
-        
-        if (control instanceof javafx.scene.control.TextField) {
-            ((javafx.scene.control.TextField) control).textProperty().addListener((obs, oldVal, newVal) -> validator.run());
-        } else if (control instanceof javafx.scene.control.TextArea) {
-            ((javafx.scene.control.TextArea) control).textProperty().addListener((obs, oldVal, newVal) -> validator.run());
-        } else if (control instanceof javafx.scene.control.PasswordField) {
-            ((javafx.scene.control.PasswordField) control).textProperty().addListener((obs, oldVal, newVal) -> validator.run());
-        } else if (control instanceof javafx.scene.control.ComboBox) {
-            ((javafx.scene.control.ComboBox<?>) control).valueProperty().addListener((obs, oldVal, newVal) -> validator.run());
-        } else if (control instanceof javafx.scene.control.ChoiceBox) {
-            ((javafx.scene.control.ChoiceBox<?>) control).valueProperty().addListener((obs, oldVal, newVal) -> validator.run());
-        } else if (control instanceof javafx.scene.control.CheckBox) {
-            ((javafx.scene.control.CheckBox) control).selectedProperty().addListener((obs, oldVal, newVal) -> validator.run());
-        } else if (control instanceof javafx.scene.control.RadioButton) {
-            ((javafx.scene.control.RadioButton) control).selectedProperty().addListener((obs, oldVal, newVal) -> validator.run());
-        } else if (control instanceof javafx.scene.control.ToggleButton) {
-            ((javafx.scene.control.ToggleButton) control).selectedProperty().addListener((obs, oldVal, newVal) -> validator.run());
-        } else if (control instanceof javafx.scene.control.Spinner) {
-            ((javafx.scene.control.Spinner<?>) control).valueProperty().addListener((obs, oldVal, newVal) -> validator.run());
-        } else if (control instanceof javafx.scene.control.Slider) {
-            ((javafx.scene.control.Slider) control).valueProperty().addListener((obs, oldVal, newVal) -> validator.run());
-        } else if (control instanceof javafx.scene.control.DatePicker) {
-            ((javafx.scene.control.DatePicker) control).valueProperty().addListener((obs, oldVal, newVal) -> validator.run());
-        } else if (control instanceof javafx.scene.control.ColorPicker) {
-            ((javafx.scene.control.ColorPicker) control).valueProperty().addListener((obs, oldVal, newVal) -> validator.run());
-        }
+        // Delegate to DisplayValidator in the display layer
+        DisplayValidator.attachValidationListener(control, validator);
     }
 
     /**

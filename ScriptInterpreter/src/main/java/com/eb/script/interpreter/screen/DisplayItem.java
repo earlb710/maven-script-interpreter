@@ -15,13 +15,13 @@ public class DisplayItem {
     // CSS class name from enum
     String cssClass;
     // Whether the field is mandatory
-    boolean mandatory = false;
+    public boolean mandatory = false;
     // Case handling: "upper", "lower", "title"
     public String caseFormat;
     // Minimum value constraint
-    Object min;
+    public Object min;
     // Maximum value constraint
-    Object max;
+    public Object max;
     // CSS style string
     String style;
     // Associated screen name
@@ -29,7 +29,7 @@ public class DisplayItem {
     // Text/content alignment (e.g., "left", "center", "right")
     String alignment;
     // Regex pattern for validation (useful for text inputs)
-    String pattern;
+    public String pattern;
     // Placeholder text for text inputs (hint shown in empty field)
     String promptHelp;
     // Label text displayed before/above the control
@@ -49,7 +49,7 @@ public class DisplayItem {
     // Item/control font size (e.g., "12px", "14px", "1em")
     String itemFontSize;
     // Maximum length/width for the control (number of characters for text fields)
-    Integer maxLength;
+    public Integer maxLength;
     // Item/control text color
     String itemColor;
     // Item/control text bold flag
