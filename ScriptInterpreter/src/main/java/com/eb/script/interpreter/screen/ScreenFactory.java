@@ -6,6 +6,11 @@ import com.eb.script.file.FileData;
 import com.eb.script.interpreter.InterpreterContext;
 import com.eb.script.interpreter.InterpreterError;
 import com.eb.script.interpreter.screen.AreaDefinition.AreaType;
+import com.eb.script.interpreter.screen.data.DataBindingManager;
+import com.eb.script.interpreter.screen.data.VarRefResolver;
+import com.eb.script.interpreter.screen.display.ControlListenerFactory;
+import com.eb.script.interpreter.screen.display.ControlUpdater;
+import com.eb.script.interpreter.screen.display.DisplayValidator;
 import com.eb.script.json.Json;
 import com.eb.script.json.JsonSchema;
 import com.eb.script.json.JsonValidate;
@@ -2130,474 +2135,90 @@ public class ScreenFactory {
      * @param varName The variable name
      * @param screenVars The map containing screen variables
      * @param metadata The DisplayItem metadata for the control
+     * @deprecated Use DataBindingManager.setupBinding() instead
      */
     private static void setupVariableBinding(Node control, String varName,
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
             java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
             DisplayItem metadata) {
-        if (control == null || varName == null || screenVars == null) {
-            return;
-        }
-
-        // Initialize control with current variable value
-        // Handle complex varRef expressions like "clients[0].clientName"
-        Object currentValue = resolveVarRefValue(varName, screenVars);
-        updateControlFromValue(control, currentValue, metadata);
-
-        // Set up listener on the control to update the variable when control changes
-        addControlListener(control, varName, screenVars, varTypes, metadata);
-
-        // Store references for potential future use
-        control.getProperties().put("varName", varName);
-        control.getProperties().put("screenVars", screenVars);
-        control.getProperties().put("varTypes", varTypes);
-        control.getProperties().put("metadata", metadata);
+        // Delegate to DataBindingManager in the data layer
+        DataBindingManager.setupBinding(control, varName, screenVars, varTypes, metadata);
     }
 
     /**
      * Resolves a varRef value, handling both simple variable names and complex
      * expressions with array element access like "clients[0].clientName".
+     * @deprecated Use VarRefResolver.resolveVarRefValue() instead
      */
     private static Object resolveVarRefValue(String varRef, 
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
-        if (varRef == null || screenVars == null) {
-            return null;
-        }
-        
-        // Check if this is a simple variable name (no array access or property access)
-        if (!varRef.contains("[") && !varRef.contains(".")) {
-            return screenVars.get(varRef.toLowerCase());
-        }
-        
-        // Handle complex expressions like "clients[0].clientName"
-        // Extract the base variable name (everything before the first '[' or '.')
-        int bracketPos = varRef.indexOf('[');
-        int dotPos = varRef.indexOf('.');
-        int splitPos;
-        
-        if (bracketPos >= 0 && dotPos >= 0) {
-            splitPos = Math.min(bracketPos, dotPos);
-        } else if (bracketPos >= 0) {
-            splitPos = bracketPos;
-        } else if (dotPos >= 0) {
-            splitPos = dotPos;
-        } else {
-            // No complex access, just a simple variable
-            return screenVars.get(varRef.toLowerCase());
-        }
-        
-        String baseVarName = varRef.substring(0, splitPos).toLowerCase();
-        String path = varRef.substring(splitPos);
-        
-        // Get the base variable from screenVars
-        Object baseValue = screenVars.get(baseVarName);
-        if (baseValue == null) {
-            return null;
-        }
-        
-        // Use case-insensitive navigation through the path
-        return navigatePathCaseInsensitive(baseValue, path);
+        // Delegate to VarRefResolver in the data layer
+        return VarRefResolver.resolveVarRefValue(varRef, screenVars);
     }
 
     /**
      * Navigates a path like "[0].clientName" through an object/array structure
      * with case-insensitive property name matching.
+     * @deprecated Use VarRefResolver.navigatePathCaseInsensitive() instead
      */
     private static Object navigatePathCaseInsensitive(Object root, String path) {
-        if (path == null || path.isEmpty() || root == null) {
-            return root;
-        }
-        
-        Object current = root;
-        int i = 0;
-        int n = path.length();
-        
-        while (i < n && current != null) {
-            char c = path.charAt(i);
-            
-            if (c == '.') {
-                i++;
-                continue;
-            }
-            
-            if (c == '[') {
-                // Array index access
-                i++; // skip '['
-                int start = i;
-                while (i < n && path.charAt(i) != ']') {
-                    i++;
-                }
-                String indexStr = path.substring(start, i);
-                i++; // skip ']'
-                
-                try {
-                    int index = Integer.parseInt(indexStr);
-                    if (current instanceof com.eb.script.arrays.ArrayDef) {
-                        com.eb.script.arrays.ArrayDef<?, ?> arr = (com.eb.script.arrays.ArrayDef<?, ?>) current;
-                        if (index >= 0 && index < arr.size()) {
-                            current = arr.get(index);
-                        } else {
-                            return null;
-                        }
-                    } else if (current instanceof java.util.List) {
-                        java.util.List<?> list = (java.util.List<?>) current;
-                        if (index >= 0 && index < list.size()) {
-                            current = list.get(index);
-                        } else {
-                            return null;
-                        }
-                    } else {
-                        return null;
-                    }
-                } catch (NumberFormatException e) {
-                    return null;
-                }
-            } else {
-                // Property name
-                int start = i;
-                while (i < n && path.charAt(i) != '.' && path.charAt(i) != '[') {
-                    i++;
-                }
-                String propName = path.substring(start, i);
-                
-                if (current instanceof java.util.Map) {
-                    @SuppressWarnings("unchecked")
-                    java.util.Map<String, Object> map = (java.util.Map<String, Object>) current;
-                    // Case-insensitive key lookup
-                    current = getMapValueCaseInsensitive(map, propName);
-                } else {
-                    return null;
-                }
-            }
-        }
-        
-        return current;
+        // Delegate to VarRefResolver in the data layer
+        return VarRefResolver.navigatePathCaseInsensitive(root, path);
     }
 
     /**
      * Gets a value from a map using case-insensitive key matching.
+     * @deprecated Use VarRefResolver.getMapValueCaseInsensitive() instead
      */
     private static Object getMapValueCaseInsensitive(java.util.Map<String, Object> map, String key) {
-        if (map == null || key == null) {
-            return null;
-        }
-        
-        // First try exact match
-        if (map.containsKey(key)) {
-            return map.get(key);
-        }
-        
-        // Try case-insensitive match
-        String lowerKey = key.toLowerCase();
-        for (java.util.Map.Entry<String, Object> entry : map.entrySet()) {
-            if (entry.getKey() != null && entry.getKey().toLowerCase().equals(lowerKey)) {
-                return entry.getValue();
-            }
-        }
-        
-        return null;
+        return VarRefResolver.getMapValueCaseInsensitive(map, key);
     }
 
     /**
      * Sets a value for a varRef, handling both simple variable names and complex
      * expressions with array element access like "clients[0].clientName".
+     * @deprecated Use VarRefResolver.setVarRefValue() instead
      */
     private static void setVarRefValue(String varRef, Object value,
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
-        if (varRef == null || screenVars == null) {
-            return;
-        }
-        
-        // Check if this is a simple variable name (no array access or property access)
-        if (!varRef.contains("[") && !varRef.contains(".")) {
-            screenVars.put(varRef.toLowerCase(), value);
-            return;
-        }
-        
-        // Handle complex expressions like "clients[0].clientName"
-        // Extract the base variable name (everything before the first '[' or '.')
-        int bracketPos = varRef.indexOf('[');
-        int dotPos = varRef.indexOf('.');
-        int splitPos;
-        
-        if (bracketPos >= 0 && dotPos >= 0) {
-            splitPos = Math.min(bracketPos, dotPos);
-        } else if (bracketPos >= 0) {
-            splitPos = bracketPos;
-        } else if (dotPos >= 0) {
-            splitPos = dotPos;
-        } else {
-            // No complex access, just a simple variable
-            screenVars.put(varRef.toLowerCase(), value);
-            return;
-        }
-        
-        String baseVarName = varRef.substring(0, splitPos).toLowerCase();
-        String path = varRef.substring(splitPos);
-        
-        // Get the base variable from screenVars
-        Object baseValue = screenVars.get(baseVarName);
-        if (baseValue == null) {
-            return;
-        }
-        
-        // Use case-insensitive navigation to set the value
-        setPathValueCaseInsensitive(baseValue, path, value);
+        // Delegate to VarRefResolver in the data layer
+        VarRefResolver.setVarRefValue(varRef, value, screenVars);
     }
 
     /**
      * Sets a value at a path like "[0].clientName" through an object/array structure
      * with case-insensitive property name matching.
+     * @deprecated Use VarRefResolver.setPathValueCaseInsensitive() instead
      */
     private static void setPathValueCaseInsensitive(Object root, String path, Object value) {
-        if (path == null || path.isEmpty() || root == null) {
-            return;
-        }
-        
-        Object current = root;
-        int i = 0;
-        int n = path.length();
-        String lastPropName = null;
-        Object lastContainer = null;
-        int lastArrayIndex = -1;
-        
-        while (i < n && current != null) {
-            char c = path.charAt(i);
-            
-            if (c == '.') {
-                i++;
-                continue;
-            }
-            
-            if (c == '[') {
-                // Array index access
-                i++; // skip '['
-                int start = i;
-                while (i < n && path.charAt(i) != ']') {
-                    i++;
-                }
-                String indexStr = path.substring(start, i);
-                i++; // skip ']'
-                
-                try {
-                    int index = Integer.parseInt(indexStr);
-                    
-                    // Check if this is the last segment
-                    if (i >= n || (path.charAt(i) == '.' && isLastPropertySegment(path, i + 1))) {
-                        // This might be the parent - save for potential update
-                        lastContainer = current;
-                        lastArrayIndex = index;
-                        lastPropName = null;
-                    }
-                    
-                    if (current instanceof com.eb.script.arrays.ArrayDef) {
-                        com.eb.script.arrays.ArrayDef<?, ?> arr = (com.eb.script.arrays.ArrayDef<?, ?>) current;
-                        if (index >= 0 && index < arr.size()) {
-                            current = arr.get(index);
-                        } else {
-                            return;
-                        }
-                    } else if (current instanceof java.util.List) {
-                        java.util.List<?> list = (java.util.List<?>) current;
-                        if (index >= 0 && index < list.size()) {
-                            current = list.get(index);
-                        } else {
-                            return;
-                        }
-                    } else {
-                        return;
-                    }
-                } catch (NumberFormatException e) {
-                    return;
-                }
-            } else {
-                // Property name
-                int start = i;
-                while (i < n && path.charAt(i) != '.' && path.charAt(i) != '[') {
-                    i++;
-                }
-                String propName = path.substring(start, i);
-                
-                // Check if this is the last segment
-                if (i >= n) {
-                    // This is the final property to set
-                    if (current instanceof java.util.Map) {
-                        @SuppressWarnings("unchecked")
-                        java.util.Map<String, Object> map = (java.util.Map<String, Object>) current;
-                        setMapValueCaseInsensitive(map, propName, value);
-                    }
-                    return;
-                }
-                
-                if (current instanceof java.util.Map) {
-                    @SuppressWarnings("unchecked")
-                    java.util.Map<String, Object> map = (java.util.Map<String, Object>) current;
-                    lastContainer = map;
-                    lastPropName = propName;
-                    lastArrayIndex = -1;
-                    current = getMapValueCaseInsensitive(map, propName);
-                } else {
-                    return;
-                }
-            }
-        }
+        // Delegate to VarRefResolver in the data layer
+        VarRefResolver.setPathValueCaseInsensitive(root, path, value);
     }
 
     /**
      * Checks if the remaining path is just a single property name (the last segment).
+     * @deprecated Use VarRefResolver.isLastPropertySegment() instead
      */
     private static boolean isLastPropertySegment(String path, int start) {
-        int n = path.length();
-        for (int i = start; i < n; i++) {
-            char c = path.charAt(i);
-            if (c == '.' || c == '[') {
-                return false;
-            }
-        }
-        return true;
+        return VarRefResolver.isLastPropertySegment(path, start);
     }
 
     /**
      * Sets a value in a map using case-insensitive key matching.
      * If key exists (any case), updates that key. Otherwise, adds with the provided key.
+     * @deprecated Use VarRefResolver.setMapValueCaseInsensitive() instead
      */
     private static void setMapValueCaseInsensitive(java.util.Map<String, Object> map, String key, Object value) {
-        if (map == null || key == null) {
-            return;
-        }
-        
-        // First try exact match
-        if (map.containsKey(key)) {
-            map.put(key, value);
-            return;
-        }
-        
-        // Try case-insensitive match
-        String lowerKey = key.toLowerCase();
-        for (String existingKey : map.keySet()) {
-            if (existingKey != null && existingKey.toLowerCase().equals(lowerKey)) {
-                map.put(existingKey, value);
-                return;
-            }
-        }
-        
-        // No existing key found, add with provided key
-        map.put(key, value);
+        VarRefResolver.setMapValueCaseInsensitive(map, key, value);
     }
 
     /**
      * Updates a control's value based on the variable value.
+     * @deprecated Use ControlUpdater.updateControlFromValue() instead
      */
     private static void updateControlFromValue(Node control, Object value, DisplayItem metadata) {
-        // Handle HBox containing slider (when showSliderValue is true)
-        if (control instanceof javafx.scene.layout.HBox) {
-            javafx.scene.layout.HBox hbox = (javafx.scene.layout.HBox) control;
-            // Check if this HBox contains a Slider as its first child
-            if (!hbox.getChildren().isEmpty() && hbox.getChildren().get(0) instanceof javafx.scene.control.Slider) {
-                javafx.scene.control.Slider slider = (javafx.scene.control.Slider) hbox.getChildren().get(0);
-                if (value instanceof Number) {
-                    slider.setValue(((Number) value).doubleValue());
-                    // The value label will be updated automatically via the listener in AreaItemFactory
-                }
-                return;
-            }
-        }
-        
-        if (control instanceof javafx.scene.control.TextField) {
-            ((javafx.scene.control.TextField) control).setText(value != null ? String.valueOf(value) : "");
-        } else if (control instanceof javafx.scene.control.TextArea) {
-            ((javafx.scene.control.TextArea) control).setText(value != null ? String.valueOf(value) : "");
-        } else if (control instanceof javafx.scene.control.CheckBox) {
-            ((javafx.scene.control.CheckBox) control).setSelected(value instanceof Boolean && (Boolean) value);
-        } else if (control instanceof javafx.scene.control.Slider) {
-            if (value instanceof Number) {
-                ((javafx.scene.control.Slider) control).setValue(((Number) value).doubleValue());
-            }
-        } else if (control instanceof javafx.scene.control.Spinner) {
-            if (value instanceof Number) {
-                @SuppressWarnings("unchecked")
-                javafx.scene.control.Spinner<Integer> spinner = (javafx.scene.control.Spinner<Integer>) control;
-                // Check if ValueFactory exists before trying to set value
-                if (spinner.getValueFactory() != null) {
-                    spinner.getValueFactory().setValue(((Number) value).intValue());
-                }
-            }
-        } else if (control instanceof javafx.scene.control.ComboBox) {
-            if (value != null) {
-                @SuppressWarnings("unchecked")
-                javafx.scene.control.ComboBox<String> comboBox = (javafx.scene.control.ComboBox<String>) control;
-                comboBox.setValue(String.valueOf(value));
-            }
-        } else if (control instanceof javafx.scene.control.ChoiceBox) {
-            if (value != null) {
-                @SuppressWarnings("unchecked")
-                javafx.scene.control.ChoiceBox<String> choiceBox = (javafx.scene.control.ChoiceBox<String>) control;
-                choiceBox.setValue(String.valueOf(value));
-            }
-        } else if (control instanceof javafx.scene.control.Label) {
-            ((javafx.scene.control.Label) control).setText(value != null ? String.valueOf(value) : "");
-        } else if (control instanceof javafx.scene.control.TableView) {
-            // Handle TableView - expecting value to be an array/list of Maps
-            @SuppressWarnings("unchecked")
-            javafx.scene.control.TableView<java.util.Map<String, Object>> tableView = 
-                (javafx.scene.control.TableView<java.util.Map<String, Object>>) control;
-            
-            // Clear existing items
-            tableView.getItems().clear();
-            
-            // Add new items if value is a collection
-            if (value instanceof java.util.List) {
-                @SuppressWarnings("unchecked")
-                java.util.List<?> list = (java.util.List<?>) value;
-                for (Object item : list) {
-                    if (item instanceof java.util.Map) {
-                        @SuppressWarnings("unchecked")
-                        java.util.Map<String, Object> mapItem = (java.util.Map<String, Object>) item;
-                        tableView.getItems().add(mapItem);
-                    }
-                }
-            } else if (value instanceof com.eb.script.arrays.ArrayDynamic) {
-                // Handle EBS array type
-                com.eb.script.arrays.ArrayDynamic array = (com.eb.script.arrays.ArrayDynamic) value;
-                for (Object item : array.getAll()) {
-                    if (item instanceof java.util.Map) {
-                        @SuppressWarnings("unchecked")
-                        java.util.Map<String, Object> mapItem = (java.util.Map<String, Object>) item;
-                        tableView.getItems().add(mapItem);
-                    }
-                }
-            }
-        } else if (control instanceof javafx.scene.control.ColorPicker) {
-            // Handle ColorPicker - value should be a color string (e.g., "#ff0000", "red", etc.)
-            if (value != null) {
-                String colorString = String.valueOf(value);
-                try {
-                    javafx.scene.paint.Color color = javafx.scene.paint.Color.web(colorString);
-                    ((javafx.scene.control.ColorPicker) control).setValue(color);
-                } catch (IllegalArgumentException e) {
-                    String varName = (String) control.getProperties().get("varName");
-                    System.err.println("Warning: Invalid color string '" + colorString + "' for ColorPicker" 
-                        + (varName != null ? " (variable: " + varName + ")" : ""));
-                }
-            }
-        } else if (control instanceof javafx.scene.control.DatePicker) {
-            // Handle DatePicker - value should be a LocalDate or date string
-            if (value != null) {
-                if (value instanceof java.time.LocalDate) {
-                    ((javafx.scene.control.DatePicker) control).setValue((java.time.LocalDate) value);
-                } else {
-                    // Try to parse as string
-                    try {
-                        java.time.LocalDate date = java.time.LocalDate.parse(String.valueOf(value));
-                        ((javafx.scene.control.DatePicker) control).setValue(date);
-                    } catch (java.time.format.DateTimeParseException e) {
-                        String varName = (String) control.getProperties().get("varName");
-                        System.err.println("Warning: Invalid date string '" + value + "' for DatePicker"
-                            + (varName != null ? " (variable: " + varName + ")" : ""));
-                    }
-                }
-            }
-        }
+        // Delegate to ControlUpdater in the display layer
+        ControlUpdater.updateControlFromValue(control, value, metadata);
     }
     
     /**
@@ -2610,56 +2231,12 @@ public class ScreenFactory {
      * @param onClickHandler Handler to execute the EBS code
      * @param screenName The screen name for context
      * @param context The interpreter context
+     * @deprecated Use DisplayValidator.setupValidationHandler() instead
      */
     private static void setupValidationHandler(Node control, String validateCode,
             OnClickHandler onClickHandler, String screenName, InterpreterContext context) {
-        if (control == null || validateCode == null || validateCode.isEmpty() || onClickHandler == null) {
-            return;
-        }
-        
-        // Define error style for validation failures
-        final String ERROR_STYLE = "-fx-border-color: red; -fx-border-width: 2;";
-        
-        // Create a validation runner that executes the code and applies styling
-        Runnable validator = () -> {
-            try {
-                // Execute the validation code
-                Object result = onClickHandler.executeWithReturn(validateCode);
-                
-                // Check if result is a boolean and apply styling
-                boolean isValid = true;
-                if (result instanceof Boolean) {
-                    isValid = (Boolean) result;
-                }
-                
-                // Apply or remove error styling based on validation result
-                if (!isValid) {
-                    // Mark control with error style
-                    String currentStyle = control.getStyle();
-                    if (currentStyle == null) {
-                        currentStyle = "";
-                    }
-                    if (!currentStyle.contains("-fx-border-color: red")) {
-                        control.setStyle(currentStyle + " " + ERROR_STYLE);
-                    }
-                } else {
-                    // Remove error styling by removing red border properties
-                    String currentStyle = control.getStyle();
-                    if (currentStyle != null) {
-                        // Remove error border styles
-                        currentStyle = currentStyle.replaceAll("-fx-border-color:\\s*red;?", "");
-                        currentStyle = currentStyle.replaceAll("-fx-border-width:\\s*2;?", "");
-                        control.setStyle(currentStyle.trim());
-                    }
-                }
-            } catch (Exception e) {
-                System.err.println("Error executing validation code: " + e.getMessage());
-                e.printStackTrace();
-            }
-        };
-        
-        // Attach validator to appropriate control events
-        attachValidationListener(control, validator);
+        // Delegate to DisplayValidator in the display layer
+        DisplayValidator.setupValidationHandler(control, validateCode, onClickHandler, screenName, context);
     }
     
     /**
@@ -2668,204 +2245,36 @@ public class ScreenFactory {
      * 
      * @param control The JavaFX control
      * @param validator The validation runnable to execute
+     * @deprecated Use DisplayValidator.attachValidationListener() instead
      */
     private static void attachValidationListener(Node control, Runnable validator) {
-        // Handle HBox containing slider (when showSliderValue is true)
-        if (control instanceof javafx.scene.layout.HBox) {
-            javafx.scene.layout.HBox hbox = (javafx.scene.layout.HBox) control;
-            if (!hbox.getChildren().isEmpty() && hbox.getChildren().get(0) instanceof javafx.scene.control.Slider) {
-                javafx.scene.control.Slider slider = (javafx.scene.control.Slider) hbox.getChildren().get(0);
-                slider.valueProperty().addListener((obs, oldVal, newVal) -> validator.run());
-                return;
-            }
-        }
-        
-        if (control instanceof javafx.scene.control.TextField) {
-            ((javafx.scene.control.TextField) control).textProperty().addListener((obs, oldVal, newVal) -> validator.run());
-        } else if (control instanceof javafx.scene.control.TextArea) {
-            ((javafx.scene.control.TextArea) control).textProperty().addListener((obs, oldVal, newVal) -> validator.run());
-        } else if (control instanceof javafx.scene.control.PasswordField) {
-            ((javafx.scene.control.PasswordField) control).textProperty().addListener((obs, oldVal, newVal) -> validator.run());
-        } else if (control instanceof javafx.scene.control.ComboBox) {
-            ((javafx.scene.control.ComboBox<?>) control).valueProperty().addListener((obs, oldVal, newVal) -> validator.run());
-        } else if (control instanceof javafx.scene.control.ChoiceBox) {
-            ((javafx.scene.control.ChoiceBox<?>) control).valueProperty().addListener((obs, oldVal, newVal) -> validator.run());
-        } else if (control instanceof javafx.scene.control.CheckBox) {
-            ((javafx.scene.control.CheckBox) control).selectedProperty().addListener((obs, oldVal, newVal) -> validator.run());
-        } else if (control instanceof javafx.scene.control.RadioButton) {
-            ((javafx.scene.control.RadioButton) control).selectedProperty().addListener((obs, oldVal, newVal) -> validator.run());
-        } else if (control instanceof javafx.scene.control.ToggleButton) {
-            ((javafx.scene.control.ToggleButton) control).selectedProperty().addListener((obs, oldVal, newVal) -> validator.run());
-        } else if (control instanceof javafx.scene.control.Spinner) {
-            ((javafx.scene.control.Spinner<?>) control).valueProperty().addListener((obs, oldVal, newVal) -> validator.run());
-        } else if (control instanceof javafx.scene.control.Slider) {
-            ((javafx.scene.control.Slider) control).valueProperty().addListener((obs, oldVal, newVal) -> validator.run());
-        } else if (control instanceof javafx.scene.control.DatePicker) {
-            ((javafx.scene.control.DatePicker) control).valueProperty().addListener((obs, oldVal, newVal) -> validator.run());
-        } else if (control instanceof javafx.scene.control.ColorPicker) {
-            ((javafx.scene.control.ColorPicker) control).valueProperty().addListener((obs, oldVal, newVal) -> validator.run());
-        }
+        // Delegate to DisplayValidator in the display layer
+        DisplayValidator.attachValidationListener(control, validator);
     }
 
     /**
      * Adds a listener to a control to update the variable when the control
      * changes.
+     * @deprecated Use ControlListenerFactory.addControlListener() instead
      */
     private static void addControlListener(Node control, String varName,
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
             java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
             DisplayItem metadata) {
-        // Handle HBox containing slider (when showSliderValue is true)
-        if (control instanceof javafx.scene.layout.HBox) {
-            javafx.scene.layout.HBox hbox = (javafx.scene.layout.HBox) control;
-            // Check if this HBox contains a Slider as its first child
-            if (!hbox.getChildren().isEmpty() && hbox.getChildren().get(0) instanceof javafx.scene.control.Slider) {
-                javafx.scene.control.Slider slider = (javafx.scene.control.Slider) hbox.getChildren().get(0);
-                slider.valueProperty().addListener((obs, oldVal, newVal) -> {
-                    setVarRefValue(varName, newVal.intValue(), screenVars);
-                });
-                return;
-            }
-        }
-        
-        if (control instanceof javafx.scene.control.TextField) {
-            javafx.scene.control.TextField textField = (javafx.scene.control.TextField) control;
-            textField.textProperty().addListener((obs, oldVal, newVal) -> {
-                // Apply case transformation if specified
-                String transformedValue = newVal;
-                if (metadata != null && metadata.caseFormat != null) {
-                    if ("upper".equals(metadata.caseFormat)) {
-                        transformedValue = newVal.toUpperCase();
-                    } else if ("lower".equals(metadata.caseFormat)) {
-                        transformedValue = newVal.toLowerCase();
-                    }
-                    // "mixed" or any other value means no transformation
-                    
-                    // Update the text field if transformation occurred
-                    if (!transformedValue.equals(newVal)) {
-                        // Save cursor position
-                        int caretPosition = textField.getCaretPosition();
-                        textField.setText(transformedValue);
-                        // Restore cursor position (adjust if text changed length)
-                        int newCaretPosition = Math.min(caretPosition, transformedValue.length());
-                        textField.positionCaret(newCaretPosition);
-                        return; // Listener will be called again with transformed value
-                    }
-                }
-                
-                // Convert the string value to the appropriate type if type info is available
-                Object convertedValue = transformedValue;
-                if (varTypes != null && varTypes.containsKey(varName)) {
-                    DataType type = varTypes.get(varName);
-                    try {
-                        convertedValue = type.convertValue(transformedValue);
-                    } catch (Exception e) {
-                        // If conversion fails, keep as string
-                        System.err.println("Warning: Could not convert '" + transformedValue + "' to " + type + " for variable '" + varName + "'");
-                    }
-                }
-                setVarRefValue(varName, convertedValue, screenVars);
-            });
-        } else if (control instanceof javafx.scene.control.TextArea) {
-            javafx.scene.control.TextArea textArea = (javafx.scene.control.TextArea) control;
-            textArea.textProperty().addListener((obs, oldVal, newVal) -> {
-                // Apply case transformation if specified
-                String transformedValue = newVal;
-                if (metadata != null && metadata.caseFormat != null) {
-                    if ("upper".equals(metadata.caseFormat)) {
-                        transformedValue = newVal.toUpperCase();
-                    } else if ("lower".equals(metadata.caseFormat)) {
-                        transformedValue = newVal.toLowerCase();
-                    }
-                    // "mixed" or any other value means no transformation
-                    
-                    // Update the text area if transformation occurred
-                    if (!transformedValue.equals(newVal)) {
-                        // Save cursor position
-                        int caretPosition = textArea.getCaretPosition();
-                        textArea.setText(transformedValue);
-                        // Restore cursor position (adjust if text changed length)
-                        int newCaretPosition = Math.min(caretPosition, transformedValue.length());
-                        textArea.positionCaret(newCaretPosition);
-                        return; // Listener will be called again with transformed value
-                    }
-                }
-                
-                setVarRefValue(varName, transformedValue, screenVars);
-            });
-        } else if (control instanceof javafx.scene.control.CheckBox) {
-            ((javafx.scene.control.CheckBox) control).selectedProperty().addListener((obs, oldVal, newVal) -> {
-                setVarRefValue(varName, newVal, screenVars);
-            });
-        } else if (control instanceof javafx.scene.control.Slider) {
-            ((javafx.scene.control.Slider) control).valueProperty().addListener((obs, oldVal, newVal) -> {
-                setVarRefValue(varName, newVal.intValue(), screenVars);
-            });
-        } else if (control instanceof javafx.scene.control.Spinner) {
-            @SuppressWarnings("unchecked")
-            javafx.scene.control.Spinner<Integer> spinner = (javafx.scene.control.Spinner<Integer>) control;
-            // Check if ValueFactory exists before adding listener
-            if (spinner.getValueFactory() != null) {
-                spinner.valueProperty().addListener((obs, oldVal, newVal) -> {
-                    if (newVal != null) {
-                        setVarRefValue(varName, newVal, screenVars);
-                    }
-                });
-            }
-        } else if (control instanceof javafx.scene.control.ComboBox) {
-            @SuppressWarnings("unchecked")
-            javafx.scene.control.ComboBox<String> comboBox = (javafx.scene.control.ComboBox<String>) control;
-            comboBox.valueProperty().addListener((obs, oldVal, newVal) -> {
-                setVarRefValue(varName, newVal, screenVars);
-            });
-        } else if (control instanceof javafx.scene.control.ChoiceBox) {
-            @SuppressWarnings("unchecked")
-            javafx.scene.control.ChoiceBox<String> choiceBox = (javafx.scene.control.ChoiceBox<String>) control;
-            choiceBox.valueProperty().addListener((obs, oldVal, newVal) -> {
-                setVarRefValue(varName, newVal, screenVars);
-            });
-        } else if (control instanceof javafx.scene.control.ColorPicker) {
-            javafx.scene.control.ColorPicker colorPicker = (javafx.scene.control.ColorPicker) control;
-            colorPicker.valueProperty().addListener((obs, oldVal, newVal) -> {
-                // Convert Color to web string format (e.g., "#ff0000")
-                if (newVal != null) {
-                    String colorString = String.format("#%02x%02x%02x",
-                        (int) (newVal.getRed() * 255),
-                        (int) (newVal.getGreen() * 255),
-                        (int) (newVal.getBlue() * 255));
-                    setVarRefValue(varName, colorString, screenVars);
-                } else {
-                    setVarRefValue(varName, null, screenVars);
-                }
-            });
-        } else if (control instanceof javafx.scene.control.DatePicker) {
-            javafx.scene.control.DatePicker datePicker = (javafx.scene.control.DatePicker) control;
-            datePicker.valueProperty().addListener((obs, oldVal, newVal) -> {
-                setVarRefValue(varName, newVal, screenVars);
-            });
-        }
+        // Delegate to ControlListenerFactory in the display layer
+        ControlListenerFactory.addControlListener(control, varName, screenVars, varTypes, metadata);
     }
     
     /**
      * Refreshes all bound controls by updating their values from the screenVars
      * map. This is called after onClick handlers execute to reflect variable
      * changes in the UI.
+     * @deprecated Use DataBindingManager.refreshBoundControls() instead
      */
     private static void refreshBoundControls(List<Node> boundControls,
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
-        if (boundControls == null || screenVars == null) {
-            return;
-        }
-
-        for (Node control : boundControls) {
-            String varName = (String) control.getProperties().get("varName");
-            DisplayItem metadata = (DisplayItem) control.getProperties().get("metadata");
-
-            if (varName != null) {
-                Object currentValue = screenVars.get(varName);
-                updateControlFromValue(control, currentValue, metadata);
-            }
-        }
+        // Delegate to DataBindingManager in the data layer
+        DataBindingManager.refreshBoundControls(boundControls, screenVars);
     }
     
     /**
