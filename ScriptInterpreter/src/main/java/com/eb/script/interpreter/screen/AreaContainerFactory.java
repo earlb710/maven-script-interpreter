@@ -137,19 +137,19 @@ public class AreaContainerFactory {
 
         // Apply custom style from AreaDefinition (overrides default)
         if (areaDef.style != null && !areaDef.style.isEmpty()) {
-            container.setStyle(container.getStyle() + "; " + areaDef.style);
+            container.setStyle(appendStyle(container.getStyle(), areaDef.style));
         }
         
         // Apply areaBackground if specified
         if (areaDef.areaBackground != null && !areaDef.areaBackground.isEmpty()) {
-            container.setStyle(container.getStyle() + "; -fx-background-color: " + areaDef.areaBackground);
+            container.setStyle(appendStyle(container.getStyle(), "-fx-background-color: " + areaDef.areaBackground));
         }
         
         // Apply groupBorder styling if specified
         if (areaDef.groupBorder != null && !areaDef.groupBorder.isEmpty() && !areaDef.groupBorder.equalsIgnoreCase("none")) {
             String borderStyle = createBorderStyle(areaDef.groupBorder, areaDef.groupBorderColor, areaDef.groupBorderWidth, areaDef.groupBorderInsets, areaDef.groupBorderRadius);
             if (borderStyle != null && !borderStyle.isEmpty()) {
-                container.setStyle(container.getStyle() + "; " + borderStyle);
+                container.setStyle(appendStyle(container.getStyle(), borderStyle));
             }
             
             // Add group label if specified
@@ -385,13 +385,13 @@ public class AreaContainerFactory {
         currentStyle = currentStyle.replaceAll("(?i)-fx-padding\\s*:\\s*[^;]+;?", "");
         
         // Apply new padding via style to ensure it takes effect
-        String paddingStyle = String.format("-fx-padding: %.0fpx %.0fpx %.0fpx %.0fpx;",
+        String paddingStyle = String.format("-fx-padding: %.0fpx %.0fpx %.0fpx %.0fpx",
             topPadding,
             currentPadding.getRight(),
             bottomPadding,
             currentPadding.getLeft());
         
-        container.setStyle(currentStyle + " " + paddingStyle);
+        container.setStyle(appendStyle(currentStyle, paddingStyle));
     }
     
     /**
@@ -596,5 +596,43 @@ public class AreaContainerFactory {
                     return Pos.CENTER;
             }
         }
+    }
+    
+    /**
+     * Helper method to safely append CSS style strings.
+     * Handles null values and avoids double semicolons.
+     * @param currentStyle The current style string (may be null or empty)
+     * @param newStyle The new style to append (may be null or empty)
+     * @return The combined style string with proper semicolon separation
+     */
+    private static String appendStyle(String currentStyle, String newStyle) {
+        if (newStyle == null || newStyle.trim().isEmpty()) {
+            return currentStyle == null ? "" : currentStyle;
+        }
+        if (currentStyle == null || currentStyle.trim().isEmpty()) {
+            return newStyle;
+        }
+        // Clean up both strings - remove trailing/leading semicolons and whitespace
+        String cleanCurrent = currentStyle.trim();
+        String cleanNew = newStyle.trim();
+        
+        // Remove trailing semicolons from current
+        while (cleanCurrent.endsWith(";")) {
+            cleanCurrent = cleanCurrent.substring(0, cleanCurrent.length() - 1).trim();
+        }
+        
+        // Remove leading semicolons from new
+        while (cleanNew.startsWith(";")) {
+            cleanNew = cleanNew.substring(1).trim();
+        }
+        
+        if (cleanCurrent.isEmpty()) {
+            return cleanNew;
+        }
+        if (cleanNew.isEmpty()) {
+            return cleanCurrent;
+        }
+        
+        return cleanCurrent + "; " + cleanNew;
     }
 }
