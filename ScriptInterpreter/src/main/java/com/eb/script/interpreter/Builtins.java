@@ -722,7 +722,7 @@ public final class Builtins {
         ));
 
         addBuiltin(info(
-                "system.alertDialog", DataType.BOOL, // returns true when acknowledged
+                "system.alertDialog", null, // returns nothing (void) when acknowledged
                 newParam("message", DataType.STRING, true),     // required: alert message
                 newParam("title", DataType.STRING, false),      // optional: dialog title (defaults to "Alert")
                 newParam("alertType", DataType.STRING, false)   // optional: info, warning, error (defaults to info)
