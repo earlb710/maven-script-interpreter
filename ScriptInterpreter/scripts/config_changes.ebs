@@ -163,8 +163,8 @@ print "Building color editor screen configuration...";
 print "Creating color editor screen with colors from console.cfg...";
 screen colorEditorScreen = {
     "title": "Console Configuration Color Editor",
-    "width": 1000,
-    "height": 650,
+    "width": 1150,
+    "height": 550,
     "maximize": false,
     "vars": [
         {
@@ -484,7 +484,7 @@ screen colorEditorScreen = {
                         ]
                     },
                     {
-                        "name": "rightColumn",
+                        "name": "middleColumn",
                         "type": "vbox",
                         "style": "-fx-spacing: 10;",
                         "areas": [
@@ -511,7 +511,14 @@ screen colorEditorScreen = {
                                     {"name": "sql_item", "varref": "sql"},
                                     {"name": "custom_item", "varref": "custom"}
                                 ]
-                            },
+                            }
+                        ]
+                    },
+                    {
+                        "name": "rightColumn",
+                        "type": "vbox",
+                        "style": "-fx-spacing: 10;",
+                        "areas": [
                             {
                                 "name": "tabColorsArea",
                                 "type": "vbox",
