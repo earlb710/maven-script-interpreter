@@ -28,6 +28,10 @@ public enum EbsTokenType implements LexerToken {
     FOR(PrintStyle.KEYWORD, Category.KEYWORD, "for"),
     FOREACH(PrintStyle.KEYWORD, Category.KEYWORD, "foreach"), IN(PrintStyle.KEYWORD, Category.KEYWORD, "in"),
     WHILE(PrintStyle.KEYWORD, Category.KEYWORD, "while"), DO(PrintStyle.KEYWORD, Category.KEYWORD, "do"), BREAK(PrintStyle.KEYWORD, Category.KEYWORD, "break", "exit"), CONTINUE(PrintStyle.KEYWORD, Category.KEYWORD, "continue"),
+    // Exception handling
+    TRY(PrintStyle.KEYWORD, Category.KEYWORD, "try"),
+    EXCEPTIONS(PrintStyle.KEYWORD, Category.KEYWORD, "exceptions"),
+    WHEN(PrintStyle.KEYWORD, Category.KEYWORD, "when"),
     // Comments
     COMMENT(PrintStyle.COMMENT, "//"),
     // data types

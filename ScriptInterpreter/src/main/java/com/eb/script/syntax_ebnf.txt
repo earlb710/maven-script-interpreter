@@ -8,6 +8,7 @@ LEXICAL
 keywords   = "var" | "print" | "call" | "return" | "if" | "then" | "else" | "while" | "do" | "break" | "exit" | "continue" 
            | "null" | "true" | "false" 
            | "import" | "foreach" | "in"
+           | "try" | "exceptions" | "when"
            | "connect" | "use" | "cursor" | "open" | "close" | "connection"
            | "select" | "from" | "where" | "order" | "by" | "group" | "having"
            | "screen" | "show" | "hide"
@@ -32,6 +33,7 @@ statement    = varDecl
              | doWhileStmt
              | breakStmt
              | continueStmt
+             | tryStmt
              | block
              | namedBlock                  (*  name { ... }                     *)
              | namedBlockWithReturn        (*  name return Type { ... }         *)
@@ -82,6 +84,51 @@ elsePart     = "else" ( ifStmt | block | statement ) ;
 whileStmt    = "while" ( "(" expression ")" | expression ["then"] ) block ;
 
 doWhileStmt  = "do" block "while" "(" expression ")" ";" ;
+
+EXCEPTION HANDLING
+------------------
+tryStmt      = "try" block "exceptions" "{" exceptionHandler+ "}" ;
+exceptionHandler
+             = "when" errorType [ "(" identifier ")" ] block ;
+
+(* 
+   Error types that can be caught:
+   - ANY_ERROR      : Catches any error (catch-all handler, should be last)
+   - IO_ERROR       : File I/O operations, streams, paths
+   - DB_ERROR       : Database connection and query errors
+   - TYPE_ERROR     : Type conversion and casting errors
+   - NULL_ERROR     : Null pointer or null value errors
+   - INDEX_ERROR    : Array index out of bounds errors
+   - MATH_ERROR     : Division by zero, arithmetic errors
+   - PARSE_ERROR    : JSON parsing, date parsing errors
+   - NETWORK_ERROR  : HTTP and network connection errors
+   - NOT_FOUND_ERROR: Variable or function not found errors
+   - ACCESS_ERROR   : Permission or access denied errors
+   - VALIDATION_ERROR: Validation errors
+   
+   Examples:
+   
+   // Simple exception handling
+   try {
+       var result = 10 / 0;  // Will throw MATH_ERROR
+   } exceptions {
+       when MATH_ERROR {
+           print "Cannot divide by zero!";
+       }
+       when ANY_ERROR {
+           print "An unexpected error occurred";
+       }
+   }
+   
+   // Exception handling with error message capture
+   try {
+       var data = #file.read("missing.txt");
+   } exceptions {
+       when IO_ERROR(msg) {
+           print "File error: " + msg;
+       }
+   }
+*)
 
 DECLARATIONS
 ------------

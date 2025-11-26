@@ -60,4 +60,6 @@ public interface StatementVisitor {
 
     void visitTypedefStatement(TypedefStatement stmt) throws InterpreterError;
 
+    void visitTryStatement(TryStatement stmt) throws InterpreterError;
+
 }

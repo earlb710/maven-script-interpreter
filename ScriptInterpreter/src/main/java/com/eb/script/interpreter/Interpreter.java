@@ -54,6 +54,8 @@ import com.eb.script.interpreter.statement.ScreenCloseStatement;
 import com.eb.script.interpreter.statement.ScreenSubmitStatement;
 import com.eb.script.interpreter.statement.ImportStatement;
 import com.eb.script.interpreter.statement.TypedefStatement;
+import com.eb.script.interpreter.statement.TryStatement;
+import com.eb.script.interpreter.statement.ExceptionHandler;
 import com.eb.script.token.ebs.EbsTokenType;
 import com.eb.script.interpreter.statement.ConnectStatement;
 import com.eb.script.parser.Parser;
@@ -458,6 +460,91 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     @Override
     public void visitContinueStatement(ContinueStatement stmt) {
         throw ContinueSignal.INSTANCE;
+    }
+
+    @Override
+    public void visitTryStatement(TryStatement stmt) throws InterpreterError {
+        environment().pushCallStack(stmt.getLine(), StatementKind.TRY_CATCH, "Try");
+        try {
+            // Execute the try block
+            stmt.tryBlock.accept(this);
+        } catch (InterpreterError e) {
+            // An error occurred - try to find a matching exception handler
+            EbsScriptException scriptException;
+            if (e instanceof EbsScriptException) {
+                scriptException = (EbsScriptException) e;
+            } else {
+                scriptException = EbsScriptException.fromInterpreterError(stmt.getLine(), e);
+            }
+            
+            // Find a matching handler
+            ExceptionHandler matchingHandler = null;
+            for (ExceptionHandler handler : stmt.handlers) {
+                if (handler.canHandle(scriptException.getErrorType())) {
+                    matchingHandler = handler;
+                    break;
+                }
+            }
+            
+            if (matchingHandler == null) {
+                // No matching handler - re-throw the original exception
+                throw e;
+            }
+            
+            // Execute the handler block
+            environment().pushEnvironmentValues();
+            try {
+                // If the handler has an error variable, define it with the error message
+                if (matchingHandler.errorVarName != null) {
+                    environment().getEnvironmentValues().define(matchingHandler.errorVarName, scriptException.getMessage());
+                }
+                
+                // Execute the handler block
+                matchingHandler.handlerBlock.accept(this);
+            } finally {
+                environment().popEnvironmentValues();
+            }
+        } catch (RuntimeException e) {
+            // Handle Java runtime exceptions (like BreakSignal, ContinueSignal, ReturnSignal)
+            // These should not be caught by exception handlers - they are control flow signals
+            if (e instanceof BreakSignal || e instanceof ContinueSignal || e instanceof ReturnSignal) {
+                throw e;
+            }
+            
+            // For other runtime exceptions, try to find a matching handler
+            EbsScriptException scriptException = new EbsScriptException(stmt.getLine(), 
+                ErrorType.ANY_ERROR, "Runtime error: " + e.getMessage(), e);
+            
+            // Find a matching handler
+            ExceptionHandler matchingHandler = null;
+            for (ExceptionHandler handler : stmt.handlers) {
+                if (handler.canHandle(scriptException.getErrorType())) {
+                    matchingHandler = handler;
+                    break;
+                }
+            }
+            
+            if (matchingHandler == null) {
+                // No matching handler - wrap and re-throw
+                throw error(stmt.getLine(), "Unhandled runtime exception: " + e.getMessage());
+            }
+            
+            // Execute the handler block
+            environment().pushEnvironmentValues();
+            try {
+                // If the handler has an error variable, define it with the error message
+                if (matchingHandler.errorVarName != null) {
+                    environment().getEnvironmentValues().define(matchingHandler.errorVarName, scriptException.getMessage());
+                }
+                
+                // Execute the handler block
+                matchingHandler.handlerBlock.accept(this);
+            } finally {
+                environment().popEnvironmentValues();
+            }
+        } finally {
+            environment().popCallStack();
+        }
     }
 
     @Override
