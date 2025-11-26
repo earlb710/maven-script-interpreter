@@ -1,0 +1,306 @@
+// Test Script for Item and Area Properties
+// Description: Tests scr.getProperty/setProperty for items and scr.getAreaProperty/setAreaProperty for areas
+// This script verifies that properties can be read and updated at runtime
+
+print "===========================================";
+print "Test Script: Item and Area Properties";
+print "===========================================";
+print "";
+
+// Define a test screen with various items and areas
+screen testScreen = {
+    "title": "Property Test Screen",
+    "width": 600,
+    "height": 500,
+    "vars": [
+        {
+            "name": "testValue",
+            "type": "string",
+            "default": "Hello World"
+        },
+        {
+            "name": "counter",
+            "type": "int",
+            "default": 0
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "10",
+            "padding": "20",
+            "numberOfRecords": 2,
+            "recordRef": "testData",
+            "items": [
+                {
+                    "name": "textField1",
+                    "varRef": "testValue",
+                    "visible": true,
+                    "editable": true,
+                    "tooltip": "Original tooltip",
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Test Field:",
+                        "promptText": "Enter text"
+                    }
+                },
+                {
+                    "name": "counterField",
+                    "varRef": "counter",
+                    "disabled": false,
+                    "display": {
+                        "type": "spinner",
+                        "labelText": "Counter:",
+                        "min": 0,
+                        "max": 100
+                    }
+                }
+            ]
+        },
+        {
+            "name": "secondArea",
+            "type": "hbox",
+            "spacing": "5",
+            "padding": "10",
+            "style": "-fx-background-color: #f0f0f0;",
+            "items": [
+                {
+                    "name": "label1",
+                    "display": {
+                        "type": "label",
+                        "labelText": "Status: Ready"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+print "Screen defined successfully.";
+print "";
+
+// Show the screen first (required for properties to work)
+show screen testScreen;
+print "Screen displayed.";
+print "";
+
+// =============================================
+// TEST 1: ITEM PROPERTY TESTS
+// =============================================
+print "--------------------------------------------";
+print "TEST 1: Item Property Tests (scr.getProperty / scr.setProperty)";
+print "--------------------------------------------";
+print "";
+
+// Test visible property
+print "Test 1.1: visible property";
+var origVisible = #scr.getProperty("testScreen.textField1", "visible");
+print "  Original visible: " + origVisible;
+#scr.setProperty("testScreen.textField1", "visible", false);
+var newVisible = #scr.getProperty("testScreen.textField1", "visible");
+print "  After setting to false: " + newVisible;
+if (newVisible == false) {
+    print "  [PASS] visible property changed correctly";
+} else {
+    print "  [FAIL] visible property did not change";
+}
+// Reset
+#scr.setProperty("testScreen.textField1", "visible", true);
+print "";
+
+// Test editable property
+print "Test 1.2: editable property";
+var origEditable = #scr.getProperty("testScreen.textField1", "editable");
+print "  Original editable: " + origEditable;
+#scr.setProperty("testScreen.textField1", "editable", false);
+var newEditable = #scr.getProperty("testScreen.textField1", "editable");
+print "  After setting to false: " + newEditable;
+if (newEditable == false) {
+    print "  [PASS] editable property changed correctly";
+} else {
+    print "  [FAIL] editable property did not change";
+}
+// Reset
+#scr.setProperty("testScreen.textField1", "editable", true);
+print "";
+
+// Test disabled property
+print "Test 1.3: disabled property";
+var origDisabled = #scr.getProperty("testScreen.counterField", "disabled");
+print "  Original disabled: " + origDisabled;
+#scr.setProperty("testScreen.counterField", "disabled", true);
+var newDisabled = #scr.getProperty("testScreen.counterField", "disabled");
+print "  After setting to true: " + newDisabled;
+if (newDisabled == true) {
+    print "  [PASS] disabled property changed correctly";
+} else {
+    print "  [FAIL] disabled property did not change";
+}
+// Reset
+#scr.setProperty("testScreen.counterField", "disabled", false);
+print "";
+
+// Test tooltip property
+print "Test 1.4: tooltip property";
+var origTooltip = #scr.getProperty("testScreen.textField1", "tooltip");
+print "  Original tooltip: " + origTooltip;
+#scr.setProperty("testScreen.textField1", "tooltip", "New tooltip text");
+var newTooltip = #scr.getProperty("testScreen.textField1", "tooltip");
+print "  After setting new tooltip: " + newTooltip;
+if (newTooltip == "New tooltip text") {
+    print "  [PASS] tooltip property changed correctly";
+} else {
+    print "  [FAIL] tooltip property did not change";
+}
+print "";
+
+// Test textColor property
+print "Test 1.5: textColor property";
+#scr.setProperty("testScreen.textField1", "textColor", "#FF0000");
+var newTextColor = #scr.getProperty("testScreen.textField1", "textColor");
+print "  After setting to #FF0000: " + newTextColor;
+if (newTextColor == "#FF0000") {
+    print "  [PASS] textColor property changed correctly";
+} else {
+    print "  [FAIL] textColor property did not change";
+}
+print "";
+
+// Test backgroundColor property
+print "Test 1.6: backgroundColor property";
+#scr.setProperty("testScreen.textField1", "backgroundColor", "#FFFFCC");
+var newBgColor = #scr.getProperty("testScreen.textField1", "backgroundColor");
+print "  After setting to #FFFFCC: " + newBgColor;
+if (newBgColor == "#FFFFCC") {
+    print "  [PASS] backgroundColor property changed correctly";
+} else {
+    print "  [FAIL] backgroundColor property did not change";
+}
+print "";
+
+// =============================================
+// TEST 2: AREA PROPERTY TESTS
+// =============================================
+print "--------------------------------------------";
+print "TEST 2: Area Property Tests (scr.getAreaProperty / scr.setAreaProperty)";
+print "--------------------------------------------";
+print "";
+
+// Test spacing property
+print "Test 2.1: spacing property";
+var origSpacing = #scr.getAreaProperty("testScreen.mainArea", "spacing");
+print "  Original spacing: " + origSpacing;
+#scr.setAreaProperty("testScreen.mainArea", "spacing", "25");
+var newSpacing = #scr.getAreaProperty("testScreen.mainArea", "spacing");
+print "  After setting to 25: " + newSpacing;
+if (newSpacing == "25") {
+    print "  [PASS] spacing property changed correctly";
+} else {
+    print "  [FAIL] spacing property did not change";
+}
+print "";
+
+// Test padding property
+print "Test 2.2: padding property";
+var origPadding = #scr.getAreaProperty("testScreen.mainArea", "padding");
+print "  Original padding: " + origPadding;
+#scr.setAreaProperty("testScreen.mainArea", "padding", "30");
+var newPadding = #scr.getAreaProperty("testScreen.mainArea", "padding");
+print "  After setting to 30: " + newPadding;
+if (newPadding == "30") {
+    print "  [PASS] padding property changed correctly";
+} else {
+    print "  [FAIL] padding property did not change";
+}
+print "";
+
+// Test numberOfRecords property
+print "Test 2.3: numberOfRecords property";
+var origNumRecords = #scr.getAreaProperty("testScreen.mainArea", "numberOfRecords");
+print "  Original numberOfRecords: " + origNumRecords;
+#scr.setAreaProperty("testScreen.mainArea", "numberOfRecords", 5);
+var newNumRecords = #scr.getAreaProperty("testScreen.mainArea", "numberOfRecords");
+print "  After setting to 5: " + newNumRecords;
+if (newNumRecords == 5) {
+    print "  [PASS] numberOfRecords property changed correctly";
+} else {
+    print "  [FAIL] numberOfRecords property did not change";
+}
+print "";
+
+// Test recordRef property
+print "Test 2.4: recordRef property";
+var origRecordRef = #scr.getAreaProperty("testScreen.mainArea", "recordRef");
+print "  Original recordRef: " + origRecordRef;
+#scr.setAreaProperty("testScreen.mainArea", "recordRef", "newDataRef");
+var newRecordRef = #scr.getAreaProperty("testScreen.mainArea", "recordRef");
+print "  After setting to newDataRef: " + newRecordRef;
+if (newRecordRef == "newDataRef") {
+    print "  [PASS] recordRef property changed correctly";
+} else {
+    print "  [FAIL] recordRef property did not change";
+}
+print "";
+
+// Test style property
+print "Test 2.5: style property";
+var origStyle = #scr.getAreaProperty("testScreen.secondArea", "style");
+print "  Original style: " + origStyle;
+#scr.setAreaProperty("testScreen.secondArea", "style", "-fx-background-color: #e0e0ff;");
+var newStyle = #scr.getAreaProperty("testScreen.secondArea", "style");
+print "  After setting new style: " + newStyle;
+if (newStyle == "-fx-background-color: #e0e0ff;") {
+    print "  [PASS] style property changed correctly";
+} else {
+    print "  [FAIL] style property did not change";
+}
+print "";
+
+// Test title property
+print "Test 2.6: title property";
+#scr.setAreaProperty("testScreen.mainArea", "title", "New Section Title");
+var newTitle = #scr.getAreaProperty("testScreen.mainArea", "title");
+print "  After setting title: " + newTitle;
+if (newTitle == "New Section Title") {
+    print "  [PASS] title property changed correctly";
+} else {
+    print "  [FAIL] title property did not change";
+}
+print "";
+
+// Test type property (read)
+print "Test 2.7: type property (read)";
+var areaType = #scr.getAreaProperty("testScreen.mainArea", "type");
+print "  mainArea type: " + areaType;
+var area2Type = #scr.getAreaProperty("testScreen.secondArea", "type");
+print "  secondArea type: " + area2Type;
+if (areaType == "vbox" and area2Type == "hbox") {
+    print "  [PASS] type properties read correctly";
+} else {
+    print "  [FAIL] type properties not as expected";
+}
+print "";
+
+// Test name property (read)
+print "Test 2.8: name property (read)";
+var areaName = #scr.getAreaProperty("testScreen.mainArea", "name");
+print "  Area name: " + areaName;
+if (areaName == "mainArea") {
+    print "  [PASS] name property read correctly";
+} else {
+    print "  [FAIL] name property not as expected";
+}
+print "";
+
+// =============================================
+// SUMMARY
+// =============================================
+print "--------------------------------------------";
+print "TEST COMPLETE";
+print "--------------------------------------------";
+print "";
+print "All item and area property tests have been executed.";
+print "Check the output above for [PASS] and [FAIL] results.";
+print "";
+print "The screen remains open for visual inspection.";
