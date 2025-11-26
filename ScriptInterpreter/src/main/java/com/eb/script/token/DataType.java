@@ -21,6 +21,7 @@ public enum DataType {
     JSON(Object.class),
     ARRAY(Object[].class),
     RECORD(java.util.Map.class),
+    MAP(java.util.Map.class),
     ANY(Comparable.class);
 
     public final Class dataClass;
@@ -67,6 +68,9 @@ public enum DataType {
                 case RECORD -> {
                     return new Object[length];
                 }
+                case MAP -> {
+                    return new Object[length];
+                }
                 case ANY -> {
                     return new Comparable[length];
                 }
@@ -95,6 +99,10 @@ public enum DataType {
         }
         if (type == RECORD) {
             // Accept Map objects as records
+            return value instanceof java.util.Map;
+        }
+        if (type == MAP) {
+            // Accept Map objects as maps (key-value stores)
             return value instanceof java.util.Map;
         }
         // For other types, allow subclasses (e.g., HashMap instanceof Map)
@@ -192,8 +200,8 @@ public enum DataType {
                     }
                 }
             }
-            case RECORD -> {
-                // Accept Map objects as records
+            case RECORD, MAP -> {
+                // Accept Map objects as records/maps
                 // If given a JSON object string, parse it
                 if (value instanceof String s) {
                     String ts = s.trim();

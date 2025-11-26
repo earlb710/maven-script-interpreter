@@ -82,6 +82,8 @@ public class Util {
                     array.getDataType() == DataType.DATE;
                 case RECORD ->
                     array.getDataType() == DataType.RECORD;
+                case MAP ->
+                    array.getDataType() == DataType.MAP;
                 case JSON ->
                     true;
                 case ANY ->
@@ -107,6 +109,8 @@ public class Util {
                     value instanceof java.time.LocalDate || value instanceof java.time.LocalDateTime || value instanceof Date;
                 case JSON ->
                     value instanceof Map || value instanceof List || value instanceof ArrayDef;
+                case MAP ->
+                    value instanceof Map;
                 case ANY ->
                     true;
                 default ->
