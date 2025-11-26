@@ -40,28 +40,153 @@ This document analyzes classes in the Maven Script Interpreter that have grown t
 - Difficult to test individual components
 - Hard to maintain and extend
 
-**Recommended Refactoring: Extract Class / Strategy Pattern**
+**Recommended Refactoring: Data vs Display Separation**
+
+The core complexity in ScreenFactory stems from two intertwined concerns:
+
+1. **DATA Component** - Managing variable values, bindings, and synchronization
+2. **DISPLAY Component** - UI control creation, styling, and layout
+
+#### Proposed Data/Display Architecture:
 
 ```
-ScreenFactory.java (reduced to ~800 lines - orchestration only)
-├── ScreenBuilder.java (~400 lines)
-│   └── Creates and assembles screen components
-├── VariableBindingManager.java (~500 lines)
-│   └── Handles variable bindings and listeners
-├── ValidationManager.java (~300 lines)
-│   └── Schema validation and control validation
-├── ControlListenerFactory.java (~400 lines)
-│   └── Creates and attaches control listeners
-├── MultiRecordExpander.java (~200 lines)
-│   └── Handles multi-record item expansion
-└── ScreenDebugger.java (~200 lines)
-    └── Debug mode handling and logging
+ScreenFactory.java (reduced to ~600 lines - orchestration only)
+│
+├── DATA LAYER (new package: screen/data/)
+│   │
+│   ├── ScreenDataManager.java (~400 lines)
+│   │   └── Central coordinator for all data operations
+│   │   └── Methods:
+│   │       - initializeScreenData(screenVars, varTypes)
+│   │       - getVariableValue(varRef)
+│   │       - setVariableValue(varRef, value)
+│   │       - registerDataChangeListener(varRef, listener)
+│   │
+│   ├── VarRefResolver.java (~200 lines)
+│   │   └── Handles complex variable references like "clients[0].clientName"
+│   │   └── Methods: (extracted from ScreenFactory)
+│   │       - resolveVarRefValue(varRef, screenVars)
+│   │       - setVarRefValue(varRef, value, screenVars)
+│   │       - navigatePathCaseInsensitive(root, path)
+│   │       - setPathValueCaseInsensitive(root, path, value)
+│   │
+│   ├── DataBindingManager.java (~300 lines)
+│   │   └── Two-way binding between controls and variables
+│   │   └── Methods:
+│   │       - setupVariableBinding(control, varName, screenVars, varTypes, metadata)
+│   │       - addControlListener(control, varName, screenVars, varTypes, metadata)
+│   │       - refreshBoundControls(boundControls, screenVars)
+│   │
+│   └── DataValidator.java (~200 lines)
+│       └── Data-level validation (min/max, patterns, required)
+│       └── Methods:
+│           - validateValue(value, metadata)
+│           - checkConstraints(value, min, max, pattern)
+│
+├── DISPLAY LAYER (new package: screen/display/)
+│   │
+│   ├── ScreenDisplayManager.java (~400 lines)
+│   │   └── Central coordinator for all display operations
+│   │   └── Methods:
+│   │       - createScreenLayout(screenDef)
+│   │       - applyTheme(screen, theme)
+│   │       - refreshDisplay(screen)
+│   │
+│   ├── ControlFactory.java (~350 lines) 
+│   │   └── Creates JavaFX controls from DisplayItem metadata
+│   │   └── (Extends existing AreaItemFactory pattern)
+│   │   └── Methods:
+│   │       - createControl(displayItem)
+│   │       - updateControlFromValue(control, value, metadata)
+│   │       - createLabeledControl(labelText, alignment, control, ...)
+│   │
+│   ├── LayoutManager.java (~250 lines)
+│   │   └── Handles control positioning and layout properties
+│   │   └── Methods:
+│   │       - applyItemLayoutProperties(control, item)
+│   │       - addItemToContainer(container, control, item, areaType)
+│   │       - addChildAreaToContainer(container, childArea, ...)
+│   │       - parseSize(), parseInsets(), parseAlignment()
+│   │
+│   ├── StyleManager.java (~200 lines)
+│   │   └── CSS styling and visual appearance
+│   │   └── Methods:
+│   │       - applyStyling(control, metadata)
+│   │       - applyValidationStyle(control, isValid)
+│   │       - applyFocusStyle(control)
+│   │
+│   └── DisplayValidator.java (~200 lines)
+│       └── UI-level validation (onValidate handlers)
+│       └── Methods:
+│           - setupValidationHandler(control, validateCode, ...)
+│           - attachValidationListener(control, validator)
+│           - showValidationError(control, message)
+│
+└── SUPPORTING
+    │
+    ├── MultiRecordExpander.java (~200 lines)
+    │   └── Handles multi-record item expansion
+    │
+    └── ScreenDebugger.java (~200 lines)
+        └── Debug mode handling and logging
 ```
+
+#### Data vs Display: Method Distribution
+
+| Method | Current Location | Move To | Reason |
+|--------|------------------|---------|--------|
+| `resolveVarRefValue()` | ScreenFactory | VarRefResolver | Pure data navigation |
+| `setVarRefValue()` | ScreenFactory | VarRefResolver | Pure data manipulation |
+| `navigatePathCaseInsensitive()` | ScreenFactory | VarRefResolver | Path traversal logic |
+| `setPathValueCaseInsensitive()` | ScreenFactory | VarRefResolver | Path setting logic |
+| `setupVariableBinding()` | ScreenFactory | DataBindingManager | Data-to-UI binding |
+| `addControlListener()` | ScreenFactory | DataBindingManager | Control change handling |
+| `refreshBoundControls()` | ScreenFactory | DataBindingManager | Refresh bindings |
+| `updateControlFromValue()` | ScreenFactory | ControlFactory | UI update from data |
+| `createLabeledControl()` | ScreenFactory | ControlFactory | UI creation |
+| `applyItemLayoutProperties()` | ScreenFactory | LayoutManager | Layout logic |
+| `addItemToContainer()` | ScreenFactory | LayoutManager | Container management |
+| `parseSize()`, `parseInsets()` | ScreenFactory | LayoutManager | Layout utilities |
+| `setupValidationHandler()` | ScreenFactory | DisplayValidator | UI validation |
+| `attachValidationListener()` | ScreenFactory | DisplayValidator | UI validation |
+
+#### Key Design Principles:
+
+1. **Data layer is UI-agnostic**: VarRefResolver and DataBindingManager work with variable maps and don't import JavaFX classes directly
+
+2. **Display layer receives data**: ControlFactory receives values from DataBindingManager, never accesses screenVars directly
+
+3. **Clear interfaces between layers**:
+   ```java
+   // Data layer provides this interface to Display layer
+   public interface DataProvider {
+       Object getValue(String varRef);
+       void setValue(String varRef, Object value);
+       void addChangeListener(String varRef, Consumer<Object> listener);
+   }
+   
+   // Display layer provides this interface for refresh
+   public interface DisplayUpdater {
+       void updateControl(String varRef, Object newValue);
+       void showValidationError(String varRef, String message);
+   }
+   ```
+
+4. **Existing classes already demonstrate this pattern**:
+   - `Var.java` - Pure data model (value, originalValue, type, defaultValue)
+   - `DisplayItem.java` - Pure display metadata (labelText, style, itemType, options)
+   - **Keep them separate**: Merging would violate SRP and couple data storage to UI rendering. A variable's data (e.g., `value = 1500`) should be independent of how it's displayed (e.g., as a Slider with min=0, max=5000). This separation enables:
+     - Reusing the same data with different display formats
+     - Testing data logic without JavaFX dependencies
+     - Changing UI controls without modifying data structures
 
 **Key Methods to Extract:**
-- `setupVariableBinding()` → VariableBindingManager
-- `setupValidationHandler()`, `attachValidationListener()` → ValidationManager
-- `addControlListener()` → ControlListenerFactory
+- `setupVariableBinding()` → DataBindingManager
+- `resolveVarRefValue()`, `setVarRefValue()` → VarRefResolver
+- `setupValidationHandler()`, `attachValidationListener()` → DisplayValidator
+- `addControlListener()` → DataBindingManager
+- `updateControlFromValue()`, `createLabeledControl()` → ControlFactory
+- `applyItemLayoutProperties()`, `addItemToContainer()` → LayoutManager
 - `expandMultiRecordItems()`, `createExpandedItem()` → MultiRecordExpander
 - `logNodeDebug()`, `logSceneGraph()`, debug mode methods → ScreenDebugger
 
