@@ -1568,11 +1568,24 @@ public class BuiltinsScreen {
             }
             case "cssclass" -> {
                 if (value != null) {
-                    String cssClass = String.valueOf(value);
-                    // Clear existing classes and add the new one
-                    container.getStyleClass().clear();
-                    if (!cssClass.isEmpty()) {
-                        container.getStyleClass().add(cssClass);
+                    String newCssClass = String.valueOf(value);
+                    // Get the previous user-set CSS class from properties (if any)
+                    String previousCssClass = (String) container.getProperties().get("userCssClass");
+                    
+                    // Remove the previous user CSS class if it was set
+                    if (previousCssClass != null && !previousCssClass.isEmpty()) {
+                        container.getStyleClass().remove(previousCssClass);
+                    }
+                    
+                    // Add the new CSS class if not empty
+                    if (!newCssClass.isEmpty()) {
+                        if (!container.getStyleClass().contains(newCssClass)) {
+                            container.getStyleClass().add(newCssClass);
+                        }
+                        // Store the new class for future removal
+                        container.getProperties().put("userCssClass", newCssClass);
+                    } else {
+                        container.getProperties().remove("userCssClass");
                     }
                 }
             }
