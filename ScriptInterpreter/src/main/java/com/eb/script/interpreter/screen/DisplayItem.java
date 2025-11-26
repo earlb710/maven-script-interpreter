@@ -17,7 +17,7 @@ public class DisplayItem {
     // Whether the field is mandatory
     boolean mandatory = false;
     // Case handling: "upper", "lower", "title"
-    String caseFormat;
+    public String caseFormat;
     // Minimum value constraint
     Object min;
     // Maximum value constraint
