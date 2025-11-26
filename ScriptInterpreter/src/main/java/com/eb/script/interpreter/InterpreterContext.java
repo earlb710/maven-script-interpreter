@@ -72,6 +72,9 @@ public class InterpreterContext {
     // Track declared screen names to prevent overwrites (screenName -> source file/script name)
     private final Map<String, String> declaredScreens = new ConcurrentHashMap<>();
 
+    // Store area container nodes for runtime property updates (screenName.areaName -> Region node)
+    private final Map<String, javafx.scene.layout.Region> screenAreaContainers = new ConcurrentHashMap<>();
+
     private DbAdapter db = new OracleDbAdapter();
     private ScriptArea output;
     
@@ -656,6 +659,43 @@ public class InterpreterContext {
      */
     public Map<String, String> getDeclaredScreens() {
         return declaredScreens;
+    }
+
+    /**
+     * Get the map of screen area containers.
+     * The key is in the format "screenName.areaName" (lowercase).
+     * Used for runtime property updates of area containers.
+     *
+     * @return the screen area containers map
+     */
+    public Map<String, javafx.scene.layout.Region> getScreenAreaContainers() {
+        return screenAreaContainers;
+    }
+
+    /**
+     * Get a specific area container by screen name and area name.
+     *
+     * @param screenName the screen name
+     * @param areaName the area name
+     * @return the Region container for the area, or null if not found
+     */
+    public javafx.scene.layout.Region getAreaContainer(String screenName, String areaName) {
+        String key = screenName.toLowerCase() + "." + areaName.toLowerCase();
+        return screenAreaContainers.get(key);
+    }
+
+    /**
+     * Register an area container for later lookup.
+     *
+     * @param screenName the screen name
+     * @param areaName the area name
+     * @param container the Region container for the area
+     */
+    public void registerAreaContainer(String screenName, String areaName, javafx.scene.layout.Region container) {
+        if (screenName != null && areaName != null && container != null) {
+            String key = screenName.toLowerCase() + "." + areaName.toLowerCase();
+            screenAreaContainers.put(key, container);
+        }
     }
 
 }

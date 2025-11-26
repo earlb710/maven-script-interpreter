@@ -758,6 +758,14 @@ public class ScreenFactory {
         // Create the container using AreaContainerFactory
         Region container = AreaContainerFactory.createContainer(areaDef);
         
+        // Register area container for runtime property updates
+        if (context != null && areaDef.name != null && !areaDef.name.isEmpty()) {
+            // Set userData on the container for identification
+            container.setUserData("area:" + screenName + "." + areaDef.name);
+            // Register the container in context for later lookup by scr.setAreaProperty
+            context.registerAreaContainer(screenName, areaDef.name, container);
+        }
+        
         // Log debug information for this container if debug mode is enabled
         if (isDebugMode()) {
             StringBuilder contextBuilder = new StringBuilder();
