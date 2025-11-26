@@ -98,6 +98,34 @@ if findHighlightBackground == "" then {
     findHighlightBackground = "#ddb107";
 }
 
+// CSS default values (from console.css / ConsoleConfig.java)
+var defaultInfoColor: string = "#e6e6e6";
+var defaultCommentColor: string = "#ffffcc";
+var defaultErrorColor: string = "#ee0000";
+var defaultWarnColor: string = "#eeee00";
+var defaultOkColor: string = "#00ee00";
+var defaultCodeColor: string = "white";
+var defaultDatatypeColor: string = "#D070FF";
+var defaultDataColor: string = "pink";
+var defaultKeywordColor: string = "#00FFFF";
+var defaultBuiltinColor: string = "#99e0e0";
+var defaultLiteralColor: string = "blue";
+var defaultIdentifierColor: string = "white";
+var defaultSqlColor: string = "#00ee66";
+var defaultCustomColor: string = "#eeee90";
+var defaultBackgroundColor: string = "#000000";
+var defaultTextColor: string = "#e6e6e6";
+var defaultCaretColor: string = "white";
+var defaultLineCursorColor: string = "#22292a";
+var defaultLineNumbersColor: string = "#808080";
+var defaultConsoleBackgroundColor: string = "#1e1e1e";
+var defaultTabBackgroundColor: string = "#252525";
+var defaultTabLabelColor: string = "#cccccc";
+var defaultTabLabelChangedColor: string = "#ff6600";
+var defaultTabLabelBackgroundColor: string = "#333333";
+var defaultFindHighlightColor: string = "#000000";
+var defaultFindHighlightBackground: string = "#ddb107";
+
 // Display all available colors
 print "Available colors in console.cfg:";
 print "- info: " + infoColor;
@@ -529,7 +557,7 @@ screen colorEditorScreen = {
                 "type": "hbox",
                 "style": "-fx-spacing: 10; -fx-padding: 10; -fx-alignment: CENTER_RIGHT;",
                 "items": [
-                    {"name": "resetBtn", "type": "button", "labelText": "Reset", "style": "-fx-min-width: 80;", "onClick": "colorEditorScreen.info = $infoColor; colorEditorScreen.comment = $commentColor; colorEditorScreen.error = $errorColor; colorEditorScreen.warn = $warnColor; colorEditorScreen.ok = $okColor; colorEditorScreen.code = $codeColor; colorEditorScreen.datatype = $datatypeColor; colorEditorScreen.data = $dataColor; colorEditorScreen.keyword = $keywordColor; colorEditorScreen.builtin = $builtinColor; colorEditorScreen.literal = $literalColor; colorEditorScreen.identifier = $identifierColor; colorEditorScreen.sql = $sqlColor; colorEditorScreen.custom = $customColor; colorEditorScreen.background = $backgroundColor; colorEditorScreen.text = $textColor; colorEditorScreen.caret = $caretColor; colorEditorScreen.lineCursor = $lineCursorColor; colorEditorScreen.lineNumbers = $lineNumbersColor; colorEditorScreen.consoleBackground = $consoleBackgroundColor; colorEditorScreen.tabBackground = $tabBackgroundColor; colorEditorScreen.tabLabelColor = $tabLabelColor; colorEditorScreen.tabLabelChangedColor = $tabLabelChangedColor; colorEditorScreen.tabLabelBackground = $tabLabelBackgroundColor; colorEditorScreen.findHighlightColor = $findHighlightColor; colorEditorScreen.findHighlightBackground = $findHighlightBackground; call system.alertDialog(\"Colors reset to original values.\", \"Reset\", \"info\");"},
+                    {"name": "resetBtn", "type": "button", "labelText": "Reset", "style": "-fx-min-width: 80;", "onClick": "if colorEditorScreen.profile == \"default\" then { colorEditorScreen.info = $defaultInfoColor; colorEditorScreen.comment = $defaultCommentColor; colorEditorScreen.error = $defaultErrorColor; colorEditorScreen.warn = $defaultWarnColor; colorEditorScreen.ok = $defaultOkColor; colorEditorScreen.code = $defaultCodeColor; colorEditorScreen.datatype = $defaultDatatypeColor; colorEditorScreen.data = $defaultDataColor; colorEditorScreen.keyword = $defaultKeywordColor; colorEditorScreen.builtin = $defaultBuiltinColor; colorEditorScreen.literal = $defaultLiteralColor; colorEditorScreen.identifier = $defaultIdentifierColor; colorEditorScreen.sql = $defaultSqlColor; colorEditorScreen.custom = $defaultCustomColor; colorEditorScreen.background = $defaultBackgroundColor; colorEditorScreen.text = $defaultTextColor; colorEditorScreen.caret = $defaultCaretColor; colorEditorScreen.lineCursor = $defaultLineCursorColor; colorEditorScreen.lineNumbers = $defaultLineNumbersColor; colorEditorScreen.consoleBackground = $defaultConsoleBackgroundColor; colorEditorScreen.tabBackground = $defaultTabBackgroundColor; colorEditorScreen.tabLabelColor = $defaultTabLabelColor; colorEditorScreen.tabLabelChangedColor = $defaultTabLabelChangedColor; colorEditorScreen.tabLabelBackground = $defaultTabLabelBackgroundColor; colorEditorScreen.findHighlightColor = $defaultFindHighlightColor; colorEditorScreen.findHighlightBackground = $defaultFindHighlightBackground; call system.alertDialog(\"Colors reset to CSS default values.\", \"Reset\", \"info\"); } else { colorEditorScreen.info = $infoColor; colorEditorScreen.comment = $commentColor; colorEditorScreen.error = $errorColor; colorEditorScreen.warn = $warnColor; colorEditorScreen.ok = $okColor; colorEditorScreen.code = $codeColor; colorEditorScreen.datatype = $datatypeColor; colorEditorScreen.data = $dataColor; colorEditorScreen.keyword = $keywordColor; colorEditorScreen.builtin = $builtinColor; colorEditorScreen.literal = $literalColor; colorEditorScreen.identifier = $identifierColor; colorEditorScreen.sql = $sqlColor; colorEditorScreen.custom = $customColor; colorEditorScreen.background = $backgroundColor; colorEditorScreen.text = $textColor; colorEditorScreen.caret = $caretColor; colorEditorScreen.lineCursor = $lineCursorColor; colorEditorScreen.lineNumbers = $lineNumbersColor; colorEditorScreen.consoleBackground = $consoleBackgroundColor; colorEditorScreen.tabBackground = $tabBackgroundColor; colorEditorScreen.tabLabelColor = $tabLabelColor; colorEditorScreen.tabLabelChangedColor = $tabLabelChangedColor; colorEditorScreen.tabLabelBackground = $tabLabelBackgroundColor; colorEditorScreen.findHighlightColor = $findHighlightColor; colorEditorScreen.findHighlightBackground = $findHighlightBackground; call system.alertDialog(\"Colors reset to original loaded values.\", \"Reset\", \"info\"); }"},
                     {"name": "saveCloseBtn", "type": "button", "labelText": "Save and Close", "style": "-fx-min-width: 120;", "onClick": "var jsonContent: string = \"{\\n  \\\"profile\\\": \\\"\" + colorEditorScreen.profile + \"\\\",\\n  \\\"colors\\\": {\\n    \\\"info\\\": \\\"\" + colorEditorScreen.info + \"\\\",\\n    \\\"comment\\\": \\\"\" + colorEditorScreen.comment + \"\\\",\\n    \\\"error\\\": \\\"\" + colorEditorScreen.error + \"\\\",\\n    \\\"warn\\\": \\\"\" + colorEditorScreen.warn + \"\\\",\\n    \\\"ok\\\": \\\"\" + colorEditorScreen.ok + \"\\\",\\n    \\\"code\\\": \\\"\" + colorEditorScreen.code + \"\\\",\\n    \\\"datatype\\\": \\\"\" + colorEditorScreen.datatype + \"\\\",\\n    \\\"data\\\": \\\"\" + colorEditorScreen.data + \"\\\",\\n    \\\"keyword\\\": \\\"\" + colorEditorScreen.keyword + \"\\\",\\n    \\\"builtin\\\": \\\"\" + colorEditorScreen.builtin + \"\\\",\\n    \\\"literal\\\": \\\"\" + colorEditorScreen.literal + \"\\\",\\n    \\\"identifier\\\": \\\"\" + colorEditorScreen.identifier + \"\\\",\\n    \\\"sql\\\": \\\"\" + colorEditorScreen.sql + \"\\\",\\n    \\\"custom\\\": \\\"\" + colorEditorScreen.custom + \"\\\",\\n    \\\"background\\\": \\\"\" + colorEditorScreen.background + \"\\\",\\n    \\\"text\\\": \\\"\" + colorEditorScreen.text + \"\\\",\\n    \\\"caret\\\": \\\"\" + colorEditorScreen.caret + \"\\\",\\n    \\\"line-cursor\\\": \\\"\" + colorEditorScreen.lineCursor + \"\\\",\\n    \\\"line-numbers\\\": \\\"\" + colorEditorScreen.lineNumbers + \"\\\",\\n    \\\"console-background\\\": \\\"\" + colorEditorScreen.consoleBackground + \"\\\",\\n    \\\"tab-background\\\": \\\"\" + colorEditorScreen.tabBackground + \"\\\",\\n    \\\"tab-label-color\\\": \\\"\" + colorEditorScreen.tabLabelColor + \"\\\",\\n    \\\"tab-label-changed-color\\\": \\\"\" + colorEditorScreen.tabLabelChangedColor + \"\\\",\\n    \\\"tab-label-background\\\": \\\"\" + colorEditorScreen.tabLabelBackground + \"\\\",\\n    \\\"find-highlight-color\\\": \\\"\" + colorEditorScreen.findHighlightColor + \"\\\",\\n    \\\"find-highlight-background\\\": \\\"\" + colorEditorScreen.findHighlightBackground + \"\\\"\\n  }\\n}\"; call file.writeTextFile($configPath, jsonContent); call system.alertDialog(\"Configuration saved to \" + $configPath + \".\\nRestart the application to see changes.\", \"Saved\", \"info\"); close screen;"}
                 ]
             }
