@@ -354,11 +354,6 @@ ITEM PROPERTY BUILTINS
      - item: string in format "screenName.itemName"
      - property: property name (case-insensitive)
      
-     Supported properties:
-       editable, disabled, visible, tooltip, textColor, backgroundColor,
-       colSpan, rowSpan, hgrow, vgrow, margin, padding,
-       prefWidth, prefHeight, minWidth, minHeight, maxWidth, maxHeight, alignment
-     
      Example:
        var isVisible = #scr.getProperty("myScreen.clientNameField", "visible");
        var tooltip = #scr.getProperty("myScreen.ageField", "tooltip");
@@ -373,6 +368,30 @@ ITEM PROPERTY BUILTINS
        #scr.setProperty("myScreen.clientNameField", "visible", false);
        #scr.setProperty("myScreen.ageField", "tooltip", "Enter client age");
        #scr.setProperty("myScreen.nameField", "textColor", "#FF0000");
+
+   Supported Item Properties:
+   
+   | Property        | Type    | Description                                           |
+   |-----------------|---------|-------------------------------------------------------|
+   | editable        | boolean | Whether the control can be edited                     |
+   | disabled        | boolean | Whether the control is disabled (grayed out)          |
+   | visible         | boolean | Whether the control is visible                        |
+   | tooltip         | string  | Hover tooltip text                                    |
+   | textColor       | string  | Text color (CSS color, e.g., "#FF0000", "red")        |
+   | backgroundColor | string  | Background color (CSS color, e.g., "#FFFFFF", "blue") |
+   | colSpan         | number  | Column span for GridPane layouts                      |
+   | rowSpan         | number  | Row span for GridPane layouts                         |
+   | hgrow           | string  | Horizontal grow priority: "ALWAYS", "SOMETIMES", "NEVER" |
+   | vgrow           | string  | Vertical grow priority: "ALWAYS", "SOMETIMES", "NEVER"   |
+   | margin          | string  | Margin around item (e.g., "10", "10 5", "10 5 10 5")  |
+   | padding         | string  | Padding inside item (e.g., "10", "10 5", "10 5 10 5") |
+   | prefWidth       | string  | Preferred width (e.g., "200", "50%")                  |
+   | prefHeight      | string  | Preferred height (e.g., "100", "30%")                 |
+   | minWidth        | string  | Minimum width                                         |
+   | minHeight       | string  | Minimum height                                        |
+   | maxWidth        | string  | Maximum width                                         |
+   | maxHeight       | string  | Maximum height                                        |
+   | alignment       | string  | Alignment: "center", "top-left", "bottom-right", etc. |
 *)
 
 AREA PROPERTY BUILTINS
@@ -383,13 +402,7 @@ AREA PROPERTY BUILTINS
      Gets a property value from an area definition.
      - area: string in format "screenName.areaName"
      - property: property name (case-insensitive)
-     
-     Supported properties:
-       name, type, areaType, cssClass, layout, style, screenName, displayName,
-       title, groupBorder, groupBorderColor, groupLabelText, groupLabelAlignment,
-       groupLabelOffset, spacing, padding, gainFocus, lostFocus, 
-       numberOfRecords, recordRef
-     
+      
      Example:
        var numRecords = #scr.getAreaProperty("myScreen.clientsArea", "numberOfRecords");
        var spacing = #scr.getAreaProperty("myScreen.mainArea", "spacing");
@@ -399,13 +412,38 @@ AREA PROPERTY BUILTINS
      - area: string in format "screenName.areaName"
      - property: property name (case-insensitive)
      - value: value to set
-     
+      
      Note: screenName and areaType are read-only properties.
-     
+      
      Example:
        #scr.setAreaProperty("myScreen.clientsArea", "numberOfRecords", 5);
        #scr.setAreaProperty("myScreen.mainArea", "spacing", "20");
        #scr.setAreaProperty("myScreen.clientsArea", "recordRef", "employees");
+
+   Supported Area Properties:
+   
+   | Property           | Type    | R/W | Description                                        |
+   |--------------------|---------|-----|----------------------------------------------------|
+   | name               | string  | R/W | Area identifier                                    |
+   | type               | string  | R/W | Container type (vbox, hbox, gridpane, etc.)        |
+   | areaType           | string  | R   | Resolved area type (read-only)                     |
+   | cssClass           | string  | R/W | CSS class name                                     |
+   | layout             | string  | R/W | Layout configuration (e.g., "fill")                |
+   | style              | string  | R/W | JavaFX CSS style string                            |
+   | screenName         | string  | R   | Associated screen name (read-only)                 |
+   | displayName        | string  | R/W | Display name for UI elements                       |
+   | title              | string  | R/W | Title for titled containers                        |
+   | groupBorder        | string  | R/W | Border style: none, raised, inset, lowered, line   |
+   | groupBorderColor   | string  | R/W | Border color in hex (e.g., "#4a9eff")              |
+   | groupLabelText     | string  | R/W | Label text on the group border                     |
+   | groupLabelAlignment| string  | R/W | Label alignment: left, center, right               |
+   | groupLabelOffset   | string  | R/W | Label position: top, on, bottom                    |
+   | spacing            | string  | R/W | Spacing between children (e.g., "10", "15")        |
+   | padding            | string  | R/W | Padding inside area (e.g., "10", "10 5 10 5")      |
+   | gainFocus          | string  | R/W | Code to execute when focus enters area             |
+   | lostFocus          | string  | R/W | Code to execute when focus leaves area             |
+   | numberOfRecords    | number  | R/W | Number of records for multi-record expansion       |
+   | recordRef          | string  | R/W | Array variable name for multi-record expansion     |
 *)
 
 COMMENTS
