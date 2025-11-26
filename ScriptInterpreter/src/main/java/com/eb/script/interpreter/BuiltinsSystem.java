@@ -185,7 +185,7 @@ public class BuiltinsSystem {
     private static Map<String, Object> runCmd(String command, ArrayDef args, Long timeoutMs, String cwd) {
         final List<String> cmd = new ArrayList<>();
         cmd.add(command);
-        if (args != null && args.size() > 1) {
+        if (args != null && args.size() > 0) {
             for (Object o : args) {
                 cmd.add(String.valueOf(o));
             }

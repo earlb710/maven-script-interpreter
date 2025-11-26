@@ -76,6 +76,8 @@ public final class Builtins {
      */
     public static void setVarsSupplier(VarsSupplier supplier) {
         VARS_SUPPLIER = supplier;
+        // Also update BuiltinsDebug to keep in sync
+        BuiltinsDebug.setVarsSupplier(supplier);
     }
 
     /**
@@ -83,6 +85,8 @@ public final class Builtins {
      */
     public static void setStackSupplier(StackSupplier supplier) {
         STACK_SUPPLIER = supplier;
+        // Also update BuiltinsDebug to keep in sync
+        BuiltinsDebug.setStackSupplier(supplier);
     }
 
     /**
