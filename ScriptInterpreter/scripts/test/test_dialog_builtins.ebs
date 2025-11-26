@@ -1,0 +1,139 @@
+// Test script for dialog builtin functions
+// Demonstrates system.inputDialog, system.confirmDialog, and system.alertDialog
+//
+// NOTE: This script is interactive and will show dialog windows.
+// Run this script in the EBS console to test the dialog builtins.
+
+print "=== Dialog Builtins Test Script ===\n\n";
+
+// ============================================
+// Test 1: system.alertDialog (message dialog)
+// ============================================
+print "1. Testing system.alertDialog (message-only dialog)\n";
+print "   This dialog has only an OK button and returns nothing.\n\n";
+
+// Basic alert
+print "   Showing basic alert...\n";
+call system.alertDialog("This is a basic alert message.");
+print "   Basic alert closed.\n\n";
+
+// Alert with custom title
+print "   Showing alert with custom title...\n";
+call system.alertDialog("Operation completed successfully!", "Success");
+print "   Custom title alert closed.\n\n";
+
+// Alert with different types
+print "   Showing INFO alert...\n";
+call system.alertDialog("This is an information message.", "Information", "info");
+print "   INFO alert closed.\n\n";
+
+print "   Showing WARNING alert...\n";
+call system.alertDialog("This is a warning message.", "Warning", "warning");
+print "   WARNING alert closed.\n\n";
+
+print "   Showing ERROR alert...\n";
+call system.alertDialog("This is an error message.", "Error", "error");
+print "   ERROR alert closed.\n\n";
+
+// ============================================
+// Test 2: system.confirmDialog (boolean dialog)
+// ============================================
+print "2. Testing system.confirmDialog (YES/NO dialog)\n";
+print "   This dialog returns true for YES, false for NO.\n\n";
+
+// Basic confirmation
+print "   Showing basic confirmation dialog...\n";
+var confirmed1: bool = call system.confirmDialog("Are you sure?");
+print "   User response: ";
+if confirmed1 then {
+    print "YES (true)\n\n";
+} else {
+    print "NO (false)\n\n";
+}
+
+// Confirmation with custom title
+print "   Showing confirmation with custom title...\n";
+var confirmed2: bool = call system.confirmDialog("Do you want to continue?", "Confirm Action");
+print "   User response: ";
+if confirmed2 then {
+    print "YES (true)\n\n";
+} else {
+    print "NO (false)\n\n";
+}
+
+// Confirmation with header text
+print "   Showing confirmation with header text...\n";
+var confirmed3: bool = call system.confirmDialog(
+    "This will delete all files in the folder.",
+    "Confirm Delete",
+    "You are about to delete files"
+);
+print "   User response: ";
+if confirmed3 then {
+    print "YES (true)\n\n";
+} else {
+    print "NO (false)\n\n";
+}
+
+// ============================================
+// Test 3: system.inputDialog (text input dialog)
+// ============================================
+print "3. Testing system.inputDialog (text input dialog)\n";
+print "   This dialog returns the entered text or empty string if cancelled.\n\n";
+
+// Basic input dialog
+print "   Showing basic input dialog...\n";
+var input1: string = call system.inputDialog("Enter Value");
+print "   User entered: '";
+print input1;
+print "'\n\n";
+
+// Input dialog with header text
+print "   Showing input dialog with header text...\n";
+var input2: string = call system.inputDialog("Enter Name", "Please enter your full name");
+print "   User entered: '";
+print input2;
+print "'\n\n";
+
+// Input dialog with default value
+print "   Showing input dialog with default value...\n";
+var input3: string = call system.inputDialog("Enter Username", "Choose a username", "guest");
+print "   User entered: '";
+print input3;
+print "'\n\n";
+
+// ============================================
+// Test 4: Practical usage examples
+// ============================================
+print "4. Practical Usage Examples\n\n";
+
+// Example: Confirm before action
+print "   Example: Confirm before saving...\n";
+var shouldSave: bool = call system.confirmDialog("Save changes before closing?", "Save Changes");
+if shouldSave then {
+    print "   User chose to save.\n";
+    call system.alertDialog("Changes saved successfully!", "Saved", "info");
+} else {
+    print "   User chose not to save.\n";
+}
+print "\n";
+
+// Example: Get user input then display
+print "   Example: Get user name and greet...\n";
+var userName: string = call system.inputDialog("Greeting", "What is your name?", "World");
+if userName != "" then {
+    var greeting: string = "Hello, " + userName + "!";
+    call system.alertDialog(greeting, "Greeting");
+} else {
+    print "   User cancelled input.\n";
+}
+print "\n";
+
+// ============================================
+// Summary
+// ============================================
+print "=== Dialog Builtins Test Complete ===\n\n";
+print "Summary of dialog builtins tested:\n";
+print "  - system.alertDialog(message, title?, alertType?) - Shows message, returns nothing\n";
+print "  - system.confirmDialog(message, title?, headerText?) - Shows YES/NO, returns bool\n";
+print "  - system.inputDialog(title, headerText?, defaultValue?) - Shows input, returns string\n";
