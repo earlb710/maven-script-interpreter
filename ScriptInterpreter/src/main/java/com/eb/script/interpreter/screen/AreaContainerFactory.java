@@ -454,8 +454,8 @@ public class AreaContainerFactory {
         switch (baseOffset) {
             case "top":
                 // Position above the border - subtract half border width
-                // Extra -6 to move up 6 more pixels from original top position
-                baseY = -11 - fontHeight - halfBorderWidth - 6;
+                // Extra -9 to move up 9 more pixels from original top position
+                baseY = -11 - fontHeight - halfBorderWidth - 9;
                 break;
             case "bottom":
                 // Position below the border - add half border width
