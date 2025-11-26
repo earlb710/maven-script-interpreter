@@ -91,6 +91,11 @@ tryStmt      = "try" block "exceptions" "{" exceptionHandler+ "}" ;
 exceptionHandler
              = "when" errorType [ "(" identifier ")" ] block ;
 
+(* Exception handlers can also be attached directly to named blocks and functions *)
+namedBlockWithExceptions
+             = identifier [ "(" paramDefList? ")" ] [ "return" typeName ] block 
+               "exceptions" "{" exceptionHandler+ "}" ;
+
 (* 
    Error types that can be caught:
    - ANY_ERROR      : Catches any error (catch-all handler, should be last)
@@ -108,7 +113,7 @@ exceptionHandler
    
    Examples:
    
-   // Simple exception handling
+   // Using try-exceptions syntax
    try {
        var result = 10 / 0;  // Will throw MATH_ERROR
    } exceptions {
@@ -126,6 +131,27 @@ exceptionHandler
    } exceptions {
        when IO_ERROR(msg) {
            print "File error: " + msg;
+       }
+   }
+   
+   // Function with exceptions (no try keyword needed)
+   divide(a:int, b:int) return int {
+       return a / b;
+   } exceptions {
+       when MATH_ERROR {
+           print "Division error!";
+       }
+   }
+   
+   // Named block with exceptions
+   riskyOperation {
+       var data = #file.read("file.txt");
+   } exceptions {
+       when IO_ERROR(msg) {
+           print "Error: " + msg;
+       }
+       when ANY_ERROR {
+           print "Something went wrong";
        }
    }
 *)

@@ -10,6 +10,9 @@ public class BlockStatement extends Statement {
     public final Statement[] statements;
     public final Parameter[] parameters;
     public DataType returnType;
+    
+    /** Optional exception handlers for this block (functions can have exceptions without try) */
+    public ExceptionHandler[] exceptionHandlers;
 
     public BlockStatement(int line, List<Statement> statements) {
         super(line);
@@ -17,6 +20,7 @@ public class BlockStatement extends Statement {
         this.statements = statementsToArray(statements);
         this.parameters = null;
         this.returnType = null;
+        this.exceptionHandlers = null;
     }
 
     public BlockStatement(int line, String name, List<Statement> statements) {
@@ -25,6 +29,7 @@ public class BlockStatement extends Statement {
         this.statements = statementsToArray(statements);
         this.parameters = null;
         this.returnType = null;
+        this.exceptionHandlers = null;
     }
 
     public BlockStatement(int line, String name, List<Parameter> parameters, List<Statement> statements) {
@@ -33,6 +38,7 @@ public class BlockStatement extends Statement {
         this.statements = statementsToArray(statements);
         this.parameters = parametersToArray(parameters);
         this.returnType = null;
+        this.exceptionHandlers = null;
     }
 
     public BlockStatement(int line, String name, List<Parameter> parameters, List<Statement> statements, DataType returnType) {
@@ -41,6 +47,24 @@ public class BlockStatement extends Statement {
         this.statements = statementsToArray(statements);
         this.parameters = parametersToArray(parameters);
         this.returnType = returnType;
+        this.exceptionHandlers = null;
+    }
+    
+    /**
+     * Set exception handlers for this block.
+     * This allows functions to have exception handlers without using try keyword.
+     */
+    public void setExceptionHandlers(List<ExceptionHandler> handlers) {
+        if (handlers != null && !handlers.isEmpty()) {
+            this.exceptionHandlers = handlers.toArray(new ExceptionHandler[0]);
+        }
+    }
+    
+    /**
+     * Check if this block has exception handlers.
+     */
+    public boolean hasExceptionHandlers() {
+        return exceptionHandlers != null && exceptionHandlers.length > 0;
     }
 
     private Statement[] statementsToArray(List<Statement> list) {

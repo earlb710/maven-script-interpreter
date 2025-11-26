@@ -168,16 +168,18 @@ public class Parser {
                     c.setBlockStatement(b);
                 }
                 try {
-                    if (b != null && b.parameters != null) {
+                    if (b != null && b.parameters != null && b.parameters.length > 0) {
                         Parameter[] parameters = matchParameters(b.parameters, c.parameters);
-                        c.parameters = parameters;
-                        Statement[] paramInit = new Statement[parameters.length];
-                        int pidx = 0;
-                        for (Parameter p : parameters) {
-                            paramInit[pidx] = new VarStatement(c.getLine(), p.name, p.paramType, p.value);
-                            pidx++;
+                        if (parameters != null) {
+                            c.parameters = parameters;
+                            Statement[] paramInit = new Statement[parameters.length];
+                            int pidx = 0;
+                            for (Parameter p : parameters) {
+                                paramInit[pidx] = new VarStatement(c.getLine(), p.name, p.paramType, p.value);
+                                pidx++;
+                            }
+                            c.paramInit = paramInit;
                         }
-                        c.paramInit = paramInit;
                     }
                 } catch (ParseError ex) {
                     throw new ParseError(ex.getMessage() + " in call to " + c.name + " on line " + c.getLine());
@@ -1416,21 +1418,61 @@ public class Parser {
         int line = currToken.line;
         List<Parameter> parameters = getBlockParameters();
         DataType type = blockParameterReturn();
+        BlockStatement bs;
         if (type != null) {
             consume(EbsTokenType.LBRACE, "Expected '{' after return.");
             List<Statement> s = getBlockStatements();
-            return new BlockStatement(line, name, parameters, s, type);
+            bs = new BlockStatement(line, name, parameters, s, type);
         } else {
             consume(EbsTokenType.LBRACE, "Expected '{' after parameters.");
             List<Statement> s = getBlockStatements();
-            return new BlockStatement(line, name, parameters, s);
+            bs = new BlockStatement(line, name, parameters, s);
         }
+        
+        // Check for optional exceptions block after function
+        parseOptionalExceptionHandlers(bs);
+        
+        return bs;
     }
 
     private BlockStatement block(String name) throws ParseError {
         int line = currToken.line;
         List<Statement> s = getBlockStatements();
-        return new BlockStatement(line, name, s);
+        BlockStatement bs = new BlockStatement(line, name, s);
+        
+        // Check for optional exceptions block after named block
+        parseOptionalExceptionHandlers(bs);
+        
+        return bs;
+    }
+    
+    /**
+     * Parse optional exception handlers after a named block or function.
+     * Syntax:
+     *   myFunction() {
+     *       // code
+     *   } exceptions {
+     *       when ERROR_TYPE { handler }
+     *   }
+     */
+    private void parseOptionalExceptionHandlers(BlockStatement block) throws ParseError {
+        // Check if there's an 'exceptions' keyword following this block
+        if (match(EbsTokenType.EXCEPTIONS)) {
+            consume(EbsTokenType.LBRACE, "Expected '{' after 'exceptions'.");
+            
+            List<ExceptionHandler> handlers = new ArrayList<>();
+            while (!check(EbsTokenType.RBRACE) && !isAtEnd()) {
+                handlers.add(parseExceptionHandler());
+            }
+            
+            consume(EbsTokenType.RBRACE, "Expected '}' to close exceptions block.");
+            
+            if (handlers.isEmpty()) {
+                throw error(peek(), "At least one 'when' handler is required in exceptions block.");
+            }
+            
+            block.setExceptionHandlers(handlers);
+        }
     }
 
     private Statement printStatement() throws ParseError {

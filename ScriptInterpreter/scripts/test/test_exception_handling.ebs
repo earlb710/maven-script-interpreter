@@ -486,6 +486,96 @@ if test15Result == "PASSED" then {
 }
 
 // ============================================================
+// TEST 16: Function with exceptions (no try keyword)
+// ============================================================
+print "TEST 16: Function with exceptions (no try keyword)";
+print "-------------------------------------------------------------";
+var test16Result:string = "FAILED";
+var funcExceptionCaught:bool = false;
+
+riskyFunction(a:int, b:int) return int {
+    return a / b;
+} exceptions {
+    when MATH_ERROR {
+        funcExceptionCaught = true;
+        print "  Exception caught inside function!";
+    }
+}
+
+#riskyFunction(10, 0);
+if funcExceptionCaught == true then {
+    test16Result = "PASSED";
+}
+print "  Result: " + test16Result + "\n";
+if test16Result == "PASSED" then {
+    testsPassed = testsPassed + 1;
+} else {
+    testsFailed = testsFailed + 1;
+}
+
+// ============================================================
+// TEST 17: Named block with exceptions (no try keyword)
+// ============================================================
+print "TEST 17: Named block with exceptions (no try keyword)";
+print "-------------------------------------------------------------";
+var test17Result:string = "FAILED";
+var blockExceptionCaught:bool = false;
+
+riskyBlock {
+    var x = 100 / 0;
+} exceptions {
+    when MATH_ERROR(msg) {
+        blockExceptionCaught = true;
+        print "  Block caught error: " + msg;
+    }
+}
+
+#riskyBlock();
+if blockExceptionCaught == true then {
+    test17Result = "PASSED";
+}
+print "  Result: " + test17Result + "\n";
+if test17Result == "PASSED" then {
+    testsPassed = testsPassed + 1;
+} else {
+    testsFailed = testsFailed + 1;
+}
+
+// ============================================================
+// TEST 18: Function with multiple exception handlers
+// ============================================================
+print "TEST 18: Function with multiple handlers";
+print "-------------------------------------------------------------";
+var test18Result:string = "FAILED";
+var multiHandlerCaught:string = "";
+
+multiHandlerFunc() {
+    var x = 50 / 0;
+} exceptions {
+    when IO_ERROR {
+        multiHandlerCaught = "IO";
+    }
+    when MATH_ERROR {
+        multiHandlerCaught = "MATH";
+        print "  Correct handler (MATH_ERROR) triggered";
+    }
+    when ANY_ERROR {
+        multiHandlerCaught = "ANY";
+    }
+}
+
+#multiHandlerFunc();
+if multiHandlerCaught == "MATH" then {
+    test18Result = "PASSED";
+}
+print "  Result: " + test18Result + "\n";
+if test18Result == "PASSED" then {
+    testsPassed = testsPassed + 1;
+} else {
+    testsFailed = testsFailed + 1;
+}
+
+// ============================================================
 // TEST SUMMARY
 // ============================================================
 print "============================================================";

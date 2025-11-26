@@ -740,6 +740,43 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 // This is an anonymous block - propagate the return signal up
                 throw r;
             }
+        } catch (InterpreterError e) {
+            // Check if this block has exception handlers
+            if (stmt.hasExceptionHandlers()) {
+                // Try to find a matching handler
+                EbsScriptException scriptException;
+                if (e instanceof EbsScriptException) {
+                    scriptException = (EbsScriptException) e;
+                } else {
+                    scriptException = EbsScriptException.fromInterpreterError(stmt.getLine(), e);
+                }
+                
+                if (executeMatchingHandler(stmt.exceptionHandlers, scriptException)) {
+                    // Exception was handled, continue normal execution
+                    return null;
+                }
+            }
+            // No handler found or no handlers defined - re-throw
+            throw e;
+        } catch (RuntimeException e) {
+            // Check if this block has exception handlers for runtime exceptions
+            if (stmt.hasExceptionHandlers()) {
+                // Don't catch control flow signals
+                if (isControlFlowSignal(e)) {
+                    throw e;
+                }
+                
+                EbsScriptException scriptException = new EbsScriptException(stmt.getLine(), 
+                    ErrorType.ANY_ERROR, "Runtime error: " + e.getMessage(), e);
+                
+                if (executeMatchingHandler(stmt.exceptionHandlers, scriptException)) {
+                    // Exception was handled, continue normal execution
+                    return null;
+                }
+                // No handler found - wrap and re-throw
+                throw error(stmt.getLine(), "Unhandled runtime exception: " + e.getMessage());
+            }
+            throw e;
         } finally {
             // POP the frame even on errors/returns
             environment().popCallStack();
