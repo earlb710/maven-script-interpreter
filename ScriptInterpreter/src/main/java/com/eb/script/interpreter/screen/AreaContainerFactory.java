@@ -459,8 +459,8 @@ public class AreaContainerFactory {
                 break;
             case "bottom":
                 // Position below the border - add half border width
-                // Extra +3 to move down 3 more pixels from original bottom position
-                baseY = -6 + halfBorderWidth + 3;
+                // Extra +6 to move down 6 more pixels from original bottom position
+                baseY = -6 + halfBorderWidth + 6;
                 break;
             case "on":
             default:
