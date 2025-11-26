@@ -454,8 +454,8 @@ public class AreaContainerFactory {
         switch (baseOffset) {
             case "top":
                 // Position above the border - subtract half border width
-                // Extra -3 to move up 3 more pixels from original top position
-                baseY = -11 - fontHeight - halfBorderWidth - 3;
+                // Extra -6 to move up 6 more pixels from original top position
+                baseY = -11 - fontHeight - halfBorderWidth - 6;
                 break;
             case "bottom":
                 // Position below the border - add half border width
@@ -465,7 +465,8 @@ public class AreaContainerFactory {
             case "on":
             default:
                 // Default: border goes through label - uses half font height
-                baseY = -8 - (fontHeight / 2);
+                // Extra +3 to move down 3 more pixels from original on position
+                baseY = -8 - (fontHeight / 2) + 3;
                 break;
         }
         
