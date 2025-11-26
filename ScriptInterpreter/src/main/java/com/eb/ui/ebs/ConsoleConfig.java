@@ -275,7 +275,7 @@ public class ConsoleConfig {
         css.append(".editor-text .text.find-current {\n");
         css.append("    -fx-fill: #000000 !important;\n");
         css.append("    -fx-font-weight: bold !important;\n");
-        css.append("    -rtfx-background-color: #eedd58 !important;\n");
+        css.append("    -rtfx-background-color: #ffff00 !important;\n");
         css.append("}\n\n");
         
         return css.toString();

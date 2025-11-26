@@ -271,7 +271,7 @@
 .editor-text .text.find-current {
     -fx-fill: #000000;
     -fx-font-weight: bold;
-    -rtfx-background-color: #eedd58; /* light yellow */
+    -rtfx-background-color: #ffff00; /* bright yellow for current match */
 }
 
 /* find bar container (optional styling) */
