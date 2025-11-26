@@ -255,18 +255,20 @@
 
 /* background for all matches - black text ensures readability on yellow background */
 .find-hit,
-.styled-text-area .find-hit,
-.editor-ebs .find-hit,
-.editor-text .find-hit {
+.text.find-hit,
+.styled-text-area .text.find-hit,
+.editor-ebs .text.find-hit,
+.editor-text .text.find-hit {
     -fx-fill: #000000;
     -rtfx-background-color: #ddb107; /* stronger amber */
 }
 
 /* background for current match (selected) - black text ensures readability on yellow background */
 .find-current,
-.styled-text-area .find-current,
-.editor-ebs .find-current,
-.editor-text .find-current {
+.text.find-current,
+.styled-text-area .text.find-current,
+.editor-ebs .text.find-current,
+.editor-text .text.find-current {
     -fx-fill: #000000;
     -fx-font-weight: bold;
     -rtfx-background-color: #eedd58; /* light yellow */
