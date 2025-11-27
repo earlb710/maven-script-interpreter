@@ -181,6 +181,8 @@ public class BuiltinsCss {
     /**
      * Parse CSS content and extract selectors with their properties.
      * Handles basic CSS syntax including multi-line rules and comments.
+     * Note: This parser is designed for JavaFX CSS files and may not fully support
+     * advanced CSS features like nested @media queries or @keyframes.
      */
     private static Map<String, Map<String, String>> parseCssContent(String cssContent) {
         Map<String, Map<String, String>> rules = new HashMap<>();
@@ -190,12 +192,18 @@ public class BuiltinsCss {
 
         // Pattern to match CSS rules: selector(s) { properties }
         // This handles multi-selector rules like ".a, .b { ... }"
+        // Note: Does not support nested rules (e.g., @media queries with nested selectors)
         Pattern rulePattern = Pattern.compile("([^{}]+)\\s*\\{([^{}]*)\\}", Pattern.MULTILINE);
         Matcher ruleMatcher = rulePattern.matcher(cssContent);
 
         while (ruleMatcher.find()) {
             String selectorGroup = ruleMatcher.group(1).trim();
             String propertiesBlock = ruleMatcher.group(2).trim();
+            
+            // Skip at-rules (e.g., @media, @keyframes) as they are not simple selectors
+            if (selectorGroup.startsWith("@")) {
+                continue;
+            }
 
             // Parse properties
             Map<String, String> properties = parseProperties(propertiesBlock);
@@ -220,40 +228,73 @@ public class BuiltinsCss {
 
     /**
      * Remove CSS comments from content.
+     * Uses a simple regex that handles most comment formats including multi-line comments.
      */
     private static String removeComments(String cssContent) {
-        // Remove /* ... */ comments
-        return cssContent.replaceAll("/\\*[^*]*\\*+(?:[^/*][^*]*\\*+)*/", "");
+        // Remove /* ... */ comments using DOTALL flag for multi-line support
+        // The .*? makes it non-greedy to handle multiple comments correctly
+        return cssContent.replaceAll("(?s)/\\*.*?\\*/", "");
     }
 
     /**
      * Parse CSS properties from a properties block.
      * Handles properties like: -fx-fill: red; color: blue;
+     * Also handles values with semicolons inside strings.
      */
     private static Map<String, String> parseProperties(String propertiesBlock) {
         Map<String, String> properties = new HashMap<>();
-
-        // Split by semicolons, but be careful with values containing semicolons in strings
-        String[] declarations = propertiesBlock.split(";");
-        for (String declaration : declarations) {
-            declaration = declaration.trim();
-            if (declaration.isEmpty()) {
-                continue;
+        
+        // Parse character by character to handle semicolons inside quoted strings
+        StringBuilder currentDeclaration = new StringBuilder();
+        boolean inSingleQuote = false;
+        boolean inDoubleQuote = false;
+        
+        for (int i = 0; i < propertiesBlock.length(); i++) {
+            char c = propertiesBlock.charAt(i);
+            
+            // Track quote state
+            if (c == '\'' && !inDoubleQuote) {
+                inSingleQuote = !inSingleQuote;
+            } else if (c == '"' && !inSingleQuote) {
+                inDoubleQuote = !inDoubleQuote;
             }
-
-            // Find the first colon (property: value)
-            int colonIndex = declaration.indexOf(':');
-            if (colonIndex > 0) {
-                String propertyName = declaration.substring(0, colonIndex).trim();
-                String propertyValue = declaration.substring(colonIndex + 1).trim();
-
-                if (!propertyName.isEmpty() && !propertyValue.isEmpty()) {
-                    properties.put(propertyName, propertyValue);
-                }
+            
+            // Semicolon ends a declaration only if not inside quotes
+            if (c == ';' && !inSingleQuote && !inDoubleQuote) {
+                addDeclaration(properties, currentDeclaration.toString());
+                currentDeclaration.setLength(0);
+            } else {
+                currentDeclaration.append(c);
             }
+        }
+        
+        // Add the last declaration (may not end with semicolon)
+        if (currentDeclaration.length() > 0) {
+            addDeclaration(properties, currentDeclaration.toString());
         }
 
         return properties;
+    }
+    
+    /**
+     * Add a declaration (property: value) to the properties map.
+     */
+    private static void addDeclaration(Map<String, String> properties, String declaration) {
+        declaration = declaration.trim();
+        if (declaration.isEmpty()) {
+            return;
+        }
+        
+        // Find the first colon (property: value)
+        int colonIndex = declaration.indexOf(':');
+        if (colonIndex > 0) {
+            String propertyName = declaration.substring(0, colonIndex).trim();
+            String propertyValue = declaration.substring(colonIndex + 1).trim();
+
+            if (!propertyName.isEmpty() && !propertyValue.isEmpty()) {
+                properties.put(propertyName, propertyValue);
+            }
+        }
     }
 
     /**
