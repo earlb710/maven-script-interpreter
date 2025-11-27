@@ -893,6 +893,11 @@ public class EbsTab extends Tab {
         findField.setOnAction(e -> {
             if (!suppressFindSearch) {
                 Platform.runLater(() -> {
+                    // Add to history when user presses Enter
+                    String q = findField.getEditor().getText();
+                    if (q != null && q.length() >= MIN_FIND_CHARS) {
+                        addToSearchHistory(q);
+                    }
                     runSearch();
                 });
             }
@@ -918,6 +923,11 @@ public class EbsTab extends Tab {
         // Button actions - next/prev immediately re-run highlighting if stale then navigate
         btnNext.setOnAction(e -> {
             Platform.runLater(() -> {
+                // Add to history when user clicks Next
+                String q = findField.getEditor().getText();
+                if (q != null && q.length() >= MIN_FIND_CHARS) {
+                    addToSearchHistory(q);
+                }
                 refreshHighlightsIfStale();
                 gotoNext();
                 dispArea.requestFocus();
@@ -925,6 +935,11 @@ public class EbsTab extends Tab {
         });
         btnPrev.setOnAction(e -> {
             Platform.runLater(() -> {
+                // Add to history when user clicks Prev
+                String q = findField.getEditor().getText();
+                if (q != null && q.length() >= MIN_FIND_CHARS) {
+                    addToSearchHistory(q);
+                }
                 refreshHighlightsIfStale();
                 gotoPrev();
                 dispArea.requestFocus();
@@ -1022,8 +1037,9 @@ public class EbsTab extends Tab {
             return;
         }
         
-        // Add to search history if not already present
-        addToSearchHistory(q);
+        // Note: Don't add to search history here - it happens on every keystroke
+        // and modifying the ComboBox's items list clears the editor text.
+        // History is added when user presses Enter, clicks Next/Prev, or selects from dropdown.
 
         boolean cs = chkCase.isSelected();
         boolean ww = chkWord.isSelected();
