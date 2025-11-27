@@ -889,6 +889,16 @@ public final class Builtins {
                 newParam("itemName", DataType.STRING, true) // required; item name
         ));
 
+        // ==========================
+        // CSS builtins
+        // ==========================
+        addBuiltin(info(
+                "css.getValue", DataType.STRING,
+                newParam("cssPath", DataType.STRING, true),   // required; path to CSS file or resource
+                newParam("selector", DataType.STRING, true),  // required; CSS selector (e.g., ".error")
+                newParam("property", DataType.STRING, true)   // required; CSS property name (e.g., "-fx-fill")
+        ));
+
         NAMES = Collections.unmodifiableSet(BUILTINS.keySet());
     }
 
@@ -932,6 +942,11 @@ public final class Builtins {
         }
         if (BuiltinsSystem.handles(name)) {
             return BuiltinsSystem.dispatch(env, name, args);
+        }
+        
+        // CSS builtins
+        if (BuiltinsCss.handles(name)) {
+            return BuiltinsCss.dispatch(name, args);
         }
         
         // File builtins (already in BuiltinsFile)
