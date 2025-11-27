@@ -177,9 +177,10 @@ public class BuiltinsHelp {
         String defaultValue = args.length > 2 && args[2] != null ? args[2].toString() : "";
 
         final java.util.concurrent.atomic.AtomicReference<String> resultRef = new java.util.concurrent.atomic.AtomicReference<>("");
-        final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
 
-        javafx.application.Platform.runLater(() -> {
+        // If already on the JavaFX Application Thread (e.g., called from screen event handler),
+        // run the dialog directly to avoid deadlock
+        if (javafx.application.Platform.isFxApplicationThread()) {
             javafx.scene.control.TextInputDialog dialog = new javafx.scene.control.TextInputDialog(defaultValue);
             dialog.setTitle(title);
             if (headerText != null && !headerText.isEmpty()) {
@@ -189,14 +190,28 @@ public class BuiltinsHelp {
 
             java.util.Optional<String> result = dialog.showAndWait();
             resultRef.set(result.orElse(""));
-            latch.countDown();
-        });
+        } else {
+            final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
 
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new InterpreterError("system.inputDialog interrupted: " + e.getMessage());
+            javafx.application.Platform.runLater(() -> {
+                javafx.scene.control.TextInputDialog dialog = new javafx.scene.control.TextInputDialog(defaultValue);
+                dialog.setTitle(title);
+                if (headerText != null && !headerText.isEmpty()) {
+                    dialog.setHeaderText(headerText);
+                }
+                dialog.setContentText("Enter value:");
+
+                java.util.Optional<String> result = dialog.showAndWait();
+                resultRef.set(result.orElse(""));
+                latch.countDown();
+            });
+
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new InterpreterError("system.inputDialog interrupted: " + e.getMessage());
+            }
         }
         return resultRef.get();
     }
@@ -207,9 +222,10 @@ public class BuiltinsHelp {
         String headerText = args.length > 2 && args[2] != null ? args[2].toString() : null;
 
         final java.util.concurrent.atomic.AtomicBoolean resultRef = new java.util.concurrent.atomic.AtomicBoolean(false);
-        final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
 
-        javafx.application.Platform.runLater(() -> {
+        // If already on the JavaFX Application Thread (e.g., called from screen event handler),
+        // run the dialog directly to avoid deadlock
+        if (javafx.application.Platform.isFxApplicationThread()) {
             javafx.scene.control.Alert confirm = new javafx.scene.control.Alert(
                 javafx.scene.control.Alert.AlertType.CONFIRMATION,
                 message,
@@ -223,14 +239,32 @@ public class BuiltinsHelp {
 
             java.util.Optional<javafx.scene.control.ButtonType> result = confirm.showAndWait();
             resultRef.set(result.isPresent() && result.get() == javafx.scene.control.ButtonType.YES);
-            latch.countDown();
-        });
+        } else {
+            final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
 
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new InterpreterError("system.confirmDialog interrupted: " + e.getMessage());
+            javafx.application.Platform.runLater(() -> {
+                javafx.scene.control.Alert confirm = new javafx.scene.control.Alert(
+                    javafx.scene.control.Alert.AlertType.CONFIRMATION,
+                    message,
+                    javafx.scene.control.ButtonType.YES,
+                    javafx.scene.control.ButtonType.NO
+                );
+                confirm.setTitle(title);
+                if (headerText != null && !headerText.isEmpty()) {
+                    confirm.setHeaderText(headerText);
+                }
+
+                java.util.Optional<javafx.scene.control.ButtonType> result = confirm.showAndWait();
+                resultRef.set(result.isPresent() && result.get() == javafx.scene.control.ButtonType.YES);
+                latch.countDown();
+            });
+
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new InterpreterError("system.confirmDialog interrupted: " + e.getMessage());
+            }
         }
         return resultRef.get();
     }
@@ -247,20 +281,28 @@ public class BuiltinsHelp {
             default -> alertType = javafx.scene.control.Alert.AlertType.INFORMATION;
         }
 
-        final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
-
-        javafx.application.Platform.runLater(() -> {
+        // If already on the JavaFX Application Thread (e.g., called from screen event handler),
+        // run the dialog directly to avoid deadlock
+        if (javafx.application.Platform.isFxApplicationThread()) {
             javafx.scene.control.Alert alert = new javafx.scene.control.Alert(alertType, message);
             alert.setTitle(title);
             alert.showAndWait();
-            latch.countDown();
-        });
+        } else {
+            final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
 
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new InterpreterError("system.alertDialog interrupted: " + e.getMessage());
+            javafx.application.Platform.runLater(() -> {
+                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(alertType, message);
+                alert.setTitle(title);
+                alert.showAndWait();
+                latch.countDown();
+            });
+
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new InterpreterError("system.alertDialog interrupted: " + e.getMessage());
+            }
         }
         return null; // Message dialog returns nothing
     }
