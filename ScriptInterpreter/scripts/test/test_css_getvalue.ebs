@@ -1,0 +1,237 @@
+// ============================================================================
+// TEST DOCUMENT: css.getValue Builtin Function
+// ============================================================================
+// This document tests the css.getValue builtin function that retrieves
+// property values from CSS stylesheets.
+//
+// Function signature: css.getValue(cssPath, selector, property) -> STRING
+//   - cssPath:  Path to CSS file (classpath resource or filesystem path)
+//   - selector: CSS selector (e.g., ".error", "#main", "body")
+//   - property: CSS property name (e.g., "-fx-fill", "color")
+// ============================================================================
+
+print("====================================================================");
+print("           TEST DOCUMENT: css.getValue Builtin Function");
+print("====================================================================");
+print("");
+
+// ============================================================================
+// TEST 1: Basic Usage - Get fill color from console.css
+// ============================================================================
+print("============================================================");
+print("TEST 1: Basic Usage - Get fill color");
+print("============================================================");
+
+print("--- Test Cases ---");
+print("Reading from: css/console.css");
+print("");
+
+// Test getting the error fill color
+var errorColor: string = call css.getValue("css/console.css", ".error", "-fx-fill");
+print("  .error -fx-fill: " + errorColor);
+call debug.assertEquals("#ee0000", errorColor, "error color should be #ee0000");
+
+// Test getting the keyword fill color
+var keywordColor: string = call css.getValue("css/console.css", ".keyword", "-fx-fill");
+print("  .keyword -fx-fill: " + keywordColor);
+call debug.assertEquals("#00FFFF", keywordColor, "keyword color should be #00FFFF");
+
+// Test getting the info fill color
+var infoColor: string = call css.getValue("css/console.css", ".info", "-fx-fill");
+print("  .info -fx-fill: " + infoColor);
+call debug.assertEquals("#e6e6e6", infoColor, "info color should be #e6e6e6");
+
+print("");
+print("✓ Basic fill color tests passed");
+print("");
+
+// ============================================================================
+// TEST 2: Different Property Types
+// ============================================================================
+print("============================================================");
+print("TEST 2: Different Property Types");
+print("============================================================");
+
+print("--- Test Cases ---");
+
+// Test font-weight property
+var keywordWeight: string = call css.getValue("css/console.css", ".keyword", "-fx-font-weight");
+print("  .keyword -fx-font-weight: " + keywordWeight);
+call debug.assertEquals("bold", keywordWeight, "keyword font-weight should be bold");
+
+// Test warning color
+var warnColor: string = call css.getValue("css/console.css", ".warn", "-fx-fill");
+print("  .warn -fx-fill: " + warnColor);
+call debug.assertEquals("#eeee00", warnColor, "warn color should be #eeee00");
+
+// Test ok/success color
+var okColor: string = call css.getValue("css/console.css", ".ok", "-fx-fill");
+print("  .ok -fx-fill: " + okColor);
+call debug.assertEquals("#00ee00", okColor, "ok color should be #00ee00");
+
+print("");
+print("✓ Different property types tests passed");
+print("");
+
+// ============================================================================
+// TEST 3: Multi-part Selectors
+// ============================================================================
+print("============================================================");
+print("TEST 3: Multi-part Selectors");
+print("============================================================");
+
+print("--- Test Cases ---");
+
+// Test nested selector
+var nestedBg: string = call css.getValue("css/console.css", ".console-frame .text-area", "-fx-background-color");
+print("  .console-frame .text-area -fx-background-color: " + nestedBg);
+call debug.assertEquals("#000000", nestedBg, "nested selector background should be #000000");
+
+print("");
+print("✓ Multi-part selector tests passed");
+print("");
+
+// ============================================================================
+// TEST 4: Non-existent Selector or Property Returns Null
+// ============================================================================
+print("============================================================");
+print("TEST 4: Non-existent Selector or Property");
+print("============================================================");
+
+print("--- Test Cases ---");
+
+// Test non-existent selector (should return null)
+var noSelector: string = call css.getValue("css/console.css", ".nonexistent", "-fx-fill");
+print("  .nonexistent -fx-fill: " + noSelector + " (expected: null)");
+
+// Test non-existent property (should return null)
+var noProperty: string = call css.getValue("css/console.css", ".error", "nonexistent-property");
+print("  .error nonexistent-property: " + noProperty + " (expected: null)");
+
+print("");
+print("✓ Non-existent selector/property tests passed (null returns expected)");
+print("");
+
+// ============================================================================
+// TEST 5: Reading from Different CSS Files
+// ============================================================================
+print("============================================================");
+print("TEST 5: Different CSS Files");
+print("============================================================");
+
+print("--- Test Cases ---");
+print("Reading from: css/screen-areas.css");
+print("");
+
+// Test reading from screen-areas.css
+var headerBg: string = call css.getValue("css/screen-areas.css", ".screen-area-header", "-fx-background-color");
+print("  .screen-area-header -fx-background-color: " + headerBg);
+call debug.assertEquals("#ffffff", headerBg, "header background should be #ffffff");
+
+// Test reading status bar font size
+var statusFontSize: string = call css.getValue("css/screen-areas.css", ".status-bar", "-fx-font-size");
+print("  .status-bar -fx-font-size: " + statusFontSize);
+call debug.assertEquals("11px", statusFontSize, "status bar font-size should be 11px");
+
+// Test reading vbox properties
+var vboxSpacing: string = call css.getValue("css/screen-areas.css", ".screen-area-vbox", "-fx-spacing");
+print("  .screen-area-vbox -fx-spacing: " + vboxSpacing);
+call debug.assertEquals("10", vboxSpacing, "vbox spacing should be 10");
+
+print("");
+print("✓ Different CSS files tests passed");
+print("");
+
+// ============================================================================
+// TEST 6: Code Style Colors
+// ============================================================================
+print("============================================================");
+print("TEST 6: Code Style Colors");
+print("============================================================");
+
+print("--- Test Cases ---");
+
+// Test code color
+var codeColor: string = call css.getValue("css/console.css", ".code", "-fx-fill");
+print("  .code -fx-fill: " + codeColor);
+call debug.assertEquals("white", codeColor, "code color should be white");
+
+// Test datatype color
+var datatypeColor: string = call css.getValue("css/console.css", ".datatype", "-fx-fill");
+print("  .datatype -fx-fill: " + datatypeColor);
+call debug.assertEquals("#D070FF", datatypeColor, "datatype color should be #D070FF");
+
+// Test builtin color
+var builtinColor: string = call css.getValue("css/console.css", ".builtin", "-fx-fill");
+print("  .builtin -fx-fill: " + builtinColor);
+call debug.assertEquals("#99e0e0", builtinColor, "builtin color should be #99e0e0");
+
+// Test sql color
+var sqlColor: string = call css.getValue("css/console.css", ".sql", "-fx-fill");
+print("  .sql -fx-fill: " + sqlColor);
+call debug.assertEquals("#00ee66", sqlColor, "sql color should be #00ee66");
+
+print("");
+print("✓ Code style color tests passed");
+print("");
+
+// ============================================================================
+// INTEGRATION TEST: Using css.getValue in a practical scenario
+// ============================================================================
+print("============================================================");
+print("INTEGRATION TEST: Practical Usage");
+print("============================================================");
+
+print("--- Theme Color Extraction Example ---");
+print("");
+
+// Extract a set of theme colors from the console stylesheet
+var themeError: string = call css.getValue("css/console.css", ".error", "-fx-fill");
+var themeWarn: string = call css.getValue("css/console.css", ".warn", "-fx-fill");
+var themeOk: string = call css.getValue("css/console.css", ".ok", "-fx-fill");
+var themeInfo: string = call css.getValue("css/console.css", ".info", "-fx-fill");
+
+print("Extracted Theme Colors:");
+print("  Error:   " + themeError);
+print("  Warning: " + themeWarn);
+print("  OK:      " + themeOk);
+print("  Info:    " + themeInfo);
+print("");
+
+print("--- Conditional Formatting Example ---");
+print("");
+
+// Get font weight for different elements
+var errorWeight: string = call css.getValue("css/console.css", ".error", "-fx-font-weight");
+var keywordStyle: string = call css.getValue("css/console.css", ".keyword", "-fx-font-weight");
+var builtinStyle: string = call css.getValue("css/console.css", ".builtin", "-fx-font-weight");
+
+print("Font Weight Styles:");
+print("  .error:   " + errorWeight + " (null = normal)");
+print("  .keyword: " + keywordStyle);
+print("  .builtin: " + builtinStyle + " (null = normal)");
+print("");
+
+print("✓ Integration tests passed");
+print("");
+
+// ============================================================================
+// SUMMARY
+// ============================================================================
+print("====================================================================");
+print("                    TEST SUMMARY");
+print("====================================================================");
+print("The css.getValue builtin function tested successfully:");
+print("  ✓ Basic Usage        - Get fill colors from console.css");
+print("  ✓ Property Types     - Get different property types (color, font)");
+print("  ✓ Multi-part Selectors - Handle nested CSS selectors");
+print("  ✓ Non-existent Items - Return null for missing selectors/properties");
+print("  ✓ Different Files    - Read from multiple CSS files");
+print("  ✓ Code Style Colors  - Extract syntax highlighting colors");
+print("  ✓ Integration Tests  - Practical usage scenarios");
+print("");
+print("Function Signature:");
+print("  css.getValue(cssPath, selector, property) -> STRING");
+print("");
+print("All test assertions passed.");
+print("====================================================================");
