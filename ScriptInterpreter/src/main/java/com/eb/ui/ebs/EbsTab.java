@@ -50,6 +50,9 @@ import javafx.scene.input.KeyEvent;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
 
+import javafx.animation.PauseTransition;
+import javafx.util.Duration;
+
 public class EbsTab extends Tab {
 
     protected static Charset defaultCharset = StandardCharsets.UTF_8;
@@ -74,6 +77,14 @@ public class EbsTab extends Tab {
     private List<int[]> lastMatches = java.util.Collections.emptyList(); // each int[]{start,endExclusive}
     private int currentIndex = -1;
     private boolean suppressFindSearch = false; // avoid automatic search when programmatically setting find field
+    
+    // Minimum character count for find highlighting (more than 2 means at least 3)
+    private static final int MIN_FIND_CHARS = 3;
+    
+    // Timer for debounced editor change re-highlighting (2 seconds)
+    private PauseTransition editorChangeTimer;
+    // Flag to indicate if highlights are stale due to editor changes
+    private boolean highlightsStale = false;
     
     // autocomplete
     private final AutocompletePopup autocompletePopup;
@@ -814,6 +825,30 @@ public class EbsTab extends Tab {
 
     // Setup find bar listeners once during initialization
     private void setupFindListeners() {
+        // Initialize the editor change timer (2 second delay)
+        editorChangeTimer = new PauseTransition(Duration.seconds(2));
+        editorChangeTimer.setOnFinished(e -> {
+            if (findBar.isVisible() && highlightsStale) {
+                Platform.runLater(() -> {
+                    runSearch();
+                    highlightsStale = false;
+                });
+            }
+        });
+        
+        // Listen for editor changes to trigger debounced re-highlighting
+        dispArea.textProperty().addListener((obs, oldText, newText) -> {
+            if (findBar.isVisible() && !lastMatches.isEmpty()) {
+                // Clear existing highlights immediately since text changed
+                clearHighlights();
+                lastMatches = java.util.Collections.emptyList();
+                currentIndex = -1;
+                highlightsStale = true;
+                // Reset and start the timer for re-highlighting
+                editorChangeTimer.playFromStart();
+            }
+        });
+        
         // Live search when typing in find field
         findField.textProperty().addListener((obs, o, n) -> {
             if (!suppressFindSearch) {
@@ -840,15 +875,27 @@ public class EbsTab extends Tab {
             });
         });
         
-        // Button actions
+        // Button actions - next/prev immediately re-run highlighting if stale
         btnNext.setOnAction(e -> {
             Platform.runLater(() -> {
-                gotoNext();
+                if (highlightsStale) {
+                    editorChangeTimer.stop();
+                    runSearch();
+                    highlightsStale = false;
+                } else {
+                    gotoNext();
+                }
             });
         });
         btnPrev.setOnAction(e -> {
             Platform.runLater(() -> {
-                gotoPrev();
+                if (highlightsStale) {
+                    editorChangeTimer.stop();
+                    runSearch();
+                    highlightsStale = false;
+                } else {
+                    gotoPrev();
+                }
             });
         });
         btnReplace.setOnAction(e -> {
@@ -909,6 +956,11 @@ public class EbsTab extends Tab {
         findBar.setManaged(false);
         lastMatches = java.util.Collections.emptyList();
         currentIndex = -1;
+        // Stop any pending timer and reset stale flag
+        if (editorChangeTimer != null) {
+            editorChangeTimer.stop();
+        }
+        highlightsStale = false;
     }
 
     private void runSearch() {
@@ -917,6 +969,14 @@ public class EbsTab extends Tab {
         String q = findField.getText();
         if (q == null || q.isEmpty()) {
             lblCount.setText("");
+            lastMatches = java.util.Collections.emptyList();
+            return;
+        }
+        
+        // Only highlight when there are more than 2 characters (at least 3)
+        if (q.length() < MIN_FIND_CHARS) {
+            lblCount.setText("Type " + MIN_FIND_CHARS + "+ chars");
+            lastMatches = java.util.Collections.emptyList();
             return;
         }
 
