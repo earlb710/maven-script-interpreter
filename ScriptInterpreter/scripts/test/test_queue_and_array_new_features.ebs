@@ -1,0 +1,517 @@
+// ============================================================================
+// Comprehensive Test Script for Queue.Type and Array Add/Remove Features
+// Tests all new functionality from this PR
+// ============================================================================
+
+print "================================================================================";
+print "       COMPREHENSIVE TEST: Queue.Type and Array Add/Remove Features";
+print "================================================================================";
+print "";
+
+var passCount: int = 0;
+var failCount: int = 0;
+
+// ============================================================================
+// SECTION 1: QUEUE TYPE SYNTAX TESTS
+// ============================================================================
+
+print "================================================================================";
+print "SECTION 1: QUEUE TYPE SYNTAX";
+print "================================================================================";
+print "";
+
+// ----------------------------------------------------------------------------
+// TEST 1.1: queue.string - Basic String Queue Operations
+// ----------------------------------------------------------------------------
+print "TEST 1.1: queue.string - Basic String Queue Operations";
+var strQ: queue.string;
+
+// Test enqueue
+call queue.enqueue(strQ, "first");
+call queue.enqueue(strQ, "second");
+call queue.enqueue(strQ, "third");
+
+// Test size
+if (call queue.size(strQ) == 3) {
+    print "  ✓ queue.enqueue + queue.size: PASSED (size = 3)";
+    passCount = passCount + 1;
+} else {
+    print "  ✗ queue.enqueue + queue.size: FAILED";
+    failCount = failCount + 1;
+}
+
+// Test peek (should return first element without removing)
+var peeked = call queue.peek(strQ);
+if (peeked == "first" && call queue.size(strQ) == 3) {
+    print "  ✓ queue.peek: PASSED (returned 'first', size still 3)";
+    passCount = passCount + 1;
+} else {
+    print "  ✗ queue.peek: FAILED";
+    failCount = failCount + 1;
+}
+
+// Test dequeue (should return and remove first element - FIFO)
+var dequeued = call queue.dequeue(strQ);
+if (dequeued == "first" && call queue.size(strQ) == 2) {
+    print "  ✓ queue.dequeue: PASSED (returned 'first', size now 2)";
+    passCount = passCount + 1;
+} else {
+    print "  ✗ queue.dequeue: FAILED";
+    failCount = failCount + 1;
+}
+print "";
+
+// ----------------------------------------------------------------------------
+// TEST 1.2: queue.int - Integer Queue
+// ----------------------------------------------------------------------------
+print "TEST 1.2: queue.int - Integer Queue";
+var intQ: queue.int;
+call queue.enqueue(intQ, 100);
+call queue.enqueue(intQ, 200);
+call queue.enqueue(intQ, 300);
+
+if (call queue.peek(intQ) == 100 && call queue.size(intQ) == 3) {
+    print "  ✓ queue.int operations: PASSED";
+    passCount = passCount + 1;
+} else {
+    print "  ✗ queue.int operations: FAILED";
+    failCount = failCount + 1;
+}
+print "";
+
+// ----------------------------------------------------------------------------
+// TEST 1.3: queue.double - Double Queue
+// ----------------------------------------------------------------------------
+print "TEST 1.3: queue.double - Double Queue";
+var dblQ: queue.double;
+call queue.enqueue(dblQ, 3.14159);
+call queue.enqueue(dblQ, 2.71828);
+
+if (call queue.size(dblQ) == 2) {
+    print "  ✓ queue.double operations: PASSED";
+    passCount = passCount + 1;
+} else {
+    print "  ✗ queue.double operations: FAILED";
+    failCount = failCount + 1;
+}
+print "";
+
+// ----------------------------------------------------------------------------
+// TEST 1.4: queue.long - Long Queue
+// ----------------------------------------------------------------------------
+print "TEST 1.4: queue.long - Long Queue";
+var longQ: queue.long;
+call queue.enqueue(longQ, 9999999999);
+call queue.enqueue(longQ, 8888888888);
+
+if (call queue.peek(longQ) == 9999999999) {
+    print "  ✓ queue.long operations: PASSED";
+    passCount = passCount + 1;
+} else {
+    print "  ✗ queue.long operations: FAILED";
+    failCount = failCount + 1;
+}
+print "";
+
+// ----------------------------------------------------------------------------
+// TEST 1.5: queue.float - Float Queue
+// ----------------------------------------------------------------------------
+print "TEST 1.5: queue.float - Float Queue";
+var floatQ: queue.float;
+call queue.enqueue(floatQ, 1.5);
+call queue.enqueue(floatQ, 2.5);
+
+if (call queue.size(floatQ) == 2) {
+    print "  ✓ queue.float operations: PASSED";
+    passCount = passCount + 1;
+} else {
+    print "  ✗ queue.float operations: FAILED";
+    failCount = failCount + 1;
+}
+print "";
+
+// ----------------------------------------------------------------------------
+// TEST 1.6: queue.isEmpty
+// ----------------------------------------------------------------------------
+print "TEST 1.6: queue.isEmpty";
+var emptyQ: queue.string;
+
+if (call queue.isEmpty(emptyQ) == true) {
+    print "  ✓ queue.isEmpty (empty queue): PASSED";
+    passCount = passCount + 1;
+} else {
+    print "  ✗ queue.isEmpty (empty queue): FAILED";
+    failCount = failCount + 1;
+}
+
+call queue.enqueue(emptyQ, "item");
+if (call queue.isEmpty(emptyQ) == false) {
+    print "  ✓ queue.isEmpty (non-empty queue): PASSED";
+    passCount = passCount + 1;
+} else {
+    print "  ✗ queue.isEmpty (non-empty queue): FAILED";
+    failCount = failCount + 1;
+}
+print "";
+
+// ----------------------------------------------------------------------------
+// TEST 1.7: queue.clear
+// ----------------------------------------------------------------------------
+print "TEST 1.7: queue.clear";
+var clearQ: queue.int;
+call queue.enqueue(clearQ, 1);
+call queue.enqueue(clearQ, 2);
+call queue.enqueue(clearQ, 3);
+call queue.clear(clearQ);
+
+if (call queue.isEmpty(clearQ) == true && call queue.size(clearQ) == 0) {
+    print "  ✓ queue.clear: PASSED";
+    passCount = passCount + 1;
+} else {
+    print "  ✗ queue.clear: FAILED";
+    failCount = failCount + 1;
+}
+print "";
+
+// ----------------------------------------------------------------------------
+// TEST 1.8: queue.contains
+// ----------------------------------------------------------------------------
+print "TEST 1.8: queue.contains";
+var containsQ: queue.string;
+call queue.enqueue(containsQ, "apple");
+call queue.enqueue(containsQ, "banana");
+call queue.enqueue(containsQ, "cherry");
+
+if (call queue.contains(containsQ, "banana") == true) {
+    print "  ✓ queue.contains (existing element): PASSED";
+    passCount = passCount + 1;
+} else {
+    print "  ✗ queue.contains (existing element): FAILED";
+    failCount = failCount + 1;
+}
+
+if (call queue.contains(containsQ, "orange") == false) {
+    print "  ✓ queue.contains (non-existing element): PASSED";
+    passCount = passCount + 1;
+} else {
+    print "  ✗ queue.contains (non-existing element): FAILED";
+    failCount = failCount + 1;
+}
+print "";
+
+// ----------------------------------------------------------------------------
+// TEST 1.9: queue.toArray
+// ----------------------------------------------------------------------------
+print "TEST 1.9: queue.toArray";
+var toArrQ: queue.int;
+call queue.enqueue(toArrQ, 10);
+call queue.enqueue(toArrQ, 20);
+call queue.enqueue(toArrQ, 30);
+var arrFromQ = call queue.toArray(toArrQ);
+
+if (arrFromQ[0] == 10 && arrFromQ[1] == 20 && arrFromQ[2] == 30) {
+    print "  ✓ queue.toArray: PASSED";
+    passCount = passCount + 1;
+} else {
+    print "  ✗ queue.toArray: FAILED";
+    failCount = failCount + 1;
+}
+print "";
+
+// ----------------------------------------------------------------------------
+// TEST 1.10: FIFO Behavior Verification
+// ----------------------------------------------------------------------------
+print "TEST 1.10: FIFO (First-In-First-Out) Behavior";
+var fifoQ: queue.string;
+call queue.enqueue(fifoQ, "A");
+call queue.enqueue(fifoQ, "B");
+call queue.enqueue(fifoQ, "C");
+
+var first = call queue.dequeue(fifoQ);
+var second = call queue.dequeue(fifoQ);
+var third = call queue.dequeue(fifoQ);
+
+if (first == "A" && second == "B" && third == "C") {
+    print "  ✓ FIFO order: PASSED (A -> B -> C)";
+    passCount = passCount + 1;
+} else {
+    print "  ✗ FIFO order: FAILED";
+    failCount = failCount + 1;
+}
+print "";
+
+// ----------------------------------------------------------------------------
+// TEST 1.11: Queue in Loop
+// ----------------------------------------------------------------------------
+print "TEST 1.11: Processing Queue in Loop";
+var loopQ: queue.int;
+call queue.enqueue(loopQ, 1);
+call queue.enqueue(loopQ, 2);
+call queue.enqueue(loopQ, 3);
+
+var sum: int = 0;
+while !call queue.isEmpty(loopQ) {
+    var val = call queue.dequeue(loopQ);
+    sum = sum + val;
+}
+
+if (sum == 6 && call queue.isEmpty(loopQ) == true) {
+    print "  ✓ Queue processing in loop: PASSED (sum = 6, queue empty)";
+    passCount = passCount + 1;
+} else {
+    print "  ✗ Queue processing in loop: FAILED";
+    failCount = failCount + 1;
+}
+print "";
+
+// ============================================================================
+// SECTION 2: ARRAY ADD/REMOVE TESTS
+// ============================================================================
+
+print "================================================================================";
+print "SECTION 2: ARRAY ADD/REMOVE FUNCTIONS";
+print "================================================================================";
+print "";
+
+// ----------------------------------------------------------------------------
+// TEST 2.1: array.add - Add to End
+// ----------------------------------------------------------------------------
+print "TEST 2.1: array.add - Add to End of Array";
+var arr1: array.string[*];
+call array.add(arr1, "first");
+call array.add(arr1, "second");
+call array.add(arr1, "third");
+
+if (arr1[0] == "first" && arr1[1] == "second" && arr1[2] == "third" && arr1.length == 3) {
+    print "  ✓ array.add (append): PASSED";
+    passCount = passCount + 1;
+} else {
+    print "  ✗ array.add (append): FAILED";
+    failCount = failCount + 1;
+}
+print "";
+
+// ----------------------------------------------------------------------------
+// TEST 2.2: array.add - Insert at Index
+// ----------------------------------------------------------------------------
+print "TEST 2.2: array.add - Insert at Specific Index";
+var arr2: array.string[*];
+call array.add(arr2, "A");
+call array.add(arr2, "C");
+call array.add(arr2, "B", 1);  // Insert "B" at index 1
+
+if (arr2[0] == "A" && arr2[1] == "B" && arr2[2] == "C" && arr2.length == 3) {
+    print "  ✓ array.add (insert at index): PASSED";
+    passCount = passCount + 1;
+} else {
+    print "  ✗ array.add (insert at index): FAILED";
+    failCount = failCount + 1;
+}
+print "";
+
+// ----------------------------------------------------------------------------
+// TEST 2.3: array.add - Insert at Beginning
+// ----------------------------------------------------------------------------
+print "TEST 2.3: array.add - Insert at Beginning (Index 0)";
+var arr3: array.int[*];
+call array.add(arr3, 20);
+call array.add(arr3, 30);
+call array.add(arr3, 10, 0);  // Insert at beginning
+
+if (arr3[0] == 10 && arr3[1] == 20 && arr3[2] == 30) {
+    print "  ✓ array.add (insert at 0): PASSED";
+    passCount = passCount + 1;
+} else {
+    print "  ✗ array.add (insert at 0): FAILED";
+    failCount = failCount + 1;
+}
+print "";
+
+// ----------------------------------------------------------------------------
+// TEST 2.4: array.remove - Basic Remove
+// ----------------------------------------------------------------------------
+print "TEST 2.4: array.remove - Remove and Return Value";
+var arr4: array.string[*];
+call array.add(arr4, "one");
+call array.add(arr4, "two");
+call array.add(arr4, "three");
+
+var removed = call array.remove(arr4, 1);  // Remove "two" at index 1
+
+if (removed == "two" && arr4.length == 2 && arr4[0] == "one" && arr4[1] == "three") {
+    print "  ✓ array.remove: PASSED (removed 'two')";
+    passCount = passCount + 1;
+} else {
+    print "  ✗ array.remove: FAILED";
+    failCount = failCount + 1;
+}
+print "";
+
+// ----------------------------------------------------------------------------
+// TEST 2.5: array.remove - Remove First Element
+// ----------------------------------------------------------------------------
+print "TEST 2.5: array.remove - Remove First Element";
+var arr5: array.int[*];
+call array.add(arr5, 100);
+call array.add(arr5, 200);
+call array.add(arr5, 300);
+
+var removedFirst = call array.remove(arr5, 0);
+
+if (removedFirst == 100 && arr5.length == 2 && arr5[0] == 200 && arr5[1] == 300) {
+    print "  ✓ array.remove (first element): PASSED";
+    passCount = passCount + 1;
+} else {
+    print "  ✗ array.remove (first element): FAILED";
+    failCount = failCount + 1;
+}
+print "";
+
+// ----------------------------------------------------------------------------
+// TEST 2.6: array.remove - Remove Last Element
+// ----------------------------------------------------------------------------
+print "TEST 2.6: array.remove - Remove Last Element";
+var arr6: array.string[*];
+call array.add(arr6, "alpha");
+call array.add(arr6, "beta");
+call array.add(arr6, "gamma");
+
+var removedLast = call array.remove(arr6, 2);
+
+if (removedLast == "gamma" && arr6.length == 2 && arr6[0] == "alpha" && arr6[1] == "beta") {
+    print "  ✓ array.remove (last element): PASSED";
+    passCount = passCount + 1;
+} else {
+    print "  ✗ array.remove (last element): FAILED";
+    failCount = failCount + 1;
+}
+print "";
+
+// ----------------------------------------------------------------------------
+// TEST 2.7: Combined Add/Remove Operations
+// ----------------------------------------------------------------------------
+print "TEST 2.7: Combined Add/Remove Operations";
+var arr7: array.int[*];
+
+// Build array: [1, 2, 3, 4, 5]
+call array.add(arr7, 1);
+call array.add(arr7, 2);
+call array.add(arr7, 3);
+call array.add(arr7, 4);
+call array.add(arr7, 5);
+
+// Remove middle element (3 at index 2)
+call array.remove(arr7, 2);
+
+// Insert 10 at beginning
+call array.add(arr7, 10, 0);
+
+// Expected: [10, 1, 2, 4, 5]
+if (arr7[0] == 10 && arr7[1] == 1 && arr7[2] == 2 && arr7[3] == 4 && arr7[4] == 5 && arr7.length == 5) {
+    print "  ✓ Combined operations: PASSED [10, 1, 2, 4, 5]";
+    passCount = passCount + 1;
+} else {
+    print "  ✗ Combined operations: FAILED";
+    failCount = failCount + 1;
+}
+print "";
+
+// ----------------------------------------------------------------------------
+// TEST 2.8: Array with Different Types
+// ----------------------------------------------------------------------------
+print "TEST 2.8: array.add/remove with Double Type";
+var arr8: array.double[*];
+call array.add(arr8, 1.1);
+call array.add(arr8, 2.2);
+call array.add(arr8, 3.3);
+
+var removedDouble = call array.remove(arr8, 1);
+
+if (arr8.length == 2) {
+    print "  ✓ array.add/remove with doubles: PASSED";
+    passCount = passCount + 1;
+} else {
+    print "  ✗ array.add/remove with doubles: FAILED";
+    failCount = failCount + 1;
+}
+print "";
+
+// ============================================================================
+// SECTION 3: INTEGRATION TESTS
+// ============================================================================
+
+print "================================================================================";
+print "SECTION 3: INTEGRATION TESTS";
+print "================================================================================";
+print "";
+
+// ----------------------------------------------------------------------------
+// TEST 3.1: Queue to Array, Modify Array, Process
+// ----------------------------------------------------------------------------
+print "TEST 3.1: Queue to Array Integration";
+var integQ: queue.int;
+call queue.enqueue(integQ, 5);
+call queue.enqueue(integQ, 10);
+call queue.enqueue(integQ, 15);
+
+// Convert queue to array
+var integArr = call queue.toArray(integQ);
+
+// Add element to array
+call array.add(integArr, 20);
+
+if (integArr.length == 4 && integArr[3] == 20) {
+    print "  ✓ Queue to Array + add: PASSED";
+    passCount = passCount + 1;
+} else {
+    print "  ✗ Queue to Array + add: FAILED";
+    failCount = failCount + 1;
+}
+print "";
+
+// ----------------------------------------------------------------------------
+// TEST 3.2: Build Queue from Array Elements
+// ----------------------------------------------------------------------------
+print "TEST 3.2: Build Queue from Array Elements";
+var srcArr: array.string[*];
+call array.add(srcArr, "task1");
+call array.add(srcArr, "task2");
+call array.add(srcArr, "task3");
+
+var taskQ: queue.string;
+var idx: int = 0;
+while idx < srcArr.length {
+    call queue.enqueue(taskQ, srcArr[idx]);
+    idx = idx + 1;
+}
+
+if (call queue.size(taskQ) == 3 && call queue.peek(taskQ) == "task1") {
+    print "  ✓ Array to Queue: PASSED";
+    passCount = passCount + 1;
+} else {
+    print "  ✗ Array to Queue: FAILED";
+    failCount = failCount + 1;
+}
+print "";
+
+// ============================================================================
+// TEST SUMMARY
+// ============================================================================
+
+print "================================================================================";
+print "                            TEST SUMMARY";
+print "================================================================================";
+print "";
+print "Total Tests Passed: " + passCount;
+print "Total Tests Failed: " + failCount;
+print "";
+
+if (failCount == 0) {
+    print "ALL TESTS PASSED!";
+} else {
+    print "Some tests failed. Please review the output above.";
+}
+print "";
+print "================================================================================";
+print "                         END OF TEST SCRIPT";
+print "================================================================================";

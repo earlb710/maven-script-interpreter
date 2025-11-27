@@ -698,12 +698,61 @@ public final class Builtins {
                 newParam("length", DataType.INTEGER)
         ));
         addBuiltin(info(
+                "array.add", null,
+                newParam("array", DataType.ARRAY, true),
+                newParam("value", DataType.ANY, true),
+                newParam("index", DataType.INTEGER, false)  // optional index parameter
+        ));
+        addBuiltin(info(
+                "array.remove", DataType.ANY,
+                newParam("array", DataType.ARRAY, true),
+                newParam("index", DataType.INTEGER)
+        ));
+        addBuiltin(info(
                 "array.base64encode", DataType.STRING,
                 newParam("bytes", DataType.ARRAY, true)
         ));
         addBuiltin(info(
                 "array.base64decode", DataType.ARRAY,
                 newParam("b64", DataType.STRING)
+        ));
+
+        // ==========================
+        // QUEUE builtins
+        // ==========================
+        addBuiltin(info(
+                "queue.enqueue", null,
+                newParam("queue", DataType.QUEUE, true),
+                newParam("value", DataType.ANY, true)
+        ));
+        addBuiltin(info(
+                "queue.dequeue", DataType.ANY,
+                newParam("queue", DataType.QUEUE, true)
+        ));
+        addBuiltin(info(
+                "queue.peek", DataType.ANY,
+                newParam("queue", DataType.QUEUE, true)
+        ));
+        addBuiltin(info(
+                "queue.isEmpty", DataType.BOOL,
+                newParam("queue", DataType.QUEUE, true)
+        ));
+        addBuiltin(info(
+                "queue.size", DataType.INTEGER,
+                newParam("queue", DataType.QUEUE, true)
+        ));
+        addBuiltin(info(
+                "queue.clear", null,
+                newParam("queue", DataType.QUEUE, true)
+        ));
+        addBuiltin(info(
+                "queue.contains", DataType.BOOL,
+                newParam("queue", DataType.QUEUE, true),
+                newParam("value", DataType.ANY, true)
+        ));
+        addBuiltin(info(
+                "queue.toArray", DataType.ARRAY,
+                newParam("queue", DataType.QUEUE, true)
         ));
 
         addBuiltin(info(
@@ -979,6 +1028,11 @@ public final class Builtins {
         }
         if (BuiltinsSystem.handles(name)) {
             return BuiltinsSystem.dispatch(env, name, args);
+        }
+        
+        // Queue builtins
+        if (BuiltinsQueue.handles(name)) {
+            return BuiltinsQueue.dispatch(name, args);
         }
         
         // CSS builtins

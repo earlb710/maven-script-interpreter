@@ -42,6 +42,8 @@ public class BuiltinsSystem {
             case "array.expand" -> arrayExpand(args);
             case "array.sort" -> arraySort(args);
             case "array.fill" -> arrayFill(args);
+            case "array.add" -> arrayAdd(args);
+            case "array.remove" -> arrayRemove(args);
             case "array.base64encode" -> base64Encode(args);
             case "array.base64decode" -> base64Decode(args);
             default -> throw new InterpreterError("Unknown System builtin: " + name);
@@ -133,6 +135,61 @@ public class BuiltinsSystem {
             array.fillArray(len, args[2]);
         }
         return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Object arrayAdd(Object[] args) throws InterpreterError {
+        if (args[0] == null) {
+            throw new InterpreterError("array.add: array cannot be null");
+        }
+        if (!(args[0] instanceof ArrayDef)) {
+            throw new InterpreterError("array.add: first argument must be an array");
+        }
+        ArrayDef<Object, ?> array = (ArrayDef<Object, ?>) args[0];
+        Object value = args[1];
+        
+        // Check if optional index parameter is provided
+        if (args.length > 2 && args[2] != null) {
+            if (!(args[2] instanceof Number)) {
+                throw new InterpreterError("array.add: index must be a number");
+            }
+            int index = ((Number) args[2]).intValue();
+            if (index < 0 || index > array.size()) {
+                throw new InterpreterError("array.add: index " + index + " out of bounds (size: " + array.size() + ")");
+            }
+            array.add(index, value);
+        } else {
+            // Add to end of array
+            array.add(value);
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Object arrayRemove(Object[] args) throws InterpreterError {
+        if (args[0] == null) {
+            throw new InterpreterError("array.remove: array cannot be null");
+        }
+        if (!(args[0] instanceof ArrayDef)) {
+            throw new InterpreterError("array.remove: first argument must be an array");
+        }
+        if (args[1] == null) {
+            throw new InterpreterError("array.remove: index cannot be null");
+        }
+        if (!(args[1] instanceof Number)) {
+            throw new InterpreterError("array.remove: index must be a number");
+        }
+        ArrayDef<Object, ?> array = (ArrayDef<Object, ?>) args[0];
+        int index = ((Number) args[1]).intValue();
+        
+        if (index < 0 || index >= array.size()) {
+            throw new InterpreterError("array.remove: index " + index + " out of bounds (size: " + array.size() + ")");
+        }
+        
+        // Get the value before removing
+        Object removedValue = array.get(index);
+        array.remove(index);
+        return removedValue;
     }
 
     private static Object base64Encode(Object[] args) throws InterpreterError {

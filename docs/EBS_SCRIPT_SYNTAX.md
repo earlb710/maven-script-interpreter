@@ -79,6 +79,7 @@ All identifiers are normalized to lowercase internally, so `myVariable`, `MyVari
 | `json` | JSON object/array | `{"key": "value"}` |
 | `map` | Key-value map (JSON objects only) | `{"key": "value"}` |
 | `array` | Generic array | `array[10]`, `array[*]` |
+| `queue` | FIFO queue (use `queue.type`) | `queue.string`, `queue.int` |
 
 ### Type Inference
 ```javascript
@@ -2222,9 +2223,73 @@ call array.expand(array, newSize);
 call array.sort(array);
 call array.fill(array, value);
 
+// Add and remove elements
+call array.add(array, value);           // Add to end
+call array.add(array, value, index);    // Insert at index
+var removed = call array.remove(array, index);  // Remove at index, returns removed value
+
 // Encoding
 var encoded = call array.base64encode(byteArray);
 var decoded = call array.base64decode(encodedString);
+```
+
+### Queue Functions
+
+Queues provide FIFO (First-In-First-Out) data structures. Declare queues using the `queue.type` syntax:
+
+```javascript
+// Queue declaration
+var stringQueue: queue.string;
+var intQueue: queue.int;
+var doubleQueue: queue.double;
+
+// Also available: queue.byte, queue.long, queue.float, queue.bool, queue.date
+```
+
+#### Queue Operations
+
+```javascript
+// Add element to the back of the queue
+call queue.enqueue(queue, value);
+
+// Remove and return element from the front
+var item = call queue.dequeue(queue);
+
+// View front element without removing
+var item = call queue.peek(queue);
+
+// Get number of elements
+var count = call queue.size(queue);
+
+// Check if queue is empty
+var isEmpty = call queue.isEmpty(queue);
+
+// Remove all elements
+call queue.clear(queue);
+
+// Check if queue contains a value
+var found = call queue.contains(queue, value);
+
+// Convert queue to array
+var arr = call queue.toArray(queue);
+```
+
+#### Queue Example: Task Processing
+
+```javascript
+// Create a task queue
+var tasks: queue.string;
+
+// Add tasks
+call queue.enqueue(tasks, "Process file A");
+call queue.enqueue(tasks, "Process file B");
+call queue.enqueue(tasks, "Send notification");
+
+// Process all tasks in order
+while !call queue.isEmpty(tasks) {
+    var task = call queue.dequeue(tasks);
+    print "Executing: " + task;
+}
 ```
 
 ### System Functions

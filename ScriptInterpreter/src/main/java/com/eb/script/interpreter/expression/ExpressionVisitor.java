@@ -16,6 +16,8 @@ public interface ExpressionVisitor {
 
     Object visitArrayInitExpression(ArrayExpression expr) throws InterpreterError;
 
+    Object visitQueueInitExpression(QueueExpression expr) throws InterpreterError;
+
     Object visitArrayLiteralExpression(ArrayLiteralExpression expr) throws InterpreterError;
 
     Object visitIndexExpression(IndexExpression expr) throws InterpreterError;
