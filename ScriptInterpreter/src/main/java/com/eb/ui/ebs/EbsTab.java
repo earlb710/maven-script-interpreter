@@ -776,7 +776,16 @@ public class EbsTab extends Tab {
         }
 
         StyleSpans<Collection<String>> spans = builder.create();
+        
+        // Preserve scroll position when applying style spans
+        double scrollY = dispArea.getEstimatedScrollY();
+        
         dispArea.setStyleSpans(0, spans);
+        
+        // Restore scroll position after style update
+        Platform.runLater(() -> {
+            dispArea.scrollYToPixel(scrollY);
+        });
     }
 
     public String getEditorText() {

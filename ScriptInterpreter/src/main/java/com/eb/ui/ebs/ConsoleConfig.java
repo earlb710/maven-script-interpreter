@@ -256,6 +256,8 @@ public class ConsoleConfig {
         // to ensure search matches are readable. Uses configurable colors.
         String findHighlightColor = colors.getOrDefault("find-highlight-color", "#000000");
         String findHighlightBackground = colors.getOrDefault("find-highlight-background", "#ddb107");
+        // Current match uses a brighter background color for better visibility
+        String findCurrentBackground = colors.getOrDefault("find-current-background", "#ffdd33");
         
         css.append("/* Find highlighting - overrides syntax highlighting for readability */\n");
         css.append(".find-hit,\n");
@@ -278,7 +280,7 @@ public class ConsoleConfig {
         css.append(".editor-text .text.find-current {\n");
         css.append("    -fx-fill: ").append(findHighlightColor).append(" !important;\n");
         css.append("    -fx-font-weight: bold !important;\n");
-        css.append("    -rtfx-background-color: ").append(findHighlightBackground).append(" !important;\n");
+        css.append("    -rtfx-background-color: ").append(findCurrentBackground).append(" !important;\n");
         css.append("}\n\n");
         
         return css.toString();
