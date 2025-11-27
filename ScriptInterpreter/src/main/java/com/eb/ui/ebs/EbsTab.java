@@ -829,10 +829,8 @@ public class EbsTab extends Tab {
         editorChangeTimer = new PauseTransition(Duration.seconds(2));
         editorChangeTimer.setOnFinished(e -> {
             if (findBar.isVisible() && highlightsStale) {
-                Platform.runLater(() -> {
-                    runSearch();
-                    highlightsStale = false;
-                });
+                runSearch();
+                highlightsStale = false;
             }
         });
         
@@ -878,22 +876,14 @@ public class EbsTab extends Tab {
         // Button actions - next/prev immediately re-run highlighting if stale
         btnNext.setOnAction(e -> {
             Platform.runLater(() -> {
-                if (highlightsStale) {
-                    editorChangeTimer.stop();
-                    runSearch();
-                    highlightsStale = false;
-                } else {
+                if (!refreshHighlightsIfStale()) {
                     gotoNext();
                 }
             });
         });
         btnPrev.setOnAction(e -> {
             Platform.runLater(() -> {
-                if (highlightsStale) {
-                    editorChangeTimer.stop();
-                    runSearch();
-                    highlightsStale = false;
-                } else {
+                if (!refreshHighlightsIfStale()) {
                     gotoPrev();
                 }
             });
@@ -975,7 +965,7 @@ public class EbsTab extends Tab {
         
         // Only highlight when there are more than 2 characters (at least 3)
         if (q.length() < MIN_FIND_CHARS) {
-            lblCount.setText("Type " + MIN_FIND_CHARS + "+ chars");
+            lblCount.setText("Enter " + MIN_FIND_CHARS + "+ chars to search");
             lastMatches = java.util.Collections.emptyList();
             return;
         }
@@ -1106,6 +1096,21 @@ public class EbsTab extends Tab {
             dispArea.removeStyleFromRange(r[0], r[1], "find-hit");
             dispArea.removeStyleFromRange(r[0], r[1], "find-current");
         }
+    }
+    
+    /**
+     * Refresh highlights if they are stale due to editor changes.
+     * Stops any pending timer and runs a fresh search.
+     * @return true if highlights were refreshed, false if they were not stale
+     */
+    private boolean refreshHighlightsIfStale() {
+        if (highlightsStale) {
+            editorChangeTimer.stop();
+            runSearch();
+            highlightsStale = false;
+            return true;
+        }
+        return false;
     }
 
     private void replaceOne() {
