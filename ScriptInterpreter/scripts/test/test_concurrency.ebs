@@ -50,7 +50,7 @@ screen concurrencyTest1 = {
     "title": "Concurrency Test 1: Shared Variables",
     "width": 550,
     "height": 450,
-    "startup": "print 'STARTUP (Test1): Reading shared counter = ' + sharedCounter; localStatus = 'Screen started, counter was ' + sharedCounter;",
+    "startup": "print 'STARTUP (Test1): Reading shared counter = ' + sharedCounter;",
     "cleanup": "print 'CLEANUP (Test1): Final counter = ' + sharedCounter;",
     "vars": [
         {
@@ -235,8 +235,8 @@ screen concurrencyStress = {
     "title": "Concurrency Test 3: Stress Test",
     "width": 500,
     "height": 350,
-    "startup": "iterations = 0;",
-    "cleanup": "print 'STRESS TEST: Completed ' + iterations + ' iterations, final counter = ' + sharedCounter;",
+    "startup": "print 'STRESS TEST: Starting with shared counter = ' + sharedCounter;",
+    "cleanup": "print 'STRESS TEST: Final counter = ' + sharedCounter;",
     "vars": [
         {
             "name": "iterations",
