@@ -43,6 +43,8 @@ public enum DataType {
                     return new Object[length];
                 }
                 case QUEUE -> {
+                    // Queues don't use this method directly (they use ArrayDeque internally)
+                    // but kept for consistency with other DataTypes
                     return new Object[length];
                 }
                 case INTEGER -> {
