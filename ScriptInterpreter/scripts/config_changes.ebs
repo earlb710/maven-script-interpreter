@@ -163,8 +163,8 @@ print "Building color editor screen configuration...";
 print "Creating color editor screen with colors from console.cfg...";
 screen colorEditorScreen = {
     "title": "Console Configuration Color Editor",
-    "width": 1150,
-    "height": 550,
+    "width": 1000,
+    "height": 664,
     "maximize": false,
     "vars": [
         {
@@ -465,7 +465,7 @@ screen colorEditorScreen = {
                                                         "groupLabelBackground": "#efefef",
                                                         "groupLabelText": "Console Colors",
                                                         "groupLabelAlignment": "left",
-                                                        "groupLabelOffset": "top",
+                                                        "groupLabelOffset": "bottom",
                                                         "style": "-fx-spacing: 5; -fx-padding: 5;",
                                                         "items": [
                                                             {"name": "info_item", "varref": "info"},
@@ -509,7 +509,7 @@ screen colorEditorScreen = {
                                                         "groupLabelColor": "#444444",
                                                         "groupLabelBackground": "#efefef",
                                                         "groupLabelAlignment": "left",
-                                                        "groupLabelOffset": "top",
+                                                        "groupLabelOffset": "bottom",
                                                         "style": "-fx-spacing: 5; -fx-padding: 5;",
                                                         "items": [
                                                             {"name": "code_item", "varref": "code"},
@@ -540,7 +540,7 @@ screen colorEditorScreen = {
                                                         "groupLabelColor": "#444444",
                                                         "groupLabelBackground": "#efefef",
                                                         "groupLabelAlignment": "left",
-                                                        "groupLabelOffset": "top",
+                                                        "groupLabelOffset": "bottom",
                                                         "style": "-fx-spacing: 5; -fx-padding: 5;",
                                                         "items": [
                                                             {"name": "tabBackground_item", "varref": "tabBackground"},
