@@ -1,11 +1,12 @@
 package com.eb.script.interpreter.screen;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Represents a set of variables in a screen definition.
  * Variables are grouped into sets with a name and visibility indicator.
+ * Uses ConcurrentHashMap for thread-safe access from screen threads.
  * 
  * @author Earl
  */
@@ -18,13 +19,14 @@ public class VarSet {
     private String scope;
     
     // Map of variables in this set, keyed by lowercase varName
+    // Uses ConcurrentHashMap for thread-safe access
     private Map<String, Var> variables;
     
     /**
      * Default constructor
      */
     public VarSet() {
-        this.variables = new HashMap<>();
+        this.variables = new ConcurrentHashMap<>();
         this.scope = "visible"; // Default to visible
     }
     

@@ -1,17 +1,19 @@
 package com.eb.script.interpreter;
 
 import com.eb.script.token.RecordType;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * Thread-safe storage for environment values (variables) and record type metadata.
+ * Uses ConcurrentHashMap for thread-safe access from screen threads.
  *
  * @author Earl Bosch
  */
 public class EnvironmentValues {
 
-    final Map<String, Object> values = new HashMap<>();
-    final Map<String, RecordType> recordTypes = new HashMap<>(); // Store record type metadata
+    final Map<String, Object> values = new ConcurrentHashMap<>();
+    final Map<String, RecordType> recordTypes = new ConcurrentHashMap<>(); // Store record type metadata
     final EnvironmentValues enclosing;
 
     public EnvironmentValues() {

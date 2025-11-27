@@ -64,9 +64,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Parser {
 
@@ -117,7 +117,7 @@ public class Parser {
     private void parse() throws ParseError {
         current = 0;
         currToken = tokens.get(current);
-        blocks = new HashMap();
+        blocks = new ConcurrentHashMap<>();
         
         // Separate imports from other statements
         List<Statement> importStatements = new ArrayList<>();
