@@ -952,13 +952,23 @@ public class EbsTab extends Tab {
         btnReplace.setDisable(!withReplace);
         btnReplaceAll.setDisable(!withReplace);
         
-        // Populate find field with current selection
+        // Clear find field and populate with current selection if any
         String selectedText = dispArea.getSelectedText();
+        suppressFindSearch = true;
         if (selectedText != null && !selectedText.isEmpty()) {
-            suppressFindSearch = true;
             findField.setText(selectedText);
-            suppressFindSearch = false;
-            // Explicitly run search after populating the field
+        } else {
+            // Clear the find field when showing find bar with no selection
+            findField.setText("");
+            clearHighlights();
+            lastMatches = java.util.Collections.emptyList();
+            currentIndex = -1;
+            lblCount.setText("");
+        }
+        suppressFindSearch = false;
+        
+        // Explicitly run search after populating the field (only if there's text)
+        if (!findField.getText().isEmpty()) {
             runSearch();
         }
         
