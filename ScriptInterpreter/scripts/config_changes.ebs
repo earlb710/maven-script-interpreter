@@ -425,8 +425,8 @@ screen colorEditorScreen = {
                 "style": "-fx-spacing: 4; -fx-padding: 4; -fx-alignment: CENTER_LEFT;",
                 "items": [
                     {"name": "profile_item", "varref": "profile"},
-                    {"name": "addProfileBtn", "type": "button", "labelText": "+", "style": "-fx-min-width: 30;", "tooltip": "Add a new profile", "onClick": "print \"Add profile button clicked\";"},
-                    {"name": "removeProfileBtn", "type": "button", "labelText": "-", "style": "-fx-min-width: 30;", "tooltip": "Remove current profile", "onClick": "print \"Remove profile button clicked\";"}
+                    {"name": "addProfileBtn", "type": "button", "labelText": "+", "style": "-fx-min-width: 30;", "tooltip": "Add a new profile", "onClick": "var newProfile: string = call system.inputDialog(\"New Profile Name\", \"Enter a name for the new profile\"); if newProfile != \"\" then { print \"Adding profile: \" + newProfile; call system.alertDialog(\"Profile '\" + newProfile + \"' added.\", \"Profile Added\", \"info\"); } else { print \"Add profile cancelled\"; }"},
+                    {"name": "removeProfileBtn", "type": "button", "labelText": "-", "style": "-fx-min-width: 30;", "tooltip": "Remove current profile", "onClick": "if colorEditorScreen.profile == \"default\" then { call system.alertDialog(\"Cannot remove the default profile.\", \"Remove Profile\", \"warn\"); } else { var confirmRemove: bool = call system.confirmDialog(\"Are you sure you want to remove the profile '\" + colorEditorScreen.profile + \"'?\", \"Remove Profile\", \"This action cannot be undone\"); if confirmRemove then { print \"Removing profile: \" + colorEditorScreen.profile; colorEditorScreen.profile = \"default\"; call system.alertDialog(\"Profile removed. Switched to default.\", \"Profile Removed\", \"info\"); } else { print \"Remove profile cancelled\"; } }"}
                 ]
             },
             {
