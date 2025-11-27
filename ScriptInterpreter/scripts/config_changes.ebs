@@ -159,27 +159,6 @@ print "";
 // Build the screen configuration using $var references
 print "Building color editor screen configuration...";
 
-// Define functions for profile management
-addProfile() {
-    var newName: string = call system.inputDialog("Add Profile", "Enter new profile name:", "");
-    if newName != "" then {
-        print "Adding profile: " + newName;
-        call system.alertDialog("Profile '" + newName + "' would be added.\n(Profile management requires restart)", "Add Profile", "info");
-    }
-}
-
-removeProfile() {
-    if colorEditorScreen.profile == "default" then {
-        call system.alertDialog("Cannot delete the default profile.", "Delete Profile", "warning");
-    } else {
-        var confirmed: bool = call system.confirmDialog("Are you sure you want to delete profile '" + colorEditorScreen.profile + "'?", "Delete Profile", "Confirm Delete");
-        if confirmed then {
-            print "Removing profile: " + colorEditorScreen.profile;
-            call system.alertDialog("Profile '" + colorEditorScreen.profile + "' would be removed.\n(Profile management requires restart)", "Remove Profile", "info");
-        }
-    }
-}
-
 // Create the screen with $var references (no quotes around $variables)
 print "Creating color editor screen with colors from console.cfg...";
 screen colorEditorScreen = {
@@ -446,8 +425,8 @@ screen colorEditorScreen = {
                 "style": "-fx-spacing: 4; -fx-padding: 4; -fx-alignment: CENTER_LEFT;",
                 "items": [
                     {"name": "profile_item", "varref": "profile"},
-                    {"name": "addProfileBtn", "type": "button", "labelText": "+", "style": "-fx-min-width: 30;", "tooltip": "Add a new profile", "onClick": "call addProfile();"},
-                    {"name": "removeProfileBtn", "type": "button", "labelText": "-", "style": "-fx-min-width: 30;", "tooltip": "Remove current profile", "onClick": "call removeProfile();"}
+                    {"name": "addProfileBtn", "type": "button", "labelText": "+", "style": "-fx-min-width: 30;", "tooltip": "Add a new profile", "onClick": "print \"Add profile button clicked\";"},
+                    {"name": "removeProfileBtn", "type": "button", "labelText": "-", "style": "-fx-min-width: 30;", "tooltip": "Remove current profile", "onClick": "print \"Remove profile button clicked\";"}
                 ]
             },
             {
