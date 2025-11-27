@@ -105,7 +105,7 @@ screen concurrencyTest1 = {
                     "display": {
                         "type": "button",
                         "labelText": "Read Shared Counter",
-                        "onClick": "localStatus = 'Shared counter = ' + sharedCounter; print 'Screen thread read sharedCounter: ' + sharedCounter;"
+                        "onClick": "concurrencyTest1.localStatus = 'Shared counter = ' + sharedCounter; print 'Screen thread read sharedCounter: ' + sharedCounter;"
                     }
                 },
                 {
@@ -114,7 +114,7 @@ screen concurrencyTest1 = {
                     "display": {
                         "type": "button",
                         "labelText": "Increment Shared Counter",
-                        "onClick": "sharedCounter = sharedCounter + incrementAmount; localStatus = 'Incremented to ' + sharedCounter; print 'Screen thread incremented sharedCounter to: ' + sharedCounter;"
+                        "onClick": "sharedCounter = sharedCounter + concurrencyTest1.incrementAmount; concurrencyTest1.localStatus = 'Incremented to ' + sharedCounter; print 'Screen thread incremented sharedCounter to: ' + sharedCounter;"
                     }
                 },
                 {
@@ -123,7 +123,7 @@ screen concurrencyTest1 = {
                     "display": {
                         "type": "button",
                         "labelText": "Call incrementAndLog Function",
-                        "onClick": "var result: int = call incrementAndLog(incrementAmount); localStatus = 'Function returned: ' + result;"
+                        "onClick": "var result: int = call incrementAndLog(concurrencyTest1.incrementAmount); concurrencyTest1.localStatus = 'Function returned: ' + result;"
                     }
                 },
                 {
@@ -132,7 +132,7 @@ screen concurrencyTest1 = {
                     "display": {
                         "type": "button",
                         "labelText": "Call Nested Function (depth=3)",
-                        "onClick": "var result: string = call nestedCall(3); localStatus = result; print 'Nested call result: ' + result;"
+                        "onClick": "var result: string = call nestedCall(3); concurrencyTest1.localStatus = result; print 'Nested call result: ' + result;"
                     }
                 },
                 {
@@ -194,7 +194,7 @@ screen concurrencyTest2 = {
                     "display": {
                         "type": "button",
                         "labelText": "Read All Shared Variables",
-                        "onClick": "lastRead = call getStatus(); print 'Test2 status: ' + lastRead;"
+                        "onClick": "concurrencyTest2.lastRead = call getStatus(); print 'Test2 status: ' + concurrencyTest2.lastRead;"
                     }
                 },
                 {
@@ -203,7 +203,7 @@ screen concurrencyTest2 = {
                     "display": {
                         "type": "button",
                         "labelText": "Increment Counter by 5",
-                        "onClick": "var result: int = call incrementAndLog(5); lastRead = 'Incremented to: ' + result;"
+                        "onClick": "var result: int = call incrementAndLog(5); concurrencyTest2.lastRead = 'Incremented to: ' + result;"
                     }
                 },
                 {
@@ -288,7 +288,7 @@ screen concurrencyStress = {
                     "display": {
                         "type": "button",
                         "labelText": "Increment 10 Times",
-                        "onClick": "var i: int = 0; while i < 10 do sharedCounter = sharedCounter + 1; i = i + 1; end; iterations = iterations + 10; result = 'Counter now: ' + sharedCounter;"
+                        "onClick": "var i: int = 0; while i < 10 do sharedCounter = sharedCounter + 1; i = i + 1; end; concurrencyStress.iterations = concurrencyStress.iterations + 10; concurrencyStress.result = 'Counter now: ' + sharedCounter;"
                     }
                 },
                 {
@@ -297,7 +297,7 @@ screen concurrencyStress = {
                     "display": {
                         "type": "button",
                         "labelText": "Call Function 10 Times",
-                        "onClick": "var i: int = 0; while i < 10 do call incrementAndLog(1); i = i + 1; end; iterations = iterations + 10; result = 'Counter now: ' + sharedCounter;"
+                        "onClick": "var i: int = 0; while i < 10 do call incrementAndLog(1); i = i + 1; end; concurrencyStress.iterations = concurrencyStress.iterations + 10; concurrencyStress.result = 'Counter now: ' + sharedCounter;"
                     }
                 },
                 {
@@ -306,7 +306,7 @@ screen concurrencyStress = {
                     "display": {
                         "type": "button",
                         "labelText": "Reset Counter",
-                        "onClick": "sharedCounter = 0; iterations = 0; result = 'Reset complete';"
+                        "onClick": "sharedCounter = 0; concurrencyStress.iterations = 0; concurrencyStress.result = 'Reset complete';"
                     }
                 },
                 {
