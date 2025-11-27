@@ -1247,6 +1247,13 @@ public class BuiltinsScreen {
                 }
             }
             case "recordref" -> area.recordRef = value != null ? String.valueOf(value) : null;
+            case "visible", "managed" -> {
+                // These are UI-only properties that are applied directly to the container
+                // They don't need to be stored in AreaDefinition since they're handled by applyPropertyToAreaContainer
+                if (!(value instanceof Boolean)) {
+                    throw new InterpreterError("scr.setAreaProperty: '" + propertyName + "' property must be a boolean");
+                }
+            }
             case "screenname", "areatype" -> 
                 throw new InterpreterError("scr.setAreaProperty: property '" + propertyName + "' is read-only");
             default -> throw new InterpreterError("scr.setAreaProperty: unknown property '" + propertyName + "'");
