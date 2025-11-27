@@ -1,0 +1,208 @@
+// Test Script: Dialog Builtins from Button onClick Handlers
+// 
+// This script tests that dialog builtins (alertDialog, confirmDialog, inputDialog)
+// work correctly when called from screen button onClick handlers, which run on
+// the JavaFX Application Thread.
+//
+// Before the fix, these dialogs would cause a deadlock when called from button
+// handlers because they used Platform.runLater() + CountDownLatch while already
+// on the FX thread.
+//
+// Author: EBS Script Collection
+// Date: 2025-11-27
+
+print "=== Dialog from Button onClick Test ===";
+print "";
+print "This screen tests all three dialog builtins when called from buttons:";
+print "  - system.alertDialog (message dialog)";
+print "  - system.confirmDialog (YES/NO dialog)";
+print "  - system.inputDialog (text input dialog)";
+print "";
+print "Before the fix, clicking any button would cause a deadlock.";
+print "After the fix, dialogs should appear and work normally.";
+print "";
+
+// Create a test screen with buttons that call dialog builtins
+screen dialogTestScreen = {
+    "title": "Test: Dialogs from Button onClick",
+    "width": 500,
+    "height": 400,
+    "vars": [
+        {
+            "name": "lastResult",
+            "type": "string",
+            "default": "(No dialog called yet)",
+            "display": {
+                "type": "textfield",
+                "labelText": "Last Result:",
+                "editable": false
+            }
+        },
+        {
+            "name": "confirmResult",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Confirm Result:",
+                "editable": false
+            }
+        },
+        {
+            "name": "inputResult",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Input Result:",
+                "editable": false
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "rootArea",
+            "type": "vbox",
+            "style": "-fx-spacing: 15; -fx-padding: 20;",
+            "areas": [
+                {
+                    "name": "infoArea",
+                    "type": "vbox",
+                    "style": "-fx-spacing: 5;",
+                    "items": [
+                        {
+                            "name": "infoLabel",
+                            "display": {
+                                "type": "label",
+                                "labelText": "Click buttons below to test dialogs from onClick handlers:"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "resultsArea",
+                    "type": "vbox",
+                    "groupBorder": "lowered",
+                    "groupBorderColor": "#cccccc",
+                    "groupLabelText": "Results",
+                    "style": "-fx-spacing: 5; -fx-padding: 10;",
+                    "items": [
+                        {"name": "lastResultItem", "varRef": "lastResult"},
+                        {"name": "confirmResultItem", "varRef": "confirmResult"},
+                        {"name": "inputResultItem", "varRef": "inputResult"}
+                    ]
+                },
+                {
+                    "name": "alertButtonsArea",
+                    "type": "hbox",
+                    "style": "-fx-spacing: 10;",
+                    "items": [
+                        {
+                            "name": "alertInfoBtn",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Alert (Info)",
+                                "tooltip": "Test system.alertDialog with info type",
+                                "onClick": "call system.alertDialog(\"This is an INFO alert from button onClick!\", \"Info Alert\", \"info\"); dialogTestScreen.lastResult = \"Alert (info) shown\";"
+                            }
+                        },
+                        {
+                            "name": "alertWarnBtn",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Alert (Warning)",
+                                "tooltip": "Test system.alertDialog with warning type",
+                                "onClick": "call system.alertDialog(\"This is a WARNING alert from button onClick!\", \"Warning Alert\", \"warning\"); dialogTestScreen.lastResult = \"Alert (warning) shown\";"
+                            }
+                        },
+                        {
+                            "name": "alertErrorBtn",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Alert (Error)",
+                                "tooltip": "Test system.alertDialog with error type",
+                                "onClick": "call system.alertDialog(\"This is an ERROR alert from button onClick!\", \"Error Alert\", \"error\"); dialogTestScreen.lastResult = \"Alert (error) shown\";"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "confirmButtonArea",
+                    "type": "hbox",
+                    "style": "-fx-spacing: 10;",
+                    "items": [
+                        {
+                            "name": "confirmBtn",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Confirm Dialog",
+                                "tooltip": "Test system.confirmDialog",
+                                "onClick": "var result: bool = call system.confirmDialog(\"Do you want to proceed?\", \"Confirm\", \"Click Yes or No\"); if result then { dialogTestScreen.confirmResult = \"User clicked YES\"; dialogTestScreen.lastResult = \"Confirm: YES\"; } else { dialogTestScreen.confirmResult = \"User clicked NO\"; dialogTestScreen.lastResult = \"Confirm: NO\"; }"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "inputButtonArea",
+                    "type": "hbox",
+                    "style": "-fx-spacing: 10;",
+                    "items": [
+                        {
+                            "name": "inputBtn",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Input Dialog",
+                                "tooltip": "Test system.inputDialog",
+                                "onClick": "var input: string = call system.inputDialog(\"Enter Your Name\", \"Please enter your name below\", \"Guest\"); if input != \"\" then { dialogTestScreen.inputResult = \"You entered: \" + input; dialogTestScreen.lastResult = \"Input received: \" + input; } else { dialogTestScreen.inputResult = \"(cancelled)\"; dialogTestScreen.lastResult = \"Input cancelled\"; }"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "chainedButtonArea",
+                    "type": "hbox",
+                    "style": "-fx-spacing: 10;",
+                    "items": [
+                        {
+                            "name": "chainedBtn",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Chained Dialogs",
+                                "tooltip": "Test multiple dialogs in sequence",
+                                "onClick": "var proceed: bool = call system.confirmDialog(\"This will show multiple dialogs. Continue?\", \"Chained Test\"); if proceed then { var name: string = call system.inputDialog(\"Enter Name\", \"What is your name?\", \"User\"); if name != \"\" then { call system.alertDialog(\"Hello, \" + name + \"! Test completed successfully.\", \"Success\", \"info\"); dialogTestScreen.lastResult = \"Chained test completed for: \" + name; } else { dialogTestScreen.lastResult = \"Chained test cancelled at input\"; } } else { dialogTestScreen.lastResult = \"Chained test cancelled at confirm\"; }"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "closeButtonArea",
+                    "type": "hbox",
+                    "style": "-fx-spacing: 10; -fx-padding: 10 0 0 0; -fx-alignment: CENTER_RIGHT;",
+                    "items": [
+                        {
+                            "name": "closeBtn",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Close",
+                                "onClick": "close screen;"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+};
+
+print "Test screen created successfully!";
+print "";
+print "Showing dialog test screen...";
+print "";
+
+show screen dialogTestScreen;
+
+print "";
+print "=== Dialog from Button onClick Test Complete ===";
+print "";
+print "If you were able to interact with all dialogs without freezing,";
+print "the JavaFX Application Thread fix is working correctly!";
