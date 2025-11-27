@@ -40,8 +40,8 @@ public class DisplayItem {
     String labelTextAlignment;
     // Options/values for selection controls (ComboBox, ChoiceBox, ListView)
     List<String> options;
-    // Options map for selection controls where keys are display text and values are data values
-    // When populated, the display text is shown to users but the data value is stored
+    // Options map for selection controls where keys are data values and values are display text
+    // When populated, the display text (map value) is shown to users but the data value (map key) is stored
     Map<String, String> optionsMap;
     // Label text color
     String labelColor;
@@ -144,7 +144,7 @@ public class DisplayItem {
     
     /**
      * Gets the optionsMap for selection controls.
-     * The map keys are display text (shown to users) and values are data values (stored when selected).
+     * The map keys are data values (stored when selected) and values are display text (shown to users).
      * @return The options map, or null if not set
      */
     public Map<String, String> getOptionsMap() {
@@ -153,7 +153,7 @@ public class DisplayItem {
     
     /**
      * Sets the optionsMap for selection controls.
-     * @param optionsMap The map of display text to data values
+     * @param optionsMap The map of data values to display text
      */
     public void setOptionsMap(Map<String, String> optionsMap) {
         this.optionsMap = optionsMap;

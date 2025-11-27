@@ -2,8 +2,8 @@
 // Description: Test map type values for initializing and dynamically updating choice controls
 // Author: GitHub Copilot
 // Date: 2025-11-26
-// Purpose: Test the new optionsMap feature that allows:
-//   1. Initializing ChoiceBox/ComboBox with a map (display text -> data value)
+// Purpose: Test the optionsMap feature that allows:
+//   1. Initializing ChoiceBox/ComboBox with a map (data value -> display text)
 //   2. Using scr.setItemChoiceOptions() to update options at runtime
 //   3. Using scr.getItemChoiceOptions() to retrieve current options
 
@@ -12,7 +12,7 @@ print "Test: ChoiceBox and ComboBox Map Options";
 print "================================================================================";
 print "";
 print "This test verifies:";
-print "  1. Initializing a ChoiceBox with a map where keys=display text, values=data values";
+print "  1. Initializing a ChoiceBox with a map where keys=data values, values=display text";
 print "  2. Initializing a ComboBox with a map";
 print "  3. Using scr.setItemChoiceOptions() to update options at runtime";
 print "  4. Using scr.getItemChoiceOptions() to retrieve current options";
@@ -39,10 +39,10 @@ screen testChoiceOptions = {
                 "labelText": "Country (ChoiceBox):",
                 "promptHelp": "Select your country",
                 "options": {
-                    "United States": "US",
-                    "Canada": "CA",
-                    "United Kingdom": "UK",
-                    "Australia": "AU"
+                    "US": "United States",
+                    "CA": "Canada",
+                    "UK": "United Kingdom",
+                    "AU": "Australia"
                 }
             }
         },
@@ -55,10 +55,10 @@ screen testChoiceOptions = {
                 "labelText": "Category (ComboBox):",
                 "promptHelp": "Select a category",
                 "options": {
-                    "Technology": "tech",
-                    "Sports": "sports",
-                    "Entertainment": "entertainment",
-                    "Science": "science"
+                    "tech": "Technology",
+                    "sports": "Sports",
+                    "entertainment": "Entertainment",
+                    "science": "Science"
                 }
             }
         },
@@ -140,7 +140,7 @@ screen testChoiceOptions = {
                     "display": {
                         "type": "button",
                         "labelText": "Change Dynamic Options",
-                        "onClick": "var newOptions:map = {\"Option A\": \"optA\", \"Option B\": \"optB\", \"Option C\": \"optC\"}; call scr.setItemChoiceOptions(\"testChoiceOptions\", \"dynamicChoiceField\", newOptions); print \"Dynamic options updated!\";"
+                        "onClick": "var newOptions:map = {\"optA\": \"Option A\", \"optB\": \"Option B\", \"optC\": \"Option C\"}; call scr.setItemChoiceOptions(\"testChoiceOptions\", \"dynamicChoiceField\", newOptions); print \"Dynamic options updated!\";"
                     }
                 },
                 {
@@ -248,14 +248,14 @@ print "Test Complete!";
 print "================================================================================";
 print "";
 print "Summary of features tested:";
-print "  ✓ Map-based options for ChoiceBox (display text -> data value)";
-print "  ✓ Map-based options for ComboBox (display text -> data value)";
+print "  ✓ Map-based options for ChoiceBox (data value -> display text)";
+print "  ✓ Map-based options for ComboBox (data value -> display text)";
 print "  ✓ scr.setItemChoiceOptions() to update options at runtime";
 print "  ✓ scr.getItemChoiceOptions() to retrieve current options";
 print "  ✓ Data value binding (stores code, shows display text)";
 print "";
 print "IMPORTANT:";
-print "  - When using map options, KEYS are shown as display text";
-print "  - VALUES are stored as the actual data when selected";
-print "  - This allows showing 'United States' while storing 'US'";
+print "  - When using map options, KEYS are the data values (stored internally)";
+print "  - VALUES are shown as the display text to users";
+print "  - This allows storing 'US' while showing 'United States'";
 print "";
