@@ -747,6 +747,12 @@ public class EbsTab extends Tab {
     }
 
     private void applyLexerSpans(String src) {
+        // When find bar is active and we're in the middle of editing (highlightsStale),
+        // skip all styling to avoid scroll jumps. Styling will be reapplied after the delay.
+        if (findBar != null && findBar.isVisible() && highlightsStale) {
+            return;
+        }
+        
         List<EbsToken> tokens = ebsLexer.tokenize(src); // returns List<EbsToken> with start/end/style
         // Build spans from token positions
         StyleSpansBuilder<Collection<String>> builder = new StyleSpansBuilder<>();
@@ -782,18 +788,6 @@ public class EbsTab extends Tab {
         double scrollY = dispArea.getEstimatedScrollY();
         
         dispArea.setStyleSpans(0, spans);
-        
-        // Reapply find highlights that are still pending (stale but visible)
-        // This ensures find highlights survive lexer re-highlighting
-        if (findBar != null && findBar.isVisible() && !stalePendingClear.isEmpty()) {
-            int textLen = src.length();
-            for (int[] r : stalePendingClear) {
-                // Only reapply if the range is still valid in the new text
-                if (r[0] >= 0 && r[1] <= textLen && r[0] < r[1]) {
-                    dispArea.addStyleToRange(r[0], r[1], "find-hit");
-                }
-            }
-        }
         
         // Restore scroll position after style update
         Platform.runLater(() -> {
@@ -851,7 +845,9 @@ public class EbsTab extends Tab {
         editorChangeTimer = new PauseTransition(Duration.seconds(2));
         editorChangeTimer.setOnFinished(e -> {
             if (findBar.isVisible() && highlightsStale) {
-                // Only refresh highlights, don't jump to a search location
+                // First reapply syntax highlighting (was skipped during editing)
+                applyLexerSpans(dispArea.getText());
+                // Then refresh find highlights, don't jump to a search location
                 runSearchHighlightOnly();
                 highlightsStale = false;
             }
