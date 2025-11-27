@@ -43,6 +43,7 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import javafx.geometry.Pos;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -69,10 +70,15 @@ public class EbsTab extends Tab {
     private boolean suppressDirty = false; // avoid marking dirty during programmatic loads
 
     private HBox findBar;
-    private TextField findField, replaceField;
+    private ComboBox<String> findField;
+    private TextField replaceField;
     private CheckBox chkCase, chkWord, chkRegex;
     private Button btnNext, btnPrev, btnReplace, btnReplaceAll, btnClose;
     private Label lblCount;
+    
+    // Search history for find field (max 10 items)
+    private static final int MAX_SEARCH_HISTORY = 10;
+    private final javafx.collections.ObservableList<String> searchHistory = javafx.collections.FXCollections.observableArrayList();
 
     private List<int[]> lastMatches = java.util.Collections.emptyList(); // each int[]{start,endExclusive}
     private List<int[]> stalePendingClear = java.util.Collections.emptyList(); // old matches pending clear after text change
@@ -437,8 +443,10 @@ public class EbsTab extends Tab {
         outputAreaScroller.setPadding(Insets.EMPTY);
         outputAreaFrame.setPadding(Insets.EMPTY);
 
-        findField = new TextField();
+        findField = new ComboBox<>(searchHistory);
+        findField.setEditable(true);
         findField.setPromptText("Find");
+        findField.setPrefWidth(200);
         replaceField = new TextField();
         replaceField.setPromptText("Replace");
 
@@ -872,8 +880,17 @@ public class EbsTab extends Tab {
             }
         });
         
-        // Live search when typing in find field
-        findField.textProperty().addListener((obs, o, n) -> {
+        // Live search when typing in find field (use the editor's text property for editable combobox)
+        findField.getEditor().textProperty().addListener((obs, o, n) -> {
+            if (!suppressFindSearch) {
+                Platform.runLater(() -> {
+                    runSearch();
+                });
+            }
+        });
+        
+        // Also search when selecting from dropdown history
+        findField.setOnAction(e -> {
             if (!suppressFindSearch) {
                 Platform.runLater(() -> {
                     runSearch();
@@ -956,10 +973,10 @@ public class EbsTab extends Tab {
         String selectedText = dispArea.getSelectedText();
         suppressFindSearch = true;
         if (selectedText != null && !selectedText.isEmpty()) {
-            findField.setText(selectedText);
+            findField.getEditor().setText(selectedText);
         } else {
             // Clear the find field when showing find bar with no selection
-            findField.setText("");
+            findField.getEditor().setText("");
             clearHighlights();
             lastMatches = java.util.Collections.emptyList();
             currentIndex = -1;
@@ -968,7 +985,7 @@ public class EbsTab extends Tab {
         suppressFindSearch = false;
         
         // Explicitly run search after populating the field (only if there's text)
-        if (!findField.getText().isEmpty()) {
+        if (!findField.getEditor().getText().isEmpty()) {
             runSearch();
         }
         
@@ -991,7 +1008,7 @@ public class EbsTab extends Tab {
     private void runSearch() {
         clearHighlights();
         currentIndex = -1;
-        String q = findField.getText();
+        String q = findField.getEditor().getText();
         if (q == null || q.isEmpty()) {
             lblCount.setText("");
             lastMatches = java.util.Collections.emptyList();
@@ -1004,6 +1021,9 @@ public class EbsTab extends Tab {
             lastMatches = java.util.Collections.emptyList();
             return;
         }
+        
+        // Add to search history if not already present
+        addToSearchHistory(q);
 
         boolean cs = chkCase.isSelected();
         boolean ww = chkWord.isSelected();
@@ -1076,7 +1096,7 @@ public class EbsTab extends Tab {
      */
     private void runSearchHighlightOnly() {
         clearHighlights();
-        String q = findField.getText();
+        String q = findField.getEditor().getText();
         if (q == null || q.isEmpty() || q.length() < MIN_FIND_CHARS) {
             lastMatches = java.util.Collections.emptyList();
             currentIndex = -1;
@@ -1203,6 +1223,25 @@ public class EbsTab extends Tab {
             dispArea.removeStyleFromRange(r[0], r[1], "find-current");
         }
         stalePendingClear = java.util.Collections.emptyList();
+    }
+    
+    /**
+     * Add a search term to the history, keeping only the last MAX_SEARCH_HISTORY items.
+     * If the term already exists, it's moved to the front.
+     */
+    private void addToSearchHistory(String term) {
+        if (term == null || term.isEmpty()) return;
+        
+        // Remove if already exists (we'll add it to the front)
+        searchHistory.remove(term);
+        
+        // Add to the front
+        searchHistory.add(0, term);
+        
+        // Keep only the last MAX_SEARCH_HISTORY items
+        while (searchHistory.size() > MAX_SEARCH_HISTORY) {
+            searchHistory.remove(searchHistory.size() - 1);
+        }
     }
     
     /**
