@@ -25,7 +25,8 @@ This document compares Python's built-in string methods with EBS Script's string
 | `str.upper()` | `str.toUpper(str)` | Convert to uppercase |
 | `str.lower()` | `str.toLower(str)` | Convert to lowercase |
 | `str.strip()` | `str.trim(str)` | Remove leading/trailing whitespace |
-| `str.replace(old, new)` | `str.replace(str, old, new)` | Replace occurrences of substring |
+| `str.replace(old, new)` | `str.replace(str, old, new)` | Replace all occurrences of substring |
+| `str.replace(old, new, 1)` | `str.replaceFirst(str, old, new)` | Replace first occurrence only |
 | `str.split(sep)` | `str.split(str, regex)` | Split into array/list |
 | `sep.join(list)` | `str.join(array, sep)` | Join array elements with separator |
 | `sub in str` | `str.contains(str, sub)` | Check if contains substring |
@@ -39,7 +40,9 @@ This document compares Python's built-in string methods with EBS Script's string
 | `str.find(sub)` | `str.indexOf(str, sub)` | Find first occurrence |
 | `str.rfind(sub)` | `str.lastIndexOf(str, sub)` | Find last occurrence |
 | `str[index]` | `str.charAt(str, index)` | Get character at index |
-| `re.sub(pattern, repl, str)` | `str.replaceAll(str, regex, repl)` | Regex replacement |
+| `re.sub(pattern, repl, str)` | `str.replaceAll(str, regex, repl)` | Regex replacement (all occurrences) |
+| `re.search(pattern, str).group()` | `str.findRegex(str, regex)` | Find first regex match |
+| `re.findall(pattern, str)` | `str.findAllRegex(str, regex)` | Find all regex matches |
 | `str.ljust(width, char)` | `str.rpad(str, length, char)` | Right-pad string |
 | `str.rjust(width, char)` | `str.lpad(str, length, char)` | Left-pad string |
 | `str(value)` | `str.toString(value)` | Convert to string |
@@ -147,9 +150,20 @@ text = "Hello World"
 # Replace all occurrences
 replaced = text.replace("o", "0")      # "Hell0 W0rld"
 
+# Replace first occurrence only
+first_only = text.replace("o", "0", 1)  # "Hell0 World"
+
 # Regex replacement (requires import re)
 import re
 regex_replaced = re.sub(r"\s+", "-", text)  # "Hello-World"
+
+# Find first regex match
+import re
+match = re.search(r"\w+", text)
+first_match = match.group() if match else None  # "Hello"
+
+# Find all regex matches
+all_matches = re.findall(r"\w+", text)  # ["Hello", "World"]
 
 # Trim whitespace
 padded = "  Hello  "
@@ -163,8 +177,17 @@ var text: string = "Hello World";
 // Replace all occurrences
 var replaced = call str.replace(text, "o", "0");      // "Hell0 W0rld"
 
+// Replace first occurrence only
+var firstOnly = call str.replaceFirst(text, "o", "0");  // "Hell0 World"
+
 // Regex replacement (built-in, no import needed)
 var regexReplaced = call str.replaceAll(text, "\\s+", "-");  // "Hello-World"
+
+// Find first regex match
+var firstMatch = call str.findRegex(text, "\\w+");    // "Hello"
+
+// Find all regex matches
+var allMatches = call str.findAllRegex(text, "\\w+"); // ["Hello", "World"]
 
 // Trim whitespace
 var padded: string = "  Hello  ";
@@ -173,7 +196,8 @@ var trimmed = call str.trim(padded);                  // "Hello"
 
 **Key Differences**: 
 - Python's `replace()` is a method; EBS uses `str.replace(str, old, new)`
-- EBS has built-in regex support via `str.replaceAll()` without needing imports
+- Python uses `replace(old, new, 1)` for single replace; EBS uses `str.replaceFirst()`
+- EBS has built-in regex support via `str.replaceAll()`, `str.findRegex()`, and `str.findAllRegex()` without needing imports
 - Note: In EBS regex patterns, backslashes need to be escaped (`\\s+` not `\s+`)
 
 ---

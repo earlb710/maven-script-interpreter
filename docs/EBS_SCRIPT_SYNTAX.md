@@ -1811,6 +1811,7 @@ call string.tolower(text);
 // Manipulation
 call string.trim(text);
 call string.replace(text, old, new);
+call string.replaceFirst(text, old, new);  // Replace first occurrence only
 call string.split(text, delimiter);
 call string.join(array, separator);
 
@@ -1825,6 +1826,10 @@ call string.isblank(text);
 
 // Character operations
 call str.charArray(text);  // Returns int[] array of Unicode code points
+
+// Regex operations
+call str.findRegex(text, regex);      // Find first regex match
+call str.findAllRegex(text, regex);   // Find all regex matches, returns array
 ```
 
 #### str.charArray() - Character Code Array
@@ -1869,6 +1874,108 @@ foreach code in charCodes {
 - Returns empty array for empty strings
 - Useful for character-level string analysis
 - Can be used for custom encoding/decoding operations
+
+#### str.replaceFirst() - Replace First Occurrence
+Replaces only the first occurrence of a target string with a replacement. Uses literal string matching (not regex).
+
+```javascript
+// Basic usage
+var text: string = "Hello World Hello";
+var result = call str.replaceFirst(text, "Hello", "Hi");
+print result;  // Output: "Hi World Hello"
+
+// Only replaces the first match
+var text2: string = "banana";
+var result2 = call str.replaceFirst(text2, "a", "o");
+print result2;  // Output: "bonana"
+
+// No match returns original string
+var text3: string = "Hello World";
+var result3 = call str.replaceFirst(text3, "xyz", "123");
+print result3;  // Output: "Hello World"
+
+// Compare with str.replace (replaces all)
+var allReplaced = call str.replace(text2, "a", "o");
+print allReplaced;  // Output: "bonono"
+```
+
+**Features:**
+- Replaces only the first occurrence
+- Uses literal string matching (not regex)
+- Returns original string if target not found
+- Use `str.replace()` for replacing all occurrences
+
+#### str.findRegex() - Find First Regex Match
+Finds the first occurrence of a regex pattern in the string. Returns the matched substring, or null if no match found.
+
+```javascript
+// Basic usage
+var text: string = "Hello World 123";
+var firstWord = call str.findRegex(text, "\\w+");
+print firstWord;  // Output: "Hello"
+
+// Find a number
+var number = call str.findRegex(text, "\\d+");
+print number;  // Output: "123"
+
+// No match returns null
+var noMatch = call str.findRegex(text, "xyz");
+print noMatch;  // Output: null
+
+// Find email pattern
+var email: string = "Contact: john@example.com for info";
+var foundEmail = call str.findRegex(email, "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}");
+print foundEmail;  // Output: "john@example.com"
+
+// Use in conditionals
+if call str.findRegex(text, "\\d+") != null then {
+    print "Text contains a number";
+}
+```
+
+**Features:**
+- Returns the matched substring (not position)
+- Returns null if no match found
+- Uses Java regex syntax
+- Backslashes must be escaped (`\\d+` not `\d+`)
+
+#### str.findAllRegex() - Find All Regex Matches
+Finds all occurrences of a regex pattern in the string. Returns an ArrayFixed containing all matched substrings.
+
+```javascript
+// Basic usage
+var text: string = "Hello World 123 Test 456";
+var words = call str.findAllRegex(text, "\\w+");
+print words;  // Output: ["Hello", "World", "123", "Test", "456"]
+print words.length;  // Output: 5
+
+// Find all numbers
+var numbers = call str.findAllRegex(text, "\\d+");
+print numbers;  // Output: ["123", "456"]
+
+// Find all email addresses
+var content: string = "Contact john@example.com or jane@test.org";
+var emails = call str.findAllRegex(content, "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}");
+print emails;  // Output: ["john@example.com", "jane@test.org"]
+
+// No matches returns empty array
+var noMatches = call str.findAllRegex(text, "xyz");
+print noMatches;  // Output: []
+print noMatches.length;  // Output: 0
+
+// Process matches in a loop
+var matches = call str.findAllRegex(text, "\\d+");
+foreach match in matches {
+    print "Found number: " + match;
+}
+```
+
+**Features:**
+- Returns ArrayFixed of all matched substrings
+- Returns empty array if no matches found
+- Uses Java regex syntax
+- Useful for extracting multiple patterns from text
+- Backslashes must be escaped (`\\d+` not `\d+`)
 
 #### string.contains() - Check for Substring
 Checks if a string contains a specified substring. Returns `true` if the substring is found, `false` otherwise.

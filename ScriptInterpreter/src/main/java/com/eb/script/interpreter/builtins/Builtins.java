@@ -403,6 +403,34 @@ public final class Builtins {
                 "str.charArray", DataType.ARRAY,
                 newParam("str", DataType.STRING)
         ));
+        
+        // str.replaceFirst(str, target, replacement) -> STRING
+        // Replaces only the first occurrence of target with replacement.
+        // Uses literal string matching (not regex).
+        addBuiltin(info(
+                "str.replaceFirst", DataType.STRING,
+                newParam("str", DataType.STRING),
+                newParam("target", DataType.STRING),
+                newParam("replacement", DataType.STRING)
+        ));
+        
+        // str.findRegex(str, regex) -> STRING
+        // Finds the first occurrence of the regex pattern in the string.
+        // Returns the matched substring, or null if no match found.
+        addBuiltin(info(
+                "str.findRegex", DataType.STRING,
+                newParam("str", DataType.STRING),
+                newParam("regex", DataType.STRING)
+        ));
+        
+        // str.findAllRegex(str, regex) -> ARRAY (String[])
+        // Finds all occurrences of the regex pattern in the string.
+        // Returns an ArrayFixed of all matched substrings.
+        addBuiltin(info(
+                "str.findAllRegex", DataType.ARRAY,
+                newParam("str", DataType.STRING),
+                newParam("regex", DataType.STRING)
+        ));
 
         addBuiltin(info(
                 "file.exists", DataType.BOOL,
