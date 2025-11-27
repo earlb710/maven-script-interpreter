@@ -84,6 +84,7 @@ public class EbsTab extends Tab {
     private List<int[]> stalePendingClear = java.util.Collections.emptyList(); // old matches pending clear after text change
     private int currentIndex = -1;
     private boolean suppressFindSearch = false; // avoid automatic search when programmatically setting find field
+    private boolean dropdownJustUsed = false; // track if dropdown selection was just made
     
     // Minimum character count for find highlighting (more than 2 means at least 3)
     private static final int MIN_FIND_CHARS = 3;
@@ -882,24 +883,31 @@ public class EbsTab extends Tab {
         
         // Live search when typing in find field (use the editor's text property for editable combobox)
         findField.getEditor().textProperty().addListener((obs, o, n) -> {
-            if (!suppressFindSearch) {
+            if (!suppressFindSearch && !dropdownJustUsed) {
                 Platform.runLater(() -> {
                     runSearch();
                 });
             }
         });
         
-        // Search when selecting from dropdown history (use onHidden to detect when dropdown closes after selection)
+        // Track dropdown opening/closing to avoid duplicate searches
+        findField.setOnShowing(e -> {
+            dropdownJustUsed = false;
+        });
+        
+        // Search when selecting from dropdown history
         findField.setOnHidden(e -> {
             if (!suppressFindSearch) {
                 String selected = findField.getValue();
                 if (selected != null && !selected.isEmpty()) {
-                    // Set editor text to the selected value (in case ComboBox didn't sync it)
+                    dropdownJustUsed = true;
+                    // Set editor text to the selected value
                     suppressFindSearch = true;
                     findField.getEditor().setText(selected);
                     suppressFindSearch = false;
                     Platform.runLater(() -> {
                         runSearch();
+                        dropdownJustUsed = false;
                     });
                 }
             }
@@ -907,7 +915,7 @@ public class EbsTab extends Tab {
         
         // Also search when user presses Enter (and add to history)
         findField.setOnAction(e -> {
-            if (!suppressFindSearch) {
+            if (!suppressFindSearch && !dropdownJustUsed) {
                 Platform.runLater(() -> {
                     // Add to history when user presses Enter
                     String q = findField.getEditor().getText();
