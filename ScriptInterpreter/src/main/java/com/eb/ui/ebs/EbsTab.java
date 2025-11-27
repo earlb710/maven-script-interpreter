@@ -1260,15 +1260,21 @@ public class EbsTab extends Tab {
     private void addToSearchHistory(String term) {
         if (term == null || term.isEmpty()) return;
         
-        // Remove if already exists (we'll add it to the front)
-        searchHistory.remove(term);
-        
-        // Add to the front
-        searchHistory.add(0, term);
-        
-        // Keep only the last MAX_SEARCH_HISTORY items
-        while (searchHistory.size() > MAX_SEARCH_HISTORY) {
-            searchHistory.remove(searchHistory.size() - 1);
+        // Suppress find search while modifying the history to avoid ComboBox listener triggering
+        suppressFindSearch = true;
+        try {
+            // Remove if already exists (we'll add it to the front)
+            searchHistory.remove(term);
+            
+            // Add to the front
+            searchHistory.add(0, term);
+            
+            // Keep only the last MAX_SEARCH_HISTORY items
+            while (searchHistory.size() > MAX_SEARCH_HISTORY) {
+                searchHistory.remove(searchHistory.size() - 1);
+            }
+        } finally {
+            suppressFindSearch = false;
         }
     }
     
