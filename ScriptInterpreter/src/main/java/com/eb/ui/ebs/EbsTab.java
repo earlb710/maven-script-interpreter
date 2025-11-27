@@ -783,6 +783,18 @@ public class EbsTab extends Tab {
         
         dispArea.setStyleSpans(0, spans);
         
+        // Reapply find highlights that are still pending (stale but visible)
+        // This ensures find highlights survive lexer re-highlighting
+        if (findBar != null && findBar.isVisible() && !stalePendingClear.isEmpty()) {
+            int textLen = src.length();
+            for (int[] r : stalePendingClear) {
+                // Only reapply if the range is still valid in the new text
+                if (r[0] >= 0 && r[1] <= textLen && r[0] < r[1]) {
+                    dispArea.addStyleToRange(r[0], r[1], "find-hit");
+                }
+            }
+        }
+        
         // Restore scroll position after style update
         Platform.runLater(() -> {
             dispArea.scrollYToPixel(scrollY);
