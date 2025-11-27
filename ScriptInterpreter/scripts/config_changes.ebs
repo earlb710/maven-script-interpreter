@@ -51,7 +51,7 @@ print "";
 
 // Get profile list from config (or default to ["default"])
 var profileListJson: json = call json.getarray(config, "profileList");
-var profileList: array.string = [];
+var profileList: array.string[*];
 var hasDefaultProfile: bool = false;
 
 // Check if profileList exists and populate the array
@@ -133,9 +133,9 @@ if call json.isempty(profileListJson) then {
 
 // If no default profile exists, add it at the beginning
 if hasDefaultProfile == false then {
-    var tempList: array.string = ["default"];
+    var tempList: array.string[*] = ["default"];
     var i: int = 0;
-    while i < call array.length(profileList) {
+    while i < profileList.length {
         call array.push(tempList, profileList[i]);
         i = i + 1;
     }
@@ -145,7 +145,7 @@ if hasDefaultProfile == false then {
 
 print "Profile list: ";
 var idx: int = 0;
-while idx < call array.length(profileList) {
+while idx < profileList.length {
     print "  - " + profileList[idx];
     idx = idx + 1;
 }
