@@ -597,6 +597,7 @@ The interpreter includes numerous built-in functions:
 ### String Operations
 - `substring()`, `length()`, `indexOf()`, `replace()`, `split()`
 - `toUpperCase()`, `toLowerCase()`, `trim()`
+- `string.contains(str, sub)` - Checks if a string contains a substring, returns boolean
 - `str.charArray()` - Returns an array of integer character codes (Unicode code points) for each character in a string
 
 ### Array Operations

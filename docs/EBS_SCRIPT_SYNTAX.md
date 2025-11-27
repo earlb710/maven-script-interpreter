@@ -1870,6 +1870,41 @@ foreach code in charCodes {
 - Useful for character-level string analysis
 - Can be used for custom encoding/decoding operations
 
+#### string.contains() - Check for Substring
+Checks if a string contains a specified substring. Returns `true` if the substring is found, `false` otherwise.
+
+```javascript
+// Basic usage
+var text: string = "Hello World";
+var hasWorld = call string.contains(text, "World");
+print hasWorld;  // Output: true
+
+var hasXyz = call string.contains(text, "xyz");
+print hasXyz;  // Output: false
+
+// Case-sensitive matching
+var hasHello = call string.contains(text, "Hello");
+print hasHello;  // Output: true
+
+var hasHELLO = call string.contains(text, "HELLO");
+print hasHELLO;  // Output: false (case-sensitive)
+
+// Use in conditionals
+if call string.contains(filename, ".css") then {
+    print "This is a CSS file";
+}
+
+// Also available as str.contains
+var result = call str.contains("Hello", "ell");
+print result;  // Output: true
+```
+
+**Features:**
+- Case-sensitive substring matching
+- Returns boolean (`true` or `false`)
+- Available as both `string.contains` and `str.contains`
+- Returns `false` if either argument is `null`
+
 
 ### JSON Functions
 ```javascript
