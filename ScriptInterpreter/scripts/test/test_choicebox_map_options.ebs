@@ -214,7 +214,7 @@ print "  6. Click 'Get Country Options' to test scr.getItemChoiceOptions()";
 print "  7. Click 'Close' when done";
 print "";
 
-screen testChoiceOptions show;
+show screen testChoiceOptions;
 
 // ================================================================================
 // Part 5: Verify values after screen closes
