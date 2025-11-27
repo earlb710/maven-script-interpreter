@@ -9,22 +9,63 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentMap;
 
+/**
+ * Environment holds the execution state including variable scopes, call stack,
+ * and debugging state. Thread-safe implementation allows screen threads to
+ * access and modify variables defined by the main thread.
+ * 
+ * Thread safety is achieved through:
+ * - ConcurrentLinkedDeque for call stack (thread-safe deque operations)
+ * - ThreadLocal for envValues to allow per-thread scope chains while sharing base values
+ * - ConcurrentHashMap in EnvironmentValues for variable storage
+ */
 public class Environment {
 
-    private EnvironmentValues envValues;
+    // Base environment values that are shared across all threads
+    private EnvironmentValues baseEnvValues;
+    
+    // Thread-local environment values for per-thread scope chains
+    // Each thread can have its own scope chain while sharing the base values
+    private final ThreadLocal<EnvironmentValues> threadLocalEnvValues = new ThreadLocal<>();
 
-    private final Deque<StackInfo> callStack = new java.util.ArrayDeque<>();
+    // Thread-safe call stack using ConcurrentLinkedDeque
+    private final Deque<StackInfo> callStack = new ConcurrentLinkedDeque<>();
     private Debugger debug = new Debugger(null);
-    private boolean echo = true;
-    private ScriptArea outputArea;
-    private Interpreter currentInterpreter; // Reference to current Interpreter for cleanup
+    private volatile boolean echo = true;
+    private volatile ScriptArea outputArea;
+    private volatile Interpreter currentInterpreter; // Reference to current Interpreter for cleanup
 
     private static final ConcurrentMap<String, FileContext> openedFiles = new ConcurrentHashMap<>();
 
     public Environment() {
-        envValues = new EnvironmentValues();
+        baseEnvValues = new EnvironmentValues();
+    }
+    
+    /**
+     * Get the current environment values for this thread.
+     * Returns the thread-local scope if one exists, otherwise returns the base environment.
+     */
+    private EnvironmentValues getCurrentEnvValues() {
+        EnvironmentValues threadLocal = threadLocalEnvValues.get();
+        return threadLocal != null ? threadLocal : baseEnvValues;
+    }
+    
+    /**
+     * Set the current environment values for this thread.
+     * Passing null or the base environment will remove the thread-local scope,
+     * causing subsequent access to fall back to the base environment.
+     */
+    private void setCurrentEnvValues(EnvironmentValues values) {
+        // If values is null or is the base environment, remove thread-local scope
+        // This ensures getCurrentEnvValues() will return baseEnvValues
+        if (values == null || values == baseEnvValues) {
+            threadLocalEnvValues.remove();
+        } else {
+            threadLocalEnvValues.set(values);
+        }
     }
 
     public Environment registerOutputArea(ScriptArea outputArea) {
@@ -33,7 +74,15 @@ public class Environment {
     }
 
     public EnvironmentValues getEnvironmentValues() {
-        return envValues;
+        return getCurrentEnvValues();
+    }
+    
+    /**
+     * Get the base environment values (shared across all threads).
+     * Used for defining global variables and functions.
+     */
+    public EnvironmentValues getBaseEnvironmentValues() {
+        return baseEnvValues;
     }
 
     public ScriptArea getOutputArea() {
@@ -100,9 +149,16 @@ public class Environment {
         openedFiles.clear();
     }
 
+    /**
+     * Clear all environment state.
+     * Note: This clears the base environment and the current thread's thread-local scope.
+     * Other threads may still have their own thread-local scopes which will eventually 
+     * fall back to the cleared base environment when accessed.
+     */
     public void clear() {
         clearCallStack();
-        envValues.clear();
+        baseEnvValues.clear();
+        threadLocalEnvValues.remove();
     }
 
     public Deque<StackInfo> getCallStack() {
@@ -117,8 +173,12 @@ public class Environment {
         callStack.push(new StackInfo(line, kind, message, values));
     }
 
+    /**
+     * Pop the top entry from the call stack.
+     * Returns null if the stack is empty (thread-safe behavior).
+     */
     public StackInfo popCallStack() {
-        return callStack.pop();
+        return callStack.poll(); // poll() returns null if empty, unlike pop() which throws
     }
 
     public Debugger getDebugger() {
@@ -148,12 +208,12 @@ public class Environment {
     }
 
     public Object get(String name) throws InterpreterError {
-        return envValues.get(name);
+        return getCurrentEnvValues().get(name);
     }
 
     public Map<String, Object> snapshot() {
         Map<String, Object> out = new java.util.LinkedHashMap<>();
-        EnvironmentValues e = this.envValues;
+        EnvironmentValues e = getCurrentEnvValues();
         // NOTE: values/enclosing are in this class; add this method inside the class
         while (e != null) {
             out.putAll(e.values); // values is a field in Environment
@@ -162,13 +222,28 @@ public class Environment {
         return out;
     }
 
+    /**
+     * Push a new scope onto the environment values stack for this thread.
+     * The new scope will have access to variables from enclosing scopes.
+     */
     public void pushEnvironmentValues() {
-        envValues = new EnvironmentValues(envValues);
+        EnvironmentValues current = getCurrentEnvValues();
+        EnvironmentValues newScope = new EnvironmentValues(current);
+        setCurrentEnvValues(newScope);
     }
 
+    /**
+     * Pop the current scope from the environment values stack for this thread.
+     * Returns to the enclosing scope, falling back to baseEnvValues if enclosing is null.
+     * Does nothing if already at the base environment.
+     */
     public void popEnvironmentValues() {
-        if (envValues != null) {
-            envValues = envValues.enclosing;
+        EnvironmentValues current = getCurrentEnvValues();
+        if (current != null && current != baseEnvValues) {
+            // If enclosing is null, we fall back to baseEnvValues
+            // setCurrentEnvValues(null) will remove thread-local and fallback to baseEnvValues
+            EnvironmentValues enclosing = current.enclosing;
+            setCurrentEnvValues(enclosing != null ? enclosing : null);
         }
     }
 

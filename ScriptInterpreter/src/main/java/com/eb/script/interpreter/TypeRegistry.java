@@ -2,12 +2,13 @@ package com.eb.script.interpreter;
 
 import com.eb.script.token.DataType;
 import com.eb.script.token.RecordType;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Registry for type aliases defined with the typeof keyword.
  * Type aliases are global and accessible throughout the script.
+ * Uses ConcurrentHashMap for thread-safe access from screen threads.
  * 
  * @author Earl Bosch
  */
@@ -55,7 +56,7 @@ public class TypeRegistry {
         }
     }
     
-    private static final Map<String, TypeAlias> typeAliases = new HashMap<>();
+    private static final Map<String, TypeAlias> typeAliases = new ConcurrentHashMap<>();
     
     /**
      * Register a type alias

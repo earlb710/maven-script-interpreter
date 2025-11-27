@@ -1,0 +1,378 @@
+// Test Script: Concurrency - Thread-Safe Variable and Function Access
+// Description: Tests that screen threads can safely access variables and functions
+//              defined by the main thread. Exercises the thread-safe collections:
+//              - ConcurrentHashMap for environment values and blocks
+//              - ThreadLocal for per-thread scope chains
+//              - ConcurrentLinkedDeque for call stack
+// Date: 2025-11-27
+
+print "=== Concurrency Test Suite ===";
+print "";
+print "This test verifies thread-safe access to variables and functions";
+print "when screens run in their own threads.";
+print "";
+
+// Define shared variables that will be accessed from screen threads
+var sharedCounter: int = 0;
+var sharedMessage: string = "Initial value from main thread";
+var accessLog: string = "";
+
+// Define a function that screen threads will call
+incrementAndLog(amount: int) return int {
+    // This function modifies shared state - must be thread-safe
+    sharedCounter = sharedCounter + amount;
+    accessLog = accessLog + "[Called with " + amount + "] ";
+    print "Function called from thread, counter is now: " + sharedCounter;
+    return sharedCounter;
+}
+
+// Define another function that reads shared state
+getStatus() return string {
+    return "Counter=" + sharedCounter + ", Message=" + sharedMessage;
+}
+
+// Define a function that tests the call stack
+nestedCall(depth: int) return string {
+    if depth <= 0 then {
+        return "Reached depth 0";
+    }
+    return "Depth " + depth + " then " + call nestedCall(depth - 1);
+}
+
+print "Shared variables initialized:";
+print "  sharedCounter = " + sharedCounter;
+print "  sharedMessage = " + sharedMessage;
+print "";
+
+// Test 1: Screen that reads and writes shared variables
+print "Test 1: Creating screen that accesses shared variables";
+screen concurrencyTest1 = {
+    "title": "Concurrency Test 1: Shared Variables",
+    "width": 550,
+    "height": 450,
+    "startup": "print 'STARTUP (Test1): Reading shared counter = ' + sharedCounter;",
+    "cleanup": "print 'CLEANUP (Test1): Final counter = ' + sharedCounter;",
+    "vars": [
+        {
+            "name": "localStatus",
+            "type": "string",
+            "default": "Not started",
+            "display": {
+                "type": "textfield",
+                "labelText": "Local Status:"
+            }
+        },
+        {
+            "name": "incrementAmount",
+            "type": "int",
+            "default": 1,
+            "display": {
+                "type": "spinner",
+                "labelText": "Increment By:",
+                "min": 1,
+                "max": 100
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "15",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "instructions",
+                    "seq": 1,
+                    "display": {
+                        "type": "label",
+                        "labelText": "Test 1: Shared Variable Access\n\nThis screen runs in its own thread but accesses\nand modifies variables defined in the main thread.\nThe 'sharedCounter' and 'sharedMessage' are shared."
+                    }
+                },
+                {
+                    "name": "localStatus",
+                    "varRef": "localStatus",
+                    "seq": 2
+                },
+                {
+                    "name": "incrementAmount",
+                    "varRef": "incrementAmount",
+                    "seq": 3
+                },
+                {
+                    "name": "readSharedButton",
+                    "seq": 4,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Read Shared Counter",
+                        "onClick": "concurrencyTest1.localStatus = 'Shared counter = ' + sharedCounter; print 'Screen thread read sharedCounter: ' + sharedCounter;"
+                    }
+                },
+                {
+                    "name": "incrementSharedButton",
+                    "seq": 5,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Increment Shared Counter",
+                        "onClick": "sharedCounter = sharedCounter + concurrencyTest1.incrementAmount; concurrencyTest1.localStatus = 'Incremented to ' + sharedCounter; print 'Screen thread incremented sharedCounter to: ' + sharedCounter;"
+                    }
+                },
+                {
+                    "name": "callFunctionButton",
+                    "seq": 6,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Call incrementAndLog Function",
+                        "onClick": "var result: int = call incrementAndLog(concurrencyTest1.incrementAmount); concurrencyTest1.localStatus = 'Function returned: ' + result;"
+                    }
+                },
+                {
+                    "name": "callNestedButton",
+                    "seq": 7,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Call Nested Function (depth=3)",
+                        "onClick": "var result: string = call nestedCall(3); concurrencyTest1.localStatus = result; print 'Nested call result: ' + result;"
+                    }
+                },
+                {
+                    "name": "closeButton",
+                    "seq": 8,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Close Screen",
+                        "onClick": "print 'Closing Test 1, final sharedCounter = ' + sharedCounter; close screen;"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+// Test 2: Second screen to test concurrent access
+print "Test 2: Creating second screen for concurrent access testing";
+screen concurrencyTest2 = {
+    "title": "Concurrency Test 2: Concurrent Access",
+    "width": 550,
+    "height": 400,
+    "startup": "print 'STARTUP (Test2): Reading shared counter = ' + sharedCounter;",
+    "cleanup": "print 'CLEANUP (Test2): Final counter = ' + sharedCounter;",
+    "vars": [
+        {
+            "name": "lastRead",
+            "type": "string",
+            "default": "No read yet",
+            "display": {
+                "type": "textfield",
+                "labelText": "Last Read:"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "15",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "instructions",
+                    "seq": 1,
+                    "display": {
+                        "type": "label",
+                        "labelText": "Test 2: Concurrent Access\n\nOpen BOTH Test 1 and Test 2 screens simultaneously.\nBoth screens access the same shared variables.\nChanges made in one screen should be visible in the other."
+                    }
+                },
+                {
+                    "name": "lastRead",
+                    "varRef": "lastRead",
+                    "seq": 2
+                },
+                {
+                    "name": "readButton",
+                    "seq": 3,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Read All Shared Variables",
+                        "onClick": "concurrencyTest2.lastRead = call getStatus(); print 'Test2 status: ' + concurrencyTest2.lastRead;"
+                    }
+                },
+                {
+                    "name": "incrementBy5Button",
+                    "seq": 4,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Increment Counter by 5",
+                        "onClick": "var result: int = call incrementAndLog(5); concurrencyTest2.lastRead = 'Incremented to: ' + result;"
+                    }
+                },
+                {
+                    "name": "modifyMessageButton",
+                    "seq": 5,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Modify Shared Message",
+                        "onClick": "sharedMessage = 'Modified by Test2 at counter=' + sharedCounter; print 'Modified sharedMessage from Test2';"
+                    }
+                },
+                {
+                    "name": "closeButton",
+                    "seq": 6,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Close Screen",
+                        "onClick": "close screen;"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+// Test 3: Stress test with rapid updates
+print "Test 3: Creating stress test screen";
+screen concurrencyStress = {
+    "title": "Concurrency Test 3: Stress Test",
+    "width": 500,
+    "height": 350,
+    "startup": "print 'STRESS TEST: Starting with shared counter = ' + sharedCounter;",
+    "cleanup": "print 'STRESS TEST: Final counter = ' + sharedCounter;",
+    "vars": [
+        {
+            "name": "iterations",
+            "type": "int",
+            "default": 0,
+            "display": {
+                "type": "textfield",
+                "labelText": "Iterations:"
+            }
+        },
+        {
+            "name": "result",
+            "type": "string",
+            "default": "Ready",
+            "display": {
+                "type": "textfield",
+                "labelText": "Result:"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "15",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "instructions",
+                    "seq": 1,
+                    "display": {
+                        "type": "label",
+                        "labelText": "Test 3: Stress Test\n\nRapidly increment the counter multiple times.\nThis tests thread-safety under repeated access."
+                    }
+                },
+                {
+                    "name": "iterations",
+                    "varRef": "iterations",
+                    "seq": 2
+                },
+                {
+                    "name": "result",
+                    "varRef": "result",
+                    "seq": 3
+                },
+                {
+                    "name": "increment10Button",
+                    "seq": 4,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Increment 10 Times",
+                        "onClick": "var i: int = 0; while i < 10 do sharedCounter = sharedCounter + 1; i = i + 1; end; concurrencyStress.iterations = concurrencyStress.iterations + 10; concurrencyStress.result = 'Counter now: ' + sharedCounter;"
+                    }
+                },
+                {
+                    "name": "callFunction10Button",
+                    "seq": 5,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Call Function 10 Times",
+                        "onClick": "var i: int = 0; while i < 10 do call incrementAndLog(1); i = i + 1; end; concurrencyStress.iterations = concurrencyStress.iterations + 10; concurrencyStress.result = 'Counter now: ' + sharedCounter;"
+                    }
+                },
+                {
+                    "name": "resetButton",
+                    "seq": 6,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Reset Counter",
+                        "onClick": "sharedCounter = 0; concurrencyStress.iterations = 0; concurrencyStress.result = 'Reset complete';"
+                    }
+                },
+                {
+                    "name": "closeButton",
+                    "seq": 7,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Close Screen",
+                        "onClick": "close screen;"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+print "";
+print "=== Test Screens Created ===";
+print "";
+print "Three test screens have been created to test concurrency:";
+print "";
+print "1. show screen concurrencyTest1;";
+print "   - Tests reading/writing shared variables from screen thread";
+print "   - Tests calling functions defined in main thread";
+print "   - Tests nested function calls (call stack thread-safety)";
+print "";
+print "2. show screen concurrencyTest2;";
+print "   - Open BOTH Test1 and Test2 simultaneously";
+print "   - Make changes in one and verify visibility in the other";
+print "   - Tests true concurrent access to shared state";
+print "";
+print "3. show screen concurrencyStress;";
+print "   - Rapid repeated access to shared variables and functions";
+print "   - Tests thread-safety under stress";
+print "";
+print "=== How to Test ===";
+print "";
+print "BASIC TEST:";
+print "  1. show screen concurrencyTest1;";
+print "  2. Click 'Increment Shared Counter' several times";
+print "  3. Click 'Call incrementAndLog Function'";
+print "  4. Click 'Call Nested Function' to test call stack";
+print "  5. Observe console output - should show no errors";
+print "";
+print "CONCURRENT ACCESS TEST:";
+print "  1. show screen concurrencyTest1;";
+print "  2. show screen concurrencyTest2;";
+print "  3. In Test1, increment the counter";
+print "  4. In Test2, click 'Read All Shared Variables'";
+print "  5. Verify Test2 sees the changes made by Test1";
+print "";
+print "STRESS TEST:";
+print "  1. show screen concurrencyStress;";
+print "  2. Click 'Increment 10 Times' rapidly several times";
+print "  3. Click 'Call Function 10 Times' rapidly";
+print "  4. Verify counter increments correctly with no errors";
+print "";
+print "=== Expected Behavior ===";
+print "- All buttons should work without 'ConcurrentModificationException'";
+print "- Variables modified in one screen visible in another";
+print "- Functions called from screen threads execute correctly";
+print "- Nested function calls work (call stack is thread-safe)";
+print "- No race conditions or data corruption";
+print "";
+
+// Show the first test screen
+print "Starting Test 1...";
+print "";
+show screen concurrencyTest1;

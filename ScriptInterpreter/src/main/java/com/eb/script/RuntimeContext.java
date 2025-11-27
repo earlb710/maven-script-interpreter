@@ -4,10 +4,13 @@ import com.eb.script.interpreter.Environment;
 import com.eb.script.interpreter.statement.BlockStatement;
 import com.eb.script.interpreter.statement.Statement;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * RuntimeContext holds the parsed script context including functions (blocks),
+ * statements, and environment. Uses thread-safe collections to allow screen
+ * threads to access functions defined in the main script.
  *
  * @author Earl Bosch
  */
@@ -26,7 +29,7 @@ public class RuntimeContext {
     public RuntimeContext(String name, Path sourcePath) {
         this.name = name;
         this.sourcePath = sourcePath;
-        this.blocks = new HashMap();
+        this.blocks = new ConcurrentHashMap<>();
         this.statements = null;
     }
 
@@ -37,7 +40,8 @@ public class RuntimeContext {
     public RuntimeContext(String name, Path sourcePath, Map<String, BlockStatement> blocks, Statement[] statements) {
         this.name = name;
         this.sourcePath = sourcePath;
-        this.blocks = blocks;
+        // Use ConcurrentHashMap for thread-safe access from screen threads
+        this.blocks = blocks != null ? new ConcurrentHashMap<>(blocks) : new ConcurrentHashMap<>();
         this.statements = statements;
     }
 

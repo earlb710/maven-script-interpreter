@@ -425,8 +425,8 @@ screen colorEditorScreen = {
                 "style": "-fx-spacing: 4; -fx-padding: 4; -fx-alignment: CENTER_LEFT;",
                 "items": [
                     {"name": "profile_item", "varref": "profile"},
-                    {"name": "addProfileBtn", "type": "button", "labelText": "+", "style": "-fx-min-width: 30;", "tooltip": "Add a new profile", "onClick": "print \"Add profile button clicked\";"},
-                    {"name": "removeProfileBtn", "type": "button", "labelText": "-", "style": "-fx-min-width: 30;", "tooltip": "Remove current profile", "onClick": "print \"Remove profile button clicked\";"}
+                    {"name": "addProfileBtn", "type": "button", "labelText": "+", "style": "-fx-min-width: 30;", "tooltip": "Add a new profile (TODO: implement)", "onClick": "print 'Add profile button clicked - feature not yet implemented';"},
+                    {"name": "removeProfileBtn", "type": "button", "labelText": "-", "style": "-fx-min-width: 30;", "tooltip": "Remove current profile (TODO: implement)", "onClick": "print 'Remove profile button clicked - feature not yet implemented';"}
                 ]
             },
             {
