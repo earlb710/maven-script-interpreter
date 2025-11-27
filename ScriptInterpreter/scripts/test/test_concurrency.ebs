@@ -33,10 +33,10 @@ getStatus() return string {
 
 // Define a function that tests the call stack
 nestedCall(depth: int) return string {
-    if depth <= 0 then
+    if depth <= 0 then {
         return "Reached depth 0";
-    end
-    return "Depth " + depth + " -> " + call nestedCall(depth - 1);
+    }
+    return "Depth " + depth + " then " + call nestedCall(depth - 1);
 }
 
 print "Shared variables initialized:";
