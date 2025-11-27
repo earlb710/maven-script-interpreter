@@ -849,8 +849,8 @@ public class EbsTab extends Tab {
                 highlightsStale = false;
                 // Now reapply syntax highlighting (was skipped during editing)
                 applyLexerSpans(dispArea.getText());
-                // Then refresh find highlights, don't jump to a search location
-                runSearchHighlightOnly();
+                // Then redo the find search (text has changed) and jump to first match
+                runSearch();
             }
         });
         
