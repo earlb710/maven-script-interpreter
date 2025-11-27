@@ -38,7 +38,7 @@ public class BuiltinsSystem {
             case "system.wincommand" -> winCommand(args);
             case "system.getproperty" -> getProperty(args);
             case "system.setproperty" -> setProperty(args);
-            case "sleep" -> sleep(args);
+            case "thread.sleep" -> sleep(args);
             case "array.expand" -> arrayExpand(args);
             case "array.sort" -> arraySort(args);
             case "array.fill" -> arrayFill(args);
@@ -52,7 +52,7 @@ public class BuiltinsSystem {
      * Checks if the given builtin name is a System/Array/Sleep builtin.
      */
     public static boolean handles(String name) {
-        return name.startsWith("system.") || name.startsWith("array.") || name.equals("sleep");
+        return name.startsWith("system.") || name.startsWith("array.") || name.equals("thread.sleep");
     }
 
     // --- Individual builtin implementations ---

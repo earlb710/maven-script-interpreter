@@ -942,6 +942,25 @@ public class BuiltinsScreen {
         // Set the property on the AreaDefinition
         setAreaDefinitionProperty(targetArea, propertyName, value);
 
+        // Apply the property change to the actual JavaFX container on the UI thread
+        final String finalScreenName = screenName;
+        final String finalAreaName = areaName;
+        final String finalPropertyName = propertyName;
+        final Object finalValue = value;
+
+        javafx.application.Platform.runLater(() -> {
+            try {
+                // Get the area container from context
+                javafx.scene.layout.Region container = context.getAreaContainer(finalScreenName, finalAreaName);
+                if (container != null) {
+                    applyPropertyToAreaContainer(container, finalPropertyName, finalValue);
+                }
+            } catch (Exception e) {
+                System.err.println("Error applying property to area container: " + e.getMessage());
+                e.printStackTrace();
+            }
+        });
+
         return Boolean.TRUE;
     }
 
@@ -1228,6 +1247,13 @@ public class BuiltinsScreen {
                 }
             }
             case "recordref" -> area.recordRef = value != null ? String.valueOf(value) : null;
+            case "visible", "managed" -> {
+                // These are UI-only properties that are applied directly to the container
+                // They don't need to be stored in AreaDefinition since they're handled by applyPropertyToAreaContainer
+                if (!(value instanceof Boolean)) {
+                    throw new InterpreterError("scr.setAreaProperty: '" + propertyName + "' property must be a boolean");
+                }
+            }
             case "screenname", "areatype" -> 
                 throw new InterpreterError("scr.setAreaProperty: property '" + propertyName + "' is read-only");
             default -> throw new InterpreterError("scr.setAreaProperty: unknown property '" + propertyName + "'");
@@ -1530,5 +1556,189 @@ public class BuiltinsScreen {
             // are layout-specific and would require re-layouting the parent container to apply.
             // These are stored in the AreaItem but not directly applied to the control at runtime.
         }
+    }
+
+    /**
+     * Helper method to apply a property change to a JavaFX area container. This method
+     * is called on the JavaFX Application Thread.
+     */
+    private static void applyPropertyToAreaContainer(javafx.scene.layout.Region container, String propertyName, Object value) {
+        String propLower = propertyName.toLowerCase();
+
+        switch (propLower) {
+            case "style" -> {
+                if (value != null) {
+                    container.setStyle(String.valueOf(value));
+                } else {
+                    container.setStyle("");
+                }
+            }
+            case "cssclass" -> {
+                if (value != null) {
+                    String newCssClass = String.valueOf(value);
+                    // Get the previous user-set CSS class from properties (if any)
+                    String previousCssClass = (String) container.getProperties().get("userCssClass");
+                    
+                    // Remove the previous user CSS class if it was set
+                    if (previousCssClass != null && !previousCssClass.isEmpty()) {
+                        container.getStyleClass().remove(previousCssClass);
+                    }
+                    
+                    // Add the new CSS class if not empty
+                    if (!newCssClass.isEmpty()) {
+                        if (!container.getStyleClass().contains(newCssClass)) {
+                            container.getStyleClass().add(newCssClass);
+                        }
+                        // Store the new class for future removal
+                        container.getProperties().put("userCssClass", newCssClass);
+                    } else {
+                        container.getProperties().remove("userCssClass");
+                    }
+                }
+            }
+            case "spacing" -> {
+                if (value != null) {
+                    try {
+                        double spacing = Double.parseDouble(String.valueOf(value));
+                        if (container instanceof javafx.scene.layout.HBox) {
+                            ((javafx.scene.layout.HBox) container).setSpacing(spacing);
+                        } else if (container instanceof javafx.scene.layout.VBox) {
+                            ((javafx.scene.layout.VBox) container).setSpacing(spacing);
+                        } else if (container instanceof javafx.scene.layout.FlowPane) {
+                            ((javafx.scene.layout.FlowPane) container).setHgap(spacing);
+                            ((javafx.scene.layout.FlowPane) container).setVgap(spacing);
+                        } else if (container instanceof javafx.scene.layout.TilePane) {
+                            ((javafx.scene.layout.TilePane) container).setHgap(spacing);
+                            ((javafx.scene.layout.TilePane) container).setVgap(spacing);
+                        } else if (container instanceof javafx.scene.layout.GridPane) {
+                            ((javafx.scene.layout.GridPane) container).setHgap(spacing);
+                            ((javafx.scene.layout.GridPane) container).setVgap(spacing);
+                        }
+                    } catch (NumberFormatException e) {
+                        // Ignore invalid spacing values
+                    }
+                }
+            }
+            case "padding" -> {
+                if (value != null) {
+                    javafx.geometry.Insets padding = parseInsets(String.valueOf(value));
+                    if (padding != null) {
+                        container.setPadding(padding);
+                    }
+                }
+            }
+            case "title" -> {
+                if (container instanceof javafx.scene.control.TitledPane) {
+                    ((javafx.scene.control.TitledPane) container).setText(value != null ? String.valueOf(value) : "");
+                }
+            }
+            case "prefwidth" -> {
+                if (value != null) {
+                    try {
+                        double width = Double.parseDouble(String.valueOf(value));
+                        container.setPrefWidth(width);
+                    } catch (NumberFormatException e) {
+                        // Ignore invalid values
+                    }
+                }
+            }
+            case "prefheight" -> {
+                if (value != null) {
+                    try {
+                        double height = Double.parseDouble(String.valueOf(value));
+                        container.setPrefHeight(height);
+                    } catch (NumberFormatException e) {
+                        // Ignore invalid values
+                    }
+                }
+            }
+            case "minwidth" -> {
+                if (value != null) {
+                    try {
+                        double width = Double.parseDouble(String.valueOf(value));
+                        container.setMinWidth(width);
+                    } catch (NumberFormatException e) {
+                        // Ignore invalid values
+                    }
+                }
+            }
+            case "minheight" -> {
+                if (value != null) {
+                    try {
+                        double height = Double.parseDouble(String.valueOf(value));
+                        container.setMinHeight(height);
+                    } catch (NumberFormatException e) {
+                        // Ignore invalid values
+                    }
+                }
+            }
+            case "maxwidth" -> {
+                if (value != null) {
+                    try {
+                        double width = Double.parseDouble(String.valueOf(value));
+                        container.setMaxWidth(width);
+                    } catch (NumberFormatException e) {
+                        // Ignore invalid values
+                    }
+                }
+            }
+            case "maxheight" -> {
+                if (value != null) {
+                    try {
+                        double height = Double.parseDouble(String.valueOf(value));
+                        container.setMaxHeight(height);
+                    } catch (NumberFormatException e) {
+                        // Ignore invalid values
+                    }
+                }
+            }
+            case "visible" -> {
+                if (value instanceof Boolean) {
+                    container.setVisible((Boolean) value);
+                }
+            }
+            case "managed" -> {
+                if (value instanceof Boolean) {
+                    container.setManaged((Boolean) value);
+                }
+            }
+            // Note: Some area properties like name, type, areaType, screenName are read-only
+            // and cannot be changed at runtime. Others like groupBorder properties would require
+            // re-creating the border styling which is complex.
+        }
+    }
+
+    /**
+     * Helper method to parse insets string to Insets object.
+     * Supports formats: "10" (all), "10 5" (vertical horizontal),
+     * "10 5 10 5" (top right bottom left).
+     */
+    private static javafx.geometry.Insets parseInsets(String insetsStr) {
+        if (insetsStr == null || insetsStr.isEmpty()) {
+            return null;
+        }
+
+        String[] parts = insetsStr.trim().split("\\s+");
+
+        try {
+            if (parts.length == 1) {
+                double all = Double.parseDouble(parts[0]);
+                return new javafx.geometry.Insets(all);
+            } else if (parts.length == 2) {
+                double vertical = Double.parseDouble(parts[0]);
+                double horizontal = Double.parseDouble(parts[1]);
+                return new javafx.geometry.Insets(vertical, horizontal, vertical, horizontal);
+            } else if (parts.length == 4) {
+                double top = Double.parseDouble(parts[0]);
+                double right = Double.parseDouble(parts[1]);
+                double bottom = Double.parseDouble(parts[2]);
+                double left = Double.parseDouble(parts[3]);
+                return new javafx.geometry.Insets(top, right, bottom, left);
+            }
+        } catch (NumberFormatException e) {
+            // Return null for invalid format
+        }
+
+        return null;
     }
 }

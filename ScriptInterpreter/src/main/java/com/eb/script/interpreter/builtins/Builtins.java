@@ -731,7 +731,7 @@ public final class Builtins {
         ));
 
         addBuiltin(info(
-                "sleep", DataType.STRING,
+                "thread.sleep", DataType.STRING,
                 newParam("millis", DataType.LONG) // required: milliseconds to sleep
         ));
 
