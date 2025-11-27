@@ -37,6 +37,9 @@ public class BuiltinsScreen {
                         + "Provide a screen name or call from within screen event handlers.");
             }
         }
+        
+        // Normalize screen name to lowercase to match how screens are stored
+        screenName = screenName.toLowerCase();
 
         // Check if screen configuration exists (might not be created yet)
         if (!context.hasScreenConfig(screenName) && !context.getScreens().containsKey(screenName)) {
@@ -87,6 +90,9 @@ public class BuiltinsScreen {
                         + "Provide a screen name or call from within screen event handlers.");
             }
         }
+        
+        // Normalize screen name to lowercase to match how screens are stored
+        screenName = screenName.toLowerCase();
 
         // Check if screen configuration exists
         if (!context.hasScreenConfig(screenName) && !context.getScreens().containsKey(screenName)) {
@@ -140,6 +146,9 @@ public class BuiltinsScreen {
                         + "Provide a screen name or call from within screen event handlers.");
             }
         }
+        
+        // Normalize screen name to lowercase to match how screens are stored
+        screenName = screenName.toLowerCase();
 
         // Check if screen configuration exists
         if (!context.hasScreenConfig(screenName) && !context.getScreens().containsKey(screenName)) {
