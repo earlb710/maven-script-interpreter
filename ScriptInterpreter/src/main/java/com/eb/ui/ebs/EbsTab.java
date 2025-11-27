@@ -747,9 +747,11 @@ public class EbsTab extends Tab {
     }
 
     private void applyLexerSpans(String src) {
-        // When find bar is visible AND we're in the middle of editing (highlightsStale),
+        // When find bar is visible AND there are any active highlights (current or stale),
         // skip all styling during editing. Styling will be reapplied after the timer fires.
-        if (findBar != null && findBar.isVisible() && highlightsStale) {
+        // We check multiple conditions to catch the first keystroke before highlightsStale is set.
+        if (findBar != null && findBar.isVisible() && 
+            (highlightsStale || !lastMatches.isEmpty() || !stalePendingClear.isEmpty())) {
             return;
         }
         
