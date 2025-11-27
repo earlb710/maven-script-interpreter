@@ -51,7 +51,7 @@ print "";
 
 // Get profile list from config (or default to ["default"])
 var profileListJson: json = call json.getarray(config, "profileList");
-var profileList: array.string[*];
+var profileList: array.string[*] = [];
 var hasDefaultProfile: bool = false;
 
 // Check if profileList exists and populate the array
