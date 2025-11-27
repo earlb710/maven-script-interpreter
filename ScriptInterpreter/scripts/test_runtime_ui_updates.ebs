@@ -89,7 +89,7 @@ print "Screen displayed.";
 print "";
 
 // Wait a moment for the screen to be fully rendered
-#sleep(500);
+#thread.sleep(500);
 
 // =============================================
 // TEST 1: Item Property UI Updates
@@ -102,33 +102,33 @@ print "";
 // Test visible property - hide and show the text field
 print "Test 1.1: Hiding textField1...";
 #scr.setProperty("uiTestScreen.textField1", "visible", false);
-#sleep(1000);
+#thread.sleep(1000);
 print "  TextField should now be hidden on screen.";
 print "Test 1.2: Showing textField1...";
 #scr.setProperty("uiTestScreen.textField1", "visible", true);
-#sleep(500);
+#thread.sleep(500);
 print "  TextField should now be visible again.";
 print "";
 
 // Test disabled property
 print "Test 1.3: Disabling textField1...";
 #scr.setProperty("uiTestScreen.textField1", "disabled", true);
-#sleep(1000);
+#thread.sleep(1000);
 print "  TextField should now be disabled (grayed out).";
 print "Test 1.4: Enabling textField1...";
 #scr.setProperty("uiTestScreen.textField1", "disabled", false);
-#sleep(500);
+#thread.sleep(500);
 print "  TextField should now be enabled again.";
 print "";
 
 // Test editable property
 print "Test 1.5: Making textField1 non-editable...";
 #scr.setProperty("uiTestScreen.textField1", "editable", false);
-#sleep(1000);
+#thread.sleep(1000);
 print "  TextField should now be read-only.";
 print "Test 1.6: Making textField1 editable again...";
 #scr.setProperty("uiTestScreen.textField1", "editable", true);
-#sleep(500);
+#thread.sleep(500);
 print "  TextField should now be editable again.";
 print "";
 
@@ -136,31 +136,31 @@ print "";
 print "Test 1.7: Setting tooltip on textField1...";
 #scr.setProperty("uiTestScreen.textField1", "tooltip", "This is a new runtime tooltip!");
 print "  Hover over the text field to see the tooltip.";
-#sleep(500);
+#thread.sleep(500);
 print "";
 
 // Test textColor property
 print "Test 1.8: Changing text color to red...";
 #scr.setProperty("uiTestScreen.textField1", "textColor", "#FF0000");
-#sleep(1000);
+#thread.sleep(1000);
 print "  TextField text should now be red.";
 print "Test 1.9: Changing text color to blue...";
 #scr.setProperty("uiTestScreen.textField1", "textColor", "#0000FF");
-#sleep(500);
+#thread.sleep(500);
 print "  TextField text should now be blue.";
 print "";
 
 // Test backgroundColor property
 print "Test 1.10: Changing background color to yellow...";
 #scr.setProperty("uiTestScreen.textField1", "backgroundColor", "#FFFFCC");
-#sleep(1000);
+#thread.sleep(1000);
 print "  TextField background should now be yellow.";
 print "";
 
 // Test size properties
 print "Test 1.11: Changing preferred width to 300...";
 #scr.setProperty("uiTestScreen.textField1", "prefWidth", "300");
-#sleep(1000);
+#thread.sleep(1000);
 print "  TextField should now be wider.";
 print "";
 
@@ -175,39 +175,39 @@ print "";
 // Test style property on area
 print "Test 2.1: Changing mainArea background to light blue...";
 #scr.setAreaProperty("uiTestScreen.mainArea", "style", "-fx-background-color: #e0f0ff;");
-#sleep(1000);
+#thread.sleep(1000);
 print "  Main area should now have a light blue background.";
 print "";
 
 // Test spacing property
 print "Test 2.2: Increasing mainArea spacing to 30...";
 #scr.setAreaProperty("uiTestScreen.mainArea", "spacing", "30");
-#sleep(1000);
+#thread.sleep(1000);
 print "  Items in main area should now be more spaced apart.";
 print "";
 
 // Test padding property
 print "Test 2.3: Changing mainArea padding to 40...";
 #scr.setAreaProperty("uiTestScreen.mainArea", "padding", "40");
-#sleep(1000);
+#thread.sleep(1000);
 print "  Main area should now have more internal padding.";
 print "";
 
 // Test style on second area
 print "Test 2.4: Changing secondArea background to light green...";
 #scr.setAreaProperty("uiTestScreen.secondArea", "style", "-fx-background-color: #e0ffe0;");
-#sleep(1000);
+#thread.sleep(1000);
 print "  Second area should now have a light green background.";
 print "";
 
 // Test visible property on area (if applicable)
 print "Test 2.5: Hiding secondArea...";
 #scr.setAreaProperty("uiTestScreen.secondArea", "visible", false);
-#sleep(1000);
+#thread.sleep(1000);
 print "  Second area should now be hidden.";
 print "Test 2.6: Showing secondArea...";
 #scr.setAreaProperty("uiTestScreen.secondArea", "visible", true);
-#sleep(500);
+#thread.sleep(500);
 print "  Second area should now be visible again.";
 print "";
 
@@ -225,7 +225,7 @@ print "Test 3.1: Applying multiple changes at once...";
 // Change item properties
 #scr.setProperty("uiTestScreen.textField1", "backgroundColor", "#ffffff");
 #scr.setProperty("uiTestScreen.textField1", "textColor", "#000000");
-#sleep(1000);
+#thread.sleep(1000);
 print "  Main area should have orange border and peach background.";
 print "  TextField should have white background and black text.";
 print "";
@@ -237,7 +237,7 @@ print "Test 3.2: Resetting to original styles...";
 #scr.setAreaProperty("uiTestScreen.mainArea", "padding", "20");
 #scr.setAreaProperty("uiTestScreen.secondArea", "style", "-fx-background-color: #f0f0f0;");
 #scr.setProperty("uiTestScreen.textField1", "prefWidth", "200");
-#sleep(500);
+#thread.sleep(500);
 print "  Screen should now be reset to original appearance.";
 print "";
 
