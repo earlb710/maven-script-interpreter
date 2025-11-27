@@ -890,26 +890,19 @@ public class EbsTab extends Tab {
             }
         });
         
-        // Track dropdown opening/closing to avoid duplicate searches
-        findField.setOnShowing(e -> {
-            dropdownJustUsed = false;
-        });
-        
-        // Search when selecting from dropdown history
-        findField.setOnHidden(e -> {
-            if (!suppressFindSearch) {
-                String selected = findField.getValue();
-                if (selected != null && !selected.isEmpty()) {
-                    dropdownJustUsed = true;
+        // Listen for selection changes from the dropdown list
+        findField.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            if (!suppressFindSearch && newVal != null && !newVal.isEmpty() && findField.isShowing()) {
+                // Mark that dropdown was used to prevent duplicate search from text listener
+                dropdownJustUsed = true;
+                Platform.runLater(() -> {
                     // Set editor text to the selected value
                     suppressFindSearch = true;
-                    findField.getEditor().setText(selected);
+                    findField.getEditor().setText(newVal);
                     suppressFindSearch = false;
-                    Platform.runLater(() -> {
-                        runSearch();
-                        dropdownJustUsed = false;
-                    });
-                }
+                    runSearch();
+                    dropdownJustUsed = false;
+                });
             }
         });
         
