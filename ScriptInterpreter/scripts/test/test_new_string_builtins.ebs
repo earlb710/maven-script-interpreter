@@ -1,0 +1,321 @@
+// ============================================================================
+// TEST SCRIPT: New String Builtin Functions (PR #17)
+// ============================================================================
+// This script tests the 3 new string builtin functions added:
+// - str.replaceFirst  - Replace first occurrence only (literal string)
+// - str.findRegex     - Find first regex match
+// - str.findAllRegex  - Find all regex matches (returns ArrayFixed)
+// ============================================================================
+
+print "====================================================================";
+print "       TEST SCRIPT: New String Builtin Functions";
+print "====================================================================";
+print "";
+
+// ============================================================================
+// TEST 1: str.replaceFirst - Replace first occurrence only
+// ============================================================================
+print "============================================================";
+print "TEST 1: str.replaceFirst - Replace First Occurrence Only";
+print "============================================================";
+print "";
+
+// Test 1.1: Replace first occurrence in string with multiple occurrences
+print "--- Test 1.1: Replace first in multiple occurrences ---";
+var text1: string = "Hello World Hello Universe Hello";
+print "Original:  '" + text1 + "'";
+var result1: string = call str.replaceFirst(text1, "Hello", "Hi");
+print "replaceFirst(text, 'Hello', 'Hi'): '" + result1 + "'";
+print "Expected:  'Hi World Hello Universe Hello'";
+call debug.assertEquals("Hi World Hello Universe Hello", result1, "Replace first Hello with Hi");
+print "";
+
+// Test 1.2: Replace first occurrence of single character
+print "--- Test 1.2: Replace first character ---";
+var text2: string = "banana";
+print "Original:  '" + text2 + "'";
+var result2: string = call str.replaceFirst(text2, "a", "o");
+print "replaceFirst(text, 'a', 'o'): '" + result2 + "'";
+print "Expected:  'bonana'";
+call debug.assertEquals("bonana", result2, "Replace first 'a' with 'o'");
+print "";
+
+// Test 1.3: Target not found - should return original
+print "--- Test 1.3: Target not found ---";
+var text3: string = "Hello World";
+print "Original:  '" + text3 + "'";
+var result3: string = call str.replaceFirst(text3, "xyz", "123");
+print "replaceFirst(text, 'xyz', '123'): '" + result3 + "'";
+print "Expected:  'Hello World' (unchanged)";
+call debug.assertEquals("Hello World", result3, "No match returns original");
+print "";
+
+// Test 1.4: Replace at beginning
+print "--- Test 1.4: Replace at beginning ---";
+var text4: string = "ABC ABC ABC";
+print "Original:  '" + text4 + "'";
+var result4: string = call str.replaceFirst(text4, "ABC", "XYZ");
+print "replaceFirst(text, 'ABC', 'XYZ'): '" + result4 + "'";
+print "Expected:  'XYZ ABC ABC'";
+call debug.assertEquals("XYZ ABC ABC", result4, "Replace at beginning");
+print "";
+
+// Test 1.5: Replace with empty string
+print "--- Test 1.5: Replace with empty string ---";
+var text5: string = "one two one three one";
+print "Original:  '" + text5 + "'";
+var result5: string = call str.replaceFirst(text5, "one", "");
+print "replaceFirst(text, 'one', ''): '" + result5 + "'";
+print "Expected:  ' two one three one'";
+call debug.assertEquals(" two one three one", result5, "Replace with empty string");
+print "";
+
+// Test 1.6: Compare with str.replace (replaces all)
+print "--- Test 1.6: Compare with str.replace (replaces ALL) ---";
+var text6: string = "aaa";
+print "Original:  '" + text6 + "'";
+var first6: string = call str.replaceFirst(text6, "a", "b");
+var all6: string = call str.replace(text6, "a", "b");
+print "replaceFirst(text, 'a', 'b'): '" + first6 + "' (only first)";
+print "replace(text, 'a', 'b'):      '" + all6 + "' (all occurrences)";
+call debug.assertEquals("baa", first6, "replaceFirst replaces only first");
+call debug.assertEquals("bbb", all6, "replace replaces all");
+print "";
+
+print "✓ str.replaceFirst tests PASSED";
+print "";
+
+// ============================================================================
+// TEST 2: str.findRegex - Find first regex match
+// ============================================================================
+print "============================================================";
+print "TEST 2: str.findRegex - Find First Regex Match";
+print "============================================================";
+print "";
+
+// Test 2.1: Find first word
+print "--- Test 2.1: Find first word ---";
+var text7: string = "Hello World 123";
+print "Text: '" + text7 + "'";
+var match1: string = call str.findRegex(text7, "\\w+");
+print "findRegex(text, '\\w+'): '" + match1 + "'";
+print "Expected: 'Hello'";
+call debug.assertEquals("Hello", match1, "Find first word");
+print "";
+
+// Test 2.2: Find first number
+print "--- Test 2.2: Find first number ---";
+var text8: string = "There are 42 apples and 13 oranges";
+print "Text: '" + text8 + "'";
+var match2: string = call str.findRegex(text8, "\\d+");
+print "findRegex(text, '\\d+'): '" + match2 + "'";
+print "Expected: '42'";
+call debug.assertEquals("42", match2, "Find first number");
+print "";
+
+// Test 2.3: No match returns null
+print "--- Test 2.3: No match returns null ---";
+var text9: string = "Hello World";
+print "Text: '" + text9 + "'";
+var match3 = call str.findRegex(text9, "\\d+");
+print "findRegex(text, '\\d+') with no digits: ";
+if match3 == null then {
+    print "null (correct)";
+} else {
+    print "'" + match3 + "' (unexpected!)";
+}
+print "";
+
+// Test 2.4: Find email pattern
+print "--- Test 2.4: Find email pattern ---";
+var text10: string = "Contact: john@example.com for details";
+print "Text: '" + text10 + "'";
+var emailPattern: string = "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}";
+var foundEmail: string = call str.findRegex(text10, emailPattern);
+print "findRegex with email pattern: '" + foundEmail + "'";
+print "Expected: 'john@example.com'";
+call debug.assertEquals("john@example.com", foundEmail, "Find email pattern");
+print "";
+
+// Test 2.5: Find specific word
+print "--- Test 2.5: Find specific word with word boundary ---";
+var text11: string = "The cat sat on the mat";
+print "Text: '" + text11 + "'";
+var match5: string = call str.findRegex(text11, "cat");
+print "findRegex(text, 'cat'): '" + match5 + "'";
+call debug.assertEquals("cat", match5, "Find word 'cat'");
+print "";
+
+// Test 2.6: Find pattern with groups (returns full match)
+print "--- Test 2.6: Date pattern ---";
+var text12: string = "Date: " + "2024" + "-" + "12" + "-" + "25" + " is Christmas";
+print "Text: '" + text12 + "'";
+var datePattern: string = "\\d{4}-\\d{2}-\\d{2}";
+var dateMatch: string = call str.findRegex(text12, datePattern);
+print "findRegex with date pattern: '" + dateMatch + "'";
+var expectedDate: string = "2024" + "-" + "12" + "-" + "25";
+print "Expected: '" + expectedDate + "'";
+call debug.assertEquals(expectedDate, dateMatch, "Find date pattern");
+print "";
+
+print "✓ str.findRegex tests PASSED";
+print "";
+
+// ============================================================================
+// TEST 3: str.findAllRegex - Find all regex matches
+// ============================================================================
+print "============================================================";
+print "TEST 3: str.findAllRegex - Find All Regex Matches";
+print "============================================================";
+print "";
+
+// Test 3.1: Find all words
+print "--- Test 3.1: Find all words ---";
+var text13: string = "Hello World 123 Test";
+print "Text: '" + text13 + "'";
+var allWords = call str.findAllRegex(text13, "\\w+");
+print "findAllRegex(text, '\\w+'): ";
+print allWords;
+print "Length: " + allWords.length;
+call debug.assertEquals(4, allWords.length, "Should find 4 words");
+call debug.assertEquals("Hello", allWords[0], "First word is Hello");
+call debug.assertEquals("World", allWords[1], "Second word is World");
+call debug.assertEquals("123", allWords[2], "Third word is 123");
+call debug.assertEquals("Test", allWords[3], "Fourth word is Test");
+print "";
+
+// Test 3.2: Find all numbers
+print "--- Test 3.2: Find all numbers ---";
+var text14: string = "There are 42 apples, 13 oranges, and 7 bananas";
+print "Text: '" + text14 + "'";
+var allNumbers = call str.findAllRegex(text14, "\\d+");
+print "findAllRegex(text, '\\d+'): ";
+print allNumbers;
+print "Length: " + allNumbers.length;
+call debug.assertEquals(3, allNumbers.length, "Should find 3 numbers");
+call debug.assertEquals("42", allNumbers[0], "First number is 42");
+call debug.assertEquals("13", allNumbers[1], "Second number is 13");
+call debug.assertEquals("7", allNumbers[2], "Third number is 7");
+print "";
+
+// Test 3.3: No matches returns empty array
+print "--- Test 3.3: No matches returns empty array ---";
+var text15: string = "Hello World";
+print "Text: '" + text15 + "'";
+var noMatches = call str.findAllRegex(text15, "\\d+");
+print "findAllRegex(text, '\\d+') with no digits: ";
+print noMatches;
+print "Length: " + noMatches.length;
+call debug.assertEquals(0, noMatches.length, "Should find 0 matches");
+print "";
+
+// Test 3.4: Find all email addresses
+print "--- Test 3.4: Find all email addresses ---";
+var text16: string = "Contact john@example.com or jane@test.org for help";
+print "Text: '" + text16 + "'";
+var allEmails = call str.findAllRegex(text16, "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}");
+print "findAllRegex with email pattern: ";
+print allEmails;
+print "Length: " + allEmails.length;
+call debug.assertEquals(2, allEmails.length, "Should find 2 emails");
+call debug.assertEquals("john@example.com", allEmails[0], "First email");
+call debug.assertEquals("jane@test.org", allEmails[1], "Second email");
+print "";
+
+// Test 3.5: Find all occurrences of a specific pattern
+print "--- Test 3.5: Find all hashtags ---";
+var text17: string = "#coding is fun! #programming #EBS #scripts";
+print "Text: '" + text17 + "'";
+var hashtags = call str.findAllRegex(text17, "#\\w+");
+print "findAllRegex(text, '#\\w+'): ";
+print hashtags;
+print "Length: " + hashtags.length;
+call debug.assertEquals(4, hashtags.length, "Should find 4 hashtags");
+call debug.assertEquals("#coding", hashtags[0], "First hashtag");
+call debug.assertEquals("#programming", hashtags[1], "Second hashtag");
+call debug.assertEquals("#EBS", hashtags[2], "Third hashtag");
+call debug.assertEquals("#scripts", hashtags[3], "Fourth hashtag");
+print "";
+
+// Test 3.6: Iterate through matches
+print "--- Test 3.6: Iterate through matches ---";
+var text18: string = "Prices: $10, $25, $100, $5";
+print "Text: '" + text18 + "'";
+var prices = call str.findAllRegex(text18, "\\$\\d+");
+print "Found " + prices.length + " prices:";
+foreach price in prices {
+    print "  - " + price;
+}
+print "";
+
+print "✓ str.findAllRegex tests PASSED";
+print "";
+
+// ============================================================================
+// INTEGRATION TEST: Combined Usage
+// ============================================================================
+print "============================================================";
+print "INTEGRATION TEST: Combined Usage";
+print "============================================================";
+print "";
+
+// Real-world scenario: Parse log entries
+print "--- Log Entry Parsing Example ---";
+var logEntry: string = "2024" + "-" + "12" + "-" + "25 10:30:45 ERROR [MainThread] Connection failed to server1.example.com";
+print "Log Entry: '" + logEntry + "'";
+print "";
+
+// Extract date using findRegex
+var logDate: string = call str.findRegex(logEntry, "\\d{4}-\\d{2}-\\d{2}");
+print "Date: " + logDate;
+var expectedLogDate: string = "2024" + "-" + "12" + "-" + "25";
+call debug.assertEquals(expectedLogDate, logDate, "Extract date from log");
+
+// Extract time using findRegex
+var logTime: string = call str.findRegex(logEntry, "\\d{2}:\\d{2}:\\d{2}");
+print "Time: " + logTime;
+call debug.assertEquals("10:30:45", logTime, "Extract time from log");
+
+// Extract log level
+var logLevel: string = call str.findRegex(logEntry, "ERROR|WARN|INFO|DEBUG");
+print "Level: " + logLevel;
+call debug.assertEquals("ERROR", logLevel, "Extract log level");
+
+// Extract all words
+var logWords = call str.findAllRegex(logEntry, "\\w+");
+print "Word count: " + logWords.length;
+print "";
+
+// Anonymize the log - replace first occurrence of hostname
+var anonymized: string = call str.replaceFirst(logEntry, "server1.example.com", "[REDACTED]");
+print "Anonymized: '" + anonymized + "'";
+print "";
+
+print "✓ Integration test PASSED";
+print "";
+
+// ============================================================================
+// SUMMARY
+// ============================================================================
+print "====================================================================";
+print "                    TEST SUMMARY";
+print "====================================================================";
+print "All 3 new string builtin functions tested successfully:";
+print "";
+print "  ✓ str.replaceFirst(str, target, replacement)";
+print "    - Replaces only the first occurrence";
+print "    - Uses literal string matching (not regex)";
+print "    - Returns original string if target not found";
+print "";
+print "  ✓ str.findRegex(str, regex)";
+print "    - Finds first match of regex pattern";
+print "    - Returns matched substring";
+print "    - Returns null if no match found";
+print "";
+print "  ✓ str.findAllRegex(str, regex)";
+print "    - Finds all matches of regex pattern";
+print "    - Returns ArrayFixed of matched substrings";
+print "    - Returns empty array if no matches found";
+print "";
+print "All test assertions passed.";
+print "====================================================================";

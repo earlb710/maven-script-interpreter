@@ -6,7 +6,11 @@ import com.eb.script.arrays.ArrayDef;
 import com.eb.script.arrays.ArrayFixed;
 import com.eb.script.token.DataType;
 import com.eb.util.Util;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * Built-in functions for String operations.
@@ -31,6 +35,7 @@ public class BuiltinsString {
             case "str.tolower" -> toLower(args);
             case "str.trim" -> trim(args);
             case "str.replace" -> replace(args);
+            case "str.replacefirst" -> replaceFirst(args);
             case "str.split" -> split(args);
             case "str.join" -> join(args);
             case "str.contains", "string.contains" -> contains(args);
@@ -48,6 +53,8 @@ public class BuiltinsString {
             case "str.lpad" -> lpad(args);
             case "str.rpad" -> rpad(args);
             case "str.chararray" -> charArray(args);
+            case "str.findregex" -> findRegex(args);
+            case "str.findallregex" -> findAllRegex(args);
             default -> throw new InterpreterError("Unknown String builtin: " + name);
         };
     }
@@ -370,5 +377,82 @@ public class BuiltinsString {
 
         ArrayFixed result = new ArrayFixed(DataType.INTEGER, charCodes);
         return result;
+    }
+
+    /**
+     * Replaces only the first occurrence of target with replacement.
+     * Uses literal string matching (not regex).
+     */
+    private static Object replaceFirst(Object[] args) {
+        String s = (String) args[0];
+        String target = (String) args[1];
+        String replacement = (String) args[2];
+
+        if (s == null) {
+            return null;
+        }
+        if (target == null || replacement == null) {
+            return s;
+        }
+
+        int index = s.indexOf(target);
+        if (index < 0) {
+            return s;
+        }
+
+        return s.substring(0, index) + replacement + s.substring(index + target.length());
+    }
+
+    /**
+     * Finds the first occurrence of the regex pattern in the string.
+     * Returns the matched substring, or null if no match found.
+     */
+    private static Object findRegex(Object[] args) throws InterpreterError {
+        String s = (String) args[0];
+        String regex = (String) args[1];
+
+        if (s == null || regex == null) {
+            return null;
+        }
+
+        try {
+            Pattern pattern = Pattern.compile(regex);
+            Matcher matcher = pattern.matcher(s);
+
+            if (matcher.find()) {
+                return matcher.group();
+            }
+            return null;
+        } catch (PatternSyntaxException ex) {
+            throw new InterpreterError("str.findRegex: Invalid regex - " + ex.getMessage());
+        }
+    }
+
+    /**
+     * Finds all occurrences of the regex pattern in the string.
+     * Returns an ArrayFixed of all matched substrings.
+     */
+    private static Object findAllRegex(Object[] args) throws InterpreterError {
+        String s = (String) args[0];
+        String regex = (String) args[1];
+
+        if (s == null || regex == null) {
+            return new ArrayFixed(DataType.STRING, new String[0]);
+        }
+
+        try {
+            Pattern pattern = Pattern.compile(regex);
+            Matcher matcher = pattern.matcher(s);
+
+            List<String> matches = new ArrayList<>();
+            while (matcher.find()) {
+                matches.add(matcher.group());
+            }
+
+            String[] matchArray = matches.toArray(new String[0]);
+            return new ArrayFixed(DataType.STRING, matchArray);
+        } catch (PatternSyntaxException ex) {
+            throw new InterpreterError("str.findAllRegex: Invalid regex - " + ex.getMessage());
+        }
     }
 }
