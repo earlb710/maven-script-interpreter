@@ -747,10 +747,9 @@ public class EbsTab extends Tab {
     }
 
     private void applyLexerSpans(String src) {
-        // When find bar is active and there are any highlights (current or stale),
-        // skip all styling to preserve highlights. Styling will be reapplied after the delay.
-        if (findBar != null && findBar.isVisible() && 
-            (!lastMatches.isEmpty() || !stalePendingClear.isEmpty() || highlightsStale)) {
+        // When find bar is visible, skip all styling during editing.
+        // Styling will be reapplied after the 2-second delay when editorChangeTimer fires.
+        if (findBar != null && findBar.isVisible()) {
             return;
         }
         
@@ -856,14 +855,16 @@ public class EbsTab extends Tab {
         
         // Listen for editor changes to trigger debounced re-highlighting
         dispArea.textProperty().addListener((obs, oldText, newText) -> {
-            if (findBar.isVisible() && !lastMatches.isEmpty()) {
-                // Save current matches for clearing later when timer fires
-                // Don't clear highlights immediately - keep them visible until reapplied
-                stalePendingClear = lastMatches;
-                lastMatches = java.util.Collections.emptyList();
-                currentIndex = -1;
+            if (findBar.isVisible()) {
+                // When find bar is visible and editing, we need to refresh styling after delay
+                if (!lastMatches.isEmpty()) {
+                    // Save current matches for clearing later when timer fires
+                    stalePendingClear = lastMatches;
+                    lastMatches = java.util.Collections.emptyList();
+                    currentIndex = -1;
+                }
                 highlightsStale = true;
-                // Reset and start the timer for re-highlighting
+                // Reset and start the timer for re-highlighting (syntax + find)
                 editorChangeTimer.playFromStart();
             }
         });
