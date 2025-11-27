@@ -2223,6 +2223,11 @@ call array.expand(array, newSize);
 call array.sort(array);
 call array.fill(array, value);
 
+// Add and remove elements
+call array.add(array, value);           // Add to end
+call array.add(array, value, index);    // Insert at index
+var removed = call array.remove(array, index);  // Remove at index, returns removed value
+
 // Encoding
 var encoded = call array.base64encode(byteArray);
 var decoded = call array.base64decode(encodedString);

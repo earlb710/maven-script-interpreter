@@ -698,6 +698,17 @@ public final class Builtins {
                 newParam("length", DataType.INTEGER)
         ));
         addBuiltin(info(
+                "array.add", null,
+                newParam("array", DataType.ARRAY, true),
+                newParam("value", DataType.ANY, true),
+                newParam("index", DataType.INTEGER, false)  // optional index parameter
+        ));
+        addBuiltin(info(
+                "array.remove", DataType.ANY,
+                newParam("array", DataType.ARRAY, true),
+                newParam("index", DataType.INTEGER)
+        ));
+        addBuiltin(info(
                 "array.base64encode", DataType.STRING,
                 newParam("bytes", DataType.ARRAY, true)
         ));
