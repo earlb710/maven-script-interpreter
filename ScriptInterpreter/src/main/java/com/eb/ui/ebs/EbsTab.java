@@ -747,9 +747,9 @@ public class EbsTab extends Tab {
     }
 
     private void applyLexerSpans(String src) {
-        // When find bar is visible, skip all styling during editing.
-        // Styling will be reapplied after the 2-second delay when editorChangeTimer fires.
-        if (findBar != null && findBar.isVisible()) {
+        // When find bar is visible AND we're in the middle of editing (highlightsStale),
+        // skip all styling during editing. Styling will be reapplied after the timer fires.
+        if (findBar != null && findBar.isVisible() && highlightsStale) {
             return;
         }
         
@@ -845,11 +845,12 @@ public class EbsTab extends Tab {
         editorChangeTimer = new PauseTransition(Duration.seconds(2));
         editorChangeTimer.setOnFinished(e -> {
             if (findBar.isVisible() && highlightsStale) {
-                // First reapply syntax highlighting (was skipped during editing)
+                // Reset stale flag FIRST so applyLexerSpans won't skip
+                highlightsStale = false;
+                // Now reapply syntax highlighting (was skipped during editing)
                 applyLexerSpans(dispArea.getText());
                 // Then refresh find highlights, don't jump to a search location
                 runSearchHighlightOnly();
-                highlightsStale = false;
             }
         });
         
