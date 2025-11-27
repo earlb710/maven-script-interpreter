@@ -78,7 +78,7 @@ public class EbsTab extends Tab {
     
     // Search history for find field (max 10 items)
     private static final int MAX_SEARCH_HISTORY = 10;
-    private final javafx.collections.ObservableList<String> searchHistory = javafx.collections.FXCollections.observableArrayList();
+    private final java.util.List<String> searchHistory = new java.util.ArrayList<>();
 
     private List<int[]> lastMatches = java.util.Collections.emptyList(); // each int[]{start,endExclusive}
     private List<int[]> stalePendingClear = java.util.Collections.emptyList(); // old matches pending clear after text change
@@ -444,7 +444,7 @@ public class EbsTab extends Tab {
         outputAreaScroller.setPadding(Insets.EMPTY);
         outputAreaFrame.setPadding(Insets.EMPTY);
 
-        findField = new ComboBox<>(searchHistory);
+        findField = new ComboBox<>();
         findField.setEditable(true);
         findField.setPromptText("Find");
         findField.setPrefWidth(200);
@@ -1275,24 +1275,22 @@ public class EbsTab extends Tab {
     private void addToSearchHistory(String term) {
         if (term == null || term.isEmpty()) return;
         
-        // Suppress find search while modifying the history to avoid ComboBox listener triggering
+        // Remove if already exists (we'll add it to the front)
+        searchHistory.remove(term);
+        
+        // Add to the front
+        searchHistory.add(0, term);
+        
+        // Keep only the last MAX_SEARCH_HISTORY items
+        while (searchHistory.size() > MAX_SEARCH_HISTORY) {
+            searchHistory.remove(searchHistory.size() - 1);
+        }
+        
+        // Update ComboBox items (no listeners since we're not using ObservableList)
         suppressFindSearch = true;
         try {
-            // Save the current editor text before modifying the list
             String currentText = findField.getEditor().getText();
-            
-            // Remove if already exists (we'll add it to the front)
-            searchHistory.remove(term);
-            
-            // Add to the front
-            searchHistory.add(0, term);
-            
-            // Keep only the last MAX_SEARCH_HISTORY items
-            while (searchHistory.size() > MAX_SEARCH_HISTORY) {
-                searchHistory.remove(searchHistory.size() - 1);
-            }
-            
-            // Restore the editor text (ComboBox might have cleared it when list changed)
+            findField.getItems().setAll(searchHistory);
             findField.getEditor().setText(currentText);
         } finally {
             suppressFindSearch = false;
