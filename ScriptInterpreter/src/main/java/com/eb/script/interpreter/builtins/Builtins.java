@@ -706,6 +706,44 @@ public final class Builtins {
                 newParam("b64", DataType.STRING)
         ));
 
+        // ==========================
+        // QUEUE builtins
+        // ==========================
+        addBuiltin(info(
+                "queue.enqueue", null,
+                newParam("queue", DataType.QUEUE, true),
+                newParam("value", DataType.ANY, true)
+        ));
+        addBuiltin(info(
+                "queue.dequeue", DataType.ANY,
+                newParam("queue", DataType.QUEUE, true)
+        ));
+        addBuiltin(info(
+                "queue.peek", DataType.ANY,
+                newParam("queue", DataType.QUEUE, true)
+        ));
+        addBuiltin(info(
+                "queue.isEmpty", DataType.BOOL,
+                newParam("queue", DataType.QUEUE, true)
+        ));
+        addBuiltin(info(
+                "queue.size", DataType.INTEGER,
+                newParam("queue", DataType.QUEUE, true)
+        ));
+        addBuiltin(info(
+                "queue.clear", null,
+                newParam("queue", DataType.QUEUE, true)
+        ));
+        addBuiltin(info(
+                "queue.contains", DataType.BOOL,
+                newParam("queue", DataType.QUEUE, true),
+                newParam("value", DataType.ANY, true)
+        ));
+        addBuiltin(info(
+                "queue.toArray", DataType.ARRAY,
+                newParam("queue", DataType.QUEUE, true)
+        ));
+
         addBuiltin(info(
                 "system.command", DataType.JSON,
                 newParam("command", DataType.STRING), // required
@@ -979,6 +1017,11 @@ public final class Builtins {
         }
         if (BuiltinsSystem.handles(name)) {
             return BuiltinsSystem.dispatch(env, name, args);
+        }
+        
+        // Queue builtins
+        if (BuiltinsQueue.handles(name)) {
+            return BuiltinsQueue.dispatch(name, args);
         }
         
         // CSS builtins

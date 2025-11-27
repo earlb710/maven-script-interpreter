@@ -33,6 +33,7 @@ import com.eb.script.interpreter.expression.IndexExpression;
 import com.eb.script.interpreter.expression.LengthExpression;
 import com.eb.script.interpreter.expression.PropertyExpression;
 import com.eb.script.interpreter.expression.CastExpression;
+import com.eb.script.interpreter.expression.QueueExpression;
 import com.eb.script.interpreter.statement.ForEachStatement;
 import com.eb.script.interpreter.statement.ForStatement;
 import com.eb.script.interpreter.statement.IndexAssignStatement;
@@ -332,6 +333,8 @@ public class Parser {
             return EbsTokenType.JSON;
         } else if (EbsTokenType.ARRAY.contains(str)) {
             return EbsTokenType.ARRAY;
+        } else if (EbsTokenType.QUEUE.contains(str)) {
+            return EbsTokenType.QUEUE;
         } else if (EbsTokenType.RECORD.contains(str)) {
             return EbsTokenType.RECORD;
         } else if (EbsTokenType.MAP.contains(str)) {
@@ -458,6 +461,7 @@ public class Parser {
         RecordType recordType = null;
         Expression[] arrayDims = null;
         boolean consumedBraces = false; // Track if we consumed braces for record fields
+        boolean isQueueType = false; // Track if this is a queue type declaration
 
         if (match(EbsTokenType.COLON)) {
             EbsToken t = peek();
@@ -483,7 +487,7 @@ public class Parser {
                 if (t.type == EbsTokenType.DATATYPE || t.type == EbsTokenType.IDENTIFIER) {
                     String typeName = (String) t.literal;
                     
-                    // Check if it's a qualified type name like "array.int"
+                    // Check if it's a qualified type name like "array.int" or "queue.string"
                     if (typeName.startsWith("array.")) {
                         String subType = typeName.substring(6); // Remove "array." prefix
                         switch (subType.toLowerCase()) {
@@ -502,6 +506,23 @@ public class Parser {
                                 // So don't parse them here, just note we have a record type
                             }
                             default -> throw error(t, "Unknown array element type: " + subType);
+                        }
+                    } else if (typeName.startsWith("queue.")) {
+                        String subType = typeName.substring(6); // Remove "queue." prefix
+                        isQueueType = true; // Mark as queue type
+                        // For queue types, set elemType based on the subtype
+                        // The QUEUE dataType will be set separately
+                        switch (subType.toLowerCase()) {
+                            case "any" -> elemType = DataType.QUEUE;
+                            case "string" -> elemType = DataType.STRING;
+                            case "byte" -> elemType = DataType.BYTE;
+                            case "int", "integer" -> elemType = DataType.INTEGER;
+                            case "long" -> elemType = DataType.LONG;
+                            case "float" -> elemType = DataType.FLOAT;
+                            case "double", "number" -> elemType = DataType.DOUBLE;
+                            case "bool", "boolean" -> elemType = DataType.BOOL;
+                            case "date" -> elemType = DataType.DATE;
+                            default -> throw error(t, "Unknown queue element type: " + subType);
                         }
                     } else {
                         // Check if it's a type alias
@@ -591,6 +612,7 @@ public class Parser {
             if (t.type != EbsTokenType.RECORD && 
                 !(t.literal instanceof String && "record".equals(((String)t.literal).toLowerCase())) &&
                 !(t.literal instanceof String && ((String)t.literal).toLowerCase().startsWith("array.record")) &&
+                !(t.literal instanceof String && ((String)t.literal).toLowerCase().startsWith("queue.")) &&
                 !isAlias) {
                 advance();
             }
@@ -632,6 +654,39 @@ public class Parser {
                 }
             }
             
+            // Check for queue.type syntax when type is not already qualified
+            // This handles cases where lexer separates queue and type (queue . string)
+            if (elemType == DataType.QUEUE && match(EbsTokenType.DOT)) {
+                isQueueType = true; // Mark as queue type
+                EbsToken subType = peek();
+                String subTypeName = null;
+                
+                // Handle both keyword types (int, string, etc.) and identifiers
+                if (subType.type.getDataType() != null) {
+                    elemType = subType.type.getDataType();
+                    advance();
+                } else if (subType.type == EbsTokenType.IDENTIFIER || subType.type == EbsTokenType.DATATYPE) {
+                    subTypeName = (String) subType.literal;
+                    advance();
+                    
+                    // Map common type names for queue element type
+                    switch (subTypeName.toLowerCase()) {
+                        case "any" -> elemType = DataType.QUEUE;  // queue.any is generic queue
+                        case "string" -> elemType = DataType.STRING;
+                        case "byte" -> elemType = DataType.BYTE;
+                        case "int", "integer" -> elemType = DataType.INTEGER;
+                        case "long" -> elemType = DataType.LONG;
+                        case "float" -> elemType = DataType.FLOAT;
+                        case "double", "number" -> elemType = DataType.DOUBLE;
+                        case "bool", "boolean" -> elemType = DataType.BOOL;
+                        case "date" -> elemType = DataType.DATE;
+                        default -> throw error(subType, "Unknown queue element type: " + subTypeName);
+                    }
+                } else {
+                    throw error(subType, "Expected type name after 'queue.'");
+                }
+            }
+            
             // Check for array dimensions after type or after record field definitions
             if (check(EbsTokenType.LBRACKET)) {
                 arrayDims = parseArrayDimensions();
@@ -650,7 +705,10 @@ public class Parser {
 
         Expression varInit = null;
 
-        if (arrayDims != null && arrayDims.length > 0) {
+        if (isQueueType) {
+            // For queue types, create a QueueExpression
+            varInit = new QueueExpression(name.line, elemType);
+        } else if (arrayDims != null && arrayDims.length > 0) {
             // Implicit allocation: synthesize an ArrayInitExpression from parsed sizes.
             varInit = new ArrayExpression(name.line, elemType, arrayDims, null);
         }
@@ -2439,13 +2497,28 @@ public class Parser {
         consumeOptional(EbsTokenType.CALL);
         
         // Now check for BUILTIN or IDENTIFIER
+        // Also accept DATATYPE tokens for builtins like queue.enqueue or array.sort
         EbsToken first = consumeOptional(EbsTokenType.BUILTIN);
         if (first == null) {
-            first = consume(EbsTokenType.IDENTIFIER, "Expected identifier.");
-            sb = sb.append((String) first.literal);
+            // Accept IDENTIFIER or DATATYPE (for type-prefixed builtins like queue.*, array.*)
+            if (check(EbsTokenType.DATATYPE) || check(EbsTokenType.QUEUE) || check(EbsTokenType.ARRAY)) {
+                first = advance();
+                sb.append((String) first.literal);
+            } else {
+                first = consume(EbsTokenType.IDENTIFIER, "Expected identifier.");
+                sb.append((String) first.literal);
+            }
             while (match(EbsTokenType.DOT)) {
-                EbsToken seg = consume(EbsTokenType.IDENTIFIER, "Expected identifier after '.'.");
-                sb.append('.').append((String) seg.literal);
+                // Accept various token types that could be method names (size, length, etc.)
+                // These are keywords but can also be method names in builtins
+                EbsToken seg;
+                if (check(EbsTokenType.SIZE) || check(EbsTokenType.LENGTH)) {
+                    seg = advance();
+                    sb.append('.').append((String) seg.literal);
+                } else {
+                    seg = consume(EbsTokenType.IDENTIFIER, "Expected identifier after '.'.");
+                    sb.append('.').append((String) seg.literal);
+                }
             }
         } else {
             sb = sb.append((String) first.literal);
@@ -2629,6 +2702,7 @@ public class Parser {
             case "bool", "boolean" -> DataType.BOOL;
             case "json" -> DataType.JSON;
             case "array" -> DataType.ARRAY;
+            case "queue" -> DataType.QUEUE;
             case "record" -> DataType.RECORD;
             case "map" -> DataType.MAP;
             default -> null;

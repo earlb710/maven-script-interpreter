@@ -18,6 +18,7 @@ import com.eb.script.interpreter.expression.ArrayExpression;
 import com.eb.script.interpreter.expression.ArrayLiteralExpression;
 import com.eb.script.interpreter.expression.ExpressionVisitor;
 import com.eb.script.interpreter.expression.Expression;
+import com.eb.script.interpreter.expression.QueueExpression;
 import com.eb.script.interpreter.statement.StatementVisitor;
 import com.eb.script.interpreter.statement.Statement;
 import com.eb.script.interpreter.expression.LiteralExpression;
@@ -311,6 +312,10 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                     if (!Util.checkDataType(array.dataType, value)) {
                         throw error(stmt.getLine(), "Array type mismatch: expected " + expectedType + " for variable '" + stmt.name + "'");
                     }
+                } else if (stmt.initializer instanceof QueueExpression queue) {
+                    // For queue declarations, don't convert the queue itself
+                    // The queue already has the correct element type from visitQueueInitExpression
+                    // Skip validation - the queue is already properly typed
                 } else if (expectedType == DataType.RECORD && stmt.recordType != null) {
                     // Special handling for standalone record types (not arrays)
                     // Convert and validate the value against the record type
@@ -351,6 +356,12 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         @Override
     public Object visitArrayInitExpression(ArrayExpression expr) throws InterpreterError {
         return arrayInterpreter.visitArrayInitExpression(expr);
+    }
+
+    @Override
+    public Object visitQueueInitExpression(QueueExpression expr) throws InterpreterError {
+        // Create a new QueueDynamic with the specified element type
+        return new com.eb.script.arrays.QueueDynamic(expr.dataType);
     }
 
 

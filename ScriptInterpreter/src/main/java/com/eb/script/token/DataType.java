@@ -20,6 +20,7 @@ public enum DataType {
     BOOL(Boolean.class),
     JSON(Object.class),
     ARRAY(Object[].class),
+    QUEUE(java.util.Queue.class),
     RECORD(java.util.Map.class),
     MAP(java.util.Map.class),
     ANY(Comparable.class);
@@ -39,6 +40,9 @@ public enum DataType {
                     return new Byte[length];
                 }
                 case ARRAY -> {
+                    return new Object[length];
+                }
+                case QUEUE -> {
                     return new Object[length];
                 }
                 case INTEGER -> {
@@ -96,6 +100,10 @@ public enum DataType {
             return (value instanceof ArrayDef)
                 || (value instanceof java.util.List)
                 || (value.getClass().isArray());
+        }
+        if (type == QUEUE) {
+            // Accept QueueDef objects as queues
+            return value instanceof com.eb.script.arrays.QueueDef;
         }
         if (type == RECORD) {
             // Accept Map objects as records

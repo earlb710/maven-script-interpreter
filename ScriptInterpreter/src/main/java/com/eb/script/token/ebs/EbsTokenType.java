@@ -40,6 +40,7 @@ public enum EbsTokenType implements LexerToken {
     STRING(PrintStyle.DATA, DataType.STRING, "string"), DATE(PrintStyle.DATA, DataType.DATE, "date"), BOOL(PrintStyle.DATA, DataType.BOOL, "bool", "boolean"),
     JSON(PrintStyle.DATA, DataType.JSON, "json"),
     ARRAY(PrintStyle.DATA, DataType.ARRAY, "array"),
+    QUEUE(PrintStyle.DATA, DataType.QUEUE, "queue"),
     RECORD(PrintStyle.DATA, DataType.RECORD, "record"),
     MAP(PrintStyle.DATA, DataType.MAP, "map"),
     // Identifiers

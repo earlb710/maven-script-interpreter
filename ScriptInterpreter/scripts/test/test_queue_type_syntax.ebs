@@ -1,0 +1,128 @@
+// Test script for queue.type syntax
+// Tests queue, queue.string, queue.int, queue.double, etc.
+
+print "=== Testing Queue.Type Syntax ===";
+print "";
+
+// ============================================================================
+// TEST 1: queue.string - String queue
+// ============================================================================
+print "TEST 1: queue.string - String queue";
+var stringQueue: queue.string;
+call queue.enqueue(stringQueue, "First");
+call queue.enqueue(stringQueue, "Second");
+call queue.enqueue(stringQueue, "Third");
+print "  Queue size: " + call queue.size(stringQueue);
+print "  Peek: " + call queue.peek(stringQueue);
+print "  Dequeue: " + call queue.dequeue(stringQueue);
+print "  After dequeue, size: " + call queue.size(stringQueue);
+print "";
+
+// ============================================================================
+// TEST 2: queue.int - Integer queue
+// ============================================================================
+print "TEST 2: queue.int - Integer queue";
+var intQueue: queue.int;
+call queue.enqueue(intQueue, 10);
+call queue.enqueue(intQueue, 20);
+call queue.enqueue(intQueue, 30);
+print "  Queue size: " + call queue.size(intQueue);
+print "  Peek: " + call queue.peek(intQueue);
+print "  Dequeue: " + call queue.dequeue(intQueue);
+print "  After dequeue, peek: " + call queue.peek(intQueue);
+print "";
+
+// ============================================================================
+// TEST 3: queue.double - Double queue
+// ============================================================================
+print "TEST 3: queue.double - Double queue";
+var doubleQueue: queue.double;
+call queue.enqueue(doubleQueue, 3.14);
+call queue.enqueue(doubleQueue, 2.71);
+call queue.enqueue(doubleQueue, 1.41);
+print "  Queue size: " + call queue.size(doubleQueue);
+print "  Peek: " + call queue.peek(doubleQueue);
+print "";
+
+// ============================================================================
+// TEST 4: queue.isEmpty and queue.clear
+// ============================================================================
+print "TEST 4: queue.isEmpty and queue.clear";
+var testQueue: queue.string;
+print "  Is empty (initially): " + call queue.isEmpty(testQueue);
+call queue.enqueue(testQueue, "item");
+print "  Is empty (after enqueue): " + call queue.isEmpty(testQueue);
+call queue.clear(testQueue);
+print "  Is empty (after clear): " + call queue.isEmpty(testQueue);
+print "";
+
+// ============================================================================
+// TEST 5: queue.contains
+// ============================================================================
+print "TEST 5: queue.contains";
+var fruitsQueue: queue.string;
+call queue.enqueue(fruitsQueue, "apple");
+call queue.enqueue(fruitsQueue, "banana");
+call queue.enqueue(fruitsQueue, "cherry");
+print "  Contains 'banana': " + call queue.contains(fruitsQueue, "banana");
+print "  Contains 'orange': " + call queue.contains(fruitsQueue, "orange");
+print "";
+
+// ============================================================================
+// TEST 6: queue.toArray
+// ============================================================================
+print "TEST 6: queue.toArray";
+var numQueue: queue.int;
+call queue.enqueue(numQueue, 1);
+call queue.enqueue(numQueue, 2);
+call queue.enqueue(numQueue, 3);
+var numArray = call queue.toArray(numQueue);
+print "  Array from queue: " + numArray[0] + ", " + numArray[1] + ", " + numArray[2];
+print "";
+
+// ============================================================================
+// TEST 7: FIFO behavior
+// ============================================================================
+print "TEST 7: FIFO (First-In-First-Out) behavior";
+var fifoQueue: queue.string;
+call queue.enqueue(fifoQueue, "A");
+call queue.enqueue(fifoQueue, "B");
+call queue.enqueue(fifoQueue, "C");
+print "  Enqueued: A, B, C";
+print "  Dequeue 1: " + call queue.dequeue(fifoQueue);
+print "  Dequeue 2: " + call queue.dequeue(fifoQueue);
+print "  Dequeue 3: " + call queue.dequeue(fifoQueue);
+print "";
+
+// ============================================================================
+// TEST 8: Using queue in a loop
+// ============================================================================
+print "TEST 8: Using queue in a loop (process queue)";
+var taskQueue: queue.string;
+call queue.enqueue(taskQueue, "Task 1");
+call queue.enqueue(taskQueue, "Task 2");
+call queue.enqueue(taskQueue, "Task 3");
+print "  Processing queue:";
+while !call queue.isEmpty(taskQueue) {
+    var task = call queue.dequeue(taskQueue);
+    print "    Processing: " + task;
+}
+print "  Queue is now empty: " + call queue.isEmpty(taskQueue);
+print "";
+
+// ============================================================================
+// TEST 9: queue.long and queue.float
+// ============================================================================
+print "TEST 9: queue.long and queue.float";
+var longQueue: queue.long;
+call queue.enqueue(longQueue, 9999999999);
+call queue.enqueue(longQueue, 8888888888);
+print "  Long queue peek: " + call queue.peek(longQueue);
+
+var floatQueue: queue.float;
+call queue.enqueue(floatQueue, 1.5);
+call queue.enqueue(floatQueue, 2.5);
+print "  Float queue peek: " + call queue.peek(floatQueue);
+print "";
+
+print "=== All Queue.Type Tests Complete ===";
