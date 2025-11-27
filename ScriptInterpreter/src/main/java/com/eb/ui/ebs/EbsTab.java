@@ -838,8 +838,8 @@ public class EbsTab extends Tab {
         // Listen for editor changes to trigger debounced re-highlighting
         dispArea.textProperty().addListener((obs, oldText, newText) -> {
             if (findBar.isVisible() && !lastMatches.isEmpty()) {
-                // Clear existing highlights immediately since text changed
-                clearHighlights();
+                // Mark matches as invalid - positions have shifted due to text change
+                // Don't clear highlights immediately as it may cause scroll issues
                 lastMatches = java.util.Collections.emptyList();
                 currentIndex = -1;
                 highlightsStale = true;
@@ -879,12 +879,14 @@ public class EbsTab extends Tab {
             Platform.runLater(() -> {
                 refreshHighlightsIfStale();
                 gotoNext();
+                dispArea.requestFocus();
             });
         });
         btnPrev.setOnAction(e -> {
             Platform.runLater(() -> {
                 refreshHighlightsIfStale();
                 gotoPrev();
+                dispArea.requestFocus();
             });
         });
         btnReplace.setOnAction(e -> {
