@@ -892,6 +892,11 @@ public class EbsTab extends Tab {
         // Search when selecting from dropdown history (valueProperty changes when user clicks dropdown item)
         findField.valueProperty().addListener((obs, oldVal, newVal) -> {
             if (!suppressFindSearch && newVal != null && !newVal.isEmpty()) {
+                // Explicitly set the editor text to the selected value
+                // This ensures the editor is updated before runSearch() reads from it
+                suppressFindSearch = true;
+                findField.getEditor().setText(newVal);
+                suppressFindSearch = false;
                 Platform.runLater(() -> {
                     runSearch();
                 });
