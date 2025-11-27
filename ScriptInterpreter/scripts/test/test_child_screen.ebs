@@ -1,0 +1,291 @@
+// Test Script: Child Screen Support
+// Description: Tests that when a screen is shown from within another screen's context,
+//              the child screen becomes owned by the parent and runs in the parent's thread.
+// Features tested:
+//   1. Child screen's Stage is owned by parent Stage (window relationship)
+//   2. Child screen reuses parent's thread
+//   3. Child screen appears on top of parent
+//   4. Closing child screen doesn't interrupt parent's thread
+// Date: 2025-11-27
+
+print "=== Child Screen Support Test ===";
+print "";
+print "This test demonstrates that screens opened from within another screen";
+print "become child screens of the parent:";
+print "  - Child appears on top of parent";
+print "  - Child follows parent for window management (minimize/close)";
+print "  - Child shares parent's thread";
+print "";
+
+// Define the child screen
+print "Defining child screen...";
+screen childScreen = {
+    "title": "Child Screen",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "childMessage",
+            "type": "string",
+            "default": "I am a child screen!",
+            "display": {
+                "type": "textfield",
+                "labelText": "Message:"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "childArea",
+            "type": "vbox",
+            "spacing": "15",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "info",
+                    "seq": 1,
+                    "display": {
+                        "type": "label",
+                        "labelText": "This is a CHILD screen.\n\nIt is owned by the parent screen and shares\nthe parent's thread.\n\nTry minimizing/restoring the parent - this\nchild window will follow."
+                    }
+                },
+                {
+                    "name": "childMessage",
+                    "varRef": "childMessage",
+                    "seq": 2
+                },
+                {
+                    "name": "closeChildButton",
+                    "seq": 3,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Close Child Screen",
+                        "onClick": "print 'Closing child screen...'; close screen;"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+// Define a grandchild screen (to test multi-level parent-child relationships)
+print "Defining grandchild screen...";
+screen grandchildScreen = {
+    "title": "Grandchild Screen",
+    "width": 350,
+    "height": 250,
+    "area": [
+        {
+            "name": "grandchildArea",
+            "type": "vbox",
+            "spacing": "15",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "info",
+                    "seq": 1,
+                    "display": {
+                        "type": "label",
+                        "labelText": "This is a GRANDCHILD screen.\n\nIt is opened from the child screen,\nmaking it a child of the child."
+                    }
+                },
+                {
+                    "name": "closeGrandchildButton",
+                    "seq": 2,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Close Grandchild",
+                        "onClick": "print 'Closing grandchild screen...'; close screen;"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+// Update child screen to open grandchild
+screen childScreen2 = {
+    "title": "Child Screen (with grandchild)",
+    "width": 450,
+    "height": 350,
+    "vars": [
+        {
+            "name": "childMessage",
+            "type": "string",
+            "default": "I can open grandchild screens!",
+            "display": {
+                "type": "textfield",
+                "labelText": "Message:"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "childArea",
+            "type": "vbox",
+            "spacing": "15",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "info",
+                    "seq": 1,
+                    "display": {
+                        "type": "label",
+                        "labelText": "This is a CHILD screen.\n\nClick the button below to open a\ngrandchild screen."
+                    }
+                },
+                {
+                    "name": "childMessage",
+                    "varRef": "childMessage",
+                    "seq": 2
+                },
+                {
+                    "name": "openGrandchildButton",
+                    "seq": 3,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Open Grandchild Screen",
+                        "onClick": "print 'Opening grandchild screen from child...'; show screen grandchildScreen;"
+                    }
+                },
+                {
+                    "name": "closeChildButton",
+                    "seq": 4,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Close Child Screen",
+                        "onClick": "print 'Closing child screen...'; close screen;"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+// Define the parent screen
+print "Defining parent screen...";
+screen parentScreen = {
+    "title": "Parent Screen",
+    "width": 500,
+    "height": 400,
+    "vars": [
+        {
+            "name": "parentMessage",
+            "type": "string",
+            "default": "Hello from parent!",
+            "display": {
+                "type": "textfield",
+                "labelText": "Parent Message:"
+            }
+        },
+        {
+            "name": "childOpenCount",
+            "type": "int",
+            "default": 0,
+            "display": {
+                "type": "textfield",
+                "labelText": "Times child opened:"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "parentArea",
+            "type": "vbox",
+            "spacing": "15",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "title",
+                    "seq": 1,
+                    "display": {
+                        "type": "label",
+                        "labelText": "PARENT SCREEN - Child Screen Test",
+                        "labelBold": true,
+                        "labelFontSize": "16px"
+                    }
+                },
+                {
+                    "name": "instructions",
+                    "seq": 2,
+                    "display": {
+                        "type": "label",
+                        "labelText": "Click the buttons below to open child screens.\nChild screens will:\n  - Be owned by this parent window\n  - Share this parent's thread\n  - Appear on top of this window"
+                    }
+                },
+                {
+                    "name": "parentMessage",
+                    "varRef": "parentMessage",
+                    "seq": 3
+                },
+                {
+                    "name": "childOpenCount",
+                    "varRef": "childOpenCount",
+                    "seq": 4
+                },
+                {
+                    "name": "openChildButton",
+                    "seq": 5,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Open Simple Child Screen",
+                        "onClick": "parentScreen.childOpenCount = parentScreen.childOpenCount + 1; print 'Opening child screen #' + parentScreen.childOpenCount + '...'; show screen childScreen;"
+                    }
+                },
+                {
+                    "name": "openNestedChildButton",
+                    "seq": 6,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Open Child (can open grandchild)",
+                        "onClick": "parentScreen.childOpenCount = parentScreen.childOpenCount + 1; print 'Opening nested child screen #' + parentScreen.childOpenCount + '...'; show screen childScreen2;"
+                    }
+                },
+                {
+                    "name": "closeParentButton",
+                    "seq": 7,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Close Parent Screen",
+                        "onClick": "print 'Closing parent screen. Total child screens opened: ' + parentScreen.childOpenCount; close screen;"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+print "";
+print "=== Test Screens Created ===";
+print "";
+print "Three screens have been defined:";
+print "  1. parentScreen - The main parent window";
+print "  2. childScreen - A simple child screen";  
+print "  3. childScreen2 - A child that can open grandchildScreen";
+print "  4. grandchildScreen - A grandchild screen (child of child)";
+print "";
+print "=== How to Test ===";
+print "";
+print "1. The parent screen will open automatically";
+print "2. Click 'Open Simple Child Screen' to open a basic child";
+print "3. Click 'Open Child (can open grandchild)' to test multi-level";
+print "4. Observe that:";
+print "   - Child windows appear on top of parent";
+print "   - Minimizing parent also minimizes children";
+print "   - Closing child doesn't affect parent";
+print "";
+print "=== Expected Behavior ===";
+print "";
+print "Child screens should:";
+print "  - Be owned by the parent Stage (initOwner called)";
+print "  - Share the parent's thread (not create new threads)";
+print "  - Follow parent for window management";
+print "";
+print "Opening parent screen now...";
+print "";
+
+show screen parentScreen;
+
+print "";
+print "Parent screen is now displayed!";
+print "Click the buttons to test child screen functionality.";
