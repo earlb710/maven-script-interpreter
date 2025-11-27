@@ -476,24 +476,20 @@ screen colorEditorScreen = {
                                                         ]
                                                     },
                                                     {
-                                                        "name": "editorColorsArea",
+                                                        "name": "findColorsArea",
                                                         "type": "vbox",
                                                         "groupBorder": "lowered",
                                                         "groupBorderColor": "#ffffff",
                                                         "groupBorderWidth": "2",
-                                                        "groupLabelText": "Editor Colors",
+                                                        "groupLabelText": "Find Colors",
                                                         "groupLabelColor": "#444444",
                                                         "groupLabelBackground": "#efefef",
                                                         "groupLabelAlignment": "left",
                                                         "groupLabelOffset": "bottom",
                                                         "style": "-fx-spacing: 5; -fx-padding: 5;",
                                                         "items": [
-                                                            {"name": "background_item", "varref": "background"},
-                                                            {"name": "text_item", "varref": "text"},
-                                                            {"name": "caret_item", "varref": "caret"},
-                                                            {"name": "lineCursor_item", "varref": "lineCursor"},
-                                                            {"name": "lineNumbers_item", "varref": "lineNumbers"},
-                                                            {"name": "consoleBackground_item", "varref": "consoleBackground"}
+                                                            {"name": "findHighlightColor_item", "varref": "findHighlightColor"},
+                                                            {"name": "findHighlightBackground_item", "varref": "findHighlightBackground"}
                                                         ]
                                                     }
                                                 ]
@@ -554,20 +550,24 @@ screen colorEditorScreen = {
                                                         ]
                                                     },
                                                     {
-                                                        "name": "findColorsArea",
+                                                        "name": "editorColorsArea",
                                                         "type": "vbox",
                                                         "groupBorder": "lowered",
                                                         "groupBorderColor": "#ffffff",
                                                         "groupBorderWidth": "2",
-                                                        "groupLabelText": "Find Colors",
+                                                        "groupLabelText": "Editor Colors",
                                                         "groupLabelColor": "#444444",
                                                         "groupLabelBackground": "#efefef",
                                                         "groupLabelAlignment": "left",
                                                         "groupLabelOffset": "bottom",
                                                         "style": "-fx-spacing: 5; -fx-padding: 5;",
                                                         "items": [
-                                                            {"name": "findHighlightColor_item", "varref": "findHighlightColor"},
-                                                            {"name": "findHighlightBackground_item", "varref": "findHighlightBackground"}
+                                                            {"name": "background_item", "varref": "background"},
+                                                            {"name": "text_item", "varref": "text"},
+                                                            {"name": "caret_item", "varref": "caret"},
+                                                            {"name": "lineCursor_item", "varref": "lineCursor"},
+                                                            {"name": "lineNumbers_item", "varref": "lineNumbers"},
+                                                            {"name": "consoleBackground_item", "varref": "consoleBackground"}
                                                         ]
                                                     }
                                                 ]
