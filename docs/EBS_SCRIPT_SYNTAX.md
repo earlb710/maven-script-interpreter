@@ -1870,6 +1870,41 @@ foreach code in charCodes {
 - Useful for character-level string analysis
 - Can be used for custom encoding/decoding operations
 
+#### string.contains() - Check for Substring
+Checks if a string contains a specified substring. Returns `true` if the substring is found, `false` otherwise.
+
+```javascript
+// Basic usage
+var text: string = "Hello World";
+var hasWorld = call string.contains(text, "World");
+print hasWorld;  // Output: true
+
+var hasXyz = call string.contains(text, "xyz");
+print hasXyz;  // Output: false
+
+// Case-sensitive matching
+var hasHello = call string.contains(text, "Hello");
+print hasHello;  // Output: true
+
+var hasHELLO = call string.contains(text, "HELLO");
+print hasHELLO;  // Output: false (case-sensitive)
+
+// Use in conditionals
+if call string.contains(filename, ".css") then {
+    print "This is a CSS file";
+}
+
+// Also available as str.contains
+var result = call str.contains("Hello", "ell");
+print result;  // Output: true
+```
+
+**Features:**
+- Case-sensitive substring matching
+- Returns boolean (`true` or `false`)
+- Available as both `string.contains` and `str.contains`
+- Returns `false` if either argument is `null`
+
 
 ### JSON Functions
 ```javascript
@@ -1966,6 +2001,112 @@ var json = call http.postjson(url, headers, jsonBody);
 call http.ensure2xx(response);  // Throws error if not 2xx
 var isOk = call http.is2xx(response);  // Returns boolean
 ```
+
+### CSS Functions
+```javascript
+// Get property value from CSS stylesheet
+var color = call css.getValue(cssPath, selector, property);
+```
+
+#### css.getValue(cssPath, selector, property)
+Retrieves a CSS property value from a stylesheet file. This function can read CSS files from classpath resources or filesystem paths.
+
+**Parameters:**
+- `cssPath` (string, required): Path to the CSS file. Can be a classpath resource (e.g., "css/console.css") or a filesystem path
+- `selector` (string, required): CSS selector to look up (e.g., ".error", "#main", ".console-frame .text-area")
+- `property` (string, required): CSS property name to retrieve (e.g., "-fx-fill", "-fx-font-weight", "-fx-background-color")
+
+**Returns:** String - the property value, or `null` if the selector or property is not found
+
+```javascript
+// Basic usage - get fill color for error class
+var errorColor = call css.getValue("css/console.css", ".error", "-fx-fill");
+print errorColor;  // Output: #ee0000
+
+// Get font weight for keyword styling
+var keywordWeight = call css.getValue("css/console.css", ".keyword", "-fx-font-weight");
+print keywordWeight;  // Output: bold
+
+// Multi-part selectors
+var bgColor = call css.getValue("css/console.css", ".console-frame .text-area", "-fx-background-color");
+print bgColor;  // Output: #000000
+
+// Read from different CSS files
+var headerBg = call css.getValue("css/screen-areas.css", ".screen-area-header", "-fx-background-color");
+print headerBg;  // Output: #ffffff
+
+// Handle non-existent selector (returns null)
+var missing = call css.getValue("css/console.css", ".nonexistent", "-fx-fill");
+if missing == null then {
+    print "Selector not found";
+}
+
+// Handle non-existent property (returns null)
+var noProperty = call css.getValue("css/console.css", ".error", "nonexistent-prop");
+if noProperty == null then {
+    print "Property not found";
+}
+
+// Extract theme colors for dynamic styling
+var themeError = call css.getValue("css/console.css", ".error", "-fx-fill");
+var themeWarn = call css.getValue("css/console.css", ".warn", "-fx-fill");
+var themeOk = call css.getValue("css/console.css", ".ok", "-fx-fill");
+print "Error: " + themeError + ", Warn: " + themeWarn + ", OK: " + themeOk;
+```
+
+**Features:**
+- Reads CSS from classpath resources (e.g., "css/console.css") or filesystem paths
+- Handles multi-selector rules (e.g., ".a, .b { ... }")
+- Correctly parses CSS comments (single and multi-line)
+- Handles values containing semicolons in quoted strings
+- Caches parsed CSS files for improved performance
+- Case-insensitive property name matching
+- Skips @-rules (media queries, keyframes)
+
+**Use Cases:**
+- Extract theme colors for dynamic UI styling
+- Read font settings from stylesheets
+- Validate CSS property values programmatically
+- Build style-aware applications that adapt to CSS changes
+
+#### css.findCss(searchPath?)
+Searches for all available CSS stylesheet files and returns their paths as a string array.
+
+**Parameters:**
+- `searchPath` (string, optional): Base path to search in. If not provided, searches in default locations (classpath css/ folder and sandbox)
+
+**Returns:** String[] - an array of paths to all found CSS files
+
+```javascript
+// Find all available CSS files
+var cssFiles = call css.findCss();
+print "Found " + cssFiles.length + " CSS files:";
+foreach file in cssFiles {
+    print "  - " + file;
+}
+
+// Search in a specific directory
+var customCss = call css.findCss("/path/to/styles");
+foreach file in customCss {
+    print file;
+}
+
+// Use with css.getValue to iterate over all stylesheets
+var allCss = call css.findCss();
+foreach cssFile in allCss {
+    var errorColor = call css.getValue(cssFile, ".error", "-fx-fill");
+    if errorColor != null then {
+        print cssFile + " defines .error color: " + errorColor;
+    }
+}
+```
+
+**Features:**
+- Searches classpath resources (css/ folder)
+- Searches filesystem paths (sandbox directory)
+- Returns absolute paths for filesystem files
+- Returns relative paths for classpath resources (e.g., "css/console.css")
+- Recursive directory search when searching filesystem paths
 
 ### Array Functions
 ```javascript

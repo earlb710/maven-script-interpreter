@@ -33,7 +33,7 @@ public class BuiltinsString {
             case "str.replace" -> replace(args);
             case "str.split" -> split(args);
             case "str.join" -> join(args);
-            case "str.contains" -> contains(args);
+            case "str.contains", "string.contains" -> contains(args);
             case "str.startswith" -> startsWith(args);
             case "str.endswith" -> endsWith(args);
             case "str.equalsignorecase" -> equalsIgnoreCase(args);

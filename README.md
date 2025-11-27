@@ -597,6 +597,7 @@ The interpreter includes numerous built-in functions:
 ### String Operations
 - `substring()`, `length()`, `indexOf()`, `replace()`, `split()`
 - `toUpperCase()`, `toLowerCase()`, `trim()`
+- `string.contains(str, sub)` - Checks if a string contains a substring, returns boolean
 - `str.charArray()` - Returns an array of integer character codes (Unicode code points) for each character in a string
 
 ### Array Operations
@@ -619,6 +620,10 @@ The interpreter includes numerous built-in functions:
 
 ### Date/Time
 - `now()`, `dateFormat()`, `parseDate()`
+
+### CSS Operations
+- `css.getValue(cssPath, selector, property)` - Retrieves a CSS property value from a stylesheet (e.g., `css.getValue("css/console.css", ".error", "-fx-fill")` returns `"#ee0000"`)
+- `css.findCss(searchPath?)` - Searches for all available CSS stylesheet files and returns their paths as a string array
 
 ### Dialog Functions
 - `system.inputDialog(title, headerText?, defaultValue?)` - Prompts user for text input, returns the entered string
