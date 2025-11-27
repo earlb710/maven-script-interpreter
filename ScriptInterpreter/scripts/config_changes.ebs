@@ -66,61 +66,61 @@ if call json.isempty(profileListJson) then {
     var idx: int = 0;
     var tempProfile: string = "";
     
-    tempProfile = call json.getstring(profileListJson, "[0]");
+    tempProfile = call json.getstring(profileListJson, "[0]", "");
     if tempProfile != "" then {
         profileList[idx] = tempProfile;
         if tempProfile == "default" then { hasDefaultProfile = true; }
         idx = idx + 1;
     }
-    tempProfile = call json.getstring(profileListJson, "[1]");
+    tempProfile = call json.getstring(profileListJson, "[1]", "");
     if tempProfile != "" then {
         profileList[idx] = tempProfile;
         if tempProfile == "default" then { hasDefaultProfile = true; }
         idx = idx + 1;
     }
-    tempProfile = call json.getstring(profileListJson, "[2]");
+    tempProfile = call json.getstring(profileListJson, "[2]", "");
     if tempProfile != "" then {
         profileList[idx] = tempProfile;
         if tempProfile == "default" then { hasDefaultProfile = true; }
         idx = idx + 1;
     }
-    tempProfile = call json.getstring(profileListJson, "[3]");
+    tempProfile = call json.getstring(profileListJson, "[3]", "");
     if tempProfile != "" then {
         profileList[idx] = tempProfile;
         if tempProfile == "default" then { hasDefaultProfile = true; }
         idx = idx + 1;
     }
-    tempProfile = call json.getstring(profileListJson, "[4]");
+    tempProfile = call json.getstring(profileListJson, "[4]", "");
     if tempProfile != "" then {
         profileList[idx] = tempProfile;
         if tempProfile == "default" then { hasDefaultProfile = true; }
         idx = idx + 1;
     }
-    tempProfile = call json.getstring(profileListJson, "[5]");
+    tempProfile = call json.getstring(profileListJson, "[5]", "");
     if tempProfile != "" then {
         profileList[idx] = tempProfile;
         if tempProfile == "default" then { hasDefaultProfile = true; }
         idx = idx + 1;
     }
-    tempProfile = call json.getstring(profileListJson, "[6]");
+    tempProfile = call json.getstring(profileListJson, "[6]", "");
     if tempProfile != "" then {
         profileList[idx] = tempProfile;
         if tempProfile == "default" then { hasDefaultProfile = true; }
         idx = idx + 1;
     }
-    tempProfile = call json.getstring(profileListJson, "[7]");
+    tempProfile = call json.getstring(profileListJson, "[7]", "");
     if tempProfile != "" then {
         profileList[idx] = tempProfile;
         if tempProfile == "default" then { hasDefaultProfile = true; }
         idx = idx + 1;
     }
-    tempProfile = call json.getstring(profileListJson, "[8]");
+    tempProfile = call json.getstring(profileListJson, "[8]", "");
     if tempProfile != "" then {
         profileList[idx] = tempProfile;
         if tempProfile == "default" then { hasDefaultProfile = true; }
         idx = idx + 1;
     }
-    tempProfile = call json.getstring(profileListJson, "[9]");
+    tempProfile = call json.getstring(profileListJson, "[9]", "");
     if tempProfile != "" then {
         profileList[idx] = tempProfile;
         if tempProfile == "default" then { hasDefaultProfile = true; }
