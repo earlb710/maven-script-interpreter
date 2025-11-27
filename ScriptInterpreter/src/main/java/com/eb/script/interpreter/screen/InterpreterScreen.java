@@ -38,6 +38,52 @@ public class InterpreterScreen {
     }
 
     /**
+     * Creates and starts a new daemon thread for a screen.
+     * This is a helper method to avoid code duplication.
+     * 
+     * @param screenName The name of the screen for thread naming
+     * @return The created and started thread
+     */
+    private Thread createScreenThread(String screenName) {
+        Thread screenThread = new Thread(() -> {
+            try {
+                while (!Thread.currentThread().isInterrupted()) {
+                    Thread.sleep(100);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }, "Screen-" + screenName);
+
+        screenThread.setDaemon(true);
+        screenThread.start();
+
+        return screenThread;
+    }
+
+    /**
+     * Cleans up the screen thread for a given screen.
+     * If this is a top-level screen (no parent), the thread is interrupted.
+     * If this is a child screen (has a parent), the thread is not interrupted 
+     * since it's shared with the parent.
+     * 
+     * @param screenName The name of the screen
+     */
+    private void cleanupScreenThread(String screenName) {
+        // Only interrupt the thread if this is NOT a child screen
+        // Child screens share their parent's thread, so we should not interrupt it
+        String parentScreenName = context.getScreenParent(screenName);
+        if (parentScreenName == null) {
+            // This is a top-level screen - it owns its thread, so we can interrupt it
+            Thread thread = context.getScreenThreads().get(screenName);
+            if (thread != null && thread.isAlive()) {
+                thread.interrupt();
+            }
+        }
+        // For child screens, we just remove the reference but don't interrupt the parent's thread
+    }
+
+    /**
      * Visit a screen statement to define a new screen (does not create Stage until shown)
      */
     public void visitScreenStatement(ScreenStatement stmt) throws InterpreterError {
@@ -429,211 +475,255 @@ public class InterpreterScreen {
         // Mark this screen as being created to prevent duplicate creation
         context.getScreensBeingCreated().add(screenName);
 
-        // Use CountDownLatch to wait for stage creation
-        final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
-        final java.util.concurrent.atomic.AtomicReference<Exception> creationError = new java.util.concurrent.atomic.AtomicReference<>();
-
-        Platform.runLater(() -> {
+        // Check if we're already on the JavaFX Application Thread
+        // If so, run directly to avoid deadlock (Platform.runLater + latch.await would deadlock)
+        if (Platform.isFxApplicationThread()) {
+            // Already on FX thread - run directly and let exceptions propagate
             try {
-                Stage stage;
-
-                // Get screen variables and areas from config
-                ConcurrentHashMap<String, Object> varsMap = config.getScreenVars();
-                ConcurrentHashMap<String, DataType> varTypesMap = config.getScreenVarTypes();
-                java.util.List<AreaDefinition> areas = config.getAreas();
-
-                    // Use ScreenFactory if areas are defined, otherwise create simple stage
-                    if (areas != null && !areas.isEmpty()) {
-                        // Create screen with areas using ScreenFactory
-                        // Create onClick handler that executes EBS code
-                        ScreenFactory.OnClickHandler onClickHandler = new ScreenFactory.OnClickHandler() {
-                            @Override
-                            public void execute(String ebsCode) throws InterpreterError {
-                                executeCode(ebsCode, false);
-                            }
-                            
-                            @Override
-                            public Object executeWithReturn(String ebsCode) throws InterpreterError {
-                                return executeCode(ebsCode, true);
-                            }
-                            
-                            private Object executeCode(String ebsCode, boolean returnValue) throws InterpreterError {
-                                try {
-                                    // Set the screen context before executing code
-                                    // This allows inline code to use screen statements like "close screen;" or "hide screen;"
-                                    context.setCurrentScreen(screenName);
-                                    try {
-                                        // Parse and execute the EBS code
-                                        RuntimeContext clickContext = com.eb.script.parser.Parser.parse("inline_" + screenName, ebsCode);
-                                        // Execute in the current interpreter context
-                                        for (com.eb.script.interpreter.statement.Statement s : clickContext.statements) {
-                                            interpreter.acceptStatement(s);
-                                        }
-                                        // If no return statement was executed, return null
-                                        return null;
-                                    } catch (com.eb.script.interpreter.Interpreter.ReturnSignal rs) {
-                                        // Catch return statement and extract the value
-                                        return returnValue ? rs.value : null;
-                                    } finally {
-                                        // Always clear the screen context after execution to prevent context leakage
-                                        context.clearCurrentScreen();
-                                    }
-                                } catch (com.eb.script.parser.ParseError e) {
-                                    throw new InterpreterError("Failed to parse inline code: " + e.getMessage());
-                                } catch (java.io.IOException e) {
-                                    throw new InterpreterError("IO error executing inline code: " + e.getMessage());
-                                }
-                            }
-                        };
-
-                    // Create ScreenDefinition and use it to create the Stage
-                    ScreenDefinition screenDef = ScreenFactory.createScreenDefinition(
-                            screenName,
-                            config.getTitle(),
-                            config.getWidth(),
-                            config.getHeight(),
-                            areas,
-                            varsMap,
-                            varTypesMap,
-                            onClickHandler,
-                            context
-                    );
-                    stage = screenDef.createScreen();
-                } else {
-                    // Create simple ScreenDefinition without areas
-                    ScreenDefinition screenDef = new ScreenDefinition(screenName, config.getTitle(), config.getWidth(), config.getHeight());
-                    stage = screenDef.createScreen();
+                createStageForScreenOnFxThread(screenName, config);
+            } catch (Exception e) {
+                context.getScreensBeingCreated().remove(screenName);
+                if (e instanceof InterpreterError) {
+                    throw (InterpreterError) e;
                 }
+                throw interpreter.error(line, "Failed to create screen: " + e.getMessage());
+            }
+        } else {
+            // Not on FX thread - use Platform.runLater and wait with latch
+            final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
+            final java.util.concurrent.atomic.AtomicReference<Exception> creationError = new java.util.concurrent.atomic.AtomicReference<>();
 
-                if (config.isMaximize()) {
-                    stage.setMaximized(true);
-                }
-                
-                // Set up screen-level focus listeners
-                String screenGainFocusCode = config.getGainFocusCode();
-                String screenLostFocusCode = config.getLostFocusCode();
-                
-                if (screenGainFocusCode != null || screenLostFocusCode != null) {
-                    stage.focusedProperty().addListener((observable, oldValue, newValue) -> {
-                        if (newValue && screenGainFocusCode != null && !screenGainFocusCode.trim().isEmpty()) {
-                            try {
-                                executeScreenInlineCode(screenName, screenGainFocusCode, "gainFocus");
-                            } catch (InterpreterError e) {
-                                if (context.getOutput() != null) {
-                                    context.getOutput().printlnError("Error executing screen gainFocus code: " + e.getMessage());
-                                }
-                            }
-                        } else if (!newValue && screenLostFocusCode != null && !screenLostFocusCode.trim().isEmpty()) {
-                            try {
-                                executeScreenInlineCode(screenName, screenLostFocusCode, "lostFocus");
-                            } catch (InterpreterError e) {
-                                if (context.getOutput() != null) {
-                                    context.getOutput().printlnError("Error executing screen lostFocus code: " + e.getMessage());
-                                }
-                            }
-                        }
-                    });
-                }
-
-                // Create a thread for this screen
-                Thread screenThread = new Thread(() -> {
-                    try {
-                        while (!Thread.currentThread().isInterrupted()) {
-                            Thread.sleep(100);
-                        }
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
+            Platform.runLater(() -> {
+                try {
+                    createStageForScreenOnFxThread(screenName, config);
+                } catch (Exception e) {
+                    creationError.set(e);
+                    context.getScreensBeingCreated().remove(screenName);
+                    if (context.getOutput() != null) {
+                        context.getOutput().printlnError("Failed to create screen '" + screenName + "': " + e.getMessage());
                     }
-                }, "Screen-" + screenName);
+                } finally {
+                    latch.countDown();
+                }
+            });
 
-                screenThread.setDaemon(true);
-                screenThread.start();
+            // Wait for stage creation to complete
+            try {
+                boolean completed = latch.await(10, java.util.concurrent.TimeUnit.SECONDS);
+                if (!completed) {
+                    context.getScreensBeingCreated().remove(screenName);
+                    throw interpreter.error(line, "Screen creation timed out after 10 seconds");
+                }
+            } catch (InterruptedException e) {
+                context.getScreensBeingCreated().remove(screenName);
+                Thread.currentThread().interrupt();
+                throw interpreter.error(line, "Screen creation was interrupted");
+            }
 
-                context.getScreenThreads().put(screenName, screenThread);
+            // Check if there was an error during creation
+            if (creationError.get() != null) {
+                throw interpreter.error(line, "Failed to create screen: " + creationError.get().getMessage());
+            }
+        }
+    }
 
-                // Set up cleanup when screen is closed
-                stage.setOnCloseRequest(event -> {
-                    ScreenStatus status = context.getScreenStatus(screenName);
-                    
-                    if (status == ScreenStatus.CHANGED || status == ScreenStatus.ERROR) {
-                        event.consume();
-                        
-                        final String dialogMessage;
-                        final String dialogTitle;
-                        if (status == ScreenStatus.ERROR) {
-                            String errorMsg = context.getScreenErrorMessage(screenName);
-                            String msg = "Screen has an error";
-                            if (errorMsg != null && !errorMsg.isEmpty()) {
-                                msg += ": " + errorMsg;
+    /**
+     * Helper method that performs the actual stage creation on the JavaFX Application Thread.
+     * This method should only be called from the FX thread.
+     * 
+     * @param screenName The name of the screen to create
+     * @param config The screen configuration
+     */
+    private void createStageForScreenOnFxThread(String screenName, ScreenConfig config) {
+        // Ensure we're on the FX thread
+        assert Platform.isFxApplicationThread() : "This method must be called from the JavaFX Application Thread";
+        
+        Stage stage;
+
+        // Get screen variables and areas from config
+        ConcurrentHashMap<String, Object> varsMap = config.getScreenVars();
+        ConcurrentHashMap<String, DataType> varTypesMap = config.getScreenVarTypes();
+        java.util.List<AreaDefinition> areas = config.getAreas();
+
+        // Use ScreenFactory if areas are defined, otherwise create simple stage
+        if (areas != null && !areas.isEmpty()) {
+            // Create screen with areas using ScreenFactory
+            // Create onClick handler that executes EBS code
+            ScreenFactory.OnClickHandler onClickHandler = new ScreenFactory.OnClickHandler() {
+                @Override
+                public void execute(String ebsCode) throws InterpreterError {
+                    executeCode(ebsCode, false);
+                }
+                
+                @Override
+                public Object executeWithReturn(String ebsCode) throws InterpreterError {
+                    return executeCode(ebsCode, true);
+                }
+                
+                private Object executeCode(String ebsCode, boolean returnValue) throws InterpreterError {
+                    try {
+                        // Set the screen context before executing code
+                        // This allows inline code to use screen statements like "close screen;" or "hide screen;"
+                        context.setCurrentScreen(screenName);
+                        try {
+                            // Parse and execute the EBS code
+                            RuntimeContext clickContext = com.eb.script.parser.Parser.parse("inline_" + screenName, ebsCode);
+                            // Execute in the current interpreter context
+                            for (com.eb.script.interpreter.statement.Statement s : clickContext.statements) {
+                                interpreter.acceptStatement(s);
                             }
-                            msg += "\n\nAre you sure?";
-                            dialogMessage = msg;
-                            dialogTitle = "Error - Confirm Close";
-                        } else {
-                            dialogMessage = "Screen has unsaved changes.\n\nAre you sure?";
-                            dialogTitle = "Warning - Confirm Close";
+                            // If no return statement was executed, return null
+                            return null;
+                        } catch (com.eb.script.interpreter.Interpreter.ReturnSignal rs) {
+                            // Catch return statement and extract the value
+                            return returnValue ? rs.value : null;
+                        } finally {
+                            // Always clear the screen context after execution to prevent context leakage
+                            context.clearCurrentScreen();
                         }
-                        
-                        javafx.application.Platform.runLater(() -> {
-                            javafx.scene.control.Alert confirm = new javafx.scene.control.Alert(
-                                javafx.scene.control.Alert.AlertType.CONFIRMATION,
-                                dialogMessage,
-                                javafx.scene.control.ButtonType.YES,
-                                javafx.scene.control.ButtonType.NO
-                            );
-                            confirm.setTitle(dialogTitle);
-                            confirm.setHeaderText("Confirm Close");
-                            
-                            java.util.Optional<javafx.scene.control.ButtonType> result = confirm.showAndWait();
-                            if (result.isPresent() && result.get() == javafx.scene.control.ButtonType.YES) {
-                                performScreenClose(screenName);
-                                Stage stageToClose = context.getScreens().get(screenName);
-                                if (stageToClose != null) {
-                                    stageToClose.close();
-                                }
-                            }
-                        });
-                    } else {
+                    } catch (com.eb.script.parser.ParseError e) {
+                        throw new InterpreterError("Failed to parse inline code: " + e.getMessage());
+                    } catch (java.io.IOException e) {
+                        throw new InterpreterError("IO error executing inline code: " + e.getMessage());
+                    }
+                }
+            };
+
+            // Create ScreenDefinition and use it to create the Stage
+            ScreenDefinition screenDef = ScreenFactory.createScreenDefinition(
+                    screenName,
+                    config.getTitle(),
+                    config.getWidth(),
+                    config.getHeight(),
+                    areas,
+                    varsMap,
+                    varTypesMap,
+                    onClickHandler,
+                    context
+            );
+            stage = screenDef.createScreen();
+        } else {
+            // Create simple ScreenDefinition without areas
+            ScreenDefinition screenDef = new ScreenDefinition(screenName, config.getTitle(), config.getWidth(), config.getHeight());
+            stage = screenDef.createScreen();
+        }
+
+        // If this screen has a parent screen, set the owner relationship
+        // This makes the child screen always appear on top of the parent and 
+        // associates them for window management (minimizing, closing, etc.)
+        String parentScreenName = context.getScreenParent(screenName);
+        if (parentScreenName != null) {
+            Stage parentStage = context.getScreens().get(parentScreenName);
+            if (parentStage != null) {
+                stage.initOwner(parentStage);
+            }
+        }
+
+        if (config.isMaximize()) {
+            stage.setMaximized(true);
+        }
+        
+        // Set up screen-level focus listeners
+        String screenGainFocusCode = config.getGainFocusCode();
+        String screenLostFocusCode = config.getLostFocusCode();
+        
+        if (screenGainFocusCode != null || screenLostFocusCode != null) {
+            stage.focusedProperty().addListener((observable, oldValue, newValue) -> {
+                if (newValue && screenGainFocusCode != null && !screenGainFocusCode.trim().isEmpty()) {
+                    try {
+                        executeScreenInlineCode(screenName, screenGainFocusCode, "gainFocus");
+                    } catch (InterpreterError e) {
+                        if (context.getOutput() != null) {
+                            context.getOutput().printlnError("Error executing screen gainFocus code: " + e.getMessage());
+                        }
+                    }
+                } else if (!newValue && screenLostFocusCode != null && !screenLostFocusCode.trim().isEmpty()) {
+                    try {
+                        executeScreenInlineCode(screenName, screenLostFocusCode, "lostFocus");
+                    } catch (InterpreterError e) {
+                        if (context.getOutput() != null) {
+                            context.getOutput().printlnError("Error executing screen lostFocus code: " + e.getMessage());
+                        }
+                    }
+                }
+            });
+        }
+
+        // Handle thread assignment for this screen
+        // If this screen has a parent, reuse the parent's thread instead of creating a new one
+        String parentForThread = context.getScreenParent(screenName);
+        if (parentForThread != null) {
+            // Child screen: try to reuse the parent's thread
+            Thread parentThread = context.getScreenThreads().get(parentForThread);
+            if (parentThread != null && parentThread.isAlive()) {
+                // Parent thread exists and is alive, register the child screen to use it
+                context.getScreenThreads().put(screenName, parentThread);
+            } else {
+                // Parent's thread not found or is dead (edge case), create a new thread
+                Thread screenThread = createScreenThread(screenName);
+                context.getScreenThreads().put(screenName, screenThread);
+            }
+        } else {
+            // Top-level screen: create a new thread
+            Thread screenThread = createScreenThread(screenName);
+            context.getScreenThreads().put(screenName, screenThread);
+        }
+
+        // Set up cleanup when screen is closed
+        stage.setOnCloseRequest(event -> {
+            ScreenStatus status = context.getScreenStatus(screenName);
+            
+            if (status == ScreenStatus.CHANGED || status == ScreenStatus.ERROR) {
+                event.consume();
+                
+                final String dialogMessage;
+                final String dialogTitle;
+                if (status == ScreenStatus.ERROR) {
+                    String errorMsg = context.getScreenErrorMessage(screenName);
+                    String msg = "Screen has an error";
+                    if (errorMsg != null && !errorMsg.isEmpty()) {
+                        msg += ": " + errorMsg;
+                    }
+                    msg += "\n\nAre you sure?";
+                    dialogMessage = msg;
+                    dialogTitle = "Error - Confirm Close";
+                } else {
+                    dialogMessage = "Screen has unsaved changes.\n\nAre you sure?";
+                    dialogTitle = "Warning - Confirm Close";
+                }
+                
+                javafx.application.Platform.runLater(() -> {
+                    javafx.scene.control.Alert confirm = new javafx.scene.control.Alert(
+                        javafx.scene.control.Alert.AlertType.CONFIRMATION,
+                        dialogMessage,
+                        javafx.scene.control.ButtonType.YES,
+                        javafx.scene.control.ButtonType.NO
+                    );
+                    confirm.setTitle(dialogTitle);
+                    confirm.setHeaderText("Confirm Close");
+                    
+                    java.util.Optional<javafx.scene.control.ButtonType> result = confirm.showAndWait();
+                    if (result.isPresent() && result.get() == javafx.scene.control.ButtonType.YES) {
                         performScreenClose(screenName);
+                        Stage stageToClose = context.getScreens().get(screenName);
+                        if (stageToClose != null) {
+                            stageToClose.close();
+                        }
                     }
                 });
+            } else {
+                performScreenClose(screenName);
+            }
+        });
 
-                // Store the stage reference in global map
-                context.getScreens().put(screenName, stage);
-                context.getScreensBeingCreated().remove(screenName);
-                context.getScreenCreationOrder().add(screenName);
+        // Store the stage reference in global map
+        context.getScreens().put(screenName, stage);
+        context.getScreensBeingCreated().remove(screenName);
+        context.getScreenCreationOrder().add(screenName);
 
                 if (context.getOutput() != null) {
                     context.getOutput().printlnOk("Screen '" + screenName + "' created with title: " + config.getTitle());
                 }
-            } catch (Exception e) {
-                creationError.set(e);
-                context.getScreensBeingCreated().remove(screenName);
-                if (context.getOutput() != null) {
-                    context.getOutput().printlnError("Failed to create screen '" + screenName + "': " + e.getMessage());
-                }
-            } finally {
-                latch.countDown();
-            }
-        });
-
-        // Wait for stage creation to complete
-        try {
-            boolean completed = latch.await(10, java.util.concurrent.TimeUnit.SECONDS);
-            if (!completed) {
-                context.getScreensBeingCreated().remove(screenName);
-                throw interpreter.error(line, "Screen creation timed out after 10 seconds");
-            }
-        } catch (InterruptedException e) {
-            context.getScreensBeingCreated().remove(screenName);
-            Thread.currentThread().interrupt();
-            throw interpreter.error(line, "Screen creation was interrupted");
-        }
-
-        // Check if there was an error during creation
-        if (creationError.get() != null) {
-            throw interpreter.error(line, "Failed to create screen: " + creationError.get().getMessage());
-        }
     }
 
     /**
@@ -658,6 +748,14 @@ public class InterpreterScreen {
             // Check if screen configuration exists
             if (!context.hasScreenConfig(screenName) && !context.getScreens().containsKey(screenName)) {
                 throw interpreter.error(stmt.getLine(), "Screen '" + screenName + "' does not exist. Create it first with 'screen " + screenName + " = {...};'");
+            }
+
+            // Detect if we're showing a screen from within another screen's context
+            // This makes the new screen a child of the parent screen
+            String parentScreenName = context.getCurrentScreen();
+            if (parentScreenName != null && !parentScreenName.equalsIgnoreCase(screenName)) {
+                // Record the parent-child relationship
+                context.setScreenParent(screenName, parentScreenName);
             }
 
             // Create the Stage if it doesn't exist yet (lazy initialization)
@@ -689,7 +787,8 @@ public class InterpreterScreen {
             }
 
             // Show the screen on JavaFX Application Thread
-            Platform.runLater(() -> {
+            // If already on FX thread, run directly to avoid potential issues
+            Runnable showTask = () -> {
                 if (!stage.isShowing()) {
                     stage.show();
                     if (context.getOutput() != null) {
@@ -712,7 +811,13 @@ public class InterpreterScreen {
                         context.getOutput().printlnInfo("Screen '" + finalScreenName + "' is already showing");
                     }
                 }
-            });
+            };
+            
+            if (Platform.isFxApplicationThread()) {
+                showTask.run();
+            } else {
+                Platform.runLater(showTask);
+            }
 
         } catch (InterpreterError ex) {
             throw interpreter.error(stmt.getLine(), ex.getLocalizedMessage());
@@ -842,7 +947,8 @@ public class InterpreterScreen {
             final String finalScreenName = screenName;
             
             // Hide the screen on JavaFX Application Thread
-            Platform.runLater(() -> {
+            // If already on FX thread, run directly
+            Runnable hideTask = () -> {
                 boolean wasShowing = stage.isShowing();
                 stage.hide();
                 if (context.getOutput() != null) {
@@ -852,7 +958,13 @@ public class InterpreterScreen {
                         context.getOutput().printlnOk("Screen '" + finalScreenName + "' hidden (was already hidden)");
                     }
                 }
-            });
+            };
+            
+            if (Platform.isFxApplicationThread()) {
+                hideTask.run();
+            } else {
+                Platform.runLater(hideTask);
+            }
 
         } catch (InterpreterError ex) {
             throw interpreter.error(stmt.getLine(), ex.getLocalizedMessage());
@@ -902,17 +1014,15 @@ public class InterpreterScreen {
             final String finalScreenName = screenName;
             
             // Close the screen on JavaFX Application Thread
-            Platform.runLater(() -> {
+            // If already on FX thread, run directly
+            Runnable closeTask = () -> {
                 // Close the stage
                 if (stage.isShowing()) {
                     stage.close();
                 }
                 
-                // Interrupt and stop the screen thread
-                Thread thread = context.getScreenThreads().get(finalScreenName);
-                if (thread != null && thread.isAlive()) {
-                    thread.interrupt();
-                }
+                // Clean up the screen thread (only top-level screens have their threads interrupted)
+                cleanupScreenThread(finalScreenName);
                 
                 // Clean up resources
                 context.remove(finalScreenName);
@@ -920,7 +1030,13 @@ public class InterpreterScreen {
                 if (context.getOutput() != null) {
                     context.getOutput().printlnOk("Screen '" + finalScreenName + "' closed");
                 }
-            });
+            };
+            
+            if (Platform.isFxApplicationThread()) {
+                closeTask.run();
+            } else {
+                Platform.runLater(closeTask);
+            }
 
         } catch (InterpreterError ex) {
             throw interpreter.error(stmt.getLine(), ex.getLocalizedMessage());
@@ -974,7 +1090,8 @@ public class InterpreterScreen {
             final String finalScreenName = screenName;
             
             // Submit the screen on JavaFX Application Thread
-            Platform.runLater(() -> {
+            // If already on FX thread, run directly
+            Runnable submitTask = () -> {
                 try {
                     // Collect output fields and invoke callback
                     collectOutputFieldsAndInvokeCallback(finalScreenName, 0);
@@ -989,11 +1106,8 @@ public class InterpreterScreen {
                     stage.close();
                 }
                 
-                // Interrupt and stop the screen thread
-                Thread thread = context.getScreenThreads().get(finalScreenName);
-                if (thread != null && thread.isAlive()) {
-                    thread.interrupt();
-                }
+                // Clean up the screen thread (only top-level screens have their threads interrupted)
+                cleanupScreenThread(finalScreenName);
                 
                 // Clean up resources
                 context.remove(finalScreenName);
@@ -1001,7 +1115,13 @@ public class InterpreterScreen {
                 if (context.getOutput() != null) {
                     context.getOutput().printlnOk("Screen '" + finalScreenName + "' submitted");
                 }
-            });
+            };
+            
+            if (Platform.isFxApplicationThread()) {
+                submitTask.run();
+            } else {
+                Platform.runLater(submitTask);
+            }
 
         } catch (InterpreterError ex) {
             throw interpreter.error(stmt.getLine(), ex.getLocalizedMessage());
@@ -1092,11 +1212,9 @@ public class InterpreterScreen {
             }
         }
         
-        // Interrupt and stop the screen thread
-        Thread thread = context.getScreenThreads().get(screenName);
-        if (thread != null && thread.isAlive()) {
-            thread.interrupt();
-        }
+        // Clean up the screen thread (only top-level screens have their threads interrupted)
+        cleanupScreenThread(screenName);
+        
         // Clean up resources
         context.remove(screenName);
     }
