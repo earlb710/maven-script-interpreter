@@ -747,9 +747,10 @@ public class EbsTab extends Tab {
     }
 
     private void applyLexerSpans(String src) {
-        // When find bar is active and we're in the middle of editing (highlightsStale),
-        // skip all styling to avoid scroll jumps. Styling will be reapplied after the delay.
-        if (findBar != null && findBar.isVisible() && highlightsStale) {
+        // When find bar is active and there are any highlights (current or stale),
+        // skip all styling to preserve highlights. Styling will be reapplied after the delay.
+        if (findBar != null && findBar.isVisible() && 
+            (!lastMatches.isEmpty() || !stalePendingClear.isEmpty() || highlightsStale)) {
             return;
         }
         
