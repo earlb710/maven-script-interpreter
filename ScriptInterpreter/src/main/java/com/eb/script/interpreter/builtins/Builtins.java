@@ -294,6 +294,11 @@ public final class Builtins {
                 newParam("sub", DataType.STRING)
         ));
         addBuiltin(info(
+                "string.contains", DataType.BOOL,
+                newParam("str", DataType.STRING),
+                newParam("sub", DataType.STRING)
+        ));
+        addBuiltin(info(
                 "str.startsWith", DataType.BOOL,
                 newParam("str", DataType.STRING),
                 newParam("prefix", DataType.STRING)
