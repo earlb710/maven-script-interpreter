@@ -83,9 +83,9 @@ public class AreaItemFactory {
             case COMBOBOX:
                 ComboBox<String> comboBox = new ComboBox<>();
                 // Populate with options if available
-                // If optionsMap is present, use the keys (display text) for display
+                // If optionsMap is present, use the values (display text) for display
                 if (metadata != null && metadata.optionsMap != null && !metadata.optionsMap.isEmpty()) {
-                    comboBox.getItems().addAll(metadata.optionsMap.keySet());
+                    comboBox.getItems().addAll(metadata.optionsMap.values());
                     // Store the optionsMap in the control's properties for value binding
                     comboBox.getProperties().put("optionsMap", metadata.optionsMap);
                 } else if (metadata != null && metadata.options != null && !metadata.options.isEmpty()) {
@@ -95,9 +95,9 @@ public class AreaItemFactory {
             case CHOICEBOX:
                 ChoiceBox<String> choiceBox = new ChoiceBox<>();
                 // Populate with options if available
-                // If optionsMap is present, use the keys (display text) for display
+                // If optionsMap is present, use the values (display text) for display
                 if (metadata != null && metadata.optionsMap != null && !metadata.optionsMap.isEmpty()) {
-                    choiceBox.getItems().addAll(metadata.optionsMap.keySet());
+                    choiceBox.getItems().addAll(metadata.optionsMap.values());
                     // Store the optionsMap in the control's properties for value binding
                     choiceBox.getProperties().put("optionsMap", metadata.optionsMap);
                 } else if (metadata != null && metadata.options != null && !metadata.options.isEmpty()) {
@@ -616,7 +616,7 @@ public class AreaItemFactory {
     
     /**
      * Gets the longest display option text from metadata.
-     * Checks optionsMap first (using keys as display text), then falls back to options list.
+     * Checks optionsMap first (using values as display text), then falls back to options list.
      * 
      * @param metadata The DisplayItem metadata containing options or optionsMap
      * @return The longest option text, or empty string if no options are available
@@ -628,9 +628,9 @@ public class AreaItemFactory {
             return longestOption;
         }
         
-        // Check optionsMap first (keys are display text)
+        // Check optionsMap first (values are display text)
         if (metadata.optionsMap != null && !metadata.optionsMap.isEmpty()) {
-            for (String option : metadata.optionsMap.keySet()) {
+            for (String option : metadata.optionsMap.values()) {
                 if (option != null && option.length() > longestOption.length()) {
                     longestOption = option;
                 }

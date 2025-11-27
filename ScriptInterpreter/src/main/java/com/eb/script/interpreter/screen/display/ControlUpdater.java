@@ -176,11 +176,11 @@ public class ControlUpdater {
     }
     
     /**
-     * Gets the display text (map key) for a given data value (map value) from an optionsMap.
+     * Gets the display text (map value) for a given data value (map key) from an optionsMap.
      * If optionsMap is null or the value is not found, returns the original data value.
      * 
-     * @param dataValue The data value to look up
-     * @param optionsMap The map of display text (key) to data value (value), or null
+     * @param dataValue The data value (map key) to look up
+     * @param optionsMap The map of data value (key) to display text (value), or null
      * @return The display text for the data value, or the original data value if not found
      */
     private static String getDisplayTextForDataValue(String dataValue, java.util.Map<String, String> optionsMap) {
@@ -188,11 +188,9 @@ public class ControlUpdater {
             return dataValue;
         }
         
-        // Find the display text (key) for this data value (value)
-        for (java.util.Map.Entry<String, String> entry : optionsMap.entrySet()) {
-            if (entry.getValue().equals(dataValue)) {
-                return entry.getKey();
-            }
+        // Find the display text (value) for this data value (key)
+        if (optionsMap.containsKey(dataValue)) {
+            return optionsMap.get(dataValue);
         }
         
         // Value not found in map, return original

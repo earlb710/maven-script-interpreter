@@ -203,7 +203,7 @@ public class ControlListenerFactory {
     
     /**
      * Adds a listener to a ComboBox control.
-     * Supports optionsMap for mapping display text to data values.
+     * Supports optionsMap for mapping display text (values) to data values (keys).
      */
     private static void addComboBoxListener(Node control, String varName,
             ConcurrentHashMap<String, Object> screenVars) {
@@ -212,13 +212,18 @@ public class ControlListenerFactory {
         comboBox.valueProperty().addListener((obs, oldVal, newVal) -> {
             Object valueToStore = newVal;
             
-            // Check if optionsMap is present to get the data value
+            // Check if optionsMap is present to get the data value (key)
             @SuppressWarnings("unchecked")
             java.util.Map<String, String> optionsMap = 
                 (java.util.Map<String, String>) comboBox.getProperties().get("optionsMap");
-            if (optionsMap != null && newVal != null && optionsMap.containsKey(newVal)) {
-                // Use the data value (map value) instead of display text (map key)
-                valueToStore = optionsMap.get(newVal);
+            if (optionsMap != null && newVal != null) {
+                // Find the key (data value) for this display text (value)
+                for (java.util.Map.Entry<String, String> entry : optionsMap.entrySet()) {
+                    if (entry.getValue().equals(newVal)) {
+                        valueToStore = entry.getKey();
+                        break;
+                    }
+                }
             }
             
             VarRefResolver.setVarRefValue(varName, valueToStore, screenVars);
@@ -227,7 +232,7 @@ public class ControlListenerFactory {
     
     /**
      * Adds a listener to a ChoiceBox control.
-     * Supports optionsMap for mapping display text to data values.
+     * Supports optionsMap for mapping display text (values) to data values (keys).
      */
     private static void addChoiceBoxListener(Node control, String varName,
             ConcurrentHashMap<String, Object> screenVars) {
@@ -236,13 +241,18 @@ public class ControlListenerFactory {
         choiceBox.valueProperty().addListener((obs, oldVal, newVal) -> {
             Object valueToStore = newVal;
             
-            // Check if optionsMap is present to get the data value
+            // Check if optionsMap is present to get the data value (key)
             @SuppressWarnings("unchecked")
             java.util.Map<String, String> optionsMap = 
                 (java.util.Map<String, String>) choiceBox.getProperties().get("optionsMap");
-            if (optionsMap != null && newVal != null && optionsMap.containsKey(newVal)) {
-                // Use the data value (map value) instead of display text (map key)
-                valueToStore = optionsMap.get(newVal);
+            if (optionsMap != null && newVal != null) {
+                // Find the key (data value) for this display text (value)
+                for (java.util.Map.Entry<String, String> entry : optionsMap.entrySet()) {
+                    if (entry.getValue().equals(newVal)) {
+                        valueToStore = entry.getKey();
+                        break;
+                    }
+                }
             }
             
             VarRefResolver.setVarRefValue(varName, valueToStore, screenVars);

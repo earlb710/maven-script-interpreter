@@ -967,7 +967,7 @@ public class BuiltinsScreen {
     /**
      * scr.setItemChoiceOptions(screenName, itemName, optionsMap) -> Boolean
      * Sets the choice options for a ChoiceBox or ComboBox screen item using a map.
-     * The map keys are display text (shown to users), and values are data values (stored when selected).
+     * The map keys are data values (stored when selected), and values are display text (shown to users).
      */
     public static Object screenSetItemChoiceOptions(InterpreterContext context, Object[] args) throws InterpreterError {
         String screenName = (String) args[0];
@@ -1049,30 +1049,30 @@ public class BuiltinsScreen {
                             if (control instanceof javafx.scene.control.ChoiceBox) {
                                 @SuppressWarnings("unchecked")
                                 javafx.scene.control.ChoiceBox<String> choiceBox = (javafx.scene.control.ChoiceBox<String>) control;
-                                // Store the current selection
-                                String currentValue = choiceBox.getValue();
-                                // Clear and add new items (keys from the map)
+                                // Store the current selection (display text)
+                                String currentDisplayValue = choiceBox.getValue();
+                                // Clear and add new items (values from the map are display text)
                                 choiceBox.getItems().clear();
-                                choiceBox.getItems().addAll(finalOptionsMap.keySet());
+                                choiceBox.getItems().addAll(finalOptionsMap.values());
                                 // Store the optionsMap in the control's properties
                                 choiceBox.getProperties().put("optionsMap", finalOptionsMap);
-                                // Restore selection if the key is still in the new options
-                                if (currentValue != null && finalOptionsMap.containsKey(currentValue)) {
-                                    choiceBox.setValue(currentValue);
+                                // Restore selection if the display value is still in the new options
+                                if (currentDisplayValue != null && finalOptionsMap.containsValue(currentDisplayValue)) {
+                                    choiceBox.setValue(currentDisplayValue);
                                 }
                             } else if (control instanceof javafx.scene.control.ComboBox) {
                                 @SuppressWarnings("unchecked")
                                 javafx.scene.control.ComboBox<String> comboBox = (javafx.scene.control.ComboBox<String>) control;
-                                // Store the current selection
-                                String currentValue = comboBox.getValue();
-                                // Clear and add new items (keys from the map)
+                                // Store the current selection (display text)
+                                String currentDisplayValue = comboBox.getValue();
+                                // Clear and add new items (values from the map are display text)
                                 comboBox.getItems().clear();
-                                comboBox.getItems().addAll(finalOptionsMap.keySet());
+                                comboBox.getItems().addAll(finalOptionsMap.values());
                                 // Store the optionsMap in the control's properties
                                 comboBox.getProperties().put("optionsMap", finalOptionsMap);
-                                // Restore selection if the key is still in the new options
-                                if (currentValue != null && finalOptionsMap.containsKey(currentValue)) {
-                                    comboBox.setValue(currentValue);
+                                // Restore selection if the display value is still in the new options
+                                if (currentDisplayValue != null && finalOptionsMap.containsValue(currentDisplayValue)) {
+                                    comboBox.setValue(currentDisplayValue);
                                 }
                             }
                             break;
@@ -1091,7 +1091,7 @@ public class BuiltinsScreen {
     /**
      * scr.getItemChoiceOptions(screenName, itemName) -> Map
      * Gets the choice options for a ChoiceBox or ComboBox screen item.
-     * Returns a map where keys are display text and values are data values.
+     * Returns a map where keys are data values and values are display text.
      */
     public static Object screenGetItemChoiceOptions(InterpreterContext context, Object[] args) throws InterpreterError {
         String screenName = (String) args[0];
