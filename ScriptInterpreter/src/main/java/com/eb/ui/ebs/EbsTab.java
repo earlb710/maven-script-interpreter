@@ -829,7 +829,8 @@ public class EbsTab extends Tab {
         editorChangeTimer = new PauseTransition(Duration.seconds(2));
         editorChangeTimer.setOnFinished(e -> {
             if (findBar.isVisible() && highlightsStale) {
-                runSearch();
+                // Only refresh highlights, don't jump to a search location
+                runSearchHighlightOnly();
                 highlightsStale = false;
             }
         });
@@ -873,19 +874,17 @@ public class EbsTab extends Tab {
             });
         });
         
-        // Button actions - next/prev immediately re-run highlighting if stale
+        // Button actions - next/prev immediately re-run highlighting if stale then navigate
         btnNext.setOnAction(e -> {
             Platform.runLater(() -> {
-                if (!refreshHighlightsIfStale()) {
-                    gotoNext();
-                }
+                refreshHighlightsIfStale();
+                gotoNext();
             });
         });
         btnPrev.setOnAction(e -> {
             Platform.runLater(() -> {
-                if (!refreshHighlightsIfStale()) {
-                    gotoPrev();
-                }
+                refreshHighlightsIfStale();
+                gotoPrev();
             });
         });
         btnReplace.setOnAction(e -> {
@@ -1034,6 +1033,72 @@ public class EbsTab extends Tab {
         // Emphasize current
         dispArea.addStyleToRange(cur[0], cur[1], "find-current");
     }
+    
+    /**
+     * Run search but only refresh highlights without jumping to a location.
+     * Used when the editor content changes and we want to re-highlight after a delay.
+     */
+    private void runSearchHighlightOnly() {
+        clearHighlights();
+        String q = findField.getText();
+        if (q == null || q.isEmpty() || q.length() < MIN_FIND_CHARS) {
+            lastMatches = java.util.Collections.emptyList();
+            currentIndex = -1;
+            lblCount.setText(q == null || q.isEmpty() ? "" : "Enter " + MIN_FIND_CHARS + "+ chars to search");
+            return;
+        }
+
+        boolean cs = chkCase.isSelected();
+        boolean ww = chkWord.isSelected();
+        boolean rx = chkRegex.isSelected();
+
+        String text = dispArea.getText();
+        ArrayList<int[]> hits = new ArrayList<>();
+
+        try {
+            java.util.regex.Pattern pat;
+            if (rx) {
+                int flags = cs ? 0 : java.util.regex.Pattern.CASE_INSENSITIVE;
+                pat = java.util.regex.Pattern.compile(q, flags);
+            } else {
+                String literal = java.util.regex.Pattern.quote(q);
+                String pattern = ww ? "\\b" + literal + "\\b" : literal;
+                int flags = cs ? 0 : java.util.regex.Pattern.CASE_INSENSITIVE;
+                pat = java.util.regex.Pattern.compile(pattern, flags);
+            }
+            java.util.regex.Matcher m = pat.matcher(text);
+            while (m.find()) {
+                hits.add(new int[]{m.start(), m.end()});
+            }
+        } catch (Exception ex) {
+            // invalid regex; show nothing
+        }
+
+        lastMatches = hits;
+        
+        if (hits.isEmpty()) {
+            currentIndex = -1;
+            lblCount.setText("0 matches");
+            return;
+        }
+
+        // Highlight all matches without selecting or jumping
+        for (int[] r : hits) {
+            dispArea.addStyleToRange(r[0], r[1], "find-hit");
+        }
+        
+        // Update currentIndex to nearest match to caret position (for next/prev navigation)
+        int caretPos = dispArea.getCaretPosition();
+        currentIndex = 0;
+        for (int i = 0; i < hits.size(); i++) {
+            if (hits.get(i)[0] >= caretPos) {
+                currentIndex = i;
+                break;
+            }
+        }
+        
+        updateCountLabel();
+    }
 
     private void selectCurrent(int[] r) {
         dispArea.selectRange(r[0], r[1]); // selection shows current
@@ -1100,13 +1165,13 @@ public class EbsTab extends Tab {
     
     /**
      * Refresh highlights if they are stale due to editor changes.
-     * Stops any pending timer and runs a fresh search.
+     * Stops any pending timer and runs a highlight-only search (no cursor jump).
      * @return true if highlights were refreshed, false if they were not stale
      */
     private boolean refreshHighlightsIfStale() {
         if (highlightsStale) {
             editorChangeTimer.stop();
-            runSearch();
+            runSearchHighlightOnly();
             highlightsStale = false;
             return true;
         }
