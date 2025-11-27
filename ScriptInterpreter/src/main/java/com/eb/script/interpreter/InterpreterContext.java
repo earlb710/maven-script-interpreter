@@ -75,6 +75,9 @@ public class InterpreterContext {
     // Store area container nodes for runtime property updates (screenName.areaName -> Region node)
     private final Map<String, javafx.scene.layout.Region> screenAreaContainers = new ConcurrentHashMap<>();
 
+    // Track parent-child screen relationships (childScreenName -> parentScreenName)
+    private final Map<String, String> screenParentMap = new ConcurrentHashMap<>();
+
     private DbAdapter db = new OracleDbAdapter();
     private ScriptArea output;
     
@@ -462,6 +465,7 @@ public class InterpreterContext {
         screenConfigs.clear();
         declaredFunctions.clear();
         declaredScreens.clear();
+        screenParentMap.clear();
     }
 
     public void remove(String screenName) {
@@ -482,7 +486,7 @@ public class InterpreterContext {
         screenStatuses.remove(screenName);
         screenErrorMessages.remove(screenName);
         screenConfigs.remove(screenName);
-
+        screenParentMap.remove(screenName);
     }
 
     /**
@@ -695,6 +699,51 @@ public class InterpreterContext {
         if (screenName != null && areaName != null && container != null) {
             String key = screenName.toLowerCase() + "." + areaName.toLowerCase();
             screenAreaContainers.put(key, container);
+        }
+    }
+
+    /**
+     * Set the parent screen for a child screen.
+     * When a screen is shown from within another screen's context,
+     * the child screen should be a child of the parent screen.
+     *
+     * @param childScreenName the child screen name
+     * @param parentScreenName the parent screen name
+     */
+    public void setScreenParent(String childScreenName, String parentScreenName) {
+        if (childScreenName != null && parentScreenName != null) {
+            screenParentMap.put(childScreenName.toLowerCase(), parentScreenName.toLowerCase());
+        }
+    }
+
+    /**
+     * Get the parent screen name for a child screen.
+     *
+     * @param childScreenName the child screen name
+     * @return the parent screen name, or null if no parent is set
+     */
+    public String getScreenParent(String childScreenName) {
+        return childScreenName != null ? screenParentMap.get(childScreenName.toLowerCase()) : null;
+    }
+
+    /**
+     * Check if a screen has a parent screen.
+     *
+     * @param screenName the screen name
+     * @return true if the screen has a parent screen
+     */
+    public boolean hasScreenParent(String screenName) {
+        return screenName != null && screenParentMap.containsKey(screenName.toLowerCase());
+    }
+
+    /**
+     * Remove the parent relationship for a screen.
+     *
+     * @param screenName the screen name
+     */
+    public void removeScreenParent(String screenName) {
+        if (screenName != null) {
+            screenParentMap.remove(screenName.toLowerCase());
         }
     }
 
