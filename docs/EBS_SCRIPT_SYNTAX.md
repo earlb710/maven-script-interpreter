@@ -1967,6 +1967,73 @@ call http.ensure2xx(response);  // Throws error if not 2xx
 var isOk = call http.is2xx(response);  // Returns boolean
 ```
 
+### CSS Functions
+```javascript
+// Get property value from CSS stylesheet
+var color = call css.getValue(cssPath, selector, property);
+```
+
+#### css.getValue(cssPath, selector, property)
+Retrieves a CSS property value from a stylesheet file. This function can read CSS files from classpath resources or filesystem paths.
+
+**Parameters:**
+- `cssPath` (string, required): Path to the CSS file. Can be a classpath resource (e.g., "css/console.css") or a filesystem path
+- `selector` (string, required): CSS selector to look up (e.g., ".error", "#main", ".console-frame .text-area")
+- `property` (string, required): CSS property name to retrieve (e.g., "-fx-fill", "-fx-font-weight", "-fx-background-color")
+
+**Returns:** String - the property value, or `null` if the selector or property is not found
+
+```javascript
+// Basic usage - get fill color for error class
+var errorColor = call css.getValue("css/console.css", ".error", "-fx-fill");
+print errorColor;  // Output: #ee0000
+
+// Get font weight for keyword styling
+var keywordWeight = call css.getValue("css/console.css", ".keyword", "-fx-font-weight");
+print keywordWeight;  // Output: bold
+
+// Multi-part selectors
+var bgColor = call css.getValue("css/console.css", ".console-frame .text-area", "-fx-background-color");
+print bgColor;  // Output: #000000
+
+// Read from different CSS files
+var headerBg = call css.getValue("css/screen-areas.css", ".screen-area-header", "-fx-background-color");
+print headerBg;  // Output: #ffffff
+
+// Handle non-existent selector (returns null)
+var missing = call css.getValue("css/console.css", ".nonexistent", "-fx-fill");
+if missing == null then {
+    print "Selector not found";
+}
+
+// Handle non-existent property (returns null)
+var noProperty = call css.getValue("css/console.css", ".error", "nonexistent-prop");
+if noProperty == null then {
+    print "Property not found";
+}
+
+// Extract theme colors for dynamic styling
+var themeError = call css.getValue("css/console.css", ".error", "-fx-fill");
+var themeWarn = call css.getValue("css/console.css", ".warn", "-fx-fill");
+var themeOk = call css.getValue("css/console.css", ".ok", "-fx-fill");
+print "Error: " + themeError + ", Warn: " + themeWarn + ", OK: " + themeOk;
+```
+
+**Features:**
+- Reads CSS from classpath resources (e.g., "css/console.css") or filesystem paths
+- Handles multi-selector rules (e.g., ".a, .b { ... }")
+- Correctly parses CSS comments (single and multi-line)
+- Handles values containing semicolons in quoted strings
+- Caches parsed CSS files for improved performance
+- Case-insensitive property name matching
+- Skips @-rules (media queries, keyframes)
+
+**Use Cases:**
+- Extract theme colors for dynamic UI styling
+- Read font settings from stylesheets
+- Validate CSS property values programmatically
+- Build style-aware applications that adapt to CSS changes
+
 ### Array Functions
 ```javascript
 // Array manipulation

@@ -620,6 +620,9 @@ The interpreter includes numerous built-in functions:
 ### Date/Time
 - `now()`, `dateFormat()`, `parseDate()`
 
+### CSS Operations
+- `css.getValue(cssPath, selector, property)` - Retrieves a CSS property value from a stylesheet (e.g., `css.getValue("css/console.css", ".error", "-fx-fill")` returns `"#ee0000"`)
+
 ### Dialog Functions
 - `system.inputDialog(title, headerText?, defaultValue?)` - Prompts user for text input, returns the entered string
 - `system.confirmDialog(message, title?, headerText?)` - Shows YES/NO confirmation dialog, returns boolean
