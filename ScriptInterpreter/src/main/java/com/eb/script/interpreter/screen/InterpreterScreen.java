@@ -38,6 +38,52 @@ public class InterpreterScreen {
     }
 
     /**
+     * Creates and starts a new daemon thread for a screen.
+     * This is a helper method to avoid code duplication.
+     * 
+     * @param screenName The name of the screen for thread naming
+     * @return The created and started thread
+     */
+    private Thread createScreenThread(String screenName) {
+        Thread screenThread = new Thread(() -> {
+            try {
+                while (!Thread.currentThread().isInterrupted()) {
+                    Thread.sleep(100);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }, "Screen-" + screenName);
+
+        screenThread.setDaemon(true);
+        screenThread.start();
+
+        return screenThread;
+    }
+
+    /**
+     * Cleans up the screen thread for a given screen.
+     * If this is a top-level screen (no parent), the thread is interrupted.
+     * If this is a child screen (has a parent), the thread is not interrupted 
+     * since it's shared with the parent.
+     * 
+     * @param screenName The name of the screen
+     */
+    private void cleanupScreenThread(String screenName) {
+        // Only interrupt the thread if this is NOT a child screen
+        // Child screens share their parent's thread, so we should not interrupt it
+        String parentScreenName = context.getScreenParent(screenName);
+        if (parentScreenName == null) {
+            // This is a top-level screen - it owns its thread, so we can interrupt it
+            Thread thread = context.getScreenThreads().get(screenName);
+            if (thread != null && thread.isAlive()) {
+                thread.interrupt();
+            }
+        }
+        // For child screens, we just remove the reference but don't interrupt the parent's thread
+    }
+
+    /**
      * Visit a screen statement to define a new screen (does not create Stage until shown)
      */
     public void visitScreenStatement(ScreenStatement stmt) throws InterpreterError {
@@ -550,43 +596,19 @@ public class InterpreterScreen {
                 // If this screen has a parent, reuse the parent's thread instead of creating a new one
                 String parentForThread = context.getScreenParent(screenName);
                 if (parentForThread != null) {
-                    // Child screen: reuse the parent's thread
+                    // Child screen: try to reuse the parent's thread
                     Thread parentThread = context.getScreenThreads().get(parentForThread);
-                    if (parentThread != null) {
-                        // Register the child screen to use the parent's thread
+                    if (parentThread != null && parentThread.isAlive()) {
+                        // Parent thread exists and is alive, register the child screen to use it
                         context.getScreenThreads().put(screenName, parentThread);
                     } else {
-                        // Parent's thread not found (edge case), create a new thread
-                        Thread screenThread = new Thread(() -> {
-                            try {
-                                while (!Thread.currentThread().isInterrupted()) {
-                                    Thread.sleep(100);
-                                }
-                            } catch (InterruptedException e) {
-                                Thread.currentThread().interrupt();
-                            }
-                        }, "Screen-" + screenName);
-
-                        screenThread.setDaemon(true);
-                        screenThread.start();
-
+                        // Parent's thread not found or is dead (edge case), create a new thread
+                        Thread screenThread = createScreenThread(screenName);
                         context.getScreenThreads().put(screenName, screenThread);
                     }
                 } else {
                     // Top-level screen: create a new thread
-                    Thread screenThread = new Thread(() -> {
-                        try {
-                            while (!Thread.currentThread().isInterrupted()) {
-                                Thread.sleep(100);
-                            }
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                        }
-                    }, "Screen-" + screenName);
-
-                    screenThread.setDaemon(true);
-                    screenThread.start();
-
+                    Thread screenThread = createScreenThread(screenName);
                     context.getScreenThreads().put(screenName, screenThread);
                 }
 
@@ -955,17 +977,8 @@ public class InterpreterScreen {
                     stage.close();
                 }
                 
-                // Interrupt and stop the screen thread only if this is NOT a child screen
-                // Child screens share their parent's thread, so we should not interrupt it
-                String parentScreenName = context.getScreenParent(finalScreenName);
-                if (parentScreenName == null) {
-                    // This is a top-level screen - it owns its thread, so we can interrupt it
-                    Thread thread = context.getScreenThreads().get(finalScreenName);
-                    if (thread != null && thread.isAlive()) {
-                        thread.interrupt();
-                    }
-                }
-                // For child screens, we just remove the reference but don't interrupt the parent's thread
+                // Clean up the screen thread (only top-level screens have their threads interrupted)
+                cleanupScreenThread(finalScreenName);
                 
                 // Clean up resources
                 context.remove(finalScreenName);
@@ -1042,17 +1055,8 @@ public class InterpreterScreen {
                     stage.close();
                 }
                 
-                // Interrupt and stop the screen thread only if this is NOT a child screen
-                // Child screens share their parent's thread, so we should not interrupt it
-                String parentScreenName = context.getScreenParent(finalScreenName);
-                if (parentScreenName == null) {
-                    // This is a top-level screen - it owns its thread, so we can interrupt it
-                    Thread thread = context.getScreenThreads().get(finalScreenName);
-                    if (thread != null && thread.isAlive()) {
-                        thread.interrupt();
-                    }
-                }
-                // For child screens, we just remove the reference but don't interrupt the parent's thread
+                // Clean up the screen thread (only top-level screens have their threads interrupted)
+                cleanupScreenThread(finalScreenName);
                 
                 // Clean up resources
                 context.remove(finalScreenName);
@@ -1151,17 +1155,8 @@ public class InterpreterScreen {
             }
         }
         
-        // Interrupt and stop the screen thread only if this is NOT a child screen
-        // Child screens share their parent's thread, so we should not interrupt it
-        String parentScreenName = context.getScreenParent(screenName);
-        if (parentScreenName == null) {
-            // This is a top-level screen - it owns its thread, so we can interrupt it
-            Thread thread = context.getScreenThreads().get(screenName);
-            if (thread != null && thread.isAlive()) {
-                thread.interrupt();
-            }
-        }
-        // For child screens, we just remove the reference but don't interrupt the parent's thread
+        // Clean up the screen thread (only top-level screens have their threads interrupted)
+        cleanupScreenThread(screenName);
         
         // Clean up resources
         context.remove(screenName);
