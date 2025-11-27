@@ -55,9 +55,13 @@ public class Environment {
     
     /**
      * Set the current environment values for this thread.
+     * Passing null or the base environment will remove the thread-local scope,
+     * causing subsequent access to fall back to the base environment.
      */
     private void setCurrentEnvValues(EnvironmentValues values) {
-        if (values == baseEnvValues || values == null) {
+        // If values is null or is the base environment, remove thread-local scope
+        // This ensures getCurrentEnvValues() will return baseEnvValues
+        if (values == null || values == baseEnvValues) {
             threadLocalEnvValues.remove();
         } else {
             threadLocalEnvValues.set(values);
@@ -145,6 +149,12 @@ public class Environment {
         openedFiles.clear();
     }
 
+    /**
+     * Clear all environment state.
+     * Note: This clears the base environment and the current thread's thread-local scope.
+     * Other threads may still have their own thread-local scopes which will eventually 
+     * fall back to the cleared base environment when accessed.
+     */
     public void clear() {
         clearCallStack();
         baseEnvValues.clear();
@@ -224,12 +234,16 @@ public class Environment {
 
     /**
      * Pop the current scope from the environment values stack for this thread.
-     * Returns to the enclosing scope.
+     * Returns to the enclosing scope, falling back to baseEnvValues if enclosing is null.
+     * Does nothing if already at the base environment.
      */
     public void popEnvironmentValues() {
         EnvironmentValues current = getCurrentEnvValues();
         if (current != null && current != baseEnvValues) {
-            setCurrentEnvValues(current.enclosing);
+            // If enclosing is null, we fall back to baseEnvValues
+            // setCurrentEnvValues(null) will remove thread-local and fallback to baseEnvValues
+            EnvironmentValues enclosing = current.enclosing;
+            setCurrentEnvValues(enclosing != null ? enclosing : null);
         }
     }
 
