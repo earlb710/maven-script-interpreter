@@ -889,17 +889,19 @@ public class EbsTab extends Tab {
             }
         });
         
-        // Search when selecting from dropdown history (valueProperty changes when user clicks dropdown item)
-        findField.valueProperty().addListener((obs, oldVal, newVal) -> {
-            if (!suppressFindSearch && newVal != null && !newVal.isEmpty()) {
-                // Explicitly set the editor text to the selected value
-                // This ensures the editor is updated before runSearch() reads from it
-                suppressFindSearch = true;
-                findField.getEditor().setText(newVal);
-                suppressFindSearch = false;
-                Platform.runLater(() -> {
-                    runSearch();
-                });
+        // Search when selecting from dropdown history (use onHidden to detect when dropdown closes after selection)
+        findField.setOnHidden(e -> {
+            if (!suppressFindSearch) {
+                String selected = findField.getValue();
+                if (selected != null && !selected.isEmpty()) {
+                    // Set editor text to the selected value (in case ComboBox didn't sync it)
+                    suppressFindSearch = true;
+                    findField.getEditor().setText(selected);
+                    suppressFindSearch = false;
+                    Platform.runLater(() -> {
+                        runSearch();
+                    });
+                }
             }
         });
         
@@ -1268,6 +1270,9 @@ public class EbsTab extends Tab {
         // Suppress find search while modifying the history to avoid ComboBox listener triggering
         suppressFindSearch = true;
         try {
+            // Save the current editor text before modifying the list
+            String currentText = findField.getEditor().getText();
+            
             // Remove if already exists (we'll add it to the front)
             searchHistory.remove(term);
             
@@ -1278,6 +1283,9 @@ public class EbsTab extends Tab {
             while (searchHistory.size() > MAX_SEARCH_HISTORY) {
                 searchHistory.remove(searchHistory.size() - 1);
             }
+            
+            // Restore the editor text (ComboBox might have cleared it when list changed)
+            findField.getEditor().setText(currentText);
         } finally {
             suppressFindSearch = false;
         }
