@@ -75,6 +75,7 @@ public class EbsTab extends Tab {
     private Label lblCount;
 
     private List<int[]> lastMatches = java.util.Collections.emptyList(); // each int[]{start,endExclusive}
+    private List<int[]> stalePendingClear = java.util.Collections.emptyList(); // old matches pending clear after text change
     private int currentIndex = -1;
     private boolean suppressFindSearch = false; // avoid automatic search when programmatically setting find field
     
@@ -847,8 +848,9 @@ public class EbsTab extends Tab {
         // Listen for editor changes to trigger debounced re-highlighting
         dispArea.textProperty().addListener((obs, oldText, newText) -> {
             if (findBar.isVisible() && !lastMatches.isEmpty()) {
-                // Mark matches as invalid - positions have shifted due to text change
-                // Don't clear highlights immediately as it may cause scroll issues
+                // Save current matches for clearing later when timer fires
+                // Don't clear highlights immediately - keep them visible until reapplied
+                stalePendingClear = lastMatches;
                 lastMatches = java.util.Collections.emptyList();
                 currentIndex = -1;
                 highlightsStale = true;
@@ -1172,6 +1174,12 @@ public class EbsTab extends Tab {
             dispArea.removeStyleFromRange(r[0], r[1], "find-hit");
             dispArea.removeStyleFromRange(r[0], r[1], "find-current");
         }
+        // Also clear any stale highlights that were pending from text changes
+        for (int[] r : stalePendingClear) {
+            dispArea.removeStyleFromRange(r[0], r[1], "find-hit");
+            dispArea.removeStyleFromRange(r[0], r[1], "find-current");
+        }
+        stalePendingClear = java.util.Collections.emptyList();
     }
     
     /**
