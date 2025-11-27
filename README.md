@@ -622,6 +622,7 @@ The interpreter includes numerous built-in functions:
 
 ### CSS Operations
 - `css.getValue(cssPath, selector, property)` - Retrieves a CSS property value from a stylesheet (e.g., `css.getValue("css/console.css", ".error", "-fx-fill")` returns `"#ee0000"`)
+- `css.findCss(searchPath?)` - Searches for all available CSS stylesheet files and returns their paths as a string array
 
 ### Dialog Functions
 - `system.inputDialog(title, headerText?, defaultValue?)` - Prompts user for text input, returns the entered string

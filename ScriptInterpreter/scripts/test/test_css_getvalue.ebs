@@ -1,17 +1,16 @@
 // ============================================================================
-// TEST DOCUMENT: css.getValue Builtin Function
+// TEST DOCUMENT: CSS Builtin Functions
 // ============================================================================
-// This document tests the css.getValue builtin function that retrieves
-// property values from CSS stylesheets.
+// This document tests the CSS builtin functions:
+// - css.getValue(cssPath, selector, property) -> STRING
+// - css.findCss(searchPath?) -> STRING[]
 //
-// Function signature: css.getValue(cssPath, selector, property) -> STRING
-//   - cssPath:  Path to CSS file (classpath resource or filesystem path)
-//   - selector: CSS selector (e.g., ".error", "#main", "body")
-//   - property: CSS property name (e.g., "-fx-fill", "color")
+// css.getValue retrieves property values from CSS stylesheets.
+// css.findCss searches for all available CSS stylesheet files.
 // ============================================================================
 
 print("====================================================================");
-print("           TEST DOCUMENT: css.getValue Builtin Function");
+print("           TEST DOCUMENT: CSS Builtin Functions");
 print("====================================================================");
 print("");
 
@@ -216,12 +215,60 @@ print("✓ Integration tests passed");
 print("");
 
 // ============================================================================
+// TEST 7: css.findCss - Find all CSS files
+// ============================================================================
+print("============================================================");
+print("TEST 7: css.findCss - Find all CSS files");
+print("============================================================");
+
+print("--- Test Cases ---");
+
+// Find all CSS files in default locations
+var allCssFiles = call css.findCss();
+print("  Found " + allCssFiles.length + " CSS file(s)");
+
+// Check that we found at least the core CSS files
+var foundConsole: bool = false;
+var foundScreenAreas: bool = false;
+var foundScreenInputs: bool = false;
+
+var i: int = 0;
+while i < allCssFiles.length {
+    var file: string = allCssFiles[i];
+    print("    - " + file);
+    if call string.contains(file, "console.css") then {
+        foundConsole = true;
+    }
+    if call string.contains(file, "screen-areas.css") then {
+        foundScreenAreas = true;
+    }
+    if call string.contains(file, "screen-inputs.css") then {
+        foundScreenInputs = true;
+    }
+    i = i + 1;
+}
+
+print("");
+print("  Found console.css: " + foundConsole);
+print("  Found screen-areas.css: " + foundScreenAreas);
+print("  Found screen-inputs.css: " + foundScreenInputs);
+
+// At least console.css should be found
+call debug.assertEquals(true, foundConsole, "console.css should be found");
+
+print("");
+print("✓ css.findCss tests passed");
+print("");
+
+// ============================================================================
 // SUMMARY
 // ============================================================================
 print("====================================================================");
 print("                    TEST SUMMARY");
 print("====================================================================");
-print("The css.getValue builtin function tested successfully:");
+print("CSS builtin functions tested successfully:");
+print("");
+print("css.getValue:");
 print("  ✓ Basic Usage        - Get fill colors from console.css");
 print("  ✓ Property Types     - Get different property types (color, font)");
 print("  ✓ Multi-part Selectors - Handle nested CSS selectors");
@@ -230,8 +277,12 @@ print("  ✓ Different Files    - Read from multiple CSS files");
 print("  ✓ Code Style Colors  - Extract syntax highlighting colors");
 print("  ✓ Integration Tests  - Practical usage scenarios");
 print("");
-print("Function Signature:");
+print("css.findCss:");
+print("  ✓ Find CSS Files     - Search and list all available stylesheets");
+print("");
+print("Function Signatures:");
 print("  css.getValue(cssPath, selector, property) -> STRING");
+print("  css.findCss(searchPath?) -> STRING[]");
 print("");
 print("All test assertions passed.");
 print("====================================================================");

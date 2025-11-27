@@ -1,18 +1,28 @@
 package com.eb.script.interpreter.builtins;
 
+import com.eb.script.arrays.ArrayDynamic;
 import com.eb.script.interpreter.InterpreterError;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * Built-in functions for CSS operations.
@@ -36,6 +46,7 @@ public class BuiltinsCss {
     public static Object dispatch(String name, Object[] args) throws InterpreterError {
         return switch (name) {
             case "css.getvalue" -> getValue(args);
+            case "css.findcss" -> findCss(args);
             default -> throw new InterpreterError("Unknown CSS builtin: " + name);
         };
     }
@@ -96,6 +107,155 @@ public class BuiltinsCss {
             return null;
         } catch (IOException e) {
             throw new InterpreterError("css.getValue: Failed to read CSS file: " + e.getMessage());
+        }
+    }
+
+    /**
+     * css.findCss(searchPath?) -> STRING[]
+     * Searches for all available CSS stylesheet files and returns their paths.
+     * 
+     * @param args args[0] = searchPath (String, optional) - base path to search in. 
+     *             If null/empty, searches in default locations (classpath css/ folder and sandbox)
+     * @return ArrayDynamic of strings containing all found CSS file paths
+     */
+    private static Object findCss(Object[] args) throws InterpreterError {
+        String searchPath = null;
+        if (args.length > 0 && args[0] != null) {
+            searchPath = (String) args[0];
+        }
+
+        List<String> cssFiles = new ArrayList<>();
+
+        try {
+            // Search in classpath resources (css/ folder)
+            findCssInClasspath(cssFiles);
+
+            // Search in filesystem if a path is provided
+            if (searchPath != null && !searchPath.isBlank()) {
+                findCssInFilesystem(cssFiles, searchPath);
+            } else {
+                // Search in sandbox root if no specific path provided
+                try {
+                    Path sandboxRoot = com.eb.util.Util.SANDBOX_ROOT;
+                    if (Files.exists(sandboxRoot)) {
+                        findCssInFilesystem(cssFiles, sandboxRoot.toString());
+                    }
+                } catch (Exception e) {
+                    // Ignore sandbox errors
+                }
+            }
+        } catch (Exception e) {
+            throw new InterpreterError("css.findCss: Error searching for CSS files: " + e.getMessage());
+        }
+
+        // Convert to ArrayDynamic
+        ArrayDynamic result = new ArrayDynamic(com.eb.script.token.DataType.STRING);
+        for (String cssFile : cssFiles) {
+            result.add(cssFile);
+        }
+
+        return result;
+    }
+
+    /**
+     * Search for CSS files in classpath resources.
+     */
+    private static void findCssInClasspath(List<String> cssFiles) {
+        try {
+            // Get the css resource folder URL
+            URL cssUrl = BuiltinsCss.class.getResource("/css");
+            if (cssUrl == null) {
+                return;
+            }
+
+            URI uri = cssUrl.toURI();
+            Path cssPath;
+            
+            if (uri.getScheme().equals("jar")) {
+                // Running from JAR file
+                FileSystem fileSystem = null;
+                try {
+                    try {
+                        fileSystem = FileSystems.getFileSystem(uri);
+                    } catch (Exception e) {
+                        fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap());
+                    }
+                    cssPath = fileSystem.getPath("/css");
+                    if (Files.exists(cssPath)) {
+                        try (Stream<Path> walk = Files.walk(cssPath, 1)) {
+                            walk.filter(p -> p.toString().endsWith(".css"))
+                                .forEach(p -> {
+                                    String fileName = p.getFileName().toString();
+                                    cssFiles.add("css/" + fileName);
+                                });
+                        }
+                    }
+                } catch (Exception e) {
+                    // Ignore JAR access errors
+                }
+            } else {
+                // Running from filesystem (IDE or exploded classes)
+                cssPath = Paths.get(uri);
+                if (Files.exists(cssPath) && Files.isDirectory(cssPath)) {
+                    try (Stream<Path> walk = Files.walk(cssPath, 1)) {
+                        walk.filter(p -> p.toString().endsWith(".css"))
+                            .forEach(p -> {
+                                String fileName = p.getFileName().toString();
+                                cssFiles.add("css/" + fileName);
+                            });
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // Ignore classpath search errors
+        }
+    }
+
+    /**
+     * Search for CSS files in the filesystem.
+     */
+    private static void findCssInFilesystem(List<String> cssFiles, String basePath) {
+        try {
+            Path initialPath = Path.of(basePath);
+            Path searchPath;
+            
+            // Try resolving with sandbox if it's a relative path
+            if (!initialPath.isAbsolute()) {
+                try {
+                    searchPath = com.eb.util.Util.resolveSandboxedPath(basePath);
+                } catch (Exception e) {
+                    // Use the original path if sandbox resolution fails
+                    searchPath = initialPath;
+                }
+            } else {
+                searchPath = initialPath;
+            }
+            
+            if (!Files.exists(searchPath)) {
+                return;
+            }
+
+            final Path finalSearchPath = searchPath;
+            if (Files.isDirectory(searchPath)) {
+                // Search recursively in directory
+                try (Stream<Path> walk = Files.walk(searchPath)) {
+                    walk.filter(p -> p.toString().endsWith(".css"))
+                        .forEach(p -> {
+                            String pathStr = p.toString();
+                            if (!cssFiles.contains(pathStr)) {
+                                cssFiles.add(pathStr);
+                            }
+                        });
+                }
+            } else if (searchPath.toString().endsWith(".css")) {
+                // Single file
+                String pathStr = searchPath.toString();
+                if (!cssFiles.contains(pathStr)) {
+                    cssFiles.add(pathStr);
+                }
+            }
+        } catch (Exception e) {
+            // Ignore filesystem errors for individual paths
         }
     }
 

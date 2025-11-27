@@ -2034,6 +2034,45 @@ print "Error: " + themeError + ", Warn: " + themeWarn + ", OK: " + themeOk;
 - Validate CSS property values programmatically
 - Build style-aware applications that adapt to CSS changes
 
+#### css.findCss(searchPath?)
+Searches for all available CSS stylesheet files and returns their paths as a string array.
+
+**Parameters:**
+- `searchPath` (string, optional): Base path to search in. If not provided, searches in default locations (classpath css/ folder and sandbox)
+
+**Returns:** String[] - an array of paths to all found CSS files
+
+```javascript
+// Find all available CSS files
+var cssFiles = call css.findCss();
+print "Found " + cssFiles.length + " CSS files:";
+foreach file in cssFiles {
+    print "  - " + file;
+}
+
+// Search in a specific directory
+var customCss = call css.findCss("/path/to/styles");
+foreach file in customCss {
+    print file;
+}
+
+// Use with css.getValue to iterate over all stylesheets
+var allCss = call css.findCss();
+foreach cssFile in allCss {
+    var errorColor = call css.getValue(cssFile, ".error", "-fx-fill");
+    if errorColor != null then {
+        print cssFile + " defines .error color: " + errorColor;
+    }
+}
+```
+
+**Features:**
+- Searches classpath resources (css/ folder)
+- Searches filesystem paths (sandbox directory)
+- Returns absolute paths for filesystem files
+- Returns relative paths for classpath resources (e.g., "css/console.css")
+- Recursive directory search when searching filesystem paths
+
 ### Array Functions
 ```javascript
 // Array manipulation

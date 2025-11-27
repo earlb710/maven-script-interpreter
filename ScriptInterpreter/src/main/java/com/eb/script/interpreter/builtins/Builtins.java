@@ -898,6 +898,10 @@ public final class Builtins {
                 newParam("selector", DataType.STRING, true),  // required; CSS selector (e.g., ".error")
                 newParam("property", DataType.STRING, true)   // required; CSS property name (e.g., "-fx-fill")
         ));
+        addBuiltin(info(
+                "css.findCss", DataType.ARRAY,
+                newParam("searchPath", DataType.STRING, false)  // optional; base path to search in
+        ));
 
         NAMES = Collections.unmodifiableSet(BUILTINS.keySet());
     }
