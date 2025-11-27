@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import javafx.stage.Modality;
+import javafx.stage.Window;
 
 /**
  * Built-in functions for Help operations.
@@ -52,6 +54,29 @@ public class BuiltinsHelp {
                name.equals("system.inputdialog") || 
                name.equals("system.confirmdialog") || 
                name.equals("system.alertdialog");
+    }
+
+    // --- Helper method to find the focused window ---
+    
+    /**
+     * Finds the currently focused window to use as the owner for dialogs.
+     * This ensures dialogs are properly parented to the screen they were called from.
+     * 
+     * @return The focused window, or null if no focused window is found
+     */
+    private static Window getFocusedWindow() {
+        for (Window window : Window.getWindows()) {
+            if (window.isFocused()) {
+                return window;
+            }
+        }
+        // If no window is focused, return the first showing window (if any)
+        for (Window window : Window.getWindows()) {
+            if (window.isShowing()) {
+                return window;
+            }
+        }
+        return null;
     }
 
     // --- Individual builtin implementations ---
@@ -187,6 +212,13 @@ public class BuiltinsHelp {
                 dialog.setHeaderText(headerText);
             }
             dialog.setContentText("Enter value:");
+            
+            // Set the owner window so dialog appears as a child of the calling screen
+            Window owner = getFocusedWindow();
+            if (owner != null) {
+                dialog.initOwner(owner);
+                dialog.initModality(Modality.WINDOW_MODAL);
+            }
 
             java.util.Optional<String> result = dialog.showAndWait();
             resultRef.set(result.orElse(""));
@@ -200,6 +232,13 @@ public class BuiltinsHelp {
                     dialog.setHeaderText(headerText);
                 }
                 dialog.setContentText("Enter value:");
+                
+                // Set the owner window so dialog appears as a child of the calling screen
+                Window owner = getFocusedWindow();
+                if (owner != null) {
+                    dialog.initOwner(owner);
+                    dialog.initModality(Modality.WINDOW_MODAL);
+                }
 
                 java.util.Optional<String> result = dialog.showAndWait();
                 resultRef.set(result.orElse(""));
@@ -236,6 +275,13 @@ public class BuiltinsHelp {
             if (headerText != null && !headerText.isEmpty()) {
                 confirm.setHeaderText(headerText);
             }
+            
+            // Set the owner window so dialog appears as a child of the calling screen
+            Window owner = getFocusedWindow();
+            if (owner != null) {
+                confirm.initOwner(owner);
+                confirm.initModality(Modality.WINDOW_MODAL);
+            }
 
             java.util.Optional<javafx.scene.control.ButtonType> result = confirm.showAndWait();
             resultRef.set(result.isPresent() && result.get() == javafx.scene.control.ButtonType.YES);
@@ -252,6 +298,13 @@ public class BuiltinsHelp {
                 confirm.setTitle(title);
                 if (headerText != null && !headerText.isEmpty()) {
                     confirm.setHeaderText(headerText);
+                }
+                
+                // Set the owner window so dialog appears as a child of the calling screen
+                Window owner = getFocusedWindow();
+                if (owner != null) {
+                    confirm.initOwner(owner);
+                    confirm.initModality(Modality.WINDOW_MODAL);
                 }
 
                 java.util.Optional<javafx.scene.control.ButtonType> result = confirm.showAndWait();
@@ -286,6 +339,14 @@ public class BuiltinsHelp {
         if (javafx.application.Platform.isFxApplicationThread()) {
             javafx.scene.control.Alert alert = new javafx.scene.control.Alert(alertType, message);
             alert.setTitle(title);
+            
+            // Set the owner window so dialog appears as a child of the calling screen
+            Window owner = getFocusedWindow();
+            if (owner != null) {
+                alert.initOwner(owner);
+                alert.initModality(Modality.WINDOW_MODAL);
+            }
+            
             alert.showAndWait();
         } else {
             final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
@@ -293,6 +354,14 @@ public class BuiltinsHelp {
             javafx.application.Platform.runLater(() -> {
                 javafx.scene.control.Alert alert = new javafx.scene.control.Alert(alertType, message);
                 alert.setTitle(title);
+                
+                // Set the owner window so dialog appears as a child of the calling screen
+                Window owner = getFocusedWindow();
+                if (owner != null) {
+                    alert.initOwner(owner);
+                    alert.initModality(Modality.WINDOW_MODAL);
+                }
+                
                 alert.showAndWait();
                 latch.countDown();
             });
