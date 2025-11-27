@@ -889,7 +889,16 @@ public class EbsTab extends Tab {
             }
         });
         
-        // Also search when selecting from dropdown history
+        // Search when selecting from dropdown history (valueProperty changes when user clicks dropdown item)
+        findField.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (!suppressFindSearch && newVal != null && !newVal.isEmpty()) {
+                Platform.runLater(() -> {
+                    runSearch();
+                });
+            }
+        });
+        
+        // Also search when user presses Enter (and add to history)
         findField.setOnAction(e -> {
             if (!suppressFindSearch) {
                 Platform.runLater(() -> {
@@ -1159,13 +1168,16 @@ public class EbsTab extends Tab {
             dispArea.addStyleToRange(r[0], r[1], "find-hit");
         }
         
-        // Update currentIndex to nearest match to caret position (for next/prev navigation)
-        int caretPos = dispArea.getCaretPosition();
-        currentIndex = 0;
-        for (int i = 0; i < hits.size(); i++) {
-            if (hits.get(i)[0] >= caretPos) {
-                currentIndex = i;
-                break;
+        // Preserve currentIndex if still valid, otherwise find nearest match to caret
+        if (currentIndex < 0 || currentIndex >= hits.size()) {
+            // currentIndex invalid, find nearest match to caret position
+            int caretPos = dispArea.getCaretPosition();
+            currentIndex = 0;
+            for (int i = 0; i < hits.size(); i++) {
+                if (hits.get(i)[0] >= caretPos) {
+                    currentIndex = i;
+                    break;
+                }
             }
         }
         
