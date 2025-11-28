@@ -550,7 +550,7 @@ function saveConfigWithCurrentProfile {
     jsonContent = jsonContent + "}";
     
     call file.writeTextFile(configPath, jsonContent);
-    println("Config saved with current profile: " + colorEditorScreen.profile);
+    print "Config saved with current profile: " + colorEditorScreen.profile;
 }
 
 // Function: Add a new profile to the config file with default colors
@@ -764,7 +764,7 @@ function addProfileToConfig(newProfileName: string) {
     jsonContent = jsonContent + "}";
     
     call file.writeTextFile(configPath, jsonContent);
-    println("New profile '" + newProfileName + "' added to config file with default colors");
+    print "New profile '" + newProfileName + "' added to config file with default colors";
 }
 
 // Function: Handle profile change - loads colors for the selected profile and updates config
@@ -773,10 +773,10 @@ function onProfileChange {
     var profileColors: json = call json.getobject(profiles, selectedProfile);
     
     if call json.isempty(profileColors) then {
-        println("Profile '" + selectedProfile + "' not found, using defaults");
+        print "Profile '" + selectedProfile + "' not found, using defaults";
         call setColorsToDefaults();
     } else {
-        println("Loading colors for profile: " + selectedProfile);
+        print "Loading colors for profile: " + selectedProfile;
         
         // Get all color values from the profile
         var pInfo: string = call json.getstring(profileColors, "info");
@@ -834,7 +834,7 @@ function onProfileChange {
         if pFindHlColor != "" then { colorEditorScreen.findHighlightColor = pFindHlColor; } else { colorEditorScreen.findHighlightColor = defaultFindHighlightColor; }
         if pFindHlBg != "" then { colorEditorScreen.findHighlightBackground = pFindHlBg; } else { colorEditorScreen.findHighlightBackground = defaultFindHighlightBackground; }
         
-        println("Profile colors loaded successfully");
+        print "Profile colors loaded successfully";
     }
     
     // Update the current profile in the config file
