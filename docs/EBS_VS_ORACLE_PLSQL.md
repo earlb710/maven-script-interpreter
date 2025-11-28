@@ -408,7 +408,7 @@ END;
 |---------|-----------|---------------|
 | Exit loop | `break;` or `exit;` | `EXIT;` |
 | Exit with condition | `if cond then break;` | `EXIT WHEN condition;` |
-| Skip iteration | `continue;` | `CONTINUE;` (11g+) |
+| Skip iteration | `continue;` | `CONTINUE;` |
 
 ---
 
@@ -845,7 +845,7 @@ var obj = call json.jsonfromstring(jsonStr);
 var str = call string.tostring(person);
 ```
 
-### Oracle PL/SQL (12c+)
+### Oracle PL/SQL
 
 ```sql
 DECLARE
