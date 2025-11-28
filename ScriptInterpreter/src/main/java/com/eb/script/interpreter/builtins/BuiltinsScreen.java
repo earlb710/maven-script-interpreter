@@ -1049,12 +1049,26 @@ public class BuiltinsScreen {
 
         javafx.application.Platform.runLater(() -> {
             try {
-                java.util.List<javafx.scene.Node> controls = context.getScreenBoundControls().get(finalScreenName);
+                // Try to find controls with case-insensitive screen name matching
+                java.util.List<javafx.scene.Node> controls = null;
+                String actualScreenKey = null;
+                for (String key : context.getScreenBoundControls().keySet()) {
+                    if (key.equalsIgnoreCase(finalScreenName)) {
+                        controls = context.getScreenBoundControls().get(key);
+                        actualScreenKey = key;
+                        break;
+                    }
+                }
+                
                 if (controls != null) {
-                    String targetUserData = finalScreenName + "." + finalItemName;
+                    // Build targetUserData using the actual screen key (as stored) for matching
+                    String targetUserData = actualScreenKey + "." + finalItemName;
                     for (javafx.scene.Node control : controls) {
                         Object userData = control.getUserData();
-                        if (targetUserData.equals(userData)) {
+                        // Try case-insensitive match for userData
+                        boolean matches = targetUserData.equals(userData) || 
+                                          (userData instanceof String && targetUserData.equalsIgnoreCase((String) userData));
+                        if (matches) {
                             if (control instanceof javafx.scene.control.ChoiceBox) {
                                 @SuppressWarnings("unchecked")
                                 javafx.scene.control.ChoiceBox<String> choiceBox = (javafx.scene.control.ChoiceBox<String>) control;
