@@ -5,7 +5,8 @@ import java.util.Deque;
 /**
  * A runtime exception that can be thrown during EBS script execution.
  * This exception carries an ErrorType that allows exception handlers
- * to catch specific types of errors.
+ * to catch specific types of errors. It also supports custom exception
+ * types with their own names.
  * 
  * @author Earl Bosch
  */
@@ -20,6 +21,9 @@ public class EbsScriptException extends InterpreterError {
     /** The line number where the error occurred */
     private final int line;
     
+    /** The name of a custom exception type, if this is a custom exception */
+    private final String customExceptionName;
+    
     /**
      * Create a new EbsScriptException with the specified error type and message.
      */
@@ -28,6 +32,7 @@ public class EbsScriptException extends InterpreterError {
         this.line = line;
         this.errorType = errorType != null ? errorType : ErrorType.ANY_ERROR;
         this.cause = null;
+        this.customExceptionName = null;
     }
     
     /**
@@ -38,6 +43,7 @@ public class EbsScriptException extends InterpreterError {
         this.line = line;
         this.errorType = errorType != null ? errorType : ErrorType.ANY_ERROR;
         this.cause = null;
+        this.customExceptionName = null;
     }
     
     /**
@@ -48,6 +54,7 @@ public class EbsScriptException extends InterpreterError {
         this.line = line;
         this.errorType = errorType != null ? errorType : ErrorType.ANY_ERROR;
         this.cause = cause;
+        this.customExceptionName = null;
     }
     
     /**
@@ -58,6 +65,18 @@ public class EbsScriptException extends InterpreterError {
         this.line = line;
         this.errorType = errorType != null ? errorType : ErrorType.ANY_ERROR;
         this.cause = cause;
+        this.customExceptionName = null;
+    }
+    
+    /**
+     * Create a new custom EbsScriptException with a custom exception name.
+     */
+    public EbsScriptException(int line, String customExceptionName, String message, Deque<Environment.StackInfo> stack) {
+        super(message, stack);
+        this.line = line;
+        this.errorType = ErrorType.ANY_ERROR;
+        this.cause = null;
+        this.customExceptionName = customExceptionName;
     }
     
     /**
@@ -65,6 +84,21 @@ public class EbsScriptException extends InterpreterError {
      */
     public ErrorType getErrorType() {
         return errorType;
+    }
+    
+    /**
+     * Get the custom exception name, if this is a custom exception.
+     * Returns null for standard exceptions.
+     */
+    public String getCustomExceptionName() {
+        return customExceptionName;
+    }
+    
+    /**
+     * Check if this is a custom exception (not a standard ErrorType).
+     */
+    public boolean isCustomException() {
+        return customExceptionName != null;
     }
     
     /**
@@ -91,6 +125,18 @@ public class EbsScriptException extends InterpreterError {
             return true;
         }
         return this.errorType == handlerType;
+    }
+    
+    /**
+     * Check if this exception matches the given custom exception name.
+     * @param handlerExceptionName The name of the custom exception to match
+     * @return true if this is a custom exception with the matching name
+     */
+    public boolean matchesCustomException(String handlerExceptionName) {
+        if (handlerExceptionName == null) {
+            return false;
+        }
+        return handlerExceptionName.equalsIgnoreCase(customExceptionName);
     }
     
     /**

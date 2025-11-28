@@ -79,12 +79,12 @@ public class TestExceptionHandling {
             }
             """);
         
-        // Test 5: Invalid error type (should fail)
-        testParsingFails("Invalid error type", """
+        // Test 5: Custom exception type (now allowed)
+        testParsing("Custom exception type", """
             try {
                 var x = 10;
             } exceptions {
-                when INVALID_ERROR_TYPE {
+                when MyCustomError {
                     print "error";
                 }
             }
@@ -122,6 +122,48 @@ public class TestExceptionHandling {
             try {
                 var x = 10;
             } exceptions {
+            }
+            """);
+        
+        // Test 9: Raise standard exception parsing
+        testParsing("Raise standard exception", """
+            raise exception IO_ERROR("File not found");
+            """);
+        
+        // Test 10: Raise standard exception without message
+        testParsing("Raise standard exception without message", """
+            raise exception MATH_ERROR();
+            """);
+        
+        // Test 11: Raise custom exception with multiple parameters
+        testParsing("Raise custom exception with parameters", """
+            raise exception MyCustomError("message", 42, true);
+            """);
+        
+        // Test 12: Raise custom exception in try block
+        testParsing("Raise and catch custom exception", """
+            try {
+                raise exception ValidationFailed("field1", "must be numeric");
+            } exceptions {
+                when ValidationFailed(msg) {
+                    print "Caught: " + msg;
+                }
+            }
+            """);
+        
+        // Test 13: Standard exception should only take one parameter
+        testParsingFails("Standard exception with multiple parameters", """
+            raise exception IO_ERROR("message1", "message2");
+            """);
+        
+        // Test 14: Custom exception with error variable in handler
+        testParsing("Custom exception with error variable", """
+            try {
+                raise exception MyError("test");
+            } exceptions {
+                when MyError(errorMsg) {
+                    print errorMsg;
+                }
             }
             """);
         

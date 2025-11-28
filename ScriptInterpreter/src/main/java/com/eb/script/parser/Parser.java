@@ -55,6 +55,7 @@ import com.eb.script.interpreter.statement.ScreenCloseStatement;
 import com.eb.script.interpreter.statement.ScreenSubmitStatement;
 import com.eb.script.interpreter.statement.ImportStatement;
 import com.eb.script.interpreter.statement.TryStatement;
+import com.eb.script.interpreter.statement.RaiseStatement;
 import com.eb.script.interpreter.statement.ExceptionHandler;
 import com.eb.script.interpreter.ErrorType;
 import com.eb.script.token.ebs.EbsTokenType;
@@ -369,6 +370,8 @@ public class Parser {
             return continueStatement();
         } else if (match(EbsTokenType.TRY)) {
             return tryStatement();
+        } else if (matchAll(EbsTokenType.RAISE, EbsTokenType.EXCEPTION)) {
+            return raiseStatement();
         } else if (match(EbsTokenType.CONNECT)) {
             return connectStatement();
         } else if (match(EbsTokenType.SCREEN)) {
@@ -1818,20 +1821,18 @@ public class Parser {
      * Syntax:
      *   when ERROR_TYPE { statements }
      *   when ERROR_TYPE(errorVar) { statements }
+     *   when CUSTOM_EXCEPTION { statements }
+     *   when CUSTOM_EXCEPTION(errorVar) { statements }
      */
     private ExceptionHandler parseExceptionHandler() throws ParseError {
         consume(EbsTokenType.WHEN, "Expected 'when' keyword in exception handler.");
 
-        // Parse error type (e.g., IO_ERROR, ANY_ERROR)
+        // Parse error type (e.g., IO_ERROR, ANY_ERROR, or custom exception name)
         EbsToken errorTypeToken = consume(EbsTokenType.IDENTIFIER, "Expected error type name after 'when'.");
         String errorTypeName = (String) errorTypeToken.literal;
 
-        // Validate the error type
+        // Check if this is a standard error type
         ErrorType errorType = ErrorType.fromName(errorTypeName);
-        if (errorType == null) {
-            throw error(errorTypeToken, "Unknown error type '" + errorTypeName + "'. " +
-                "Valid error types: " + ErrorType.getAllErrorTypeNames());
-        }
 
         // Check for optional error variable: when ERROR_TYPE(varName)
         String errorVarName = null;
@@ -1845,7 +1846,64 @@ public class Parser {
         consume(EbsTokenType.LBRACE, "Expected '{' after error type.");
         BlockStatement handlerBlock = (BlockStatement) block();
 
-        return new ExceptionHandler(errorType, errorVarName, handlerBlock);
+        // Create appropriate handler based on whether this is a standard or custom exception
+        if (errorType != null) {
+            return new ExceptionHandler(errorType, errorVarName, handlerBlock);
+        } else {
+            // Custom exception handler
+            return new ExceptionHandler(errorTypeName, errorVarName, handlerBlock);
+        }
+    }
+
+    /**
+     * Parse a raise exception statement.
+     * Syntax:
+     *   raise exception ERROR_TYPE("message");              // Standard exception
+     *   raise exception CUSTOM_EXCEPTION(param1, param2);   // Custom exception
+     * 
+     * Standard exceptions (defined in ErrorType enum) only take a message parameter.
+     * Custom exceptions can have multiple parameters.
+     */
+    private Statement raiseStatement() throws ParseError {
+        // matchAll(RAISE, EXCEPTION) matched but didn't consume tokens
+        // Need to advance past both RAISE and EXCEPTION
+        advance(); // RAISE
+        int line = currToken.line;
+        advance(); // EXCEPTION
+        
+        // Parse exception name
+        EbsToken exceptionNameToken = consume(EbsTokenType.IDENTIFIER, "Expected exception type name after 'raise exception'.");
+        String exceptionName = (String) exceptionNameToken.literal;
+        
+        // Check if this is a standard exception type
+        ErrorType errorType = ErrorType.fromName(exceptionName);
+        
+        // Expect opening paren
+        consume(EbsTokenType.LPAREN, "Expected '(' after exception type name.");
+        
+        // Parse parameters
+        List<Expression> parameters = new ArrayList<>();
+        if (!check(EbsTokenType.RPAREN)) {
+            do {
+                parameters.add(expression());
+            } while (match(EbsTokenType.COMMA));
+        }
+        
+        consume(EbsTokenType.RPAREN, "Expected ')' after exception parameters.");
+        consume(EbsTokenType.SEMICOLON, "Expected ';' after raise statement.");
+        
+        // Validate standard exceptions only take a single message parameter
+        if (errorType != null) {
+            if (parameters.size() > 1) {
+                throw error(exceptionNameToken, "Standard exception '" + exceptionName + 
+                    "' only accepts a single message parameter. For multiple parameters, use a custom exception.");
+            }
+            Expression message = parameters.isEmpty() ? null : parameters.get(0);
+            return new RaiseStatement(line, errorType, message);
+        } else {
+            // Custom exception
+            return new RaiseStatement(line, exceptionName, parameters);
+        }
     }
 
     private Expression expression() throws ParseError {

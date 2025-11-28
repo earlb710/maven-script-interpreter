@@ -277,6 +277,59 @@ try {
 - Multiple handlers can be specified for different error types
 - `ANY_ERROR` should typically be placed last as it catches all errors
 - Try blocks can be nested for granular error handling
+
+### Raising Exceptions
+
+You can explicitly raise exceptions using the `raise exception` statement. This allows you to signal errors from your own code.
+
+**Standard Exceptions** (from the ErrorType enum) only accept a single message parameter:
+
+```javascript
+// Raise standard exceptions with a message
+raise exception IO_ERROR("File not found: config.txt");
+raise exception VALIDATION_ERROR("Input must be a positive number");
+raise exception MATH_ERROR("Cannot calculate square root of negative number");
+
+// Raise without a message (uses default message)
+raise exception NULL_ERROR();
+```
+
+**Custom Exceptions** can have multiple parameters and are identified by any name not in the standard ErrorType list:
+
+```javascript
+// Raise custom exceptions with multiple parameters
+raise exception ValidationFailed("username", "must be at least 3 characters");
+raise exception OutOfBoundsError(10, 0, 5);  // index, min, max
+raise exception BusinessRuleViolation("order", 12345, "insufficient inventory");
+```
+
+**Catching Raised Exceptions:**
+
+```javascript
+// Catch standard exceptions
+try {
+    raise exception VALIDATION_ERROR("Invalid input");
+} exceptions {
+    when VALIDATION_ERROR(msg) {
+        print "Validation failed: " + msg;
+    }
+}
+
+// Catch custom exceptions by name
+try {
+    raise exception MyCustomError("error details", 42);
+} exceptions {
+    when MyCustomError(msg) {
+        print "Custom error: " + msg;
+    }
+    when ANY_ERROR(msg) {
+        print "Caught by ANY_ERROR: " + msg;
+    }
+}
+```
+
+**Note:** Both standard and custom exception names are matched case-insensitively. Any unrecognized exception type (not in the standard ErrorType list) is treated as a custom exception.
+
 ### Map Type
 
 The `map` type provides a flexible key-value store where keys are strings and values can be any type. Maps are backed by JSON objects and are ideal for dynamic data storage.

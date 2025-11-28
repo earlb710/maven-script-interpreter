@@ -32,6 +32,8 @@ public enum EbsTokenType implements LexerToken {
     TRY(PrintStyle.KEYWORD, Category.KEYWORD, "try"),
     EXCEPTIONS(PrintStyle.KEYWORD, Category.KEYWORD, "exceptions"),
     WHEN(PrintStyle.KEYWORD, Category.KEYWORD, "when"),
+    RAISE(PrintStyle.KEYWORD, Category.KEYWORD, "raise"),
+    EXCEPTION(PrintStyle.KEYWORD, Category.KEYWORD, "exception"),
     // Comments
     COMMENT(PrintStyle.COMMENT, "//"),
     // data types

@@ -62,4 +62,6 @@ public interface StatementVisitor {
 
     void visitTryStatement(TryStatement stmt) throws InterpreterError;
 
+    void visitRaiseStatement(RaiseStatement stmt) throws InterpreterError;
+
 }
