@@ -170,7 +170,7 @@ while printIdx < profileList.length {
 print "";
 
 // Get the current profile name (default to "default" if not present)
-var profileName: string = call json.getstring(config, "currentProfile");
+var profileName: string = call json.getstring(config, "currentProfile", "");
 if profileName == "" then {
     profileName = "default";
 }
@@ -192,32 +192,32 @@ print "Colors object retrieved for profile: " + profileName;
 print "";
 
 // Extract all color values into variables
-var infoColor: string = call json.getstring(colors, "info");
-var commentColor: string = call json.getstring(colors, "comment");
-var errorColor: string = call json.getstring(colors, "error");
-var warnColor: string = call json.getstring(colors, "warn");
-var okColor: string = call json.getstring(colors, "ok");
-var codeColor: string = call json.getstring(colors, "code");
-var datatypeColor: string = call json.getstring(colors, "datatype");
-var dataColor: string = call json.getstring(colors, "data");
-var keywordColor: string = call json.getstring(colors, "keyword");
-var builtinColor: string = call json.getstring(colors, "builtin");
-var literalColor: string = call json.getstring(colors, "literal");
-var identifierColor: string = call json.getstring(colors, "identifier");
-var sqlColor: string = call json.getstring(colors, "sql");
-var customColor: string = call json.getstring(colors, "custom");
-var backgroundColor: string = call json.getstring(colors, "background");
-var textColor: string = call json.getstring(colors, "text");
-var caretColor: string = call json.getstring(colors, "caret");
-var lineCursorColor: string = call json.getstring(colors, "line-cursor");
-var lineNumbersColor: string = call json.getstring(colors, "line-numbers");
-var consoleBackgroundColor: string = call json.getstring(colors, "console-background");
-var tabBackgroundColor: string = call json.getstring(colors, "tab-background");
-var tabLabelColor: string = call json.getstring(colors, "tab-label-color");
-var tabLabelChangedColor: string = call json.getstring(colors, "tab-label-changed-color");
-var tabLabelBackgroundColor: string = call json.getstring(colors, "tab-label-background");
-var findHighlightColor: string = call json.getstring(colors, "find-highlight-color");
-var findHighlightBackground: string = call json.getstring(colors, "find-highlight-background");
+var infoColor: string = call json.getstring(colors, "info", "");
+var commentColor: string = call json.getstring(colors, "comment", "");
+var errorColor: string = call json.getstring(colors, "error", "");
+var warnColor: string = call json.getstring(colors, "warn", "");
+var okColor: string = call json.getstring(colors, "ok", "");
+var codeColor: string = call json.getstring(colors, "code", "");
+var datatypeColor: string = call json.getstring(colors, "datatype", "");
+var dataColor: string = call json.getstring(colors, "data", "");
+var keywordColor: string = call json.getstring(colors, "keyword", "");
+var builtinColor: string = call json.getstring(colors, "builtin", "");
+var literalColor: string = call json.getstring(colors, "literal", "");
+var identifierColor: string = call json.getstring(colors, "identifier", "");
+var sqlColor: string = call json.getstring(colors, "sql", "");
+var customColor: string = call json.getstring(colors, "custom", "");
+var backgroundColor: string = call json.getstring(colors, "background", "");
+var textColor: string = call json.getstring(colors, "text", "");
+var caretColor: string = call json.getstring(colors, "caret", "");
+var lineCursorColor: string = call json.getstring(colors, "line-cursor", "");
+var lineNumbersColor: string = call json.getstring(colors, "line-numbers", "");
+var consoleBackgroundColor: string = call json.getstring(colors, "console-background", "");
+var tabBackgroundColor: string = call json.getstring(colors, "tab-background", "");
+var tabLabelColor: string = call json.getstring(colors, "tab-label-color", "");
+var tabLabelChangedColor: string = call json.getstring(colors, "tab-label-changed-color", "");
+var tabLabelBackgroundColor: string = call json.getstring(colors, "tab-label-background", "");
+var findHighlightColor: string = call json.getstring(colors, "find-highlight-color", "");
+var findHighlightBackground: string = call json.getstring(colors, "find-highlight-background", "");
 
 // Set defaults if not present
 if findHighlightColor == "" then {
@@ -493,32 +493,32 @@ function saveConfigWithCurrentProfile {
         }
         
         // Get each color value and build the JSON
-        var pInfo: string = call json.getstring(pColors, "info");
-        var pComment: string = call json.getstring(pColors, "comment");
-        var pError: string = call json.getstring(pColors, "error");
-        var pWarn: string = call json.getstring(pColors, "warn");
-        var pOk: string = call json.getstring(pColors, "ok");
-        var pCode: string = call json.getstring(pColors, "code");
-        var pDatatype: string = call json.getstring(pColors, "datatype");
-        var pData: string = call json.getstring(pColors, "data");
-        var pKeyword: string = call json.getstring(pColors, "keyword");
-        var pBuiltin: string = call json.getstring(pColors, "builtin");
-        var pLiteral: string = call json.getstring(pColors, "literal");
-        var pIdentifier: string = call json.getstring(pColors, "identifier");
-        var pSql: string = call json.getstring(pColors, "sql");
-        var pCustom: string = call json.getstring(pColors, "custom");
-        var pBackground: string = call json.getstring(pColors, "background");
-        var pText: string = call json.getstring(pColors, "text");
-        var pCaret: string = call json.getstring(pColors, "caret");
-        var pLineCursor: string = call json.getstring(pColors, "line-cursor");
-        var pLineNumbers: string = call json.getstring(pColors, "line-numbers");
-        var pConsoleBg: string = call json.getstring(pColors, "console-background");
-        var pTabBg: string = call json.getstring(pColors, "tab-background");
-        var pTabLabelColor: string = call json.getstring(pColors, "tab-label-color");
-        var pTabLabelChanged: string = call json.getstring(pColors, "tab-label-changed-color");
-        var pTabLabelBg: string = call json.getstring(pColors, "tab-label-background");
-        var pFindHlColor: string = call json.getstring(pColors, "find-highlight-color");
-        var pFindHlBg: string = call json.getstring(pColors, "find-highlight-background");
+        var pInfo: string = call json.getstring(pColors, "info", "");
+        var pComment: string = call json.getstring(pColors, "comment", "");
+        var pError: string = call json.getstring(pColors, "error", "");
+        var pWarn: string = call json.getstring(pColors, "warn", "");
+        var pOk: string = call json.getstring(pColors, "ok", "");
+        var pCode: string = call json.getstring(pColors, "code", "");
+        var pDatatype: string = call json.getstring(pColors, "datatype", "");
+        var pData: string = call json.getstring(pColors, "data", "");
+        var pKeyword: string = call json.getstring(pColors, "keyword", "");
+        var pBuiltin: string = call json.getstring(pColors, "builtin", "");
+        var pLiteral: string = call json.getstring(pColors, "literal", "");
+        var pIdentifier: string = call json.getstring(pColors, "identifier", "");
+        var pSql: string = call json.getstring(pColors, "sql", "");
+        var pCustom: string = call json.getstring(pColors, "custom", "");
+        var pBackground: string = call json.getstring(pColors, "background", "");
+        var pText: string = call json.getstring(pColors, "text", "");
+        var pCaret: string = call json.getstring(pColors, "caret", "");
+        var pLineCursor: string = call json.getstring(pColors, "line-cursor", "");
+        var pLineNumbers: string = call json.getstring(pColors, "line-numbers", "");
+        var pConsoleBg: string = call json.getstring(pColors, "console-background", "");
+        var pTabBg: string = call json.getstring(pColors, "tab-background", "");
+        var pTabLabelColor: string = call json.getstring(pColors, "tab-label-color", "");
+        var pTabLabelChanged: string = call json.getstring(pColors, "tab-label-changed-color", "");
+        var pTabLabelBg: string = call json.getstring(pColors, "tab-label-background", "");
+        var pFindHlColor: string = call json.getstring(pColors, "find-highlight-color", "");
+        var pFindHlBg: string = call json.getstring(pColors, "find-highlight-background", "");
         
         profilesStr = profilesStr + "\"" + pName + "\": {\n";
         profilesStr = profilesStr + "      \"info\": \"" + pInfo + "\",\n";
@@ -674,32 +674,32 @@ function addProfileToConfig(newProfileName: string) {
         }
         
         // Get each color value and build the JSON
-        var pInfo: string = call json.getstring(pColors, "info");
-        var pComment: string = call json.getstring(pColors, "comment");
-        var pError: string = call json.getstring(pColors, "error");
-        var pWarn: string = call json.getstring(pColors, "warn");
-        var pOk: string = call json.getstring(pColors, "ok");
-        var pCode: string = call json.getstring(pColors, "code");
-        var pDatatype: string = call json.getstring(pColors, "datatype");
-        var pData: string = call json.getstring(pColors, "data");
-        var pKeyword: string = call json.getstring(pColors, "keyword");
-        var pBuiltin: string = call json.getstring(pColors, "builtin");
-        var pLiteral: string = call json.getstring(pColors, "literal");
-        var pIdentifier: string = call json.getstring(pColors, "identifier");
-        var pSql: string = call json.getstring(pColors, "sql");
-        var pCustom: string = call json.getstring(pColors, "custom");
-        var pBackground: string = call json.getstring(pColors, "background");
-        var pText: string = call json.getstring(pColors, "text");
-        var pCaret: string = call json.getstring(pColors, "caret");
-        var pLineCursor: string = call json.getstring(pColors, "line-cursor");
-        var pLineNumbers: string = call json.getstring(pColors, "line-numbers");
-        var pConsoleBg: string = call json.getstring(pColors, "console-background");
-        var pTabBg: string = call json.getstring(pColors, "tab-background");
-        var pTabLabelColor: string = call json.getstring(pColors, "tab-label-color");
-        var pTabLabelChanged: string = call json.getstring(pColors, "tab-label-changed-color");
-        var pTabLabelBg: string = call json.getstring(pColors, "tab-label-background");
-        var pFindHlColor: string = call json.getstring(pColors, "find-highlight-color");
-        var pFindHlBg: string = call json.getstring(pColors, "find-highlight-background");
+        var pInfo: string = call json.getstring(pColors, "info", "");
+        var pComment: string = call json.getstring(pColors, "comment", "");
+        var pError: string = call json.getstring(pColors, "error", "");
+        var pWarn: string = call json.getstring(pColors, "warn", "");
+        var pOk: string = call json.getstring(pColors, "ok", "");
+        var pCode: string = call json.getstring(pColors, "code", "");
+        var pDatatype: string = call json.getstring(pColors, "datatype", "");
+        var pData: string = call json.getstring(pColors, "data", "");
+        var pKeyword: string = call json.getstring(pColors, "keyword", "");
+        var pBuiltin: string = call json.getstring(pColors, "builtin", "");
+        var pLiteral: string = call json.getstring(pColors, "literal", "");
+        var pIdentifier: string = call json.getstring(pColors, "identifier", "");
+        var pSql: string = call json.getstring(pColors, "sql", "");
+        var pCustom: string = call json.getstring(pColors, "custom", "");
+        var pBackground: string = call json.getstring(pColors, "background", "");
+        var pText: string = call json.getstring(pColors, "text", "");
+        var pCaret: string = call json.getstring(pColors, "caret", "");
+        var pLineCursor: string = call json.getstring(pColors, "line-cursor", "");
+        var pLineNumbers: string = call json.getstring(pColors, "line-numbers", "");
+        var pConsoleBg: string = call json.getstring(pColors, "console-background", "");
+        var pTabBg: string = call json.getstring(pColors, "tab-background", "");
+        var pTabLabelColor: string = call json.getstring(pColors, "tab-label-color", "");
+        var pTabLabelChanged: string = call json.getstring(pColors, "tab-label-changed-color", "");
+        var pTabLabelBg: string = call json.getstring(pColors, "tab-label-background", "");
+        var pFindHlColor: string = call json.getstring(pColors, "find-highlight-color", "");
+        var pFindHlBg: string = call json.getstring(pColors, "find-highlight-background", "");
         
         profilesStr = profilesStr + "\"" + pName + "\": {\n";
         profilesStr = profilesStr + "      \"info\": \"" + pInfo + "\",\n";
@@ -789,32 +789,32 @@ function onProfileChange {
         print "Loading colors for profile: " + selectedProfile;
         
         // Get all color values from the profile
-        var pInfo: string = call json.getstring(profileColors, "info");
-        var pComment: string = call json.getstring(profileColors, "comment");
-        var pError: string = call json.getstring(profileColors, "error");
-        var pWarn: string = call json.getstring(profileColors, "warn");
-        var pOk: string = call json.getstring(profileColors, "ok");
-        var pCode: string = call json.getstring(profileColors, "code");
-        var pDatatype: string = call json.getstring(profileColors, "datatype");
-        var pData: string = call json.getstring(profileColors, "data");
-        var pKeyword: string = call json.getstring(profileColors, "keyword");
-        var pBuiltin: string = call json.getstring(profileColors, "builtin");
-        var pLiteral: string = call json.getstring(profileColors, "literal");
-        var pIdentifier: string = call json.getstring(profileColors, "identifier");
-        var pSql: string = call json.getstring(profileColors, "sql");
-        var pCustom: string = call json.getstring(profileColors, "custom");
-        var pBackground: string = call json.getstring(profileColors, "background");
-        var pText: string = call json.getstring(profileColors, "text");
-        var pCaret: string = call json.getstring(profileColors, "caret");
-        var pLineCursor: string = call json.getstring(profileColors, "line-cursor");
-        var pLineNumbers: string = call json.getstring(profileColors, "line-numbers");
-        var pConsoleBg: string = call json.getstring(profileColors, "console-background");
-        var pTabBg: string = call json.getstring(profileColors, "tab-background");
-        var pTabLabelColor: string = call json.getstring(profileColors, "tab-label-color");
-        var pTabLabelChanged: string = call json.getstring(profileColors, "tab-label-changed-color");
-        var pTabLabelBg: string = call json.getstring(profileColors, "tab-label-background");
-        var pFindHlColor: string = call json.getstring(profileColors, "find-highlight-color");
-        var pFindHlBg: string = call json.getstring(profileColors, "find-highlight-background");
+        var pInfo: string = call json.getstring(profileColors, "info", "");
+        var pComment: string = call json.getstring(profileColors, "comment", "");
+        var pError: string = call json.getstring(profileColors, "error", "");
+        var pWarn: string = call json.getstring(profileColors, "warn", "");
+        var pOk: string = call json.getstring(profileColors, "ok", "");
+        var pCode: string = call json.getstring(profileColors, "code", "");
+        var pDatatype: string = call json.getstring(profileColors, "datatype", "");
+        var pData: string = call json.getstring(profileColors, "data", "");
+        var pKeyword: string = call json.getstring(profileColors, "keyword", "");
+        var pBuiltin: string = call json.getstring(profileColors, "builtin", "");
+        var pLiteral: string = call json.getstring(profileColors, "literal", "");
+        var pIdentifier: string = call json.getstring(profileColors, "identifier", "");
+        var pSql: string = call json.getstring(profileColors, "sql", "");
+        var pCustom: string = call json.getstring(profileColors, "custom", "");
+        var pBackground: string = call json.getstring(profileColors, "background", "");
+        var pText: string = call json.getstring(profileColors, "text", "");
+        var pCaret: string = call json.getstring(profileColors, "caret", "");
+        var pLineCursor: string = call json.getstring(profileColors, "line-cursor", "");
+        var pLineNumbers: string = call json.getstring(profileColors, "line-numbers", "");
+        var pConsoleBg: string = call json.getstring(profileColors, "console-background", "");
+        var pTabBg: string = call json.getstring(profileColors, "tab-background", "");
+        var pTabLabelColor: string = call json.getstring(profileColors, "tab-label-color", "");
+        var pTabLabelChanged: string = call json.getstring(profileColors, "tab-label-changed-color", "");
+        var pTabLabelBg: string = call json.getstring(profileColors, "tab-label-background", "");
+        var pFindHlColor: string = call json.getstring(profileColors, "find-highlight-color", "");
+        var pFindHlBg: string = call json.getstring(profileColors, "find-highlight-background", "");
         
         // Set each color, falling back to defaults if not defined
         if pInfo != "" then { colorEditorScreen.info = pInfo; } else { colorEditorScreen.info = defaultInfoColor; }
