@@ -305,9 +305,20 @@ public class ControlListenerFactory {
             ((PasswordField) control).textProperty().addListener((obs, oldVal, newVal) -> handler.run());
         } else if (control instanceof ComboBox) {
             ComboBox<?> comboBox = (ComboBox<?>) control;
-            if (comboBox.isEditable() && comboBox.getEditor() != null) {
-                // For editable ComboBox, listen to text changes (fires on every keystroke)
-                comboBox.getEditor().textProperty().addListener((obs, oldVal, newVal) -> handler.run());
+            if (comboBox.isEditable()) {
+                // For editable ComboBox, we need to listen to the editor's text property
+                // The editor is lazily created, so we need to handle when it's not yet available
+                if (comboBox.getEditor() != null) {
+                    // Editor already exists - attach directly
+                    comboBox.getEditor().textProperty().addListener((obs, oldVal, newVal) -> handler.run());
+                } else {
+                    // Editor not yet created - wait for it and attach when available
+                    comboBox.skinProperty().addListener((obs, oldSkin, newSkin) -> {
+                        if (newSkin != null && comboBox.getEditor() != null) {
+                            comboBox.getEditor().textProperty().addListener((textObs, oldText, newText) -> handler.run());
+                        }
+                    });
+                }
             } else {
                 // For non-editable ComboBox, listen to value selection changes
                 comboBox.valueProperty().addListener((obs, oldVal, newVal) -> handler.run());
