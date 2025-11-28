@@ -213,8 +213,6 @@ public class EbsTab extends Tab {
                 e.consume();
             }
         });
-
-        dispArea.multiPlainChanges().successionEnds(java.time.Duration.ofMillis(120));
     }
 
     private void loadFile(TabContext tabContext) {
@@ -697,14 +695,10 @@ public class EbsTab extends Tab {
         // Initial highlight
         applyEbsHighlighting(dispArea.getText());
 
-        // Re-highlight after pauses in typing
-        // If you have ReactFX on classpath, this is ideal:
-        // dispArea.multiPlainChanges()
-        //        .successionEnds(Duration.ofMillis(120))
-        //        .subscribe(ch -> applyEbsHighlighting(dispArea.getText()));
-        //
-        // Fallback: simple text listener (less efficient but OK for small files)
-        dispArea.textProperty().addListener((obs, oldV, newV) -> applyEbsHighlighting(newV));
+        // Re-highlight after pauses in typing using ReactFX's debouncing
+        dispArea.multiPlainChanges()
+                .successionEnds(java.time.Duration.ofMillis(100))
+                .subscribe(ignore -> applyEbsHighlighting(dispArea.getText()));
     }
 
     private void applyEbsHighlighting(String text) {
@@ -751,8 +745,12 @@ public class EbsTab extends Tab {
         // Initial pass
         applyLexerSpans(dispArea.getText());
 
-        // Re-highlight after changes (simple listener; you can throttle with ReactFX if present)
-        dispArea.textProperty().addListener((obs, oldV, newV) -> applyLexerSpans(newV));
+        // Re-highlight after pauses in typing using ReactFX's debouncing
+        // This is more efficient than the simple text listener as it batches
+        // multiple rapid keystrokes into a single highlighting pass
+        dispArea.multiPlainChanges()
+                .successionEnds(java.time.Duration.ofMillis(100))
+                .subscribe(ignore -> applyLexerSpans(dispArea.getText()));
     }
 
     private void applyLexerSpans(String src) {
