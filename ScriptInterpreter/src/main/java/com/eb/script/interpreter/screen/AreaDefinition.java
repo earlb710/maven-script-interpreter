@@ -120,7 +120,7 @@ public class AreaDefinition {
         TITLEDPANE("titledpane", "screen-area-titledpane", "-fx-background-color: transparent;"),
         
         // Special
-        GROUP("group", "screen-area-group", ""),
+        GROUP("group", "screen-area-group", "-fx-background-color: transparent; -fx-spacing: 4; -fx-padding: 4;"),
         REGION("region", "screen-area-region", "-fx-background-color: transparent;"),
         CANVAS("canvas", "screen-area-canvas", ""),
         

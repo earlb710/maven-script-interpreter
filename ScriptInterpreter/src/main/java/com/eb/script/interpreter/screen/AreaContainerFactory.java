@@ -16,6 +16,11 @@ import javafx.scene.Group;
 public class AreaContainerFactory {
 
     /**
+     * Default padding and spacing for GROUP containers in pixels.
+     */
+    private static final double GROUP_DEFAULT_PADDING_SPACING = 4;
+
+    /**
      * Creates a JavaFX container based on the provided AreaDefinition.
      * Only layout properties are applied (style, cssClass, layout configuration).
      * Items should be added by the caller after creation.
@@ -85,8 +90,11 @@ public class AreaContainerFactory {
 
             // Special
             case GROUP:
-                // Group is not a Region, wrap in Pane
-                return new Pane(); // Placeholder - Group needs special handling
+                // Group is not a Region, use VBox with default spacing and padding
+                VBox groupBox = new VBox();
+                groupBox.setSpacing(GROUP_DEFAULT_PADDING_SPACING);
+                groupBox.setPadding(new javafx.geometry.Insets(GROUP_DEFAULT_PADDING_SPACING));
+                return groupBox;
             case REGION:
                 return new Region();
             case CANVAS:
