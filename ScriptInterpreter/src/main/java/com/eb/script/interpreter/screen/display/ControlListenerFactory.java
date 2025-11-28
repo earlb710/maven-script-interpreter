@@ -304,7 +304,14 @@ public class ControlListenerFactory {
         } else if (control instanceof PasswordField) {
             ((PasswordField) control).textProperty().addListener((obs, oldVal, newVal) -> handler.run());
         } else if (control instanceof ComboBox) {
-            ((ComboBox<?>) control).valueProperty().addListener((obs, oldVal, newVal) -> handler.run());
+            ComboBox<?> comboBox = (ComboBox<?>) control;
+            if (comboBox.isEditable() && comboBox.getEditor() != null) {
+                // For editable ComboBox, listen to text changes (fires on every keystroke)
+                comboBox.getEditor().textProperty().addListener((obs, oldVal, newVal) -> handler.run());
+            } else {
+                // For non-editable ComboBox, listen to value selection changes
+                comboBox.valueProperty().addListener((obs, oldVal, newVal) -> handler.run());
+            }
         } else if (control instanceof ChoiceBox) {
             ((ChoiceBox<?>) control).valueProperty().addListener((obs, oldVal, newVal) -> handler.run());
         } else if (control instanceof CheckBox) {
