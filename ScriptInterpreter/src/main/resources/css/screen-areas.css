@@ -235,7 +235,9 @@
 
 /* Group - Group container */
 .screen-area-group {
-    /* Groups don't have direct styling */
+    -fx-background-color: transparent;
+    -fx-spacing: 4;
+    -fx-padding: 4;
 }
 
 /* Region - Base region */

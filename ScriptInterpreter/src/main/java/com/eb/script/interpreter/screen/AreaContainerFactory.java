@@ -85,8 +85,11 @@ public class AreaContainerFactory {
 
             // Special
             case GROUP:
-                // Group is not a Region, wrap in Pane
-                return new Pane(); // Placeholder - Group needs special handling
+                // Group is not a Region, use VBox with default spacing and padding of 4
+                VBox groupBox = new VBox();
+                groupBox.setSpacing(4);
+                groupBox.setPadding(new javafx.geometry.Insets(4));
+                return groupBox;
             case REGION:
                 return new Region();
             case CANVAS:
