@@ -849,12 +849,84 @@ function onAddProfileClick {
         if newProfileName == "default" then {
             call system.alertDialog("Cannot use 'default' as a profile name.\nPlease choose a different name.", "Add Profile", "warning");
         } else {
-            var currentProfile: string = colorEditorScreen.profile;
-            var newOptionsStr: string = "{\"default\": \"default\"";
-            if currentProfile != "default" then {
-                newOptionsStr = newOptionsStr + ", \"" + currentProfile + "\": \"" + currentProfile + "\"";
+            // Re-read config to get all existing profiles
+            var currentConfigContent: string = call file.readtextfile(configPath);
+            var currentConfig: json = call json.jsonfromstring(currentConfigContent);
+            var currentProfileList: json = call json.getarray(currentConfig, "profileList");
+            
+            // Build new options JSON with ALL existing profiles plus the new one
+            var newOptionsStr: string = "{";
+            var firstOption: bool = true;
+            var pIdx: int = 0;
+            var tempP: string = "";
+            
+            // Add all existing profiles from config
+            tempP = call json.getstring(currentProfileList, "[0]", "");
+            if tempP != "" then {
+                if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
+                newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
+                firstOption = false;
             }
-            newOptionsStr = newOptionsStr + ", \"" + newProfileName + "\": \"" + newProfileName + "\"}";
+            tempP = call json.getstring(currentProfileList, "[1]", "");
+            if tempP != "" then {
+                if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
+                newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
+                firstOption = false;
+            }
+            tempP = call json.getstring(currentProfileList, "[2]", "");
+            if tempP != "" then {
+                if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
+                newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
+                firstOption = false;
+            }
+            tempP = call json.getstring(currentProfileList, "[3]", "");
+            if tempP != "" then {
+                if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
+                newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
+                firstOption = false;
+            }
+            tempP = call json.getstring(currentProfileList, "[4]", "");
+            if tempP != "" then {
+                if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
+                newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
+                firstOption = false;
+            }
+            tempP = call json.getstring(currentProfileList, "[5]", "");
+            if tempP != "" then {
+                if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
+                newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
+                firstOption = false;
+            }
+            tempP = call json.getstring(currentProfileList, "[6]", "");
+            if tempP != "" then {
+                if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
+                newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
+                firstOption = false;
+            }
+            tempP = call json.getstring(currentProfileList, "[7]", "");
+            if tempP != "" then {
+                if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
+                newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
+                firstOption = false;
+            }
+            tempP = call json.getstring(currentProfileList, "[8]", "");
+            if tempP != "" then {
+                if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
+                newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
+                firstOption = false;
+            }
+            tempP = call json.getstring(currentProfileList, "[9]", "");
+            if tempP != "" then {
+                if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
+                newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
+                firstOption = false;
+            }
+            
+            // Add the new profile
+            if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
+            newOptionsStr = newOptionsStr + "\"" + newProfileName + "\": \"" + newProfileName + "\"";
+            newOptionsStr = newOptionsStr + "}";
+            
             var newOptions: json = call json.jsonfromstring(newOptionsStr);
             call scr.setItemChoiceOptions("colorEditorScreen", "profile_item", newOptions);
             colorEditorScreen.profile = newProfileName;
@@ -862,6 +934,11 @@ function onAddProfileClick {
             
             // Save the new profile to the config file with default colors
             call addProfileToConfig(newProfileName);
+            
+            // Refresh the in-memory profiles object to include the new profile
+            var refreshedConfigContent: string = call file.readtextfile(configPath);
+            var refreshedConfig: json = call json.jsonfromstring(refreshedConfigContent);
+            profiles = call json.getobject(refreshedConfig, "profiles");
             
             call system.alertDialog("Profile '" + newProfileName + "' has been created with default colors and saved to config.\nThe profile has been selected and colors set to defaults.", "Profile Added", "info");
         }
@@ -879,10 +956,116 @@ function onRemoveProfileClick {
     } else {
         var confirmRemove: bool = call system.confirmDialog("Are you sure you want to remove the '" + currentProfile + "' profile?\n\nThis will delete the profile and switch to 'default'.", "Confirm Remove");
         if confirmRemove then {
-            var newOptions: json = call json.jsonfromstring("{\"default\": \"default\"}");
+            // Re-read config to get all existing profiles
+            var currentConfigContent: string = call file.readtextfile(configPath);
+            var currentConfig: json = call json.jsonfromstring(currentConfigContent);
+            var currentProfileList: json = call json.getarray(currentConfig, "profileList");
+            
+            // Build new options JSON with all profiles EXCEPT the one being removed
+            var newOptionsStr: string = "{";
+            var firstOption: bool = true;
+            var tempP: string = "";
+            
+            tempP = call json.getstring(currentProfileList, "[0]", "");
+            if tempP != "" then {
+                if tempP != currentProfile then {
+                    if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
+                    newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
+                    firstOption = false;
+                }
+            }
+            tempP = call json.getstring(currentProfileList, "[1]", "");
+            if tempP != "" then {
+                if tempP != currentProfile then {
+                    if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
+                    newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
+                    firstOption = false;
+                }
+            }
+            tempP = call json.getstring(currentProfileList, "[2]", "");
+            if tempP != "" then {
+                if tempP != currentProfile then {
+                    if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
+                    newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
+                    firstOption = false;
+                }
+            }
+            tempP = call json.getstring(currentProfileList, "[3]", "");
+            if tempP != "" then {
+                if tempP != currentProfile then {
+                    if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
+                    newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
+                    firstOption = false;
+                }
+            }
+            tempP = call json.getstring(currentProfileList, "[4]", "");
+            if tempP != "" then {
+                if tempP != currentProfile then {
+                    if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
+                    newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
+                    firstOption = false;
+                }
+            }
+            tempP = call json.getstring(currentProfileList, "[5]", "");
+            if tempP != "" then {
+                if tempP != currentProfile then {
+                    if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
+                    newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
+                    firstOption = false;
+                }
+            }
+            tempP = call json.getstring(currentProfileList, "[6]", "");
+            if tempP != "" then {
+                if tempP != currentProfile then {
+                    if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
+                    newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
+                    firstOption = false;
+                }
+            }
+            tempP = call json.getstring(currentProfileList, "[7]", "");
+            if tempP != "" then {
+                if tempP != currentProfile then {
+                    if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
+                    newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
+                    firstOption = false;
+                }
+            }
+            tempP = call json.getstring(currentProfileList, "[8]", "");
+            if tempP != "" then {
+                if tempP != currentProfile then {
+                    if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
+                    newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
+                    firstOption = false;
+                }
+            }
+            tempP = call json.getstring(currentProfileList, "[9]", "");
+            if tempP != "" then {
+                if tempP != currentProfile then {
+                    if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
+                    newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
+                    firstOption = false;
+                }
+            }
+            
+            // Ensure at least default is in the options
+            if firstOption == true then {
+                newOptionsStr = newOptionsStr + "\"default\": \"default\"";
+            }
+            newOptionsStr = newOptionsStr + "}";
+            
+            var newOptions: json = call json.jsonfromstring(newOptionsStr);
             call scr.setItemChoiceOptions("colorEditorScreen", "profile_item", newOptions);
             colorEditorScreen.profile = "default";
             call setColorsToDefaults();
+            
+            // TODO: Remove the profile from the config file (for now just update currentProfile)
+            call saveConfigWithCurrentProfile();
+            
+            // Refresh the in-memory profiles object
+            var refreshedConfigContent: string = call file.readtextfile(configPath);
+            var refreshedConfig: json = call json.jsonfromstring(refreshedConfigContent);
+            profiles = call json.getobject(refreshedConfig, "profiles");
+            
             call system.alertDialog("Profile '" + currentProfile + "' has been removed.\nSwitched to 'default' profile.", "Profile Removed", "info");
         } else {
             print "Remove profile cancelled.";
