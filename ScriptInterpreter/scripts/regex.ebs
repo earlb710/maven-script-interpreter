@@ -30,7 +30,9 @@ removeAllFlags(pattern: string) return string {
             // Check if all chars between (? and ) are valid flags (i, m, s)
             var flagPart: string = call str.substring(result, 2, endParen);
             var isValidFlagBlock: bool = true;
-            var flagLen: int = call string.length(flagPart);
+            // Use str.charArray to get the characters as an array, then use .length
+            var flagChars = call str.charArray(flagPart);
+            var flagLen: int = flagChars.length;
             var j: int = 0;
             while j < flagLen {
                 var c: string = call str.charAt(flagPart, j);
