@@ -482,9 +482,9 @@ The `onChange` property allows you to specify inline EBS code that executes when
 
 **Combining onValidate and onChange:**
 When both `onValidate` and `onChange` are defined on the same item:
-1. The value change is first validated using `onValidate`
-2. If validation passes (returns `true`), the `onChange` code is executed
-3. If validation fails (returns `false`), the `onChange` code is still executed (after validation styling is applied)
+1. The value change first triggers `onValidate` (if defined)
+2. Validation styling is applied (red border if invalid)
+3. The `onChange` code is then executed, regardless of validation result
 
 ```javascript
 {

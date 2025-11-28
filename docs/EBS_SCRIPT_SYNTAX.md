@@ -1676,7 +1676,7 @@ Executes EBS code whenever the control's value changes. Does not require a retur
 ```
 
 **Combining onValidate and onChange:**
-Both handlers can be used on the same control. The onChange handler runs after the validation.
+Both handlers can be used on the same control. When both are present, `onValidate` runs first to apply validation styling, then `onChange` runs regardless of validation result.
 
 ```javascript
 {
