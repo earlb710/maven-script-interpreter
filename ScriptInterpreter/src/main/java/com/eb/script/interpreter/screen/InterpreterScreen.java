@@ -1550,6 +1550,24 @@ public class InterpreterScreen {
             metadata.style = metadata.itemType.getDefaultStyle();
         }
 
+        // Extract onChange event handler - fires whenever the control value changes
+        if (displayDef.containsKey("onChange")) {
+            metadata.onChange = String.valueOf(displayDef.get("onChange"));
+        } else if (displayDef.containsKey("on_change")) {
+            metadata.onChange = String.valueOf(displayDef.get("on_change"));
+        } else if (displayDef.containsKey("onchange")) {
+            metadata.onChange = String.valueOf(displayDef.get("onchange"));
+        }
+
+        // Extract onValidate event handler - for inline validation
+        if (displayDef.containsKey("onValidate")) {
+            metadata.onValidate = String.valueOf(displayDef.get("onValidate"));
+        } else if (displayDef.containsKey("on_validate")) {
+            metadata.onValidate = String.valueOf(displayDef.get("on_validate"));
+        } else if (displayDef.containsKey("onvalidate")) {
+            metadata.onValidate = String.valueOf(displayDef.get("onvalidate"));
+        }
+
         metadata.screenName = screenName;
 
         return metadata;
