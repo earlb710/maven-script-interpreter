@@ -7,15 +7,16 @@
 4. [Variables](#variables)
 5. [Operators](#operators)
 6. [Control Flow](#control-flow)
-7. [Code Organization](#code-organization)
-8. [Functions](#functions)
-9. [Arrays](#arrays)
-10. [JSON](#json)
-11. [Database Operations](#database-operations)
-12. [Screen/UI Windows](#screenui-windows)
-13. [Built-in Functions](#built-in-functions)
-14. [Comments](#comments)
-15. [Console Commands](#console-commands)
+7. [Exception Handling](#exception-handling)
+8. [Code Organization](#code-organization)
+9. [Functions](#functions)
+10. [Arrays](#arrays)
+11. [JSON](#json)
+12. [Database Operations](#database-operations)
+13. [Screen/UI Windows](#screenui-windows)
+14. [Built-in Functions](#built-in-functions)
+15. [Comments](#comments)
+16. [Console Commands](#console-commands)
 
 ---
 
@@ -600,6 +601,212 @@ while i < 10 {
 // 'exit' is synonym for 'break'
 while true {
     if done then exit;
+}
+```
+
+---
+
+## Exception Handling
+
+EBS provides robust exception handling with `try-exceptions-when` syntax for catching errors, and `raise exception` for explicitly throwing errors.
+
+### Try-Exceptions Syntax
+
+Use `try-exceptions` blocks to catch and handle errors:
+
+```javascript
+// Basic exception handling
+try {
+    var result = 10 / 0;  // Will throw MATH_ERROR
+} exceptions {
+    when MATH_ERROR {
+        print "Cannot divide by zero!";
+    }
+    when ANY_ERROR {
+        print "An unexpected error occurred";
+    }
+}
+
+// Capture error message in a variable
+try {
+    var data = #file.read("missing.txt");
+} exceptions {
+    when IO_ERROR(msg) {
+        print "File error: " + msg;
+    }
+}
+
+// Multiple specific handlers
+try {
+    var result = processData();
+} exceptions {
+    when DB_ERROR {
+        print "Database error occurred";
+    }
+    when TYPE_ERROR {
+        print "Type conversion failed";
+    }
+    when ANY_ERROR(errorMsg) {
+        print "Unexpected error: " + errorMsg;
+    }
+}
+```
+
+### Available Error Types
+
+| Error Type | Description |
+|------------|-------------|
+| `ANY_ERROR` | Catches any error (catch-all handler, should be last) |
+| `IO_ERROR` | File I/O operations, streams, paths |
+| `DB_ERROR` | Database connection and query errors |
+| `TYPE_ERROR` | Type conversion and casting errors |
+| `NULL_ERROR` | Null pointer or null value errors |
+| `INDEX_ERROR` | Array index out of bounds errors |
+| `MATH_ERROR` | Division by zero, arithmetic errors |
+| `PARSE_ERROR` | JSON parsing, date parsing errors |
+| `NETWORK_ERROR` | HTTP and network connection errors |
+| `NOT_FOUND_ERROR` | Variable or function not found errors |
+| `ACCESS_ERROR` | Permission or access denied errors |
+| `VALIDATION_ERROR` | Validation errors |
+
+### Raising Exceptions
+
+Use the `raise exception` statement to explicitly throw errors from your code.
+
+#### Standard Exceptions
+
+Standard exceptions (from the ErrorType list above) only accept a single message parameter:
+
+```javascript
+// Raise with a message
+raise exception IO_ERROR("File not found: config.txt");
+raise exception VALIDATION_ERROR("Input must be a positive number");
+raise exception MATH_ERROR("Cannot calculate square root of negative number");
+
+// Raise without a message (uses default message)
+raise exception NULL_ERROR();
+```
+
+#### Custom Exceptions
+
+Custom exceptions are identified by any name NOT in the standard ErrorType list. They can accept multiple parameters:
+
+```javascript
+// Custom exceptions with multiple parameters
+raise exception ValidationFailed("username", "must be at least 3 characters");
+raise exception OutOfBoundsError(10, 0, 5);  // index, min, max
+raise exception BusinessRuleViolation("order", 12345, "insufficient inventory");
+
+// Single parameter custom exception
+raise exception ConfigurationError("Missing required setting: API_KEY");
+```
+
+#### Catching Raised Exceptions
+
+Both standard and custom exceptions can be caught with exception handlers:
+
+```javascript
+// Catch standard exception
+try {
+    if value < 0 then {
+        raise exception VALIDATION_ERROR("Value must be non-negative");
+    }
+} exceptions {
+    when VALIDATION_ERROR(msg) {
+        print "Validation failed: " + msg;
+    }
+}
+
+// Catch custom exception by name
+try {
+    raise exception MyCustomError("something went wrong", 42);
+} exceptions {
+    when MyCustomError(msg) {
+        print "Custom error caught: " + msg;
+    }
+}
+
+// Custom exceptions can also be caught by ANY_ERROR
+try {
+    raise exception UnhandledScenario("edge case detected");
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "Caught by ANY_ERROR: " + msg;
+    }
+}
+```
+
+### Exception Handling Features
+
+- **Handler Order**: Handlers are checked in order; the first matching handler is executed
+- **Error Variable**: Use `when ERROR_TYPE(varName)` to capture the error message
+- **Custom Exceptions**: Any unrecognized exception name is treated as a custom exception
+- **Case-Insensitive**: Custom exception names are matched case-insensitively
+- **Nested Try Blocks**: Try blocks can be nested for granular error handling
+- **Standard Validation**: Standard exceptions only accept one parameter (the message)
+- **ANY_ERROR Placement**: `ANY_ERROR` should typically be last as it catches all errors
+
+### Exception Handling Examples
+
+#### Input Validation with Custom Exception
+
+```javascript
+// Define a validation function that raises exceptions
+validateAge(age: int) {
+    if age < 0 then {
+        raise exception ValidationFailed("age", "cannot be negative");
+    }
+    if age > 150 then {
+        raise exception ValidationFailed("age", "unrealistic value");
+    }
+}
+
+// Use the function with exception handling
+try {
+    call validateAge(-5);
+} exceptions {
+    when ValidationFailed(msg) {
+        print "Validation error: " + msg;
+    }
+}
+```
+
+#### Chained Exception Handling
+
+```javascript
+// Process data with multiple potential error types
+processOrder(orderId: int) {
+    if orderId <= 0 then {
+        raise exception VALIDATION_ERROR("Invalid order ID");
+    }
+    
+    // Simulate database lookup that might fail
+    var order = call db.getOrder(orderId);
+    if order == null then {
+        raise exception NOT_FOUND_ERROR("Order not found: " + orderId);
+    }
+    
+    // Simulate business rule check
+    if order.status == "cancelled" then {
+        raise exception BusinessRuleViolation("order", orderId, "already cancelled");
+    }
+}
+
+try {
+    call processOrder(12345);
+} exceptions {
+    when VALIDATION_ERROR(msg) {
+        print "Invalid input: " + msg;
+    }
+    when NOT_FOUND_ERROR(msg) {
+        print "Not found: " + msg;
+    }
+    when BusinessRuleViolation(msg) {
+        print "Business rule violated: " + msg;
+    }
+    when ANY_ERROR(msg) {
+        print "Unexpected error: " + msg;
+    }
 }
 ```
 
