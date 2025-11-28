@@ -1973,6 +1973,31 @@ public class InterpreterScreen {
                         if (itemDef.containsKey("alignment")) {
                             item.alignment = String.valueOf(itemDef.get("alignment")).toLowerCase();
                         }
+                        
+                        // Event handlers
+                        // onValidate handler
+                        if (itemDef.containsKey("onValidate")) {
+                            Object val = itemDef.get("onValidate");
+                            if (val != null) item.onValidate = String.valueOf(val);
+                        } else if (itemDef.containsKey("on_validate")) {
+                            Object val = itemDef.get("on_validate");
+                            if (val != null) item.onValidate = String.valueOf(val);
+                        } else if (itemDef.containsKey("onvalidate")) {
+                            Object val = itemDef.get("onvalidate");
+                            if (val != null) item.onValidate = String.valueOf(val);
+                        }
+                        
+                        // onChange handler
+                        if (itemDef.containsKey("onChange")) {
+                            Object val = itemDef.get("onChange");
+                            if (val != null) item.onChange = String.valueOf(val);
+                        } else if (itemDef.containsKey("on_change")) {
+                            Object val = itemDef.get("on_change");
+                            if (val != null) item.onChange = String.valueOf(val);
+                        } else if (itemDef.containsKey("onchange")) {
+                            Object val = itemDef.get("onchange");
+                            if (val != null) item.onChange = String.valueOf(val);
+                        }
 
                         // Store in screenAreaItems map by item name (for screen.getProperty/setProperty)
                         if (item.name != null && !item.name.isEmpty()) {

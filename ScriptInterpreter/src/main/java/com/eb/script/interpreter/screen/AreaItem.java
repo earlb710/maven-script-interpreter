@@ -64,6 +64,8 @@ public class AreaItem {
     public String alignment;
     // onValidate event handler - EBS code to validate item value, expects return true/false
     public String onValidate;
+    // onChange event handler - EBS code to execute whenever the item value changes
+    public String onChange;
     // Source of the value: "data" (original data value) or "display" (formatted display value)
     public String source = "data";
 

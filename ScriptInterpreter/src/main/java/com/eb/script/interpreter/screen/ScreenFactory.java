@@ -10,6 +10,7 @@ import com.eb.script.interpreter.screen.data.DataBindingManager;
 import com.eb.script.interpreter.screen.data.VarRefResolver;
 import com.eb.script.interpreter.screen.display.ControlListenerFactory;
 import com.eb.script.interpreter.screen.display.ControlUpdater;
+import com.eb.script.interpreter.screen.display.DisplayChangeHandler;
 import com.eb.script.interpreter.screen.display.DisplayValidator;
 import com.eb.script.json.Json;
 import com.eb.script.json.JsonSchema;
@@ -904,6 +905,15 @@ public class ScreenFactory {
                 if (onClickHandler != null && validateCode != null && !validateCode.isEmpty()) {
                     setupValidationHandler(control, validateCode, onClickHandler, screenName, context);
                 }
+                
+                // Set up onChange handler for input controls
+                String changeCode = item.onChange;
+                if (changeCode == null && metadata != null) {
+                    changeCode = metadata.onChange;
+                }
+                if (onClickHandler != null && changeCode != null && !changeCode.isEmpty()) {
+                    setupChangeHandler(control, changeCode, onClickHandler, screenName, context);
+                }
 
                 // Apply item layout properties
                 applyItemLayoutProperties(control, item);
@@ -1701,6 +1711,7 @@ public class ScreenFactory {
         
         // Event handlers
         item.onValidate = getStringValue(itemDef, "onValidate", getStringValue(itemDef, "on_validate", null));
+        item.onChange = getStringValue(itemDef, "onChange", getStringValue(itemDef, "on_change", null));
 
         return item;
     }
@@ -1750,6 +1761,9 @@ public class ScreenFactory {
         
         // Extract onValidate event handler for item validation
         metadata.onValidate = getStringValue(displayDef, "onValidate", getStringValue(displayDef, "on_validate", null));
+        
+        // Extract onChange event handler - fires whenever the item value changes
+        metadata.onChange = getStringValue(displayDef, "onChange", getStringValue(displayDef, "on_change", null));
         
         // Extract options for selection controls
         if (displayDef.containsKey("options")) {
@@ -1835,6 +1849,7 @@ public class ScreenFactory {
         merged.itemItalic = base.itemItalic;
         merged.onClick = base.onClick;
         merged.onValidate = base.onValidate;
+        merged.onChange = base.onChange;
         
         // Override with non-null overlay values
         if (overlay.itemType != null) merged.itemType = overlay.itemType;
@@ -1867,6 +1882,7 @@ public class ScreenFactory {
         if (overlay.itemItalic != null) merged.itemItalic = overlay.itemItalic;
         if (overlay.onClick != null) merged.onClick = overlay.onClick;
         if (overlay.onValidate != null) merged.onValidate = overlay.onValidate;
+        if (overlay.onChange != null) merged.onChange = overlay.onChange;
         
         return merged;
     }
@@ -2269,6 +2285,22 @@ public class ScreenFactory {
         // Delegate to DisplayValidator in the display layer
         DisplayValidator.attachValidationListener(control, validator);
     }
+    
+    /**
+     * Sets up an onChange event handler for a control.
+     * The change code is executed whenever the control value changes.
+     * 
+     * @param control The JavaFX control to monitor
+     * @param changeCode The EBS code to execute on change
+     * @param onClickHandler Handler to execute the EBS code
+     * @param screenName The screen name for context
+     * @param context The interpreter context
+     */
+    private static void setupChangeHandler(Node control, String changeCode,
+            OnClickHandler onClickHandler, String screenName, InterpreterContext context) {
+        // Delegate to DisplayChangeHandler in the display layer
+        DisplayChangeHandler.setupChangeHandler(control, changeCode, onClickHandler, screenName, context);
+    }
 
     /**
      * Adds a listener to a control to update the variable when the control
@@ -2374,6 +2406,7 @@ public class ScreenFactory {
         item.maxHeight = template.maxHeight;
         item.alignment = template.alignment;
         item.onValidate = template.onValidate;
+        item.onChange = template.onChange;
         item.source = template.source;
         
         // Expand the name to be unique for each record
@@ -2498,6 +2531,7 @@ public class ScreenFactory {
         clone.itemItalic = source.itemItalic;
         clone.onClick = source.onClick;
         clone.onValidate = source.onValidate;
+        clone.onChange = source.onChange;
         clone.showSliderValue = source.showSliderValue;
         clone.source = source.source;
         clone.status = source.status;
