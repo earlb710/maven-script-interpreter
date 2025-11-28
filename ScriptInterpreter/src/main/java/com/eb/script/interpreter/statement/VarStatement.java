@@ -13,21 +13,27 @@ public class VarStatement extends Statement {
     public final DataType varType;
     public final RecordType recordType; // Record type definition (if varType is RECORD)
     public final Expression initializer;
+    public final boolean isConst; // Whether this is a const declaration (cannot be reassigned)
 
     public VarStatement(int line, String name, DataType type, Expression initializer) {
-        super(line);
-        this.name = name;
-        this.varType = type;
-        this.recordType = null;
-        this.initializer = initializer;
+        this(line, name, type, null, initializer, false);
+    }
+    
+    public VarStatement(int line, String name, DataType type, Expression initializer, boolean isConst) {
+        this(line, name, type, null, initializer, isConst);
     }
     
     public VarStatement(int line, String name, DataType type, RecordType recordType, Expression initializer) {
+        this(line, name, type, recordType, initializer, false);
+    }
+    
+    public VarStatement(int line, String name, DataType type, RecordType recordType, Expression initializer, boolean isConst) {
         super(line);
         this.name = name;
         this.varType = type;
         this.recordType = recordType;
         this.initializer = initializer;
+        this.isConst = isConst;
     }
 
     public VarStatement(int line, String name, EbsToken tokenType, Expression initializer) {
@@ -54,6 +60,7 @@ public class VarStatement extends Statement {
         this.varType = tokenType.type.getDataType();
         this.recordType = null;
         this.initializer = initializer;
+        this.isConst = false;
     }
 
     @Override
@@ -63,9 +70,10 @@ public class VarStatement extends Statement {
 
     @Override
     public String toString() {
+        String prefix = isConst ? "Const " : "Variable ";
         if (recordType != null) {
-            return "Variable " + name + " : " + recordType + " = " + initializer;
+            return prefix + name + " : " + recordType + " = " + initializer;
         }
-        return "Variable " + name + " : " + varType + " = " + initializer;
+        return prefix + name + " : " + varType + " = " + initializer;
     }
 }

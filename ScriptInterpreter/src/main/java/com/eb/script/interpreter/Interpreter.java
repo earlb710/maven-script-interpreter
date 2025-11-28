@@ -298,7 +298,8 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     // --- Statement Visitors ---
     @Override
     public void visitVarStatement(VarStatement stmt) throws InterpreterError {
-        environment().pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Var %1", stmt.name);  // name may be null
+        String stmtType = stmt.isConst ? "Const" : "Var";
+        environment().pushCallStack(stmt.getLine(), StatementKind.STATEMENT, stmtType + " %1", stmt.name);  // name may be null
         try {
             Object value = evaluate(stmt.initializer);
 
@@ -333,10 +334,19 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             }
             
             // Store the record type metadata with the variable if it's a record
+            // Also mark as const if this is a const declaration
             if (stmt.recordType != null) {
-                environment().getEnvironmentValues().defineWithRecordType(stmt.name, value, stmt.recordType);
+                if (stmt.isConst) {
+                    environment().getEnvironmentValues().defineConstWithRecordType(stmt.name, value, stmt.recordType);
+                } else {
+                    environment().getEnvironmentValues().defineWithRecordType(stmt.name, value, stmt.recordType);
+                }
             } else {
-                environment().getEnvironmentValues().define(stmt.name, value);
+                if (stmt.isConst) {
+                    environment().getEnvironmentValues().defineConst(stmt.name, value);
+                } else {
+                    environment().getEnvironmentValues().define(stmt.name, value);
+                }
             }
         } finally {
             environment().popCallStack();

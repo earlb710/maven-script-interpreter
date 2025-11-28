@@ -347,7 +347,9 @@ public class Parser {
         if (match(EbsTokenType.IMPORT)) {
             return importStatement();
         } else if (match(EbsTokenType.VAR)) {
-            return varDeclaration();
+            return varDeclaration(false);
+        } else if (match(EbsTokenType.CONST)) {
+            return varDeclaration(true);
         } else if (matchAll(EbsTokenType.IDENTIFIER, EbsTokenType.TYPEOF)) {
             // Type alias definition: typename typeof type_definition
             return typedefStatement();
@@ -448,7 +450,7 @@ public class Parser {
         return new ImportStatement(line, filename);
     }
 
-    private Statement varDeclaration() throws ParseError {
+    private Statement varDeclaration(boolean isConst) throws ParseError {
         EbsToken name = peek();
         
         // Check if the token is a keyword and reject it with a clear error message
@@ -566,9 +568,9 @@ public class Parser {
                                     
                                     // Return appropriate VarStatement
                                     if (recordType != null) {
-                                        return new VarStatement(name.line, (String) name.literal, elemType, recordType, varInit);
+                                        return new VarStatement(name.line, (String) name.literal, elemType, recordType, varInit, isConst);
                                     } else {
-                                        return new VarStatement(name.line, (String) name.literal, elemType, varInit);
+                                        return new VarStatement(name.line, (String) name.literal, elemType, varInit, isConst);
                                     }
                                 } else {
                                     // Dynamic array - no dimensions, just handle assignment
@@ -581,9 +583,9 @@ public class Parser {
                                     
                                     // Return appropriate VarStatement
                                     if (recordType != null) {
-                                        return new VarStatement(name.line, (String) name.literal, elemType, recordType, varInit);
+                                        return new VarStatement(name.line, (String) name.literal, elemType, recordType, varInit, isConst);
                                     } else {
-                                        return new VarStatement(name.line, (String) name.literal, elemType, varInit);
+                                        return new VarStatement(name.line, (String) name.literal, elemType, varInit, isConst);
                                     }
                                 }
                             }
@@ -750,9 +752,9 @@ public class Parser {
         
         // Return appropriate VarStatement based on whether it's a record type
         if (recordType != null) {
-            return new VarStatement(name.line, (String) name.literal, elemType, recordType, varInit);
+            return new VarStatement(name.line, (String) name.literal, elemType, recordType, varInit, isConst);
         } else {
-            return new VarStatement(name.line, (String) name.literal, elemType, varInit);
+            return new VarStatement(name.line, (String) name.literal, elemType, varInit, isConst);
         }
 
     }
@@ -2174,7 +2176,7 @@ public class Parser {
         if (match(EbsTokenType.SEMICOLON)) {
             initializer = null;  // No initializer
         } else if (match(EbsTokenType.VAR)) {
-            initializer = varDeclaration();
+            initializer = varDeclaration(false);
         } else {
             initializer = assignmentStatement();
         }

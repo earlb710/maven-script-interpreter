@@ -5,7 +5,7 @@ This grammar is reconstructed from Parser.java / Token.java in the attached proj
 
 LEXICAL
 -------
-keywords   = "var" | "print" | "call" | "return" | "if" | "then" | "else" | "while" | "do" | "break" | "exit" | "continue" 
+keywords   = "var" | "const" | "print" | "call" | "return" | "if" | "then" | "else" | "while" | "do" | "break" | "exit" | "continue" 
            | "null" | "true" | "false" 
            | "import" | "foreach" | "in"
            | "try" | "exceptions" | "when"
@@ -159,6 +159,15 @@ namedBlockWithExceptions
 DECLARATIONS
 ------------
 varDecl      = "var" identifier ( ":" typeName ( arrayDims )? )? ( "=" varInitializer )? ";" ;
+
+constDecl    = "const" identifier ( ":" typeName ( arrayDims )? )? ( "=" varInitializer )? ";" ;
+               (* const declares a constant variable that cannot be reassigned.
+                  Attempting to reassign a const variable will throw an error at runtime.
+                  Example:
+                    const PI:double = 3.14159;
+                    const MAX_SIZE:int = 100;
+                    PI = 3.0;  // Error: Cannot reassign constant variable 'PI'.
+               *)
 
 arrayDims    = "[" ( "*" | ( expression ( "," expression )* ) )? "]" ;
 
