@@ -57,6 +57,7 @@ import com.eb.script.interpreter.statement.ScreenSubmitStatement;
 import com.eb.script.interpreter.statement.ImportStatement;
 import com.eb.script.interpreter.statement.TypedefStatement;
 import com.eb.script.interpreter.statement.TryStatement;
+import com.eb.script.interpreter.statement.RaiseStatement;
 import com.eb.script.interpreter.statement.ExceptionHandler;
 import com.eb.script.token.ebs.EbsTokenType;
 import com.eb.script.interpreter.statement.ConnectStatement;
@@ -528,7 +529,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         // Find a matching handler
         ExceptionHandler matchingHandler = null;
         for (ExceptionHandler handler : handlers) {
-            if (handler.canHandle(exception.getErrorType())) {
+            if (handler.canHandle(exception)) {
                 matchingHandler = handler;
                 break;
             }
@@ -553,6 +554,48 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         }
         
         return true;
+    }
+
+    @Override
+    public void visitRaiseStatement(RaiseStatement stmt) throws InterpreterError {
+        environment().pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Raise %1", stmt.exceptionName);
+        try {
+            // Evaluate all parameters
+            Object[] evaluatedParams = new Object[stmt.parameters.length];
+            for (int i = 0; i < stmt.parameters.length; i++) {
+                evaluatedParams[i] = evaluate(stmt.parameters[i]);
+            }
+            
+            // Build the error message
+            String message;
+            if (stmt.isCustomException) {
+                // For custom exceptions, format the message with all parameters
+                StringBuilder sb = new StringBuilder(stmt.exceptionName);
+                sb.append(": ");
+                if (evaluatedParams.length > 0) {
+                    for (int i = 0; i < evaluatedParams.length; i++) {
+                        if (i > 0) sb.append(", ");
+                        sb.append(com.eb.util.Util.stringify(evaluatedParams[i]));
+                    }
+                }
+                message = sb.toString();
+                
+                // Throw custom exception
+                throw new EbsScriptException(stmt.getLine(), stmt.exceptionName, message, environment().getCallStack());
+            } else {
+                // For standard exceptions, use the single message parameter
+                if (evaluatedParams.length > 0 && evaluatedParams[0] != null) {
+                    message = com.eb.util.Util.stringify(evaluatedParams[0]);
+                } else {
+                    message = stmt.exceptionName + " raised with no message";
+                }
+                
+                // Throw standard exception
+                throw new EbsScriptException(stmt.getLine(), stmt.errorType, message, environment().getCallStack());
+            }
+        } finally {
+            environment().popCallStack();
+        }
     }
 
     @Override

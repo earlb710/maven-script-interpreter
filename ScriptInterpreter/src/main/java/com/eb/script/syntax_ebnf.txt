@@ -34,6 +34,7 @@ statement    = varDecl
              | breakStmt
              | continueStmt
              | tryStmt
+             | raiseStmt
              | block
              | namedBlock                  (*  name { ... }                     *)
              | namedBlockWithReturn        (*  name return Type { ... }         *)
@@ -89,7 +90,10 @@ EXCEPTION HANDLING
 ------------------
 tryStmt      = "try" block "exceptions" "{" exceptionHandler+ "}" ;
 exceptionHandler
-             = "when" errorType [ "(" identifier ")" ] block ;
+             = "when" ( errorType | customExceptionName ) [ "(" identifier ")" ] block ;
+
+(* Raise exceptions explicitly *)
+raiseStmt    = "raise" "exception" exceptionName "(" argumentList? ")" ";" ;
 
 (* Exception handlers can also be attached directly to named blocks and functions *)
 namedBlockWithExceptions
@@ -111,7 +115,43 @@ namedBlockWithExceptions
    - ACCESS_ERROR   : Permission or access denied errors
    - VALIDATION_ERROR: Validation errors
    
+   Raising Exceptions:
+   
+   Standard exceptions only accept a single message parameter:
+   
+   raise exception IO_ERROR("File not found");
+   raise exception MATH_ERROR("Invalid calculation");
+   raise exception VALIDATION_ERROR("Input must be positive");
+   
+   Custom exceptions can be declared with multiple parameters:
+   
+   raise exception MyCustomError("error message", 42, true);
+   raise exception ValidationFailed("field1", "must be numeric");
+   
    Examples:
+   
+   // Raising a standard exception
+   validateInput(value: int) {
+       if (value < 0) {
+           raise exception VALIDATION_ERROR("Value must be non-negative");
+       }
+   }
+   
+   // Raising a custom exception with multiple parameters
+   checkBounds(index: int, min: int, max: int) {
+       if (index < min or index > max) {
+           raise exception OutOfBoundsError(index, min, max);
+       }
+   }
+   
+   // Catching raised exceptions
+   try {
+       checkBounds(10, 0, 5);
+   } exceptions {
+       when OutOfBoundsError(msg) {
+           print "Bounds error: " + msg;
+       }
+   }
    
    // Using try-exceptions syntax
    try {
