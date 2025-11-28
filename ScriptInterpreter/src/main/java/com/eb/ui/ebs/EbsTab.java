@@ -84,7 +84,7 @@ public class EbsTab extends Tab {
     private List<int[]> stalePendingClear = java.util.Collections.emptyList(); // old matches pending clear after text change
     private int currentIndex = -1;
     private boolean suppressFindSearch = false; // avoid automatic search when programmatically setting find field
-    private String pendingDropdownSelection = null; // stores the selection from dropdown to apply after it closes
+    private boolean dropdownOpen = false; // tracks if dropdown is currently open
     
     // Minimum character count for find highlighting (more than 2 means at least 3)
     private static final int MIN_FIND_CHARS = 3;
@@ -883,39 +883,40 @@ public class EbsTab extends Tab {
         
         // Live search when typing in find field (use the editor's text property for editable combobox)
         findField.getEditor().textProperty().addListener((obs, o, n) -> {
-            if (!suppressFindSearch && pendingDropdownSelection == null) {
+            if (!suppressFindSearch && !dropdownOpen) {
                 Platform.runLater(() -> {
                     runSearch();
                 });
             }
         });
         
-        // Capture the selection when dropdown starts to hide (before JavaFX potentially clears it)
-        findField.setOnHiding(e -> {
-            String selected = findField.getSelectionModel().getSelectedItem();
-            if (selected != null && !selected.isEmpty()) {
-                pendingDropdownSelection = selected;
-            }
+        // Track when dropdown opens
+        findField.setOnShowing(e -> {
+            dropdownOpen = true;
         });
         
-        // Apply the captured selection after dropdown has fully hidden
+        // Handle dropdown selection when it closes
         findField.setOnHidden(e -> {
-            if (pendingDropdownSelection != null) {
-                String selection = pendingDropdownSelection;
-                pendingDropdownSelection = null;
-                Platform.runLater(() -> {
-                    suppressFindSearch = true;
-                    findField.getEditor().setText(selection);
-                    suppressFindSearch = false;
-                    addToSearchHistory(selection);
-                    runSearch();
-                });
+            if (dropdownOpen) {
+                dropdownOpen = false;
+                // Get the currently selected item
+                String selected = findField.getSelectionModel().getSelectedItem();
+                if (selected != null && !selected.isEmpty()) {
+                    // The selection changed - update editor and search
+                    Platform.runLater(() -> {
+                        suppressFindSearch = true;
+                        findField.getEditor().setText(selected);
+                        suppressFindSearch = false;
+                        addToSearchHistory(selected);
+                        runSearch();
+                    });
+                }
             }
         });
         
         // Also search when user presses Enter (and add to history)
         findField.setOnAction(e -> {
-            if (!suppressFindSearch && pendingDropdownSelection == null) {
+            if (!suppressFindSearch && !dropdownOpen) {
                 Platform.runLater(() -> {
                     // Add to history when user presses Enter
                     String q = findField.getEditor().getText();
