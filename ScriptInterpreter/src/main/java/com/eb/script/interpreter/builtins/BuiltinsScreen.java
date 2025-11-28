@@ -983,7 +983,10 @@ public class BuiltinsScreen {
         String itemName = (String) args[1];
         Object optionsMapArg = args[2];
 
-        System.out.println("[DEBUG setItemChoiceOptions] Called with screenName='" + screenName + "', itemName='" + itemName + "'");
+        // Debug output to EBS console
+        if (context.getOutput() != null) {
+            context.getOutput().printlnInfo("[DEBUG] setItemChoiceOptions called: screen='" + screenName + "', item='" + itemName + "'");
+        }
 
         if (screenName == null || screenName.isEmpty()) {
             throw new InterpreterError("scr.setItemChoiceOptions: screenName parameter cannot be null or empty");
@@ -1000,21 +1003,29 @@ public class BuiltinsScreen {
 
         @SuppressWarnings("unchecked")
         Map<String, Object> optionsMap = (Map<String, Object>) optionsMapArg;
-        System.out.println("[DEBUG setItemChoiceOptions] optionsMap=" + optionsMap);
+        if (context.getOutput() != null) {
+            context.getOutput().printlnInfo("[DEBUG] optionsMap=" + optionsMap);
+        }
 
         // Verify screen exists
-        System.out.println("[DEBUG setItemChoiceOptions] Checking if screen exists. Available screens: " + context.getScreens().keySet());
+        if (context.getOutput() != null) {
+            context.getOutput().printlnInfo("[DEBUG] Available screens: " + context.getScreens().keySet());
+        }
         if (!context.getScreens().containsKey(screenName.toLowerCase())) {
             throw new InterpreterError("scr.setItemChoiceOptions: screen '" + screenName + "' not found");
         }
-        System.out.println("[DEBUG setItemChoiceOptions] Screen found");
+        if (context.getOutput() != null) {
+            context.getOutput().printlnInfo("[DEBUG] Screen found");
+        }
 
         // Get the area items for this screen
         Map<String, AreaItem> areaItems = context.getScreenAreaItems(screenName);
         if (areaItems == null || areaItems.isEmpty()) {
             throw new InterpreterError("scr.setItemChoiceOptions: no area items defined for screen '" + screenName + "'");
         }
-        System.out.println("[DEBUG setItemChoiceOptions] Area items keys: " + areaItems.keySet());
+        if (context.getOutput() != null) {
+            context.getOutput().printlnInfo("[DEBUG] Area items keys: " + areaItems.keySet());
+        }
 
         // Find the area item
         AreaItem item = null;
@@ -1023,11 +1034,15 @@ public class BuiltinsScreen {
         for (Map.Entry<String, AreaItem> entry : areaItems.entrySet()) {
             String key = entry.getKey();
             AreaItem ai = entry.getValue();
-            System.out.println("[DEBUG setItemChoiceOptions] Checking key='" + key + "', ai.name='" + ai.name + "'");
+            if (context.getOutput() != null) {
+                context.getOutput().printlnInfo("[DEBUG] Checking key='" + key + "', ai.name='" + ai.name + "'");
+            }
             if (key.equals(lowerItemName) || key.endsWith("." + lowerItemName)
                     || (ai.name != null && ai.name.equalsIgnoreCase(itemName))) {
                 item = ai;
-                System.out.println("[DEBUG setItemChoiceOptions] Found matching item!");
+                if (context.getOutput() != null) {
+                    context.getOutput().printlnInfo("[DEBUG] Found matching area item!");
+                }
                 break;
             }
         }
@@ -1049,39 +1064,75 @@ public class BuiltinsScreen {
             convertedOptionsMap.put(entry.getKey(), String.valueOf(entry.getValue()));
         }
         displayItem.setOptionsMap(convertedOptionsMap);
-        System.out.println("[DEBUG setItemChoiceOptions] Set displayItem.optionsMap=" + convertedOptionsMap);
+        if (context.getOutput() != null) {
+            context.getOutput().printlnInfo("[DEBUG] Set displayItem.optionsMap=" + convertedOptionsMap);
+        }
 
         // Also update the JavaFX control on the UI thread
         final String finalScreenName = screenName;
         final String finalItemName = itemName;
         final java.util.Map<String, String> finalOptionsMap = convertedOptionsMap;
+        // Capture output for use in Platform.runLater
+        final var output = context.getOutput();
 
         javafx.application.Platform.runLater(() -> {
             try {
-                System.out.println("[DEBUG setItemChoiceOptions UI] Looking for controls for screen '" + finalScreenName + "'");
-                java.util.List<javafx.scene.Node> controls = context.getScreenBoundControls().get(finalScreenName);
-                System.out.println("[DEBUG setItemChoiceOptions UI] screenBoundControls keys: " + context.getScreenBoundControls().keySet());
+                if (output != null) {
+                    output.printlnInfo("[DEBUG UI] Looking for controls for screen '" + finalScreenName + "'");
+                    output.printlnInfo("[DEBUG UI] screenBoundControls keys: " + context.getScreenBoundControls().keySet());
+                }
+                
+                // Try to find controls with case-insensitive screen name matching
+                java.util.List<javafx.scene.Node> controls = null;
+                String actualScreenKey = null;
+                for (String key : context.getScreenBoundControls().keySet()) {
+                    if (key.equalsIgnoreCase(finalScreenName)) {
+                        controls = context.getScreenBoundControls().get(key);
+                        actualScreenKey = key;
+                        if (output != null) {
+                            output.printlnInfo("[DEBUG UI] Found matching screen key: '" + key + "'");
+                        }
+                        break;
+                    }
+                }
+                
                 if (controls != null) {
-                    System.out.println("[DEBUG setItemChoiceOptions UI] Found " + controls.size() + " controls");
-                    String targetUserData = finalScreenName + "." + finalItemName;
-                    System.out.println("[DEBUG setItemChoiceOptions UI] Looking for control with userData='" + targetUserData + "'");
+                    if (output != null) {
+                        output.printlnInfo("[DEBUG UI] Found " + controls.size() + " controls");
+                    }
+                    // Build targetUserData using the actual screen key (as stored) for matching
+                    String targetUserData = actualScreenKey + "." + finalItemName;
+                    if (output != null) {
+                        output.printlnInfo("[DEBUG UI] Looking for control with userData='" + targetUserData + "'");
+                    }
                     boolean found = false;
                     for (javafx.scene.Node control : controls) {
                         Object userData = control.getUserData();
-                        System.out.println("[DEBUG setItemChoiceOptions UI] Control: " + control.getClass().getSimpleName() + ", userData='" + userData + "'");
-                        if (targetUserData.equals(userData)) {
+                        if (output != null) {
+                            output.printlnInfo("[DEBUG UI] Control: " + control.getClass().getSimpleName() + ", userData='" + userData + "'");
+                        }
+                        // Try case-insensitive match for userData
+                        boolean matches = targetUserData.equals(userData) || 
+                                          (userData instanceof String && targetUserData.equalsIgnoreCase((String) userData));
+                        if (matches) {
                             found = true;
-                            System.out.println("[DEBUG setItemChoiceOptions UI] MATCH FOUND!");
+                            if (output != null) {
+                                output.printlnInfo("[DEBUG UI] MATCH FOUND!");
+                            }
                             if (control instanceof javafx.scene.control.ChoiceBox) {
                                 @SuppressWarnings("unchecked")
                                 javafx.scene.control.ChoiceBox<String> choiceBox = (javafx.scene.control.ChoiceBox<String>) control;
                                 // Store the current selection (display text)
                                 String currentDisplayValue = choiceBox.getValue();
-                                System.out.println("[DEBUG setItemChoiceOptions UI] ChoiceBox current value: " + currentDisplayValue);
+                                if (output != null) {
+                                    output.printlnInfo("[DEBUG UI] ChoiceBox current value: " + currentDisplayValue);
+                                }
                                 // Clear and add new items (values from the map are display text)
                                 choiceBox.getItems().clear();
                                 choiceBox.getItems().addAll(finalOptionsMap.values());
-                                System.out.println("[DEBUG setItemChoiceOptions UI] ChoiceBox items updated to: " + choiceBox.getItems());
+                                if (output != null) {
+                                    output.printlnInfo("[DEBUG UI] ChoiceBox items updated to: " + choiceBox.getItems());
+                                }
                                 // Store the optionsMap in the control's properties
                                 choiceBox.getProperties().put("optionsMap", finalOptionsMap);
                                 // Restore selection if the display value is still in the new options
@@ -1093,11 +1144,15 @@ public class BuiltinsScreen {
                                 javafx.scene.control.ComboBox<String> comboBox = (javafx.scene.control.ComboBox<String>) control;
                                 // Store the current selection (display text)
                                 String currentDisplayValue = comboBox.getValue();
-                                System.out.println("[DEBUG setItemChoiceOptions UI] ComboBox current value: " + currentDisplayValue);
+                                if (output != null) {
+                                    output.printlnInfo("[DEBUG UI] ComboBox current value: " + currentDisplayValue);
+                                }
                                 // Clear and add new items (values from the map are display text)
                                 comboBox.getItems().clear();
                                 comboBox.getItems().addAll(finalOptionsMap.values());
-                                System.out.println("[DEBUG setItemChoiceOptions UI] ComboBox items updated to: " + comboBox.getItems());
+                                if (output != null) {
+                                    output.printlnInfo("[DEBUG UI] ComboBox items updated to: " + comboBox.getItems());
+                                }
                                 // Store the optionsMap in the control's properties
                                 comboBox.getProperties().put("optionsMap", finalOptionsMap);
                                 // Restore selection if the display value is still in the new options
@@ -1105,19 +1160,27 @@ public class BuiltinsScreen {
                                     comboBox.setValue(currentDisplayValue);
                                 }
                             } else {
-                                System.out.println("[DEBUG setItemChoiceOptions UI] Control is not a ChoiceBox or ComboBox: " + control.getClass().getName());
+                                if (output != null) {
+                                    output.printlnInfo("[DEBUG UI] Control is not a ChoiceBox or ComboBox: " + control.getClass().getName());
+                                }
                             }
                             break;
                         }
                     }
                     if (!found) {
-                        System.out.println("[DEBUG setItemChoiceOptions UI] NO MATCHING CONTROL FOUND!");
+                        if (output != null) {
+                            output.printlnError("[DEBUG UI] NO MATCHING CONTROL FOUND!");
+                        }
                     }
                 } else {
-                    System.out.println("[DEBUG setItemChoiceOptions UI] No controls found for screen '" + finalScreenName + "'");
+                    if (output != null) {
+                        output.printlnError("[DEBUG UI] No controls found for screen '" + finalScreenName + "'");
+                    }
                 }
             } catch (Exception e) {
-                System.err.println("Error setting choice options on control: " + e.getMessage());
+                if (output != null) {
+                    output.printlnError("Error setting choice options on control: " + e.getMessage());
+                }
                 e.printStackTrace();
             }
         });
