@@ -17,6 +17,42 @@ print "";
 print "Loading regex tester screen...";
 print "";
 
+// Helper function to remove all flag prefixes from a pattern
+// Removes patterns like (?i), (?m), (?s), (?ims), (?im), etc.
+removeAllFlags(pattern: string) return string {
+    var result: string = pattern;
+    
+    // Remove all flag prefix patterns: (?...) where ... contains only i, m, s
+    // We need to handle various combinations like (?i), (?m), (?s), (?im), (?is), (?ms), (?ims)
+    while call str.startsWith(result, "(?") {
+        var endParen: int = call str.indexOf(result, ")");
+        if endParen > 2 then {
+            // Check if all chars between (? and ) are valid flags (i, m, s)
+            var flagPart: string = call str.substring(result, 2, endParen);
+            var isValidFlagBlock: bool = true;
+            var flagLen: int = call string.length(flagPart);
+            var j: int = 0;
+            while j < flagLen {
+                var c: string = call str.charAt(flagPart, j);
+                if c != "i" and c != "m" and c != "s" then {
+                    isValidFlagBlock = false;
+                }
+                j = j + 1;
+            }
+            if isValidFlagBlock then {
+                result = call str.substring(result, endParen + 1);
+            } else {
+                // Not a flag block, stop trying to remove
+                break;
+            }
+        } else {
+            break;
+        }
+    }
+    
+    return result;
+}
+
 // Helper function to build regex pattern with flags
 buildRegexPattern(pattern: string, caseInsensitive: bool, multiline: bool, dotAll: bool) return string {
     var flags: string = "";
@@ -42,6 +78,26 @@ buildRegexPattern(pattern: string, caseInsensitive: bool, multiline: bool, dotAl
     return flags + pattern;
 }
 
+// Function to sync the regex pattern field with checkbox states
+// This adds/removes flags from the pattern text as checkboxes are toggled
+syncPatternWithFlags {
+    var currentPattern: string = regexScreen.regexPattern;
+    
+    // First, remove any existing flags from the pattern
+    var cleanPattern: string = call removeAllFlags(currentPattern);
+    
+    // Now rebuild with current checkbox states
+    var newPattern: string = call buildRegexPattern(
+        cleanPattern,
+        regexScreen.caseInsensitive,
+        regexScreen.multilineMode,
+        regexScreen.dotAllMode
+    );
+    
+    // Update the pattern field
+    regexScreen.regexPattern = newPattern;
+}
+
 // Function to perform find first match
 performFindFirst {
     var sourceText: string = regexScreen.sourceText;
@@ -52,19 +108,12 @@ performFindFirst {
         return;
     }
     
-    // Build pattern with flags
-    var fullPattern: string = call buildRegexPattern(
-        regexPattern,
-        regexScreen.caseInsensitive,
-        regexScreen.multilineMode,
-        regexScreen.dotAllMode
-    );
-    
+    // Pattern already contains flags (updated by checkboxes via syncPatternWithFlags)
     regexScreen.resultText = "Finding first match...\n";
-    regexScreen.resultText = regexScreen.resultText + "Pattern: " + fullPattern + "\n\n";
+    regexScreen.resultText = regexScreen.resultText + "Pattern: " + regexPattern + "\n\n";
     
     try {
-        var match: string = call str.findRegex(sourceText, fullPattern);
+        var match: string = call str.findRegex(sourceText, regexPattern);
         
         if match == null then {
             regexScreen.resultText = regexScreen.resultText + "No match found.";
@@ -88,19 +137,12 @@ performFindAll {
         return;
     }
     
-    // Build pattern with flags
-    var fullPattern: string = call buildRegexPattern(
-        regexPattern,
-        regexScreen.caseInsensitive,
-        regexScreen.multilineMode,
-        regexScreen.dotAllMode
-    );
-    
+    // Pattern already contains flags (updated by checkboxes via syncPatternWithFlags)
     regexScreen.resultText = "Finding all matches...\n";
-    regexScreen.resultText = regexScreen.resultText + "Pattern: " + fullPattern + "\n\n";
+    regexScreen.resultText = regexScreen.resultText + "Pattern: " + regexPattern + "\n\n";
     
     try {
-        var matches = call str.findAllRegex(sourceText, fullPattern);
+        var matches = call str.findAllRegex(sourceText, regexPattern);
         
         if matches.length == 0 then {
             regexScreen.resultText = regexScreen.resultText + "No matches found.";
@@ -130,20 +172,13 @@ performReplaceAll {
         return;
     }
     
-    // Build pattern with flags
-    var fullPattern: string = call buildRegexPattern(
-        regexPattern,
-        regexScreen.caseInsensitive,
-        regexScreen.multilineMode,
-        regexScreen.dotAllMode
-    );
-    
+    // Pattern already contains flags (updated by checkboxes via syncPatternWithFlags)
     regexScreen.resultText = "Replacing matches...\n";
-    regexScreen.resultText = regexScreen.resultText + "Pattern: " + fullPattern + "\n";
+    regexScreen.resultText = regexScreen.resultText + "Pattern: " + regexPattern + "\n";
     regexScreen.resultText = regexScreen.resultText + "Replacement: '" + replacementText + "'\n\n";
     
     try {
-        var result: string = call str.replaceAll(sourceText, fullPattern, replacementText);
+        var result: string = call str.replaceAll(sourceText, regexPattern, replacementText);
         regexScreen.resultText = regexScreen.resultText + "Result:\n" + result;
     } exceptions {
         when ANY_ERROR(msg) {
@@ -245,7 +280,8 @@ screen regexScreen = {
             "default": false,
             "display": {
                 "type": "checkbox",
-                "labelText": "Case Insensitive (?i)"
+                "labelText": "Case Insensitive (?i)",
+                "onValidate": "call syncPatternWithFlags(); return true;"
             }
         },
         {
@@ -254,7 +290,8 @@ screen regexScreen = {
             "default": false,
             "display": {
                 "type": "checkbox",
-                "labelText": "Multiline Mode (?m) - ^ and $ match line boundaries"
+                "labelText": "Multiline Mode (?m) - ^ and $ match line boundaries",
+                "onValidate": "call syncPatternWithFlags(); return true;"
             }
         },
         {
@@ -263,7 +300,8 @@ screen regexScreen = {
             "default": false,
             "display": {
                 "type": "checkbox",
-                "labelText": "Dot All Mode (?s) - . matches newlines"
+                "labelText": "Dot All Mode (?s) - . matches newlines",
+                "onValidate": "call syncPatternWithFlags(); return true;"
             }
         },
         {
