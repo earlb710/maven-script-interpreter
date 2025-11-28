@@ -671,11 +671,15 @@ try {
 
 ### Raising Exceptions
 
-Use the `raise exception` statement to explicitly throw errors from your code.
+Use the `raise exception` statement to explicitly throw errors from your code. This is useful for:
+- **Input validation**: Rejecting invalid user input with descriptive error messages
+- **Business rule violations**: Enforcing application-specific constraints
+- **Precondition checks**: Validating function parameters before processing
+- **Error propagation**: Converting low-level errors to domain-specific exceptions
 
 #### Standard Exceptions
 
-Standard exceptions (from the ErrorType list above) only accept a single message parameter:
+Standard exceptions (from the ErrorType list above) only accept a single message parameter (string). The message describes the error condition:
 
 ```javascript
 // Raise with a message
@@ -683,13 +687,15 @@ raise exception IO_ERROR("File not found: config.txt");
 raise exception VALIDATION_ERROR("Input must be a positive number");
 raise exception MATH_ERROR("Cannot calculate square root of negative number");
 
-// Raise without a message (uses default message)
+// Raise without a message (uses default message: "ERROR_TYPE raised with no message")
 raise exception NULL_ERROR();
 ```
 
+**Note:** Standard exception names are case-insensitive. `IO_ERROR`, `io_error`, and `Io_Error` are all equivalent.
+
 #### Custom Exceptions
 
-Custom exceptions are identified by any name NOT in the standard ErrorType list. They can accept multiple parameters:
+Custom exceptions are identified by any name NOT in the standard ErrorType list. They can accept multiple parameters of any type:
 
 ```javascript
 // Custom exceptions with multiple parameters
@@ -700,6 +706,11 @@ raise exception BusinessRuleViolation("order", 12345, "insufficient inventory");
 // Single parameter custom exception
 raise exception ConfigurationError("Missing required setting: API_KEY");
 ```
+
+**Custom Exception Naming:**
+- Names follow standard identifier rules (letters, digits, underscores; cannot start with a digit)
+- Names are case-insensitive: `MyError`, `myerror`, and `MYERROR` all match the same exception
+- Use descriptive names that indicate the error condition (e.g., `ValidationFailed`, `InsufficientFunds`)
 
 #### Catching Raised Exceptions
 
@@ -739,12 +750,13 @@ try {
 ### Exception Handling Features
 
 - **Handler Order**: Handlers are checked in order; the first matching handler is executed
-- **Error Variable**: Use `when ERROR_TYPE(varName)` to capture the error message
+- **Error Variable**: Use `when ERROR_TYPE(varName)` to capture the error message in a string variable
 - **Custom Exceptions**: Any unrecognized exception name is treated as a custom exception
-- **Case-Insensitive**: Custom exception names are matched case-insensitively
+- **Case-Insensitive Matching**: Both standard and custom exception names are matched case-insensitively
 - **Nested Try Blocks**: Try blocks can be nested for granular error handling
-- **Standard Validation**: Standard exceptions only accept one parameter (the message)
-- **ANY_ERROR Placement**: `ANY_ERROR` should typically be last as it catches all errors
+- **Standard Exception Parameters**: Standard exceptions accept zero or one parameter (the error message as a string)
+- **Custom Exception Parameters**: Custom exceptions can accept any number of parameters of any type
+- **ANY_ERROR Placement**: `ANY_ERROR` catches all exception types, so it should typically be last
 
 ### Exception Handling Examples
 

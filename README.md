@@ -328,7 +328,7 @@ try {
 }
 ```
 
-**Note:** Custom exception names are matched case-insensitively, and unrecognized exception types (not in the standard ErrorType list) are treated as custom exceptions.
+**Note:** Both standard and custom exception names are matched case-insensitively. Any unrecognized exception type (not in the standard ErrorType list) is treated as a custom exception.
 
 ### Map Type
 
