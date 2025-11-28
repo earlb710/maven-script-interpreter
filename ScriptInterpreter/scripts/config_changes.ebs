@@ -49,17 +49,136 @@ var config: json = call json.jsonfromstring(configContent);
 print "JSON parsed successfully";
 print "";
 
-// Get the colors object
-var colors: json = call json.getobject(config, "colors");
-print "Colors object retrieved";
+// Get profile list from config (or default to ["default"])
+var profileListJson: json = call json.getarray(config, "profileList");
+var profileList: array.string[*] = [];
+var hasDefaultProfile: bool = false;
+
+// Check if profileList exists and populate the array
+if call json.isempty(profileListJson) then {
+    // No profile list in config, use default
+    profileList = ["default"];
+    hasDefaultProfile = true;
+    print "No profileList found, using default";
+} else {
+    // Build profile list from JSON array
+    // Dynamic arrays auto-expand when assigning to index = length
+    var idx: int = 0;
+    var tempProfile: string = "";
+    
+    tempProfile = call json.getstring(profileListJson, "[0]", "");
+    if tempProfile != "" then {
+        profileList[idx] = tempProfile;
+        if tempProfile == "default" then { hasDefaultProfile = true; }
+        idx = idx + 1;
+    }
+    tempProfile = call json.getstring(profileListJson, "[1]", "");
+    if tempProfile != "" then {
+        profileList[idx] = tempProfile;
+        if tempProfile == "default" then { hasDefaultProfile = true; }
+        idx = idx + 1;
+    }
+    tempProfile = call json.getstring(profileListJson, "[2]", "");
+    if tempProfile != "" then {
+        profileList[idx] = tempProfile;
+        if tempProfile == "default" then { hasDefaultProfile = true; }
+        idx = idx + 1;
+    }
+    tempProfile = call json.getstring(profileListJson, "[3]", "");
+    if tempProfile != "" then {
+        profileList[idx] = tempProfile;
+        if tempProfile == "default" then { hasDefaultProfile = true; }
+        idx = idx + 1;
+    }
+    tempProfile = call json.getstring(profileListJson, "[4]", "");
+    if tempProfile != "" then {
+        profileList[idx] = tempProfile;
+        if tempProfile == "default" then { hasDefaultProfile = true; }
+        idx = idx + 1;
+    }
+    tempProfile = call json.getstring(profileListJson, "[5]", "");
+    if tempProfile != "" then {
+        profileList[idx] = tempProfile;
+        if tempProfile == "default" then { hasDefaultProfile = true; }
+        idx = idx + 1;
+    }
+    tempProfile = call json.getstring(profileListJson, "[6]", "");
+    if tempProfile != "" then {
+        profileList[idx] = tempProfile;
+        if tempProfile == "default" then { hasDefaultProfile = true; }
+        idx = idx + 1;
+    }
+    tempProfile = call json.getstring(profileListJson, "[7]", "");
+    if tempProfile != "" then {
+        profileList[idx] = tempProfile;
+        if tempProfile == "default" then { hasDefaultProfile = true; }
+        idx = idx + 1;
+    }
+    tempProfile = call json.getstring(profileListJson, "[8]", "");
+    if tempProfile != "" then {
+        profileList[idx] = tempProfile;
+        if tempProfile == "default" then { hasDefaultProfile = true; }
+        idx = idx + 1;
+    }
+    tempProfile = call json.getstring(profileListJson, "[9]", "");
+    if tempProfile != "" then {
+        profileList[idx] = tempProfile;
+        if tempProfile == "default" then { hasDefaultProfile = true; }
+        idx = idx + 1;
+    }
+    
+    if idx == 0 then {
+        // No profiles found, use default
+        profileList = ["default"];
+        hasDefaultProfile = true;
+    } else {
+        print "Found " + idx + " profiles in config";
+    }
+}
+
+// If no default profile exists, add it at the beginning
+if hasDefaultProfile == false then {
+    // Create new array with default + existing profiles
+    // Dynamic arrays auto-expand when assigning to index = length
+    var oldLength: int = profileList.length;
+    var tempList: array.string[*] = ["default"];
+    var i: int = 0;
+    while i < oldLength {
+        tempList[i + 1] = profileList[i];
+        i = i + 1;
+    }
+    profileList = tempList;
+    print "Added 'default' profile since it was missing";
+}
+
+print "Profile list: ";
+var printIdx: int = 0;
+while printIdx < profileList.length {
+    print "  - " + profileList[printIdx];
+    printIdx = printIdx + 1;
+}
 print "";
 
-// Get the profile name (default to "default" if not present)
-var profileName: string = call json.getstring(config, "profile");
+// Get the current profile name (default to "default" if not present)
+var profileName: string = call json.getstring(config, "currentProfile");
 if profileName == "" then {
     profileName = "default";
 }
-print "Profile: " + profileName;
+print "Current Profile: " + profileName;
+print "";
+
+// Get profiles object and current profile's colors
+var profiles: json = call json.getobject(config, "profiles");
+var colors: json = call json.getobject(profiles, profileName);
+
+// If current profile doesn't exist, try to get default profile colors
+if call json.isempty(colors) then {
+    print "Profile '" + profileName + "' not found, falling back to 'default'";
+    colors = call json.getobject(profiles, "default");
+    profileName = "default";
+}
+
+print "Colors object retrieved for profile: " + profileName;
 print "";
 
 // Extract all color values into variables
@@ -163,8 +282,8 @@ print "Building color editor screen configuration...";
 print "Creating color editor screen with colors from console.cfg...";
 screen colorEditorScreen = {
     "title": "Console Configuration Color Editor",
-    "width": 1150,
-    "height": 550,
+    "width": 1000,
+    "height": 664,
     "maximize": false,
     "vars": [
         {
@@ -175,7 +294,7 @@ screen colorEditorScreen = {
                 "type": "combobox",
                 "labelText": "Profile:",
                 "labelTextAlignment": "left",
-                "options": ["default", "dark", "light", "custom"]
+                "options": $profileList
             }
         },
         {
@@ -420,139 +539,160 @@ screen colorEditorScreen = {
         "background": "#efefef",
         "areas": [
             {
-                "name": "profileArea",
-                "type": "hbox",
-                "style": "-fx-spacing: 4; -fx-padding: 4; -fx-alignment: CENTER_LEFT;",
-                "items": [
-                    {"name": "profile_item", "varref": "profile"},
-                    {"name": "addProfileBtn", "type": "button", "labelText": "+", "style": "-fx-min-width: 30;", "tooltip": "Add a new profile", "onClick": "var newProfileName: string = call system.inputDialog(\"Add Profile\", \"Enter the name for the new profile:\", \"\"); if newProfileName != \"\" then { call system.alertDialog(\"Profile '\" + newProfileName + \"' would be added.\\n\\nNote: Full profile management is not yet implemented.\\nThis demonstrates the dialog builtin working from a button onClick handler.\", \"Add Profile\", \"info\"); } else { print \"Add profile cancelled.\"; }"},
-                    {"name": "removeProfileBtn", "type": "button", "labelText": "-", "style": "-fx-min-width: 30;", "tooltip": "Remove current profile", "onClick": "var currentProfile: string = colorEditorScreen.profile; if currentProfile == \"default\" then { call system.alertDialog(\"Cannot remove the 'default' profile.\\nPlease select a different profile to remove.\", \"Remove Profile\", \"warning\"); } else { var confirmRemove: bool = call system.confirmDialog(\"Are you sure you want to remove the '\" + currentProfile + \"' profile?\", \"Confirm Remove\", \"This action cannot be undone.\"); if confirmRemove then { call system.alertDialog(\"Profile '\" + currentProfile + \"' would be removed.\\n\\nNote: Full profile management is not yet implemented.\\nThis demonstrates the dialog builtin working from a button onClick handler.\", \"Remove Profile\", \"info\"); } else { print \"Remove profile cancelled.\"; } }"}
-                ]
-            },
-            {
-                "name": "mainArea",
-                "type": "hbox",
-                "style": "-fx-spacing: 15;",
+                "name": "tabPane",
+                "type": "tabpane",
+                "layout": "fill",
                 "areas": [
                     {
-                        "name": "leftColumn",
-                        "type": "vbox",
-                        "style": "-fx-spacing: 10;",
+                        "name": "colorsTab",
+                        "type": "tab",
+                        "displayName": "Colors",
                         "areas": [
                             {
-                                "name": "consoleColorsArea",
+                                "name": "colorsContent",
                                 "type": "vbox",
-                                "groupBorder": "lowered",
-                                "groupBorderColor": "#ffffff",
-                                "groupBorderWidth": "2",
-                                "groupBorderRadius": "4",
-                                "groupLabelColor": "#444444",
-                                "groupLabelBackground": "#efefef",
-                                "groupLabelText": "Console Colors",
-                                "groupLabelAlignment": "left",
-                                "groupLabelOffset": "top",
-                                "style": "-fx-spacing: 5; -fx-padding: 5;",
-                                "items": [
-                                    {"name": "info_item", "varref": "info"},
-                                    {"name": "comment_item", "varref": "comment"},
-                                    {"name": "error_item", "varref": "error"},
-                                    {"name": "warn_item", "varref": "warn"},
-                                    {"name": "ok_item", "varref": "ok"}
-                                ]
-                            },
-                            {
-                                "name": "editorColorsArea",
-                                "type": "vbox",
-                                "groupBorder": "lowered",
-                                "groupBorderColor": "#ffffff",
-                                "groupBorderWidth": "2",
-                                "groupLabelText": "Editor Colors",
-                                "groupLabelColor": "#444444",
-                                "groupLabelBackground": "#efefef",
-                                "groupLabelAlignment": "left",
-                                "groupLabelOffset": "bottom",
-                                "style": "-fx-spacing: 5; -fx-padding: 5;",
-                                "items": [
-                                    {"name": "background_item", "varref": "background"},
-                                    {"name": "text_item", "varref": "text"},
-                                    {"name": "caret_item", "varref": "caret"},
-                                    {"name": "lineCursor_item", "varref": "lineCursor"},
-                                    {"name": "lineNumbers_item", "varref": "lineNumbers"},
-                                    {"name": "consoleBackground_item", "varref": "consoleBackground"}
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        "name": "middleColumn",
-                        "type": "vbox",
-                        "style": "-fx-spacing: 10;",
-                        "areas": [
-                            {
-                                "name": "syntaxColorsArea",
-                                "type": "vbox",
-                                "groupBorder": "lowered",
-                                "groupBorderColor": "#ffffff",
-                                "groupBorderWidth": "2",
-                                "groupLabelText": "Syntax Colors",
-                                "groupLabelColor": "#444444",
-                                "groupLabelBackground": "#efefef",
-                                "groupLabelAlignment": "left",
-                                "groupLabelOffset": "top",
-                                "style": "-fx-spacing: 5; -fx-padding: 5;",
-                                "items": [
-                                    {"name": "code_item", "varref": "code"},
-                                    {"name": "datatype_item", "varref": "datatype"},
-                                    {"name": "data_item", "varref": "data"},
-                                    {"name": "keyword_item", "varref": "keyword"},
-                                    {"name": "builtin_item", "varref": "builtin"},
-                                    {"name": "literal_item", "varref": "literal"},
-                                    {"name": "identifier_item", "varref": "identifier"},
-                                    {"name": "sql_item", "varref": "sql"},
-                                    {"name": "custom_item", "varref": "custom"}
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        "name": "rightColumn",
-                        "type": "vbox",
-                        "style": "-fx-spacing: 10;",
-                        "areas": [
-                            {
-                                "name": "tabColorsArea",
-                                "type": "vbox",
-                                "groupBorder": "lowered",
-                                "groupBorderColor": "#ffffff",
-                                "groupBorderWidth": "2",
-                                "groupLabelText": "Tab Colors",
-                                "groupLabelColor": "#444444",
-                                "groupLabelBackground": "#efefef",
-                                "groupLabelAlignment": "left",
-                                "groupLabelOffset": "top",
-                                "style": "-fx-spacing: 5; -fx-padding: 5;",
-                                "items": [
-                                    {"name": "tabBackground_item", "varref": "tabBackground"},
-                                    {"name": "tabLabelColor_item", "varref": "tabLabelColor"},
-                                    {"name": "tabLabelChangedColor_item", "varref": "tabLabelChangedColor"},
-                                    {"name": "tabLabelBackground_item", "varref": "tabLabelBackground"}
-                                ]
-                            },
-                            {
-                                "name": "findColorsArea",
-                                "type": "vbox",
-                                "groupBorder": "lowered",
-                                "groupBorderColor": "#ffffff",
-                                "groupBorderWidth": "2",
-                                "groupLabelText": "Find Colors",
-                                "groupLabelColor": "#444444",
-                                "groupLabelBackground": "#efefef",
-                                "groupLabelAlignment": "left",
-                                "groupLabelOffset": "bottom",
-                                "style": "-fx-spacing: 5; -fx-padding: 5;",
-                                "items": [
-                                    {"name": "findHighlightColor_item", "varref": "findHighlightColor"},
-                                    {"name": "findHighlightBackground_item", "varref": "findHighlightBackground"}
+                                "style": "-fx-spacing: 4; -fx-padding: 4;",
+                                "areas": [
+                                    {
+                                        "name": "profileArea",
+                                        "type": "hbox",
+                                        "style": "-fx-spacing: 4; -fx-padding: 4; -fx-alignment: CENTER_LEFT;",
+                                        "items": [
+                                            {"name": "profile_item", "varref": "profile"},
+                                            {"name": "addProfileBtn", "type": "button", "labelText": "+", "style": "-fx-min-width: 30;", "tooltip": "Add a new profile with default colors", "onClick": "var newProfileName: string = call system.inputDialog(\"Add Profile\", \"Enter the name for the new profile:\\n(New profile will use default color values)\", \"\"); if newProfileName != \"\" then { if newProfileName == \"default\" then { call system.alertDialog(\"Cannot use 'default' as a profile name.\\nPlease choose a different name.\", \"Add Profile\", \"warning\"); } else { var currentProfile: string = colorEditorScreen.profile; var newOptionsStr: string = \"{\\\"default\\\": \\\"default\\\"\"; if currentProfile != \"default\" then { newOptionsStr = newOptionsStr + \", \\\"\" + currentProfile + \"\\\": \\\"\" + currentProfile + \"\\\"\"; } newOptionsStr = newOptionsStr + \", \\\"\" + newProfileName + \"\\\": \\\"\" + newProfileName + \"\\\"}\"; var newOptions: json = call json.jsonfromstring(newOptionsStr); call scr.setItemChoiceOptions(\"colorEditorScreen\", \"profile\", newOptions); colorEditorScreen.profile = newProfileName; colorEditorScreen.info = \"$defaultInfoColor\"; colorEditorScreen.comment = \"$defaultCommentColor\"; colorEditorScreen.error = \"$defaultErrorColor\"; colorEditorScreen.warn = \"$defaultWarnColor\"; colorEditorScreen.ok = \"$defaultOkColor\"; colorEditorScreen.code = \"$defaultCodeColor\"; colorEditorScreen.datatype = \"$defaultDatatypeColor\"; colorEditorScreen.data = \"$defaultDataColor\"; colorEditorScreen.keyword = \"$defaultKeywordColor\"; colorEditorScreen.builtin = \"$defaultBuiltinColor\"; colorEditorScreen.literal = \"$defaultLiteralColor\"; colorEditorScreen.identifier = \"$defaultIdentifierColor\"; colorEditorScreen.sql = \"$defaultSqlColor\"; colorEditorScreen.custom = \"$defaultCustomColor\"; colorEditorScreen.background = \"$defaultBackgroundColor\"; colorEditorScreen.text = \"$defaultTextColor\"; colorEditorScreen.caret = \"$defaultCaretColor\"; colorEditorScreen.lineCursor = \"$defaultLineCursorColor\"; colorEditorScreen.lineNumbers = \"$defaultLineNumbersColor\"; colorEditorScreen.consoleBackground = \"$defaultConsoleBackgroundColor\"; colorEditorScreen.tabBackground = \"$defaultTabBackgroundColor\"; colorEditorScreen.tabLabelColor = \"$defaultTabLabelColor\"; colorEditorScreen.tabLabelChangedColor = \"$defaultTabLabelChangedColor\"; colorEditorScreen.tabLabelBackground = \"$defaultTabLabelBackgroundColor\"; colorEditorScreen.findHighlightColor = \"$defaultFindHighlightColor\"; colorEditorScreen.findHighlightBackground = \"$defaultFindHighlightBackground\"; call system.alertDialog(\"Profile '\" + newProfileName + \"' has been created with default colors.\\nThe profile has been selected and colors set to defaults.\", \"Profile Added\", \"info\"); } } else { print \"Add profile cancelled.\"; }"},
+                                            {"name": "removeProfileBtn", "type": "button", "labelText": "-", "style": "-fx-min-width: 30;", "tooltip": "Remove current profile", "onClick": "var currentProfile: string = colorEditorScreen.profile; if currentProfile == \"default\" then { call system.alertDialog(\"Cannot remove the 'default' profile.\\nPlease select a different profile to remove.\", \"Remove Profile\", \"warning\"); } else { var confirmRemove: bool = call system.confirmDialog(\"Are you sure you want to remove the '\" + currentProfile + \"' profile?\\n\\nThis will delete the profile and switch to 'default'.\", \"Confirm Remove\"); if confirmRemove then { var newOptions: json = call json.jsonfromstring(\"{\\\"default\\\": \\\"default\\\"}\"); call scr.setItemChoiceOptions(\"colorEditorScreen\", \"profile\", newOptions); colorEditorScreen.profile = \"default\"; colorEditorScreen.info = \"$defaultInfoColor\"; colorEditorScreen.comment = \"$defaultCommentColor\"; colorEditorScreen.error = \"$defaultErrorColor\"; colorEditorScreen.warn = \"$defaultWarnColor\"; colorEditorScreen.ok = \"$defaultOkColor\"; colorEditorScreen.code = \"$defaultCodeColor\"; colorEditorScreen.datatype = \"$defaultDatatypeColor\"; colorEditorScreen.data = \"$defaultDataColor\"; colorEditorScreen.keyword = \"$defaultKeywordColor\"; colorEditorScreen.builtin = \"$defaultBuiltinColor\"; colorEditorScreen.literal = \"$defaultLiteralColor\"; colorEditorScreen.identifier = \"$defaultIdentifierColor\"; colorEditorScreen.sql = \"$defaultSqlColor\"; colorEditorScreen.custom = \"$defaultCustomColor\"; colorEditorScreen.background = \"$defaultBackgroundColor\"; colorEditorScreen.text = \"$defaultTextColor\"; colorEditorScreen.caret = \"$defaultCaretColor\"; colorEditorScreen.lineCursor = \"$defaultLineCursorColor\"; colorEditorScreen.lineNumbers = \"$defaultLineNumbersColor\"; colorEditorScreen.consoleBackground = \"$defaultConsoleBackgroundColor\"; colorEditorScreen.tabBackground = \"$defaultTabBackgroundColor\"; colorEditorScreen.tabLabelColor = \"$defaultTabLabelColor\"; colorEditorScreen.tabLabelChangedColor = \"$defaultTabLabelChangedColor\"; colorEditorScreen.tabLabelBackground = \"$defaultTabLabelBackgroundColor\"; colorEditorScreen.findHighlightColor = \"$defaultFindHighlightColor\"; colorEditorScreen.findHighlightBackground = \"$defaultFindHighlightBackground\"; call system.alertDialog(\"Profile '\" + currentProfile + \"' has been removed.\\nSwitched to 'default' profile.\", \"Profile Removed\", \"info\"); } else { print \"Remove profile cancelled.\"; } }"}
+                                        ]
+                                    },
+                                    {
+                                        "name": "mainArea",
+                                        "type": "hbox",
+                                        "style": "-fx-spacing: 15;",
+                                        "areas": [
+                                            {
+                                                "name": "leftColumn",
+                                                "type": "vbox",
+                                                "style": "-fx-spacing: 10;",
+                                                "areas": [
+                                                    {
+                                                        "name": "consoleColorsArea",
+                                                        "type": "vbox",
+                                                        "groupBorder": "lowered",
+                                                        "groupBorderColor": "#ffffff",
+                                                        "groupBorderWidth": "2",
+                                                        "groupBorderRadius": "4",
+                                                        "groupLabelColor": "#444444",
+                                                        "groupLabelBackground": "#efefef",
+                                                        "groupLabelText": "Console Colors",
+                                                        "groupLabelAlignment": "left",
+                                                        "groupLabelOffset": "bottom",
+                                                        "style": "-fx-spacing: 5; -fx-padding: 5;",
+                                                        "items": [
+                                                            {"name": "info_item", "varref": "info"},
+                                                            {"name": "comment_item", "varref": "comment"},
+                                                            {"name": "error_item", "varref": "error"},
+                                                            {"name": "warn_item", "varref": "warn"},
+                                                            {"name": "ok_item", "varref": "ok"}
+                                                        ]
+                                                    },
+                                                    {
+                                                        "name": "findColorsArea",
+                                                        "type": "vbox",
+                                                        "groupBorder": "lowered",
+                                                        "groupBorderColor": "#ffffff",
+                                                        "groupBorderWidth": "2",
+                                                        "groupLabelText": "Find Colors",
+                                                        "groupLabelColor": "#444444",
+                                                        "groupLabelBackground": "#efefef",
+                                                        "groupLabelAlignment": "left",
+                                                        "groupLabelOffset": "bottom",
+                                                        "style": "-fx-spacing: 5; -fx-padding: 5;",
+                                                        "items": [
+                                                            {"name": "findHighlightColor_item", "varref": "findHighlightColor"},
+                                                            {"name": "findHighlightBackground_item", "varref": "findHighlightBackground"}
+                                                        ]
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "name": "middleColumn",
+                                                "type": "vbox",
+                                                "style": "-fx-spacing: 10;",
+                                                "areas": [
+                                                    {
+                                                        "name": "syntaxColorsArea",
+                                                        "type": "vbox",
+                                                        "groupBorder": "lowered",
+                                                        "groupBorderColor": "#ffffff",
+                                                        "groupBorderWidth": "2",
+                                                        "groupLabelText": "Syntax Colors",
+                                                        "groupLabelColor": "#444444",
+                                                        "groupLabelBackground": "#efefef",
+                                                        "groupLabelAlignment": "left",
+                                                        "groupLabelOffset": "bottom",
+                                                        "style": "-fx-spacing: 5; -fx-padding: 5;",
+                                                        "items": [
+                                                            {"name": "code_item", "varref": "code"},
+                                                            {"name": "datatype_item", "varref": "datatype"},
+                                                            {"name": "data_item", "varref": "data"},
+                                                            {"name": "keyword_item", "varref": "keyword"},
+                                                            {"name": "builtin_item", "varref": "builtin"},
+                                                            {"name": "literal_item", "varref": "literal"},
+                                                            {"name": "identifier_item", "varref": "identifier"},
+                                                            {"name": "sql_item", "varref": "sql"},
+                                                            {"name": "custom_item", "varref": "custom"}
+                                                        ]
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "name": "rightColumn",
+                                                "type": "vbox",
+                                                "style": "-fx-spacing: 10;",
+                                                "areas": [
+                                                    {
+                                                        "name": "tabColorsArea",
+                                                        "type": "vbox",
+                                                        "groupBorder": "lowered",
+                                                        "groupBorderColor": "#ffffff",
+                                                        "groupBorderWidth": "2",
+                                                        "groupLabelText": "Tab Colors",
+                                                        "groupLabelColor": "#444444",
+                                                        "groupLabelBackground": "#efefef",
+                                                        "groupLabelAlignment": "left",
+                                                        "groupLabelOffset": "bottom",
+                                                        "style": "-fx-spacing: 5; -fx-padding: 5;",
+                                                        "items": [
+                                                            {"name": "tabBackground_item", "varref": "tabBackground"},
+                                                            {"name": "tabLabelColor_item", "varref": "tabLabelColor"},
+                                                            {"name": "tabLabelChangedColor_item", "varref": "tabLabelChangedColor"},
+                                                            {"name": "tabLabelBackground_item", "varref": "tabLabelBackground"}
+                                                        ]
+                                                    },
+                                                    {
+                                                        "name": "editorColorsArea",
+                                                        "type": "vbox",
+                                                        "groupBorder": "lowered",
+                                                        "groupBorderColor": "#ffffff",
+                                                        "groupBorderWidth": "2",
+                                                        "groupLabelText": "Editor Colors",
+                                                        "groupLabelColor": "#444444",
+                                                        "groupLabelBackground": "#efefef",
+                                                        "groupLabelAlignment": "left",
+                                                        "groupLabelOffset": "bottom",
+                                                        "style": "-fx-spacing: 5; -fx-padding: 5;",
+                                                        "items": [
+                                                            {"name": "background_item", "varref": "background"},
+                                                            {"name": "text_item", "varref": "text"},
+                                                            {"name": "caret_item", "varref": "caret"},
+                                                            {"name": "lineCursor_item", "varref": "lineCursor"},
+                                                            {"name": "lineNumbers_item", "varref": "lineNumbers"},
+                                                            {"name": "consoleBackground_item", "varref": "consoleBackground"}
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
                                 ]
                             }
                         ]
@@ -565,7 +705,7 @@ screen colorEditorScreen = {
                 "style": "-fx-spacing: 10; -fx-padding: 10; -fx-alignment: CENTER_RIGHT;",
                 "items": [
                     {"name": "resetBtn", "type": "button", "labelText": "Reset", "style": "-fx-min-width: 80;", "onClick": "if colorEditorScreen.profile == \"default\" then { colorEditorScreen.info = $defaultInfoColor; colorEditorScreen.comment = $defaultCommentColor; colorEditorScreen.error = $defaultErrorColor; colorEditorScreen.warn = $defaultWarnColor; colorEditorScreen.ok = $defaultOkColor; colorEditorScreen.code = $defaultCodeColor; colorEditorScreen.datatype = $defaultDatatypeColor; colorEditorScreen.data = $defaultDataColor; colorEditorScreen.keyword = $defaultKeywordColor; colorEditorScreen.builtin = $defaultBuiltinColor; colorEditorScreen.literal = $defaultLiteralColor; colorEditorScreen.identifier = $defaultIdentifierColor; colorEditorScreen.sql = $defaultSqlColor; colorEditorScreen.custom = $defaultCustomColor; colorEditorScreen.background = $defaultBackgroundColor; colorEditorScreen.text = $defaultTextColor; colorEditorScreen.caret = $defaultCaretColor; colorEditorScreen.lineCursor = $defaultLineCursorColor; colorEditorScreen.lineNumbers = $defaultLineNumbersColor; colorEditorScreen.consoleBackground = $defaultConsoleBackgroundColor; colorEditorScreen.tabBackground = $defaultTabBackgroundColor; colorEditorScreen.tabLabelColor = $defaultTabLabelColor; colorEditorScreen.tabLabelChangedColor = $defaultTabLabelChangedColor; colorEditorScreen.tabLabelBackground = $defaultTabLabelBackgroundColor; colorEditorScreen.findHighlightColor = $defaultFindHighlightColor; colorEditorScreen.findHighlightBackground = $defaultFindHighlightBackground; call system.alertDialog(\"Colors reset to CSS default values.\", \"Reset\", \"info\"); } else { colorEditorScreen.info = $infoColor; colorEditorScreen.comment = $commentColor; colorEditorScreen.error = $errorColor; colorEditorScreen.warn = $warnColor; colorEditorScreen.ok = $okColor; colorEditorScreen.code = $codeColor; colorEditorScreen.datatype = $datatypeColor; colorEditorScreen.data = $dataColor; colorEditorScreen.keyword = $keywordColor; colorEditorScreen.builtin = $builtinColor; colorEditorScreen.literal = $literalColor; colorEditorScreen.identifier = $identifierColor; colorEditorScreen.sql = $sqlColor; colorEditorScreen.custom = $customColor; colorEditorScreen.background = $backgroundColor; colorEditorScreen.text = $textColor; colorEditorScreen.caret = $caretColor; colorEditorScreen.lineCursor = $lineCursorColor; colorEditorScreen.lineNumbers = $lineNumbersColor; colorEditorScreen.consoleBackground = $consoleBackgroundColor; colorEditorScreen.tabBackground = $tabBackgroundColor; colorEditorScreen.tabLabelColor = $tabLabelColor; colorEditorScreen.tabLabelChangedColor = $tabLabelChangedColor; colorEditorScreen.tabLabelBackground = $tabLabelBackgroundColor; colorEditorScreen.findHighlightColor = $findHighlightColor; colorEditorScreen.findHighlightBackground = $findHighlightBackground; call system.alertDialog(\"Colors reset to original loaded values.\", \"Reset\", \"info\"); }"},
-                    {"name": "saveCloseBtn", "type": "button", "labelText": "Save and Close", "style": "-fx-min-width: 120;", "onClick": "var jsonContent: string = \"{\\n  \\\"profile\\\": \\\"\" + colorEditorScreen.profile + \"\\\",\\n  \\\"colors\\\": {\\n    \\\"info\\\": \\\"\" + colorEditorScreen.info + \"\\\",\\n    \\\"comment\\\": \\\"\" + colorEditorScreen.comment + \"\\\",\\n    \\\"error\\\": \\\"\" + colorEditorScreen.error + \"\\\",\\n    \\\"warn\\\": \\\"\" + colorEditorScreen.warn + \"\\\",\\n    \\\"ok\\\": \\\"\" + colorEditorScreen.ok + \"\\\",\\n    \\\"code\\\": \\\"\" + colorEditorScreen.code + \"\\\",\\n    \\\"datatype\\\": \\\"\" + colorEditorScreen.datatype + \"\\\",\\n    \\\"data\\\": \\\"\" + colorEditorScreen.data + \"\\\",\\n    \\\"keyword\\\": \\\"\" + colorEditorScreen.keyword + \"\\\",\\n    \\\"builtin\\\": \\\"\" + colorEditorScreen.builtin + \"\\\",\\n    \\\"literal\\\": \\\"\" + colorEditorScreen.literal + \"\\\",\\n    \\\"identifier\\\": \\\"\" + colorEditorScreen.identifier + \"\\\",\\n    \\\"sql\\\": \\\"\" + colorEditorScreen.sql + \"\\\",\\n    \\\"custom\\\": \\\"\" + colorEditorScreen.custom + \"\\\",\\n    \\\"background\\\": \\\"\" + colorEditorScreen.background + \"\\\",\\n    \\\"text\\\": \\\"\" + colorEditorScreen.text + \"\\\",\\n    \\\"caret\\\": \\\"\" + colorEditorScreen.caret + \"\\\",\\n    \\\"line-cursor\\\": \\\"\" + colorEditorScreen.lineCursor + \"\\\",\\n    \\\"line-numbers\\\": \\\"\" + colorEditorScreen.lineNumbers + \"\\\",\\n    \\\"console-background\\\": \\\"\" + colorEditorScreen.consoleBackground + \"\\\",\\n    \\\"tab-background\\\": \\\"\" + colorEditorScreen.tabBackground + \"\\\",\\n    \\\"tab-label-color\\\": \\\"\" + colorEditorScreen.tabLabelColor + \"\\\",\\n    \\\"tab-label-changed-color\\\": \\\"\" + colorEditorScreen.tabLabelChangedColor + \"\\\",\\n    \\\"tab-label-background\\\": \\\"\" + colorEditorScreen.tabLabelBackground + \"\\\",\\n    \\\"find-highlight-color\\\": \\\"\" + colorEditorScreen.findHighlightColor + \"\\\",\\n    \\\"find-highlight-background\\\": \\\"\" + colorEditorScreen.findHighlightBackground + \"\\\"\\n  }\\n}\"; call file.writeTextFile($configPath, jsonContent); call system.alertDialog(\"Configuration saved to \" + $configPath + \".\\nRestart the application to see changes.\", \"Saved\", \"info\"); close screen;"}
+                    {"name": "saveCloseBtn", "type": "button", "labelText": "Save and Close", "style": "-fx-min-width: 120;", "onClick": "var currentColors: string = \"{\\n      \\\"info\\\": \\\"\" + colorEditorScreen.info + \"\\\",\\n      \\\"comment\\\": \\\"\" + colorEditorScreen.comment + \"\\\",\\n      \\\"error\\\": \\\"\" + colorEditorScreen.error + \"\\\",\\n      \\\"warn\\\": \\\"\" + colorEditorScreen.warn + \"\\\",\\n      \\\"ok\\\": \\\"\" + colorEditorScreen.ok + \"\\\",\\n      \\\"code\\\": \\\"\" + colorEditorScreen.code + \"\\\",\\n      \\\"datatype\\\": \\\"\" + colorEditorScreen.datatype + \"\\\",\\n      \\\"data\\\": \\\"\" + colorEditorScreen.data + \"\\\",\\n      \\\"keyword\\\": \\\"\" + colorEditorScreen.keyword + \"\\\",\\n      \\\"builtin\\\": \\\"\" + colorEditorScreen.builtin + \"\\\",\\n      \\\"literal\\\": \\\"\" + colorEditorScreen.literal + \"\\\",\\n      \\\"identifier\\\": \\\"\" + colorEditorScreen.identifier + \"\\\",\\n      \\\"sql\\\": \\\"\" + colorEditorScreen.sql + \"\\\",\\n      \\\"custom\\\": \\\"\" + colorEditorScreen.custom + \"\\\",\\n      \\\"background\\\": \\\"\" + colorEditorScreen.background + \"\\\",\\n      \\\"text\\\": \\\"\" + colorEditorScreen.text + \"\\\",\\n      \\\"caret\\\": \\\"\" + colorEditorScreen.caret + \"\\\",\\n      \\\"line-cursor\\\": \\\"\" + colorEditorScreen.lineCursor + \"\\\",\\n      \\\"line-numbers\\\": \\\"\" + colorEditorScreen.lineNumbers + \"\\\",\\n      \\\"console-background\\\": \\\"\" + colorEditorScreen.consoleBackground + \"\\\",\\n      \\\"tab-background\\\": \\\"\" + colorEditorScreen.tabBackground + \"\\\",\\n      \\\"tab-label-color\\\": \\\"\" + colorEditorScreen.tabLabelColor + \"\\\",\\n      \\\"tab-label-changed-color\\\": \\\"\" + colorEditorScreen.tabLabelChangedColor + \"\\\",\\n      \\\"tab-label-background\\\": \\\"\" + colorEditorScreen.tabLabelBackground + \"\\\",\\n      \\\"find-highlight-color\\\": \\\"\" + colorEditorScreen.findHighlightColor + \"\\\",\\n      \\\"find-highlight-background\\\": \\\"\" + colorEditorScreen.findHighlightBackground + \"\\\"\\n    }\"; var jsonContent: string = \"{\\n  \\\"currentProfile\\\": \\\"\" + colorEditorScreen.profile + \"\\\",\\n  \\\"profileList\\\": [\\\"\" + colorEditorScreen.profile + \"\\\"],\\n  \\\"profiles\\\": {\\n    \\\"\" + colorEditorScreen.profile + \"\\\": \" + currentColors + \"\\n  }\\n}\"; call file.writeTextFile($configPath, jsonContent); call system.alertDialog(\"Configuration saved to \" + $configPath + \".\\nRestart the application to see changes.\", \"Saved\", \"info\"); close screen;"}
                 ]
             }
         ]
