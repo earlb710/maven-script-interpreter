@@ -539,6 +539,7 @@ The autocomplete automatically detects JSON content and provides schema-aware su
 
 - **[EBS Script Syntax Reference](docs/EBS_SCRIPT_SYNTAX.md)** - Complete language syntax guide including type aliases (typeof)
 - **[Python vs EBS String Functions](docs/PYTHON_VS_EBS_STRING_FUNCTIONS.md)** - Comparison guide for Python developers learning EBS Script
+- **[EBS Script vs Oracle PL/SQL](docs/EBS_VS_ORACLE_PLSQL.md)** - Comprehensive comparison guide for PL/SQL developers learning EBS Script
 - **[Architecture & Flow Documentation](ARCHITECTURE.md)** - Comprehensive documentation of the system architecture, data flow, and internal workings
 - **[Class Tree Lister](CLASS_TREE_LISTER.md)** - Utility for analyzing the project's class hierarchy
 - **[Syntax Reference](ScriptInterpreter/src/main/java/com/eb/script/syntax_ebnf.txt)** - EBNF grammar specification
