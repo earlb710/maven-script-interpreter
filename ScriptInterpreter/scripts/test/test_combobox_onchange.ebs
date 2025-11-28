@@ -131,7 +131,7 @@ screen testOnChange = {
                     "editable": true,
                     "sequence": 1,
                     "prefWidth": "400",
-                    "onChange": "editableComboCount = editableComboCount + 1; testOnChange.editableCount = string.tostring(editableComboCount); testOnChange.lastEvent = \"Editable ComboBox: '\" + testOnChange.editableComboValue + \"'\"; print \"[Editable ComboBox] onChange #\" + editableComboCount + \": '\" + testOnChange.editableComboValue + \"'\";"
+                    "onChange": "editableComboCount = editableComboCount + 1; testOnChange.editableCount = \"\" + editableComboCount; testOnChange.lastEvent = \"Editable ComboBox: '\" + testOnChange.editableComboValue + \"'\"; print \"[Editable ComboBox] onChange #\" + editableComboCount + \": '\" + testOnChange.editableComboValue + \"'\";"
                 },
                 {
                     "name": "nonEditableComboField",
@@ -139,21 +139,21 @@ screen testOnChange = {
                     "editable": false,
                     "sequence": 2,
                     "prefWidth": "400",
-                    "onChange": "nonEditableComboCount = nonEditableComboCount + 1; testOnChange.nonEditableCount = string.tostring(nonEditableComboCount); testOnChange.lastEvent = \"Non-Editable ComboBox: '\" + testOnChange.nonEditableComboValue + \"'\"; print \"[Non-Editable ComboBox] onChange #\" + nonEditableComboCount + \": '\" + testOnChange.nonEditableComboValue + \"'\";"
+                    "onChange": "nonEditableComboCount = nonEditableComboCount + 1; testOnChange.nonEditableCount = \"\" + nonEditableComboCount; testOnChange.lastEvent = \"Non-Editable ComboBox: '\" + testOnChange.nonEditableComboValue + \"'\"; print \"[Non-Editable ComboBox] onChange #\" + nonEditableComboCount + \": '\" + testOnChange.nonEditableComboValue + \"'\";"
                 },
                 {
                     "name": "choiceBoxField",
                     "varRef": "choiceBoxValue",
                     "sequence": 3,
                     "prefWidth": "400",
-                    "onChange": "choiceBoxCount = choiceBoxCount + 1; testOnChange.choiceCount = string.tostring(choiceBoxCount); testOnChange.lastEvent = \"ChoiceBox: '\" + testOnChange.choiceBoxValue + \"'\"; print \"[ChoiceBox] onChange #\" + choiceBoxCount + \": '\" + testOnChange.choiceBoxValue + \"'\";"
+                    "onChange": "choiceBoxCount = choiceBoxCount + 1; testOnChange.choiceCount = \"\" + choiceBoxCount; testOnChange.lastEvent = \"ChoiceBox: '\" + testOnChange.choiceBoxValue + \"'\"; print \"[ChoiceBox] onChange #\" + choiceBoxCount + \": '\" + testOnChange.choiceBoxValue + \"'\";"
                 },
                 {
                     "name": "textFieldItem",
                     "varRef": "textFieldValue",
                     "sequence": 4,
                     "prefWidth": "400",
-                    "onChange": "textFieldCount = textFieldCount + 1; testOnChange.textCount = string.tostring(textFieldCount); testOnChange.lastEvent = \"TextField: '\" + testOnChange.textFieldValue + \"'\"; print \"[TextField] onChange #\" + textFieldCount + \": '\" + testOnChange.textFieldValue + \"'\";"
+                    "onChange": "textFieldCount = textFieldCount + 1; testOnChange.textCount = \"\" + textFieldCount; testOnChange.lastEvent = \"TextField: '\" + testOnChange.textFieldValue + \"'\"; print \"[TextField] onChange #\" + textFieldCount + \": '\" + testOnChange.textFieldValue + \"'\";"
                 },
                 {
                     "varRef": "editableCount",
