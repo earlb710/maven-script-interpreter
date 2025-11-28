@@ -309,7 +309,465 @@ function setColorsToOriginal {
     colorEditorScreen.findHighlightBackground = findHighlightBackground;
 }
 
-// Function: Handle profile change - loads colors for the selected profile
+// Function: Build profile colors JSON string for a given profile name using screen values
+function buildProfileColorsJson(pName: string) return string {
+    var colorsJson: string = "\"" + pName + "\": {\n";
+    colorsJson = colorsJson + "      \"info\": \"" + colorEditorScreen.info + "\",\n";
+    colorsJson = colorsJson + "      \"comment\": \"" + colorEditorScreen.comment + "\",\n";
+    colorsJson = colorsJson + "      \"error\": \"" + colorEditorScreen.error + "\",\n";
+    colorsJson = colorsJson + "      \"warn\": \"" + colorEditorScreen.warn + "\",\n";
+    colorsJson = colorsJson + "      \"ok\": \"" + colorEditorScreen.ok + "\",\n";
+    colorsJson = colorsJson + "      \"code\": \"" + colorEditorScreen.code + "\",\n";
+    colorsJson = colorsJson + "      \"datatype\": \"" + colorEditorScreen.datatype + "\",\n";
+    colorsJson = colorsJson + "      \"data\": \"" + colorEditorScreen.data + "\",\n";
+    colorsJson = colorsJson + "      \"keyword\": \"" + colorEditorScreen.keyword + "\",\n";
+    colorsJson = colorsJson + "      \"builtin\": \"" + colorEditorScreen.builtin + "\",\n";
+    colorsJson = colorsJson + "      \"literal\": \"" + colorEditorScreen.literal + "\",\n";
+    colorsJson = colorsJson + "      \"identifier\": \"" + colorEditorScreen.identifier + "\",\n";
+    colorsJson = colorsJson + "      \"sql\": \"" + colorEditorScreen.sql + "\",\n";
+    colorsJson = colorsJson + "      \"custom\": \"" + colorEditorScreen.custom + "\",\n";
+    colorsJson = colorsJson + "      \"background\": \"" + colorEditorScreen.background + "\",\n";
+    colorsJson = colorsJson + "      \"text\": \"" + colorEditorScreen.text + "\",\n";
+    colorsJson = colorsJson + "      \"caret\": \"" + colorEditorScreen.caret + "\",\n";
+    colorsJson = colorsJson + "      \"line-cursor\": \"" + colorEditorScreen.lineCursor + "\",\n";
+    colorsJson = colorsJson + "      \"line-numbers\": \"" + colorEditorScreen.lineNumbers + "\",\n";
+    colorsJson = colorsJson + "      \"console-background\": \"" + colorEditorScreen.consoleBackground + "\",\n";
+    colorsJson = colorsJson + "      \"tab-background\": \"" + colorEditorScreen.tabBackground + "\",\n";
+    colorsJson = colorsJson + "      \"tab-label-color\": \"" + colorEditorScreen.tabLabelColor + "\",\n";
+    colorsJson = colorsJson + "      \"tab-label-changed-color\": \"" + colorEditorScreen.tabLabelChangedColor + "\",\n";
+    colorsJson = colorsJson + "      \"tab-label-background\": \"" + colorEditorScreen.tabLabelBackground + "\",\n";
+    colorsJson = colorsJson + "      \"find-highlight-color\": \"" + colorEditorScreen.findHighlightColor + "\",\n";
+    colorsJson = colorsJson + "      \"find-highlight-background\": \"" + colorEditorScreen.findHighlightBackground + "\"\n";
+    colorsJson = colorsJson + "    }";
+    return colorsJson;
+}
+
+// Function: Build default profile colors JSON string for a new profile
+function buildDefaultProfileColorsJson(pName: string) return string {
+    var colorsJson: string = "\"" + pName + "\": {\n";
+    colorsJson = colorsJson + "      \"info\": \"" + defaultInfoColor + "\",\n";
+    colorsJson = colorsJson + "      \"comment\": \"" + defaultCommentColor + "\",\n";
+    colorsJson = colorsJson + "      \"error\": \"" + defaultErrorColor + "\",\n";
+    colorsJson = colorsJson + "      \"warn\": \"" + defaultWarnColor + "\",\n";
+    colorsJson = colorsJson + "      \"ok\": \"" + defaultOkColor + "\",\n";
+    colorsJson = colorsJson + "      \"code\": \"" + defaultCodeColor + "\",\n";
+    colorsJson = colorsJson + "      \"datatype\": \"" + defaultDatatypeColor + "\",\n";
+    colorsJson = colorsJson + "      \"data\": \"" + defaultDataColor + "\",\n";
+    colorsJson = colorsJson + "      \"keyword\": \"" + defaultKeywordColor + "\",\n";
+    colorsJson = colorsJson + "      \"builtin\": \"" + defaultBuiltinColor + "\",\n";
+    colorsJson = colorsJson + "      \"literal\": \"" + defaultLiteralColor + "\",\n";
+    colorsJson = colorsJson + "      \"identifier\": \"" + defaultIdentifierColor + "\",\n";
+    colorsJson = colorsJson + "      \"sql\": \"" + defaultSqlColor + "\",\n";
+    colorsJson = colorsJson + "      \"custom\": \"" + defaultCustomColor + "\",\n";
+    colorsJson = colorsJson + "      \"background\": \"" + defaultBackgroundColor + "\",\n";
+    colorsJson = colorsJson + "      \"text\": \"" + defaultTextColor + "\",\n";
+    colorsJson = colorsJson + "      \"caret\": \"" + defaultCaretColor + "\",\n";
+    colorsJson = colorsJson + "      \"line-cursor\": \"" + defaultLineCursorColor + "\",\n";
+    colorsJson = colorsJson + "      \"line-numbers\": \"" + defaultLineNumbersColor + "\",\n";
+    colorsJson = colorsJson + "      \"console-background\": \"" + defaultConsoleBackgroundColor + "\",\n";
+    colorsJson = colorsJson + "      \"tab-background\": \"" + defaultTabBackgroundColor + "\",\n";
+    colorsJson = colorsJson + "      \"tab-label-color\": \"" + defaultTabLabelColor + "\",\n";
+    colorsJson = colorsJson + "      \"tab-label-changed-color\": \"" + defaultTabLabelChangedColor + "\",\n";
+    colorsJson = colorsJson + "      \"tab-label-background\": \"" + defaultTabLabelBackgroundColor + "\",\n";
+    colorsJson = colorsJson + "      \"find-highlight-color\": \"" + defaultFindHighlightColor + "\",\n";
+    colorsJson = colorsJson + "      \"find-highlight-background\": \"" + defaultFindHighlightBackground + "\"\n";
+    colorsJson = colorsJson + "    }";
+    return colorsJson;
+}
+
+// Function: Save config file with current profile as active and all profiles preserved
+function saveConfigWithCurrentProfile {
+    // Re-read the current config to preserve all existing profiles
+    var currentConfigContent: string = call file.readtextfile(configPath);
+    var currentConfig: json = call json.jsonfromstring(currentConfigContent);
+    var currentProfiles: json = call json.getobject(currentConfig, "profiles");
+    var currentProfileList: json = call json.getarray(currentConfig, "profileList");
+    
+    // Build profile list string
+    var profileListStr: string = "";
+    var pIdx: int = 0;
+    var tempP: string = "";
+    
+    tempP = call json.getstring(currentProfileList, "[0]", "");
+    if tempP != "" then { 
+        profileListStr = "\"" + tempP + "\""; 
+        pIdx = pIdx + 1;
+    }
+    tempP = call json.getstring(currentProfileList, "[1]", "");
+    if tempP != "" then { 
+        profileListStr = profileListStr + ", \"" + tempP + "\""; 
+        pIdx = pIdx + 1;
+    }
+    tempP = call json.getstring(currentProfileList, "[2]", "");
+    if tempP != "" then { 
+        profileListStr = profileListStr + ", \"" + tempP + "\""; 
+        pIdx = pIdx + 1;
+    }
+    tempP = call json.getstring(currentProfileList, "[3]", "");
+    if tempP != "" then { 
+        profileListStr = profileListStr + ", \"" + tempP + "\""; 
+        pIdx = pIdx + 1;
+    }
+    tempP = call json.getstring(currentProfileList, "[4]", "");
+    if tempP != "" then { 
+        profileListStr = profileListStr + ", \"" + tempP + "\""; 
+        pIdx = pIdx + 1;
+    }
+    tempP = call json.getstring(currentProfileList, "[5]", "");
+    if tempP != "" then { 
+        profileListStr = profileListStr + ", \"" + tempP + "\""; 
+        pIdx = pIdx + 1;
+    }
+    tempP = call json.getstring(currentProfileList, "[6]", "");
+    if tempP != "" then { 
+        profileListStr = profileListStr + ", \"" + tempP + "\""; 
+        pIdx = pIdx + 1;
+    }
+    tempP = call json.getstring(currentProfileList, "[7]", "");
+    if tempP != "" then { 
+        profileListStr = profileListStr + ", \"" + tempP + "\""; 
+        pIdx = pIdx + 1;
+    }
+    tempP = call json.getstring(currentProfileList, "[8]", "");
+    if tempP != "" then { 
+        profileListStr = profileListStr + ", \"" + tempP + "\""; 
+        pIdx = pIdx + 1;
+    }
+    tempP = call json.getstring(currentProfileList, "[9]", "");
+    if tempP != "" then { 
+        profileListStr = profileListStr + ", \"" + tempP + "\""; 
+        pIdx = pIdx + 1;
+    }
+    
+    if profileListStr == "" then {
+        profileListStr = "\"default\"";
+    }
+    
+    // Build profiles JSON - preserve all existing profiles
+    var profilesStr: string = "";
+    var profileKeys: array.string[*] = ["default"];
+    var profileCount: int = 1;
+    
+    // Get all profile names from the profile list
+    pIdx = 0;
+    tempP = call json.getstring(currentProfileList, "[0]", "");
+    if tempP != "" then { profileKeys[pIdx] = tempP; pIdx = pIdx + 1; }
+    tempP = call json.getstring(currentProfileList, "[1]", "");
+    if tempP != "" then { profileKeys[pIdx] = tempP; pIdx = pIdx + 1; }
+    tempP = call json.getstring(currentProfileList, "[2]", "");
+    if tempP != "" then { profileKeys[pIdx] = tempP; pIdx = pIdx + 1; }
+    tempP = call json.getstring(currentProfileList, "[3]", "");
+    if tempP != "" then { profileKeys[pIdx] = tempP; pIdx = pIdx + 1; }
+    tempP = call json.getstring(currentProfileList, "[4]", "");
+    if tempP != "" then { profileKeys[pIdx] = tempP; pIdx = pIdx + 1; }
+    tempP = call json.getstring(currentProfileList, "[5]", "");
+    if tempP != "" then { profileKeys[pIdx] = tempP; pIdx = pIdx + 1; }
+    tempP = call json.getstring(currentProfileList, "[6]", "");
+    if tempP != "" then { profileKeys[pIdx] = tempP; pIdx = pIdx + 1; }
+    tempP = call json.getstring(currentProfileList, "[7]", "");
+    if tempP != "" then { profileKeys[pIdx] = tempP; pIdx = pIdx + 1; }
+    tempP = call json.getstring(currentProfileList, "[8]", "");
+    if tempP != "" then { profileKeys[pIdx] = tempP; pIdx = pIdx + 1; }
+    tempP = call json.getstring(currentProfileList, "[9]", "");
+    if tempP != "" then { profileKeys[pIdx] = tempP; pIdx = pIdx + 1; }
+    profileCount = pIdx;
+    
+    // Build each profile's JSON
+    var i: int = 0;
+    while i < profileCount {
+        var pName: string = profileKeys[i];
+        var pColors: json = call json.getobject(currentProfiles, pName);
+        
+        if i > 0 then {
+            profilesStr = profilesStr + ",\n    ";
+        }
+        
+        // Get each color value and build the JSON
+        var pInfo: string = call json.getstring(pColors, "info");
+        var pComment: string = call json.getstring(pColors, "comment");
+        var pError: string = call json.getstring(pColors, "error");
+        var pWarn: string = call json.getstring(pColors, "warn");
+        var pOk: string = call json.getstring(pColors, "ok");
+        var pCode: string = call json.getstring(pColors, "code");
+        var pDatatype: string = call json.getstring(pColors, "datatype");
+        var pData: string = call json.getstring(pColors, "data");
+        var pKeyword: string = call json.getstring(pColors, "keyword");
+        var pBuiltin: string = call json.getstring(pColors, "builtin");
+        var pLiteral: string = call json.getstring(pColors, "literal");
+        var pIdentifier: string = call json.getstring(pColors, "identifier");
+        var pSql: string = call json.getstring(pColors, "sql");
+        var pCustom: string = call json.getstring(pColors, "custom");
+        var pBackground: string = call json.getstring(pColors, "background");
+        var pText: string = call json.getstring(pColors, "text");
+        var pCaret: string = call json.getstring(pColors, "caret");
+        var pLineCursor: string = call json.getstring(pColors, "line-cursor");
+        var pLineNumbers: string = call json.getstring(pColors, "line-numbers");
+        var pConsoleBg: string = call json.getstring(pColors, "console-background");
+        var pTabBg: string = call json.getstring(pColors, "tab-background");
+        var pTabLabelColor: string = call json.getstring(pColors, "tab-label-color");
+        var pTabLabelChanged: string = call json.getstring(pColors, "tab-label-changed-color");
+        var pTabLabelBg: string = call json.getstring(pColors, "tab-label-background");
+        var pFindHlColor: string = call json.getstring(pColors, "find-highlight-color");
+        var pFindHlBg: string = call json.getstring(pColors, "find-highlight-background");
+        
+        profilesStr = profilesStr + "\"" + pName + "\": {\n";
+        profilesStr = profilesStr + "      \"info\": \"" + pInfo + "\",\n";
+        profilesStr = profilesStr + "      \"comment\": \"" + pComment + "\",\n";
+        profilesStr = profilesStr + "      \"error\": \"" + pError + "\",\n";
+        profilesStr = profilesStr + "      \"warn\": \"" + pWarn + "\",\n";
+        profilesStr = profilesStr + "      \"ok\": \"" + pOk + "\",\n";
+        profilesStr = profilesStr + "      \"code\": \"" + pCode + "\",\n";
+        profilesStr = profilesStr + "      \"datatype\": \"" + pDatatype + "\",\n";
+        profilesStr = profilesStr + "      \"data\": \"" + pData + "\",\n";
+        profilesStr = profilesStr + "      \"keyword\": \"" + pKeyword + "\",\n";
+        profilesStr = profilesStr + "      \"builtin\": \"" + pBuiltin + "\",\n";
+        profilesStr = profilesStr + "      \"literal\": \"" + pLiteral + "\",\n";
+        profilesStr = profilesStr + "      \"identifier\": \"" + pIdentifier + "\",\n";
+        profilesStr = profilesStr + "      \"sql\": \"" + pSql + "\",\n";
+        profilesStr = profilesStr + "      \"custom\": \"" + pCustom + "\",\n";
+        profilesStr = profilesStr + "      \"background\": \"" + pBackground + "\",\n";
+        profilesStr = profilesStr + "      \"text\": \"" + pText + "\",\n";
+        profilesStr = profilesStr + "      \"caret\": \"" + pCaret + "\",\n";
+        profilesStr = profilesStr + "      \"line-cursor\": \"" + pLineCursor + "\",\n";
+        profilesStr = profilesStr + "      \"line-numbers\": \"" + pLineNumbers + "\",\n";
+        profilesStr = profilesStr + "      \"console-background\": \"" + pConsoleBg + "\",\n";
+        profilesStr = profilesStr + "      \"tab-background\": \"" + pTabBg + "\",\n";
+        profilesStr = profilesStr + "      \"tab-label-color\": \"" + pTabLabelColor + "\",\n";
+        profilesStr = profilesStr + "      \"tab-label-changed-color\": \"" + pTabLabelChanged + "\",\n";
+        profilesStr = profilesStr + "      \"tab-label-background\": \"" + pTabLabelBg + "\",\n";
+        profilesStr = profilesStr + "      \"find-highlight-color\": \"" + pFindHlColor + "\",\n";
+        profilesStr = profilesStr + "      \"find-highlight-background\": \"" + pFindHlBg + "\"\n";
+        profilesStr = profilesStr + "    }";
+        
+        i = i + 1;
+    }
+    
+    // Build final JSON
+    var jsonContent: string = "{\n";
+    jsonContent = jsonContent + "  \"currentProfile\": \"" + colorEditorScreen.profile + "\",\n";
+    jsonContent = jsonContent + "  \"profileList\": [" + profileListStr + "],\n";
+    jsonContent = jsonContent + "  \"profiles\": {\n    " + profilesStr + "\n  }\n";
+    jsonContent = jsonContent + "}";
+    
+    call file.writeTextFile(configPath, jsonContent);
+    println("Config saved with current profile: " + colorEditorScreen.profile);
+}
+
+// Function: Add a new profile to the config file with default colors
+function addProfileToConfig(newProfileName: string) {
+    // Re-read the current config to preserve all existing profiles
+    var currentConfigContent: string = call file.readtextfile(configPath);
+    var currentConfig: json = call json.jsonfromstring(currentConfigContent);
+    var currentProfiles: json = call json.getobject(currentConfig, "profiles");
+    var currentProfileList: json = call json.getarray(currentConfig, "profileList");
+    
+    // Build profile list string (including new profile)
+    var profileListStr: string = "";
+    var pIdx: int = 0;
+    var tempP: string = "";
+    
+    tempP = call json.getstring(currentProfileList, "[0]", "");
+    if tempP != "" then { 
+        profileListStr = "\"" + tempP + "\""; 
+        pIdx = pIdx + 1;
+    }
+    tempP = call json.getstring(currentProfileList, "[1]", "");
+    if tempP != "" then { 
+        profileListStr = profileListStr + ", \"" + tempP + "\""; 
+        pIdx = pIdx + 1;
+    }
+    tempP = call json.getstring(currentProfileList, "[2]", "");
+    if tempP != "" then { 
+        profileListStr = profileListStr + ", \"" + tempP + "\""; 
+        pIdx = pIdx + 1;
+    }
+    tempP = call json.getstring(currentProfileList, "[3]", "");
+    if tempP != "" then { 
+        profileListStr = profileListStr + ", \"" + tempP + "\""; 
+        pIdx = pIdx + 1;
+    }
+    tempP = call json.getstring(currentProfileList, "[4]", "");
+    if tempP != "" then { 
+        profileListStr = profileListStr + ", \"" + tempP + "\""; 
+        pIdx = pIdx + 1;
+    }
+    tempP = call json.getstring(currentProfileList, "[5]", "");
+    if tempP != "" then { 
+        profileListStr = profileListStr + ", \"" + tempP + "\""; 
+        pIdx = pIdx + 1;
+    }
+    tempP = call json.getstring(currentProfileList, "[6]", "");
+    if tempP != "" then { 
+        profileListStr = profileListStr + ", \"" + tempP + "\""; 
+        pIdx = pIdx + 1;
+    }
+    tempP = call json.getstring(currentProfileList, "[7]", "");
+    if tempP != "" then { 
+        profileListStr = profileListStr + ", \"" + tempP + "\""; 
+        pIdx = pIdx + 1;
+    }
+    tempP = call json.getstring(currentProfileList, "[8]", "");
+    if tempP != "" then { 
+        profileListStr = profileListStr + ", \"" + tempP + "\""; 
+        pIdx = pIdx + 1;
+    }
+    tempP = call json.getstring(currentProfileList, "[9]", "");
+    if tempP != "" then { 
+        profileListStr = profileListStr + ", \"" + tempP + "\""; 
+        pIdx = pIdx + 1;
+    }
+    
+    // Add new profile to list
+    if profileListStr == "" then {
+        profileListStr = "\"" + newProfileName + "\"";
+    } else {
+        profileListStr = profileListStr + ", \"" + newProfileName + "\"";
+    }
+    
+    // Build profiles JSON - preserve all existing profiles and add new one
+    var profilesStr: string = "";
+    var profileKeys: array.string[*] = [];
+    var profileCount: int = 0;
+    
+    // Get all profile names from the profile list
+    pIdx = 0;
+    tempP = call json.getstring(currentProfileList, "[0]", "");
+    if tempP != "" then { profileKeys[pIdx] = tempP; pIdx = pIdx + 1; }
+    tempP = call json.getstring(currentProfileList, "[1]", "");
+    if tempP != "" then { profileKeys[pIdx] = tempP; pIdx = pIdx + 1; }
+    tempP = call json.getstring(currentProfileList, "[2]", "");
+    if tempP != "" then { profileKeys[pIdx] = tempP; pIdx = pIdx + 1; }
+    tempP = call json.getstring(currentProfileList, "[3]", "");
+    if tempP != "" then { profileKeys[pIdx] = tempP; pIdx = pIdx + 1; }
+    tempP = call json.getstring(currentProfileList, "[4]", "");
+    if tempP != "" then { profileKeys[pIdx] = tempP; pIdx = pIdx + 1; }
+    tempP = call json.getstring(currentProfileList, "[5]", "");
+    if tempP != "" then { profileKeys[pIdx] = tempP; pIdx = pIdx + 1; }
+    tempP = call json.getstring(currentProfileList, "[6]", "");
+    if tempP != "" then { profileKeys[pIdx] = tempP; pIdx = pIdx + 1; }
+    tempP = call json.getstring(currentProfileList, "[7]", "");
+    if tempP != "" then { profileKeys[pIdx] = tempP; pIdx = pIdx + 1; }
+    tempP = call json.getstring(currentProfileList, "[8]", "");
+    if tempP != "" then { profileKeys[pIdx] = tempP; pIdx = pIdx + 1; }
+    tempP = call json.getstring(currentProfileList, "[9]", "");
+    if tempP != "" then { profileKeys[pIdx] = tempP; pIdx = pIdx + 1; }
+    profileCount = pIdx;
+    
+    // Build each existing profile's JSON
+    var i: int = 0;
+    while i < profileCount {
+        var pName: string = profileKeys[i];
+        var pColors: json = call json.getobject(currentProfiles, pName);
+        
+        if i > 0 then {
+            profilesStr = profilesStr + ",\n    ";
+        }
+        
+        // Get each color value and build the JSON
+        var pInfo: string = call json.getstring(pColors, "info");
+        var pComment: string = call json.getstring(pColors, "comment");
+        var pError: string = call json.getstring(pColors, "error");
+        var pWarn: string = call json.getstring(pColors, "warn");
+        var pOk: string = call json.getstring(pColors, "ok");
+        var pCode: string = call json.getstring(pColors, "code");
+        var pDatatype: string = call json.getstring(pColors, "datatype");
+        var pData: string = call json.getstring(pColors, "data");
+        var pKeyword: string = call json.getstring(pColors, "keyword");
+        var pBuiltin: string = call json.getstring(pColors, "builtin");
+        var pLiteral: string = call json.getstring(pColors, "literal");
+        var pIdentifier: string = call json.getstring(pColors, "identifier");
+        var pSql: string = call json.getstring(pColors, "sql");
+        var pCustom: string = call json.getstring(pColors, "custom");
+        var pBackground: string = call json.getstring(pColors, "background");
+        var pText: string = call json.getstring(pColors, "text");
+        var pCaret: string = call json.getstring(pColors, "caret");
+        var pLineCursor: string = call json.getstring(pColors, "line-cursor");
+        var pLineNumbers: string = call json.getstring(pColors, "line-numbers");
+        var pConsoleBg: string = call json.getstring(pColors, "console-background");
+        var pTabBg: string = call json.getstring(pColors, "tab-background");
+        var pTabLabelColor: string = call json.getstring(pColors, "tab-label-color");
+        var pTabLabelChanged: string = call json.getstring(pColors, "tab-label-changed-color");
+        var pTabLabelBg: string = call json.getstring(pColors, "tab-label-background");
+        var pFindHlColor: string = call json.getstring(pColors, "find-highlight-color");
+        var pFindHlBg: string = call json.getstring(pColors, "find-highlight-background");
+        
+        profilesStr = profilesStr + "\"" + pName + "\": {\n";
+        profilesStr = profilesStr + "      \"info\": \"" + pInfo + "\",\n";
+        profilesStr = profilesStr + "      \"comment\": \"" + pComment + "\",\n";
+        profilesStr = profilesStr + "      \"error\": \"" + pError + "\",\n";
+        profilesStr = profilesStr + "      \"warn\": \"" + pWarn + "\",\n";
+        profilesStr = profilesStr + "      \"ok\": \"" + pOk + "\",\n";
+        profilesStr = profilesStr + "      \"code\": \"" + pCode + "\",\n";
+        profilesStr = profilesStr + "      \"datatype\": \"" + pDatatype + "\",\n";
+        profilesStr = profilesStr + "      \"data\": \"" + pData + "\",\n";
+        profilesStr = profilesStr + "      \"keyword\": \"" + pKeyword + "\",\n";
+        profilesStr = profilesStr + "      \"builtin\": \"" + pBuiltin + "\",\n";
+        profilesStr = profilesStr + "      \"literal\": \"" + pLiteral + "\",\n";
+        profilesStr = profilesStr + "      \"identifier\": \"" + pIdentifier + "\",\n";
+        profilesStr = profilesStr + "      \"sql\": \"" + pSql + "\",\n";
+        profilesStr = profilesStr + "      \"custom\": \"" + pCustom + "\",\n";
+        profilesStr = profilesStr + "      \"background\": \"" + pBackground + "\",\n";
+        profilesStr = profilesStr + "      \"text\": \"" + pText + "\",\n";
+        profilesStr = profilesStr + "      \"caret\": \"" + pCaret + "\",\n";
+        profilesStr = profilesStr + "      \"line-cursor\": \"" + pLineCursor + "\",\n";
+        profilesStr = profilesStr + "      \"line-numbers\": \"" + pLineNumbers + "\",\n";
+        profilesStr = profilesStr + "      \"console-background\": \"" + pConsoleBg + "\",\n";
+        profilesStr = profilesStr + "      \"tab-background\": \"" + pTabBg + "\",\n";
+        profilesStr = profilesStr + "      \"tab-label-color\": \"" + pTabLabelColor + "\",\n";
+        profilesStr = profilesStr + "      \"tab-label-changed-color\": \"" + pTabLabelChanged + "\",\n";
+        profilesStr = profilesStr + "      \"tab-label-background\": \"" + pTabLabelBg + "\",\n";
+        profilesStr = profilesStr + "      \"find-highlight-color\": \"" + pFindHlColor + "\",\n";
+        profilesStr = profilesStr + "      \"find-highlight-background\": \"" + pFindHlBg + "\"\n";
+        profilesStr = profilesStr + "    }";
+        
+        i = i + 1;
+    }
+    
+    // Add new profile with default colors
+    if profilesStr != "" then {
+        profilesStr = profilesStr + ",\n    ";
+    }
+    profilesStr = profilesStr + "\"" + newProfileName + "\": {\n";
+    profilesStr = profilesStr + "      \"info\": \"" + defaultInfoColor + "\",\n";
+    profilesStr = profilesStr + "      \"comment\": \"" + defaultCommentColor + "\",\n";
+    profilesStr = profilesStr + "      \"error\": \"" + defaultErrorColor + "\",\n";
+    profilesStr = profilesStr + "      \"warn\": \"" + defaultWarnColor + "\",\n";
+    profilesStr = profilesStr + "      \"ok\": \"" + defaultOkColor + "\",\n";
+    profilesStr = profilesStr + "      \"code\": \"" + defaultCodeColor + "\",\n";
+    profilesStr = profilesStr + "      \"datatype\": \"" + defaultDatatypeColor + "\",\n";
+    profilesStr = profilesStr + "      \"data\": \"" + defaultDataColor + "\",\n";
+    profilesStr = profilesStr + "      \"keyword\": \"" + defaultKeywordColor + "\",\n";
+    profilesStr = profilesStr + "      \"builtin\": \"" + defaultBuiltinColor + "\",\n";
+    profilesStr = profilesStr + "      \"literal\": \"" + defaultLiteralColor + "\",\n";
+    profilesStr = profilesStr + "      \"identifier\": \"" + defaultIdentifierColor + "\",\n";
+    profilesStr = profilesStr + "      \"sql\": \"" + defaultSqlColor + "\",\n";
+    profilesStr = profilesStr + "      \"custom\": \"" + defaultCustomColor + "\",\n";
+    profilesStr = profilesStr + "      \"background\": \"" + defaultBackgroundColor + "\",\n";
+    profilesStr = profilesStr + "      \"text\": \"" + defaultTextColor + "\",\n";
+    profilesStr = profilesStr + "      \"caret\": \"" + defaultCaretColor + "\",\n";
+    profilesStr = profilesStr + "      \"line-cursor\": \"" + defaultLineCursorColor + "\",\n";
+    profilesStr = profilesStr + "      \"line-numbers\": \"" + defaultLineNumbersColor + "\",\n";
+    profilesStr = profilesStr + "      \"console-background\": \"" + defaultConsoleBackgroundColor + "\",\n";
+    profilesStr = profilesStr + "      \"tab-background\": \"" + defaultTabBackgroundColor + "\",\n";
+    profilesStr = profilesStr + "      \"tab-label-color\": \"" + defaultTabLabelColor + "\",\n";
+    profilesStr = profilesStr + "      \"tab-label-changed-color\": \"" + defaultTabLabelChangedColor + "\",\n";
+    profilesStr = profilesStr + "      \"tab-label-background\": \"" + defaultTabLabelBackgroundColor + "\",\n";
+    profilesStr = profilesStr + "      \"find-highlight-color\": \"" + defaultFindHighlightColor + "\",\n";
+    profilesStr = profilesStr + "      \"find-highlight-background\": \"" + defaultFindHighlightBackground + "\"\n";
+    profilesStr = profilesStr + "    }";
+    
+    // Build final JSON with new profile as current
+    var jsonContent: string = "{\n";
+    jsonContent = jsonContent + "  \"currentProfile\": \"" + newProfileName + "\",\n";
+    jsonContent = jsonContent + "  \"profileList\": [" + profileListStr + "],\n";
+    jsonContent = jsonContent + "  \"profiles\": {\n    " + profilesStr + "\n  }\n";
+    jsonContent = jsonContent + "}";
+    
+    call file.writeTextFile(configPath, jsonContent);
+    println("New profile '" + newProfileName + "' added to config file with default colors");
+}
+
+// Function: Handle profile change - loads colors for the selected profile and updates config
 function onProfileChange {
     var selectedProfile: string = colorEditorScreen.profile;
     var profileColors: json = call json.getobject(profiles, selectedProfile);
@@ -378,6 +836,9 @@ function onProfileChange {
         
         println("Profile colors loaded successfully");
     }
+    
+    // Update the current profile in the config file
+    call saveConfigWithCurrentProfile();
 }
 
 // Function: Handle Add Profile button click
@@ -398,7 +859,11 @@ function onAddProfileClick {
             call scr.setItemChoiceOptions("colorEditorScreen", "profile_item", newOptions);
             colorEditorScreen.profile = newProfileName;
             call setColorsToDefaults();
-            call system.alertDialog("Profile '" + newProfileName + "' has been created with default colors.\nThe profile has been selected and colors set to defaults.", "Profile Added", "info");
+            
+            // Save the new profile to the config file with default colors
+            call addProfileToConfig(newProfileName);
+            
+            call system.alertDialog("Profile '" + newProfileName + "' has been created with default colors and saved to config.\nThe profile has been selected and colors set to defaults.", "Profile Added", "info");
         }
     } else {
         print "Add profile cancelled.";
