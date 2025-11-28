@@ -43,12 +43,16 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import javafx.geometry.Pos;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
+
+import javafx.animation.PauseTransition;
+import javafx.util.Duration;
 
 public class EbsTab extends Tab {
 
@@ -66,14 +70,29 @@ public class EbsTab extends Tab {
     private boolean suppressDirty = false; // avoid marking dirty during programmatic loads
 
     private HBox findBar;
-    private TextField findField, replaceField;
+    private ComboBox<String> findField;
+    private TextField replaceField;
     private CheckBox chkCase, chkWord, chkRegex;
     private Button btnNext, btnPrev, btnReplace, btnReplaceAll, btnClose;
     private Label lblCount;
+    
+    // Search history for find field (max 10 items)
+    private static final int MAX_SEARCH_HISTORY = 10;
+    private final java.util.List<String> searchHistory = new java.util.ArrayList<>();
 
     private List<int[]> lastMatches = java.util.Collections.emptyList(); // each int[]{start,endExclusive}
+    private List<int[]> stalePendingClear = java.util.Collections.emptyList(); // old matches pending clear after text change
     private int currentIndex = -1;
     private boolean suppressFindSearch = false; // avoid automatic search when programmatically setting find field
+    private boolean dropdownOpen = false; // tracks if dropdown is currently open
+    
+    // Minimum character count for find highlighting (more than 2 means at least 3)
+    private static final int MIN_FIND_CHARS = 3;
+    
+    // Timer for debounced editor change re-highlighting (2 seconds)
+    private PauseTransition editorChangeTimer;
+    // Flag to indicate if highlights are stale due to editor changes
+    private boolean highlightsStale = false;
     
     // autocomplete
     private final AutocompletePopup autocompletePopup;
@@ -425,8 +444,10 @@ public class EbsTab extends Tab {
         outputAreaScroller.setPadding(Insets.EMPTY);
         outputAreaFrame.setPadding(Insets.EMPTY);
 
-        findField = new TextField();
+        findField = new ComboBox<>();
+        findField.setEditable(true);
         findField.setPromptText("Find");
+        findField.setPrefWidth(200);
         replaceField = new TextField();
         replaceField.setPromptText("Replace");
 
@@ -735,6 +756,14 @@ public class EbsTab extends Tab {
     }
 
     private void applyLexerSpans(String src) {
+        // When find bar is visible AND there are any active highlights (current or stale),
+        // skip all styling during editing. Styling will be reapplied after the timer fires.
+        // We check multiple conditions to catch the first keystroke before highlightsStale is set.
+        if (findBar != null && findBar.isVisible() && 
+            (highlightsStale || !lastMatches.isEmpty() || !stalePendingClear.isEmpty())) {
+            return;
+        }
+        
         List<EbsToken> tokens = ebsLexer.tokenize(src); // returns List<EbsToken> with start/end/style
         // Build spans from token positions
         StyleSpansBuilder<Collection<String>> builder = new StyleSpansBuilder<>();
@@ -765,7 +794,16 @@ public class EbsTab extends Tab {
         }
 
         StyleSpans<Collection<String>> spans = builder.create();
+        
+        // Preserve scroll position when applying style spans
+        double scrollY = dispArea.getEstimatedScrollY();
+        
         dispArea.setStyleSpans(0, spans);
+        
+        // Restore scroll position after style update
+        Platform.runLater(() -> {
+            dispArea.scrollYToPixel(scrollY);
+        });
     }
 
     public String getEditorText() {
@@ -814,10 +852,77 @@ public class EbsTab extends Tab {
 
     // Setup find bar listeners once during initialization
     private void setupFindListeners() {
-        // Live search when typing in find field
-        findField.textProperty().addListener((obs, o, n) -> {
-            if (!suppressFindSearch) {
+        // Initialize the editor change timer (2 second delay)
+        editorChangeTimer = new PauseTransition(Duration.seconds(2));
+        editorChangeTimer.setOnFinished(e -> {
+            if (findBar.isVisible() && highlightsStale) {
+                // Reset stale flag FIRST so applyLexerSpans won't skip
+                highlightsStale = false;
+                // Now reapply syntax highlighting (was skipped during editing)
+                applyLexerSpans(dispArea.getText());
+                // Redo the find search on new text, but don't move cursor or change find position
+                runSearchHighlightOnly();
+            }
+        });
+        
+        // Listen for editor changes to trigger debounced re-highlighting
+        dispArea.textProperty().addListener((obs, oldText, newText) -> {
+            if (findBar.isVisible()) {
+                // When find bar is visible and editing, we need to refresh styling after delay
+                if (!lastMatches.isEmpty()) {
+                    // Save current matches for clearing later when timer fires
+                    stalePendingClear = lastMatches;
+                    lastMatches = java.util.Collections.emptyList();
+                    currentIndex = -1;
+                }
+                highlightsStale = true;
+                // Reset and start the timer for re-highlighting (syntax + find)
+                editorChangeTimer.playFromStart();
+            }
+        });
+        
+        // Live search when typing in find field (use the editor's text property for editable combobox)
+        findField.getEditor().textProperty().addListener((obs, o, n) -> {
+            if (!suppressFindSearch && !dropdownOpen) {
                 Platform.runLater(() -> {
+                    runSearch();
+                });
+            }
+        });
+        
+        // Track when dropdown opens
+        findField.setOnShowing(e -> {
+            dropdownOpen = true;
+        });
+        
+        // Handle dropdown selection when it closes
+        findField.setOnHidden(e -> {
+            if (dropdownOpen) {
+                dropdownOpen = false;
+                // Get the currently selected item
+                String selected = findField.getSelectionModel().getSelectedItem();
+                if (selected != null && !selected.isEmpty()) {
+                    // The selection changed - update editor and search
+                    Platform.runLater(() -> {
+                        suppressFindSearch = true;
+                        findField.getEditor().setText(selected);
+                        suppressFindSearch = false;
+                        addToSearchHistory(selected);
+                        runSearch();
+                    });
+                }
+            }
+        });
+        
+        // Also search when user presses Enter (and add to history)
+        findField.setOnAction(e -> {
+            if (!suppressFindSearch && !dropdownOpen) {
+                Platform.runLater(() -> {
+                    // Add to history when user presses Enter
+                    String q = findField.getEditor().getText();
+                    if (q != null && q.length() >= MIN_FIND_CHARS) {
+                        addToSearchHistory(q);
+                    }
                     runSearch();
                 });
             }
@@ -840,15 +945,29 @@ public class EbsTab extends Tab {
             });
         });
         
-        // Button actions
+        // Button actions - next/prev immediately re-run highlighting if stale then navigate
         btnNext.setOnAction(e -> {
             Platform.runLater(() -> {
+                // Add to history when user clicks Next
+                String q = findField.getEditor().getText();
+                if (q != null && q.length() >= MIN_FIND_CHARS) {
+                    addToSearchHistory(q);
+                }
+                refreshHighlightsIfStale();
                 gotoNext();
+                dispArea.requestFocus();
             });
         });
         btnPrev.setOnAction(e -> {
             Platform.runLater(() -> {
+                // Add to history when user clicks Prev
+                String q = findField.getEditor().getText();
+                if (q != null && q.length() >= MIN_FIND_CHARS) {
+                    addToSearchHistory(q);
+                }
+                refreshHighlightsIfStale();
                 gotoPrev();
+                dispArea.requestFocus();
             });
         });
         btnReplace.setOnAction(e -> {
@@ -890,13 +1009,23 @@ public class EbsTab extends Tab {
         btnReplace.setDisable(!withReplace);
         btnReplaceAll.setDisable(!withReplace);
         
-        // Populate find field with current selection
+        // Clear find field and populate with current selection if any
         String selectedText = dispArea.getSelectedText();
+        suppressFindSearch = true;
         if (selectedText != null && !selectedText.isEmpty()) {
-            suppressFindSearch = true;
-            findField.setText(selectedText);
-            suppressFindSearch = false;
-            // Explicitly run search after populating the field
+            findField.getEditor().setText(selectedText);
+        } else {
+            // Clear the find field when showing find bar with no selection
+            findField.getEditor().setText("");
+            clearHighlights();
+            lastMatches = java.util.Collections.emptyList();
+            currentIndex = -1;
+            lblCount.setText("");
+        }
+        suppressFindSearch = false;
+        
+        // Explicitly run search after populating the field (only if there's text)
+        if (!findField.getEditor().getText().isEmpty()) {
             runSearch();
         }
         
@@ -909,16 +1038,33 @@ public class EbsTab extends Tab {
         findBar.setManaged(false);
         lastMatches = java.util.Collections.emptyList();
         currentIndex = -1;
+        // Stop any pending timer and reset stale flag
+        if (editorChangeTimer != null) {
+            editorChangeTimer.stop();
+        }
+        highlightsStale = false;
     }
 
     private void runSearch() {
         clearHighlights();
         currentIndex = -1;
-        String q = findField.getText();
+        String q = findField.getEditor().getText();
         if (q == null || q.isEmpty()) {
             lblCount.setText("");
+            lastMatches = java.util.Collections.emptyList();
             return;
         }
+        
+        // Only highlight when there are more than 2 characters (at least 3)
+        if (q.length() < MIN_FIND_CHARS) {
+            lblCount.setText("Enter " + MIN_FIND_CHARS + "+ chars to search");
+            lastMatches = java.util.Collections.emptyList();
+            return;
+        }
+        
+        // Note: Don't add to search history here - it happens on every keystroke
+        // and modifying the ComboBox's items list clears the editor text.
+        // History is added when user presses Enter, clicks Next/Prev, or selects from dropdown.
 
         boolean cs = chkCase.isSelected();
         boolean ww = chkWord.isSelected();
@@ -984,6 +1130,75 @@ public class EbsTab extends Tab {
         // Emphasize current
         dispArea.addStyleToRange(cur[0], cur[1], "find-current");
     }
+    
+    /**
+     * Run search but only refresh highlights without jumping to a location.
+     * Used when the editor content changes and we want to re-highlight after a delay.
+     */
+    private void runSearchHighlightOnly() {
+        clearHighlights();
+        String q = findField.getEditor().getText();
+        if (q == null || q.isEmpty() || q.length() < MIN_FIND_CHARS) {
+            lastMatches = java.util.Collections.emptyList();
+            currentIndex = -1;
+            lblCount.setText(q == null || q.isEmpty() ? "" : "Enter " + MIN_FIND_CHARS + "+ chars to search");
+            return;
+        }
+
+        boolean cs = chkCase.isSelected();
+        boolean ww = chkWord.isSelected();
+        boolean rx = chkRegex.isSelected();
+
+        String text = dispArea.getText();
+        ArrayList<int[]> hits = new ArrayList<>();
+
+        try {
+            java.util.regex.Pattern pat;
+            if (rx) {
+                int flags = cs ? 0 : java.util.regex.Pattern.CASE_INSENSITIVE;
+                pat = java.util.regex.Pattern.compile(q, flags);
+            } else {
+                String literal = java.util.regex.Pattern.quote(q);
+                String pattern = ww ? "\\b" + literal + "\\b" : literal;
+                int flags = cs ? 0 : java.util.regex.Pattern.CASE_INSENSITIVE;
+                pat = java.util.regex.Pattern.compile(pattern, flags);
+            }
+            java.util.regex.Matcher m = pat.matcher(text);
+            while (m.find()) {
+                hits.add(new int[]{m.start(), m.end()});
+            }
+        } catch (Exception ex) {
+            // invalid regex; show nothing
+        }
+
+        lastMatches = hits;
+        
+        if (hits.isEmpty()) {
+            currentIndex = -1;
+            lblCount.setText("0 matches");
+            return;
+        }
+
+        // Highlight all matches without selecting or jumping
+        for (int[] r : hits) {
+            dispArea.addStyleToRange(r[0], r[1], "find-hit");
+        }
+        
+        // Preserve currentIndex if still valid, otherwise find nearest match to caret
+        if (currentIndex < 0 || currentIndex >= hits.size()) {
+            // currentIndex invalid, find nearest match to caret position
+            int caretPos = dispArea.getCaretPosition();
+            currentIndex = 0;
+            for (int i = 0; i < hits.size(); i++) {
+                if (hits.get(i)[0] >= caretPos) {
+                    currentIndex = i;
+                    break;
+                }
+            }
+        }
+        
+        updateCountLabel();
+    }
 
     private void selectCurrent(int[] r) {
         dispArea.selectRange(r[0], r[1]); // selection shows current
@@ -1046,6 +1261,56 @@ public class EbsTab extends Tab {
             dispArea.removeStyleFromRange(r[0], r[1], "find-hit");
             dispArea.removeStyleFromRange(r[0], r[1], "find-current");
         }
+        // Also clear any stale highlights that were pending from text changes
+        for (int[] r : stalePendingClear) {
+            dispArea.removeStyleFromRange(r[0], r[1], "find-hit");
+            dispArea.removeStyleFromRange(r[0], r[1], "find-current");
+        }
+        stalePendingClear = java.util.Collections.emptyList();
+    }
+    
+    /**
+     * Add a search term to the history, keeping only the last MAX_SEARCH_HISTORY items.
+     * If the term already exists, it's moved to the front.
+     */
+    private void addToSearchHistory(String term) {
+        if (term == null || term.isEmpty()) return;
+        
+        // Remove if already exists (we'll add it to the front)
+        searchHistory.remove(term);
+        
+        // Add to the front
+        searchHistory.add(0, term);
+        
+        // Keep only the last MAX_SEARCH_HISTORY items
+        while (searchHistory.size() > MAX_SEARCH_HISTORY) {
+            searchHistory.remove(searchHistory.size() - 1);
+        }
+        
+        // Update ComboBox items (no listeners since we're not using ObservableList)
+        suppressFindSearch = true;
+        try {
+            String currentText = findField.getEditor().getText();
+            findField.getItems().setAll(searchHistory);
+            findField.getEditor().setText(currentText);
+        } finally {
+            suppressFindSearch = false;
+        }
+    }
+    
+    /**
+     * Refresh highlights if they are stale due to editor changes.
+     * Stops any pending timer and runs a highlight-only search (no cursor jump).
+     * @return true if highlights were refreshed, false if they were not stale
+     */
+    private boolean refreshHighlightsIfStale() {
+        if (highlightsStale) {
+            editorChangeTimer.stop();
+            runSearchHighlightOnly();
+            highlightsStale = false;
+            return true;
+        }
+        return false;
     }
 
     private void replaceOne() {
