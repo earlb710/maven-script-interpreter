@@ -2,6 +2,7 @@ package com.eb.script.interpreter;
 
 import com.eb.script.token.RecordType;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -14,6 +15,7 @@ public class EnvironmentValues {
 
     final Map<String, Object> values = new ConcurrentHashMap<>();
     final Map<String, RecordType> recordTypes = new ConcurrentHashMap<>(); // Store record type metadata
+    final Set<String> constants = ConcurrentHashMap.newKeySet(); // Track constant variables
     final EnvironmentValues enclosing;
 
     public EnvironmentValues() {
@@ -27,14 +29,28 @@ public class EnvironmentValues {
     void clear() {
         values.clear();
         recordTypes.clear();
+        constants.clear();
     }
 
     public void define(String name, Object value) {
         values.put(name, value);
     }
     
+    public void defineConst(String name, Object value) {
+        values.put(name, value);
+        constants.add(name);
+    }
+    
     public void defineWithRecordType(String name, Object value, RecordType recordType) {
         values.put(name, value);
+        if (recordType != null) {
+            recordTypes.put(name, recordType);
+        }
+    }
+    
+    public void defineConstWithRecordType(String name, Object value, RecordType recordType) {
+        values.put(name, value);
+        constants.add(name);
         if (recordType != null) {
             recordTypes.put(name, recordType);
         }
@@ -48,6 +64,19 @@ public class EnvironmentValues {
             return enclosing.getRecordType(name);
         }
         return null;
+    }
+    
+    /**
+     * Check if a variable is declared as a constant.
+     */
+    public boolean isConst(String name) {
+        if (constants.contains(name)) {
+            return true;
+        }
+        if (enclosing != null) {
+            return enclosing.isConst(name);
+        }
+        return false;
     }
 
     Object get(String name) throws InterpreterError {
@@ -63,6 +92,10 @@ public class EnvironmentValues {
 
     public void assign(String name, Object value) throws InterpreterError {
         if (values.containsKey(name)) {
+            // Check if the variable is a constant
+            if (constants.contains(name)) {
+                throw new InterpreterError("Cannot reassign constant variable '" + name + "'.");
+            }
             values.put(name, value);
             return;
         }
