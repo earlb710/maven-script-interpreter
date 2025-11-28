@@ -1,0 +1,252 @@
+// Test Script: ComboBox onChange Event
+// Description: Tests onChange event handler for ComboBox controls
+// Author: GitHub Copilot
+// Date: 2025-11-28
+// Purpose: Test onChange fires correctly for editable and non-editable ComboBox:
+//   1. Editable ComboBox: onChange fires on every character typed
+//   2. Non-editable ComboBox: onChange fires once when value is selected
+//   3. ChoiceBox comparison: onChange fires once when value is chosen
+
+print "================================================================================";
+print "Test: ComboBox onChange Event";
+print "================================================================================";
+print "";
+print "This test verifies onChange behavior:";
+print "  1. Editable ComboBox - fires on every character typed";
+print "  2. Non-editable ComboBox - fires once when value selected from dropdown";
+print "  3. ChoiceBox - fires once when value chosen";
+print "  4. TextField - fires on every character typed (for comparison)";
+print "";
+
+// Counter variables to track onChange calls
+var editableComboCount:int = 0;
+var nonEditableComboCount:int = 0;
+var choiceBoxCount:int = 0;
+var textFieldCount:int = 0;
+
+screen testOnChange = {
+    "title": "Test ComboBox onChange Event",
+    "width": 700,
+    "height": 600,
+    "vars": [
+        {
+            "name": "editableComboValue",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "combobox",
+                "labelText": "Editable ComboBox:",
+                "promptHelp": "Type or select - onChange fires on every keystroke",
+                "options": ["Apple", "Banana", "Cherry", "Date", "Elderberry"]
+            }
+        },
+        {
+            "name": "nonEditableComboValue",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "combobox",
+                "labelText": "Non-Editable ComboBox:",
+                "promptHelp": "Select only - onChange fires on selection",
+                "options": ["Red", "Green", "Blue", "Yellow", "Purple"]
+            }
+        },
+        {
+            "name": "choiceBoxValue",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "choicebox",
+                "labelText": "ChoiceBox:",
+                "promptHelp": "Select only - onChange fires on selection",
+                "options": ["Small", "Medium", "Large", "Extra Large"]
+            }
+        },
+        {
+            "name": "textFieldValue",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "TextField (for comparison):",
+                "promptHelp": "Type here - onChange fires on every keystroke"
+            }
+        },
+        {
+            "name": "editableCount",
+            "type": "string",
+            "default": "0",
+            "display": {
+                "type": "label",
+                "labelText": "Editable ComboBox onChange count:"
+            }
+        },
+        {
+            "name": "nonEditableCount",
+            "type": "string",
+            "default": "0",
+            "display": {
+                "type": "label",
+                "labelText": "Non-Editable ComboBox onChange count:"
+            }
+        },
+        {
+            "name": "choiceCount",
+            "type": "string",
+            "default": "0",
+            "display": {
+                "type": "label",
+                "labelText": "ChoiceBox onChange count:"
+            }
+        },
+        {
+            "name": "textCount",
+            "type": "string",
+            "default": "0",
+            "display": {
+                "type": "label",
+                "labelText": "TextField onChange count:"
+            }
+        },
+        {
+            "name": "lastEvent",
+            "type": "string",
+            "default": "(no events yet)",
+            "display": {
+                "type": "label",
+                "labelText": "Last onChange event:"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "15",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "editableComboField",
+                    "varRef": "editableComboValue",
+                    "editable": true,
+                    "sequence": 1,
+                    "prefWidth": "400",
+                    "onChange": "editableComboCount = editableComboCount + 1; testOnChange.editableCount = string.valueOf(editableComboCount); testOnChange.lastEvent = \"Editable ComboBox: '\" + testOnChange.editableComboValue + \"'\"; print \"[Editable ComboBox] onChange #\" + editableComboCount + \": '\" + testOnChange.editableComboValue + \"'\";"
+                },
+                {
+                    "name": "nonEditableComboField",
+                    "varRef": "nonEditableComboValue",
+                    "editable": false,
+                    "sequence": 2,
+                    "prefWidth": "400",
+                    "onChange": "nonEditableComboCount = nonEditableComboCount + 1; testOnChange.nonEditableCount = string.valueOf(nonEditableComboCount); testOnChange.lastEvent = \"Non-Editable ComboBox: '\" + testOnChange.nonEditableComboValue + \"'\"; print \"[Non-Editable ComboBox] onChange #\" + nonEditableComboCount + \": '\" + testOnChange.nonEditableComboValue + \"'\";"
+                },
+                {
+                    "name": "choiceBoxField",
+                    "varRef": "choiceBoxValue",
+                    "sequence": 3,
+                    "prefWidth": "400",
+                    "onChange": "choiceBoxCount = choiceBoxCount + 1; testOnChange.choiceCount = string.valueOf(choiceBoxCount); testOnChange.lastEvent = \"ChoiceBox: '\" + testOnChange.choiceBoxValue + \"'\"; print \"[ChoiceBox] onChange #\" + choiceBoxCount + \": '\" + testOnChange.choiceBoxValue + \"'\";"
+                },
+                {
+                    "name": "textFieldItem",
+                    "varRef": "textFieldValue",
+                    "sequence": 4,
+                    "prefWidth": "400",
+                    "onChange": "textFieldCount = textFieldCount + 1; testOnChange.textCount = string.valueOf(textFieldCount); testOnChange.lastEvent = \"TextField: '\" + testOnChange.textFieldValue + \"'\"; print \"[TextField] onChange #\" + textFieldCount + \": '\" + testOnChange.textFieldValue + \"'\";"
+                },
+                {
+                    "varRef": "editableCount",
+                    "sequence": 5,
+                    "margin": "20 0 0 0"
+                },
+                {
+                    "varRef": "nonEditableCount",
+                    "sequence": 6
+                },
+                {
+                    "varRef": "choiceCount",
+                    "sequence": 7
+                },
+                {
+                    "varRef": "textCount",
+                    "sequence": 8
+                },
+                {
+                    "varRef": "lastEvent",
+                    "sequence": 9,
+                    "margin": "10 0 0 0"
+                },
+                {
+                    "name": "resetBtn",
+                    "sequence": 10,
+                    "margin": "20 0 0 0",
+                    "display": {
+                        "type": "button",
+                        "labelText": "Reset Counters",
+                        "onClick": "editableComboCount = 0; nonEditableComboCount = 0; choiceBoxCount = 0; textFieldCount = 0; testOnChange.editableCount = \"0\"; testOnChange.nonEditableCount = \"0\"; testOnChange.choiceCount = \"0\"; testOnChange.textCount = \"0\"; testOnChange.lastEvent = \"(counters reset)\"; print \"Counters reset.\";"
+                    }
+                },
+                {
+                    "name": "closeBtn",
+                    "sequence": 11,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Close",
+                        "onClick": "call scr.closeScreen(\"testOnChange\");"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+print "Step 1: Opening test screen...";
+print "";
+print "INSTRUCTIONS:";
+print "================================================================================";
+print "";
+print "1. EDITABLE COMBOBOX (first field):";
+print "   - Type 'ABC' in the editable combobox";
+print "   - EXPECTED: onChange fires 3 times (once per character)";
+print "   - You should see count increase from 0 to 3";
+print "";
+print "2. NON-EDITABLE COMBOBOX (second field):";
+print "   - Click and select 'Blue' from the dropdown";
+print "   - EXPECTED: onChange fires 1 time only";
+print "   - You should see count go from 0 to 1";
+print "";
+print "3. CHOICEBOX (third field):";
+print "   - Click and select 'Large' from the dropdown";
+print "   - EXPECTED: onChange fires 1 time only";
+print "   - You should see count go from 0 to 1";
+print "";
+print "4. TEXTFIELD (fourth field):";
+print "   - Type 'Hello' in the text field";
+print "   - EXPECTED: onChange fires 5 times (once per character)";
+print "   - You should see count increase from 0 to 5";
+print "";
+print "5. Check the console output - each onChange should print its event";
+print "";
+print "================================================================================";
+print "";
+
+show screen testOnChange;
+
+print "";
+print "================================================================================";
+print "Test Complete!";
+print "================================================================================";
+print "";
+print "Summary of expected behavior:";
+print "  • Editable ComboBox: onChange fires on EVERY character typed";
+print "  • Non-Editable ComboBox: onChange fires ONCE when value selected";
+print "  • ChoiceBox: onChange fires ONCE when value chosen";
+print "  • TextField: onChange fires on EVERY character typed";
+print "";
+print "Final onChange counts:";
+print "  - Editable ComboBox: " + editableComboCount;
+print "  - Non-Editable ComboBox: " + nonEditableComboCount;
+print "  - ChoiceBox: " + choiceBoxCount;
+print "  - TextField: " + textFieldCount;
+print "";
