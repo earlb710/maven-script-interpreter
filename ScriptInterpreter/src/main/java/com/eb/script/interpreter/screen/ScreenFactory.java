@@ -908,13 +908,10 @@ public class ScreenFactory {
                 
                 // Set up onChange handler for input controls
                 String changeCode = item.onChange;
-                System.out.println("[DEBUG ScreenFactory] Item '" + item.name + "' item.onChange = " + item.onChange);
                 if (changeCode == null && metadata != null) {
                     changeCode = metadata.onChange;
-                    System.out.println("[DEBUG ScreenFactory] Item '" + item.name + "' using metadata.onChange = " + changeCode);
                 }
                 if (onClickHandler != null && changeCode != null && !changeCode.isEmpty()) {
-                    System.out.println("[DEBUG ScreenFactory] Setting up onChange handler for item '" + item.name + "'");
                     setupChangeHandler(control, changeCode, onClickHandler, screenName, context);
                 }
 
