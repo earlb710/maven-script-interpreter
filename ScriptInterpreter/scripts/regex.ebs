@@ -240,8 +240,8 @@ loadSampleData {
 // Create the regex tester screen
 screen regexScreen = {
     "title": "Regex Tester - Interactive Regular Expression Tool",
-    "width": 900,
-    "height": 800,
+    "width": 800,
+    "height": 900,
     "vars": [
         {
             "name": "sourceText",
@@ -322,7 +322,7 @@ screen regexScreen = {
         {
             "name": "mainArea",
             "type": "vbox",
-            "style": "-fx-spacing: 10; -fx-padding: 15;",
+            "style": "-fx-spacing: 2; -fx-padding: 2;",
             "areas": [
                 {
                     "name": "titleArea",
@@ -334,8 +334,10 @@ screen regexScreen = {
                             "display": {
                                 "type": "label",
                                 "labelText": "Interactive Regular Expression Tester",
+                                "itemColor": "#000088",
                                 "itemBold": true,
-                                "itemFontSize": "18"
+                                "itemUnderline": true,
+                                "itemFontSize": "20"
                             }
                         }
                     ]
@@ -346,6 +348,9 @@ screen regexScreen = {
                     "groupBorder": "lowered",
                     "groupBorderColor": "#cccccc",
                     "groupLabelText": "Input",
+                    "groupLabelColor": "#444444",
+                    "groupLabelOffset": "bottom",
+                    "padding": "4",
                     "style": "-fx-spacing: 8; -fx-padding: 10;",
                     "items": [
                         {"name": "sourceTextItem", "varRef": "sourceText"},
@@ -359,6 +364,9 @@ screen regexScreen = {
                     "groupBorder": "lowered",
                     "groupBorderColor": "#cccccc",
                     "groupLabelText": "Regex Options",
+                    "groupLabelOffset": "bottom",
+                    "padding": "4",
+                    "groupLabelColor": "#444444",
                     "style": "-fx-spacing: 5; -fx-padding: 10;",
                     "items": [
                         {"name": "caseInsensitiveItem", "varRef": "caseInsensitive"},
@@ -449,6 +457,9 @@ screen regexScreen = {
                     "groupBorder": "lowered",
                     "groupBorderColor": "#cccccc",
                     "groupLabelText": "Output",
+                    "groupLabelColor": "#444444",
+                    "groupLabelOffset": "bottom",
+                    "padding": "4",
                     "style": "-fx-spacing: 5; -fx-padding: 10;",
                     "items": [
                         {"name": "resultTextItem", "varRef": "resultText"}
