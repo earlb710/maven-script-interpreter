@@ -8,16 +8,43 @@ import java.util.List;
 /**
  * Represents a raise exception statement for explicitly throwing errors in EBS scripts.
  * 
- * Syntax for standard exceptions:
+ * <h2>Syntax</h2>
+ * <h3>Standard Exceptions:</h3>
+ * <pre>
  *   raise exception ERROR_TYPE("error message");
+ * </pre>
+ * Standard exceptions are predefined error types from the {@link ErrorType} enum,
+ * such as IO_ERROR, MATH_ERROR, VALIDATION_ERROR, etc. They only accept a single
+ * message parameter to provide context about the error.
  * 
- * Syntax for custom exceptions:
+ * <h3>Custom Exceptions:</h3>
+ * <pre>
  *   raise exception CUSTOM_EXCEPTION(param1, param2, ...);
+ * </pre>
+ * Custom exceptions are user-defined and can have multiple parameters. They are
+ * identified by any name that is NOT a standard ErrorType name. The parameters
+ * are formatted into the exception message as a comma-separated list.
  * 
- * Standard exceptions (like IO_ERROR, MATH_ERROR, etc.) take only a message parameter.
- * Custom exceptions can be declared with multiple parameters.
+ * <h2>Exception Handling Behavior</h2>
+ * <ul>
+ *   <li>When a raise statement executes, it creates an {@link com.eb.script.interpreter.EbsScriptException}
+ *       and throws it immediately.</li>
+ *   <li>Standard exceptions can be caught using their ErrorType name in a when clause.</li>
+ *   <li>Custom exceptions can be caught by their exact name (case-insensitive) or by ANY_ERROR.</li>
+ *   <li>The exception message is captured in the handler's error variable if specified.</li>
+ * </ul>
+ * 
+ * <h2>Validation Rules</h2>
+ * <ul>
+ *   <li>Standard exceptions accept at most one parameter (the error message).</li>
+ *   <li>Custom exceptions can accept any number of parameters.</li>
+ *   <li>The parser validates that standard exceptions don't receive multiple parameters.</li>
+ * </ul>
  * 
  * @author Earl Bosch
+ * @see com.eb.script.interpreter.ErrorType
+ * @see com.eb.script.interpreter.EbsScriptException
+ * @see com.eb.script.interpreter.statement.ExceptionHandler
  */
 public class RaiseStatement extends Statement {
     
