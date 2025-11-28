@@ -398,6 +398,9 @@ The `AreaItem` class defines individual UI elements within an area, including th
 | Property | Type | Description | Example |
 |----------|------|-------------|---------|
 | `onValidate` | String | EBS code to validate item value | "if (age < 18) { return false; } return true;" |
+| `onChange` | String | EBS code to execute when value changes | "call updateTotal();" |
+
+#### onValidate
 
 The `onValidate` property allows you to specify inline EBS code that validates the item's value whenever it changes. The validation code:
 - Is executed automatically when the control's value changes
@@ -424,6 +427,74 @@ The `onValidate` property allows you to specify inline EBS code that validates t
     "display": {
         "type": "textfield",
         "onValidate": "if (age < 18 or age > 100) { return false; } return true;"
+    }
+}
+```
+
+#### onChange
+
+The `onChange` property allows you to specify inline EBS code that executes whenever the item's value changes. The change handler:
+- Is executed automatically when the control's value changes
+- Runs after the variable value has been updated
+- Has access to all screen variables (including the new value)
+- Runs after validation (if `onValidate` is defined)
+- Can be defined at either the variable's display level or the individual item level
+- Item-level `onChange` takes precedence over variable-level `onChange`
+- Does not need to return a value (any return value is ignored)
+
+**Use Cases:**
+- Update calculated fields based on input changes
+- Trigger cascading updates in related controls
+- Log or track field changes
+- Enable/disable other controls based on value
+- Show/hide sections based on selections
+
+**Example: Update total when quantity changes**
+```javascript
+{
+    "varRef": "quantity",
+    "sequence": 1,
+    "onChange": "total = quantity * unitPrice; call screen.setProperty('myScreen.totalLabel', 'text', string(total));"
+}
+```
+
+**Example: Enable/disable a field based on checkbox**
+```javascript
+{
+    "name": "enableAdvanced",
+    "type": "bool",
+    "display": {
+        "type": "checkbox",
+        "labelText": "Enable Advanced Options",
+        "onChange": "call screen.setProperty('myScreen.advancedField', 'disabled', not enableAdvanced);"
+    }
+}
+```
+
+**Example: Cascading update with logging**
+```javascript
+{
+    "varRef": "country",
+    "sequence": 1,
+    "onChange": "println('Country changed to: ' + country); call updateCityList(country);"
+}
+```
+
+**Combining onValidate and onChange:**
+When both `onValidate` and `onChange` are defined on the same item:
+1. The value change is first validated using `onValidate`
+2. If validation passes (returns `true`), the `onChange` code is executed
+3. If validation fails (returns `false`), the `onChange` code is still executed (after validation styling is applied)
+
+```javascript
+{
+    "name": "email",
+    "type": "string",
+    "display": {
+        "type": "textfield",
+        "labelText": "Email:",
+        "onValidate": "return string.contains(email, '@');",
+        "onChange": "call checkEmailAvailability(email);"
     }
 }
 ```
@@ -462,6 +533,7 @@ The `DisplayMetadata` class defines the display properties and behavior for UI i
 | `alignment` | String | Text/content alignment | "left", "center", "right" |
 | `pattern` | String | Regex validation pattern | "^[a-zA-Z0-9]+$" |
 | `onValidate` | String | Inline EBS code for validation | "return age >= 18;" |
+| `onChange` | String | Inline EBS code executed on value change | "call updateTotal();" |
 
 ### Event Handler Properties
 
@@ -497,6 +569,54 @@ The `onValidate` property defines inline validation logic for a variable's displ
         "min": 0,
         "max": 150,
         "onValidate": "if (age < 18 or age > 100) { return false; } return true;"
+    }
+}
+```
+
+#### onChange
+
+The `onChange` property defines inline code that executes whenever the variable's value changes. When defined at the variable level in the `display` object, this handler will apply to all instances of that variable unless overridden at the item level.
+
+**Format**: String containing EBS code to execute
+**Trigger**: Executed automatically whenever the control's value changes
+**Return Value**: None required (any return value is ignored)
+
+**Example: Update calculated field**
+```javascript
+{
+    "name": "quantity",
+    "type": "int",
+    "display": {
+        "type": "spinner",
+        "min": 1,
+        "max": 100,
+        "onChange": "total = quantity * unitPrice;"
+    }
+}
+```
+
+**Example: Cascading dropdown update**
+```javascript
+{
+    "name": "category",
+    "type": "string",
+    "display": {
+        "type": "combobox",
+        "options": ["Electronics", "Clothing", "Books"],
+        "onChange": "call loadSubcategories(category);"
+    }
+}
+```
+
+**Example: Conditional control visibility**
+```javascript
+{
+    "name": "showDetails",
+    "type": "bool",
+    "display": {
+        "type": "checkbox",
+        "labelText": "Show Details",
+        "onChange": "call screen.setProperty('myScreen.detailsArea', 'visible', showDetails);"
     }
 }
 ```
