@@ -1783,6 +1783,11 @@ public class InterpreterScreen {
                         @SuppressWarnings("unchecked")
                         Map<String, Object> itemDef = (Map<String, Object>) itemObj;
 
+                        // DEBUG: Print all keys in itemDef
+                        System.out.println("[DEBUG InterpreterScreen] itemDef keys: " + itemDef.keySet());
+                        System.out.println("[DEBUG InterpreterScreen] itemDef contains 'onChange': " + itemDef.containsKey("onChange"));
+                        System.out.println("[DEBUG InterpreterScreen] itemDef contains 'onchange': " + itemDef.containsKey("onchange"));
+
                         AreaItem item = new AreaItem();
 
                         // Extract item properties
@@ -1991,13 +1996,18 @@ public class InterpreterScreen {
                         if (itemDef.containsKey("onChange")) {
                             Object val = itemDef.get("onChange");
                             if (val != null) item.onChange = String.valueOf(val);
+                            System.out.println("[DEBUG InterpreterScreen] Set item.onChange from 'onChange' key");
                         } else if (itemDef.containsKey("on_change")) {
                             Object val = itemDef.get("on_change");
                             if (val != null) item.onChange = String.valueOf(val);
+                            System.out.println("[DEBUG InterpreterScreen] Set item.onChange from 'on_change' key");
                         } else if (itemDef.containsKey("onchange")) {
                             Object val = itemDef.get("onchange");
                             if (val != null) item.onChange = String.valueOf(val);
+                            System.out.println("[DEBUG InterpreterScreen] Set item.onChange from 'onchange' key");
                         }
+                        
+                        System.out.println("[DEBUG InterpreterScreen] Item '" + item.name + "' onChange = " + item.onChange);
 
                         // Store in screenAreaItems map by item name (for screen.getProperty/setProperty)
                         if (item.name != null && !item.name.isEmpty()) {
