@@ -245,6 +245,208 @@ var defaultTabLabelBackgroundColor: string = "#333333";
 var defaultFindHighlightColor: string = "#000000";
 var defaultFindHighlightBackground: string = "#ddb107";
 
+// ============================================================================
+// Event Handler Functions
+// ============================================================================
+
+// Function: Set all screen colors to default values
+function setColorsToDefaults {
+    colorEditorScreen.info = defaultInfoColor;
+    colorEditorScreen.comment = defaultCommentColor;
+    colorEditorScreen.error = defaultErrorColor;
+    colorEditorScreen.warn = defaultWarnColor;
+    colorEditorScreen.ok = defaultOkColor;
+    colorEditorScreen.code = defaultCodeColor;
+    colorEditorScreen.datatype = defaultDatatypeColor;
+    colorEditorScreen.data = defaultDataColor;
+    colorEditorScreen.keyword = defaultKeywordColor;
+    colorEditorScreen.builtin = defaultBuiltinColor;
+    colorEditorScreen.literal = defaultLiteralColor;
+    colorEditorScreen.identifier = defaultIdentifierColor;
+    colorEditorScreen.sql = defaultSqlColor;
+    colorEditorScreen.custom = defaultCustomColor;
+    colorEditorScreen.background = defaultBackgroundColor;
+    colorEditorScreen.text = defaultTextColor;
+    colorEditorScreen.caret = defaultCaretColor;
+    colorEditorScreen.lineCursor = defaultLineCursorColor;
+    colorEditorScreen.lineNumbers = defaultLineNumbersColor;
+    colorEditorScreen.consoleBackground = defaultConsoleBackgroundColor;
+    colorEditorScreen.tabBackground = defaultTabBackgroundColor;
+    colorEditorScreen.tabLabelColor = defaultTabLabelColor;
+    colorEditorScreen.tabLabelChangedColor = defaultTabLabelChangedColor;
+    colorEditorScreen.tabLabelBackground = defaultTabLabelBackgroundColor;
+    colorEditorScreen.findHighlightColor = defaultFindHighlightColor;
+    colorEditorScreen.findHighlightBackground = defaultFindHighlightBackground;
+}
+
+// Function: Set all screen colors to originally loaded values
+function setColorsToOriginal {
+    colorEditorScreen.info = infoColor;
+    colorEditorScreen.comment = commentColor;
+    colorEditorScreen.error = errorColor;
+    colorEditorScreen.warn = warnColor;
+    colorEditorScreen.ok = okColor;
+    colorEditorScreen.code = codeColor;
+    colorEditorScreen.datatype = datatypeColor;
+    colorEditorScreen.data = dataColor;
+    colorEditorScreen.keyword = keywordColor;
+    colorEditorScreen.builtin = builtinColor;
+    colorEditorScreen.literal = literalColor;
+    colorEditorScreen.identifier = identifierColor;
+    colorEditorScreen.sql = sqlColor;
+    colorEditorScreen.custom = customColor;
+    colorEditorScreen.background = backgroundColor;
+    colorEditorScreen.text = textColor;
+    colorEditorScreen.caret = caretColor;
+    colorEditorScreen.lineCursor = lineCursorColor;
+    colorEditorScreen.lineNumbers = lineNumbersColor;
+    colorEditorScreen.consoleBackground = consoleBackgroundColor;
+    colorEditorScreen.tabBackground = tabBackgroundColor;
+    colorEditorScreen.tabLabelColor = tabLabelColor;
+    colorEditorScreen.tabLabelChangedColor = tabLabelChangedColor;
+    colorEditorScreen.tabLabelBackground = tabLabelBackgroundColor;
+    colorEditorScreen.findHighlightColor = findHighlightColor;
+    colorEditorScreen.findHighlightBackground = findHighlightBackground;
+}
+
+// Function: Handle profile change - loads colors for the selected profile
+function onProfileChange {
+    var selectedProfile: string = colorEditorScreen.profile;
+    var profileColors: json = call json.getobject(profiles, selectedProfile);
+    
+    if call json.isempty(profileColors) then {
+        println("Profile '" + selectedProfile + "' not found, using defaults");
+        call setColorsToDefaults();
+    } else {
+        println("Loading colors for profile: " + selectedProfile);
+        
+        // Get all color values from the profile
+        var pInfo: string = call json.getstring(profileColors, "info");
+        var pComment: string = call json.getstring(profileColors, "comment");
+        var pError: string = call json.getstring(profileColors, "error");
+        var pWarn: string = call json.getstring(profileColors, "warn");
+        var pOk: string = call json.getstring(profileColors, "ok");
+        var pCode: string = call json.getstring(profileColors, "code");
+        var pDatatype: string = call json.getstring(profileColors, "datatype");
+        var pData: string = call json.getstring(profileColors, "data");
+        var pKeyword: string = call json.getstring(profileColors, "keyword");
+        var pBuiltin: string = call json.getstring(profileColors, "builtin");
+        var pLiteral: string = call json.getstring(profileColors, "literal");
+        var pIdentifier: string = call json.getstring(profileColors, "identifier");
+        var pSql: string = call json.getstring(profileColors, "sql");
+        var pCustom: string = call json.getstring(profileColors, "custom");
+        var pBackground: string = call json.getstring(profileColors, "background");
+        var pText: string = call json.getstring(profileColors, "text");
+        var pCaret: string = call json.getstring(profileColors, "caret");
+        var pLineCursor: string = call json.getstring(profileColors, "line-cursor");
+        var pLineNumbers: string = call json.getstring(profileColors, "line-numbers");
+        var pConsoleBg: string = call json.getstring(profileColors, "console-background");
+        var pTabBg: string = call json.getstring(profileColors, "tab-background");
+        var pTabLabelColor: string = call json.getstring(profileColors, "tab-label-color");
+        var pTabLabelChanged: string = call json.getstring(profileColors, "tab-label-changed-color");
+        var pTabLabelBg: string = call json.getstring(profileColors, "tab-label-background");
+        var pFindHlColor: string = call json.getstring(profileColors, "find-highlight-color");
+        var pFindHlBg: string = call json.getstring(profileColors, "find-highlight-background");
+        
+        // Set each color, falling back to defaults if not defined
+        if pInfo != "" then { colorEditorScreen.info = pInfo; } else { colorEditorScreen.info = defaultInfoColor; }
+        if pComment != "" then { colorEditorScreen.comment = pComment; } else { colorEditorScreen.comment = defaultCommentColor; }
+        if pError != "" then { colorEditorScreen.error = pError; } else { colorEditorScreen.error = defaultErrorColor; }
+        if pWarn != "" then { colorEditorScreen.warn = pWarn; } else { colorEditorScreen.warn = defaultWarnColor; }
+        if pOk != "" then { colorEditorScreen.ok = pOk; } else { colorEditorScreen.ok = defaultOkColor; }
+        if pCode != "" then { colorEditorScreen.code = pCode; } else { colorEditorScreen.code = defaultCodeColor; }
+        if pDatatype != "" then { colorEditorScreen.datatype = pDatatype; } else { colorEditorScreen.datatype = defaultDatatypeColor; }
+        if pData != "" then { colorEditorScreen.data = pData; } else { colorEditorScreen.data = defaultDataColor; }
+        if pKeyword != "" then { colorEditorScreen.keyword = pKeyword; } else { colorEditorScreen.keyword = defaultKeywordColor; }
+        if pBuiltin != "" then { colorEditorScreen.builtin = pBuiltin; } else { colorEditorScreen.builtin = defaultBuiltinColor; }
+        if pLiteral != "" then { colorEditorScreen.literal = pLiteral; } else { colorEditorScreen.literal = defaultLiteralColor; }
+        if pIdentifier != "" then { colorEditorScreen.identifier = pIdentifier; } else { colorEditorScreen.identifier = defaultIdentifierColor; }
+        if pSql != "" then { colorEditorScreen.sql = pSql; } else { colorEditorScreen.sql = defaultSqlColor; }
+        if pCustom != "" then { colorEditorScreen.custom = pCustom; } else { colorEditorScreen.custom = defaultCustomColor; }
+        if pBackground != "" then { colorEditorScreen.background = pBackground; } else { colorEditorScreen.background = defaultBackgroundColor; }
+        if pText != "" then { colorEditorScreen.text = pText; } else { colorEditorScreen.text = defaultTextColor; }
+        if pCaret != "" then { colorEditorScreen.caret = pCaret; } else { colorEditorScreen.caret = defaultCaretColor; }
+        if pLineCursor != "" then { colorEditorScreen.lineCursor = pLineCursor; } else { colorEditorScreen.lineCursor = defaultLineCursorColor; }
+        if pLineNumbers != "" then { colorEditorScreen.lineNumbers = pLineNumbers; } else { colorEditorScreen.lineNumbers = defaultLineNumbersColor; }
+        if pConsoleBg != "" then { colorEditorScreen.consoleBackground = pConsoleBg; } else { colorEditorScreen.consoleBackground = defaultConsoleBackgroundColor; }
+        if pTabBg != "" then { colorEditorScreen.tabBackground = pTabBg; } else { colorEditorScreen.tabBackground = defaultTabBackgroundColor; }
+        if pTabLabelColor != "" then { colorEditorScreen.tabLabelColor = pTabLabelColor; } else { colorEditorScreen.tabLabelColor = defaultTabLabelColor; }
+        if pTabLabelChanged != "" then { colorEditorScreen.tabLabelChangedColor = pTabLabelChanged; } else { colorEditorScreen.tabLabelChangedColor = defaultTabLabelChangedColor; }
+        if pTabLabelBg != "" then { colorEditorScreen.tabLabelBackground = pTabLabelBg; } else { colorEditorScreen.tabLabelBackground = defaultTabLabelBackgroundColor; }
+        if pFindHlColor != "" then { colorEditorScreen.findHighlightColor = pFindHlColor; } else { colorEditorScreen.findHighlightColor = defaultFindHighlightColor; }
+        if pFindHlBg != "" then { colorEditorScreen.findHighlightBackground = pFindHlBg; } else { colorEditorScreen.findHighlightBackground = defaultFindHighlightBackground; }
+        
+        println("Profile colors loaded successfully");
+    }
+}
+
+// Function: Handle Add Profile button click
+function onAddProfileClick {
+    var newProfileName: string = call system.inputDialog("Add Profile", "Enter the name for the new profile:\n(New profile will use default color values)", "");
+    
+    if newProfileName != "" then {
+        if newProfileName == "default" then {
+            call system.alertDialog("Cannot use 'default' as a profile name.\nPlease choose a different name.", "Add Profile", "warning");
+        } else {
+            var currentProfile: string = colorEditorScreen.profile;
+            var newOptionsStr: string = "{\"default\": \"default\"";
+            if currentProfile != "default" then {
+                newOptionsStr = newOptionsStr + ", \"" + currentProfile + "\": \"" + currentProfile + "\"";
+            }
+            newOptionsStr = newOptionsStr + ", \"" + newProfileName + "\": \"" + newProfileName + "\"}";
+            var newOptions: json = call json.jsonfromstring(newOptionsStr);
+            call scr.setItemChoiceOptions("colorEditorScreen", "profile_item", newOptions);
+            colorEditorScreen.profile = newProfileName;
+            call setColorsToDefaults();
+            call system.alertDialog("Profile '" + newProfileName + "' has been created with default colors.\nThe profile has been selected and colors set to defaults.", "Profile Added", "info");
+        }
+    } else {
+        print "Add profile cancelled.";
+    }
+}
+
+// Function: Handle Remove Profile button click
+function onRemoveProfileClick {
+    var currentProfile: string = colorEditorScreen.profile;
+    
+    if currentProfile == "default" then {
+        call system.alertDialog("Cannot remove the 'default' profile.\nPlease select a different profile to remove.", "Remove Profile", "warning");
+    } else {
+        var confirmRemove: bool = call system.confirmDialog("Are you sure you want to remove the '" + currentProfile + "' profile?\n\nThis will delete the profile and switch to 'default'.", "Confirm Remove");
+        if confirmRemove then {
+            var newOptions: json = call json.jsonfromstring("{\"default\": \"default\"}");
+            call scr.setItemChoiceOptions("colorEditorScreen", "profile_item", newOptions);
+            colorEditorScreen.profile = "default";
+            call setColorsToDefaults();
+            call system.alertDialog("Profile '" + currentProfile + "' has been removed.\nSwitched to 'default' profile.", "Profile Removed", "info");
+        } else {
+            print "Remove profile cancelled.";
+        }
+    }
+}
+
+// Function: Handle Reset button click
+function onResetClick {
+    if colorEditorScreen.profile == "default" then {
+        call setColorsToDefaults();
+        call system.alertDialog("Colors reset to CSS default values.", "Reset", "info");
+    } else {
+        call setColorsToOriginal();
+        call system.alertDialog("Colors reset to original loaded values.", "Reset", "info");
+    }
+}
+
+// Function: Handle Save and Close button click
+function onSaveCloseClick {
+    var currentColors: string = "{\n      \"info\": \"" + colorEditorScreen.info + "\",\n      \"comment\": \"" + colorEditorScreen.comment + "\",\n      \"error\": \"" + colorEditorScreen.error + "\",\n      \"warn\": \"" + colorEditorScreen.warn + "\",\n      \"ok\": \"" + colorEditorScreen.ok + "\",\n      \"code\": \"" + colorEditorScreen.code + "\",\n      \"datatype\": \"" + colorEditorScreen.datatype + "\",\n      \"data\": \"" + colorEditorScreen.data + "\",\n      \"keyword\": \"" + colorEditorScreen.keyword + "\",\n      \"builtin\": \"" + colorEditorScreen.builtin + "\",\n      \"literal\": \"" + colorEditorScreen.literal + "\",\n      \"identifier\": \"" + colorEditorScreen.identifier + "\",\n      \"sql\": \"" + colorEditorScreen.sql + "\",\n      \"custom\": \"" + colorEditorScreen.custom + "\",\n      \"background\": \"" + colorEditorScreen.background + "\",\n      \"text\": \"" + colorEditorScreen.text + "\",\n      \"caret\": \"" + colorEditorScreen.caret + "\",\n      \"line-cursor\": \"" + colorEditorScreen.lineCursor + "\",\n      \"line-numbers\": \"" + colorEditorScreen.lineNumbers + "\",\n      \"console-background\": \"" + colorEditorScreen.consoleBackground + "\",\n      \"tab-background\": \"" + colorEditorScreen.tabBackground + "\",\n      \"tab-label-color\": \"" + colorEditorScreen.tabLabelColor + "\",\n      \"tab-label-changed-color\": \"" + colorEditorScreen.tabLabelChangedColor + "\",\n      \"tab-label-background\": \"" + colorEditorScreen.tabLabelBackground + "\",\n      \"find-highlight-color\": \"" + colorEditorScreen.findHighlightColor + "\",\n      \"find-highlight-background\": \"" + colorEditorScreen.findHighlightBackground + "\"\n    }";
+    
+    var jsonContent: string = "{\n  \"currentProfile\": \"" + colorEditorScreen.profile + "\",\n  \"profileList\": [\"" + colorEditorScreen.profile + "\"],\n  \"profiles\": {\n    \"" + colorEditorScreen.profile + "\": " + currentColors + "\n  }\n}";
+    
+    call file.writeTextFile(configPath, jsonContent);
+    call system.alertDialog("Configuration saved to " + configPath + ".\nRestart the application to see changes.", "Saved", "info");
+    close screen;
+}
+
 // Display all available colors
 print "Available colors in console.cfg:";
 print "- info: " + infoColor;
@@ -295,7 +497,7 @@ screen colorEditorScreen = {
                 "labelText": "Profile:",
                 "labelTextAlignment": "left",
                 "options": $profileList,
-                "onChange": "var selectedProfile: string = colorEditorScreen.profile; var profileColors: json = call json.getobject($profiles, selectedProfile); if call json.isempty(profileColors) then { println(\"Profile '\" + selectedProfile + \"' not found, using defaults\"); colorEditorScreen.info = $defaultInfoColor; colorEditorScreen.comment = $defaultCommentColor; colorEditorScreen.error = $defaultErrorColor; colorEditorScreen.warn = $defaultWarnColor; colorEditorScreen.ok = $defaultOkColor; colorEditorScreen.code = $defaultCodeColor; colorEditorScreen.datatype = $defaultDatatypeColor; colorEditorScreen.data = $defaultDataColor; colorEditorScreen.keyword = $defaultKeywordColor; colorEditorScreen.builtin = $defaultBuiltinColor; colorEditorScreen.literal = $defaultLiteralColor; colorEditorScreen.identifier = $defaultIdentifierColor; colorEditorScreen.sql = $defaultSqlColor; colorEditorScreen.custom = $defaultCustomColor; colorEditorScreen.background = $defaultBackgroundColor; colorEditorScreen.text = $defaultTextColor; colorEditorScreen.caret = $defaultCaretColor; colorEditorScreen.lineCursor = $defaultLineCursorColor; colorEditorScreen.lineNumbers = $defaultLineNumbersColor; colorEditorScreen.consoleBackground = $defaultConsoleBackgroundColor; colorEditorScreen.tabBackground = $defaultTabBackgroundColor; colorEditorScreen.tabLabelColor = $defaultTabLabelColor; colorEditorScreen.tabLabelChangedColor = $defaultTabLabelChangedColor; colorEditorScreen.tabLabelBackground = $defaultTabLabelBackgroundColor; colorEditorScreen.findHighlightColor = $defaultFindHighlightColor; colorEditorScreen.findHighlightBackground = $defaultFindHighlightBackground; } else { println(\"Loading colors for profile: \" + selectedProfile); var pInfo: string = call json.getstring(profileColors, \"info\"); var pComment: string = call json.getstring(profileColors, \"comment\"); var pError: string = call json.getstring(profileColors, \"error\"); var pWarn: string = call json.getstring(profileColors, \"warn\"); var pOk: string = call json.getstring(profileColors, \"ok\"); var pCode: string = call json.getstring(profileColors, \"code\"); var pDatatype: string = call json.getstring(profileColors, \"datatype\"); var pData: string = call json.getstring(profileColors, \"data\"); var pKeyword: string = call json.getstring(profileColors, \"keyword\"); var pBuiltin: string = call json.getstring(profileColors, \"builtin\"); var pLiteral: string = call json.getstring(profileColors, \"literal\"); var pIdentifier: string = call json.getstring(profileColors, \"identifier\"); var pSql: string = call json.getstring(profileColors, \"sql\"); var pCustom: string = call json.getstring(profileColors, \"custom\"); var pBackground: string = call json.getstring(profileColors, \"background\"); var pText: string = call json.getstring(profileColors, \"text\"); var pCaret: string = call json.getstring(profileColors, \"caret\"); var pLineCursor: string = call json.getstring(profileColors, \"line-cursor\"); var pLineNumbers: string = call json.getstring(profileColors, \"line-numbers\"); var pConsoleBg: string = call json.getstring(profileColors, \"console-background\"); var pTabBg: string = call json.getstring(profileColors, \"tab-background\"); var pTabLabelColor: string = call json.getstring(profileColors, \"tab-label-color\"); var pTabLabelChanged: string = call json.getstring(profileColors, \"tab-label-changed-color\"); var pTabLabelBg: string = call json.getstring(profileColors, \"tab-label-background\"); var pFindHlColor: string = call json.getstring(profileColors, \"find-highlight-color\"); var pFindHlBg: string = call json.getstring(profileColors, \"find-highlight-background\"); if pInfo != \"\" then { colorEditorScreen.info = pInfo; } else { colorEditorScreen.info = $defaultInfoColor; } if pComment != \"\" then { colorEditorScreen.comment = pComment; } else { colorEditorScreen.comment = $defaultCommentColor; } if pError != \"\" then { colorEditorScreen.error = pError; } else { colorEditorScreen.error = $defaultErrorColor; } if pWarn != \"\" then { colorEditorScreen.warn = pWarn; } else { colorEditorScreen.warn = $defaultWarnColor; } if pOk != \"\" then { colorEditorScreen.ok = pOk; } else { colorEditorScreen.ok = $defaultOkColor; } if pCode != \"\" then { colorEditorScreen.code = pCode; } else { colorEditorScreen.code = $defaultCodeColor; } if pDatatype != \"\" then { colorEditorScreen.datatype = pDatatype; } else { colorEditorScreen.datatype = $defaultDatatypeColor; } if pData != \"\" then { colorEditorScreen.data = pData; } else { colorEditorScreen.data = $defaultDataColor; } if pKeyword != \"\" then { colorEditorScreen.keyword = pKeyword; } else { colorEditorScreen.keyword = $defaultKeywordColor; } if pBuiltin != \"\" then { colorEditorScreen.builtin = pBuiltin; } else { colorEditorScreen.builtin = $defaultBuiltinColor; } if pLiteral != \"\" then { colorEditorScreen.literal = pLiteral; } else { colorEditorScreen.literal = $defaultLiteralColor; } if pIdentifier != \"\" then { colorEditorScreen.identifier = pIdentifier; } else { colorEditorScreen.identifier = $defaultIdentifierColor; } if pSql != \"\" then { colorEditorScreen.sql = pSql; } else { colorEditorScreen.sql = $defaultSqlColor; } if pCustom != \"\" then { colorEditorScreen.custom = pCustom; } else { colorEditorScreen.custom = $defaultCustomColor; } if pBackground != \"\" then { colorEditorScreen.background = pBackground; } else { colorEditorScreen.background = $defaultBackgroundColor; } if pText != \"\" then { colorEditorScreen.text = pText; } else { colorEditorScreen.text = $defaultTextColor; } if pCaret != \"\" then { colorEditorScreen.caret = pCaret; } else { colorEditorScreen.caret = $defaultCaretColor; } if pLineCursor != \"\" then { colorEditorScreen.lineCursor = pLineCursor; } else { colorEditorScreen.lineCursor = $defaultLineCursorColor; } if pLineNumbers != \"\" then { colorEditorScreen.lineNumbers = pLineNumbers; } else { colorEditorScreen.lineNumbers = $defaultLineNumbersColor; } if pConsoleBg != \"\" then { colorEditorScreen.consoleBackground = pConsoleBg; } else { colorEditorScreen.consoleBackground = $defaultConsoleBackgroundColor; } if pTabBg != \"\" then { colorEditorScreen.tabBackground = pTabBg; } else { colorEditorScreen.tabBackground = $defaultTabBackgroundColor; } if pTabLabelColor != \"\" then { colorEditorScreen.tabLabelColor = pTabLabelColor; } else { colorEditorScreen.tabLabelColor = $defaultTabLabelColor; } if pTabLabelChanged != \"\" then { colorEditorScreen.tabLabelChangedColor = pTabLabelChanged; } else { colorEditorScreen.tabLabelChangedColor = $defaultTabLabelChangedColor; } if pTabLabelBg != \"\" then { colorEditorScreen.tabLabelBackground = pTabLabelBg; } else { colorEditorScreen.tabLabelBackground = $defaultTabLabelBackgroundColor; } if pFindHlColor != \"\" then { colorEditorScreen.findHighlightColor = pFindHlColor; } else { colorEditorScreen.findHighlightColor = $defaultFindHighlightColor; } if pFindHlBg != \"\" then { colorEditorScreen.findHighlightBackground = pFindHlBg; } else { colorEditorScreen.findHighlightBackground = $defaultFindHighlightBackground; } println(\"Profile colors loaded successfully\"); }"
+                "onChange": "call onProfileChange();"
             }
         },
         {
@@ -560,8 +762,8 @@ screen colorEditorScreen = {
                                         "style": "-fx-spacing: 4; -fx-padding: 4; -fx-alignment: CENTER_LEFT;",
                                         "items": [
                                             {"name": "profile_item", "varref": "profile"},
-                                            {"name": "addProfileBtn", "type": "button", "labelText": "+", "style": "-fx-min-width: 30;", "tooltip": "Add a new profile with default colors", "onClick": "var newProfileName: string = call system.inputDialog(\"Add Profile\", \"Enter the name for the new profile:\\n(New profile will use default color values)\", \"\"); if newProfileName != \"\" then { if newProfileName == \"default\" then { call system.alertDialog(\"Cannot use 'default' as a profile name.\\nPlease choose a different name.\", \"Add Profile\", \"warning\"); } else { var currentProfile: string = colorEditorScreen.profile; var newOptionsStr: string = \"{\\\"default\\\": \\\"default\\\"\"; if currentProfile != \"default\" then { newOptionsStr = newOptionsStr + \", \\\"\" + currentProfile + \"\\\": \\\"\" + currentProfile + \"\\\"\"; } newOptionsStr = newOptionsStr + \", \\\"\" + newProfileName + \"\\\": \\\"\" + newProfileName + \"\\\"}\"; var newOptions: json = call json.jsonfromstring(newOptionsStr); call scr.setItemChoiceOptions(\"colorEditorScreen\", \"profile_item\", newOptions); colorEditorScreen.profile = newProfileName; colorEditorScreen.info = \"$defaultInfoColor\"; colorEditorScreen.comment = \"$defaultCommentColor\"; colorEditorScreen.error = \"$defaultErrorColor\"; colorEditorScreen.warn = \"$defaultWarnColor\"; colorEditorScreen.ok = \"$defaultOkColor\"; colorEditorScreen.code = \"$defaultCodeColor\"; colorEditorScreen.datatype = \"$defaultDatatypeColor\"; colorEditorScreen.data = \"$defaultDataColor\"; colorEditorScreen.keyword = \"$defaultKeywordColor\"; colorEditorScreen.builtin = \"$defaultBuiltinColor\"; colorEditorScreen.literal = \"$defaultLiteralColor\"; colorEditorScreen.identifier = \"$defaultIdentifierColor\"; colorEditorScreen.sql = \"$defaultSqlColor\"; colorEditorScreen.custom = \"$defaultCustomColor\"; colorEditorScreen.background = \"$defaultBackgroundColor\"; colorEditorScreen.text = \"$defaultTextColor\"; colorEditorScreen.caret = \"$defaultCaretColor\"; colorEditorScreen.lineCursor = \"$defaultLineCursorColor\"; colorEditorScreen.lineNumbers = \"$defaultLineNumbersColor\"; colorEditorScreen.consoleBackground = \"$defaultConsoleBackgroundColor\"; colorEditorScreen.tabBackground = \"$defaultTabBackgroundColor\"; colorEditorScreen.tabLabelColor = \"$defaultTabLabelColor\"; colorEditorScreen.tabLabelChangedColor = \"$defaultTabLabelChangedColor\"; colorEditorScreen.tabLabelBackground = \"$defaultTabLabelBackgroundColor\"; colorEditorScreen.findHighlightColor = \"$defaultFindHighlightColor\"; colorEditorScreen.findHighlightBackground = \"$defaultFindHighlightBackground\"; call system.alertDialog(\"Profile '\" + newProfileName + \"' has been created with default colors.\\nThe profile has been selected and colors set to defaults.\", \"Profile Added\", \"info\"); } } else { print \"Add profile cancelled.\"; }"},
-                                            {"name": "removeProfileBtn", "type": "button", "labelText": "-", "style": "-fx-min-width: 30;", "tooltip": "Remove current profile", "onClick": "var currentProfile: string = colorEditorScreen.profile; if currentProfile == \"default\" then { call system.alertDialog(\"Cannot remove the 'default' profile.\\nPlease select a different profile to remove.\", \"Remove Profile\", \"warning\"); } else { var confirmRemove: bool = call system.confirmDialog(\"Are you sure you want to remove the '\" + currentProfile + \"' profile?\\n\\nThis will delete the profile and switch to 'default'.\", \"Confirm Remove\"); if confirmRemove then { var newOptions: json = call json.jsonfromstring(\"{\\\"default\\\": \\\"default\\\"}\"); call scr.setItemChoiceOptions(\"colorEditorScreen\", \"profile_item\", newOptions); colorEditorScreen.profile = \"default\"; colorEditorScreen.info = \"$defaultInfoColor\"; colorEditorScreen.comment = \"$defaultCommentColor\"; colorEditorScreen.error = \"$defaultErrorColor\"; colorEditorScreen.warn = \"$defaultWarnColor\"; colorEditorScreen.ok = \"$defaultOkColor\"; colorEditorScreen.code = \"$defaultCodeColor\"; colorEditorScreen.datatype = \"$defaultDatatypeColor\"; colorEditorScreen.data = \"$defaultDataColor\"; colorEditorScreen.keyword = \"$defaultKeywordColor\"; colorEditorScreen.builtin = \"$defaultBuiltinColor\"; colorEditorScreen.literal = \"$defaultLiteralColor\"; colorEditorScreen.identifier = \"$defaultIdentifierColor\"; colorEditorScreen.sql = \"$defaultSqlColor\"; colorEditorScreen.custom = \"$defaultCustomColor\"; colorEditorScreen.background = \"$defaultBackgroundColor\"; colorEditorScreen.text = \"$defaultTextColor\"; colorEditorScreen.caret = \"$defaultCaretColor\"; colorEditorScreen.lineCursor = \"$defaultLineCursorColor\"; colorEditorScreen.lineNumbers = \"$defaultLineNumbersColor\"; colorEditorScreen.consoleBackground = \"$defaultConsoleBackgroundColor\"; colorEditorScreen.tabBackground = \"$defaultTabBackgroundColor\"; colorEditorScreen.tabLabelColor = \"$defaultTabLabelColor\"; colorEditorScreen.tabLabelChangedColor = \"$defaultTabLabelChangedColor\"; colorEditorScreen.tabLabelBackground = \"$defaultTabLabelBackgroundColor\"; colorEditorScreen.findHighlightColor = \"$defaultFindHighlightColor\"; colorEditorScreen.findHighlightBackground = \"$defaultFindHighlightBackground\"; call system.alertDialog(\"Profile '\" + currentProfile + \"' has been removed.\\nSwitched to 'default' profile.\", \"Profile Removed\", \"info\"); } else { print \"Remove profile cancelled.\"; } }"}
+                                            {"name": "addProfileBtn", "type": "button", "labelText": "+", "style": "-fx-min-width: 30;", "tooltip": "Add a new profile with default colors", "onClick": "call onAddProfileClick();"},
+                                            {"name": "removeProfileBtn", "type": "button", "labelText": "-", "style": "-fx-min-width: 30;", "tooltip": "Remove current profile", "onClick": "call onRemoveProfileClick();"}
                                         ]
                                     },
                                     {
@@ -705,8 +907,8 @@ screen colorEditorScreen = {
                 "type": "hbox",
                 "style": "-fx-spacing: 10; -fx-padding: 10; -fx-alignment: CENTER_RIGHT;",
                 "items": [
-                    {"name": "resetBtn", "type": "button", "labelText": "Reset", "style": "-fx-min-width: 80;", "onClick": "if colorEditorScreen.profile == \"default\" then { colorEditorScreen.info = $defaultInfoColor; colorEditorScreen.comment = $defaultCommentColor; colorEditorScreen.error = $defaultErrorColor; colorEditorScreen.warn = $defaultWarnColor; colorEditorScreen.ok = $defaultOkColor; colorEditorScreen.code = $defaultCodeColor; colorEditorScreen.datatype = $defaultDatatypeColor; colorEditorScreen.data = $defaultDataColor; colorEditorScreen.keyword = $defaultKeywordColor; colorEditorScreen.builtin = $defaultBuiltinColor; colorEditorScreen.literal = $defaultLiteralColor; colorEditorScreen.identifier = $defaultIdentifierColor; colorEditorScreen.sql = $defaultSqlColor; colorEditorScreen.custom = $defaultCustomColor; colorEditorScreen.background = $defaultBackgroundColor; colorEditorScreen.text = $defaultTextColor; colorEditorScreen.caret = $defaultCaretColor; colorEditorScreen.lineCursor = $defaultLineCursorColor; colorEditorScreen.lineNumbers = $defaultLineNumbersColor; colorEditorScreen.consoleBackground = $defaultConsoleBackgroundColor; colorEditorScreen.tabBackground = $defaultTabBackgroundColor; colorEditorScreen.tabLabelColor = $defaultTabLabelColor; colorEditorScreen.tabLabelChangedColor = $defaultTabLabelChangedColor; colorEditorScreen.tabLabelBackground = $defaultTabLabelBackgroundColor; colorEditorScreen.findHighlightColor = $defaultFindHighlightColor; colorEditorScreen.findHighlightBackground = $defaultFindHighlightBackground; call system.alertDialog(\"Colors reset to CSS default values.\", \"Reset\", \"info\"); } else { colorEditorScreen.info = $infoColor; colorEditorScreen.comment = $commentColor; colorEditorScreen.error = $errorColor; colorEditorScreen.warn = $warnColor; colorEditorScreen.ok = $okColor; colorEditorScreen.code = $codeColor; colorEditorScreen.datatype = $datatypeColor; colorEditorScreen.data = $dataColor; colorEditorScreen.keyword = $keywordColor; colorEditorScreen.builtin = $builtinColor; colorEditorScreen.literal = $literalColor; colorEditorScreen.identifier = $identifierColor; colorEditorScreen.sql = $sqlColor; colorEditorScreen.custom = $customColor; colorEditorScreen.background = $backgroundColor; colorEditorScreen.text = $textColor; colorEditorScreen.caret = $caretColor; colorEditorScreen.lineCursor = $lineCursorColor; colorEditorScreen.lineNumbers = $lineNumbersColor; colorEditorScreen.consoleBackground = $consoleBackgroundColor; colorEditorScreen.tabBackground = $tabBackgroundColor; colorEditorScreen.tabLabelColor = $tabLabelColor; colorEditorScreen.tabLabelChangedColor = $tabLabelChangedColor; colorEditorScreen.tabLabelBackground = $tabLabelBackgroundColor; colorEditorScreen.findHighlightColor = $findHighlightColor; colorEditorScreen.findHighlightBackground = $findHighlightBackground; call system.alertDialog(\"Colors reset to original loaded values.\", \"Reset\", \"info\"); }"},
-                    {"name": "saveCloseBtn", "type": "button", "labelText": "Save and Close", "style": "-fx-min-width: 120;", "onClick": "var currentColors: string = \"{\\n      \\\"info\\\": \\\"\" + colorEditorScreen.info + \"\\\",\\n      \\\"comment\\\": \\\"\" + colorEditorScreen.comment + \"\\\",\\n      \\\"error\\\": \\\"\" + colorEditorScreen.error + \"\\\",\\n      \\\"warn\\\": \\\"\" + colorEditorScreen.warn + \"\\\",\\n      \\\"ok\\\": \\\"\" + colorEditorScreen.ok + \"\\\",\\n      \\\"code\\\": \\\"\" + colorEditorScreen.code + \"\\\",\\n      \\\"datatype\\\": \\\"\" + colorEditorScreen.datatype + \"\\\",\\n      \\\"data\\\": \\\"\" + colorEditorScreen.data + \"\\\",\\n      \\\"keyword\\\": \\\"\" + colorEditorScreen.keyword + \"\\\",\\n      \\\"builtin\\\": \\\"\" + colorEditorScreen.builtin + \"\\\",\\n      \\\"literal\\\": \\\"\" + colorEditorScreen.literal + \"\\\",\\n      \\\"identifier\\\": \\\"\" + colorEditorScreen.identifier + \"\\\",\\n      \\\"sql\\\": \\\"\" + colorEditorScreen.sql + \"\\\",\\n      \\\"custom\\\": \\\"\" + colorEditorScreen.custom + \"\\\",\\n      \\\"background\\\": \\\"\" + colorEditorScreen.background + \"\\\",\\n      \\\"text\\\": \\\"\" + colorEditorScreen.text + \"\\\",\\n      \\\"caret\\\": \\\"\" + colorEditorScreen.caret + \"\\\",\\n      \\\"line-cursor\\\": \\\"\" + colorEditorScreen.lineCursor + \"\\\",\\n      \\\"line-numbers\\\": \\\"\" + colorEditorScreen.lineNumbers + \"\\\",\\n      \\\"console-background\\\": \\\"\" + colorEditorScreen.consoleBackground + \"\\\",\\n      \\\"tab-background\\\": \\\"\" + colorEditorScreen.tabBackground + \"\\\",\\n      \\\"tab-label-color\\\": \\\"\" + colorEditorScreen.tabLabelColor + \"\\\",\\n      \\\"tab-label-changed-color\\\": \\\"\" + colorEditorScreen.tabLabelChangedColor + \"\\\",\\n      \\\"tab-label-background\\\": \\\"\" + colorEditorScreen.tabLabelBackground + \"\\\",\\n      \\\"find-highlight-color\\\": \\\"\" + colorEditorScreen.findHighlightColor + \"\\\",\\n      \\\"find-highlight-background\\\": \\\"\" + colorEditorScreen.findHighlightBackground + \"\\\"\\n    }\"; var jsonContent: string = \"{\\n  \\\"currentProfile\\\": \\\"\" + colorEditorScreen.profile + \"\\\",\\n  \\\"profileList\\\": [\\\"\" + colorEditorScreen.profile + \"\\\"],\\n  \\\"profiles\\\": {\\n    \\\"\" + colorEditorScreen.profile + \"\\\": \" + currentColors + \"\\n  }\\n}\"; call file.writeTextFile($configPath, jsonContent); call system.alertDialog(\"Configuration saved to \" + $configPath + \".\\nRestart the application to see changes.\", \"Saved\", \"info\"); close screen;"}
+                    {"name": "resetBtn", "type": "button", "labelText": "Reset", "style": "-fx-min-width: 80;", "onClick": "call onResetClick();"},
+                    {"name": "saveCloseBtn", "type": "button", "labelText": "Save and Close", "style": "-fx-min-width: 120;", "onClick": "call onSaveCloseClick();"}
                 ]
             }
         ]
