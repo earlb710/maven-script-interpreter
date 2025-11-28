@@ -281,7 +281,7 @@ screen regexScreen = {
             "display": {
                 "type": "checkbox",
                 "labelText": "Case Insensitive (?i)",
-                "onValidate": "call syncPatternWithFlags(); return true;"
+                "onChange": "call syncPatternWithFlags();"
             }
         },
         {
@@ -291,7 +291,7 @@ screen regexScreen = {
             "display": {
                 "type": "checkbox",
                 "labelText": "Multiline Mode (?m) - ^ and $ match line boundaries",
-                "onValidate": "call syncPatternWithFlags(); return true;"
+                "onChange": "call syncPatternWithFlags();"
             }
         },
         {
@@ -301,7 +301,7 @@ screen regexScreen = {
             "display": {
                 "type": "checkbox",
                 "labelText": "Dot All Mode (?s) - . matches newlines",
-                "onValidate": "call syncPatternWithFlags(); return true;"
+                "onChange": "call syncPatternWithFlags();"
             }
         },
         {
