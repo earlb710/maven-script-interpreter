@@ -132,37 +132,25 @@ public class ScriptArea extends StyleClassedTextArea {
             return;
         }
         
-        // Batch consecutive characters with same initial style to reduce setStyle calls
-        int batchStart = actualStart;
-        java.util.List<String> batchStyle = null;
+        // Use getStyleSpans to get all existing style spans in the range at once,
+        // then modify them to add the style class and apply via setStyleSpans.
+        // This is more efficient than per-character getStyleOfChar calls.
+        org.fxmisc.richtext.model.StyleSpans<java.util.Collection<String>> existingSpans = 
+            getStyleSpans(actualStart, actualEnd);
         
-        for (int i = actualStart; i < actualEnd; i++) {
-            var curr = new java.util.ArrayList<>(getStyleOfChar(i));
-            
-            // Check if we need to start a new batch
-            if (batchStyle != null && !curr.equals(batchStyle)) {
-                // Apply previous batch
-                if (!batchStyle.contains(styleClass)) {
-                    batchStyle.add(styleClass);
-                }
-                setStyle(batchStart, i, batchStyle);
-                batchStart = i;
-                batchStyle = null;
+        org.fxmisc.richtext.model.StyleSpansBuilder<java.util.Collection<String>> builder = 
+            new org.fxmisc.richtext.model.StyleSpansBuilder<>();
+        
+        for (org.fxmisc.richtext.model.StyleSpan<java.util.Collection<String>> span : existingSpans) {
+            java.util.Collection<String> existingStyles = span.getStyle();
+            java.util.List<String> newStyles = new java.util.ArrayList<>(existingStyles);
+            if (!newStyles.contains(styleClass)) {
+                newStyles.add(styleClass);
             }
-            
-            // Initialize or continue batch
-            if (batchStyle == null) {
-                batchStyle = curr;
-            }
+            builder.add(newStyles, span.getLength());
         }
         
-        // Apply final batch
-        if (batchStyle != null) {
-            if (!batchStyle.contains(styleClass)) {
-                batchStyle.add(styleClass);
-            }
-            setStyle(batchStart, actualEnd, batchStyle);
-        }
+        setStyleSpans(actualStart, builder.create());
     }
 
     public void removeStyleFromRange(int start, int endExclusive, String styleClass) {
@@ -173,32 +161,22 @@ public class ScriptArea extends StyleClassedTextArea {
             return;
         }
         
-        // Batch consecutive characters with same initial style to reduce setStyle calls
-        int batchStart = actualStart;
-        java.util.List<String> batchStyle = null;
+        // Use getStyleSpans to get all existing style spans in the range at once,
+        // then modify them to remove the style class and apply via setStyleSpans.
+        // This is more efficient than per-character getStyleOfChar calls.
+        org.fxmisc.richtext.model.StyleSpans<java.util.Collection<String>> existingSpans = 
+            getStyleSpans(actualStart, actualEnd);
         
-        for (int i = actualStart; i < actualEnd; i++) {
-            var curr = new java.util.ArrayList<>(getStyleOfChar(i));
-            
-            // Check if we need to start a new batch
-            if (batchStyle != null && !curr.equals(batchStyle)) {
-                // Apply previous batch
-                batchStyle.removeIf(c -> c.equals(styleClass));
-                setStyle(batchStart, i, batchStyle);
-                batchStart = i;
-                batchStyle = null;
-            }
-            
-            // Initialize or continue batch
-            if (batchStyle == null) {
-                batchStyle = curr;
-            }
+        org.fxmisc.richtext.model.StyleSpansBuilder<java.util.Collection<String>> builder = 
+            new org.fxmisc.richtext.model.StyleSpansBuilder<>();
+        
+        for (org.fxmisc.richtext.model.StyleSpan<java.util.Collection<String>> span : existingSpans) {
+            java.util.Collection<String> existingStyles = span.getStyle();
+            java.util.List<String> newStyles = new java.util.ArrayList<>(existingStyles);
+            newStyles.removeIf(c -> c.equals(styleClass));
+            builder.add(newStyles, span.getLength());
         }
         
-        // Apply final batch
-        if (batchStyle != null) {
-            batchStyle.removeIf(c -> c.equals(styleClass));
-            setStyle(batchStart, actualEnd, batchStyle);
-        }
+        setStyleSpans(actualStart, builder.create());
     }
 }
