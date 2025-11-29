@@ -82,8 +82,11 @@ mvn javafx:run
 When adding new keywords to EBS, create a corresponding example file following this template:
 
 ```javascript
+// EBS Language Reference v1.2.0 - See EBS_LANGUAGE_REFERENCE.md
 // Example: keyword_name keyword - Brief description
 // Syntax: keyword syntax
 
 // Working example code here
 ```
+
+**Important:** Always include the version reference comment as the first line of every example script. Update the version number to match the current documentation version in `EBS_LANGUAGE_REFERENCE.md`.

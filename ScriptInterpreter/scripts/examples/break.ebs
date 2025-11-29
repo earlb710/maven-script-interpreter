@@ -1,3 +1,4 @@
+// EBS Language Reference v1.2.0 - See EBS_LANGUAGE_REFERENCE.md
 // Example: break, exit keywords - Exit loop early
 // Syntax: break; or exit;
 

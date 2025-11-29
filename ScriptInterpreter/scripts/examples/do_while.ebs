@@ -1,3 +1,4 @@
+// EBS Language Reference v1.2.0 - See EBS_LANGUAGE_REFERENCE.md
 // Example: do-while loop - Execute at least once
 // Syntax: do { } while (condition);
 
