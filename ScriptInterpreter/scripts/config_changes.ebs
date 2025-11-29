@@ -52,6 +52,7 @@ print "";
 // Get profile list from config (or default to ["default"])
 var profileListJson: json = call json.getarray(config, "profileList");
 var profileList: array.string[*] = [];
+var profileOptionsMap: map = {};
 var hasDefaultProfile: bool = false;
 
 // Check if profileList exists and populate the array
@@ -155,8 +156,13 @@ print "Profile list: ";
 var printIdx: int = 0;
 while printIdx < profileList.length {
     print "  - " + profileList[printIdx];
+    // Build the map for combobox options
+    call json.set(profileOptionsMap, profileList[printIdx], profileList[printIdx]);
     printIdx = printIdx + 1;
 }
+print "";
+
+print "Profile options map: " + profileOptionsMap;
 print "";
 
 // Get the current profile name (default to "default" if not present)
@@ -1144,7 +1150,7 @@ screen colorEditorScreen = {
                 "type": "combobox",
                 "labelText": "Profile:",
                 "labelTextAlignment": "left",
-                "options": $profileList,
+                "options": $profileOptionsMap,
                 "onChange": "call onProfileChange();"
             }
         },
