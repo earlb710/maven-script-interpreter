@@ -256,19 +256,7 @@ performFindFirst {
     
     // Build result header
     var resultHeader: string = "Finding first match...\n";
-    resultHeader = resultHeader + "Pattern: " + regexPattern + "\n";
-    
-    // Show active filters
-    if regexScreen.orPatterns != "" then {
-        resultHeader = resultHeader + "OR Filter: " + regexScreen.orPatterns + "\n";
-    }
-    if regexScreen.andPatterns != "" then {
-        resultHeader = resultHeader + "AND Filter: " + regexScreen.andPatterns + "\n";
-    }
-    if regexScreen.notPatterns != "" then {
-        resultHeader = resultHeader + "NOT Filter: " + regexScreen.notPatterns + "\n";
-    }
-    resultHeader = resultHeader + "\n";
+    resultHeader = resultHeader + "Pattern: " + regexPattern + "\n\n";
     
     // Set or append result header
     if appendResults then {
@@ -283,12 +271,7 @@ performFindFirst {
         if match == null then {
             regexScreen.resultText = regexScreen.resultText + "No match found.";
         } else {
-            // Apply filters to the match
-            if call applyFilters(match) then {
-                regexScreen.resultText = regexScreen.resultText + "Match found:\n'" + match + "'";
-            } else {
-                regexScreen.resultText = regexScreen.resultText + "Match found but filtered out by OR/AND/NOT filters.";
-            }
+            regexScreen.resultText = regexScreen.resultText + "Match found:\n'" + match + "'";
         }
     } exceptions {
         when ANY_ERROR(msg) {
@@ -310,19 +293,7 @@ performFindAll {
     
     // Build result header
     var resultHeader: string = "Finding all matches...\n";
-    resultHeader = resultHeader + "Pattern: " + regexPattern + "\n";
-    
-    // Show active filters
-    if regexScreen.orPatterns != "" then {
-        resultHeader = resultHeader + "OR Filter: " + regexScreen.orPatterns + "\n";
-    }
-    if regexScreen.andPatterns != "" then {
-        resultHeader = resultHeader + "AND Filter: " + regexScreen.andPatterns + "\n";
-    }
-    if regexScreen.notPatterns != "" then {
-        resultHeader = resultHeader + "NOT Filter: " + regexScreen.notPatterns + "\n";
-    }
-    resultHeader = resultHeader + "\n";
+    resultHeader = resultHeader + "Pattern: " + regexPattern + "\n\n";
     
     // Set or append result header
     if appendResults then {
@@ -337,25 +308,15 @@ performFindAll {
         if matches.length == 0 then {
             regexScreen.resultText = regexScreen.resultText + "No matches found.";
         } else {
-            // Apply filters and count filtered results
-            var filteredCount: int = 0;
-            var filteredResults: string = "";
-            var totalCount: int = 0;
+            var matchCount: int = 0;
+            var matchResults: string = "";
             
             foreach match in matches {
-                totalCount = totalCount + 1;
-                if call applyFilters(match) then {
-                    filteredCount = filteredCount + 1;
-                    filteredResults = filteredResults + "[" + filteredCount + "] '" + match + "'\n";
-                }
+                matchCount = matchCount + 1;
+                matchResults = matchResults + "[" + matchCount + "] '" + match + "'\n";
             }
             
-            if filteredCount == 0 then {
-                regexScreen.resultText = regexScreen.resultText + "Found " + totalCount + " match(es), but all were filtered out by OR/AND/NOT filters.";
-            } else {
-                regexScreen.resultText = regexScreen.resultText + "Found " + filteredCount + " match(es) after filtering (from " + totalCount + " total):\n\n";
-                regexScreen.resultText = regexScreen.resultText + filteredResults;
-            }
+            regexScreen.resultText = regexScreen.resultText + "Found " + matchCount + " match(es):\n\n" + matchResults;
         }
     } exceptions {
         when ANY_ERROR(msg) {
@@ -731,7 +692,7 @@ screen regexScreen = {
                                             "name": "appendOrBtn",
                                             "display": {
                                                 "type": "button",
-                                                "labelText": "Append",
+                                                "labelText": "Append >",
                                                 "tooltip": "Append OR filter to regex pattern",
                                                 "onClick": "call appendOrToPattern();"
                                             }
@@ -748,7 +709,7 @@ screen regexScreen = {
                                             "name": "appendAndBtn",
                                             "display": {
                                                 "type": "button",
-                                                "labelText": "Append",
+                                                "labelText": "Append >",
                                                 "tooltip": "Append AND filter to regex pattern",
                                                 "onClick": "call appendAndToPattern();"
                                             }
@@ -765,7 +726,7 @@ screen regexScreen = {
                                             "name": "appendNotBtn",
                                             "display": {
                                                 "type": "button",
-                                                "labelText": "Append",
+                                                "labelText": "Append >",
                                                 "tooltip": "Append NOT filter to regex pattern",
                                                 "onClick": "call appendNotToPattern();"
                                             }
@@ -890,7 +851,7 @@ screen regexScreen = {
                             "name": "helpLabel3",
                             "display": {
                                 "type": "label",
-                                "labelText": "Filters: OR=any match, AND=all must match, NOT=exclude. Use Append to add to regex pattern."
+                                "labelText": "Match Filters: Use 'Append >' to add OR (|), AND (lookahead), or NOT (neg-lookahead) to the regex pattern."
                             }
                         }
                     ]
