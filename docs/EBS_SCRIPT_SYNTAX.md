@@ -1817,6 +1817,98 @@ screen formScreen = {
 }
 ```
 
+#### Event Handlers
+
+Event handlers allow you to execute EBS code in response to user interactions with screen controls.
+
+##### onClick (Button only)
+Executes EBS code when a button is clicked.
+
+```javascript
+"display": {
+    "type": "button",
+    "labelText": "Save",
+    "onClick": "call saveData();"
+}
+```
+
+##### onValidate
+Validates user input and shows visual error feedback. Must return a boolean (`true` for valid, `false` for invalid).
+
+```javascript
+"display": {
+    "type": "textfield",
+    "onValidate": "if (string.length(username) < 3) { return false; } return true;"
+}
+```
+
+When validation fails, the control is marked with a red border.
+
+##### onChange
+Executes EBS code whenever the control's value changes. Does not require a return value.
+
+```javascript
+"display": {
+    "type": "textfield",
+    "onChange": "call updatePreview(inputText);"
+}
+```
+
+**Example: Calculated field update**
+```javascript
+{
+    "name": "quantity",
+    "type": "int",
+    "display": {
+        "type": "spinner",
+        "min": 1,
+        "max": 100,
+        "onChange": "total = quantity * unitPrice;"
+    }
+}
+```
+
+**Example: Cascading dropdown**
+```javascript
+{
+    "name": "country",
+    "type": "string",
+    "display": {
+        "type": "combobox",
+        "options": ["USA", "Canada", "UK"],
+        "onChange": "call loadCities(country);"
+    }
+}
+```
+
+**Example: Enable/disable controls**
+```javascript
+{
+    "name": "enableOptions",
+    "type": "bool",
+    "display": {
+        "type": "checkbox",
+        "labelText": "Enable Advanced Options",
+        "onChange": "call screen.setProperty('myScreen.advancedField', 'disabled', not enableOptions);"
+    }
+}
+```
+
+**Combining onValidate and onChange:**
+Both handlers can be used on the same control. When both are present, `onValidate` runs first to apply validation styling, then `onChange` runs regardless of validation result.
+
+```javascript
+{
+    "name": "email",
+    "type": "string",
+    "display": {
+        "type": "textfield",
+        "onValidate": "return string.contains(email, '@');",
+        "onChange": "call checkEmailAvailability(email);"
+    }
+}
+```
+
 ### Automatic Width Calculation
 
 The EBS interpreter automatically calculates control widths based on their data when no explicit `maxLength` is specified. This ensures controls are sized appropriately for their content.
