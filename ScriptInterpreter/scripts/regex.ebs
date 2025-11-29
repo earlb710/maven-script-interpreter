@@ -486,6 +486,144 @@ appendNotToPattern {
     }
 }
 
+// Function to call AI and generate regex from user description
+generateRegexFromAi {
+    var userRequest: string = askAiScreen.aiRequest;
+    
+    if userRequest == "" then {
+        askAiScreen.aiResult = "Error: Please describe what you want to match.";
+        return;
+    }
+    
+    askAiScreen.aiResult = "Generating regex pattern...";
+    
+    var systemPrompt: string = "You are a Java regex expert. The user will describe what they want to match. Generate ONLY the Java regex pattern - no explanation, no code, no quotes. Just the raw regex pattern. Examples:\n- Email: [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}\n- Phone: \\d{3}-\\d{3}-\\d{4}\n- Date: \\d{4}-\\d{2}-\\d{2}";
+    
+    try {
+        var result: string = call ai.complete(systemPrompt, userRequest, 200, 0.3);
+        
+        // Trim whitespace and remove quotes if present
+        result = call str.trim(result);
+        if call str.startsWith(result, "\"") and call str.endsWith(result, "\"") then {
+            var resultChars = call str.charArray(result);
+            var resultLen: int = resultChars.length;
+            result = call str.substring(result, 1, resultLen - 1);
+        }
+        if call str.startsWith(result, "'") and call str.endsWith(result, "'") then {
+            var resultChars = call str.charArray(result);
+            var resultLen: int = resultChars.length;
+            result = call str.substring(result, 1, resultLen - 1);
+        }
+        
+        askAiScreen.aiResult = "Generated pattern:\n" + result;
+        askAiScreen.generatedPattern = result;
+    } exceptions {
+        when ANY_ERROR(msg) {
+            askAiScreen.aiResult = "Error calling AI: " + msg;
+        }
+    }
+}
+
+// Function to apply the generated AI pattern to the main regex screen
+applyAiPattern {
+    var generatedPattern: string = askAiScreen.generatedPattern;
+    if generatedPattern != "" then {
+        regexScreen.regexPattern = generatedPattern;
+        close screen;
+    }
+}
+
+// Ask AI screen - child screen for AI-based regex generation
+screen askAiScreen = {
+    "title": "Ask AI - Generate Regex Pattern",
+    "width": 500,
+    "height": 400,
+    "vars": [
+        {
+            "name": "aiRequest",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textarea",
+                "labelText": "Describe what you want to match:",
+                "promptHelp": "E.g., 'email addresses' or 'dates in YYYY-MM-DD format' or 'phone numbers with area code'",
+                "maxLength": 60
+            }
+        },
+        {
+            "name": "aiResult",
+            "type": "string",
+            "default": "The AI-generated regex pattern will appear here...",
+            "display": {
+                "type": "textarea",
+                "labelText": "AI Result:",
+                "editable": false,
+                "maxLength": 60
+            }
+        },
+        {
+            "name": "generatedPattern",
+            "type": "string",
+            "default": ""
+        }
+    ],
+    "area": [
+        {
+            "name": "aiMainArea",
+            "type": "vbox",
+            "style": "-fx-spacing: 10; -fx-padding: 15;",
+            "items": [
+                {
+                    "name": "aiTitle",
+                    "display": {
+                        "type": "label",
+                        "labelText": "Ask AI to Generate Regex Pattern",
+                        "itemColor": "#000088",
+                        "itemBold": true,
+                        "itemFontSize": "16"
+                    }
+                },
+                {"name": "aiRequestItem", "varRef": "aiRequest"},
+                {
+                    "name": "aiButtonArea",
+                    "type": "hbox",
+                    "style": "-fx-spacing: 10; -fx-alignment: CENTER;",
+                    "items": [
+                        {
+                            "name": "generateBtn",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Generate Regex",
+                                "tooltip": "Ask AI to generate a regex pattern based on your description",
+                                "onClick": "call generateRegexFromAi();"
+                            }
+                        },
+                        {
+                            "name": "applyBtn",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Apply Pattern",
+                                "tooltip": "Apply the generated pattern to the main regex tester",
+                                "onClick": "call applyAiPattern();"
+                            }
+                        },
+                        {
+                            "name": "cancelBtn",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Cancel",
+                                "tooltip": "Close without applying",
+                                "onClick": "close screen;"
+                            }
+                        }
+                    ]
+                },
+                {"name": "aiResultItem", "varRef": "aiResult"}
+            ]
+        }
+    ]
+};
+
 // Create the regex tester screen
 screen regexScreen = {
     "title": "Regex Tester - Interactive Regular Expression Tool",
@@ -804,6 +942,15 @@ screen regexScreen = {
                             }
                         },
                         {
+                            "name": "askAiBtn",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Ask AI",
+                                "tooltip": "Ask AI to generate a regex pattern from your description",
+                                "onClick": "show screen askAiScreen;"
+                            }
+                        },
+                        {
                             "name": "closeBtn",
                             "display": {
                                 "type": "button",
@@ -872,15 +1019,15 @@ print "    * Case Insensitive (?i) - ignore case";
 print "    * Multiline Mode (?m) - ^ and $ match line boundaries";
 print "    * Dot All Mode (?s) - . matches newlines";
 print "    * Append Results - accumulate output instead of replacing";
-print "  - Match Filters (applied after regex matching):";
-print "    * OR Filter: comma-separated patterns, match ANY (e.g., user,admin)";
-print "    * AND Filter: comma-separated patterns, match must contain ALL";
-print "    * NOT Filter: comma-separated patterns, exclude matches containing ANY";
-print "    * Use +/* within a pattern for AND logic (e.g., user+/*com)";
+print "  - Match Filters (build regex patterns):";
+print "    * OR Filter: use 'Append >' to add OR (|) to regex pattern";
+print "    * AND Filter: use 'Append >' to add lookahead to regex pattern";
+print "    * NOT Filter: use 'Append >' to add negative lookahead to regex pattern";
 print "  - Click 'Find First' to find first match";
 print "  - Click 'Find All' to find all matches";
 print "  - Click 'Replace All' for regex replacement";
 print "  - Click 'Replace Literal' for literal text replacement (not regex)";
+print "  - Click 'Ask AI' to generate regex from natural language description";
 print "  - Click 'Load Sample Data' to see examples";
 print "";
 print "Showing regex tester screen...";
