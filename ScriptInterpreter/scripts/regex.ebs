@@ -472,27 +472,55 @@ appendOrToPattern {
 }
 
 // Function to append AND filter to regex pattern
+// Prepends positive lookahead and ensures pattern ends with .+ to capture content
 appendAndToPattern {
     var andValue: string = regexScreen.andPatterns;
     if andValue != "" then {
         var currentPattern: string = regexScreen.regexPattern;
+        // Prepend the lookahead at the start, and ensure .+ at the end
+        var lookahead: string = "(?=.*" + andValue + ")";
         if currentPattern != "" then {
-            regexScreen.regexPattern = currentPattern + "(?=.*" + andValue + ")";
+            // Check if pattern already ends with .+ 
+            if call str.endsWith(currentPattern, ".+") then {
+                // Insert lookahead before the .+ at the end
+                var patternChars = call str.charArray(currentPattern);
+                var patternLen: int = patternChars.length;
+                var patternWithoutSuffix: string = call str.substring(currentPattern, 0, patternLen - 2);
+                regexScreen.regexPattern = patternWithoutSuffix + lookahead + ".+";
+            } else {
+                // Add lookahead at beginning and .+ at end
+                regexScreen.regexPattern = lookahead + currentPattern;
+            }
         } else {
-            regexScreen.regexPattern = "(?=.*" + andValue + ")";
+            // Just the lookahead with .+ to capture
+            regexScreen.regexPattern = lookahead + ".+";
         }
     }
 }
 
 // Function to append NOT filter to regex pattern
+// Prepends negative lookahead and ensures pattern ends with .+ to capture content
 appendNotToPattern {
     var notValue: string = regexScreen.notPatterns;
     if notValue != "" then {
         var currentPattern: string = regexScreen.regexPattern;
+        // Prepend the negative lookahead at the start, and ensure .+ at the end
+        var lookahead: string = "(?!.*" + notValue + ")";
         if currentPattern != "" then {
-            regexScreen.regexPattern = currentPattern + "(?!.*" + notValue + ")";
+            // Check if pattern already ends with .+
+            if call str.endsWith(currentPattern, ".+") then {
+                // Insert lookahead before the .+ at the end
+                var patternChars = call str.charArray(currentPattern);
+                var patternLen: int = patternChars.length;
+                var patternWithoutSuffix: string = call str.substring(currentPattern, 0, patternLen - 2);
+                regexScreen.regexPattern = patternWithoutSuffix + lookahead + ".+";
+            } else {
+                // Add lookahead at beginning
+                regexScreen.regexPattern = lookahead + currentPattern;
+            }
         } else {
-            regexScreen.regexPattern = "(?!.*" + notValue + ")";
+            // Just the negative lookahead with .+ to capture
+            regexScreen.regexPattern = lookahead + ".+";
         }
     }
 }
