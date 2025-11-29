@@ -159,21 +159,6 @@ while printIdx < profileList.length {
 }
 print "";
 
-// Build the profile options JSON object for the combobox
-// Format: {"profile1": "profile1", "profile2": "profile2", ...}
-var profileOptionsStr: string = "{";
-var optIdx: int = 0;
-while optIdx < profileList.length {
-    if optIdx > 0 then {
-        profileOptionsStr = profileOptionsStr + ", ";
-    }
-    profileOptionsStr = profileOptionsStr + "\"" + profileList[optIdx] + "\": \"" + profileList[optIdx] + "\"";
-    optIdx = optIdx + 1;
-}
-profileOptionsStr = profileOptionsStr + "}";
-var profileOptionsJson: json = call json.jsonfromstring(profileOptionsStr);
-print "Profile options JSON: " + profileOptionsStr;
-
 // Get the current profile name (default to "default" if not present)
 var profileName: string = call json.getstring(config, "currentProfile", "");
 if profileName == "" then {
@@ -1159,7 +1144,7 @@ screen colorEditorScreen = {
                 "type": "combobox",
                 "labelText": "Profile:",
                 "labelTextAlignment": "left",
-                "options": $profileOptionsJson,
+                "options": $profileList,
                 "onChange": "call onProfileChange();"
             }
         },
