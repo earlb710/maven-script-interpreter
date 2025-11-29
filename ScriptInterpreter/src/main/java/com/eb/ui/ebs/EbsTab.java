@@ -1037,12 +1037,16 @@ public class EbsTab extends Tab {
         findBar.setVisible(false);
         findBar.setManaged(false);
         lastMatches = java.util.Collections.emptyList();
+        stalePendingClear = java.util.Collections.emptyList();
         currentIndex = -1;
         // Stop any pending timer and reset stale flag
         if (editorChangeTimer != null) {
             editorChangeTimer.stop();
         }
         highlightsStale = false;
+        // Reapply syntax highlighting to reset all text styling
+        // This ensures any stale find highlights are cleared and text is properly re-highlighted
+        applyLexerSpans(dispArea.getText());
     }
 
     private void runSearch() {
