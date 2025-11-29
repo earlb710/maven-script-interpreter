@@ -122,7 +122,7 @@ checkOrFilter(match: string, orPatterns: string) return bool {
                 var j: int = 0;
                 while j < parts.length {
                     var part: string = call str.trim(parts[j]);
-                    if part != "" and not call str.contains(match, part) then {
+                    if part != "" and !call str.contains(match, part) then {
                         allPartsMatch = false;
                     }
                     j = j + 1;
@@ -161,14 +161,14 @@ checkAndFilter(match: string, andPatterns: string) return bool {
                 var j: int = 0;
                 while j < parts.length {
                     var part: string = call str.trim(parts[j]);
-                    if part != "" and not call str.contains(match, part) then {
+                    if part != "" and !call str.contains(match, part) then {
                         return false;
                     }
                     j = j + 1;
                 }
             } else {
                 // Simple contains check
-                if not call str.contains(match, pattern) then {
+                if !call str.contains(match, pattern) then {
                     return false;
                 }
             }
@@ -198,7 +198,7 @@ checkNotFilter(match: string, notPatterns: string) return bool {
                 var j: int = 0;
                 while j < parts.length {
                     var part: string = call str.trim(parts[j]);
-                    if part != "" and not call str.contains(match, part) then {
+                    if part != "" and !call str.contains(match, part) then {
                         allPartsMatch = false;
                     }
                     j = j + 1;
@@ -226,17 +226,17 @@ applyFilters(match: string) return bool {
     var notPatterns: string = regexScreen.notPatterns;
     
     // Check OR filter first (match must satisfy at least one OR pattern)
-    if not call checkOrFilter(match, orPatterns) then {
+    if !call checkOrFilter(match, orPatterns) then {
         return false;
     }
     
     // Check AND filter (match must satisfy all AND patterns)
-    if not call checkAndFilter(match, andPatterns) then {
+    if !call checkAndFilter(match, andPatterns) then {
         return false;
     }
     
     // Check NOT filter (match must not satisfy any NOT pattern)
-    if not call checkNotFilter(match, notPatterns) then {
+    if !call checkNotFilter(match, notPatterns) then {
         return false;
     }
     
