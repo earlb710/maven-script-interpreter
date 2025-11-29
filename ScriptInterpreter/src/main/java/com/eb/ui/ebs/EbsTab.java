@@ -1041,6 +1041,9 @@ public class EbsTab extends Tab {
             editorChangeTimer.stop();
         }
         highlightsStale = false;
+        // Reapply syntax highlighting to reset all text styling
+        // This ensures any stale find highlights are cleared and text is properly re-highlighted
+        applyLexerSpans(dispArea.getText());
     }
 
     private void runSearch() {
