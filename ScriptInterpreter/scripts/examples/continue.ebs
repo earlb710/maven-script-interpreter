@@ -1,0 +1,12 @@
+// Example: continue keyword - Skip to next iteration
+// Syntax: continue;
+
+// Skip even numbers
+for (var i: int = 1; i <= 5; i++) {
+    if i == 3 then {
+        continue;
+    }
+    print "Number: " + i;
+}
+
+// Output: 1, 2, 4, 5 (skips 3)

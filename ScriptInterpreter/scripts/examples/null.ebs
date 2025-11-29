@@ -1,0 +1,14 @@
+// Example: null keyword - Represents absence of value
+// Syntax: null
+
+var empty = null;
+
+if empty == null then {
+    print "Value is null";
+}
+
+var name: string = null;
+if name == null then {
+    name = "Default";
+}
+print "Name: " + name;

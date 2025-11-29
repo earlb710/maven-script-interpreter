@@ -1,0 +1,21 @@
+// Example: Type casting
+// Syntax: type(value)
+
+// String to int
+var num: int = int("42");
+print num + 10;
+
+// Int to string
+var text: string = string(123);
+print "Value: " + text;
+
+// String to double
+var price: double = double("19.99");
+print price * 2;
+
+// String to boolean
+var flag: bool = bool("true");
+
+// Truncation
+var truncated: int = int(3.99);
+print truncated;  // 3

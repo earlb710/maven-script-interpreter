@@ -1,0 +1,27 @@
+// Example: Data type keywords
+// byte, int, integer, long, float, double, string, date, bool, boolean, json, record
+
+// Integer types
+var b: byte = 127;
+var i: int = 42;
+var l: long = 9999999999;
+
+// Floating point
+var f: float = 3.14;
+var d: double = 3.14159265359;
+
+// String
+var s: string = "Hello";
+
+// Boolean
+var flag: bool = true;
+var active: boolean = false;
+
+// JSON
+var data: json = {"name": "John", "age": 30};
+
+// Record type
+var person: record {name: string, age: int};
+person = {"name": "Alice", "age": 25};
+
+print "All types demonstrated";

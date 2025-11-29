@@ -1,0 +1,23 @@
+// Example: break, exit keywords - Exit loop early
+// Syntax: break; or exit;
+
+var i: int = 1;
+
+while i <= 10 {
+    if i == 5 then {
+        print "Breaking at 5";
+        break;
+    }
+    print "i = " + i;
+    i = i + 1;
+}
+
+// 'exit' is a synonym for 'break'
+var j: int = 1;
+while j <= 10 {
+    if j == 3 then {
+        exit;
+    }
+    print "j = " + j;
+    j = j + 1;
+}

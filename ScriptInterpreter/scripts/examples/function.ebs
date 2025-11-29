@@ -1,0 +1,22 @@
+// Example: function keyword - Define named functions
+// Syntax: function name(params) return type { }
+
+// Simple function (optional 'function' keyword)
+function greet(name: string) {
+    print "Hello, " + name + "!";
+}
+
+// Function with return type
+function add(a: int, b: int) return int {
+    return a + b;
+}
+
+// Function with default parameter
+function greetUser(name: string = "Guest") {
+    print "Welcome, " + name;
+}
+
+call greet("World");
+var sum = call add(5, 3);
+print "Sum: " + sum;
+call greetUser();

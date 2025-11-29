@@ -1,0 +1,22 @@
+// Example: try, exceptions, when keywords - Exception handling
+// Syntax: try { } exceptions { when ERROR_TYPE { } }
+
+try {
+    var result = 10 / 0;
+} exceptions {
+    when MATH_ERROR {
+        print "Cannot divide by zero!";
+    }
+    when ANY_ERROR {
+        print "Unexpected error occurred";
+    }
+}
+
+// Capture error message
+try {
+    var x: int = int("abc");
+} exceptions {
+    when TYPE_ERROR(msg) {
+        print "Type error: " + msg;
+    }
+}

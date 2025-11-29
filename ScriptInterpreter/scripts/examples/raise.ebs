@@ -1,0 +1,20 @@
+// Example: raise exception - Throw errors explicitly
+// Syntax: raise exception ERROR_TYPE("message");
+
+validateAge(age: int) {
+    if age < 0 then {
+        raise exception VALIDATION_ERROR("Age cannot be negative");
+    }
+    if age > 150 then {
+        raise exception VALIDATION_ERROR("Age is unrealistic");
+    }
+    print "Age is valid: " + age;
+}
+
+try {
+    call validateAge(-5);
+} exceptions {
+    when VALIDATION_ERROR(msg) {
+        print "Validation failed: " + msg;
+    }
+}

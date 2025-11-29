@@ -1,0 +1,13 @@
+// Example: var keyword - Declare variables
+// Syntax: var name: type = value;
+
+var message: string = "Hello, World!";
+var count: int = 42;
+var price: double = 19.99;
+var active: bool = true;
+
+// Type inference (type optional)
+var inferred = "Auto-detected as string";
+
+print message;
+print "Count: " + count;

@@ -1,0 +1,13 @@
+// Example: import keyword - Include other scripts
+// Syntax: import "path/to/script.ebs";
+
+// Import from same directory
+// import "helper.ebs";
+
+// Import from subdirectory
+// import "util/stringUtil.ebs";
+
+// After import, functions from that file are available
+// call helperFunction();
+
+print "Import allows code reuse across files";

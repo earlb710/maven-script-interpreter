@@ -1,0 +1,19 @@
+// Example: cursor, open, close - SQL cursor operations
+// Syntax: cursor name = select ...; open name(); close name;
+
+// Define cursor with SQL query
+// cursor employees = select id, name, salary from employees where salary > 50000;
+
+// Open cursor (executes query)
+// open employees();
+
+// Iterate results
+// while call employees.hasNext() {
+//     var emp = call employees.next();
+//     print emp.name + ": $" + emp.salary;
+// }
+
+// Close cursor
+// close employees;
+
+print "Cursor keywords: cursor, open, close";

@@ -1,0 +1,14 @@
+// Example: foreach, in keywords - Iterate over collections
+// Syntax: foreach item in collection { }
+
+var numbers = [1, 2, 3, 4, 5];
+
+foreach num in numbers {
+    print "Value: " + num;
+}
+
+// Iterate over string characters
+var text: string = "Hello";
+foreach char in text {
+    print char;
+}

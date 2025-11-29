@@ -1,0 +1,10 @@
+// Example: print keyword - Output to console
+// Syntax: print expression;
+
+print "Hello, World!";
+print 42;
+print 3.14 + 2.86;
+print "Sum: " + (10 + 20);
+
+var name: string = "EBS";
+print "Welcome to " + name + "!";

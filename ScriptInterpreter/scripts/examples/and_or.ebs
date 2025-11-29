@@ -1,0 +1,25 @@
+// Example: and, or operators - Logical operations
+// Syntax: expr1 and expr2, expr1 or expr2
+
+var a: bool = true;
+var b: bool = false;
+
+// AND - both must be true
+if a and b then {
+    print "Both true";
+} else {
+    print "Not both true";
+}
+
+// OR - at least one true
+if a or b then {
+    print "At least one is true";
+}
+
+// Combined conditions
+var age: int = 25;
+var hasLicense: bool = true;
+
+if age >= 18 and hasLicense then {
+    print "Can drive";
+}

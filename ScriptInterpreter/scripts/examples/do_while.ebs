@@ -1,0 +1,11 @@
+// Example: do-while loop - Execute at least once
+// Syntax: do { } while (condition);
+
+var count: int = 1;
+
+do {
+    print "Iteration: " + count;
+    count = count + 1;
+} while (count <= 3);
+
+print "Loop completed";

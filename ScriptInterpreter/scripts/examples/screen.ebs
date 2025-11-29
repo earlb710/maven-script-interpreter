@@ -1,0 +1,25 @@
+// Example: screen, show, hide keywords - UI window management
+// Syntax: screen name = {...}; show screen name; hide screen name;
+
+screen myScreen = {
+    "title": "Example Screen",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "username",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Username:"
+            }
+        }
+    ]
+};
+
+// Show the screen
+show screen myScreen;
+
+// Hide after use (typically in a button handler)
+// hide screen myScreen;

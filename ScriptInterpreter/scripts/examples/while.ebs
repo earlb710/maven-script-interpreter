@@ -1,0 +1,17 @@
+// Example: while keyword - Loop while condition is true
+// Syntax: while condition { }
+
+var count: int = 1;
+
+while count <= 5 {
+    print "Count: " + count;
+    count = count + 1;
+}
+
+// Alternative with 'then'
+var i: int = 3;
+while i > 0 then {
+    print "Countdown: " + i;
+    i = i - 1;
+}
+print "Liftoff!";

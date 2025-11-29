@@ -1,0 +1,17 @@
+// Example: return keyword - Return value from function
+// Syntax: return expression;
+
+// Function with return value
+add(a: int, b: int) return int {
+    return a + b;
+}
+
+multiply(x: double, y: double) return double {
+    return x * y;
+}
+
+var sum = call add(5, 3);
+print "5 + 3 = " + sum;
+
+var product = call multiply(4.0, 2.5);
+print "4.0 * 2.5 = " + product;

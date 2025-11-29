@@ -1,0 +1,18 @@
+// Example: call keyword - Invoke functions
+// Syntax: call functionName(args);
+
+// Define a function
+greet(name: string) {
+    print "Hello, " + name + "!";
+}
+
+// Call user-defined function
+call greet("World");
+
+// Call built-in functions
+var upper = call str.toUpper("hello");
+print upper;
+
+// Shorthand with # prefix
+var lower = #str.toLower("HELLO");
+print lower;

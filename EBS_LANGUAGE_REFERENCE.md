@@ -1,6 +1,6 @@
 # EBS Language Reference
 
-**Documentation Version: 1.0.0**
+**Documentation Version: 1.1.0**
 
 This document serves as a pointer to the comprehensive EBS (Earl Bosch Script) language documentation.
 
@@ -36,6 +36,14 @@ This document includes:
 - Console commands
 - Best practices and examples
 
+## Keyword Examples
+
+Short, precise examples for each EBS keyword are available in:
+
+**[ScriptInterpreter/scripts/examples/](ScriptInterpreter/scripts/examples/)**
+
+Each keyword has its own example file demonstrating correct usage.
+
 ## Quick Reference
 
 ### Grammar Specification
@@ -67,6 +75,7 @@ For the latest updates and comprehensive language reference, always refer to [do
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.1.0 | 2025-11-29 | Added keyword examples in ScriptInterpreter/scripts/examples/ |
 | 1.0.0 | 2025-11-29 | Initial version - Created language reference index with links to main documentation |
 
 ---
@@ -84,7 +93,7 @@ When adding or removing **keywords**, **built-in functions**, or other language 
    - `ScriptInterpreter/src/main/resources/help-lookup.json` - Built-in help lookup data
 
 3. **Example Scripts:**
-   - `ScriptInterpreter/scripts/` - Example and test scripts demonstrating features
+   - `ScriptInterpreter/scripts/examples/` - Individual example files for each keyword
 
 4. **Grammar Specification:**
    - `ScriptInterpreter/src/main/java/com/eb/script/syntax_ebnf.txt` - EBNF grammar (if syntax changes)

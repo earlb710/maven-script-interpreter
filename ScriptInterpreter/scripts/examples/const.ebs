@@ -1,0 +1,12 @@
+// Example: const keyword - Declare constant variables
+// Syntax: const name: type = value;
+
+const PI: double = 3.14159;
+const MAX_SIZE: int = 100;
+const APP_NAME: string = "My Application";
+
+print "PI = " + PI;
+print "Max size: " + MAX_SIZE;
+
+// Attempting to reassign a const throws an error:
+// PI = 3.0;  // Error: Cannot reassign constant variable 'PI'
