@@ -2114,6 +2114,9 @@ formScreen.isActive = false;
 ## Built-in Functions
 
 ### String Functions
+
+**Note:** String functions can use either the `str.` or `string.` prefix. Both are equivalent and interchangeable (e.g., `str.trim()` and `string.trim()` work identically).
+
 ```javascript
 // Conversion
 call string.tostring(value);
@@ -2431,13 +2434,15 @@ for (var i: int = 0; i < 5; i++) {
 #### str.replaceAll() - Regex Replace All
 Replaces all occurrences of a regex pattern with a replacement string.
 
+**Important:** Since EBS strings use backslash escaping, regex backslashes must be double-escaped (e.g., `\\d` instead of `\d`).
+
 ```javascript
-// Basic usage - remove all digits
+// Basic usage - remove all digits (\\d+ matches one or more digits)
 var text: string = "abc123def456";
 var result = call str.replaceAll(text, "\\d+", "");
 print result;  // Output: "abcdef"
 
-// Replace all whitespace
+// Replace all whitespace (\\s+ matches one or more whitespace chars)
 var text2: string = "Hello   World  Test";
 var result2 = call str.replaceAll(text2, "\\s+", " ");
 print result2;  // Output: "Hello World Test"
@@ -2450,7 +2455,7 @@ print result3;  // Output: "[Hello] [World]"
 
 **Features:**
 - Uses Java regex syntax
-- Backslashes must be escaped (`\\d+` not `\d+`)
+- Backslashes must be double-escaped (`\\d+` not `\d+`) in EBS strings
 - Supports capture group references in replacement
 - Use str.replace() for literal (non-regex) replacement
 
@@ -2986,7 +2991,7 @@ var items = call scr.getItemList("propTest");
 // items[0], items[1], ... contain item names like "usernamefield", "agefield", etc.
 ```
 
-**Note:** The prefix `scr.` is used for all screen functions. Some older documentation may show `screen.` as an alias.
+**Note:** The canonical prefix for screen functions is `scr.` (e.g., `scr.getProperty`, `scr.setStatus`). This is the recommended prefix for all new code.
 
 ### Debug Functions
 ```javascript
