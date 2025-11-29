@@ -61,77 +61,67 @@ if call json.isempty(profileListJson) then {
     hasDefaultProfile = true;
     print "No profileList found, using default";
 } else {
-    // Build profile list from JSON array using json.get and convert to string
+    // Build profile list from JSON array using json.getstring with default
     var idx: int = 0;
     var tempProfile: string = "";
-    var tempValue: json;
     
-    tempValue = call json.get(profileListJson, "[0]");
-    if tempValue != null then {
-        tempProfile = call string.tostring(tempValue);
+    // Read each element with json.getstring - returns "" if not found
+    tempProfile = call json.getstring(profileListJson, "[0]", "");
+    if tempProfile != "" then {
         profileList[idx] = tempProfile;
         if tempProfile == "default" then { hasDefaultProfile = true; }
         idx = idx + 1;
     }
-    tempValue = call json.get(profileListJson, "[1]");
-    if tempValue != null then {
-        tempProfile = call string.tostring(tempValue);
+    tempProfile = call json.getstring(profileListJson, "[1]", "");
+    if tempProfile != "" then {
         profileList[idx] = tempProfile;
         if tempProfile == "default" then { hasDefaultProfile = true; }
         idx = idx + 1;
     }
-    tempValue = call json.get(profileListJson, "[2]");
-    if tempValue != null then {
-        tempProfile = call string.tostring(tempValue);
+    tempProfile = call json.getstring(profileListJson, "[2]", "");
+    if tempProfile != "" then {
         profileList[idx] = tempProfile;
         if tempProfile == "default" then { hasDefaultProfile = true; }
         idx = idx + 1;
     }
-    tempValue = call json.get(profileListJson, "[3]");
-    if tempValue != null then {
-        tempProfile = call string.tostring(tempValue);
+    tempProfile = call json.getstring(profileListJson, "[3]", "");
+    if tempProfile != "" then {
         profileList[idx] = tempProfile;
         if tempProfile == "default" then { hasDefaultProfile = true; }
         idx = idx + 1;
     }
-    tempValue = call json.get(profileListJson, "[4]");
-    if tempValue != null then {
-        tempProfile = call string.tostring(tempValue);
+    tempProfile = call json.getstring(profileListJson, "[4]", "");
+    if tempProfile != "" then {
         profileList[idx] = tempProfile;
         if tempProfile == "default" then { hasDefaultProfile = true; }
         idx = idx + 1;
     }
-    tempValue = call json.get(profileListJson, "[5]");
-    if tempValue != null then {
-        tempProfile = call string.tostring(tempValue);
+    tempProfile = call json.getstring(profileListJson, "[5]", "");
+    if tempProfile != "" then {
         profileList[idx] = tempProfile;
         if tempProfile == "default" then { hasDefaultProfile = true; }
         idx = idx + 1;
     }
-    tempValue = call json.get(profileListJson, "[6]");
-    if tempValue != null then {
-        tempProfile = call string.tostring(tempValue);
+    tempProfile = call json.getstring(profileListJson, "[6]", "");
+    if tempProfile != "" then {
         profileList[idx] = tempProfile;
         if tempProfile == "default" then { hasDefaultProfile = true; }
         idx = idx + 1;
     }
-    tempValue = call json.get(profileListJson, "[7]");
-    if tempValue != null then {
-        tempProfile = call string.tostring(tempValue);
+    tempProfile = call json.getstring(profileListJson, "[7]", "");
+    if tempProfile != "" then {
         profileList[idx] = tempProfile;
         if tempProfile == "default" then { hasDefaultProfile = true; }
         idx = idx + 1;
     }
-    tempValue = call json.get(profileListJson, "[8]");
-    if tempValue != null then {
-        tempProfile = call string.tostring(tempValue);
+    tempProfile = call json.getstring(profileListJson, "[8]", "");
+    if tempProfile != "" then {
         profileList[idx] = tempProfile;
         if tempProfile == "default" then { hasDefaultProfile = true; }
         idx = idx + 1;
     }
-    tempValue = call json.get(profileListJson, "[9]");
-    if tempValue != null then {
-        tempProfile = call string.tostring(tempValue);
+    tempProfile = call json.getstring(profileListJson, "[9]", "");
+    if tempProfile != "" then {
         profileList[idx] = tempProfile;
         if tempProfile == "default" then { hasDefaultProfile = true; }
         idx = idx + 1;
@@ -869,75 +859,64 @@ function onAddProfileClick {
             var firstOption: bool = true;
             var pIdx: int = 0;
             var tempP: string = "";
-            var tempV: json;
             
-            // Add all existing profiles from config using json.get and convert to string
-            tempV = call json.get(currentProfileList, "[0]");
-            if tempV != null then {
-                tempP = call string.tostring(tempV);
+            // Add all existing profiles from config using json.getstring with default ""
+            tempP = call json.getstring(currentProfileList, "[0]", "");
+            if tempP != "" then {
                 if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
                 newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
                 firstOption = false;
             }
-            tempV = call json.get(currentProfileList, "[1]");
-            if tempV != null then {
-                tempP = call string.tostring(tempV);
+            tempP = call json.getstring(currentProfileList, "[1]", "");
+            if tempP != "" then {
                 if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
                 newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
                 firstOption = false;
             }
-            tempV = call json.get(currentProfileList, "[2]");
-            if tempV != null then {
-                tempP = call string.tostring(tempV);
+            tempP = call json.getstring(currentProfileList, "[2]", "");
+            if tempP != "" then {
                 if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
                 newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
                 firstOption = false;
             }
-            tempV = call json.get(currentProfileList, "[3]");
-            if tempV != null then {
-                tempP = call string.tostring(tempV);
+            tempP = call json.getstring(currentProfileList, "[3]", "");
+            if tempP != "" then {
                 if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
                 newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
                 firstOption = false;
             }
-            tempV = call json.get(currentProfileList, "[4]");
-            if tempV != null then {
-                tempP = call string.tostring(tempV);
+            tempP = call json.getstring(currentProfileList, "[4]", "");
+            if tempP != "" then {
                 if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
                 newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
                 firstOption = false;
             }
-            tempV = call json.get(currentProfileList, "[5]");
-            if tempV != null then {
-                tempP = call string.tostring(tempV);
+            tempP = call json.getstring(currentProfileList, "[5]", "");
+            if tempP != "" then {
                 if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
                 newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
                 firstOption = false;
             }
-            tempV = call json.get(currentProfileList, "[6]");
-            if tempV != null then {
-                tempP = call string.tostring(tempV);
+            tempP = call json.getstring(currentProfileList, "[6]", "");
+            if tempP != "" then {
                 if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
                 newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
                 firstOption = false;
             }
-            tempV = call json.get(currentProfileList, "[7]");
-            if tempV != null then {
-                tempP = call string.tostring(tempV);
+            tempP = call json.getstring(currentProfileList, "[7]", "");
+            if tempP != "" then {
                 if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
                 newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
                 firstOption = false;
             }
-            tempV = call json.get(currentProfileList, "[8]");
-            if tempV != null then {
-                tempP = call string.tostring(tempV);
+            tempP = call json.getstring(currentProfileList, "[8]", "");
+            if tempP != "" then {
                 if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
                 newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
                 firstOption = false;
             }
-            tempV = call json.get(currentProfileList, "[9]");
-            if tempV != null then {
-                tempP = call string.tostring(tempV);
+            tempP = call json.getstring(currentProfileList, "[9]", "");
+            if tempP != "" then {
                 if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
                 newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
                 firstOption = false;
@@ -986,92 +965,81 @@ function onRemoveProfileClick {
             var newOptionsStr: string = "{";
             var firstOption: bool = true;
             var tempP: string = "";
-            var tempV: json;
             
-            tempV = call json.get(currentProfileList, "[0]");
-            if tempV != null then {
-                tempP = call string.tostring(tempV);
+            tempP = call json.getstring(currentProfileList, "[0]", "");
+            if tempP != "" then {
                 if tempP != currentProfile then {
                     if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
                     newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
                     firstOption = false;
                 }
             }
-            tempV = call json.get(currentProfileList, "[1]");
-            if tempV != null then {
-                tempP = call string.tostring(tempV);
+            tempP = call json.getstring(currentProfileList, "[1]", "");
+            if tempP != "" then {
                 if tempP != currentProfile then {
                     if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
                     newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
                     firstOption = false;
                 }
             }
-            tempV = call json.get(currentProfileList, "[2]");
-            if tempV != null then {
-                tempP = call string.tostring(tempV);
+            tempP = call json.getstring(currentProfileList, "[2]", "");
+            if tempP != "" then {
                 if tempP != currentProfile then {
                     if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
                     newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
                     firstOption = false;
                 }
             }
-            tempV = call json.get(currentProfileList, "[3]");
-            if tempV != null then {
-                tempP = call string.tostring(tempV);
+            tempP = call json.getstring(currentProfileList, "[3]", "");
+            if tempP != "" then {
                 if tempP != currentProfile then {
                     if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
                     newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
                     firstOption = false;
                 }
             }
-            tempV = call json.get(currentProfileList, "[4]");
-            if tempV != null then {
-                tempP = call string.tostring(tempV);
+            tempP = call json.getstring(currentProfileList, "[4]", "");
+            if tempP != "" then {
                 if tempP != currentProfile then {
                     if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
                     newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
                     firstOption = false;
                 }
             }
-            tempV = call json.get(currentProfileList, "[5]");
-            if tempV != null then {
-                tempP = call string.tostring(tempV);
+            tempP = call json.getstring(currentProfileList, "[5]", "");
+            if tempP != "" then {
                 if tempP != currentProfile then {
                     if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
                     newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
                     firstOption = false;
                 }
             }
-            tempV = call json.get(currentProfileList, "[6]");
-            if tempV != null then {
-                tempP = call string.tostring(tempV);
+            tempP = call json.getstring(currentProfileList, "[6]", "");
+            if tempP != "" then {
                 if tempP != currentProfile then {
                     if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
                     newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
                     firstOption = false;
                 }
             }
-            tempV = call json.get(currentProfileList, "[7]");
-            if tempV != null then {
-                tempP = call string.tostring(tempV);
+            tempP = call json.getstring(currentProfileList, "[7]", "");
+            if tempP != "" then {
                 if tempP != currentProfile then {
                     if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
                     newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
                     firstOption = false;
                 }
             }
-            tempV = call json.get(currentProfileList, "[8]");
-            if tempV != null then {
-                tempP = call string.tostring(tempV);
+            tempP = call json.getstring(currentProfileList, "[8]", "");
+            if tempP != "" then {
                 if tempP != currentProfile then {
                     if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
                     newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
                     firstOption = false;
                 }
             }
-            tempV = call json.get(currentProfileList, "[9]");
-            if tempV != null then {
-                tempP = call string.tostring(tempV);
+            tempP = call json.getstring(currentProfileList, "[9]", "");
+            if tempP != "" then {
                 if tempP != currentProfile then {
                     if firstOption == false then { newOptionsStr = newOptionsStr + ", "; }
                     newOptionsStr = newOptionsStr + "\"" + tempP + "\": \"" + tempP + "\"";
