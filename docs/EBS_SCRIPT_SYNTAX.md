@@ -2124,8 +2124,19 @@ call string.tolower(text);
 call string.trim(text);
 call string.replace(text, old, new);
 call string.replaceFirst(text, old, new);  // Replace first occurrence only
+call str.replaceAll(text, regex, replacement);  // Regex-based replace all
 call string.split(text, delimiter);
 call string.join(array, separator);
+
+// Substring and indexing
+call str.substring(text, beginIndex, endIndex?);  // Extract substring
+call str.indexOf(text, searchString, fromIndex?);  // Find first occurrence
+call str.lastIndexOf(text, searchString, fromIndex?);  // Find last occurrence
+call str.charAt(text, index);  // Get character at index
+
+// Padding
+call str.lpad(text, length, padChar);  // Left-pad to length
+call str.rpad(text, length, padChar);  // Right-pad to length
 
 // Queries
 call string.contains(text, substring);
@@ -2323,6 +2334,175 @@ print result;  // Output: true
 - Returns boolean (`true` or `false`)
 - Available as both `string.contains` and `str.contains`
 - Returns `false` if either argument is `null`
+
+#### str.substring() - Extract Substring
+Extracts a portion of a string from beginIndex to endIndex (exclusive).
+
+```javascript
+// Basic usage - from index to end
+var text: string = "Hello World";
+var result = call str.substring(text, 6);
+print result;  // Output: "World"
+
+// With end index
+var result2 = call str.substring(text, 0, 5);
+print result2;  // Output: "Hello"
+
+// Extract middle portion
+var result3 = call str.substring(text, 3, 8);
+print result3;  // Output: "lo Wo"
+```
+
+**Features:**
+- Uses Java String.substring() semantics
+- beginIndex is inclusive, endIndex is exclusive
+- If endIndex is omitted, extracts to end of string
+- Throws error if indices are out of bounds
+
+#### str.indexOf() - Find First Occurrence
+Finds the first occurrence of a substring in the string.
+
+```javascript
+// Basic usage
+var text: string = "Hello World Hello";
+var index = call str.indexOf(text, "Hello");
+print index;  // Output: 0
+
+// Find second occurrence
+var index2 = call str.indexOf(text, "Hello", 1);
+print index2;  // Output: 12
+
+// Not found returns -1
+var notFound = call str.indexOf(text, "xyz");
+print notFound;  // Output: -1
+```
+
+**Features:**
+- Returns index of first occurrence, or -1 if not found
+- Optional fromIndex parameter to start search from a position
+- Case-sensitive matching
+
+#### str.lastIndexOf() - Find Last Occurrence
+Finds the last occurrence of a substring in the string.
+
+```javascript
+// Basic usage
+var text: string = "Hello World Hello";
+var index = call str.lastIndexOf(text, "Hello");
+print index;  // Output: 12
+
+// With fromIndex (search backwards from position)
+var index2 = call str.lastIndexOf(text, "Hello", 10);
+print index2;  // Output: 0
+
+// Not found returns -1
+var notFound = call str.lastIndexOf(text, "xyz");
+print notFound;  // Output: -1
+```
+
+**Features:**
+- Returns index of last occurrence, or -1 if not found
+- Optional fromIndex parameter to limit search range
+- Case-sensitive matching
+
+#### str.charAt() - Get Character at Index
+Returns the character at the specified index as a single-character string.
+
+```javascript
+// Basic usage
+var text: string = "Hello";
+var char1 = call str.charAt(text, 0);
+print char1;  // Output: "H"
+
+var char2 = call str.charAt(text, 4);
+print char2;  // Output: "o"
+
+// Use in loop
+for (var i: int = 0; i < 5; i++) {
+    print call str.charAt(text, i);
+}
+```
+
+**Features:**
+- Returns single-character string (not char type)
+- Throws error if index is out of bounds
+- Use with str.charArray() if you need character codes
+
+#### str.replaceAll() - Regex Replace All
+Replaces all occurrences of a regex pattern with a replacement string.
+
+```javascript
+// Basic usage - remove all digits
+var text: string = "abc123def456";
+var result = call str.replaceAll(text, "\\d+", "");
+print result;  // Output: "abcdef"
+
+// Replace all whitespace
+var text2: string = "Hello   World  Test";
+var result2 = call str.replaceAll(text2, "\\s+", " ");
+print result2;  // Output: "Hello World Test"
+
+// Use capture groups
+var text3: string = "Hello World";
+var result3 = call str.replaceAll(text3, "(\\w+)", "[$1]");
+print result3;  // Output: "[Hello] [World]"
+```
+
+**Features:**
+- Uses Java regex syntax
+- Backslashes must be escaped (`\\d+` not `\d+`)
+- Supports capture group references in replacement
+- Use str.replace() for literal (non-regex) replacement
+
+#### str.lpad() - Left Pad String
+Left-pads a string with a character to reach a specified length.
+
+```javascript
+// Basic usage - pad with zeros
+var num: string = "42";
+var result = call str.lpad(num, 5, "0");
+print result;  // Output: "00042"
+
+// Pad with spaces
+var text: string = "Hi";
+var result2 = call str.lpad(text, 10, " ");
+print result2;  // Output: "        Hi"
+
+// Already at or exceeds length - no change
+var text3: string = "Hello";
+var result3 = call str.lpad(text3, 3, "0");
+print result3;  // Output: "Hello"
+```
+
+**Features:**
+- padChar must be exactly one character
+- Returns original string if already >= length
+- Useful for formatting numbers and alignment
+
+#### str.rpad() - Right Pad String
+Right-pads a string with a character to reach a specified length.
+
+```javascript
+// Basic usage - pad with spaces
+var text: string = "Hi";
+var result = call str.rpad(text, 10, " ");
+print result;  // Output: "Hi        "
+
+// Pad with dots
+var text2: string = "Loading";
+var result2 = call str.rpad(text2, 10, ".");
+print result2;  // Output: "Loading..."
+
+// Already at or exceeds length - no change
+var text3: string = "Hello";
+var result3 = call str.rpad(text3, 3, "0");
+print result3;  // Output: "Hello"
+```
+
+**Features:**
+- padChar must be exactly one character
+- Returns original string if already >= length
+- Useful for formatting and alignment
 
 
 ### JSON Functions
@@ -2620,7 +2800,38 @@ call system.help();
 var userInput = call system.inputDialog(title, headerText?, defaultValue?);
 var confirmed = call system.confirmDialog(message, title?, headerText?);
 call system.alertDialog(message, title?, alertType?);
+
+// Thread/timing
+call thread.sleep(milliseconds);  // Pause execution
 ```
+
+#### thread.sleep(milliseconds)
+Pauses the current thread execution for the specified number of milliseconds.
+
+```javascript
+// Pause for 1 second
+call thread.sleep(1000);
+
+// Pause for half a second
+call thread.sleep(500);
+
+// Use in a loop with delay
+for (var i: int = 0; i < 5; i++) {
+    print "Step " + i;
+    call thread.sleep(500);  // Wait 500ms between steps
+}
+```
+
+**Parameters:**
+- `milliseconds` (long, required): Number of milliseconds to pause
+
+**Returns:** String (usually empty)
+
+**Use Cases:**
+- Adding delays between operations
+- Rate limiting API calls
+- Animation timing
+- Waiting for resources to become available
 
 #### Dialog Functions
 
@@ -2722,24 +2933,60 @@ call system.alertDialog("Export completed. 150 records exported.", "Export Compl
 
 ### Screen Functions
 ```javascript
-// Get property value from a screen item
-var value = call screen.getProperty("screenName.itemName", "propertyName");
-
-// Set property value on a screen item
-call screen.setProperty("screenName.itemName", "propertyName", value);
+// Get/set property value on a screen item
+var value = call scr.getProperty("screenName.itemName", "propertyName");
+call scr.setProperty("screenName.itemName", "propertyName", value);
 
 // Get list of all item names in a screen
-var itemList = call screen.getItemList("screenName");
-// Alias: screen.getScreenItemList also available
-var itemList = call screen.getScreenItemList("screenName");
+var itemList = call scr.getItemList("screenName");
+// Alias: scr.getScreenItemList also available
+var itemList = call scr.getScreenItemList("screenName");
 // Returns an ArrayDynamic of strings containing all item names
 
+// Show/hide/close screens programmatically
+call scr.showScreen("screenName");
+call scr.hideScreen("screenName");
+call scr.closeScreen("screenName");
+
+// Screen status management
+call scr.setStatus("screenName", "clean");    // or "changed" or "error"
+var status = call scr.getStatus("screenName");
+call scr.setError("screenName", "Error message");
+var error = call scr.getError("screenName");
+
+// Check screen state
+var hasChanges = call scr.checkChanged("screenName");
+var hasErrors = call scr.checkError("screenName");
+
+// Item source and status
+var source = call scr.getItemSource("screenName", "itemName");  // "data" or "display"
+call scr.setItemSource("screenName", "itemName", "data");
+var itemStatus = call scr.getItemStatus("screenName", "itemName");
+call scr.resetItemOriginalValue("screenName", "itemName");
+
+// Revert and clear
+call scr.revert("screenName");  // Revert to original values
+call scr.clear("screenName");   // Clear all values
+
+// Get variable reference
+var varRef = call scr.getVarReference("screenName", "itemName");
+
+// Area properties
+var prop = call scr.getAreaProperty("screenName.areaName", "propertyName");
+call scr.setAreaProperty("screenName.areaName", "propertyName", value);
+
+// Choice/dropdown options
+var options = call scr.getItemChoiceOptions("screenName", "itemName");
+call scr.setItemChoiceOptions("screenName", "itemName", optionsMap);
+
 // Examples:
-var editable = call screen.getProperty("propTest.usernamefield", "editable");
-call screen.setProperty("propTest.usernamefield", "visible", false);
-var items = call screen.getItemList("propTest");
+var editable = call scr.getProperty("propTest.usernamefield", "editable");
+call scr.setProperty("propTest.usernamefield", "visible", false);
+var items = call scr.getItemList("propTest");
 // items[0], items[1], ... contain item names like "usernamefield", "agefield", etc.
 ```
+
+**Note:** The prefix `scr.` is used for all screen functions. Some older documentation may show `screen.` as an alias.
 
 ### Debug Functions
 ```javascript
