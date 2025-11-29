@@ -458,6 +458,45 @@ loadSampleData {
     regexScreen.resultText = "Sample data loaded!\n\nTry clicking 'Find All' to find email addresses,\nor modify the regex pattern to test other patterns.\n\nSample patterns to try:\n- \\d+ (find numbers)\n- \\w+ (find words)\n- [A-Z][a-z]+ (find capitalized words)\n- \\d{4}-\\d{2}-\\d{2} (find dates like YYYY-MM-DD)\n\nFilter Examples:\n- OR Filter: 'user, admin' - matches containing 'user' OR 'admin'\n- AND Filter: 'example' - matches must contain 'example'\n- NOT Filter: 'test' - exclude matches containing 'test'\n- Wildcard: 'user+/*com' - matches containing both 'user' AND 'com'";
 }
 
+// Function to append OR filter to regex pattern
+appendOrToPattern {
+    var orValue: string = regexScreen.orPatterns;
+    if orValue != "" then {
+        var currentPattern: string = regexScreen.regexPattern;
+        if currentPattern != "" then {
+            regexScreen.regexPattern = currentPattern + "|" + orValue;
+        } else {
+            regexScreen.regexPattern = orValue;
+        }
+    }
+}
+
+// Function to append AND filter to regex pattern
+appendAndToPattern {
+    var andValue: string = regexScreen.andPatterns;
+    if andValue != "" then {
+        var currentPattern: string = regexScreen.regexPattern;
+        if currentPattern != "" then {
+            regexScreen.regexPattern = currentPattern + "(?=.*" + andValue + ")";
+        } else {
+            regexScreen.regexPattern = "(?=.*" + andValue + ")";
+        }
+    }
+}
+
+// Function to append NOT filter to regex pattern
+appendNotToPattern {
+    var notValue: string = regexScreen.notPatterns;
+    if notValue != "" then {
+        var currentPattern: string = regexScreen.regexPattern;
+        if currentPattern != "" then {
+            regexScreen.regexPattern = currentPattern + "(?!.*" + notValue + ")";
+        } else {
+            regexScreen.regexPattern = "(?!.*" + notValue + ")";
+        }
+    }
+}
+
 // Create the regex tester screen
 screen regexScreen = {
     "title": "Regex Tester - Interactive Regular Expression Tool",
@@ -622,36 +661,91 @@ screen regexScreen = {
                     ]
                 },
                 {
-                    "name": "optionsArea",
-                    "type": "vbox",
-                    "groupBorder": "lowered",
-                    "groupBorderColor": "#cccccc",
-                    "groupLabelText": "Regex Options",
-                    "groupLabelOffset": "bottom",
-                    "padding": "4",
-                    "groupLabelColor": "#444444",
-                    "style": "-fx-spacing: 5; -fx-padding: 10;",
-                    "items": [
-                        {"name": "caseInsensitiveItem", "varRef": "caseInsensitive"},
-                        {"name": "multilineModeItem", "varRef": "multilineMode"},
-                        {"name": "dotAllModeItem", "varRef": "dotAllMode"},
-                        {"name": "appendResultsItem", "varRef": "appendResults"}
-                    ]
-                },
-                {
-                    "name": "filtersArea",
-                    "type": "vbox",
-                    "groupBorder": "lowered",
-                    "groupBorderColor": "#cccccc",
-                    "groupLabelText": "Match Filters (comma-separated, use +/* for AND within pattern)",
-                    "groupLabelOffset": "bottom",
-                    "padding": "4",
-                    "groupLabelColor": "#444444",
-                    "style": "-fx-spacing: 5; -fx-padding: 10;",
-                    "items": [
-                        {"name": "orPatternsItem", "varRef": "orPatterns"},
-                        {"name": "andPatternsItem", "varRef": "andPatterns"},
-                        {"name": "notPatternsItem", "varRef": "notPatterns"}
+                    "name": "optionsAndFiltersRow",
+                    "type": "hbox",
+                    "style": "-fx-spacing: 10;",
+                    "areas": [
+                        {
+                            "name": "optionsArea",
+                            "type": "vbox",
+                            "groupBorder": "lowered",
+                            "groupBorderColor": "#cccccc",
+                            "groupLabelText": "Regex Options",
+                            "groupLabelOffset": "bottom",
+                            "padding": "4",
+                            "groupLabelColor": "#444444",
+                            "style": "-fx-spacing: 5; -fx-padding: 10;",
+                            "items": [
+                                {"name": "caseInsensitiveItem", "varRef": "caseInsensitive"},
+                                {"name": "multilineModeItem", "varRef": "multilineMode"},
+                                {"name": "dotAllModeItem", "varRef": "dotAllMode"},
+                                {"name": "appendResultsItem", "varRef": "appendResults"}
+                            ]
+                        },
+                        {
+                            "name": "filtersArea",
+                            "type": "vbox",
+                            "groupBorder": "lowered",
+                            "groupBorderColor": "#cccccc",
+                            "groupLabelText": "Match Filters",
+                            "groupLabelOffset": "bottom",
+                            "padding": "4",
+                            "groupLabelColor": "#444444",
+                            "style": "-fx-spacing: 5; -fx-padding: 10;",
+                            "areas": [
+                                {
+                                    "name": "orFilterRow",
+                                    "type": "hbox",
+                                    "style": "-fx-spacing: 5; -fx-alignment: CENTER_LEFT;",
+                                    "items": [
+                                        {"name": "orPatternsItem", "varRef": "orPatterns"},
+                                        {
+                                            "name": "appendOrBtn",
+                                            "display": {
+                                                "type": "button",
+                                                "labelText": "Append",
+                                                "tooltip": "Append OR filter to regex pattern",
+                                                "onClick": "call appendOrToPattern();"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "name": "andFilterRow",
+                                    "type": "hbox",
+                                    "style": "-fx-spacing: 5; -fx-alignment: CENTER_LEFT;",
+                                    "items": [
+                                        {"name": "andPatternsItem", "varRef": "andPatterns"},
+                                        {
+                                            "name": "appendAndBtn",
+                                            "display": {
+                                                "type": "button",
+                                                "labelText": "Append",
+                                                "tooltip": "Append AND filter to regex pattern",
+                                                "onClick": "call appendAndToPattern();"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "name": "notFilterRow",
+                                    "type": "hbox",
+                                    "style": "-fx-spacing: 5; -fx-alignment: CENTER_LEFT;",
+                                    "items": [
+                                        {"name": "notPatternsItem", "varRef": "notPatterns"},
+                                        {
+                                            "name": "appendNotBtn",
+                                            "display": {
+                                                "type": "button",
+                                                "labelText": "Append",
+                                                "tooltip": "Append NOT filter to regex pattern",
+                                                "onClick": "call appendNotToPattern();"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
                     ]
                 },
                 {
@@ -768,7 +862,7 @@ screen regexScreen = {
                             "name": "helpLabel3",
                             "display": {
                                 "type": "label",
-                                "labelText": "Filters: OR=any match, AND=all must match, NOT=exclude. Use +/* for AND within a pattern."
+                                "labelText": "Filters: OR=any match, AND=all must match, NOT=exclude. Use Append to add to regex pattern."
                             }
                         }
                     ]
