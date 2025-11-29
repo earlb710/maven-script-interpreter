@@ -1,5 +1,7 @@
 # EBS Language Reference
 
+**Documentation Version: 1.0.0**
+
 This document serves as a pointer to the comprehensive EBS (Earl Bosch Script) language documentation.
 
 ## Main Language Reference
@@ -58,3 +60,33 @@ print message;
 This documentation corresponds to the EBS Script Interpreter version 1.0-SNAPSHOT.
 
 For the latest updates and comprehensive language reference, always refer to [docs/EBS_SCRIPT_SYNTAX.md](docs/EBS_SCRIPT_SYNTAX.md).
+
+---
+
+## Changelog
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 1.0.0 | 2025-11-29 | Initial version - Created language reference index with links to main documentation |
+
+---
+
+## Maintaining This Documentation
+
+When adding or removing **keywords**, **built-in functions**, or other language features, the following files must be updated to keep documentation in sync:
+
+1. **Documentation Files:**
+   - `docs/EBS_SCRIPT_SYNTAX.md` - Main language syntax reference
+   - `EBS_LANGUAGE_REFERENCE.md` - This file (update version and changelog)
+   - `README.md` - If the change affects the project overview
+
+2. **Help System:**
+   - `ScriptInterpreter/src/main/resources/help-lookup.json` - Built-in help lookup data
+
+3. **Example Scripts:**
+   - `ScriptInterpreter/scripts/` - Example and test scripts demonstrating features
+
+4. **Grammar Specification:**
+   - `ScriptInterpreter/src/main/java/com/eb/script/syntax_ebnf.txt` - EBNF grammar (if syntax changes)
+
+**Version Update Rule:** Increment the documentation version in this file whenever significant changes are made to the language documentation.
