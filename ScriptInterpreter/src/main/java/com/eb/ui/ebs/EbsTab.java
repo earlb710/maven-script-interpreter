@@ -1037,7 +1037,6 @@ public class EbsTab extends Tab {
         findBar.setVisible(false);
         findBar.setManaged(false);
         lastMatches = java.util.Collections.emptyList();
-        stalePendingClear = java.util.Collections.emptyList();
         currentIndex = -1;
         // Stop any pending timer and reset stale flag
         if (editorChangeTimer != null) {
