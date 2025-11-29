@@ -1572,6 +1572,12 @@ screen colorEditorScreen = {
 print "Color editor screen created successfully";
 print "";
 
+// Set the profile combobox options using the map
+print "Setting profile combobox options...";
+call scr.setItemChoiceOptions("colorEditorScreen", "profile", profileOptionsMap);
+print "Profile options set: " + profileOptionsMap;
+print "";
+
 // Show the screen
 print "Displaying color editor screen...";
 print "You can now edit the colors using the color pickers.";
