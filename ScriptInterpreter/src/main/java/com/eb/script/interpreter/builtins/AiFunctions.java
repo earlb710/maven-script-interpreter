@@ -82,7 +82,7 @@ public final class AiFunctions {
     private static final String EMBED_URL = cfg("ai.embed.url", "AI_EMBED_URL", "https://api.openai.com/v1/embeddings");
     private static final String CHAT_MODEL = cfg("ai.chat.model", "AI_CHAT_MODEL", "gpt-4o-mini");
     private static final String EMB_MODEL = cfg("ai.embed.model", "AI_EMBED_MODEL", "text-embedding-3-small");
-    private static final int TIMEOUT_MS = cfgInt("ai.timeout.ms", "AI_TIMEOUT_MS", 30_000);
+    private static final int TIMEOUT_MS = cfgInt("ai.timeout.ms", "AI_TIMEOUT_MS", 300_000); // 5 minutes default
 
     private static final HttpClient HTTP = HttpClient.newBuilder()
             .connectTimeout(Duration.ofMillis(Math.max(5_000, TIMEOUT_MS / 2)))
