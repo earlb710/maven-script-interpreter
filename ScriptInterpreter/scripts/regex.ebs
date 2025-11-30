@@ -558,7 +558,7 @@ clearAiFields {
 screen askAiScreen = {
     "title": "Ask AI - Generate Regex Pattern",
     "width": 500,
-    "height": 400,
+    "height": 550,
     "vars": [
         {
             "name": "aiRequest",
@@ -566,7 +566,7 @@ screen askAiScreen = {
             "default": "",
             "display": {
                 "type": "textarea",
-                "labelText": "Describe what you want to match:",
+                "labelText": "Describe what\nyou want\nto match:",
                 "promptHelp": "E.g., 'email addresses' or 'dates in YYYY-MM-DD format' or 'phone numbers with area code'",
                 "maxLength": 60
             }
@@ -592,7 +592,7 @@ screen askAiScreen = {
         {
             "name": "aiMainArea",
             "type": "vbox",
-            "style": "-fx-spacing: 10; -fx-padding: 15;",
+            "style": "-fx-spacing: 5; -fx-padding: 5;",
             "areas": [
                 {
                     "name": "aiTitleArea",
