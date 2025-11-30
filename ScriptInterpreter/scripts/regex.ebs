@@ -519,11 +519,19 @@ generateRegexFromAi {
         askAiScreen.generatedPattern = result;
     } exceptions {
         when ANY_ERROR(msg) {
-            // Provide helpful error message for API key issues
-            if call str.contains(msg, "401") or call str.contains(msg, "Unauthorized") or call str.contains(msg, "api") or call str.contains(msg, "key") then {
-                askAiScreen.aiResult = "Error: AI API key not configured.\n\nPlease set up your API key:\n1. Go to Edit > AI Chat Model Setup\n2. Enter your API key and model settings\n3. Click Save\n4. Restart the application\n\nDetails: " + msg;
+            // Check for API key issues (401 Unauthorized)
+            var isApiKeyError: bool = false;
+            if call str.contains(msg, "401") then {
+                isApiKeyError = true;
+            }
+            if call str.contains(msg, "API key") then {
+                isApiKeyError = true;
+            }
+            
+            if isApiKeyError then {
+                askAiScreen.aiResult = "API KEY NOT CONFIGURED\n\nTo use the AI feature, you need to set up your OpenAI API key:\n\n1. Go to: Edit > AI Chat Model Setup\n2. Enter your API key (from https://platform.openai.com/api-keys)\n3. Click Save\n4. RESTART the application\n\nThe AI configuration is loaded at startup, so you must restart after saving.";
             } else {
-                askAiScreen.aiResult = "Error calling AI: " + msg + "\n\nIf this is an API key issue, go to Edit > AI Chat Model Setup to configure your AI settings.";
+                askAiScreen.aiResult = "Error: " + msg;
             }
         }
     }
