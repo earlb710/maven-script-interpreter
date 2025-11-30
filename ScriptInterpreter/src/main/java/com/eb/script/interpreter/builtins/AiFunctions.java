@@ -13,6 +13,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.*;
+import java.util.prefs.Preferences;
 
 /**
  * General AI helpers that use an OpenAI-compatible REST API.
@@ -32,13 +33,35 @@ public final class AiFunctions {
     private AiFunctions() {
     }
 
+    private static final String PREF_NODE = "com.eb.ai";
+
     // ---- Configuration helpers ----
+    // First check Preferences (registry), then system property, then env var
     private static String cfg(String prop, String env, String def) {
-        String v = System.getProperty(prop);
-        if (v == null || v.isBlank()) {
-            v = System.getenv(env);
+        // First try to get from Preferences (registry)
+        try {
+            Preferences p = Preferences.userRoot().node(PREF_NODE);
+            String prefVal = p.get(prop, null);
+            if (prefVal != null && !prefVal.isBlank()) {
+                return prefVal;
+            }
+        } catch (Exception ignored) {
+            // Fall through to system property
         }
-        return (v == null || v.isBlank()) ? def : v;
+        
+        // Then try system property
+        String v = System.getProperty(prop);
+        if (v != null && !v.isBlank()) {
+            return v;
+        }
+        
+        // Then try environment variable
+        v = System.getenv(env);
+        if (v != null && !v.isBlank()) {
+            return v;
+        }
+        
+        return def;
     }
 
     private static int cfgInt(String prop, String env, int def) {
@@ -53,9 +76,10 @@ public final class AiFunctions {
         }
     }
 
+    // These are read once at class load for backwards compatibility with env vars
+    // The API key is read fresh on each call to support runtime configuration
     private static final String CHAT_URL = cfg("ai.chat.url", "AI_CHAT_URL", "https://api.openai.com/v1/chat/completions");
     private static final String EMBED_URL = cfg("ai.embed.url", "AI_EMBED_URL", "https://api.openai.com/v1/embeddings");
-    private static final String API_KEY = cfg("ai.api.key", "AI_API_KEY", null);
     private static final String CHAT_MODEL = cfg("ai.chat.model", "AI_CHAT_MODEL", "gpt-4o-mini");
     private static final String EMB_MODEL = cfg("ai.embed.model", "AI_EMBED_MODEL", "text-embedding-3-small");
     private static final int TIMEOUT_MS = cfgInt("ai.timeout.ms", "AI_TIMEOUT_MS", 30_000);
@@ -64,12 +88,18 @@ public final class AiFunctions {
             .connectTimeout(Duration.ofMillis(Math.max(5_000, TIMEOUT_MS / 2)))
             .build();
 
+    // Read API key fresh on each request to pick up runtime configuration changes
+    private static String getApiKey() {
+        return cfg("ai.api.key", "AI_API_KEY", null);
+    }
+
     private static HttpRequest.Builder base(URI uri) {
+        String apiKey = getApiKey();
         HttpRequest.Builder b = HttpRequest.newBuilder(uri)
                 .timeout(Duration.ofMillis(TIMEOUT_MS))
                 .header("Content-Type", "application/json; charset=utf-8");
-        if (API_KEY != null && !API_KEY.isBlank()) {
-            b.header("Authorization", "Bearer " + API_KEY);
+        if (apiKey != null && !apiKey.isBlank()) {
+            b.header("Authorization", "Bearer " + apiKey);
         }
         return b;
     }
