@@ -53,8 +53,8 @@ if configContent == "" then {
     configError = "Config file is empty";
 } else {
     // Check if content looks like valid JSON (starts with { after trimming)
-    var trimmedContent: string = call string.trim(configContent);
-    if call string.startsWith(trimmedContent, "{") == false then {
+    var trimmedContent: string = call str.trim(configContent);
+    if call str.startswith(trimmedContent, "{") == false then {
         configIsValid = false;
         configError = "Config file does not contain valid JSON (must start with '{')";
     }
