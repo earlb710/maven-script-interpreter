@@ -144,11 +144,8 @@ public final class AiFunctions {
         }
         messages.add(Map.of("role", "user", "content", Objects.toString(user, "")));
         req.put("messages", messages);
-        // Note: max_tokens is intentionally not sent as some models don't support it
-        // and models will automatically limit response size appropriately
-        if (temperature != null) {
-            req.put("temperature", temperature);
-        }
+        // Note: max_tokens and temperature are intentionally not sent as some models 
+        // don't support them (e.g., o1 models only support default temperature=1)
 
         String json = postJson(CHAT_URL, req);
         Object parsed = Json.parse(json);
