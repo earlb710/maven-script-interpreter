@@ -519,7 +519,12 @@ generateRegexFromAi {
         askAiScreen.generatedPattern = result;
     } exceptions {
         when ANY_ERROR(msg) {
-            askAiScreen.aiResult = "Error calling AI: " + msg;
+            // Provide helpful error message for API key issues
+            if call str.contains(msg, "401") or call str.contains(msg, "Unauthorized") or call str.contains(msg, "api") or call str.contains(msg, "key") then {
+                askAiScreen.aiResult = "Error: AI API key not configured.\n\nPlease set up your API key:\n1. Go to Edit > AI Chat Model Setup\n2. Enter your API key and model settings\n3. Click Save\n4. Restart the application\n\nDetails: " + msg;
+            } else {
+                askAiScreen.aiResult = "Error calling AI: " + msg + "\n\nIf this is an API key issue, go to Edit > AI Chat Model Setup to configure your AI settings.";
+            }
         }
     }
 }
