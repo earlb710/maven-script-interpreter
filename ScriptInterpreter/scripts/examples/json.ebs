@@ -1,0 +1,23 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: json type - Work with JSON data
+// Syntax: var name: json = {...};
+
+var person: json = {
+    "name": "John Doe",
+    "age": 30,
+    "email": "john@example.com"
+};
+
+// Access values
+var name = call json.get(person, "name");
+var age = call json.getInt(person, "age");
+
+print "Name: " + name;
+print "Age: " + age;
+
+// Modify JSON
+call json.set(person, "age", 31);
+
+// JSON array
+var numbers: json = [1, 2, 3, 4, 5];
+call json.add(numbers, 6);

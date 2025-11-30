@@ -1,0 +1,15 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: length keyword - Get collection size
+// Syntax: array.length
+
+var numbers = [1, 2, 3, 4, 5];
+print "Array length: " + numbers.length;
+
+var text: string = "Hello";
+// String length via built-in
+var len = call str.length(text);
+print "String length: " + len;
+
+// Fixed-size array
+var fixed: int[10];
+print "Fixed array size: " + fixed.length;

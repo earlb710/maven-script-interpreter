@@ -1,0 +1,21 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: if, then, else keywords - Conditional execution
+// Syntax: if condition then { } else { }
+
+var score: int = 85;
+
+if score >= 90 then {
+    print "Grade: A";
+} else if score >= 80 then {
+    print "Grade: B";
+} else if score >= 70 then {
+    print "Grade: C";
+} else {
+    print "Grade: F";
+}
+
+// Alternative syntax with parentheses
+var isActive: bool = true;
+if (isActive) {
+    print "Status: Active";
+}

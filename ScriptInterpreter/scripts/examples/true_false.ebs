@@ -1,0 +1,21 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: true, false keywords - Boolean literals
+// Syntax: true, false
+
+var isActive: bool = true;
+var isComplete: bool = false;
+
+if isActive then {
+    print "System is active";
+}
+
+if !isComplete then {
+    print "Task not complete";
+}
+
+// In conditions
+var flag = true;
+while flag {
+    print "One iteration";
+    flag = false;
+}

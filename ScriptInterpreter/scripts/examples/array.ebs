@@ -1,0 +1,22 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: array types - Fixed and dynamic arrays
+// Syntax: var name: type[size]; or var name: type[*];
+
+// Fixed-size array
+var numbers: int[5];
+numbers[0] = 10;
+numbers[1] = 20;
+print numbers[0];
+
+// Dynamic array
+var items: string[*];
+call array.add(items, "apple");
+call array.add(items, "banana");
+
+// Array literal
+var colors = ["red", "green", "blue"];
+print colors[1];
+
+// array.type syntax
+var bytes: array.byte[10];
+var strings: array.string[5];

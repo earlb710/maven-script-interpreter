@@ -1,0 +1,18 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: typeof keyword - Get runtime type
+// Syntax: typeof expression
+
+var text: string = "Hello";
+var num: int = 42;
+var price: double = 19.99;
+var active: bool = true;
+
+print typeof text;    // string
+print typeof num;     // int
+print typeof price;   // double
+print typeof active;  // bool
+
+// Use in conditions
+if typeof text == "string" then {
+    print "It's a string!";
+}

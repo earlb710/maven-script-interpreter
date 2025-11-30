@@ -38,6 +38,8 @@ public class BuiltinsSystem {
             case "system.wincommand" -> winCommand(args);
             case "system.getproperty" -> getProperty(args);
             case "system.setproperty" -> setProperty(args);
+            case "system.getebsver" -> getEBSver();
+            case "system.testebsver" -> testEBSver(args);
             case "thread.sleep" -> sleep(args);
             case "array.expand" -> arrayExpand(args);
             case "array.sort" -> arraySort(args);
@@ -94,6 +96,89 @@ public class BuiltinsSystem {
         return (val == null)
                 ? java.lang.System.clearProperty(key)
                 : java.lang.System.setProperty(key, val);
+    }
+
+    /**
+     * EBS Version Components - Four-part versioning system.
+     * Format: "language.keyword.builtin.build"
+     * 
+     * - LANGUAGE_VER: Major language changes that break compatibility with previous versions
+     * - KEYWORD_VER: Incremented when keywords are added/modified/removed
+     * - BUILTIN_VER: Incremented when builtin functions are added/modified/removed
+     * - BUILD_VER: Build number, incremented with each release/build
+     * 
+     * Each component is incremented independently based on the type of change.
+     */
+    public static final int LANGUAGE_VER = 1;  // Major language compatibility version
+    public static final int KEYWORD_VER = 0;   // Keyword version (updated when keywords change)
+    public static final int BUILTIN_VER = 2;   // Builtin version (updated when builtins change)
+    public static final int BUILD_VER = 1;     // Build number
+    
+    public static final String EBS_LANGUAGE_VERSION = LANGUAGE_VER + "." + KEYWORD_VER + "." + BUILTIN_VER + "." + BUILD_VER;
+
+    private static Object getEBSver() {
+        return EBS_LANGUAGE_VERSION;
+    }
+
+    /**
+     * Compares a supplied version with the running EBS language version.
+     * Returns true if the running version is greater than or equal to the supplied version.
+     * Version format: "language.keyword.builtin.build" where each part is compared independently.
+     *
+     * @param args args[0] = version string to compare (e.g., "1.0.2")
+     * @return true if running version >= supplied version, false otherwise
+     */
+    private static Object testEBSver(Object[] args) throws InterpreterError {
+        String testVersion = (String) args[0];
+        if (testVersion == null || testVersion.isBlank()) {
+            throw new InterpreterError("system.testEBSver: version string cannot be null or empty");
+        }
+        return compareVersions(EBS_LANGUAGE_VERSION, testVersion) >= 0;
+    }
+
+    /**
+     * Compares two version strings in "language.keyword.builtin" format.
+     * @param v1 first version string (e.g., "1.0.2")
+     * @param v2 second version string (e.g., "1.0.1")
+     * @return negative if v1 < v2, zero if v1 == v2, positive if v1 > v2
+     */
+    private static int compareVersions(String v1, String v2) {
+        String[] parts1 = v1.split("\\.");
+        String[] parts2 = v2.split("\\.");
+        
+        int maxLen = Math.max(parts1.length, parts2.length);
+        for (int i = 0; i < maxLen; i++) {
+            int num1 = (i < parts1.length) ? parseVersionPart(parts1[i]) : 0;
+            int num2 = (i < parts2.length) ? parseVersionPart(parts2[i]) : 0;
+            
+            if (num1 != num2) {
+                return num1 - num2;
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Parses a version part, handling non-numeric suffixes (e.g., "1-beta" -> 1).
+     */
+    private static int parseVersionPart(String part) {
+        // Extract leading numeric portion
+        StringBuilder numStr = new StringBuilder();
+        for (char c : part.toCharArray()) {
+            if (Character.isDigit(c)) {
+                numStr.append(c);
+            } else {
+                break;
+            }
+        }
+        if (numStr.length() == 0) {
+            return 0;
+        }
+        try {
+            return Integer.parseInt(numStr.toString());
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 
     private static Object sleep(Object[] args) throws InterpreterError {

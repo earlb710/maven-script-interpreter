@@ -1,0 +1,19 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: record type - Structured data
+// Syntax: var name: record {field: type, ...};
+
+// Define record with explicit type
+var person: record {name: string, age: int};
+person = {"name": "Alice", "age": 25};
+
+print person.name;
+print "Age: " + person.age;
+
+// Update fields
+person.name = "Bob";
+person.age = 30;
+
+// Cast JSON to record
+var data: json = {"id": 1, "title": "Hello"};
+var item = record(data);
+print typeof item;

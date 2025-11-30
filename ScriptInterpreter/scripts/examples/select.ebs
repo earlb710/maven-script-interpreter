@@ -1,0 +1,20 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: select, from, where, order, by, group, having - SQL clauses
+// Used within cursor declarations
+
+// Basic select
+// cursor all = select * from products;
+
+// With WHERE clause
+// cursor filtered = select name, price from products where price > 100;
+
+// With ORDER BY
+// cursor sorted = select name from products order by name;
+
+// With GROUP BY and HAVING
+// cursor grouped = select category, count(*) as cnt 
+//                  from products 
+//                  group by category 
+//                  having count(*) > 5;
+
+print "SQL keywords: select, from, where, order, by, group, having";

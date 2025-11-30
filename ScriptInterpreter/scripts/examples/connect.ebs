@@ -1,0 +1,22 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: connect, use, close connection - Database operations
+// Syntax: connect db = "connection_string"; use db { } close connection db;
+
+// Connect to database
+// connect myDb = "jdbc:oracle:thin:@localhost:1521:xe";
+
+// Use connection block
+// use myDb {
+//     cursor users = select * from users;
+//     open users();
+//     while call users.hasNext() {
+//         var row = call users.next();
+//         print row.name;
+//     }
+//     close users;
+// }
+
+// Close connection
+// close connection myDb;
+
+print "Database keywords: connect, use, close connection";
