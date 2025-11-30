@@ -99,20 +99,22 @@ public class BuiltinsSystem {
     }
 
     /**
-     * EBS Version Components - Three-part versioning system.
-     * Format: "language.keyword.builtin"
+     * EBS Version Components - Four-part versioning system.
+     * Format: "language.keyword.builtin.build"
      * 
      * - LANGUAGE_VER: Major language changes that break compatibility with previous versions
      * - KEYWORD_VER: Incremented when keywords are added/modified/removed
      * - BUILTIN_VER: Incremented when builtin functions are added/modified/removed
+     * - BUILD_VER: Build number, incremented with each release/build
      * 
      * Each component is incremented independently based on the type of change.
      */
     public static final int LANGUAGE_VER = 1;  // Major language compatibility version
     public static final int KEYWORD_VER = 0;   // Keyword version (updated when keywords change)
     public static final int BUILTIN_VER = 2;   // Builtin version (updated when builtins change)
+    public static final int BUILD_VER = 1;     // Build number
     
-    public static final String EBS_LANGUAGE_VERSION = LANGUAGE_VER + "." + KEYWORD_VER + "." + BUILTIN_VER;
+    public static final String EBS_LANGUAGE_VERSION = LANGUAGE_VER + "." + KEYWORD_VER + "." + BUILTIN_VER + "." + BUILD_VER;
 
     private static Object getEBSver() {
         return EBS_LANGUAGE_VERSION;
@@ -121,7 +123,7 @@ public class BuiltinsSystem {
     /**
      * Compares a supplied version with the running EBS language version.
      * Returns true if the running version is greater than or equal to the supplied version.
-     * Version format: "language.keyword.builtin" where each part is compared independently.
+     * Version format: "language.keyword.builtin.build" where each part is compared independently.
      *
      * @param args args[0] = version string to compare (e.g., "1.0.2")
      * @return true if running version >= supplied version, false otherwise

@@ -1,6 +1,6 @@
 # EBS Language Reference
 
-**Documentation Version: 1.0.2**
+**Documentation Version: 1.0.2.1**
 
 This document serves as a pointer to the comprehensive EBS (Earl Bosch Script) language documentation.
 
@@ -69,17 +69,18 @@ This documentation corresponds to the EBS Script Interpreter version 1.0-SNAPSHO
 
 ### Version Format
 
-EBS uses a three-part versioning system: **`language.keyword.builtin`**
+EBS uses a four-part versioning system: **`language.keyword.builtin.build`**
 
 | Part | Name | Description |
 |------|------|-------------|
 | 1st | Language Version | Major language changes that break compatibility with previous versions |
 | 2nd | Keyword Version | Incremented when keywords are added, modified, or removed |
 | 3rd | Builtin Version | Incremented when builtin functions are added, modified, or removed |
+| 4th | Build Number | Incremented with each release/build |
 
 Each version component is incremented independently based on the type of change made.
 
-**Current Version: 1.0.2** (Language v1, Keyword v0, Builtin v2)
+**Current Version: 1.0.2.1** (Language v1, Keyword v0, Builtin v2, Build 1)
 
 ### Getting the Language Version Programmatically
 
@@ -87,7 +88,7 @@ Use the `system.getEBSver` builtin function to retrieve the current EBS language
 
 ```javascript
 var version = call system.getEBSver();
-print "EBS Language Version: " + version;  // Output: EBS Language Version: 1.0.2
+print "EBS Language Version: " + version;  // Output: EBS Language Version: 1.0.2.1
 ```
 
 ### Testing Version Compatibility
@@ -114,6 +115,7 @@ For the latest updates and comprehensive language reference, always refer to [do
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.0.2.1 | 2025-11-30 | Added 4th version component (build number); Format now language.keyword.builtin.build |
 | 1.0.2 | 2025-11-30 | Added system.testEBSver builtin function; Changed to 3-part versioning (language.keyword.builtin) |
 | 1.0.1 | 2025-11-30 | Added system.getEBSver builtin function to return language version |
 | 1.0.0 | 2025-11-29 | Initial version - Created language reference with keyword examples |
@@ -136,7 +138,7 @@ When adding or removing **keywords**, **built-in functions**, or other language 
    - `ScriptInterpreter/scripts/examples/` - Individual example files for each keyword
    - **Important:** All example scripts must include this reference comment as the first line:
      ```
-     // EBS Language Reference v1.0.2 - See EBS_LANGUAGE_REFERENCE.md
+     // EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
      ```
      Update the version number to match the current documentation version.
 
@@ -145,6 +147,7 @@ When adding or removing **keywords**, **built-in functions**, or other language 
      - `LANGUAGE_VER` - Increment for major incompatible language changes
      - `KEYWORD_VER` - Increment for keyword additions/changes
      - `BUILTIN_VER` - Increment for builtin function additions/changes
+     - `BUILD_VER` - Increment for each release/build
 
 5. **Grammar Specification:**
    - `ScriptInterpreter/src/main/java/com/eb/script/syntax_ebnf.txt` - EBNF grammar (if syntax changes)

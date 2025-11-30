@@ -1,4 +1,4 @@
-// EBS Language Reference v1.0.2 - See EBS_LANGUAGE_REFERENCE.md
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
 // Example: var keyword - Declare variables
 // Syntax: var name: type = value;
 
