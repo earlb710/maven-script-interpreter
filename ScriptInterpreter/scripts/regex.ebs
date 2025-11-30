@@ -579,18 +579,32 @@ screen askAiScreen = {
             "name": "aiMainArea",
             "type": "vbox",
             "style": "-fx-spacing: 10; -fx-padding: 15;",
-            "items": [
+            "areas": [
                 {
-                    "name": "aiTitle",
-                    "display": {
-                        "type": "label",
-                        "labelText": "Ask AI to Generate Regex Pattern",
-                        "itemColor": "#000088",
-                        "itemBold": true,
-                        "itemFontSize": "16"
-                    }
+                    "name": "aiTitleArea",
+                    "type": "hbox",
+                    "style": "-fx-alignment: CENTER;",
+                    "items": [
+                        {
+                            "name": "aiTitle",
+                            "display": {
+                                "type": "label",
+                                "labelText": "Ask AI to Generate Regex Pattern",
+                                "itemColor": "#000088",
+                                "itemBold": true,
+                                "itemFontSize": "16"
+                            }
+                        }
+                    ]
                 },
-                {"name": "aiRequestItem", "varRef": "aiRequest"},
+                {
+                    "name": "aiRequestArea",
+                    "type": "vbox",
+                    "style": "-fx-spacing: 5;",
+                    "items": [
+                        {"name": "aiRequestItem", "varRef": "aiRequest"}
+                    ]
+                },
                 {
                     "name": "aiButtonArea",
                     "type": "hbox",
@@ -634,7 +648,14 @@ screen askAiScreen = {
                         }
                     ]
                 },
-                {"name": "aiResultItem", "varRef": "aiResult"}
+                {
+                    "name": "aiResultArea",
+                    "type": "vbox",
+                    "style": "-fx-spacing: 5;",
+                    "items": [
+                        {"name": "aiResultItem", "varRef": "aiResult"}
+                    ]
+                }
             ]
         }
     ]
