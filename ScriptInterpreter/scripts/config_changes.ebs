@@ -215,15 +215,8 @@ var tabLabelBackgroundColor: string = call json.getstring(colors, "tab-label-bac
 var findHighlightColor: string = call json.getstring(colors, "find-highlight-color", "");
 var findHighlightBackground: string = call json.getstring(colors, "find-highlight-background", "");
 
-// Set defaults if not present
-if findHighlightColor == "" then {
-    findHighlightColor = "#000000";
-}
-if findHighlightBackground == "" then {
-    findHighlightBackground = "#ddb107";
-}
-
 // CSS default values (from console.css / ConsoleConfig.java)
+// These are used as fallback when config values are missing
 var defaultInfoColor: string = "#e6e6e6";
 var defaultCommentColor: string = "#ffffcc";
 var defaultErrorColor: string = "#ee0000";
@@ -250,6 +243,34 @@ var defaultTabLabelChangedColor: string = "#ff6600";
 var defaultTabLabelBackgroundColor: string = "#333333";
 var defaultFindHighlightColor: string = "#000000";
 var defaultFindHighlightBackground: string = "#ddb107";
+
+// Set defaults for any missing color values (robust loading)
+if infoColor == "" then { infoColor = defaultInfoColor; }
+if commentColor == "" then { commentColor = defaultCommentColor; }
+if errorColor == "" then { errorColor = defaultErrorColor; }
+if warnColor == "" then { warnColor = defaultWarnColor; }
+if okColor == "" then { okColor = defaultOkColor; }
+if codeColor == "" then { codeColor = defaultCodeColor; }
+if datatypeColor == "" then { datatypeColor = defaultDatatypeColor; }
+if dataColor == "" then { dataColor = defaultDataColor; }
+if keywordColor == "" then { keywordColor = defaultKeywordColor; }
+if builtinColor == "" then { builtinColor = defaultBuiltinColor; }
+if literalColor == "" then { literalColor = defaultLiteralColor; }
+if identifierColor == "" then { identifierColor = defaultIdentifierColor; }
+if sqlColor == "" then { sqlColor = defaultSqlColor; }
+if customColor == "" then { customColor = defaultCustomColor; }
+if backgroundColor == "" then { backgroundColor = defaultBackgroundColor; }
+if textColor == "" then { textColor = defaultTextColor; }
+if caretColor == "" then { caretColor = defaultCaretColor; }
+if lineCursorColor == "" then { lineCursorColor = defaultLineCursorColor; }
+if lineNumbersColor == "" then { lineNumbersColor = defaultLineNumbersColor; }
+if consoleBackgroundColor == "" then { consoleBackgroundColor = defaultConsoleBackgroundColor; }
+if tabBackgroundColor == "" then { tabBackgroundColor = defaultTabBackgroundColor; }
+if tabLabelColor == "" then { tabLabelColor = defaultTabLabelColor; }
+if tabLabelChangedColor == "" then { tabLabelChangedColor = defaultTabLabelChangedColor; }
+if tabLabelBackgroundColor == "" then { tabLabelBackgroundColor = defaultTabLabelBackgroundColor; }
+if findHighlightColor == "" then { findHighlightColor = defaultFindHighlightColor; }
+if findHighlightBackground == "" then { findHighlightBackground = defaultFindHighlightBackground; }
 
 // ============================================================================
 // Event Handler Functions
