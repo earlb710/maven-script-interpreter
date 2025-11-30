@@ -1148,11 +1148,15 @@ function onResetClick {
     }
 }
 
-// Function: Handle Save and Close button click
-function onSaveCloseClick {
+// Function: Handle Save button click
+function onSaveClick {
     // Use saveConfigWithCurrentProfile to preserve all profiles while updating the current one
     call saveConfigWithCurrentProfile();
     call system.alertDialog("Configuration saved to " + configPath + ".\nRestart the application to see changes.", "Saved", "info");
+}
+
+// Function: Handle Close button click
+function onCloseClick {
     close screen;
 }
 
@@ -1617,7 +1621,8 @@ screen colorEditorScreen = {
                 "style": "-fx-spacing: 10; -fx-padding: 10; -fx-alignment: CENTER_RIGHT;",
                 "items": [
                     {"name": "resetBtn", "type": "button", "labelText": "Reset", "style": "-fx-min-width: 80;", "onClick": "call onResetClick();"},
-                    {"name": "saveCloseBtn", "type": "button", "labelText": "Save and Close", "style": "-fx-min-width: 120;", "onClick": "call onSaveCloseClick();"}
+                    {"name": "saveBtn", "type": "button", "labelText": "Save", "style": "-fx-min-width: 80;", "onClick": "call onSaveClick();"},
+                    {"name": "closeBtn", "type": "button", "labelText": "Close", "style": "-fx-min-width: 80;", "onClick": "call onCloseClick();"}
                 ]
             }
         ]
