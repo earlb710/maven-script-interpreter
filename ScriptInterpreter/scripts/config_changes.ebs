@@ -301,36 +301,26 @@ print "Current Profile: " + profileName;
 print "";
 
 // Get profiles object and current profile's colors
-// Initialize with empty JSON, then try to get actual value
-var profiles: json = call json.jsonfromstring("{}");
-var tempProfiles: json = call json.getobject(config, "profiles");
+// json.getobject now returns empty map if key doesn't exist (instead of null)
+var profiles: json = call json.getobject(config, "profiles");
 
-// Handle case where profiles object doesn't exist or is null
-if call json.isempty(tempProfiles) then {
+// Handle case where profiles object doesn't exist
+if call json.isempty(profiles) then {
     print "No profiles found in config, using defaults";
-    // profiles stays as empty JSON object
-} else {
-    profiles = tempProfiles;
 }
 
-// Initialize colors with empty object, then try to get actual profile colors
-var colors: json = call json.jsonfromstring("{}");
-var tempColors: json = call json.getobject(profiles, profileName);
+// Get current profile's colors (returns empty map if profile doesn't exist)
+var colors: json = call json.getobject(profiles, profileName);
 
-// Only use tempColors if it's not empty/null
-if call json.isempty(tempColors) == false then {
-    colors = tempColors;
-} else {
-    // If current profile doesn't exist, try to get default profile colors
+// Check if colors exist, otherwise fall back to default profile
+if call json.isempty(colors) then {
     print "Profile '" + profileName + "' not found, falling back to 'default'";
-    tempColors = call json.getobject(profiles, "default");
+    colors = call json.getobject(profiles, "default");
     profileName = "default";
     
-    if call json.isempty(tempColors) == false then {
-        colors = tempColors;
-    } else {
+    if call json.isempty(colors) then {
         print "Default profile not found, using empty colors (will fall back to CSS defaults)";
-        // colors stays as empty JSON object
+        // colors stays as empty JSON object, CSS defaults will be used
     }
 }
 
