@@ -478,43 +478,73 @@ function saveConfigWithCurrentProfile {
     if tempP != "" then { profileKeys[pIdx] = tempP; pIdx = pIdx + 1; }
     profileCount = pIdx;
     
+    // Declare all loop variables before the while loop to avoid redeclaration issues
+    var pName: string = "";
+    var pColors: json = null;
+    var pInfo: string = "";
+    var pComment: string = "";
+    var pError: string = "";
+    var pWarn: string = "";
+    var pOk: string = "";
+    var pCode: string = "";
+    var pDatatype: string = "";
+    var pData: string = "";
+    var pKeyword: string = "";
+    var pBuiltin: string = "";
+    var pLiteral: string = "";
+    var pIdentifier: string = "";
+    var pSql: string = "";
+    var pCustom: string = "";
+    var pBackground: string = "";
+    var pText: string = "";
+    var pCaret: string = "";
+    var pLineCursor: string = "";
+    var pLineNumbers: string = "";
+    var pConsoleBg: string = "";
+    var pTabBg: string = "";
+    var pTabLabelColor: string = "";
+    var pTabLabelChanged: string = "";
+    var pTabLabelBg: string = "";
+    var pFindHlColor: string = "";
+    var pFindHlBg: string = "";
+    
     // Build each profile's JSON
     var i: int = 0;
     while i < profileCount {
-        var pName: string = profileKeys[i];
-        var pColors: json = call json.getobject(currentProfiles, pName);
+        pName = profileKeys[i];
+        pColors = call json.getobject(currentProfiles, pName);
         
         if i > 0 then {
             profilesStr = profilesStr + ",\n    ";
         }
         
-        // Get each color value - use screen values for the current profile, file values for others
-        var pInfo: string = "";
-        var pComment: string = "";
-        var pError: string = "";
-        var pWarn: string = "";
-        var pOk: string = "";
-        var pCode: string = "";
-        var pDatatype: string = "";
-        var pData: string = "";
-        var pKeyword: string = "";
-        var pBuiltin: string = "";
-        var pLiteral: string = "";
-        var pIdentifier: string = "";
-        var pSql: string = "";
-        var pCustom: string = "";
-        var pBackground: string = "";
-        var pText: string = "";
-        var pCaret: string = "";
-        var pLineCursor: string = "";
-        var pLineNumbers: string = "";
-        var pConsoleBg: string = "";
-        var pTabBg: string = "";
-        var pTabLabelColor: string = "";
-        var pTabLabelChanged: string = "";
-        var pTabLabelBg: string = "";
-        var pFindHlColor: string = "";
-        var pFindHlBg: string = "";
+        // Reset color values for each iteration
+        pInfo = "";
+        pComment = "";
+        pError = "";
+        pWarn = "";
+        pOk = "";
+        pCode = "";
+        pDatatype = "";
+        pData = "";
+        pKeyword = "";
+        pBuiltin = "";
+        pLiteral = "";
+        pIdentifier = "";
+        pSql = "";
+        pCustom = "";
+        pBackground = "";
+        pText = "";
+        pCaret = "";
+        pLineCursor = "";
+        pLineNumbers = "";
+        pConsoleBg = "";
+        pTabBg = "";
+        pTabLabelColor = "";
+        pTabLabelChanged = "";
+        pTabLabelBg = "";
+        pFindHlColor = "";
+        pFindHlBg = "";
         
         if pName == colorEditorScreen.profile then {
             // Use current screen values for the active profile
