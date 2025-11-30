@@ -478,43 +478,131 @@ function saveConfigWithCurrentProfile {
     if tempP != "" then { profileKeys[pIdx] = tempP; pIdx = pIdx + 1; }
     profileCount = pIdx;
     
+    // Declare all loop variables before the while loop to avoid redeclaration issues
+    var pName: string = "";
+    var pColors: json = null;
+    var pInfo: string = "";
+    var pComment: string = "";
+    var pError: string = "";
+    var pWarn: string = "";
+    var pOk: string = "";
+    var pCode: string = "";
+    var pDatatype: string = "";
+    var pData: string = "";
+    var pKeyword: string = "";
+    var pBuiltin: string = "";
+    var pLiteral: string = "";
+    var pIdentifier: string = "";
+    var pSql: string = "";
+    var pCustom: string = "";
+    var pBackground: string = "";
+    var pText: string = "";
+    var pCaret: string = "";
+    var pLineCursor: string = "";
+    var pLineNumbers: string = "";
+    var pConsoleBg: string = "";
+    var pTabBg: string = "";
+    var pTabLabelColor: string = "";
+    var pTabLabelChanged: string = "";
+    var pTabLabelBg: string = "";
+    var pFindHlColor: string = "";
+    var pFindHlBg: string = "";
+    
     // Build each profile's JSON
     var i: int = 0;
     while i < profileCount {
-        var pName: string = profileKeys[i];
-        var pColors: json = call json.getobject(currentProfiles, pName);
+        pName = profileKeys[i];
+        pColors = call json.getobject(currentProfiles, pName);
         
         if i > 0 then {
             profilesStr = profilesStr + ",\n    ";
         }
         
-        // Get each color value and build the JSON
-        var pInfo: string = call json.getstring(pColors, "info", "");
-        var pComment: string = call json.getstring(pColors, "comment", "");
-        var pError: string = call json.getstring(pColors, "error", "");
-        var pWarn: string = call json.getstring(pColors, "warn", "");
-        var pOk: string = call json.getstring(pColors, "ok", "");
-        var pCode: string = call json.getstring(pColors, "code", "");
-        var pDatatype: string = call json.getstring(pColors, "datatype", "");
-        var pData: string = call json.getstring(pColors, "data", "");
-        var pKeyword: string = call json.getstring(pColors, "keyword", "");
-        var pBuiltin: string = call json.getstring(pColors, "builtin", "");
-        var pLiteral: string = call json.getstring(pColors, "literal", "");
-        var pIdentifier: string = call json.getstring(pColors, "identifier", "");
-        var pSql: string = call json.getstring(pColors, "sql", "");
-        var pCustom: string = call json.getstring(pColors, "custom", "");
-        var pBackground: string = call json.getstring(pColors, "background", "");
-        var pText: string = call json.getstring(pColors, "text", "");
-        var pCaret: string = call json.getstring(pColors, "caret", "");
-        var pLineCursor: string = call json.getstring(pColors, "line-cursor", "");
-        var pLineNumbers: string = call json.getstring(pColors, "line-numbers", "");
-        var pConsoleBg: string = call json.getstring(pColors, "console-background", "");
-        var pTabBg: string = call json.getstring(pColors, "tab-background", "");
-        var pTabLabelColor: string = call json.getstring(pColors, "tab-label-color", "");
-        var pTabLabelChanged: string = call json.getstring(pColors, "tab-label-changed-color", "");
-        var pTabLabelBg: string = call json.getstring(pColors, "tab-label-background", "");
-        var pFindHlColor: string = call json.getstring(pColors, "find-highlight-color", "");
-        var pFindHlBg: string = call json.getstring(pColors, "find-highlight-background", "");
+        // Reset color values for each iteration
+        pInfo = "";
+        pComment = "";
+        pError = "";
+        pWarn = "";
+        pOk = "";
+        pCode = "";
+        pDatatype = "";
+        pData = "";
+        pKeyword = "";
+        pBuiltin = "";
+        pLiteral = "";
+        pIdentifier = "";
+        pSql = "";
+        pCustom = "";
+        pBackground = "";
+        pText = "";
+        pCaret = "";
+        pLineCursor = "";
+        pLineNumbers = "";
+        pConsoleBg = "";
+        pTabBg = "";
+        pTabLabelColor = "";
+        pTabLabelChanged = "";
+        pTabLabelBg = "";
+        pFindHlColor = "";
+        pFindHlBg = "";
+        
+        if pName == colorEditorScreen.profile then {
+            // Use current screen values for the active profile
+            pInfo = colorEditorScreen.info;
+            pComment = colorEditorScreen.comment;
+            pError = colorEditorScreen.error;
+            pWarn = colorEditorScreen.warn;
+            pOk = colorEditorScreen.ok;
+            pCode = colorEditorScreen.code;
+            pDatatype = colorEditorScreen.datatype;
+            pData = colorEditorScreen.data;
+            pKeyword = colorEditorScreen.keyword;
+            pBuiltin = colorEditorScreen.builtin;
+            pLiteral = colorEditorScreen.literal;
+            pIdentifier = colorEditorScreen.identifier;
+            pSql = colorEditorScreen.sql;
+            pCustom = colorEditorScreen.custom;
+            pBackground = colorEditorScreen.background;
+            pText = colorEditorScreen.text;
+            pCaret = colorEditorScreen.caret;
+            pLineCursor = colorEditorScreen.lineCursor;
+            pLineNumbers = colorEditorScreen.lineNumbers;
+            pConsoleBg = colorEditorScreen.consoleBackground;
+            pTabBg = colorEditorScreen.tabBackground;
+            pTabLabelColor = colorEditorScreen.tabLabelColor;
+            pTabLabelChanged = colorEditorScreen.tabLabelChangedColor;
+            pTabLabelBg = colorEditorScreen.tabLabelBackground;
+            pFindHlColor = colorEditorScreen.findHighlightColor;
+            pFindHlBg = colorEditorScreen.findHighlightBackground;
+        } else {
+            // Use values from the config file for other profiles
+            pInfo = call json.getstring(pColors, "info", "");
+            pComment = call json.getstring(pColors, "comment", "");
+            pError = call json.getstring(pColors, "error", "");
+            pWarn = call json.getstring(pColors, "warn", "");
+            pOk = call json.getstring(pColors, "ok", "");
+            pCode = call json.getstring(pColors, "code", "");
+            pDatatype = call json.getstring(pColors, "datatype", "");
+            pData = call json.getstring(pColors, "data", "");
+            pKeyword = call json.getstring(pColors, "keyword", "");
+            pBuiltin = call json.getstring(pColors, "builtin", "");
+            pLiteral = call json.getstring(pColors, "literal", "");
+            pIdentifier = call json.getstring(pColors, "identifier", "");
+            pSql = call json.getstring(pColors, "sql", "");
+            pCustom = call json.getstring(pColors, "custom", "");
+            pBackground = call json.getstring(pColors, "background", "");
+            pText = call json.getstring(pColors, "text", "");
+            pCaret = call json.getstring(pColors, "caret", "");
+            pLineCursor = call json.getstring(pColors, "line-cursor", "");
+            pLineNumbers = call json.getstring(pColors, "line-numbers", "");
+            pConsoleBg = call json.getstring(pColors, "console-background", "");
+            pTabBg = call json.getstring(pColors, "tab-background", "");
+            pTabLabelColor = call json.getstring(pColors, "tab-label-color", "");
+            pTabLabelChanged = call json.getstring(pColors, "tab-label-changed-color", "");
+            pTabLabelBg = call json.getstring(pColors, "tab-label-background", "");
+            pFindHlColor = call json.getstring(pColors, "find-highlight-color", "");
+            pFindHlBg = call json.getstring(pColors, "find-highlight-background", "");
+        }
         
         profilesStr = profilesStr + "\"" + pName + "\": {\n";
         profilesStr = profilesStr + "      \"info\": \"" + pInfo + "\",\n";
@@ -1090,14 +1178,15 @@ function onResetClick {
     }
 }
 
-// Function: Handle Save and Close button click
-function onSaveCloseClick {
-    var currentColors: string = "{\n      \"info\": \"" + colorEditorScreen.info + "\",\n      \"comment\": \"" + colorEditorScreen.comment + "\",\n      \"error\": \"" + colorEditorScreen.error + "\",\n      \"warn\": \"" + colorEditorScreen.warn + "\",\n      \"ok\": \"" + colorEditorScreen.ok + "\",\n      \"code\": \"" + colorEditorScreen.code + "\",\n      \"datatype\": \"" + colorEditorScreen.datatype + "\",\n      \"data\": \"" + colorEditorScreen.data + "\",\n      \"keyword\": \"" + colorEditorScreen.keyword + "\",\n      \"builtin\": \"" + colorEditorScreen.builtin + "\",\n      \"literal\": \"" + colorEditorScreen.literal + "\",\n      \"identifier\": \"" + colorEditorScreen.identifier + "\",\n      \"sql\": \"" + colorEditorScreen.sql + "\",\n      \"custom\": \"" + colorEditorScreen.custom + "\",\n      \"background\": \"" + colorEditorScreen.background + "\",\n      \"text\": \"" + colorEditorScreen.text + "\",\n      \"caret\": \"" + colorEditorScreen.caret + "\",\n      \"line-cursor\": \"" + colorEditorScreen.lineCursor + "\",\n      \"line-numbers\": \"" + colorEditorScreen.lineNumbers + "\",\n      \"console-background\": \"" + colorEditorScreen.consoleBackground + "\",\n      \"tab-background\": \"" + colorEditorScreen.tabBackground + "\",\n      \"tab-label-color\": \"" + colorEditorScreen.tabLabelColor + "\",\n      \"tab-label-changed-color\": \"" + colorEditorScreen.tabLabelChangedColor + "\",\n      \"tab-label-background\": \"" + colorEditorScreen.tabLabelBackground + "\",\n      \"find-highlight-color\": \"" + colorEditorScreen.findHighlightColor + "\",\n      \"find-highlight-background\": \"" + colorEditorScreen.findHighlightBackground + "\"\n    }";
-    
-    var jsonContent: string = "{\n  \"currentProfile\": \"" + colorEditorScreen.profile + "\",\n  \"profileList\": [\"" + colorEditorScreen.profile + "\"],\n  \"profiles\": {\n    \"" + colorEditorScreen.profile + "\": " + currentColors + "\n  }\n}";
-    
-    call file.writeTextFile(configPath, jsonContent);
+// Function: Handle Save button click
+function onSaveClick {
+    // Use saveConfigWithCurrentProfile to preserve all profiles while updating the current one
+    call saveConfigWithCurrentProfile();
     call system.alertDialog("Configuration saved to " + configPath + ".\nRestart the application to see changes.", "Saved", "info");
+}
+
+// Function: Handle Close button click
+function onCloseClick {
     close screen;
 }
 
@@ -1562,7 +1651,8 @@ screen colorEditorScreen = {
                 "style": "-fx-spacing: 10; -fx-padding: 10; -fx-alignment: CENTER_RIGHT;",
                 "items": [
                     {"name": "resetBtn", "type": "button", "labelText": "Reset", "style": "-fx-min-width: 80;", "onClick": "call onResetClick();"},
-                    {"name": "saveCloseBtn", "type": "button", "labelText": "Save and Close", "style": "-fx-min-width: 120;", "onClick": "call onSaveCloseClick();"}
+                    {"name": "saveBtn", "type": "button", "labelText": "Save", "style": "-fx-min-width: 80;", "onClick": "call onSaveClick();"},
+                    {"name": "closeBtn", "type": "button", "labelText": "Close", "style": "-fx-min-width: 80;", "onClick": "call onCloseClick();"}
                 ]
             }
         ]

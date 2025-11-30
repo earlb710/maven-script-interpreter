@@ -999,8 +999,8 @@ public class BuiltinsScreen {
         @SuppressWarnings("unchecked")
         Map<String, Object> optionsMap = (Map<String, Object>) optionsMapArg;
 
-        // Verify screen exists
-        if (!context.getScreens().containsKey(screenName.toLowerCase())) {
+        // Verify screen exists (check both screen config and displayed screens)
+        if (!context.hasScreenConfig(screenName) && !context.getScreens().containsKey(screenName.toLowerCase())) {
             throw new InterpreterError("scr.setItemChoiceOptions: screen '" + screenName + "' not found");
         }
 
@@ -1127,8 +1127,8 @@ public class BuiltinsScreen {
             throw new InterpreterError("scr.getItemChoiceOptions: itemName parameter cannot be null or empty");
         }
 
-        // Verify screen exists
-        if (!context.getScreens().containsKey(screenName.toLowerCase())) {
+        // Verify screen exists (check both screen config and displayed screens)
+        if (!context.hasScreenConfig(screenName) && !context.getScreens().containsKey(screenName.toLowerCase())) {
             throw new InterpreterError("scr.getItemChoiceOptions: screen '" + screenName + "' not found");
         }
 
