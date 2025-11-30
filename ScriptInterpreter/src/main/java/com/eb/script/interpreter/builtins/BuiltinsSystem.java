@@ -99,10 +99,20 @@ public class BuiltinsSystem {
     }
 
     /**
-     * EBS Language Version constant.
-     * Update this value when language features (keywords, builtins) are added or removed.
+     * EBS Version Components - Three-part versioning system.
+     * Format: "language.keyword.builtin"
+     * 
+     * - LANGUAGE_VER: Major language changes that break compatibility with previous versions
+     * - KEYWORD_VER: Incremented when keywords are added/modified/removed
+     * - BUILTIN_VER: Incremented when builtin functions are added/modified/removed
+     * 
+     * Each component is incremented independently based on the type of change.
      */
-    public static final String EBS_LANGUAGE_VERSION = "1.4.0";
+    public static final int LANGUAGE_VER = 1;  // Major language compatibility version
+    public static final int KEYWORD_VER = 0;   // Keyword version (updated when keywords change)
+    public static final int BUILTIN_VER = 2;   // Builtin version (updated when builtins change)
+    
+    public static final String EBS_LANGUAGE_VERSION = LANGUAGE_VER + "." + KEYWORD_VER + "." + BUILTIN_VER;
 
     private static Object getEBSver() {
         return EBS_LANGUAGE_VERSION;
@@ -111,9 +121,9 @@ public class BuiltinsSystem {
     /**
      * Compares a supplied version with the running EBS language version.
      * Returns true if the running version is greater than or equal to the supplied version.
-     * Uses semantic versioning comparison (major.minor.patch).
+     * Version format: "language.keyword.builtin" where each part is compared independently.
      *
-     * @param args args[0] = version string to compare (e.g., "1.3.0")
+     * @param args args[0] = version string to compare (e.g., "1.0.2")
      * @return true if running version >= supplied version, false otherwise
      */
     private static Object testEBSver(Object[] args) throws InterpreterError {
@@ -125,9 +135,9 @@ public class BuiltinsSystem {
     }
 
     /**
-     * Compares two semantic version strings.
-     * @param v1 first version string (e.g., "1.3.0")
-     * @param v2 second version string (e.g., "1.2.0")
+     * Compares two version strings in "language.keyword.builtin" format.
+     * @param v1 first version string (e.g., "1.0.2")
+     * @param v2 second version string (e.g., "1.0.1")
      * @return negative if v1 < v2, zero if v1 == v2, positive if v1 > v2
      */
     private static int compareVersions(String v1, String v2) {

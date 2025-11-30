@@ -1,17 +1,18 @@
-// EBS Language Reference v1.4.0 - See EBS_LANGUAGE_REFERENCE.md
+// EBS Language Reference v1.0.2 - See EBS_LANGUAGE_REFERENCE.md
 // Example: system.getEBSver and system.testEBSver builtins - Version functions
+// Version format: "language.keyword.builtin" - each part increments independently
 // Syntax: call system.getEBSver(); call system.testEBSver(version);
 
 // Get the current EBS language version
 var version = call system.getEBSver();
-print "EBS Language Version: " + version;
+print "EBS Language Version: " + version;  // Output: 1.0.2
 
 // Test if running version meets minimum requirement
-if call system.testEBSver("1.3.0") then {
-    print "Version 1.3.0 or higher features available";
+if call system.testEBSver("1.0.1") then {
+    print "Version 1.0.1 or higher features available";
 }
 
-// Check for specific version features
-if call system.testEBSver("1.4.0") then {
+// Check for specific builtin version (1.0.2 added testEBSver)
+if call system.testEBSver("1.0.2") then {
     print "testEBSver function is available";
 }

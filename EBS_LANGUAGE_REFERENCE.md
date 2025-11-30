@@ -1,6 +1,6 @@
 # EBS Language Reference
 
-**Documentation Version: 1.4.0**
+**Documentation Version: 1.0.2**
 
 This document serves as a pointer to the comprehensive EBS (Earl Bosch Script) language documentation.
 
@@ -67,13 +67,27 @@ print message;
 
 This documentation corresponds to the EBS Script Interpreter version 1.0-SNAPSHOT.
 
+### Version Format
+
+EBS uses a three-part versioning system: **`language.keyword.builtin`**
+
+| Part | Name | Description |
+|------|------|-------------|
+| 1st | Language Version | Major language changes that break compatibility with previous versions |
+| 2nd | Keyword Version | Incremented when keywords are added, modified, or removed |
+| 3rd | Builtin Version | Incremented when builtin functions are added, modified, or removed |
+
+Each version component is incremented independently based on the type of change made.
+
+**Current Version: 1.0.2** (Language v1, Keyword v0, Builtin v2)
+
 ### Getting the Language Version Programmatically
 
 Use the `system.getEBSver` builtin function to retrieve the current EBS language version at runtime:
 
 ```javascript
 var version = call system.getEBSver();
-print "EBS Language Version: " + version;  // Output: EBS Language Version: 1.4.0
+print "EBS Language Version: " + version;  // Output: EBS Language Version: 1.0.2
 ```
 
 ### Testing Version Compatibility
@@ -82,12 +96,12 @@ Use the `system.testEBSver` builtin function to check if the running version mee
 
 ```javascript
 // Returns true if running version >= supplied version
-if call system.testEBSver("1.3.0") then {
-    print "Version 1.3.0 or higher features are available";
+if call system.testEBSver("1.0.1") then {
+    print "Version 1.0.1 or higher features are available";
 }
 
-// Check for specific feature availability
-if call system.testEBSver("1.4.0") then {
+// Check for specific builtin availability (v1.0.2 added testEBSver)
+if call system.testEBSver("1.0.2") then {
     print "testEBSver function is available";
 }
 ```
@@ -100,11 +114,9 @@ For the latest updates and comprehensive language reference, always refer to [do
 
 | Version | Date | Changes |
 |---------|------|---------|
-| 1.4.0 | 2025-11-30 | Added system.testEBSver builtin function for version comparison |
-| 1.3.0 | 2025-11-30 | Added system.getEBSver builtin function to return language version |
-| 1.2.0 | 2025-11-29 | Added version reference comment to all example scripts |
-| 1.1.0 | 2025-11-29 | Added keyword examples in ScriptInterpreter/scripts/examples/ |
-| 1.0.0 | 2025-11-29 | Initial version - Created language reference index with links to main documentation |
+| 1.0.2 | 2025-11-30 | Added system.testEBSver builtin function; Changed to 3-part versioning (language.keyword.builtin) |
+| 1.0.1 | 2025-11-30 | Added system.getEBSver builtin function to return language version |
+| 1.0.0 | 2025-11-29 | Initial version - Created language reference with keyword examples |
 
 ---
 
@@ -124,12 +136,15 @@ When adding or removing **keywords**, **built-in functions**, or other language 
    - `ScriptInterpreter/scripts/examples/` - Individual example files for each keyword
    - **Important:** All example scripts must include this reference comment as the first line:
      ```
-     // EBS Language Reference v1.4.0 - See EBS_LANGUAGE_REFERENCE.md
+     // EBS Language Reference v1.0.2 - See EBS_LANGUAGE_REFERENCE.md
      ```
      Update the version number to match the current documentation version.
 
 4. **Source Code (for builtin changes):**
-   - `ScriptInterpreter/src/main/java/com/eb/script/interpreter/builtins/BuiltinsSystem.java` - Update EBS_LANGUAGE_VERSION constant
+   - `ScriptInterpreter/src/main/java/com/eb/script/interpreter/builtins/BuiltinsSystem.java` - Update version constants:
+     - `LANGUAGE_VER` - Increment for major incompatible language changes
+     - `KEYWORD_VER` - Increment for keyword additions/changes
+     - `BUILTIN_VER` - Increment for builtin function additions/changes
 
 5. **Grammar Specification:**
    - `ScriptInterpreter/src/main/java/com/eb/script/syntax_ebnf.txt` - EBNF grammar (if syntax changes)
