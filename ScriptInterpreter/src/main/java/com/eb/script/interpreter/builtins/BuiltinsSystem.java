@@ -38,6 +38,7 @@ public class BuiltinsSystem {
             case "system.wincommand" -> winCommand(args);
             case "system.getproperty" -> getProperty(args);
             case "system.setproperty" -> setProperty(args);
+            case "system.getebsver" -> getEBSver();
             case "thread.sleep" -> sleep(args);
             case "array.expand" -> arrayExpand(args);
             case "array.sort" -> arraySort(args);
@@ -94,6 +95,16 @@ public class BuiltinsSystem {
         return (val == null)
                 ? java.lang.System.clearProperty(key)
                 : java.lang.System.setProperty(key, val);
+    }
+
+    /**
+     * EBS Language Version constant.
+     * Update this value when language features (keywords, builtins) are added or removed.
+     */
+    public static final String EBS_LANGUAGE_VERSION = "1.2.0";
+
+    private static Object getEBSver() {
+        return EBS_LANGUAGE_VERSION;
     }
 
     private static Object sleep(Object[] args) throws InterpreterError {

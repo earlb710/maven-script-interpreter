@@ -792,6 +792,10 @@ public final class Builtins {
         ));
 
         addBuiltin(info(
+                "system.getEBSver", DataType.STRING // returns the current EBS language version
+        ));
+
+        addBuiltin(info(
                 "system.inputDialog", DataType.STRING, // returns the input text or empty string if cancelled
                 newParam("title", DataType.STRING, true),      // required: dialog title
                 newParam("headerText", DataType.STRING, false), // optional: header text

@@ -1,0 +1,12 @@
+// EBS Language Reference v1.3.0 - See EBS_LANGUAGE_REFERENCE.md
+// Example: system.getEBSver builtin - Get EBS language version
+// Syntax: call system.getEBSver();
+
+// Get the current EBS language version
+var version = call system.getEBSver();
+print "EBS Language Version: " + version;
+
+// Use in conditional logic
+if version == "1.3.0" then {
+    print "Running on the latest version!";
+}

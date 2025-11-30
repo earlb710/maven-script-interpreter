@@ -1,6 +1,6 @@
 # EBS Language Reference
 
-**Documentation Version: 1.2.0**
+**Documentation Version: 1.3.0**
 
 This document serves as a pointer to the comprehensive EBS (Earl Bosch Script) language documentation.
 
@@ -67,6 +67,15 @@ print message;
 
 This documentation corresponds to the EBS Script Interpreter version 1.0-SNAPSHOT.
 
+### Getting the Language Version Programmatically
+
+Use the `system.getEBSver` builtin function to retrieve the current EBS language version at runtime:
+
+```javascript
+var version = call system.getEBSver();
+print "EBS Language Version: " + version;  // Output: EBS Language Version: 1.3.0
+```
+
 For the latest updates and comprehensive language reference, always refer to [docs/EBS_SCRIPT_SYNTAX.md](docs/EBS_SCRIPT_SYNTAX.md).
 
 ---
@@ -75,6 +84,7 @@ For the latest updates and comprehensive language reference, always refer to [do
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.3.0 | 2025-11-30 | Added system.getEBSver builtin function to return language version |
 | 1.2.0 | 2025-11-29 | Added version reference comment to all example scripts |
 | 1.1.0 | 2025-11-29 | Added keyword examples in ScriptInterpreter/scripts/examples/ |
 | 1.0.0 | 2025-11-29 | Initial version - Created language reference index with links to main documentation |
@@ -97,11 +107,14 @@ When adding or removing **keywords**, **built-in functions**, or other language 
    - `ScriptInterpreter/scripts/examples/` - Individual example files for each keyword
    - **Important:** All example scripts must include this reference comment as the first line:
      ```
-     // EBS Language Reference v1.2.0 - See EBS_LANGUAGE_REFERENCE.md
+     // EBS Language Reference v1.3.0 - See EBS_LANGUAGE_REFERENCE.md
      ```
      Update the version number to match the current documentation version.
 
-4. **Grammar Specification:**
+4. **Source Code (for builtin changes):**
+   - `ScriptInterpreter/src/main/java/com/eb/script/interpreter/builtins/BuiltinsSystem.java` - Update EBS_LANGUAGE_VERSION constant
+
+5. **Grammar Specification:**
    - `ScriptInterpreter/src/main/java/com/eb/script/syntax_ebnf.txt` - EBNF grammar (if syntax changes)
 
 **Version Update Rule:** Increment the documentation version in this file whenever significant changes are made to the language documentation.
