@@ -46,6 +46,7 @@ public class BuiltinsJson {
             case "json.remove" -> remove(args);
             case "json.add" -> add(args);
             case "json.insert" -> insert(args);
+            case "json.tostring" -> toString(args);
             default -> throw new InterpreterError("Unknown JSON builtin: " + name);
         };
     }
@@ -207,6 +208,14 @@ public class BuiltinsJson {
         Object val = args[3];
         Json.insert(root, arrPath, index.intValue(), val);
         return root;
+    }
+
+    private static Object toString(Object[] args) {
+        Object jsonObj = args[0];
+        if (jsonObj == null) {
+            return "null";
+        }
+        return Json.prettyJson(jsonObj);
     }
 
     // --- Helper methods ---

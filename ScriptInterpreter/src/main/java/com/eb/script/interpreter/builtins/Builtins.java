@@ -242,6 +242,10 @@ public final class Builtins {
                 newParam("index", DataType.INTEGER),
                 newParam("value", DataType.JSON)
         ));
+        addBuiltin(info(
+                "json.toString", DataType.STRING, // converts JSON to formatted string
+                newParam("json", DataType.JSON)
+        ));
 
         // ==========================
         // STRING builtins
