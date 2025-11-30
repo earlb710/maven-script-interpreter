@@ -39,6 +39,7 @@ public class BuiltinsSystem {
             case "system.getproperty" -> getProperty(args);
             case "system.setproperty" -> setProperty(args);
             case "system.getebsver" -> getEBSver();
+            case "system.testebsver" -> testEBSver(args);
             case "thread.sleep" -> sleep(args);
             case "array.expand" -> arrayExpand(args);
             case "array.sort" -> arraySort(args);
@@ -101,10 +102,71 @@ public class BuiltinsSystem {
      * EBS Language Version constant.
      * Update this value when language features (keywords, builtins) are added or removed.
      */
-    public static final String EBS_LANGUAGE_VERSION = "1.2.0";
+    public static final String EBS_LANGUAGE_VERSION = "1.4.0";
 
     private static Object getEBSver() {
         return EBS_LANGUAGE_VERSION;
+    }
+
+    /**
+     * Compares a supplied version with the running EBS language version.
+     * Returns true if the running version is greater than or equal to the supplied version.
+     * Uses semantic versioning comparison (major.minor.patch).
+     *
+     * @param args args[0] = version string to compare (e.g., "1.3.0")
+     * @return true if running version >= supplied version, false otherwise
+     */
+    private static Object testEBSver(Object[] args) throws InterpreterError {
+        String testVersion = (String) args[0];
+        if (testVersion == null || testVersion.isBlank()) {
+            throw new InterpreterError("system.testEBSver: version string cannot be null or empty");
+        }
+        return compareVersions(EBS_LANGUAGE_VERSION, testVersion) >= 0;
+    }
+
+    /**
+     * Compares two semantic version strings.
+     * @param v1 first version string (e.g., "1.3.0")
+     * @param v2 second version string (e.g., "1.2.0")
+     * @return negative if v1 < v2, zero if v1 == v2, positive if v1 > v2
+     */
+    private static int compareVersions(String v1, String v2) {
+        String[] parts1 = v1.split("\\.");
+        String[] parts2 = v2.split("\\.");
+        
+        int maxLen = Math.max(parts1.length, parts2.length);
+        for (int i = 0; i < maxLen; i++) {
+            int num1 = (i < parts1.length) ? parseVersionPart(parts1[i]) : 0;
+            int num2 = (i < parts2.length) ? parseVersionPart(parts2[i]) : 0;
+            
+            if (num1 != num2) {
+                return num1 - num2;
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Parses a version part, handling non-numeric suffixes (e.g., "1-beta" -> 1).
+     */
+    private static int parseVersionPart(String part) {
+        // Extract leading numeric portion
+        StringBuilder numStr = new StringBuilder();
+        for (char c : part.toCharArray()) {
+            if (Character.isDigit(c)) {
+                numStr.append(c);
+            } else {
+                break;
+            }
+        }
+        if (numStr.length() == 0) {
+            return 0;
+        }
+        try {
+            return Integer.parseInt(numStr.toString());
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 
     private static Object sleep(Object[] args) throws InterpreterError {

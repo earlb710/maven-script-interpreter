@@ -1,6 +1,6 @@
 # EBS Language Reference
 
-**Documentation Version: 1.3.0**
+**Documentation Version: 1.4.0**
 
 This document serves as a pointer to the comprehensive EBS (Earl Bosch Script) language documentation.
 
@@ -73,7 +73,23 @@ Use the `system.getEBSver` builtin function to retrieve the current EBS language
 
 ```javascript
 var version = call system.getEBSver();
-print "EBS Language Version: " + version;  // Output: EBS Language Version: 1.3.0
+print "EBS Language Version: " + version;  // Output: EBS Language Version: 1.4.0
+```
+
+### Testing Version Compatibility
+
+Use the `system.testEBSver` builtin function to check if the running version meets a minimum version requirement:
+
+```javascript
+// Returns true if running version >= supplied version
+if call system.testEBSver("1.3.0") then {
+    print "Version 1.3.0 or higher features are available";
+}
+
+// Check for specific feature availability
+if call system.testEBSver("1.4.0") then {
+    print "testEBSver function is available";
+}
 ```
 
 For the latest updates and comprehensive language reference, always refer to [docs/EBS_SCRIPT_SYNTAX.md](docs/EBS_SCRIPT_SYNTAX.md).
@@ -84,6 +100,7 @@ For the latest updates and comprehensive language reference, always refer to [do
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.4.0 | 2025-11-30 | Added system.testEBSver builtin function for version comparison |
 | 1.3.0 | 2025-11-30 | Added system.getEBSver builtin function to return language version |
 | 1.2.0 | 2025-11-29 | Added version reference comment to all example scripts |
 | 1.1.0 | 2025-11-29 | Added keyword examples in ScriptInterpreter/scripts/examples/ |
@@ -107,7 +124,7 @@ When adding or removing **keywords**, **built-in functions**, or other language 
    - `ScriptInterpreter/scripts/examples/` - Individual example files for each keyword
    - **Important:** All example scripts must include this reference comment as the first line:
      ```
-     // EBS Language Reference v1.3.0 - See EBS_LANGUAGE_REFERENCE.md
+     // EBS Language Reference v1.4.0 - See EBS_LANGUAGE_REFERENCE.md
      ```
      Update the version number to match the current documentation version.
 

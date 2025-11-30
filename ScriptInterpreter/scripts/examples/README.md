@@ -68,6 +68,7 @@ This directory contains short, precise example scripts for each EBS language key
 | File | Builtin |
 |------|---------|
 | [getEBSver.ebs](getEBSver.ebs) | `system.getEBSver` - Get EBS language version |
+| [getEBSver.ebs](getEBSver.ebs) | `system.testEBSver` - Test if running version >= supplied version |
 
 ## Running Examples
 
@@ -87,7 +88,7 @@ mvn javafx:run
 When adding new keywords to EBS, create a corresponding example file following this template:
 
 ```javascript
-// EBS Language Reference v1.3.0 - See EBS_LANGUAGE_REFERENCE.md
+// EBS Language Reference v1.4.0 - See EBS_LANGUAGE_REFERENCE.md
 // Example: keyword_name keyword - Brief description
 // Syntax: keyword syntax
 

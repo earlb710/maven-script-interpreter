@@ -1,4 +1,4 @@
-// EBS Language Reference v1.3.0 - See EBS_LANGUAGE_REFERENCE.md
+// EBS Language Reference v1.4.0 - See EBS_LANGUAGE_REFERENCE.md
 // Example: screen, show, hide keywords - UI window management
 // Syntax: screen name = {...}; show screen name; hide screen name;
 
