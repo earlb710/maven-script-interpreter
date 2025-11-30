@@ -43,9 +43,136 @@ print "File found at: " + configPath;
 print "File content read successfully";
 print "";
 
+// Validate config content - check if it's empty or invalid
+var configIsValid: bool = true;
+var configError: string = "";
+
+// Check if content is empty
+if configContent == "" then {
+    configIsValid = false;
+    configError = "Config file is empty";
+} else {
+    // Check if content looks like valid JSON (starts with { after trimming)
+    var trimmedContent: string = call string.trim(configContent);
+    if call string.startsWith(trimmedContent, "{") == false then {
+        configIsValid = false;
+        configError = "Config file does not contain valid JSON (must start with '{')";
+    }
+}
+
+// If config is invalid, ask user if they want to recreate it
+if configIsValid == false then {
+    print "ERROR: " + configError;
+    var recreate: bool = call system.confirmDialog("The configuration file could not be read:\n\n" + configError + "\n\nWould you like to create a new config file with default values?\n\nThis will overwrite the existing file.", "Config Error");
+    
+    if recreate then {
+        // Create default config content
+        var defaultConfig: string = "{\n";
+        defaultConfig = defaultConfig + "  \"currentProfile\": \"default\",\n";
+        defaultConfig = defaultConfig + "  \"profileList\": [\"default\"],\n";
+        defaultConfig = defaultConfig + "  \"profiles\": {\n";
+        defaultConfig = defaultConfig + "    \"default\": {\n";
+        defaultConfig = defaultConfig + "      \"info\": \"#e6e6e6\",\n";
+        defaultConfig = defaultConfig + "      \"comment\": \"#ffffcc\",\n";
+        defaultConfig = defaultConfig + "      \"error\": \"#ee0000\",\n";
+        defaultConfig = defaultConfig + "      \"warn\": \"#eeee00\",\n";
+        defaultConfig = defaultConfig + "      \"ok\": \"#00ee00\",\n";
+        defaultConfig = defaultConfig + "      \"code\": \"white\",\n";
+        defaultConfig = defaultConfig + "      \"datatype\": \"#D070FF\",\n";
+        defaultConfig = defaultConfig + "      \"data\": \"pink\",\n";
+        defaultConfig = defaultConfig + "      \"keyword\": \"#00FFFF\",\n";
+        defaultConfig = defaultConfig + "      \"builtin\": \"#99e0e0\",\n";
+        defaultConfig = defaultConfig + "      \"literal\": \"blue\",\n";
+        defaultConfig = defaultConfig + "      \"identifier\": \"white\",\n";
+        defaultConfig = defaultConfig + "      \"sql\": \"#00ee66\",\n";
+        defaultConfig = defaultConfig + "      \"custom\": \"#eeee90\",\n";
+        defaultConfig = defaultConfig + "      \"background\": \"#000000\",\n";
+        defaultConfig = defaultConfig + "      \"text\": \"#e6e6e6\",\n";
+        defaultConfig = defaultConfig + "      \"caret\": \"white\",\n";
+        defaultConfig = defaultConfig + "      \"line-cursor\": \"#22292a\",\n";
+        defaultConfig = defaultConfig + "      \"line-numbers\": \"#808080\",\n";
+        defaultConfig = defaultConfig + "      \"console-background\": \"#1e1e1e\",\n";
+        defaultConfig = defaultConfig + "      \"tab-background\": \"#252525\",\n";
+        defaultConfig = defaultConfig + "      \"tab-label-color\": \"#cccccc\",\n";
+        defaultConfig = defaultConfig + "      \"tab-label-changed-color\": \"#ff6600\",\n";
+        defaultConfig = defaultConfig + "      \"tab-label-background\": \"#333333\",\n";
+        defaultConfig = defaultConfig + "      \"find-highlight-color\": \"#000000\",\n";
+        defaultConfig = defaultConfig + "      \"find-highlight-background\": \"#ddb107\"\n";
+        defaultConfig = defaultConfig + "    }\n";
+        defaultConfig = defaultConfig + "  }\n";
+        defaultConfig = defaultConfig + "}";
+        
+        // Write the default config to file
+        call file.writetextfile(configPath, defaultConfig);
+        print "Created new config file with default values";
+        configContent = defaultConfig;
+        call system.alertDialog("New config file created with default values.\nThe color editor will now load with these defaults.", "Config Created", "info");
+    } else {
+        print "User chose not to recreate config file. Exiting.";
+        call system.alertDialog("Cannot continue without a valid config file.\nPlease fix the file manually or restart and choose to recreate it.", "Exiting", "warning");
+        return;
+    }
+}
+
 // Parse the JSON content
 print "Parsing JSON configuration...";
 var config: json = call json.jsonfromstring(configContent);
+
+// Check if parsing succeeded
+if call json.isempty(config) then {
+    print "ERROR: Failed to parse JSON configuration";
+    var recreate2: bool = call system.confirmDialog("Failed to parse the configuration file as JSON.\n\nWould you like to create a new config file with default values?\n\nThis will overwrite the existing file.", "Parse Error");
+    
+    if recreate2 then {
+        // Create default config content
+        var defaultConfig2: string = "{\n";
+        defaultConfig2 = defaultConfig2 + "  \"currentProfile\": \"default\",\n";
+        defaultConfig2 = defaultConfig2 + "  \"profileList\": [\"default\"],\n";
+        defaultConfig2 = defaultConfig2 + "  \"profiles\": {\n";
+        defaultConfig2 = defaultConfig2 + "    \"default\": {\n";
+        defaultConfig2 = defaultConfig2 + "      \"info\": \"#e6e6e6\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"comment\": \"#ffffcc\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"error\": \"#ee0000\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"warn\": \"#eeee00\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"ok\": \"#00ee00\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"code\": \"white\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"datatype\": \"#D070FF\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"data\": \"pink\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"keyword\": \"#00FFFF\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"builtin\": \"#99e0e0\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"literal\": \"blue\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"identifier\": \"white\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"sql\": \"#00ee66\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"custom\": \"#eeee90\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"background\": \"#000000\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"text\": \"#e6e6e6\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"caret\": \"white\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"line-cursor\": \"#22292a\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"line-numbers\": \"#808080\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"console-background\": \"#1e1e1e\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"tab-background\": \"#252525\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"tab-label-color\": \"#cccccc\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"tab-label-changed-color\": \"#ff6600\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"tab-label-background\": \"#333333\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"find-highlight-color\": \"#000000\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"find-highlight-background\": \"#ddb107\"\n";
+        defaultConfig2 = defaultConfig2 + "    }\n";
+        defaultConfig2 = defaultConfig2 + "  }\n";
+        defaultConfig2 = defaultConfig2 + "}";
+        
+        // Write the default config to file
+        call file.writetextfile(configPath, defaultConfig2);
+        print "Created new config file with default values";
+        configContent = defaultConfig2;
+        config = call json.jsonfromstring(configContent);
+        call system.alertDialog("New config file created with default values.\nThe color editor will now load with these defaults.", "Config Created", "info");
+    } else {
+        print "User chose not to recreate config file. Exiting.";
+        call system.alertDialog("Cannot continue without a valid config file.\nPlease fix the file manually or restart and choose to recreate it.", "Exiting", "warning");
+        return;
+    }
+}
+
 print "JSON parsed successfully";
 print "";
 
