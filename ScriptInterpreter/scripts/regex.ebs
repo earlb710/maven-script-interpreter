@@ -533,6 +533,13 @@ applyAiPattern {
     }
 }
 
+// Function to clear the AI screen fields
+clearAiFields {
+    askAiScreen.aiRequest = "";
+    askAiScreen.aiResult = "The AI-generated regex pattern will appear here...";
+    askAiScreen.generatedPattern = "";
+}
+
 // Ask AI screen - child screen for AI-based regex generation
 screen askAiScreen = {
     "title": "Ask AI - Generate Regex Pattern",
@@ -590,12 +597,21 @@ screen askAiScreen = {
                     "style": "-fx-spacing: 10; -fx-alignment: CENTER;",
                     "items": [
                         {
-                            "name": "generateBtn",
+                            "name": "submitBtn",
                             "display": {
                                 "type": "button",
-                                "labelText": "Generate Regex",
+                                "labelText": "Submit",
                                 "tooltip": "Ask AI to generate a regex pattern based on your description",
                                 "onClick": "call generateRegexFromAi();"
+                            }
+                        },
+                        {
+                            "name": "clearBtn",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Clear",
+                                "tooltip": "Clear the request and result fields",
+                                "onClick": "call clearAiFields();"
                             }
                         },
                         {
