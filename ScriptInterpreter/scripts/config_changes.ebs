@@ -1180,8 +1180,13 @@ function onResetClick {
 
 // Function: Handle Save button click
 function onSaveClick {
-    // Use saveConfigWithCurrentProfile to preserve all profiles while updating the current one
-    call saveConfigWithCurrentProfile();
+    // Build the current profile colors JSON directly from screen values
+    var currentColors: string = "{\n      \"info\": \"" + colorEditorScreen.info + "\",\n      \"comment\": \"" + colorEditorScreen.comment + "\",\n      \"error\": \"" + colorEditorScreen.error + "\",\n      \"warn\": \"" + colorEditorScreen.warn + "\",\n      \"ok\": \"" + colorEditorScreen.ok + "\",\n      \"code\": \"" + colorEditorScreen.code + "\",\n      \"datatype\": \"" + colorEditorScreen.datatype + "\",\n      \"data\": \"" + colorEditorScreen.data + "\",\n      \"keyword\": \"" + colorEditorScreen.keyword + "\",\n      \"builtin\": \"" + colorEditorScreen.builtin + "\",\n      \"literal\": \"" + colorEditorScreen.literal + "\",\n      \"identifier\": \"" + colorEditorScreen.identifier + "\",\n      \"sql\": \"" + colorEditorScreen.sql + "\",\n      \"custom\": \"" + colorEditorScreen.custom + "\",\n      \"background\": \"" + colorEditorScreen.background + "\",\n      \"text\": \"" + colorEditorScreen.text + "\",\n      \"caret\": \"" + colorEditorScreen.caret + "\",\n      \"line-cursor\": \"" + colorEditorScreen.lineCursor + "\",\n      \"line-numbers\": \"" + colorEditorScreen.lineNumbers + "\",\n      \"console-background\": \"" + colorEditorScreen.consoleBackground + "\",\n      \"tab-background\": \"" + colorEditorScreen.tabBackground + "\",\n      \"tab-label-color\": \"" + colorEditorScreen.tabLabelColor + "\",\n      \"tab-label-changed-color\": \"" + colorEditorScreen.tabLabelChangedColor + "\",\n      \"tab-label-background\": \"" + colorEditorScreen.tabLabelBackground + "\",\n      \"find-highlight-color\": \"" + colorEditorScreen.findHighlightColor + "\",\n      \"find-highlight-background\": \"" + colorEditorScreen.findHighlightBackground + "\"\n    }";
+    
+    // Build simple JSON with just the current profile
+    var jsonContent: string = "{\n  \"currentProfile\": \"" + colorEditorScreen.profile + "\",\n  \"profileList\": [\"" + colorEditorScreen.profile + "\"],\n  \"profiles\": {\n    \"" + colorEditorScreen.profile + "\": " + currentColors + "\n  }\n}";
+    
+    call file.writeTextFile(configPath, jsonContent);
     call system.alertDialog("Configuration saved to " + configPath + ".\nRestart the application to see changes.", "Saved", "info");
 }
 
