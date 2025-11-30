@@ -175,6 +175,13 @@ print "";
 
 // Get profiles object and current profile's colors
 var profiles: json = call json.getobject(config, "profiles");
+
+// Handle case where profiles object doesn't exist
+if call json.isempty(profiles) then {
+    print "No profiles found in config, using defaults";
+    profiles = call json.jsonfromstring("{}");
+}
+
 var colors: json = call json.getobject(profiles, profileName);
 
 // If current profile doesn't exist, try to get default profile colors
@@ -182,6 +189,12 @@ if call json.isempty(colors) then {
     print "Profile '" + profileName + "' not found, falling back to 'default'";
     colors = call json.getobject(profiles, "default");
     profileName = "default";
+}
+
+// If default profile also doesn't exist, create empty JSON to prevent null errors
+if call json.isempty(colors) then {
+    print "Default profile not found, using empty colors (will fall back to CSS defaults)";
+    colors = call json.jsonfromstring("{}");
 }
 
 print "Colors object retrieved for profile: " + profileName;
