@@ -144,9 +144,8 @@ public final class AiFunctions {
         }
         messages.add(Map.of("role", "user", "content", Objects.toString(user, "")));
         req.put("messages", messages);
-        if (maxTokens != null && maxTokens > 0) {
-            req.put("max_tokens", maxTokens);
-        }
+        // Note: max_tokens is intentionally not sent as some models don't support it
+        // and models will automatically limit response size appropriately
         if (temperature != null) {
             req.put("temperature", temperature);
         }
