@@ -1,0 +1,23 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: scr.findScreen builtin - Check if a screen has been defined
+// Syntax: call scr.findScreen("screenName")
+// Returns: true if screen exists, false otherwise
+
+// Define a test screen
+screen testScreen = {
+    "title": "Test Screen",
+    "width": 400,
+    "height": 300
+};
+
+// Check if the screen exists
+var exists = call scr.findScreen("testScreen");
+print "testScreen exists: " + exists;  // Output: true
+
+// Check for a non-existent screen
+var notExists = call scr.findScreen("unknownScreen");
+print "unknownScreen exists: " + notExists;  // Output: false
+
+// Case-insensitive lookup
+var existsUpper = call scr.findScreen("TESTSCREEN");
+print "TESTSCREEN exists: " + existsUpper;  // Output: true

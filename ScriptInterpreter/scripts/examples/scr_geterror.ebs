@@ -1,0 +1,33 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: scr.getError builtin - Get the current error message from a screen
+// Syntax: call scr.getError("screenName")
+// Returns: Error message string (empty if no error)
+
+// Define a test screen
+screen getErrorScreen = {
+    "title": "Get Error Test",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "field",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield"
+            }
+        }
+    ]
+};
+
+show screen getErrorScreen;
+
+// Set an error and then retrieve it
+call scr.setError("getErrorScreen", "Invalid input detected");
+var errorMsg = call scr.getError("getErrorScreen");
+print "Error message: " + errorMsg;
+
+// Check if there's an error
+if errorMsg != "" then {
+    print "Screen has an error!";
+}

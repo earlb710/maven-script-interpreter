@@ -1,0 +1,39 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: scr.setItemChoiceOptions builtin - Set options for a dropdown/combobox
+// Syntax: call scr.setItemChoiceOptions("screenName", "itemName", optionsMap)
+// Returns: true on success
+
+// Define a test screen with a combobox
+screen choiceOptionsScreen = {
+    "title": "Choice Options Test",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "country",
+            "type": "string",
+            "default": "US",
+            "display": {
+                "type": "combobox",
+                "labelText": "Country:",
+                "options": ["US", "UK", "CA"]
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "items": [
+                { "name": "countryField", "varRef": "country" }
+            ]
+        }
+    ]
+};
+
+show screen choiceOptionsScreen;
+
+// Update the options dynamically
+var newOptions: json = {"US": "United States", "UK": "United Kingdom", "CA": "Canada", "AU": "Australia"};
+call scr.setItemChoiceOptions("choiceOptionsScreen", "countryField", newOptions);
+print "Choice options updated with display names";

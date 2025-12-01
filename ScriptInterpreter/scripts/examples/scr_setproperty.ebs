@@ -1,0 +1,42 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: scr.setProperty builtin - Set property value on a screen item
+// Syntax: call scr.setProperty("screenName.itemName", "propertyName", value)
+// Returns: true on success
+
+// Define a test screen with an item
+screen propSetScreen = {
+    "title": "Set Property Test",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "email",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Email:"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "items": [
+                {
+                    "name": "emailField",
+                    "varRef": "email"
+                }
+            ]
+        }
+    ]
+};
+
+show screen propSetScreen;
+
+// Set properties on the item
+call scr.setProperty("propSetScreen.emailField", "editable", false);
+call scr.setProperty("propSetScreen.emailField", "tooltip", "Enter email address");
+call scr.setProperty("propSetScreen.emailField", "visible", true);
+print "Properties updated successfully";

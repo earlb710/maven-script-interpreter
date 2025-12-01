@@ -1,0 +1,36 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: scr.getItemList builtin - Get list of all item names in a screen
+// Syntax: call scr.getItemList("screenName")
+// Returns: ArrayDynamic of strings containing all item names
+
+// Define a test screen with multiple items
+screen itemListScreen = {
+    "title": "Item List Test",
+    "width": 400,
+    "height": 400,
+    "vars": [
+        { "name": "firstName", "type": "string", "display": { "type": "textfield" } },
+        { "name": "lastName", "type": "string", "display": { "type": "textfield" } },
+        { "name": "age", "type": "int", "display": { "type": "spinner", "min": 0, "max": 120 } }
+    ],
+    "area": [
+        {
+            "name": "formArea",
+            "type": "vbox",
+            "items": [
+                { "name": "firstNameField", "varRef": "firstName" },
+                { "name": "lastNameField", "varRef": "lastName" },
+                { "name": "ageField", "varRef": "age" }
+            ]
+        }
+    ]
+};
+
+show screen itemListScreen;
+
+// Get all item names
+var items = call scr.getItemList("itemListScreen");
+print "Number of items: " + items.length;
+foreach item in items {
+    print "  Item: " + item;
+}

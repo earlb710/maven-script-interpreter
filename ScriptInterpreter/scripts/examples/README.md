@@ -99,6 +99,34 @@ This directory contains short, precise example scripts for each EBS language key
 | [str_findregex.ebs](str_findregex.ebs) | `str.findregex` | Find first regex match |
 | [str_findallregex.ebs](str_findallregex.ebs) | `str.findallregex` | Find all regex matches |
 
+## Screen Builtins (scr.*)
+| File | Builtin | Description |
+|------|---------|-------------|
+| [scr_findscreen.ebs](scr_findscreen.ebs) | `scr.findScreen` | Check if a screen has been defined |
+| [scr_showscreen.ebs](scr_showscreen.ebs) | `scr.showScreen` | Show a screen programmatically |
+| [scr_hidescreen.ebs](scr_hidescreen.ebs) | `scr.hideScreen` | Hide a screen programmatically |
+| [scr_closescreen.ebs](scr_closescreen.ebs) | `scr.closeScreen` | Close a screen programmatically |
+| [scr_getproperty.ebs](scr_getproperty.ebs) | `scr.getProperty` | Get property value from a screen item |
+| [scr_setproperty.ebs](scr_setproperty.ebs) | `scr.setProperty` | Set property value on a screen item |
+| [scr_getitemlist.ebs](scr_getitemlist.ebs) | `scr.getItemList` | Get list of all item names in a screen |
+| [scr_setstatus.ebs](scr_setstatus.ebs) | `scr.setStatus` | Set the status of a screen |
+| [scr_getstatus.ebs](scr_getstatus.ebs) | `scr.getStatus` | Get the current status of a screen |
+| [scr_seterror.ebs](scr_seterror.ebs) | `scr.setError` | Set an error message on a screen |
+| [scr_geterror.ebs](scr_geterror.ebs) | `scr.getError` | Get the current error message from a screen |
+| [scr_checkchanged.ebs](scr_checkchanged.ebs) | `scr.checkChanged` | Check if a screen has unsaved changes |
+| [scr_checkerror.ebs](scr_checkerror.ebs) | `scr.checkError` | Check if a screen has an error |
+| [scr_revert.ebs](scr_revert.ebs) | `scr.revert` | Revert screen fields to original values |
+| [scr_clear.ebs](scr_clear.ebs) | `scr.clear` | Clear all field values in a screen |
+| [scr_getitemsource.ebs](scr_getitemsource.ebs) | `scr.getItemSource` | Get the source type of a screen item |
+| [scr_setitemsource.ebs](scr_setitemsource.ebs) | `scr.setItemSource` | Set the source type of a screen item |
+| [scr_getitemstatus.ebs](scr_getitemstatus.ebs) | `scr.getItemStatus` | Get the status of a screen item |
+| [scr_resetitemoriginalvalue.ebs](scr_resetitemoriginalvalue.ebs) | `scr.resetItemOriginalValue` | Reset an item's original value |
+| [scr_getvarreference.ebs](scr_getvarreference.ebs) | `scr.getVarReference` | Get the variable reference for an item |
+| [scr_getareaproperty.ebs](scr_getareaproperty.ebs) | `scr.getAreaProperty` | Get property value from a screen area |
+| [scr_setareaproperty.ebs](scr_setareaproperty.ebs) | `scr.setAreaProperty` | Set property value on a screen area |
+| [scr_setitemchoiceoptions.ebs](scr_setitemchoiceoptions.ebs) | `scr.setItemChoiceOptions` | Set options for a dropdown/combobox |
+| [scr_getitemchoiceoptions.ebs](scr_getitemchoiceoptions.ebs) | `scr.getItemChoiceOptions` | Get options from a dropdown/combobox |
+
 ## Running Examples
 
 From the ScriptInterpreter directory:

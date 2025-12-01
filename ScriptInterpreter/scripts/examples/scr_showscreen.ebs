@@ -1,0 +1,29 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: scr.showScreen builtin - Show a screen programmatically
+// Syntax: call scr.showScreen("screenName")
+// Returns: true on success
+
+// Define a test screen
+screen demoScreen = {
+    "title": "Demo Screen",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "message",
+            "type": "string",
+            "default": "Hello!",
+            "display": {
+                "type": "label",
+                "labelText": "Message:"
+            }
+        }
+    ]
+};
+
+// First show the screen using the statement form
+show screen demoScreen;
+
+// Later, you can show it again programmatically using the builtin
+// call scr.showScreen("demoScreen");
+print "Screen shown successfully";

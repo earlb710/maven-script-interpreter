@@ -1,0 +1,39 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: scr.getAreaProperty builtin - Get property value from a screen area
+// Syntax: call scr.getAreaProperty("screenName.areaName", "propertyName")
+// Returns: Property value
+
+// Define a test screen with an area
+screen areaPropertyScreen = {
+    "title": "Area Property Test",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "field1",
+            "type": "string",
+            "display": { "type": "textfield" }
+        }
+    ],
+    "area": [
+        {
+            "name": "contentArea",
+            "type": "vbox",
+            "spacing": "10",
+            "padding": "20",
+            "items": [
+                { "name": "field1Item", "varRef": "field1" }
+            ]
+        }
+    ]
+};
+
+show screen areaPropertyScreen;
+
+// Get area properties
+var spacing = call scr.getAreaProperty("areaPropertyScreen.contentArea", "spacing");
+var padding = call scr.getAreaProperty("areaPropertyScreen.contentArea", "padding");
+var areaType = call scr.getAreaProperty("areaPropertyScreen.contentArea", "type");
+print "Spacing: " + spacing;
+print "Padding: " + padding;
+print "Area type: " + areaType;

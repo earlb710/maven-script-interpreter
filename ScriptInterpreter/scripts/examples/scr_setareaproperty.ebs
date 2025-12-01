@@ -1,0 +1,35 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: scr.setAreaProperty builtin - Set property value on a screen area
+// Syntax: call scr.setAreaProperty("screenName.areaName", "propertyName", value)
+// Returns: true on success
+
+// Define a test screen with an area
+screen setAreaPropertyScreen = {
+    "title": "Set Area Property Test",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "field1",
+            "type": "string",
+            "display": { "type": "textfield" }
+        }
+    ],
+    "area": [
+        {
+            "name": "contentArea",
+            "type": "vbox",
+            "spacing": "5",
+            "items": [
+                { "name": "field1Item", "varRef": "field1" }
+            ]
+        }
+    ]
+};
+
+show screen setAreaPropertyScreen;
+
+// Set area properties
+call scr.setAreaProperty("setAreaPropertyScreen.contentArea", "spacing", "15");
+call scr.setAreaProperty("setAreaPropertyScreen.contentArea", "padding", "10");
+print "Area properties updated";

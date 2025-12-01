@@ -1,0 +1,32 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: scr.checkError builtin - Check if a screen has an error
+// Syntax: call scr.checkError("screenName")
+// Returns: true if screen has an error, false otherwise
+
+// Define a test screen
+screen checkErrorScreen = {
+    "title": "Check Error Test",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "input",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield"
+            }
+        }
+    ]
+};
+
+show screen checkErrorScreen;
+
+// Check initial error state
+var hasError = call scr.checkError("checkErrorScreen");
+print "Has error initially: " + hasError;
+
+// Set an error and check again
+call scr.setError("checkErrorScreen", "Validation error");
+hasError = call scr.checkError("checkErrorScreen");
+print "Has error after setting: " + hasError;

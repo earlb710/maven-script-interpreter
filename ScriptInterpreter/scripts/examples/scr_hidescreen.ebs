@@ -1,0 +1,29 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: scr.hideScreen builtin - Hide a screen programmatically
+// Syntax: call scr.hideScreen("screenName")
+// Returns: true on success
+
+// Define a test screen
+screen hiddenScreen = {
+    "title": "Hidden Screen Example",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "status",
+            "type": "string",
+            "default": "Visible",
+            "display": {
+                "type": "label"
+            }
+        }
+    ]
+};
+
+// Show the screen first
+show screen hiddenScreen;
+print "Screen is now visible";
+
+// Hide the screen programmatically
+call scr.hideScreen("hiddenScreen");
+print "Screen is now hidden (still in memory, can be shown again)";

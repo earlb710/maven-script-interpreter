@@ -1,0 +1,42 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: scr.revert builtin - Revert screen fields to their original values
+// Syntax: call scr.revert("screenName")
+// Returns: true on success
+
+// Define a test screen
+screen revertScreen = {
+    "title": "Revert Test",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "username",
+            "type": "string",
+            "default": "OriginalUser",
+            "display": {
+                "type": "textfield",
+                "labelText": "Username:"
+            }
+        },
+        {
+            "name": "email",
+            "type": "string",
+            "default": "original@example.com",
+            "display": {
+                "type": "textfield",
+                "labelText": "Email:"
+            }
+        }
+    ]
+};
+
+show screen revertScreen;
+
+// Modify values (simulating user input)
+revertScreen.username = "ModifiedUser";
+revertScreen.email = "modified@example.com";
+print "Values modified";
+
+// Revert all values to original
+call scr.revert("revertScreen");
+print "Values reverted to original";

@@ -1,0 +1,39 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: scr.getItemSource builtin - Get the source type of a screen item
+// Syntax: call scr.getItemSource("screenName", "itemName")
+// Returns: "data" or "display"
+
+// Define a test screen
+screen itemSourceScreen = {
+    "title": "Item Source Test",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "field1",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "items": [
+                {
+                    "name": "field1Item",
+                    "varRef": "field1"
+                }
+            ]
+        }
+    ]
+};
+
+show screen itemSourceScreen;
+
+// Get the item source
+var source = call scr.getItemSource("itemSourceScreen", "field1Item");
+print "Item source: " + source;
