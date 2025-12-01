@@ -281,11 +281,23 @@ public class ThreadViewerDialog extends Stage {
 
     /**
      * Find a Thread object by its ID.
+     * Uses ThreadGroup enumeration which is more efficient than getAllStackTraces().
      */
     private Thread findThreadById(long threadId) {
-        for (Thread t : Thread.getAllStackTraces().keySet()) {
-            if (t.getId() == threadId) {
-                return t;
+        // Get root thread group
+        ThreadGroup rootGroup = Thread.currentThread().getThreadGroup();
+        while (rootGroup.getParent() != null) {
+            rootGroup = rootGroup.getParent();
+        }
+        
+        // Enumerate all threads
+        int estimatedSize = rootGroup.activeCount() * 2;
+        Thread[] threads = new Thread[estimatedSize];
+        int count = rootGroup.enumerate(threads, true);
+        
+        for (int i = 0; i < count; i++) {
+            if (threads[i] != null && threads[i].getId() == threadId) {
+                return threads[i];
             }
         }
         return null;
