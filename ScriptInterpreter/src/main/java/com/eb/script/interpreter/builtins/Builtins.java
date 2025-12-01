@@ -854,6 +854,14 @@ public final class Builtins {
                 newParam("text", DataType.STRING, true),
                 newParam("labels", DataType.JSON, true) // expect List<String>
         ));
+        addBuiltin(info(
+                "ai.completeAsync", null, // returns null immediately, result passed to callback
+                newParam("system", DataType.STRING, false),
+                newParam("user", DataType.STRING, true),
+                newParam("maxTokens", DataType.INTEGER, false),
+                newParam("temperature", DataType.DOUBLE, false),
+                newParam("callback", DataType.STRING, true) // callback function name to invoke with result
+        ));
 
         // ==========================
         // ClassTree builtins
@@ -1038,7 +1046,7 @@ public final class Builtins {
             return BuiltinsDebug.dispatch(env, name, args);
         }
         if (BuiltinsAi.handles(name)) {
-            return BuiltinsAi.dispatch(name, args);
+            return BuiltinsAi.dispatch(context, name, args);
         }
         if (BuiltinsHelp.handles(name)) {
             return BuiltinsHelp.dispatch(env, name, args);

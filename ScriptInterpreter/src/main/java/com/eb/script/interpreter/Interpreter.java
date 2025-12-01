@@ -94,6 +94,19 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         this.arrayInterpreter = new InterpreterArray(context, this);
     }
 
+    /**
+     * Constructor that reuses an existing InterpreterContext.
+     * Used for callback execution to share state with the main interpreter.
+     * 
+     * @param context The existing interpreter context to reuse
+     */
+    public Interpreter(InterpreterContext context) {
+        this.context = context;
+        this.screenInterpreter = new InterpreterScreen(context, this);
+        this.databaseInterpreter = new InterpreterDatabase(context, this);
+        this.arrayInterpreter = new InterpreterArray(context, this);
+    }
+
     public InterpreterContext getContext() {
         return context;
     }

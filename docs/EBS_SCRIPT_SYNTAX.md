@@ -3110,8 +3110,23 @@ call debug.memusage(unit); // "B", "KB", "MB"
 
 ### AI Functions
 ```javascript
-// Text generation
+// Text generation (synchronous - blocks until complete)
 var completion = call ai.complete(prompt, options);
+
+// Text generation (asynchronous - runs in background thread)
+// The callback function receives a JSON object with: success, result, error
+call ai.completeAsync(systemPrompt, userPrompt, maxTokens, temperature, "callbackFunction");
+
+// Example callback function for ai.completeAsync
+onAiComplete(response: json) {
+    if call json.getBool(response, "success", false) then {
+        var result: string = call json.getString(response, "result", "");
+        print "AI Response: " + result;
+    } else {
+        var error: string = call json.getString(response, "error", "Unknown error");
+        print "AI Error: " + error;
+    }
+}
 
 // Summarization
 var summary = call ai.summarize(text, options);

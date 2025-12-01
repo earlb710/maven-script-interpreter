@@ -487,6 +487,7 @@ appendNotToPattern {
 }
 
 // Function to call AI and generate regex from user description
+// Uses ai.completeAsync to run in its own thread with a callback
 generateRegexFromAi {
     var userRequest: string = askAiScreen.aiRequest;
     
@@ -503,13 +504,18 @@ generateRegexFromAi {
     // Show busy working message
     askAiScreen.aiResult = "⏳ WORKING...\n\nGenerating regex pattern from AI.\nThis may take up to a few minutes.\n\nPlease wait...";
     
-    // Small delay to allow UI to update before blocking AI call
-    call thread.sleep(100);
-    
     var systemPrompt: string = "You are a Java regex expert. The user will describe what they want to match. Generate ONLY the Java regex pattern - no explanation, no code, no quotes. Just the raw regex pattern. Examples:\n- Email: [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}\n- Phone: \\d{3}-\\d{3}-\\d{4}\n- Date: \\d{4}-\\d{2}-\\d{2}";
     
-    try {
-        var result: string = call ai.complete(systemPrompt, userRequest, 200, 0.3);
+    // Use async AI call - runs in background thread and calls onAiComplete when done
+    call ai.completeAsync(systemPrompt, userRequest, 200, 0.3, "onAiComplete");
+}
+
+// Callback function invoked when async AI call completes
+// Receives a JSON object with: success (bool), result (string), error (string)
+onAiComplete(aiResponse: json) {
+    if call json.getBool(aiResponse, "success", false) then {
+        // AI call succeeded - process the result
+        var result: string = call json.getString(aiResponse, "result", "");
         
         // Trim whitespace and remove quotes if present
         result = call str.trim(result);
@@ -526,22 +532,23 @@ generateRegexFromAi {
         
         askAiScreen.aiResult = "✓ Generated pattern:\n" + result;
         askAiScreen.generatedPattern = result;
-    } exceptions {
-        when ANY_ERROR(msg) {
-            // Check for API key issues (401 Unauthorized)
-            var isApiKeyError: bool = false;
-            if call str.contains(msg, "401") then {
-                isApiKeyError = true;
-            }
-            if call str.contains(msg, "API key") then {
-                isApiKeyError = true;
-            }
-            
-            if isApiKeyError then {
-                askAiScreen.aiResult = "❌ API KEY NOT CONFIGURED\n\nTo use the AI feature, you need to set up your OpenAI API key:\n\n1. Go to: Edit > AI Chat Model Setup\n2. Enter your API key (from https://platform.openai.com/api-keys)\n3. Click Save\n4. RESTART the application\n\nThe AI configuration is loaded at startup, so you must restart after saving.";
-            } else {
-                askAiScreen.aiResult = "❌ Error: " + msg;
-            }
+    } else {
+        // AI call failed - show error
+        var errorMsg: string = call json.getString(aiResponse, "error", "Unknown error");
+        
+        // Check for API key issues (401 Unauthorized)
+        var isApiKeyError: bool = false;
+        if call str.contains(errorMsg, "401") then {
+            isApiKeyError = true;
+        }
+        if call str.contains(errorMsg, "API key") then {
+            isApiKeyError = true;
+        }
+        
+        if isApiKeyError then {
+            askAiScreen.aiResult = "❌ API KEY NOT CONFIGURED\n\nTo use the AI feature, you need to set up your OpenAI API key:\n\n1. Go to: Edit > AI Chat Model Setup\n2. Enter your API key (from https://platform.openai.com/api-keys)\n3. Click Save\n4. RESTART the application\n\nThe AI configuration is loaded at startup, so you must restart after saving.";
+        } else {
+            askAiScreen.aiResult = "❌ Error: " + errorMsg;
         }
     }
     
