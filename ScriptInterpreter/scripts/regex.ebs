@@ -496,9 +496,10 @@ generateRegexFromAi {
     }
     
     // Disable buttons while processing (except Cancel)
-    call scr.setProperty("askAiScreen.submitBtn", "disabled", true);
-    call scr.setProperty("askAiScreen.clearBtn", "disabled", true);
-    call scr.setProperty("askAiScreen.applyBtn", "disabled", true);
+    // Use qualified screen name since askAiScreen is a child of regexScreen
+    call scr.setProperty("regexscreen.askaiscreen.submitBtn", "disabled", true);
+    call scr.setProperty("regexscreen.askaiscreen.clearBtn", "disabled", true);
+    call scr.setProperty("regexscreen.askaiscreen.applyBtn", "disabled", true);
     
     // Show busy working message
     askAiScreen.aiResult = "⏳ WORKING...\n\nGenerating regex pattern from AI.\nThis may take up to a few minutes.\n\nPlease wait...";
@@ -511,10 +512,11 @@ generateRegexFromAi {
 
 // Callback function for AI regex generation result
 onAiRegexComplete(response: json) {
-    var success: bool = response.success;
+    // Use json.getBool to access JSON fields
+    var success: bool = call json.getBool(response, "success", false);
     
     if success then {
-        var result: string = response.result;
+        var result: string = call json.getString(response, "result", "");
         
         // Trim whitespace and remove quotes if present
         result = call str.trim(result);
@@ -532,7 +534,7 @@ onAiRegexComplete(response: json) {
         askAiScreen.aiResult = "✓ Generated pattern:\n" + result;
         askAiScreen.generatedPattern = result;
     } else {
-        var errorMsg: string = response.error;
+        var errorMsg: string = call json.getString(response, "error", "Unknown error");
         
         // Check for API key issues (401 Unauthorized)
         var isApiKeyError: bool = false;
@@ -551,9 +553,10 @@ onAiRegexComplete(response: json) {
     }
     
     // Re-enable buttons after processing
-    call scr.setProperty("askAiScreen.submitBtn", "disabled", false);
-    call scr.setProperty("askAiScreen.clearBtn", "disabled", false);
-    call scr.setProperty("askAiScreen.applyBtn", "disabled", false);
+    // Use qualified screen name since askAiScreen is a child of regexScreen
+    call scr.setProperty("regexscreen.askaiscreen.submitBtn", "disabled", false);
+    call scr.setProperty("regexscreen.askaiscreen.clearBtn", "disabled", false);
+    call scr.setProperty("regexscreen.askaiscreen.applyBtn", "disabled", false);
 }
 
 // Function to apply the generated AI pattern to the main regex screen
