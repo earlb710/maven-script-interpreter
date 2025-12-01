@@ -1,0 +1,30 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: str.startswith builtin - Check if string starts with prefix
+// Syntax: call str.startswith(text, prefix)
+
+var text: string = "Hello World";
+
+// Check prefix
+var startsHello = call str.startswith(text, "Hello");
+print "Starts with 'Hello': " + startsHello;  // Output: true
+
+var startsWorld = call str.startswith(text, "World");
+print "Starts with 'World': " + startsWorld;  // Output: false
+
+// Case-sensitive
+var startsHELLO = call str.startswith(text, "HELLO");
+print "Starts with 'HELLO': " + startsHELLO;  // Output: false
+
+// Common use: check URL protocols
+var url: string = "https://example.com";
+if call str.startswith(url, "https://") then {
+    print "Secure URL";
+} else if call str.startswith(url, "http://") then {
+    print "Insecure URL";
+}
+
+// Check file paths
+var path: string = "/home/user/file.txt";
+if call str.startswith(path, "/") then {
+    print "Absolute path";
+}

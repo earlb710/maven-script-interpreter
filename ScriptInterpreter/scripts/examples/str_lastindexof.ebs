@@ -1,0 +1,30 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: str.lastindexof builtin - Find last occurrence index
+// Syntax: call str.lastindexof(text, searchString, fromIndex?)
+
+var text: string = "Hello World Hello";
+
+// Find last occurrence
+var lastIndex = call str.lastindexof(text, "Hello");
+print "Last 'Hello' at: " + lastIndex;  // Output: 12
+
+// Compare with indexof (first occurrence)
+var firstIndex = call str.indexof(text, "Hello");
+print "First 'Hello' at: " + firstIndex;  // Output: 0
+
+// Not found returns -1
+var notFound = call str.lastindexof(text, "xyz");
+print "'xyz' at: " + notFound;  // Output: -1
+
+// Search backwards from specific position
+var beforeTen = call str.lastindexof(text, "Hello", 10);
+print "'Hello' before index 10: " + beforeTen;  // Output: 0
+
+// Common use: find last occurrence of separator
+var path: string = "/home/user/documents/file.txt";
+var lastSlash = call str.lastindexof(path, "/");
+print "Last '/' at: " + lastSlash;
+
+// Extract filename from path
+var filename = call str.substring(path, lastSlash + 1);
+print "Filename: " + filename;  // Output: file.txt

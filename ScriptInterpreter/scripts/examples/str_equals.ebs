@@ -1,0 +1,30 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: str.equals builtin - Case-sensitive string equality
+// Syntax: call str.equals(text1, text2)
+
+var a: string = "Hello";
+var b: string = "Hello";
+var c: string = "HELLO";
+
+// Case-sensitive comparison
+var abEqual = call str.equals(a, b);
+print "Hello == Hello: " + abEqual;  // Output: true
+
+var acEqual = call str.equals(a, c);
+print "Hello == HELLO: " + acEqual;  // Output: false
+
+// Handles null safely
+var nullStr: string = null;
+var nullEqual = call str.equals(nullStr, "test");
+print "null == 'test': " + nullEqual;  // Output: false
+
+// Use in conditionals
+var command: string = "start";
+if call str.equals(command, "start") then {
+    print "Starting...";
+} else if call str.equals(command, "stop") then {
+    print "Stopping...";
+}
+
+// Compare with == operator (both work)
+print "Using ==: " + (a == b);

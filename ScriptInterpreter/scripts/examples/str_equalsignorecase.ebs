@@ -1,0 +1,30 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: str.equalsignorecase builtin - Case-insensitive string equality
+// Syntax: call str.equalsignorecase(text1, text2)
+
+var a: string = "Hello";
+var b: string = "HELLO";
+var c: string = "hello";
+
+// Case-insensitive comparison
+var abEqual = call str.equalsignorecase(a, b);
+print "Hello == HELLO (ignore case): " + abEqual;  // Output: true
+
+var acEqual = call str.equalsignorecase(a, c);
+print "Hello == hello (ignore case): " + acEqual;  // Output: true
+
+// Compare with case-sensitive str.equals
+var sensitive = call str.equals(a, b);
+print "Hello == HELLO (case-sensitive): " + sensitive;  // Output: false
+
+// Common use: validate user input
+var userResponse: string = "YES";
+if call str.equalsignorecase(userResponse, "yes") then {
+    print "User confirmed";
+}
+
+// Match commands regardless of case
+var command: string = "QUIT";
+if call str.equalsignorecase(command, "quit") then {
+    print "Exiting application...";
+}

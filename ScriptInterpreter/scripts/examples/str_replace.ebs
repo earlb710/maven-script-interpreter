@@ -1,0 +1,23 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: str.replace builtin - Replace all occurrences of substring
+// Syntax: call str.replace(text, target, replacement)
+
+var text: string = "Hello World";
+var result = call str.replace(text, "World", "EBS");
+print "Original: " + text;
+print "Replaced: " + result;
+
+// Replaces ALL occurrences
+var repeated: string = "banana";
+var changed = call str.replace(repeated, "a", "o");
+print "banana -> " + changed;  // Output: bonono
+
+// Remove characters by replacing with empty string
+var noSpaces = call str.replace("hello world", " ", "");
+print "No spaces: " + noSpaces;  // Output: helloworld
+
+// Use for template substitution
+var template: string = "Dear {name}, welcome to {company}!";
+var msg = call str.replace(template, "{name}", "Alice");
+msg = call str.replace(msg, "{company}", "EBS Corp");
+print msg;

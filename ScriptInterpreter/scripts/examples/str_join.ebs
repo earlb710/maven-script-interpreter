@@ -1,0 +1,25 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: str.join builtin - Join array elements into string
+// Syntax: call str.join(array, separator)
+
+// Join string array with comma
+var fruits = ["apple", "banana", "cherry"];
+var csv = call str.join(fruits, ", ");
+print "Joined: " + csv;  // Output: apple, banana, cherry
+
+// Join with different separators
+var words = ["Hello", "World", "EBS"];
+print "Space: " + call str.join(words, " ");     // Hello World EBS
+print "Dash: " + call str.join(words, "-");      // Hello-World-EBS
+print "No sep: " + call str.join(words, "");     // HelloWorldEBS
+
+// Useful for building paths
+var pathParts = ["home", "user", "documents"];
+var path = call str.join(pathParts, "/");
+print "Path: " + path;  // Output: home/user/documents
+
+// Works with arrays from split (round-trip)
+var original: string = "a:b:c";
+var parts = call str.split(original, ":");
+var rejoined = call str.join(parts, ":");
+print "Rejoined: " + rejoined;  // Output: a:b:c

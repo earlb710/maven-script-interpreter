@@ -1,0 +1,28 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: str.contains / string.contains builtin - Check if substring exists
+// Syntax: call str.contains(text, substring)
+
+var text: string = "Hello World";
+
+// Check if contains substring
+var hasWorld = call str.contains(text, "World");
+print "Contains 'World': " + hasWorld;  // Output: true
+
+var hasXyz = call string.contains(text, "xyz");
+print "Contains 'xyz': " + hasXyz;  // Output: false
+
+// Case-sensitive matching
+var hasHELLO = call str.contains(text, "HELLO");
+print "Contains 'HELLO': " + hasHELLO;  // Output: false (case-sensitive)
+
+// Common use: conditional logic
+var filename: string = "document.pdf";
+if call str.contains(filename, ".pdf") then {
+    print "This is a PDF file";
+}
+
+// Check for multiple substrings
+var email: string = "user@example.com";
+if call str.contains(email, "@") and call str.contains(email, ".") then {
+    print "Looks like a valid email format";
+}

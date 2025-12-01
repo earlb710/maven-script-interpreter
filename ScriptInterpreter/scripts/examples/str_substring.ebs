@@ -1,0 +1,31 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: str.substring builtin - Extract portion of string
+// Syntax: call str.substring(text, beginIndex, endIndex?)
+
+var text: string = "Hello World";
+
+// Extract from index to end
+var fromSix = call str.substring(text, 6);
+print "From index 6: " + fromSix;  // Output: World
+
+// Extract with start and end index (end exclusive)
+var hello = call str.substring(text, 0, 5);
+print "Index 0 to 5: " + hello;  // Output: Hello
+
+// Extract middle portion
+var middle = call str.substring(text, 3, 8);
+print "Index 3 to 8: " + middle;  // Output: lo Wo
+
+// Common use: extract file extension
+var filename: string = "document.pdf";
+var dotIndex = 8;
+var extension = call str.substring(filename, dotIndex);
+print "Extension: " + extension;  // Output: .pdf
+
+// Extract first N characters
+var preview = call str.substring("This is a long text...", 0, 10);
+print "Preview: " + preview + "...";
+
+// Extract last N characters (calculate start index)
+var last5 = call str.substring(text, 6);
+print "Last part: " + last5;

@@ -1,0 +1,33 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: str.findregex builtin - Find first regex match
+// Syntax: call str.findregex(text, regex)
+// Note: Use double backslash for regex escapes (\\d, \\w, etc.)
+
+var text: string = "Hello World 123";
+
+// Find first word
+var firstWord = call str.findregex(text, "\\w+");
+print "First word: " + firstWord;  // Output: Hello
+
+// Find first number
+var number = call str.findregex(text, "\\d+");
+print "First number: " + number;  // Output: 123
+
+// No match returns null
+var noMatch = call str.findregex(text, "xyz");
+print "No match: " + noMatch;  // Output: null
+
+// Find email pattern
+var content: string = "Contact: john@example.com for info";
+var email = call str.findregex(content, "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}");
+print "Found email: " + email;  // Output: john@example.com
+
+// Use in conditionals
+if call str.findregex(text, "\\d+") != null then {
+    print "Text contains a number";
+}
+
+// Find specific pattern
+var dateText: string = "Date: 2024-01-15, Time: 10:30";
+var datePattern = call str.findregex(dateText, "\\d{4}-\\d{2}-\\d{2}");
+print "Found date: " + datePattern;  // Output: 2024-01-15

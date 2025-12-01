@@ -1,0 +1,19 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: str.replacefirst builtin - Replace only first occurrence
+// Syntax: call str.replacefirst(text, target, replacement)
+
+var text: string = "Hello World Hello";
+var result = call str.replacefirst(text, "Hello", "Hi");
+print "Original: " + text;
+print "Replaced first: " + result;  // Output: Hi World Hello
+
+// Compare with str.replace (replaces all)
+var banana: string = "banana";
+var firstOnly = call str.replacefirst(banana, "a", "o");
+var allReplaced = call str.replace(banana, "a", "o");
+print "Replace first 'a': " + firstOnly;  // Output: bonana
+print "Replace all 'a': " + allReplaced;   // Output: bonono
+
+// No match returns original string
+var noMatch = call str.replacefirst("Hello", "xyz", "123");
+print "No match: " + noMatch;  // Output: Hello

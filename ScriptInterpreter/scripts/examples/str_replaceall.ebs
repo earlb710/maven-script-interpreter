@@ -1,0 +1,30 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: str.replaceall builtin - Regex-based replace all
+// Syntax: call str.replaceall(text, regex, replacement)
+// Note: Use double backslash for regex escapes (\\d, \\s, etc.)
+
+// Remove all digits
+var text1: string = "abc123def456";
+var noDigits = call str.replaceall(text1, "\\d+", "");
+print "Remove digits: " + noDigits;  // Output: abcdef
+
+// Normalize whitespace (multiple spaces to single)
+var text2: string = "Hello   World  Test";
+var normalized = call str.replaceall(text2, "\\s+", " ");
+print "Normalized: " + normalized;  // Output: Hello World Test
+
+// Replace all word characters
+var text3: string = "Hello World";
+var bracketed = call str.replaceall(text3, "(\\w+)", "[$1]");
+print "Bracketed: " + bracketed;  // Output: [Hello] [World]
+
+// Remove non-alphanumeric characters
+var messy: string = "Hello! World? Test...";
+var clean = call str.replaceall(messy, "[^a-zA-Z0-9 ]", "");
+print "Clean: " + clean;  // Output: Hello World Test
+
+// Compare with str.replace (literal, not regex)
+var literal = call str.replace("a.b.c", ".", "-");
+var regex = call str.replaceall("a.b.c", "\\.", "-");
+print "Literal: " + literal;  // Output: a-b-c (. is literal)
+print "Regex: " + regex;      // Output: a-b-c (\\. matches literal dot)

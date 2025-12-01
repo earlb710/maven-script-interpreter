@@ -70,6 +70,35 @@ This directory contains short, precise example scripts for each EBS language key
 | [getEBSver.ebs](getEBSver.ebs) | `system.getEBSver` - Get EBS language version |
 | [getEBSver.ebs](getEBSver.ebs) | `system.testEBSver` - Test if running version >= supplied version |
 
+## String Builtins (str.* / string.*)
+| File | Builtin | Description |
+|------|---------|-------------|
+| [str_tostring.ebs](str_tostring.ebs) | `str.tostring` | Convert value to string |
+| [str_toupper.ebs](str_toupper.ebs) | `str.toupper` | Convert to uppercase |
+| [str_tolower.ebs](str_tolower.ebs) | `str.tolower` | Convert to lowercase |
+| [str_trim.ebs](str_trim.ebs) | `str.trim` | Remove leading/trailing whitespace |
+| [str_replace.ebs](str_replace.ebs) | `str.replace` | Replace all occurrences |
+| [str_replacefirst.ebs](str_replacefirst.ebs) | `str.replacefirst` | Replace first occurrence only |
+| [str_split.ebs](str_split.ebs) | `str.split` | Split string into array |
+| [str_join.ebs](str_join.ebs) | `str.join` | Join array elements into string |
+| [str_contains.ebs](str_contains.ebs) | `str.contains` | Check if substring exists |
+| [str_startswith.ebs](str_startswith.ebs) | `str.startswith` | Check if starts with prefix |
+| [str_endswith.ebs](str_endswith.ebs) | `str.endswith` | Check if ends with suffix |
+| [str_equals.ebs](str_equals.ebs) | `str.equals` | Case-sensitive equality |
+| [str_equalsignorecase.ebs](str_equalsignorecase.ebs) | `str.equalsignorecase` | Case-insensitive equality |
+| [str_isempty.ebs](str_isempty.ebs) | `str.isempty` | Check if empty (zero length) |
+| [str_isblank.ebs](str_isblank.ebs) | `str.isblank` | Check if empty or whitespace only |
+| [str_substring.ebs](str_substring.ebs) | `str.substring` | Extract portion of string |
+| [str_indexof.ebs](str_indexof.ebs) | `str.indexof` | Find first occurrence index |
+| [str_lastindexof.ebs](str_lastindexof.ebs) | `str.lastindexof` | Find last occurrence index |
+| [str_charat.ebs](str_charat.ebs) | `str.charat` | Get character at index |
+| [str_replaceall.ebs](str_replaceall.ebs) | `str.replaceall` | Regex-based replace all |
+| [str_lpad.ebs](str_lpad.ebs) | `str.lpad` | Left pad to length |
+| [str_rpad.ebs](str_rpad.ebs) | `str.rpad` | Right pad to length |
+| [str_chararray.ebs](str_chararray.ebs) | `str.chararray` | Get Unicode code points array |
+| [str_findregex.ebs](str_findregex.ebs) | `str.findregex` | Find first regex match |
+| [str_findallregex.ebs](str_findallregex.ebs) | `str.findallregex` | Find all regex matches |
+
 ## Running Examples
 
 From the ScriptInterpreter directory:

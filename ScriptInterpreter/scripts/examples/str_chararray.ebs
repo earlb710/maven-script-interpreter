@@ -1,0 +1,39 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: str.chararray builtin - Get Unicode code points as integer array
+// Syntax: call str.chararray(text)
+
+// Basic usage
+var text: string = "Hello";
+var codes = call str.chararray(text);
+print "Character codes for 'Hello':";
+print codes;  // Output: [72, 101, 108, 108, 111]
+
+// Access individual character codes
+print "H = " + codes[0];  // 72
+print "e = " + codes[1];  // 101
+print "l = " + codes[2];  // 108
+
+// ASCII printable characters
+var special: string = "A@1";
+var specialCodes = call str.chararray(special);
+print "'A@1' codes: ";
+print specialCodes;  // Output: [65, 64, 49]
+
+// Empty string returns empty array
+var empty: string = "";
+var emptyCodes = call str.chararray(empty);
+print "Empty string codes: ";
+print emptyCodes;  // Output: []
+
+// Process characters in loop
+var word: string = "Code";
+var charCodes = call str.chararray(word);
+print "Character analysis:";
+foreach code in charCodes {
+    print "  Code point: " + code;
+}
+
+// Useful for character-level validation or encoding
+var input: string = "abc";
+var inputCodes = call str.chararray(input);
+print "Lowercase 'a' code: " + inputCodes[0];  // 97

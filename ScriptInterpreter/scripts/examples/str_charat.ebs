@@ -1,0 +1,30 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: str.charat builtin - Get character at index
+// Syntax: call str.charat(text, index)
+
+var text: string = "Hello";
+
+// Get character at specific index
+var first = call str.charat(text, 0);
+print "Character at 0: " + first;  // Output: H
+
+var last = call str.charat(text, 4);
+print "Character at 4: " + last;  // Output: o
+
+// Iterate through string characters
+print "All characters:";
+for (var i: int = 0; i < 5; i++) {
+    var ch = call str.charat(text, i);
+    print "  [" + i + "]: " + ch;
+}
+
+// Check first character
+var input: string = "Hello World";
+var firstChar = call str.charat(input, 0);
+if firstChar == "H" then {
+    print "String starts with H";
+}
+
+// Note: Returns single-character string, not char type
+var ch = call str.charat("ABC", 1);
+print "Type check - is string: " + (typeof ch == "string");

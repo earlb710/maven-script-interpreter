@@ -1,0 +1,30 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: str.indexof builtin - Find first occurrence index
+// Syntax: call str.indexof(text, searchString, fromIndex?)
+
+var text: string = "Hello World Hello";
+
+// Find first occurrence
+var index = call str.indexof(text, "Hello");
+print "First 'Hello' at: " + index;  // Output: 0
+
+var worldIdx = call str.indexof(text, "World");
+print "'World' at: " + worldIdx;  // Output: 6
+
+// Not found returns -1
+var notFound = call str.indexof(text, "xyz");
+print "'xyz' at: " + notFound;  // Output: -1
+
+// Search from specific position (finds second occurrence)
+var secondHello = call str.indexof(text, "Hello", 1);
+print "Second 'Hello' at: " + secondHello;  // Output: 12
+
+// Common use: find character position
+var email: string = "user@example.com";
+var atIndex = call str.indexof(email, "@");
+print "'@' position: " + atIndex;
+
+// Check if substring exists using indexof
+if call str.indexof(email, "@") >= 0 then {
+    print "Valid email format (has @)";
+}
