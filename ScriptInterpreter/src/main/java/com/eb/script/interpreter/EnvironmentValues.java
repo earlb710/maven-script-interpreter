@@ -1,6 +1,7 @@
 package com.eb.script.interpreter;
 
 import com.eb.script.token.RecordType;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,25 +32,33 @@ public class EnvironmentValues {
         recordTypes.clear();
         constants.clear();
     }
+    
+    /**
+     * Safely convert null values to empty JSON objects (LinkedHashMap).
+     * ConcurrentHashMap doesn't accept null values, so we replace null with empty map.
+     */
+    private Object safeValue(Object value) {
+        return value != null ? value : new LinkedHashMap<String, Object>();
+    }
 
     public void define(String name, Object value) {
-        values.put(name, value);
+        values.put(name, safeValue(value));
     }
     
     public void defineConst(String name, Object value) {
-        values.put(name, value);
+        values.put(name, safeValue(value));
         constants.add(name);
     }
     
     public void defineWithRecordType(String name, Object value, RecordType recordType) {
-        values.put(name, value);
+        values.put(name, safeValue(value));
         if (recordType != null) {
             recordTypes.put(name, recordType);
         }
     }
     
     public void defineConstWithRecordType(String name, Object value, RecordType recordType) {
-        values.put(name, value);
+        values.put(name, safeValue(value));
         constants.add(name);
         if (recordType != null) {
             recordTypes.put(name, recordType);
@@ -96,7 +105,7 @@ public class EnvironmentValues {
             if (constants.contains(name)) {
                 throw new InterpreterError("Cannot reassign constant variable '" + name + "'.");
             }
-            values.put(name, value);
+            values.put(name, safeValue(value));
             return;
         }
 
