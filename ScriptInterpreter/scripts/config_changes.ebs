@@ -648,7 +648,7 @@ function saveConfigWithCurrentProfile {
     
     // Declare all loop variables before the while loop to avoid redeclaration issues
     var pName: string = "";
-    var pColors: json = null;
+    var pColors: json = call json.jsonfromstring("{}");
     var pInfo: string = "";
     var pComment: string = "";
     var pError: string = "";
