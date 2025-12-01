@@ -82,6 +82,17 @@ public class InterpreterScreen {
         Thread screenThread = new Thread(() -> {
             // Run the event loop - this blocks until shutdown is called
             dispatcher.runEventLoop();
+            
+            // When the event loop exits (thread stopping), close the screen
+            // This ensures the screen closes when the thread is interrupted or shutdown
+            Platform.runLater(() -> {
+                Stage stage = context.getScreens().get(screenName);
+                if (stage != null && stage.isShowing()) {
+                    stage.close();
+                }
+                // Clean up screen state
+                context.closeScreen(screenName);
+            });
         }, "Screen-" + screenName);
 
         screenThread.setDaemon(true);
