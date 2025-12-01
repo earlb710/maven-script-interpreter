@@ -1,0 +1,27 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: str.isempty builtin - Check if string is empty
+// Syntax: call str.isempty(text)
+
+// Empty string check
+var empty: string = "";
+var hasContent: string = "Hello";
+var whitespace: string = "   ";
+
+print "Is '' empty: " + call str.isempty(empty);       // Output: true
+print "Is 'Hello' empty: " + call str.isempty(hasContent);  // Output: false
+print "Is '   ' empty: " + call str.isempty(whitespace);    // Output: false (has spaces)
+
+// Note: str.isempty only checks for zero length
+// Use str.isblank to also detect whitespace-only strings
+
+// Common use: validate required fields
+var userName: string = "";
+if call str.isempty(userName) then {
+    print "Error: Username is required";
+}
+
+// Check after trimming
+var input: string = "   ";
+if call str.isempty(call str.trim(input)) then {
+    print "Input is empty or whitespace only";
+}

@@ -1,0 +1,22 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: str.tostring / string.tostring builtin - Convert value to string
+// Syntax: call str.tostring(value)
+
+// Convert integer to string
+var num: int = 42;
+var numStr = call str.tostring(num);
+print "Number as string: " + numStr;
+
+// Convert double to string
+var pi: double = 3.14159;
+var piStr = call string.tostring(pi);
+print "Pi as string: " + piStr;
+
+// Convert boolean to string
+var flag: bool = true;
+var flagStr = call str.tostring(flag);
+print "Boolean as string: " + flagStr;
+
+// Useful for concatenation with explicit conversion
+var age: int = 25;
+print "Age is: " + call str.tostring(age);

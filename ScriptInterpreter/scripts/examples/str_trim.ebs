@@ -1,0 +1,17 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: str.trim builtin - Remove leading and trailing whitespace
+// Syntax: call str.trim(text)
+
+var padded: string = "   Hello World   ";
+var trimmed = call str.trim(padded);
+print "Original: [" + padded + "]";
+print "Trimmed: [" + trimmed + "]";
+
+// Common use case: clean user input
+var userInput: string = "  user@example.com  ";
+var cleanInput = call str.trim(userInput);
+print "Clean email: " + cleanInput;
+
+// Removes tabs and newlines too
+var messy: string = "	 text with tabs	 ";
+print "Cleaned: [" + call str.trim(messy) + "]";

@@ -1,0 +1,27 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: str.split builtin - Split string into array
+// Syntax: call str.split(text, delimiter)
+
+var csv: string = "apple,banana,cherry";
+var fruits = call str.split(csv, ",");
+print "Split CSV:";
+print "  Item 0: " + fruits[0];
+print "  Item 1: " + fruits[1];
+print "  Item 2: " + fruits[2];
+
+// Split by space
+var sentence: string = "Hello World Example";
+var words = call str.split(sentence, " ");
+print "Word count: " + words.length;
+
+// Iterate over split results
+var data: string = "one:two:three";
+var parts = call str.split(data, ":");
+foreach part in parts {
+    print "Part: " + part;
+}
+
+// Split by newline (useful for file processing)
+var lines: string = "line1\nline2\nline3";
+var lineArray = call str.split(lines, "\n");
+print "Lines: " + lineArray.length;

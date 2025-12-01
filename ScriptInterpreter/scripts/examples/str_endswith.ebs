@@ -1,0 +1,32 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: str.endswith builtin - Check if string ends with suffix
+// Syntax: call str.endswith(text, suffix)
+
+var text: string = "Hello World";
+
+// Check suffix
+var endsWorld = call str.endswith(text, "World");
+print "Ends with 'World': " + endsWorld;  // Output: true
+
+var endsHello = call str.endswith(text, "Hello");
+print "Ends with 'Hello': " + endsHello;  // Output: false
+
+// Case-sensitive
+var endsWORLD = call str.endswith(text, "WORLD");
+print "Ends with 'WORLD': " + endsWORLD;  // Output: false
+
+// Common use: check file extensions
+var filename: string = "document.pdf";
+if call str.endswith(filename, ".pdf") then {
+    print "PDF document";
+} else if call str.endswith(filename, ".txt") then {
+    print "Text file";
+}
+
+// Filter file types
+var files = ["report.pdf", "notes.txt", "image.png", "data.csv"];
+foreach file in files {
+    if call str.endswith(file, ".pdf") or call str.endswith(file, ".txt") then {
+        print "Document: " + file;
+    }
+}

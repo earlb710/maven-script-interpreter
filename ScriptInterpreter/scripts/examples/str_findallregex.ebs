@@ -1,0 +1,40 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: str.findallregex builtin - Find all regex matches
+// Syntax: call str.findallregex(text, regex)
+// Note: Use double backslash for regex escapes (\\d, \\w, etc.)
+
+var text: string = "Hello World 123 Test 456";
+
+// Find all words
+var words = call str.findallregex(text, "\\w+");
+print "All words:";
+print words;  // Output: [Hello, World, 123, Test, 456]
+print "Count: " + words.length;  // Output: 5
+
+// Find all numbers
+var numbers = call str.findallregex(text, "\\d+");
+print "All numbers:";
+print numbers;  // Output: [123, 456]
+
+// Find all email addresses
+var content: string = "Contact john@example.com or jane@test.org for help";
+var emails = call str.findallregex(content, "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}");
+print "All emails:";
+print emails;  // Output: [john@example.com, jane@test.org]
+
+// No matches returns empty array
+var noMatches = call str.findallregex(text, "xyz");
+print "No matches: " + noMatches.length;  // Output: 0
+
+// Process matches in a loop
+var matches = call str.findallregex(text, "\\d+");
+print "Processing numbers:";
+foreach match in matches {
+    print "  Found: " + match;
+}
+
+// Extract hashtags from text
+var tweet: string = "Learning #EBS with #programming today!";
+var hashtags = call str.findallregex(tweet, "#\\w+");
+print "Hashtags:";
+print hashtags;  // Output: [#EBS, #programming]

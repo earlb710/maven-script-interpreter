@@ -1,0 +1,30 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: str.lpad builtin - Left pad string to specified length
+// Syntax: call str.lpad(text, length, padChar)
+
+// Pad number with zeros
+var num: string = "42";
+var padded = call str.lpad(num, 5, "0");
+print "Padded: " + padded;  // Output: 00042
+
+// Pad with spaces for alignment
+var text: string = "Hi";
+var aligned = call str.lpad(text, 10, " ");
+print "Aligned: [" + aligned + "]";  // Output: [        Hi]
+
+// Already at or exceeds length - no change
+var longText: string = "Hello";
+var unchanged = call str.lpad(longText, 3, "0");
+print "Unchanged: " + unchanged;  // Output: Hello
+
+// Format numbers consistently
+var amounts = ["5", "42", "100", "1000"];
+print "Formatted amounts:";
+foreach amt in amounts {
+    print "  " + call str.lpad(amt, 6, " ");
+}
+
+// Common use: format IDs
+var id: int = 7;
+var formattedId = call str.lpad(call str.tostring(id), 4, "0");
+print "ID: " + formattedId;  // Output: 0007

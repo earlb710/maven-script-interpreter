@@ -1,0 +1,17 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: str.tolower builtin - Convert string to lowercase
+// Syntax: call str.tolower(text)
+
+var text: string = "Hello World";
+var lower = call str.tolower(text);
+print "Original: " + text;
+print "Lowercase: " + lower;
+
+// Common use case: normalize user input
+var userInput: string = "ADMIN";
+var normalized = call str.tolower(userInput);
+print "Normalized input: " + normalized;
+
+// Works with mixed case
+var mixed: string = "aBcDeFg";
+print call str.tolower(mixed);  // Output: abcdefg

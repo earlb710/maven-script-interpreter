@@ -1,0 +1,18 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: str.toupper builtin - Convert string to uppercase
+// Syntax: call str.toupper(text)
+
+var text: string = "Hello World";
+var upper = call str.toupper(text);
+print "Original: " + text;
+print "Uppercase: " + upper;
+
+// Common use case: case-insensitive comparison
+var input: string = "yes";
+if call str.toupper(input) == "YES" then {
+    print "User confirmed!";
+}
+
+// Works with mixed case
+var mixed: string = "aBcDeFg";
+print call str.toupper(mixed);  // Output: ABCDEFG

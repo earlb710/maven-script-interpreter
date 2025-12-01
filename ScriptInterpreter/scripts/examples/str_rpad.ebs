@@ -1,0 +1,33 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: str.rpad builtin - Right pad string to specified length
+// Syntax: call str.rpad(text, length, padChar)
+
+// Pad with spaces for alignment
+var text: string = "Hi";
+var padded = call str.rpad(text, 10, " ");
+print "Padded: [" + padded + "]";  // Output: [Hi        ]
+
+// Pad with dots (loading indicator style)
+var loading: string = "Loading";
+var dots = call str.rpad(loading, 10, ".");
+print dots;  // Output: Loading...
+
+// Already at or exceeds length - no change
+var longText: string = "Hello";
+var unchanged = call str.rpad(longText, 3, "0");
+print "Unchanged: " + unchanged;  // Output: Hello
+
+// Format table columns
+var names = ["Alice", "Bob", "Charlie"];
+var scores = ["100", "85", "92"];
+print "Name       Score";
+print "-----------------";
+for (var i: int = 0; i < names.length; i++) {
+    var name = call str.rpad(names[i], 10, " ");
+    print name + " " + scores[i];
+}
+
+// Combine with lpad for centered effect
+var title: string = "Title";
+var rightPad = call str.rpad(title, 10, " ");
+print "Right padded: [" + rightPad + "]";
