@@ -222,20 +222,15 @@ public class EbsApp {
     }
 
     /**
-     * Check if any screens are currently running (showing).
+     * Check if any screens are currently running (open or hidden).
+     * A screen is considered "running" if it exists in the global screens map,
+     * regardless of whether it's currently showing or hidden.
      * @return true if there are running screens, false otherwise
      */
     private boolean hasRunningScreens() {
         try {
-            Object interpreter = ctx.environment.getCurrentInterpreter();
-            if (interpreter instanceof com.eb.script.interpreter.Interpreter interp) {
-                var screens = interp.getContext().getScreens();
-                for (Stage screen : screens.values()) {
-                    if (screen != null && screen.isShowing()) {
-                        return true;
-                    }
-                }
-            }
+            var screens = com.eb.script.interpreter.InterpreterContext.getGlobalScreens();
+            return screens != null && !screens.isEmpty();
         } catch (Exception e) {
             // Ignore errors checking screen state
         }
