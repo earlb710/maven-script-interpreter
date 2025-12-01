@@ -3,14 +3,13 @@ package com.eb.script.interpreter.builtins;
 import com.eb.script.interpreter.Interpreter;
 import com.eb.script.interpreter.InterpreterContext;
 import com.eb.script.interpreter.InterpreterError;
-import com.eb.script.interpreter.statement.Statement;
-import com.eb.script.json.Json;
-import com.eb.script.parser.Parser;
-import com.eb.script.RuntimeContext;
+import com.eb.script.interpreter.statement.CallStatement;
+import com.eb.script.interpreter.statement.Parameter;
+import com.eb.script.interpreter.expression.LiteralExpression;
+import com.eb.script.token.DataType;
 
 import com.eb.script.arrays.ArrayDef;
 import com.eb.script.arrays.ArrayDynamic;
-import com.eb.script.token.DataType;
 import javafx.application.Platform;
 import java.util.ArrayList;
 import java.util.List;
@@ -155,23 +154,28 @@ public class BuiltinsAi {
             // Invoke callback on JavaFX Application Thread for UI safety
             Platform.runLater(() -> {
                 try {
-                    // Build the callback EBS code: call callbackName(jsonData);
-                    String jsonArg = Json.compactJson(callbackData);
-                    String callbackCode = "call " + callbackName + "(" + jsonArg + ");";
-                    
                     // Set screen context if we were in a screen
                     if (currentScreen != null) {
                         context.setCurrentScreen(currentScreen);
                     }
                     
                     try {
-                        // Parse and execute the callback
-                        RuntimeContext callbackContext = Parser.parse("ai_callback", callbackCode);
-                        
-                        // Execute each statement in the callback code
-                        for (Statement s : callbackContext.statements) {
-                            executeCallbackStatement(context, s);
+                        // Get the main interpreter that has access to the script's functions
+                        Interpreter mainInterpreter = context.getMainInterpreter();
+                        if (mainInterpreter == null) {
+                            throw new InterpreterError("No main interpreter available for callback execution");
                         }
+                        
+                        // Create a CallStatement directly like screen callbacks do
+                        // This properly resolves the function through the interpreter's currentRuntime.blocks
+                        List<Parameter> paramsList = new ArrayList<>();
+                        paramsList.add(new Parameter("response", DataType.JSON, 
+                            new LiteralExpression(DataType.JSON, callbackData)));
+                        
+                        CallStatement callStmt = new CallStatement(0, callbackName, paramsList);
+                        
+                        // Execute the call statement using the main interpreter
+                        mainInterpreter.visitCallStatement(callStmt);
                     } finally {
                         if (currentScreen != null) {
                             context.clearCurrentScreen();
@@ -193,16 +197,5 @@ public class BuiltinsAi {
         
         // Return immediately - result will be passed to callback
         return null;
-    }
-    
-    /**
-     * Helper to execute a callback statement using the context's environment.
-     * This creates an interpreter that shares the existing context.
-     */
-    private static void executeCallbackStatement(InterpreterContext context, 
-            Statement stmt) throws InterpreterError {
-        // Create an interpreter instance that shares the existing context
-        Interpreter interpreter = new Interpreter(context);
-        interpreter.acceptStatement(stmt);
     }
 }

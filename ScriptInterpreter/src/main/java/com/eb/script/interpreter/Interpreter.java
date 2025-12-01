@@ -207,6 +207,9 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         context.setEnvironment(runtime.environment);
         context.setOutput(runtime.environment.getOutputArea());
         
+        // Register this interpreter as the main interpreter for async callbacks
+        context.setMainInterpreter(this);
+        
         // Register this interpreter in the environment for cleanup
         environment().setCurrentInterpreter(this);
         

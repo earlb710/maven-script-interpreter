@@ -85,8 +85,27 @@ public class InterpreterContext {
     // This is used to associate RecordType metadata with cast expressions
     // Using ThreadLocal for thread-safety in case of concurrent script execution
     private final ThreadLocal<RecordType> lastInferredRecordType = new ThreadLocal<>();
+    
+    // Store reference to the main interpreter for async callbacks
+    // This allows callbacks to access functions defined in the script
+    private volatile Interpreter mainInterpreter;
 
     public InterpreterContext() {
+    }
+    
+    /**
+     * Set the main interpreter reference for async callbacks.
+     * This should be called after the interpreter processes the script.
+     */
+    public void setMainInterpreter(Interpreter interpreter) {
+        this.mainInterpreter = interpreter;
+    }
+    
+    /**
+     * Get the main interpreter reference for async callbacks.
+     */
+    public Interpreter getMainInterpreter() {
+        return mainInterpreter;
     }
 
     // Getters and setters for all fields
