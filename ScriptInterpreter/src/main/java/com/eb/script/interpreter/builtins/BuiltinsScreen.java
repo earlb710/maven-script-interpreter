@@ -196,6 +196,38 @@ public class BuiltinsScreen {
     }
 
     /**
+     * scr.findScreen(screenName) -> BOOL
+     * Checks if a screen has been defined.
+     * Returns true if the screen exists in any of these states:
+     * - Has a configuration (defined with 'screen name = {...}' syntax)
+     * - Has an active Stage (currently shown or hidden)
+     * - Has been declared in the current or imported script
+     * 
+     * This is a case-insensitive lookup.
+     */
+    public static Object screenFindScreen(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (String) args[0];
+
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("scr.findScreen: screenName parameter cannot be null or empty");
+        }
+
+        // Normalize screen name to lowercase for case-insensitive lookup
+        screenName = screenName.toLowerCase();
+
+        // Check all three conditions for screen existence:
+        // 1. Has a configuration (from 'screen name = {...}' syntax)
+        // 2. Has an active Stage (currently shown or hidden)
+        // 3. Has been declared in the current or imported script
+        boolean configExists = context.hasScreenConfig(screenName);
+        boolean stageExists = context.getScreens().containsKey(screenName);
+        boolean declaredExists = context.getDeclaredScreens().containsKey(screenName);
+
+        // Return true if screen is defined in any way
+        return configExists || stageExists || declaredExists;
+    }
+
+    /**
      * scr.setProperty(screenName.areaItemName, propertyName, value) -> BOOL
      * Sets a property on an area item in a screen.
      */
