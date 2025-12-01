@@ -1433,7 +1433,7 @@ function onRemoveProfileClick {
 function setColorsFromCss {
     var cssPath: string = "/css/console.css";
     
-    // Get colors from CSS file
+    // Get colors from CSS file - syntax highlighting colors
     colorEditorScreen.info = call css.getValue(cssPath, ".info", "-fx-fill");
     colorEditorScreen.comment = call css.getValue(cssPath, ".comment", "-fx-fill");
     colorEditorScreen.error = call css.getValue(cssPath, ".error", "-fx-fill");
@@ -1449,16 +1449,18 @@ function setColorsFromCss {
     colorEditorScreen.sql = call css.getValue(cssPath, ".sql", "-fx-fill");
     colorEditorScreen.custom = call css.getValue(cssPath, ".custom", "-fx-fill");
     
-    // Use default values for properties not in CSS (background/editor colors)
-    colorEditorScreen.background = defaultBackgroundColor;
-    colorEditorScreen.text = defaultTextColor;
-    colorEditorScreen.caret = defaultCaretColor;
-    colorEditorScreen.lineCursor = defaultLineCursorColor;
-    colorEditorScreen.lineNumbers = defaultLineNumbersColor;
-    colorEditorScreen.consoleBackground = defaultConsoleBackgroundColor;
+    // Get tab and editor colors from CSS file
+    colorEditorScreen.tabLabelColor = call css.getValue(cssPath, ".tab-file .tab-label", "-fx-text-fill");
+    colorEditorScreen.tabLabelChangedColor = call css.getValue(cssPath, ".tab.tab-changed .tab-label", "-fx-text-fill");
+    colorEditorScreen.consoleBackground = call css.getValue(cssPath, ".console-out", "-fx-background-color");
+    colorEditorScreen.text = call css.getValue(cssPath, ".console-out", "-fx-text-fill");
+    colorEditorScreen.background = call css.getValue(cssPath, ".console-out", "-fx-background-color");
+    colorEditorScreen.caret = call css.getValue(cssPath, ".console-in .caret", "-fx-stroke");
+    colorEditorScreen.lineCursor = call css.getValue(cssPath, ".paragraph-box:has-caret", "-fx-background-color");
+    colorEditorScreen.lineNumbers = call css.getValue(cssPath, ".lineno", "-fx-text-fill");
+    
+    // Use default values for properties not clearly defined in CSS
     colorEditorScreen.tabBackground = defaultTabBackgroundColor;
-    colorEditorScreen.tabLabelColor = defaultTabLabelColor;
-    colorEditorScreen.tabLabelChangedColor = defaultTabLabelChangedColor;
     colorEditorScreen.tabLabelBackground = defaultTabLabelBackgroundColor;
     colorEditorScreen.findHighlightColor = defaultFindHighlightColor;
     colorEditorScreen.findHighlightBackground = defaultFindHighlightBackground;
