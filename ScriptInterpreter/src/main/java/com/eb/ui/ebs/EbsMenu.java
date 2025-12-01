@@ -221,6 +221,18 @@ public class EbsMenu extends MenuBar {
         toolsMenu.getItems().addAll(aiSetupItem, safeDirsItem, dbConfigItem);
         getMenus().add(toolsMenu);
 
+        // --- Tools Menu ---
+        Menu devToolsMenu = new Menu("Tools");
+        
+        MenuItem threadViewerItem = new MenuItem("Thread Viewer…");
+        threadViewerItem.setOnAction(e -> {
+            ThreadViewerDialog dialog = new ThreadViewerDialog();
+            dialog.show();
+        });
+        
+        devToolsMenu.getItems().addAll(threadViewerItem);
+        getMenus().add(devToolsMenu);
+
         // --- Screens Menu ---
         refreshScreensMenu();
         // Refresh screens menu when it's about to be shown
