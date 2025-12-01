@@ -21,6 +21,12 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class ScreenEventDispatcher {
 
+    /** Default timeout for synchronous event dispatch in milliseconds */
+    public static final long DEFAULT_DISPATCH_TIMEOUT_MS = 30000;
+    
+    /** Polling interval for the event loop in milliseconds */
+    private static final long EVENT_LOOP_POLL_INTERVAL_MS = 100;
+
     /**
      * Functional interface for EBS code execution.
      */
@@ -127,7 +133,7 @@ public class ScreenEventDispatcher {
             while (running && !Thread.currentThread().isInterrupted()) {
                 try {
                     // Wait for an event with a timeout to allow periodic interrupt checks
-                    ScreenEvent event = eventQueue.poll(100, TimeUnit.MILLISECONDS);
+                    ScreenEvent event = eventQueue.poll(EVENT_LOOP_POLL_INTERVAL_MS, TimeUnit.MILLISECONDS);
                     
                     if (event == null) {
                         continue; // No event, continue waiting
@@ -182,7 +188,7 @@ public class ScreenEventDispatcher {
      * @throws InterpreterError If execution fails or times out
      */
     public Object dispatchSync(String ebsCode) throws InterpreterError {
-        return dispatchSync(ebsCode, 30000); // 30 second default timeout
+        return dispatchSync(ebsCode, DEFAULT_DISPATCH_TIMEOUT_MS);
     }
 
     /**
