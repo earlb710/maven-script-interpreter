@@ -1440,7 +1440,7 @@ function onResetClick {
     }
 }
 
-// Function: Handle Save button click
+// Function: Handle Save and Apply button click
 function onSaveClick {
     // First, update the current profile in memory with screen values
     call updateProfileInMemory(colorEditorScreen.profile);
@@ -1460,7 +1460,14 @@ function onSaveClick {
     call file.writeTextFile(configPath, jsonContent);
     
     print "Saved all profiles to " + configPath;
-    call system.alertDialog("All profiles saved to " + configPath + ".\nRestart the application to see changes.", "Saved", "info");
+    
+    // Apply the configuration changes immediately
+    var reloadSuccess: bool = call system.reloadConfig();
+    if reloadSuccess then {
+        call system.alertDialog("All profiles saved and applied to " + configPath + ".\nColors have been updated.", "Saved and Applied", "info");
+    } else {
+        call system.alertDialog("All profiles saved to " + configPath + ".\nHowever, colors could not be applied immediately.\nRestart the application to see changes.", "Saved", "warning");
+    }
 }
 
 // Function: Handle Close button click
@@ -1962,7 +1969,7 @@ screen colorEditorScreen = {
                 "style": "-fx-spacing: 10; -fx-padding: 10; -fx-alignment: CENTER_RIGHT;",
                 "items": [
                     {"name": "resetBtn", "type": "button", "labelText": "Reset", "style": "-fx-min-width: 80;", "onClick": "call onResetClick();"},
-                    {"name": "saveBtn", "type": "button", "labelText": "Save", "style": "-fx-min-width: 80;", "onClick": "call onSaveClick();"},
+                    {"name": "saveBtn", "type": "button", "labelText": "Save and Apply", "style": "-fx-min-width: 120;", "onClick": "call onSaveClick();"},
                     {"name": "closeBtn", "type": "button", "labelText": "Close", "style": "-fx-min-width: 80;", "onClick": "call onCloseClick();"}
                 ]
             }

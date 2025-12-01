@@ -824,6 +824,10 @@ public final class Builtins {
                 newParam("title", DataType.STRING, false),      // optional: dialog title (defaults to "Alert")
                 newParam("alertType", DataType.STRING, false)   // optional: info, warning, error (defaults to info)
         ));
+        
+        addBuiltin(info(
+                "system.reloadConfig", DataType.BOOL // returns true if config was reloaded successfully
+        ));
 
         addBuiltin(info(
                 "thread.sleep", DataType.STRING,
