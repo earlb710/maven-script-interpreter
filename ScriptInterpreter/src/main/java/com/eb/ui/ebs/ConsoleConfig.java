@@ -294,8 +294,13 @@ public class ConsoleConfig {
                 css.append("    -fx-background-color: ").append(color).append(" !important;\n");
                 css.append("}\n\n");
             } else if ("tab-content".equals(className)) {
-                // Tab content area background
-                css.append(".tab-pane .tab-content-area {\n");
+                // Tab content area background - this is the area behind all tab content
+                // Use multiple selectors for broader coverage including the main console's tab pane
+                // Using descendant selectors (space) instead of child combinators (>) for broader matching
+                // The !important ensures this overrides JavaFX's default Modena styling
+                css.append(".tab-pane .tab-content-area,\n");
+                css.append("#mainTabs .tab-content-area,\n");
+                css.append(".viewer-tabs .tab-content-area {\n");
                 css.append("    -fx-background-color: ").append(color).append(" !important;\n");
                 css.append("}\n\n");
             } else {
