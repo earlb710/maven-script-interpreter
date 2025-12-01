@@ -39,20 +39,49 @@ public class InterpreterScreen {
 
     /**
      * Creates and starts a new daemon thread for a screen.
-     * This is a helper method to avoid code duplication.
+     * The thread runs an event loop that processes EBS code dispatched from UI event handlers.
+     * This enables true thread-based screen isolation where stopping a screen thread
+     * also stops its event handlers.
      * 
      * @param screenName The name of the screen for thread naming
      * @return The created and started thread
      */
     private Thread createScreenThread(String screenName) {
-        Thread screenThread = new Thread(() -> {
+        // Create the code executor that will run EBS code on the screen thread
+        ScreenEventDispatcher.CodeExecutor codeExecutor = (ebsCode) -> {
             try {
-                while (!Thread.currentThread().isInterrupted()) {
-                    Thread.sleep(100);
+                // Set the screen context before executing code
+                context.setCurrentScreen(screenName);
+                try {
+                    // Parse and execute the EBS code
+                    RuntimeContext codeContext = com.eb.script.parser.Parser.parse("inline_" + screenName, ebsCode);
+                    // Execute in the current interpreter context
+                    Object returnValue = null;
+                    for (com.eb.script.interpreter.statement.Statement s : codeContext.statements) {
+                        interpreter.acceptStatement(s);
+                    }
+                    return returnValue;
+                } catch (com.eb.script.interpreter.Interpreter.ReturnSignal rs) {
+                    // Catch return statement and extract the value
+                    return rs.value;
+                } finally {
+                    // Always clear the screen context after execution to prevent context leakage
+                    context.clearCurrentScreen();
                 }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+            } catch (com.eb.script.parser.ParseError e) {
+                throw new InterpreterError("Failed to parse inline code: " + e.getMessage());
+            } catch (java.io.IOException e) {
+                throw new InterpreterError("IO error executing inline code: " + e.getMessage());
             }
+        };
+        
+        // Create the event dispatcher for this screen
+        ScreenEventDispatcher dispatcher = new ScreenEventDispatcher(screenName, codeExecutor);
+        context.setScreenEventDispatcher(screenName, dispatcher);
+        
+        Thread screenThread = new Thread(() -> {
+            // Run the event loop - this blocks until shutdown is called
+            dispatcher.runEventLoop();
         }, "Screen-" + screenName);
 
         screenThread.setDaemon(true);
@@ -70,6 +99,12 @@ public class InterpreterScreen {
      * @param screenName The name of the screen
      */
     private void cleanupScreenThread(String screenName) {
+        // Shutdown the event dispatcher first
+        ScreenEventDispatcher dispatcher = context.getScreenEventDispatcher(screenName);
+        if (dispatcher != null) {
+            dispatcher.shutdown();
+        }
+        
         // Only interrupt the thread if this is NOT a child screen
         // Child screens share their parent's thread, so we should not interrupt it
         String parentScreenName = context.getScreenParent(screenName);
@@ -592,7 +627,7 @@ public class InterpreterScreen {
         // Use ScreenFactory if areas are defined, otherwise create simple stage
         if (areas != null && !areas.isEmpty()) {
             // Create screen with areas using ScreenFactory
-            // Create onClick handler that executes EBS code
+            // Create onClick handler that dispatches EBS code to the screen thread
             ScreenFactory.OnClickHandler onClickHandler = new ScreenFactory.OnClickHandler() {
                 @Override
                 public void execute(String ebsCode) throws InterpreterError {
@@ -605,6 +640,29 @@ public class InterpreterScreen {
                 }
                 
                 private Object executeCode(String ebsCode, boolean returnValue) throws InterpreterError {
+                    // Get the screen's event dispatcher
+                    ScreenEventDispatcher dispatcher = context.getScreenEventDispatcher(qualifiedKey);
+                    
+                    if (dispatcher != null && dispatcher.isRunning()) {
+                        // Dispatch the code to the screen thread for execution
+                        // Use synchronous dispatch so we can return a result and propagate errors
+                        Object result = dispatcher.dispatchSync(ebsCode);
+                        
+                        // After event execution completes, trigger UI refresh on the JavaFX thread
+                        // This ensures any variable changes are reflected in the UI
+                        Platform.runLater(() -> {
+                            context.triggerScreenRefresh(qualifiedKey);
+                        });
+                        
+                        return returnValue ? result : null;
+                    } else {
+                        // Fallback: execute directly if dispatcher is not available
+                        // This can happen for child screens that share parent's thread
+                        return executeCodeDirectly(ebsCode, returnValue);
+                    }
+                }
+                
+                private Object executeCodeDirectly(String ebsCode, boolean returnValue) throws InterpreterError {
                     try {
                         // Set the screen context before executing code
                         // This allows inline code to use screen statements like "close screen;" or "hide screen;"
@@ -694,14 +752,17 @@ public class InterpreterScreen {
         }
 
         // Handle thread assignment for this screen
-        // If this screen has a parent, reuse the parent's thread instead of creating a new one
+        // If this screen has a parent, reuse the parent's thread and dispatcher instead of creating new ones
         String parentForThread = context.getScreenParent(qualifiedKey);
         if (parentForThread != null) {
-            // Child screen: try to reuse the parent's thread
+            // Child screen: try to reuse the parent's thread and dispatcher
             Thread parentThread = context.getScreenThreads().get(parentForThread);
-            if (parentThread != null && parentThread.isAlive()) {
-                // Parent thread exists and is alive, register the child screen to use it
+            ScreenEventDispatcher parentDispatcher = context.getScreenEventDispatcher(parentForThread);
+            
+            if (parentThread != null && parentThread.isAlive() && parentDispatcher != null && parentDispatcher.isRunning()) {
+                // Parent thread and dispatcher exist and are alive, register the child screen to use them
                 context.getScreenThreads().put(qualifiedKey, parentThread);
+                context.setScreenEventDispatcher(qualifiedKey, parentDispatcher);
             } else {
                 // Parent's thread not found or is dead (edge case), create a new thread
                 Thread screenThread = createScreenThread(qualifiedKey);
@@ -2331,24 +2392,37 @@ public class InterpreterScreen {
      * @throws InterpreterError if the code fails to parse or execute
      */
     private void executeScreenInlineCode(String screenName, String ebsCode, String eventType) throws InterpreterError {
-        try {
-            // Set the screen context before executing inline code
-            context.setCurrentScreen(screenName);
+        // Try to use the screen's event dispatcher for consistent thread handling
+        ScreenEventDispatcher dispatcher = context.getScreenEventDispatcher(screenName);
+        
+        if (dispatcher != null && dispatcher.isRunning()) {
+            // Use the dispatcher to execute on the screen thread
             try {
-                // Parse and execute the EBS code
-                RuntimeContext eventContext = com.eb.script.parser.Parser.parse(eventType + "_" + screenName, ebsCode);
-                // Execute in the current interpreter context
-                for (com.eb.script.interpreter.statement.Statement s : eventContext.statements) {
-                    interpreter.acceptStatement(s);
-                }
-            } finally {
-                // Always clear the screen context after execution to prevent context leakage
-                context.clearCurrentScreen();
+                dispatcher.dispatchSync(ebsCode);
+            } catch (InterpreterError e) {
+                throw new InterpreterError("Failed to execute " + eventType + " code: " + e.getMessage());
             }
-        } catch (com.eb.script.parser.ParseError e) {
-            throw new InterpreterError("Failed to parse " + eventType + " code: " + e.getMessage());
-        } catch (java.io.IOException e) {
-            throw new InterpreterError("IO error executing " + eventType + " code: " + e.getMessage());
+        } else {
+            // Fallback: execute directly if dispatcher is not available
+            try {
+                // Set the screen context before executing inline code
+                context.setCurrentScreen(screenName);
+                try {
+                    // Parse and execute the EBS code
+                    RuntimeContext eventContext = com.eb.script.parser.Parser.parse(eventType + "_" + screenName, ebsCode);
+                    // Execute in the current interpreter context
+                    for (com.eb.script.interpreter.statement.Statement s : eventContext.statements) {
+                        interpreter.acceptStatement(s);
+                    }
+                } finally {
+                    // Always clear the screen context after execution to prevent context leakage
+                    context.clearCurrentScreen();
+                }
+            } catch (com.eb.script.parser.ParseError e) {
+                throw new InterpreterError("Failed to parse " + eventType + " code: " + e.getMessage());
+            } catch (java.io.IOException e) {
+                throw new InterpreterError("IO error executing " + eventType + " code: " + e.getMessage());
+            }
         }
     }
 }
