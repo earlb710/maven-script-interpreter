@@ -567,126 +567,133 @@ clearAiFields {
     askAiScreen.generatedPattern = "";
 }
 
-// Ask AI screen - child screen for AI-based regex generation
-screen askAiScreen = {
-    "title": "Ask AI - Generate Regex Pattern",
-    "width": 500,
-    "height": 550,
-    "vars": [
-        {
-            "name": "aiRequest",
-            "type": "string",
-            "default": "",
-            "display": {
-                "type": "textarea",
-                "labelText": "Describe what\nyou want\nto match:",
-                "promptHelp": "E.g., 'email addresses' or 'dates in YYYY-MM-DD format' or 'phone numbers with area code'",
-                "maxLength": 60
-            }
-        },
-        {
-            "name": "aiResult",
-            "type": "string",
-            "default": "The AI-generated regex pattern will appear here...",
-            "display": {
-                "type": "textarea",
-                "labelText": "AI Result:",
-                "editable": false,
-                "maxLength": 60
-            }
-        },
-        {
-            "name": "generatedPattern",
-            "type": "string",
-            "default": ""
-        }
-    ],
-    "area": [
-        {
-            "name": "aiMainArea",
-            "type": "vbox",
-            "style": "-fx-spacing: 5; -fx-padding: 5;",
-            "areas": [
-                {
-                    "name": "aiTitleArea",
-                    "type": "hbox",
-                    "style": "-fx-alignment: CENTER;",
-                    "items": [
-                        {
-                            "name": "aiTitle",
-                            "display": {
-                                "type": "label",
-                                "labelText": "Ask AI to Generate Regex Pattern",
-                                "itemColor": "#000088",
-                                "itemBold": true,
-                                "itemFontSize": "16"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "aiRequestArea",
-                    "type": "vbox",
-                    "style": "-fx-spacing: 5;",
-                    "items": [
-                        {"name": "aiRequestItem", "varRef": "aiRequest"}
-                    ]
-                },
-                {
-                    "name": "aiButtonArea",
-                    "type": "hbox",
-                    "style": "-fx-spacing: 10; -fx-alignment: CENTER;",
-                    "items": [
-                        {
-                            "name": "submitBtn",
-                            "display": {
-                                "type": "button",
-                                "labelText": "Submit",
-                                "tooltip": "Ask AI to generate a regex pattern based on your description",
-                                "onClick": "call generateRegexFromAi();"
-                            }
-                        },
-                        {
-                            "name": "clearBtn",
-                            "display": {
-                                "type": "button",
-                                "labelText": "Clear",
-                                "tooltip": "Clear the request and result fields",
-                                "onClick": "call clearAiFields();"
-                            }
-                        },
-                        {
-                            "name": "applyBtn",
-                            "display": {
-                                "type": "button",
-                                "labelText": "Apply Pattern",
-                                "tooltip": "Apply the generated pattern to the main regex tester",
-                                "onClick": "call applyAiPattern();"
-                            }
-                        },
-                        {
-                            "name": "cancelBtn",
-                            "display": {
-                                "type": "button",
-                                "labelText": "Cancel",
-                                "tooltip": "Close without applying",
-                                "onClick": "hide screen askAiScreen;"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "aiResultArea",
-                    "type": "vbox",
-                    "style": "-fx-spacing: 5;",
-                    "items": [
-                        {"name": "aiResultItem", "varRef": "aiResult"}
-                    ]
+// Function to create and show the Ask AI screen
+// This function creates the screen if it doesn't exist (e.g., if it was closed with X button)
+showAskAiScreen {
+    // Define the Ask AI screen - child screen for AI-based regex generation
+    screen askAiScreen = {
+        "title": "Ask AI - Generate Regex Pattern",
+        "width": 500,
+        "height": 550,
+        "vars": [
+            {
+                "name": "aiRequest",
+                "type": "string",
+                "default": "",
+                "display": {
+                    "type": "textarea",
+                    "labelText": "Describe what\nyou want\nto match:",
+                    "promptHelp": "E.g., 'email addresses' or 'dates in YYYY-MM-DD format' or 'phone numbers with area code'",
+                    "maxLength": 60
                 }
-            ]
-        }
-    ]
-};
+            },
+            {
+                "name": "aiResult",
+                "type": "string",
+                "default": "The AI-generated regex pattern will appear here...",
+                "display": {
+                    "type": "textarea",
+                    "labelText": "AI Result:",
+                    "editable": false,
+                    "maxLength": 60
+                }
+            },
+            {
+                "name": "generatedPattern",
+                "type": "string",
+                "default": ""
+            }
+        ],
+        "area": [
+            {
+                "name": "aiMainArea",
+                "type": "vbox",
+                "style": "-fx-spacing: 5; -fx-padding: 5;",
+                "areas": [
+                    {
+                        "name": "aiTitleArea",
+                        "type": "hbox",
+                        "style": "-fx-alignment: CENTER;",
+                        "items": [
+                            {
+                                "name": "aiTitle",
+                                "display": {
+                                    "type": "label",
+                                    "labelText": "Ask AI to Generate Regex Pattern",
+                                    "itemColor": "#000088",
+                                    "itemBold": true,
+                                    "itemFontSize": "16"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "aiRequestArea",
+                        "type": "vbox",
+                        "style": "-fx-spacing: 5;",
+                        "items": [
+                            {"name": "aiRequestItem", "varRef": "aiRequest"}
+                        ]
+                    },
+                    {
+                        "name": "aiButtonArea",
+                        "type": "hbox",
+                        "style": "-fx-spacing: 10; -fx-alignment: CENTER;",
+                        "items": [
+                            {
+                                "name": "submitBtn",
+                                "display": {
+                                    "type": "button",
+                                    "labelText": "Submit",
+                                    "tooltip": "Ask AI to generate a regex pattern based on your description",
+                                    "onClick": "call generateRegexFromAi();"
+                                }
+                            },
+                            {
+                                "name": "clearBtn",
+                                "display": {
+                                    "type": "button",
+                                    "labelText": "Clear",
+                                    "tooltip": "Clear the request and result fields",
+                                    "onClick": "call clearAiFields();"
+                                }
+                            },
+                            {
+                                "name": "applyBtn",
+                                "display": {
+                                    "type": "button",
+                                    "labelText": "Apply Pattern",
+                                    "tooltip": "Apply the generated pattern to the main regex tester",
+                                    "onClick": "call applyAiPattern();"
+                                }
+                            },
+                            {
+                                "name": "cancelBtn",
+                                "display": {
+                                    "type": "button",
+                                    "labelText": "Cancel",
+                                    "tooltip": "Close without applying",
+                                    "onClick": "hide screen askAiScreen;"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "aiResultArea",
+                        "type": "vbox",
+                        "style": "-fx-spacing: 5;",
+                        "items": [
+                            {"name": "aiResultItem", "varRef": "aiResult"}
+                        ]
+                    }
+                ]
+            }
+        ]
+    };
+    
+    // Show the screen
+    show screen askAiScreen;
+}
 
 // Create the regex tester screen
 screen regexScreen = {
@@ -1011,7 +1018,7 @@ screen regexScreen = {
                                 "type": "button",
                                 "labelText": "Ask AI",
                                 "tooltip": "Ask AI to generate a regex pattern from your description",
-                                "onClick": "show screen askAiScreen;"
+                                "onClick": "call showAskAiScreen();"
                             }
                         },
                         {
