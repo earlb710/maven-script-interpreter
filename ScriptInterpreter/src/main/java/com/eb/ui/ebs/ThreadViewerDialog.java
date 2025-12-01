@@ -231,16 +231,32 @@ public class ThreadViewerDialog extends Stage {
 
         // --- Buttons ---
         Button btnRefresh = new Button("Refresh");
+        Button btnStopThread = new Button("Stop Screen Thread");
         Button btnClose = new Button("Close");
         CheckBox autoRefreshCheckBox = new CheckBox("Auto-refresh (2s)");
+        autoRefreshCheckBox.setSelected(true); // Auto-refresh enabled by default
 
         btnClose.setCancelButton(true);
+        btnStopThread.setDisable(true); // Disabled until a screen thread is selected
 
         // --- Actions ---
         btnRefresh.setOnAction(e -> refreshThreadList());
         btnClose.setOnAction(e -> {
             stopAutoRefresh();
             close();
+        });
+        
+        // Enable/disable stop button based on selection
+        threadTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            btnStopThread.setDisable(newVal == null || !newVal.isScreenThread());
+        });
+        
+        btnStopThread.setOnAction(e -> {
+            ThreadEntry selected = threadTableView.getSelectionModel().getSelectedItem();
+            if (selected != null && selected.isScreenThread()) {
+                stopScreenThread(selected.getScreenName());
+                refreshThreadList();
+            }
         });
         
         autoRefreshCheckBox.setOnAction(e -> {
@@ -266,7 +282,7 @@ public class ThreadViewerDialog extends Stage {
         infoLabel.setWrapText(true);
 
         HBox buttonBox = new HBox(10);
-        buttonBox.getChildren().addAll(btnRefresh, autoRefreshCheckBox, btnClose);
+        buttonBox.getChildren().addAll(btnRefresh, btnStopThread, autoRefreshCheckBox, btnClose);
 
         layout.getChildren().addAll(
             infoLabel,
@@ -284,6 +300,9 @@ public class ThreadViewerDialog extends Stage {
 
         // Initial load
         refreshThreadList();
+        
+        // Start auto-refresh by default
+        startAutoRefresh();
     }
 
     /**
@@ -404,5 +423,62 @@ public class ThreadViewerDialog extends Stage {
         if (refreshTimeline != null) {
             refreshTimeline.stop();
         }
+    }
+    
+    /**
+     * Stop a screen thread by its screen name.
+     * This interrupts the thread found by searching for threads with the "Screen-{screenName}" pattern.
+     * 
+     * @param screenName The name of the screen whose thread should be stopped
+     */
+    private void stopScreenThread(String screenName) {
+        if (screenName == null || screenName.isEmpty()) {
+            return;
+        }
+        
+        String targetThreadName = SCREEN_THREAD_PREFIX + screenName;
+        
+        // Find the thread by name and interrupt it
+        Thread targetThread = findThreadByName(targetThreadName);
+        if (targetThread != null && targetThread.isAlive()) {
+            // Show confirmation dialog
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+            confirm.setTitle("Stop Screen Thread");
+            confirm.setHeaderText("Stop thread: " + targetThreadName);
+            confirm.setContentText("Are you sure you want to stop this screen thread? This may cause the associated screen to become unresponsive.");
+            confirm.initOwner(this);
+            
+            confirm.showAndWait().ifPresent(response -> {
+                if (response == ButtonType.OK) {
+                    targetThread.interrupt();
+                }
+            });
+        }
+    }
+    
+    /**
+     * Find a thread by its exact name.
+     * 
+     * @param threadName The name of the thread to find
+     * @return The Thread object, or null if not found
+     */
+    private Thread findThreadByName(String threadName) {
+        // Get root thread group
+        ThreadGroup rootGroup = Thread.currentThread().getThreadGroup();
+        while (rootGroup.getParent() != null) {
+            rootGroup = rootGroup.getParent();
+        }
+        
+        // Enumerate all threads
+        int estimatedSize = rootGroup.activeCount() * 2;
+        Thread[] threads = new Thread[estimatedSize];
+        int count = rootGroup.enumerate(threads, true);
+        
+        for (int i = 0; i < count; i++) {
+            if (threads[i] != null && threadName.equals(threads[i].getName())) {
+                return threads[i];
+            }
+        }
+        return null;
     }
 }
