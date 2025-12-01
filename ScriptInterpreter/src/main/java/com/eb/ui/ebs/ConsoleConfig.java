@@ -288,6 +288,16 @@ public class ConsoleConfig {
                 css.append(".tab-pane .tab {\n");
                 css.append("    -fx-background-color: ").append(color).append(" !important;\n");
                 css.append("}\n\n");
+            } else if ("tab-select".equals(className)) {
+                // Selected tab background
+                css.append(".tab-pane .tab:selected {\n");
+                css.append("    -fx-background-color: ").append(color).append(" !important;\n");
+                css.append("}\n\n");
+            } else if ("tab-normal".equals(className)) {
+                // Normal (unselected) tab background
+                css.append(".tab-pane .tab:hover {\n");
+                css.append("    -fx-background-color: ").append(color).append(" !important;\n");
+                css.append("}\n\n");
             } else {
                 // Regular style class - need to target both regular and RichTextFX .text nodes
                 // Use multiple selectors to cover all possible contexts
@@ -309,7 +319,7 @@ public class ConsoleConfig {
         String findHighlightColor = colors.getOrDefault("find-highlight-color", "#000000");
         String findHighlightBackground = colors.getOrDefault("find-highlight-background", "#ddb107");
         // Current match uses a brighter background color for better visibility
-        String findCurrentBackground = colors.getOrDefault("find-current-background", "#ffdd33");
+        String findCurrentBackground = colors.getOrDefault("current-find-highlight-bg", "#ffff00");
         
         css.append("/* Find highlighting - overrides syntax highlighting for readability */\n");
         css.append(".find-hit,\n");
