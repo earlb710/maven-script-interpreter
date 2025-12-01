@@ -3109,15 +3109,37 @@ call debug.memusage(unit); // "B", "KB", "MB"
 ```
 
 ### AI Functions
+
+**Prerequisites:** Configure your OpenAI API key via Edit > AI Chat Model Setup before using AI functions.
+
+#### ai.complete - Synchronous Text Generation
 ```javascript
-// Text generation (synchronous - blocks until complete)
-var completion = call ai.complete(prompt, options);
+// Basic usage with just user prompt
+var answer = call ai.complete(null, "What is the capital of France?");
+print answer;
 
-// Text generation (asynchronous - runs in background thread)
-// The callback function receives a JSON object with: success, result, error
-call ai.completeAsync(systemPrompt, userPrompt, maxTokens, temperature, "callbackFunction");
+// Full parameters: system prompt, user prompt, maxTokens, temperature
+var response = call ai.complete(
+    "You are a helpful coding assistant",  // system prompt (optional)
+    "Write a function to calculate factorial",  // user prompt (required)
+    500,  // maxTokens (optional, limits response length)
+    0.7   // temperature (optional, 0.0-1.0, higher = more creative)
+);
+print response;
+```
 
-// Example callback function for ai.completeAsync
+#### ai.completeAsync - Asynchronous Text Generation (Non-blocking)
+```javascript
+// Call AI without blocking the UI - result delivered via callback
+call ai.completeAsync(
+    "You are a regex expert",  // system prompt
+    "Generate a pattern for email validation",  // user prompt
+    200,  // maxTokens
+    0.3,  // temperature
+    "onAiComplete"  // callback function name
+);
+
+// Callback function receives JSON with: success (bool), result (string), error (string)
 onAiComplete(response: json) {
     if call json.getBool(response, "success", false) then {
         var result: string = call json.getString(response, "result", "");
@@ -3127,15 +3149,48 @@ onAiComplete(response: json) {
         print "AI Error: " + error;
     }
 }
+```
 
-// Summarization
-var summary = call ai.summarize(text, options);
+#### ai.summarize - Text Summarization
+```javascript
+// Summarize a long text
+var longText: string = "The quick brown fox jumps over the lazy dog. " +
+    "This is a sample text that demonstrates the summarization capability. " +
+    "It contains multiple sentences that can be condensed into a shorter form.";
 
-// Text embedding
-var embedding = call ai.embed(text);
+var summary = call ai.summarize(longText, 50);  // maxTokens limits summary length
+print "Summary: " + summary;
 
-// Classification
-var category = call ai.classify(text, categories);
+// Summarize file contents
+var article = call file.readTextFile("article.txt");
+var briefSummary = call ai.summarize(article);  // maxTokens is optional
+print briefSummary;
+```
+
+#### ai.embed - Text Embeddings
+```javascript
+// Generate semantic embeddings for text
+var embedding = call ai.embed("machine learning algorithms");
+print "Embedding dimensions: " + call array.length(embedding);
+
+// Embeddings are useful for semantic similarity comparisons
+var embed1 = call ai.embed("happy");
+var embed2 = call ai.embed("joyful");
+// Similar meanings produce similar embedding vectors
+```
+
+#### ai.classify - Text Classification
+```javascript
+// Classify text into predefined categories
+var categories = ["positive", "negative", "neutral"];
+var sentiment = call ai.classify("This product is amazing!", categories);
+print "Sentiment: " + sentiment;  // Output: positive
+
+// Classify support tickets
+var ticketTypes = ["billing", "technical", "general inquiry"];
+var ticketText: string = "My payment failed and I was charged twice";
+var ticketCategory = call ai.classify(ticketText, ticketTypes);
+print "Ticket type: " + ticketCategory;  // Output: billing
 ```
 
 ### Class Tree Functions
