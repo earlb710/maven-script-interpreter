@@ -1365,26 +1365,9 @@ function onResetClick {
 
 // Function: Handle Save button click
 function onSaveClick {
-    // Build the current profile colors as JSON string
-    var currentColorsStr: string = "{\"info\": \"" + colorEditorScreen.info + "\", \"comment\": \"" + colorEditorScreen.comment + "\", \"error\": \"" + colorEditorScreen.error + "\", \"warn\": \"" + colorEditorScreen.warn + "\", \"ok\": \"" + colorEditorScreen.ok + "\", \"code\": \"" + colorEditorScreen.code + "\", \"datatype\": \"" + colorEditorScreen.datatype + "\", \"data\": \"" + colorEditorScreen.data + "\", \"keyword\": \"" + colorEditorScreen.keyword + "\", \"builtin\": \"" + colorEditorScreen.builtin + "\", \"literal\": \"" + colorEditorScreen.literal + "\", \"identifier\": \"" + colorEditorScreen.identifier + "\", \"sql\": \"" + colorEditorScreen.sql + "\", \"custom\": \"" + colorEditorScreen.custom + "\", \"background\": \"" + colorEditorScreen.background + "\", \"text\": \"" + colorEditorScreen.text + "\", \"caret\": \"" + colorEditorScreen.caret + "\", \"line-cursor\": \"" + colorEditorScreen.lineCursor + "\", \"line-numbers\": \"" + colorEditorScreen.lineNumbers + "\", \"console-background\": \"" + colorEditorScreen.consoleBackground + "\", \"tab-background\": \"" + colorEditorScreen.tabBackground + "\", \"tab-label-color\": \"" + colorEditorScreen.tabLabelColor + "\", \"tab-label-changed-color\": \"" + colorEditorScreen.tabLabelChangedColor + "\", \"tab-label-background\": \"" + colorEditorScreen.tabLabelBackground + "\", \"find-highlight-color\": \"" + colorEditorScreen.findHighlightColor + "\", \"find-highlight-background\": \"" + colorEditorScreen.findHighlightBackground + "\"}";
-    
-    // Parse the colors string to JSON
-    var currentColorsJson: json = call json.jsonFromString(currentColorsStr);
-    
-    // Read existing config file and parse it
-    var existingContent: string = call file.readTextFile(configPath);
-    var existingConfig: json = call json.jsonFromString(existingContent);
-    
-    // Update the current profile in the config using json.set
-    var profilePath: string = "profiles." + colorEditorScreen.profile;
-    var updatedConfig: json = call json.set(existingConfig, profilePath, currentColorsJson);
-    
-    // Update the currentProfile field
-    updatedConfig = call json.set(updatedConfig, "currentProfile", colorEditorScreen.profile);
-    
-    // Convert back to string and write to file
-    var jsonContent: string = call json.toString(updatedConfig);
-    call file.writeTextFile(configPath, jsonContent);
+    // Save all profiles using the common save function which preserves all profiles
+    // and updates the current profile with screen values
+    call saveConfigWithCurrentProfile();
     call system.alertDialog("Configuration saved to " + configPath + ".\nRestart the application to see changes.", "Saved", "info");
 }
 
