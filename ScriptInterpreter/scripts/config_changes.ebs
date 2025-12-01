@@ -1379,7 +1379,7 @@ function onSaveClick {
     
     // Read existing config file and parse it
     var existingContent: string = call file.readTextFile(configPath);
-    print "Read existing content: " + call str.length(existingContent) + " chars";
+    print "Read existing config file successfully";
     
     var existingConfig: json = call json.jsonFromString(existingContent);
     print "Parsed existing config";
@@ -1397,7 +1397,7 @@ function onSaveClick {
     
     // Convert back to string and write to file
     var jsonContent: string = call json.toString(updatedConfig);
-    print "Converted to JSON string: " + call str.length(jsonContent) + " chars";
+    print "Converted config to JSON string";
     
     var writeResult: bool = call file.writeTextFile(configPath, jsonContent);
     print "Write result: " + writeResult;
