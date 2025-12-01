@@ -88,15 +88,18 @@ public class InterpreterScreen {
      * If called from within a parent screen context, the key will be "parentScreen.childScreen" (lowercase).
      * Otherwise, the key will be just the screen name (lowercase).
      * 
+     * Note: The parent screen key is used as-is (it may already be qualified like "grandparent.parent").
+     * This creates a hierarchy: grandparent.parent.child
+     * 
      * @param screenName The screen name (without parent prefix)
-     * @param parentScreenName The parent screen name, or null if not in a parent context
+     * @param parentScreenKey The parent screen key (may already be qualified), or null if not in a parent context
      * @return The qualified screen key in lowercase
      */
-    private String getQualifiedScreenKey(String screenName, String parentScreenName) {
+    private String getQualifiedScreenKey(String screenName, String parentScreenKey) {
         String key;
-        if (parentScreenName != null && !parentScreenName.isEmpty()) {
-            // Child screen - use parent.child format
-            key = parentScreenName + "." + screenName;
+        if (parentScreenKey != null && !parentScreenKey.isEmpty()) {
+            // Child screen - append to parent's key (supports nested hierarchy)
+            key = parentScreenKey + "." + screenName;
         } else {
             // Top-level screen - use just the screen name
             key = screenName;
@@ -785,11 +788,12 @@ public class InterpreterScreen {
         }
         
         // Detect if we're showing a screen from within another screen's context
-        String parentScreenName = context.getCurrentScreen();
+        // getCurrentScreen() returns the qualified key of the current screen (e.g., "parent" or "grandparent.parent")
+        String parentScreenKey = context.getCurrentScreen();
         
         // Generate the qualified screen key (parent.child or just child)
         // If called from within a parent screen, automatically add parent prefix
-        String qualifiedScreenKey = getQualifiedScreenKey(screenName, parentScreenName);
+        String qualifiedScreenKey = getQualifiedScreenKey(screenName, parentScreenKey);
         
         interpreter.environment().pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Screen %1 show", qualifiedScreenKey);
         try {
@@ -801,9 +805,9 @@ public class InterpreterScreen {
                 throw interpreter.error(stmt.getLine(), "Screen '" + screenName + "' does not exist. Create it first with 'screen " + screenName + " = {...};'");
             }
 
-            // If we have a parent, record the parent-child relationship
-            if (parentScreenName != null && !parentScreenName.equalsIgnoreCase(screenName)) {
-                context.setScreenParent(qualifiedScreenKey, parentScreenName.toLowerCase());
+            // If we have a parent, record the parent-child relationship using the qualified key
+            if (parentScreenKey != null && !parentScreenKey.equalsIgnoreCase(screenName)) {
+                context.setScreenParent(qualifiedScreenKey, parentScreenKey.toLowerCase());
             }
 
             // Create the Stage if it doesn't exist yet (lazy initialization)
