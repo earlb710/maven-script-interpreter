@@ -1614,6 +1614,34 @@ screen myWindow = {
 };
 ```
 
+**Note**: If a screen with the same name already exists, the declaration is skipped silently. Use `screen new` to replace an existing screen definition.
+
+#### Replace Existing Screen Definition
+```javascript
+// Replace an existing screen definition with a new one
+screen new myWindow = {
+    "title": "Updated Application",
+    "width": 1024,
+    "height": 768,
+    "vars": [ /* new variables */ ]
+};
+```
+
+**Note**: 
+- `screen new` will replace the existing screen definition
+- Cannot replace a screen that is currently in use (open or hidden) - throws an exception
+- Use `close screen` first if you need to replace an active screen
+
+#### Check if Screen is Defined
+```javascript
+// Check if a screen has been defined before creating or showing it
+var exists = call scr.findScreen("myWindow");
+if (exists == false) then
+    screen myWindow = { "title": "New Window", "width": 400, "height": 300 };
+    show screen myWindow;
+end if;
+```
+
 #### Dynamic Screen with Variable References
 
 You can use `$variable` references (without quotes) to set default values dynamically:
@@ -2079,12 +2107,64 @@ close screen;
 ```
 
 **Note**: Closing a screen will:
-- Destroy the screen window
-- Clean up all screen resources (variables, threads, etc.)
+- Destroy the screen window (Stage)
+- Clean up runtime resources (threads, status)
 - Invoke any registered close callback
+- **Preserve the screen configuration** - the screen can be shown again with `show screen`
 - If no screen name is provided, determines the screen from the execution thread context
 - The no-name form must be called from within a screen context (e.g., onClick handlers)
 - If called from console/main thread without a name, an error is thrown
+
+#### Screen State Transitions
+| State | Configuration | Stage (Window) |
+|-------|---------------|----------------|
+| undefined | ✗ | ✗ |
+| defined | ✓ | ✗ |
+| open/hidden | ✓ | ✓ |
+
+- `screen <name> = {...};` → defined
+- `show screen <name>;` → open
+- `hide screen <name>;` → hidden
+- `close screen <name>;` → defined (configuration preserved)
+
+### Child Screens (Parent-Child Relationship)
+
+When showing a screen from within another screen's context, it becomes a child screen:
+
+```javascript
+screen parentScreen = {
+    "title": "Parent",
+    "width": 800,
+    "height": 600,
+    "areas": [
+        {
+            "name": "buttons",
+            "items": [
+                {
+                    "type": "button",
+                    "text": "Open Child",
+                    "onClick": "show screen childScreen;"
+                }
+            ]
+        }
+    ]
+};
+
+screen childScreen = {
+    "title": "Child Screen",
+    "width": 400,
+    "height": 300
+};
+
+show screen parentScreen;
+// When button is clicked, childScreen is shown as "parentscreen.childscreen"
+```
+
+**Note**: 
+- Child screen keys are automatically qualified as `parentscreen.childscreen` (lowercase)
+- Supports nested hierarchy: `grandparent.parent.child`
+- Child screens can only be created from within their parent's context
+- From outside the parent screen, child screens cannot be called directly
 
 ### Accessing Screen Variables
 
@@ -2104,10 +2184,11 @@ formScreen.isActive = false;
 
 ### Screen Features
 - **Thread-Safe**: Each screen runs in its own thread with thread-safe variables
-- **Case-Insensitive**: JSON keys are case-insensitive
+- **Case-Insensitive**: Screen names and JSON keys are case-insensitive
 - **Not Auto-Shown**: Screens must be explicitly shown with `show` command
 - **Multiple Screens**: Can create and manage multiple independent screens
 - **Data Binding**: Variable changes immediately reflected in UI
+- **Reusable**: Closed screens can be shown again (configuration is preserved)
 
 ---
 
@@ -2938,6 +3019,11 @@ call system.alertDialog("Export completed. 150 records exported.", "Export Compl
 
 ### Screen Functions
 ```javascript
+// Check if a screen has been defined
+var exists = call scr.findScreen("screenName");
+// Returns true if screen exists (has configuration, Stage, or is declared)
+// Case-insensitive lookup
+
 // Get/set property value on a screen item
 var value = call scr.getProperty("screenName.itemName", "propertyName");
 call scr.setProperty("screenName.itemName", "propertyName", value);
