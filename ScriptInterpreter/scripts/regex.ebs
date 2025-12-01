@@ -556,7 +556,7 @@ applyAiPattern {
     var generatedPattern: string = askAiScreen.generatedPattern;
     if generatedPattern != "" then {
         regexScreen.regexPattern = generatedPattern;
-        close screen;
+        hide screen askAiScreen;
     }
 }
 
@@ -670,7 +670,7 @@ screen askAiScreen = {
                                 "type": "button",
                                 "labelText": "Cancel",
                                 "tooltip": "Close without applying",
-                                "onClick": "close screen;"
+                                "onClick": "hide screen askAiScreen;"
                             }
                         }
                     ]
