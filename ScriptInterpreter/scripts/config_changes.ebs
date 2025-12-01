@@ -1459,14 +1459,20 @@ function setColorsFromCss {
     colorEditorScreen.lineCursor = call css.getValue(cssPath, ".paragraph-box:has-caret", "-fx-background-color");
     colorEditorScreen.lineNumbers = call css.getValue(cssPath, ".lineno", "-fx-text-fill");
     
-    // Use default values for properties not clearly defined in CSS
-    colorEditorScreen.tabBackground = defaultTabBackgroundColor;
-    colorEditorScreen.tabLabelBackground = defaultTabLabelBackgroundColor;
+    // Tab colors not in CSS - use JavaFX Modena-based defaults
+    // JavaFX base color is light gray (#ECECEC), so we create variations:
+    // - Tab content: slightly darker than base
+    // - Tab background (not selected): slightly darker than base
+    // - Tab selected: brighter than base (white)
+    colorEditorScreen.tabBackground = "#D4D4D4";        // Darker than JavaFX base for non-selected tabs
+    colorEditorScreen.tabLabelBackground = "#D4D4D4";   // Same as tab background
+    colorEditorScreen.tabSelect = "#FFFFFF";            // Brighter than base for selected tab
+    colorEditorScreen.tabContent = "#C8C8C8";           // Slightly darker for tab content area
+    
+    // Other defaults
     colorEditorScreen.findHighlightColor = defaultFindHighlightColor;
     colorEditorScreen.findHighlightBackground = defaultFindHighlightBackground;
     colorEditorScreen.currentFindHighlightBg = defaultCurrentFindHighlightBg;
-    colorEditorScreen.tabSelect = defaultTabSelectColor;
-    colorEditorScreen.tabContent = defaultTabContentColor;
 }
 
 // Function: Handle Reset button click
