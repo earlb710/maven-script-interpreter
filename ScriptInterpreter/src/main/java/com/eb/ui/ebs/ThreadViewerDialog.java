@@ -31,6 +31,8 @@ public class ThreadViewerDialog extends Stage {
     private final Label threadCountLabel;
     private Timeline refreshTimeline;
 
+    private static final String SCREEN_THREAD_PREFIX = "Screen-";
+
     /**
      * Data model for a thread entry.
      */
@@ -41,6 +43,7 @@ public class ThreadViewerDialog extends Stage {
         private final SimpleLongProperty threadId;
         private final SimpleStringProperty daemon;
         private final SimpleStringProperty priority;
+        private final SimpleStringProperty screenName;
 
         public ThreadEntry(String name, Thread.State state, long cpuTimeMs, long threadId, boolean isDaemon, int priority) {
             this.name = new SimpleStringProperty(name);
@@ -49,6 +52,20 @@ public class ThreadViewerDialog extends Stage {
             this.threadId = new SimpleLongProperty(threadId);
             this.daemon = new SimpleStringProperty(isDaemon ? "Yes" : "No");
             this.priority = new SimpleStringProperty(String.valueOf(priority));
+            // Extract screen name from thread name if it follows the "Screen-<screenName>" pattern
+            this.screenName = new SimpleStringProperty(extractScreenName(name));
+        }
+
+        /**
+         * Extract the screen name from a thread name if it follows the "Screen-<screenName>" pattern.
+         * @param threadName The thread name to parse
+         * @return The screen name, or empty string if not a screen thread
+         */
+        private static String extractScreenName(String threadName) {
+            if (threadName != null && threadName.startsWith(SCREEN_THREAD_PREFIX)) {
+                return threadName.substring(SCREEN_THREAD_PREFIX.length());
+            }
+            return "";
         }
 
         public String getName() {
@@ -99,6 +116,23 @@ public class ThreadViewerDialog extends Stage {
             return priority;
         }
 
+        public String getScreenName() {
+            return screenName.get();
+        }
+
+        public SimpleStringProperty screenNameProperty() {
+            return screenName;
+        }
+
+        /**
+         * Check if this thread is a screen thread.
+         * @return true if this is a screen thread
+         */
+        public boolean isScreenThread() {
+            String screenNameValue = screenName.get();
+            return screenNameValue != null && !screenNameValue.isEmpty();
+        }
+
         /**
          * Format CPU time as a human-readable duration string.
          */
@@ -147,6 +181,12 @@ public class ThreadViewerDialog extends Stage {
         nameColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
         nameColumn.setMinWidth(250);
 
+        // Screen column - shows extracted screen name for screen threads
+        TableColumn<ThreadEntry, String> screenColumn = new TableColumn<>("Screen");
+        screenColumn.setCellValueFactory(cellData -> cellData.getValue().screenNameProperty());
+        screenColumn.setMinWidth(100);
+        screenColumn.setMaxWidth(150);
+
         // State column
         TableColumn<ThreadEntry, String> stateColumn = new TableColumn<>("State");
         stateColumn.setCellValueFactory(cellData -> cellData.getValue().stateProperty());
@@ -174,6 +214,7 @@ public class ThreadViewerDialog extends Stage {
 
         threadTableView.getColumns().add(idColumn);
         threadTableView.getColumns().add(nameColumn);
+        threadTableView.getColumns().add(screenColumn);
         threadTableView.getColumns().add(stateColumn);
         threadTableView.getColumns().add(cpuTimeColumn);
         threadTableView.getColumns().add(daemonColumn);
@@ -210,7 +251,8 @@ public class ThreadViewerDialog extends Stage {
 
         Label infoLabel = new Label(
             "This view shows all currently running threads in the JVM.\n" +
-            "CPU Time indicates how long the thread has been actively using the CPU."
+            "CPU Time indicates how long the thread has been actively using the CPU.\n" +
+            "The Screen column shows the screen name for screen-related threads."
         );
         infoLabel.setWrapText(true);
 
