@@ -1429,14 +1429,58 @@ function onRemoveProfileClick {
     }
 }
 
+// Function: Set all screen colors from CSS file values
+function setColorsFromCss {
+    var cssPath: string = "/css/console.css";
+    
+    // Get colors from CSS file
+    colorEditorScreen.info = call css.getValue(cssPath, ".info", "-fx-fill");
+    colorEditorScreen.comment = call css.getValue(cssPath, ".comment", "-fx-fill");
+    colorEditorScreen.error = call css.getValue(cssPath, ".error", "-fx-fill");
+    colorEditorScreen.warn = call css.getValue(cssPath, ".warn", "-fx-fill");
+    colorEditorScreen.ok = call css.getValue(cssPath, ".ok", "-fx-fill");
+    colorEditorScreen.code = call css.getValue(cssPath, ".code", "-fx-fill");
+    colorEditorScreen.datatype = call css.getValue(cssPath, ".datatype", "-fx-fill");
+    colorEditorScreen.data = call css.getValue(cssPath, ".data", "-fx-fill");
+    colorEditorScreen.keyword = call css.getValue(cssPath, ".keyword", "-fx-fill");
+    colorEditorScreen.builtin = call css.getValue(cssPath, ".builtin", "-fx-fill");
+    colorEditorScreen.literal = call css.getValue(cssPath, ".literal", "-fx-fill");
+    colorEditorScreen.identifier = call css.getValue(cssPath, ".identifier", "-fx-fill");
+    colorEditorScreen.sql = call css.getValue(cssPath, ".sql", "-fx-fill");
+    colorEditorScreen.custom = call css.getValue(cssPath, ".custom", "-fx-fill");
+    
+    // Use default values for properties not in CSS (background/editor colors)
+    colorEditorScreen.background = defaultBackgroundColor;
+    colorEditorScreen.text = defaultTextColor;
+    colorEditorScreen.caret = defaultCaretColor;
+    colorEditorScreen.lineCursor = defaultLineCursorColor;
+    colorEditorScreen.lineNumbers = defaultLineNumbersColor;
+    colorEditorScreen.consoleBackground = defaultConsoleBackgroundColor;
+    colorEditorScreen.tabBackground = defaultTabBackgroundColor;
+    colorEditorScreen.tabLabelColor = defaultTabLabelColor;
+    colorEditorScreen.tabLabelChangedColor = defaultTabLabelChangedColor;
+    colorEditorScreen.tabLabelBackground = defaultTabLabelBackgroundColor;
+    colorEditorScreen.findHighlightColor = defaultFindHighlightColor;
+    colorEditorScreen.findHighlightBackground = defaultFindHighlightBackground;
+    colorEditorScreen.currentFindHighlightBg = defaultCurrentFindHighlightBg;
+    colorEditorScreen.tabSelect = defaultTabSelectColor;
+    colorEditorScreen.tabContent = defaultTabContentColor;
+}
+
 // Function: Handle Reset button click
 function onResetClick {
     if colorEditorScreen.profile == "default" then {
-        call setColorsToDefaults();
-        call system.alertDialog("Colors reset to CSS default values.", "Reset", "info");
+        // On default profile: ask for confirmation and reset to CSS values
+        var confirm: bool = call system.confirmDialog("Are you sure you want to reset all colors to their original CSS default values?", "Confirm Reset");
+        if confirm then {
+            call setColorsFromCss();
+            call system.alertDialog("Colors reset to original CSS default values.", "Reset", "info");
+        }
     } else {
-        call setColorsToOriginal();
-        call system.alertDialog("Colors reset to original loaded values.", "Reset", "info");
+        // On non-default profile: switch to default profile
+        colorEditorScreen.profile = "default";
+        call onProfileChange();
+        call system.alertDialog("Reset to default profile.", "Reset", "info");
     }
 }
 
