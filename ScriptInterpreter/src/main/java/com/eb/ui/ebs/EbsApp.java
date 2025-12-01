@@ -11,6 +11,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.MenuBar;
 
@@ -38,21 +39,25 @@ public class EbsApp {
         } catch (IOException ignored) {
         }
 
-        // Confirm on exit
+        // Confirm on exit only if there are dirty tabs or running screens
         stage.setOnCloseRequest(evt -> {
-            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
-                    "Exit the application? Unsaved data will be lost.",
-                    ButtonType.OK, ButtonType.CANCEL);
-            confirm.setHeaderText("Confirm Exit");
-            var res = confirm.showAndWait();
-            if (res.isEmpty() || res.get() == ButtonType.CANCEL) {
-                evt.consume(); // cancel close
-            } else {
-                // User confirmed exit - cleanup all screens and threads
-                cleanupScreens();
-                // Exit JavaFX platform to ensure all windows close
-                Platform.exit();
+            boolean needsConfirmation = hasDirtyTabs() || hasRunningScreens();
+            
+            if (needsConfirmation) {
+                Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                        "Exit the application? Unsaved data will be lost.",
+                        ButtonType.OK, ButtonType.CANCEL);
+                confirm.setHeaderText("Confirm Exit");
+                var res = confirm.showAndWait();
+                if (res.isEmpty() || res.get() == ButtonType.CANCEL) {
+                    evt.consume(); // cancel close
+                    return;
+                }
             }
+            // User confirmed exit or no confirmation needed - cleanup all screens and threads
+            cleanupScreens();
+            // Exit JavaFX platform to ensure all windows close
+            Platform.exit();
         });
         handler = new EbsConsoleHandler(stage, ctx);
         console = new Console(handler);
@@ -198,6 +203,38 @@ public class EbsApp {
                 .replace("\r", "\\r")
                 .replace("\n", "\\n")
                 .replace("\t", "\\t");
+    }
+
+    /**
+     * Check if any open tabs have unsaved changes (dirty state).
+     * @return true if there are dirty tabs, false otherwise
+     */
+    private boolean hasDirtyTabs() {
+        if (mainTabs == null) {
+            return false;
+        }
+        for (Tab tab : mainTabs.getTabs()) {
+            if (tab instanceof EbsTab ebsTab && ebsTab.isDirty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check if any screens are currently running (open or hidden).
+     * A screen is considered "running" if it exists in the global screens map,
+     * regardless of whether it's currently showing or hidden.
+     * @return true if there are running screens, false otherwise
+     */
+    private boolean hasRunningScreens() {
+        try {
+            var screens = com.eb.script.interpreter.InterpreterContext.getGlobalScreens();
+            return screens != null && !screens.isEmpty();
+        } catch (Exception e) {
+            // Ignore errors checking screen state
+        }
+        return false;
     }
 
 }
