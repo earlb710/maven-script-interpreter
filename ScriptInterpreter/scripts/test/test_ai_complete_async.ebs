@@ -1,0 +1,354 @@
+// ============================================================================
+// Test Script: ai.completeAsync - Asynchronous AI Completion with Callback
+// ============================================================================
+// Description: Tests the ai.completeAsync builtin function which runs AI calls
+//              in a background thread and invokes a callback function with the result.
+//
+// Features tested:
+//   - ai.completeAsync runs in a background thread (non-blocking)
+//   - Callback function is invoked on completion with JSON response
+//   - JSON response contains: success (bool), result (string), error (string)
+//   - UI remains responsive during AI processing
+//   - Error handling when AI call fails
+//
+// Prerequisites:
+//   - OpenAI API key configured (Edit > AI Chat Model Setup)
+//   - EBS version 1.0.3.1 or later
+//
+// Date: 2025-12-01
+// ============================================================================
+
+print "====================================================================";
+print "       ai.completeAsync Test - Asynchronous AI with Callback";
+print "====================================================================";
+print "";
+
+// Check EBS version supports ai.completeAsync
+if !call system.testEBSver("1.0.3") then {
+    print "ERROR: This test requires EBS version 1.0.3 or later.";
+    print "Current version: " + call system.getEBSver();
+    print "";
+    print "Please update to a newer version to run this test.";
+}
+
+print "Testing ai.completeAsync builtin function...";
+print "";
+print "This test verifies:";
+print "  1. AI calls run in a background thread (UI remains responsive)";
+print "  2. Callback function receives JSON response";
+print "  3. Response contains: success, result, error fields";
+print "  4. Both success and error scenarios are handled";
+print "";
+
+// Shared state variables for tracking test results
+var testStartTime: string = "";
+var callbackInvoked: bool = false;
+var lastResponse: json = {};
+
+// ============================================================================
+// Callback function for successful AI completion
+// ============================================================================
+onAiTestComplete(response: json) {
+    callbackInvoked = true;
+    lastResponse = response;
+    
+    print "";
+    print "--- Callback Invoked ---";
+    print "Response received from AI:";
+    
+    var success: bool = call json.getBool(response, "success", false);
+    print "  success: " + success;
+    
+    if success then {
+        var result: string = call json.getString(response, "result", "");
+        print "  result: " + result;
+        asyncTestScreen.resultText = "✓ SUCCESS\n\nAI Response:\n" + result;
+        asyncTestScreen.status = "Complete - AI call succeeded!";
+    } else {
+        var error: string = call json.getString(response, "error", "Unknown error");
+        print "  error: " + error;
+        
+        // Check for API key error
+        if call str.contains(error, "401") or call str.contains(error, "API key") then {
+            asyncTestScreen.resultText = "❌ API KEY ERROR\n\nPlease configure your OpenAI API key:\n1. Go to Edit > AI Chat Model Setup\n2. Enter your API key\n3. Click Save and restart the application";
+        } else {
+            asyncTestScreen.resultText = "❌ ERROR\n\n" + error;
+        }
+        asyncTestScreen.status = "Complete - AI call failed!";
+    }
+    
+    // Re-enable buttons after completion
+    call scr.setProperty("asyncTestScreen.testBtn", "disabled", false);
+    call scr.setProperty("asyncTestScreen.testErrorBtn", "disabled", false);
+    
+    print "------------------------";
+    print "";
+}
+
+// ============================================================================
+// Test functions that trigger ai.completeAsync
+// ============================================================================
+
+// Test 1: Simple AI completion request
+runAsyncTest {
+    print "Starting ai.completeAsync test...";
+    
+    // Disable buttons during test
+    call scr.setProperty("asyncTestScreen.testBtn", "disabled", true);
+    call scr.setProperty("asyncTestScreen.testErrorBtn", "disabled", true);
+    
+    asyncTestScreen.status = "Running... (UI should remain responsive)";
+    asyncTestScreen.resultText = "⏳ WORKING...\n\nAI call is running in a background thread.\n\nThe UI remains responsive during this time.\nTry clicking other buttons or moving the window!";
+    
+    // Get user input from screen
+    var userPrompt: string = asyncTestScreen.userPrompt;
+    if userPrompt == "" then {
+        userPrompt = "What is 2 + 2?";
+    }
+    
+    var systemPrompt: string = "You are a helpful assistant. Give brief, direct answers.";
+    
+    print "Calling ai.completeAsync...";
+    print "  System: " + systemPrompt;
+    print "  User: " + userPrompt;
+    
+    // This returns immediately - callback will be invoked when AI completes
+    call ai.completeAsync(systemPrompt, userPrompt, 100, 0.7, "onAiTestComplete");
+    
+    print "ai.completeAsync returned immediately (non-blocking)";
+    print "Waiting for callback...";
+}
+
+// Test 2: Deliberately trigger an error condition (empty prompt)
+runErrorTest {
+    print "Starting ai.completeAsync error handling test...";
+    
+    // Disable buttons during test
+    call scr.setProperty("asyncTestScreen.testBtn", "disabled", true);
+    call scr.setProperty("asyncTestScreen.testErrorBtn", "disabled", true);
+    
+    asyncTestScreen.status = "Testing error handling...";
+    asyncTestScreen.resultText = "⏳ Testing error scenario...\n\nThis test uses minimal parameters to verify error handling.";
+    
+    // Call with minimal parameters - may succeed or fail depending on API config
+    call ai.completeAsync(null, "test", 10, 0.0, "onAiTestComplete");
+    
+    print "Error test initiated, waiting for callback...";
+}
+
+// Clear the results
+clearResults {
+    asyncTestScreen.status = "Ready";
+    asyncTestScreen.resultText = "Results will appear here...";
+    asyncTestScreen.userPrompt = "";
+    callbackInvoked = false;
+}
+
+// ============================================================================
+// Test Screen Definition
+// ============================================================================
+print "Creating test screen...";
+
+screen asyncTestScreen = {
+    "title": "ai.completeAsync Test",
+    "width": 600,
+    "height": 550,
+    "vars": [
+        {
+            "name": "userPrompt",
+            "type": "string",
+            "default": "What is the capital of France?",
+            "display": {
+                "type": "textfield",
+                "labelText": "User Prompt:",
+                "promptHelp": "Enter a question to ask the AI",
+                "maxLength": 60
+            }
+        },
+        {
+            "name": "status",
+            "type": "string",
+            "default": "Ready",
+            "display": {
+                "type": "textfield",
+                "labelText": "Status:",
+                "editable": false
+            }
+        },
+        {
+            "name": "resultText",
+            "type": "string",
+            "default": "Results will appear here...\n\nClick 'Test AI Async' to start.",
+            "display": {
+                "type": "textarea",
+                "labelText": "Result:",
+                "editable": false,
+                "maxLength": 60
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "style": "-fx-spacing: 10; -fx-padding: 15;",
+            "areas": [
+                {
+                    "name": "titleArea",
+                    "type": "hbox",
+                    "style": "-fx-alignment: CENTER;",
+                    "items": [
+                        {
+                            "name": "titleLabel",
+                            "display": {
+                                "type": "label",
+                                "labelText": "ai.completeAsync Test Suite",
+                                "itemColor": "#000088",
+                                "itemBold": true,
+                                "itemFontSize": "18"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "descArea",
+                    "type": "vbox",
+                    "style": "-fx-spacing: 5;",
+                    "items": [
+                        {
+                            "name": "desc1",
+                            "display": {
+                                "type": "label",
+                                "labelText": "This test verifies the ai.completeAsync builtin function."
+                            }
+                        },
+                        {
+                            "name": "desc2",
+                            "display": {
+                                "type": "label",
+                                "labelText": "The AI call runs in a background thread while the UI stays responsive."
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "inputArea",
+                    "type": "vbox",
+                    "groupBorder": "lowered",
+                    "groupBorderColor": "#cccccc",
+                    "groupLabelText": "Input",
+                    "groupLabelOffset": "bottom",
+                    "padding": "4",
+                    "style": "-fx-spacing: 10; -fx-padding: 10;",
+                    "items": [
+                        {"name": "userPromptItem", "varRef": "userPrompt"},
+                        {"name": "statusItem", "varRef": "status"}
+                    ]
+                },
+                {
+                    "name": "buttonArea",
+                    "type": "hbox",
+                    "style": "-fx-spacing: 10; -fx-alignment: CENTER;",
+                    "items": [
+                        {
+                            "name": "testBtn",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Test AI Async",
+                                "tooltip": "Run ai.completeAsync with the entered prompt",
+                                "onClick": "call runAsyncTest();"
+                            }
+                        },
+                        {
+                            "name": "testErrorBtn",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Test Error Handling",
+                                "tooltip": "Test error handling with minimal parameters",
+                                "onClick": "call runErrorTest();"
+                            }
+                        },
+                        {
+                            "name": "clearBtn",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Clear",
+                                "tooltip": "Clear results",
+                                "onClick": "call clearResults();"
+                            }
+                        },
+                        {
+                            "name": "closeBtn",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Close",
+                                "tooltip": "Close test screen",
+                                "onClick": "close screen;"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "resultArea",
+                    "type": "vbox",
+                    "groupBorder": "lowered",
+                    "groupBorderColor": "#cccccc",
+                    "groupLabelText": "Output",
+                    "groupLabelOffset": "bottom",
+                    "padding": "4",
+                    "style": "-fx-spacing: 10; -fx-padding: 10;",
+                    "items": [
+                        {"name": "resultTextItem", "varRef": "resultText"}
+                    ]
+                },
+                {
+                    "name": "helpArea",
+                    "type": "vbox",
+                    "style": "-fx-spacing: 2;",
+                    "items": [
+                        {
+                            "name": "helpLabel1",
+                            "display": {
+                                "type": "label",
+                                "labelText": "Note: Requires OpenAI API key (Edit > AI Chat Model Setup)"
+                            }
+                        },
+                        {
+                            "name": "helpLabel2",
+                            "display": {
+                                "type": "label",
+                                "labelText": "EBS Version: 1.0.3.1+ required for ai.completeAsync"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+};
+
+// ============================================================================
+// Run the test
+// ============================================================================
+print "";
+print "Test screen created successfully!";
+print "";
+print "To run this test:";
+print "  1. Ensure OpenAI API key is configured (Edit > AI Chat Model Setup)";
+print "  2. Enter a prompt in the 'User Prompt' field";
+print "  3. Click 'Test AI Async' button";
+print "  4. Observe that the UI remains responsive while waiting";
+print "  5. Callback function receives JSON response with result";
+print "";
+print "Expected behavior:";
+print "  - ai.completeAsync returns immediately (non-blocking)";
+print "  - UI stays responsive (you can interact with the screen)";
+print "  - onAiTestComplete callback is invoked when AI finishes";
+print "  - Response contains: success (bool), result (string), error (string)";
+print "";
+
+show screen asyncTestScreen;
+
+print "";
+print "Test screen is now active. Try the 'Test AI Async' button!";
+print "====================================================================";

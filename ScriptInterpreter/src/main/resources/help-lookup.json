@@ -923,6 +923,38 @@
       "example": "<b>var</b> <b>labels</b> = [\"positive\", \"negative\", \"neutral\"];<br><b>var</b> <b>sentiment</b> = <b>call</b> <b>ai.classify</b>(text=\"This product is amazing!\", labels=labels);<br><b>print</b> sentiment;"
     },
     {
+      "function": "ai.completeAsync",
+      "short_description": "Gets AI chat completion asynchronously",
+      "long_help": "Calls an OpenAI-compatible API asynchronously in a background thread. The callback function is invoked when the call<br>completes, receiving a JSON object with: success (bool), result (string), error (string). This allows the UI to remain<br>responsive during long-running AI operations.",
+      "parameters": [
+        {
+          "name": "system",
+          "type": "string",
+          "optional": true
+        },
+        {
+          "name": "user",
+          "type": "string"
+        },
+        {
+          "name": "maxTokens",
+          "type": "integer",
+          "optional": true
+        },
+        {
+          "name": "temperature",
+          "type": "double",
+          "optional": true
+        },
+        {
+          "name": "callback",
+          "type": "string"
+        }
+      ],
+      "return_type": "null",
+      "example": "<b>call</b> <b>ai.completeAsync</b>(system=\"You are a helpful assistant\", user=\"Explain quantum computing\",<br>maxTokens=500, temperature=0.7, callback=\"onAiComplete\");<br><br>// Callback function definition<br><b>onAiComplete</b>(response: <b>json</b>) {<br>    <b>if</b> <b>call</b> <b>json.getBool</b>(response, \"success\", <b>false</b>) <b>then</b> {<br>        <b>var</b> result: <b>string</b> = <b>call</b> <b>json.getString</b>(response, \"result\", \"\");<br>        <b>print</b> result;<br>    } <b>else</b> {<br>        <b>print</b> \"Error: \" + <b>call</b> <b>json.getString</b>(response, \"error\", \"Unknown error\");<br>    }<br>}"
+    },
+    {
       "function": "array.base64decode",
       "short_description": "Decodes a base64 string to a byte array",
       "long_help": "Decodes a base64-encoded string and returns the decoded bytes as an array. Useful for handling binary data encoded in<br>text format.",
