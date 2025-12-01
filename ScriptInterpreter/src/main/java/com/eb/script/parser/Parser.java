@@ -376,7 +376,8 @@ public class Parser {
             return connectStatement();
         } else if (checkNewScreen()) {
             // new screen <name> = {...}; syntax for replacing existing screen
-            advance(2); // consume 'new' identifier and 'screen' keyword
+            advance(); // consume 'new' identifier
+            advance(); // consume 'screen' keyword
             return screenStatement(true);
         } else if (match(EbsTokenType.SCREEN)) {
             return screenStatement(false);
@@ -2648,12 +2649,11 @@ public class Parser {
         }
         // Check if current token is identifier 'new'
         if (currToken.type == EbsTokenType.IDENTIFIER && 
-            currToken.literal != null && 
-            currToken.literal.toString().equalsIgnoreCase("new")) {
-            // Check if next token is SCREEN
+            currToken.literal instanceof String literal && 
+            literal.equalsIgnoreCase("new")) {
+            // Check if next token is SCREEN using bounds-checked access
             if (current + 1 < tokens.size()) {
-                EbsToken nextToken = tokens.get(current + 1);
-                return nextToken.type == EbsTokenType.SCREEN;
+                return tokens.get(current + 1).type == EbsTokenType.SCREEN;
             }
         }
         return false;
