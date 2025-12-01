@@ -90,20 +90,34 @@ public class InterpreterScreen {
         interpreter.environment().pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Screen %1", stmt.name);
         try {
             // Check if screen has been shown (Stage exists in GLOBAL_SCREENS)
+            // A screen that is currently in use cannot be replaced
             if (context.getScreens().containsKey(stmt.name)) {
-                throw interpreter.error(stmt.getLine(), 
-                    "Screen '" + stmt.name + "' already exists and has been shown. " +
-                    "Please close the existing screen first, or use a different screen name.");
+                if (stmt.replaceExisting) {
+                    throw interpreter.error(stmt.getLine(), 
+                        "Screen '" + stmt.name + "' is currently in use (open or hidden). " +
+                        "Close the screen first before replacing it with 'screen new'.");
+                }
+                // For normal screen definition, skip silently if already shown
+                if (context.getOutput() != null) {
+                    context.getOutput().printlnInfo("Screen '" + stmt.name + "' already exists and is in use - definition skipped");
+                }
+                return;
             }
             
             // Check if this screen name was already declared (even if not shown yet)
-            // This enforces strict no-overwrite semantics - once a screen name is declared
-            // (either in current script or any import), it cannot be redeclared
             if (context.getDeclaredScreens().containsKey(stmt.name)) {
-                String existingSource = context.getDeclaredScreens().get(stmt.name);
-                throw interpreter.error(stmt.getLine(), 
-                    "Screen '" + stmt.name + "' is already declared in " + existingSource + 
-                    " and cannot be overwritten");
+                if (stmt.replaceExisting) {
+                    // For 'screen new', remove the old definition first
+                    context.remove(stmt.name);
+                    // Continue to create new definition
+                } else {
+                    // For normal screen definition, skip silently if already declared
+                    if (context.getOutput() != null) {
+                        String existingSource = context.getDeclaredScreens().get(stmt.name);
+                        context.getOutput().printlnInfo("Screen '" + stmt.name + "' already defined in " + existingSource + " - definition skipped");
+                    }
+                    return;
+                }
             }
             
             // Register this screen as declared
