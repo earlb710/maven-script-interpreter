@@ -490,6 +490,27 @@ public class InterpreterContext {
     }
 
     /**
+     * Close a screen by removing its runtime state (Stage, threads, status) but keeping
+     * the screen configuration so the screen can be shown again with 'show screen'.
+     * This transitions the screen from open/hidden state to defined state.
+     * 
+     * @param screenName the name of the screen to close
+     */
+    public void closeScreen(String screenName) {
+        GLOBAL_SCREENS.remove(screenName);
+        GLOBAL_SCREEN_THREADS.remove(screenName);
+        screenCallbacks.remove(screenName);
+        GLOBAL_SCREEN_CREATION_ORDER.remove(screenName);
+        screenStatuses.remove(screenName);
+        screenErrorMessages.remove(screenName);
+        screenParentMap.remove(screenName);
+        // Note: screenConfigs, screenVars, screenAreas, screenVarSets, screenVarItems,
+        // screenAreaItems, displayMetadata, screenStartupCode, screenCleanupCode,
+        // screenGainFocusCode, and screenLostFocusCode are preserved so the screen
+        // can be shown again.
+    }
+
+    /**
      * Get the callback function name for a screen
      * @param screenName The screen name
      * @return The callback function name, or null if no callback is set

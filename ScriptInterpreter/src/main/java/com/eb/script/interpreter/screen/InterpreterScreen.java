@@ -997,11 +997,11 @@ public class InterpreterScreen {
                 throw interpreter.error(stmt.getLine(), "Screen '" + screenName + "' does not exist.");
             }
 
-            // If stage doesn't exist yet, just remove the config
+            // If stage doesn't exist yet, the screen is already in 'defined' state
+            // Nothing to close, just inform the user
             if (!context.getScreens().containsKey(screenName)) {
-                context.remove(screenName);
                 if (context.getOutput() != null) {
-                    context.getOutput().printlnOk("Screen '" + screenName + "' definition removed (was not shown)");
+                    context.getOutput().printlnInfo("Screen '" + screenName + "' is already closed (in defined state, not shown)");
                 }
                 return;
             }
@@ -1024,8 +1024,8 @@ public class InterpreterScreen {
                 // Clean up the screen thread (only top-level screens have their threads interrupted)
                 cleanupScreenThread(finalScreenName);
                 
-                // Clean up resources
-                context.remove(finalScreenName);
+                // Close screen (remove runtime state but preserve configuration for re-use)
+                context.closeScreen(finalScreenName);
                 
                 if (context.getOutput() != null) {
                     context.getOutput().printlnOk("Screen '" + finalScreenName + "' closed");
@@ -1109,8 +1109,8 @@ public class InterpreterScreen {
                 // Clean up the screen thread (only top-level screens have their threads interrupted)
                 cleanupScreenThread(finalScreenName);
                 
-                // Clean up resources
-                context.remove(finalScreenName);
+                // Close screen (remove runtime state but preserve configuration for re-use)
+                context.closeScreen(finalScreenName);
                 
                 if (context.getOutput() != null) {
                     context.getOutput().printlnOk("Screen '" + finalScreenName + "' submitted");
@@ -1188,6 +1188,7 @@ public class InterpreterScreen {
     /**
      * Perform the actual screen close cleanup operations.
      * This includes collecting output fields, invoking callbacks, stopping threads, and cleaning up resources.
+     * The screen configuration is preserved so the screen can be shown again.
      * @param screenName The name of the screen to close
      */
     private void performScreenClose(String screenName) {
@@ -1215,8 +1216,8 @@ public class InterpreterScreen {
         // Clean up the screen thread (only top-level screens have their threads interrupted)
         cleanupScreenThread(screenName);
         
-        // Clean up resources
-        context.remove(screenName);
+        // Close screen (remove runtime state but preserve configuration for re-use)
+        context.closeScreen(screenName);
     }
 
     /**
