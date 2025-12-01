@@ -293,9 +293,9 @@ public class ConsoleConfig {
                 css.append(".tab-pane .tab:selected {\n");
                 css.append("    -fx-background-color: ").append(color).append(" !important;\n");
                 css.append("}\n\n");
-            } else if ("tab-normal".equals(className)) {
-                // Normal (unselected) tab background
-                css.append(".tab-pane .tab:hover {\n");
+            } else if ("tab-content".equals(className)) {
+                // Tab content area background
+                css.append(".tab-pane .tab-content-area {\n");
                 css.append("    -fx-background-color: ").append(color).append(" !important;\n");
                 css.append("}\n\n");
             } else {

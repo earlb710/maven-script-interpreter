@@ -97,7 +97,7 @@ if configIsValid == false then {
         defaultConfig = defaultConfig + "      \"tab-label-changed-color\": \"#ff6600\",\n";
         defaultConfig = defaultConfig + "      \"tab-label-background\": \"#333333\",\n";
         defaultConfig = defaultConfig + "      \"tab-select\": \"#444444\",\n";
-        defaultConfig = defaultConfig + "      \"tab-normal\": \"#2d2d2d\",\n";
+        defaultConfig = defaultConfig + "      \"tab-content\": \"#2d2d2d\",\n";
         defaultConfig = defaultConfig + "      \"find-highlight-color\": \"#000000\",\n";
         defaultConfig = defaultConfig + "      \"find-highlight-background\": \"#ddb107\",\n";
         defaultConfig = defaultConfig + "      \"current-find-highlight-bg\": \"#ffff00\"\n";
@@ -158,7 +158,7 @@ if call json.isempty(config) then {
         defaultConfig2 = defaultConfig2 + "      \"tab-label-changed-color\": \"#ff6600\",\n";
         defaultConfig2 = defaultConfig2 + "      \"tab-label-background\": \"#333333\",\n";
         defaultConfig2 = defaultConfig2 + "      \"tab-select\": \"#444444\",\n";
-        defaultConfig2 = defaultConfig2 + "      \"tab-normal\": \"#2d2d2d\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"tab-content\": \"#2d2d2d\",\n";
         defaultConfig2 = defaultConfig2 + "      \"find-highlight-color\": \"#000000\",\n";
         defaultConfig2 = defaultConfig2 + "      \"find-highlight-background\": \"#ddb107\",\n";
         defaultConfig2 = defaultConfig2 + "      \"current-find-highlight-bg\": \"#ffff00\"\n";
@@ -365,7 +365,7 @@ var findHighlightColor: string = call json.getstring(colors, "find-highlight-col
 var findHighlightBackground: string = call json.getstring(colors, "find-highlight-background", "");
 var currentFindHighlightBg: string = call json.getstring(colors, "current-find-highlight-bg", "");
 var tabSelectColor: string = call json.getstring(colors, "tab-select", "");
-var tabNormalColor: string = call json.getstring(colors, "tab-normal", "");
+var tabContentColor: string = call json.getstring(colors, "tab-content", "");
 
 // CSS default values (from console.css / ConsoleConfig.java)
 // These are used as fallback when config values are missing
@@ -397,7 +397,7 @@ var defaultFindHighlightColor: string = "#000000";
 var defaultFindHighlightBackground: string = "#ddb107";
 var defaultCurrentFindHighlightBg: string = "#ffff00";
 var defaultTabSelectColor: string = "#444444";
-var defaultTabNormalColor: string = "#2d2d2d";
+var defaultTabContentColor: string = "#2d2d2d";
 
 // Set defaults for any missing color values (robust loading)
 if infoColor == "" then { infoColor = defaultInfoColor; }
@@ -428,7 +428,7 @@ if findHighlightColor == "" then { findHighlightColor = defaultFindHighlightColo
 if findHighlightBackground == "" then { findHighlightBackground = defaultFindHighlightBackground; }
 if currentFindHighlightBg == "" then { currentFindHighlightBg = defaultCurrentFindHighlightBg; }
 if tabSelectColor == "" then { tabSelectColor = defaultTabSelectColor; }
-if tabNormalColor == "" then { tabNormalColor = defaultTabNormalColor; }
+if tabContentColor == "" then { tabContentColor = defaultTabContentColor; }
 
 // ============================================================================
 // Event Handler Functions
@@ -464,7 +464,7 @@ function setColorsToDefaults {
     colorEditorScreen.findHighlightBackground = defaultFindHighlightBackground;
     colorEditorScreen.currentFindHighlightBg = defaultCurrentFindHighlightBg;
     colorEditorScreen.tabSelect = defaultTabSelectColor;
-    colorEditorScreen.tabNormal = defaultTabNormalColor;
+    colorEditorScreen.tabContent = defaultTabContentColor;
 }
 
 // Function: Set all screen colors to originally loaded values
@@ -497,7 +497,7 @@ function setColorsToOriginal {
     colorEditorScreen.findHighlightBackground = findHighlightBackground;
     colorEditorScreen.currentFindHighlightBg = currentFindHighlightBg;
     colorEditorScreen.tabSelect = tabSelectColor;
-    colorEditorScreen.tabNormal = tabNormalColor;
+    colorEditorScreen.tabContent = tabContentColor;
 }
 
 // Function: Build profile colors JSON string for a given profile name using screen values
@@ -531,7 +531,7 @@ function buildProfileColorsJson(pName: string) return string {
     colorsJson = colorsJson + "      \"find-highlight-background\": \"" + colorEditorScreen.findHighlightBackground + "\",\n";
     colorsJson = colorsJson + "      \"current-find-highlight-bg\": \"" + colorEditorScreen.currentFindHighlightBg + "\",\n";
     colorsJson = colorsJson + "      \"tab-select\": \"" + colorEditorScreen.tabSelect + "\",\n";
-    colorsJson = colorsJson + "      \"tab-normal\": \"" + colorEditorScreen.tabNormal + "\"\n";
+    colorsJson = colorsJson + "      \"tab-content\": \"" + colorEditorScreen.tabContent + "\"\n";
     colorsJson = colorsJson + "    }";
     return colorsJson;
 }
@@ -567,7 +567,7 @@ function buildDefaultProfileColorsJson(pName: string) return string {
     colorsJson = colorsJson + "      \"find-highlight-background\": \"" + defaultFindHighlightBackground + "\",\n";
     colorsJson = colorsJson + "      \"current-find-highlight-bg\": \"" + defaultCurrentFindHighlightBg + "\",\n";
     colorsJson = colorsJson + "      \"tab-select\": \"" + defaultTabSelectColor + "\",\n";
-    colorsJson = colorsJson + "      \"tab-normal\": \"" + defaultTabNormalColor + "\"\n";
+    colorsJson = colorsJson + "      \"tab-content\": \"" + defaultTabContentColor + "\"\n";
     colorsJson = colorsJson + "    }";
     return colorsJson;
 }
@@ -575,7 +575,7 @@ function buildDefaultProfileColorsJson(pName: string) return string {
 // Function: Update a profile in the in-memory profiles object with current screen values
 function updateProfileInMemory(targetProfile: string) {
     // Build the colors JSON for the current screen values
-    var colorsStr: string = "{\"info\": \"" + colorEditorScreen.info + "\", \"comment\": \"" + colorEditorScreen.comment + "\", \"error\": \"" + colorEditorScreen.error + "\", \"warn\": \"" + colorEditorScreen.warn + "\", \"ok\": \"" + colorEditorScreen.ok + "\", \"code\": \"" + colorEditorScreen.code + "\", \"datatype\": \"" + colorEditorScreen.datatype + "\", \"data\": \"" + colorEditorScreen.data + "\", \"keyword\": \"" + colorEditorScreen.keyword + "\", \"builtin\": \"" + colorEditorScreen.builtin + "\", \"literal\": \"" + colorEditorScreen.literal + "\", \"identifier\": \"" + colorEditorScreen.identifier + "\", \"sql\": \"" + colorEditorScreen.sql + "\", \"custom\": \"" + colorEditorScreen.custom + "\", \"background\": \"" + colorEditorScreen.background + "\", \"text\": \"" + colorEditorScreen.text + "\", \"caret\": \"" + colorEditorScreen.caret + "\", \"line-cursor\": \"" + colorEditorScreen.lineCursor + "\", \"line-numbers\": \"" + colorEditorScreen.lineNumbers + "\", \"console-background\": \"" + colorEditorScreen.consoleBackground + "\", \"tab-background\": \"" + colorEditorScreen.tabBackground + "\", \"tab-label-color\": \"" + colorEditorScreen.tabLabelColor + "\", \"tab-label-changed-color\": \"" + colorEditorScreen.tabLabelChangedColor + "\", \"tab-label-background\": \"" + colorEditorScreen.tabLabelBackground + "\", \"find-highlight-color\": \"" + colorEditorScreen.findHighlightColor + "\", \"find-highlight-background\": \"" + colorEditorScreen.findHighlightBackground + "\", \"current-find-highlight-bg\": \"" + colorEditorScreen.currentFindHighlightBg + "\", \"tab-select\": \"" + colorEditorScreen.tabSelect + "\", \"tab-normal\": \"" + colorEditorScreen.tabNormal + "\"}";
+    var colorsStr: string = "{\"info\": \"" + colorEditorScreen.info + "\", \"comment\": \"" + colorEditorScreen.comment + "\", \"error\": \"" + colorEditorScreen.error + "\", \"warn\": \"" + colorEditorScreen.warn + "\", \"ok\": \"" + colorEditorScreen.ok + "\", \"code\": \"" + colorEditorScreen.code + "\", \"datatype\": \"" + colorEditorScreen.datatype + "\", \"data\": \"" + colorEditorScreen.data + "\", \"keyword\": \"" + colorEditorScreen.keyword + "\", \"builtin\": \"" + colorEditorScreen.builtin + "\", \"literal\": \"" + colorEditorScreen.literal + "\", \"identifier\": \"" + colorEditorScreen.identifier + "\", \"sql\": \"" + colorEditorScreen.sql + "\", \"custom\": \"" + colorEditorScreen.custom + "\", \"background\": \"" + colorEditorScreen.background + "\", \"text\": \"" + colorEditorScreen.text + "\", \"caret\": \"" + colorEditorScreen.caret + "\", \"line-cursor\": \"" + colorEditorScreen.lineCursor + "\", \"line-numbers\": \"" + colorEditorScreen.lineNumbers + "\", \"console-background\": \"" + colorEditorScreen.consoleBackground + "\", \"tab-background\": \"" + colorEditorScreen.tabBackground + "\", \"tab-label-color\": \"" + colorEditorScreen.tabLabelColor + "\", \"tab-label-changed-color\": \"" + colorEditorScreen.tabLabelChangedColor + "\", \"tab-label-background\": \"" + colorEditorScreen.tabLabelBackground + "\", \"find-highlight-color\": \"" + colorEditorScreen.findHighlightColor + "\", \"find-highlight-background\": \"" + colorEditorScreen.findHighlightBackground + "\", \"current-find-highlight-bg\": \"" + colorEditorScreen.currentFindHighlightBg + "\", \"tab-select\": \"" + colorEditorScreen.tabSelect + "\", \"tab-content\": \"" + colorEditorScreen.tabContent + "\"}";
     
     // Parse to JSON and update the in-memory profiles object
     var colorsJson: json = call json.jsonFromString(colorsStr);
@@ -718,7 +718,7 @@ function saveConfigWithCurrentProfile {
     var pFindHlBg: string = "";
     var pCurrentFindHlBg: string = "";
     var pTabSelect: string = "";
-    var pTabNormal: string = "";
+    var pTabContent: string = "";
     
     // Build each profile's JSON
     var i: int = 0;
@@ -759,7 +759,7 @@ function saveConfigWithCurrentProfile {
         pFindHlBg = "";
         pCurrentFindHlBg = "";
         pTabSelect = "";
-        pTabNormal = "";
+        pTabContent = "";
         
         if pName == colorEditorScreen.profile then {
             // Use current screen values for the active profile
@@ -791,7 +791,7 @@ function saveConfigWithCurrentProfile {
             pFindHlBg = colorEditorScreen.findHighlightBackground;
             pCurrentFindHlBg = colorEditorScreen.currentFindHighlightBg;
             pTabSelect = colorEditorScreen.tabSelect;
-            pTabNormal = colorEditorScreen.tabNormal;
+            pTabContent = colorEditorScreen.tabContent;
         } else {
             // Use values from the config file for other profiles
             pInfo = call json.getstring(pColors, "info", "");
@@ -822,7 +822,7 @@ function saveConfigWithCurrentProfile {
             pFindHlBg = call json.getstring(pColors, "find-highlight-background", "");
             pCurrentFindHlBg = call json.getstring(pColors, "current-find-highlight-bg", "");
             pTabSelect = call json.getstring(pColors, "tab-select", "");
-            pTabNormal = call json.getstring(pColors, "tab-normal", "");
+            pTabContent = call json.getstring(pColors, "tab-content", "");
         }
         
         profilesStr = profilesStr + "\"" + pName + "\": {\n";
@@ -854,7 +854,7 @@ function saveConfigWithCurrentProfile {
         profilesStr = profilesStr + "      \"find-highlight-background\": \"" + pFindHlBg + "\",\n";
         profilesStr = profilesStr + "      \"current-find-highlight-bg\": \"" + pCurrentFindHlBg + "\",\n";
         profilesStr = profilesStr + "      \"tab-select\": \"" + pTabSelect + "\",\n";
-        profilesStr = profilesStr + "      \"tab-normal\": \"" + pTabNormal + "\"\n";
+        profilesStr = profilesStr + "      \"tab-content\": \"" + pTabContent + "\"\n";
         profilesStr = profilesStr + "    }";
         
         i = i + 1;
@@ -1023,7 +1023,7 @@ function addProfileToConfig(newProfileName: string) {
         var pFindHlBg: string = call json.getstring(pColors, "find-highlight-background", "");
         var pCurrentFindHlBg: string = call json.getstring(pColors, "current-find-highlight-bg", "");
         var pTabSelect: string = call json.getstring(pColors, "tab-select", "");
-        var pTabNormal: string = call json.getstring(pColors, "tab-normal", "");
+        var pTabContent: string = call json.getstring(pColors, "tab-content", "");
         
         profilesStr = profilesStr + "\"" + pName + "\": {\n";
         profilesStr = profilesStr + "      \"info\": \"" + pInfo + "\",\n";
@@ -1054,7 +1054,7 @@ function addProfileToConfig(newProfileName: string) {
         profilesStr = profilesStr + "      \"find-highlight-background\": \"" + pFindHlBg + "\",\n";
         profilesStr = profilesStr + "      \"current-find-highlight-bg\": \"" + pCurrentFindHlBg + "\",\n";
         profilesStr = profilesStr + "      \"tab-select\": \"" + pTabSelect + "\",\n";
-        profilesStr = profilesStr + "      \"tab-normal\": \"" + pTabNormal + "\"\n";
+        profilesStr = profilesStr + "      \"tab-content\": \"" + pTabContent + "\"\n";
         profilesStr = profilesStr + "    }";
         
         i = i + 1;
@@ -1093,7 +1093,7 @@ function addProfileToConfig(newProfileName: string) {
     profilesStr = profilesStr + "      \"find-highlight-background\": \"" + defaultFindHighlightBackground + "\",\n";
     profilesStr = profilesStr + "      \"current-find-highlight-bg\": \"" + defaultCurrentFindHighlightBg + "\",\n";
     profilesStr = profilesStr + "      \"tab-select\": \"" + defaultTabSelectColor + "\",\n";
-    profilesStr = profilesStr + "      \"tab-normal\": \"" + defaultTabNormalColor + "\"\n";
+    profilesStr = profilesStr + "      \"tab-content\": \"" + defaultTabContentColor + "\"\n";
     profilesStr = profilesStr + "    }";
     
     // Build final JSON with new profile as current
@@ -1157,7 +1157,7 @@ function onProfileChange {
         var pFindHlBg: string = call json.getstring(profileColors, "find-highlight-background", "");
         var pCurrentFindHlBg: string = call json.getstring(profileColors, "current-find-highlight-bg", "");
         var pTabSelect: string = call json.getstring(profileColors, "tab-select", "");
-        var pTabNormal: string = call json.getstring(profileColors, "tab-normal", "");
+        var pTabContent: string = call json.getstring(profileColors, "tab-content", "");
         
         // Set each color, falling back to defaults if not defined
         if pInfo != "" then { colorEditorScreen.info = pInfo; } else { colorEditorScreen.info = defaultInfoColor; }
@@ -1188,7 +1188,7 @@ function onProfileChange {
         if pFindHlBg != "" then { colorEditorScreen.findHighlightBackground = pFindHlBg; } else { colorEditorScreen.findHighlightBackground = defaultFindHighlightBackground; }
         if pCurrentFindHlBg != "" then { colorEditorScreen.currentFindHighlightBg = pCurrentFindHlBg; } else { colorEditorScreen.currentFindHighlightBg = defaultCurrentFindHighlightBg; }
         if pTabSelect != "" then { colorEditorScreen.tabSelect = pTabSelect; } else { colorEditorScreen.tabSelect = defaultTabSelectColor; }
-        if pTabNormal != "" then { colorEditorScreen.tabNormal = pTabNormal; } else { colorEditorScreen.tabNormal = defaultTabNormalColor; }
+        if pTabContent != "" then { colorEditorScreen.tabContent = pTabContent; } else { colorEditorScreen.tabContent = defaultTabContentColor; }
         
         print "Profile colors loaded successfully";
     }
@@ -1495,7 +1495,7 @@ print "- tab-label-color: " + tabLabelColor;
 print "- tab-label-changed-color: " + tabLabelChangedColor;
 print "- tab-label-background: " + tabLabelBackgroundColor;
 print "- tab-select: " + tabSelectColor;
-print "- tab-normal: " + tabNormalColor;
+print "- tab-content: " + tabContentColor;
 print "- find-highlight-color: " + findHighlightColor;
 print "- find-highlight-background: " + findHighlightBackground;
 print "- current-find-highlight-bg: " + currentFindHighlightBg;
@@ -1777,12 +1777,12 @@ screen colorEditorScreen = {
             }
         },
         {
-            "name": "tabNormal",
+            "name": "tabContent",
             "type": "string",
-            "default": $tabNormalColor,
+            "default": $tabContentColor,
             "display": {
                 "type": "colorpicker",
-                "labelText": "Tab Normal:"
+                "labelText": "Tab Content:"
             }
         }
     ],
@@ -1922,7 +1922,7 @@ screen colorEditorScreen = {
                                                             {"name": "tabLabelChangedColor_item", "varref": "tabLabelChangedColor"},
                                                             {"name": "tabLabelBackground_item", "varref": "tabLabelBackground"},
                                                             {"name": "tabSelect_item", "varref": "tabSelect"},
-                                                            {"name": "tabNormal_item", "varref": "tabNormal"}
+                                                            {"name": "tabContent_item", "varref": "tabContent"}
                                                         ]
                                                     },
                                                     {
@@ -2016,7 +2016,7 @@ print "tabLabelColor: " + colorEditorScreen.tabLabelColor;
 print "tabLabelChangedColor: " + colorEditorScreen.tabLabelChangedColor;
 print "tabLabelBackground: " + colorEditorScreen.tabLabelBackground;
 print "tabSelect: " + colorEditorScreen.tabSelect;
-print "tabNormal: " + colorEditorScreen.tabNormal;
+print "tabContent: " + colorEditorScreen.tabContent;
 print "findHighlightColor: " + colorEditorScreen.findHighlightColor;
 print "findHighlightBackground: " + colorEditorScreen.findHighlightBackground;
 print "currentFindHighlightBg: " + colorEditorScreen.currentFindHighlightBg;
