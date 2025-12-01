@@ -1,7 +1,11 @@
 package com.eb.script.interpreter.builtins;
 
+import com.eb.script.interpreter.Interpreter;
 import com.eb.script.interpreter.InterpreterContext;
 import com.eb.script.interpreter.InterpreterError;
+import com.eb.script.interpreter.statement.Statement;
+import com.eb.script.json.Json;
+import com.eb.script.parser.Parser;
 import com.eb.script.RuntimeContext;
 
 import com.eb.script.arrays.ArrayDef;
@@ -152,7 +156,7 @@ public class BuiltinsAi {
             Platform.runLater(() -> {
                 try {
                     // Build the callback EBS code: call callbackName(jsonData);
-                    String jsonArg = com.eb.script.json.Json.compactJson(callbackData);
+                    String jsonArg = Json.compactJson(callbackData);
                     String callbackCode = "call " + callbackName + "(" + jsonArg + ");";
                     
                     // Set screen context if we were in a screen
@@ -162,13 +166,10 @@ public class BuiltinsAi {
                     
                     try {
                         // Parse and execute the callback
-                        RuntimeContext callbackContext = com.eb.script.parser.Parser.parse("ai_callback", callbackCode);
+                        RuntimeContext callbackContext = Parser.parse("ai_callback", callbackCode);
                         
-                        // We need an interpreter to execute the callback
-                        // Use the environment from context to create statements
-                        for (com.eb.script.interpreter.statement.Statement s : callbackContext.statements) {
-                            // We need to find the interpreter associated with this context
-                            // The callback is executed through a mini-interpreter
+                        // Execute each statement in the callback code
+                        for (Statement s : callbackContext.statements) {
                             executeCallbackStatement(context, s);
                         }
                     } finally {
@@ -199,9 +200,9 @@ public class BuiltinsAi {
      * This creates an interpreter that shares the existing context.
      */
     private static void executeCallbackStatement(InterpreterContext context, 
-            com.eb.script.interpreter.statement.Statement stmt) throws InterpreterError {
+            Statement stmt) throws InterpreterError {
         // Create an interpreter instance that shares the existing context
-        com.eb.script.interpreter.Interpreter interpreter = new com.eb.script.interpreter.Interpreter(context);
+        Interpreter interpreter = new Interpreter(context);
         interpreter.acceptStatement(stmt);
     }
 }
