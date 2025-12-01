@@ -1365,9 +1365,43 @@ function onResetClick {
 
 // Function: Handle Save button click
 function onSaveClick {
-    // Save all profiles using the existing saveConfigWithCurrentProfile function
-    // which preserves all profiles and uses current screen values for the active profile
-    call saveConfigWithCurrentProfile();
+    print "=== Save Button Clicked ===";
+    print "Config path: " + configPath;
+    print "Current profile: " + colorEditorScreen.profile;
+    
+    // Build the current profile colors as JSON string
+    var currentColorsStr: string = "{\"info\": \"" + colorEditorScreen.info + "\", \"comment\": \"" + colorEditorScreen.comment + "\", \"error\": \"" + colorEditorScreen.error + "\", \"warn\": \"" + colorEditorScreen.warn + "\", \"ok\": \"" + colorEditorScreen.ok + "\", \"code\": \"" + colorEditorScreen.code + "\", \"datatype\": \"" + colorEditorScreen.datatype + "\", \"data\": \"" + colorEditorScreen.data + "\", \"keyword\": \"" + colorEditorScreen.keyword + "\", \"builtin\": \"" + colorEditorScreen.builtin + "\", \"literal\": \"" + colorEditorScreen.literal + "\", \"identifier\": \"" + colorEditorScreen.identifier + "\", \"sql\": \"" + colorEditorScreen.sql + "\", \"custom\": \"" + colorEditorScreen.custom + "\", \"background\": \"" + colorEditorScreen.background + "\", \"text\": \"" + colorEditorScreen.text + "\", \"caret\": \"" + colorEditorScreen.caret + "\", \"line-cursor\": \"" + colorEditorScreen.lineCursor + "\", \"line-numbers\": \"" + colorEditorScreen.lineNumbers + "\", \"console-background\": \"" + colorEditorScreen.consoleBackground + "\", \"tab-background\": \"" + colorEditorScreen.tabBackground + "\", \"tab-label-color\": \"" + colorEditorScreen.tabLabelColor + "\", \"tab-label-changed-color\": \"" + colorEditorScreen.tabLabelChangedColor + "\", \"tab-label-background\": \"" + colorEditorScreen.tabLabelBackground + "\", \"find-highlight-color\": \"" + colorEditorScreen.findHighlightColor + "\", \"find-highlight-background\": \"" + colorEditorScreen.findHighlightBackground + "\"}";
+    print "Built colors JSON string";
+    
+    // Parse the colors string to JSON
+    var currentColorsJson: json = call json.jsonFromString(currentColorsStr);
+    print "Parsed colors to JSON";
+    
+    // Read existing config file and parse it
+    var existingContent: string = call file.readTextFile(configPath);
+    print "Read existing content: " + call str.length(existingContent) + " chars";
+    
+    var existingConfig: json = call json.jsonFromString(existingContent);
+    print "Parsed existing config";
+    
+    // Update the current profile in the config using json.set
+    var profilePath: string = "profiles." + colorEditorScreen.profile;
+    print "Profile path: " + profilePath;
+    
+    var updatedConfig: json = call json.set(existingConfig, profilePath, currentColorsJson);
+    print "Set profile colors";
+    
+    // Update the currentProfile field
+    updatedConfig = call json.set(updatedConfig, "currentProfile", colorEditorScreen.profile);
+    print "Set currentProfile field";
+    
+    // Convert back to string and write to file
+    var jsonContent: string = call json.toString(updatedConfig);
+    print "Converted to JSON string: " + call str.length(jsonContent) + " chars";
+    
+    var writeResult: bool = call file.writeTextFile(configPath, jsonContent);
+    print "Write result: " + writeResult;
+    
     call system.alertDialog("Configuration saved to " + configPath + ".\nRestart the application to see changes.", "Saved", "info");
 }
 
