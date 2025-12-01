@@ -56,11 +56,11 @@ public class InterpreterScreen {
                     // Parse and execute the EBS code
                     RuntimeContext codeContext = com.eb.script.parser.Parser.parse("inline_" + screenName, ebsCode);
                     // Execute in the current interpreter context
-                    Object returnValue = null;
                     for (com.eb.script.interpreter.statement.Statement s : codeContext.statements) {
                         interpreter.acceptStatement(s);
                     }
-                    return returnValue;
+                    // If no return statement was executed, return null
+                    return null;
                 } catch (com.eb.script.interpreter.Interpreter.ReturnSignal rs) {
                     // Catch return statement and extract the value
                     return rs.value;
