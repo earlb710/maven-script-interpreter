@@ -304,6 +304,9 @@ print "";
 // json.getobject now returns empty map if key doesn't exist (instead of null)
 var profiles: json = call json.getobject(config, "profiles");
 
+// Track the previous profile for saving changes when switching
+var previousProfile: string = profileName;
+
 // Handle case where profiles object doesn't exist
 if call json.isempty(profiles) then {
     print "No profiles found in config, using defaults";
@@ -540,6 +543,17 @@ function buildDefaultProfileColorsJson(pName: string) return string {
     colorsJson = colorsJson + "      \"find-highlight-background\": \"" + defaultFindHighlightBackground + "\"\n";
     colorsJson = colorsJson + "    }";
     return colorsJson;
+}
+
+// Function: Update a profile in the in-memory profiles object with current screen values
+function updateProfileInMemory(targetProfile: string) {
+    // Build the colors JSON for the current screen values
+    var colorsStr: string = "{\"info\": \"" + colorEditorScreen.info + "\", \"comment\": \"" + colorEditorScreen.comment + "\", \"error\": \"" + colorEditorScreen.error + "\", \"warn\": \"" + colorEditorScreen.warn + "\", \"ok\": \"" + colorEditorScreen.ok + "\", \"code\": \"" + colorEditorScreen.code + "\", \"datatype\": \"" + colorEditorScreen.datatype + "\", \"data\": \"" + colorEditorScreen.data + "\", \"keyword\": \"" + colorEditorScreen.keyword + "\", \"builtin\": \"" + colorEditorScreen.builtin + "\", \"literal\": \"" + colorEditorScreen.literal + "\", \"identifier\": \"" + colorEditorScreen.identifier + "\", \"sql\": \"" + colorEditorScreen.sql + "\", \"custom\": \"" + colorEditorScreen.custom + "\", \"background\": \"" + colorEditorScreen.background + "\", \"text\": \"" + colorEditorScreen.text + "\", \"caret\": \"" + colorEditorScreen.caret + "\", \"line-cursor\": \"" + colorEditorScreen.lineCursor + "\", \"line-numbers\": \"" + colorEditorScreen.lineNumbers + "\", \"console-background\": \"" + colorEditorScreen.consoleBackground + "\", \"tab-background\": \"" + colorEditorScreen.tabBackground + "\", \"tab-label-color\": \"" + colorEditorScreen.tabLabelColor + "\", \"tab-label-changed-color\": \"" + colorEditorScreen.tabLabelChangedColor + "\", \"tab-label-background\": \"" + colorEditorScreen.tabLabelBackground + "\", \"find-highlight-color\": \"" + colorEditorScreen.findHighlightColor + "\", \"find-highlight-background\": \"" + colorEditorScreen.findHighlightBackground + "\"}";
+    
+    // Parse to JSON and update the in-memory profiles object
+    var colorsJson: json = call json.jsonFromString(colorsStr);
+    profiles = call json.set(profiles, targetProfile, colorsJson);
+    print "Updated profile '" + targetProfile + "' in memory";
 }
 
 // Function: Save config file with current profile as active and all profiles preserved
@@ -1046,6 +1060,12 @@ function addProfileToConfig(newProfileName: string) {
 function onProfileChange {
     var selectedProfile: string = colorEditorScreen.profile;
     
+    // First, save the current screen values to the previous profile in memory
+    // This preserves changes made to the profile we're switching away from
+    if previousProfile != "" then {
+        call updateProfileInMemory(previousProfile);
+    }
+    
     // Initialize with empty JSON, then try to get actual colors
     var profileColors: json = call json.jsonfromstring("{}");
     var tempProfileColors: json = call json.getobject(profiles, selectedProfile);
@@ -1116,8 +1136,8 @@ function onProfileChange {
         print "Profile colors loaded successfully";
     }
     
-    // Note: We no longer auto-save when switching profiles.
-    // User should click Save button before switching profiles to preserve changes.
+    // Update previousProfile to track the current profile for next switch
+    previousProfile = selectedProfile;
 }
 
 // Function: Handle Add Profile button click
@@ -1365,19 +1385,15 @@ function onResetClick {
 
 // Function: Handle Save button click
 function onSaveClick {
-    // Build the current profile colors as JSON string
-    var currentColorsStr: string = "{\"info\": \"" + colorEditorScreen.info + "\", \"comment\": \"" + colorEditorScreen.comment + "\", \"error\": \"" + colorEditorScreen.error + "\", \"warn\": \"" + colorEditorScreen.warn + "\", \"ok\": \"" + colorEditorScreen.ok + "\", \"code\": \"" + colorEditorScreen.code + "\", \"datatype\": \"" + colorEditorScreen.datatype + "\", \"data\": \"" + colorEditorScreen.data + "\", \"keyword\": \"" + colorEditorScreen.keyword + "\", \"builtin\": \"" + colorEditorScreen.builtin + "\", \"literal\": \"" + colorEditorScreen.literal + "\", \"identifier\": \"" + colorEditorScreen.identifier + "\", \"sql\": \"" + colorEditorScreen.sql + "\", \"custom\": \"" + colorEditorScreen.custom + "\", \"background\": \"" + colorEditorScreen.background + "\", \"text\": \"" + colorEditorScreen.text + "\", \"caret\": \"" + colorEditorScreen.caret + "\", \"line-cursor\": \"" + colorEditorScreen.lineCursor + "\", \"line-numbers\": \"" + colorEditorScreen.lineNumbers + "\", \"console-background\": \"" + colorEditorScreen.consoleBackground + "\", \"tab-background\": \"" + colorEditorScreen.tabBackground + "\", \"tab-label-color\": \"" + colorEditorScreen.tabLabelColor + "\", \"tab-label-changed-color\": \"" + colorEditorScreen.tabLabelChangedColor + "\", \"tab-label-background\": \"" + colorEditorScreen.tabLabelBackground + "\", \"find-highlight-color\": \"" + colorEditorScreen.findHighlightColor + "\", \"find-highlight-background\": \"" + colorEditorScreen.findHighlightBackground + "\"}";
+    // First, update the current profile in memory with screen values
+    call updateProfileInMemory(colorEditorScreen.profile);
     
-    // Parse the colors string to JSON
-    var currentColorsJson: json = call json.jsonFromString(currentColorsStr);
-    
-    // Read existing config file and parse it
+    // Read existing config file to preserve non-profile data (like profileList)
     var existingContent: string = call file.readTextFile(configPath);
     var existingConfig: json = call json.jsonFromString(existingContent);
     
-    // Update the current profile in the config using json.set
-    var profilePath: string = "profiles." + colorEditorScreen.profile;
-    var updatedConfig: json = call json.set(existingConfig, profilePath, currentColorsJson);
+    // Replace the profiles object with our in-memory version (which has all changes)
+    var updatedConfig: json = call json.set(existingConfig, "profiles", profiles);
     
     // Update the currentProfile field
     updatedConfig = call json.set(updatedConfig, "currentProfile", colorEditorScreen.profile);
@@ -1386,10 +1402,8 @@ function onSaveClick {
     var jsonContent: string = call json.toString(updatedConfig);
     call file.writeTextFile(configPath, jsonContent);
     
-    // Also update the in-memory profiles object so it reflects the saved changes
-    profiles = call json.getobject(updatedConfig, "profiles");
-    
-    call system.alertDialog("Configuration saved to " + configPath + ".\nRestart the application to see changes.", "Saved", "info");
+    print "Saved all profiles to " + configPath;
+    call system.alertDialog("All profiles saved to " + configPath + ".\nRestart the application to see changes.", "Saved", "info");
 }
 
 // Function: Handle Close button click
