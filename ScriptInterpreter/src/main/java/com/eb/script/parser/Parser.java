@@ -2404,13 +2404,21 @@ public class Parser {
     private Statement screenStatement() throws ParseError {
         int line = previous().line; // the 'screen' token
 
-        // 1) Require screen name
+        // 1) Check for optional 'new' keyword for replace mode: screen new <name> = {...};
+        boolean replaceExisting = false;
         EbsToken nameTok = consume(EbsTokenType.IDENTIFIER, "Expected screen name after 'screen'.");
         String screenName = (String) nameTok.literal;
+        
+        // If the first identifier is "new", then the next identifier is the screen name
+        if (screenName.equalsIgnoreCase("new")) {
+            replaceExisting = true;
+            nameTok = consume(EbsTokenType.IDENTIFIER, "Expected screen name after 'screen new'.");
+            screenName = (String) nameTok.literal;
+        }
 
         // 2) Expect '=' for screen definition
         if (match(EbsTokenType.EQUAL)) {
-            // screen <name> = {...};
+            // screen <name> = {...}; or screen new <name> = {...};
             // 3) Parse the spec:
             //    - JSON literal ({...}) captured from source
             //    - IDENTIFIER (reference to a var holding json)
@@ -2427,7 +2435,7 @@ public class Parser {
             // 4) ';'
             consume(EbsTokenType.SEMICOLON, "Expected ';' after screen statement.");
 
-            return new ScreenStatement(line, screenName, spec);
+            return new ScreenStatement(line, screenName, spec, replaceExisting);
         } else {
             throw error(peek(), "Expected '=' after screen name. Use 'show screen <name>' to show or 'hide screen <name>' to hide.");
         }

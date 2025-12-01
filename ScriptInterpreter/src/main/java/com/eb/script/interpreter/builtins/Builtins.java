@@ -920,6 +920,10 @@ public final class Builtins {
                 newParam("screenName", DataType.STRING, true) // required; screen name
         ));
         addBuiltin(info(
+                "scr.findScreen", DataType.BOOL,
+                newParam("screenName", DataType.STRING, true) // required; screen name to check if defined
+        ));
+        addBuiltin(info(
                 "scr.getItemSource", DataType.STRING,
                 newParam("screenName", DataType.STRING, true), // required; screen name
                 newParam("itemName", DataType.STRING, true) // required; item name (varRef)
@@ -1117,6 +1121,7 @@ public final class Builtins {
             case "scr.getstatus" -> BuiltinsScreen.screenGetStatus(context, args);
             case "scr.seterror" -> BuiltinsScreen.screenSetError(context, args);
             case "scr.geterror" -> BuiltinsScreen.screenGetError(context, args);
+            case "scr.findscreen" -> BuiltinsScreen.screenFindScreen(context, args);
             case "scr.getitemsource" -> BuiltinsScreen.screenGetItemSource(context, args);
             case "scr.setitemsource" -> BuiltinsScreen.screenSetItemSource(context, args);
             case "scr.getitemstatus" -> BuiltinsScreen.screenGetItemStatus(context, args);
