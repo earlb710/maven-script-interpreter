@@ -7,6 +7,8 @@ import com.eb.script.json.JsonSchema;
 import com.eb.script.json.JsonSchemaDeriver;
 import com.eb.script.json.JsonValidate;
 import com.eb.script.arrays.ArrayDef;
+import com.eb.script.arrays.ArrayDynamic;
+import com.eb.script.token.DataType;
 import java.util.Map;
 
 /**
@@ -46,6 +48,7 @@ public class BuiltinsJson {
             case "json.remove" -> remove(args);
             case "json.add" -> add(args);
             case "json.insert" -> insert(args);
+            case "json.tostring" -> toString(args);
             default -> throw new InterpreterError("Unknown JSON builtin: " + name);
         };
     }
@@ -160,13 +163,29 @@ public class BuiltinsJson {
     @SuppressWarnings("unchecked")
     private static Object getArray(Object[] args) {
         Object v = Json.getValue(args[0], String.valueOf(args[1]));
-        return (v instanceof ArrayDef) ? (ArrayDef) v : null;
+        if (v instanceof ArrayDef) {
+            return (ArrayDef) v;
+        }
+        // Return default value if provided (3rd arg), otherwise return empty array to avoid null
+        if (args.length > 2 && args[2] != null) {
+            return args[2];
+        }
+        // Return empty array as default to avoid NullPointerException in EBS
+        return new ArrayDynamic(DataType.ANY);
     }
 
     @SuppressWarnings("unchecked")
     private static Object getObject(Object[] args) {
         Object v = Json.getValue(args[0], String.valueOf(args[1]));
-        return (v instanceof java.util.Map) ? (java.util.Map<String, Object>) v : null;
+        if (v instanceof java.util.Map) {
+            return (java.util.Map<String, Object>) v;
+        }
+        // Return default value if provided (3rd arg), otherwise return empty map to avoid null
+        if (args.length > 2 && args[2] != null) {
+            return args[2];
+        }
+        // Return empty map as default to avoid NullPointerException in EBS
+        return new java.util.LinkedHashMap<String, Object>();
     }
 
     private static Object set(Object[] args) {
@@ -207,6 +226,14 @@ public class BuiltinsJson {
         Object val = args[3];
         Json.insert(root, arrPath, index.intValue(), val);
         return root;
+    }
+
+    private static Object toString(Object[] args) {
+        Object jsonObj = args[0];
+        if (jsonObj == null) {
+            return "null";
+        }
+        return Json.prettyJson(jsonObj);
     }
 
     // --- Helper methods ---

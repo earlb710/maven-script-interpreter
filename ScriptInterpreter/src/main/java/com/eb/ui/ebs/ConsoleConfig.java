@@ -85,12 +85,63 @@ public class ConsoleConfig {
     
     /**
      * Extract color properties from the configuration.
+     * Supports both the new profile-based structure (with currentProfile, profiles) 
+     * and the old flat structure (with colors).
      */
     private void loadColors() {
         if (config == null) {
             return;
         }
         
+        // First, try the new profile-based structure
+        Object profilesObj = config.get("profiles");
+        if (profilesObj instanceof Map) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> profilesMap = (Map<String, Object>) profilesObj;
+            
+            // Get the current profile name, default to "default" if not specified
+            String currentProfile = "default";
+            Object currentProfileObj = config.get("currentProfile");
+            if (currentProfileObj != null && !currentProfileObj.toString().isEmpty()) {
+                currentProfile = currentProfileObj.toString();
+            }
+            
+            // Get the colors from the current profile
+            Object profileColorsObj = profilesMap.get(currentProfile);
+            if (profileColorsObj instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> colorMap = (Map<String, Object>) profileColorsObj;
+                
+                for (Map.Entry<String, Object> entry : colorMap.entrySet()) {
+                    String key = entry.getKey();
+                    Object value = entry.getValue();
+                    if (value != null) {
+                        colors.put(key, value.toString());
+                    }
+                }
+                System.out.println("Loaded colors from profile: " + currentProfile);
+                return;
+            } else {
+                // Profile not found, try "default"
+                profileColorsObj = profilesMap.get("default");
+                if (profileColorsObj instanceof Map) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> colorMap = (Map<String, Object>) profileColorsObj;
+                    
+                    for (Map.Entry<String, Object> entry : colorMap.entrySet()) {
+                        String key = entry.getKey();
+                        Object value = entry.getValue();
+                        if (value != null) {
+                            colors.put(key, value.toString());
+                        }
+                    }
+                    System.out.println("Profile '" + currentProfile + "' not found, loaded colors from 'default' profile");
+                    return;
+                }
+            }
+        }
+        
+        // Fall back to the old flat structure with "colors" key
         Object colorsObj = config.get("colors");
         if (colorsObj instanceof Map) {
             @SuppressWarnings("unchecked")
@@ -103,6 +154,7 @@ public class ConsoleConfig {
                     colors.put(key, value.toString());
                 }
             }
+            System.out.println("Loaded colors from legacy 'colors' structure");
         }
     }
     

@@ -43,9 +43,136 @@ print "File found at: " + configPath;
 print "File content read successfully";
 print "";
 
+// Validate config content - check if it's empty or invalid
+var configIsValid: bool = true;
+var configError: string = "";
+
+// Check if content is empty
+if configContent == "" then {
+    configIsValid = false;
+    configError = "Config file is empty";
+} else {
+    // Check if content looks like valid JSON (starts with { after trimming)
+    var trimmedContent: string = call str.trim(configContent);
+    if call str.startswith(trimmedContent, "{") == false then {
+        configIsValid = false;
+        configError = "Config file does not contain valid JSON (must start with '{')";
+    }
+}
+
+// If config is invalid, ask user if they want to recreate it
+if configIsValid == false then {
+    print "ERROR: " + configError;
+    var recreate: bool = call system.confirmDialog("The configuration file could not be read:\n\n" + configError + "\n\nWould you like to create a new config file with default values?\n\nThis will overwrite the existing file.", "Config Error");
+    
+    if recreate then {
+        // Create default config content
+        var defaultConfig: string = "{\n";
+        defaultConfig = defaultConfig + "  \"currentProfile\": \"default\",\n";
+        defaultConfig = defaultConfig + "  \"profileList\": [\"default\"],\n";
+        defaultConfig = defaultConfig + "  \"profiles\": {\n";
+        defaultConfig = defaultConfig + "    \"default\": {\n";
+        defaultConfig = defaultConfig + "      \"info\": \"#e6e6e6\",\n";
+        defaultConfig = defaultConfig + "      \"comment\": \"#ffffcc\",\n";
+        defaultConfig = defaultConfig + "      \"error\": \"#ee0000\",\n";
+        defaultConfig = defaultConfig + "      \"warn\": \"#eeee00\",\n";
+        defaultConfig = defaultConfig + "      \"ok\": \"#00ee00\",\n";
+        defaultConfig = defaultConfig + "      \"code\": \"white\",\n";
+        defaultConfig = defaultConfig + "      \"datatype\": \"#D070FF\",\n";
+        defaultConfig = defaultConfig + "      \"data\": \"pink\",\n";
+        defaultConfig = defaultConfig + "      \"keyword\": \"#00FFFF\",\n";
+        defaultConfig = defaultConfig + "      \"builtin\": \"#99e0e0\",\n";
+        defaultConfig = defaultConfig + "      \"literal\": \"blue\",\n";
+        defaultConfig = defaultConfig + "      \"identifier\": \"white\",\n";
+        defaultConfig = defaultConfig + "      \"sql\": \"#00ee66\",\n";
+        defaultConfig = defaultConfig + "      \"custom\": \"#eeee90\",\n";
+        defaultConfig = defaultConfig + "      \"background\": \"#000000\",\n";
+        defaultConfig = defaultConfig + "      \"text\": \"#e6e6e6\",\n";
+        defaultConfig = defaultConfig + "      \"caret\": \"white\",\n";
+        defaultConfig = defaultConfig + "      \"line-cursor\": \"#22292a\",\n";
+        defaultConfig = defaultConfig + "      \"line-numbers\": \"#808080\",\n";
+        defaultConfig = defaultConfig + "      \"console-background\": \"#1e1e1e\",\n";
+        defaultConfig = defaultConfig + "      \"tab-background\": \"#252525\",\n";
+        defaultConfig = defaultConfig + "      \"tab-label-color\": \"#cccccc\",\n";
+        defaultConfig = defaultConfig + "      \"tab-label-changed-color\": \"#ff6600\",\n";
+        defaultConfig = defaultConfig + "      \"tab-label-background\": \"#333333\",\n";
+        defaultConfig = defaultConfig + "      \"find-highlight-color\": \"#000000\",\n";
+        defaultConfig = defaultConfig + "      \"find-highlight-background\": \"#ddb107\"\n";
+        defaultConfig = defaultConfig + "    }\n";
+        defaultConfig = defaultConfig + "  }\n";
+        defaultConfig = defaultConfig + "}";
+        
+        // Write the default config to file
+        call file.writetextfile(configPath, defaultConfig);
+        print "Created new config file with default values";
+        configContent = defaultConfig;
+        call system.alertDialog("New config file created with default values.\nThe color editor will now load with these defaults.", "Config Created", "info");
+    } else {
+        print "User chose not to recreate config file. Exiting.";
+        call system.alertDialog("Cannot continue without a valid config file.\nPlease fix the file manually or restart and choose to recreate it.", "Exiting", "warning");
+        return;
+    }
+}
+
 // Parse the JSON content
 print "Parsing JSON configuration...";
 var config: json = call json.jsonfromstring(configContent);
+
+// Check if parsing succeeded
+if call json.isempty(config) then {
+    print "ERROR: Failed to parse JSON configuration";
+    var recreate2: bool = call system.confirmDialog("Failed to parse the configuration file as JSON.\n\nWould you like to create a new config file with default values?\n\nThis will overwrite the existing file.", "Parse Error");
+    
+    if recreate2 then {
+        // Create default config content
+        var defaultConfig2: string = "{\n";
+        defaultConfig2 = defaultConfig2 + "  \"currentProfile\": \"default\",\n";
+        defaultConfig2 = defaultConfig2 + "  \"profileList\": [\"default\"],\n";
+        defaultConfig2 = defaultConfig2 + "  \"profiles\": {\n";
+        defaultConfig2 = defaultConfig2 + "    \"default\": {\n";
+        defaultConfig2 = defaultConfig2 + "      \"info\": \"#e6e6e6\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"comment\": \"#ffffcc\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"error\": \"#ee0000\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"warn\": \"#eeee00\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"ok\": \"#00ee00\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"code\": \"white\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"datatype\": \"#D070FF\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"data\": \"pink\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"keyword\": \"#00FFFF\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"builtin\": \"#99e0e0\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"literal\": \"blue\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"identifier\": \"white\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"sql\": \"#00ee66\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"custom\": \"#eeee90\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"background\": \"#000000\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"text\": \"#e6e6e6\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"caret\": \"white\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"line-cursor\": \"#22292a\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"line-numbers\": \"#808080\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"console-background\": \"#1e1e1e\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"tab-background\": \"#252525\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"tab-label-color\": \"#cccccc\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"tab-label-changed-color\": \"#ff6600\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"tab-label-background\": \"#333333\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"find-highlight-color\": \"#000000\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"find-highlight-background\": \"#ddb107\"\n";
+        defaultConfig2 = defaultConfig2 + "    }\n";
+        defaultConfig2 = defaultConfig2 + "  }\n";
+        defaultConfig2 = defaultConfig2 + "}";
+        
+        // Write the default config to file
+        call file.writetextfile(configPath, defaultConfig2);
+        print "Created new config file with default values";
+        configContent = defaultConfig2;
+        config = call json.jsonfromstring(configContent);
+        call system.alertDialog("New config file created with default values.\nThe color editor will now load with these defaults.", "Config Created", "info");
+    } else {
+        print "User chose not to recreate config file. Exiting.";
+        call system.alertDialog("Cannot continue without a valid config file.\nPlease fix the file manually or restart and choose to recreate it.", "Exiting", "warning");
+        return;
+    }
+}
+
 print "JSON parsed successfully";
 print "";
 
@@ -174,14 +301,27 @@ print "Current Profile: " + profileName;
 print "";
 
 // Get profiles object and current profile's colors
+// json.getobject now returns empty map if key doesn't exist (instead of null)
 var profiles: json = call json.getobject(config, "profiles");
+
+// Handle case where profiles object doesn't exist
+if call json.isempty(profiles) then {
+    print "No profiles found in config, using defaults";
+}
+
+// Get current profile's colors (returns empty map if profile doesn't exist)
 var colors: json = call json.getobject(profiles, profileName);
 
-// If current profile doesn't exist, try to get default profile colors
+// Check if colors exist, otherwise fall back to default profile
 if call json.isempty(colors) then {
     print "Profile '" + profileName + "' not found, falling back to 'default'";
     colors = call json.getobject(profiles, "default");
     profileName = "default";
+    
+    if call json.isempty(colors) then {
+        print "Default profile not found, using empty colors (will fall back to CSS defaults)";
+        // colors stays as empty JSON object, CSS defaults will be used
+    }
 }
 
 print "Colors object retrieved for profile: " + profileName;
@@ -215,15 +355,8 @@ var tabLabelBackgroundColor: string = call json.getstring(colors, "tab-label-bac
 var findHighlightColor: string = call json.getstring(colors, "find-highlight-color", "");
 var findHighlightBackground: string = call json.getstring(colors, "find-highlight-background", "");
 
-// Set defaults if not present
-if findHighlightColor == "" then {
-    findHighlightColor = "#000000";
-}
-if findHighlightBackground == "" then {
-    findHighlightBackground = "#ddb107";
-}
-
 // CSS default values (from console.css / ConsoleConfig.java)
+// These are used as fallback when config values are missing
 var defaultInfoColor: string = "#e6e6e6";
 var defaultCommentColor: string = "#ffffcc";
 var defaultErrorColor: string = "#ee0000";
@@ -250,6 +383,34 @@ var defaultTabLabelChangedColor: string = "#ff6600";
 var defaultTabLabelBackgroundColor: string = "#333333";
 var defaultFindHighlightColor: string = "#000000";
 var defaultFindHighlightBackground: string = "#ddb107";
+
+// Set defaults for any missing color values (robust loading)
+if infoColor == "" then { infoColor = defaultInfoColor; }
+if commentColor == "" then { commentColor = defaultCommentColor; }
+if errorColor == "" then { errorColor = defaultErrorColor; }
+if warnColor == "" then { warnColor = defaultWarnColor; }
+if okColor == "" then { okColor = defaultOkColor; }
+if codeColor == "" then { codeColor = defaultCodeColor; }
+if datatypeColor == "" then { datatypeColor = defaultDatatypeColor; }
+if dataColor == "" then { dataColor = defaultDataColor; }
+if keywordColor == "" then { keywordColor = defaultKeywordColor; }
+if builtinColor == "" then { builtinColor = defaultBuiltinColor; }
+if literalColor == "" then { literalColor = defaultLiteralColor; }
+if identifierColor == "" then { identifierColor = defaultIdentifierColor; }
+if sqlColor == "" then { sqlColor = defaultSqlColor; }
+if customColor == "" then { customColor = defaultCustomColor; }
+if backgroundColor == "" then { backgroundColor = defaultBackgroundColor; }
+if textColor == "" then { textColor = defaultTextColor; }
+if caretColor == "" then { caretColor = defaultCaretColor; }
+if lineCursorColor == "" then { lineCursorColor = defaultLineCursorColor; }
+if lineNumbersColor == "" then { lineNumbersColor = defaultLineNumbersColor; }
+if consoleBackgroundColor == "" then { consoleBackgroundColor = defaultConsoleBackgroundColor; }
+if tabBackgroundColor == "" then { tabBackgroundColor = defaultTabBackgroundColor; }
+if tabLabelColor == "" then { tabLabelColor = defaultTabLabelColor; }
+if tabLabelChangedColor == "" then { tabLabelChangedColor = defaultTabLabelChangedColor; }
+if tabLabelBackgroundColor == "" then { tabLabelBackgroundColor = defaultTabLabelBackgroundColor; }
+if findHighlightColor == "" then { findHighlightColor = defaultFindHighlightColor; }
+if findHighlightBackground == "" then { findHighlightBackground = defaultFindHighlightBackground; }
 
 // ============================================================================
 // Event Handler Functions
@@ -386,7 +547,14 @@ function saveConfigWithCurrentProfile {
     // Re-read the current config to preserve all existing profiles
     var currentConfigContent: string = call file.readtextfile(configPath);
     var currentConfig: json = call json.jsonfromstring(currentConfigContent);
-    var currentProfiles: json = call json.getobject(currentConfig, "profiles");
+    
+    // Initialize with empty JSON objects, then try to get actual values
+    var currentProfiles: json = call json.jsonfromstring("{}");
+    var tempProfiles: json = call json.getobject(currentConfig, "profiles");
+    if call json.isempty(tempProfiles) == false then {
+        currentProfiles = tempProfiles;
+    }
+    
     var currentProfileList: json = call json.getarray(currentConfig, "profileList");
     
     // Build profile list string
@@ -478,43 +646,131 @@ function saveConfigWithCurrentProfile {
     if tempP != "" then { profileKeys[pIdx] = tempP; pIdx = pIdx + 1; }
     profileCount = pIdx;
     
+    // Declare all loop variables before the while loop to avoid redeclaration issues
+    var pName: string = "";
+    var pColors: json = null;
+    var pInfo: string = "";
+    var pComment: string = "";
+    var pError: string = "";
+    var pWarn: string = "";
+    var pOk: string = "";
+    var pCode: string = "";
+    var pDatatype: string = "";
+    var pData: string = "";
+    var pKeyword: string = "";
+    var pBuiltin: string = "";
+    var pLiteral: string = "";
+    var pIdentifier: string = "";
+    var pSql: string = "";
+    var pCustom: string = "";
+    var pBackground: string = "";
+    var pText: string = "";
+    var pCaret: string = "";
+    var pLineCursor: string = "";
+    var pLineNumbers: string = "";
+    var pConsoleBg: string = "";
+    var pTabBg: string = "";
+    var pTabLabelColor: string = "";
+    var pTabLabelChanged: string = "";
+    var pTabLabelBg: string = "";
+    var pFindHlColor: string = "";
+    var pFindHlBg: string = "";
+    
     // Build each profile's JSON
     var i: int = 0;
     while i < profileCount {
-        var pName: string = profileKeys[i];
-        var pColors: json = call json.getobject(currentProfiles, pName);
+        pName = profileKeys[i];
+        pColors = call json.getobject(currentProfiles, pName);
         
         if i > 0 then {
             profilesStr = profilesStr + ",\n    ";
         }
         
-        // Get each color value and build the JSON
-        var pInfo: string = call json.getstring(pColors, "info", "");
-        var pComment: string = call json.getstring(pColors, "comment", "");
-        var pError: string = call json.getstring(pColors, "error", "");
-        var pWarn: string = call json.getstring(pColors, "warn", "");
-        var pOk: string = call json.getstring(pColors, "ok", "");
-        var pCode: string = call json.getstring(pColors, "code", "");
-        var pDatatype: string = call json.getstring(pColors, "datatype", "");
-        var pData: string = call json.getstring(pColors, "data", "");
-        var pKeyword: string = call json.getstring(pColors, "keyword", "");
-        var pBuiltin: string = call json.getstring(pColors, "builtin", "");
-        var pLiteral: string = call json.getstring(pColors, "literal", "");
-        var pIdentifier: string = call json.getstring(pColors, "identifier", "");
-        var pSql: string = call json.getstring(pColors, "sql", "");
-        var pCustom: string = call json.getstring(pColors, "custom", "");
-        var pBackground: string = call json.getstring(pColors, "background", "");
-        var pText: string = call json.getstring(pColors, "text", "");
-        var pCaret: string = call json.getstring(pColors, "caret", "");
-        var pLineCursor: string = call json.getstring(pColors, "line-cursor", "");
-        var pLineNumbers: string = call json.getstring(pColors, "line-numbers", "");
-        var pConsoleBg: string = call json.getstring(pColors, "console-background", "");
-        var pTabBg: string = call json.getstring(pColors, "tab-background", "");
-        var pTabLabelColor: string = call json.getstring(pColors, "tab-label-color", "");
-        var pTabLabelChanged: string = call json.getstring(pColors, "tab-label-changed-color", "");
-        var pTabLabelBg: string = call json.getstring(pColors, "tab-label-background", "");
-        var pFindHlColor: string = call json.getstring(pColors, "find-highlight-color", "");
-        var pFindHlBg: string = call json.getstring(pColors, "find-highlight-background", "");
+        // Reset color values for each iteration
+        pInfo = "";
+        pComment = "";
+        pError = "";
+        pWarn = "";
+        pOk = "";
+        pCode = "";
+        pDatatype = "";
+        pData = "";
+        pKeyword = "";
+        pBuiltin = "";
+        pLiteral = "";
+        pIdentifier = "";
+        pSql = "";
+        pCustom = "";
+        pBackground = "";
+        pText = "";
+        pCaret = "";
+        pLineCursor = "";
+        pLineNumbers = "";
+        pConsoleBg = "";
+        pTabBg = "";
+        pTabLabelColor = "";
+        pTabLabelChanged = "";
+        pTabLabelBg = "";
+        pFindHlColor = "";
+        pFindHlBg = "";
+        
+        if pName == colorEditorScreen.profile then {
+            // Use current screen values for the active profile
+            pInfo = colorEditorScreen.info;
+            pComment = colorEditorScreen.comment;
+            pError = colorEditorScreen.error;
+            pWarn = colorEditorScreen.warn;
+            pOk = colorEditorScreen.ok;
+            pCode = colorEditorScreen.code;
+            pDatatype = colorEditorScreen.datatype;
+            pData = colorEditorScreen.data;
+            pKeyword = colorEditorScreen.keyword;
+            pBuiltin = colorEditorScreen.builtin;
+            pLiteral = colorEditorScreen.literal;
+            pIdentifier = colorEditorScreen.identifier;
+            pSql = colorEditorScreen.sql;
+            pCustom = colorEditorScreen.custom;
+            pBackground = colorEditorScreen.background;
+            pText = colorEditorScreen.text;
+            pCaret = colorEditorScreen.caret;
+            pLineCursor = colorEditorScreen.lineCursor;
+            pLineNumbers = colorEditorScreen.lineNumbers;
+            pConsoleBg = colorEditorScreen.consoleBackground;
+            pTabBg = colorEditorScreen.tabBackground;
+            pTabLabelColor = colorEditorScreen.tabLabelColor;
+            pTabLabelChanged = colorEditorScreen.tabLabelChangedColor;
+            pTabLabelBg = colorEditorScreen.tabLabelBackground;
+            pFindHlColor = colorEditorScreen.findHighlightColor;
+            pFindHlBg = colorEditorScreen.findHighlightBackground;
+        } else {
+            // Use values from the config file for other profiles
+            pInfo = call json.getstring(pColors, "info", "");
+            pComment = call json.getstring(pColors, "comment", "");
+            pError = call json.getstring(pColors, "error", "");
+            pWarn = call json.getstring(pColors, "warn", "");
+            pOk = call json.getstring(pColors, "ok", "");
+            pCode = call json.getstring(pColors, "code", "");
+            pDatatype = call json.getstring(pColors, "datatype", "");
+            pData = call json.getstring(pColors, "data", "");
+            pKeyword = call json.getstring(pColors, "keyword", "");
+            pBuiltin = call json.getstring(pColors, "builtin", "");
+            pLiteral = call json.getstring(pColors, "literal", "");
+            pIdentifier = call json.getstring(pColors, "identifier", "");
+            pSql = call json.getstring(pColors, "sql", "");
+            pCustom = call json.getstring(pColors, "custom", "");
+            pBackground = call json.getstring(pColors, "background", "");
+            pText = call json.getstring(pColors, "text", "");
+            pCaret = call json.getstring(pColors, "caret", "");
+            pLineCursor = call json.getstring(pColors, "line-cursor", "");
+            pLineNumbers = call json.getstring(pColors, "line-numbers", "");
+            pConsoleBg = call json.getstring(pColors, "console-background", "");
+            pTabBg = call json.getstring(pColors, "tab-background", "");
+            pTabLabelColor = call json.getstring(pColors, "tab-label-color", "");
+            pTabLabelChanged = call json.getstring(pColors, "tab-label-changed-color", "");
+            pTabLabelBg = call json.getstring(pColors, "tab-label-background", "");
+            pFindHlColor = call json.getstring(pColors, "find-highlight-color", "");
+            pFindHlBg = call json.getstring(pColors, "find-highlight-background", "");
+        }
         
         profilesStr = profilesStr + "\"" + pName + "\": {\n";
         profilesStr = profilesStr + "      \"info\": \"" + pInfo + "\",\n";
@@ -564,7 +820,14 @@ function addProfileToConfig(newProfileName: string) {
     // Re-read the current config to preserve all existing profiles
     var currentConfigContent: string = call file.readtextfile(configPath);
     var currentConfig: json = call json.jsonfromstring(currentConfigContent);
-    var currentProfiles: json = call json.getobject(currentConfig, "profiles");
+    
+    // Initialize with empty JSON objects, then try to get actual values
+    var currentProfiles: json = call json.jsonfromstring("{}");
+    var tempProfiles: json = call json.getobject(currentConfig, "profiles");
+    if call json.isempty(tempProfiles) == false then {
+        currentProfiles = tempProfiles;
+    }
+    
     var currentProfileList: json = call json.getarray(currentConfig, "profileList");
     
     // Build profile list string (including new profile)
@@ -663,7 +926,13 @@ function addProfileToConfig(newProfileName: string) {
     var i: int = 0;
     while i < profileCount {
         var pName: string = profileKeys[i];
-        var pColors: json = call json.getobject(currentProfiles, pName);
+        
+        // Initialize with empty JSON, then try to get actual colors
+        var pColors: json = call json.jsonfromstring("{}");
+        var tempPColors: json = call json.getobject(currentProfiles, pName);
+        if call json.isempty(tempPColors) == false then {
+            pColors = tempPColors;
+        }
         
         if i > 0 then {
             profilesStr = profilesStr + ",\n    ";
@@ -776,12 +1045,16 @@ function addProfileToConfig(newProfileName: string) {
 // Function: Handle profile change - loads colors for the selected profile and updates config
 function onProfileChange {
     var selectedProfile: string = colorEditorScreen.profile;
-    var profileColors: json = call json.getobject(profiles, selectedProfile);
     
-    if call json.isempty(profileColors) then {
+    // Initialize with empty JSON, then try to get actual colors
+    var profileColors: json = call json.jsonfromstring("{}");
+    var tempProfileColors: json = call json.getobject(profiles, selectedProfile);
+    
+    if call json.isempty(tempProfileColors) then {
         print "Profile '" + selectedProfile + "' not found, using defaults";
         call setColorsToDefaults();
     } else {
+        profileColors = tempProfileColors;
         print "Loading colors for profile: " + selectedProfile;
         
         // Get all color values from the profile
@@ -1090,14 +1363,33 @@ function onResetClick {
     }
 }
 
-// Function: Handle Save and Close button click
-function onSaveCloseClick {
-    var currentColors: string = "{\n      \"info\": \"" + colorEditorScreen.info + "\",\n      \"comment\": \"" + colorEditorScreen.comment + "\",\n      \"error\": \"" + colorEditorScreen.error + "\",\n      \"warn\": \"" + colorEditorScreen.warn + "\",\n      \"ok\": \"" + colorEditorScreen.ok + "\",\n      \"code\": \"" + colorEditorScreen.code + "\",\n      \"datatype\": \"" + colorEditorScreen.datatype + "\",\n      \"data\": \"" + colorEditorScreen.data + "\",\n      \"keyword\": \"" + colorEditorScreen.keyword + "\",\n      \"builtin\": \"" + colorEditorScreen.builtin + "\",\n      \"literal\": \"" + colorEditorScreen.literal + "\",\n      \"identifier\": \"" + colorEditorScreen.identifier + "\",\n      \"sql\": \"" + colorEditorScreen.sql + "\",\n      \"custom\": \"" + colorEditorScreen.custom + "\",\n      \"background\": \"" + colorEditorScreen.background + "\",\n      \"text\": \"" + colorEditorScreen.text + "\",\n      \"caret\": \"" + colorEditorScreen.caret + "\",\n      \"line-cursor\": \"" + colorEditorScreen.lineCursor + "\",\n      \"line-numbers\": \"" + colorEditorScreen.lineNumbers + "\",\n      \"console-background\": \"" + colorEditorScreen.consoleBackground + "\",\n      \"tab-background\": \"" + colorEditorScreen.tabBackground + "\",\n      \"tab-label-color\": \"" + colorEditorScreen.tabLabelColor + "\",\n      \"tab-label-changed-color\": \"" + colorEditorScreen.tabLabelChangedColor + "\",\n      \"tab-label-background\": \"" + colorEditorScreen.tabLabelBackground + "\",\n      \"find-highlight-color\": \"" + colorEditorScreen.findHighlightColor + "\",\n      \"find-highlight-background\": \"" + colorEditorScreen.findHighlightBackground + "\"\n    }";
+// Function: Handle Save button click
+function onSaveClick {
+    // Build the current profile colors as JSON string
+    var currentColorsStr: string = "{\"info\": \"" + colorEditorScreen.info + "\", \"comment\": \"" + colorEditorScreen.comment + "\", \"error\": \"" + colorEditorScreen.error + "\", \"warn\": \"" + colorEditorScreen.warn + "\", \"ok\": \"" + colorEditorScreen.ok + "\", \"code\": \"" + colorEditorScreen.code + "\", \"datatype\": \"" + colorEditorScreen.datatype + "\", \"data\": \"" + colorEditorScreen.data + "\", \"keyword\": \"" + colorEditorScreen.keyword + "\", \"builtin\": \"" + colorEditorScreen.builtin + "\", \"literal\": \"" + colorEditorScreen.literal + "\", \"identifier\": \"" + colorEditorScreen.identifier + "\", \"sql\": \"" + colorEditorScreen.sql + "\", \"custom\": \"" + colorEditorScreen.custom + "\", \"background\": \"" + colorEditorScreen.background + "\", \"text\": \"" + colorEditorScreen.text + "\", \"caret\": \"" + colorEditorScreen.caret + "\", \"line-cursor\": \"" + colorEditorScreen.lineCursor + "\", \"line-numbers\": \"" + colorEditorScreen.lineNumbers + "\", \"console-background\": \"" + colorEditorScreen.consoleBackground + "\", \"tab-background\": \"" + colorEditorScreen.tabBackground + "\", \"tab-label-color\": \"" + colorEditorScreen.tabLabelColor + "\", \"tab-label-changed-color\": \"" + colorEditorScreen.tabLabelChangedColor + "\", \"tab-label-background\": \"" + colorEditorScreen.tabLabelBackground + "\", \"find-highlight-color\": \"" + colorEditorScreen.findHighlightColor + "\", \"find-highlight-background\": \"" + colorEditorScreen.findHighlightBackground + "\"}";
     
-    var jsonContent: string = "{\n  \"currentProfile\": \"" + colorEditorScreen.profile + "\",\n  \"profileList\": [\"" + colorEditorScreen.profile + "\"],\n  \"profiles\": {\n    \"" + colorEditorScreen.profile + "\": " + currentColors + "\n  }\n}";
+    // Parse the colors string to JSON
+    var currentColorsJson: json = call json.jsonFromString(currentColorsStr);
     
+    // Read existing config file and parse it
+    var existingContent: string = call file.readTextFile(configPath);
+    var existingConfig: json = call json.jsonFromString(existingContent);
+    
+    // Update the current profile in the config using json.set
+    var profilePath: string = "profiles." + colorEditorScreen.profile;
+    var updatedConfig: json = call json.set(existingConfig, profilePath, currentColorsJson);
+    
+    // Update the currentProfile field
+    updatedConfig = call json.set(updatedConfig, "currentProfile", colorEditorScreen.profile);
+    
+    // Convert back to string and write to file
+    var jsonContent: string = call json.toString(updatedConfig);
     call file.writeTextFile(configPath, jsonContent);
     call system.alertDialog("Configuration saved to " + configPath + ".\nRestart the application to see changes.", "Saved", "info");
+}
+
+// Function: Handle Close button click
+function onCloseClick {
     close screen;
 }
 
@@ -1562,7 +1854,8 @@ screen colorEditorScreen = {
                 "style": "-fx-spacing: 10; -fx-padding: 10; -fx-alignment: CENTER_RIGHT;",
                 "items": [
                     {"name": "resetBtn", "type": "button", "labelText": "Reset", "style": "-fx-min-width: 80;", "onClick": "call onResetClick();"},
-                    {"name": "saveCloseBtn", "type": "button", "labelText": "Save and Close", "style": "-fx-min-width: 120;", "onClick": "call onSaveCloseClick();"}
+                    {"name": "saveBtn", "type": "button", "labelText": "Save", "style": "-fx-min-width: 80;", "onClick": "call onSaveClick();"},
+                    {"name": "closeBtn", "type": "button", "labelText": "Close", "style": "-fx-min-width: 80;", "onClick": "call onCloseClick();"}
                 ]
             }
         ]
