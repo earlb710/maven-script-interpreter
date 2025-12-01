@@ -810,7 +810,7 @@ public class ScreenFactory {
                 // Start with var-level metadata (from vars section), then merge item-level metadata (from area items display)
                 DisplayItem metadata = null;
                 if (item.varRef != null && context != null) {
-                    metadata = context.getDisplayItem().get(screenName + "." + item.varRef);
+                    metadata = lookupDisplayItem(context, screenName, item.varRef);
                 }
                 // If item has its own display metadata, merge it (item-level overwrites var-level)
                 if (item.displayItem != null) {
@@ -1886,6 +1886,46 @@ public class ScreenFactory {
         
         return merged;
     }
+    
+    /**
+     * Looks up a DisplayItem from the context, trying both the qualified screen name
+     * and the base screen name (for child screens shown from parent screen context).
+     * 
+     * When a screen is defined, display metadata is stored with the base screen name.
+     * However, when shown from within another screen's context, the qualified key
+     * includes the parent prefix (e.g., "parentscreen.childscreen"). This method
+     * handles both cases by first trying the qualified key, then falling back to
+     * the base screen name.
+     * 
+     * @param context The interpreter context containing display items
+     * @param screenName The screen name (may be qualified with parent prefix)
+     * @param varRef The variable reference to look up
+     * @return The DisplayItem if found, or null if not found
+     */
+    private static DisplayItem lookupDisplayItem(InterpreterContext context, String screenName, String varRef) {
+        if (context == null || varRef == null) {
+            return null;
+        }
+        
+        // First try with the qualified screen name
+        String qualifiedKey = screenName + "." + varRef;
+        DisplayItem metadata = context.getDisplayItem().get(qualifiedKey);
+        
+        if (metadata != null) {
+            return metadata;
+        }
+        
+        // If not found and screenName contains a dot (indicating a parent.child pattern),
+        // try with just the base screen name (last part after the last dot)
+        if (screenName.contains(".")) {
+            int lastDotIndex = screenName.lastIndexOf('.');
+            String baseScreenName = screenName.substring(lastDotIndex + 1);
+            String baseKey = baseScreenName + "." + varRef;
+            metadata = context.getDisplayItem().get(baseKey);
+        }
+        
+        return metadata;
+    }
 
     // Helper methods for safe value extraction from Maps
     private static String getStringValue(Map<String, Object> map, String key, String defaultValue) {
@@ -1955,7 +1995,7 @@ public class ScreenFactory {
             // Get metadata with same merge logic as createAreaWithItems
             DisplayItem metadata = null;
             if (item.varRef != null && context != null) {
-                metadata = context.getDisplayItem().get(screenName + "." + item.varRef);
+                metadata = lookupDisplayItem(context, screenName, item.varRef);
             }
             if (item.displayItem != null) {
                 metadata = mergeDisplayMetadata(metadata, item.displayItem);
