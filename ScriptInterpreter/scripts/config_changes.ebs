@@ -1464,7 +1464,7 @@ function setColorsFromCss {
     // - Tab content: slightly darker than base
     // - Tab background (not selected): slightly darker than base
     // - Tab selected: brighter than base (light gray)
-    colorEditorScreen.tabBackground = "#C8C8C8";        // Tab header background - gray
+    colorEditorScreen.tabBackground = "#888888";        // Tab header background - JavaFX gray
     colorEditorScreen.tabLabelBackground = "#C8C8C8";   // Same as tab content
     colorEditorScreen.tabSelect = "#EEEEEE";            // Brighter than base for selected tab
     colorEditorScreen.tabContent = "#C8C8C8";           // Tab content area
