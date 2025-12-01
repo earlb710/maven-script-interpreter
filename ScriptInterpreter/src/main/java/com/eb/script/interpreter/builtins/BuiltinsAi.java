@@ -133,6 +133,9 @@ public class BuiltinsAi {
             throw new InterpreterError("ai.completeAsync requires a callback function name");
         }
         
+        // Lowercase the callback name to match how the lexer stores identifiers
+        final String finalCallbackName = callbackName.toLowerCase();
+        
         // Get the current screen context for the callback (if in a screen)
         String currentScreen = context.getCurrentScreen();
         
@@ -172,7 +175,7 @@ public class BuiltinsAi {
                         paramsList.add(new Parameter("response", DataType.JSON, 
                             new LiteralExpression(DataType.JSON, callbackData)));
                         
-                        CallStatement callStmt = new CallStatement(0, callbackName, paramsList);
+                        CallStatement callStmt = new CallStatement(0, finalCallbackName, paramsList);
                         
                         // Execute the call statement using the main interpreter
                         mainInterpreter.visitCallStatement(callStmt);
