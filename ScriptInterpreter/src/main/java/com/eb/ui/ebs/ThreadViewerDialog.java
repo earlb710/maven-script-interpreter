@@ -20,7 +20,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 /**
- * Dialog that displays all currently running threads in the JVM
+ * Dialog that displays JavaFX and screen-related threads in the JVM
  * along with how long they have been running.
  * 
  * @author Earl Bosch
@@ -32,6 +32,15 @@ public class ThreadViewerDialog extends Stage {
     private Timeline refreshTimeline;
 
     private static final String SCREEN_THREAD_PREFIX = "Screen-";
+    
+    // Prefixes/patterns for JavaFX threads
+    private static final String[] JAVAFX_THREAD_PATTERNS = {
+        "JavaFX",
+        "FX Application",
+        "QuantumRenderer",
+        "Prism",
+        "InvokeLaterDispatcher"
+    };
 
     /**
      * Data model for a thread entry.
@@ -250,7 +259,7 @@ public class ThreadViewerDialog extends Stage {
         layout.setPadding(new Insets(16));
 
         Label infoLabel = new Label(
-            "This view shows all currently running threads in the JVM.\n" +
+            "This view shows JavaFX and screen-related threads.\n" +
             "CPU Time indicates how long the thread has been actively using the CPU.\n" +
             "The Screen column shows the screen name for screen-related threads."
         );
@@ -278,7 +287,7 @@ public class ThreadViewerDialog extends Stage {
     }
 
     /**
-     * Refresh the thread list by querying all active threads.
+     * Refresh the thread list by querying JavaFX and screen threads only.
      */
     private void refreshThreadList() {
         List<ThreadEntry> entries = new ArrayList<>();
@@ -292,6 +301,13 @@ public class ThreadViewerDialog extends Stage {
             ThreadInfo info = threadInfos[i];
             
             if (info != null) {
+                String threadName = info.getThreadName();
+                
+                // Only include JavaFX threads and screen threads
+                if (!isJavaFXOrScreenThread(threadName)) {
+                    continue;
+                }
+                
                 // Get CPU time in nanoseconds, convert to milliseconds
                 long cpuTimeNs = threadMXBean.getThreadCpuTime(threadId);
                 long cpuTimeMs = cpuTimeNs >= 0 ? cpuTimeNs / 1_000_000 : -1;
@@ -302,7 +318,7 @@ public class ThreadViewerDialog extends Stage {
                 int priority = thread != null ? thread.getPriority() : Thread.NORM_PRIORITY;
                 
                 entries.add(new ThreadEntry(
-                    info.getThreadName(),
+                    threadName,
                     info.getThreadState(),
                     cpuTimeMs,
                     threadId,
@@ -318,7 +334,32 @@ public class ThreadViewerDialog extends Stage {
         threadTableView.getItems().clear();
         threadTableView.getItems().addAll(entries);
         
-        threadCountLabel.setText("Total threads: " + entries.size());
+        threadCountLabel.setText("JavaFX & Screen threads: " + entries.size());
+    }
+
+    /**
+     * Check if a thread is a JavaFX thread or a screen thread.
+     * @param threadName The name of the thread to check
+     * @return true if it's a JavaFX or screen thread
+     */
+    private boolean isJavaFXOrScreenThread(String threadName) {
+        if (threadName == null) {
+            return false;
+        }
+        
+        // Check if it's a screen thread
+        if (threadName.startsWith(SCREEN_THREAD_PREFIX)) {
+            return true;
+        }
+        
+        // Check if it matches any JavaFX thread pattern
+        for (String pattern : JAVAFX_THREAD_PATTERNS) {
+            if (threadName.contains(pattern)) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     /**
