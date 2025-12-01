@@ -1,0 +1,42 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: scr.clear builtin - Clear all field values in a screen
+// Syntax: call scr.clear("screenName")
+// Returns: true on success
+
+// Define a test screen
+screen clearScreen = {
+    "title": "Clear Test",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "name",
+            "type": "string",
+            "default": "John Doe",
+            "display": {
+                "type": "textfield",
+                "labelText": "Name:"
+            }
+        },
+        {
+            "name": "count",
+            "type": "int",
+            "default": 42,
+            "display": {
+                "type": "spinner",
+                "min": 0,
+                "max": 100
+            }
+        }
+    ]
+};
+
+show screen clearScreen;
+
+// Display current values
+print "Name before clear: " + clearScreen.name;
+print "Count before clear: " + clearScreen.count;
+
+// Clear all field values
+call scr.clear("clearScreen");
+print "All fields cleared";

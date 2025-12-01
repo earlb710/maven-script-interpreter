@@ -374,8 +374,13 @@ public class Parser {
             return raiseStatement();
         } else if (match(EbsTokenType.CONNECT)) {
             return connectStatement();
+        } else if (checkNewScreen()) {
+            // new screen <name> = {...}; syntax for replacing existing screen
+            advance(); // consume 'new' identifier
+            advance(); // consume 'screen' keyword
+            return screenStatement(true);
         } else if (match(EbsTokenType.SCREEN)) {
-            return screenStatement();
+            return screenStatement(false);
         } else if (match(EbsTokenType.SHOW)) {
             return showScreenStatement();
         } else if (match(EbsTokenType.HIDE)) {
@@ -2401,25 +2406,17 @@ public class Parser {
         return new CloseConnectionStatement(line, (String) nameTok.literal);
     }
 
-    private Statement screenStatement() throws ParseError {
+    private Statement screenStatement(boolean replaceExisting) throws ParseError {
         int line = previous().line; // the 'screen' token
 
-        // 1) Check for optional 'new' keyword for replace mode: screen new <name> = {...};
-        boolean replaceExisting = false;
+        // Parse screen name
         EbsToken nameTok = consume(EbsTokenType.IDENTIFIER, "Expected screen name after 'screen'.");
         String screenName = (String) nameTok.literal;
-        
-        // If the first identifier is "new", then the next identifier is the screen name
-        if (screenName.equalsIgnoreCase("new")) {
-            replaceExisting = true;
-            nameTok = consume(EbsTokenType.IDENTIFIER, "Expected screen name after 'screen new'.");
-            screenName = (String) nameTok.literal;
-        }
 
-        // 2) Expect '=' for screen definition
+        // Expect '=' for screen definition
         if (match(EbsTokenType.EQUAL)) {
-            // screen <name> = {...}; or screen new <name> = {...};
-            // 3) Parse the spec:
+            // screen <name> = {...}; or new screen <name> = {...};
+            // Parse the spec:
             //    - JSON literal ({...}) captured from source
             //    - IDENTIFIER (reference to a var holding json)
             Expression spec;
@@ -2432,7 +2429,7 @@ public class Parser {
                 throw error(peek(), "Expected screen configuration json or variable after '='.");
             }
 
-            // 4) ';'
+            // ';'
             consume(EbsTokenType.SEMICOLON, "Expected ';' after screen statement.");
 
             return new ScreenStatement(line, screenName, spec, replaceExisting);
@@ -2637,6 +2634,26 @@ public class Parser {
         for (EbsTokenType t : types) {
             if (currToken.type == t) {
                 return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check for 'new screen' pattern (identifier 'new' followed by SCREEN keyword).
+     * Used for the 'new screen <name> = {...};' syntax to replace existing screen definitions.
+     */
+    private boolean checkNewScreen() {
+        if (isAtEnd()) {
+            return false;
+        }
+        // Check if current token is identifier 'new'
+        if (currToken.type == EbsTokenType.IDENTIFIER && 
+            currToken.literal instanceof String literal && 
+            literal.equalsIgnoreCase("new")) {
+            // Check if next token is SCREEN using bounds-checked access
+            if (current + 1 < tokens.size()) {
+                return tokens.get(current + 1).type == EbsTokenType.SCREEN;
             }
         }
         return false;

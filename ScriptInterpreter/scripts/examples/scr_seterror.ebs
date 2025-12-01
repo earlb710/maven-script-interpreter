@@ -1,0 +1,32 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: scr.setError builtin - Set an error message on a screen
+// Syntax: call scr.setError("screenName", "errorMessage")
+// Returns: true on success
+
+// Define a test screen
+screen errorScreen = {
+    "title": "Error Screen Test",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "input",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Input:"
+            }
+        }
+    ]
+};
+
+show screen errorScreen;
+
+// Set an error message on the screen
+call scr.setError("errorScreen", "Validation failed: Input cannot be empty");
+print "Error message set on screen";
+
+// Clear the error by setting empty message
+call scr.setError("errorScreen", "");
+print "Error message cleared";

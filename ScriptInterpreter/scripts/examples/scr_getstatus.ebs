@@ -1,0 +1,32 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: scr.getStatus builtin - Get the current status of a screen
+// Syntax: call scr.getStatus("screenName")
+// Returns: Status string ("clean", "changed", or "error")
+
+// Define a test screen
+screen getStatusScreen = {
+    "title": "Get Status Test",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "value",
+            "type": "string",
+            "default": "Initial",
+            "display": {
+                "type": "textfield"
+            }
+        }
+    ]
+};
+
+show screen getStatusScreen;
+
+// Get current status
+var status = call scr.getStatus("getStatusScreen");
+print "Current status: " + status;
+
+// Change status and get it again
+call scr.setStatus("getStatusScreen", "changed");
+status = call scr.getStatus("getStatusScreen");
+print "Updated status: " + status;

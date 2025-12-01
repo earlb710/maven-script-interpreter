@@ -1,0 +1,37 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: scr.setStatus builtin - Set the status of a screen
+// Syntax: call scr.setStatus("screenName", "status")
+// Status values: "clean", "changed", "error"
+// Returns: true on success
+
+// Define a test screen
+screen statusScreen = {
+    "title": "Status Test",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "data",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Data:"
+            }
+        }
+    ]
+};
+
+show screen statusScreen;
+
+// Set screen status to clean (no changes)
+call scr.setStatus("statusScreen", "clean");
+print "Status set to: clean";
+
+// Set screen status to changed (unsaved changes)
+call scr.setStatus("statusScreen", "changed");
+print "Status set to: changed";
+
+// Set screen status to error
+call scr.setStatus("statusScreen", "error");
+print "Status set to: error";

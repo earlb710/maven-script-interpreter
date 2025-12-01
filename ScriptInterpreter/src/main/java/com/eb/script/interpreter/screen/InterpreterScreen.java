@@ -119,7 +119,7 @@ public class InterpreterScreen {
                 if (stmt.replaceExisting) {
                     throw interpreter.error(stmt.getLine(), 
                         "Screen '" + stmt.name + "' is currently in use (open or hidden). " +
-                        "Close the screen first before replacing it with 'screen new'.");
+                        "Close the screen first before replacing it with 'new screen'.");
                 }
                 // For normal screen definition, skip silently if already shown
                 if (context.getOutput() != null) {
@@ -131,7 +131,7 @@ public class InterpreterScreen {
             // Check if this screen name was already declared (even if not shown yet)
             if (context.getDeclaredScreens().containsKey(stmt.name)) {
                 if (stmt.replaceExisting) {
-                    // For 'screen new', remove the old definition first
+                    // For 'new screen', remove the old definition first
                     context.remove(stmt.name);
                     // Continue to create new definition
                 } else {

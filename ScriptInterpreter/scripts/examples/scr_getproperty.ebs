@@ -1,0 +1,42 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: scr.getProperty builtin - Get property value from a screen item
+// Syntax: call scr.getProperty("screenName.itemName", "propertyName")
+// Returns: Property value (type depends on property)
+
+// Define a test screen with an item
+screen propScreen = {
+    "title": "Property Test",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "username",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Username:"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "items": [
+                {
+                    "name": "usernameField",
+                    "varRef": "username"
+                }
+            ]
+        }
+    ]
+};
+
+show screen propScreen;
+
+// Get properties from the item
+var isEditable = call scr.getProperty("propScreen.usernameField", "editable");
+var isVisible = call scr.getProperty("propScreen.usernameField", "visible");
+print "Editable: " + isEditable;
+print "Visible: " + isVisible;

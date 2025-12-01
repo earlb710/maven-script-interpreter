@@ -1,0 +1,29 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: scr.closeScreen builtin - Close a screen programmatically
+// Syntax: call scr.closeScreen("screenName")
+// Returns: true on success
+
+// Define a test screen
+screen closableScreen = {
+    "title": "Closable Screen",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "data",
+            "type": "string",
+            "default": "Test Data",
+            "display": {
+                "type": "textfield"
+            }
+        }
+    ]
+};
+
+// Show the screen
+show screen closableScreen;
+print "Screen is open";
+
+// Close the screen programmatically
+call scr.closeScreen("closableScreen");
+print "Screen is closed (configuration preserved, can be shown again)";

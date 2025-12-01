@@ -1,0 +1,38 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: scr.getItemChoiceOptions builtin - Get options from a dropdown/combobox
+// Syntax: call scr.getItemChoiceOptions("screenName", "itemName")
+// Returns: Options as a map/array
+
+// Define a test screen with a combobox
+screen getChoiceScreen = {
+    "title": "Get Choice Options Test",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "status",
+            "type": "string",
+            "default": "active",
+            "display": {
+                "type": "combobox",
+                "labelText": "Status:",
+                "options": ["active", "inactive", "pending"]
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "items": [
+                { "name": "statusField", "varRef": "status" }
+            ]
+        }
+    ]
+};
+
+show screen getChoiceScreen;
+
+// Get the current options
+var options = call scr.getItemChoiceOptions("getChoiceScreen", "statusField");
+print "Current options: " + options;

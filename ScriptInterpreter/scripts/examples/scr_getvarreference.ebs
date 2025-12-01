@@ -1,0 +1,39 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: scr.getVarReference builtin - Get the variable reference for an item
+// Syntax: call scr.getVarReference("screenName", "itemName")
+// Returns: Variable reference string
+
+// Define a test screen
+screen varRefScreen = {
+    "title": "Var Reference Test",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "userName",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "items": [
+                {
+                    "name": "userNameField",
+                    "varRef": "userName"
+                }
+            ]
+        }
+    ]
+};
+
+show screen varRefScreen;
+
+// Get the variable reference for the item
+var varRef = call scr.getVarReference("varRefScreen", "userNameField");
+print "Variable reference: " + varRef;

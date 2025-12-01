@@ -1,6 +1,6 @@
 // EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
-// Example: screen, show, hide keywords - UI window management
-// Syntax: screen name = {...}; show screen name; hide screen name;
+// Example: screen, show, hide, new screen keywords - UI window management
+// Syntax: screen name = {...}; new screen name = {...}; show screen name; hide screen name;
 
 screen myScreen = {
     "title": "Example Screen",
@@ -24,3 +24,12 @@ show screen myScreen;
 
 // Hide after use (typically in a button handler)
 // hide screen myScreen;
+
+// Replace an existing screen definition with 'new screen'
+// Note: Cannot replace a screen that is currently in use (open or hidden)
+// close screen myScreen;
+// new screen myScreen = {
+//     "title": "Updated Screen",
+//     "width": 600,
+//     "height": 400
+// };

@@ -1,0 +1,33 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: scr.checkChanged builtin - Check if a screen has unsaved changes
+// Syntax: call scr.checkChanged("screenName")
+// Returns: true if screen has changes, false otherwise
+
+// Define a test screen
+screen changedScreen = {
+    "title": "Check Changed Test",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "data",
+            "type": "string",
+            "default": "Original",
+            "display": {
+                "type": "textfield",
+                "labelText": "Data:"
+            }
+        }
+    ]
+};
+
+show screen changedScreen;
+
+// Check initial state
+var hasChanges = call scr.checkChanged("changedScreen");
+print "Has changes initially: " + hasChanges;
+
+// Mark as changed and check again
+call scr.setStatus("changedScreen", "changed");
+hasChanges = call scr.checkChanged("changedScreen");
+print "Has changes after modification: " + hasChanges;

@@ -1,0 +1,39 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: scr.getItemStatus builtin - Get the status of a screen item
+// Syntax: call scr.getItemStatus("screenName", "itemName")
+// Returns: Item status string
+
+// Define a test screen
+screen itemStatusScreen = {
+    "title": "Item Status Test",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "username",
+            "type": "string",
+            "default": "guest",
+            "display": {
+                "type": "textfield"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "items": [
+                {
+                    "name": "usernameItem",
+                    "varRef": "username"
+                }
+            ]
+        }
+    ]
+};
+
+show screen itemStatusScreen;
+
+// Get the item status
+var status = call scr.getItemStatus("itemStatusScreen", "usernameItem");
+print "Item status: " + status;

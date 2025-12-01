@@ -7,7 +7,7 @@ public class ScreenStatement extends Statement {
 
     public final String name;          // required screen name
     public final Expression spec;      // json literal or identifier containing screen configuration
-    public final boolean replaceExisting; // if true, use 'screen new' to replace existing screen definition
+    public final boolean replaceExisting; // if true, use 'new screen' to replace existing screen definition
 
     public ScreenStatement(int line, String name, Expression spec) {
         this(line, name, spec, false);
@@ -28,7 +28,7 @@ public class ScreenStatement extends Statement {
     @Override
     public String toString() {
         if (replaceExisting) {
-            return "screen new " + name + " = " + spec;
+            return "new screen " + name + " = " + spec;
         }
         return "screen " + name + " = " + spec;
     }

@@ -1614,12 +1614,12 @@ screen myWindow = {
 };
 ```
 
-**Note**: If a screen with the same name already exists, the declaration is skipped silently. Use `screen new` to replace an existing screen definition.
+**Note**: If a screen with the same name already exists, the declaration is skipped silently. Use `new screen` to replace an existing screen definition.
 
 #### Replace Existing Screen Definition
 ```javascript
 // Replace an existing screen definition with a new one
-screen new myWindow = {
+new screen myWindow = {
     "title": "Updated Application",
     "width": 1024,
     "height": 768,
@@ -1628,7 +1628,7 @@ screen new myWindow = {
 ```
 
 **Note**: 
-- `screen new` will replace the existing screen definition
+- `new screen` will replace the existing screen definition
 - Cannot replace a screen that is currently in use (open or hidden) - throws an exception
 - Use `close screen` first if you need to replace an active screen
 

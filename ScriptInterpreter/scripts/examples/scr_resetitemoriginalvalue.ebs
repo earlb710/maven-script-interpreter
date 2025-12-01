@@ -1,0 +1,43 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: scr.resetItemOriginalValue builtin - Reset an item's original value
+// Syntax: call scr.resetItemOriginalValue("screenName", "itemName")
+// Returns: true on success
+
+// Define a test screen
+screen resetOrigScreen = {
+    "title": "Reset Original Value Test",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "value",
+            "type": "string",
+            "default": "Initial",
+            "display": {
+                "type": "textfield"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "items": [
+                {
+                    "name": "valueItem",
+                    "varRef": "value"
+                }
+            ]
+        }
+    ]
+};
+
+show screen resetOrigScreen;
+
+// Modify the value
+resetOrigScreen.value = "Modified";
+print "Value modified to: Modified";
+
+// Reset the original value (makes current value the new original)
+call scr.resetItemOriginalValue("resetOrigScreen", "valueItem");
+print "Original value reset to current value";

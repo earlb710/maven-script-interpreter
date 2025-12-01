@@ -346,6 +346,11 @@ screenStmt       = "screen" identifier "=" screenSpec ";" ;
                    (* Define a screen with configuration *)
                    (* Example: screen myScreen = { title: "My Screen", width: 800, height: 600 }; *)
 
+newScreenStmt    = "new" "screen" identifier "=" screenSpec ";" ;
+                   (* Replace an existing screen definition *)
+                   (* Example: new screen myScreen = { title: "Updated Screen" }; *)
+                   (* Note: Cannot replace a screen that is currently in use (open or hidden) *)
+
 showScreenStmt   = "show" "screen" identifier ( "(" expressionList? ")" )? ";" ;
                    (* Show a defined screen, optionally with parameters *)
                    (* Examples:
