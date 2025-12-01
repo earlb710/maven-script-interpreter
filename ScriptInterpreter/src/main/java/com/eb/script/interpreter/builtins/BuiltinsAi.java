@@ -172,7 +172,7 @@ public class BuiltinsAi {
                         // Create a CallStatement directly like screen callbacks do
                         // This properly resolves the function through the interpreter's currentRuntime.blocks
                         List<Parameter> paramsList = new ArrayList<>();
-                        paramsList.add(new Parameter("response", DataType.JSON, 
+                        paramsList.add(new Parameter("airesponse", DataType.JSON, 
                             new LiteralExpression(DataType.JSON, callbackData)));
                         
                         CallStatement callStmt = new CallStatement(0, finalCallbackName, paramsList);

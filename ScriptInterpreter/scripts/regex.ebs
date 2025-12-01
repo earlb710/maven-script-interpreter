@@ -511,30 +511,30 @@ generateRegexFromAi {
 }
 
 // Callback function for AI regex generation result
-onAiRegexComplete(response: json) {
-    // Use json.getBool to access JSON fields
-    var success: bool = call json.getBool(response, "success", false);
+onAiRegexComplete(aiResponse: json) {
+    // Extract success flag using json.getBool builtin
+    var isSuccess: bool = call json.getBool(aiResponse, "success", false);
     
-    if success then {
-        var result: string = call json.getString(response, "result", "");
+    if isSuccess then {
+        var aiResult: string = call json.getString(aiResponse, "result", "");
         
         // Trim whitespace and remove quotes if present
-        result = call str.trim(result);
-        if call str.startsWith(result, "\"") and call str.endsWith(result, "\"") then {
-            var resultChars = call str.charArray(result);
+        aiResult = call str.trim(aiResult);
+        if call str.startsWith(aiResult, "\"") and call str.endsWith(aiResult, "\"") then {
+            var resultChars = call str.charArray(aiResult);
             var resultLen: int = resultChars.length;
-            result = call str.substring(result, 1, resultLen - 1);
+            aiResult = call str.substring(aiResult, 1, resultLen - 1);
         }
-        if call str.startsWith(result, "'") and call str.endsWith(result, "'") then {
-            var resultChars = call str.charArray(result);
+        if call str.startsWith(aiResult, "'") and call str.endsWith(aiResult, "'") then {
+            var resultChars = call str.charArray(aiResult);
             var resultLen: int = resultChars.length;
-            result = call str.substring(result, 1, resultLen - 1);
+            aiResult = call str.substring(aiResult, 1, resultLen - 1);
         }
         
-        askAiScreen.aiResult = "✓ Generated pattern:\n" + result;
-        askAiScreen.generatedPattern = result;
+        askAiScreen.aiResult = "✓ Generated pattern:\n" + aiResult;
+        askAiScreen.generatedPattern = aiResult;
     } else {
-        var errorMsg: string = call json.getString(response, "error", "Unknown error");
+        var errorMsg: string = call json.getString(aiResponse, "error", "Unknown error");
         
         // Check for API key issues (401 Unauthorized)
         var isApiKeyError: bool = false;
