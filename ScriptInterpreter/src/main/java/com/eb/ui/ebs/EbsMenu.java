@@ -220,12 +220,10 @@ public class EbsMenu extends MenuBar {
         
         MenuItem colorsItem = new MenuItem("Colors…");
         colorsItem.setOnAction(e -> {
-            try {
+            try (java.io.InputStream is = getClass().getResourceAsStream("/scripts/config_changes.ebs")) {
                 // Read and execute the config_changes.ebs script
-                java.io.InputStream is = getClass().getResourceAsStream("/scripts/config_changes.ebs");
                 if (is != null) {
                     String script = new String(is.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
-                    is.close();
                     handler.submit(script);
                 } else {
                     handler.submitErrors("Could not find config_changes.ebs script in resources");
