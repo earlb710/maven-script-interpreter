@@ -249,7 +249,9 @@ public class BuiltinsScreen {
             throw new InterpreterError("scr.setProperty: areaItem must be in format 'screenName.areaItemName', got: " + areaItemPath);
         }
 
+        System.out.println("[DEBUG] scr.setProperty: Input path='" + areaItemPath + "' parts[0]='" + parts[0] + "' parts[1]='" + parts[1] + "'");
         String screenName = resolveScreenNameWithParent(context, parts[0]);
+        System.out.println("[DEBUG] scr.setProperty: Resolved screenName='" + screenName + "'");
         String itemName = parts[1];
 
         // Find the screen and area item
@@ -286,18 +288,31 @@ public class BuiltinsScreen {
             try {
                 // Get the list of bound controls for this screen (use lowercase for map lookup)
                 String screenNameLower = screenNameFinal.toLowerCase();
+                System.out.println("[DEBUG] scr.setProperty: Looking for controls with screenName='" + screenNameLower + "'");
                 java.util.List<javafx.scene.Node> controls = context.getScreenBoundControls().get(screenNameLower);
                 if (controls != null) {
+                    System.out.println("[DEBUG] scr.setProperty: Found " + controls.size() + " controls for screen '" + screenNameLower + "'");
                     // Find the control with matching user data (use case-insensitive comparison)
                     String targetUserData = screenNameLower + "." + itemNameFinal.toLowerCase();
+                    System.out.println("[DEBUG] scr.setProperty: Looking for control with userData='" + targetUserData + "'");
+                    boolean found = false;
                     for (javafx.scene.Node control : controls) {
                         Object userData = control.getUserData();
+                        System.out.println("[DEBUG] scr.setProperty:   Control userData='" + userData + "' type=" + control.getClass().getSimpleName());
                         if (userData != null && targetUserData.equalsIgnoreCase(userData.toString())) {
                             // Found the control - apply the property
+                            System.out.println("[DEBUG] scr.setProperty: MATCH! Applying " + finalPropertyName + "=" + finalValue + " to " + control.getClass().getSimpleName());
                             applyPropertyToControl(control, finalPropertyName, finalValue);
+                            found = true;
                             break;
                         }
                     }
+                    if (!found) {
+                        System.out.println("[DEBUG] scr.setProperty: No matching control found for userData='" + targetUserData + "'");
+                    }
+                } else {
+                    System.out.println("[DEBUG] scr.setProperty: No controls found for screen '" + screenNameLower + "'");
+                    System.out.println("[DEBUG] scr.setProperty: Available screens in boundControls: " + context.getScreenBoundControls().keySet());
                 }
             } catch (Exception e) {
                 System.err.println("Error applying property to control: " + e.getMessage());
