@@ -307,8 +307,13 @@ public class ThreadViewerDialog extends Stage {
 
     /**
      * Refresh the thread list by querying JavaFX and screen threads only.
+     * Preserves the currently selected row by remembering the thread ID and restoring selection after refresh.
      */
     private void refreshThreadList() {
+        // Remember the currently selected thread ID to restore selection after refresh
+        ThreadEntry selectedEntry = threadTableView.getSelectionModel().getSelectedItem();
+        long selectedThreadId = selectedEntry != null ? selectedEntry.getThreadId() : -1;
+        
         List<ThreadEntry> entries = new ArrayList<>();
         
         ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
@@ -354,6 +359,17 @@ public class ThreadViewerDialog extends Stage {
         threadTableView.getItems().addAll(entries);
         
         threadCountLabel.setText("JavaFX & Screen threads: " + entries.size());
+        
+        // Restore selection to the previously selected thread if it still exists
+        if (selectedThreadId >= 0) {
+            for (int i = 0; i < entries.size(); i++) {
+                if (entries.get(i).getThreadId() == selectedThreadId) {
+                    threadTableView.getSelectionModel().select(i);
+                    threadTableView.scrollTo(i);
+                    break;
+                }
+            }
+        }
     }
 
     /**

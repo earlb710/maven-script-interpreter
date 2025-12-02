@@ -7,6 +7,7 @@ import com.eb.script.interpreter.screen.VarSet;
 import com.eb.script.interpreter.screen.Var;
 import com.eb.script.interpreter.screen.ScreenStatus;
 import com.eb.script.interpreter.screen.ScreenConfig;
+import com.eb.script.interpreter.screen.ScreenEventDispatcher;
 import com.eb.util.Debugger;
 import com.eb.script.interpreter.db.DbAdapter;
 import com.eb.script.interpreter.db.DbConnection;
@@ -78,6 +79,9 @@ public class InterpreterContext {
     // Track parent-child screen relationships (childScreenName -> parentScreenName)
     private final Map<String, String> screenParentMap = new ConcurrentHashMap<>();
 
+    // Event dispatchers for screen threads (screenName -> ScreenEventDispatcher)
+    private static final ConcurrentHashMap<String, ScreenEventDispatcher> GLOBAL_SCREEN_DISPATCHERS = new ConcurrentHashMap<>();
+
     private DbAdapter db = new OracleDbAdapter();
     private ScriptArea output;
     
@@ -136,6 +140,39 @@ public class InterpreterContext {
 
     public ConcurrentHashMap<String, Thread> getScreenThreads() {
         return GLOBAL_SCREEN_THREADS;
+    }
+
+    /**
+     * Get the event dispatchers map for all screens.
+     * 
+     * @return the event dispatchers map
+     */
+    public ConcurrentHashMap<String, ScreenEventDispatcher> getScreenEventDispatchers() {
+        return GLOBAL_SCREEN_DISPATCHERS;
+    }
+
+    /**
+     * Get the event dispatcher for a specific screen.
+     * 
+     * @param screenName the name of the screen
+     * @return the event dispatcher, or null if not found
+     */
+    public ScreenEventDispatcher getScreenEventDispatcher(String screenName) {
+        return GLOBAL_SCREEN_DISPATCHERS.get(screenName.toLowerCase());
+    }
+
+    /**
+     * Set the event dispatcher for a screen.
+     * 
+     * @param screenName the name of the screen
+     * @param dispatcher the event dispatcher
+     */
+    public void setScreenEventDispatcher(String screenName, ScreenEventDispatcher dispatcher) {
+        if (dispatcher != null) {
+            GLOBAL_SCREEN_DISPATCHERS.put(screenName.toLowerCase(), dispatcher);
+        } else {
+            GLOBAL_SCREEN_DISPATCHERS.remove(screenName.toLowerCase());
+        }
     }
 
     public ConcurrentHashMap<String, Object> getScreenVars(String screen) {
@@ -468,6 +505,11 @@ public class InterpreterContext {
     }
 
     public void clear() {
+        // Shutdown all event dispatchers before clearing
+        for (ScreenEventDispatcher dispatcher : GLOBAL_SCREEN_DISPATCHERS.values()) {
+            dispatcher.shutdown();
+        }
+        GLOBAL_SCREEN_DISPATCHERS.clear();
         GLOBAL_SCREENS.clear();
         GLOBAL_SCREEN_THREADS.clear();
         screenVars.clear();
@@ -488,6 +530,11 @@ public class InterpreterContext {
     }
 
     public void remove(String screenName) {
+        // Shutdown the event dispatcher for this screen
+        ScreenEventDispatcher dispatcher = GLOBAL_SCREEN_DISPATCHERS.remove(screenName);
+        if (dispatcher != null) {
+            dispatcher.shutdown();
+        }
         GLOBAL_SCREENS.remove(screenName);
         GLOBAL_SCREEN_THREADS.remove(screenName);
         screenVars.remove(screenName);
@@ -516,6 +563,11 @@ public class InterpreterContext {
      * @param screenName the name of the screen to close
      */
     public void closeScreen(String screenName) {
+        // Shutdown the event dispatcher for this screen
+        ScreenEventDispatcher dispatcher = GLOBAL_SCREEN_DISPATCHERS.remove(screenName);
+        if (dispatcher != null) {
+            dispatcher.shutdown();
+        }
         GLOBAL_SCREENS.remove(screenName);
         GLOBAL_SCREEN_THREADS.remove(screenName);
         screenCallbacks.remove(screenName);
