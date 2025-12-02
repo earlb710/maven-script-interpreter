@@ -619,7 +619,8 @@ showAskAiScreen {
                     "type": "textarea",
                     "labelText": "Describe what\nyou want\nto match:",
                     "promptHelp": "E.g., 'email addresses' or 'dates in YYYY-MM-DD format' or 'phone numbers with area code'",
-                    "maxLength": 60
+                    "maxLength": 60,
+                    "height": 4
                 }
             },
             {
