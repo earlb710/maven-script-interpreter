@@ -650,6 +650,16 @@ public class InterpreterScreen {
                     return executeCode(ebsCode, true);
                 }
                 
+                @Override
+                public void executeDirect(String ebsCode) throws InterpreterError {
+                    // Execute code directly on the calling thread (e.g., JavaFX thread)
+                    // This is useful for button onClick handlers that need to show dialogs
+                    // to avoid deadlocks between JavaFX thread and screen thread
+                    executeCodeDirectly(ebsCode, false);
+                    // Trigger UI refresh after execution
+                    context.triggerScreenRefresh(qualifiedKey);
+                }
+                
                 private Object executeCode(String ebsCode, boolean returnValue) throws InterpreterError {
                     // Get the screen's event dispatcher
                     ScreenEventDispatcher dispatcher = context.getScreenEventDispatcher(qualifiedKey);

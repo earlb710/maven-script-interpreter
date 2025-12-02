@@ -645,7 +645,9 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             if (screenVarMap != null) {
                 if (screenVarMap.containsKey(varName)) {
                     // Variable exists with simple name (legacy format)
-                    screenVarMap.put(varName, value);
+                    // ConcurrentHashMap doesn't allow null values, so convert null to empty string
+                    Object safeValue = (value != null) ? value : "";
+                    screenVarMap.put(varName, safeValue);
                     // Trigger screen refresh to update UI controls
                     context.triggerScreenRefresh(screenName);
                     return;
@@ -662,7 +664,9 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars(firstPart);
             if (screenVarMap != null) {
                 if (screenVarMap.containsKey(secondPart)) {
-                    screenVarMap.put(secondPart, value);
+                    // ConcurrentHashMap doesn't allow null values, so convert null to empty string
+                    Object safeValue = (value != null) ? value : "";
+                    screenVarMap.put(secondPart, safeValue);
                     // Trigger screen refresh to update UI controls
                     context.triggerScreenRefresh(firstPart);
                     return;

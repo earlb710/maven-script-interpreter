@@ -61,6 +61,22 @@ public class ScreenFactory {
             execute(ebsCode);
             return null;
         }
+        
+        /**
+         * Execute EBS code directly on the calling thread (e.g., JavaFX thread).
+         * This avoids deadlocks when the code needs to show dialogs.
+         * Implementations must override this method if they use a separate thread
+         * for code execution (e.g., screen thread via dispatchSync).
+         * 
+         * @param ebsCode The EBS code to execute
+         * @throws InterpreterError If execution fails
+         */
+        default void executeDirect(String ebsCode) throws InterpreterError {
+            // Default implementation calls execute() which may cause deadlock
+            // if the implementation dispatches to a separate thread.
+            // Implementations that use separate threads should override this method.
+            execute(ebsCode);
+        }
     }
 
     private static Map<String, Object> screenSchema;
@@ -1552,7 +1568,9 @@ public class ScreenFactory {
                         String ebsCode = metadata.onClick;
                         button.setOnAction(event -> {
                             try {
-                                onClickHandler.execute(ebsCode);
+                                // Use executeDirect to run code on JavaFX thread
+                                // This avoids deadlocks when the code shows dialogs
+                                onClickHandler.executeDirect(ebsCode);
                                 // After executing the onClick code, refresh all bound controls
                                 refreshBoundControls(boundControls, screenVars);
                             } catch (InterpreterError e) {
@@ -1760,10 +1778,11 @@ public class ScreenFactory {
     
     /**
      * Executes area inline code with proper screen context using the onClick handler.
+     * Uses executeDirect to run on the calling thread and avoid deadlocks with dialogs.
      */
     private static void executeAreaInlineCode(String screenName, String ebsCode, String eventType, InterpreterContext context, OnClickHandler onClickHandler) throws InterpreterError {
         if (onClickHandler != null) {
-            onClickHandler.execute(ebsCode);
+            onClickHandler.executeDirect(ebsCode);
         }
     }
 

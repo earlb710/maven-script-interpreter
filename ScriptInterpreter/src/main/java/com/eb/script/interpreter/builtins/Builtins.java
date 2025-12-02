@@ -932,6 +932,11 @@ public final class Builtins {
                 newParam("screenName", DataType.STRING, true) // required; screen name
         ));
         addBuiltin(info(
+                "scr.setStatusBarMessage", DataType.BOOL,
+                newParam("screenName", DataType.STRING, true), // required; screen name
+                newParam("message", DataType.STRING, false) // optional; message to display (empty clears the status)
+        ));
+        addBuiltin(info(
                 "scr.findScreen", DataType.BOOL,
                 newParam("screenName", DataType.STRING, true) // required; screen name to check if defined
         ));
@@ -1133,6 +1138,7 @@ public final class Builtins {
             case "scr.getstatus" -> BuiltinsScreen.screenGetStatus(context, args);
             case "scr.seterror" -> BuiltinsScreen.screenSetError(context, args);
             case "scr.geterror" -> BuiltinsScreen.screenGetError(context, args);
+            case "scr.setstatusbarmessage" -> BuiltinsScreen.screenSetStatusBarMessage(context, args);
             case "scr.findscreen" -> BuiltinsScreen.screenFindScreen(context, args);
             case "scr.getitemsource" -> BuiltinsScreen.screenGetItemSource(context, args);
             case "scr.setitemsource" -> BuiltinsScreen.screenSetItemSource(context, args);

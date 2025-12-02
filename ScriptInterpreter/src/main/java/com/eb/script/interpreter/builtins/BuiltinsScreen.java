@@ -521,6 +521,36 @@ public class BuiltinsScreen {
     }
 
     /**
+     * scr.setStatusBarMessage(screenName, message) -> Boolean
+     * Sets a message in the screen's status bar.
+     */
+    public static Object screenSetStatusBarMessage(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (String) args[0];
+        String message = args.length > 1 && args[1] != null ? String.valueOf(args[1]) : "";
+
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("scr.setStatusBarMessage: screenName parameter cannot be null or empty");
+        }
+
+        // Verify screen exists
+        String normalizedName = screenName.toLowerCase();
+        if (!context.getScreens().containsKey(normalizedName)) {
+            throw new InterpreterError("scr.setStatusBarMessage: screen '" + screenName + "' not found");
+        }
+
+        // Get the status bar and set the message
+        com.eb.ui.ebs.StatusBar statusBar = context.getScreenStatusBars().get(normalizedName);
+        if (statusBar != null) {
+            javafx.application.Platform.runLater(() -> {
+                statusBar.setMessage(message);
+            });
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * scr.getItemSource(screenName, itemName) -> String Gets the source
      * property of a screen item: "data" or "display"
      */

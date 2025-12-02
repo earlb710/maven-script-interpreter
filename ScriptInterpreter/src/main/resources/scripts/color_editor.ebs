@@ -1482,13 +1482,13 @@ function onResetClick {
         var confirm: bool = call system.confirmDialog("Are you sure you want to reset all colors to their original CSS default values?", "Confirm Reset");
         if confirm then {
             call setColorsFromCss();
-            call system.alertDialog("Colors reset to original CSS default values.", "Reset", "info");
+            call scr.setStatusBarMessage("colorEditorScreen", "Colors reset to original CSS default values.");
         }
     } else {
         // On non-default profile: switch to default profile
         colorEditorScreen.profile = "default";
         call onProfileChange();
-        call system.alertDialog("Reset to default profile.", "Reset", "info");
+        call scr.setStatusBarMessage("colorEditorScreen", "Reset to default profile.");
     }
 }
 
@@ -1516,9 +1516,9 @@ function onSaveClick {
     // Apply the configuration changes immediately
     var reloadSuccess: bool = call system.reloadConfig();
     if reloadSuccess then {
-        call system.alertDialog("All profiles saved and applied to " + configPath + ".\nColors have been updated.", "Saved and Applied", "info");
+        call scr.setStatusBarMessage("colorEditorScreen", "All profiles saved and applied. Colors have been updated.");
     } else {
-        call system.alertDialog("All profiles saved to " + configPath + ".\nHowever, colors could not be applied immediately.\nRestart the application to see changes.", "Saved", "warning");
+        call scr.setStatusBarMessage("colorEditorScreen", "Saved to " + configPath + ". Restart to see changes.");
     }
 }
 
