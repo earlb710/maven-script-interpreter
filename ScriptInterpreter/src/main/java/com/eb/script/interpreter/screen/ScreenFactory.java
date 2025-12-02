@@ -61,6 +61,17 @@ public class ScreenFactory {
             execute(ebsCode);
             return null;
         }
+        
+        /**
+         * Execute EBS code directly on the calling thread (e.g., JavaFX thread).
+         * This avoids deadlocks when the code needs to show dialogs.
+         * 
+         * @param ebsCode The EBS code to execute
+         * @throws InterpreterError If execution fails
+         */
+        default void executeDirect(String ebsCode) throws InterpreterError {
+            execute(ebsCode);
+        }
     }
 
     private static Map<String, Object> screenSchema;
@@ -1552,7 +1563,9 @@ public class ScreenFactory {
                         String ebsCode = metadata.onClick;
                         button.setOnAction(event -> {
                             try {
-                                onClickHandler.execute(ebsCode);
+                                // Use executeDirect to run code on JavaFX thread
+                                // This avoids deadlocks when the code shows dialogs
+                                onClickHandler.executeDirect(ebsCode);
                                 // After executing the onClick code, refresh all bound controls
                                 refreshBoundControls(boundControls, screenVars);
                             } catch (InterpreterError e) {
