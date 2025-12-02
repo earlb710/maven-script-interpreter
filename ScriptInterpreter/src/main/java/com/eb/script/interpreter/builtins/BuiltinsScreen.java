@@ -284,11 +284,12 @@ public class BuiltinsScreen {
 
         javafx.application.Platform.runLater(() -> {
             try {
-                // Get the list of bound controls for this screen
-                java.util.List<javafx.scene.Node> controls = context.getScreenBoundControls().get(screenNameFinal);
+                // Get the list of bound controls for this screen (use lowercase for map lookup)
+                String screenNameLower = screenNameFinal.toLowerCase();
+                java.util.List<javafx.scene.Node> controls = context.getScreenBoundControls().get(screenNameLower);
                 if (controls != null) {
-                    // Find the control with matching user data
-                    String targetUserData = screenNameFinal + "." + itemNameFinal;
+                    // Find the control with matching user data (user data is stored in lowercase)
+                    String targetUserData = screenNameLower + "." + itemNameFinal.toLowerCase();
                     for (javafx.scene.Node control : controls) {
                         Object userData = control.getUserData();
                         if (targetUserData.equals(userData)) {
