@@ -268,23 +268,21 @@ public class ScreenFactory {
         row.setAlignment(Pos.CENTER_LEFT);
         row.setPadding(new Insets(2, 5, 2, 5));
         
-        // Variable name
+        // Variable name with tooltip showing full name
         javafx.scene.control.Label nameLabel = new javafx.scene.control.Label(name + ":");
         nameLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #0066cc;");
         nameLabel.setMinWidth(80);
         nameLabel.setMaxWidth(100);
+        nameLabel.setTooltip(new javafx.scene.control.Tooltip(name));
         
-        // Variable value
+        // Variable value with tooltip showing full value
         String valueStr = formatValue(value);
+        String fullValueStr = formatValueFull(value);
         javafx.scene.control.Label valueLabel = new javafx.scene.control.Label(valueStr);
         valueLabel.setStyle("-fx-text-fill: #333;");
         valueLabel.setWrapText(true);
         valueLabel.setMaxWidth(150);
-        
-        // Add tooltip with full value for long values
-        if (valueStr.length() > 30) {
-            valueLabel.setTooltip(new javafx.scene.control.Tooltip(valueStr));
-        }
+        valueLabel.setTooltip(new javafx.scene.control.Tooltip(fullValueStr));
         
         row.getChildren().addAll(nameLabel, valueLabel);
         
@@ -325,6 +323,68 @@ public class ScreenFactory {
             return str.substring(0, 47) + "...";
         }
         return str;
+    }
+    
+    /**
+     * Format a value for tooltip display (full value without truncation).
+     * 
+     * @param value The value to format
+     * @return A full string representation of the value for tooltip display
+     */
+    private static String formatValueFull(Object value) {
+        if (value == null) {
+            return "null";
+        }
+        if (value instanceof String) {
+            return "\"" + value + "\"";
+        }
+        if (value instanceof java.util.Map) {
+            @SuppressWarnings("unchecked")
+            java.util.Map<Object, Object> map = (java.util.Map<Object, Object>) value;
+            StringBuilder sb = new StringBuilder("{");
+            int count = 0;
+            for (java.util.Map.Entry<Object, Object> entry : map.entrySet()) {
+                if (count > 0) sb.append(", ");
+                sb.append(entry.getKey()).append(": ").append(entry.getValue());
+                count++;
+                if (count >= 20) {
+                    sb.append(", ... (").append(map.size() - 20).append(" more)");
+                    break;
+                }
+            }
+            sb.append("}");
+            return sb.toString();
+        }
+        if (value instanceof java.util.List) {
+            java.util.List<?> list = (java.util.List<?>) value;
+            StringBuilder sb = new StringBuilder("[");
+            int count = 0;
+            for (Object item : list) {
+                if (count > 0) sb.append(", ");
+                sb.append(item);
+                count++;
+                if (count >= 20) {
+                    sb.append(", ... (").append(list.size() - 20).append(" more)");
+                    break;
+                }
+            }
+            sb.append("]");
+            return sb.toString();
+        }
+        if (value.getClass().isArray()) {
+            int length = java.lang.reflect.Array.getLength(value);
+            StringBuilder sb = new StringBuilder("[");
+            for (int i = 0; i < Math.min(length, 20); i++) {
+                if (i > 0) sb.append(", ");
+                sb.append(java.lang.reflect.Array.get(value, i));
+            }
+            if (length > 20) {
+                sb.append(", ... (").append(length - 20).append(" more)");
+            }
+            sb.append("]");
+            return sb.toString();
+        }
+        return String.valueOf(value);
     }
     
     /**
