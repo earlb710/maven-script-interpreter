@@ -3,8 +3,8 @@
 // Author: EBS Script Collection
 // Date: 2025-11-22
 
-print "=== Console Configuration Color Editor ===";
-print "";
+// print "=== Console Configuration Color Editor ===";
+// print "";
 
 // Read the console.cfg file
 // Try multiple possible paths since the script can be run from different directories
@@ -39,9 +39,9 @@ if call file.exists("console.cfg") then {
     }
 }
 
-print "File found at: " + configPath;
-print "File content read successfully";
-print "";
+// print "File found at: " + configPath;
+// print "File content read successfully";
+// print "";
 
 // Validate config content - check if it's empty or invalid
 var configIsValid: bool = true;
@@ -118,7 +118,7 @@ if configIsValid == false then {
 }
 
 // Parse the JSON content
-print "Parsing JSON configuration...";
+// print "Parsing JSON configuration...";
 var config: json = call json.jsonfromstring(configContent);
 
 // Check if parsing succeeded
@@ -179,8 +179,8 @@ if call json.isempty(config) then {
     }
 }
 
-print "JSON parsed successfully";
-print "";
+// print "JSON parsed successfully";
+// print "";
 
 // Get profile list from config (or default to ["default"])
 var profileListJson: json = call json.getarray(config, "profileList");
@@ -285,18 +285,18 @@ if hasDefaultProfile == false then {
     print "Added 'default' profile since it was missing";
 }
 
-print "Profile list: ";
+// print "Profile list: ";
 var printIdx: int = 0;
 while printIdx < profileList.length {
-    print "  - " + profileList[printIdx];
+    // print "  - " + profileList[printIdx];
     // Build the map for combobox options
     call json.set(profileOptionsMap, profileList[printIdx], profileList[printIdx]);
     printIdx = printIdx + 1;
 }
-print "";
+// print "";
 
-print "Profile options map: " + profileOptionsMap;
-print "";
+// print "Profile options map: " + profileOptionsMap;
+// print "";
 
 // Get the current profile name (default to "default" if not present)
 var profileName: string = call json.getstring(config, "currentProfile", "");
@@ -304,7 +304,7 @@ if profileName == "" then {
     profileName = "default";
 }
 print "Current Profile: " + profileName;
-print "";
+// print "";
 
 // Get profiles object and current profile's colors
 // json.getobject now returns empty map if key doesn't exist (instead of null)
@@ -333,8 +333,8 @@ if call json.isempty(colors) then {
     }
 }
 
-print "Colors object retrieved for profile: " + profileName;
-print "";
+// print "Colors object retrieved for profile: " + profileName;
+// print "";
 
 // Extract all color values into variables
 var infoColor: string = call json.getstring(colors, "info", "");
@@ -1528,43 +1528,43 @@ function onCloseClick {
 }
 
 // Display all available colors
-print "Available colors in console.cfg:";
-print "- info: " + infoColor;
-print "- comment: " + commentColor;
-print "- error: " + errorColor;
-print "- warn: " + warnColor;
-print "- ok: " + okColor;
-print "- code: " + codeColor;
-print "- datatype: " + datatypeColor;
-print "- data: " + dataColor;
-print "- keyword: " + keywordColor;
-print "- builtin: " + builtinColor;
-print "- literal: " + literalColor;
-print "- identifier: " + identifierColor;
-print "- sql: " + sqlColor;
-print "- custom: " + customColor;
-print "- background: " + backgroundColor;
-print "- text: " + textColor;
-print "- caret: " + caretColor;
-print "- line-cursor: " + lineCursorColor;
-print "- line-numbers: " + lineNumbersColor;
-print "- console-background: " + consoleBackgroundColor;
-print "- tab-background: " + tabBackgroundColor;
-print "- tab-label-color: " + tabLabelColor;
-print "- tab-label-changed-color: " + tabLabelChangedColor;
-print "- tab-label-background: " + tabLabelBackgroundColor;
-print "- tab-select: " + tabSelectColor;
-print "- tab-content: " + tabContentColor;
-print "- find-highlight-color: " + findHighlightColor;
-print "- find-highlight-background: " + findHighlightBackground;
-print "- current-find-highlight-bg: " + currentFindHighlightBg;
-print "";
+// print "Available colors in console.cfg:";
+// print "- info: " + infoColor;
+// print "- comment: " + commentColor;
+// print "- error: " + errorColor;
+// print "- warn: " + warnColor;
+// print "- ok: " + okColor;
+// print "- code: " + codeColor;
+// print "- datatype: " + datatypeColor;
+// print "- data: " + dataColor;
+// print "- keyword: " + keywordColor;
+// print "- builtin: " + builtinColor;
+// print "- literal: " + literalColor;
+// print "- identifier: " + identifierColor;
+// print "- sql: " + sqlColor;
+// print "- custom: " + customColor;
+// print "- background: " + backgroundColor;
+// print "- text: " + textColor;
+// print "- caret: " + caretColor;
+// print "- line-cursor: " + lineCursorColor;
+// print "- line-numbers: " + lineNumbersColor;
+// print "- console-background: " + consoleBackgroundColor;
+// print "- tab-background: " + tabBackgroundColor;
+// print "- tab-label-color: " + tabLabelColor;
+// print "- tab-label-changed-color: " + tabLabelChangedColor;
+// print "- tab-label-background: " + tabLabelBackgroundColor;
+// print "- tab-select: " + tabSelectColor;
+// print "- tab-content: " + tabContentColor;
+// print "- find-highlight-color: " + findHighlightColor;
+// print "- find-highlight-background: " + findHighlightBackground;
+// print "- current-find-highlight-bg: " + currentFindHighlightBg;
+// print "";
 
 // Build the screen configuration using $var references
-print "Building color editor screen configuration...";
+// print "Building color editor screen configuration...";
 
 // Create the screen with $var references (no quotes around $variables)
-print "Creating color editor screen with colors from console.cfg...";
+// print "Creating color editor screen with colors from console.cfg...";
 screen colorEditorScreen = {
     "title": "Console Configuration Color Editor",
     "width": 1000,
@@ -2029,56 +2029,56 @@ screen colorEditorScreen = {
     }]
 };
 
-print "Color editor screen created successfully";
-print "";
+// print "Color editor screen created successfully";
+// print "";
 
 // Set the profile combobox options using the map
-print "Setting profile combobox options...";
+// print "Setting profile combobox options...";
 call scr.setItemChoiceOptions("colorEditorScreen", "profile", profileOptionsMap);
-print "Profile options set: " + profileOptionsMap;
-print "";
+// print "Profile options set: " + profileOptionsMap;
+// print "";
 
 // Show the screen
 print "Displaying color editor screen...";
-print "You can now edit the colors using the color pickers.";
-print "";
+// print "You can now edit the colors using the color pickers.";
+// print "";
 show screen colorEditorScreen;
 
 // After the screen is closed, display the updated values
-print "";
-print "=== Updated Configuration ===";
-print "profile: " + colorEditorScreen.profile;
-print "";
-print "=== Updated Color Values ===";
-print "info: " + colorEditorScreen.info;
-print "comment: " + colorEditorScreen.comment;
-print "error: " + colorEditorScreen.error;
-print "warn: " + colorEditorScreen.warn;
-print "ok: " + colorEditorScreen.ok;
-print "code: " + colorEditorScreen.code;
-print "datatype: " + colorEditorScreen.datatype;
-print "data: " + colorEditorScreen.data;
-print "keyword: " + colorEditorScreen.keyword;
-print "builtin: " + colorEditorScreen.builtin;
-print "literal: " + colorEditorScreen.literal;
-print "identifier: " + colorEditorScreen.identifier;
-print "sql: " + colorEditorScreen.sql;
-print "custom: " + colorEditorScreen.custom;
-print "background: " + colorEditorScreen.background;
-print "text: " + colorEditorScreen.text;
-print "caret: " + colorEditorScreen.caret;
-print "lineCursor: " + colorEditorScreen.lineCursor;
-print "lineNumbers: " + colorEditorScreen.lineNumbers;
-print "consoleBackground: " + colorEditorScreen.consoleBackground;
-print "tabBackground: " + colorEditorScreen.tabBackground;
-print "tabLabelColor: " + colorEditorScreen.tabLabelColor;
-print "tabLabelChangedColor: " + colorEditorScreen.tabLabelChangedColor;
-print "tabLabelBackground: " + colorEditorScreen.tabLabelBackground;
-print "tabSelect: " + colorEditorScreen.tabSelect;
-print "tabContent: " + colorEditorScreen.tabContent;
-print "findHighlightColor: " + colorEditorScreen.findHighlightColor;
-print "findHighlightBackground: " + colorEditorScreen.findHighlightBackground;
-print "currentFindHighlightBg: " + colorEditorScreen.currentFindHighlightBg;
+// print "";
+// print "=== Updated Configuration ===";
+// print "profile: " + colorEditorScreen.profile;
+// print "";
+// print "=== Updated Color Values ===";
+// print "info: " + colorEditorScreen.info;
+// print "comment: " + colorEditorScreen.comment;
+// print "error: " + colorEditorScreen.error;
+// print "warn: " + colorEditorScreen.warn;
+// print "ok: " + colorEditorScreen.ok;
+// print "code: " + colorEditorScreen.code;
+// print "datatype: " + colorEditorScreen.datatype;
+// print "data: " + colorEditorScreen.data;
+// print "keyword: " + colorEditorScreen.keyword;
+// print "builtin: " + colorEditorScreen.builtin;
+// print "literal: " + colorEditorScreen.literal;
+// print "identifier: " + colorEditorScreen.identifier;
+// print "sql: " + colorEditorScreen.sql;
+// print "custom: " + colorEditorScreen.custom;
+// print "background: " + colorEditorScreen.background;
+// print "text: " + colorEditorScreen.text;
+// print "caret: " + colorEditorScreen.caret;
+// print "lineCursor: " + colorEditorScreen.lineCursor;
+// print "lineNumbers: " + colorEditorScreen.lineNumbers;
+// print "consoleBackground: " + colorEditorScreen.consoleBackground;
+// print "tabBackground: " + colorEditorScreen.tabBackground;
+// print "tabLabelColor: " + colorEditorScreen.tabLabelColor;
+// print "tabLabelChangedColor: " + colorEditorScreen.tabLabelChangedColor;
+// print "tabLabelBackground: " + colorEditorScreen.tabLabelBackground;
+// print "tabSelect: " + colorEditorScreen.tabSelect;
+// print "tabContent: " + colorEditorScreen.tabContent;
+// print "findHighlightColor: " + colorEditorScreen.findHighlightColor;
+// print "findHighlightBackground: " + colorEditorScreen.findHighlightBackground;
+// print "currentFindHighlightBg: " + colorEditorScreen.currentFindHighlightBg;
 
-print "";
-print "Console configuration color editor completed!";
+// print "";
+// print "Console configuration color editor completed!";
