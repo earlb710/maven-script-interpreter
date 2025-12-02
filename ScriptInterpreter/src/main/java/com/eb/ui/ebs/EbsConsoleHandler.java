@@ -65,7 +65,8 @@ public class EbsConsoleHandler extends EbsHandler {
             // Handle simple commands
             if (line != null && !line.isBlank()) {
                 line = line.trim();
-                if (line.charAt(0) == '/') {
+                // Check for console commands (start with single '/') but not EBS comments (start with '//')
+                if (line.charAt(0) == '/' && (line.length() < 2 || line.charAt(1) != '/')) {
                     String cmd = line.toLowerCase();
                     if (cmd.startsWith("/list ")) {
                         line = line.substring(6).trim();
