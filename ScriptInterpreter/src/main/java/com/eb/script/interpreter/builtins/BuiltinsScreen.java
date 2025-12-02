@@ -288,11 +288,11 @@ public class BuiltinsScreen {
                 String screenNameLower = screenNameFinal.toLowerCase();
                 java.util.List<javafx.scene.Node> controls = context.getScreenBoundControls().get(screenNameLower);
                 if (controls != null) {
-                    // Find the control with matching user data (user data is stored in lowercase)
+                    // Find the control with matching user data (use case-insensitive comparison)
                     String targetUserData = screenNameLower + "." + itemNameFinal.toLowerCase();
                     for (javafx.scene.Node control : controls) {
                         Object userData = control.getUserData();
-                        if (targetUserData.equals(userData)) {
+                        if (userData != null && targetUserData.equalsIgnoreCase(userData.toString())) {
                             // Found the control - apply the property
                             applyPropertyToControl(control, finalPropertyName, finalValue);
                             break;
