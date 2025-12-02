@@ -731,6 +731,51 @@ Set the adapter in the interpreter:
 interpreter.setDbAdapter(new MyDbAdapter());
 ```
 
+### Running Scripts from Menu Items
+
+You can add menu items that execute EBS scripts bundled as resources. This is useful for utility scripts like configuration editors.
+
+**Step 1: Add your script to resources**
+
+Place your `.ebs` script in `ScriptInterpreter/src/main/resources/scripts/`:
+
+```
+src/main/resources/
+└── scripts/
+    └── my_script.ebs
+```
+
+**Step 2: Add a menu item in `EbsMenu.java`**
+
+```java
+MenuItem myScriptItem = new MenuItem("My Script…");
+myScriptItem.setOnAction(e -> {
+    handler.runScriptFromResource("/scripts/my_script.ebs", "My Script");
+});
+
+// Add to the appropriate menu
+toolsMenu.getItems().add(myScriptItem);
+```
+
+**The `runScriptFromResource` method:**
+- Loads the script from the classpath resources
+- Executes it in a background thread (doesn't block the UI)
+- Updates the status bar during execution
+- Displays errors in the console output if execution fails
+
+**Parameters:**
+- `resourcePath` - Path to the script resource (e.g., `/scripts/my_script.ebs`)
+- `scriptName` - Friendly name shown in status bar and error messages
+
+**Example: Color Editor Menu Item**
+
+```java
+MenuItem colorsItem = new MenuItem("Colors…");
+colorsItem.setOnAction(e -> {
+    handler.runScriptFromResource("/scripts/color_editor.ebs", "Color Editor");
+});
+```
+
 ## Contributing
 
 Contributions are welcome! Areas for enhancement:
