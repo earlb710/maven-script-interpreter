@@ -217,8 +217,25 @@ public class EbsMenu extends MenuBar {
             DatabaseConfigDialog dialog = new DatabaseConfigDialog();
             dialog.show();
         });
+        
+        MenuItem colorsItem = new MenuItem("Colors…");
+        colorsItem.setOnAction(e -> {
+            try {
+                // Read and execute the config_changes.ebs script
+                java.io.InputStream is = getClass().getResourceAsStream("/scripts/config_changes.ebs");
+                if (is != null) {
+                    String script = new String(is.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+                    is.close();
+                    handler.submit(script);
+                } else {
+                    handler.submitErrors("Could not find config_changes.ebs script in resources");
+                }
+            } catch (Exception ex) {
+                handler.submitErrors("Error running colors configuration: " + ex.getMessage());
+            }
+        });
 
-        toolsMenu.getItems().addAll(aiSetupItem, safeDirsItem, dbConfigItem);
+        toolsMenu.getItems().addAll(aiSetupItem, safeDirsItem, dbConfigItem, colorsItem);
         getMenus().add(toolsMenu);
 
         // --- Tools Menu ---
