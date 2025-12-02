@@ -1848,7 +1848,7 @@ screen colorEditorScreen = {
     "area": [{
         "name": "rootArea",
         "type": "vbox",
-        "style": "-fx-spacing: 4; -fx-padding: 4;",
+        "spacing":4, "padding":4,
         "background": "#efefef",
         "areas": [
             {
@@ -1864,12 +1864,12 @@ screen colorEditorScreen = {
                             {
                                 "name": "colorsContent",
                                 "type": "vbox",
-                                "style": "-fx-spacing: 4; -fx-padding: 4;",
+        			"spacing":4, "padding":4,
                                 "areas": [
                                     {
                                         "name": "profileArea",
                                         "type": "hbox",
-                                        "style": "-fx-spacing: 4; -fx-padding: 4; -fx-alignment: CENTER_LEFT;",
+                                        "style": "-fx-spacing: 5; -fx-padding: 1; -fx-alignment: CENTER_LEFT;",
                                         "items": [
                                             {"name": "profile_item", "varref": "profile"},
                                             {"name": "addProfileBtn", "type": "button", "labelText": "+", "style": "-fx-min-width: 30;", "tooltip": "Add a new profile with default colors", "onClick": "call onAddProfileClick();"},
@@ -1879,12 +1879,12 @@ screen colorEditorScreen = {
                                     {
                                         "name": "mainArea",
                                         "type": "hbox",
-                                        "style": "-fx-spacing: 15;",
+       					"spacing":4, "padding":4,
                                         "areas": [
                                             {
                                                 "name": "leftColumn",
                                                 "type": "vbox",
-                                                "style": "-fx-spacing: 10;",
+        					"spacing":4, "padding":4,
                                                 "areas": [
                                                     {
                                                         "name": "consoleColorsArea",
@@ -1898,7 +1898,7 @@ screen colorEditorScreen = {
                                                         "groupLabelText": "Console Colors",
                                                         "groupLabelAlignment": "left",
                                                         "groupLabelOffset": "bottom",
-                                                        "style": "-fx-spacing: 5; -fx-padding: 5;",
+        						"spacing":4, "padding":4,
                                                         "items": [
                                                             {"name": "info_item", "varref": "info"},
                                                             {"name": "comment_item", "varref": "comment"},
@@ -1918,7 +1918,7 @@ screen colorEditorScreen = {
                                                         "groupLabelBackground": "#efefef",
                                                         "groupLabelAlignment": "left",
                                                         "groupLabelOffset": "bottom",
-                                                        "style": "-fx-spacing: 5; -fx-padding: 5;",
+        						"spacing":4, "padding":4,
                                                         "items": [
                                                             {"name": "findHighlightColor_item", "varref": "findHighlightColor"},
                                                             {"name": "findHighlightBackground_item", "varref": "findHighlightBackground"},
@@ -1930,7 +1930,7 @@ screen colorEditorScreen = {
                                             {
                                                 "name": "middleColumn",
                                                 "type": "vbox",
-                                                "style": "-fx-spacing: 10;",
+        					"spacing":4, "padding":4,
                                                 "areas": [
                                                     {
                                                         "name": "syntaxColorsArea",
@@ -1943,7 +1943,7 @@ screen colorEditorScreen = {
                                                         "groupLabelBackground": "#efefef",
                                                         "groupLabelAlignment": "left",
                                                         "groupLabelOffset": "bottom",
-                                                        "style": "-fx-spacing: 5; -fx-padding: 5;",
+        						"spacing":4, "padding":4,
                                                         "items": [
                                                             {"name": "code_item", "varref": "code"},
                                                             {"name": "datatype_item", "varref": "datatype"},
@@ -1961,7 +1961,7 @@ screen colorEditorScreen = {
                                             {
                                                 "name": "rightColumn",
                                                 "type": "vbox",
-                                                "style": "-fx-spacing: 10;",
+        					"spacing":4, "padding":4,
                                                 "areas": [
                                                     {
                                                         "name": "tabColorsArea",
@@ -1974,7 +1974,7 @@ screen colorEditorScreen = {
                                                         "groupLabelBackground": "#efefef",
                                                         "groupLabelAlignment": "left",
                                                         "groupLabelOffset": "bottom",
-                                                        "style": "-fx-spacing: 5; -fx-padding: 5;",
+        						"spacing":4, "padding":4,
                                                         "items": [
                                                             {"name": "tabBackground_item", "varref": "tabBackground"},
                                                             {"name": "tabLabelColor_item", "varref": "tabLabelColor"},
@@ -1995,7 +1995,7 @@ screen colorEditorScreen = {
                                                         "groupLabelBackground": "#efefef",
                                                         "groupLabelAlignment": "left",
                                                         "groupLabelOffset": "bottom",
-                                                        "style": "-fx-spacing: 5; -fx-padding: 5;",
+        						"spacing":4, "padding":4,
                                                         "items": [
                                                             {"name": "background_item", "varref": "background"},
                                                             {"name": "text_item", "varref": "text"},
@@ -2018,7 +2018,7 @@ screen colorEditorScreen = {
             {
                 "name": "buttonArea",
                 "type": "hbox",
-                "style": "-fx-spacing: 10; -fx-padding: 10; -fx-alignment: CENTER_RIGHT;",
+                "style": "-fx-spacing: 5; -fx-padding: 1; -fx-alignment: CENTER_RIGHT;",
                 "items": [
                     {"name": "resetBtn", "type": "button", "labelText": "Reset", "style": "-fx-min-width: 80;", "onClick": "call onResetClick();"},
                     {"name": "saveBtn", "type": "button", "labelText": "Save and Apply", "style": "-fx-min-width: 120;", "onClick": "call onSaveClick();"},
