@@ -744,15 +744,9 @@ public class EbsConsoleHandler extends EbsHandler {
      * @param scriptName A friendly name for the script (used in log messages)
      */
     public void runScriptFromResource(String resourcePath, String scriptName) {
-        ScriptArea output = env.getOutputArea();
-        
-        // Debug message - script loading attempt
-        javafx.application.Platform.runLater(() -> {
-            output.printlnInfo("> Loading script: " + scriptName + " from " + resourcePath);
-        });
-        
         try (InputStream is = getClass().getResourceAsStream(resourcePath)) {
             if (is == null) {
+                ScriptArea output = env.getOutputArea();
                 javafx.application.Platform.runLater(() -> {
                     output.printlnError("ERROR: Could not find script resource: " + resourcePath);
                 });
@@ -760,11 +754,6 @@ public class EbsConsoleHandler extends EbsHandler {
             }
             
             String script = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-            
-            // Debug message - script loaded successfully
-            javafx.application.Platform.runLater(() -> {
-                output.printlnInfo("> Script loaded (" + script.length() + " bytes). Executing...");
-            });
             
             // Update status bar
             if (statusBar != null) {
@@ -780,9 +769,8 @@ public class EbsConsoleHandler extends EbsHandler {
                     // Submit script for execution
                     submit(script);
                     
-                    // Success message
+                    // Update status bar on completion
                     javafx.application.Platform.runLater(() -> {
-                        output.printlnOk("✓ " + scriptName + " completed.");
                         if (statusBar != null) {
                             statusBar.clearStatus();
                             statusBar.setMessage(scriptName + " completed");
@@ -790,6 +778,7 @@ public class EbsConsoleHandler extends EbsHandler {
                     });
                 } catch (Exception ex) {
                     // Error message
+                    ScriptArea output = env.getOutputArea();
                     javafx.application.Platform.runLater(() -> {
                         output.printlnError("✗ Error running " + scriptName + ": " + Util.formatExceptionWith2Origin(ex));
                         if (statusBar != null) {
@@ -807,6 +796,7 @@ public class EbsConsoleHandler extends EbsHandler {
             t.start();
             
         } catch (Exception ex) {
+            ScriptArea output = env.getOutputArea();
             javafx.application.Platform.runLater(() -> {
                 output.printlnError("ERROR loading script " + scriptName + ": " + ex.getMessage());
             });

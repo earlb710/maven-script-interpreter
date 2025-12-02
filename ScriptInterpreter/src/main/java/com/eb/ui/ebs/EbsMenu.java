@@ -220,7 +220,7 @@ public class EbsMenu extends MenuBar {
         
         MenuItem colorsItem = new MenuItem("Colors…");
         colorsItem.setOnAction(e -> {
-            handler.runScriptFromResource("/scripts/config_changes.ebs", "Colors Configuration");
+            handler.runScriptFromResource("/scripts/color_editor.ebs", "Color Editor");
         });
 
         toolsMenu.getItems().addAll(aiSetupItem, safeDirsItem, dbConfigItem, colorsItem);
