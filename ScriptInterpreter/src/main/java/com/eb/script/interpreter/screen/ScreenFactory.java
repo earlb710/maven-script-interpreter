@@ -345,7 +345,7 @@ public class ScreenFactory {
             int count = 0;
             for (java.util.Map.Entry<Object, Object> entry : map.entrySet()) {
                 if (count > 0) sb.append(", ");
-                sb.append(entry.getKey()).append(": ").append(entry.getValue());
+                sb.append(String.valueOf(entry.getKey())).append(": ").append(String.valueOf(entry.getValue()));
                 count++;
                 if (count >= 20) {
                     sb.append(", ... (").append(map.size() - 20).append(" more)");
@@ -361,7 +361,7 @@ public class ScreenFactory {
             int count = 0;
             for (Object item : list) {
                 if (count > 0) sb.append(", ");
-                sb.append(item);
+                sb.append(String.valueOf(item));
                 count++;
                 if (count >= 20) {
                     sb.append(", ... (").append(list.size() - 20).append(" more)");
@@ -376,7 +376,7 @@ public class ScreenFactory {
             StringBuilder sb = new StringBuilder("[");
             for (int i = 0; i < Math.min(length, 20); i++) {
                 if (i > 0) sb.append(", ");
-                sb.append(java.lang.reflect.Array.get(value, i));
+                sb.append(String.valueOf(java.lang.reflect.Array.get(value, i)));
             }
             if (length > 20) {
                 sb.append(", ... (").append(length - 20).append(" more)");
