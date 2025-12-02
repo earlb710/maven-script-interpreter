@@ -233,7 +233,7 @@ public class ScreenFactory {
         Map<String, AreaItem> screenAreaItems = context.getScreenAreaItems(screenName);
         
         copyButton.setOnAction(e -> {
-            String clipboardText = formatAllForClipboard(screenName, screenVars, screenVarTypes, screenAreaItems);
+            String clipboardText = formatAllForClipboard(screenName, screenVars, screenVarTypes, screenAreaItems, context);
             javafx.scene.input.Clipboard clipboard = javafx.scene.input.Clipboard.getSystemClipboard();
             javafx.scene.input.ClipboardContent clipboardContent = new javafx.scene.input.ClipboardContent();
             clipboardContent.putString(clipboardText);
@@ -486,12 +486,14 @@ public class ScreenFactory {
      * @param screenVars The screen variables map
      * @param screenVarTypes The screen variable types map
      * @param screenAreaItems The screen area items map
+     * @param context The interpreter context for accessing bound controls
      * @return Formatted string for clipboard
      */
     private static String formatAllForClipboard(String screenName, 
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
             java.util.concurrent.ConcurrentHashMap<String, DataType> screenVarTypes,
-            Map<String, AreaItem> screenAreaItems) {
+            Map<String, AreaItem> screenAreaItems,
+            InterpreterContext context) {
         StringBuilder sb = new StringBuilder();
         sb.append("Screen: ").append(screenName).append("\n");
         sb.append("=".repeat(50)).append("\n\n");
@@ -522,24 +524,76 @@ public class ScreenFactory {
             java.util.List<String> sortedItemKeys = new java.util.ArrayList<>(screenAreaItems.keySet());
             java.util.Collections.sort(sortedItemKeys, String.CASE_INSENSITIVE_ORDER);
             
+            // Get bound controls for value extraction
+            List<Node> boundControls = context.getScreenBoundControls().get(screenName);
+            
             for (String key : sortedItemKeys) {
                 AreaItem item = screenAreaItems.get(key);
                 String displayName = item.name != null ? item.name : key;
+                
                 // Full qualified name: screenName.itemName
                 sb.append(screenName).append(".").append(displayName);
+                
                 // Add JavaFX item type
                 if (item.displayItem != null && item.displayItem.itemType != null) {
                     sb.append(" [").append(item.displayItem.itemType).append("]");
                 }
+                
                 // Add varRef
                 if (item.varRef != null) {
-                    sb.append(" -> varRef: ").append(item.varRef);
+                    sb.append(" varRef: ").append(item.varRef);
                 }
+                
+                // Add actual control value
+                String valueStr = getControlValueForClipboard(key, boundControls, item, screenVars);
+                sb.append(" = ").append(valueStr);
+                
                 sb.append("\n");
             }
         }
         
         return sb.toString();
+    }
+    
+    /**
+     * Get the control value for clipboard formatting.
+     * 
+     * @param key The item key
+     * @param boundControls List of bound controls
+     * @param item The area item
+     * @param screenVars Screen variables map
+     * @return The formatted value string
+     */
+    private static String getControlValueForClipboard(String key, List<Node> boundControls, 
+            AreaItem item, java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
+        // Try to find the bound control and get its actual value
+        Node matchingControl = null;
+        if (boundControls != null) {
+            String itemKey = key.toLowerCase();
+            for (Node node : boundControls) {
+                Object userData = node.getUserData();
+                if (userData != null && userData.toString().toLowerCase().equals(itemKey)) {
+                    matchingControl = node;
+                    break;
+                }
+            }
+        }
+        
+        if (matchingControl != null) {
+            Object controlValue = getControlValue(matchingControl);
+            if (controlValue != null) {
+                return formatValueFull(controlValue);
+            }
+            return "(empty)";
+        } else if (item.varRef != null && screenVars != null) {
+            // Fallback to variable value if control not found
+            Object value = screenVars.get(item.varRef.toLowerCase());
+            if (value != null) {
+                return formatValueFull(value);
+            }
+            return "(unset)";
+        }
+        return "(no value)";
     }
     
     /**
