@@ -485,6 +485,58 @@ public class AreaItemFactory {
                 ((ColorPicker) control).setPrefWidth(prefWidth);
             }
         }
+        
+        // Calculate and apply preferred height for TextArea based on height property
+        if (control instanceof TextArea && metadata.height != null && metadata.height > 0) {
+            double prefHeight = calculateTextAreaHeight(metadata);
+            if (prefHeight > 0) {
+                ((TextArea) control).setPrefHeight(prefHeight);
+            }
+        }
+    }
+    
+    /**
+     * Calculates the preferred height for a TextArea based on the height property (number of lines)
+     * and the font size. The pixel height is calculated as: fontSize * height (number of lines).
+     * 
+     * @param metadata The DisplayItem metadata containing height and font size
+     * @return The calculated height in pixels, or -1 if height is not specified
+     */
+    private static double calculateTextAreaHeight(DisplayItem metadata) {
+        if (metadata == null || metadata.height == null || metadata.height <= 0) {
+            return -1; // Use default
+        }
+        
+        // Default font size is 13px (as per ItemType.TEXTAREA default style)
+        double fontSize = 13.0;
+        
+        // Parse font size if specified
+        if (metadata.itemFontSize != null && !metadata.itemFontSize.isEmpty()) {
+            String fontSizeStr = metadata.itemFontSize.trim().toLowerCase();
+            try {
+                if (fontSizeStr.endsWith("px")) {
+                    fontSize = Double.parseDouble(fontSizeStr.substring(0, fontSizeStr.length() - 2).trim());
+                } else if (fontSizeStr.endsWith("pt")) {
+                    // Convert points to pixels (approximate: 1pt = 1.33px)
+                    fontSize = Double.parseDouble(fontSizeStr.substring(0, fontSizeStr.length() - 2).trim()) * 1.33;
+                } else if (fontSizeStr.endsWith("em")) {
+                    // Convert em to pixels (approximate: 1em = 16px)
+                    fontSize = Double.parseDouble(fontSizeStr.substring(0, fontSizeStr.length() - 2).trim()) * 16;
+                } else {
+                    // Try to parse as plain number (assume pixels)
+                    fontSize = Double.parseDouble(fontSizeStr);
+                }
+            } catch (NumberFormatException e) {
+                // Keep default font size if parsing fails
+            }
+        }
+        
+        // Calculate height: fontSize * number of lines + padding for borders and scrollbars
+        // Add approximately 8 pixels padding per line for line spacing, plus 10 for borders
+        double lineHeight = fontSize + 4; // Font size plus line spacing
+        double padding = 10; // Padding for borders and internal spacing
+        
+        return (lineHeight * metadata.height) + padding;
     }
     
     /**
