@@ -75,6 +75,12 @@ public class ScreenFactory {
             return false;
         }
     };
+    
+    // Map to store debug panels for each screen (screenName -> debugPanel)
+    private static final java.util.concurrent.ConcurrentHashMap<String, javafx.scene.control.ScrollPane> screenDebugPanels = new java.util.concurrent.ConcurrentHashMap<>();
+    
+    // Map to store the root BorderPane for each screen (screenName -> BorderPane) for debug panel toggling
+    private static final java.util.concurrent.ConcurrentHashMap<String, BorderPane> screenRootPanes = new java.util.concurrent.ConcurrentHashMap<>();
 
     static {
         try {
@@ -158,7 +164,190 @@ public class ScreenFactory {
                     statusBar.setMessage(message);
                 });
             }
+            
+            // Show or hide the debug panel
+            Platform.runLater(() -> {
+                toggleDebugPanel(screenName, context, newDebugMode);
+            });
         }
+    }
+    
+    /**
+     * Toggle the debug panel visibility for a screen.
+     * Shows a scrollable panel on the right side with all screen variables and values.
+     * 
+     * @param screenName The name of the screen
+     * @param context The interpreter context
+     * @param show Whether to show or hide the debug panel
+     */
+    private static void toggleDebugPanel(String screenName, InterpreterContext context, boolean show) {
+        BorderPane rootPane = screenRootPanes.get(screenName.toLowerCase());
+        if (rootPane == null) {
+            return;
+        }
+        
+        if (show) {
+            // Create or update the debug panel
+            javafx.scene.control.ScrollPane debugPanel = createDebugPanel(screenName, context);
+            screenDebugPanels.put(screenName.toLowerCase(), debugPanel);
+            rootPane.setRight(debugPanel);
+        } else {
+            // Hide the debug panel
+            rootPane.setRight(null);
+            screenDebugPanels.remove(screenName.toLowerCase());
+        }
+    }
+    
+    /**
+     * Create the debug panel showing all screen variables and their values.
+     * 
+     * @param screenName The name of the screen
+     * @param context The interpreter context
+     * @return A ScrollPane containing the debug information
+     */
+    private static javafx.scene.control.ScrollPane createDebugPanel(String screenName, InterpreterContext context) {
+        VBox content = new VBox(5);
+        content.setPadding(new Insets(10));
+        content.setStyle("-fx-background-color: #f5f5f5;");
+        
+        // Title
+        javafx.scene.control.Label titleLabel = new javafx.scene.control.Label("Debug: " + screenName);
+        titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #333;");
+        content.getChildren().add(titleLabel);
+        
+        // Separator
+        javafx.scene.control.Separator separator = new javafx.scene.control.Separator();
+        content.getChildren().add(separator);
+        
+        // Get screen variables
+        java.util.concurrent.ConcurrentHashMap<String, Object> screenVars = context.getScreenVars(screenName);
+        
+        if (screenVars != null && !screenVars.isEmpty()) {
+            // Variables section title
+            javafx.scene.control.Label varsLabel = new javafx.scene.control.Label("Variables:");
+            varsLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #555;");
+            content.getChildren().add(varsLabel);
+            
+            // Sort variable names for consistent display
+            java.util.List<String> sortedKeys = new java.util.ArrayList<>(screenVars.keySet());
+            java.util.Collections.sort(sortedKeys, String.CASE_INSENSITIVE_ORDER);
+            
+            for (String key : sortedKeys) {
+                Object value = screenVars.get(key);
+                HBox varRow = createVariableRow(key, value);
+                content.getChildren().add(varRow);
+            }
+        } else {
+            javafx.scene.control.Label noVarsLabel = new javafx.scene.control.Label("No variables defined");
+            noVarsLabel.setStyle("-fx-font-style: italic; -fx-text-fill: #888;");
+            content.getChildren().add(noVarsLabel);
+        }
+        
+        // Create scrollable container
+        javafx.scene.control.ScrollPane scrollPane = new javafx.scene.control.ScrollPane(content);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setPrefWidth(250);
+        scrollPane.setMinWidth(200);
+        scrollPane.setMaxWidth(300);
+        scrollPane.setStyle("-fx-background-color: #f5f5f5; -fx-border-color: #ccc; -fx-border-width: 0 0 0 1;");
+        scrollPane.setHbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setVbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        
+        return scrollPane;
+    }
+    
+    /**
+     * Create a row displaying a variable name and its value.
+     * 
+     * @param name The variable name
+     * @param value The variable value
+     * @return An HBox containing the variable display
+     */
+    private static HBox createVariableRow(String name, Object value) {
+        HBox row = new HBox(5);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.setPadding(new Insets(2, 5, 2, 5));
+        
+        // Variable name
+        javafx.scene.control.Label nameLabel = new javafx.scene.control.Label(name + ":");
+        nameLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #0066cc;");
+        nameLabel.setMinWidth(80);
+        nameLabel.setMaxWidth(100);
+        
+        // Variable value
+        String valueStr = formatValue(value);
+        javafx.scene.control.Label valueLabel = new javafx.scene.control.Label(valueStr);
+        valueLabel.setStyle("-fx-text-fill: #333;");
+        valueLabel.setWrapText(true);
+        valueLabel.setMaxWidth(150);
+        
+        // Add tooltip with full value for long values
+        if (valueStr.length() > 30) {
+            valueLabel.setTooltip(new javafx.scene.control.Tooltip(valueStr));
+        }
+        
+        row.getChildren().addAll(nameLabel, valueLabel);
+        
+        // Alternate row background for readability
+        row.setStyle("-fx-background-color: " + (row.getChildren().size() % 2 == 0 ? "#ffffff" : "#f0f0f0") + ";");
+        
+        return row;
+    }
+    
+    /**
+     * Format a value for display in the debug panel.
+     * 
+     * @param value The value to format
+     * @return A string representation of the value
+     */
+    private static String formatValue(Object value) {
+        if (value == null) {
+            return "null";
+        }
+        if (value instanceof String) {
+            String str = (String) value;
+            if (str.length() > 50) {
+                return "\"" + str.substring(0, 47) + "...\"";
+            }
+            return "\"" + str + "\"";
+        }
+        if (value instanceof java.util.Map) {
+            return "{Map: " + ((java.util.Map<?, ?>) value).size() + " entries}";
+        }
+        if (value instanceof java.util.List) {
+            return "[List: " + ((java.util.List<?>) value).size() + " items]";
+        }
+        if (value.getClass().isArray()) {
+            return "[Array: " + java.lang.reflect.Array.getLength(value) + " items]";
+        }
+        String str = String.valueOf(value);
+        if (str.length() > 50) {
+            return str.substring(0, 47) + "...";
+        }
+        return str;
+    }
+    
+    /**
+     * Clean up debug panel resources for a specific screen.
+     * Should be called when a screen is closed or removed.
+     * 
+     * @param screenName The name of the screen
+     */
+    public static void cleanupScreenDebugPanel(String screenName) {
+        if (screenName != null) {
+            String key = screenName.toLowerCase();
+            screenDebugPanels.remove(key);
+            screenRootPanes.remove(key);
+        }
+    }
+    
+    /**
+     * Clean up all debug panel resources.
+     * Should be called when the interpreter is reset or all screens are cleared.
+     */
+    public static void cleanupAllDebugPanels() {
+        screenDebugPanels.clear();
+        screenRootPanes.clear();
     }
     
     /**
@@ -518,6 +707,9 @@ public class ScreenFactory {
         screenRoot.setTop(menuBar);
         screenRoot.setCenter(scrollPane);
         screenRoot.setBottom(statusBar);
+        
+        // Store the root pane reference for debug panel toggling
+        screenRootPanes.put(screenName.toLowerCase(), screenRoot);
         
         // Store status bar in context for later access
         if (context != null) {
