@@ -273,7 +273,10 @@ public class ScreenFactory {
         nameLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #0066cc;");
         nameLabel.setMinWidth(80);
         nameLabel.setMaxWidth(100);
-        nameLabel.setTooltip(new javafx.scene.control.Tooltip(name));
+        javafx.scene.control.Tooltip nameTooltip = new javafx.scene.control.Tooltip(name);
+        nameTooltip.setStyle("-fx-font-size: 14px;");
+        nameTooltip.setShowDelay(javafx.util.Duration.millis(500));
+        nameLabel.setTooltip(nameTooltip);
         
         // Variable value with tooltip showing full value
         String valueStr = formatValue(value);
@@ -282,7 +285,10 @@ public class ScreenFactory {
         valueLabel.setStyle("-fx-text-fill: #333;");
         valueLabel.setWrapText(true);
         valueLabel.setMaxWidth(150);
-        valueLabel.setTooltip(new javafx.scene.control.Tooltip(fullValueStr));
+        javafx.scene.control.Tooltip valueTooltip = new javafx.scene.control.Tooltip(fullValueStr);
+        valueTooltip.setStyle("-fx-font-size: 14px;");
+        valueTooltip.setShowDelay(javafx.util.Duration.millis(500));
+        valueLabel.setTooltip(valueTooltip);
         
         row.getChildren().addAll(nameLabel, valueLabel);
         
