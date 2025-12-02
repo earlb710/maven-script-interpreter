@@ -1379,6 +1379,10 @@ public class BuiltinsScreen {
         String propLower = propertyName.toLowerCase();
 
         switch (propLower) {
+            case "value", "text" -> {
+                // The "value" and "text" properties are handled by applyPropertyToControl
+                // but we accept them here without error to allow the JavaFX control update
+            }
             case "editable" -> {
                 if (value instanceof Boolean) {
                     item.editable = (Boolean) value;
@@ -1510,6 +1514,19 @@ public class BuiltinsScreen {
         String propLower = propertyName.toLowerCase();
 
         switch (propLower) {
+            case "value", "text" -> {
+                // Set the text/value of the control
+                String textValue = value != null ? String.valueOf(value) : "";
+                if (control instanceof javafx.scene.control.TextField) {
+                    ((javafx.scene.control.TextField) control).setText(textValue);
+                } else if (control instanceof javafx.scene.control.TextArea) {
+                    ((javafx.scene.control.TextArea) control).setText(textValue);
+                } else if (control instanceof javafx.scene.control.Label) {
+                    ((javafx.scene.control.Label) control).setText(textValue);
+                } else if (control instanceof javafx.scene.control.Button) {
+                    ((javafx.scene.control.Button) control).setText(textValue);
+                }
+            }
             case "editable" -> {
                 if (value instanceof Boolean) {
                     boolean boolVal = (Boolean) value;

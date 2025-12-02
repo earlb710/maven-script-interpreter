@@ -531,7 +531,9 @@ onAiRegexComplete(aiResponse: json) {
             aiResult = call str.substring(aiResult, 1, resultLen - 1);
         }
         
-        askAiScreen.aiResult = "✓ Generated pattern:\n" + aiResult;
+        var resultText: string = "✓ Generated pattern:\n" + aiResult;
+        askAiScreen.aiResult = resultText;
+        call scr.setProperty("askAiScreen.aiResultItem", "value", resultText);
         askAiScreen.generatedPattern = aiResult;
     } else {
         var errorMsg: string = call json.getString(aiResponse, "error", "Unknown error");
@@ -546,9 +548,13 @@ onAiRegexComplete(aiResponse: json) {
         }
         
         if isApiKeyError then {
-            askAiScreen.aiResult = "❌ API KEY NOT CONFIGURED\n\nTo use the AI feature, you need to set up your OpenAI API key:\n\n1. Go to: Edit > AI Chat Model Setup\n2. Enter your API key (from https://platform.openai.com/api-keys)\n3. Click Save\n4. RESTART the application\n\nThe AI configuration is loaded at startup, so you must restart after saving.";
+            var apiKeyErrMsg: string = "❌ API KEY NOT CONFIGURED\n\nTo use the AI feature, you need to set up your OpenAI API key:\n\n1. Go to: Edit > AI Chat Model Setup\n2. Enter your API key (from https://platform.openai.com/api-keys)\n3. Click Save\n4. RESTART the application\n\nThe AI configuration is loaded at startup, so you must restart after saving.";
+            askAiScreen.aiResult = apiKeyErrMsg;
+            call scr.setProperty("askAiScreen.aiResultItem", "value", apiKeyErrMsg);
         } else {
-            askAiScreen.aiResult = "❌ Error: " + errorMsg;
+            var errResult: string = "❌ Error: " + errorMsg;
+            askAiScreen.aiResult = errResult;
+            call scr.setProperty("askAiScreen.aiResultItem", "value", errResult);
         }
     }
     
