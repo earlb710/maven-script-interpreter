@@ -75,6 +75,12 @@ public class ScreenFactory {
             return false;
         }
     };
+    
+    // Map to store debug panels for each screen (screenName -> debugPanel)
+    private static final java.util.concurrent.ConcurrentHashMap<String, javafx.scene.control.ScrollPane> screenDebugPanels = new java.util.concurrent.ConcurrentHashMap<>();
+    
+    // Map to store the root BorderPane for each screen (screenName -> BorderPane) for debug panel toggling
+    private static final java.util.concurrent.ConcurrentHashMap<String, BorderPane> screenRootPanes = new java.util.concurrent.ConcurrentHashMap<>();
 
     static {
         try {
@@ -158,7 +164,672 @@ public class ScreenFactory {
                     statusBar.setMessage(message);
                 });
             }
+            
+            // Show or hide the debug panel
+            Platform.runLater(() -> {
+                toggleDebugPanel(screenName, context, newDebugMode);
+            });
         }
+    }
+    
+    /**
+     * Toggle the debug panel visibility for a screen.
+     * Shows a scrollable panel on the right side with all screen variables and values.
+     * 
+     * @param screenName The name of the screen
+     * @param context The interpreter context
+     * @param show Whether to show or hide the debug panel
+     */
+    private static void toggleDebugPanel(String screenName, InterpreterContext context, boolean show) {
+        BorderPane rootPane = screenRootPanes.get(screenName.toLowerCase());
+        if (rootPane == null) {
+            return;
+        }
+        
+        if (show) {
+            // Create or update the debug panel
+            javafx.scene.control.ScrollPane debugPanel = createDebugPanel(screenName, context);
+            screenDebugPanels.put(screenName.toLowerCase(), debugPanel);
+            rootPane.setRight(debugPanel);
+        } else {
+            // Hide the debug panel
+            rootPane.setRight(null);
+            screenDebugPanels.remove(screenName.toLowerCase());
+        }
+    }
+    
+    /**
+     * Create the debug panel showing all screen variables and their values.
+     * 
+     * @param screenName The name of the screen
+     * @param context The interpreter context
+     * @return A ScrollPane containing the debug information
+     */
+    private static javafx.scene.control.ScrollPane createDebugPanel(String screenName, InterpreterContext context) {
+        VBox mainContent = new VBox(5);
+        mainContent.setPadding(new Insets(10));
+        mainContent.setStyle("-fx-background-color: #f5f5f5;");
+        
+        // Header with title and copy button
+        HBox headerRow = new HBox(5);
+        headerRow.setAlignment(Pos.CENTER_LEFT);
+        
+        // Title
+        javafx.scene.control.Label titleLabel = new javafx.scene.control.Label("Debug: " + screenName);
+        titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #333;");
+        HBox.setHgrow(titleLabel, Priority.ALWAYS);
+        
+        // Copy button
+        javafx.scene.control.Button copyButton = new javafx.scene.control.Button("📋");
+        copyButton.setStyle("-fx-font-size: 12px; -fx-padding: 2 6 2 6; -fx-background-color: #e0e0e0; -fx-cursor: hand;");
+        javafx.scene.control.Tooltip copyTooltip = new javafx.scene.control.Tooltip("Copy all to clipboard");
+        copyTooltip.setStyle("-fx-font-size: 12px;");
+        copyTooltip.setShowDelay(javafx.util.Duration.millis(500));
+        copyButton.setTooltip(copyTooltip);
+        
+        // Get screen variables and types for copy action
+        java.util.concurrent.ConcurrentHashMap<String, Object> screenVars = context.getScreenVars(screenName);
+        java.util.concurrent.ConcurrentHashMap<String, DataType> screenVarTypes = context.getScreenVarTypes(screenName);
+        Map<String, AreaItem> screenAreaItems = context.getScreenAreaItems(screenName);
+        
+        copyButton.setOnAction(e -> {
+            String clipboardText = formatAllForClipboard(screenName, screenVars, screenVarTypes, screenAreaItems, context);
+            javafx.scene.input.Clipboard clipboard = javafx.scene.input.Clipboard.getSystemClipboard();
+            javafx.scene.input.ClipboardContent clipboardContent = new javafx.scene.input.ClipboardContent();
+            clipboardContent.putString(clipboardText);
+            clipboard.setContent(clipboardContent);
+            
+            // Show brief feedback
+            copyButton.setText("✓");
+            new Thread(() -> {
+                try {
+                    Thread.sleep(1000);
+                    Platform.runLater(() -> copyButton.setText("📋"));
+                } catch (InterruptedException ex) {
+                    // Ignore
+                }
+            }).start();
+        });
+        
+        headerRow.getChildren().addAll(titleLabel, copyButton);
+        mainContent.getChildren().add(headerRow);
+        
+        // Separator
+        javafx.scene.control.Separator separator = new javafx.scene.control.Separator();
+        mainContent.getChildren().add(separator);
+        
+        // === VARIABLES SECTION (Top Half) ===
+        VBox varsSection = new VBox(3);
+        varsSection.setPadding(new Insets(5));
+        varsSection.setStyle("-fx-background-color: #f8f8f8;");
+        
+        javafx.scene.control.Label varsHeader = new javafx.scene.control.Label("📊 Variables");
+        varsHeader.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #444;");
+        varsSection.getChildren().add(varsHeader);
+        
+        if (screenVars != null && !screenVars.isEmpty()) {
+            java.util.List<String> sortedKeys = new java.util.ArrayList<>(screenVars.keySet());
+            java.util.Collections.sort(sortedKeys, String.CASE_INSENSITIVE_ORDER);
+            
+            for (String key : sortedKeys) {
+                Object value = screenVars.get(key);
+                DataType dataType = screenVarTypes != null ? screenVarTypes.get(key) : null;
+                HBox varRow = createVariableRow(key, value, dataType);
+                varsSection.getChildren().add(varRow);
+            }
+        } else {
+            javafx.scene.control.Label noVarsLabel = new javafx.scene.control.Label("No variables defined");
+            noVarsLabel.setStyle("-fx-font-style: italic; -fx-text-fill: #888;");
+            varsSection.getChildren().add(noVarsLabel);
+        }
+        
+        javafx.scene.control.ScrollPane varsScrollPane = new javafx.scene.control.ScrollPane(varsSection);
+        varsScrollPane.setFitToWidth(true);
+        varsScrollPane.setStyle("-fx-background-color: transparent;");
+        varsScrollPane.setHbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
+        varsScrollPane.setVbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        VBox.setVgrow(varsScrollPane, Priority.ALWAYS);
+        
+        // === SCREEN ITEMS SECTION (Bottom Half) ===
+        VBox itemsSection = new VBox(3);
+        itemsSection.setPadding(new Insets(5));
+        itemsSection.setStyle("-fx-background-color: #f0f5f0;");
+        
+        javafx.scene.control.Label itemsHeader = new javafx.scene.control.Label("🖼️ Screen Items");
+        itemsHeader.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #444;");
+        itemsSection.getChildren().add(itemsHeader);
+        
+        if (screenAreaItems != null && !screenAreaItems.isEmpty()) {
+            java.util.List<String> sortedItemKeys = new java.util.ArrayList<>(screenAreaItems.keySet());
+            java.util.Collections.sort(sortedItemKeys, String.CASE_INSENSITIVE_ORDER);
+            
+            for (String key : sortedItemKeys) {
+                AreaItem item = screenAreaItems.get(key);
+                HBox itemRow = createScreenItemRow(key, item, context, screenName);
+                itemsSection.getChildren().add(itemRow);
+            }
+        } else {
+            javafx.scene.control.Label noItemsLabel = new javafx.scene.control.Label("No screen items defined");
+            noItemsLabel.setStyle("-fx-font-style: italic; -fx-text-fill: #888;");
+            itemsSection.getChildren().add(noItemsLabel);
+        }
+        
+        javafx.scene.control.ScrollPane itemsScrollPane = new javafx.scene.control.ScrollPane(itemsSection);
+        itemsScrollPane.setFitToWidth(true);
+        itemsScrollPane.setStyle("-fx-background-color: transparent;");
+        itemsScrollPane.setHbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
+        itemsScrollPane.setVbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        VBox.setVgrow(itemsScrollPane, Priority.ALWAYS);
+        
+        // Create split pane with variables on top, items on bottom
+        javafx.scene.control.SplitPane splitPane = new javafx.scene.control.SplitPane();
+        splitPane.setOrientation(javafx.geometry.Orientation.VERTICAL);
+        splitPane.getItems().addAll(varsScrollPane, itemsScrollPane);
+        splitPane.setDividerPositions(0.5);
+        VBox.setVgrow(splitPane, Priority.ALWAYS);
+        
+        mainContent.getChildren().add(splitPane);
+        
+        // Create scrollable container
+        javafx.scene.control.ScrollPane scrollPane = new javafx.scene.control.ScrollPane(mainContent);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(true);
+        scrollPane.setPrefWidth(280);
+        scrollPane.setMinWidth(220);
+        scrollPane.setMaxWidth(350);
+        scrollPane.setStyle("-fx-background-color: #f5f5f5; -fx-border-color: #ccc; -fx-border-width: 0 0 0 1;");
+        scrollPane.setHbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setVbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
+        
+        return scrollPane;
+    }
+    
+    /**
+     * Create a row displaying a screen item.
+     * 
+     * @param key The item key
+     * @param item The AreaItem
+     * @param context The interpreter context
+     * @param screenName The screen name
+     * @return An HBox containing the item display
+     */
+    private static HBox createScreenItemRow(String key, AreaItem item, InterpreterContext context, String screenName) {
+        HBox row = new HBox(5);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.setPadding(new Insets(2, 5, 2, 5));
+        
+        // Item name with tooltip showing full qualified name (screen.item)
+        String displayName = item.name != null ? item.name : key;
+        javafx.scene.control.Label nameLabel = new javafx.scene.control.Label(displayName);
+        nameLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #006600;");
+        nameLabel.setMinWidth(80);
+        nameLabel.setMaxWidth(100);
+        
+        // Build tooltip with full qualified name (screen.item) and item details
+        StringBuilder tooltipText = new StringBuilder();
+        // Full qualified name: screenName.itemName
+        tooltipText.append(screenName).append(".").append(displayName);
+        // JavaFX item type
+        if (item.displayItem != null && item.displayItem.itemType != null) {
+            tooltipText.append("\njfxType: ").append(item.displayItem.itemType);
+        }
+        // Variable reference
+        if (item.varRef != null) {
+            tooltipText.append("\nvarRef: ").append(item.varRef);
+        }
+        // Layout position
+        if (item.layoutPos != null) {
+            tooltipText.append("\nlayout: ").append(item.layoutPos);
+        }
+        
+        javafx.scene.control.Tooltip nameTooltip = new javafx.scene.control.Tooltip(tooltipText.toString());
+        nameTooltip.setStyle("-fx-font-size: 14px;");
+        nameTooltip.setShowDelay(javafx.util.Duration.millis(500));
+        nameLabel.setTooltip(nameTooltip);
+        
+        // Get the actual value from the JavaFX control
+        String valueStr = "";
+        String fullValueStr = "";
+        
+        // Try to find the bound control and get its actual value
+        List<Node> boundControls = context.getScreenBoundControls().get(screenName);
+        Node matchingControl = null;
+        if (boundControls != null) {
+            String itemKey = key.toLowerCase();
+            for (Node node : boundControls) {
+                Object userData = node.getUserData();
+                if (userData != null && userData.toString().toLowerCase().equals(itemKey)) {
+                    matchingControl = node;
+                    break;
+                }
+            }
+        }
+        
+        if (matchingControl != null) {
+            // Extract value from the actual JavaFX control
+            Object controlValue = getControlValue(matchingControl);
+            if (controlValue != null) {
+                valueStr = formatValue(controlValue);
+                fullValueStr = formatValueFull(controlValue);
+            } else {
+                valueStr = "(empty)";
+                fullValueStr = "Control has no value";
+            }
+        } else if (item.varRef != null) {
+            // Fallback to variable value if control not found
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars = context.getScreenVars(screenName);
+            if (screenVars != null) {
+                Object value = screenVars.get(item.varRef.toLowerCase());
+                if (value != null) {
+                    valueStr = formatValue(value);
+                    fullValueStr = formatValueFull(value);
+                } else {
+                    valueStr = "(unset)";
+                    fullValueStr = "Variable not set";
+                }
+            }
+        } else {
+            valueStr = "(no varRef)";
+            fullValueStr = "No variable reference";
+        }
+        
+        javafx.scene.control.Label valueLabel = new javafx.scene.control.Label(valueStr);
+        valueLabel.setStyle("-fx-text-fill: #333;");
+        valueLabel.setWrapText(true);
+        valueLabel.setMaxWidth(130);
+        javafx.scene.control.Tooltip valueTooltip = new javafx.scene.control.Tooltip(fullValueStr);
+        valueTooltip.setStyle("-fx-font-size: 14px;");
+        valueTooltip.setShowDelay(javafx.util.Duration.millis(500));
+        valueLabel.setTooltip(valueTooltip);
+        
+        row.getChildren().addAll(nameLabel, valueLabel);
+        row.setStyle("-fx-background-color: #e8f0e8;");
+        
+        return row;
+    }
+    
+    /**
+     * Extract the current value from a JavaFX control.
+     * 
+     * @param control The JavaFX control node
+     * @return The control's current value, or null if not extractable
+     */
+    private static Object getControlValue(Node control) {
+        if (control instanceof javafx.scene.control.TextField) {
+            return ((javafx.scene.control.TextField) control).getText();
+        } else if (control instanceof javafx.scene.control.TextArea) {
+            return ((javafx.scene.control.TextArea) control).getText();
+        } else if (control instanceof javafx.scene.control.CheckBox) {
+            return ((javafx.scene.control.CheckBox) control).isSelected();
+        } else if (control instanceof javafx.scene.control.ComboBox) {
+            return ((javafx.scene.control.ComboBox<?>) control).getValue();
+        } else if (control instanceof javafx.scene.control.ChoiceBox) {
+            return ((javafx.scene.control.ChoiceBox<?>) control).getValue();
+        } else if (control instanceof javafx.scene.control.Slider) {
+            return ((javafx.scene.control.Slider) control).getValue();
+        } else if (control instanceof javafx.scene.control.Spinner) {
+            return ((javafx.scene.control.Spinner<?>) control).getValue();
+        } else if (control instanceof javafx.scene.control.DatePicker) {
+            return ((javafx.scene.control.DatePicker) control).getValue();
+        } else if (control instanceof javafx.scene.control.Label) {
+            return ((javafx.scene.control.Label) control).getText();
+        } else if (control instanceof javafx.scene.control.Labeled) {
+            return ((javafx.scene.control.Labeled) control).getText();
+        }
+        return null;
+    }
+    
+    /**
+     * Format all variables and screen items for clipboard copy.
+     * 
+     * @param screenName The name of the screen
+     * @param screenVars The screen variables map
+     * @param screenVarTypes The screen variable types map
+     * @param screenAreaItems The screen area items map
+     * @param context The interpreter context for accessing bound controls
+     * @return Formatted string for clipboard
+     */
+    private static String formatAllForClipboard(String screenName, 
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+            java.util.concurrent.ConcurrentHashMap<String, DataType> screenVarTypes,
+            Map<String, AreaItem> screenAreaItems,
+            InterpreterContext context) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Screen: ").append(screenName).append("\n");
+        sb.append("=".repeat(50)).append("\n\n");
+        
+        // Variables section
+        sb.append("📊 VARIABLES\n");
+        sb.append("-".repeat(40)).append("\n");
+        if (screenVars == null || screenVars.isEmpty()) {
+            sb.append("No variables defined\n");
+        } else {
+            java.util.List<String> sortedKeys = new java.util.ArrayList<>(screenVars.keySet());
+            java.util.Collections.sort(sortedKeys, String.CASE_INSENSITIVE_ORDER);
+            
+            for (String key : sortedKeys) {
+                Object value = screenVars.get(key);
+                DataType dataType = screenVarTypes != null ? screenVarTypes.get(key) : null;
+                String typeStr = getDataTypeString(dataType, value);
+                sb.append(key).append(" : ").append(typeStr).append(" = ").append(formatValueFull(value)).append("\n");
+            }
+        }
+        
+        // Screen items section
+        sb.append("\n🖼️ SCREEN ITEMS\n");
+        sb.append("-".repeat(40)).append("\n");
+        if (screenAreaItems == null || screenAreaItems.isEmpty()) {
+            sb.append("No screen items defined\n");
+        } else {
+            java.util.List<String> sortedItemKeys = new java.util.ArrayList<>(screenAreaItems.keySet());
+            java.util.Collections.sort(sortedItemKeys, String.CASE_INSENSITIVE_ORDER);
+            
+            // Get bound controls for value extraction
+            List<Node> boundControls = context.getScreenBoundControls().get(screenName);
+            
+            for (String key : sortedItemKeys) {
+                AreaItem item = screenAreaItems.get(key);
+                String displayName = item.name != null ? item.name : key;
+                
+                // Full qualified name: screenName.itemName
+                sb.append(screenName).append(".").append(displayName);
+                
+                // Add JavaFX item type
+                if (item.displayItem != null && item.displayItem.itemType != null) {
+                    sb.append(" [").append(item.displayItem.itemType).append("]");
+                }
+                
+                // Add varRef
+                if (item.varRef != null) {
+                    sb.append(" varRef: ").append(item.varRef);
+                }
+                
+                // Add actual control value
+                String valueStr = getControlValueForClipboard(key, boundControls, item, screenVars);
+                sb.append(" = ").append(valueStr);
+                
+                sb.append("\n");
+            }
+        }
+        
+        return sb.toString();
+    }
+    
+    /**
+     * Get the control value for clipboard formatting.
+     * 
+     * @param key The item key
+     * @param boundControls List of bound controls
+     * @param item The area item
+     * @param screenVars Screen variables map
+     * @return The formatted value string
+     */
+    private static String getControlValueForClipboard(String key, List<Node> boundControls, 
+            AreaItem item, java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
+        // Try to find the bound control and get its actual value
+        Node matchingControl = null;
+        if (boundControls != null) {
+            String itemKey = key.toLowerCase();
+            for (Node node : boundControls) {
+                Object userData = node.getUserData();
+                if (userData != null && userData.toString().toLowerCase().equals(itemKey)) {
+                    matchingControl = node;
+                    break;
+                }
+            }
+        }
+        
+        if (matchingControl != null) {
+            Object controlValue = getControlValue(matchingControl);
+            if (controlValue != null) {
+                return formatValueFull(controlValue);
+            }
+            return "(empty)";
+        } else if (item.varRef != null && screenVars != null) {
+            // Fallback to variable value if control not found
+            Object value = screenVars.get(item.varRef.toLowerCase());
+            if (value != null) {
+                return formatValueFull(value);
+            }
+            return "(unset)";
+        }
+        return "(no value)";
+    }
+    
+    /**
+     * Format all variables for clipboard copy.
+     * 
+     * @param screenName The name of the screen
+     * @param screenVars The screen variables map
+     * @param screenVarTypes The screen variable types map
+     * @return Formatted string for clipboard
+     */
+    private static String formatVariablesForClipboard(String screenName, 
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+            java.util.concurrent.ConcurrentHashMap<String, DataType> screenVarTypes) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Screen: ").append(screenName).append("\n");
+        sb.append("=".repeat(40)).append("\n\n");
+        
+        if (screenVars == null || screenVars.isEmpty()) {
+            sb.append("No variables defined\n");
+        } else {
+            java.util.List<String> sortedKeys = new java.util.ArrayList<>(screenVars.keySet());
+            java.util.Collections.sort(sortedKeys, String.CASE_INSENSITIVE_ORDER);
+            
+            for (String key : sortedKeys) {
+                Object value = screenVars.get(key);
+                DataType dataType = screenVarTypes != null ? screenVarTypes.get(key) : null;
+                String typeStr = getDataTypeString(dataType, value);
+                sb.append(key).append(" : ").append(typeStr).append(" = ").append(formatValueFull(value)).append("\n");
+            }
+        }
+        
+        return sb.toString();
+    }
+    
+    /**
+     * Create a row displaying a variable name and its value.
+     * 
+     * @param name The variable name
+     * @param value The variable value
+     * @param dataType The variable's data type (can be null)
+     * @return An HBox containing the variable display
+     */
+    private static HBox createVariableRow(String name, Object value, DataType dataType) {
+        HBox row = new HBox(5);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.setPadding(new Insets(2, 5, 2, 5));
+        
+        // Variable name with tooltip showing full name and data type
+        javafx.scene.control.Label nameLabel = new javafx.scene.control.Label(name + ":");
+        nameLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #0066cc;");
+        nameLabel.setMinWidth(80);
+        nameLabel.setMaxWidth(100);
+        String typeStr = getDataTypeString(dataType, value);
+        javafx.scene.control.Tooltip nameTooltip = new javafx.scene.control.Tooltip(name + " : " + typeStr);
+        nameTooltip.setStyle("-fx-font-size: 14px;");
+        nameTooltip.setShowDelay(javafx.util.Duration.millis(500));
+        nameLabel.setTooltip(nameTooltip);
+        
+        // Variable value with tooltip showing full value
+        String valueStr = formatValue(value);
+        String fullValueStr = formatValueFull(value);
+        javafx.scene.control.Label valueLabel = new javafx.scene.control.Label(valueStr);
+        valueLabel.setStyle("-fx-text-fill: #333;");
+        valueLabel.setWrapText(true);
+        valueLabel.setMaxWidth(150);
+        javafx.scene.control.Tooltip valueTooltip = new javafx.scene.control.Tooltip(fullValueStr);
+        valueTooltip.setStyle("-fx-font-size: 14px;");
+        valueTooltip.setShowDelay(javafx.util.Duration.millis(500));
+        valueLabel.setTooltip(valueTooltip);
+        
+        row.getChildren().addAll(nameLabel, valueLabel);
+        
+        // Alternate row background for readability
+        row.setStyle("-fx-background-color: " + (row.getChildren().size() % 2 == 0 ? "#ffffff" : "#f0f0f0") + ";");
+        
+        return row;
+    }
+    
+    /**
+     * Get the data type as a string for display.
+     * 
+     * @param dataType The DataType from the context (can be null)
+     * @param value The actual value to infer type from if DataType is null
+     * @return A string representation of the data type
+     */
+    private static String getDataTypeString(DataType dataType, Object value) {
+        if (dataType != null) {
+            return dataType.name().toLowerCase();
+        }
+        // Infer type from value
+        if (value == null) {
+            return "null";
+        }
+        if (value instanceof String) {
+            return "string";
+        }
+        if (value instanceof Integer) {
+            return "int";
+        }
+        if (value instanceof Long) {
+            return "long";
+        }
+        if (value instanceof Double || value instanceof Float) {
+            return "float";
+        }
+        if (value instanceof Boolean) {
+            return "bool";
+        }
+        if (value instanceof java.util.Map) {
+            return "map";
+        }
+        if (value instanceof java.util.List) {
+            return "list";
+        }
+        if (value.getClass().isArray()) {
+            return "array";
+        }
+        return value.getClass().getSimpleName().toLowerCase();
+    }
+    
+    /**
+     * Format a value for display in the debug panel.
+     * 
+     * @param value The value to format
+     * @return A string representation of the value
+     */
+    private static String formatValue(Object value) {
+        if (value == null) {
+            return "null";
+        }
+        if (value instanceof String) {
+            String str = (String) value;
+            if (str.length() > 50) {
+                return "\"" + str.substring(0, 47) + "...\"";
+            }
+            return "\"" + str + "\"";
+        }
+        if (value instanceof java.util.Map) {
+            return "{Map: " + ((java.util.Map<?, ?>) value).size() + " entries}";
+        }
+        if (value instanceof java.util.List) {
+            return "[List: " + ((java.util.List<?>) value).size() + " items]";
+        }
+        if (value.getClass().isArray()) {
+            return "[Array: " + java.lang.reflect.Array.getLength(value) + " items]";
+        }
+        String str = String.valueOf(value);
+        if (str.length() > 50) {
+            return str.substring(0, 47) + "...";
+        }
+        return str;
+    }
+    
+    /**
+     * Format a value for tooltip display (full value without truncation).
+     * 
+     * @param value The value to format
+     * @return A full string representation of the value for tooltip display
+     */
+    private static String formatValueFull(Object value) {
+        if (value == null) {
+            return "null";
+        }
+        if (value instanceof String) {
+            return "\"" + value + "\"";
+        }
+        if (value instanceof java.util.Map) {
+            @SuppressWarnings("unchecked")
+            java.util.Map<Object, Object> map = (java.util.Map<Object, Object>) value;
+            StringBuilder sb = new StringBuilder("{");
+            int count = 0;
+            for (java.util.Map.Entry<Object, Object> entry : map.entrySet()) {
+                if (count > 0) sb.append(", ");
+                sb.append(String.valueOf(entry.getKey())).append(": ").append(String.valueOf(entry.getValue()));
+                count++;
+                if (count >= 20) {
+                    sb.append(", ... (").append(map.size() - 20).append(" more)");
+                    break;
+                }
+            }
+            sb.append("}");
+            return sb.toString();
+        }
+        if (value instanceof java.util.List) {
+            java.util.List<?> list = (java.util.List<?>) value;
+            StringBuilder sb = new StringBuilder("[");
+            int count = 0;
+            for (Object item : list) {
+                if (count > 0) sb.append(", ");
+                sb.append(String.valueOf(item));
+                count++;
+                if (count >= 20) {
+                    sb.append(", ... (").append(list.size() - 20).append(" more)");
+                    break;
+                }
+            }
+            sb.append("]");
+            return sb.toString();
+        }
+        if (value.getClass().isArray()) {
+            int length = java.lang.reflect.Array.getLength(value);
+            StringBuilder sb = new StringBuilder("[");
+            for (int i = 0; i < Math.min(length, 20); i++) {
+                if (i > 0) sb.append(", ");
+                sb.append(String.valueOf(java.lang.reflect.Array.get(value, i)));
+            }
+            if (length > 20) {
+                sb.append(", ... (").append(length - 20).append(" more)");
+            }
+            sb.append("]");
+            return sb.toString();
+        }
+        return String.valueOf(value);
+    }
+    
+    /**
+     * Clean up debug panel resources for a specific screen.
+     * Should be called when a screen is closed or removed.
+     * 
+     * @param screenName The name of the screen
+     */
+    public static void cleanupScreenDebugPanel(String screenName) {
+        if (screenName != null) {
+            String key = screenName.toLowerCase();
+            screenDebugPanels.remove(key);
+            screenRootPanes.remove(key);
+        }
+    }
+    
+    /**
+     * Clean up all debug panel resources.
+     * Should be called when the interpreter is reset or all screens are cleared.
+     */
+    public static void cleanupAllDebugPanels() {
+        screenDebugPanels.clear();
+        screenRootPanes.clear();
     }
     
     /**
@@ -518,6 +1189,9 @@ public class ScreenFactory {
         screenRoot.setTop(menuBar);
         screenRoot.setCenter(scrollPane);
         screenRoot.setBottom(statusBar);
+        
+        // Store the root pane reference for debug panel toggling
+        screenRootPanes.put(screenName.toLowerCase(), screenRoot);
         
         // Store status bar in context for later access
         if (context != null) {

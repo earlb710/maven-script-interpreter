@@ -588,6 +588,53 @@ When editing JSON content (screen definitions, area definitions, display metadat
 
 The autocomplete automatically detects JSON content and provides schema-aware suggestions from all three schemas combined.
 
+### Screen Debug Panel (Ctrl+D)
+
+When working with EBS screens, you can toggle a debug panel by pressing `Ctrl+D` on any screen window. The debug panel appears on the right side and provides real-time information about the screen state:
+
+#### Panel Layout
+The debug panel is divided into two sections with an adjustable divider:
+
+**Top Half: 📊 Variables**
+- Lists all screen variables with their names, types, and current values
+- Variables are sorted alphabetically for easy lookup
+- Hover over a variable name to see: `varName : dataType` (e.g., `username : string`)
+- Hover over a value to see the full content (useful for truncated strings, maps, lists, arrays)
+
+**Bottom Half: 🖼️ Screen Items**
+- Lists all screen area items from the screen definition
+- Shows the item name with its actual current value from the JavaFX control
+- Hover over an item name to see:
+  - Full qualified name: `screenName.itemName`
+  - `jfxType:` - The JavaFX control type (TEXTFIELD, CHECKBOX, etc.)
+  - `varRef:` - The linked variable reference
+  - `layout:` - The layout position
+
+#### Copy to Clipboard
+Click the 📋 button in the panel header to copy all variables and screen items to clipboard. The format includes:
+
+```
+Screen: myScreen
+==================================================
+
+📊 VARIABLES
+----------------------------------------
+username : string = "john_doe"
+isActive : bool = true
+count : int = 42
+
+🖼️ SCREEN ITEMS
+----------------------------------------
+myScreen.usernameField [TEXTFIELD] varRef: username = "john_doe"
+myScreen.activeCheck [CHECKBOX] varRef: isActive = true
+```
+
+#### Tooltip Styling
+- Tooltips have a larger font (14px) for better readability
+- Tooltips appear after 0.5 second delay to avoid interference with normal interaction
+
+Press `Ctrl+D` again to hide the debug panel.
+
 ## Documentation
 
 - **[EBS Script Syntax Reference](docs/EBS_SCRIPT_SYNTAX.md)** - Complete language syntax guide including type aliases (typeof)
