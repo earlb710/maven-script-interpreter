@@ -217,8 +217,13 @@ public class EbsMenu extends MenuBar {
             DatabaseConfigDialog dialog = new DatabaseConfigDialog();
             dialog.show();
         });
+        
+        MenuItem colorsItem = new MenuItem("Colors…");
+        colorsItem.setOnAction(e -> {
+            handler.runScriptFromResource("/scripts/color_editor.ebs", "Color Editor");
+        });
 
-        toolsMenu.getItems().addAll(aiSetupItem, safeDirsItem, dbConfigItem);
+        toolsMenu.getItems().addAll(aiSetupItem, safeDirsItem, dbConfigItem, colorsItem);
         getMenus().add(toolsMenu);
 
         // --- Tools Menu ---

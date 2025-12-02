@@ -40,6 +40,11 @@ public class EbsConsoleHandler extends EbsHandler {
     protected static final int RECENT_MAX = 10;
     protected static final String PREF_NODE = "com.eb.ui.cli.EbsApp.recent";
     protected static final String PREF_KEY_PREFIX = "recentFile.";
+    
+    /** Maximum length for error message display before truncation */
+    private static final int MAX_ERROR_MESSAGE_LENGTH = 60;
+    /** Length to truncate error message to (with room for "...") */
+    private static final int TRUNCATED_MESSAGE_LENGTH = 57;
 
     protected final Stage stage;
     protected final Deque<Path> recentFiles = new ArrayDeque<>(); // Most recent at the head
@@ -60,7 +65,8 @@ public class EbsConsoleHandler extends EbsHandler {
             // Handle simple commands
             if (line != null && !line.isBlank()) {
                 line = line.trim();
-                if (line.charAt(0) == '/') {
+                // Check for console commands (start with single '/') but not EBS comments (start with '//')
+                if (line.charAt(0) == '/' && (line.length() < 2 || line.charAt(1) != '/')) {
                     String cmd = line.toLowerCase();
                     if (cmd.startsWith("/list ")) {
                         line = line.substring(6).trim();
@@ -398,8 +404,8 @@ public class EbsConsoleHandler extends EbsHandler {
             String lastError = lines[lines.length - 1];
             if (lastError != null && !lastError.isEmpty()) {
                 // Truncate message if too long for display
-                String displayMsg = lastError.length() > 60 
-                    ? lastError.substring(0, 57) + "..." 
+                String displayMsg = lastError.length() > MAX_ERROR_MESSAGE_LENGTH 
+                    ? lastError.substring(0, TRUNCATED_MESSAGE_LENGTH) + "..." 
                     : lastError;
                 statusBar.setMessage(displayMsg, lastError); // full message in tooltip
             }
@@ -727,5 +733,73 @@ public class EbsConsoleHandler extends EbsHandler {
 
         // Dialog was closed without a selection, treat as cancel
         return false;
+    }
+    
+    /**
+     * Run a script from a resource path. This method is designed to be called from menu actions
+     * and other places that need to execute EBS scripts. It runs the script in a background
+     * thread to avoid blocking the UI.
+     * 
+     * @param resourcePath The path to the script resource (e.g., "/scripts/config_changes.ebs")
+     * @param scriptName A friendly name for the script (used in log messages)
+     */
+    public void runScriptFromResource(String resourcePath, String scriptName) {
+        try (InputStream is = getClass().getResourceAsStream(resourcePath)) {
+            if (is == null) {
+                ScriptArea output = env.getOutputArea();
+                javafx.application.Platform.runLater(() -> {
+                    output.printlnError("ERROR: Could not find script resource: " + resourcePath);
+                });
+                return;
+            }
+            
+            String script = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+            
+            // Update status bar
+            if (statusBar != null) {
+                javafx.application.Platform.runLater(() -> {
+                    statusBar.setStatus("Running " + scriptName);
+                    statusBar.clearMessage();
+                });
+            }
+            
+            // Execute script in background thread like the Run button does
+            Thread t = new Thread(() -> {
+                try {
+                    // Submit script for execution
+                    submit(script);
+                    
+                    // Update status bar on completion
+                    javafx.application.Platform.runLater(() -> {
+                        if (statusBar != null) {
+                            statusBar.clearStatus();
+                            statusBar.setMessage(scriptName + " completed");
+                        }
+                    });
+                } catch (Exception ex) {
+                    // Error message
+                    ScriptArea output = env.getOutputArea();
+                    javafx.application.Platform.runLater(() -> {
+                        output.printlnError("✗ Error running " + scriptName + ": " + Util.formatExceptionWith2Origin(ex));
+                        if (statusBar != null) {
+                            statusBar.clearStatus();
+                            String errorMsg = ex.getMessage() != null ? ex.getMessage() : ex.getClass().getSimpleName();
+                            String displayMsg = errorMsg.length() > MAX_ERROR_MESSAGE_LENGTH 
+                                ? errorMsg.substring(0, TRUNCATED_MESSAGE_LENGTH) + "..." 
+                                : errorMsg;
+                            statusBar.setMessage(displayMsg, errorMsg);
+                        }
+                    });
+                }
+            }, "script-runner");  // Use fixed thread name to avoid potential issues with special characters
+            t.setDaemon(true);
+            t.start();
+            
+        } catch (Exception ex) {
+            ScriptArea output = env.getOutputArea();
+            javafx.application.Platform.runLater(() -> {
+                output.printlnError("ERROR loading script " + scriptName + ": " + ex.getMessage());
+            });
+        }
     }
 }
