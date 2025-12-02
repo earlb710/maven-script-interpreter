@@ -1046,8 +1046,9 @@ public class InterpreterScreen {
      * @return The resolved screen name (may include parent prefix)
      */
     private String resolveScreenName(String screenName) {
-        // First try as-is
-        if (context.getScreens().containsKey(screenName) || context.hasScreenConfig(screenName)) {
+        // First try as-is - check if the Stage exists (runtime state)
+        // We prioritize Stage over config because for hide/close we need the runtime state
+        if (context.getScreens().containsKey(screenName)) {
             return screenName;
         }
         
@@ -1055,7 +1056,7 @@ public class InterpreterScreen {
         String parentScreen = context.getScreenParent(screenName);
         if (parentScreen != null) {
             String qualifiedName = parentScreen + "." + screenName;
-            if (context.getScreens().containsKey(qualifiedName) || context.hasScreenConfig(qualifiedName)) {
+            if (context.getScreens().containsKey(qualifiedName)) {
                 return qualifiedName;
             }
         }
@@ -1071,7 +1072,7 @@ public class InterpreterScreen {
                 
                 // Try parent.screenName
                 String qualifiedFromContext = parentFromContext + "." + screenName;
-                if (context.getScreens().containsKey(qualifiedFromContext) || context.hasScreenConfig(qualifiedFromContext)) {
+                if (context.getScreens().containsKey(qualifiedFromContext)) {
                     return qualifiedFromContext;
                 }
             }
@@ -1081,10 +1082,15 @@ public class InterpreterScreen {
             // Use precise matching: either exact match or preceded by a dot
             String suffix = "." + screenName;
             if (currentScreen.equals(screenName) || currentScreen.endsWith(suffix)) {
-                if (context.getScreens().containsKey(currentScreen) || context.hasScreenConfig(currentScreen)) {
+                if (context.getScreens().containsKey(currentScreen)) {
                     return currentScreen;
                 }
             }
+        }
+        
+        // Finally, check if only config exists (for operations that can work with just config)
+        if (context.hasScreenConfig(screenName)) {
+            return screenName;
         }
         
         // Return original (caller will handle not found error)
