@@ -224,12 +224,23 @@ public class EbsMenu extends MenuBar {
                 // Read and execute the config_changes.ebs script
                 if (is != null) {
                     String script = new String(is.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
-                    handler.submit(script);
+                    // Execute script in background thread like the Run button does
+                    Thread t = new Thread(() -> {
+                        try {
+                            handler.submit(script);
+                        } catch (Exception ex) {
+                            javafx.application.Platform.runLater(() -> 
+                                handler.submitErrors("Error running colors configuration: " + ex.getMessage())
+                            );
+                        }
+                    }, "colors-config-runner");
+                    t.setDaemon(true);
+                    t.start();
                 } else {
                     handler.submitErrors("Could not find config_changes.ebs script in resources");
                 }
             } catch (Exception ex) {
-                handler.submitErrors("Error running colors configuration: " + ex.getMessage());
+                handler.submitErrors("Error loading colors configuration: " + ex.getMessage());
             }
         });
 
