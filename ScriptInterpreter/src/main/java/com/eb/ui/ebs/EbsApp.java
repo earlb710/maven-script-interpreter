@@ -29,6 +29,10 @@ public class EbsApp {
     private Console console;
     private EbsConsoleHandler handler;
     private StatusBar statusBar; // Main window status bar
+    
+    // Static reference to root for config reloading
+    private static BorderPane rootPane;
+    private static final String CONFIG_CSS_FILE = "console-config.css";
 
     public void start(Stage primaryStage) {
 
@@ -63,6 +67,7 @@ public class EbsApp {
         console = new Console(handler);
 
         BorderPane root = new BorderPane();
+        rootPane = root; // Store static reference for config reloading
         
         // Load and apply console configuration to root BEFORE initUI
         ConsoleConfig consoleConfig = new ConsoleConfig();
@@ -179,7 +184,7 @@ public class EbsApp {
         if (css != null && !css.isEmpty()) {
             try {
                 // Write CSS to a fixed file in the working directory
-                java.nio.file.Path cssFile = java.nio.file.Paths.get("console-config.css");
+                java.nio.file.Path cssFile = java.nio.file.Paths.get(CONFIG_CSS_FILE);
                 java.nio.file.Files.writeString(cssFile, css);
                 
                 // Load the CSS file as a stylesheet (same approach as other stylesheets)
@@ -189,6 +194,56 @@ public class EbsApp {
             } catch (IOException e) {
                 System.err.println("Warning: Failed to apply console configuration: " + e.getMessage());
             }
+        }
+    }
+    
+    /**
+     * Reload the console configuration from console.cfg and reapply CSS styles.
+     * This method can be called from scripts to apply config changes without restarting.
+     * Must be called on the JavaFX Application Thread.
+     * 
+     * @return true if config was successfully reloaded and applied, false otherwise
+     */
+    public static boolean reloadConfig() {
+        if (rootPane == null) {
+            System.err.println("Warning: Cannot reload config - root pane not initialized");
+            return false;
+        }
+        
+        try {
+            // Reload config from file
+            ConsoleConfig config = new ConsoleConfig();
+            
+            // Generate new CSS
+            String css = config.generateCSS();
+            if (css == null || css.isEmpty()) {
+                System.err.println("Warning: Generated CSS is empty");
+                return false;
+            }
+            
+            // Write CSS to file
+            java.nio.file.Path cssFile = java.nio.file.Paths.get(CONFIG_CSS_FILE);
+            java.nio.file.Files.writeString(cssFile, css);
+            
+            // Get the stylesheet URI
+            String cssUri = cssFile.toUri().toString();
+            
+            // Remove old config stylesheet if present (use endsWith for exact matching)
+            rootPane.getStylesheets().removeIf(s -> s.endsWith(CONFIG_CSS_FILE));
+            
+            // Add the new stylesheet
+            rootPane.getStylesheets().add(cssUri);
+            
+            // Force a layout pass to ensure styles are applied
+            rootPane.applyCss();
+            rootPane.layout();
+            
+            System.out.println("Console configuration reloaded successfully");
+            return true;
+            
+        } catch (IOException e) {
+            System.err.println("Warning: Failed to reload console configuration: " + e.getMessage());
+            return false;
         }
     }
 

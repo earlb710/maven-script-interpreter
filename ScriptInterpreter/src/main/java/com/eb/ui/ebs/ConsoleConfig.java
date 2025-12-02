@@ -294,8 +294,22 @@ public class ConsoleConfig {
                 css.append("    -fx-background-color: ").append(color).append(" !important;\n");
                 css.append("}\n\n");
             } else if ("tab-content".equals(className)) {
-                // Tab content area background
-                css.append(".tab-pane .tab-content-area {\n");
+                // Tab content area background using multiple descendant selectors for broader coverage
+                css.append(".tab-pane .tab-content-area,\n");
+                css.append("#mainTabs .tab-content-area,\n");
+                css.append(".viewer-tabs .tab-content-area {\n");
+                css.append("    -fx-background-color: ").append(color).append(" !important;\n");
+                css.append("}\n\n");
+                // Also style the content elements within tabs to match
+                // SplitPane uses .split-pane style class, VBox and HBox need type selectors (case-sensitive)
+                css.append("#mainTabs .tab-content-area .split-pane,\n");
+                css.append("#mainTabs .tab-content-area VBox,\n");
+                css.append("#mainTabs .tab-content-area HBox,\n");
+                css.append("#mainTabs .tab-content-area BorderPane,\n");
+                css.append(".tab-pane .tab-content-area .split-pane,\n");
+                css.append(".tab-pane .tab-content-area VBox,\n");
+                css.append(".tab-pane .tab-content-area HBox,\n");
+                css.append(".tab-pane .tab-content-area BorderPane {\n");
                 css.append("    -fx-background-color: ").append(color).append(" !important;\n");
                 css.append("}\n\n");
             } else {

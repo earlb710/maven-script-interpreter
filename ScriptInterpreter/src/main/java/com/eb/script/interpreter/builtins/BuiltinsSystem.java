@@ -7,13 +7,17 @@ import com.eb.script.arrays.ArrayDef;
 import com.eb.script.arrays.ArrayDynamic;
 import com.eb.script.arrays.ArrayFixedByte;
 import com.eb.script.token.DataType;
+import com.eb.ui.ebs.EbsApp;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import javafx.application.Platform;
 
 /**
  * Built-in functions for System operations.
@@ -22,6 +26,9 @@ import java.util.concurrent.TimeUnit;
  * @author Earl Bosch
  */
 public class BuiltinsSystem {
+    
+    /** Timeout in seconds for reloadConfig to wait for FX thread completion */
+    private static final int RELOAD_CONFIG_TIMEOUT_SECONDS = 5;
 
     /**
      * Dispatch a System builtin by name.
@@ -40,6 +47,7 @@ public class BuiltinsSystem {
             case "system.setproperty" -> setProperty(args);
             case "system.getebsver" -> getEBSver();
             case "system.testebsver" -> testEBSver(args);
+            case "system.reloadconfig" -> reloadConfig();
             case "thread.sleep" -> sleep(args);
             case "array.expand" -> arrayExpand(args);
             case "array.sort" -> arraySort(args);
@@ -193,6 +201,43 @@ public class BuiltinsSystem {
             }
         }
         return "";
+    }
+    
+    /**
+     * Reload console configuration from console.cfg and reapply CSS styles.
+     * This allows users to apply config changes without restarting the application.
+     * 
+     * @return true if config was successfully reloaded, false otherwise
+     */
+    private static Object reloadConfig() throws InterpreterError {
+        // If already on FX thread, execute directly
+        if (Platform.isFxApplicationThread()) {
+            return EbsApp.reloadConfig();
+        }
+        
+        // Otherwise, run on FX thread and wait for result
+        final AtomicBoolean result = new AtomicBoolean(false);
+        final CountDownLatch latch = new CountDownLatch(1);
+        
+        Platform.runLater(() -> {
+            try {
+                result.set(EbsApp.reloadConfig());
+            } finally {
+                latch.countDown();
+            }
+        });
+        
+        try {
+            // Wait for the reload to complete (with timeout)
+            if (!latch.await(RELOAD_CONFIG_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                throw new InterpreterError("system.reloadConfig: timeout waiting for config reload");
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new InterpreterError("system.reloadConfig interrupted: " + e.getMessage());
+        }
+        
+        return result.get();
     }
 
     private static Object arrayExpand(Object[] args) {
