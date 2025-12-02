@@ -728,4 +728,82 @@ public class EbsConsoleHandler extends EbsHandler {
         // Dialog was closed without a selection, treat as cancel
         return false;
     }
+    
+    /**
+     * Run a script from a resource path. This method is designed to be called from menu actions
+     * and other places that need to execute EBS scripts. It runs the script in a background
+     * thread to avoid blocking the UI.
+     * 
+     * @param resourcePath The path to the script resource (e.g., "/scripts/config_changes.ebs")
+     * @param scriptName A friendly name for the script (used in log messages)
+     */
+    public void runScriptFromResource(String resourcePath, String scriptName) {
+        ScriptArea output = env.getOutputArea();
+        
+        // Debug message - script loading attempt
+        javafx.application.Platform.runLater(() -> {
+            output.printlnInfo("> Loading script: " + scriptName + " from " + resourcePath);
+        });
+        
+        try (InputStream is = getClass().getResourceAsStream(resourcePath)) {
+            if (is == null) {
+                javafx.application.Platform.runLater(() -> {
+                    output.printlnError("ERROR: Could not find script resource: " + resourcePath);
+                });
+                return;
+            }
+            
+            String script = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+            
+            // Debug message - script loaded successfully
+            javafx.application.Platform.runLater(() -> {
+                output.printlnInfo("> Script loaded (" + script.length() + " bytes). Executing...");
+            });
+            
+            // Update status bar
+            if (statusBar != null) {
+                javafx.application.Platform.runLater(() -> {
+                    statusBar.setStatus("Running " + scriptName);
+                    statusBar.clearMessage();
+                });
+            }
+            
+            // Execute script in background thread like the Run button does
+            Thread t = new Thread(() -> {
+                try {
+                    // Submit script for execution
+                    submit(script);
+                    
+                    // Success message
+                    javafx.application.Platform.runLater(() -> {
+                        output.printlnOk("✓ " + scriptName + " completed.");
+                        if (statusBar != null) {
+                            statusBar.clearStatus();
+                            statusBar.setMessage(scriptName + " completed");
+                        }
+                    });
+                } catch (Exception ex) {
+                    // Error message
+                    javafx.application.Platform.runLater(() -> {
+                        output.printlnError("✗ Error running " + scriptName + ": " + Util.formatExceptionWith2Origin(ex));
+                        if (statusBar != null) {
+                            statusBar.clearStatus();
+                            String errorMsg = ex.getMessage() != null ? ex.getMessage() : ex.getClass().getSimpleName();
+                            String displayMsg = errorMsg.length() > 60 
+                                ? errorMsg.substring(0, 57) + "..." 
+                                : errorMsg;
+                            statusBar.setMessage(displayMsg, errorMsg);
+                        }
+                    });
+                }
+            }, "script-runner-" + scriptName);
+            t.setDaemon(true);
+            t.start();
+            
+        } catch (Exception ex) {
+            javafx.application.Platform.runLater(() -> {
+                output.printlnError("ERROR loading script " + scriptName + ": " + ex.getMessage());
+            });
+        }
+    }
 }
