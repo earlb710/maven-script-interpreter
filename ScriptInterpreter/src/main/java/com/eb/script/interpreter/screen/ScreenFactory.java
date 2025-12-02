@@ -369,12 +369,15 @@ public class ScreenFactory {
         StringBuilder tooltipText = new StringBuilder();
         // Full qualified name: screenName.itemName
         tooltipText.append(screenName).append(".").append(displayName);
+        // JavaFX item type
+        if (item.displayItem != null && item.displayItem.itemType != null) {
+            tooltipText.append("\njfxType: ").append(item.displayItem.itemType);
+        }
+        // Variable reference
         if (item.varRef != null) {
             tooltipText.append("\nvarRef: ").append(item.varRef);
         }
-        if (item.displayItem != null && item.displayItem.itemType != null) {
-            tooltipText.append("\ntype: ").append(item.displayItem.itemType);
-        }
+        // Layout position
         if (item.layoutPos != null) {
             tooltipText.append("\nlayout: ").append(item.layoutPos);
         }
@@ -521,12 +524,16 @@ public class ScreenFactory {
             
             for (String key : sortedItemKeys) {
                 AreaItem item = screenAreaItems.get(key);
-                sb.append(key);
-                if (item.varRef != null) {
-                    sb.append(" -> ").append(item.varRef);
-                }
+                String displayName = item.name != null ? item.name : key;
+                // Full qualified name: screenName.itemName
+                sb.append(screenName).append(".").append(displayName);
+                // Add JavaFX item type
                 if (item.displayItem != null && item.displayItem.itemType != null) {
-                    sb.append(" (").append(item.displayItem.itemType).append(")");
+                    sb.append(" [").append(item.displayItem.itemType).append("]");
+                }
+                // Add varRef
+                if (item.varRef != null) {
+                    sb.append(" -> varRef: ").append(item.varRef);
                 }
                 sb.append("\n");
             }
