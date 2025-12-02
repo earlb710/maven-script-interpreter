@@ -897,6 +897,12 @@ public class ScreenFactory {
                     boundControls.add(control);
                 }
                 
+                // Also add controls with names (like buttons) to boundControls even without varRef
+                // This allows scr.setProperty to find and modify them (e.g., disable buttons)
+                if (item.name != null && !item.name.isEmpty() && item.varRef == null) {
+                    boundControls.add(control);
+                }
+                
                 // Set up onValidate handler for input controls
                 String validateCode = item.onValidate;
                 if (validateCode == null && metadata != null) {
