@@ -1051,12 +1051,39 @@ public class InterpreterScreen {
             return screenName;
         }
         
-        // Try with parent prefix
+        // Try with parent prefix from the screen parent map
         String parentScreen = context.getScreenParent(screenName);
         if (parentScreen != null) {
             String qualifiedName = parentScreen + "." + screenName;
             if (context.getScreens().containsKey(qualifiedName) || context.hasScreenConfig(qualifiedName)) {
                 return qualifiedName;
+            }
+        }
+        
+        // Try using current screen context - if we're inside a parent screen,
+        // the target screen might be parent.screenName
+        String currentScreen = context.getCurrentScreen();
+        if (currentScreen != null && !currentScreen.isEmpty()) {
+            // If current screen is "parent.child", get the parent part
+            int lastDot = currentScreen.lastIndexOf('.');
+            if (lastDot > 0) {
+                String parentFromContext = currentScreen.substring(0, lastDot);
+                
+                // Try parent.screenName
+                String qualifiedFromContext = parentFromContext + "." + screenName;
+                if (context.getScreens().containsKey(qualifiedFromContext) || context.hasScreenConfig(qualifiedFromContext)) {
+                    return qualifiedFromContext;
+                }
+            }
+            
+            // Also check if the current screen is exactly "parent.screenName" or just "screenName"
+            // This handles the case where we're inside askAiScreen and trying to hide askAiScreen
+            // Use precise matching: either exact match or preceded by a dot
+            String suffix = "." + screenName;
+            if (currentScreen.equals(screenName) || currentScreen.endsWith(suffix)) {
+                if (context.getScreens().containsKey(currentScreen) || context.hasScreenConfig(currentScreen)) {
+                    return currentScreen;
+                }
             }
         }
         
