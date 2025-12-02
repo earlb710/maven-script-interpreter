@@ -1829,15 +1829,17 @@ public class BuiltinsScreen {
     private static String resolveScreenNameWithParent(InterpreterContext context, String screenName) {
         // First, try the screen name as-is - check both areas AND bound controls
         // We need bound controls for setProperty to work, not just areas
-        List<AreaDefinition> areas = context.getScreenAreas(screenName);
-        if (areas != null && context.getScreenBoundControls().containsKey(screenName.toLowerCase())) {
-            return screenName;
+        // Always use lowercase for consistency
+        String screenNameLower = screenName.toLowerCase();
+        List<AreaDefinition> areas = context.getScreenAreas(screenNameLower);
+        if (areas != null && context.getScreenBoundControls().containsKey(screenNameLower)) {
+            return screenNameLower;
         }
         
         // If not found, check if the screen has a parent and try parent.screen format
-        String parentScreen = context.getScreenParent(screenName);
+        String parentScreen = context.getScreenParent(screenNameLower);
         if (parentScreen != null) {
-            String qualifiedName = parentScreen + "." + screenName;
+            String qualifiedName = (parentScreen + "." + screenNameLower).toLowerCase();
             areas = context.getScreenAreas(qualifiedName);
             if (areas != null) {
                 return qualifiedName;
@@ -1853,10 +1855,10 @@ public class BuiltinsScreen {
             if (lastDot > 0) {
                 String parentFromContext = currentScreen.substring(0, lastDot);
                 
-                // Try parent.screenName
-                String qualifiedFromContext = parentFromContext + "." + screenName;
+                // Try parent.screenName (always use lowercase for consistency)
+                String qualifiedFromContext = (parentFromContext + "." + screenName).toLowerCase();
                 if (context.getScreenAreas(qualifiedFromContext) != null || 
-                    context.getScreenBoundControls().containsKey(qualifiedFromContext.toLowerCase())) {
+                    context.getScreenBoundControls().containsKey(qualifiedFromContext)) {
                     return qualifiedFromContext;
                 }
             }
@@ -1867,17 +1869,17 @@ public class BuiltinsScreen {
             if (currentScreen.toLowerCase().equals(screenName.toLowerCase()) || 
                 currentScreen.toLowerCase().endsWith(suffix)) {
                 if (context.getScreenBoundControls().containsKey(currentScreen.toLowerCase())) {
-                    return currentScreen;
+                    return currentScreen.toLowerCase();
                 }
             }
         }
         
         // Fall back to returning original if areas exist (for read operations that don't need bound controls)
         if (areas != null) {
-            return screenName;
+            return screenName.toLowerCase();
         }
         
         // Return original screen name (caller will handle the error)
-        return screenName;
+        return screenName.toLowerCase();
     }
 }
