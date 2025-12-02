@@ -358,16 +358,17 @@ public class ScreenFactory {
         row.setAlignment(Pos.CENTER_LEFT);
         row.setPadding(new Insets(2, 5, 2, 5));
         
-        // Item name with tooltip showing details
+        // Item name with tooltip showing full qualified name (screen.item)
         String displayName = item.name != null ? item.name : key;
         javafx.scene.control.Label nameLabel = new javafx.scene.control.Label(displayName);
         nameLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #006600;");
         nameLabel.setMinWidth(80);
         nameLabel.setMaxWidth(100);
         
-        // Build tooltip with item details
+        // Build tooltip with full qualified name (screen.item) and item details
         StringBuilder tooltipText = new StringBuilder();
-        tooltipText.append(key);
+        // Full qualified name: screenName.itemName
+        tooltipText.append(screenName).append(".").append(displayName);
         if (item.varRef != null) {
             tooltipText.append("\nvarRef: ").append(item.varRef);
         }
@@ -383,10 +384,36 @@ public class ScreenFactory {
         nameTooltip.setShowDelay(javafx.util.Duration.millis(500));
         nameLabel.setTooltip(nameTooltip);
         
-        // Value from varRef if available
+        // Get the actual value from the JavaFX control
         String valueStr = "";
         String fullValueStr = "";
-        if (item.varRef != null) {
+        
+        // Try to find the bound control and get its actual value
+        List<Node> boundControls = context.getScreenBoundControls().get(screenName);
+        Node matchingControl = null;
+        if (boundControls != null) {
+            String itemKey = key.toLowerCase();
+            for (Node node : boundControls) {
+                Object userData = node.getUserData();
+                if (userData != null && userData.toString().toLowerCase().equals(itemKey)) {
+                    matchingControl = node;
+                    break;
+                }
+            }
+        }
+        
+        if (matchingControl != null) {
+            // Extract value from the actual JavaFX control
+            Object controlValue = getControlValue(matchingControl);
+            if (controlValue != null) {
+                valueStr = formatValue(controlValue);
+                fullValueStr = formatValueFull(controlValue);
+            } else {
+                valueStr = "(empty)";
+                fullValueStr = "Control has no value";
+            }
+        } else if (item.varRef != null) {
+            // Fallback to variable value if control not found
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVars = context.getScreenVars(screenName);
             if (screenVars != null) {
                 Object value = screenVars.get(item.varRef.toLowerCase());
@@ -416,6 +443,37 @@ public class ScreenFactory {
         row.setStyle("-fx-background-color: #e8f0e8;");
         
         return row;
+    }
+    
+    /**
+     * Extract the current value from a JavaFX control.
+     * 
+     * @param control The JavaFX control node
+     * @return The control's current value, or null if not extractable
+     */
+    private static Object getControlValue(Node control) {
+        if (control instanceof javafx.scene.control.TextField) {
+            return ((javafx.scene.control.TextField) control).getText();
+        } else if (control instanceof javafx.scene.control.TextArea) {
+            return ((javafx.scene.control.TextArea) control).getText();
+        } else if (control instanceof javafx.scene.control.CheckBox) {
+            return ((javafx.scene.control.CheckBox) control).isSelected();
+        } else if (control instanceof javafx.scene.control.ComboBox) {
+            return ((javafx.scene.control.ComboBox<?>) control).getValue();
+        } else if (control instanceof javafx.scene.control.ChoiceBox) {
+            return ((javafx.scene.control.ChoiceBox<?>) control).getValue();
+        } else if (control instanceof javafx.scene.control.Slider) {
+            return ((javafx.scene.control.Slider) control).getValue();
+        } else if (control instanceof javafx.scene.control.Spinner) {
+            return ((javafx.scene.control.Spinner<?>) control).getValue();
+        } else if (control instanceof javafx.scene.control.DatePicker) {
+            return ((javafx.scene.control.DatePicker) control).getValue();
+        } else if (control instanceof javafx.scene.control.Label) {
+            return ((javafx.scene.control.Label) control).getText();
+        } else if (control instanceof javafx.scene.control.Labeled) {
+            return ((javafx.scene.control.Labeled) control).getText();
+        }
+        return null;
     }
     
     /**
