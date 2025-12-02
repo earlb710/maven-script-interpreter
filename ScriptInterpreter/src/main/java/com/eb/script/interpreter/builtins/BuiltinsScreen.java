@@ -1812,9 +1812,10 @@ public class BuiltinsScreen {
      * @return The resolved screen name, or the original if no parent fallback is needed
      */
     private static String resolveScreenNameWithParent(InterpreterContext context, String screenName) {
-        // First, try the screen name as-is
+        // First, try the screen name as-is - check both areas AND bound controls
+        // We need bound controls for setProperty to work, not just areas
         List<AreaDefinition> areas = context.getScreenAreas(screenName);
-        if (areas != null) {
+        if (areas != null && context.getScreenBoundControls().containsKey(screenName.toLowerCase())) {
             return screenName;
         }
         
@@ -1826,6 +1827,39 @@ public class BuiltinsScreen {
             if (areas != null) {
                 return qualifiedName;
             }
+        }
+        
+        // Try using current screen context - if we're inside a parent screen,
+        // the target screen might be parent.screenName
+        String currentScreen = context.getCurrentScreen();
+        if (currentScreen != null && !currentScreen.isEmpty()) {
+            // If current screen is "parent.child", get the parent part
+            int lastDot = currentScreen.lastIndexOf('.');
+            if (lastDot > 0) {
+                String parentFromContext = currentScreen.substring(0, lastDot);
+                
+                // Try parent.screenName
+                String qualifiedFromContext = parentFromContext + "." + screenName;
+                if (context.getScreenAreas(qualifiedFromContext) != null || 
+                    context.getScreenBoundControls().containsKey(qualifiedFromContext.toLowerCase())) {
+                    return qualifiedFromContext;
+                }
+            }
+            
+            // Also check if the current screen itself ends with the screen name we're looking for
+            // This handles the case where we're inside askAiScreen and calling scr.setProperty for askAiScreen
+            String suffix = "." + screenName.toLowerCase();
+            if (currentScreen.toLowerCase().equals(screenName.toLowerCase()) || 
+                currentScreen.toLowerCase().endsWith(suffix)) {
+                if (context.getScreenBoundControls().containsKey(currentScreen.toLowerCase())) {
+                    return currentScreen;
+                }
+            }
+        }
+        
+        // Fall back to returning original if areas exist (for read operations that don't need bound controls)
+        if (areas != null) {
+            return screenName;
         }
         
         // Return original screen name (caller will handle the error)
