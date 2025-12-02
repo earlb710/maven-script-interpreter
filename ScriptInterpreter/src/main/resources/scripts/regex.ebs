@@ -1,0 +1,1149 @@
+// ============================================================================
+// regex.ebs - Interactive Regular Expression Tester
+// ============================================================================
+// This script provides an interactive screen for testing regular expressions.
+// Features:
+//   - Input field for sample source text (multiline textarea)
+//   - Input field for regex pattern
+//   - Checkboxes for regex options/flags
+//   - Append Results option to accumulate results
+//   - Advanced regex filters: OR, AND, NOT pattern matching
+//   - Buttons to execute regex operations (find first, find all, replace)
+//   - Display area for showing match results
+// ============================================================================
+
+print "====================================================================";
+print "       Regex Tester - Interactive Regular Expression Tool";
+print "====================================================================";
+print "";
+print "Loading regex tester screen...";
+print "";
+
+// Helper function to remove all flag prefixes from a pattern
+// Removes patterns like (?i), (?m), (?s), (?ims), (?im), etc.
+removeAllFlags(pattern: string) return string {
+    var result: string = pattern;
+    
+    // Remove all flag prefix patterns: (?...) where ... contains only i, m, s
+    // We need to handle various combinations like (?i), (?m), (?s), (?im), (?is), (?ms), (?ims)
+    while call str.startsWith(result, "(?") {
+        var endParen: int = call str.indexOf(result, ")");
+        if endParen > 2 then {
+            // Check if all chars between (? and ) are valid flags (i, m, s)
+            var flagPart: string = call str.substring(result, 2, endParen);
+            var isValidFlagBlock: bool = true;
+            // Use str.charArray to get the characters as an array, then use .length
+            var flagChars = call str.charArray(flagPart);
+            var flagLen: int = flagChars.length;
+            var j: int = 0;
+            while j < flagLen {
+                var c: string = call str.charAt(flagPart, j);
+                if c != "i" and c != "m" and c != "s" then {
+                    isValidFlagBlock = false;
+                }
+                j = j + 1;
+            }
+            if isValidFlagBlock then {
+                result = call str.substring(result, endParen + 1);
+            } else {
+                // Not a flag block, stop trying to remove
+                break;
+            }
+        } else {
+            break;
+        }
+    }
+    
+    return result;
+}
+
+// Helper function to build regex pattern with flags
+buildRegexPattern(pattern: string, caseInsensitive: bool, multiline: bool, dotAll: bool) return string {
+    var flags: string = "";
+    
+    // Build flag prefix for Java regex
+    // (?i) = case insensitive
+    // (?m) = multiline (^ and $ match line boundaries)
+    // (?s) = dotall (. matches newlines)
+    if caseInsensitive or multiline or dotAll then {
+        flags = "(?";
+        if caseInsensitive then {
+            flags = flags + "i";
+        }
+        if multiline then {
+            flags = flags + "m";
+        }
+        if dotAll then {
+            flags = flags + "s";
+        }
+        flags = flags + ")";
+    }
+    
+    return flags + pattern;
+}
+
+// Function to sync the regex pattern field with checkbox states
+// This adds/removes flags from the pattern text as checkboxes are toggled
+syncPatternWithFlags {
+    var currentPattern: string = regexScreen.regexPattern;
+    
+    // First, remove any existing flags from the pattern
+    var cleanPattern: string = call removeAllFlags(currentPattern);
+    
+    // Now rebuild with current checkbox states
+    var newPattern: string = call buildRegexPattern(
+        cleanPattern,
+        regexScreen.caseInsensitive,
+        regexScreen.multilineMode,
+        regexScreen.dotAllMode
+    );
+    
+    // Update the pattern field
+    regexScreen.regexPattern = newPattern;
+}
+
+// Helper function to check if a match satisfies OR filter patterns
+// Returns true if match contains ANY of the OR patterns
+checkOrFilter(match: string, orPatterns: string) return bool {
+    if orPatterns == "" then {
+        return true;
+    }
+    
+    var patterns = call str.split(orPatterns, ",");
+    var i: int = 0;
+    while i < patterns.length {
+        var pattern: string = call str.trim(patterns[i]);
+        if pattern != "" then {
+            // Check for +/* wildcard syntax
+            if call str.contains(pattern, "+/*") then {
+                // Split by +/* and check if match contains all parts
+                var parts = call str.split(pattern, "\\+/\\*");
+                var allPartsMatch: bool = true;
+                var j: int = 0;
+                while j < parts.length {
+                    var part: string = call str.trim(parts[j]);
+                    if part != "" and !call str.contains(match, part) then {
+                        allPartsMatch = false;
+                    }
+                    j = j + 1;
+                }
+                if allPartsMatch then {
+                    return true;
+                }
+            } else {
+                // Simple contains check
+                if call str.contains(match, pattern) then {
+                    return true;
+                }
+            }
+        }
+        i = i + 1;
+    }
+    return false;
+}
+
+// Helper function to check if a match satisfies AND filter patterns
+// Returns true if match contains ALL of the AND patterns
+checkAndFilter(match: string, andPatterns: string) return bool {
+    if andPatterns == "" then {
+        return true;
+    }
+    
+    var patterns = call str.split(andPatterns, ",");
+    var i: int = 0;
+    while i < patterns.length {
+        var pattern: string = call str.trim(patterns[i]);
+        if pattern != "" then {
+            // Check for +/* wildcard syntax
+            if call str.contains(pattern, "+/*") then {
+                // Split by +/* and check if match contains all parts
+                var parts = call str.split(pattern, "\\+/\\*");
+                var j: int = 0;
+                while j < parts.length {
+                    var part: string = call str.trim(parts[j]);
+                    if part != "" and !call str.contains(match, part) then {
+                        return false;
+                    }
+                    j = j + 1;
+                }
+            } else {
+                // Simple contains check
+                if !call str.contains(match, pattern) then {
+                    return false;
+                }
+            }
+        }
+        i = i + 1;
+    }
+    return true;
+}
+
+// Helper function to check if a match satisfies NOT filter patterns
+// Returns true if match does NOT contain any of the NOT patterns
+checkNotFilter(match: string, notPatterns: string) return bool {
+    if notPatterns == "" then {
+        return true;
+    }
+    
+    var patterns = call str.split(notPatterns, ",");
+    var i: int = 0;
+    while i < patterns.length {
+        var pattern: string = call str.trim(patterns[i]);
+        if pattern != "" then {
+            // Check for +/* wildcard syntax
+            if call str.contains(pattern, "+/*") then {
+                // Split by +/* and check if match contains all parts
+                var parts = call str.split(pattern, "\\+/\\*");
+                var allPartsMatch: bool = true;
+                var j: int = 0;
+                while j < parts.length {
+                    var part: string = call str.trim(parts[j]);
+                    if part != "" and !call str.contains(match, part) then {
+                        allPartsMatch = false;
+                    }
+                    j = j + 1;
+                }
+                if allPartsMatch then {
+                    return false;
+                }
+            } else {
+                // Simple contains check - if pattern is found, exclude the match
+                if call str.contains(match, pattern) then {
+                    return false;
+                }
+            }
+        }
+        i = i + 1;
+    }
+    return true;
+}
+
+// Helper function to apply all filters to a match
+// Returns true if the match passes all filters (OR, AND, NOT)
+applyFilters(match: string) return bool {
+    var orPatterns: string = regexScreen.orPatterns;
+    var andPatterns: string = regexScreen.andPatterns;
+    var notPatterns: string = regexScreen.notPatterns;
+    
+    // Check OR filter first (match must satisfy at least one OR pattern)
+    if !call checkOrFilter(match, orPatterns) then {
+        return false;
+    }
+    
+    // Check AND filter (match must satisfy all AND patterns)
+    if !call checkAndFilter(match, andPatterns) then {
+        return false;
+    }
+    
+    // Check NOT filter (match must not satisfy any NOT pattern)
+    if !call checkNotFilter(match, notPatterns) then {
+        return false;
+    }
+    
+    return true;
+}
+
+// Function to perform find first match
+performFindFirst {
+    var sourceText: string = regexScreen.sourceText;
+    var regexPattern: string = regexScreen.regexPattern;
+    var appendResults: bool = regexScreen.appendResults;
+    
+    if regexPattern == "" then {
+        regexScreen.resultText = "Error: Please enter a regex pattern";
+        return;
+    }
+    
+    // Build result header
+    var resultHeader: string = "Finding first match...\n";
+    resultHeader = resultHeader + "Pattern: " + regexPattern + "\n\n";
+    
+    // Set or append result header
+    if appendResults then {
+        regexScreen.resultText = regexScreen.resultText + "\n--- New Search ---\n" + resultHeader;
+    } else {
+        regexScreen.resultText = resultHeader;
+    }
+    
+    try {
+        var match: string = call str.findRegex(sourceText, regexPattern);
+        
+        if match == null then {
+            regexScreen.resultText = regexScreen.resultText + "No match found.";
+        } else {
+            regexScreen.resultText = regexScreen.resultText + "Match found:\n'" + match + "'";
+        }
+    } exceptions {
+        when ANY_ERROR(msg) {
+            regexScreen.resultText = regexScreen.resultText + "Error: " + msg;
+        }
+    }
+}
+
+// Function to perform find all matches
+performFindAll {
+    var sourceText: string = regexScreen.sourceText;
+    var regexPattern: string = regexScreen.regexPattern;
+    var appendResults: bool = regexScreen.appendResults;
+    
+    if regexPattern == "" then {
+        regexScreen.resultText = "Error: Please enter a regex pattern";
+        return;
+    }
+    
+    // Build result header
+    var resultHeader: string = "Finding all matches...\n";
+    resultHeader = resultHeader + "Pattern: " + regexPattern + "\n\n";
+    
+    // Set or append result header
+    if appendResults then {
+        regexScreen.resultText = regexScreen.resultText + "\n--- New Search ---\n" + resultHeader;
+    } else {
+        regexScreen.resultText = resultHeader;
+    }
+    
+    try {
+        var matches = call str.findAllRegex(sourceText, regexPattern);
+        
+        if matches.length == 0 then {
+            regexScreen.resultText = regexScreen.resultText + "No matches found.";
+        } else {
+            var matchCount: int = 0;
+            var matchResults: string = "";
+            
+            foreach match in matches {
+                matchCount = matchCount + 1;
+                matchResults = matchResults + "[" + matchCount + "] '" + match + "'\n";
+            }
+            
+            regexScreen.resultText = regexScreen.resultText + "Found " + matchCount + " match(es):\n\n" + matchResults;
+        }
+    } exceptions {
+        when ANY_ERROR(msg) {
+            regexScreen.resultText = regexScreen.resultText + "Error: " + msg;
+        }
+    }
+}
+
+// Function to perform replace all
+performReplaceAll {
+    var sourceText: string = regexScreen.sourceText;
+    var regexPattern: string = regexScreen.regexPattern;
+    var replacementText: string = regexScreen.replacementText;
+    var appendResults: bool = regexScreen.appendResults;
+    
+    if regexPattern == "" then {
+        regexScreen.resultText = "Error: Please enter a regex pattern";
+        return;
+    }
+    
+    // Build result header
+    var resultHeader: string = "Replacing matches...\n";
+    resultHeader = resultHeader + "Pattern: " + regexPattern + "\n";
+    resultHeader = resultHeader + "Replacement: '" + replacementText + "'\n\n";
+    
+    // Set or append result header
+    if appendResults then {
+        regexScreen.resultText = regexScreen.resultText + "\n--- New Replace ---\n" + resultHeader;
+    } else {
+        regexScreen.resultText = resultHeader;
+    }
+    
+    try {
+        var result: string = call str.replaceAll(sourceText, regexPattern, replacementText);
+        regexScreen.resultText = regexScreen.resultText + "Result:\n" + result;
+    } exceptions {
+        when ANY_ERROR(msg) {
+            regexScreen.resultText = regexScreen.resultText + "Error: " + msg;
+        }
+    }
+}
+
+// Function to perform replace first only (literal string matching - not regex)
+performReplaceLiteral {
+    var sourceText: string = regexScreen.sourceText;
+    var searchText: string = regexScreen.regexPattern;
+    var replacementText: string = regexScreen.replacementText;
+    var appendResults: bool = regexScreen.appendResults;
+    
+    if searchText == "" then {
+        regexScreen.resultText = "Error: Please enter text to search for";
+        return;
+    }
+    
+    // Note: This uses literal string matching (not regex)
+    // Useful when you want to find/replace exact text without regex interpretation
+    
+    var resultHeader: string = "Replace First (LITERAL text match - not regex)...\n";
+    resultHeader = resultHeader + "Search for: '" + searchText + "'\n";
+    resultHeader = resultHeader + "Replace with: '" + replacementText + "'\n\n";
+    resultHeader = resultHeader + "Note: This treats the pattern as literal text, not a regex.\n";
+    resultHeader = resultHeader + "Special characters like . * + are matched literally.\n\n";
+    
+    // Set or append result header
+    if appendResults then {
+        regexScreen.resultText = regexScreen.resultText + "\n--- New Replace ---\n" + resultHeader;
+    } else {
+        regexScreen.resultText = resultHeader;
+    }
+    
+    try {
+        var result: string = call str.replaceFirst(sourceText, searchText, replacementText);
+        regexScreen.resultText = regexScreen.resultText + "Result:\n" + result;
+    } exceptions {
+        when ANY_ERROR(msg) {
+            regexScreen.resultText = regexScreen.resultText + "Error: " + msg;
+        }
+    }
+}
+
+// Function to clear all fields
+clearFields {
+    regexScreen.sourceText = "";
+    regexScreen.regexPattern = "";
+    regexScreen.replacementText = "";
+    regexScreen.resultText = "";
+    regexScreen.caseInsensitive = false;
+    regexScreen.multilineMode = false;
+    regexScreen.dotAllMode = false;
+    regexScreen.appendResults = false;
+    regexScreen.orPatterns = "";
+    regexScreen.andPatterns = "";
+    regexScreen.notPatterns = "";
+}
+
+// Function to load sample data
+loadSampleData {
+    regexScreen.sourceText = "Hello World!\nThis is a test.\nEmail: user@example.com\nPhone: 123-456-7890\nAnother email: admin@test.org\nDate: 2024-12-25\nThe quick brown fox jumps over the lazy dog.\nHELLO again!";
+    regexScreen.regexPattern = "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}";
+    regexScreen.resultText = "Sample data loaded!\n\nTry clicking 'Find All' to find email addresses,\nor modify the regex pattern to test other patterns.\n\nSample patterns to try:\n- \\d+ (find numbers)\n- \\w+ (find words)\n- [A-Z][a-z]+ (find capitalized words)\n- \\d{4}-\\d{2}-\\d{2} (find dates like YYYY-MM-DD)\n\nFilter Examples:\n- OR Filter: 'user, admin' - matches containing 'user' OR 'admin'\n- AND Filter: 'example' - matches must contain 'example'\n- NOT Filter: 'test' - exclude matches containing 'test'\n- Wildcard: 'user+/*com' - matches containing both 'user' AND 'com'";
+}
+
+// Function to append OR filter to regex pattern
+appendOrToPattern {
+    var orValue: string = regexScreen.orPatterns;
+    if orValue != "" then {
+        var currentPattern: string = regexScreen.regexPattern;
+        if currentPattern != "" then {
+            regexScreen.regexPattern = currentPattern + "|" + orValue;
+        } else {
+            regexScreen.regexPattern = orValue;
+        }
+    }
+}
+
+// Function to append AND filter to regex pattern
+// Prepends positive lookahead and ensures pattern ends with .+ to capture content
+appendAndToPattern {
+    var andValue: string = regexScreen.andPatterns;
+    if andValue != "" then {
+        var currentPattern: string = regexScreen.regexPattern;
+        // Prepend the lookahead at the start, and ensure .+ at the end
+        var lookahead: string = "(?=.*" + andValue + ")";
+        if currentPattern != "" then {
+            // Check if pattern already ends with .+ 
+            if call str.endsWith(currentPattern, ".+") then {
+                // Insert lookahead before the .+ at the end
+                var patternChars = call str.charArray(currentPattern);
+                var patternLen: int = patternChars.length;
+                var patternWithoutSuffix: string = call str.substring(currentPattern, 0, patternLen - 2);
+                regexScreen.regexPattern = patternWithoutSuffix + lookahead + ".+";
+            } else {
+                // Add lookahead at beginning and .+ at end
+                regexScreen.regexPattern = lookahead + currentPattern;
+            }
+        } else {
+            // Just the lookahead with .+ to capture
+            regexScreen.regexPattern = lookahead + ".+";
+        }
+    }
+}
+
+// Function to append NOT filter to regex pattern
+// Prepends negative lookahead and ensures pattern ends with .+ to capture content
+appendNotToPattern {
+    var notValue: string = regexScreen.notPatterns;
+    if notValue != "" then {
+        var currentPattern: string = regexScreen.regexPattern;
+        // Prepend the negative lookahead at the start, and ensure .+ at the end
+        var lookahead: string = "(?!.*" + notValue + ")";
+        if currentPattern != "" then {
+            // Check if pattern already ends with .+
+            if call str.endsWith(currentPattern, ".+") then {
+                // Insert lookahead before the .+ at the end
+                var patternChars = call str.charArray(currentPattern);
+                var patternLen: int = patternChars.length;
+                var patternWithoutSuffix: string = call str.substring(currentPattern, 0, patternLen - 2);
+                regexScreen.regexPattern = patternWithoutSuffix + lookahead + ".+";
+            } else {
+                // Add lookahead at beginning
+                regexScreen.regexPattern = lookahead + currentPattern;
+            }
+        } else {
+            // Just the negative lookahead with .+ to capture
+            regexScreen.regexPattern = lookahead + ".+";
+        }
+    }
+}
+
+// Function to call AI and generate regex from user description (async version)
+generateRegexFromAi {
+    var userRequest: string = askAiScreen.aiRequest;
+    
+    if userRequest == "" then {
+        askAiScreen.aiResult = "Error: Please describe what you want to match.";
+        return;
+    }
+    
+    // Disable buttons while processing (except Cancel)
+    // Use simple screen name since askAiScreen is registered with its own name
+    call scr.setProperty("askAiScreen.submitBtn", "disabled", true);
+    call scr.setProperty("askAiScreen.clearBtn", "disabled", true);
+    call scr.setProperty("askAiScreen.applyBtn", "disabled", true);
+    
+    // Show busy working message
+    askAiScreen.aiResult = "⏳ WORKING...\n\nGenerating regex pattern from AI.\nThis may take up to a few minutes.\n\nPlease wait...";
+    
+    var systemPrompt: string = "You are a Java regex expert. The user will describe what they want to match. Generate ONLY the Java regex pattern - no explanation, no code, no quotes. Just the raw regex pattern. Examples:\n- Email: [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}\n- Phone: \\d{3}-\\d{3}-\\d{4}\n- Date: \\d{4}-\\d{2}-\\d{2}";
+    
+    // Use async AI call with callback - UI remains responsive
+    // Store the request ID so we can cancel if needed
+    var requestId: int = call ai.completeAsync(systemPrompt, userRequest, 200, 0.3, "onAiRegexComplete");
+    askAiScreen.aiRequestId = requestId;
+}
+
+// Callback function for AI regex generation result
+onAiRegexComplete(aiResponse: json) {
+    // Check if request was cancelled
+    var wasCancelled: bool = call json.getBool(aiResponse, "cancelled", false);
+    if wasCancelled then {
+        // Request was cancelled - don't update UI (screen may be closed)
+        return;
+    }
+    
+    // Extract success flag using json.getBool builtin
+    var isSuccess: bool = call json.getBool(aiResponse, "success", false);
+    
+    if isSuccess then {
+        var aiResult: string = call json.getString(aiResponse, "result", "");
+        
+        // Trim whitespace and remove quotes if present
+        aiResult = call str.trim(aiResult);
+        if call str.startsWith(aiResult, "\"") and call str.endsWith(aiResult, "\"") then {
+            var resultChars = call str.charArray(aiResult);
+            var resultLen: int = resultChars.length;
+            aiResult = call str.substring(aiResult, 1, resultLen - 1);
+        }
+        if call str.startsWith(aiResult, "'") and call str.endsWith(aiResult, "'") then {
+            var resultChars = call str.charArray(aiResult);
+            var resultLen: int = resultChars.length;
+            aiResult = call str.substring(aiResult, 1, resultLen - 1);
+        }
+        
+        var resultText: string = "✓ Generated pattern:\n" + aiResult;
+        askAiScreen.aiResult = resultText;
+        call scr.setProperty("askAiScreen.aiResultItem", "value", resultText);
+        askAiScreen.generatedPattern = aiResult;
+    } else {
+        var errorMsg: string = call json.getString(aiResponse, "error", "Unknown error");
+        
+        // Check for API key issues (401 Unauthorized)
+        var isApiKeyError: bool = false;
+        if call str.contains(errorMsg, "401") then {
+            isApiKeyError = true;
+        }
+        if call str.contains(errorMsg, "API key") then {
+            isApiKeyError = true;
+        }
+        
+        if isApiKeyError then {
+            var apiKeyErrMsg: string = "❌ API KEY NOT CONFIGURED\n\nTo use the AI feature, you need to set up your OpenAI API key:\n\n1. Go to: Edit > AI Chat Model Setup\n2. Enter your API key (from https://platform.openai.com/api-keys)\n3. Click Save\n4. RESTART the application\n\nThe AI configuration is loaded at startup, so you must restart after saving.";
+            askAiScreen.aiResult = apiKeyErrMsg;
+            call scr.setProperty("askAiScreen.aiResultItem", "value", apiKeyErrMsg);
+        } else {
+            var errResult: string = "❌ Error: " + errorMsg;
+            askAiScreen.aiResult = errResult;
+            call scr.setProperty("askAiScreen.aiResultItem", "value", errResult);
+        }
+    }
+    
+    // Re-enable buttons after processing
+    // Use simple screen name since askAiScreen is registered with its own name
+    call scr.setProperty("askAiScreen.submitBtn", "disabled", false);
+    call scr.setProperty("askAiScreen.clearBtn", "disabled", false);
+    call scr.setProperty("askAiScreen.applyBtn", "disabled", false);
+}
+
+// Function to apply the generated AI pattern to the main regex screen
+applyAiPattern {
+    var generatedPattern: string = askAiScreen.generatedPattern;
+    if generatedPattern != "" then {
+        regexScreen.regexPattern = generatedPattern;
+        hide screen askAiScreen;
+    }
+}
+
+// Function to clear the AI screen fields
+clearAiFields {
+    askAiScreen.aiRequest = "";
+    askAiScreen.aiResult = "The AI-generated regex pattern will appear here...";
+    askAiScreen.generatedPattern = "";
+}
+
+// Function to cancel the AI request and close the screen
+cancelAiRequest {
+    // Cancel any active AI request
+    var requestId: int = askAiScreen.aiRequestId;
+    if requestId > 0 then {
+        call ai.cancel(requestId);
+        askAiScreen.aiRequestId = 0;
+    }
+    // Hide the screen
+    hide screen askAiScreen;
+}
+
+// Function to create and show the Ask AI screen
+// This function creates the screen if it doesn't exist (e.g., if it was closed with X button)
+showAskAiScreen {
+    // Define the Ask AI screen - child screen for AI-based regex generation
+    screen askAiScreen = {
+        "title": "Ask AI - Generate Regex Pattern",
+        "width": 500,
+        "height": 550,
+        "vars": [
+            {
+                "name": "aiRequest",
+                "type": "string",
+                "default": "",
+                "display": {
+                    "type": "textarea",
+                    "labelText": "Describe what\nyou want\nto match:",
+                    "promptHelp": "E.g., 'email addresses' or 'dates in YYYY-MM-DD format' or 'phone numbers with area code'",
+                    "maxLength": 60
+                }
+            },
+            {
+                "name": "aiResult",
+                "type": "string",
+                "default": "The AI-generated regex pattern will appear here...",
+                "display": {
+                    "type": "textarea",
+                    "labelText": "AI Result:",
+                    "editable": false,
+                    "maxLength": 60
+                }
+            },
+            {
+                "name": "generatedPattern",
+                "type": "string",
+                "default": ""
+            },
+            {
+                "name": "aiRequestId",
+                "type": "int",
+                "default": 0
+            }
+        ],
+        "area": [
+            {
+                "name": "aiMainArea",
+                "type": "vbox",
+                "style": "-fx-spacing: 5; -fx-padding: 5;",
+                "areas": [
+                    {
+                        "name": "aiTitleArea",
+                        "type": "hbox",
+                        "style": "-fx-alignment: CENTER;",
+                        "items": [
+                            {
+                                "name": "aiTitle",
+                                "display": {
+                                    "type": "label",
+                                    "labelText": "Ask AI to Generate Regex Pattern",
+                                    "itemColor": "#000088",
+                                    "itemBold": true,
+                                    "itemFontSize": "16"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "aiRequestArea",
+                        "type": "vbox",
+                        "style": "-fx-spacing: 5;",
+                        "items": [
+                            {"name": "aiRequestItem", "varRef": "aiRequest"}
+                        ]
+                    },
+                    {
+                        "name": "aiButtonArea",
+                        "type": "hbox",
+                        "style": "-fx-spacing: 10; -fx-alignment: CENTER;",
+                        "items": [
+                            {
+                                "name": "submitBtn",
+                                "display": {
+                                    "type": "button",
+                                    "labelText": "Submit",
+                                    "tooltip": "Ask AI to generate a regex pattern based on your description",
+                                    "onClick": "call generateRegexFromAi();"
+                                }
+                            },
+                            {
+                                "name": "clearBtn",
+                                "display": {
+                                    "type": "button",
+                                    "labelText": "Clear",
+                                    "tooltip": "Clear the request and result fields",
+                                    "onClick": "call clearAiFields();"
+                                }
+                            },
+                            {
+                                "name": "applyBtn",
+                                "display": {
+                                    "type": "button",
+                                    "labelText": "Apply Pattern",
+                                    "tooltip": "Apply the generated pattern to the main regex tester",
+                                    "onClick": "call applyAiPattern();"
+                                }
+                            },
+                            {
+                                "name": "cancelBtn",
+                                "display": {
+                                    "type": "button",
+                                    "labelText": "Cancel",
+                                    "tooltip": "Cancel AI request and close",
+                                    "onClick": "call cancelAiRequest();"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "aiResultArea",
+                        "type": "vbox",
+                        "style": "-fx-spacing: 5;",
+                        "items": [
+                            {"name": "aiResultItem", "varRef": "aiResult"}
+                        ]
+                    }
+                ]
+            }
+        ]
+    };
+    
+    // Show the screen
+    show screen askAiScreen;
+}
+
+// Create the regex tester screen
+screen regexScreen = {
+    "title": "Regex Tester - Interactive Regular Expression Tool",
+    "width": 850,
+    "height": 1000,
+    "vars": [
+        {
+            "name": "sourceText",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textarea",
+                "labelText": "Source Text:",
+                "promptHelp": "Enter text to search/match against",
+                "maxLength": 80
+            }
+        },
+        {
+            "name": "regexPattern",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Regex Pattern:",
+                "promptHelp": "Enter your regular expression pattern",
+                "maxLength": 60
+            }
+        },
+        {
+            "name": "replacementText",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Replacement:",
+                "promptHelp": "Replacement text for replace operations",
+                "maxLength": 60
+            }
+        },
+        {
+            "name": "caseInsensitive",
+            "type": "bool",
+            "default": false,
+            "display": {
+                "type": "checkbox",
+                "labelText": "Case Insensitive (?i)",
+                "onChange": "call syncPatternWithFlags();"
+            }
+        },
+        {
+            "name": "multilineMode",
+            "type": "bool",
+            "default": false,
+            "display": {
+                "type": "checkbox",
+                "labelText": "Multiline Mode (?m) - ^ and $ match line boundaries",
+                "onChange": "call syncPatternWithFlags();"
+            }
+        },
+        {
+            "name": "dotAllMode",
+            "type": "bool",
+            "default": false,
+            "display": {
+                "type": "checkbox",
+                "labelText": "Dot All Mode (?s) - . matches newlines",
+                "onChange": "call syncPatternWithFlags();"
+            }
+        },
+        {
+            "name": "appendResults",
+            "type": "bool",
+            "default": false,
+            "display": {
+                "type": "checkbox",
+                "labelText": "Append Results (accumulate output instead of replacing)"
+            }
+        },
+        {
+            "name": "orPatterns",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "OR Filter:",
+                "promptHelp": "Comma-separated patterns - match ANY (e.g., user,admin or user+/*com)",
+                "maxLength": 60
+            }
+        },
+        {
+            "name": "andPatterns",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "AND Filter:",
+                "promptHelp": "Comma-separated patterns - match must contain ALL (e.g., @,example)",
+                "maxLength": 60
+            }
+        },
+        {
+            "name": "notPatterns",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "NOT Filter:",
+                "promptHelp": "Comma-separated patterns - exclude matches containing ANY (e.g., test,admin)",
+                "maxLength": 60
+            }
+        },
+        {
+            "name": "resultText",
+            "type": "string",
+            "default": "Results will appear here...",
+            "display": {
+                "type": "textarea",
+                "labelText": "Results:",
+                "editable": false,
+                "maxLength": 80
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "style": "-fx-spacing: 2; -fx-padding: 2;",
+            "areas": [
+                {
+                    "name": "titleArea",
+                    "type": "hbox",
+                    "style": "-fx-alignment: CENTER;",
+                    "items": [
+                        {
+                            "name": "titleLabel",
+                            "display": {
+                                "type": "label",
+                                "labelText": "Interactive Regular Expression Tester",
+                                "itemColor": "#000088",
+                                "itemBold": true,
+                                "itemUnderline": true,
+                                "itemFontSize": "20"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "inputArea",
+                    "type": "vbox",
+                    "groupBorder": "lowered",
+                    "groupBorderColor": "#cccccc",
+                    "groupLabelText": "Input",
+                    "groupLabelColor": "#444444",
+                    "groupLabelOffset": "bottom",
+                    "padding": "4",
+                    "style": "-fx-spacing: 8; -fx-padding: 10;",
+                    "items": [
+                        {"name": "sourceTextItem", "varRef": "sourceText"},
+                        {"name": "regexPatternItem", "varRef": "regexPattern"},
+                        {"name": "replacementItem", "varRef": "replacementText"}
+                    ]
+                },
+                {
+                    "name": "optionsAndFiltersRow",
+                    "type": "hbox",
+                    "style": "-fx-spacing: 10;",
+                    "areas": [
+                        {
+                            "name": "optionsArea",
+                            "type": "vbox",
+                            "groupBorder": "lowered",
+                            "groupBorderColor": "#cccccc",
+                            "groupLabelText": "Regex Options",
+                            "groupLabelOffset": "bottom",
+                            "padding": "4",
+                            "groupLabelColor": "#444444",
+                            "style": "-fx-spacing: 5; -fx-padding: 10;",
+                            "items": [
+                                {"name": "caseInsensitiveItem", "varRef": "caseInsensitive"},
+                                {"name": "multilineModeItem", "varRef": "multilineMode"},
+                                {"name": "dotAllModeItem", "varRef": "dotAllMode"},
+                                {"name": "appendResultsItem", "varRef": "appendResults"}
+                            ]
+                        },
+                        {
+                            "name": "filtersArea",
+                            "type": "vbox",
+                            "groupBorder": "lowered",
+                            "groupBorderColor": "#cccccc",
+                            "groupLabelText": "Match Filters",
+                            "groupLabelOffset": "bottom",
+                            "padding": "4",
+                            "groupLabelColor": "#444444",
+                            "style": "-fx-spacing: 5; -fx-padding: 10;",
+                            "areas": [
+                                {
+                                    "name": "orFilterRow",
+                                    "type": "hbox",
+                                    "style": "-fx-spacing: 5; -fx-alignment: CENTER_LEFT;",
+                                    "items": [
+                                        {"name": "orPatternsItem", "varRef": "orPatterns"},
+                                        {
+                                            "name": "appendOrBtn",
+                                            "display": {
+                                                "type": "button",
+                                                "labelText": "Append >",
+                                                "tooltip": "Append OR filter to regex pattern",
+                                                "onClick": "call appendOrToPattern();"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "name": "andFilterRow",
+                                    "type": "hbox",
+                                    "style": "-fx-spacing: 5; -fx-alignment: CENTER_LEFT;",
+                                    "items": [
+                                        {"name": "andPatternsItem", "varRef": "andPatterns"},
+                                        {
+                                            "name": "appendAndBtn",
+                                            "display": {
+                                                "type": "button",
+                                                "labelText": "Append >",
+                                                "tooltip": "Append AND filter to regex pattern",
+                                                "onClick": "call appendAndToPattern();"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "name": "notFilterRow",
+                                    "type": "hbox",
+                                    "style": "-fx-spacing: 5; -fx-alignment: CENTER_LEFT;",
+                                    "items": [
+                                        {"name": "notPatternsItem", "varRef": "notPatterns"},
+                                        {
+                                            "name": "appendNotBtn",
+                                            "display": {
+                                                "type": "button",
+                                                "labelText": "Append >",
+                                                "tooltip": "Append NOT filter to regex pattern",
+                                                "onClick": "call appendNotToPattern();"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "buttonArea",
+                    "type": "hbox",
+                    "style": "-fx-spacing: 10; -fx-alignment: CENTER;",
+                    "items": [
+                        {
+                            "name": "findFirstBtn",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Find First",
+                                "tooltip": "Find the first match of the regex pattern",
+                                "onClick": "call performFindFirst();"
+                            }
+                        },
+                        {
+                            "name": "findAllBtn",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Find All",
+                                "tooltip": "Find all matches of the regex pattern",
+                                "onClick": "call performFindAll();"
+                            }
+                        },
+                        {
+                            "name": "replaceAllBtn",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Replace All",
+                                "tooltip": "Replace all matches with replacement text",
+                                "onClick": "call performReplaceAll();"
+                            }
+                        },
+                        {
+                            "name": "replaceLiteralBtn",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Replace Literal",
+                                "tooltip": "Replace first occurrence using LITERAL text match (NOT regex) - special chars are not interpreted",
+                                "onClick": "call performReplaceLiteral();"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "utilButtonArea",
+                    "type": "hbox",
+                    "style": "-fx-spacing: 10; -fx-alignment: CENTER;",
+                    "items": [
+                        {
+                            "name": "loadSampleBtn",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Load Sample Data",
+                                "tooltip": "Load example text and pattern",
+                                "onClick": "call loadSampleData();"
+                            }
+                        },
+                        {
+                            "name": "clearBtn",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Clear All",
+                                "tooltip": "Clear all input fields",
+                                "onClick": "call clearFields();"
+                            }
+                        },
+                        {
+                            "name": "askAiBtn",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Ask AI",
+                                "tooltip": "Ask AI to generate a regex pattern from your description",
+                                "onClick": "call showAskAiScreen();"
+                            }
+                        },
+                        {
+                            "name": "closeBtn",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Close",
+                                "tooltip": "Close the regex tester",
+                                "onClick": "close screen;"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "resultArea",
+                    "type": "vbox",
+                    "groupBorder": "lowered",
+                    "groupBorderColor": "#cccccc",
+                    "groupLabelText": "Output",
+                    "groupLabelColor": "#444444",
+                    "groupLabelOffset": "bottom",
+                    "padding": "4",
+                    "style": "-fx-spacing: 5; -fx-padding: 10;",
+                    "items": [
+                        {"name": "resultTextItem", "varRef": "resultText"}
+                    ]
+                },
+                {
+                    "name": "helpArea",
+                    "type": "vbox",
+                    "style": "-fx-spacing: 2; -fx-padding: 5;",
+                    "items": [
+                        {
+                            "name": "helpLabel1",
+                            "display": {
+                                "type": "label",
+                                "labelText": "Common Patterns: \\d+ (digits), \\w+ (word chars), [A-Za-z]+ (letters), .+ (any chars)"
+                            }
+                        },
+                        {
+                            "name": "helpLabel2",
+                            "display": {
+                                "type": "label",
+                                "labelText": "Note: Use \\\\ for backslash in patterns (e.g., \\\\d+ for digits)"
+                            }
+                        },
+                        {
+                            "name": "helpLabel3",
+                            "display": {
+                                "type": "label",
+                                "labelText": "Match Filters: Use 'Append >' to add OR (|), AND (lookahead), or NOT (neg-lookahead) to the regex pattern."
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+};
+
+// Show the screen
+print "Regex Tester screen created successfully!";
+print "";
+print "Features:";
+print "  - Enter source text in the textarea";
+print "  - Enter regex pattern to test";
+print "  - Use checkboxes to enable regex flags:";
+print "    * Case Insensitive (?i) - ignore case";
+print "    * Multiline Mode (?m) - ^ and $ match line boundaries";
+print "    * Dot All Mode (?s) - . matches newlines";
+print "    * Append Results - accumulate output instead of replacing";
+print "  - Match Filters (build regex patterns):";
+print "    * OR Filter: use 'Append >' to add OR (|) to regex pattern";
+print "    * AND Filter: use 'Append >' to add lookahead to regex pattern";
+print "    * NOT Filter: use 'Append >' to add negative lookahead to regex pattern";
+print "  - Click 'Find First' to find first match";
+print "  - Click 'Find All' to find all matches";
+print "  - Click 'Replace All' for regex replacement";
+print "  - Click 'Replace Literal' for literal text replacement (not regex)";
+print "  - Click 'Ask AI' to generate regex from natural language description";
+print "  - Click 'Load Sample Data' to see examples";
+print "";
+print "Showing regex tester screen...";
+show screen regexScreen;
+
+print "";
+print "Regex Tester is now active!";
+print "====================================================================";
