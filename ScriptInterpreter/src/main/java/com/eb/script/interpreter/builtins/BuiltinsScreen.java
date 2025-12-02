@@ -249,7 +249,7 @@ public class BuiltinsScreen {
             throw new InterpreterError("scr.setProperty: areaItem must be in format 'screenName.areaItemName', got: " + areaItemPath);
         }
 
-        String screenName = parts[0];
+        String screenName = resolveScreenNameWithParent(context, parts[0]);
         String itemName = parts[1];
 
         // Find the screen and area item
@@ -328,7 +328,7 @@ public class BuiltinsScreen {
             throw new InterpreterError("scr.getProperty: areaItem must be in format 'screenName.areaItemName', got: " + areaItemPath);
         }
 
-        String screenName = parts[0];
+        String screenName = resolveScreenNameWithParent(context, parts[0]);
         String itemName = parts[1];
 
         // Find the screen and area item
@@ -924,7 +924,7 @@ public class BuiltinsScreen {
             throw new InterpreterError("scr.getAreaProperty: area must be in format 'screenName.areaName', got: " + areaPath);
         }
 
-        String screenName = parts[0];
+        String screenName = resolveScreenNameWithParent(context, parts[0]);
         String areaName = parts[1].toLowerCase();
 
         // Find the screen areas
@@ -965,7 +965,7 @@ public class BuiltinsScreen {
             throw new InterpreterError("scr.setAreaProperty: area must be in format 'screenName.areaName', got: " + areaPath);
         }
 
-        String screenName = parts[0];
+        String screenName = resolveScreenNameWithParent(context, parts[0]);
         String areaName = parts[1].toLowerCase();
 
         // Find the screen areas
@@ -1795,5 +1795,39 @@ public class BuiltinsScreen {
         }
 
         return null;
+    }
+    
+    /**
+     * Resolves a screen.item path by trying the original screen name first,
+     * then prepending the parent screen name if not found.
+     * 
+     * When a child screen is shown from within a parent screen context,
+     * the child screen's areas are registered under its simple name.
+     * However, the user might pass "screen.item" expecting it to resolve
+     * to "parent.screen.item".
+     * 
+     * @param context The interpreter context
+     * @param screenName The original screen name from the path
+     * @return The resolved screen name, or the original if no parent fallback is needed
+     */
+    private static String resolveScreenNameWithParent(InterpreterContext context, String screenName) {
+        // First, try the screen name as-is
+        List<AreaDefinition> areas = context.getScreenAreas(screenName);
+        if (areas != null) {
+            return screenName;
+        }
+        
+        // If not found, check if the screen has a parent and try parent.screen format
+        String parentScreen = context.getScreenParent(screenName);
+        if (parentScreen != null) {
+            String qualifiedName = parentScreen + "." + screenName;
+            areas = context.getScreenAreas(qualifiedName);
+            if (areas != null) {
+                return qualifiedName;
+            }
+        }
+        
+        // Return original screen name (caller will handle the error)
+        return screenName;
     }
 }
