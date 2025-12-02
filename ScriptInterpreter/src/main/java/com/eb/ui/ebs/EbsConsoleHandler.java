@@ -40,6 +40,11 @@ public class EbsConsoleHandler extends EbsHandler {
     protected static final int RECENT_MAX = 10;
     protected static final String PREF_NODE = "com.eb.ui.cli.EbsApp.recent";
     protected static final String PREF_KEY_PREFIX = "recentFile.";
+    
+    /** Maximum length for error message display before truncation */
+    private static final int MAX_ERROR_MESSAGE_LENGTH = 60;
+    /** Length to truncate error message to (with room for "...") */
+    private static final int TRUNCATED_MESSAGE_LENGTH = 57;
 
     protected final Stage stage;
     protected final Deque<Path> recentFiles = new ArrayDeque<>(); // Most recent at the head
@@ -398,8 +403,8 @@ public class EbsConsoleHandler extends EbsHandler {
             String lastError = lines[lines.length - 1];
             if (lastError != null && !lastError.isEmpty()) {
                 // Truncate message if too long for display
-                String displayMsg = lastError.length() > 60 
-                    ? lastError.substring(0, 57) + "..." 
+                String displayMsg = lastError.length() > MAX_ERROR_MESSAGE_LENGTH 
+                    ? lastError.substring(0, TRUNCATED_MESSAGE_LENGTH) + "..." 
                     : lastError;
                 statusBar.setMessage(displayMsg, lastError); // full message in tooltip
             }
@@ -789,14 +794,14 @@ public class EbsConsoleHandler extends EbsHandler {
                         if (statusBar != null) {
                             statusBar.clearStatus();
                             String errorMsg = ex.getMessage() != null ? ex.getMessage() : ex.getClass().getSimpleName();
-                            String displayMsg = errorMsg.length() > 60 
-                                ? errorMsg.substring(0, 57) + "..." 
+                            String displayMsg = errorMsg.length() > MAX_ERROR_MESSAGE_LENGTH 
+                                ? errorMsg.substring(0, TRUNCATED_MESSAGE_LENGTH) + "..." 
                                 : errorMsg;
                             statusBar.setMessage(displayMsg, errorMsg);
                         }
                     });
                 }
-            }, "script-runner-" + scriptName);
+            }, "script-runner");  // Use fixed thread name to avoid potential issues with special characters
             t.setDaemon(true);
             t.start();
             
