@@ -65,11 +65,16 @@ public class ScreenFactory {
         /**
          * Execute EBS code directly on the calling thread (e.g., JavaFX thread).
          * This avoids deadlocks when the code needs to show dialogs.
+         * Implementations must override this method if they use a separate thread
+         * for code execution (e.g., screen thread via dispatchSync).
          * 
          * @param ebsCode The EBS code to execute
          * @throws InterpreterError If execution fails
          */
         default void executeDirect(String ebsCode) throws InterpreterError {
+            // Default implementation calls execute() which may cause deadlock
+            // if the implementation dispatches to a separate thread.
+            // Implementations that use separate threads should override this method.
             execute(ebsCode);
         }
     }
@@ -1767,10 +1772,11 @@ public class ScreenFactory {
     
     /**
      * Executes area inline code with proper screen context using the onClick handler.
+     * Uses executeDirect to run on the calling thread and avoid deadlocks with dialogs.
      */
     private static void executeAreaInlineCode(String screenName, String ebsCode, String eventType, InterpreterContext context, OnClickHandler onClickHandler) throws InterpreterError {
         if (onClickHandler != null) {
-            onClickHandler.execute(ebsCode);
+            onClickHandler.executeDirect(ebsCode);
         }
     }
 
