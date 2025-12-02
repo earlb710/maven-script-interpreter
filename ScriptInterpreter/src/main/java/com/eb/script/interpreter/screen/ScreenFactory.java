@@ -210,17 +210,52 @@ public class ScreenFactory {
         content.setPadding(new Insets(10));
         content.setStyle("-fx-background-color: #f5f5f5;");
         
+        // Header with title and copy button
+        HBox headerRow = new HBox(5);
+        headerRow.setAlignment(Pos.CENTER_LEFT);
+        
         // Title
         javafx.scene.control.Label titleLabel = new javafx.scene.control.Label("Debug: " + screenName);
         titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #333;");
-        content.getChildren().add(titleLabel);
+        HBox.setHgrow(titleLabel, Priority.ALWAYS);
+        
+        // Copy button
+        javafx.scene.control.Button copyButton = new javafx.scene.control.Button("📋");
+        copyButton.setStyle("-fx-font-size: 12px; -fx-padding: 2 6 2 6; -fx-background-color: #e0e0e0; -fx-cursor: hand;");
+        javafx.scene.control.Tooltip copyTooltip = new javafx.scene.control.Tooltip("Copy all variables to clipboard");
+        copyTooltip.setStyle("-fx-font-size: 12px;");
+        copyTooltip.setShowDelay(javafx.util.Duration.millis(500));
+        copyButton.setTooltip(copyTooltip);
+        
+        // Get screen variables and types for copy action
+        java.util.concurrent.ConcurrentHashMap<String, Object> screenVars = context.getScreenVars(screenName);
+        java.util.concurrent.ConcurrentHashMap<String, DataType> screenVarTypes = context.getScreenVarTypes(screenName);
+        
+        copyButton.setOnAction(e -> {
+            String clipboardText = formatVariablesForClipboard(screenName, screenVars, screenVarTypes);
+            javafx.scene.input.Clipboard clipboard = javafx.scene.input.Clipboard.getSystemClipboard();
+            javafx.scene.input.ClipboardContent clipboardContent = new javafx.scene.input.ClipboardContent();
+            clipboardContent.putString(clipboardText);
+            clipboard.setContent(clipboardContent);
+            
+            // Show brief feedback
+            copyButton.setText("✓");
+            new Thread(() -> {
+                try {
+                    Thread.sleep(1000);
+                    Platform.runLater(() -> copyButton.setText("📋"));
+                } catch (InterruptedException ex) {
+                    // Ignore
+                }
+            }).start();
+        });
+        
+        headerRow.getChildren().addAll(titleLabel, copyButton);
+        content.getChildren().add(headerRow);
         
         // Separator
         javafx.scene.control.Separator separator = new javafx.scene.control.Separator();
         content.getChildren().add(separator);
-        
-        // Get screen variables
-        java.util.concurrent.ConcurrentHashMap<String, Object> screenVars = context.getScreenVars(screenName);
         
         if (screenVars != null && !screenVars.isEmpty()) {
             // Variables section title
@@ -234,7 +269,8 @@ public class ScreenFactory {
             
             for (String key : sortedKeys) {
                 Object value = screenVars.get(key);
-                HBox varRow = createVariableRow(key, value);
+                DataType dataType = screenVarTypes != null ? screenVarTypes.get(key) : null;
+                HBox varRow = createVariableRow(key, value, dataType);
                 content.getChildren().add(varRow);
             }
         } else {
@@ -257,23 +293,57 @@ public class ScreenFactory {
     }
     
     /**
+     * Format all variables for clipboard copy.
+     * 
+     * @param screenName The name of the screen
+     * @param screenVars The screen variables map
+     * @param screenVarTypes The screen variable types map
+     * @return Formatted string for clipboard
+     */
+    private static String formatVariablesForClipboard(String screenName, 
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+            java.util.concurrent.ConcurrentHashMap<String, DataType> screenVarTypes) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Screen: ").append(screenName).append("\n");
+        sb.append("=".repeat(40)).append("\n\n");
+        
+        if (screenVars == null || screenVars.isEmpty()) {
+            sb.append("No variables defined\n");
+        } else {
+            java.util.List<String> sortedKeys = new java.util.ArrayList<>(screenVars.keySet());
+            java.util.Collections.sort(sortedKeys, String.CASE_INSENSITIVE_ORDER);
+            
+            for (String key : sortedKeys) {
+                Object value = screenVars.get(key);
+                DataType dataType = screenVarTypes != null ? screenVarTypes.get(key) : null;
+                String typeStr = getDataTypeString(dataType, value);
+                sb.append(key).append(" : ").append(typeStr).append(" = ").append(formatValueFull(value)).append("\n");
+            }
+        }
+        
+        return sb.toString();
+    }
+    
+    /**
      * Create a row displaying a variable name and its value.
      * 
      * @param name The variable name
      * @param value The variable value
+     * @param dataType The variable's data type (can be null)
      * @return An HBox containing the variable display
      */
-    private static HBox createVariableRow(String name, Object value) {
+    private static HBox createVariableRow(String name, Object value, DataType dataType) {
         HBox row = new HBox(5);
         row.setAlignment(Pos.CENTER_LEFT);
         row.setPadding(new Insets(2, 5, 2, 5));
         
-        // Variable name with tooltip showing full name
+        // Variable name with tooltip showing full name and data type
         javafx.scene.control.Label nameLabel = new javafx.scene.control.Label(name + ":");
         nameLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #0066cc;");
         nameLabel.setMinWidth(80);
         nameLabel.setMaxWidth(100);
-        javafx.scene.control.Tooltip nameTooltip = new javafx.scene.control.Tooltip(name);
+        String typeStr = getDataTypeString(dataType, value);
+        javafx.scene.control.Tooltip nameTooltip = new javafx.scene.control.Tooltip(name + " : " + typeStr);
         nameTooltip.setStyle("-fx-font-size: 14px;");
         nameTooltip.setShowDelay(javafx.util.Duration.millis(500));
         nameLabel.setTooltip(nameTooltip);
@@ -296,6 +366,48 @@ public class ScreenFactory {
         row.setStyle("-fx-background-color: " + (row.getChildren().size() % 2 == 0 ? "#ffffff" : "#f0f0f0") + ";");
         
         return row;
+    }
+    
+    /**
+     * Get the data type as a string for display.
+     * 
+     * @param dataType The DataType from the context (can be null)
+     * @param value The actual value to infer type from if DataType is null
+     * @return A string representation of the data type
+     */
+    private static String getDataTypeString(DataType dataType, Object value) {
+        if (dataType != null) {
+            return dataType.name().toLowerCase();
+        }
+        // Infer type from value
+        if (value == null) {
+            return "null";
+        }
+        if (value instanceof String) {
+            return "string";
+        }
+        if (value instanceof Integer) {
+            return "int";
+        }
+        if (value instanceof Long) {
+            return "long";
+        }
+        if (value instanceof Double || value instanceof Float) {
+            return "float";
+        }
+        if (value instanceof Boolean) {
+            return "bool";
+        }
+        if (value instanceof java.util.Map) {
+            return "map";
+        }
+        if (value instanceof java.util.List) {
+            return "list";
+        }
+        if (value.getClass().isArray()) {
+            return "array";
+        }
+        return value.getClass().getSimpleName().toLowerCase();
     }
     
     /**
