@@ -2493,6 +2493,7 @@ public class ScreenFactory {
         metadata.itemBold = getBooleanValue(displayDef, "itemBold", getBooleanValue(displayDef, "item_bold", null));
         metadata.itemItalic = getBooleanValue(displayDef, "itemItalic", getBooleanValue(displayDef, "item_italic", null));
         metadata.maxLength = getIntValue(displayDef, "maxLength", getIntValue(displayDef, "max_length", null));
+        metadata.height = getIntValue(displayDef, "height", null);
 
         return metadata;
     }
@@ -2543,6 +2544,7 @@ public class ScreenFactory {
         merged.labelFontSize = base.labelFontSize;
         merged.itemFontSize = base.itemFontSize;
         merged.maxLength = base.maxLength;
+        merged.height = base.height;
         merged.itemColor = base.itemColor;
         merged.itemBold = base.itemBold;
         merged.itemItalic = base.itemItalic;
@@ -2576,6 +2578,7 @@ public class ScreenFactory {
         if (overlay.labelFontSize != null) merged.labelFontSize = overlay.labelFontSize;
         if (overlay.itemFontSize != null) merged.itemFontSize = overlay.itemFontSize;
         if (overlay.maxLength != null) merged.maxLength = overlay.maxLength;
+        if (overlay.height != null) merged.height = overlay.height;
         if (overlay.itemColor != null) merged.itemColor = overlay.itemColor;
         if (overlay.itemBold != null) merged.itemBold = overlay.itemBold;
         if (overlay.itemItalic != null) merged.itemItalic = overlay.itemItalic;
@@ -3265,6 +3268,7 @@ public class ScreenFactory {
         clone.labelFontSize = source.labelFontSize;
         clone.itemFontSize = source.itemFontSize;
         clone.maxLength = source.maxLength;
+        clone.height = source.height;
         clone.itemColor = source.itemColor;
         clone.itemBold = source.itemBold;
         clone.itemItalic = source.itemItalic;

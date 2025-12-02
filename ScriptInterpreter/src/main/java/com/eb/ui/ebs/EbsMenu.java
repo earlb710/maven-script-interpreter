@@ -229,13 +229,18 @@ public class EbsMenu extends MenuBar {
         // --- Tools Menu ---
         Menu devToolsMenu = new Menu("Tools");
         
+        MenuItem regexItem = new MenuItem("Regex");
+        regexItem.setOnAction(e -> {
+            handler.runScriptFromResource("/scripts/regex.ebs", "Regex Tester");
+        });
+        
         MenuItem threadViewerItem = new MenuItem("Thread Viewer…");
         threadViewerItem.setOnAction(e -> {
             ThreadViewerDialog dialog = new ThreadViewerDialog();
             dialog.show();
         });
         
-        devToolsMenu.getItems().addAll(threadViewerItem);
+        devToolsMenu.getItems().addAll(regexItem, threadViewerItem);
         getMenus().add(devToolsMenu);
 
         // --- Screens Menu ---

@@ -55,6 +55,8 @@ public class DisplayItem {
     String itemFontSize;
     // Maximum length/width for the control (number of characters for text fields)
     public Integer maxLength;
+    // Height for textarea controls (number of lines to display; pixel height = fontsize * height)
+    public Integer height;
     // Item/control text color
     String itemColor;
     // Item/control text bold flag
