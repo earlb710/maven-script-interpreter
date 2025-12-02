@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Built-in functions for AI operations.
@@ -23,6 +25,12 @@ import java.util.Map;
  * @author Earl Bosch
  */
 public class BuiltinsAi {
+
+    // Counter for generating unique request IDs
+    private static final AtomicLong requestCounter = new AtomicLong(0);
+    
+    // Map of active AI request threads, keyed by request ID
+    private static final Map<Long, Thread> activeRequests = new ConcurrentHashMap<>();
 
     /**
      * Dispatch an AI builtin by name.
@@ -37,6 +45,7 @@ public class BuiltinsAi {
         return switch (name) {
             case "ai.complete" -> complete(args);
             case "ai.completeasync" -> completeAsync(context, args);
+            case "ai.cancel" -> cancel(args);
             case "ai.summarize" -> summarize(args);
             case "ai.embed" -> embed(args);
             case "ai.classify" -> classify(args);
@@ -117,10 +126,11 @@ public class BuiltinsAi {
      * - success: boolean indicating if the call succeeded
      * - result: the AI response text (if successful)
      * - error: the error message (if failed)
+     * - cancelled: boolean indicating if the request was cancelled
      * 
      * @param context The interpreter context for executing the callback
      * @param args Arguments: system, user, maxTokens, temperature, callbackName
-     * @return null immediately (result is passed to callback)
+     * @return request ID (Long) that can be used with ai.cancel()
      */
     private static Object completeAsync(InterpreterContext context, Object[] args) throws InterpreterError {
         String system = args.length > 0 && args[0] != null ? args[0].toString() : null;
@@ -139,66 +149,134 @@ public class BuiltinsAi {
         // Get the current screen context for the callback (if in a screen)
         String currentScreen = context.getCurrentScreen();
         
+        // Generate unique request ID
+        final long requestId = requestCounter.incrementAndGet();
+        
         // Start background thread for AI call
         Thread aiThread = new Thread(() -> {
             Map<String, Object> callbackData = new LinkedHashMap<>();
             try {
-                // Execute the AI call
-                String result = AiFunctions.chatComplete(system, user, maxT, temp);
-                callbackData.put("success", true);
-                callbackData.put("result", result);
-                callbackData.put("error", null);
+                // Check for interruption before starting
+                if (Thread.currentThread().isInterrupted()) {
+                    callbackData.put("success", false);
+                    callbackData.put("result", null);
+                    callbackData.put("error", "Request cancelled");
+                    callbackData.put("cancelled", true);
+                } else {
+                    // Execute the AI call
+                    String result = AiFunctions.chatComplete(system, user, maxT, temp);
+                    
+                    // Check for interruption after the call (in case it was cancelled during execution)
+                    if (Thread.currentThread().isInterrupted()) {
+                        callbackData.put("success", false);
+                        callbackData.put("result", null);
+                        callbackData.put("error", "Request cancelled");
+                        callbackData.put("cancelled", true);
+                    } else {
+                        callbackData.put("success", true);
+                        callbackData.put("result", result);
+                        callbackData.put("error", null);
+                        callbackData.put("cancelled", false);
+                    }
+                }
+            } catch (InterruptedException e) {
+                // Thread was interrupted - request was cancelled
+                callbackData.put("success", false);
+                callbackData.put("result", null);
+                callbackData.put("error", "Request cancelled");
+                callbackData.put("cancelled", true);
+                Thread.currentThread().interrupt(); // Restore interrupted status
             } catch (Exception e) {
                 callbackData.put("success", false);
                 callbackData.put("result", null);
                 callbackData.put("error", e.getMessage());
+                callbackData.put("cancelled", false);
+            } finally {
+                // Remove from active requests
+                activeRequests.remove(requestId);
             }
             
-            // Invoke callback on JavaFX Application Thread for UI safety
-            Platform.runLater(() -> {
-                try {
-                    // Set screen context if we were in a screen
-                    if (currentScreen != null) {
-                        context.setCurrentScreen(currentScreen);
-                    }
-                    
+            // Only invoke callback if not interrupted (cancelled requests may skip callback)
+            boolean shouldCallback = !Thread.currentThread().isInterrupted() || 
+                                     Boolean.TRUE.equals(callbackData.get("cancelled"));
+            
+            if (shouldCallback) {
+                // Invoke callback on JavaFX Application Thread for UI safety
+                Platform.runLater(() -> {
                     try {
-                        // Get the main interpreter that has access to the script's functions
-                        Interpreter mainInterpreter = context.getMainInterpreter();
-                        if (mainInterpreter == null) {
-                            throw new InterpreterError("No main interpreter available for callback execution");
-                        }
-                        
-                        // Create a CallStatement directly like screen callbacks do
-                        // This properly resolves the function through the interpreter's currentRuntime.blocks
-                        List<Parameter> paramsList = new ArrayList<>();
-                        paramsList.add(new Parameter("airesponse", DataType.JSON, 
-                            new LiteralExpression(DataType.JSON, callbackData)));
-                        
-                        CallStatement callStmt = new CallStatement(0, finalCallbackName, paramsList);
-                        
-                        // Execute the call statement using the main interpreter
-                        mainInterpreter.visitCallStatement(callStmt);
-                    } finally {
+                        // Set screen context if we were in a screen
                         if (currentScreen != null) {
-                            context.clearCurrentScreen();
+                            context.setCurrentScreen(currentScreen);
+                        }
+                        
+                        try {
+                            // Get the main interpreter that has access to the script's functions
+                            Interpreter mainInterpreter = context.getMainInterpreter();
+                            if (mainInterpreter == null) {
+                                throw new InterpreterError("No main interpreter available for callback execution");
+                            }
+                            
+                            // Create a CallStatement directly like screen callbacks do
+                            // This properly resolves the function through the interpreter's currentRuntime.blocks
+                            List<Parameter> paramsList = new ArrayList<>();
+                            paramsList.add(new Parameter("airesponse", DataType.JSON, 
+                                new LiteralExpression(DataType.JSON, callbackData)));
+                            
+                            CallStatement callStmt = new CallStatement(0, finalCallbackName, paramsList);
+                            
+                            // Execute the call statement using the main interpreter
+                            mainInterpreter.visitCallStatement(callStmt);
+                        } finally {
+                            if (currentScreen != null) {
+                                context.clearCurrentScreen();
+                            }
+                        }
+                    } catch (Exception e) {
+                        // Log error to output if available
+                        if (context.getOutput() != null) {
+                            context.getOutput().printlnError("Error executing AI callback: " + e.getMessage());
+                        } else {
+                            System.err.println("Error executing AI callback: " + e.getMessage());
                         }
                     }
-                } catch (Exception e) {
-                    // Log error to output if available
-                    if (context.getOutput() != null) {
-                        context.getOutput().printlnError("Error executing AI callback: " + e.getMessage());
-                    } else {
-                        System.err.println("Error executing AI callback: " + e.getMessage());
-                    }
-                }
-            });
-        }, "AI-CompleteAsync");
+                });
+            }
+        }, "AI-CompleteAsync-" + requestId);
         
         aiThread.setDaemon(true);
+        
+        // Store in active requests map before starting
+        activeRequests.put(requestId, aiThread);
+        
         aiThread.start();
         
-        // Return immediately - result will be passed to callback
-        return null;
+        // Return request ID so caller can cancel if needed
+        return requestId;
+    }
+    
+    /**
+     * Cancels an active AI request by its request ID.
+     * 
+     * @param args Arguments: requestId (Long)
+     * @return true if the request was found and cancelled, false if not found
+     */
+    private static Object cancel(Object[] args) throws InterpreterError {
+        if (args.length < 1 || args[0] == null) {
+            throw new InterpreterError("ai.cancel requires a request ID");
+        }
+        
+        long requestId;
+        if (args[0] instanceof Number) {
+            requestId = ((Number) args[0]).longValue();
+        } else {
+            throw new InterpreterError("ai.cancel requires a numeric request ID");
+        }
+        
+        Thread thread = activeRequests.remove(requestId);
+        if (thread != null) {
+            thread.interrupt();
+            return true;
+        }
+        return false;
     }
 }

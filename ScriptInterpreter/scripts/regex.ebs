@@ -507,11 +507,20 @@ generateRegexFromAi {
     var systemPrompt: string = "You are a Java regex expert. The user will describe what they want to match. Generate ONLY the Java regex pattern - no explanation, no code, no quotes. Just the raw regex pattern. Examples:\n- Email: [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}\n- Phone: \\d{3}-\\d{3}-\\d{4}\n- Date: \\d{4}-\\d{2}-\\d{2}";
     
     // Use async AI call with callback - UI remains responsive
-    call ai.completeAsync(systemPrompt, userRequest, 200, 0.3, "onAiRegexComplete");
+    // Store the request ID so we can cancel if needed
+    var requestId: int = call ai.completeAsync(systemPrompt, userRequest, 200, 0.3, "onAiRegexComplete");
+    askAiScreen.aiRequestId = requestId;
 }
 
 // Callback function for AI regex generation result
 onAiRegexComplete(aiResponse: json) {
+    // Check if request was cancelled
+    var wasCancelled: bool = call json.getBool(aiResponse, "cancelled", false);
+    if wasCancelled then {
+        // Request was cancelled - don't update UI (screen may be closed)
+        return;
+    }
+    
     // Extract success flag using json.getBool builtin
     var isSuccess: bool = call json.getBool(aiResponse, "success", false);
     
@@ -581,6 +590,18 @@ clearAiFields {
     askAiScreen.generatedPattern = "";
 }
 
+// Function to cancel the AI request and close the screen
+cancelAiRequest {
+    // Cancel any active AI request
+    var requestId: int = askAiScreen.aiRequestId;
+    if requestId > 0 then {
+        call ai.cancel(requestId);
+        askAiScreen.aiRequestId = 0;
+    }
+    // Hide the screen
+    hide screen askAiScreen;
+}
+
 // Function to create and show the Ask AI screen
 // This function creates the screen if it doesn't exist (e.g., if it was closed with X button)
 showAskAiScreen {
@@ -616,6 +637,11 @@ showAskAiScreen {
                 "name": "generatedPattern",
                 "type": "string",
                 "default": ""
+            },
+            {
+                "name": "aiRequestId",
+                "type": "int",
+                "default": 0
             }
         ],
         "area": [
@@ -686,8 +712,8 @@ showAskAiScreen {
                                 "display": {
                                     "type": "button",
                                     "labelText": "Cancel",
-                                    "tooltip": "Close without applying",
-                                    "onClick": "hide screen askAiScreen;"
+                                    "tooltip": "Cancel AI request and close",
+                                    "onClick": "call cancelAiRequest();"
                                 }
                             }
                         ]
