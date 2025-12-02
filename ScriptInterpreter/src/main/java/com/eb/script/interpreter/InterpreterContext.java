@@ -253,6 +253,10 @@ public class InterpreterContext {
     public List<AreaDefinition> getScreenAreas(String screen) {
         return screenAreas.get(screen.toLowerCase());
     }
+    
+    public java.util.Set<String> getAllScreenAreaKeys() {
+        return screenAreas.keySet();
+    }
 
     public void setScreenAreas(String screen, List<AreaDefinition> val) {
         screenAreas.put(screen.toLowerCase(), val);

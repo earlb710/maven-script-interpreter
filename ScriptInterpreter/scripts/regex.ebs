@@ -486,7 +486,7 @@ appendNotToPattern {
     }
 }
 
-// Function to call AI and generate regex from user description
+// Function to call AI and generate regex from user description (async version)
 generateRegexFromAi {
     var userRequest: string = askAiScreen.aiRequest;
     
@@ -496,6 +496,7 @@ generateRegexFromAi {
     }
     
     // Disable buttons while processing (except Cancel)
+    // Use simple screen name since askAiScreen is registered with its own name
     call scr.setProperty("askAiScreen.submitBtn", "disabled", true);
     call scr.setProperty("askAiScreen.clearBtn", "disabled", true);
     call scr.setProperty("askAiScreen.applyBtn", "disabled", true);
@@ -503,49 +504,71 @@ generateRegexFromAi {
     // Show busy working message
     askAiScreen.aiResult = "⏳ WORKING...\n\nGenerating regex pattern from AI.\nThis may take up to a few minutes.\n\nPlease wait...";
     
-    // Small delay to allow UI to update before blocking AI call
-    call thread.sleep(100);
-    
     var systemPrompt: string = "You are a Java regex expert. The user will describe what they want to match. Generate ONLY the Java regex pattern - no explanation, no code, no quotes. Just the raw regex pattern. Examples:\n- Email: [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}\n- Phone: \\d{3}-\\d{3}-\\d{4}\n- Date: \\d{4}-\\d{2}-\\d{2}";
     
-    try {
-        var result: string = call ai.complete(systemPrompt, userRequest, 200, 0.3);
+    // Use async AI call with callback - UI remains responsive
+    // Store the request ID so we can cancel if needed
+    var requestId: int = call ai.completeAsync(systemPrompt, userRequest, 200, 0.3, "onAiRegexComplete");
+    askAiScreen.aiRequestId = requestId;
+}
+
+// Callback function for AI regex generation result
+onAiRegexComplete(aiResponse: json) {
+    // Check if request was cancelled
+    var wasCancelled: bool = call json.getBool(aiResponse, "cancelled", false);
+    if wasCancelled then {
+        // Request was cancelled - don't update UI (screen may be closed)
+        return;
+    }
+    
+    // Extract success flag using json.getBool builtin
+    var isSuccess: bool = call json.getBool(aiResponse, "success", false);
+    
+    if isSuccess then {
+        var aiResult: string = call json.getString(aiResponse, "result", "");
         
         // Trim whitespace and remove quotes if present
-        result = call str.trim(result);
-        if call str.startsWith(result, "\"") and call str.endsWith(result, "\"") then {
-            var resultChars = call str.charArray(result);
+        aiResult = call str.trim(aiResult);
+        if call str.startsWith(aiResult, "\"") and call str.endsWith(aiResult, "\"") then {
+            var resultChars = call str.charArray(aiResult);
             var resultLen: int = resultChars.length;
-            result = call str.substring(result, 1, resultLen - 1);
+            aiResult = call str.substring(aiResult, 1, resultLen - 1);
         }
-        if call str.startsWith(result, "'") and call str.endsWith(result, "'") then {
-            var resultChars = call str.charArray(result);
+        if call str.startsWith(aiResult, "'") and call str.endsWith(aiResult, "'") then {
+            var resultChars = call str.charArray(aiResult);
             var resultLen: int = resultChars.length;
-            result = call str.substring(result, 1, resultLen - 1);
+            aiResult = call str.substring(aiResult, 1, resultLen - 1);
         }
         
-        askAiScreen.aiResult = "✓ Generated pattern:\n" + result;
-        askAiScreen.generatedPattern = result;
-    } exceptions {
-        when ANY_ERROR(msg) {
-            // Check for API key issues (401 Unauthorized)
-            var isApiKeyError: bool = false;
-            if call str.contains(msg, "401") then {
-                isApiKeyError = true;
-            }
-            if call str.contains(msg, "API key") then {
-                isApiKeyError = true;
-            }
-            
-            if isApiKeyError then {
-                askAiScreen.aiResult = "❌ API KEY NOT CONFIGURED\n\nTo use the AI feature, you need to set up your OpenAI API key:\n\n1. Go to: Edit > AI Chat Model Setup\n2. Enter your API key (from https://platform.openai.com/api-keys)\n3. Click Save\n4. RESTART the application\n\nThe AI configuration is loaded at startup, so you must restart after saving.";
-            } else {
-                askAiScreen.aiResult = "❌ Error: " + msg;
-            }
+        var resultText: string = "✓ Generated pattern:\n" + aiResult;
+        askAiScreen.aiResult = resultText;
+        call scr.setProperty("askAiScreen.aiResultItem", "value", resultText);
+        askAiScreen.generatedPattern = aiResult;
+    } else {
+        var errorMsg: string = call json.getString(aiResponse, "error", "Unknown error");
+        
+        // Check for API key issues (401 Unauthorized)
+        var isApiKeyError: bool = false;
+        if call str.contains(errorMsg, "401") then {
+            isApiKeyError = true;
+        }
+        if call str.contains(errorMsg, "API key") then {
+            isApiKeyError = true;
+        }
+        
+        if isApiKeyError then {
+            var apiKeyErrMsg: string = "❌ API KEY NOT CONFIGURED\n\nTo use the AI feature, you need to set up your OpenAI API key:\n\n1. Go to: Edit > AI Chat Model Setup\n2. Enter your API key (from https://platform.openai.com/api-keys)\n3. Click Save\n4. RESTART the application\n\nThe AI configuration is loaded at startup, so you must restart after saving.";
+            askAiScreen.aiResult = apiKeyErrMsg;
+            call scr.setProperty("askAiScreen.aiResultItem", "value", apiKeyErrMsg);
+        } else {
+            var errResult: string = "❌ Error: " + errorMsg;
+            askAiScreen.aiResult = errResult;
+            call scr.setProperty("askAiScreen.aiResultItem", "value", errResult);
         }
     }
     
     // Re-enable buttons after processing
+    // Use simple screen name since askAiScreen is registered with its own name
     call scr.setProperty("askAiScreen.submitBtn", "disabled", false);
     call scr.setProperty("askAiScreen.clearBtn", "disabled", false);
     call scr.setProperty("askAiScreen.applyBtn", "disabled", false);
@@ -565,6 +588,18 @@ clearAiFields {
     askAiScreen.aiRequest = "";
     askAiScreen.aiResult = "The AI-generated regex pattern will appear here...";
     askAiScreen.generatedPattern = "";
+}
+
+// Function to cancel the AI request and close the screen
+cancelAiRequest {
+    // Cancel any active AI request
+    var requestId: int = askAiScreen.aiRequestId;
+    if requestId > 0 then {
+        call ai.cancel(requestId);
+        askAiScreen.aiRequestId = 0;
+    }
+    // Hide the screen
+    hide screen askAiScreen;
 }
 
 // Function to create and show the Ask AI screen
@@ -602,6 +637,11 @@ showAskAiScreen {
                 "name": "generatedPattern",
                 "type": "string",
                 "default": ""
+            },
+            {
+                "name": "aiRequestId",
+                "type": "int",
+                "default": 0
             }
         ],
         "area": [
@@ -672,8 +712,8 @@ showAskAiScreen {
                                 "display": {
                                     "type": "button",
                                     "labelText": "Cancel",
-                                    "tooltip": "Close without applying",
-                                    "onClick": "hide screen askAiScreen;"
+                                    "tooltip": "Cancel AI request and close",
+                                    "onClick": "call cancelAiRequest();"
                                 }
                             }
                         ]

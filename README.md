@@ -743,6 +743,104 @@ The interpreter includes built-in database support with:
 
 Currently supports Oracle databases via `OracleDbAdapter`. Additional database adapters can be easily added by implementing the `DbAdapter` interface.
 
+## AI Integration
+
+The interpreter includes built-in AI integration for calling language models. The AI module supports both synchronous and asynchronous operations.
+
+### AI Configuration
+
+Configure AI settings using the `/ai setup` console command, which prompts for:
+- API endpoint URL
+- API key
+- Model name
+
+### Synchronous AI Calls
+
+```javascript
+// Simple AI completion (blocks until response)
+var response = call ai.complete(systemPrompt, userPrompt, maxTokens, temperature);
+
+// Example
+var systemPrompt: string = "You are a helpful assistant.";
+var userPrompt: string = "What is the capital of France?";
+var result = call ai.complete(systemPrompt, userPrompt, 100, 0.7);
+print result;
+```
+
+### Asynchronous AI Calls with Callbacks
+
+For non-blocking AI calls that keep the UI responsive:
+
+```javascript
+// Async AI call returns a request ID
+var requestId: int = call ai.completeAsync(systemPrompt, userPrompt, maxTokens, temperature, "callbackFunctionName");
+
+// The callback function receives a JSON response
+onAiComplete(aiResponse: json) {
+    var isSuccess: bool = call json.getBool(aiResponse, "success", false);
+    var result: string = call json.getString(aiResponse, "result", "");
+    var wasCancelled: bool = call json.getBool(aiResponse, "cancelled", false);
+    
+    if isSuccess then {
+        print "AI Response: " + result;
+    } else if wasCancelled then {
+        print "Request was cancelled";
+    } else {
+        print "Error: " + result;
+    }
+}
+```
+
+**Callback Response JSON Fields:**
+- `success` (boolean) - Whether the AI call succeeded
+- `result` (string) - The AI response text or error message
+- `cancelled` (boolean) - Whether the request was cancelled
+
+### Cancelling AI Requests
+
+Cancel pending AI requests using the request ID:
+
+```javascript
+// Start an async request
+var requestId: int = call ai.completeAsync(system, user, 200, 0.7, "myCallback");
+
+// Cancel it if needed (e.g., user clicks Cancel button)
+call ai.cancel(requestId);
+```
+
+**Cancellation Behavior:**
+- Cancellation is immediate on the client side
+- The callback receives `{"success": false, "cancelled": true, "result": "Request was cancelled"}`
+- The underlying HTTP request may continue in the background until it naturally completes
+- From the user's perspective, cancellation is instant
+
+### AI Built-in Functions
+
+| Function | Description |
+|----------|-------------|
+| `ai.complete(system, user, maxTokens, temp)` | Synchronous AI call, blocks until response |
+| `ai.completeAsync(system, user, maxTokens, temp, callback)` | Async AI call, returns request ID |
+| `ai.cancel(requestId)` | Cancels a pending async request |
+
+### Screen Property Updates with `scr.setProperty`
+
+Update UI controls programmatically (useful in AI callbacks):
+
+```javascript
+// Disable a button
+call scr.setProperty("screenName.buttonName", "disabled", true);
+
+// Update text content
+call scr.setProperty("screenName.textAreaName", "value", "New text content");
+
+// Enable button after operation
+call scr.setProperty("screenName.buttonName", "disabled", false);
+```
+
+**Supported Properties:**
+- `disabled` - Enable/disable controls (boolean)
+- `value` / `text` - Update text content of TextField, TextArea, Label, or Button
+
 ## Extension & Customization
 
 ### Adding Built-in Functions

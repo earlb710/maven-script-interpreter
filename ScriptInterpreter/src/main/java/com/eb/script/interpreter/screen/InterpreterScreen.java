@@ -1051,27 +1051,36 @@ public class InterpreterScreen {
             }
         }
         
-        interpreter.environment().pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Screen %1 hide", screenName);
+        // Store original name for error messages before normalization
+        final String originalScreenName = screenName;
+        
+        // Normalize screen name to lowercase
+        screenName = screenName.toLowerCase();
+        
+        // Try to resolve the screen name - first try as-is, then try with parent prefix
+        String resolvedScreenName = resolveScreenName(screenName);
+        
+        interpreter.environment().pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Screen %1 hide", resolvedScreenName);
         try {
             // Check if screen config or stage exists
-            if (!context.hasScreenConfig(screenName) && !context.getScreens().containsKey(screenName)) {
-                throw interpreter.error(stmt.getLine(), "Screen '" + screenName + "' does not exist. Create it first with 'screen " + screenName + " = {...};'");
+            if (!context.hasScreenConfig(resolvedScreenName) && !context.getScreens().containsKey(resolvedScreenName)) {
+                throw interpreter.error(stmt.getLine(), "Screen '" + resolvedScreenName + "' does not exist. Create it first with 'screen " + originalScreenName + " = {...};'");
             }
 
             // If stage doesn't exist yet, nothing to hide
-            if (!context.getScreens().containsKey(screenName)) {
+            if (!context.getScreens().containsKey(resolvedScreenName)) {
                 if (context.getOutput() != null) {
-                    context.getOutput().printlnInfo("Screen '" + screenName + "' is not shown (has not been created yet)");
+                    context.getOutput().printlnInfo("Screen '" + resolvedScreenName + "' is not shown (has not been created yet)");
                 }
                 return;
             }
 
-            Stage stage = context.getScreens().get(screenName);
+            Stage stage = context.getScreens().get(resolvedScreenName);
             if (stage == null) {
-                throw interpreter.error(stmt.getLine(), "Screen '" + screenName + "' is still being initialized. Please try again.");
+                throw interpreter.error(stmt.getLine(), "Screen '" + resolvedScreenName + "' is still being initialized. Please try again.");
             }
 
-            final String finalScreenName = screenName;
+            final String finalScreenName = resolvedScreenName;
             
             // Hide the screen on JavaFX Application Thread
             // If already on FX thread, run directly
@@ -1099,6 +1108,66 @@ public class InterpreterScreen {
             interpreter.environment().popCallStack();
         }
     }
+    
+    /**
+     * Resolves a screen name by first trying the name as-is, then trying with parent prefix.
+     * This is used for hide/close/show operations to handle child screens that are registered
+     * with their qualified name (parent.child).
+     * 
+     * @param screenName The screen name to resolve (should be lowercase)
+     * @return The resolved screen name (may include parent prefix)
+     */
+    private String resolveScreenName(String screenName) {
+        // First try as-is - check if the Stage exists (runtime state)
+        // We prioritize Stage over config because for hide/close we need the runtime state
+        if (context.getScreens().containsKey(screenName)) {
+            return screenName;
+        }
+        
+        // Try with parent prefix from the screen parent map
+        String parentScreen = context.getScreenParent(screenName);
+        if (parentScreen != null) {
+            String qualifiedName = parentScreen + "." + screenName;
+            if (context.getScreens().containsKey(qualifiedName)) {
+                return qualifiedName;
+            }
+        }
+        
+        // Try using current screen context - if we're inside a parent screen,
+        // the target screen might be parent.screenName
+        String currentScreen = context.getCurrentScreen();
+        if (currentScreen != null && !currentScreen.isEmpty()) {
+            // If current screen is "parent.child", get the parent part
+            int lastDot = currentScreen.lastIndexOf('.');
+            if (lastDot > 0) {
+                String parentFromContext = currentScreen.substring(0, lastDot);
+                
+                // Try parent.screenName
+                String qualifiedFromContext = parentFromContext + "." + screenName;
+                if (context.getScreens().containsKey(qualifiedFromContext)) {
+                    return qualifiedFromContext;
+                }
+            }
+            
+            // Also check if the current screen is exactly "parent.screenName" or just "screenName"
+            // This handles the case where we're inside askAiScreen and trying to hide askAiScreen
+            // Use precise matching: either exact match or preceded by a dot
+            String suffix = "." + screenName;
+            if (currentScreen.equals(screenName) || currentScreen.endsWith(suffix)) {
+                if (context.getScreens().containsKey(currentScreen)) {
+                    return currentScreen;
+                }
+            }
+        }
+        
+        // Finally, check if only config exists (for operations that can work with just config)
+        if (context.hasScreenConfig(screenName)) {
+            return screenName;
+        }
+        
+        // Return original (caller will handle not found error)
+        return screenName;
+    }
 
     /**
      * Visit a screen close statement to close a screen (with or without name)
@@ -1116,6 +1185,9 @@ public class InterpreterScreen {
                     "from within screen event handlers (e.g., onClick).");
             }
         }
+        
+        // Normalize screen name to lowercase and resolve with parent prefix if needed
+        screenName = resolveScreenName(screenName.toLowerCase());
         
         interpreter.environment().pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Screen %1 close", screenName);
         try {
@@ -1188,6 +1260,9 @@ public class InterpreterScreen {
                     "from within screen event handlers (e.g., onClick).");
             }
         }
+        
+        // Normalize screen name to lowercase and resolve with parent prefix if needed
+        screenName = resolveScreenName(screenName.toLowerCase());
         
         interpreter.environment().pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Screen %1 submit", screenName);
         try {
