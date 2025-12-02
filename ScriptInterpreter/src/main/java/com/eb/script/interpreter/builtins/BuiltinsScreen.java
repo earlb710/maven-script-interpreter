@@ -257,6 +257,7 @@ public class BuiltinsScreen {
         // Find the screen and area item
         List<AreaDefinition> areas = context.getScreenAreas(screenName);
         if (areas == null) {
+            System.out.println("[DEBUG] scr.setProperty: Available screen areas keys: " + context.getAllScreenAreaKeys());
             throw new InterpreterError("scr.setProperty: screen '" + screenName + "' not found");
         }
 
