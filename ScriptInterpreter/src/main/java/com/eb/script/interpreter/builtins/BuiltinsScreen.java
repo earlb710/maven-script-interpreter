@@ -279,22 +279,41 @@ public class BuiltinsScreen {
 
         // Apply changes to the actual JavaFX control on the UI thread
         // Find the control by its user data and apply the property change
+        // Note: screenName is the simple name for area lookup, but bound controls are stored under qualified names
         final String screenNameFinal = screenName;
         final String itemNameFinal = itemName;
         final com.eb.script.interpreter.screen.AreaItem finalItem = targetItem;
         final String finalPropertyName = propertyName;
         final Object finalValue = value;
+        
+        // Get the current screen context to determine the qualified name for bound controls
+        final String currentScreenContext = context.getCurrentScreen();
 
         javafx.application.Platform.runLater(() -> {
             try {
-                // Get the list of bound controls for this screen (use lowercase for map lookup)
-                String screenNameLower = screenNameFinal.toLowerCase();
-                System.out.println("[DEBUG] scr.setProperty: Looking for controls with screenName='" + screenNameLower + "'");
-                java.util.List<javafx.scene.Node> controls = context.getScreenBoundControls().get(screenNameLower);
+                // Bound controls are stored under qualified names (e.g., "regexscreen.askaiscreen")
+                // Try to find controls using:
+                // 1. Current screen context if it ends with our screen name
+                // 2. Simple screen name as fallback
+                String boundControlsKey = screenNameFinal.toLowerCase();
+                
+                // If we're in a qualified context like "regexscreen.askaiscreen" and looking for "askaiscreen",
+                // use the qualified name to find bound controls
+                if (currentScreenContext != null && !currentScreenContext.isEmpty()) {
+                    String suffix = "." + screenNameFinal.toLowerCase();
+                    if (currentScreenContext.toLowerCase().endsWith(suffix) || 
+                        currentScreenContext.toLowerCase().equals(screenNameFinal.toLowerCase())) {
+                        boundControlsKey = currentScreenContext.toLowerCase();
+                    }
+                }
+                
+                System.out.println("[DEBUG] scr.setProperty: Looking for controls with screenName='" + boundControlsKey + "'");
+                java.util.List<javafx.scene.Node> controls = context.getScreenBoundControls().get(boundControlsKey);
                 if (controls != null) {
-                    System.out.println("[DEBUG] scr.setProperty: Found " + controls.size() + " controls for screen '" + screenNameLower + "'");
+                    System.out.println("[DEBUG] scr.setProperty: Found " + controls.size() + " controls for screen '" + boundControlsKey + "'");
                     // Find the control with matching user data (use case-insensitive comparison)
-                    String targetUserData = screenNameLower + "." + itemNameFinal.toLowerCase();
+                    // User data is stored as "screenName.itemName" using the qualified screen name
+                    String targetUserData = boundControlsKey + "." + itemNameFinal.toLowerCase();
                     System.out.println("[DEBUG] scr.setProperty: Looking for control with userData='" + targetUserData + "'");
                     boolean found = false;
                     for (javafx.scene.Node control : controls) {
@@ -312,7 +331,7 @@ public class BuiltinsScreen {
                         System.out.println("[DEBUG] scr.setProperty: No matching control found for userData='" + targetUserData + "'");
                     }
                 } else {
-                    System.out.println("[DEBUG] scr.setProperty: No controls found for screen '" + screenNameLower + "'");
+                    System.out.println("[DEBUG] scr.setProperty: No controls found for screen '" + boundControlsKey + "'");
                     System.out.println("[DEBUG] scr.setProperty: Available screens in boundControls: " + context.getScreenBoundControls().keySet());
                 }
             } catch (Exception e) {
@@ -1828,59 +1847,47 @@ public class BuiltinsScreen {
      * @return The resolved screen name, or the original if no parent fallback is needed
      */
     private static String resolveScreenNameWithParent(InterpreterContext context, String screenName) {
-        // First, try the screen name as-is - check both areas AND bound controls
-        // We need bound controls for setProperty to work, not just areas
-        // Always use lowercase for consistency
+        // Screen areas are stored under simple names (e.g., "askaiscreen")
+        // Bound controls are stored under qualified names (e.g., "regexscreen.askaiscreen")
+        // We need to resolve both correctly
+        
         String screenNameLower = screenName.toLowerCase();
+        
+        // First, check if screen areas exist under the simple name
         List<AreaDefinition> areas = context.getScreenAreas(screenNameLower);
-        if (areas != null && context.getScreenBoundControls().containsKey(screenNameLower)) {
+        if (areas != null) {
+            // Areas found under simple name - this is the correct name for area lookups
             return screenNameLower;
         }
         
-        // If not found, check if the screen has a parent and try parent.screen format
+        // If not found directly, check if the screen has a registered parent
         String parentScreen = context.getScreenParent(screenNameLower);
         if (parentScreen != null) {
-            String qualifiedName = (parentScreen + "." + screenNameLower).toLowerCase();
-            areas = context.getScreenAreas(qualifiedName);
-            if (areas != null) {
-                return qualifiedName;
-            }
+            // Screen areas might still be under simple name even with a parent
+            // (which we already checked above), so just return simple name
+            return screenNameLower;
         }
         
-        // Try using current screen context - if we're inside a parent screen,
-        // the target screen might be parent.screenName
+        // Try extracting from current screen context
         String currentScreen = context.getCurrentScreen();
         if (currentScreen != null && !currentScreen.isEmpty()) {
-            // If current screen is "parent.child", get the parent part
-            int lastDot = currentScreen.lastIndexOf('.');
-            if (lastDot > 0) {
-                String parentFromContext = currentScreen.substring(0, lastDot);
-                
-                // Try parent.screenName (always use lowercase for consistency)
-                String qualifiedFromContext = (parentFromContext + "." + screenName).toLowerCase();
-                if (context.getScreenAreas(qualifiedFromContext) != null || 
-                    context.getScreenBoundControls().containsKey(qualifiedFromContext)) {
-                    return qualifiedFromContext;
+            // If we're in "regexscreen.askaiscreen" and looking for "askaiscreen",
+            // the areas are under "askaiscreen" not the qualified name
+            String suffix = "." + screenNameLower;
+            if (currentScreen.toLowerCase().endsWith(suffix)) {
+                // Extract the child screen name and check if areas exist
+                if (context.getScreenAreas(screenNameLower) != null) {
+                    return screenNameLower;
                 }
             }
             
-            // Also check if the current screen itself ends with the screen name we're looking for
-            // This handles the case where we're inside askAiScreen and calling scr.setProperty for askAiScreen
-            String suffix = "." + screenName.toLowerCase();
-            if (currentScreen.toLowerCase().equals(screenName.toLowerCase()) || 
-                currentScreen.toLowerCase().endsWith(suffix)) {
-                if (context.getScreenBoundControls().containsKey(currentScreen.toLowerCase())) {
-                    return currentScreen.toLowerCase();
-                }
+            // Also check if currentScreen equals what we're looking for
+            if (currentScreen.toLowerCase().equals(screenNameLower)) {
+                return screenNameLower;
             }
         }
         
-        // Fall back to returning original if areas exist (for read operations that don't need bound controls)
-        if (areas != null) {
-            return screenName.toLowerCase();
-        }
-        
-        // Return original screen name (caller will handle the error)
-        return screenName.toLowerCase();
+        // Return simple lowercase name - areas are stored under simple names
+        return screenNameLower;
     }
 }
