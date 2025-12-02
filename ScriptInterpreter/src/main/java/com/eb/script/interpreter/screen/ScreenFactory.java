@@ -206,9 +206,9 @@ public class ScreenFactory {
      * @return A ScrollPane containing the debug information
      */
     private static javafx.scene.control.ScrollPane createDebugPanel(String screenName, InterpreterContext context) {
-        VBox content = new VBox(5);
-        content.setPadding(new Insets(10));
-        content.setStyle("-fx-background-color: #f5f5f5;");
+        VBox mainContent = new VBox(5);
+        mainContent.setPadding(new Insets(10));
+        mainContent.setStyle("-fx-background-color: #f5f5f5;");
         
         // Header with title and copy button
         HBox headerRow = new HBox(5);
@@ -222,7 +222,7 @@ public class ScreenFactory {
         // Copy button
         javafx.scene.control.Button copyButton = new javafx.scene.control.Button("📋");
         copyButton.setStyle("-fx-font-size: 12px; -fx-padding: 2 6 2 6; -fx-background-color: #e0e0e0; -fx-cursor: hand;");
-        javafx.scene.control.Tooltip copyTooltip = new javafx.scene.control.Tooltip("Copy all variables to clipboard");
+        javafx.scene.control.Tooltip copyTooltip = new javafx.scene.control.Tooltip("Copy all to clipboard");
         copyTooltip.setStyle("-fx-font-size: 12px;");
         copyTooltip.setShowDelay(javafx.util.Duration.millis(500));
         copyButton.setTooltip(copyTooltip);
@@ -230,9 +230,10 @@ public class ScreenFactory {
         // Get screen variables and types for copy action
         java.util.concurrent.ConcurrentHashMap<String, Object> screenVars = context.getScreenVars(screenName);
         java.util.concurrent.ConcurrentHashMap<String, DataType> screenVarTypes = context.getScreenVarTypes(screenName);
+        Map<String, AreaItem> screenAreaItems = context.getScreenAreaItems(screenName);
         
         copyButton.setOnAction(e -> {
-            String clipboardText = formatVariablesForClipboard(screenName, screenVars, screenVarTypes);
+            String clipboardText = formatAllForClipboard(screenName, screenVars, screenVarTypes, screenAreaItems);
             javafx.scene.input.Clipboard clipboard = javafx.scene.input.Clipboard.getSystemClipboard();
             javafx.scene.input.ClipboardContent clipboardContent = new javafx.scene.input.ClipboardContent();
             clipboardContent.putString(clipboardText);
@@ -251,19 +252,22 @@ public class ScreenFactory {
         });
         
         headerRow.getChildren().addAll(titleLabel, copyButton);
-        content.getChildren().add(headerRow);
+        mainContent.getChildren().add(headerRow);
         
         // Separator
         javafx.scene.control.Separator separator = new javafx.scene.control.Separator();
-        content.getChildren().add(separator);
+        mainContent.getChildren().add(separator);
+        
+        // === VARIABLES SECTION (Top Half) ===
+        VBox varsSection = new VBox(3);
+        varsSection.setPadding(new Insets(5));
+        varsSection.setStyle("-fx-background-color: #f8f8f8;");
+        
+        javafx.scene.control.Label varsHeader = new javafx.scene.control.Label("📊 Variables");
+        varsHeader.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #444;");
+        varsSection.getChildren().add(varsHeader);
         
         if (screenVars != null && !screenVars.isEmpty()) {
-            // Variables section title
-            javafx.scene.control.Label varsLabel = new javafx.scene.control.Label("Variables:");
-            varsLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #555;");
-            content.getChildren().add(varsLabel);
-            
-            // Sort variable names for consistent display
             java.util.List<String> sortedKeys = new java.util.ArrayList<>(screenVars.keySet());
             java.util.Collections.sort(sortedKeys, String.CASE_INSENSITIVE_ORDER);
             
@@ -271,25 +275,206 @@ public class ScreenFactory {
                 Object value = screenVars.get(key);
                 DataType dataType = screenVarTypes != null ? screenVarTypes.get(key) : null;
                 HBox varRow = createVariableRow(key, value, dataType);
-                content.getChildren().add(varRow);
+                varsSection.getChildren().add(varRow);
             }
         } else {
             javafx.scene.control.Label noVarsLabel = new javafx.scene.control.Label("No variables defined");
             noVarsLabel.setStyle("-fx-font-style: italic; -fx-text-fill: #888;");
-            content.getChildren().add(noVarsLabel);
+            varsSection.getChildren().add(noVarsLabel);
         }
         
+        javafx.scene.control.ScrollPane varsScrollPane = new javafx.scene.control.ScrollPane(varsSection);
+        varsScrollPane.setFitToWidth(true);
+        varsScrollPane.setStyle("-fx-background-color: transparent;");
+        varsScrollPane.setHbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
+        varsScrollPane.setVbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        VBox.setVgrow(varsScrollPane, Priority.ALWAYS);
+        
+        // === SCREEN ITEMS SECTION (Bottom Half) ===
+        VBox itemsSection = new VBox(3);
+        itemsSection.setPadding(new Insets(5));
+        itemsSection.setStyle("-fx-background-color: #f0f5f0;");
+        
+        javafx.scene.control.Label itemsHeader = new javafx.scene.control.Label("🖼️ Screen Items");
+        itemsHeader.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #444;");
+        itemsSection.getChildren().add(itemsHeader);
+        
+        if (screenAreaItems != null && !screenAreaItems.isEmpty()) {
+            java.util.List<String> sortedItemKeys = new java.util.ArrayList<>(screenAreaItems.keySet());
+            java.util.Collections.sort(sortedItemKeys, String.CASE_INSENSITIVE_ORDER);
+            
+            for (String key : sortedItemKeys) {
+                AreaItem item = screenAreaItems.get(key);
+                HBox itemRow = createScreenItemRow(key, item, context, screenName);
+                itemsSection.getChildren().add(itemRow);
+            }
+        } else {
+            javafx.scene.control.Label noItemsLabel = new javafx.scene.control.Label("No screen items defined");
+            noItemsLabel.setStyle("-fx-font-style: italic; -fx-text-fill: #888;");
+            itemsSection.getChildren().add(noItemsLabel);
+        }
+        
+        javafx.scene.control.ScrollPane itemsScrollPane = new javafx.scene.control.ScrollPane(itemsSection);
+        itemsScrollPane.setFitToWidth(true);
+        itemsScrollPane.setStyle("-fx-background-color: transparent;");
+        itemsScrollPane.setHbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
+        itemsScrollPane.setVbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        VBox.setVgrow(itemsScrollPane, Priority.ALWAYS);
+        
+        // Create split pane with variables on top, items on bottom
+        javafx.scene.control.SplitPane splitPane = new javafx.scene.control.SplitPane();
+        splitPane.setOrientation(javafx.geometry.Orientation.VERTICAL);
+        splitPane.getItems().addAll(varsScrollPane, itemsScrollPane);
+        splitPane.setDividerPositions(0.5);
+        VBox.setVgrow(splitPane, Priority.ALWAYS);
+        
+        mainContent.getChildren().add(splitPane);
+        
         // Create scrollable container
-        javafx.scene.control.ScrollPane scrollPane = new javafx.scene.control.ScrollPane(content);
+        javafx.scene.control.ScrollPane scrollPane = new javafx.scene.control.ScrollPane(mainContent);
         scrollPane.setFitToWidth(true);
-        scrollPane.setPrefWidth(250);
-        scrollPane.setMinWidth(200);
-        scrollPane.setMaxWidth(300);
+        scrollPane.setFitToHeight(true);
+        scrollPane.setPrefWidth(280);
+        scrollPane.setMinWidth(220);
+        scrollPane.setMaxWidth(350);
         scrollPane.setStyle("-fx-background-color: #f5f5f5; -fx-border-color: #ccc; -fx-border-width: 0 0 0 1;");
         scrollPane.setHbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
-        scrollPane.setVbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setVbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
         
         return scrollPane;
+    }
+    
+    /**
+     * Create a row displaying a screen item.
+     * 
+     * @param key The item key
+     * @param item The AreaItem
+     * @param context The interpreter context
+     * @param screenName The screen name
+     * @return An HBox containing the item display
+     */
+    private static HBox createScreenItemRow(String key, AreaItem item, InterpreterContext context, String screenName) {
+        HBox row = new HBox(5);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.setPadding(new Insets(2, 5, 2, 5));
+        
+        // Item name with tooltip showing details
+        String displayName = item.name != null ? item.name : key;
+        javafx.scene.control.Label nameLabel = new javafx.scene.control.Label(displayName);
+        nameLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #006600;");
+        nameLabel.setMinWidth(80);
+        nameLabel.setMaxWidth(100);
+        
+        // Build tooltip with item details
+        StringBuilder tooltipText = new StringBuilder();
+        tooltipText.append(key);
+        if (item.varRef != null) {
+            tooltipText.append("\nvarRef: ").append(item.varRef);
+        }
+        if (item.displayItem != null && item.displayItem.itemType != null) {
+            tooltipText.append("\ntype: ").append(item.displayItem.itemType);
+        }
+        if (item.layoutPos != null) {
+            tooltipText.append("\nlayout: ").append(item.layoutPos);
+        }
+        
+        javafx.scene.control.Tooltip nameTooltip = new javafx.scene.control.Tooltip(tooltipText.toString());
+        nameTooltip.setStyle("-fx-font-size: 14px;");
+        nameTooltip.setShowDelay(javafx.util.Duration.millis(500));
+        nameLabel.setTooltip(nameTooltip);
+        
+        // Value from varRef if available
+        String valueStr = "";
+        String fullValueStr = "";
+        if (item.varRef != null) {
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars = context.getScreenVars(screenName);
+            if (screenVars != null) {
+                Object value = screenVars.get(item.varRef.toLowerCase());
+                if (value != null) {
+                    valueStr = formatValue(value);
+                    fullValueStr = formatValueFull(value);
+                } else {
+                    valueStr = "(unset)";
+                    fullValueStr = "Variable not set";
+                }
+            }
+        } else {
+            valueStr = "(no varRef)";
+            fullValueStr = "No variable reference";
+        }
+        
+        javafx.scene.control.Label valueLabel = new javafx.scene.control.Label(valueStr);
+        valueLabel.setStyle("-fx-text-fill: #333;");
+        valueLabel.setWrapText(true);
+        valueLabel.setMaxWidth(130);
+        javafx.scene.control.Tooltip valueTooltip = new javafx.scene.control.Tooltip(fullValueStr);
+        valueTooltip.setStyle("-fx-font-size: 14px;");
+        valueTooltip.setShowDelay(javafx.util.Duration.millis(500));
+        valueLabel.setTooltip(valueTooltip);
+        
+        row.getChildren().addAll(nameLabel, valueLabel);
+        row.setStyle("-fx-background-color: #e8f0e8;");
+        
+        return row;
+    }
+    
+    /**
+     * Format all variables and screen items for clipboard copy.
+     * 
+     * @param screenName The name of the screen
+     * @param screenVars The screen variables map
+     * @param screenVarTypes The screen variable types map
+     * @param screenAreaItems The screen area items map
+     * @return Formatted string for clipboard
+     */
+    private static String formatAllForClipboard(String screenName, 
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+            java.util.concurrent.ConcurrentHashMap<String, DataType> screenVarTypes,
+            Map<String, AreaItem> screenAreaItems) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Screen: ").append(screenName).append("\n");
+        sb.append("=".repeat(50)).append("\n\n");
+        
+        // Variables section
+        sb.append("📊 VARIABLES\n");
+        sb.append("-".repeat(40)).append("\n");
+        if (screenVars == null || screenVars.isEmpty()) {
+            sb.append("No variables defined\n");
+        } else {
+            java.util.List<String> sortedKeys = new java.util.ArrayList<>(screenVars.keySet());
+            java.util.Collections.sort(sortedKeys, String.CASE_INSENSITIVE_ORDER);
+            
+            for (String key : sortedKeys) {
+                Object value = screenVars.get(key);
+                DataType dataType = screenVarTypes != null ? screenVarTypes.get(key) : null;
+                String typeStr = getDataTypeString(dataType, value);
+                sb.append(key).append(" : ").append(typeStr).append(" = ").append(formatValueFull(value)).append("\n");
+            }
+        }
+        
+        // Screen items section
+        sb.append("\n🖼️ SCREEN ITEMS\n");
+        sb.append("-".repeat(40)).append("\n");
+        if (screenAreaItems == null || screenAreaItems.isEmpty()) {
+            sb.append("No screen items defined\n");
+        } else {
+            java.util.List<String> sortedItemKeys = new java.util.ArrayList<>(screenAreaItems.keySet());
+            java.util.Collections.sort(sortedItemKeys, String.CASE_INSENSITIVE_ORDER);
+            
+            for (String key : sortedItemKeys) {
+                AreaItem item = screenAreaItems.get(key);
+                sb.append(key);
+                if (item.varRef != null) {
+                    sb.append(" -> ").append(item.varRef);
+                }
+                if (item.displayItem != null && item.displayItem.itemType != null) {
+                    sb.append(" (").append(item.displayItem.itemType).append(")");
+                }
+                sb.append("\n");
+            }
+        }
+        
+        return sb.toString();
     }
     
     /**
