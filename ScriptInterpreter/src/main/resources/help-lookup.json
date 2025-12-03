@@ -2417,6 +2417,120 @@
       "example": "<b>var</b> info = #plugin.info(\"myFunc\");<br><b>var</b> sig = #json.get(info, \"signature\");<br><b>if</b> sig != null <b>then</b> { <b>print</b> #json.getString(sig, \"returnType\", \"any\"); }"
     },
     {
+      "function": "mail.connect",
+      "short_description": "Connects to a mail server",
+      "long_help": "Connects to a mail server using IMAP or POP3 protocol and returns a connection handle for subsequent operations.<br><br><b>Supported protocols:</b> imap, imaps (default, SSL), pop3, pop3s (SSL)<br><br><b>Note:</b> When using Gmail or Google Workspace, you must use an App Password instead of your regular password if 2-Factor Authentication is enabled.<br><br><b>SSL Note:</b> SSL protocols (imaps, pop3s) trust all certificates by default for compatibility.",
+      "parameters": [
+        {
+          "name": "host",
+          "type": "string",
+          "description": "Mail server hostname (e.g., 'imap.gmail.com')"
+        },
+        {
+          "name": "port",
+          "type": "integer",
+          "description": "Server port (993 for IMAPS, 143 for IMAP, 995 for POP3S, 110 for POP3)"
+        },
+        {
+          "name": "user",
+          "type": "string",
+          "description": "Username or email address"
+        },
+        {
+          "name": "password",
+          "type": "string",
+          "description": "Password or app-specific password"
+        },
+        {
+          "name": "protocol",
+          "type": "string",
+          "optional": true,
+          "description": "Protocol: 'imap', 'imaps' (default), 'pop3', 'pop3s'"
+        }
+      ],
+      "return_type": "string",
+      "example": "<b>var</b> handle = <b>call</b> mail.connect(\"imap.gmail.com\", 993, \"user@gmail.com\", \"app-password\", \"imaps\");<br><b>print</b> \"Connected: \" + handle;"
+    },
+    {
+      "function": "mail.folders",
+      "short_description": "Lists available mail folders",
+      "long_help": "Lists all available folders in the mail account. Returns a JSON array of folder information including folder name, type, message count and unread count.<br><br><b>Folder types:</b><br>• messages - folder can contain messages<br>• folders - folder can contain subfolders<br>• messages,folders - folder can contain both",
+      "parameters": [
+        {
+          "name": "handle",
+          "type": "string",
+          "description": "Connection handle from mail.connect"
+        }
+      ],
+      "return_type": "json",
+      "example": "<b>var</b> folders = <b>call</b> mail.folders(handle);<br><b>foreach</b> f <b>in</b> folders {<br>    <b>print</b> f.name + \" (\" + f.messageCount + \" messages)\";<br>}"
+    },
+    {
+      "function": "mail.list",
+      "short_description": "Lists emails in a folder",
+      "long_help": "Lists emails in the specified folder with pagination support. Returns a JSON array of message summaries.<br><br><b>Returned fields:</b><br>• id - Message number (use with mail.get)<br>• subject - Email subject<br>• from - Sender email address<br>• fromName - Sender display name<br>• date - Sent date as milliseconds since epoch<br>• dateStr - Formatted date string<br>• size - Message size in bytes<br>• read - Boolean indicating if message has been read",
+      "parameters": [
+        {
+          "name": "handle",
+          "type": "string",
+          "description": "Connection handle from mail.connect"
+        },
+        {
+          "name": "folder",
+          "type": "string",
+          "optional": true,
+          "description": "Folder name (default: 'INBOX')"
+        },
+        {
+          "name": "start",
+          "type": "integer",
+          "optional": true,
+          "description": "Starting message number, 1-based (default: 1)"
+        },
+        {
+          "name": "count",
+          "type": "integer",
+          "optional": true,
+          "description": "Maximum messages to return (default: 50)"
+        }
+      ],
+      "return_type": "json",
+      "example": "<b>var</b> messages = <b>call</b> mail.list(handle, \"INBOX\", 1, 10);<br><b>foreach</b> msg <b>in</b> messages {<br>    <b>var</b> status = \"\";<br>    <b>if</b> msg.read == false <b>then</b> { status = \"[NEW] \"; }<br>    <b>print</b> status + msg.subject + \" - \" + msg.from;<br>}"
+    },
+    {
+      "function": "mail.get",
+      "short_description": "Retrieves full email content",
+      "long_help": "Retrieves the full content of a specific email by its message ID.<br><br><b>Returned fields:</b><br>• id - Message number<br>• subject - Email subject<br>• from - Array of sender address objects (address, name)<br>• to - Array of recipient addresses<br>• cc - Array of CC addresses<br>• bcc - Array of BCC addresses<br>• date - Sent date as milliseconds<br>• dateStr - Formatted date string<br>• size - Message size in bytes<br>• read - Boolean indicating if read<br>• contentType - MIME content type<br>• body - Email body text (plain or HTML)<br>• attachments - Array of attachment info (filename, contentType, size)",
+      "parameters": [
+        {
+          "name": "handle",
+          "type": "string",
+          "description": "Connection handle from mail.connect"
+        },
+        {
+          "name": "messageId",
+          "type": "integer",
+          "description": "Message ID from mail.list results"
+        }
+      ],
+      "return_type": "json",
+      "example": "<b>var</b> email = <b>call</b> mail.get(handle, 1);<br><b>print</b> \"Subject: \" + email.subject;<br><b>print</b> \"From: \" + email.from[0].address;<br><b>print</b> \"Date: \" + email.dateStr;<br><b>print</b> email.body;<br><br><b>if</b> email.attachments.length > 0 <b>then</b> {<br>    <b>print</b> \"Attachments:\";<br>    <b>foreach</b> att <b>in</b> email.attachments {<br>        <b>print</b> \"  - \" + att.filename;<br>    }<br>}"
+    },
+    {
+      "function": "mail.close",
+      "short_description": "Closes mail connection",
+      "long_help": "Closes an open mail server connection and releases associated resources. Always call this when done reading emails to properly close the connection.",
+      "parameters": [
+        {
+          "name": "handle",
+          "type": "string",
+          "description": "Connection handle from mail.connect"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>var</b> result = <b>call</b> mail.close(handle);<br><b>if</b> result <b>then</b> {<br>    <b>print</b> \"Connection closed successfully\";<br>}"
+    },
+    {
       "function": "EbsFunction",
       "short_description": "Interface that plugin classes must implement",
       "long_help": "The EbsFunction interface defines the contract for custom plugin functions. Classes implementing this interface can be<br>loaded via #plugin.load() and called using #custom.alias(...) syntax.<br><br><b>Required Methods:</b><br>• <b>String getName()</b> - Returns the display name for logging<br>• <b>String getDescription()</b> - Returns description for help text<br>• <b>Object execute(Object[] args)</b> - Main execution method<br><br><b>Optional Methods (have defaults):</b><br>• <b>void initialize(Map&lt;String, Object&gt; config)</b> - Called on load with config<br>• <b>void cleanup()</b> - Called on unload for resource cleanup<br>• <b>Map&lt;String, Object&gt; getSignature()</b> - Returns parameter/return type metadata<br>• <b>String getSignatureString()</b> - Returns signature as JSON string<br><br>Use <b>/help EbsFunction.java</b> to see the full Java interface code.",
