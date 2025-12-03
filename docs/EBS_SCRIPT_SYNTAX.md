@@ -3590,27 +3590,42 @@ Mail and FTP connections can be configured using URL strings stored in variables
 
 #### Mail URL Format
 ```
-mail://user:password@host:port?protocol=imaps
+******host:port?protocol=imaps
 ```
 
 **Examples:**
-- `mail://user%40gmail.com:apppassword@imap.gmail.com:993?protocol=imaps`
-- `mail://user:password@outlook.office365.com:993?protocol=imaps`
+- `******imap.gmail.com:993?protocol=imaps`
+- `******outlook.office365.com:993?protocol=imaps`
 
 #### FTP URL Format
 ```
-ftp://user:password@host:port     (standard FTP)
-ftps://user:password@host:port    (secure FTPS)
+******host:port     (standard FTP)
+******host:port    (secure FTPS)
 ```
 
 **Examples:**
-- `ftp://myuser:mypassword@ftp.example.com:21`
-- `ftps://myuser:mypassword@ftps.example.com:990`
+- `******ftp.example.com:21`
+- `******ftps.example.com:990`
 
 **Note:** URL-encode special characters in usernames and passwords:
 - Use `%40` for `@`
 - Use `%3A` for `:`
 - Use `%2F` for `/`
+
+### Using Config Variables in Scripts
+
+Variables defined in the Config dialogs (Config > Mail Server Config or Config > FTP Server Config) are automatically available as global variables in your scripts. The variable name you specify in the config becomes a script variable containing the connection URL.
+
+**Example:**
+If you create a mail config with variable name `myemail` and URL `******imap.gmail.com:993?protocol=imaps`, you can use it in a script:
+
+```javascript
+// The variable myemail is automatically available
+print myemail;  // Outputs: ******imap.gmail.com:993?protocol=imaps
+
+// FTP config variable example
+print myftp;    // Outputs: ******ftp.example.com:21
+```
 
 ### Type Coercion
 ```javascript
