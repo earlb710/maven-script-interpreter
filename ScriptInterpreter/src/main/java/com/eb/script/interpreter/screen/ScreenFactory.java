@@ -274,7 +274,11 @@ public class ScreenFactory {
         javafx.scene.control.Separator separator = new javafx.scene.control.Separator();
         mainContent.getChildren().add(separator);
         
-        // === VARIABLES SECTION (Top Half) ===
+        // === SCREEN STATUS & CONFIG SECTION ===
+        VBox statusSection = createScreenStatusSection(screenName, context);
+        mainContent.getChildren().add(statusSection);
+        
+        // === VARIABLES SECTION ===
         VBox varsSection = new VBox(3);
         varsSection.setPadding(new Insets(5));
         varsSection.setStyle("-fx-background-color: #f8f8f8;");
@@ -306,7 +310,7 @@ public class ScreenFactory {
         varsScrollPane.setVbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.AS_NEEDED);
         VBox.setVgrow(varsScrollPane, Priority.ALWAYS);
         
-        // === SCREEN ITEMS SECTION (Bottom Half) ===
+        // === SCREEN ITEMS SECTION ===
         VBox itemsSection = new VBox(3);
         itemsSection.setPadding(new Insets(5));
         itemsSection.setStyle("-fx-background-color: #f0f5f0;");
@@ -337,27 +341,408 @@ public class ScreenFactory {
         itemsScrollPane.setVbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.AS_NEEDED);
         VBox.setVgrow(itemsScrollPane, Priority.ALWAYS);
         
-        // Create split pane with variables on top, items on bottom
-        javafx.scene.control.SplitPane splitPane = new javafx.scene.control.SplitPane();
-        splitPane.setOrientation(javafx.geometry.Orientation.VERTICAL);
-        splitPane.getItems().addAll(varsScrollPane, itemsScrollPane);
-        splitPane.setDividerPositions(0.5);
-        VBox.setVgrow(splitPane, Priority.ALWAYS);
+        // === SCREEN AREAS SECTION ===
+        VBox areasSection = createScreenAreasSection(screenName, context);
+        javafx.scene.control.ScrollPane areasScrollPane = new javafx.scene.control.ScrollPane(areasSection);
+        areasScrollPane.setFitToWidth(true);
+        areasScrollPane.setStyle("-fx-background-color: transparent;");
+        areasScrollPane.setHbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
+        areasScrollPane.setVbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        VBox.setVgrow(areasScrollPane, Priority.ALWAYS);
         
-        mainContent.getChildren().add(splitPane);
+        // === EVENT HANDLERS SECTION ===
+        VBox handlersSection = createEventHandlersSection(screenName, context, screenAreaItems);
+        javafx.scene.control.ScrollPane handlersScrollPane = new javafx.scene.control.ScrollPane(handlersSection);
+        handlersScrollPane.setFitToWidth(true);
+        handlersScrollPane.setStyle("-fx-background-color: transparent;");
+        handlersScrollPane.setHbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
+        handlersScrollPane.setVbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        VBox.setVgrow(handlersScrollPane, Priority.ALWAYS);
+        
+        // Create TabPane for organizing sections
+        javafx.scene.control.TabPane tabPane = new javafx.scene.control.TabPane();
+        tabPane.setTabClosingPolicy(javafx.scene.control.TabPane.TabClosingPolicy.UNAVAILABLE);
+        tabPane.setStyle("-fx-background-color: transparent;");
+        
+        javafx.scene.control.Tab varsTab = new javafx.scene.control.Tab("Vars", varsScrollPane);
+        javafx.scene.control.Tab itemsTab = new javafx.scene.control.Tab("Items", itemsScrollPane);
+        javafx.scene.control.Tab areasTab = new javafx.scene.control.Tab("Areas", areasScrollPane);
+        javafx.scene.control.Tab handlersTab = new javafx.scene.control.Tab("Events", handlersScrollPane);
+        
+        tabPane.getTabs().addAll(varsTab, itemsTab, areasTab, handlersTab);
+        VBox.setVgrow(tabPane, Priority.ALWAYS);
+        
+        mainContent.getChildren().add(tabPane);
         
         // Create scrollable container
         javafx.scene.control.ScrollPane scrollPane = new javafx.scene.control.ScrollPane(mainContent);
         scrollPane.setFitToWidth(true);
         scrollPane.setFitToHeight(true);
-        scrollPane.setPrefWidth(280);
-        scrollPane.setMinWidth(220);
-        scrollPane.setMaxWidth(350);
+        scrollPane.setPrefWidth(320);
+        scrollPane.setMinWidth(250);
+        scrollPane.setMaxWidth(400);
         scrollPane.setStyle("-fx-background-color: #f5f5f5; -fx-border-color: #ccc; -fx-border-width: 0 0 0 1;");
         scrollPane.setHbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.setVbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
         
         return scrollPane;
+    }
+    
+    /**
+     * Create the Screen Status & Configuration section showing screen status, errors, 
+     * dimensions, thread info, and parent/child relationships.
+     * 
+     * @param screenName The name of the screen
+     * @param context The interpreter context
+     * @return A VBox containing the status section
+     */
+    private static VBox createScreenStatusSection(String screenName, InterpreterContext context) {
+        VBox statusSection = new VBox(2);
+        statusSection.setPadding(new Insets(5));
+        statusSection.setStyle("-fx-background-color: #e8f4f8;");
+        
+        javafx.scene.control.Label statusHeader = new javafx.scene.control.Label("⚙️ Status & Config");
+        statusHeader.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #444;");
+        statusSection.getChildren().add(statusHeader);
+        
+        // Screen status
+        ScreenStatus status = context.getScreenStatus(screenName);
+        String statusEmoji = status == ScreenStatus.ERROR ? "❌" : 
+                             status == ScreenStatus.CHANGED ? "⚠️" : "✓";
+        addDebugRow(statusSection, "Status", statusEmoji + " " + status.name(), 
+                    status == ScreenStatus.ERROR ? "#cc0000" : 
+                    status == ScreenStatus.CHANGED ? "#cc6600" : "#006600");
+        
+        // Error message if any
+        String errorMsg = context.getScreenErrorMessage(screenName);
+        if (errorMsg != null && !errorMsg.isEmpty()) {
+            addDebugRow(statusSection, "Error", errorMsg, "#cc0000");
+        }
+        
+        // Screen configuration
+        ScreenConfig config = context.getScreenConfig(screenName);
+        if (config != null) {
+            addDebugRow(statusSection, "Title", config.getTitle(), "#333");
+            addDebugRow(statusSection, "Size", config.getWidth() + " x " + config.getHeight(), "#333");
+        }
+        
+        // Parent screen relationship
+        String parentScreen = context.getScreenParent(screenName);
+        if (parentScreen != null) {
+            addDebugRow(statusSection, "Parent", parentScreen, "#0066cc");
+        }
+        
+        // Thread info
+        Thread screenThread = context.getScreenThreads().get(screenName.toLowerCase());
+        if (screenThread != null) {
+            String threadState = screenThread.isAlive() ? "🟢 " + screenThread.getName() : "🔴 stopped";
+            addDebugRow(statusSection, "Thread", threadState, "#333");
+        }
+        
+        // Event dispatcher info
+        ScreenEventDispatcher dispatcher = context.getScreenEventDispatcher(screenName);
+        if (dispatcher != null) {
+            addDebugRow(statusSection, "Dispatcher", dispatcher.isRunning() ? "🟢 running" : "🔴 stopped", "#333");
+        }
+        
+        return statusSection;
+    }
+    
+    /**
+     * Create the Screen Areas section showing the area hierarchy with types and item counts.
+     * 
+     * @param screenName The name of the screen
+     * @param context The interpreter context
+     * @return A VBox containing the areas section
+     */
+    private static VBox createScreenAreasSection(String screenName, InterpreterContext context) {
+        VBox areasSection = new VBox(3);
+        areasSection.setPadding(new Insets(5));
+        areasSection.setStyle("-fx-background-color: #f5f0e8;");
+        
+        javafx.scene.control.Label areasHeader = new javafx.scene.control.Label("📐 Screen Areas");
+        areasHeader.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #444;");
+        areasSection.getChildren().add(areasHeader);
+        
+        List<AreaDefinition> screenAreas = context.getScreenAreas(screenName);
+        if (screenAreas != null && !screenAreas.isEmpty()) {
+            for (AreaDefinition area : screenAreas) {
+                addAreaDefinitionToSection(areasSection, area, 0);
+            }
+        } else {
+            javafx.scene.control.Label noAreasLabel = new javafx.scene.control.Label("No areas defined");
+            noAreasLabel.setStyle("-fx-font-style: italic; -fx-text-fill: #888;");
+            areasSection.getChildren().add(noAreasLabel);
+        }
+        
+        return areasSection;
+    }
+    
+    /**
+     * Recursively add area definitions to the section with indentation for hierarchy.
+     * 
+     * @param section The VBox to add the area to
+     * @param area The area definition
+     * @param depth The indentation depth
+     */
+    private static void addAreaDefinitionToSection(VBox section, AreaDefinition area, int depth) {
+        HBox row = new HBox(3);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.setPadding(new Insets(2, 5, 2, 5 + (depth * 15)));
+        
+        // Area type icon
+        String icon = getAreaTypeIcon(area.areaType);
+        javafx.scene.control.Label iconLabel = new javafx.scene.control.Label(icon);
+        iconLabel.setStyle("-fx-font-size: 11px;");
+        
+        // Area name and type
+        String displayText = area.name + " [" + (area.type != null ? area.type : "pane") + "]";
+        javafx.scene.control.Label nameLabel = new javafx.scene.control.Label(displayText);
+        nameLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #663300;");
+        
+        // Item count
+        int itemCount = area.items != null ? area.items.size() : 0;
+        int childCount = area.childAreas != null ? area.childAreas.size() : 0;
+        String countText = "";
+        if (itemCount > 0) countText += itemCount + " items";
+        if (childCount > 0) countText += (countText.isEmpty() ? "" : ", ") + childCount + " children";
+        
+        javafx.scene.control.Label countLabel = new javafx.scene.control.Label(countText);
+        countLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #888;");
+        
+        row.getChildren().addAll(iconLabel, nameLabel, countLabel);
+        
+        // Build tooltip with detailed area info
+        StringBuilder tooltipText = new StringBuilder();
+        tooltipText.append("Area: ").append(area.name);
+        tooltipText.append("\nType: ").append(area.type != null ? area.type : "pane");
+        if (area.layout != null) tooltipText.append("\nLayout: ").append(area.layout);
+        if (area.spacing != null) tooltipText.append("\nSpacing: ").append(area.spacing);
+        if (area.padding != null) tooltipText.append("\nPadding: ").append(area.padding);
+        if (area.groupBorder != null) tooltipText.append("\nBorder: ").append(area.groupBorder);
+        if (area.gainFocus != null) tooltipText.append("\n⚡ gainFocus handler");
+        if (area.lostFocus != null) tooltipText.append("\n⚡ lostFocus handler");
+        
+        javafx.scene.control.Tooltip tooltip = new javafx.scene.control.Tooltip(tooltipText.toString());
+        tooltip.setStyle("-fx-font-size: 12px;");
+        tooltip.setShowDelay(javafx.util.Duration.millis(500));
+        javafx.scene.control.Tooltip.install(row, tooltip);
+        
+        row.setStyle("-fx-background-color: " + (depth % 2 == 0 ? "#f8f3e8" : "#f0ebd8") + ";");
+        section.getChildren().add(row);
+        
+        // Recursively add child areas
+        if (area.childAreas != null) {
+            for (AreaDefinition childArea : area.childAreas) {
+                addAreaDefinitionToSection(section, childArea, depth + 1);
+            }
+        }
+    }
+    
+    /**
+     * Get an icon for the area type.
+     */
+    private static String getAreaTypeIcon(AreaDefinition.AreaType areaType) {
+        if (areaType == null) return "📦";
+        switch (areaType) {
+            case VBOX: return "⬇️";
+            case HBOX: return "➡️";
+            case GRIDPANE: return "🔲";
+            case BORDERPANE: return "🔳";
+            case TABPANE: return "📑";
+            case TAB: return "📄";
+            case SCROLLPANE: return "📜";
+            case SPLITPANE: return "➖";
+            case ACCORDION: return "🎛️";
+            case TITLEDPANE: return "📋";
+            case FLOWPANE: return "〰️";
+            case TILEPANE: return "🧱";
+            case STACKPANE: return "📚";
+            case ANCHORPANE: return "📌";
+            case GROUP: return "📁";
+            default: return "📦";
+        }
+    }
+    
+    /**
+     * Create the Event Handlers section showing onClick, onValidate, onChange, 
+     * and screen-level callbacks.
+     * 
+     * @param screenName The name of the screen
+     * @param context The interpreter context
+     * @param screenAreaItems The screen area items map
+     * @return A VBox containing the handlers section
+     */
+    private static VBox createEventHandlersSection(String screenName, InterpreterContext context, 
+            Map<String, AreaItem> screenAreaItems) {
+        VBox handlersSection = new VBox(3);
+        handlersSection.setPadding(new Insets(5));
+        handlersSection.setStyle("-fx-background-color: #f0e8f5;");
+        
+        javafx.scene.control.Label handlersHeader = new javafx.scene.control.Label("⚡ Event Handlers");
+        handlersHeader.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #444;");
+        handlersSection.getChildren().add(handlersHeader);
+        
+        boolean hasHandlers = false;
+        
+        // Screen-level callbacks
+        String callback = context.getScreenCallback(screenName);
+        if (callback != null) {
+            addEventHandlerRow(handlersSection, "Screen", "callback", callback);
+            hasHandlers = true;
+        }
+        
+        String startupCode = context.getScreenStartupCode(screenName);
+        if (startupCode != null) {
+            addEventHandlerRow(handlersSection, "Screen", "onStartup", truncateCode(startupCode));
+            hasHandlers = true;
+        }
+        
+        String cleanupCode = context.getScreenCleanupCode(screenName);
+        if (cleanupCode != null) {
+            addEventHandlerRow(handlersSection, "Screen", "onCleanup", truncateCode(cleanupCode));
+            hasHandlers = true;
+        }
+        
+        String gainFocusCode = context.getScreenGainFocusCode(screenName);
+        if (gainFocusCode != null) {
+            addEventHandlerRow(handlersSection, "Screen", "onGainFocus", truncateCode(gainFocusCode));
+            hasHandlers = true;
+        }
+        
+        String lostFocusCode = context.getScreenLostFocusCode(screenName);
+        if (lostFocusCode != null) {
+            addEventHandlerRow(handlersSection, "Screen", "onLostFocus", truncateCode(lostFocusCode));
+            hasHandlers = true;
+        }
+        
+        // Item-level handlers
+        if (screenAreaItems != null) {
+            for (Map.Entry<String, AreaItem> entry : screenAreaItems.entrySet()) {
+                AreaItem item = entry.getValue();
+                String itemName = item.name != null ? item.name : entry.getKey();
+                
+                // Check item-level handlers
+                if (item.onValidate != null) {
+                    addEventHandlerRow(handlersSection, itemName, "onValidate", truncateCode(item.onValidate));
+                    hasHandlers = true;
+                }
+                if (item.onChange != null) {
+                    addEventHandlerRow(handlersSection, itemName, "onChange", truncateCode(item.onChange));
+                    hasHandlers = true;
+                }
+                
+                // Check displayItem handlers
+                if (item.displayItem != null) {
+                    if (item.displayItem.onClick != null) {
+                        addEventHandlerRow(handlersSection, itemName, "onClick", truncateCode(item.displayItem.onClick));
+                        hasHandlers = true;
+                    }
+                    if (item.displayItem.onValidate != null && item.onValidate == null) {
+                        addEventHandlerRow(handlersSection, itemName, "onValidate", truncateCode(item.displayItem.onValidate));
+                        hasHandlers = true;
+                    }
+                    if (item.displayItem.onChange != null && item.onChange == null) {
+                        addEventHandlerRow(handlersSection, itemName, "onChange", truncateCode(item.displayItem.onChange));
+                        hasHandlers = true;
+                    }
+                }
+            }
+        }
+        
+        if (!hasHandlers) {
+            javafx.scene.control.Label noHandlersLabel = new javafx.scene.control.Label("No event handlers defined");
+            noHandlersLabel.setStyle("-fx-font-style: italic; -fx-text-fill: #888;");
+            handlersSection.getChildren().add(noHandlersLabel);
+        }
+        
+        return handlersSection;
+    }
+    
+    /**
+     * Add an event handler row to the handlers section.
+     */
+    private static void addEventHandlerRow(VBox section, String itemName, String eventType, String code) {
+        HBox row = new HBox(3);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.setPadding(new Insets(2, 5, 2, 5));
+        
+        // Event type icon
+        String icon = getEventTypeIcon(eventType);
+        javafx.scene.control.Label iconLabel = new javafx.scene.control.Label(icon);
+        iconLabel.setStyle("-fx-font-size: 11px;");
+        
+        // Item name
+        javafx.scene.control.Label nameLabel = new javafx.scene.control.Label(itemName);
+        nameLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #660066;");
+        nameLabel.setMinWidth(60);
+        nameLabel.setMaxWidth(80);
+        
+        // Event type
+        javafx.scene.control.Label typeLabel = new javafx.scene.control.Label("." + eventType);
+        typeLabel.setStyle("-fx-text-fill: #006666;");
+        
+        row.getChildren().addAll(iconLabel, nameLabel, typeLabel);
+        
+        // Add tooltip with full code
+        javafx.scene.control.Tooltip tooltip = new javafx.scene.control.Tooltip(code);
+        tooltip.setStyle("-fx-font-size: 12px; -fx-font-family: monospace;");
+        tooltip.setShowDelay(javafx.util.Duration.millis(300));
+        tooltip.setMaxWidth(400);
+        tooltip.setWrapText(true);
+        javafx.scene.control.Tooltip.install(row, tooltip);
+        
+        row.setStyle("-fx-background-color: #ebe0f0;");
+        section.getChildren().add(row);
+    }
+    
+    /**
+     * Get an icon for the event type.
+     */
+    private static String getEventTypeIcon(String eventType) {
+        switch (eventType.toLowerCase()) {
+            case "onclick": return "🖱️";
+            case "onvalidate": return "✅";
+            case "onchange": return "🔄";
+            case "onstartup": return "🚀";
+            case "oncleanup": return "🧹";
+            case "ongainfocus": return "👁️";
+            case "onlostfocus": return "👁️‍🗨️";
+            case "callback": return "📞";
+            default: return "⚡";
+        }
+    }
+    
+    /**
+     * Truncate code to a reasonable display length.
+     */
+    private static String truncateCode(String code) {
+        if (code == null) return "";
+        String trimmed = code.trim().replace("\n", " ").replace("\r", "");
+        if (trimmed.length() > 50) {
+            return trimmed.substring(0, 47) + "...";
+        }
+        return trimmed;
+    }
+    
+    /**
+     * Helper method to add a simple debug row with label and value.
+     */
+    private static void addDebugRow(VBox section, String label, String value, String valueColor) {
+        HBox row = new HBox(5);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.setPadding(new Insets(1, 5, 1, 5));
+        
+        javafx.scene.control.Label labelNode = new javafx.scene.control.Label(label + ":");
+        labelNode.setStyle("-fx-font-weight: bold; -fx-text-fill: #555; -fx-font-size: 11px;");
+        labelNode.setMinWidth(60);
+        
+        javafx.scene.control.Label valueNode = new javafx.scene.control.Label(value);
+        valueNode.setStyle("-fx-text-fill: " + valueColor + "; -fx-font-size: 11px;");
+        valueNode.setWrapText(true);
+        
+        row.getChildren().addAll(labelNode, valueNode);
+        section.getChildren().add(row);
     }
     
     /**
@@ -511,11 +896,38 @@ public class ScreenFactory {
             Map<String, AreaItem> screenAreaItems,
             InterpreterContext context) {
         StringBuilder sb = new StringBuilder();
-        sb.append("Screen: ").append(screenName).append("\n");
-        sb.append("=".repeat(50)).append("\n\n");
+        sb.append("Screen Debug: ").append(screenName).append("\n");
+        sb.append("=".repeat(60)).append("\n\n");
+        
+        // Status & Config section
+        sb.append("⚙️ STATUS & CONFIGURATION\n");
+        sb.append("-".repeat(40)).append("\n");
+        ScreenStatus status = context.getScreenStatus(screenName);
+        sb.append("Status: ").append(status.name()).append("\n");
+        String errorMsg = context.getScreenErrorMessage(screenName);
+        if (errorMsg != null && !errorMsg.isEmpty()) {
+            sb.append("Error: ").append(errorMsg).append("\n");
+        }
+        ScreenConfig config = context.getScreenConfig(screenName);
+        if (config != null) {
+            sb.append("Title: ").append(config.getTitle()).append("\n");
+            sb.append("Size: ").append(config.getWidth()).append(" x ").append(config.getHeight()).append("\n");
+        }
+        String parentScreen = context.getScreenParent(screenName);
+        if (parentScreen != null) {
+            sb.append("Parent Screen: ").append(parentScreen).append("\n");
+        }
+        Thread screenThread = context.getScreenThreads().get(screenName.toLowerCase());
+        if (screenThread != null) {
+            sb.append("Thread: ").append(screenThread.getName()).append(" (").append(screenThread.isAlive() ? "alive" : "stopped").append(")\n");
+        }
+        ScreenEventDispatcher dispatcher = context.getScreenEventDispatcher(screenName);
+        if (dispatcher != null) {
+            sb.append("Dispatcher: ").append(dispatcher.isRunning() ? "running" : "stopped").append("\n");
+        }
         
         // Variables section
-        sb.append("📊 VARIABLES\n");
+        sb.append("\n📊 VARIABLES\n");
         sb.append("-".repeat(40)).append("\n");
         if (screenVars == null || screenVars.isEmpty()) {
             sb.append("No variables defined\n");
@@ -568,7 +980,123 @@ public class ScreenFactory {
             }
         }
         
+        // Screen Areas section
+        sb.append("\n📐 SCREEN AREAS\n");
+        sb.append("-".repeat(40)).append("\n");
+        List<AreaDefinition> screenAreas = context.getScreenAreas(screenName);
+        if (screenAreas != null && !screenAreas.isEmpty()) {
+            for (AreaDefinition area : screenAreas) {
+                formatAreaDefinitionForClipboard(sb, area, 0);
+            }
+        } else {
+            sb.append("No areas defined\n");
+        }
+        
+        // Event Handlers section
+        sb.append("\n⚡ EVENT HANDLERS\n");
+        sb.append("-".repeat(40)).append("\n");
+        boolean hasHandlers = false;
+        
+        String callback = context.getScreenCallback(screenName);
+        if (callback != null) {
+            sb.append("Screen.callback: ").append(callback).append("\n");
+            hasHandlers = true;
+        }
+        String startupCode = context.getScreenStartupCode(screenName);
+        if (startupCode != null) {
+            sb.append("Screen.onStartup: ").append(truncateCode(startupCode)).append("\n");
+            hasHandlers = true;
+        }
+        String cleanupCode = context.getScreenCleanupCode(screenName);
+        if (cleanupCode != null) {
+            sb.append("Screen.onCleanup: ").append(truncateCode(cleanupCode)).append("\n");
+            hasHandlers = true;
+        }
+        String gainFocusCode = context.getScreenGainFocusCode(screenName);
+        if (gainFocusCode != null) {
+            sb.append("Screen.onGainFocus: ").append(truncateCode(gainFocusCode)).append("\n");
+            hasHandlers = true;
+        }
+        String lostFocusCode = context.getScreenLostFocusCode(screenName);
+        if (lostFocusCode != null) {
+            sb.append("Screen.onLostFocus: ").append(truncateCode(lostFocusCode)).append("\n");
+            hasHandlers = true;
+        }
+        
+        // Item-level handlers
+        if (screenAreaItems != null) {
+            for (Map.Entry<String, AreaItem> entry : screenAreaItems.entrySet()) {
+                AreaItem item = entry.getValue();
+                String itemName = item.name != null ? item.name : entry.getKey();
+                
+                if (item.onValidate != null) {
+                    sb.append(itemName).append(".onValidate: ").append(truncateCode(item.onValidate)).append("\n");
+                    hasHandlers = true;
+                }
+                if (item.onChange != null) {
+                    sb.append(itemName).append(".onChange: ").append(truncateCode(item.onChange)).append("\n");
+                    hasHandlers = true;
+                }
+                if (item.displayItem != null) {
+                    if (item.displayItem.onClick != null) {
+                        sb.append(itemName).append(".onClick: ").append(truncateCode(item.displayItem.onClick)).append("\n");
+                        hasHandlers = true;
+                    }
+                    if (item.displayItem.onValidate != null && item.onValidate == null) {
+                        sb.append(itemName).append(".onValidate: ").append(truncateCode(item.displayItem.onValidate)).append("\n");
+                        hasHandlers = true;
+                    }
+                    if (item.displayItem.onChange != null && item.onChange == null) {
+                        sb.append(itemName).append(".onChange: ").append(truncateCode(item.displayItem.onChange)).append("\n");
+                        hasHandlers = true;
+                    }
+                }
+            }
+        }
+        
+        if (!hasHandlers) {
+            sb.append("No event handlers defined\n");
+        }
+        
         return sb.toString();
+    }
+    
+    /**
+     * Format an area definition for clipboard output with indentation.
+     */
+    private static void formatAreaDefinitionForClipboard(StringBuilder sb, AreaDefinition area, int depth) {
+        String indent = "  ".repeat(depth);
+        sb.append(indent).append(getAreaTypeIcon(area.areaType)).append(" ").append(area.name);
+        sb.append(" [").append(area.type != null ? area.type : "pane").append("]");
+        
+        int itemCount = area.items != null ? area.items.size() : 0;
+        int childCount = area.childAreas != null ? area.childAreas.size() : 0;
+        if (itemCount > 0 || childCount > 0) {
+            sb.append(" (");
+            if (itemCount > 0) sb.append(itemCount).append(" items");
+            if (itemCount > 0 && childCount > 0) sb.append(", ");
+            if (childCount > 0) sb.append(childCount).append(" children");
+            sb.append(")");
+        }
+        sb.append("\n");
+        
+        // Add additional area details
+        if (area.layout != null) {
+            sb.append(indent).append("  layout: ").append(area.layout).append("\n");
+        }
+        if (area.gainFocus != null) {
+            sb.append(indent).append("  gainFocus: ").append(truncateCode(area.gainFocus)).append("\n");
+        }
+        if (area.lostFocus != null) {
+            sb.append(indent).append("  lostFocus: ").append(truncateCode(area.lostFocus)).append("\n");
+        }
+        
+        // Recursively add child areas
+        if (area.childAreas != null) {
+            for (AreaDefinition childArea : area.childAreas) {
+                formatAreaDefinitionForClipboard(sb, childArea, depth + 1);
+            }
+        }
     }
     
     /**
