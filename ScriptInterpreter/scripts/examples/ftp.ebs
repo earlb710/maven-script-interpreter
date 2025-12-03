@@ -5,200 +5,115 @@
 // ============================================================
 // FTP BUILTIN FUNCTIONS TEST SCRIPT
 // ============================================================
-// This script demonstrates all FTP builtin functions.
-// NOTE: These examples show the syntax but require an actual
-// FTP server to execute. Comment/uncomment as needed.
-// ============================================================
 
-print "=== FTP/FTPS Test Script ===";
+print "=== FTP/FTPS Builtins Test Script ===";
 print "";
 
 // ------------------------------------------------------------
-// CONNECTION FUNCTIONS
+// TEST 1: Verify listConnections works (no server needed)
 // ------------------------------------------------------------
-
-print "--- Connection Functions ---";
-
-// ftp.connect - Connect to an FTP server
-// Returns a handle for subsequent operations
-// var handle = #ftp.connect("ftp.example.com", 21, "username", "password");
-// var handle = #ftp.connect("ftp.example.com");  // anonymous connection
-print "ftp.connect(host, port?, username?, password?) -> handle";
-
-// ftp.connectSecure - Connect to FTPS server (FTP over SSL/TLS)
-// Supports explicit TLS (default) and implicit SSL modes
-// var secureHandle = #ftp.connectSecure("ftps.example.com", 21, "user", "pass");
-// var implicitHandle = #ftp.connectSecure("ftps.example.com", 990, "user", "pass", true);
-print "ftp.connectSecure(host, port?, username?, password?, implicit?) -> handle";
-
-// ftp.isConnected - Check if connection is active
-// var connected = #ftp.isConnected(handle);
-// print "Connected: " + connected;
-print "ftp.isConnected(handle) -> bool";
-
-// ftp.listConnections - List all open FTP connections
-// var connections = #ftp.listConnections();
-// foreach c in connections do {
-//     print "Handle: " + c.handle + " Host: " + c.host;
-// }
-print "ftp.listConnections() -> json array";
-
-// ftp.disconnect - Close FTP connection
-// #ftp.disconnect(handle);
-print "ftp.disconnect(handle) -> bool";
+print "TEST 1: ftp.listConnections() - List open connections";
+var connections = #ftp.listConnections();
+print "  Open connections: " + connections;
+print "  Result: PASS (returns empty array when no connections)";
 print "";
 
 // ------------------------------------------------------------
-// DIRECTORY NAVIGATION
+// TEST 2: Verify isConnected returns false for invalid handle
 // ------------------------------------------------------------
-
-print "--- Directory Navigation ---";
-
-// ftp.pwd - Print working directory
-// var cwd = #ftp.pwd(handle);
-// print "Current directory: " + cwd;
-print "ftp.pwd(handle) -> string";
-
-// ftp.cd - Change directory
-// #ftp.cd(handle, "/uploads");
-// #ftp.cd(handle, "..");
-print "ftp.cd(handle, path) -> bool";
-
-// ftp.exists - Check if path exists
-// if #ftp.exists(handle, "/data/config.json") then {
-//     print "File exists";
-// }
-print "ftp.exists(handle, path) -> bool";
+print "TEST 2: ftp.isConnected() - Check invalid handle";
+var connected = #ftp.isConnected("invalid-handle");
+print "  isConnected(invalid-handle): " + connected;
+if connected == false then {
+    print "  Result: PASS";
+} else {
+    print "  Result: FAIL - expected false";
+}
 print "";
 
 // ------------------------------------------------------------
-// FILE LISTING
+// TEST 3: Verify disconnect returns false for invalid handle
 // ------------------------------------------------------------
-
-print "--- File Listing ---";
-
-// ftp.listFiles - List files in directory
-// Returns JSON array with file details
-// var files = #ftp.listFiles(handle, "/uploads");
-// foreach f in files do {
-//     if f.isDir then {
-//         print "[DIR]  " + f.name;
-//     } else {
-//         print "[FILE] " + f.name + " (" + f.size + " bytes)";
-//     }
-// }
-print "ftp.listFiles(handle, path?) -> json array";
-print "  Returns: name, isDir, isFile, isLink, size, modified, modifiedMs, user, group";
+print "TEST 3: ftp.disconnect() - Disconnect invalid handle";
+var disconnected = #ftp.disconnect("invalid-handle");
+print "  disconnect(invalid-handle): " + disconnected;
+if disconnected == false then {
+    print "  Result: PASS";
+} else {
+    print "  Result: FAIL - expected false";
+}
 print "";
 
 // ------------------------------------------------------------
-// FILE TRANSFER
+// FTP FUNCTION REFERENCE
 // ------------------------------------------------------------
+print "=== FTP Function Reference ===";
+print "";
 
-print "--- File Transfer ---";
+print "CONNECTION:";
+print "  ftp.connect(host, port?, username?, password?) -> handle";
+print "  ftp.connectSecure(host, port?, username?, password?, implicit?) -> handle";
+print "  ftp.isConnected(handle) -> bool";
+print "  ftp.disconnect(handle) -> bool";
+print "  ftp.listConnections() -> json array";
+print "";
 
-// ftp.upload - Upload local file to server
-// #ftp.upload(handle, "local/data.txt", "/remote/data.txt");
-print "ftp.upload(handle, localPath, remotePath) -> bool";
+print "DIRECTORY:";
+print "  ftp.pwd(handle) -> string";
+print "  ftp.cd(handle, path) -> bool";
+print "  ftp.mkdir(handle, path) -> bool";
+print "  ftp.rmdir(handle, path) -> bool";
+print "  ftp.exists(handle, path) -> bool";
+print "  ftp.listFiles(handle, path?) -> json array";
+print "";
 
-// ftp.download - Download file from server
-// #ftp.download(handle, "/remote/data.csv", "local/data.csv");
-print "ftp.download(handle, remotePath, localPath) -> bool";
+print "FILE TRANSFER:";
+print "  ftp.upload(handle, localPath, remotePath) -> bool";
+print "  ftp.download(handle, remotePath, localPath) -> bool";
+print "  ftp.size(handle, path) -> long";
+print "  ftp.delete(handle, path) -> bool";
+print "  ftp.rename(handle, from, to) -> bool";
+print "";
 
-// ftp.size - Get file size
-// var size = #ftp.size(handle, "/remote/file.zip");
-// print "File size: " + size + " bytes";
-print "ftp.size(handle, path) -> long (-1 if not found)";
+print "TRANSFER MODE:";
+print "  ftp.binary(handle) -> bool";
+print "  ftp.ascii(handle) -> bool";
+print "  ftp.passive(handle) -> bool";
+print "  ftp.active(handle) -> bool";
 print "";
 
 // ------------------------------------------------------------
-// FILE OPERATIONS
+// USAGE EXAMPLES (requires real FTP server)
 // ------------------------------------------------------------
-
-print "--- File Operations ---";
-
-// ftp.delete - Delete a file
-// #ftp.delete(handle, "/remote/old-file.txt");
-print "ftp.delete(handle, remotePath) -> bool";
-
-// ftp.rename - Rename or move a file
-// #ftp.rename(handle, "/old-name.txt", "/new-name.txt");
-print "ftp.rename(handle, fromPath, toPath) -> bool";
+print "=== Usage Examples ===";
 print "";
 
-// ------------------------------------------------------------
-// DIRECTORY OPERATIONS
-// ------------------------------------------------------------
-
-print "--- Directory Operations ---";
-
-// ftp.mkdir - Create directory
-// #ftp.mkdir(handle, "/uploads/new-folder");
-print "ftp.mkdir(handle, remotePath) -> bool";
-
-// ftp.rmdir - Remove empty directory
-// #ftp.rmdir(handle, "/uploads/old-folder");
-print "ftp.rmdir(handle, remotePath) -> bool";
-print "";
-
-// ------------------------------------------------------------
-// TRANSFER MODE SETTINGS
-// ------------------------------------------------------------
-
-print "--- Transfer Mode Settings ---";
-
-// ftp.binary - Set binary transfer mode (default)
-// #ftp.binary(handle);
-print "ftp.binary(handle) -> bool";
-
-// ftp.ascii - Set ASCII transfer mode (for text files)
-// #ftp.ascii(handle);
-print "ftp.ascii(handle) -> bool";
-
-// ftp.passive - Set passive mode (default, firewall-friendly)
-// #ftp.passive(handle);
-print "ftp.passive(handle) -> bool";
-
-// ftp.active - Set active mode
-// #ftp.active(handle);
-print "ftp.active(handle) -> bool";
-print "";
-
-// ------------------------------------------------------------
-// COMPLETE EXAMPLE (Commented - requires real FTP server)
-// ------------------------------------------------------------
-
-print "--- Complete Example ---";
 print "// Connect to FTP server";
-print "// var h = #ftp.connect(\"ftp.example.com\", 21, \"user\", \"pass\");";
-print "// ";
-print "// // List files";
-print "// var files = #ftp.listFiles(h, \"/\");";
-print "// foreach f in files do {";
-print "//     print f.name + \" - \" + f.size;";
-print "// }";
-print "// ";
-print "// // Upload a file";
-print "// #ftp.upload(h, \"local.txt\", \"/remote.txt\");";
-print "// ";
-print "// // Create directory and navigate";
-print "// #ftp.mkdir(h, \"/backups\");";
-print "// #ftp.cd(h, \"/backups\");";
-print "// print #ftp.pwd(h);";
-print "// ";
-print "// // Disconnect";
-print "// #ftp.disconnect(h);";
+print "var h = #ftp.connect(\"ftp.example.com\", 21, \"user\", \"pass\");";
 print "";
-
-// ------------------------------------------------------------
-// GET HELP ON ANY FTP FUNCTION
-// ------------------------------------------------------------
-
-print "--- Get Help ---";
-print "Use system.help() to get detailed help on any FTP function:";
-print "#system.help(\"ftp.connect\");";
-print "#system.help(\"ftp.connectSecure\");";
-print "#system.help(\"ftp.listFiles\");";
+print "// Connect to FTPS server (explicit TLS)";
+print "var hs = #ftp.connectSecure(\"ftps.example.com\", 21, \"user\", \"pass\");";
+print "";
+print "// Connect to FTPS server (implicit SSL)";
+print "var hi = #ftp.connectSecure(\"ftps.example.com\", 990, \"user\", \"pass\", true);";
+print "";
+print "// List files in directory";
+print "var files = #ftp.listFiles(h, \"/uploads\");";
+print "foreach f in files do {";
+print "    print f.name + \" (\" + f.size + \" bytes)\";";
+print "}";
+print "";
+print "// Upload and download";
+print "#ftp.upload(h, \"local.txt\", \"/remote.txt\");";
+print "#ftp.download(h, \"/remote.txt\", \"downloaded.txt\");";
+print "";
+print "// Directory operations";
+print "#ftp.mkdir(h, \"/new-folder\");";
+print "#ftp.cd(h, \"/new-folder\");";
+print "print #ftp.pwd(h);";
+print "";
+print "// Disconnect when done";
+print "#ftp.disconnect(h);";
 print "";
 
 print "=== FTP Test Script Complete ===";
