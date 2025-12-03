@@ -40,6 +40,16 @@ import java.util.*;
  * screen definitions.
  */
 public class ScreenFactory {
+    
+    // Debug panel layout constants
+    private static final int DEBUG_PANEL_MIN_WIDTH = 250;
+    private static final int DEBUG_PANEL_PREF_WIDTH = 320;
+    private static final int DEBUG_PANEL_MAX_WIDTH = 400;
+    private static final int DEBUG_AREA_INDENT_PIXELS = 15;
+    private static final int DEBUG_MAX_CODE_DISPLAY_LENGTH = 50;
+    private static final int DEBUG_TOOLTIP_MAX_WIDTH = 400;
+    private static final int DEBUG_ITEM_NAME_MIN_WIDTH = 60;
+    private static final int DEBUG_ITEM_NAME_MAX_WIDTH = 80;
 
     /**
      * Functional interface for executing onClick EBS code
@@ -378,9 +388,9 @@ public class ScreenFactory {
         javafx.scene.control.ScrollPane scrollPane = new javafx.scene.control.ScrollPane(mainContent);
         scrollPane.setFitToWidth(true);
         scrollPane.setFitToHeight(true);
-        scrollPane.setPrefWidth(320);
-        scrollPane.setMinWidth(250);
-        scrollPane.setMaxWidth(400);
+        scrollPane.setPrefWidth(DEBUG_PANEL_PREF_WIDTH);
+        scrollPane.setMinWidth(DEBUG_PANEL_MIN_WIDTH);
+        scrollPane.setMaxWidth(DEBUG_PANEL_MAX_WIDTH);
         scrollPane.setStyle("-fx-background-color: #f5f5f5; -fx-border-color: #ccc; -fx-border-width: 0 0 0 1;");
         scrollPane.setHbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.setVbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
@@ -488,7 +498,7 @@ public class ScreenFactory {
     private static void addAreaDefinitionToSection(VBox section, AreaDefinition area, int depth) {
         HBox row = new HBox(3);
         row.setAlignment(Pos.CENTER_LEFT);
-        row.setPadding(new Insets(2, 5, 2, 5 + (depth * 15)));
+        row.setPadding(new Insets(2, 5, 2, 5 + (depth * DEBUG_AREA_INDENT_PIXELS)));
         
         // Area type icon
         String icon = getAreaTypeIcon(area.areaType);
@@ -675,8 +685,8 @@ public class ScreenFactory {
         // Item name
         javafx.scene.control.Label nameLabel = new javafx.scene.control.Label(itemName);
         nameLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #660066;");
-        nameLabel.setMinWidth(60);
-        nameLabel.setMaxWidth(80);
+        nameLabel.setMinWidth(DEBUG_ITEM_NAME_MIN_WIDTH);
+        nameLabel.setMaxWidth(DEBUG_ITEM_NAME_MAX_WIDTH);
         
         // Event type
         javafx.scene.control.Label typeLabel = new javafx.scene.control.Label("." + eventType);
@@ -688,7 +698,7 @@ public class ScreenFactory {
         javafx.scene.control.Tooltip tooltip = new javafx.scene.control.Tooltip(code);
         tooltip.setStyle("-fx-font-size: 12px; -fx-font-family: monospace;");
         tooltip.setShowDelay(javafx.util.Duration.millis(300));
-        tooltip.setMaxWidth(400);
+        tooltip.setMaxWidth(DEBUG_TOOLTIP_MAX_WIDTH);
         tooltip.setWrapText(true);
         javafx.scene.control.Tooltip.install(row, tooltip);
         
@@ -719,8 +729,8 @@ public class ScreenFactory {
     private static String truncateCode(String code) {
         if (code == null) return "";
         String trimmed = code.trim().replace("\n", " ").replace("\r", "");
-        if (trimmed.length() > 50) {
-            return trimmed.substring(0, 47) + "...";
+        if (trimmed.length() > DEBUG_MAX_CODE_DISPLAY_LENGTH) {
+            return trimmed.substring(0, DEBUG_MAX_CODE_DISPLAY_LENGTH - 3) + "...";
         }
         return trimmed;
     }
@@ -735,7 +745,7 @@ public class ScreenFactory {
         
         javafx.scene.control.Label labelNode = new javafx.scene.control.Label(label + ":");
         labelNode.setStyle("-fx-font-weight: bold; -fx-text-fill: #555; -fx-font-size: 11px;");
-        labelNode.setMinWidth(60);
+        labelNode.setMinWidth(DEBUG_ITEM_NAME_MIN_WIDTH);
         
         javafx.scene.control.Label valueNode = new javafx.scene.control.Label(value);
         valueNode.setStyle("-fx-text-fill: " + valueColor + "; -fx-font-size: 11px;");
