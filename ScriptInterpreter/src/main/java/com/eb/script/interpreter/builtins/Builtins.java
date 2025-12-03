@@ -1076,6 +1076,8 @@ public final class Builtins {
         addBuiltin(info(
                 "mail.folders", DataType.JSON, // returns array of folder info
                 newParam("handle", DataType.STRING, true)    // required; connection handle
+        ));
+        // ==========================
         // FTP builtins
         // ==========================
         addBuiltin(info(
@@ -1249,6 +1251,8 @@ public final class Builtins {
         // Mail builtins (email operations)
         if (BuiltinsMail.handles(name)) {
             return BuiltinsMail.dispatch(env, name, args);
+        }
+        
         // FTP builtins
         if (BuiltinsFtp.handles(name)) {
             return BuiltinsFtp.dispatch(env, name, args);
