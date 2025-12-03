@@ -113,7 +113,23 @@ public class EbsLexer extends Lexer<EbsTokenType> {
                     int tempStart = current;
                     String nextIdent = getIdentifier();
                     
+                    // Precedence: Check if combining would create a valid builtin FIRST
+                    // This allows reserved keywords like 'open' and 'connect' to be used
+                    // as method names in registered builtins (e.g., ftp.open, mail.open).
+                    // Non-registered combinations like 'myobj.open' will fall through to
+                    // the keyword check below and be tokenized as separate tokens.
+                    String combined = text + "." + nextIdent;
+                    EbsTokenType combinedType = keywords.get(combined);
+                    
+                    // If the combined identifier is a registered builtin, allow it
+                    if (combinedType == EbsTokenType.BUILTIN) {
+                        text = combined;
+                        c = peek();
+                        continue;
+                    }
+                    
                     // Check if the next identifier is a reserved keyword (length, size, etc.)
+                    // This prevents property access like 'arr.length' from being combined
                     EbsTokenType nextType = keywords.get(nextIdent);
                     if (nextType != null) {
                         // Don't combine with keywords - stop here
@@ -122,7 +138,7 @@ public class EbsLexer extends Lexer<EbsTokenType> {
                     }
                     
                     // Not a keyword, combine it
-                    text = text + "." + nextIdent;
+                    text = combined;
                     c = peek();
                 } else {
                     // No identifier after dot, rewind
