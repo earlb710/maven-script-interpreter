@@ -608,8 +608,8 @@ showAskAiScreen {
     // Define the Ask AI screen - child screen for AI-based regex generation
     screen askAiScreen = {
         "title": "Ask AI - Generate Regex Pattern",
-        "width": 500,
-        "height": 550,
+        "width": 700,
+        "height": 400,
         "vars": [
             {
                 "name": "aiRequest",
@@ -617,10 +617,10 @@ showAskAiScreen {
                 "default": "",
                 "display": {
                     "type": "textarea",
-                    "labelText": "Describe what\nyou want\nto match:",
+                    "labelText": "Describe what you want to match:",
                     "promptHelp": "E.g., 'email addresses' or 'dates in YYYY-MM-DD format' or 'phone numbers with area code'",
-                    "maxLength": 60,
-                    "height": 4
+                    "maxLength": 80,
+                    "height": 2
                 }
             },
             {
@@ -631,7 +631,8 @@ showAskAiScreen {
                     "type": "textarea",
                     "labelText": "AI Result:",
                     "editable": false,
-                    "maxLength": 60
+                    "maxLength": 80,
+                    "height": 3
                 }
             },
             {
