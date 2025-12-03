@@ -50,6 +50,10 @@ public class ScreenFactory {
     private static final int DEBUG_TOOLTIP_MAX_WIDTH = 400;
     private static final int DEBUG_ITEM_NAME_MIN_WIDTH = 60;
     private static final int DEBUG_ITEM_NAME_MAX_WIDTH = 80;
+    
+    // Debug row styling constants
+    private static final String DEBUG_ROW_HOVER_STYLE = "-fx-background-color: #d0e8ff; -fx-cursor: hand;";
+    private static final String DEBUG_ROW_CLICK_STYLE = "-fx-background-color: #a0d0a0; -fx-cursor: hand;";
 
     /**
      * Functional interface for executing onClick EBS code
@@ -517,6 +521,7 @@ public class ScreenFactory {
     
     /**
      * Recursively add area definitions to the section with indentation for hierarchy.
+     * Clicking on a row copies the area details to clipboard.
      * 
      * @param section The VBox to add the area to
      * @param area The area definition
@@ -549,23 +554,24 @@ public class ScreenFactory {
         
         row.getChildren().addAll(iconLabel, nameLabel, countLabel);
         
-        // Build tooltip with detailed area info
-        StringBuilder tooltipText = new StringBuilder();
-        tooltipText.append("Area: ").append(area.name);
-        tooltipText.append("\nType: ").append(area.type != null ? area.type : "pane");
-        if (area.layout != null) tooltipText.append("\nLayout: ").append(area.layout);
-        if (area.spacing != null) tooltipText.append("\nSpacing: ").append(area.spacing);
-        if (area.padding != null) tooltipText.append("\nPadding: ").append(area.padding);
-        if (area.groupBorder != null) tooltipText.append("\nBorder: ").append(area.groupBorder);
-        if (area.gainFocus != null) tooltipText.append("\n⚡ gainFocus handler");
-        if (area.lostFocus != null) tooltipText.append("\n⚡ lostFocus handler");
+        // Build clipboard text with all area details
+        StringBuilder clipboardBuilder = new StringBuilder();
+        clipboardBuilder.append("Area: ").append(area.name);
+        clipboardBuilder.append("\nType: ").append(area.type != null ? area.type : "pane");
+        if (area.layout != null) clipboardBuilder.append("\nLayout: ").append(area.layout);
+        if (area.spacing != null) clipboardBuilder.append("\nSpacing: ").append(area.spacing);
+        if (area.padding != null) clipboardBuilder.append("\nPadding: ").append(area.padding);
+        if (area.groupBorder != null) clipboardBuilder.append("\nBorder: ").append(area.groupBorder);
+        if (area.style != null) clipboardBuilder.append("\nStyle: ").append(area.style);
+        if (itemCount > 0) clipboardBuilder.append("\nItems: ").append(itemCount);
+        if (childCount > 0) clipboardBuilder.append("\nChildren: ").append(childCount);
+        if (area.gainFocus != null) clipboardBuilder.append("\ngainFocus: ").append(area.gainFocus);
+        if (area.lostFocus != null) clipboardBuilder.append("\nlostFocus: ").append(area.lostFocus);
         
-        javafx.scene.control.Tooltip tooltip = new javafx.scene.control.Tooltip(tooltipText.toString());
-        tooltip.setStyle("-fx-font-size: 12px;");
-        tooltip.setShowDelay(javafx.util.Duration.millis(500));
-        javafx.scene.control.Tooltip.install(row, tooltip);
+        String originalStyle = "-fx-background-color: " + (depth % 2 == 0 ? "#f8f3e8" : "#f0ebd8") + ";";
+        row.setStyle(originalStyle);
+        makeRowClickable(row, clipboardBuilder.toString(), originalStyle);
         
-        row.setStyle("-fx-background-color: " + (depth % 2 == 0 ? "#f8f3e8" : "#f0ebd8") + ";");
         section.getChildren().add(row);
         
         // Recursively add child areas
@@ -631,25 +637,25 @@ public class ScreenFactory {
         
         String startupCode = context.getScreenStartupCode(screenName);
         if (startupCode != null) {
-            addEventHandlerRow(handlersSection, "Screen", "onStartup", truncateCode(startupCode));
+            addEventHandlerRow(handlersSection, "Screen", "onStartup", startupCode);
             hasHandlers = true;
         }
         
         String cleanupCode = context.getScreenCleanupCode(screenName);
         if (cleanupCode != null) {
-            addEventHandlerRow(handlersSection, "Screen", "onCleanup", truncateCode(cleanupCode));
+            addEventHandlerRow(handlersSection, "Screen", "onCleanup", cleanupCode);
             hasHandlers = true;
         }
         
         String gainFocusCode = context.getScreenGainFocusCode(screenName);
         if (gainFocusCode != null) {
-            addEventHandlerRow(handlersSection, "Screen", "onGainFocus", truncateCode(gainFocusCode));
+            addEventHandlerRow(handlersSection, "Screen", "onGainFocus", gainFocusCode);
             hasHandlers = true;
         }
         
         String lostFocusCode = context.getScreenLostFocusCode(screenName);
         if (lostFocusCode != null) {
-            addEventHandlerRow(handlersSection, "Screen", "onLostFocus", truncateCode(lostFocusCode));
+            addEventHandlerRow(handlersSection, "Screen", "onLostFocus", lostFocusCode);
             hasHandlers = true;
         }
         
@@ -661,26 +667,26 @@ public class ScreenFactory {
                 
                 // Check item-level handlers
                 if (item.onValidate != null) {
-                    addEventHandlerRow(handlersSection, itemName, "onValidate", truncateCode(item.onValidate));
+                    addEventHandlerRow(handlersSection, itemName, "onValidate", item.onValidate);
                     hasHandlers = true;
                 }
                 if (item.onChange != null) {
-                    addEventHandlerRow(handlersSection, itemName, "onChange", truncateCode(item.onChange));
+                    addEventHandlerRow(handlersSection, itemName, "onChange", item.onChange);
                     hasHandlers = true;
                 }
                 
                 // Check displayItem handlers
                 if (item.displayItem != null) {
                     if (item.displayItem.onClick != null) {
-                        addEventHandlerRow(handlersSection, itemName, "onClick", truncateCode(item.displayItem.onClick));
+                        addEventHandlerRow(handlersSection, itemName, "onClick", item.displayItem.onClick);
                         hasHandlers = true;
                     }
                     if (item.displayItem.onValidate != null && item.onValidate == null) {
-                        addEventHandlerRow(handlersSection, itemName, "onValidate", truncateCode(item.displayItem.onValidate));
+                        addEventHandlerRow(handlersSection, itemName, "onValidate", item.displayItem.onValidate);
                         hasHandlers = true;
                     }
                     if (item.displayItem.onChange != null && item.onChange == null) {
-                        addEventHandlerRow(handlersSection, itemName, "onChange", truncateCode(item.displayItem.onChange));
+                        addEventHandlerRow(handlersSection, itemName, "onChange", item.displayItem.onChange);
                         hasHandlers = true;
                     }
                 }
@@ -698,8 +704,14 @@ public class ScreenFactory {
     
     /**
      * Add an event handler row to the handlers section.
+     * Clicking on the row copies the handler details (including full code) to clipboard.
+     * 
+     * @param section The VBox to add the row to
+     * @param itemName The name of the item (e.g., "Screen", "button1")
+     * @param eventType The event type (e.g., "onClick", "onValidate")
+     * @param fullCode The full handler code (for clipboard)
      */
-    private static void addEventHandlerRow(VBox section, String itemName, String eventType, String code) {
+    private static void addEventHandlerRow(VBox section, String itemName, String eventType, String fullCode) {
         HBox row = new HBox(3);
         row.setAlignment(Pos.CENTER_LEFT);
         row.setPadding(new Insets(2, 5, 2, 5));
@@ -715,21 +727,20 @@ public class ScreenFactory {
         nameLabel.setMinWidth(DEBUG_ITEM_NAME_MIN_WIDTH);
         nameLabel.setMaxWidth(DEBUG_ITEM_NAME_MAX_WIDTH);
         
-        // Event type
-        javafx.scene.control.Label typeLabel = new javafx.scene.control.Label("." + eventType);
+        // Event type with truncated code preview
+        String truncatedCode = truncateCode(fullCode);
+        javafx.scene.control.Label typeLabel = new javafx.scene.control.Label("." + eventType + ": " + truncatedCode);
         typeLabel.setStyle("-fx-text-fill: #006666;");
         
         row.getChildren().addAll(iconLabel, nameLabel, typeLabel);
         
-        // Add tooltip with full code
-        javafx.scene.control.Tooltip tooltip = new javafx.scene.control.Tooltip(code);
-        tooltip.setStyle("-fx-font-size: 12px; -fx-font-family: monospace;");
-        tooltip.setShowDelay(javafx.util.Duration.millis(300));
-        tooltip.setMaxWidth(DEBUG_TOOLTIP_MAX_WIDTH);
-        tooltip.setWrapText(true);
-        javafx.scene.control.Tooltip.install(row, tooltip);
+        // Build clipboard text with handler details including full code
+        String clipboardText = itemName + "." + eventType + ":\n" + fullCode;
         
-        row.setStyle("-fx-background-color: #ebe0f0;");
+        String originalStyle = "-fx-background-color: #ebe0f0;";
+        row.setStyle(originalStyle);
+        makeRowClickable(row, clipboardText, originalStyle);
+        
         section.getChildren().add(row);
     }
     
@@ -763,7 +774,70 @@ public class ScreenFactory {
     }
     
     /**
+     * Makes a debug row clickable with copy-to-clipboard functionality.
+     * Adds hover effect and click handler to copy the provided text to clipboard.
+     * 
+     * @param row The HBox row to make clickable
+     * @param clipboardText The text to copy to clipboard when clicked
+     * @param originalStyle The original background style to restore after hover
+     */
+    private static void makeRowClickable(HBox row, String clipboardText, String originalStyle) {
+        // Set cursor to hand to indicate clickable
+        row.setStyle(originalStyle + " -fx-cursor: hand;");
+        
+        // Add hover effect
+        row.setOnMouseEntered(e -> {
+            row.setStyle(DEBUG_ROW_HOVER_STYLE);
+        });
+        
+        row.setOnMouseExited(e -> {
+            row.setStyle(originalStyle + " -fx-cursor: hand;");
+        });
+        
+        // Add click handler to copy to clipboard
+        row.setOnMouseClicked(e -> {
+            javafx.scene.input.Clipboard clipboard = javafx.scene.input.Clipboard.getSystemClipboard();
+            javafx.scene.input.ClipboardContent content = new javafx.scene.input.ClipboardContent();
+            content.putString(clipboardText);
+            clipboard.setContent(content);
+            
+            // Show brief visual feedback
+            String currentStyle = row.getStyle();
+            row.setStyle(DEBUG_ROW_CLICK_STYLE);
+            
+            // Revert style after a short delay
+            new Thread(() -> {
+                try {
+                    Thread.sleep(200);
+                    Platform.runLater(() -> row.setStyle(currentStyle));
+                } catch (InterruptedException ex) {
+                    // Ignore
+                }
+            }).start();
+        });
+        
+        // Update tooltip to indicate click-to-copy
+        javafx.scene.control.Tooltip existingTooltip = null;
+        for (javafx.scene.Node child : row.getChildren()) {
+            if (child instanceof javafx.scene.control.Control) {
+                existingTooltip = ((javafx.scene.control.Control) child).getTooltip();
+                if (existingTooltip != null) break;
+            }
+        }
+        
+        // Add or update tooltip with click-to-copy hint
+        String tooltipText = clipboardText + "\n\n📋 Click to copy";
+        javafx.scene.control.Tooltip tooltip = new javafx.scene.control.Tooltip(tooltipText);
+        tooltip.setStyle("-fx-font-size: 12px;");
+        tooltip.setShowDelay(javafx.util.Duration.millis(500));
+        tooltip.setMaxWidth(DEBUG_TOOLTIP_MAX_WIDTH);
+        tooltip.setWrapText(true);
+        javafx.scene.control.Tooltip.install(row, tooltip);
+    }
+    
+    /**
      * Helper method to add a simple debug row with label and value.
+     * Clicking on the row copies the label and value to clipboard.
      */
     private static void addDebugRow(VBox section, String label, String value, String valueColor) {
         HBox row = new HBox(5);
@@ -779,11 +853,18 @@ public class ScreenFactory {
         valueNode.setWrapText(true);
         
         row.getChildren().addAll(labelNode, valueNode);
+        
+        // Format clipboard text with label and value
+        String clipboardText = label + ": " + value;
+        String originalStyle = "-fx-background-color: transparent;";
+        makeRowClickable(row, clipboardText, originalStyle);
+        
         section.getChildren().add(row);
     }
     
     /**
      * Create a row displaying a screen item.
+     * Clicking on the row copies the item details to clipboard.
      * 
      * @param key The item key
      * @param item The AreaItem
@@ -881,7 +962,24 @@ public class ScreenFactory {
         valueLabel.setTooltip(valueTooltip);
         
         row.getChildren().addAll(nameLabel, valueLabel);
-        row.setStyle("-fx-background-color: #e8f0e8;");
+        
+        // Build comprehensive clipboard text with all item details
+        StringBuilder clipboardBuilder = new StringBuilder();
+        clipboardBuilder.append(screenName).append(".").append(displayName);
+        if (item.displayItem != null && item.displayItem.itemType != null) {
+            clipboardBuilder.append(" [").append(item.displayItem.itemType).append("]");
+        }
+        if (item.varRef != null) {
+            clipboardBuilder.append("\nvarRef: ").append(item.varRef);
+        }
+        if (item.layoutPos != null) {
+            clipboardBuilder.append("\nlayout: ").append(item.layoutPos);
+        }
+        clipboardBuilder.append("\nvalue: ").append(fullValueStr);
+        
+        String originalStyle = "-fx-background-color: #e8f0e8;";
+        row.setStyle(originalStyle);
+        makeRowClickable(row, clipboardBuilder.toString(), originalStyle);
         
         return row;
     }
@@ -1211,7 +1309,7 @@ public class ScreenFactory {
     
     /**
      * Create a row displaying a variable name and its value.
-     * 
+         * 
      * @param name The variable name
      * @param value The variable value
      * @param dataType The variable's data type (can be null)
@@ -1247,8 +1345,11 @@ public class ScreenFactory {
         
         row.getChildren().addAll(nameLabel, valueLabel);
         
-        // Alternate row background for readability
-        row.setStyle("-fx-background-color: " + (row.getChildren().size() % 2 == 0 ? "#ffffff" : "#f0f0f0") + ";");
+        // Build clipboard text with variable name, type, and value
+        String clipboardText = name + " : " + typeStr + " = " + fullValueStr;
+        String originalStyle = "-fx-background-color: #f8f8f8;";
+        row.setStyle(originalStyle);
+        makeRowClickable(row, clipboardText, originalStyle);
         
         return row;
     }
