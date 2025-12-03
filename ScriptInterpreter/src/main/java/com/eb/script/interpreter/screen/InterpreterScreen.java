@@ -1742,6 +1742,14 @@ public class InterpreterScreen {
             }
         }
 
+        // Extract height (for textarea control height, number of lines to display)
+        if (displayDef.containsKey("height")) {
+            Object heightObj = displayDef.get("height");
+            if (heightObj instanceof Number) {
+                metadata.height = ((Number) heightObj).intValue();
+            }
+        }
+
         // Extract showSliderValue (for displaying slider value label)
         if (displayDef.containsKey("showSliderValue")) {
             Object showSliderValueObj = displayDef.get("showSliderValue");
