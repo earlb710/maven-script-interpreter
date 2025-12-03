@@ -1047,6 +1047,35 @@ public final class Builtins {
         ));
 
         // ==========================
+        // Mail builtins (email operations)
+        // ==========================
+        addBuiltin(info(
+                "mail.open", DataType.STRING,  // returns connection handle
+                newParam("host", DataType.STRING, true),     // required; mail server host
+                newParam("port", DataType.INTEGER, true),    // required; mail server port
+                newParam("user", DataType.STRING, true),     // required; username
+                newParam("password", DataType.STRING, true), // required; password
+                newParam("protocol", DataType.STRING, false) // optional; imap, imaps (default), pop3, pop3s
+        ));
+        addBuiltin(info(
+                "mail.list", DataType.JSON,  // returns array of message info
+                newParam("handle", DataType.STRING, true),   // required; connection handle
+                newParam("folder", DataType.STRING, false),  // optional; folder name (default INBOX)
+                newParam("start", DataType.INTEGER, false),  // optional; start index (1-based, default 1)
+                newParam("count", DataType.INTEGER, false)   // optional; max messages to return (default 50)
+        ));
+        addBuiltin(info(
+                "mail.get", DataType.JSON,   // returns full message content
+                newParam("handle", DataType.STRING, true),   // required; connection handle
+                newParam("messageId", DataType.INTEGER, true) // required; message ID from mail.list
+        ));
+        addBuiltin(info(
+                "mail.close", DataType.BOOL, // returns true if closed successfully
+                newParam("handle", DataType.STRING, true)    // required; connection handle
+        ));
+        addBuiltin(info(
+                "mail.folders", DataType.JSON, // returns array of folder info
+                newParam("handle", DataType.STRING, true)    // required; connection handle
         // FTP builtins
         // ==========================
         addBuiltin(info(
@@ -1217,6 +1246,9 @@ public final class Builtins {
             return BuiltinsPlugin.dispatch(name, args);
         }
         
+        // Mail builtins (email operations)
+        if (BuiltinsMail.handles(name)) {
+            return BuiltinsMail.dispatch(env, name, args);
         // FTP builtins
         if (BuiltinsFtp.handles(name)) {
             return BuiltinsFtp.dispatch(env, name, args);
