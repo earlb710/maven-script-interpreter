@@ -11,18 +11,18 @@ import java.util.Map;
  * <h2>Usage Example in EBS</h2>
  * <pre>
  * // Load this example function
- * call plugin.load("com.eb.script.interpreter.plugin.ExampleEbsFunction", "echo");
+ * #plugin.load("com.eb.script.interpreter.plugin.ExampleEbsFunction", "echo");
  * 
- * // Call it with arguments
- * var result = call plugin.call("echo", "Hello", "World");
+ * // Call it using #custom.echo(...) syntax
+ * var result = #custom.echo("Hello", "World");
  * print result;  // Outputs: [Echo] Hello World
  * 
  * // Get plugin info
- * var info = call plugin.info("echo");
- * print call json.getString(info, "description", "");
+ * var info = #plugin.info("echo");
+ * print #json.getString(info, "description", "");
  * 
  * // Unload when done
- * call plugin.unload("echo");
+ * #plugin.unload("echo");
  * </pre>
  * 
  * @author Earl Bosch

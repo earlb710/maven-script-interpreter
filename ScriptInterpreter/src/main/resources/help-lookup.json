@@ -2329,7 +2329,7 @@
     {
       "function": "plugin.load",
       "short_description": "Loads an external Java class as a plugin",
-      "long_help": "Loads a Java class that implements the EbsFunction interface and registers it with the given alias. The class must be<br>on the classpath and have a public no-argument constructor. An optional configuration map can be passed to initialize<br>the plugin. Returns true if loaded successfully.",
+      "long_help": "Loads a Java class that implements the EbsFunction interface and registers it with the given alias. The class must be<br>on the classpath and have a public no-argument constructor. An optional configuration map can be passed to initialize<br>the plugin. After loading, call the function using #custom.alias(...) syntax. Returns true if loaded successfully.",
       "parameters": [
         {
           "name": "className",
@@ -2339,7 +2339,7 @@
         {
           "name": "alias",
           "type": "string",
-          "description": "Alias to reference the plugin in plugin.call"
+          "description": "Alias to reference via #custom.alias(...)"
         },
         {
           "name": "config",
@@ -2349,32 +2349,27 @@
         }
       ],
       "return_type": "bool",
-      "example": "<b>call</b> <b>plugin.load</b>(\"com.example.MyFunc\", \"myFunc\");<br><b>call</b> <b>plugin.load</b>(\"com.example.MyFunc\", \"myFunc\", {\"opt\": \"val\"});"
+      "example": "#plugin.load(\"com.example.MyFunc\", \"myFunc\");<br><b>var</b> result = #custom.myFunc(\"arg1\", 42);"
     },
     {
-      "function": "plugin.call",
-      "short_description": "Calls a loaded plugin function",
-      "long_help": "Executes a previously loaded plugin function with the given arguments. The plugin must have been loaded with<br>plugin.load first. Returns the result of the function execution.",
+      "function": "custom.*",
+      "short_description": "Calls a loaded custom plugin function",
+      "long_help": "Calls a custom function that was loaded via plugin.load. The alias after 'custom.' must match the alias used when<br>loading the plugin. Arguments are passed directly to the function's execute() method. Returns the function's result.",
       "parameters": [
-        {
-          "name": "alias",
-          "type": "string",
-          "description": "The alias assigned when the plugin was loaded"
-        },
         {
           "name": "args",
           "type": "any",
           "optional": true,
-          "description": "Arguments to pass to the function (up to 5)"
+          "description": "Arguments to pass to the custom function"
         }
       ],
       "return_type": "any",
-      "example": "<b>var</b> result = <b>call</b> <b>plugin.call</b>(\"myFunc\", \"arg1\", 42);<br><b>print</b> result;"
+      "example": "#plugin.load(\"com.example.MyFunc\", \"myFunc\");<br><b>var</b> result = #custom.myFunc(\"arg1\", 42);<br><b>print</b> result;"
     },
     {
       "function": "plugin.isLoaded",
       "short_description": "Checks if a plugin is loaded",
-      "long_help": "Returns true if a plugin with the given alias is currently loaded, false otherwise. Useful for checking before<br>calling a plugin or for conditional plugin loading.",
+      "long_help": "Returns true if a plugin with the given alias is currently loaded, false otherwise. Useful for checking before<br>calling a custom function or for conditional plugin loading.",
       "parameters": [
         {
           "name": "alias",
@@ -2383,7 +2378,7 @@
         }
       ],
       "return_type": "bool",
-      "example": "<b>if</b> <b>call</b> <b>plugin.isLoaded</b>(\"myFunc\") <b>then</b> {<br>    <b>print</b> \"Plugin is available\";<br>}"
+      "example": "<b>if</b> #plugin.isLoaded(\"myFunc\") <b>then</b> {<br>    <b>var</b> result = #custom.myFunc(\"arg\");<br>}"
     },
     {
       "function": "plugin.unload",
@@ -2397,15 +2392,15 @@
         }
       ],
       "return_type": "bool",
-      "example": "<b>call</b> <b>plugin.unload</b>(\"myFunc\");<br><b>print</b> \"Plugin has been unloaded\";"
+      "example": "#plugin.unload(\"myFunc\");<br><b>print</b> \"Plugin has been unloaded\";"
     },
     {
       "function": "plugin.list",
       "short_description": "Lists all loaded plugins",
-      "long_help": "Returns an array of all currently loaded plugin aliases. Useful for debugging and inspecting the plugin state.",
+      "long_help": "Returns an array of all currently loaded plugin aliases. These aliases can be used with #custom.alias(...) to call<br>the loaded functions.",
       "parameters": [],
       "return_type": "json",
-      "example": "<b>var</b> plugins = <b>call</b> <b>plugin.list</b>();<br><b>foreach</b> p <b>in</b> plugins {<br>    <b>print</b> \"Loaded: \" + p;<br>}"
+      "example": "<b>var</b> plugins = #plugin.list();<br><b>foreach</b> p <b>in</b> plugins {<br>    <b>print</b> \"Loaded: \" + p;<br>}"
     },
     {
       "function": "plugin.info",
@@ -2419,7 +2414,7 @@
         }
       ],
       "return_type": "json",
-      "example": "<b>var</b> info = <b>call</b> <b>plugin.info</b>(\"myFunc\");<br><b>print</b> <b>call</b> json.getString(info, \"description\", \"\");"
+      "example": "<b>var</b> info = #plugin.info(\"myFunc\");<br><b>print</b> #json.getString(info, \"description\", \"\");"
     }
   ]
 }

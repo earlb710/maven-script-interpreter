@@ -11,16 +11,16 @@ package com.eb.script.interpreter.plugin;
  * <h2>Usage from EBS Scripts</h2>
  * <pre>
  * // Load a plugin class (must be on classpath)
- * var result = call plugin.load("com.example.MyFunction", "myFunc");
+ * #plugin.load("com.example.MyFunction", "myFunc");
  * 
- * // Call the loaded function with arguments
- * var output = call plugin.call("myFunc", "arg1", 42, true);
+ * // Call the loaded function using #custom.alias(...) syntax
+ * var output = #custom.myFunc("arg1", 42, true);
  * 
  * // Check if a plugin is loaded
- * var loaded = call plugin.isLoaded("myFunc");
+ * var loaded = #plugin.isLoaded("myFunc");
  * 
  * // Unload a plugin
- * call plugin.unload("myFunc");
+ * #plugin.unload("myFunc");
  * </pre>
  * 
  * <h2>Implementation Example</h2>

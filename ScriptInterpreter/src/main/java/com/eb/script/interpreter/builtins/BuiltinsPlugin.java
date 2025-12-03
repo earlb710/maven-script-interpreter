@@ -14,35 +14,40 @@ import java.util.concurrent.ConcurrentHashMap;
  * 
  * <p>This class provides the runtime support for the plugin system, allowing
  * EBS scripts to load external Java classes that implement the {@link EbsFunction}
- * interface and call them at runtime.</p>
+ * interface and call them at runtime using the {@code #custom.functionName(...)} syntax.</p>
  * 
- * <h2>Builtin Functions</h2>
+ * <h2>Plugin Management Functions</h2>
  * <ul>
  *   <li>{@code plugin.load(className, alias, config?)} - Load a Java class as a plugin</li>
- *   <li>{@code plugin.call(alias, args...)} - Call a loaded plugin function</li>
  *   <li>{@code plugin.isLoaded(alias)} - Check if a plugin is loaded</li>
  *   <li>{@code plugin.unload(alias)} - Unload a plugin</li>
  *   <li>{@code plugin.list()} - List all loaded plugins</li>
  *   <li>{@code plugin.info(alias)} - Get information about a loaded plugin</li>
  * </ul>
  * 
+ * <h2>Calling Custom Functions</h2>
+ * <p>Once loaded, custom functions are called using {@code #custom.alias(...)} syntax:</p>
+ * <pre>
+ * var result = #custom.myFunc("arg1", 42);
+ * </pre>
+ * 
  * <h2>Example Usage in EBS</h2>
  * <pre>
  * // Load a custom function from the classpath
- * call plugin.load("com.example.MyFunction", "myFunc");
+ * #plugin.load("com.example.MyFunction", "myFunc");
  * 
- * // Call the function
- * var result = call plugin.call("myFunc", "argument1", 42);
+ * // Call the function using #custom.alias syntax
+ * var result = #custom.myFunc("argument1", 42);
  * print result;
  * 
  * // List all loaded plugins
- * var plugins = call plugin.list();
+ * var plugins = #plugin.list();
  * foreach p in plugins {
  *     print p;
  * }
  * 
  * // Unload when done
- * call plugin.unload("myFunc");
+ * #plugin.unload("myFunc");
  * </pre>
  * 
  * @author Earl Bosch
@@ -62,33 +67,83 @@ public class BuiltinsPlugin {
     private static final ConcurrentHashMap<String, String> PLUGIN_CLASS_NAMES = new ConcurrentHashMap<>();
     
     /**
-     * Checks if the given builtin name is a Plugin builtin.
+     * Checks if the given builtin name is a Plugin builtin or a custom function call.
+     * 
+     * <p>Handles both:
+     * <ul>
+     *   <li>{@code plugin.*} - Plugin management builtins (load, unload, list, info)</li>
+     *   <li>{@code custom.*} - Calls to loaded custom functions</li>
+     * </ul>
      * 
      * @param name the builtin name (lowercase)
-     * @return true if this is a plugin builtin
+     * @return true if this is a plugin builtin or custom function call
      */
     public static boolean handles(String name) {
-        return name.startsWith("plugin.");
+        return name.startsWith("plugin.") || name.startsWith("custom.");
     }
     
     /**
-     * Dispatch a Plugin builtin by name.
+     * Dispatch a Plugin builtin or custom function call by name.
      * 
-     * @param name Lowercase builtin name (e.g., "plugin.load")
-     * @param args Arguments passed to the builtin
-     * @return Result of the builtin call
+     * <p>Handles both:
+     * <ul>
+     *   <li>{@code plugin.*} - Plugin management builtins (load, unload, list, info)</li>
+     *   <li>{@code custom.*} - Calls to loaded custom functions via #custom.functionName(...)</li>
+     * </ul>
+     * 
+     * @param name Lowercase builtin name (e.g., "plugin.load" or "custom.myfunc")
+     * @param args Arguments passed to the builtin or custom function
+     * @return Result of the builtin or custom function call
      * @throws InterpreterError if the call fails
      */
     public static Object dispatch(String name, Object[] args) throws InterpreterError {
+        // Handle custom function calls: #custom.functionName(args...)
+        if (name.startsWith("custom.")) {
+            String alias = name.substring(7); // Remove "custom." prefix
+            return invokeCustomFunction(alias, args);
+        }
+        
+        // Handle plugin management builtins
         return switch (name) {
             case "plugin.load" -> pluginLoad(args);
-            case "plugin.call" -> pluginCall(args);
             case "plugin.isloaded" -> pluginIsLoaded(args);
             case "plugin.unload" -> pluginUnload(args);
             case "plugin.list" -> pluginList();
             case "plugin.info" -> pluginInfo(args);
             default -> throw new InterpreterError("Unknown Plugin builtin: " + name);
         };
+    }
+    
+    /**
+     * Invoke a loaded custom function directly.
+     * 
+     * <p>This is called when using the #custom.functionName(...) syntax.</p>
+     * 
+     * @param alias the alias of the loaded plugin (function name after "custom.")
+     * @param args the arguments to pass to the function
+     * @return the result of the function execution
+     * @throws InterpreterError if the function is not loaded or execution fails
+     */
+    private static Object invokeCustomFunction(String alias, Object[] args) throws InterpreterError {
+        if (alias == null || alias.isBlank()) {
+            throw new InterpreterError("custom: function name cannot be empty");
+        }
+        
+        String normalizedAlias = alias.toLowerCase();
+        EbsFunction function = LOADED_PLUGINS.get(normalizedAlias);
+        
+        if (function == null) {
+            throw new InterpreterError("custom." + alias + ": no plugin loaded with this name. " +
+                "Use plugin.load(className, \"" + alias + "\") first.");
+        }
+        
+        try {
+            return function.execute(args);
+        } catch (InterpreterError e) {
+            throw e;
+        } catch (Exception e) {
+            throw new InterpreterError("custom." + alias + ": execution failed: " + e.getMessage());
+        }
     }
     
     /**
@@ -170,46 +225,6 @@ public class BuiltinsPlugin {
         } catch (Exception e) {
             throw new InterpreterError("plugin.load: failed to load class '" + className + 
                 "': " + e.getMessage());
-        }
-    }
-    
-    /**
-     * Call a loaded plugin function.
-     * 
-     * <p>Syntax: {@code plugin.call(alias, args...)}</p>
-     * 
-     * @param args [0] alias (String), [1...] function arguments
-     * @return the result of the function call
-     * @throws InterpreterError if the call fails
-     */
-    private static Object pluginCall(Object[] args) throws InterpreterError {
-        if (args.length < 1) {
-            throw new InterpreterError("plugin.call: requires at least the alias argument");
-        }
-        
-        String alias = (String) args[0];
-        if (alias == null || alias.isBlank()) {
-            throw new InterpreterError("plugin.call: alias cannot be null or empty");
-        }
-        
-        String normalizedAlias = alias.toLowerCase();
-        EbsFunction function = LOADED_PLUGINS.get(normalizedAlias);
-        
-        if (function == null) {
-            throw new InterpreterError("plugin.call: no plugin loaded with alias '" + alias + "'");
-        }
-        
-        // Extract the actual arguments (skip the alias)
-        Object[] functionArgs = new Object[args.length - 1];
-        System.arraycopy(args, 1, functionArgs, 0, functionArgs.length);
-        
-        try {
-            return function.execute(functionArgs);
-        } catch (InterpreterError e) {
-            throw e;
-        } catch (Exception e) {
-            throw new InterpreterError("plugin.call: execution of '" + alias + "' failed: " + 
-                e.getMessage());
         }
     }
     

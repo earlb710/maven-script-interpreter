@@ -4,7 +4,7 @@ This document describes how to create and use external Java functions (plugins) 
 
 ## Overview
 
-The EBS plugin system allows you to extend the interpreter with custom Java functionality without modifying the core codebase. External Java classes that implement the `EbsFunction` interface can be loaded at runtime and called from EBS scripts.
+The EBS plugin system allows you to extend the interpreter with custom Java functionality without modifying the core codebase. External Java classes that implement the `EbsFunction` interface can be loaded at runtime and called from EBS scripts using the `#custom.functionName(...)` syntax.
 
 ## Quick Start
 
@@ -54,15 +54,15 @@ java -cp "ScriptInterpreter/target/classes:." com.eb.ui.cli.MainApp
 ### 3. Use in EBS script
 
 ```javascript
-// Load the plugin
-call plugin.load("com.example.MyCustomFunction", "myFunc");
+// Load the plugin with an alias
+#plugin.load("com.example.MyCustomFunction", "myFunc");
 
-// Call it
-var result = call plugin.call("myFunc", "Hello World");
+// Call it using #custom.alias(...) syntax
+var result = #custom.myFunc("Hello World");
 print result;  // Outputs: Processed: Hello World
 
 // Unload when done (optional - cleanup on exit)
-call plugin.unload("myFunc");
+#plugin.unload("myFunc");
 ```
 
 ## EbsFunction Interface
@@ -82,7 +82,22 @@ public interface EbsFunction {
 }
 ```
 
-## Plugin Builtin Functions
+## Calling Custom Functions
+
+Once a plugin is loaded with `plugin.load`, you can call it using the `#custom.alias(...)` syntax:
+
+```javascript
+// Load the plugin
+#plugin.load("com.example.MyFunction", "myFunc");
+
+// Call using #custom.alias syntax
+var result = #custom.myFunc("arg1", 42, true);
+print result;
+```
+
+This is consistent with how other EBS builtins are called (e.g., `#str.toUpper`, `#json.get`).
+
+## Plugin Management Functions
 
 ### plugin.load(className, alias, config?)
 
@@ -90,7 +105,7 @@ Loads a Java class as a plugin function.
 
 **Parameters:**
 - `className` (string, required): Fully qualified Java class name
-- `alias` (string, required): Name to reference this plugin in `plugin.call`
+- `alias` (string, required): Name to reference via `#custom.alias(...)`
 - `config` (json, optional): Configuration object passed to `initialize()`
 
 **Returns:** `true` if loaded successfully
@@ -98,26 +113,10 @@ Loads a Java class as a plugin function.
 **Example:**
 ```javascript
 // Basic load
-call plugin.load("com.example.MyFunction", "myFunc");
+#plugin.load("com.example.MyFunction", "myFunc");
 
 // Load with configuration
-call plugin.load("com.example.MyFunction", "myFunc", {"option": "value"});
-```
-
-### plugin.call(alias, args...)
-
-Calls a loaded plugin function with the given arguments.
-
-**Parameters:**
-- `alias` (string, required): The alias assigned during `plugin.load`
-- `args...` (any, optional): Arguments to pass to the function (up to 5)
-
-**Returns:** The result from the function's `execute()` method
-
-**Example:**
-```javascript
-var result = call plugin.call("myFunc", "arg1", 42, true);
-print result;
+#plugin.load("com.example.MyFunction", "myFunc", {"option": "value"});
 ```
 
 ### plugin.isLoaded(alias)
@@ -131,7 +130,7 @@ Checks if a plugin is currently loaded.
 
 **Example:**
 ```javascript
-if call plugin.isLoaded("myFunc") then {
+if #plugin.isLoaded("myFunc") then {
     print "Plugin is loaded";
 }
 ```
@@ -147,7 +146,7 @@ Unloads a plugin and calls its `cleanup()` method.
 
 **Example:**
 ```javascript
-call plugin.unload("myFunc");
+#plugin.unload("myFunc");
 ```
 
 ### plugin.list()
@@ -160,7 +159,7 @@ Lists all currently loaded plugins.
 
 **Example:**
 ```javascript
-var plugins = call plugin.list();
+var plugins = #plugin.list();
 foreach p in plugins {
     print "Loaded plugin: " + p;
 }
@@ -177,11 +176,11 @@ Gets detailed information about a loaded plugin.
 
 **Example:**
 ```javascript
-var info = call plugin.info("myFunc");
+var info = #plugin.info("myFunc");
 if info != null then {
-    print "Name: " + call json.getString(info, "name", "");
-    print "Description: " + call json.getString(info, "description", "");
-    print "Class: " + call json.getString(info, "className", "");
+    print "Name: " + #json.getString(info, "name", "");
+    print "Description: " + #json.getString(info, "description", "");
+    print "Class: " + #json.getString(info, "className", "");
 }
 ```
 
@@ -209,7 +208,7 @@ Plugin errors are handled through EBS's exception system:
 
 ```javascript
 try {
-    call plugin.load("com.example.NonExistent", "test");
+    #plugin.load("com.example.NonExistent", "test");
 } exceptions {
     when ANY_ERROR(msg) {
         print "Failed to load plugin: " + msg;
@@ -222,7 +221,7 @@ Common errors:
 - Class doesn't implement `EbsFunction`
 - No public no-arg constructor
 - Alias already in use
-- Plugin not loaded (when calling)
+- Plugin not loaded (when calling #custom.alias)
 
 ## Built-in Example
 
@@ -230,16 +229,16 @@ An example plugin is included in the interpreter for testing:
 
 ```javascript
 // Load the built-in example
-call plugin.load("com.eb.script.interpreter.plugin.ExampleEbsFunction", "echo");
+#plugin.load("com.eb.script.interpreter.plugin.ExampleEbsFunction", "echo");
 
-// Use it
-var result = call plugin.call("echo", "Hello", "World");
+// Call it using #custom.echo(...)
+var result = #custom.echo("Hello", "World");
 print result;  // Outputs: [Echo] Hello World
 
 // With custom prefix
-call plugin.unload("echo");
-call plugin.load("com.eb.script.interpreter.plugin.ExampleEbsFunction", "echo", {"prefix": "[Custom]"});
-var result2 = call plugin.call("echo", "Test");
+#plugin.unload("echo");
+#plugin.load("com.eb.script.interpreter.plugin.ExampleEbsFunction", "echo", {"prefix": "[Custom]"});
+var result2 = #custom.echo("Test");
 print result2;  // Outputs: [Custom] Test
 ```
 
@@ -345,16 +344,16 @@ public class DbLookupPlugin implements EbsFunction {
 
 Usage in EBS:
 ```javascript
-call plugin.load("com.example.DbLookupPlugin", "dbLookup", {
+#plugin.load("com.example.DbLookupPlugin", "dbLookup", {
     "url": "jdbc:oracle:thin:@localhost:1521:xe",
     "user": "myuser",
     "password": "mypass"
 });
 
-var user = call plugin.call("dbLookup", "users", 123);
+var user = #custom.dbLookup("users", 123);
 if user != null then {
-    print "Found: " + call json.getString(user, "name", "Unknown");
+    print "Found: " + #json.getString(user, "name", "Unknown");
 }
 
-call plugin.unload("dbLookup");
+#plugin.unload("dbLookup");
 ```

@@ -4,6 +4,7 @@
 // =============================================================================
 // Plugin System Test Script
 // This script demonstrates loading and calling external Java functions
+// Custom functions are called using #custom.functionName(...) syntax
 // =============================================================================
 
 print "=== Testing Plugin System ===";
@@ -13,7 +14,7 @@ print "";
 // Test 1: Load the built-in example plugin
 // -----------------------------------------------------------------------------
 print "Test 1: Loading ExampleEbsFunction plugin...";
-var loadResult: bool = call plugin.load("com.eb.script.interpreter.plugin.ExampleEbsFunction", "echo");
+var loadResult: bool = #plugin.load("com.eb.script.interpreter.plugin.ExampleEbsFunction", "echo");
 if loadResult then {
     print "  Plugin loaded successfully!";
 } else {
@@ -25,10 +26,10 @@ print "";
 // Test 2: Check if plugin is loaded
 // -----------------------------------------------------------------------------
 print "Test 2: Checking if 'echo' plugin is loaded...";
-var isLoaded: bool = call plugin.isLoaded("echo");
+var isLoaded: bool = #plugin.isLoaded("echo");
 print "  isLoaded('echo') = " + isLoaded;
 
-var notLoaded: bool = call plugin.isLoaded("nonexistent");
+var notLoaded: bool = #plugin.isLoaded("nonexistent");
 print "  isLoaded('nonexistent') = " + notLoaded;
 print "";
 
@@ -36,38 +37,38 @@ print "";
 // Test 3: Get plugin info
 // -----------------------------------------------------------------------------
 print "Test 3: Getting plugin info...";
-var info = call plugin.info("echo");
+var info = #plugin.info("echo");
 if info != null then {
-    print "  alias: " + call json.getString(info, "alias", "");
-    print "  className: " + call json.getString(info, "className", "");
-    print "  name: " + call json.getString(info, "name", "");
-    print "  description: " + call json.getString(info, "description", "");
+    print "  alias: " + #json.getString(info, "alias", "");
+    print "  className: " + #json.getString(info, "className", "");
+    print "  name: " + #json.getString(info, "name", "");
+    print "  description: " + #json.getString(info, "description", "");
 }
 print "";
 
 // -----------------------------------------------------------------------------
-// Test 4: Call the plugin with various arguments
+// Test 4: Call the plugin using #custom.functionName(...) syntax
 // -----------------------------------------------------------------------------
-print "Test 4: Calling 'echo' plugin with arguments...";
+print "Test 4: Calling 'echo' plugin using #custom.echo(...) syntax...";
 
-var result1 = call plugin.call("echo");
-print "  echo(): " + result1;
+var result1 = #custom.echo();
+print "  #custom.echo(): " + result1;
 
-var result2 = call plugin.call("echo", "Hello");
-print "  echo('Hello'): " + result2;
+var result2 = #custom.echo("Hello");
+print "  #custom.echo('Hello'): " + result2;
 
-var result3 = call plugin.call("echo", "Hello", "World");
-print "  echo('Hello', 'World'): " + result3;
+var result3 = #custom.echo("Hello", "World");
+print "  #custom.echo('Hello', 'World'): " + result3;
 
-var result4 = call plugin.call("echo", "Answer:", 42, true);
-print "  echo('Answer:', 42, true): " + result4;
+var result4 = #custom.echo("Answer:", 42, true);
+print "  #custom.echo('Answer:', 42, true): " + result4;
 print "";
 
 // -----------------------------------------------------------------------------
 // Test 5: List all loaded plugins
 // -----------------------------------------------------------------------------
 print "Test 5: Listing all loaded plugins...";
-var plugins = call plugin.list();
+var plugins = #plugin.list();
 print "  Loaded plugins: " + plugins;
 print "";
 
@@ -75,13 +76,13 @@ print "";
 // Test 6: Unload and reload with configuration
 // -----------------------------------------------------------------------------
 print "Test 6: Unload and reload with custom configuration...";
-var unloadResult = call plugin.unload("echo");
+var unloadResult = #plugin.unload("echo");
 print "  Unloaded 'echo': " + unloadResult;
 
 // Reload with custom prefix
-call plugin.load("com.eb.script.interpreter.plugin.ExampleEbsFunction", "customEcho", {"prefix": "[CUSTOM]"});
-var customResult = call plugin.call("customEcho", "Test", "Message");
-print "  customEcho with prefix: " + customResult;
+#plugin.load("com.eb.script.interpreter.plugin.ExampleEbsFunction", "customEcho", {"prefix": "[CUSTOM]"});
+var customResult = #custom.customEcho("Test", "Message");
+print "  #custom.customEcho with prefix: " + customResult;
 print "";
 
 // -----------------------------------------------------------------------------
@@ -89,7 +90,7 @@ print "";
 // -----------------------------------------------------------------------------
 print "Test 7: Error handling for non-existent class...";
 try {
-    call plugin.load("com.example.NonExistentClass", "fail");
+    #plugin.load("com.example.NonExistentClass", "fail");
     print "  ERROR: Should have thrown an error!";
 } exceptions {
     when ANY_ERROR(msg) {
@@ -101,9 +102,9 @@ print "";
 // -----------------------------------------------------------------------------
 // Test 8: Error handling - try to call non-loaded plugin
 // -----------------------------------------------------------------------------
-print "Test 8: Error handling for non-loaded plugin...";
+print "Test 8: Error handling for non-loaded custom function...";
 try {
-    call plugin.call("nonexistent", "arg");
+    #custom.nonexistent("arg");
     print "  ERROR: Should have thrown an error!";
 } exceptions {
     when ANY_ERROR(msg) {
@@ -117,7 +118,7 @@ print "";
 // -----------------------------------------------------------------------------
 print "Test 9: Error handling for duplicate alias...";
 try {
-    call plugin.load("com.eb.script.interpreter.plugin.ExampleEbsFunction", "customEcho");
+    #plugin.load("com.eb.script.interpreter.plugin.ExampleEbsFunction", "customEcho");
     print "  ERROR: Should have thrown an error!";
 } exceptions {
     when ANY_ERROR(msg) {
@@ -130,7 +131,7 @@ print "";
 // Cleanup
 // -----------------------------------------------------------------------------
 print "Cleanup: Unloading all test plugins...";
-call plugin.unload("customEcho");
+#plugin.unload("customEcho");
 print "  Done!";
 print "";
 

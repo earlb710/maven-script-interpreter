@@ -1021,21 +1021,13 @@ public final class Builtins {
 
         // ==========================
         // Plugin builtins (external Java function loading)
+        // Custom functions are called via #custom.functionName(...) syntax
         // ==========================
         addBuiltin(info(
                 "plugin.load", DataType.BOOL,
                 newParam("className", DataType.STRING, true),   // required; fully qualified class name
-                newParam("alias", DataType.STRING, true),       // required; alias to reference the plugin
+                newParam("alias", DataType.STRING, true),       // required; alias to reference via #custom.alias
                 newParam("config", DataType.JSON, false)        // optional; configuration map
-        ));
-        addBuiltin(info(
-                "plugin.call", DataType.ANY,
-                newParam("alias", DataType.STRING, true),       // required; alias of the loaded plugin
-                newParam("arg1", DataType.ANY, false),          // optional; first argument
-                newParam("arg2", DataType.ANY, false),          // optional; second argument
-                newParam("arg3", DataType.ANY, false),          // optional; third argument
-                newParam("arg4", DataType.ANY, false),          // optional; fourth argument
-                newParam("arg5", DataType.ANY, false)           // optional; fifth argument
         ));
         addBuiltin(info(
                 "plugin.isLoaded", DataType.BOOL,
@@ -1057,7 +1049,15 @@ public final class Builtins {
     }
 
     public static boolean isBuiltin(String name) {
-        return NAMES.contains(name);
+        // Check static builtins first
+        if (NAMES.contains(name)) {
+            return true;
+        }
+        // Check for dynamic custom.* function calls (loaded via plugin.load)
+        if (name.startsWith("custom.")) {
+            return true;
+        }
+        return false;
     }
 
     // genral script functions that can be called with "call"

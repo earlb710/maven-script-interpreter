@@ -3206,27 +3206,29 @@ var scan = call classtree.scan(directory);
 
 The plugin system allows loading and calling external Java classes that implement the `EbsFunction` interface. This enables extending the interpreter with custom functionality without modifying the core codebase.
 
+Custom functions are called using the `#custom.functionName(...)` syntax, which is consistent with other EBS builtins.
+
 See [PLUGIN_SYSTEM.md](PLUGIN_SYSTEM.md) for complete documentation and examples.
 
 #### plugin.load - Load a Java Plugin
 ```javascript
 // Load a Java class as a plugin (must implement EbsFunction interface)
-call plugin.load("com.example.MyFunction", "myFunc");
+#plugin.load("com.example.MyFunction", "myFunc");
 
 // Load with configuration
-call plugin.load("com.example.MyFunction", "myFunc", {"option": "value"});
+#plugin.load("com.example.MyFunction", "myFunc", {"option": "value"});
 ```
 
-#### plugin.call - Call a Loaded Plugin
+#### Calling Custom Functions with #custom.alias(...)
 ```javascript
-// Call the plugin with arguments
-var result = call plugin.call("myFunc", "arg1", 42, true);
+// Call the loaded plugin using #custom.alias syntax
+var result = #custom.myFunc("arg1", 42, true);
 print result;
 ```
 
 #### plugin.isLoaded - Check if Plugin is Loaded
 ```javascript
-if call plugin.isLoaded("myFunc") then {
+if #plugin.isLoaded("myFunc") then {
     print "Plugin is loaded";
 }
 ```
@@ -3234,12 +3236,12 @@ if call plugin.isLoaded("myFunc") then {
 #### plugin.unload - Unload a Plugin
 ```javascript
 // Unload the plugin and cleanup resources
-call plugin.unload("myFunc");
+#plugin.unload("myFunc");
 ```
 
 #### plugin.list - List Loaded Plugins
 ```javascript
-var plugins = call plugin.list();
+var plugins = #plugin.list();
 foreach p in plugins {
     print "Loaded: " + p;
 }
@@ -3247,22 +3249,22 @@ foreach p in plugins {
 
 #### plugin.info - Get Plugin Information
 ```javascript
-var info = call plugin.info("myFunc");
-print "Name: " + call json.getString(info, "name", "");
-print "Description: " + call json.getString(info, "description", "");
+var info = #plugin.info("myFunc");
+print "Name: " + #json.getString(info, "name", "");
+print "Description: " + #json.getString(info, "description", "");
 ```
 
 #### Example: Using the Built-in Example Plugin
 ```javascript
 // Load the built-in example plugin
-call plugin.load("com.eb.script.interpreter.plugin.ExampleEbsFunction", "echo");
+#plugin.load("com.eb.script.interpreter.plugin.ExampleEbsFunction", "echo");
 
-// Call it
-var result = call plugin.call("echo", "Hello", "World");
+// Call it using #custom.echo(...)
+var result = #custom.echo("Hello", "World");
 print result;  // Output: [Echo] Hello World
 
 // Unload when done
-call plugin.unload("echo");
+#plugin.unload("echo");
 ```
 
 ---
