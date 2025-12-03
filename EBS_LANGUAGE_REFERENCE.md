@@ -1,6 +1,6 @@
 # EBS Language Reference
 
-**Documentation Version: 1.0.5.7**
+**Documentation Version: 1.0.5.8**
 
 This document serves as a pointer to the comprehensive EBS (Earl Bosch Script) language documentation.
 
@@ -81,7 +81,7 @@ EBS uses a four-part versioning system: **`language.keyword.builtin.build`**
 
 Each version component is incremented independently based on the type of change made.
 
-**Current Version: 1.0.5.7** (Language v1, Keyword v0, Builtin v5, Build 7)
+**Current Version: 1.0.5.8** (Language v1, Keyword v0, Builtin v5, Build 8)
 
 ### Getting the Language Version Programmatically
 
@@ -116,6 +116,7 @@ For the latest updates and comprehensive language reference, always refer to [do
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.0.5.8 | 2025-12-03 | Added `mail.openUrl` and `ftp.openUrl` functions for URL-based connections; Password now optional in URL (stored separately in config); Added password column with masking in config dialogs |
 | 1.0.5.7 | 2025-12-03 | Config variable names are now case-insensitive (e.g., `MyFtp` can be accessed as `myftp` in scripts) |
 | 1.0.5.6 | 2025-12-03 | Mail and FTP config variables are now automatically available as global script variables (e.g., `print myemail;`) |
 | 1.0.5.5 | 2025-12-03 | Added URL format for mail and FTP connections: `******host:port?protocol=imaps`, `******host:port`, `******host:port`; Config dialogs now store URLs |

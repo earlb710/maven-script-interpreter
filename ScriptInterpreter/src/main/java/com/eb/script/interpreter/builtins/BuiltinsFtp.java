@@ -67,6 +67,7 @@ public class BuiltinsFtp {
     public static Object dispatch(Environment env, String name, Object[] args) throws InterpreterError {
         return switch (name) {
             case "ftp.open" -> connect(args);
+            case "ftp.openurl" -> openUrl(args);
             case "ftp.opensecure" -> connectSecure(args);
             case "ftp.disconnect" -> disconnect(args);
             case "ftp.listfiles" -> listFiles(args);
@@ -217,6 +218,85 @@ public class BuiltinsFtp {
             } catch (Exception ignore) {
             }
             throw new InterpreterError("ftp.open: " + ex.getMessage());
+        }
+    }
+
+    /**
+     * ftp.openUrl(url, password?, timeout?) -> STRING (handle)
+     *
+     * Opens a connection to an FTP server using a URL and returns a handle for subsequent operations.
+     * URL Format: ftp://user[:password]@host:port or ftps://user[:password]@host:port
+     * Password can be omitted from URL and provided as separate parameter (for security).
+     *
+     * @param args [0] url (String), [1] password (String, optional: overrides URL password),
+     *             [2] timeout (Integer, optional: timeout in seconds, default 30)
+     * @return String handle to identify this connection
+     * @throws InterpreterError if connection fails
+     */
+    private static String openUrl(Object[] args) throws InterpreterError {
+        if (args.length < 1) {
+            throw new InterpreterError("ftp.openUrl: requires url parameter");
+        }
+
+        String url = (String) args[0];
+        String passwordOverride = args.length > 1 && args[1] != null ? (String) args[1] : null;
+        int timeout = args.length > 2 && args[2] != null ? ((Number) args[2]).intValue() : 30;
+
+        if (url == null || url.isBlank()) {
+            throw new InterpreterError("ftp.openUrl: url cannot be empty");
+        }
+
+        // Parse the URL using FtpConfigDialog's parser
+        java.util.Map<String, String> parsed;
+        try {
+            Class<?> dialogClass = Class.forName("com.eb.ui.ebs.FtpConfigDialog");
+            java.lang.reflect.Method parseMethod = dialogClass.getMethod("parseFtpUrl", String.class);
+            @SuppressWarnings("unchecked")
+            java.util.Map<String, String> result = (java.util.Map<String, String>) parseMethod.invoke(null, url);
+            parsed = result;
+        } catch (Exception e) {
+            throw new InterpreterError("ftp.openUrl: failed to parse URL: " + e.getMessage());
+        }
+
+        if (parsed.isEmpty()) {
+            throw new InterpreterError("ftp.openUrl: invalid FTP URL format. Expected: ftp://user[:password]@host:port or ftps://...");
+        }
+
+        String host = parsed.get("host");
+        String portStr = parsed.get("port");
+        String user = parsed.get("user");
+        String password = passwordOverride != null ? passwordOverride : parsed.get("password");
+        boolean secure = "true".equals(parsed.get("secure"));
+
+        if (host == null || host.isBlank()) {
+            throw new InterpreterError("ftp.openUrl: host cannot be empty");
+        }
+        if (portStr == null || portStr.isBlank()) {
+            throw new InterpreterError("ftp.openUrl: port cannot be empty");
+        }
+        if (user == null || user.isBlank()) {
+            user = "anonymous";
+        }
+        if (password == null) {
+            password = "";
+        }
+
+        int port;
+        try {
+            port = Integer.parseInt(portStr);
+        } catch (NumberFormatException e) {
+            throw new InterpreterError("ftp.openUrl: invalid port number: " + portStr);
+        }
+
+        // Call the appropriate connection function based on secure flag
+        if (secure) {
+            // For FTPS: host, port, username, password, implicit=false, timeout
+            Object[] secureArgs = new Object[]{host, port, user, password, false, timeout};
+            return connectSecure(secureArgs);
+        } else {
+            // For FTP: host, port, username, password, timeout
+            Object[] openArgs = new Object[]{host, port, user, password, timeout};
+            return connect(openArgs);
         }
     }
 

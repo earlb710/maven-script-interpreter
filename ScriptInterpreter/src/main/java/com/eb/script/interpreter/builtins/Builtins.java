@@ -1078,6 +1078,12 @@ public final class Builtins {
                 "mail.folders", DataType.JSON, // returns array of folder info
                 newParam("handle", DataType.STRING, true)    // required; connection handle
         ));
+        addBuiltin(info(
+                "mail.openUrl", DataType.STRING,  // returns connection handle
+                newParam("url", DataType.STRING, true),      // required; mail URL (mail://user@host:port?protocol=imaps)
+                newParam("password", DataType.STRING, false), // optional; password (overrides URL password if provided)
+                newParam("timeout", DataType.INTEGER, false)  // optional; connection timeout in seconds (default 30)
+        ));
         // ==========================
         // FTP builtins
         // ==========================
@@ -1096,6 +1102,12 @@ public final class Builtins {
                 newParam("username", DataType.STRING, false),   // optional; username (default "anonymous")
                 newParam("password", DataType.STRING, false),   // optional; password (default "")
                 newParam("implicit", DataType.BOOL, false),     // optional; use implicit SSL mode (default false = explicit TLS)
+                newParam("timeout", DataType.INTEGER, false)    // optional; connection timeout in seconds (default 30)
+        ));
+        addBuiltin(info(
+                "ftp.openUrl", DataType.STRING,  // returns connection handle
+                newParam("url", DataType.STRING, true),         // required; FTP URL (ftp://user@host:port or ftps://...)
+                newParam("password", DataType.STRING, false),   // optional; password (overrides URL password if provided)
                 newParam("timeout", DataType.INTEGER, false)    // optional; connection timeout in seconds (default 30)
         ));
         addBuiltin(info(

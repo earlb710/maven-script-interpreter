@@ -2419,7 +2419,7 @@
     {
       "function": "mail.open",
       "short_description": "Opens a connection to a mail server",
-      "long_help": "Opens a connection to a mail server using IMAP or POP3 protocol and returns a connection handle for subsequent operations.<br><br><b>Supported protocols:</b> imap, imaps (default, SSL), pop3, pop3s (SSL)<br><br><b>Gmail App Password:</b> When using Gmail or Google Workspace, you must use an App Password instead of your regular password if 2-Factor Authentication is enabled. Gmail App Passwords are <b>16 characters with no spaces</b> (format: xxxx xxxx xxxx xxxx shown with spaces but enter without spaces). Generate one from your Google Account &gt; Security &gt; App Passwords.<br><br><b>URL Format:</b> Mail connections can also be stored as URLs: <code>mail://user:password@host:port?protocol=imaps</code><br>Example: <code>mail://user%40gmail.com:apppassword@imap.gmail.com:993?protocol=imaps</code><br><br><b>SSL Note:</b> SSL protocols (imaps, pop3s) trust all certificates by default for compatibility.",
+      "long_help": "Opens a connection to a mail server using IMAP or POP3 protocol and returns a connection handle for subsequent operations.<br><br><b>Supported protocols:</b> imap, imaps (default, SSL), pop3, pop3s (SSL)<br><br><b>Gmail App Password:</b> When using Gmail or Google Workspace, you must use an App Password instead of your regular password if 2-Factor Authentication is enabled. Gmail App Passwords are <b>16 characters with no spaces</b> (format: xxxx xxxx xxxx xxxx shown with spaces but enter without spaces). Generate one from your Google Account &gt; Security &gt; App Passwords.<br><br><b>URL Format:</b> Mail connections can also be stored as URLs: <code>mail://user@host:port?protocol=imaps</code><br>Password can be provided separately for security.<br><br><b>SSL Note:</b> SSL protocols (imaps, pop3s) trust all certificates by default for compatibility.",
       "parameters": [
         {
           "name": "host",
@@ -2456,6 +2456,32 @@
       ],
       "return_type": "string",
       "example": "<b>var</b> handle = <b>call</b> mail.open(\"imap.gmail.com\", 993, \"user@gmail.com\", \"app-password\", \"imaps\");<br><b>print</b> \"Connected: \" + handle;<br><br>// With custom timeout (60 seconds)<br><b>var</b> handle2 = <b>call</b> mail.open(\"imap.gmail.com\", 993, \"user@gmail.com\", \"app-password\", \"imaps\", 60);"
+    },
+    {
+      "function": "mail.openUrl",
+      "short_description": "Opens a mail connection using a URL",
+      "long_help": "Opens a connection to a mail server using a URL string. The URL contains server details while password can be provided separately for security.<br><br><b>URL Format:</b> <code>mail://user@host:port?protocol=imaps</code><br><br>Password can be included in URL as <code>mail://user:password@host:port?protocol=imaps</code> but for security, it's recommended to store password separately and pass it as a parameter.<br><br><b>Gmail App Password:</b> When using Gmail, you must use an App Password (16 characters with no spaces).<br><br><b>Use with config variables:</b> Define connection in Config > Mail Server Config, then use the variable in scripts.",
+      "parameters": [
+        {
+          "name": "url",
+          "type": "string",
+          "description": "Mail URL (e.g., 'mail://user@imap.gmail.com:993?protocol=imaps')"
+        },
+        {
+          "name": "password",
+          "type": "string",
+          "optional": true,
+          "description": "Password (overrides URL password if provided)"
+        },
+        {
+          "name": "timeout",
+          "type": "integer",
+          "optional": true,
+          "description": "Connection timeout in seconds (default: 30)"
+        }
+      ],
+      "return_type": "string",
+      "example": "// Using URL from config variable<br><b>var</b> handle = <b>call</b> mail.openUrl(myemail, \"app-password\");<br><br>// With timeout<br><b>var</b> handle = <b>call</b> mail.openUrl(myemail, \"app-password\", 60);<br><br>// URL with password included<br><b>var</b> handle = <b>call</b> mail.openUrl(\"mail://user%40gmail.com:apppassword@imap.gmail.com:993?protocol=imaps\");"
     },
     {
       "function": "mail.folders",
@@ -2565,6 +2591,18 @@
       ],
       "return_type": "string",
       "example": "<b>var</b> handle = #ftp.open(\"ftp.example.com\", 21, \"user\", \"pass\");<br>#ftp.listFiles(handle, \"/\");<br>#ftp.disconnect(handle);<br><br>// With custom timeout (60 seconds)<br><b>var</b> handle2 = #ftp.open(\"ftp.example.com\", 21, \"user\", \"pass\", 60);"
+    },
+    {
+      "function": "ftp.openUrl",
+      "short_description": "Opens an FTP connection using a URL",
+      "long_help": "Opens a connection to an FTP or FTPS server using a URL string. The URL contains server details while password can be provided separately for security.<br><br><b>URL Formats:</b><br>• FTP: <code>ftp://user@host:port</code><br>• FTPS: <code>ftps://user@host:port</code><br><br>Password can be included in URL as <code>ftp://user:password@host:port</code> but for security, it's recommended to store password separately.<br><br><b>Use with config variables:</b> Define connection in Config > FTP Server Config, then use the variable in scripts.",
+      "parameters": [
+        {"name": "url", "type": "string", "description": "FTP URL (e.g., 'ftp://user@ftp.example.com:21' or 'ftps://user@ftps.example.com:990')"},
+        {"name": "password", "type": "string", "optional": true, "description": "Password (overrides URL password if provided)"},
+        {"name": "timeout", "type": "integer", "optional": true, "description": "Connection timeout in seconds (default: 30)"}
+      ],
+      "return_type": "string",
+      "example": "// Using URL from config variable<br><b>var</b> handle = #ftp.openUrl(myftp, \"mypassword\");<br><br>// With timeout<br><b>var</b> handle = #ftp.openUrl(myftp, \"mypassword\", 60);<br><br>// URL with password included<br><b>var</b> handle = #ftp.openUrl(\"ftp://user:password@ftp.example.com:21\");"
     },
     {
       "function": "ftp.openSecure",

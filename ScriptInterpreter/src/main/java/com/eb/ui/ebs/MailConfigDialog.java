@@ -39,24 +39,33 @@ public class MailConfigDialog extends Stage {
     private static final String PREF_KEY_URL_PREFIX = "mailUrl.";
     private static final int MAX_MAIL_CONFIGS = 20;
     
-    /** Mail URL pattern: mail://user:password@host:port?protocol=xxx */
+    /** Mail URL pattern: mail://user[:password]@host:port?protocol=xxx (password is optional) */
     private static final Pattern MAIL_URL_PATTERN = Pattern.compile(
-        "mail://([^:]+):([^@]*)@([^:]+):(\\d+)(?:\\?protocol=([a-zA-Z0-9]+))?"
+        "mail://([^:@]+)(?::([^@]*))?@([^:]+):(\\d+)(?:\\?protocol=([a-zA-Z0-9]+))?"
     );
 
     private final TableView<MailConfigEntry> mailTableView;
     private final List<MailConfigEntry> mailConfigs;
+    private static final String PREF_KEY_PASS_PREFIX = "mailPass.";
     
     /**
-     * Data model for a mail configuration entry (simplified to varName + URL).
+     * Data model for a mail configuration entry with separate password field.
+     * URL format: mail://user@host:port?protocol=imaps (password stored separately)
      */
     public static class MailConfigEntry {
         private final StringProperty varName;
         private final StringProperty url;
+        private final StringProperty password;
         
-        public MailConfigEntry(String varName, String url) {
+        public MailConfigEntry(String varName, String url, String password) {
             this.varName = new SimpleStringProperty(varName != null ? varName : "");
             this.url = new SimpleStringProperty(url != null ? url : "");
+            this.password = new SimpleStringProperty(password != null ? password : "");
+        }
+        
+        // Backward compatibility constructor
+        public MailConfigEntry(String varName, String url) {
+            this(varName, url, "");
         }
         
         public String getVarName() { return varName.get(); }
@@ -66,6 +75,28 @@ public class MailConfigDialog extends Stage {
         public String getUrl() { return url.get(); }
         public void setUrl(String value) { url.set(value != null ? value : ""); }
         public StringProperty urlProperty() { return url; }
+        
+        public String getPassword() { return password.get(); }
+        public void setPassword(String value) { password.set(value != null ? value : ""); }
+        public StringProperty passwordProperty() { return password; }
+        
+        /**
+         * Gets the full URL with password for connection purposes.
+         */
+        public String getFullUrlWithPassword() {
+            String baseUrl = url.get();
+            String pass = password.get();
+            if (pass == null || pass.isEmpty()) {
+                return baseUrl;
+            }
+            // Insert password into URL
+            Map<String, String> parsed = parseUrl(baseUrl);
+            if (parsed.isEmpty()) {
+                return baseUrl;
+            }
+            return buildUrl(parsed.get("host"), parsed.get("port"), 
+                          parsed.get("user"), pass, parsed.get("protocol"));
+        }
         
         /**
          * Creates a mail URL from individual components.
@@ -84,7 +115,7 @@ public class MailConfigDialog extends Stage {
         
         /**
          * Parses a mail URL into components.
-         * @return Map with keys: host, port, user, password, protocol
+         * @return Map with keys: host, port, user, password, protocol (password may be empty if not in URL)
          */
         public static Map<String, String> parseUrl(String url) {
             Map<String, String> result = new HashMap<>();
@@ -94,7 +125,9 @@ public class MailConfigDialog extends Stage {
             if (m.matches()) {
                 try {
                     result.put("user", URLDecoder.decode(m.group(1), StandardCharsets.UTF_8.name()));
-                    result.put("password", URLDecoder.decode(m.group(2), StandardCharsets.UTF_8.name()));
+                    // Password is now optional (group 2 may be null)
+                    String password = m.group(2);
+                    result.put("password", password != null ? URLDecoder.decode(password, StandardCharsets.UTF_8.name()) : "");
                     result.put("host", m.group(3));
                     result.put("port", m.group(4));
                     result.put("protocol", m.group(5) != null ? m.group(5) : "imaps");
@@ -103,6 +136,21 @@ public class MailConfigDialog extends Stage {
                 }
             }
             return result;
+        }
+        
+        /**
+         * Creates a mail URL from individual components.
+         * Password can be omitted if empty (URL will not contain the :password part).
+         */
+        public static String buildUrlNoPassword(String host, String port, String user, String protocol) {
+            try {
+                String encodedUser = URLEncoder.encode(user, StandardCharsets.UTF_8.name());
+                String proto = protocol != null && !protocol.isEmpty() ? protocol : "imaps";
+                return String.format("mail://%s@%s:%s?protocol=%s", 
+                    encodedUser, host, port, proto);
+            } catch (UnsupportedEncodingException e) {
+                return "";
+            }
         }
     }
 
@@ -129,16 +177,25 @@ public class MailConfigDialog extends Stage {
         nameColumn.setEditable(true);
         nameColumn.setOnEditCommit(event -> event.getRowValue().setVarName(event.getNewValue()));
         
-        // URL column
-        TableColumn<MailConfigEntry, String> urlColumn = new TableColumn<>("Mail URL (mail://user:password@host:port?protocol=imaps)");
+        // URL column (without password)
+        TableColumn<MailConfigEntry, String> urlColumn = new TableColumn<>("Mail URL (mail://user@host:port?protocol=imaps)");
         urlColumn.setCellValueFactory(new PropertyValueFactory<>("url"));
         urlColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        urlColumn.setMinWidth(600);
+        urlColumn.setMinWidth(450);
         urlColumn.setEditable(true);
         urlColumn.setOnEditCommit(event -> event.getRowValue().setUrl(event.getNewValue()));
         
+        // Password column with masked display
+        TableColumn<MailConfigEntry, String> passwordColumn = new TableColumn<>("Password");
+        passwordColumn.setCellValueFactory(new PropertyValueFactory<>("password"));
+        passwordColumn.setCellFactory(column -> new PasswordTableCell());
+        passwordColumn.setMinWidth(150);
+        passwordColumn.setEditable(true);
+        passwordColumn.setOnEditCommit(event -> event.getRowValue().setPassword(event.getNewValue()));
+        
         mailTableView.getColumns().add(nameColumn);
         mailTableView.getColumns().add(urlColumn);
+        mailTableView.getColumns().add(passwordColumn);
         
         refreshTableView();
 
@@ -171,14 +228,14 @@ public class MailConfigDialog extends Stage {
         layout.setPadding(new Insets(16));
 
         Label infoLabel = new Label(
-            "Configure mail server connections using URL format.\n\n" +
-            "URL Format: mail://user:password@host:port?protocol=imaps\n\n" +
+            "Configure mail server connections. Password is stored separately (not in URL).\n\n" +
+            "URL Format: mail://user@host:port?protocol=imaps\n\n" +
             "Examples:\n" +
-            "• Gmail:   mail://user%40gmail.com:apppassword@imap.gmail.com:993?protocol=imaps\n" +
-            "• Outlook: mail://user%40outlook.com:password@outlook.office365.com:993?protocol=imaps\n\n" +
+            "• Gmail:   mail://user%40gmail.com@imap.gmail.com:993?protocol=imaps\n" +
+            "• Outlook: mail://user%40outlook.com@outlook.office365.com:993?protocol=imaps\n\n" +
             "Gmail App Password: Must be 16 characters with NO SPACES.\n" +
             "(Displayed as 'xxxx xxxx xxxx xxxx' but enter without spaces)\n\n" +
-            "Note: Use %40 for @ in email addresses, URL-encode special characters in passwords."
+            "Note: Use %40 for @ in email addresses. Password is entered in separate column."
         );
         infoLabel.setWrapText(true);
 
@@ -200,7 +257,7 @@ public class MailConfigDialog extends Stage {
 
         setScene(new Scene(layout));
         sizeToScene();
-        setMinWidth(950);
+        setMinWidth(1000);
         setMinHeight(550);
     }
 
@@ -211,7 +268,7 @@ public class MailConfigDialog extends Stage {
             return;
         }
 
-        mailConfigs.add(new MailConfigEntry("", "mail://user:password@host:993?protocol=imaps"));
+        mailConfigs.add(new MailConfigEntry("", "mail://user@host:993?protocol=imaps", ""));
         refreshTableView();
         mailTableView.getSelectionModel().selectLast();
         mailTableView.edit(mailConfigs.size() - 1, mailTableView.getColumns().get(0));
@@ -224,7 +281,7 @@ public class MailConfigDialog extends Stage {
             return;
         }
 
-        mailConfigs.add(new MailConfigEntry("gmail", "mail://your-email%40gmail.com:your-16-char-app-password@imap.gmail.com:993?protocol=imaps"));
+        mailConfigs.add(new MailConfigEntry("gmail", "mail://your-email%40gmail.com@imap.gmail.com:993?protocol=imaps", "your-16-char-app-password"));
         refreshTableView();
         mailTableView.getSelectionModel().selectLast();
     }
@@ -298,10 +355,12 @@ public class MailConfigDialog extends Stage {
         for (int i = 0; i < MAX_MAIL_CONFIGS; i++) {
             String varName = prefs.get(PREF_KEY_NAME_PREFIX + i, null);
             String url = prefs.get(PREF_KEY_URL_PREFIX + i, null);
+            String password = prefs.get(PREF_KEY_PASS_PREFIX + i, null);
             if (varName != null || url != null) {
                 mailConfigs.add(new MailConfigEntry(
                     varName != null ? varName : "",
-                    url != null ? url : ""
+                    url != null ? url : "",
+                    password != null ? password : ""
                 ));
             }
         }
@@ -314,6 +373,7 @@ public class MailConfigDialog extends Stage {
         for (int i = 0; i < MAX_MAIL_CONFIGS; i++) {
             prefs.remove(PREF_KEY_NAME_PREFIX + i);
             prefs.remove(PREF_KEY_URL_PREFIX + i);
+            prefs.remove(PREF_KEY_PASS_PREFIX + i);
         }
         
         // Save current list (only entries with variable name and URL)
@@ -321,10 +381,14 @@ public class MailConfigDialog extends Stage {
         for (MailConfigEntry entry : mailConfigs) {
             String varName = entry.getVarName().trim();
             String url = entry.getUrl().trim();
+            String password = entry.getPassword();
             
             if (!varName.isEmpty() && !url.isEmpty()) {
                 prefs.put(PREF_KEY_NAME_PREFIX + index, varName);
                 prefs.put(PREF_KEY_URL_PREFIX + index, url);
+                if (password != null && !password.isEmpty()) {
+                    prefs.put(PREF_KEY_PASS_PREFIX + index, password);
+                }
                 index++;
             }
         }
@@ -341,7 +405,7 @@ public class MailConfigDialog extends Stage {
 
     /**
      * Static method to retrieve the list of mail configuration entries from preferences.
-     * Returns entries as (varName, URL string) pairs.
+     * Returns entries as (varName, URL string, password) tuples.
      */
     public static List<MailConfigEntry> getMailConfigEntries() {
         List<MailConfigEntry> entries = new ArrayList<>();
@@ -350,8 +414,9 @@ public class MailConfigDialog extends Stage {
         for (int i = 0; i < MAX_MAIL_CONFIGS; i++) {
             String varName = prefs.get(PREF_KEY_NAME_PREFIX + i, null);
             String url = prefs.get(PREF_KEY_URL_PREFIX + i, null);
+            String password = prefs.get(PREF_KEY_PASS_PREFIX + i, null);
             if (varName != null && !varName.isEmpty() && url != null && !url.isEmpty()) {
-                entries.add(new MailConfigEntry(varName, url));
+                entries.add(new MailConfigEntry(varName, url, password != null ? password : ""));
             }
         }
         
@@ -360,7 +425,7 @@ public class MailConfigDialog extends Stage {
     
     /**
      * Parses a mail URL into its components.
-     * @param url Mail URL in format mail://user:password@host:port?protocol=xxx
+     * @param url Mail URL in format mail://user[:password]@host:port?protocol=xxx
      * @return Map with keys: host, port, user, password, protocol (or empty map if invalid)
      */
     public static Map<String, String> parseMailUrl(String url) {
@@ -373,5 +438,87 @@ public class MailConfigDialog extends Stage {
      */
     public static String buildMailUrl(String host, String port, String user, String password, String protocol) {
         return MailConfigEntry.buildUrl(host, port, user, password, protocol);
+    }
+    
+    /**
+     * Custom table cell that displays password as masked characters but allows editing.
+     */
+    private class PasswordTableCell extends TableCell<MailConfigEntry, String> {
+        private TextField textField;
+        private boolean showPassword = false;
+        
+        public PasswordTableCell() {
+            setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && !isEmpty()) {
+                    startEdit();
+                }
+            });
+        }
+        
+        @Override
+        public void startEdit() {
+            super.startEdit();
+            if (textField == null) {
+                createTextField();
+            }
+            textField.setText(getItem() != null ? getItem() : "");
+            setGraphic(textField);
+            setText(null);
+            textField.selectAll();
+            textField.requestFocus();
+        }
+        
+        @Override
+        public void cancelEdit() {
+            super.cancelEdit();
+            setText(getMaskedPassword(getItem()));
+            setGraphic(null);
+        }
+        
+        @Override
+        protected void updateItem(String item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty) {
+                setText(null);
+                setGraphic(null);
+            } else {
+                if (isEditing()) {
+                    if (textField != null) {
+                        textField.setText(item);
+                    }
+                    setText(null);
+                    setGraphic(textField);
+                } else {
+                    setText(getMaskedPassword(item));
+                    setGraphic(null);
+                }
+            }
+        }
+        
+        private void createTextField() {
+            textField = new TextField();
+            textField.setOnAction(event -> commitEdit(textField.getText()));
+            textField.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+                if (!isNowFocused) {
+                    commitEdit(textField.getText());
+                }
+            });
+            textField.setOnKeyPressed(event -> {
+                if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
+                    cancelEdit();
+                }
+            });
+        }
+        
+        private String getMaskedPassword(String password) {
+            if (password == null || password.isEmpty()) {
+                return "";
+            }
+            // Show last 4 characters, mask the rest
+            if (password.length() <= 4) {
+                return "●".repeat(password.length());
+            }
+            return "●".repeat(password.length() - 4) + password.substring(password.length() - 4);
+        }
     }
 }
