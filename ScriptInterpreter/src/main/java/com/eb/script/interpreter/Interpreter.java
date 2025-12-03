@@ -280,9 +280,10 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                     String connStr = (String) getConnStrMethod.invoke(entryObj);
 
                     // If both variable name and connection string are present, define as global variable
+                    // Convert variable name to lowercase for case-insensitive access
                     if (varName != null && !varName.trim().isEmpty()
                             && connStr != null && !connStr.trim().isEmpty()) {
-                        environment().getEnvironmentValues().define(varName.trim(), connStr);
+                        environment().getEnvironmentValues().define(varName.trim().toLowerCase(), connStr);
                     }
                 }
             } catch (Exception e) {
@@ -306,9 +307,10 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                     String url = (String) getUrlMethod.invoke(entryObj);
 
                     // If both variable name and URL are present, define as global variable
+                    // Convert variable name to lowercase for case-insensitive access
                     if (varName != null && !varName.trim().isEmpty()
                             && url != null && !url.trim().isEmpty()) {
-                        environment().getEnvironmentValues().define(varName.trim(), url);
+                        environment().getEnvironmentValues().define(varName.trim().toLowerCase(), url);
                     }
                 }
             } catch (Exception e) {
@@ -332,9 +334,10 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                     String url = (String) getUrlMethod.invoke(entryObj);
 
                     // If both variable name and URL are present, define as global variable
+                    // Convert variable name to lowercase for case-insensitive access
                     if (varName != null && !varName.trim().isEmpty()
                             && url != null && !url.trim().isEmpty()) {
-                        environment().getEnvironmentValues().define(varName.trim(), url);
+                        environment().getEnvironmentValues().define(varName.trim().toLowerCase(), url);
                     }
                 }
             } catch (Exception e) {

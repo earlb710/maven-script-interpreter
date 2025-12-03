@@ -3616,12 +3616,15 @@ Mail and FTP connections can be configured using URL strings stored in variables
 
 Variables defined in the Config dialogs (Config > Mail Server Config or Config > FTP Server Config) are automatically available as global variables in your scripts. The variable name you specify in the config becomes a script variable containing the connection URL.
 
+**Note:** Config variable names are **case-insensitive**. If you define `MyFtp` in the config, you can access it as `myftp`, `MyFtp`, or `MYFTP` in your scripts.
+
 **Example:**
-If you create a mail config with variable name `myemail` and URL `******imap.gmail.com:993?protocol=imaps`, you can use it in a script:
+If you create a mail config with variable name `MyEmail` and URL `******imap.gmail.com:993?protocol=imaps`, you can use it in a script:
 
 ```javascript
-// The variable myemail is automatically available
+// Config variables are case-insensitive
 print myemail;  // Outputs: ******imap.gmail.com:993?protocol=imaps
+print MyEmail;  // Same result
 
 // FTP config variable example
 print myftp;    // Outputs: ******ftp.example.com:21
