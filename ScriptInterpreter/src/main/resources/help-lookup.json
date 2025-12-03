@@ -2545,6 +2545,224 @@
       "parameters": [],
       "return_type": "interface",
       "example": "<b>public class</b> EchoFunction <b>implements</b> EbsFunction {<br><br>    <b>private</b> String prefix = \"\";<br><br>    @Override<br>    <b>public</b> String getName() { <b>return</b> \"Echo Function\"; }<br><br>    @Override<br>    <b>public</b> String getDescription() { <b>return</b> \"Echoes arguments\"; }<br><br>    @Override<br>    <b>public void</b> initialize(Map&lt;String, Object&gt; config) {<br>        <b>if</b> (config != null) {<br>            prefix = (String) config.getOrDefault(\"prefix\", \"\");<br>        }<br>    }<br><br>    @Override<br>    <b>public</b> Object execute(Object[] args) {<br>        StringBuilder sb = <b>new</b> StringBuilder(prefix);<br>        <b>for</b> (Object arg : args) {<br>            sb.append(arg);<br>        }<br>        <b>return</b> sb.toString();<br>    }<br><br>    @Override<br>    <b>public</b> String getSignatureString() {<br>        <b>return</b> \"\"\"<br>            {<br>              \"parameters\": [{\"name\": \"args\", \"type\": \"any\", \"description\": \"Values to echo\"}],<br>              \"returnType\": \"string\"<br>            }<br>            \"\"\";<br>    }<br>}"
+    },
+    {
+      "function": "ftp.connect",
+      "short_description": "Connects to an FTP server",
+      "long_help": "Connects to an FTP server and returns a handle for subsequent operations. The connection defaults to passive mode and<br>binary transfer. Use ftp.disconnect to close the connection when done.",
+      "parameters": [
+        {"name": "host", "type": "string", "description": "FTP server hostname"},
+        {"name": "port", "type": "integer", "optional": true, "description": "Port number (default: 21)"},
+        {"name": "username", "type": "string", "optional": true, "description": "Username (default: anonymous)"},
+        {"name": "password", "type": "string", "optional": true, "description": "Password (default: empty)"}
+      ],
+      "return_type": "string",
+      "example": "<b>var</b> handle = #ftp.connect(\"ftp.example.com\", 21, \"user\", \"pass\");<br>#ftp.listFiles(handle, \"/\");<br>#ftp.disconnect(handle);"
+    },
+    {
+      "function": "ftp.connectSecure",
+      "short_description": "Connects to an FTPS (secure FTP) server",
+      "long_help": "Connects to an FTPS server using SSL/TLS encryption. Supports both explicit TLS (default, port 21) and implicit SSL<br>(port 990). The connection enables encrypted data channel protection (PROT P) by default. Use ftp.disconnect to close.",
+      "parameters": [
+        {"name": "host", "type": "string", "description": "FTPS server hostname"},
+        {"name": "port", "type": "integer", "optional": true, "description": "Port number (default: 21 for explicit, 990 for implicit)"},
+        {"name": "username", "type": "string", "optional": true, "description": "Username (default: anonymous)"},
+        {"name": "password", "type": "string", "optional": true, "description": "Password (default: empty)"},
+        {"name": "implicit", "type": "bool", "optional": true, "description": "Use implicit SSL mode (default: false = explicit TLS)"}
+      ],
+      "return_type": "string",
+      "example": "// Explicit TLS (most common)<br><b>var</b> handle = #ftp.connectSecure(\"ftps.example.com\", 21, \"user\", \"pass\");<br><br>// Implicit SSL<br><b>var</b> handle = #ftp.connectSecure(\"ftps.example.com\", 990, \"user\", \"pass\", true);"
+    },
+    {
+      "function": "ftp.disconnect",
+      "short_description": "Disconnects from an FTP server",
+      "long_help": "Closes the FTP connection and releases resources. Always call this when done with FTP operations to properly close<br>the connection.",
+      "parameters": [
+        {"name": "handle", "type": "string", "description": "Connection handle from ftp.connect or ftp.connectSecure"}
+      ],
+      "return_type": "bool",
+      "example": "<b>var</b> handle = #ftp.connect(\"ftp.example.com\");<br>// ... perform operations ...<br>#ftp.disconnect(handle);"
+    },
+    {
+      "function": "ftp.listFiles",
+      "short_description": "Lists files in a remote directory",
+      "long_help": "Returns a JSON array of files and directories in the specified remote path. Each entry contains: name, isDir, isFile,<br>isLink, size, modified, modifiedMs, user, group, and permissions.",
+      "parameters": [
+        {"name": "handle", "type": "string", "description": "Connection handle"},
+        {"name": "path", "type": "string", "optional": true, "description": "Remote path (default: current directory)"}
+      ],
+      "return_type": "json",
+      "example": "<b>var</b> files = #ftp.listFiles(handle, \"/uploads\");<br><b>foreach</b> f <b>in</b> files <b>do</b> {<br>    <b>print</b> f.name + \" - \" + f.size + \" bytes\";<br>}"
+    },
+    {
+      "function": "ftp.upload",
+      "short_description": "Uploads a file to the FTP server",
+      "long_help": "Uploads a local file to the remote FTP server. The local path is resolved through the sandbox mechanism. Creates or<br>overwrites the remote file.",
+      "parameters": [
+        {"name": "handle", "type": "string", "description": "Connection handle"},
+        {"name": "localPath", "type": "string", "description": "Path to local file to upload"},
+        {"name": "remotePath", "type": "string", "description": "Destination path on FTP server"}
+      ],
+      "return_type": "bool",
+      "example": "#ftp.upload(handle, \"local/data.txt\", \"/remote/data.txt\");"
+    },
+    {
+      "function": "ftp.download",
+      "short_description": "Downloads a file from the FTP server",
+      "long_help": "Downloads a file from the remote FTP server to a local path. The local path is resolved through the sandbox mechanism.<br>Creates parent directories if needed.",
+      "parameters": [
+        {"name": "handle", "type": "string", "description": "Connection handle"},
+        {"name": "remotePath", "type": "string", "description": "Path to file on FTP server"},
+        {"name": "localPath", "type": "string", "description": "Destination path on local system"}
+      ],
+      "return_type": "bool",
+      "example": "#ftp.download(handle, \"/remote/data.csv\", \"local/data.csv\");"
+    },
+    {
+      "function": "ftp.delete",
+      "short_description": "Deletes a file on the FTP server",
+      "long_help": "Deletes a file on the remote FTP server. Does not work on directories - use ftp.rmdir for directories.",
+      "parameters": [
+        {"name": "handle", "type": "string", "description": "Connection handle"},
+        {"name": "remotePath", "type": "string", "description": "Path to file to delete"}
+      ],
+      "return_type": "bool",
+      "example": "#ftp.delete(handle, \"/remote/old-file.txt\");"
+    },
+    {
+      "function": "ftp.mkdir",
+      "short_description": "Creates a directory on the FTP server",
+      "long_help": "Creates a new directory on the remote FTP server. Parent directories must exist.",
+      "parameters": [
+        {"name": "handle", "type": "string", "description": "Connection handle"},
+        {"name": "remotePath", "type": "string", "description": "Path for new directory"}
+      ],
+      "return_type": "bool",
+      "example": "#ftp.mkdir(handle, \"/uploads/new-folder\");"
+    },
+    {
+      "function": "ftp.rmdir",
+      "short_description": "Removes a directory on the FTP server",
+      "long_help": "Removes an empty directory on the remote FTP server. The directory must be empty.",
+      "parameters": [
+        {"name": "handle", "type": "string", "description": "Connection handle"},
+        {"name": "remotePath", "type": "string", "description": "Path to directory to remove"}
+      ],
+      "return_type": "bool",
+      "example": "#ftp.rmdir(handle, \"/uploads/old-folder\");"
+    },
+    {
+      "function": "ftp.rename",
+      "short_description": "Renames a file or directory on the FTP server",
+      "long_help": "Renames or moves a file or directory on the remote FTP server.",
+      "parameters": [
+        {"name": "handle", "type": "string", "description": "Connection handle"},
+        {"name": "fromPath", "type": "string", "description": "Current path"},
+        {"name": "toPath", "type": "string", "description": "New path"}
+      ],
+      "return_type": "bool",
+      "example": "#ftp.rename(handle, \"/old-name.txt\", \"/new-name.txt\");"
+    },
+    {
+      "function": "ftp.pwd",
+      "short_description": "Gets current working directory on FTP server",
+      "long_help": "Returns the current working directory path on the remote FTP server.",
+      "parameters": [
+        {"name": "handle", "type": "string", "description": "Connection handle"}
+      ],
+      "return_type": "string",
+      "example": "<b>var</b> cwd = #ftp.pwd(handle);<br><b>print</b> \"Current directory: \" + cwd;"
+    },
+    {
+      "function": "ftp.cd",
+      "short_description": "Changes current directory on FTP server",
+      "long_help": "Changes the current working directory on the remote FTP server.",
+      "parameters": [
+        {"name": "handle", "type": "string", "description": "Connection handle"},
+        {"name": "path", "type": "string", "description": "Directory path to change to"}
+      ],
+      "return_type": "bool",
+      "example": "#ftp.cd(handle, \"/uploads\");<br><b>print</b> #ftp.pwd(handle);"
+    },
+    {
+      "function": "ftp.exists",
+      "short_description": "Checks if path exists on FTP server",
+      "long_help": "Checks if a file or directory exists on the remote FTP server. Returns true if the path exists.",
+      "parameters": [
+        {"name": "handle", "type": "string", "description": "Connection handle"},
+        {"name": "path", "type": "string", "description": "Path to check"}
+      ],
+      "return_type": "bool",
+      "example": "<b>if</b> #ftp.exists(handle, \"/data/config.json\") <b>then</b> {<br>    <b>print</b> \"Config file found\";<br>}"
+    },
+    {
+      "function": "ftp.size",
+      "short_description": "Gets file size on FTP server",
+      "long_help": "Returns the size of a file on the remote FTP server in bytes. Returns -1 if the file is not found.",
+      "parameters": [
+        {"name": "handle", "type": "string", "description": "Connection handle"},
+        {"name": "path", "type": "string", "description": "Path to file"}
+      ],
+      "return_type": "long",
+      "example": "<b>var</b> size = #ftp.size(handle, \"/data/file.zip\");<br><b>print</b> \"File size: \" + size + \" bytes\";"
+    },
+    {
+      "function": "ftp.binary",
+      "short_description": "Sets binary transfer mode",
+      "long_help": "Sets the FTP transfer mode to binary. Binary mode should be used for transferring non-text files like images, videos,<br>and archives. This is the default mode.",
+      "parameters": [
+        {"name": "handle", "type": "string", "description": "Connection handle"}
+      ],
+      "return_type": "bool",
+      "example": "#ftp.binary(handle);<br>#ftp.upload(handle, \"image.png\", \"/remote/image.png\");"
+    },
+    {
+      "function": "ftp.ascii",
+      "short_description": "Sets ASCII transfer mode",
+      "long_help": "Sets the FTP transfer mode to ASCII. ASCII mode should be used for transferring text files when line ending conversion<br>is needed between systems.",
+      "parameters": [
+        {"name": "handle", "type": "string", "description": "Connection handle"}
+      ],
+      "return_type": "bool",
+      "example": "#ftp.ascii(handle);<br>#ftp.upload(handle, \"readme.txt\", \"/remote/readme.txt\");"
+    },
+    {
+      "function": "ftp.passive",
+      "short_description": "Sets passive transfer mode",
+      "long_help": "Sets the FTP data transfer mode to passive. Passive mode is the default and works better through firewalls as the<br>client initiates all connections.",
+      "parameters": [
+        {"name": "handle", "type": "string", "description": "Connection handle"}
+      ],
+      "return_type": "bool",
+      "example": "#ftp.passive(handle);"
+    },
+    {
+      "function": "ftp.active",
+      "short_description": "Sets active transfer mode",
+      "long_help": "Sets the FTP data transfer mode to active. Active mode requires the FTP server to connect back to the client, which<br>may be blocked by firewalls.",
+      "parameters": [
+        {"name": "handle", "type": "string", "description": "Connection handle"}
+      ],
+      "return_type": "bool",
+      "example": "#ftp.active(handle);"
+    },
+    {
+      "function": "ftp.isConnected",
+      "short_description": "Checks if FTP connection is active",
+      "long_help": "Returns true if the FTP connection is still active and connected.",
+      "parameters": [
+        {"name": "handle", "type": "string", "description": "Connection handle"}
+      ],
+      "return_type": "bool",
+      "example": "<b>if</b> #ftp.isConnected(handle) <b>then</b> {<br>    <b>print</b> \"Still connected\";<br>}"
+    },
+    {
+      "function": "ftp.listConnections",
+      "short_description": "Lists all open FTP connections",
+      "long_help": "Returns a JSON array of all currently open FTP connections with their details including handle, host, port, username,<br>connection status, and connection time.",
+      "parameters": [],
+      "return_type": "json",
+      "example": "<b>var</b> connections = #ftp.listConnections();<br><b>foreach</b> c <b>in</b> connections <b>do</b> {<br>    <b>print</b> c.handle + \" - \" + c.host;<br>}"
     }
   ]
 }
