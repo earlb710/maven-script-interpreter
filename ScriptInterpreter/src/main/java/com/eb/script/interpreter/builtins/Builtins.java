@@ -67,10 +67,11 @@ public final class Builtins {
 
     /**
      * Convenience: just the parameter signature (defensive copy).
+     * Returns null for dynamic builtins (like custom.*) that aren't in the static registry.
      */
     public static Parameter[] getSignature(String name) {
         BuiltinInfo info = BUILTINS.get(name);
-        return info.params;
+        return info != null ? info.params : null;
     }
 
     /**

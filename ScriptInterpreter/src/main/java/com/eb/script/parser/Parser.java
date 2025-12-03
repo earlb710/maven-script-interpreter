@@ -158,7 +158,11 @@ public class Parser {
                     if (Builtins.isBuiltin(c.name)) {
                         try {
                             Parameter[] def = Builtins.getSignature(c.name);
-                            c.parameters = matchParameters(def, c.parameters);
+                            // For dynamic builtins (like custom.*), def may be null
+                            // In that case, only positional parameters are allowed (no named parameters)
+                            if (def != null) {
+                                c.parameters = matchParameters(def, c.parameters);
+                            }
                             // No paramInit for builtins; Interpreter evaluates directly from c.parameters
                         } catch (ParseError ex) {
                             throw new ParseError(ex.getMessage() + " in call to " + c.name + " on line " + c.getLine());
