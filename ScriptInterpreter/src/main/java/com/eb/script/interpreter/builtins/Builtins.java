@@ -1050,7 +1050,7 @@ public final class Builtins {
         // Mail builtins (email operations)
         // ==========================
         addBuiltin(info(
-                "mail.connect", DataType.STRING,  // returns connection handle
+                "mail.open", DataType.STRING,  // returns connection handle
                 newParam("host", DataType.STRING, true),     // required; mail server host
                 newParam("port", DataType.INTEGER, true),    // required; mail server port
                 newParam("user", DataType.STRING, true),     // required; username

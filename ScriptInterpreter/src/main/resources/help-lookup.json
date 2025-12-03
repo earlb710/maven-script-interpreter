@@ -2417,9 +2417,9 @@
       "example": "<b>var</b> info = #plugin.info(\"myFunc\");<br><b>var</b> sig = #json.get(info, \"signature\");<br><b>if</b> sig != null <b>then</b> { <b>print</b> #json.getString(sig, \"returnType\", \"any\"); }"
     },
     {
-      "function": "mail.connect",
-      "short_description": "Connects to a mail server",
-      "long_help": "Connects to a mail server using IMAP or POP3 protocol and returns a connection handle for subsequent operations.<br><br><b>Supported protocols:</b> imap, imaps (default, SSL), pop3, pop3s (SSL)<br><br><b>Note:</b> When using Gmail or Google Workspace, you must use an App Password instead of your regular password if 2-Factor Authentication is enabled.<br><br><b>SSL Note:</b> SSL protocols (imaps, pop3s) trust all certificates by default for compatibility.",
+      "function": "mail.open",
+      "short_description": "Opens a connection to a mail server",
+      "long_help": "Opens a connection to a mail server using IMAP or POP3 protocol and returns a connection handle for subsequent operations.<br><br><b>Supported protocols:</b> imap, imaps (default, SSL), pop3, pop3s (SSL)<br><br><b>Note:</b> When using Gmail or Google Workspace, you must use an App Password instead of your regular password if 2-Factor Authentication is enabled.<br><br><b>SSL Note:</b> SSL protocols (imaps, pop3s) trust all certificates by default for compatibility.",
       "parameters": [
         {
           "name": "host",
@@ -2449,7 +2449,7 @@
         }
       ],
       "return_type": "string",
-      "example": "<b>var</b> handle = <b>call</b> mail.connect(\"imap.gmail.com\", 993, \"user@gmail.com\", \"app-password\", \"imaps\");<br><b>print</b> \"Connected: \" + handle;"
+      "example": "<b>var</b> handle = <b>call</b> mail.open(\"imap.gmail.com\", 993, \"user@gmail.com\", \"app-password\", \"imaps\");<br><b>print</b> \"Connected: \" + handle;"
     },
     {
       "function": "mail.folders",
@@ -2459,7 +2459,7 @@
         {
           "name": "handle",
           "type": "string",
-          "description": "Connection handle from mail.connect"
+          "description": "Connection handle from mail.open"
         }
       ],
       "return_type": "json",
@@ -2473,7 +2473,7 @@
         {
           "name": "handle",
           "type": "string",
-          "description": "Connection handle from mail.connect"
+          "description": "Connection handle from mail.open"
         },
         {
           "name": "folder",
@@ -2505,7 +2505,7 @@
         {
           "name": "handle",
           "type": "string",
-          "description": "Connection handle from mail.connect"
+          "description": "Connection handle from mail.open"
         },
         {
           "name": "messageId",
@@ -2524,7 +2524,7 @@
         {
           "name": "handle",
           "type": "string",
-          "description": "Connection handle from mail.connect"
+          "description": "Connection handle from mail.open"
         }
       ],
       "return_type": "bool",

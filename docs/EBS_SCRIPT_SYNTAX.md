@@ -2709,7 +2709,7 @@ The mail functions allow you to connect to email servers (IMAP/POP3), list email
 
 ```javascript
 // Connect to mail server
-var handle = call mail.connect(host, port, user, password, protocol);
+var handle = call mail.open(host, port, user, password, protocol);
 
 // List folders available in the mailbox
 var folders = call mail.folders(handle);
@@ -2724,7 +2724,7 @@ var email = call mail.get(handle, messageId);
 call mail.close(handle);
 ```
 
-#### mail.connect(host, port, user, password, protocol?)
+#### mail.open(host, port, user, password, protocol?)
 Connects to a mail server and returns a connection handle for subsequent operations.
 
 **Parameters:**
@@ -2742,17 +2742,17 @@ Connects to a mail server and returns a connection handle for subsequent operati
 
 ```javascript
 // Connect to Gmail via IMAPS (SSL) - use an app password, not your regular password
-var handle = call mail.connect("imap.gmail.com", 993, "myemail@gmail.com", "your-app-password", "imaps");
+var handle = call mail.open("imap.gmail.com", 993, "myemail@gmail.com", "your-app-password", "imaps");
 
 // Connect to a local server without SSL
-var handle2 = call mail.connect("localhost", 143, "testuser", "password", "imap");
+var handle2 = call mail.open("localhost", 143, "testuser", "password", "imap");
 ```
 
 #### mail.folders(handle)
 Lists all available folders in the mail account.
 
 **Parameters:**
-- `handle` (string, required): Connection handle from mail.connect
+- `handle` (string, required): Connection handle from mail.open
 
 **Returns:** JSON array of folder information objects with properties:
 - `name`: Full folder name/path
@@ -2771,7 +2771,7 @@ foreach folder in folders {
 Lists emails in the specified folder.
 
 **Parameters:**
-- `handle` (string, required): Connection handle from mail.connect
+- `handle` (string, required): Connection handle from mail.open
 - `folder` (string, optional): Folder name. Default is "INBOX"
 - `start` (integer, optional): Starting message number (1-based). Default is 1
 - `count` (integer, optional): Maximum number of messages to return. Default is 50
@@ -2805,7 +2805,7 @@ var drafts = call mail.list(handle, "Drafts");
 Retrieves the full content of a specific email.
 
 **Parameters:**
-- `handle` (string, required): Connection handle from mail.connect
+- `handle` (string, required): Connection handle from mail.open
 - `messageId` (integer, required): Message ID from mail.list results
 
 **Returns:** JSON object with full message content:
@@ -2845,7 +2845,7 @@ if email.attachments.length > 0 then {
 Closes a mail server connection.
 
 **Parameters:**
-- `handle` (string, required): Connection handle from mail.connect
+- `handle` (string, required): Connection handle from mail.open
 
 **Returns:** Boolean - true if closed successfully
 
@@ -2856,7 +2856,7 @@ call mail.close(handle);
 #### Complete Mail Example
 ```javascript
 // Connect to mail server
-var handle = call mail.connect("imap.gmail.com", 993, "user@gmail.com", "app-password");
+var handle = call mail.open("imap.gmail.com", 993, "user@gmail.com", "app-password");
 
 // List available folders
 var folders = call mail.folders(handle);

@@ -90,7 +90,7 @@ public class BuiltinsMail {
      */
     public static Object dispatch(Environment env, String name, Object[] args) throws InterpreterError {
         return switch (name) {
-            case "mail.connect" -> connect(args);
+            case "mail.open" -> open(args);
             case "mail.list" -> list(args);
             case "mail.get" -> get(args);
             case "mail.close" -> close(args);
@@ -109,18 +109,18 @@ public class BuiltinsMail {
     // --- Individual builtin implementations ---
 
     /**
-     * mail.connect(host, port, user, password, protocol?) -> STRING (handle)
+     * mail.open(host, port, user, password, protocol?) -> STRING (handle)
      *
-     * Connects to a mail server and returns a handle for subsequent operations.
+     * Opens a connection to a mail server and returns a handle for subsequent operations.
      *
      * @param args [0] host (String), [1] port (Integer), [2] user (String),
      *             [3] password (String), [4] protocol (String, optional: "imap", "imaps", "pop3", "pop3s")
      * @return String handle to identify this connection
      * @throws InterpreterError if connection fails
      */
-    private static String connect(Object[] args) throws InterpreterError {
+    private static String open(Object[] args) throws InterpreterError {
         if (args.length < 4) {
-            throw new InterpreterError("mail.connect: requires host, port, user, password");
+            throw new InterpreterError("mail.open: requires host, port, user, password");
         }
 
         String host = (String) args[0];
@@ -130,16 +130,16 @@ public class BuiltinsMail {
         String protocol = args.length > 4 && args[4] != null ? (String) args[4] : "imaps";
 
         if (host == null || host.isBlank()) {
-            throw new InterpreterError("mail.connect: host cannot be empty");
+            throw new InterpreterError("mail.open: host cannot be empty");
         }
         if (portNum == null) {
-            throw new InterpreterError("mail.connect: port cannot be null");
+            throw new InterpreterError("mail.open: port cannot be null");
         }
         if (user == null || user.isBlank()) {
-            throw new InterpreterError("mail.connect: user cannot be empty");
+            throw new InterpreterError("mail.open: user cannot be empty");
         }
         if (password == null) {
-            throw new InterpreterError("mail.connect: password cannot be null");
+            throw new InterpreterError("mail.open: password cannot be null");
         }
 
         int port = portNum.intValue();
@@ -148,7 +148,7 @@ public class BuiltinsMail {
         // Validate protocol
         if (!protocol.equals("imap") && !protocol.equals("imaps") &&
             !protocol.equals("pop3") && !protocol.equals("pop3s")) {
-            throw new InterpreterError("mail.connect: unsupported protocol '" + protocol +
+            throw new InterpreterError("mail.open: unsupported protocol '" + protocol +
                 "'. Supported: imap, imaps, pop3, pop3s");
         }
 
@@ -187,7 +187,7 @@ public class BuiltinsMail {
             return handle;
 
         } catch (MessagingException ex) {
-            throw new InterpreterError("mail.connect: " + ex.getMessage());
+            throw new InterpreterError("mail.open: " + ex.getMessage());
         }
     }
 
