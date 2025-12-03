@@ -1,6 +1,6 @@
 // EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
 // Example: ftp.* builtins - FTP and FTPS operations
-// Syntax: #ftp.connect(host, port?, username?, password?)
+// Syntax: #ftp.open(host, port?, username?, password?)
 
 // ============================================================
 // FTP BUILTIN FUNCTIONS TEST SCRIPT
@@ -51,8 +51,8 @@ print "=== FTP Function Reference ===";
 print "";
 
 print "CONNECTION:";
-print "  ftp.connect(host, port?, username?, password?) -> handle";
-print "  ftp.connectSecure(host, port?, username?, password?, implicit?) -> handle";
+print "  ftp.open(host, port?, username?, password?) -> handle";
+print "  ftp.openSecure(host, port?, username?, password?, implicit?) -> handle";
 print "  ftp.isConnected(handle) -> bool";
 print "  ftp.disconnect(handle) -> bool";
 print "  ftp.listConnections() -> json array";
@@ -89,13 +89,13 @@ print "=== Usage Examples ===";
 print "";
 
 print "// Connect to FTP server";
-print "var h = #ftp.connect(\"ftp.example.com\", 21, \"user\", \"pass\");";
+print "var h = #ftp.open(\"ftp.example.com\", 21, \"user\", \"pass\");";
 print "";
 print "// Connect to FTPS server (explicit TLS)";
-print "var hs = #ftp.connectSecure(\"ftps.example.com\", 21, \"user\", \"pass\");";
+print "var hs = #ftp.openSecure(\"ftps.example.com\", 21, \"user\", \"pass\");";
 print "";
 print "// Connect to FTPS server (implicit SSL)";
-print "var hi = #ftp.connectSecure(\"ftps.example.com\", 990, \"user\", \"pass\", true);";
+print "var hi = #ftp.openSecure(\"ftps.example.com\", 990, \"user\", \"pass\", true);";
 print "";
 print "// List files in directory";
 print "var files = #ftp.listFiles(h, \"/uploads\");";

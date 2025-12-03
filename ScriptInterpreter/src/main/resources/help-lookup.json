@@ -2547,9 +2547,9 @@
       "example": "<b>public class</b> EchoFunction <b>implements</b> EbsFunction {<br><br>    <b>private</b> String prefix = \"\";<br><br>    @Override<br>    <b>public</b> String getName() { <b>return</b> \"Echo Function\"; }<br><br>    @Override<br>    <b>public</b> String getDescription() { <b>return</b> \"Echoes arguments\"; }<br><br>    @Override<br>    <b>public void</b> initialize(Map&lt;String, Object&gt; config) {<br>        <b>if</b> (config != null) {<br>            prefix = (String) config.getOrDefault(\"prefix\", \"\");<br>        }<br>    }<br><br>    @Override<br>    <b>public</b> Object execute(Object[] args) {<br>        StringBuilder sb = <b>new</b> StringBuilder(prefix);<br>        <b>for</b> (Object arg : args) {<br>            sb.append(arg);<br>        }<br>        <b>return</b> sb.toString();<br>    }<br><br>    @Override<br>    <b>public</b> String getSignatureString() {<br>        <b>return</b> \"\"\"<br>            {<br>              \"parameters\": [{\"name\": \"args\", \"type\": \"any\", \"description\": \"Values to echo\"}],<br>              \"returnType\": \"string\"<br>            }<br>            \"\"\";<br>    }<br>}"
     },
     {
-      "function": "ftp.connect",
-      "short_description": "Connects to an FTP server",
-      "long_help": "Connects to an FTP server and returns a handle for subsequent operations. The connection defaults to passive mode and<br>binary transfer. Use ftp.disconnect to close the connection when done.",
+      "function": "ftp.open",
+      "short_description": "Opens a connection to an FTP server",
+      "long_help": "Opens a connection to an FTP server and returns a handle for subsequent operations. The connection defaults to passive mode and<br>binary transfer. Use ftp.disconnect to close the connection when done.",
       "parameters": [
         {"name": "host", "type": "string", "description": "FTP server hostname"},
         {"name": "port", "type": "integer", "optional": true, "description": "Port number (default: 21)"},
@@ -2557,12 +2557,12 @@
         {"name": "password", "type": "string", "optional": true, "description": "Password (default: empty)"}
       ],
       "return_type": "string",
-      "example": "<b>var</b> handle = #ftp.connect(\"ftp.example.com\", 21, \"user\", \"pass\");<br>#ftp.listFiles(handle, \"/\");<br>#ftp.disconnect(handle);"
+      "example": "<b>var</b> handle = #ftp.open(\"ftp.example.com\", 21, \"user\", \"pass\");<br>#ftp.listFiles(handle, \"/\");<br>#ftp.disconnect(handle);"
     },
     {
-      "function": "ftp.connectSecure",
-      "short_description": "Connects to an FTPS (secure FTP) server",
-      "long_help": "Connects to an FTPS server using SSL/TLS encryption. Supports both explicit TLS (default, port 21) and implicit SSL<br>(port 990). The connection enables encrypted data channel protection (PROT P) by default. Use ftp.disconnect to close.",
+      "function": "ftp.openSecure",
+      "short_description": "Opens a connection to an FTPS (secure FTP) server",
+      "long_help": "Opens a connection to an FTPS server using SSL/TLS encryption. Supports both explicit TLS (default, port 21) and implicit SSL<br>(port 990). The connection enables encrypted data channel protection (PROT P) by default. Use ftp.disconnect to close.",
       "parameters": [
         {"name": "host", "type": "string", "description": "FTPS server hostname"},
         {"name": "port", "type": "integer", "optional": true, "description": "Port number (default: 21 for explicit, 990 for implicit)"},
@@ -2571,17 +2571,17 @@
         {"name": "implicit", "type": "bool", "optional": true, "description": "Use implicit SSL mode (default: false = explicit TLS)"}
       ],
       "return_type": "string",
-      "example": "// Explicit TLS (most common)<br><b>var</b> handle = #ftp.connectSecure(\"ftps.example.com\", 21, \"user\", \"pass\");<br><br>// Implicit SSL<br><b>var</b> handle = #ftp.connectSecure(\"ftps.example.com\", 990, \"user\", \"pass\", true);"
+      "example": "// Explicit TLS (most common)<br><b>var</b> handle = #ftp.openSecure(\"ftps.example.com\", 21, \"user\", \"pass\");<br><br>// Implicit SSL<br><b>var</b> handle = #ftp.openSecure(\"ftps.example.com\", 990, \"user\", \"pass\", true);"
     },
     {
       "function": "ftp.disconnect",
       "short_description": "Disconnects from an FTP server",
       "long_help": "Closes the FTP connection and releases resources. Always call this when done with FTP operations to properly close<br>the connection.",
       "parameters": [
-        {"name": "handle", "type": "string", "description": "Connection handle from ftp.connect or ftp.connectSecure"}
+        {"name": "handle", "type": "string", "description": "Connection handle from ftp.open or ftp.openSecure"}
       ],
       "return_type": "bool",
-      "example": "<b>var</b> handle = #ftp.connect(\"ftp.example.com\");<br>// ... perform operations ...<br>#ftp.disconnect(handle);"
+      "example": "<b>var</b> handle = #ftp.open(\"ftp.example.com\");<br>// ... perform operations ...<br>#ftp.disconnect(handle);"
     },
     {
       "function": "ftp.listFiles",
