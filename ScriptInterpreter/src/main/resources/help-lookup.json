@@ -2405,7 +2405,7 @@
     {
       "function": "plugin.info",
       "short_description": "Gets information about a loaded plugin",
-      "long_help": "Returns a JSON object containing detailed information about a loaded plugin, including its alias, class name, name,<br>and description. Returns null if the plugin is not loaded.",
+      "long_help": "Returns a JSON object containing detailed information about a loaded plugin, including its alias, class name, name,<br>description, and signature metadata (if provided by the plugin via getSignature() or getSignatureString()). Returns null if the plugin is not loaded.",
       "parameters": [
         {
           "name": "alias",
@@ -2414,7 +2414,7 @@
         }
       ],
       "return_type": "json",
-      "example": "<b>var</b> info = #plugin.info(\"myFunc\");<br><b>print</b> #json.getString(info, \"description\", \"\");"
+      "example": "<b>var</b> info = #plugin.info(\"myFunc\");<br><b>var</b> sig = #json.get(info, \"signature\");<br><b>if</b> sig != null <b>then</b> { <b>print</b> #json.getString(sig, \"returnType\", \"any\"); }"
     }
   ]
 }

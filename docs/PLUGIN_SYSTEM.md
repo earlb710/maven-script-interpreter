@@ -79,13 +79,20 @@ public interface EbsFunction {
     // Optional methods (have default implementations)
     default void initialize(Map<String, Object> config) {}  // Called on load
     default void cleanup() {}                               // Called on unload
-    default Map<String, Object> getSignature() { return null; }  // Parameter/return type metadata
+    default Map<String, Object> getSignature() { return null; }  // Parameter/return type metadata (Map)
+    default String getSignatureString() { return null; }         // Parameter/return type metadata (JSON string)
 }
 ```
 
 ## Providing Function Signature Metadata
 
-Plugins can optionally provide JSON-style metadata about their parameters and return type via the `getSignature()` method. This information is included in `plugin.info()` results and can be used for documentation and validation.
+Plugins can optionally provide JSON-style metadata about their parameters and return type. This information is included in `plugin.info()` results and can be used for documentation and validation.
+
+There are two ways to provide signature metadata:
+
+### Option 1: Using getSignature() (returns Map)
+
+Build the signature programmatically using Maps and Lists:
 
 ```java
 @Override
@@ -116,6 +123,30 @@ public Map<String, Object> getSignature() {
     return sig;
 }
 ```
+
+### Option 2: Using getSignatureString() (returns JSON string)
+
+For simpler implementation, return the signature as a JSON string. This is used as a fallback when `getSignature()` returns null:
+
+```java
+@Override
+public String getSignatureString() {
+    return """
+        {
+          "parameters": [
+            {"name": "input", "type": "string", "required": true, "description": "The input text to process"},
+            {"name": "options", "type": "json", "required": false, "description": "Optional configuration object"}
+          ],
+          "returnType": "string",
+          "returnDescription": "The processed result"
+        }
+        """;
+}
+```
+
+Both methods produce the same result in `plugin.info()`. Use whichever approach is more convenient for your plugin.
+
+### Accessing Signature in EBS
 
 The signature information is returned when calling `plugin.info()`:
 

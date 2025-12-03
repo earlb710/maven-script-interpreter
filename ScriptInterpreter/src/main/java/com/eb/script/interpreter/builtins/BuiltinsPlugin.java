@@ -329,9 +329,25 @@ public class BuiltinsPlugin {
         info.put("description", function.getDescription());
         
         // Include signature if provided by the plugin
+        // First try getSignature() (returns Map), then fallback to getSignatureString() (returns JSON string)
         Map<String, Object> signature = function.getSignature();
         if (signature != null) {
             info.put("signature", signature);
+        } else {
+            // Check for JSON string signature as fallback
+            String signatureString = function.getSignatureString();
+            if (signatureString != null && !signatureString.isBlank()) {
+                try {
+                    // Parse the JSON string into a Map
+                    Object parsed = com.eb.script.json.Json.parse(signatureString);
+                    if (parsed instanceof Map) {
+                        info.put("signature", parsed);
+                    }
+                } catch (Exception e) {
+                    // If parsing fails, store the raw string
+                    info.put("signatureRaw", signatureString);
+                }
+            }
         }
         
         return info;

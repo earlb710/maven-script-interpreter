@@ -186,4 +186,49 @@ public interface EbsFunction {
     default java.util.Map<String, Object> getSignature() {
         return null;
     }
+    
+    /**
+     * Returns the function signature as a JSON string describing
+     * parameter names, types, and return type.
+     * 
+     * <p>This is an alternative to {@link #getSignature()} for plugins that prefer
+     * to define the signature as a JSON string rather than building a Map structure.
+     * If {@link #getSignature()} returns null, this method is checked as a fallback.</p>
+     * 
+     * <p>The JSON string should have the following structure:</p>
+     * <pre>
+     * {
+     *   "parameters": [
+     *     {"name": "param1", "type": "string", "required": true, "description": "First parameter"},
+     *     {"name": "param2", "type": "int", "required": false, "description": "Optional second parameter"}
+     *   ],
+     *   "returnType": "string",
+     *   "returnDescription": "Description of what is returned"
+     * }
+     * </pre>
+     * 
+     * <p>Valid type names include: "string", "int", "long", "float", "double", 
+     * "bool", "json", "array", "any"</p>
+     * 
+     * <h3>Example Implementation</h3>
+     * <pre>
+     * &#64;Override
+     * public String getSignatureString() {
+     *     return """
+     *         {
+     *           "parameters": [
+     *             {"name": "input", "type": "string", "required": true, "description": "The input text"}
+     *           ],
+     *           "returnType": "string",
+     *           "returnDescription": "The processed result"
+     *         }
+     *         """;
+     * }
+     * </pre>
+     * 
+     * @return a JSON string containing signature metadata, or null if not provided
+     */
+    default String getSignatureString() {
+        return null;
+    }
 }
