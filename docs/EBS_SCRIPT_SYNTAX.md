@@ -2703,6 +2703,184 @@ call http.ensure2xx(response);  // Throws error if not 2xx
 var isOk = call http.is2xx(response);  // Returns boolean
 ```
 
+### Mail Functions
+
+The mail functions allow you to connect to email servers (IMAP/POP3), list emails, and retrieve email content.
+
+```javascript
+// Connect to mail server
+var handle = call mail.connect(host, port, user, password, protocol);
+
+// List folders available in the mailbox
+var folders = call mail.folders(handle);
+
+// List emails in a folder (default INBOX)
+var messages = call mail.list(handle, folder, start, count);
+
+// Get full content of a specific email
+var email = call mail.get(handle, messageId);
+
+// Close the connection
+call mail.close(handle);
+```
+
+#### mail.connect(host, port, user, password, protocol?)
+Connects to a mail server and returns a connection handle for subsequent operations.
+
+**Parameters:**
+- `host` (string, required): Mail server hostname (e.g., "imap.gmail.com")
+- `port` (integer, required): Server port (e.g., 993 for IMAPS, 143 for IMAP, 995 for POP3S, 110 for POP3)
+- `user` (string, required): Username or email address
+- `password` (string, required): Password or app-specific password
+- `protocol` (string, optional): Protocol to use. Default is "imaps". Supported: "imap", "imaps", "pop3", "pop3s"
+
+**Returns:** String - a connection handle to use with other mail functions
+
+```javascript
+// Connect to Gmail via IMAPS (SSL)
+var handle = call mail.connect("imap.gmail.com", 993, "myemail@gmail.com", "app-password", "imaps");
+
+// Connect to a local server without SSL
+var handle2 = call mail.connect("localhost", 143, "testuser", "password", "imap");
+```
+
+#### mail.folders(handle)
+Lists all available folders in the mail account.
+
+**Parameters:**
+- `handle` (string, required): Connection handle from mail.connect
+
+**Returns:** JSON array of folder information objects with properties:
+- `name`: Full folder name/path
+- `type`: Folder type ("messages", "folders", or "messages,folders")
+- `messageCount`: Number of messages (if folder holds messages)
+- `unreadCount`: Number of unread messages (if folder holds messages)
+
+```javascript
+var folders = call mail.folders(handle);
+foreach folder in folders {
+    print folder.name + " (" + folder.messageCount + " messages)";
+}
+```
+
+#### mail.list(handle, folder?, start?, count?)
+Lists emails in the specified folder.
+
+**Parameters:**
+- `handle` (string, required): Connection handle from mail.connect
+- `folder` (string, optional): Folder name. Default is "INBOX"
+- `start` (integer, optional): Starting message number (1-based). Default is 1
+- `count` (integer, optional): Maximum number of messages to return. Default is 50
+
+**Returns:** JSON array of message summary objects with properties:
+- `id`: Message number (use with mail.get)
+- `subject`: Email subject
+- `from`: Sender email address
+- `fromName`: Sender display name
+- `date`: Sent date as milliseconds since epoch
+- `dateStr`: Sent date as formatted string
+- `size`: Message size in bytes
+- `read`: Boolean indicating if message has been read
+
+```javascript
+// List first 10 messages from INBOX
+var messages = call mail.list(handle, "INBOX", 1, 10);
+foreach msg in messages {
+    var status = "";
+    if msg.read == false then {
+        status = "[NEW] ";
+    }
+    print status + msg.subject + " - from: " + msg.from;
+}
+
+// List messages from a different folder
+var drafts = call mail.list(handle, "Drafts");
+```
+
+#### mail.get(handle, messageId)
+Retrieves the full content of a specific email.
+
+**Parameters:**
+- `handle` (string, required): Connection handle from mail.connect
+- `messageId` (integer, required): Message ID from mail.list results
+
+**Returns:** JSON object with full message content:
+- `id`: Message number
+- `subject`: Email subject
+- `from`: Array of sender address objects (address, name)
+- `to`: Array of recipient address objects
+- `cc`: Array of CC address objects
+- `bcc`: Array of BCC address objects
+- `date`: Sent date as milliseconds since epoch
+- `dateStr`: Sent date as formatted string
+- `size`: Message size in bytes
+- `read`: Boolean indicating if message has been read
+- `contentType`: MIME content type
+- `body`: Email body text (plain text or HTML)
+- `attachments`: Array of attachment info objects (filename, contentType, size)
+
+```javascript
+// Get full email content
+var email = call mail.get(handle, 1);
+print "Subject: " + email.subject;
+print "From: " + email.from[0].address;
+print "Date: " + email.dateStr;
+print "";
+print email.body;
+
+// Check for attachments
+if email.attachments.length > 0 then {
+    print "Attachments:";
+    foreach att in email.attachments {
+        print "  - " + att.filename + " (" + att.size + " bytes)";
+    }
+}
+```
+
+#### mail.close(handle)
+Closes a mail server connection.
+
+**Parameters:**
+- `handle` (string, required): Connection handle from mail.connect
+
+**Returns:** Boolean - true if closed successfully
+
+```javascript
+call mail.close(handle);
+```
+
+#### Complete Mail Example
+```javascript
+// Connect to mail server
+var handle = call mail.connect("imap.gmail.com", 993, "user@gmail.com", "app-password");
+
+// List available folders
+var folders = call mail.folders(handle);
+foreach f in folders {
+    print "Folder: " + f.name;
+}
+
+// Get list of messages from inbox
+var messages = call mail.list(handle, "INBOX", 1, 5);
+print "Found " + messages.length + " messages";
+
+// Display each message
+foreach msg in messages {
+    print "---";
+    print "ID: " + msg.id;
+    print "From: " + msg.from;
+    print "Subject: " + msg.subject;
+    print "Date: " + msg.dateStr;
+    
+    // Get full message content
+    var full = call mail.get(handle, msg.id);
+    print "Body preview: " + call str.substring(full.body, 0, 100) + "...";
+}
+
+// Clean up
+call mail.close(handle);
+```
+
 ### CSS Functions
 ```javascript
 // Get property value from CSS stylesheet

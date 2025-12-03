@@ -1046,6 +1046,38 @@ public final class Builtins {
                 newParam("alias", DataType.STRING, true)        // required; alias to get info for
         ));
 
+        // ==========================
+        // Mail builtins (email operations)
+        // ==========================
+        addBuiltin(info(
+                "mail.connect", DataType.STRING,  // returns connection handle
+                newParam("host", DataType.STRING, true),     // required; mail server host
+                newParam("port", DataType.INTEGER, true),    // required; mail server port
+                newParam("user", DataType.STRING, true),     // required; username
+                newParam("password", DataType.STRING, true), // required; password
+                newParam("protocol", DataType.STRING, false) // optional; imap, imaps (default), pop3, pop3s
+        ));
+        addBuiltin(info(
+                "mail.list", DataType.JSON,  // returns array of message info
+                newParam("handle", DataType.STRING, true),   // required; connection handle
+                newParam("folder", DataType.STRING, false),  // optional; folder name (default INBOX)
+                newParam("start", DataType.INTEGER, false),  // optional; start index (1-based, default 1)
+                newParam("count", DataType.INTEGER, false)   // optional; max messages to return (default 50)
+        ));
+        addBuiltin(info(
+                "mail.get", DataType.JSON,   // returns full message content
+                newParam("handle", DataType.STRING, true),   // required; connection handle
+                newParam("messageId", DataType.INTEGER, true) // required; message ID from mail.list
+        ));
+        addBuiltin(info(
+                "mail.close", DataType.BOOL, // returns true if closed successfully
+                newParam("handle", DataType.STRING, true)    // required; connection handle
+        ));
+        addBuiltin(info(
+                "mail.folders", DataType.JSON, // returns array of folder info
+                newParam("handle", DataType.STRING, true)    // required; connection handle
+        ));
+
         NAMES = Collections.unmodifiableSet(BUILTINS.keySet());
     }
 
@@ -1112,6 +1144,11 @@ public final class Builtins {
         // Plugin builtins (external Java function loading)
         if (BuiltinsPlugin.handles(name)) {
             return BuiltinsPlugin.dispatch(name, args);
+        }
+        
+        // Mail builtins (email operations)
+        if (BuiltinsMail.handles(name)) {
+            return BuiltinsMail.dispatch(env, name, args);
         }
         
         // File builtins (already in BuiltinsFile)

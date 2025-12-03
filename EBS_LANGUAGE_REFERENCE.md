@@ -1,6 +1,6 @@
 # EBS Language Reference
 
-**Documentation Version: 1.0.4.1**
+**Documentation Version: 1.0.5.1**
 
 This document serves as a pointer to the comprehensive EBS (Earl Bosch Script) language documentation.
 
@@ -26,6 +26,7 @@ This document includes:
   - JSON functions
   - File I/O functions
   - HTTP functions
+  - Mail functions
   - CSS functions
   - Array functions
   - Queue functions
@@ -80,7 +81,7 @@ EBS uses a four-part versioning system: **`language.keyword.builtin.build`**
 
 Each version component is incremented independently based on the type of change made.
 
-**Current Version: 1.0.4.1** (Language v1, Keyword v0, Builtin v4, Build 1)
+**Current Version: 1.0.5.1** (Language v1, Keyword v0, Builtin v5, Build 1)
 
 ### Getting the Language Version Programmatically
 
