@@ -1770,7 +1770,7 @@ screen formScreen = {
 | Control Type | Description | Display Properties |
 |--------------|-------------|-------------------|
 | `textfield` | Single-line text input | `promptHelp`, `maxLength`, `alignment` |
-| `textarea` | Multi-line text input | `promptHelp`, `maxLength` |
+| `textarea` | Multi-line text input | `promptHelp`, `maxLength`, `height` |
 | `passwordfield` | Password input (masked) | `promptHelp`, `maxLength` |
 | `checkbox` | Boolean checkbox | `labelText` |
 | `radiobutton` | Radio button (exclusive selection) | `labelText` |
@@ -1829,6 +1829,22 @@ screen formScreen = {
     "min": 0,
     "max": 100
 }
+```
+
+#### TextArea with Height
+The `height` property specifies the number of lines to display in a textarea control.
+```javascript
+"display": {
+    "type": "textarea",
+    "maxLength": 80,
+    "height": 3,
+    "labelText": "Description:"
+}
+```
+
+**Note:** For textarea items, if the label text would be too long, use `\n` to split it across multiple lines rather than having a single long label:
+```javascript
+"labelText": "Describe what\nyou want\nto match:"
 ```
 
 #### Button with Action
