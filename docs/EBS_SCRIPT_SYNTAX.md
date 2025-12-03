@@ -2731,14 +2731,18 @@ Connects to a mail server and returns a connection handle for subsequent operati
 - `host` (string, required): Mail server hostname (e.g., "imap.gmail.com")
 - `port` (integer, required): Server port (e.g., 993 for IMAPS, 143 for IMAP, 995 for POP3S, 110 for POP3)
 - `user` (string, required): Username or email address
-- `password` (string, required): Password or app-specific password
+- `password` (string, required): Password or app-specific password (see note below)
 - `protocol` (string, optional): Protocol to use. Default is "imaps". Supported: "imap", "imaps", "pop3", "pop3s"
 
 **Returns:** String - a connection handle to use with other mail functions
 
+**Note on Gmail/Google Workspace:** Gmail requires an [App Password](https://support.google.com/accounts/answer/185833) when 2-Factor Authentication is enabled. Regular passwords will not work. Generate an app password from your Google Account security settings.
+
+**Note on SSL:** When using SSL protocols (imaps, pop3s), the implementation trusts all SSL certificates for compatibility. For production environments requiring strict certificate validation, additional configuration may be needed.
+
 ```javascript
-// Connect to Gmail via IMAPS (SSL)
-var handle = call mail.connect("imap.gmail.com", 993, "myemail@gmail.com", "app-password", "imaps");
+// Connect to Gmail via IMAPS (SSL) - use an app password, not your regular password
+var handle = call mail.connect("imap.gmail.com", 993, "myemail@gmail.com", "your-app-password", "imaps");
 
 // Connect to a local server without SSL
 var handle2 = call mail.connect("localhost", 143, "testuser", "password", "imap");

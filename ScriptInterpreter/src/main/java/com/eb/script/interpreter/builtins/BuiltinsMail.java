@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import jakarta.mail.Folder;
@@ -19,7 +20,6 @@ import jakarta.mail.Part;
 import jakarta.mail.Session;
 import jakarta.mail.Store;
 import jakarta.mail.internet.InternetAddress;
-import jakarta.mail.internet.MimeMessage;
 
 /**
  * Built-in functions for email operations.
@@ -27,6 +27,11 @@ import jakarta.mail.internet.MimeMessage;
  * listing emails, and retrieving email content.
  *
  * Supports IMAP and POP3 protocols with SSL/TLS options.
+ * 
+ * Note: When using SSL protocols (imaps, pop3s), the implementation
+ * trusts all SSL certificates by default for compatibility. For
+ * production environments requiring strict certificate validation,
+ * consider implementing custom SSL configuration.
  *
  * @author Earl Bosch
  */
@@ -155,13 +160,15 @@ public class BuiltinsMail {
 
             // Protocol-specific properties
             boolean useSSL = protocol.endsWith("s");
-            String baseProtocol = useSSL ? protocol.substring(0, protocol.length() - 1) : protocol;
 
             props.put("mail." + protocol + ".host", host);
             props.put("mail." + protocol + ".port", String.valueOf(port));
 
             if (useSSL) {
                 props.put("mail." + protocol + ".ssl.enable", "true");
+                // Trust all SSL certificates for compatibility with various mail servers.
+                // Note: In production environments with strict security requirements,
+                // consider implementing custom SSL certificate validation.
                 props.put("mail." + protocol + ".ssl.trust", "*");
             }
 
@@ -173,7 +180,7 @@ public class BuiltinsMail {
             Store store = session.getStore(protocol);
             store.connect(host, port, user, password);
 
-            String handle = "mail-" + java.util.UUID.randomUUID();
+            String handle = "mail-" + UUID.randomUUID();
             MailContext ctx = new MailContext(handle, store, session, protocol);
             MAIL_CONNECTIONS.put(handle, ctx);
 
