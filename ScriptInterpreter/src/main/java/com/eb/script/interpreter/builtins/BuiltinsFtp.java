@@ -27,8 +27,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * Handles all ftp.* builtins.
  * 
  * Provides standard FTP commands:
- * - ftp.connect(host, port?, username?, password?) - Connect to FTP server
- * - ftp.connectSecure(host, port?, username?, password?, implicit?) - Connect to FTPS server (FTP over SSL/TLS)
+ * - ftp.open(host, port?, username?, password?) - Connect to FTP server
+ * - ftp.openSecure(host, port?, username?, password?, implicit?) - Connect to FTPS server (FTP over SSL/TLS)
  * - ftp.disconnect(handle) - Disconnect from FTP server
  * - ftp.listFiles(handle, path?) - List files in directory
  * - ftp.upload(handle, localPath, remotePath) - Upload file to FTP server
@@ -59,15 +59,15 @@ public class BuiltinsFtp {
      * Dispatch an FTP builtin by name.
      *
      * @param env Environment for file path resolution
-     * @param name Lowercase builtin name (e.g., "ftp.connect")
+     * @param name Lowercase builtin name (e.g., "ftp.open")
      * @param args Arguments passed to the builtin
      * @return Result of the builtin call
      * @throws InterpreterError if the call fails
      */
     public static Object dispatch(Environment env, String name, Object[] args) throws InterpreterError {
         return switch (name) {
-            case "ftp.connect" -> connect(args);
-            case "ftp.connectsecure" -> connectSecure(args);
+            case "ftp.open" -> connect(args);
+            case "ftp.opensecure" -> connectSecure(args);
             case "ftp.disconnect" -> disconnect(args);
             case "ftp.listfiles" -> listFiles(args);
             case "ftp.upload" -> upload(env, args);
@@ -127,7 +127,7 @@ public class BuiltinsFtp {
     // --- Individual builtin implementations ---
 
     /**
-     * ftp.connect(host, port?, username?, password?) -> STRING (handle)
+     * ftp.open(host, port?, username?, password?) -> STRING (handle)
      * Connect to an FTP server. Returns a handle for subsequent operations.
      * 
      * @param args[0] host - FTP server hostname (required)
@@ -137,7 +137,7 @@ public class BuiltinsFtp {
      */
     private static String connect(Object[] args) throws InterpreterError {
         if (args.length < 1 || args[0] == null) {
-            throw new InterpreterError("ftp.connect: host is required");
+            throw new InterpreterError("ftp.open: host is required");
         }
         
         String host = (String) args[0];
@@ -171,14 +171,14 @@ public class BuiltinsFtp {
             int reply = client.getReplyCode();
             if (!FTPReply.isPositiveCompletion(reply)) {
                 client.disconnect();
-                throw new InterpreterError("ftp.connect: Connection refused by server. Reply code: " + reply);
+                throw new InterpreterError("ftp.open: Connection refused by server. Reply code: " + reply);
             }
             
             // Login
             if (!client.login(username, password)) {
                 client.logout();
                 client.disconnect();
-                throw new InterpreterError("ftp.connect: Login failed for user: " + username);
+                throw new InterpreterError("ftp.open: Login failed for user: " + username);
             }
             
             // Set default mode to passive and binary
@@ -201,12 +201,12 @@ public class BuiltinsFtp {
                 }
             } catch (Exception ignore) {
             }
-            throw new InterpreterError("ftp.connect: " + ex.getMessage());
+            throw new InterpreterError("ftp.open: " + ex.getMessage());
         }
     }
 
     /**
-     * ftp.connectSecure(host, port?, username?, password?, implicit?) -> STRING (handle)
+     * ftp.openSecure(host, port?, username?, password?, implicit?) -> STRING (handle)
      * Connect to an FTPS (FTP over SSL/TLS) server. Returns a handle for subsequent operations.
      * 
      * @param args[0] host - FTP server hostname (required)
@@ -217,7 +217,7 @@ public class BuiltinsFtp {
      */
     private static String connectSecure(Object[] args) throws InterpreterError {
         if (args.length < 1 || args[0] == null) {
-            throw new InterpreterError("ftp.connectSecure: host is required");
+            throw new InterpreterError("ftp.openSecure: host is required");
         }
         
         String host = (String) args[0];
@@ -263,7 +263,7 @@ public class BuiltinsFtp {
             int reply = client.getReplyCode();
             if (!FTPReply.isPositiveCompletion(reply)) {
                 client.disconnect();
-                throw new InterpreterError("ftp.connectSecure: Connection refused by server. Reply code: " + reply);
+                throw new InterpreterError("ftp.openSecure: Connection refused by server. Reply code: " + reply);
             }
             
             // For explicit mode, execute AUTH TLS command
@@ -275,7 +275,7 @@ public class BuiltinsFtp {
             if (!client.login(username, password)) {
                 client.logout();
                 client.disconnect();
-                throw new InterpreterError("ftp.connectSecure: Login failed for user: " + username);
+                throw new InterpreterError("ftp.openSecure: Login failed for user: " + username);
             }
             
             // Set protection buffer size and data channel protection level
@@ -302,7 +302,7 @@ public class BuiltinsFtp {
                 }
             } catch (Exception ignore) {
             }
-            throw new InterpreterError("ftp.connectSecure: " + ex.getMessage());
+            throw new InterpreterError("ftp.openSecure: " + ex.getMessage());
         }
     }
 
