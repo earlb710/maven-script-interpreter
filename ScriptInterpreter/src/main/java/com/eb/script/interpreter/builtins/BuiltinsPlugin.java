@@ -3,11 +3,15 @@ package com.eb.script.interpreter.builtins;
 import com.eb.script.interpreter.InterpreterError;
 import com.eb.script.interpreter.plugin.EbsFunction;
 
+import java.io.File;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.prefs.Preferences;
 
 /**
  * Built-in functions for loading and calling external Java plugins.
@@ -15,6 +19,13 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p>This class provides the runtime support for the plugin system, allowing
  * EBS scripts to load external Java classes that implement the {@link EbsFunction}
  * interface and call them at runtime using the {@code #custom.functionName(...)} syntax.</p>
+ * 
+ * <p>Plugins can be loaded from:
+ * <ul>
+ *   <li>The application classpath</li>
+ *   <li>Safe directories configured in Tools &gt; Safe Directories</li>
+ * </ul>
+ * </p>
  * 
  * <h2>Plugin Management Functions</h2>
  * <ul>
@@ -56,6 +67,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class BuiltinsPlugin {
     
     /**
+     * Preferences node for safe directories (must match SafeDirectoriesDialog).
+     */
+    private static final String PREF_NODE = "com.eb.sandbox";
+    private static final String PREF_KEY_DIR_PREFIX = "safeDir.";
+    private static final int MAX_SAFE_DIRS = 20;
+    
+    /**
      * Registry of loaded plugins, keyed by alias (lowercase).
      */
     private static final ConcurrentHashMap<String, EbsFunction> LOADED_PLUGINS = new ConcurrentHashMap<>();
@@ -65,6 +83,67 @@ public class BuiltinsPlugin {
      * Used for info/debugging.
      */
     private static final ConcurrentHashMap<String, String> PLUGIN_CLASS_NAMES = new ConcurrentHashMap<>();
+    
+    /**
+     * Gets the list of configured safe directories from user preferences.
+     * 
+     * @return list of safe directory paths
+     */
+    private static List<String> getSafeDirectories() {
+        List<String> dirs = new ArrayList<>();
+        try {
+            Preferences prefs = Preferences.userRoot().node(PREF_NODE);
+            for (int i = 0; i < MAX_SAFE_DIRS; i++) {
+                String dir = prefs.get(PREF_KEY_DIR_PREFIX + i, null);
+                if (dir != null && !dir.isEmpty()) {
+                    dirs.add(dir);
+                }
+            }
+        } catch (Exception e) {
+            // If preferences can't be read, return empty list
+        }
+        return dirs;
+    }
+    
+    /**
+     * Attempts to load a class from safe directories using a URLClassLoader.
+     * 
+     * @param className the fully qualified class name
+     * @return the loaded class, or null if not found in safe directories
+     */
+    private static Class<?> loadClassFromSafeDirectories(String className) {
+        List<String> safeDirs = getSafeDirectories();
+        if (safeDirs.isEmpty()) {
+            return null;
+        }
+        
+        try {
+            // Build URLs for all safe directories
+            List<URL> urls = new ArrayList<>();
+            for (String dir : safeDirs) {
+                File dirFile = new File(dir);
+                if (dirFile.isDirectory()) {
+                    urls.add(dirFile.toURI().toURL());
+                }
+            }
+            
+            if (urls.isEmpty()) {
+                return null;
+            }
+            
+            // Create a URLClassLoader with the safe directories
+            URL[] urlArray = urls.toArray(new URL[0]);
+            try (URLClassLoader classLoader = new URLClassLoader(urlArray, BuiltinsPlugin.class.getClassLoader())) {
+                return classLoader.loadClass(className);
+            }
+        } catch (ClassNotFoundException e) {
+            // Class not found in safe directories
+            return null;
+        } catch (Exception e) {
+            // Other errors (IO, security, etc.)
+            return null;
+        }
+    }
     
     /**
      * Checks if the given builtin name is a Plugin builtin or a custom function call.
@@ -188,8 +267,18 @@ public class BuiltinsPlugin {
         }
         
         try {
-            // Load the class
-            Class<?> clazz = Class.forName(className);
+            // First try to load the class from classpath
+            Class<?> clazz = null;
+            try {
+                clazz = Class.forName(className);
+            } catch (ClassNotFoundException e) {
+                // Class not on classpath, try safe directories
+                clazz = loadClassFromSafeDirectories(className);
+                if (clazz == null) {
+                    throw new InterpreterError("plugin.load: class not found: " + className + 
+                        ". Ensure the class is on the classpath or in a safe directory.");
+                }
+            }
             
             // Validate it implements EbsFunction
             if (!EbsFunction.class.isAssignableFrom(clazz)) {
@@ -208,9 +297,6 @@ public class BuiltinsPlugin {
             PLUGIN_CLASS_NAMES.put(normalizedAlias, className);
             
             return true;
-        } catch (ClassNotFoundException e) {
-            throw new InterpreterError("plugin.load: class not found: " + className + 
-                ". Ensure the class is on the classpath.");
         } catch (NoSuchMethodException e) {
             throw new InterpreterError("plugin.load: class '" + className + 
                 "' must have a public no-argument constructor");

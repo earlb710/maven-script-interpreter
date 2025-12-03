@@ -39,16 +39,29 @@ public class MyCustomFunction implements EbsFunction {
 }
 ```
 
-### 2. Compile and add to classpath
+### 2. Compile and place in a safe directory
 
-Compile your class and ensure it's on the classpath when running the EBS interpreter:
+Compile your class and place it in a directory that is configured as a "Safe Directory":
 
 ```bash
-# Compile
+# Compile the class
 javac -cp ScriptInterpreter/target/classes MyCustomFunction.java
 
+# Move to a safe directory (e.g., ~/plugins)
+mkdir -p ~/plugins/com/example
+mv MyCustomFunction.class ~/plugins/com/example/
+```
+
+Then configure the safe directory in the EBS application:
+1. Go to **Tools > Safe Directories**
+2. Click **Add** and select `~/plugins`
+3. Click **OK** to save
+
+Alternatively, you can add the class to the application classpath:
+
+```bash
 # Run with the class on classpath
-java -cp "ScriptInterpreter/target/classes:." com.eb.ui.cli.MainApp
+java -cp "ScriptInterpreter/target/classes:~/plugins" com.eb.ui.cli.MainApp
 ```
 
 ### 3. Use in EBS script
