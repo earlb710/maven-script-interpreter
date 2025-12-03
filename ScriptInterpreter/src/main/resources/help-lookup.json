@@ -2419,7 +2419,7 @@
     {
       "function": "mail.open",
       "short_description": "Opens a connection to a mail server",
-      "long_help": "Opens a connection to a mail server using IMAP or POP3 protocol and returns a connection handle for subsequent operations.<br><br><b>Supported protocols:</b> imap, imaps (default, SSL), pop3, pop3s (SSL)<br><br><b>Note:</b> When using Gmail or Google Workspace, you must use an App Password instead of your regular password if 2-Factor Authentication is enabled.<br><br><b>SSL Note:</b> SSL protocols (imaps, pop3s) trust all certificates by default for compatibility.",
+      "long_help": "Opens a connection to a mail server using IMAP or POP3 protocol and returns a connection handle for subsequent operations.<br><br><b>Supported protocols:</b> imap, imaps (default, SSL), pop3, pop3s (SSL)<br><br><b>Gmail App Password:</b> When using Gmail or Google Workspace, you must use an App Password instead of your regular password if 2-Factor Authentication is enabled. Gmail App Passwords are <b>16 characters with no spaces</b> (format: xxxx xxxx xxxx xxxx shown with spaces but enter without spaces). Generate one from your Google Account &gt; Security &gt; App Passwords.<br><br><b>SSL Note:</b> SSL protocols (imaps, pop3s) trust all certificates by default for compatibility.",
       "parameters": [
         {
           "name": "host",

@@ -2737,19 +2737,19 @@ Connects to a mail server and returns a connection handle for subsequent operati
 
 **Returns:** String - a connection handle to use with other mail functions
 
-**Note on Gmail/Google Workspace:** Gmail requires an [App Password](https://support.google.com/accounts/answer/185833) when 2-Factor Authentication is enabled. Regular passwords will not work. Generate an app password from your Google Account security settings.
+**Note on Gmail/Google Workspace:** Gmail requires an [App Password](https://support.google.com/accounts/answer/185833) when 2-Factor Authentication is enabled. Regular passwords will not work. **Important:** Gmail App Passwords are 16 characters with no spaces (displayed as `xxxx xxxx xxxx xxxx` but enter without spaces). Generate one from Google Account > Security > App Passwords.
 
 **Note on SSL:** When using SSL protocols (imaps, pop3s), the implementation trusts all SSL certificates for compatibility. For production environments requiring strict certificate validation, additional configuration may be needed.
 
 ```javascript
-// Connect to Gmail via IMAPS (SSL) - use an app password, not your regular password
-var handle = call mail.open("imap.gmail.com", 993, "myemail@gmail.com", "your-app-password", "imaps");
+// Connect to Gmail via IMAPS (SSL) - use an app password (16 chars, no spaces)
+var handle = call mail.open("imap.gmail.com", 993, "myemail@gmail.com", "xxxxyyyyzzzzwwww", "imaps");
 
 // Connect to a local server without SSL
 var handle2 = call mail.open("localhost", 143, "testuser", "password", "imap");
 
 // Connect with a custom timeout (60 seconds)
-var handle3 = call mail.open("imap.gmail.com", 993, "user@gmail.com", "app-password", "imaps", 60);
+var handle3 = call mail.open("imap.gmail.com", 993, "user@gmail.com", "xxxxyyyyzzzzwwww", "imaps", 60);
 ```
 
 #### mail.folders(handle)
