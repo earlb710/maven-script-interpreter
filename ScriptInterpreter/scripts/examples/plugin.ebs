@@ -1,0 +1,31 @@
+// EBS Language Reference v1.0.4.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: Plugin system - Load and call external Java functions
+// Custom functions are called using #custom.functionName(...) syntax
+
+// Load the built-in example plugin
+#plugin.load("com.eb.script.interpreter.plugin.ExampleEbsFunction", "echo");
+
+// Call the custom function using #custom.alias(...) syntax
+var result = #custom.echo("Hello", "World");
+print result;  // Outputs: [Echo] Hello World
+
+// Check if plugin is loaded
+var loaded = #plugin.isLoaded("echo");
+print "Is loaded: " + loaded;
+
+// Get plugin info
+var info = #plugin.info("echo");
+print "Plugin name: " + #json.getString(info, "name", "");
+
+// List all loaded plugins
+var plugins = #plugin.list();
+print "Loaded plugins: " + plugins;
+
+// Load with custom configuration
+#plugin.unload("echo");
+#plugin.load("com.eb.script.interpreter.plugin.ExampleEbsFunction", "myEcho", {"prefix": "[CUSTOM]"});
+var customResult = #custom.myEcho("Test");
+print customResult;  // Outputs: [CUSTOM] Test
+
+// Unload when done
+#plugin.unload("myEcho");
