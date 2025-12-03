@@ -545,6 +545,7 @@ public class BuiltinsFtp {
     /**
      * ftp.size(handle, path) -> LONG
      * Get the size of a file on the FTP server.
+     * Returns -1L if the file is not found.
      */
     private static Long size(Object[] args) throws InterpreterError {
         if (args.length < 2 || args[0] == null || args[1] == null) {
@@ -561,7 +562,7 @@ public class BuiltinsFtp {
             if (files != null && files.length > 0) {
                 return files[0].getSize();
             }
-            return null;
+            return -1L;  // File not found
         } catch (Exception ex) {
             throw new InterpreterError("ftp.size: " + ex.getMessage());
         }
