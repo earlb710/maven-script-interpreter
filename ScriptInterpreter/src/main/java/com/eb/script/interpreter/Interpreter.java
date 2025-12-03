@@ -194,6 +194,9 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             }
         }
 
+        // Clear all loaded plugins
+        com.eb.script.interpreter.builtins.BuiltinsPlugin.clearAllPlugins();
+
         // Clear all maps
         
         context.clear();
