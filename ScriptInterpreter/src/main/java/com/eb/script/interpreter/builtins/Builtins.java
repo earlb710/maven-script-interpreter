@@ -1019,6 +1019,40 @@ public final class Builtins {
                 newParam("searchPath", DataType.STRING, false)  // optional; base path to search in
         ));
 
+        // ==========================
+        // Plugin builtins (external Java function loading)
+        // ==========================
+        addBuiltin(info(
+                "plugin.load", DataType.BOOL,
+                newParam("className", DataType.STRING, true),   // required; fully qualified class name
+                newParam("alias", DataType.STRING, true),       // required; alias to reference the plugin
+                newParam("config", DataType.JSON, false)        // optional; configuration map
+        ));
+        addBuiltin(info(
+                "plugin.call", DataType.ANY,
+                newParam("alias", DataType.STRING, true),       // required; alias of the loaded plugin
+                newParam("arg1", DataType.ANY, false),          // optional; first argument
+                newParam("arg2", DataType.ANY, false),          // optional; second argument
+                newParam("arg3", DataType.ANY, false),          // optional; third argument
+                newParam("arg4", DataType.ANY, false),          // optional; fourth argument
+                newParam("arg5", DataType.ANY, false)           // optional; fifth argument
+        ));
+        addBuiltin(info(
+                "plugin.isLoaded", DataType.BOOL,
+                newParam("alias", DataType.STRING, true)        // required; alias to check
+        ));
+        addBuiltin(info(
+                "plugin.unload", DataType.BOOL,
+                newParam("alias", DataType.STRING, true)        // required; alias to unload
+        ));
+        addBuiltin(info(
+                "plugin.list", DataType.JSON                    // returns array of loaded plugin aliases
+        ));
+        addBuiltin(info(
+                "plugin.info", DataType.JSON,
+                newParam("alias", DataType.STRING, true)        // required; alias to get info for
+        ));
+
         NAMES = Collections.unmodifiableSet(BUILTINS.keySet());
     }
 
@@ -1072,6 +1106,11 @@ public final class Builtins {
         // CSS builtins
         if (BuiltinsCss.handles(name)) {
             return BuiltinsCss.dispatch(name, args);
+        }
+        
+        // Plugin builtins (external Java function loading)
+        if (BuiltinsPlugin.handles(name)) {
+            return BuiltinsPlugin.dispatch(name, args);
         }
         
         // File builtins (already in BuiltinsFile)

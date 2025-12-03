@@ -2325,6 +2325,101 @@
       ],
       "return_type": "string",
       "example": "<b>call</b> <b>sleep</b>(millis=1000);<br>// Pauses for 1 second<br><b>print</b> \"Resumed after 1 second delay\";"
+    },
+    {
+      "function": "plugin.load",
+      "short_description": "Loads an external Java class as a plugin",
+      "long_help": "Loads a Java class that implements the EbsFunction interface and registers it with the given alias. The class must be<br>on the classpath and have a public no-argument constructor. An optional configuration map can be passed to initialize<br>the plugin. Returns true if loaded successfully.",
+      "parameters": [
+        {
+          "name": "className",
+          "type": "string",
+          "description": "Fully qualified Java class name"
+        },
+        {
+          "name": "alias",
+          "type": "string",
+          "description": "Alias to reference the plugin in plugin.call"
+        },
+        {
+          "name": "config",
+          "type": "json",
+          "optional": true,
+          "description": "Optional configuration map passed to initialize()"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>call</b> <b>plugin.load</b>(\"com.example.MyFunc\", \"myFunc\");<br><b>call</b> <b>plugin.load</b>(\"com.example.MyFunc\", \"myFunc\", {\"opt\": \"val\"});"
+    },
+    {
+      "function": "plugin.call",
+      "short_description": "Calls a loaded plugin function",
+      "long_help": "Executes a previously loaded plugin function with the given arguments. The plugin must have been loaded with<br>plugin.load first. Returns the result of the function execution.",
+      "parameters": [
+        {
+          "name": "alias",
+          "type": "string",
+          "description": "The alias assigned when the plugin was loaded"
+        },
+        {
+          "name": "args",
+          "type": "any",
+          "optional": true,
+          "description": "Arguments to pass to the function (up to 5)"
+        }
+      ],
+      "return_type": "any",
+      "example": "<b>var</b> result = <b>call</b> <b>plugin.call</b>(\"myFunc\", \"arg1\", 42);<br><b>print</b> result;"
+    },
+    {
+      "function": "plugin.isLoaded",
+      "short_description": "Checks if a plugin is loaded",
+      "long_help": "Returns true if a plugin with the given alias is currently loaded, false otherwise. Useful for checking before<br>calling a plugin or for conditional plugin loading.",
+      "parameters": [
+        {
+          "name": "alias",
+          "type": "string",
+          "description": "The alias to check"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>if</b> <b>call</b> <b>plugin.isLoaded</b>(\"myFunc\") <b>then</b> {<br>    <b>print</b> \"Plugin is available\";<br>}"
+    },
+    {
+      "function": "plugin.unload",
+      "short_description": "Unloads a plugin",
+      "long_help": "Unloads a previously loaded plugin and calls its cleanup() method to release resources. Returns true if the plugin<br>was unloaded, false if it wasn't loaded.",
+      "parameters": [
+        {
+          "name": "alias",
+          "type": "string",
+          "description": "The alias of the plugin to unload"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>call</b> <b>plugin.unload</b>(\"myFunc\");<br><b>print</b> \"Plugin has been unloaded\";"
+    },
+    {
+      "function": "plugin.list",
+      "short_description": "Lists all loaded plugins",
+      "long_help": "Returns an array of all currently loaded plugin aliases. Useful for debugging and inspecting the plugin state.",
+      "parameters": [],
+      "return_type": "json",
+      "example": "<b>var</b> plugins = <b>call</b> <b>plugin.list</b>();<br><b>foreach</b> p <b>in</b> plugins {<br>    <b>print</b> \"Loaded: \" + p;<br>}"
+    },
+    {
+      "function": "plugin.info",
+      "short_description": "Gets information about a loaded plugin",
+      "long_help": "Returns a JSON object containing detailed information about a loaded plugin, including its alias, class name, name,<br>and description. Returns null if the plugin is not loaded.",
+      "parameters": [
+        {
+          "name": "alias",
+          "type": "string",
+          "description": "The alias of the plugin to get info for"
+        }
+      ],
+      "return_type": "json",
+      "example": "<b>var</b> info = <b>call</b> <b>plugin.info</b>(\"myFunc\");<br><b>print</b> <b>call</b> json.getString(info, \"description\", \"\");"
     }
   ]
 }
