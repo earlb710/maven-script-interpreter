@@ -617,10 +617,10 @@ showAskAiScreen {
                 "default": "",
                 "display": {
                     "type": "textarea",
-                    "labelText": "Describe what you want to match:",
+                    "labelText": "Describe what\nyou want to match:",
                     "promptHelp": "E.g., 'email addresses' or 'dates in YYYY-MM-DD format' or 'phone numbers with area code'",
                     "maxLength": 80,
-                    "height": 2
+                    "height": 3
                 }
             },
             {
