@@ -609,7 +609,7 @@ showAskAiScreen {
     screen askAiScreen = {
         "title": "Ask AI - Generate Regex Pattern",
         "width": 700,
-        "height": 400,
+        "height": 350,
         "vars": [
             {
                 "name": "aiRequest",
