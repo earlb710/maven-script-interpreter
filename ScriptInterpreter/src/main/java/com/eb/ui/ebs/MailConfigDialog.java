@@ -1,8 +1,16 @@
 package com.eb.ui.ebs;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.prefs.Preferences;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.geometry.Insets;
@@ -18,7 +26,9 @@ import javafx.stage.Stage;
 
 /**
  * Dialog for configuring mail server connections that can be accessed by the script interpreter.
- * Allows users to define variable names and associate them with mail server connection parameters.
+ * Allows users to define variable names and associate them with mail server connection URLs.
+ * 
+ * URL Format: mail://user:password@host:port?protocol=imaps
  * 
  * @author Earl Bosch
  */
@@ -26,59 +36,74 @@ public class MailConfigDialog extends Stage {
 
     private static final String PREF_NODE = "com.eb.mail";
     private static final String PREF_KEY_NAME_PREFIX = "mailVarName.";
-    private static final String PREF_KEY_HOST_PREFIX = "mailHost.";
-    private static final String PREF_KEY_PORT_PREFIX = "mailPort.";
-    private static final String PREF_KEY_USER_PREFIX = "mailUser.";
-    private static final String PREF_KEY_PASS_PREFIX = "mailPass.";
-    private static final String PREF_KEY_PROTO_PREFIX = "mailProto.";
+    private static final String PREF_KEY_URL_PREFIX = "mailUrl.";
     private static final int MAX_MAIL_CONFIGS = 20;
+    
+    /** Mail URL pattern: mail://user:password@host:port?protocol=xxx */
+    private static final Pattern MAIL_URL_PATTERN = Pattern.compile(
+        "mail://([^:]+):([^@]*)@([^:]+):(\\d+)(?:\\?protocol=([a-zA-Z0-9]+))?"
+    );
 
     private final TableView<MailConfigEntry> mailTableView;
     private final List<MailConfigEntry> mailConfigs;
     
     /**
-     * Data model for a mail configuration entry.
+     * Data model for a mail configuration entry (simplified to varName + URL).
      */
     public static class MailConfigEntry {
         private final StringProperty varName;
-        private final StringProperty host;
-        private final StringProperty port;
-        private final StringProperty user;
-        private final StringProperty password;
-        private final StringProperty protocol;
+        private final StringProperty url;
         
-        public MailConfigEntry(String varName, String host, String port, String user, String password, String protocol) {
+        public MailConfigEntry(String varName, String url) {
             this.varName = new SimpleStringProperty(varName != null ? varName : "");
-            this.host = new SimpleStringProperty(host != null ? host : "");
-            this.port = new SimpleStringProperty(port != null ? port : "993");
-            this.user = new SimpleStringProperty(user != null ? user : "");
-            this.password = new SimpleStringProperty(password != null ? password : "");
-            this.protocol = new SimpleStringProperty(protocol != null ? protocol : "imaps");
+            this.url = new SimpleStringProperty(url != null ? url : "");
         }
         
         public String getVarName() { return varName.get(); }
         public void setVarName(String value) { varName.set(value != null ? value : ""); }
         public StringProperty varNameProperty() { return varName; }
         
-        public String getHost() { return host.get(); }
-        public void setHost(String value) { host.set(value != null ? value : ""); }
-        public StringProperty hostProperty() { return host; }
+        public String getUrl() { return url.get(); }
+        public void setUrl(String value) { url.set(value != null ? value : ""); }
+        public StringProperty urlProperty() { return url; }
         
-        public String getPort() { return port.get(); }
-        public void setPort(String value) { port.set(value != null ? value : "993"); }
-        public StringProperty portProperty() { return port; }
+        /**
+         * Creates a mail URL from individual components.
+         */
+        public static String buildUrl(String host, String port, String user, String password, String protocol) {
+            try {
+                String encodedUser = URLEncoder.encode(user, StandardCharsets.UTF_8.name());
+                String encodedPass = URLEncoder.encode(password, StandardCharsets.UTF_8.name());
+                String proto = protocol != null && !protocol.isEmpty() ? protocol : "imaps";
+                return String.format("mail://%s:%s@%s:%s?protocol=%s", 
+                    encodedUser, encodedPass, host, port, proto);
+            } catch (UnsupportedEncodingException e) {
+                return "";
+            }
+        }
         
-        public String getUser() { return user.get(); }
-        public void setUser(String value) { user.set(value != null ? value : ""); }
-        public StringProperty userProperty() { return user; }
-        
-        public String getPassword() { return password.get(); }
-        public void setPassword(String value) { password.set(value != null ? value : ""); }
-        public StringProperty passwordProperty() { return password; }
-        
-        public String getProtocol() { return protocol.get(); }
-        public void setProtocol(String value) { protocol.set(value != null ? value : "imaps"); }
-        public StringProperty protocolProperty() { return protocol; }
+        /**
+         * Parses a mail URL into components.
+         * @return Map with keys: host, port, user, password, protocol
+         */
+        public static Map<String, String> parseUrl(String url) {
+            Map<String, String> result = new HashMap<>();
+            if (url == null || url.isEmpty()) return result;
+            
+            Matcher m = MAIL_URL_PATTERN.matcher(url);
+            if (m.matches()) {
+                try {
+                    result.put("user", URLDecoder.decode(m.group(1), StandardCharsets.UTF_8.name()));
+                    result.put("password", URLDecoder.decode(m.group(2), StandardCharsets.UTF_8.name()));
+                    result.put("host", m.group(3));
+                    result.put("port", m.group(4));
+                    result.put("protocol", m.group(5) != null ? m.group(5) : "imaps");
+                } catch (UnsupportedEncodingException e) {
+                    // Return empty map on error
+                }
+            }
+            return result;
+        }
     }
 
     public MailConfigDialog() {
@@ -100,51 +125,20 @@ public class MailConfigDialog extends Stage {
         TableColumn<MailConfigEntry, String> nameColumn = new TableColumn<>("Variable");
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("varName"));
         nameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        nameColumn.setMinWidth(80);
+        nameColumn.setMinWidth(100);
         nameColumn.setEditable(true);
         nameColumn.setOnEditCommit(event -> event.getRowValue().setVarName(event.getNewValue()));
         
-        // Host column
-        TableColumn<MailConfigEntry, String> hostColumn = new TableColumn<>("Host");
-        hostColumn.setCellValueFactory(new PropertyValueFactory<>("host"));
-        hostColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        hostColumn.setMinWidth(150);
-        hostColumn.setEditable(true);
-        hostColumn.setOnEditCommit(event -> event.getRowValue().setHost(event.getNewValue()));
+        // URL column
+        TableColumn<MailConfigEntry, String> urlColumn = new TableColumn<>("Mail URL (mail://user:password@host:port?protocol=imaps)");
+        urlColumn.setCellValueFactory(new PropertyValueFactory<>("url"));
+        urlColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        urlColumn.setMinWidth(600);
+        urlColumn.setEditable(true);
+        urlColumn.setOnEditCommit(event -> event.getRowValue().setUrl(event.getNewValue()));
         
-        // Port column
-        TableColumn<MailConfigEntry, String> portColumn = new TableColumn<>("Port");
-        portColumn.setCellValueFactory(new PropertyValueFactory<>("port"));
-        portColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        portColumn.setMinWidth(60);
-        portColumn.setEditable(true);
-        portColumn.setOnEditCommit(event -> event.getRowValue().setPort(event.getNewValue()));
-        
-        // User column
-        TableColumn<MailConfigEntry, String> userColumn = new TableColumn<>("User/Email");
-        userColumn.setCellValueFactory(new PropertyValueFactory<>("user"));
-        userColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        userColumn.setMinWidth(180);
-        userColumn.setEditable(true);
-        userColumn.setOnEditCommit(event -> event.getRowValue().setUser(event.getNewValue()));
-        
-        // Password column (shows masked)
-        TableColumn<MailConfigEntry, String> passColumn = new TableColumn<>("Password");
-        passColumn.setCellValueFactory(new PropertyValueFactory<>("password"));
-        passColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        passColumn.setMinWidth(150);
-        passColumn.setEditable(true);
-        passColumn.setOnEditCommit(event -> event.getRowValue().setPassword(event.getNewValue()));
-        
-        // Protocol column
-        TableColumn<MailConfigEntry, String> protoColumn = new TableColumn<>("Protocol");
-        protoColumn.setCellValueFactory(new PropertyValueFactory<>("protocol"));
-        protoColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        protoColumn.setMinWidth(80);
-        protoColumn.setEditable(true);
-        protoColumn.setOnEditCommit(event -> event.getRowValue().setProtocol(event.getNewValue()));
-        
-        mailTableView.getColumns().addAll(nameColumn, hostColumn, portColumn, userColumn, passColumn, protoColumn);
+        mailTableView.getColumns().add(nameColumn);
+        mailTableView.getColumns().add(urlColumn);
         
         refreshTableView();
 
@@ -177,15 +171,14 @@ public class MailConfigDialog extends Stage {
         layout.setPadding(new Insets(16));
 
         Label infoLabel = new Label(
-            "Configure mail server connections with variable names.\n" +
-            "These configurations provide quick access to mail servers in scripts.\n\n" +
+            "Configure mail server connections using URL format.\n\n" +
+            "URL Format: mail://user:password@host:port?protocol=imaps\n\n" +
+            "Examples:\n" +
+            "• Gmail:   mail://user%40gmail.com:apppassword@imap.gmail.com:993?protocol=imaps\n" +
+            "• Outlook: mail://user%40outlook.com:password@outlook.office365.com:993?protocol=imaps\n\n" +
             "Gmail App Password: Must be 16 characters with NO SPACES.\n" +
-            "(Displayed as 'xxxx xxxx xxxx xxxx' but enter without spaces)\n" +
-            "Generate from: Google Account > Security > App Passwords\n\n" +
-            "Common Settings:\n" +
-            "• Gmail IMAPS: imap.gmail.com:993 (protocol: imaps)\n" +
-            "• Gmail POP3S: pop.gmail.com:995 (protocol: pop3s)\n" +
-            "• Outlook IMAPS: outlook.office365.com:993 (protocol: imaps)"
+            "(Displayed as 'xxxx xxxx xxxx xxxx' but enter without spaces)\n\n" +
+            "Note: Use %40 for @ in email addresses, URL-encode special characters in passwords."
         );
         infoLabel.setWrapText(true);
 
@@ -218,7 +211,7 @@ public class MailConfigDialog extends Stage {
             return;
         }
 
-        mailConfigs.add(new MailConfigEntry("", "", "993", "", "", "imaps"));
+        mailConfigs.add(new MailConfigEntry("", "mail://user:password@host:993?protocol=imaps"));
         refreshTableView();
         mailTableView.getSelectionModel().selectLast();
         mailTableView.edit(mailConfigs.size() - 1, mailTableView.getColumns().get(0));
@@ -231,7 +224,7 @@ public class MailConfigDialog extends Stage {
             return;
         }
 
-        mailConfigs.add(new MailConfigEntry("gmail", "imap.gmail.com", "993", "your-email@gmail.com", "", "imaps"));
+        mailConfigs.add(new MailConfigEntry("gmail", "mail://your-email%40gmail.com:your-16-char-app-password@imap.gmail.com:993?protocol=imaps"));
         refreshTableView();
         mailTableView.getSelectionModel().selectLast();
     }
@@ -251,14 +244,16 @@ public class MailConfigDialog extends Stage {
             for (int i = 0; i < mailConfigs.size(); i++) {
                 MailConfigEntry entry = mailConfigs.get(i);
                 String varName = entry.getVarName().trim();
-                String host = entry.getHost().trim();
+                String url = entry.getUrl().trim();
                 
-                if (!varName.isEmpty() && host.isEmpty()) {
-                    errors.add("Row " + (i + 1) + ": Variable name '" + varName + "' has no host");
-                } else if (varName.isEmpty() && !host.isEmpty()) {
-                    errors.add("Row " + (i + 1) + ": Host has no variable name");
+                if (!varName.isEmpty() && url.isEmpty()) {
+                    errors.add("Row " + (i + 1) + ": Variable name '" + varName + "' has no URL");
+                } else if (varName.isEmpty() && !url.isEmpty()) {
+                    errors.add("Row " + (i + 1) + ": URL has no variable name");
                 } else if (!varName.isEmpty() && !varName.matches("[a-zA-Z_][a-zA-Z0-9_]*")) {
                     errors.add("Row " + (i + 1) + ": Variable name '" + varName + "' is invalid");
+                } else if (!url.isEmpty() && !url.startsWith("mail://")) {
+                    errors.add("Row " + (i + 1) + ": URL must start with 'mail://'");
                 }
             }
             
@@ -302,15 +297,11 @@ public class MailConfigDialog extends Stage {
         
         for (int i = 0; i < MAX_MAIL_CONFIGS; i++) {
             String varName = prefs.get(PREF_KEY_NAME_PREFIX + i, null);
-            String host = prefs.get(PREF_KEY_HOST_PREFIX + i, null);
-            if (varName != null || host != null) {
+            String url = prefs.get(PREF_KEY_URL_PREFIX + i, null);
+            if (varName != null || url != null) {
                 mailConfigs.add(new MailConfigEntry(
                     varName != null ? varName : "",
-                    host != null ? host : "",
-                    prefs.get(PREF_KEY_PORT_PREFIX + i, "993"),
-                    prefs.get(PREF_KEY_USER_PREFIX + i, ""),
-                    prefs.get(PREF_KEY_PASS_PREFIX + i, ""),
-                    prefs.get(PREF_KEY_PROTO_PREFIX + i, "imaps")
+                    url != null ? url : ""
                 ));
             }
         }
@@ -322,26 +313,18 @@ public class MailConfigDialog extends Stage {
         // Clear all existing entries
         for (int i = 0; i < MAX_MAIL_CONFIGS; i++) {
             prefs.remove(PREF_KEY_NAME_PREFIX + i);
-            prefs.remove(PREF_KEY_HOST_PREFIX + i);
-            prefs.remove(PREF_KEY_PORT_PREFIX + i);
-            prefs.remove(PREF_KEY_USER_PREFIX + i);
-            prefs.remove(PREF_KEY_PASS_PREFIX + i);
-            prefs.remove(PREF_KEY_PROTO_PREFIX + i);
+            prefs.remove(PREF_KEY_URL_PREFIX + i);
         }
         
-        // Save current list (only entries with variable name and host)
+        // Save current list (only entries with variable name and URL)
         int index = 0;
         for (MailConfigEntry entry : mailConfigs) {
             String varName = entry.getVarName().trim();
-            String host = entry.getHost().trim();
+            String url = entry.getUrl().trim();
             
-            if (!varName.isEmpty() && !host.isEmpty()) {
+            if (!varName.isEmpty() && !url.isEmpty()) {
                 prefs.put(PREF_KEY_NAME_PREFIX + index, varName);
-                prefs.put(PREF_KEY_HOST_PREFIX + index, host);
-                prefs.put(PREF_KEY_PORT_PREFIX + index, entry.getPort().trim());
-                prefs.put(PREF_KEY_USER_PREFIX + index, entry.getUser().trim());
-                prefs.put(PREF_KEY_PASS_PREFIX + index, entry.getPassword());
-                prefs.put(PREF_KEY_PROTO_PREFIX + index, entry.getProtocol().trim());
+                prefs.put(PREF_KEY_URL_PREFIX + index, url);
                 index++;
             }
         }
@@ -358,6 +341,7 @@ public class MailConfigDialog extends Stage {
 
     /**
      * Static method to retrieve the list of mail configuration entries from preferences.
+     * Returns entries as (varName, URL string) pairs.
      */
     public static List<MailConfigEntry> getMailConfigEntries() {
         List<MailConfigEntry> entries = new ArrayList<>();
@@ -365,19 +349,29 @@ public class MailConfigDialog extends Stage {
         
         for (int i = 0; i < MAX_MAIL_CONFIGS; i++) {
             String varName = prefs.get(PREF_KEY_NAME_PREFIX + i, null);
-            String host = prefs.get(PREF_KEY_HOST_PREFIX + i, null);
-            if (varName != null && !varName.isEmpty() && host != null && !host.isEmpty()) {
-                entries.add(new MailConfigEntry(
-                    varName,
-                    host,
-                    prefs.get(PREF_KEY_PORT_PREFIX + i, "993"),
-                    prefs.get(PREF_KEY_USER_PREFIX + i, ""),
-                    prefs.get(PREF_KEY_PASS_PREFIX + i, ""),
-                    prefs.get(PREF_KEY_PROTO_PREFIX + i, "imaps")
-                ));
+            String url = prefs.get(PREF_KEY_URL_PREFIX + i, null);
+            if (varName != null && !varName.isEmpty() && url != null && !url.isEmpty()) {
+                entries.add(new MailConfigEntry(varName, url));
             }
         }
         
         return entries;
+    }
+    
+    /**
+     * Parses a mail URL into its components.
+     * @param url Mail URL in format mail://user:password@host:port?protocol=xxx
+     * @return Map with keys: host, port, user, password, protocol (or empty map if invalid)
+     */
+    public static Map<String, String> parseMailUrl(String url) {
+        return MailConfigEntry.parseUrl(url);
+    }
+    
+    /**
+     * Builds a mail URL from components.
+     * @return Mail URL string
+     */
+    public static String buildMailUrl(String host, String port, String user, String password, String protocol) {
+        return MailConfigEntry.buildUrl(host, port, user, password, protocol);
     }
 }

@@ -1,8 +1,16 @@
 package com.eb.ui.ebs;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.prefs.Preferences;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.geometry.Insets;
@@ -18,7 +26,11 @@ import javafx.stage.Stage;
 
 /**
  * Dialog for configuring FTP server connections that can be accessed by the script interpreter.
- * Allows users to define variable names and associate them with FTP server connection parameters.
+ * Allows users to define variable names and associate them with FTP server connection URLs.
+ * 
+ * URL Formats:
+ * - ftp://user:password@host:port   (standard FTP)
+ * - ftps://user:password@host:port  (secure FTPS)
  * 
  * @author Earl Bosch
  */
@@ -26,63 +38,77 @@ public class FtpConfigDialog extends Stage {
 
     private static final String PREF_NODE = "com.eb.ftp";
     private static final String PREF_KEY_NAME_PREFIX = "ftpVarName.";
-    private static final String PREF_KEY_HOST_PREFIX = "ftpHost.";
-    private static final String PREF_KEY_PORT_PREFIX = "ftpPort.";
-    private static final String PREF_KEY_USER_PREFIX = "ftpUser.";
-    private static final String PREF_KEY_PASS_PREFIX = "ftpPass.";
-    private static final String PREF_KEY_SECURE_PREFIX = "ftpSecure.";
+    private static final String PREF_KEY_URL_PREFIX = "ftpUrl.";
     private static final int MAX_FTP_CONFIGS = 20;
+    
+    /** FTP/FTPS URL pattern: (ftp|ftps)://user:password@host:port */
+    private static final Pattern FTP_URL_PATTERN = Pattern.compile(
+        "(ftps?)://([^:]+):([^@]*)@([^:]+):(\\d+)"
+    );
 
     private final TableView<FtpConfigEntry> ftpTableView;
     private final List<FtpConfigEntry> ftpConfigs;
     
     /**
-     * Data model for an FTP configuration entry.
+     * Data model for an FTP configuration entry (simplified to varName + URL).
      */
     public static class FtpConfigEntry {
         private final StringProperty varName;
-        private final StringProperty host;
-        private final StringProperty port;
-        private final StringProperty user;
-        private final StringProperty password;
-        private final StringProperty secure;
+        private final StringProperty url;
         
-        public FtpConfigEntry(String varName, String host, String port, String user, String password, String secure) {
+        public FtpConfigEntry(String varName, String url) {
             this.varName = new SimpleStringProperty(varName != null ? varName : "");
-            this.host = new SimpleStringProperty(host != null ? host : "");
-            this.port = new SimpleStringProperty(port != null ? port : "21");
-            this.user = new SimpleStringProperty(user != null ? user : "");
-            this.password = new SimpleStringProperty(password != null ? password : "");
-            this.secure = new SimpleStringProperty(secure != null ? secure : "no");
+            this.url = new SimpleStringProperty(url != null ? url : "");
         }
         
         public String getVarName() { return varName.get(); }
         public void setVarName(String value) { varName.set(value != null ? value : ""); }
         public StringProperty varNameProperty() { return varName; }
         
-        public String getHost() { return host.get(); }
-        public void setHost(String value) { host.set(value != null ? value : ""); }
-        public StringProperty hostProperty() { return host; }
+        public String getUrl() { return url.get(); }
+        public void setUrl(String value) { url.set(value != null ? value : ""); }
+        public StringProperty urlProperty() { return url; }
         
-        public String getPort() { return port.get(); }
-        public void setPort(String value) { port.set(value != null ? value : "21"); }
-        public StringProperty portProperty() { return port; }
+        /**
+         * Creates an FTP URL from individual components.
+         */
+        public static String buildUrl(String host, String port, String user, String password, boolean secure) {
+            try {
+                String scheme = secure ? "ftps" : "ftp";
+                String encodedUser = URLEncoder.encode(user, StandardCharsets.UTF_8.name());
+                String encodedPass = URLEncoder.encode(password, StandardCharsets.UTF_8.name());
+                return String.format("%s://%s:%s@%s:%s", 
+                    scheme, encodedUser, encodedPass, host, port);
+            } catch (UnsupportedEncodingException e) {
+                return "";
+            }
+        }
         
-        public String getUser() { return user.get(); }
-        public void setUser(String value) { user.set(value != null ? value : ""); }
-        public StringProperty userProperty() { return user; }
-        
-        public String getPassword() { return password.get(); }
-        public void setPassword(String value) { password.set(value != null ? value : ""); }
-        public StringProperty passwordProperty() { return password; }
-        
-        public String getSecure() { return secure.get(); }
-        public void setSecure(String value) { secure.set(value != null ? value : "no"); }
-        public StringProperty secureProperty() { return secure; }
+        /**
+         * Parses an FTP URL into components.
+         * @return Map with keys: host, port, user, password, secure (true/false)
+         */
+        public static Map<String, String> parseUrl(String url) {
+            Map<String, String> result = new HashMap<>();
+            if (url == null || url.isEmpty()) return result;
+            
+            Matcher m = FTP_URL_PATTERN.matcher(url);
+            if (m.matches()) {
+                try {
+                    result.put("secure", m.group(1).equals("ftps") ? "true" : "false");
+                    result.put("user", URLDecoder.decode(m.group(2), StandardCharsets.UTF_8.name()));
+                    result.put("password", URLDecoder.decode(m.group(3), StandardCharsets.UTF_8.name()));
+                    result.put("host", m.group(4));
+                    result.put("port", m.group(5));
+                } catch (UnsupportedEncodingException e) {
+                    // Return empty map on error
+                }
+            }
+            return result;
+        }
         
         public boolean isSecure() {
-            String s = secure.get().toLowerCase();
-            return s.equals("yes") || s.equals("true") || s.equals("ftps");
+            return url.get().startsWith("ftps://");
         }
     }
 
@@ -105,51 +131,20 @@ public class FtpConfigDialog extends Stage {
         TableColumn<FtpConfigEntry, String> nameColumn = new TableColumn<>("Variable");
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("varName"));
         nameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        nameColumn.setMinWidth(80);
+        nameColumn.setMinWidth(100);
         nameColumn.setEditable(true);
         nameColumn.setOnEditCommit(event -> event.getRowValue().setVarName(event.getNewValue()));
         
-        // Host column
-        TableColumn<FtpConfigEntry, String> hostColumn = new TableColumn<>("Host");
-        hostColumn.setCellValueFactory(new PropertyValueFactory<>("host"));
-        hostColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        hostColumn.setMinWidth(180);
-        hostColumn.setEditable(true);
-        hostColumn.setOnEditCommit(event -> event.getRowValue().setHost(event.getNewValue()));
+        // URL column
+        TableColumn<FtpConfigEntry, String> urlColumn = new TableColumn<>("FTP URL (ftp://user:password@host:port or ftps://...)");
+        urlColumn.setCellValueFactory(new PropertyValueFactory<>("url"));
+        urlColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        urlColumn.setMinWidth(550);
+        urlColumn.setEditable(true);
+        urlColumn.setOnEditCommit(event -> event.getRowValue().setUrl(event.getNewValue()));
         
-        // Port column
-        TableColumn<FtpConfigEntry, String> portColumn = new TableColumn<>("Port");
-        portColumn.setCellValueFactory(new PropertyValueFactory<>("port"));
-        portColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        portColumn.setMinWidth(60);
-        portColumn.setEditable(true);
-        portColumn.setOnEditCommit(event -> event.getRowValue().setPort(event.getNewValue()));
-        
-        // User column
-        TableColumn<FtpConfigEntry, String> userColumn = new TableColumn<>("Username");
-        userColumn.setCellValueFactory(new PropertyValueFactory<>("user"));
-        userColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        userColumn.setMinWidth(120);
-        userColumn.setEditable(true);
-        userColumn.setOnEditCommit(event -> event.getRowValue().setUser(event.getNewValue()));
-        
-        // Password column
-        TableColumn<FtpConfigEntry, String> passColumn = new TableColumn<>("Password");
-        passColumn.setCellValueFactory(new PropertyValueFactory<>("password"));
-        passColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        passColumn.setMinWidth(120);
-        passColumn.setEditable(true);
-        passColumn.setOnEditCommit(event -> event.getRowValue().setPassword(event.getNewValue()));
-        
-        // Secure (FTPS) column
-        TableColumn<FtpConfigEntry, String> secureColumn = new TableColumn<>("Secure (FTPS)");
-        secureColumn.setCellValueFactory(new PropertyValueFactory<>("secure"));
-        secureColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        secureColumn.setMinWidth(100);
-        secureColumn.setEditable(true);
-        secureColumn.setOnEditCommit(event -> event.getRowValue().setSecure(event.getNewValue()));
-        
-        ftpTableView.getColumns().addAll(nameColumn, hostColumn, portColumn, userColumn, passColumn, secureColumn);
+        ftpTableView.getColumns().add(nameColumn);
+        ftpTableView.getColumns().add(urlColumn);
         
         refreshTableView();
 
@@ -180,14 +175,14 @@ public class FtpConfigDialog extends Stage {
         layout.setPadding(new Insets(16));
 
         Label infoLabel = new Label(
-            "Configure FTP server connections with variable names.\n" +
-            "These configurations provide quick access to FTP servers in scripts.\n\n" +
-            "Secure (FTPS) Column: Enter 'yes', 'true', or 'ftps' for secure connections.\n" +
-            "Leave empty or 'no' for regular FTP.\n\n" +
-            "Common Ports:\n" +
-            "• FTP: 21 (default)\n" +
-            "• FTPS (explicit TLS): 21\n" +
-            "• FTPS (implicit SSL): 990"
+            "Configure FTP server connections using URL format.\n\n" +
+            "URL Formats:\n" +
+            "• Standard FTP: ftp://user:password@host:port\n" +
+            "• Secure FTPS:  ftps://user:password@host:port\n\n" +
+            "Examples:\n" +
+            "• ftp://myuser:mypassword@ftp.example.com:21\n" +
+            "• ftps://myuser:mypassword@ftps.example.com:990\n\n" +
+            "Note: URL-encode special characters in passwords (use %40 for @, %3A for :, etc.)"
         );
         infoLabel.setWrapText(true);
 
@@ -220,7 +215,7 @@ public class FtpConfigDialog extends Stage {
             return;
         }
 
-        ftpConfigs.add(new FtpConfigEntry("", "", "21", "", "", "no"));
+        ftpConfigs.add(new FtpConfigEntry("", "ftp://user:password@host:21"));
         refreshTableView();
         ftpTableView.getSelectionModel().selectLast();
         ftpTableView.edit(ftpConfigs.size() - 1, ftpTableView.getColumns().get(0));
@@ -241,26 +236,16 @@ public class FtpConfigDialog extends Stage {
             for (int i = 0; i < ftpConfigs.size(); i++) {
                 FtpConfigEntry entry = ftpConfigs.get(i);
                 String varName = entry.getVarName().trim();
-                String host = entry.getHost().trim();
+                String url = entry.getUrl().trim();
                 
-                if (!varName.isEmpty() && host.isEmpty()) {
-                    errors.add("Row " + (i + 1) + ": Variable name '" + varName + "' has no host");
-                } else if (varName.isEmpty() && !host.isEmpty()) {
-                    errors.add("Row " + (i + 1) + ": Host has no variable name");
+                if (!varName.isEmpty() && url.isEmpty()) {
+                    errors.add("Row " + (i + 1) + ": Variable name '" + varName + "' has no URL");
+                } else if (varName.isEmpty() && !url.isEmpty()) {
+                    errors.add("Row " + (i + 1) + ": URL has no variable name");
                 } else if (!varName.isEmpty() && !varName.matches("[a-zA-Z_][a-zA-Z0-9_]*")) {
                     errors.add("Row " + (i + 1) + ": Variable name '" + varName + "' is invalid");
-                }
-                
-                // Validate port
-                try {
-                    int port = Integer.parseInt(entry.getPort().trim());
-                    if (port < 1 || port > 65535) {
-                        errors.add("Row " + (i + 1) + ": Port must be between 1 and 65535");
-                    }
-                } catch (NumberFormatException e) {
-                    if (!entry.getHost().trim().isEmpty()) {
-                        errors.add("Row " + (i + 1) + ": Invalid port number");
-                    }
+                } else if (!url.isEmpty() && !url.startsWith("ftp://") && !url.startsWith("ftps://")) {
+                    errors.add("Row " + (i + 1) + ": URL must start with 'ftp://' or 'ftps://'");
                 }
             }
             
@@ -304,15 +289,11 @@ public class FtpConfigDialog extends Stage {
         
         for (int i = 0; i < MAX_FTP_CONFIGS; i++) {
             String varName = prefs.get(PREF_KEY_NAME_PREFIX + i, null);
-            String host = prefs.get(PREF_KEY_HOST_PREFIX + i, null);
-            if (varName != null || host != null) {
+            String url = prefs.get(PREF_KEY_URL_PREFIX + i, null);
+            if (varName != null || url != null) {
                 ftpConfigs.add(new FtpConfigEntry(
                     varName != null ? varName : "",
-                    host != null ? host : "",
-                    prefs.get(PREF_KEY_PORT_PREFIX + i, "21"),
-                    prefs.get(PREF_KEY_USER_PREFIX + i, ""),
-                    prefs.get(PREF_KEY_PASS_PREFIX + i, ""),
-                    prefs.get(PREF_KEY_SECURE_PREFIX + i, "no")
+                    url != null ? url : ""
                 ));
             }
         }
@@ -324,26 +305,18 @@ public class FtpConfigDialog extends Stage {
         // Clear all existing entries
         for (int i = 0; i < MAX_FTP_CONFIGS; i++) {
             prefs.remove(PREF_KEY_NAME_PREFIX + i);
-            prefs.remove(PREF_KEY_HOST_PREFIX + i);
-            prefs.remove(PREF_KEY_PORT_PREFIX + i);
-            prefs.remove(PREF_KEY_USER_PREFIX + i);
-            prefs.remove(PREF_KEY_PASS_PREFIX + i);
-            prefs.remove(PREF_KEY_SECURE_PREFIX + i);
+            prefs.remove(PREF_KEY_URL_PREFIX + i);
         }
         
-        // Save current list (only entries with variable name and host)
+        // Save current list (only entries with variable name and URL)
         int index = 0;
         for (FtpConfigEntry entry : ftpConfigs) {
             String varName = entry.getVarName().trim();
-            String host = entry.getHost().trim();
+            String url = entry.getUrl().trim();
             
-            if (!varName.isEmpty() && !host.isEmpty()) {
+            if (!varName.isEmpty() && !url.isEmpty()) {
                 prefs.put(PREF_KEY_NAME_PREFIX + index, varName);
-                prefs.put(PREF_KEY_HOST_PREFIX + index, host);
-                prefs.put(PREF_KEY_PORT_PREFIX + index, entry.getPort().trim());
-                prefs.put(PREF_KEY_USER_PREFIX + index, entry.getUser().trim());
-                prefs.put(PREF_KEY_PASS_PREFIX + index, entry.getPassword());
-                prefs.put(PREF_KEY_SECURE_PREFIX + index, entry.getSecure().trim());
+                prefs.put(PREF_KEY_URL_PREFIX + index, url);
                 index++;
             }
         }
@@ -360,6 +333,7 @@ public class FtpConfigDialog extends Stage {
 
     /**
      * Static method to retrieve the list of FTP configuration entries from preferences.
+     * Returns entries as (varName, URL string) pairs.
      */
     public static List<FtpConfigEntry> getFtpConfigEntries() {
         List<FtpConfigEntry> entries = new ArrayList<>();
@@ -367,19 +341,29 @@ public class FtpConfigDialog extends Stage {
         
         for (int i = 0; i < MAX_FTP_CONFIGS; i++) {
             String varName = prefs.get(PREF_KEY_NAME_PREFIX + i, null);
-            String host = prefs.get(PREF_KEY_HOST_PREFIX + i, null);
-            if (varName != null && !varName.isEmpty() && host != null && !host.isEmpty()) {
-                entries.add(new FtpConfigEntry(
-                    varName,
-                    host,
-                    prefs.get(PREF_KEY_PORT_PREFIX + i, "21"),
-                    prefs.get(PREF_KEY_USER_PREFIX + i, ""),
-                    prefs.get(PREF_KEY_PASS_PREFIX + i, ""),
-                    prefs.get(PREF_KEY_SECURE_PREFIX + i, "no")
-                ));
+            String url = prefs.get(PREF_KEY_URL_PREFIX + i, null);
+            if (varName != null && !varName.isEmpty() && url != null && !url.isEmpty()) {
+                entries.add(new FtpConfigEntry(varName, url));
             }
         }
         
         return entries;
+    }
+    
+    /**
+     * Parses an FTP URL into its components.
+     * @param url FTP URL in format ftp://user:password@host:port or ftps://user:password@host:port
+     * @return Map with keys: host, port, user, password, secure (or empty map if invalid)
+     */
+    public static Map<String, String> parseFtpUrl(String url) {
+        return FtpConfigEntry.parseUrl(url);
+    }
+    
+    /**
+     * Builds an FTP URL from components.
+     * @return FTP URL string
+     */
+    public static String buildFtpUrl(String host, String port, String user, String password, boolean secure) {
+        return FtpConfigEntry.buildUrl(host, port, user, password, secure);
     }
 }

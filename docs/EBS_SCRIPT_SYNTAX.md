@@ -2707,6 +2707,19 @@ var isOk = call http.is2xx(response);  // Returns boolean
 
 The mail functions allow you to connect to email servers (IMAP/POP3), list emails, and retrieve email content.
 
+#### Mail URL Format
+
+Mail connections can be configured using URL format:
+```
+mail://user:password@host:port?protocol=imaps
+```
+
+**Example URLs:**
+- `mail://user%40gmail.com:apppassword@imap.gmail.com:993?protocol=imaps`
+- `mail://user:password@outlook.office365.com:993?protocol=imaps`
+
+**Note:** Use URL encoding for special characters (e.g., `%40` for `@` in email addresses).
+
 ```javascript
 // Connect to mail server
 var handle = call mail.open(host, port, user, password, protocol);
@@ -3570,6 +3583,34 @@ connect db = "jdbc:oracle:thin:@localhost:1521:xe";
 ```
 
 This allows the language to support both database-style syntax (`open cursor`, `connect db`) and modern builtin functions (`ftp.open`, `mail.open`) without conflicts.
+
+### Connection URL Formats
+
+Mail and FTP connections can be configured using URL strings stored in variables.
+
+#### Mail URL Format
+```
+mail://user:password@host:port?protocol=imaps
+```
+
+**Examples:**
+- `mail://user%40gmail.com:apppassword@imap.gmail.com:993?protocol=imaps`
+- `mail://user:password@outlook.office365.com:993?protocol=imaps`
+
+#### FTP URL Format
+```
+ftp://user:password@host:port     (standard FTP)
+ftps://user:password@host:port    (secure FTPS)
+```
+
+**Examples:**
+- `ftp://myuser:mypassword@ftp.example.com:21`
+- `ftps://myuser:mypassword@ftps.example.com:990`
+
+**Note:** URL-encode special characters in usernames and passwords:
+- Use `%40` for `@`
+- Use `%3A` for `:`
+- Use `%2F` for `/`
 
 ### Type Coercion
 ```javascript
