@@ -1,6 +1,6 @@
 # EBS Language Reference
 
-**Documentation Version: 1.0.5.1**
+**Documentation Version: 1.0.5.2**
 
 This document serves as a pointer to the comprehensive EBS (Earl Bosch Script) language documentation.
 
@@ -81,7 +81,7 @@ EBS uses a four-part versioning system: **`language.keyword.builtin.build`**
 
 Each version component is incremented independently based on the type of change made.
 
-**Current Version: 1.0.5.1** (Language v1, Keyword v0, Builtin v5, Build 1)
+**Current Version: 1.0.5.2** (Language v1, Keyword v0, Builtin v5, Build 2)
 
 ### Getting the Language Version Programmatically
 
@@ -116,6 +116,7 @@ For the latest updates and comprehensive language reference, always refer to [do
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.0.5.2 | 2025-12-03 | Allow reserved keywords (`open`, `connect`) to be used as builtin method names (e.g., `ftp.open`, `mail.open`) |
 | 1.0.4.1 | 2025-12-03 | Added plugin system for loading external Java functions (EbsFunction interface) |
 | 1.0.3.1 | 2025-12-01 | Added ai.completeAsync builtin for asynchronous AI calls with callback support |
 | 1.0.2.1 | 2025-11-30 | Added 4th version component (build number); Format now language.keyword.builtin.build |

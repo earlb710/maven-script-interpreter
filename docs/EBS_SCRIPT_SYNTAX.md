@@ -3540,6 +3540,33 @@ Ctrl+Enter             Execute the script in the editor
 - **Screen JSON**: Keys are case-insensitive, normalized to lowercase
 - **String values**: Case-sensitive (string content preserves original case)
 
+### Reserved Keywords in Builtin Functions
+Some words like `open` and `connect` are reserved keywords used for database operations (cursor opening, connection statements). However, these words can also be used as method names in builtin functions when prefixed with their module name.
+
+**Examples of reserved keywords used as builtin method names:**
+```javascript
+// ftp.open - Opens an FTP connection
+var ftpHandle = call ftp.open("ftp.example.com", 21, "user", "pass");
+
+// mail.open - Opens a mail server connection
+var mailHandle = call mail.open("imap.gmail.com", 993, "user", "pass", "imaps");
+
+// file.open - Opens a file for reading/writing
+var fileHandle = call file.open("data.txt", "r");
+```
+
+**Reserved keywords used alone retain their original meaning:**
+```javascript
+// 'open' as a cursor keyword
+cursor myCursor = select * from users;
+open myCursor();
+
+// 'connect' as a database connection keyword
+connect db = "jdbc:oracle:thin:@localhost:1521:xe";
+```
+
+This allows the language to support both database-style syntax (`open cursor`, `connect db`) and modern builtin functions (`ftp.open`, `mail.open`) without conflicts.
+
 ### Type Coercion
 ```javascript
 var x = "10" + 5;      // String concatenation: "105"
