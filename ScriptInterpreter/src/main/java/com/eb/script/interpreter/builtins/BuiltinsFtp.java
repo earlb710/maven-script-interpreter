@@ -127,13 +127,14 @@ public class BuiltinsFtp {
     // --- Individual builtin implementations ---
 
     /**
-     * ftp.open(host, port?, username?, password?) -> STRING (handle)
+     * ftp.open(host, port?, username?, password?, timeout?) -> STRING (handle)
      * Connect to an FTP server. Returns a handle for subsequent operations.
      * 
      * @param args[0] host - FTP server hostname (required)
      * @param args[1] port - FTP server port (optional, default 21)
      * @param args[2] username - Username (optional, default "anonymous")
      * @param args[3] password - Password (optional, default "")
+     * @param args[4] timeout - Connection timeout in seconds (optional, default 30)
      */
     private static String connect(Object[] args) throws InterpreterError {
         if (args.length < 1 || args[0] == null) {
@@ -144,6 +145,7 @@ public class BuiltinsFtp {
         int port = 21;
         String username = "anonymous";
         String password = "";
+        int timeout = 30; // Default 30 seconds
         
         if (args.length > 1 && args[1] != null) {
             if (args[1] instanceof Number n) {
@@ -158,13 +160,26 @@ public class BuiltinsFtp {
         if (args.length > 3 && args[3] != null) {
             password = (String) args[3];
         }
+        if (args.length > 4 && args[4] != null) {
+            if (args[4] instanceof Number n) {
+                timeout = n.intValue();
+            } else {
+                timeout = Integer.parseInt(args[4].toString());
+            }
+        }
+        
+        if (timeout < 1) {
+            throw new InterpreterError("ftp.open: timeout must be at least 1 second");
+        }
+        
+        int timeoutMs = timeout * 1000;
         
         FTPClient client = new FTPClient();
         try {
-            // Set timeouts
-            client.setConnectTimeout(30000); // 30 seconds
-            client.setDataTimeout(java.time.Duration.ofSeconds(60)); // 60 seconds for data transfer
-            client.setDefaultTimeout(30000); // 30 seconds default
+            // Set timeouts (user-configurable)
+            client.setConnectTimeout(timeoutMs);
+            client.setDataTimeout(java.time.Duration.ofSeconds(timeout * 2L)); // Data transfer timeout is 2x connect timeout
+            client.setDefaultTimeout(timeoutMs);
             
             // Connect
             client.connect(host, port);
@@ -206,7 +221,7 @@ public class BuiltinsFtp {
     }
 
     /**
-     * ftp.openSecure(host, port?, username?, password?, implicit?) -> STRING (handle)
+     * ftp.openSecure(host, port?, username?, password?, implicit?, timeout?) -> STRING (handle)
      * Connect to an FTPS (FTP over SSL/TLS) server. Returns a handle for subsequent operations.
      * 
      * @param args[0] host - FTP server hostname (required)
@@ -214,6 +229,7 @@ public class BuiltinsFtp {
      * @param args[2] username - Username (optional, default "anonymous")
      * @param args[3] password - Password (optional, default "")
      * @param args[4] implicit - Use implicit SSL mode (optional, default false = explicit TLS)
+     * @param args[5] timeout - Connection timeout in seconds (optional, default 30)
      */
     private static String connectSecure(Object[] args) throws InterpreterError {
         if (args.length < 1 || args[0] == null) {
@@ -222,6 +238,7 @@ public class BuiltinsFtp {
         
         String host = (String) args[0];
         boolean implicit = false;
+        int timeout = 30; // Default 30 seconds
         
         // Check if implicit mode is specified first (to set correct default port)
         if (args.length > 4 && args[4] != null) {
@@ -232,9 +249,23 @@ public class BuiltinsFtp {
             }
         }
         
+        // Check timeout parameter
+        if (args.length > 5 && args[5] != null) {
+            if (args[5] instanceof Number n) {
+                timeout = n.intValue();
+            } else {
+                timeout = Integer.parseInt(args[5].toString());
+            }
+        }
+        
+        if (timeout < 1) {
+            throw new InterpreterError("ftp.openSecure: timeout must be at least 1 second");
+        }
+        
         int port = implicit ? 990 : 21;  // Default port depends on mode
         String username = "anonymous";
         String password = "";
+        int timeoutMs = timeout * 1000;
         
         if (args.length > 1 && args[1] != null) {
             if (args[1] instanceof Number n) {
@@ -253,10 +284,10 @@ public class BuiltinsFtp {
         // Create FTPS client with TLS
         FTPSClient client = new FTPSClient(implicit);
         try {
-            // Set timeouts
-            client.setConnectTimeout(30000); // 30 seconds
-            client.setDataTimeout(java.time.Duration.ofSeconds(60)); // 60 seconds for data transfer
-            client.setDefaultTimeout(30000); // 30 seconds default
+            // Set timeouts (user-configurable)
+            client.setConnectTimeout(timeoutMs);
+            client.setDataTimeout(java.time.Duration.ofSeconds(timeout * 2L)); // Data transfer timeout is 2x connect timeout
+            client.setDefaultTimeout(timeoutMs);
             
             // Connect
             client.connect(host, port);

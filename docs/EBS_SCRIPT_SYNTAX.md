@@ -2724,7 +2724,7 @@ var email = call mail.get(handle, messageId);
 call mail.close(handle);
 ```
 
-#### mail.open(host, port, user, password, protocol?)
+#### mail.open(host, port, user, password, protocol?, timeout?)
 Connects to a mail server and returns a connection handle for subsequent operations.
 
 **Parameters:**
@@ -2733,6 +2733,7 @@ Connects to a mail server and returns a connection handle for subsequent operati
 - `user` (string, required): Username or email address
 - `password` (string, required): Password or app-specific password (see note below)
 - `protocol` (string, optional): Protocol to use. Default is "imaps". Supported: "imap", "imaps", "pop3", "pop3s"
+- `timeout` (integer, optional): Connection timeout in seconds. Default is 30.
 
 **Returns:** String - a connection handle to use with other mail functions
 
@@ -2746,6 +2747,9 @@ var handle = call mail.open("imap.gmail.com", 993, "myemail@gmail.com", "your-ap
 
 // Connect to a local server without SSL
 var handle2 = call mail.open("localhost", 143, "testuser", "password", "imap");
+
+// Connect with a custom timeout (60 seconds)
+var handle3 = call mail.open("imap.gmail.com", 993, "user@gmail.com", "app-password", "imaps", 60);
 ```
 
 #### mail.folders(handle)

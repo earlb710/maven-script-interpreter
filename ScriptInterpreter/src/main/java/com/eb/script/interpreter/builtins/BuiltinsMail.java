@@ -109,12 +109,13 @@ public class BuiltinsMail {
     // --- Individual builtin implementations ---
 
     /**
-     * mail.open(host, port, user, password, protocol?) -> STRING (handle)
+     * mail.open(host, port, user, password, protocol?, timeout?) -> STRING (handle)
      *
      * Opens a connection to a mail server and returns a handle for subsequent operations.
      *
      * @param args [0] host (String), [1] port (Integer), [2] user (String),
      *             [3] password (String), [4] protocol (String, optional: "imap", "imaps", "pop3", "pop3s")
+     *             [5] timeout (Integer, optional: timeout in seconds, default 30)
      * @return String handle to identify this connection
      * @throws InterpreterError if connection fails
      */
@@ -128,6 +129,7 @@ public class BuiltinsMail {
         String user = (String) args[2];
         String password = (String) args[3];
         String protocol = args.length > 4 && args[4] != null ? (String) args[4] : "imaps";
+        int timeout = args.length > 5 && args[5] != null ? ((Number) args[5]).intValue() : 30;
 
         if (host == null || host.isBlank()) {
             throw new InterpreterError("mail.open: host cannot be empty");
@@ -141,9 +143,13 @@ public class BuiltinsMail {
         if (password == null) {
             throw new InterpreterError("mail.open: password cannot be null");
         }
+        if (timeout < 1) {
+            throw new InterpreterError("mail.open: timeout must be at least 1 second");
+        }
 
         int port = portNum.intValue();
         protocol = protocol.toLowerCase();
+        int timeoutMs = timeout * 1000; // Convert to milliseconds
 
         // Validate protocol
         if (!protocol.equals("imap") && !protocol.equals("imaps") &&
@@ -172,9 +178,9 @@ public class BuiltinsMail {
                 props.put("mail." + protocol + ".ssl.trust", "*");
             }
 
-            // Timeout settings (30 seconds)
-            props.put("mail." + protocol + ".connectiontimeout", "30000");
-            props.put("mail." + protocol + ".timeout", "30000");
+            // Timeout settings (user-configurable)
+            props.put("mail." + protocol + ".connectiontimeout", String.valueOf(timeoutMs));
+            props.put("mail." + protocol + ".timeout", String.valueOf(timeoutMs));
 
             Session session = Session.getInstance(props);
             Store store = session.getStore(protocol);

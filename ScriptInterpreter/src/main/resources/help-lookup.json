@@ -2446,10 +2446,16 @@
           "type": "string",
           "optional": true,
           "description": "Protocol: 'imap', 'imaps' (default), 'pop3', 'pop3s'"
+        },
+        {
+          "name": "timeout",
+          "type": "integer",
+          "optional": true,
+          "description": "Connection timeout in seconds (default: 30)"
         }
       ],
       "return_type": "string",
-      "example": "<b>var</b> handle = <b>call</b> mail.open(\"imap.gmail.com\", 993, \"user@gmail.com\", \"app-password\", \"imaps\");<br><b>print</b> \"Connected: \" + handle;"
+      "example": "<b>var</b> handle = <b>call</b> mail.open(\"imap.gmail.com\", 993, \"user@gmail.com\", \"app-password\", \"imaps\");<br><b>print</b> \"Connected: \" + handle;<br><br>// With custom timeout (60 seconds)<br><b>var</b> handle2 = <b>call</b> mail.open(\"imap.gmail.com\", 993, \"user@gmail.com\", \"app-password\", \"imaps\", 60);"
     },
     {
       "function": "mail.folders",
@@ -2554,10 +2560,11 @@
         {"name": "host", "type": "string", "description": "FTP server hostname"},
         {"name": "port", "type": "integer", "optional": true, "description": "Port number (default: 21)"},
         {"name": "username", "type": "string", "optional": true, "description": "Username (default: anonymous)"},
-        {"name": "password", "type": "string", "optional": true, "description": "Password (default: empty)"}
+        {"name": "password", "type": "string", "optional": true, "description": "Password (default: empty)"},
+        {"name": "timeout", "type": "integer", "optional": true, "description": "Connection timeout in seconds (default: 30)"}
       ],
       "return_type": "string",
-      "example": "<b>var</b> handle = #ftp.open(\"ftp.example.com\", 21, \"user\", \"pass\");<br>#ftp.listFiles(handle, \"/\");<br>#ftp.disconnect(handle);"
+      "example": "<b>var</b> handle = #ftp.open(\"ftp.example.com\", 21, \"user\", \"pass\");<br>#ftp.listFiles(handle, \"/\");<br>#ftp.disconnect(handle);<br><br>// With custom timeout (60 seconds)<br><b>var</b> handle2 = #ftp.open(\"ftp.example.com\", 21, \"user\", \"pass\", 60);"
     },
     {
       "function": "ftp.openSecure",
@@ -2568,10 +2575,11 @@
         {"name": "port", "type": "integer", "optional": true, "description": "Port number (default: 21 for explicit, 990 for implicit)"},
         {"name": "username", "type": "string", "optional": true, "description": "Username (default: anonymous)"},
         {"name": "password", "type": "string", "optional": true, "description": "Password (default: empty)"},
-        {"name": "implicit", "type": "bool", "optional": true, "description": "Use implicit SSL mode (default: false = explicit TLS)"}
+        {"name": "implicit", "type": "bool", "optional": true, "description": "Use implicit SSL mode (default: false = explicit TLS)"},
+        {"name": "timeout", "type": "integer", "optional": true, "description": "Connection timeout in seconds (default: 30)"}
       ],
       "return_type": "string",
-      "example": "// Explicit TLS (most common)<br><b>var</b> handle = #ftp.openSecure(\"ftps.example.com\", 21, \"user\", \"pass\");<br><br>// Implicit SSL<br><b>var</b> handle = #ftp.openSecure(\"ftps.example.com\", 990, \"user\", \"pass\", true);"
+      "example": "// Explicit TLS (most common)<br><b>var</b> handle = #ftp.openSecure(\"ftps.example.com\", 21, \"user\", \"pass\");<br><br>// Implicit SSL<br><b>var</b> handle = #ftp.openSecure(\"ftps.example.com\", 990, \"user\", \"pass\", true);<br><br>// With custom timeout (60 seconds)<br><b>var</b> handle = #ftp.openSecure(\"ftps.example.com\", 21, \"user\", \"pass\", false, 60);"
     },
     {
       "function": "ftp.disconnect",
