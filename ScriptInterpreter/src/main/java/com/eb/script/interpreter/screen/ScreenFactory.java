@@ -332,10 +332,11 @@ public class ScreenFactory {
             java.util.List<String> sortedKeys = new java.util.ArrayList<>(screenVars.keySet());
             java.util.Collections.sort(sortedKeys, String.CASE_INSENSITIVE_ORDER);
             
+            int rowIndex = 0;
             for (String key : sortedKeys) {
                 Object value = screenVars.get(key);
                 DataType dataType = screenVarTypes != null ? screenVarTypes.get(key) : null;
-                HBox varRow = createVariableRow(key, value, dataType);
+                HBox varRow = createVariableRow(key, value, dataType, rowIndex++);
                 varsSection.getChildren().add(varRow);
             }
         } else {
@@ -805,27 +806,17 @@ public class ScreenFactory {
             String currentStyle = row.getStyle();
             row.setStyle(DEBUG_ROW_CLICK_STYLE);
             
-            // Revert style after a short delay
-            new Thread(() -> {
-                try {
-                    Thread.sleep(200);
-                    Platform.runLater(() -> row.setStyle(currentStyle));
-                } catch (InterruptedException ex) {
-                    // Ignore
-                }
-            }).start();
+            // Revert style after a short delay using JavaFX Timeline
+            javafx.animation.Timeline timeline = new javafx.animation.Timeline(
+                new javafx.animation.KeyFrame(
+                    javafx.util.Duration.millis(200),
+                    event -> row.setStyle(currentStyle)
+                )
+            );
+            timeline.play();
         });
         
-        // Update tooltip to indicate click-to-copy
-        javafx.scene.control.Tooltip existingTooltip = null;
-        for (javafx.scene.Node child : row.getChildren()) {
-            if (child instanceof javafx.scene.control.Control) {
-                existingTooltip = ((javafx.scene.control.Control) child).getTooltip();
-                if (existingTooltip != null) break;
-            }
-        }
-        
-        // Add or update tooltip with click-to-copy hint
+        // Add tooltip with click-to-copy hint
         String tooltipText = clipboardText + "\n\n📋 Click to copy";
         javafx.scene.control.Tooltip tooltip = new javafx.scene.control.Tooltip(tooltipText);
         tooltip.setStyle("-fx-font-size: 12px;");
@@ -1309,13 +1300,15 @@ public class ScreenFactory {
     
     /**
      * Create a row displaying a variable name and its value.
-         * 
+     * Clicking on the row copies the variable details to clipboard.
+     * 
      * @param name The variable name
      * @param value The variable value
      * @param dataType The variable's data type (can be null)
+     * @param rowIndex The row index for alternating background colors
      * @return An HBox containing the variable display
      */
-    private static HBox createVariableRow(String name, Object value, DataType dataType) {
+    private static HBox createVariableRow(String name, Object value, DataType dataType, int rowIndex) {
         HBox row = new HBox(5);
         row.setAlignment(Pos.CENTER_LEFT);
         row.setPadding(new Insets(2, 5, 2, 5));
@@ -1347,7 +1340,8 @@ public class ScreenFactory {
         
         // Build clipboard text with variable name, type, and value
         String clipboardText = name + " : " + typeStr + " = " + fullValueStr;
-        String originalStyle = "-fx-background-color: #f8f8f8;";
+        // Use alternating row colors for better readability
+        String originalStyle = "-fx-background-color: " + (rowIndex % 2 == 0 ? "#ffffff" : "#f0f0f0") + ";";
         row.setStyle(originalStyle);
         makeRowClickable(row, clipboardText, originalStyle);
         
