@@ -1057,6 +1057,14 @@ public final class Builtins {
                 newParam("password", DataType.STRING, false)    // optional; password (default "")
         ));
         addBuiltin(info(
+                "ftp.connectSecure", DataType.STRING,
+                newParam("host", DataType.STRING, true),        // required; FTP server hostname
+                newParam("port", DataType.INTEGER, false),      // optional; port (default 21 for explicit, 990 for implicit)
+                newParam("username", DataType.STRING, false),   // optional; username (default "anonymous")
+                newParam("password", DataType.STRING, false),   // optional; password (default "")
+                newParam("implicit", DataType.BOOL, false)      // optional; use implicit SSL mode (default false = explicit TLS)
+        ));
+        addBuiltin(info(
                 "ftp.disconnect", DataType.BOOL,
                 newParam("handle", DataType.STRING, true)       // required; connection handle
         ));

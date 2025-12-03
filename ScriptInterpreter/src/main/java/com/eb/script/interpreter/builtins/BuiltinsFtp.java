@@ -8,6 +8,7 @@ import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
+import org.apache.commons.net.ftp.FTPSClient;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -22,11 +23,12 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Built-in functions for FTP operations.
+ * Built-in functions for FTP and FTPS (secure FTP) operations.
  * Handles all ftp.* builtins.
  * 
  * Provides standard FTP commands:
  * - ftp.connect(host, port?, username?, password?) - Connect to FTP server
+ * - ftp.connectSecure(host, port?, username?, password?, implicit?) - Connect to FTPS server (FTP over SSL/TLS)
  * - ftp.disconnect(handle) - Disconnect from FTP server
  * - ftp.listFiles(handle, path?) - List files in directory
  * - ftp.upload(handle, localPath, remotePath) - Upload file to FTP server
@@ -65,6 +67,7 @@ public class BuiltinsFtp {
     public static Object dispatch(Environment env, String name, Object[] args) throws InterpreterError {
         return switch (name) {
             case "ftp.connect" -> connect(args);
+            case "ftp.connectsecure" -> connectSecure(args);
             case "ftp.disconnect" -> disconnect(args);
             case "ftp.listfiles" -> listFiles(args);
             case "ftp.upload" -> upload(env, args);
@@ -199,6 +202,107 @@ public class BuiltinsFtp {
             } catch (Exception ignore) {
             }
             throw new InterpreterError("ftp.connect: " + ex.getMessage());
+        }
+    }
+
+    /**
+     * ftp.connectSecure(host, port?, username?, password?, implicit?) -> STRING (handle)
+     * Connect to an FTPS (FTP over SSL/TLS) server. Returns a handle for subsequent operations.
+     * 
+     * @param args[0] host - FTP server hostname (required)
+     * @param args[1] port - FTP server port (optional, default 21 for explicit, 990 for implicit)
+     * @param args[2] username - Username (optional, default "anonymous")
+     * @param args[3] password - Password (optional, default "")
+     * @param args[4] implicit - Use implicit SSL mode (optional, default false = explicit TLS)
+     */
+    private static String connectSecure(Object[] args) throws InterpreterError {
+        if (args.length < 1 || args[0] == null) {
+            throw new InterpreterError("ftp.connectSecure: host is required");
+        }
+        
+        String host = (String) args[0];
+        boolean implicit = false;
+        
+        // Check if implicit mode is specified first (to set correct default port)
+        if (args.length > 4 && args[4] != null) {
+            if (args[4] instanceof Boolean b) {
+                implicit = b;
+            } else {
+                implicit = Boolean.parseBoolean(args[4].toString());
+            }
+        }
+        
+        int port = implicit ? 990 : 21;  // Default port depends on mode
+        String username = "anonymous";
+        String password = "";
+        
+        if (args.length > 1 && args[1] != null) {
+            if (args[1] instanceof Number n) {
+                port = n.intValue();
+            } else {
+                port = Integer.parseInt(args[1].toString());
+            }
+        }
+        if (args.length > 2 && args[2] != null) {
+            username = (String) args[2];
+        }
+        if (args.length > 3 && args[3] != null) {
+            password = (String) args[3];
+        }
+        
+        // Create FTPS client with TLS
+        FTPSClient client = new FTPSClient(implicit);
+        try {
+            // Set timeouts
+            client.setConnectTimeout(30000); // 30 seconds
+            client.setDataTimeout(java.time.Duration.ofSeconds(60)); // 60 seconds for data transfer
+            client.setDefaultTimeout(30000); // 30 seconds default
+            
+            // Connect
+            client.connect(host, port);
+            int reply = client.getReplyCode();
+            if (!FTPReply.isPositiveCompletion(reply)) {
+                client.disconnect();
+                throw new InterpreterError("ftp.connectSecure: Connection refused by server. Reply code: " + reply);
+            }
+            
+            // For explicit mode, execute AUTH TLS command
+            if (!implicit) {
+                client.execAUTH("TLS");
+            }
+            
+            // Login
+            if (!client.login(username, password)) {
+                client.logout();
+                client.disconnect();
+                throw new InterpreterError("ftp.connectSecure: Login failed for user: " + username);
+            }
+            
+            // Set protection buffer size and data channel protection level
+            client.execPBSZ(0);
+            client.execPROT("P"); // Private - encrypt data channel
+            
+            // Set default mode to passive and binary
+            client.enterLocalPassiveMode();
+            client.setFileType(FTP.BINARY_FILE_TYPE);
+            
+            // Create handle and register connection
+            String handle = "ftps-" + UUID.randomUUID().toString();
+            FtpContext ctx = new FtpContext(handle, host, port, username, client);
+            ftpConnections.put(handle, ctx);
+            
+            return handle;
+            
+        } catch (InterpreterError ie) {
+            throw ie;
+        } catch (Exception ex) {
+            try {
+                if (client.isConnected()) {
+                    client.disconnect();
+                }
+            } catch (Exception ignore) {
+            }
+            throw new InterpreterError("ftp.connectSecure: " + ex.getMessage());
         }
     }
 
