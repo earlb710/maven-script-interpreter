@@ -636,7 +636,7 @@ screen askAiScreen = {
                 "labelText": "AI Result:",
                 "editable": false,
                 "maxLength": 80,
-                "height": 3
+                "height": 6
             }
         },
         {
