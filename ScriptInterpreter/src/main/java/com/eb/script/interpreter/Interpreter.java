@@ -2097,17 +2097,21 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             len = c.parameters.length;
         }
         BuiltinInfo info = Builtins.getBuiltinInfo(name);
-        Parameter[] params = info.params;
+        // For dynamic builtins (like custom.*), info may be null
+        Parameter[] params = (info != null) ? info.params : null;
         Object[] args = new Object[len];
         if (len > 0) {
             int idx = 0;
             for (Parameter p : c.parameters) {
                 args[idx] = (p == null) ? null : evaluate(p.value);
-                DataType ptype = params[idx].paramType;
-                if (ptype != DataType.JSON && ptype != DataType.ANY && ptype != DataType.ANY && !Util.checkDataType(ptype, args[idx])) {
-                    args[idx] = ptype.convertValue(args[idx]);
-                    if (!Util.checkDataType(ptype, args[idx])) {
-                        throw error(c.getLine(), "Call to [" + info.name + "] parameter [" + params[idx].name + ":" + params[idx].paramType + "] wrong type, expected " + params[idx].paramType + " but found " + args[idx].getClass().getName());
+                // Only perform type checking if we have parameter definitions
+                if (params != null && idx < params.length && params[idx] != null) {
+                    DataType ptype = params[idx].paramType;
+                    if (ptype != DataType.JSON && ptype != DataType.ANY && ptype != DataType.ANY && !Util.checkDataType(ptype, args[idx])) {
+                        args[idx] = ptype.convertValue(args[idx]);
+                        if (!Util.checkDataType(ptype, args[idx])) {
+                            throw error(c.getLine(), "Call to [" + info.name + "] parameter [" + params[idx].name + ":" + params[idx].paramType + "] wrong type, expected " + params[idx].paramType + " but found " + args[idx].getClass().getName());
+                        }
                     }
                 }
                 idx++;
