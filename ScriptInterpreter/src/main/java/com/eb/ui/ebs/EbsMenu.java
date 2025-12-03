@@ -1,15 +1,11 @@
 package com.eb.ui.ebs;
 
 import com.eb.script.interpreter.builtins.AiFunctions;
-import com.eb.script.json.Json;
 import com.eb.ui.tabs.TabContext;
-import java.io.File;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Deque;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -18,7 +14,6 @@ import javafx.scene.control.Tab;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
-import javafx.stage.FileChooser;
 
 /**
  *
@@ -230,7 +225,8 @@ public class EbsMenu extends MenuBar {
         
         MenuItem exportConfigItem = new MenuItem("Export Config…");
         exportConfigItem.setOnAction(e -> {
-            exportConfig();
+            ExportConfigDialog dialog = new ExportConfigDialog(handler.stage);
+            dialog.show();
         });
 
         toolsMenu.getItems().addAll(aiSetupItem, safeDirsItem, dbConfigItem, colorsItem, new SeparatorMenuItem(), exportConfigItem);
@@ -379,43 +375,6 @@ public class EbsMenu extends MenuBar {
             error.setDisable(true);
             screensMenu.getItems().add(error);
             e.printStackTrace(); // Log the error for debugging
-        }
-    }
-
-    /**
-     * Export the current console configuration to a user-selected file.
-     */
-    private void exportConfig() {
-        try {
-            ConsoleConfig config = new ConsoleConfig();
-            String jsonContent = Json.prettyJson(config.getConfig());
-            
-            FileChooser fc = new FileChooser();
-            fc.setTitle("Export Configuration");
-            fc.setInitialFileName("console.cfg");
-            fc.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Configuration Files", "*.cfg"),
-                new FileChooser.ExtensionFilter("JSON Files", "*.json"),
-                new FileChooser.ExtensionFilter("All Files", "*.*")
-            );
-            
-            File file = fc.showSaveDialog(handler.stage);
-            if (file != null) {
-                Path path = file.toPath();
-                Files.writeString(path, jsonContent);
-                
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Export Successful");
-                alert.setHeaderText(null);
-                alert.setContentText("Configuration exported to:\n" + path.toString());
-                alert.showAndWait();
-            }
-        } catch (Exception ex) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Export Failed");
-            alert.setHeaderText("Failed to export configuration");
-            alert.setContentText(ex.getMessage());
-            alert.showAndWait();
         }
     }
 
