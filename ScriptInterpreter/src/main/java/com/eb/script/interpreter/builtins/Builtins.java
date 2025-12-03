@@ -1046,6 +1046,109 @@ public final class Builtins {
                 newParam("alias", DataType.STRING, true)        // required; alias to get info for
         ));
 
+        // ==========================
+        // FTP builtins
+        // ==========================
+        addBuiltin(info(
+                "ftp.connect", DataType.STRING,
+                newParam("host", DataType.STRING, true),        // required; FTP server hostname
+                newParam("port", DataType.INTEGER, false),      // optional; port (default 21)
+                newParam("username", DataType.STRING, false),   // optional; username (default "anonymous")
+                newParam("password", DataType.STRING, false)    // optional; password (default "")
+        ));
+        addBuiltin(info(
+                "ftp.connectSecure", DataType.STRING,
+                newParam("host", DataType.STRING, true),        // required; FTP server hostname
+                newParam("port", DataType.INTEGER, false),      // optional; port (default 21 for explicit, 990 for implicit)
+                newParam("username", DataType.STRING, false),   // optional; username (default "anonymous")
+                newParam("password", DataType.STRING, false),   // optional; password (default "")
+                newParam("implicit", DataType.BOOL, false)      // optional; use implicit SSL mode (default false = explicit TLS)
+        ));
+        addBuiltin(info(
+                "ftp.disconnect", DataType.BOOL,
+                newParam("handle", DataType.STRING, true)       // required; connection handle
+        ));
+        addBuiltin(info(
+                "ftp.listFiles", DataType.JSON,
+                newParam("handle", DataType.STRING, true),      // required; connection handle
+                newParam("path", DataType.STRING, false)        // optional; remote path (default ".")
+        ));
+        addBuiltin(info(
+                "ftp.upload", DataType.BOOL,
+                newParam("handle", DataType.STRING, true),      // required; connection handle
+                newParam("localPath", DataType.STRING, true),   // required; local file path
+                newParam("remotePath", DataType.STRING, true)   // required; remote file path
+        ));
+        addBuiltin(info(
+                "ftp.download", DataType.BOOL,
+                newParam("handle", DataType.STRING, true),      // required; connection handle
+                newParam("remotePath", DataType.STRING, true),  // required; remote file path
+                newParam("localPath", DataType.STRING, true)    // required; local file path
+        ));
+        addBuiltin(info(
+                "ftp.delete", DataType.BOOL,
+                newParam("handle", DataType.STRING, true),      // required; connection handle
+                newParam("remotePath", DataType.STRING, true)   // required; remote file path
+        ));
+        addBuiltin(info(
+                "ftp.mkdir", DataType.BOOL,
+                newParam("handle", DataType.STRING, true),      // required; connection handle
+                newParam("remotePath", DataType.STRING, true)   // required; remote directory path
+        ));
+        addBuiltin(info(
+                "ftp.rmdir", DataType.BOOL,
+                newParam("handle", DataType.STRING, true),      // required; connection handle
+                newParam("remotePath", DataType.STRING, true)   // required; remote directory path
+        ));
+        addBuiltin(info(
+                "ftp.rename", DataType.BOOL,
+                newParam("handle", DataType.STRING, true),      // required; connection handle
+                newParam("fromPath", DataType.STRING, true),    // required; original path
+                newParam("toPath", DataType.STRING, true)       // required; new path
+        ));
+        addBuiltin(info(
+                "ftp.pwd", DataType.STRING,
+                newParam("handle", DataType.STRING, true)       // required; connection handle
+        ));
+        addBuiltin(info(
+                "ftp.cd", DataType.BOOL,
+                newParam("handle", DataType.STRING, true),      // required; connection handle
+                newParam("path", DataType.STRING, true)         // required; directory path
+        ));
+        addBuiltin(info(
+                "ftp.exists", DataType.BOOL,
+                newParam("handle", DataType.STRING, true),      // required; connection handle
+                newParam("path", DataType.STRING, true)         // required; file/directory path
+        ));
+        addBuiltin(info(
+                "ftp.size", DataType.LONG,
+                newParam("handle", DataType.STRING, true),      // required; connection handle
+                newParam("path", DataType.STRING, true)         // required; file path
+        ));
+        addBuiltin(info(
+                "ftp.binary", DataType.BOOL,
+                newParam("handle", DataType.STRING, true)       // required; connection handle
+        ));
+        addBuiltin(info(
+                "ftp.ascii", DataType.BOOL,
+                newParam("handle", DataType.STRING, true)       // required; connection handle
+        ));
+        addBuiltin(info(
+                "ftp.passive", DataType.BOOL,
+                newParam("handle", DataType.STRING, true)       // required; connection handle
+        ));
+        addBuiltin(info(
+                "ftp.active", DataType.BOOL,
+                newParam("handle", DataType.STRING, true)       // required; connection handle
+        ));
+        addBuiltin(info(
+                "ftp.isConnected", DataType.BOOL,
+                newParam("handle", DataType.STRING, true)       // required; connection handle
+        ));
+        addBuiltin(info(
+                "ftp.listConnections", DataType.JSON            // returns array of connection info
+        ));
+
         NAMES = Collections.unmodifiableSet(BUILTINS.keySet());
     }
 
@@ -1112,6 +1215,11 @@ public final class Builtins {
         // Plugin builtins (external Java function loading)
         if (BuiltinsPlugin.handles(name)) {
             return BuiltinsPlugin.dispatch(name, args);
+        }
+        
+        // FTP builtins
+        if (BuiltinsFtp.handles(name)) {
+            return BuiltinsFtp.dispatch(env, name, args);
         }
         
         // File builtins (already in BuiltinsFile)
