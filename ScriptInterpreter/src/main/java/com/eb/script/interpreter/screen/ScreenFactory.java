@@ -107,6 +107,9 @@ public class ScreenFactory {
     
     // Map to store the root BorderPane for each screen (screenName -> BorderPane) for debug panel toggling
     private static final java.util.concurrent.ConcurrentHashMap<String, BorderPane> screenRootPanes = new java.util.concurrent.ConcurrentHashMap<>();
+    
+    // Map to store original window widths before debug panel expansion (screenName -> originalWidth)
+    private static final java.util.concurrent.ConcurrentHashMap<String, Double> screenOriginalWidths = new java.util.concurrent.ConcurrentHashMap<>();
 
     static {
         try {
@@ -201,6 +204,7 @@ public class ScreenFactory {
     /**
      * Toggle the debug panel visibility for a screen.
      * Shows a scrollable panel on the right side with all screen variables and values.
+     * Also expands the window width when debug is activated and restores it when deactivated.
      * 
      * @param screenName The name of the screen
      * @param context The interpreter context
@@ -212,15 +216,38 @@ public class ScreenFactory {
             return;
         }
         
+        // Get the Stage (window) for this screen to adjust its width
+        javafx.stage.Stage stage = context.getScreens().get(screenName.toLowerCase());
+        
         if (show) {
+            // Store the original width before expanding
+            if (stage != null && !screenOriginalWidths.containsKey(screenName.toLowerCase())) {
+                screenOriginalWidths.put(screenName.toLowerCase(), stage.getWidth());
+            }
+            
             // Create or update the debug panel
             javafx.scene.control.ScrollPane debugPanel = createDebugPanel(screenName, context);
             screenDebugPanels.put(screenName.toLowerCase(), debugPanel);
             rootPane.setRight(debugPanel);
+            
+            // Expand the window width to accommodate the debug panel
+            if (stage != null) {
+                double currentWidth = stage.getWidth();
+                double newWidth = currentWidth + DEBUG_PANEL_PREF_WIDTH;
+                stage.setWidth(newWidth);
+            }
         } else {
             // Hide the debug panel
             rootPane.setRight(null);
             screenDebugPanels.remove(screenName.toLowerCase());
+            
+            // Restore the original window width
+            if (stage != null) {
+                Double originalWidth = screenOriginalWidths.remove(screenName.toLowerCase());
+                if (originalWidth != null) {
+                    stage.setWidth(originalWidth);
+                }
+            }
         }
     }
     
@@ -1374,6 +1401,7 @@ public class ScreenFactory {
             String key = screenName.toLowerCase();
             screenDebugPanels.remove(key);
             screenRootPanes.remove(key);
+            screenOriginalWidths.remove(key);
         }
     }
     
@@ -1384,6 +1412,7 @@ public class ScreenFactory {
     public static void cleanupAllDebugPanels() {
         screenDebugPanels.clear();
         screenRootPanes.clear();
+        screenOriginalWidths.clear();
     }
     
     /**
