@@ -1,5 +1,8 @@
 package com.eb.script.interpreter.plugin;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,7 +20,7 @@ import java.util.Map;
  * var result = #custom.echo("Hello", "World");
  * print result;  // Outputs: [Echo] Hello World
  * 
- * // Get plugin info
+ * // Get plugin info (includes signature with parameter/return types)
  * var info = #plugin.info("echo");
  * print #json.getString(info, "description", "");
  * 
@@ -75,5 +78,26 @@ public class ExampleEbsFunction implements EbsFunction {
     @Override
     public void cleanup() {
         // Nothing to clean up for this simple example
+    }
+    
+    @Override
+    public Map<String, Object> getSignature() {
+        Map<String, Object> sig = new LinkedHashMap<>();
+        
+        // Define parameters
+        List<Map<String, Object>> params = new ArrayList<>();
+        
+        Map<String, Object> param1 = new LinkedHashMap<>();
+        param1.put("name", "args");
+        param1.put("type", "any");
+        param1.put("required", false);
+        param1.put("description", "Variable number of arguments to echo (can be any type)");
+        params.add(param1);
+        
+        sig.put("parameters", params);
+        sig.put("returnType", "string");
+        sig.put("returnDescription", "All arguments concatenated as a string with the configured prefix");
+        
+        return sig;
     }
 }

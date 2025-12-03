@@ -34,7 +34,7 @@ print "  isLoaded('nonexistent') = " + notLoaded;
 print "";
 
 // -----------------------------------------------------------------------------
-// Test 3: Get plugin info
+// Test 3: Get plugin info (including signature metadata)
 // -----------------------------------------------------------------------------
 print "Test 3: Getting plugin info...";
 var info = #plugin.info("echo");
@@ -43,6 +43,18 @@ if info != null then {
     print "  className: " + #json.getString(info, "className", "");
     print "  name: " + #json.getString(info, "name", "");
     print "  description: " + #json.getString(info, "description", "");
+    
+    // Display signature if available
+    var sig = #json.get(info, "signature");
+    if sig != null then {
+        print "  Signature:";
+        print "    returnType: " + #json.getString(sig, "returnType", "any");
+        print "    returnDescription: " + #json.getString(sig, "returnDescription", "");
+        var params = #json.get(sig, "parameters");
+        if params != null then {
+            print "    parameters: " + params;
+        }
+    }
 }
 print "";
 

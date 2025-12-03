@@ -328,6 +328,12 @@ public class BuiltinsPlugin {
         info.put("name", function.getName());
         info.put("description", function.getDescription());
         
+        // Include signature if provided by the plugin
+        Map<String, Object> signature = function.getSignature();
+        if (signature != null) {
+            info.put("signature", signature);
+        }
+        
         return info;
     }
     

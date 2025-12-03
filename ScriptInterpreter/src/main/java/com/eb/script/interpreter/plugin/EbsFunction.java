@@ -134,4 +134,56 @@ public interface EbsFunction {
     default void cleanup() {
         // Default: do nothing
     }
+    
+    /**
+     * Returns the function signature as a JSON-compatible Map describing
+     * parameter names, types, and return type.
+     * 
+     * <p>The returned Map should have the following structure:</p>
+     * <pre>
+     * {
+     *   "parameters": [
+     *     {"name": "param1", "type": "string", "required": true, "description": "First parameter"},
+     *     {"name": "param2", "type": "int", "required": false, "description": "Optional second parameter"}
+     *   ],
+     *   "returnType": "string",
+     *   "returnDescription": "Description of what is returned"
+     * }
+     * </pre>
+     * 
+     * <p>Valid type names include: "string", "int", "long", "float", "double", 
+     * "bool", "json", "array", "any"</p>
+     * 
+     * <p>The default implementation returns null, indicating no signature metadata
+     * is available. This is for backwards compatibility with plugins that don't
+     * provide signature information.</p>
+     * 
+     * <h3>Example Implementation</h3>
+     * <pre>
+     * &#64;Override
+     * public Map&lt;String, Object&gt; getSignature() {
+     *     Map&lt;String, Object&gt; sig = new LinkedHashMap&lt;&gt;();
+     *     
+     *     List&lt;Map&lt;String, Object&gt;&gt; params = new ArrayList&lt;&gt;();
+     *     
+     *     Map&lt;String, Object&gt; param1 = new LinkedHashMap&lt;&gt;();
+     *     param1.put("name", "input");
+     *     param1.put("type", "string");
+     *     param1.put("required", true);
+     *     param1.put("description", "The input text to process");
+     *     params.add(param1);
+     *     
+     *     sig.put("parameters", params);
+     *     sig.put("returnType", "string");
+     *     sig.put("returnDescription", "The processed result");
+     *     
+     *     return sig;
+     * }
+     * </pre>
+     * 
+     * @return a Map containing signature metadata, or null if not provided
+     */
+    default java.util.Map<String, Object> getSignature() {
+        return null;
+    }
 }

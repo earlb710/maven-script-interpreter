@@ -13,9 +13,16 @@ print result;  // Outputs: [Echo] Hello World
 var loaded = #plugin.isLoaded("echo");
 print "Is loaded: " + loaded;
 
-// Get plugin info
+// Get plugin info (includes signature metadata with parameter/return types)
 var info = #plugin.info("echo");
 print "Plugin name: " + #json.getString(info, "name", "");
+
+// Access the signature metadata (parameter names, types, return type)
+var sig = #json.get(info, "signature");
+if sig != null then {
+    print "Return type: " + #json.getString(sig, "returnType", "any");
+    print "Return description: " + #json.getString(sig, "returnDescription", "");
+}
 
 // List all loaded plugins
 var plugins = #plugin.list();

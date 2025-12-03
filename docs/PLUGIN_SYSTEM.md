@@ -79,6 +79,56 @@ public interface EbsFunction {
     // Optional methods (have default implementations)
     default void initialize(Map<String, Object> config) {}  // Called on load
     default void cleanup() {}                               // Called on unload
+    default Map<String, Object> getSignature() { return null; }  // Parameter/return type metadata
+}
+```
+
+## Providing Function Signature Metadata
+
+Plugins can optionally provide JSON-style metadata about their parameters and return type via the `getSignature()` method. This information is included in `plugin.info()` results and can be used for documentation and validation.
+
+```java
+@Override
+public Map<String, Object> getSignature() {
+    Map<String, Object> sig = new LinkedHashMap<>();
+    
+    // Define parameters
+    List<Map<String, Object>> params = new ArrayList<>();
+    
+    Map<String, Object> param1 = new LinkedHashMap<>();
+    param1.put("name", "input");
+    param1.put("type", "string");       // Type: string, int, long, float, double, bool, json, array, any
+    param1.put("required", true);
+    param1.put("description", "The input text to process");
+    params.add(param1);
+    
+    Map<String, Object> param2 = new LinkedHashMap<>();
+    param2.put("name", "options");
+    param2.put("type", "json");
+    param2.put("required", false);
+    param2.put("description", "Optional configuration object");
+    params.add(param2);
+    
+    sig.put("parameters", params);
+    sig.put("returnType", "string");
+    sig.put("returnDescription", "The processed result");
+    
+    return sig;
+}
+```
+
+The signature information is returned when calling `plugin.info()`:
+
+```javascript
+#plugin.load("com.example.MyFunction", "myFunc");
+var info = #plugin.info("myFunc");
+
+// Access signature metadata
+var sig = #json.get(info, "signature");
+if sig != null then {
+    var params = #json.get(sig, "parameters");
+    var returnType = #json.getString(sig, "returnType", "any");
+    print "Return type: " + returnType;
 }
 ```
 
