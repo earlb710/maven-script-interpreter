@@ -158,7 +158,11 @@ public class Parser {
                     if (Builtins.isBuiltin(c.name)) {
                         try {
                             Parameter[] def = Builtins.getSignature(c.name);
-                            c.parameters = matchParameters(def, c.parameters);
+                            // For dynamic builtins (like custom.*), def may be null
+                            // In that case, only positional parameters are allowed (no named parameters)
+                            if (def != null) {
+                                c.parameters = matchParameters(def, c.parameters);
+                            }
                             // No paramInit for builtins; Interpreter evaluates directly from c.parameters
                         } catch (ParseError ex) {
                             throw new ParseError(ex.getMessage() + " in call to " + c.name + " on line " + c.getLine());
@@ -197,11 +201,18 @@ public class Parser {
                     if (Builtins.isBuiltin(call.name)) {
                         try {
                             Parameter[] def = Builtins.getSignature(call.name);
-                            call.parameters = matchParameters(def, call.parameters);
+                            // For dynamic builtins (like custom.*), def may be null
+                            // In that case, only positional parameters are allowed
+                            if (def != null) {
+                                call.parameters = matchParameters(def, call.parameters);
+                            }
                             // No paramInit for builtins; Interpreter evaluates directly from c.parameters
                             Builtins.BuiltinInfo bi = Builtins.getBuiltinInfo(call.name);
-                            // Set expression return type from builtin definition
-                            ce.setReturnType(bi.returnType);
+                            // Set expression return type from builtin definition (if available)
+                            if (bi != null) {
+                                ce.setReturnType(bi.returnType);
+                            }
+                            // For custom.* functions, returnType remains null/ANY
                         } catch (ParseError ex) {
                             throw new ParseError(ex.getMessage() + " in call to " + call.name + " on line " + call.getLine());
                         }

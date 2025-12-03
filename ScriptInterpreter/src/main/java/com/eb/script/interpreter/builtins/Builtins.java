@@ -67,10 +67,11 @@ public final class Builtins {
 
     /**
      * Convenience: just the parameter signature (defensive copy).
+     * Returns null for dynamic builtins (like custom.*) that aren't in the static registry.
      */
     public static Parameter[] getSignature(String name) {
         BuiltinInfo info = BUILTINS.get(name);
-        return info.params;
+        return info != null ? info.params : null;
     }
 
     /**
@@ -1019,11 +1020,45 @@ public final class Builtins {
                 newParam("searchPath", DataType.STRING, false)  // optional; base path to search in
         ));
 
+        // ==========================
+        // Plugin builtins (external Java function loading)
+        // Custom functions are called via #custom.functionName(...) syntax
+        // ==========================
+        addBuiltin(info(
+                "plugin.load", DataType.BOOL,
+                newParam("className", DataType.STRING, true),   // required; fully qualified class name
+                newParam("alias", DataType.STRING, true),       // required; alias to reference via #custom.alias
+                newParam("config", DataType.JSON, false)        // optional; configuration map
+        ));
+        addBuiltin(info(
+                "plugin.isLoaded", DataType.BOOL,
+                newParam("alias", DataType.STRING, true)        // required; alias to check
+        ));
+        addBuiltin(info(
+                "plugin.unload", DataType.BOOL,
+                newParam("alias", DataType.STRING, true)        // required; alias to unload
+        ));
+        addBuiltin(info(
+                "plugin.list", DataType.JSON                    // returns array of loaded plugin aliases
+        ));
+        addBuiltin(info(
+                "plugin.info", DataType.JSON,
+                newParam("alias", DataType.STRING, true)        // required; alias to get info for
+        ));
+
         NAMES = Collections.unmodifiableSet(BUILTINS.keySet());
     }
 
     public static boolean isBuiltin(String name) {
-        return NAMES.contains(name);
+        // Check static builtins first
+        if (NAMES.contains(name)) {
+            return true;
+        }
+        // Check for dynamic custom.* function calls (loaded via plugin.load)
+        if (name.startsWith("custom.")) {
+            return true;
+        }
+        return false;
     }
 
     // genral script functions that can be called with "call"
@@ -1072,6 +1107,11 @@ public final class Builtins {
         // CSS builtins
         if (BuiltinsCss.handles(name)) {
             return BuiltinsCss.dispatch(name, args);
+        }
+        
+        // Plugin builtins (external Java function loading)
+        if (BuiltinsPlugin.handles(name)) {
+            return BuiltinsPlugin.dispatch(name, args);
         }
         
         // File builtins (already in BuiltinsFile)

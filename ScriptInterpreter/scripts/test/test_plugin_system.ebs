@@ -1,0 +1,150 @@
+// EBS Language Reference v1.0.4 - See EBS_LANGUAGE_REFERENCE.md
+// Test script for the external Java function plugin system
+
+// =============================================================================
+// Plugin System Test Script
+// This script demonstrates loading and calling external Java functions
+// Custom functions are called using #custom.functionName(...) syntax
+// =============================================================================
+
+print "=== Testing Plugin System ===";
+print "";
+
+// -----------------------------------------------------------------------------
+// Test 1: Load the built-in example plugin
+// -----------------------------------------------------------------------------
+print "Test 1: Loading ExampleEbsFunction plugin...";
+var loadResult: bool = #plugin.load("com.eb.script.interpreter.plugin.ExampleEbsFunction", "echo");
+if loadResult then {
+    print "  Plugin loaded successfully!";
+} else {
+    print "  ERROR: Failed to load plugin";
+}
+print "";
+
+// -----------------------------------------------------------------------------
+// Test 2: Check if plugin is loaded
+// -----------------------------------------------------------------------------
+print "Test 2: Checking if 'echo' plugin is loaded...";
+var isLoaded: bool = #plugin.isLoaded("echo");
+print "  isLoaded('echo') = " + isLoaded;
+
+var notLoaded: bool = #plugin.isLoaded("nonexistent");
+print "  isLoaded('nonexistent') = " + notLoaded;
+print "";
+
+// -----------------------------------------------------------------------------
+// Test 3: Get plugin info (including signature metadata)
+// -----------------------------------------------------------------------------
+print "Test 3: Getting plugin info...";
+var info = #plugin.info("echo");
+if info != null then {
+    print "  alias: " + #json.getString(info, "alias", "");
+    print "  className: " + #json.getString(info, "className", "");
+    print "  name: " + #json.getString(info, "name", "");
+    print "  description: " + #json.getString(info, "description", "");
+    
+    // Display signature if available
+    var sig = #json.get(info, "signature");
+    if sig != null then {
+        print "  Signature:";
+        print "    returnType: " + #json.getString(sig, "returnType", "any");
+        print "    returnDescription: " + #json.getString(sig, "returnDescription", "");
+        var params = #json.get(sig, "parameters");
+        if params != null then {
+            print "    parameters: " + params;
+        }
+    }
+}
+print "";
+
+// -----------------------------------------------------------------------------
+// Test 4: Call the plugin using #custom.functionName(...) syntax
+// -----------------------------------------------------------------------------
+print "Test 4: Calling 'echo' plugin using #custom.echo(...) syntax...";
+
+var result1 = #custom.echo();
+print "  #custom.echo(): " + result1;
+
+var result2 = #custom.echo("Hello");
+print "  #custom.echo('Hello'): " + result2;
+
+var result3 = #custom.echo("Hello", "World");
+print "  #custom.echo('Hello', 'World'): " + result3;
+
+var result4 = #custom.echo("Answer:", 42, true);
+print "  #custom.echo('Answer:', 42, true): " + result4;
+print "";
+
+// -----------------------------------------------------------------------------
+// Test 5: List all loaded plugins
+// -----------------------------------------------------------------------------
+print "Test 5: Listing all loaded plugins...";
+var plugins = #plugin.list();
+print "  Loaded plugins: " + plugins;
+print "";
+
+// -----------------------------------------------------------------------------
+// Test 6: Unload and reload with configuration
+// -----------------------------------------------------------------------------
+print "Test 6: Unload and reload with custom configuration...";
+var unloadResult = #plugin.unload("echo");
+print "  Unloaded 'echo': " + unloadResult;
+
+// Reload with custom prefix
+#plugin.load("com.eb.script.interpreter.plugin.ExampleEbsFunction", "customEcho", {"prefix": "[CUSTOM]"});
+var customResult = #custom.customEcho("Test", "Message");
+print "  #custom.customEcho with prefix: " + customResult;
+print "";
+
+// -----------------------------------------------------------------------------
+// Test 7: Error handling - try to load non-existent class
+// -----------------------------------------------------------------------------
+print "Test 7: Error handling for non-existent class...";
+try {
+    #plugin.load("com.example.NonExistentClass", "fail");
+    print "  ERROR: Should have thrown an error!";
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  Caught expected error: " + msg;
+    }
+}
+print "";
+
+// -----------------------------------------------------------------------------
+// Test 8: Error handling - try to call non-loaded plugin
+// -----------------------------------------------------------------------------
+print "Test 8: Error handling for non-loaded custom function...";
+try {
+    #custom.nonexistent("arg");
+    print "  ERROR: Should have thrown an error!";
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  Caught expected error: " + msg;
+    }
+}
+print "";
+
+// -----------------------------------------------------------------------------
+// Test 9: Error handling - duplicate alias
+// -----------------------------------------------------------------------------
+print "Test 9: Error handling for duplicate alias...";
+try {
+    #plugin.load("com.eb.script.interpreter.plugin.ExampleEbsFunction", "customEcho");
+    print "  ERROR: Should have thrown an error!";
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  Caught expected error: " + msg;
+    }
+}
+print "";
+
+// -----------------------------------------------------------------------------
+// Cleanup
+// -----------------------------------------------------------------------------
+print "Cleanup: Unloading all test plugins...";
+#plugin.unload("customEcho");
+print "  Done!";
+print "";
+
+print "=== Plugin System Tests Complete ===";

@@ -3218,6 +3218,71 @@ var tree = call classtree.generate(baseDirectory, packages);
 var scan = call classtree.scan(directory);
 ```
 
+### Plugin Functions (External Java Functions)
+
+The plugin system allows loading and calling external Java classes that implement the `EbsFunction` interface. This enables extending the interpreter with custom functionality without modifying the core codebase.
+
+Custom functions are called using the `#custom.functionName(...)` syntax, which is consistent with other EBS builtins.
+
+See [PLUGIN_SYSTEM.md](PLUGIN_SYSTEM.md) for complete documentation and examples.
+
+#### plugin.load - Load a Java Plugin
+```javascript
+// Load a Java class as a plugin (must implement EbsFunction interface)
+#plugin.load("com.example.MyFunction", "myFunc");
+
+// Load with configuration
+#plugin.load("com.example.MyFunction", "myFunc", {"option": "value"});
+```
+
+#### Calling Custom Functions with #custom.alias(...)
+```javascript
+// Call the loaded plugin using #custom.alias syntax
+var result = #custom.myFunc("arg1", 42, true);
+print result;
+```
+
+#### plugin.isLoaded - Check if Plugin is Loaded
+```javascript
+if #plugin.isLoaded("myFunc") then {
+    print "Plugin is loaded";
+}
+```
+
+#### plugin.unload - Unload a Plugin
+```javascript
+// Unload the plugin and cleanup resources
+#plugin.unload("myFunc");
+```
+
+#### plugin.list - List Loaded Plugins
+```javascript
+var plugins = #plugin.list();
+foreach p in plugins {
+    print "Loaded: " + p;
+}
+```
+
+#### plugin.info - Get Plugin Information
+```javascript
+var info = #plugin.info("myFunc");
+print "Name: " + #json.getString(info, "name", "");
+print "Description: " + #json.getString(info, "description", "");
+```
+
+#### Example: Using the Built-in Example Plugin
+```javascript
+// Load the built-in example plugin
+#plugin.load("com.eb.script.interpreter.plugin.ExampleEbsFunction", "echo");
+
+// Call it using #custom.echo(...)
+var result = #custom.echo("Hello", "World");
+print result;  // Output: [Echo] Hello World
+
+// Unload when done
+#plugin.unload("echo");
+```
+
 ---
 
 ## Comments
