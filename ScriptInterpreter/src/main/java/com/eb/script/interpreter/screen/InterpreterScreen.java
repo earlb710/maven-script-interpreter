@@ -2478,7 +2478,10 @@ public class InterpreterScreen {
                 varItemsMap.put(varKey, var);
 
                 // Store in screen's thread-safe variable map (legacy support)
-                screenVarMap.put(varName, value);
+                // Note: ConcurrentHashMap does not allow null values, so skip null values
+                if (value != null) {
+                    screenVarMap.put(varName, value);
+                }
 
                 // Store the variable type if specified (legacy support)
                 if (varType != null) {
