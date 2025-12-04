@@ -1195,6 +1195,83 @@ public final class Builtins {
                 "ftp.listConnections", DataType.JSON            // returns array of connection info
         ));
 
+        // ==========================
+        // Image builtins
+        // ==========================
+        addBuiltin(info(
+                "image.load", DataType.ARRAY,
+                newParam("path", DataType.STRING, true)          // required; path to image file
+        ));
+        addBuiltin(info(
+                "image.save", DataType.BOOL,
+                newParam("bytes", DataType.ARRAY, true),         // required; image byte array
+                newParam("path", DataType.STRING, true),         // required; output file path
+                newParam("format", DataType.STRING, false)       // optional; output format (png, jpg, gif, bmp)
+        ));
+        addBuiltin(info(
+                "image.resize", DataType.ARRAY,
+                newParam("bytes", DataType.ARRAY, true),         // required; image byte array
+                newParam("width", DataType.INTEGER, true),       // required; target width
+                newParam("height", DataType.INTEGER, true),      // required; target height
+                newParam("keepAspect", DataType.BOOL, false)     // optional; maintain aspect ratio
+        ));
+        addBuiltin(info(
+                "image.getWidth", DataType.INTEGER,
+                newParam("bytes", DataType.ARRAY, true)          // required; image byte array
+        ));
+        addBuiltin(info(
+                "image.getHeight", DataType.INTEGER,
+                newParam("bytes", DataType.ARRAY, true)          // required; image byte array
+        ));
+        addBuiltin(info(
+                "image.getInfo", DataType.JSON,
+                newParam("bytes", DataType.ARRAY, true)          // required; image byte array
+        ));
+        addBuiltin(info(
+                "image.crop", DataType.ARRAY,
+                newParam("bytes", DataType.ARRAY, true),         // required; image byte array
+                newParam("x", DataType.INTEGER, true),           // required; crop start x
+                newParam("y", DataType.INTEGER, true),           // required; crop start y
+                newParam("width", DataType.INTEGER, true),       // required; crop width
+                newParam("height", DataType.INTEGER, true)       // required; crop height
+        ));
+        addBuiltin(info(
+                "image.rotate", DataType.ARRAY,
+                newParam("bytes", DataType.ARRAY, true),         // required; image byte array
+                newParam("degrees", DataType.DOUBLE, true)       // required; rotation angle in degrees
+        ));
+        addBuiltin(info(
+                "image.flipHorizontal", DataType.ARRAY,
+                newParam("bytes", DataType.ARRAY, true)          // required; image byte array
+        ));
+        addBuiltin(info(
+                "image.flipVertical", DataType.ARRAY,
+                newParam("bytes", DataType.ARRAY, true)          // required; image byte array
+        ));
+        addBuiltin(info(
+                "image.toGrayscale", DataType.ARRAY,
+                newParam("bytes", DataType.ARRAY, true)          // required; image byte array
+        ));
+        addBuiltin(info(
+                "image.adjustBrightness", DataType.ARRAY,
+                newParam("bytes", DataType.ARRAY, true),         // required; image byte array
+                newParam("factor", DataType.DOUBLE, true)        // required; brightness factor (1.0 = no change)
+        ));
+        addBuiltin(info(
+                "image.adjustContrast", DataType.ARRAY,
+                newParam("bytes", DataType.ARRAY, true),         // required; image byte array
+                newParam("factor", DataType.DOUBLE, true)        // required; contrast factor (1.0 = no change)
+        ));
+        addBuiltin(info(
+                "image.fromBase64", DataType.ARRAY,
+                newParam("base64", DataType.STRING, true)        // required; base64 encoded image string
+        ));
+        addBuiltin(info(
+                "image.toBase64", DataType.STRING,
+                newParam("bytes", DataType.ARRAY, true),         // required; image byte array
+                newParam("format", DataType.STRING, false)       // optional; output format (png, jpg, gif, bmp)
+        ));
+
         NAMES = Collections.unmodifiableSet(BUILTINS.keySet());
     }
 
@@ -1271,6 +1348,11 @@ public final class Builtins {
         // FTP builtins
         if (BuiltinsFtp.handles(name)) {
             return BuiltinsFtp.dispatch(env, name, args);
+        }
+        
+        // Image builtins
+        if (BuiltinsImage.handles(name)) {
+            return BuiltinsImage.dispatch(env, name, args);
         }
         
         // File builtins (already in BuiltinsFile)
