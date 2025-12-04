@@ -226,7 +226,13 @@ public class InterpreterArray {
                         String varName = propExpr.propertyName.toLowerCase();
                         
                         // Check if the variable exists in the screen
-                        if (screenVarMap.containsKey(varName)) {
+                        // Check both screenVarMap and screenVarTypeMap since variables with null default values
+                        // (like IMAGE type) may not be in screenVarMap but are in screenVarTypeMap
+                        ConcurrentHashMap<String, DataType> screenVarTypeMap = context.getScreenVarTypes(screenName);
+                        boolean varExists = screenVarMap.containsKey(varName) || 
+                                           (screenVarTypeMap != null && screenVarTypeMap.containsKey(varName));
+                        
+                        if (varExists) {
                             // Evaluate the value to assign
                             Object value = interpreter.evaluate(stmt.value);
                             
