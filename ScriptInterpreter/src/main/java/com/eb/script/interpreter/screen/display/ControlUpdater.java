@@ -2,6 +2,7 @@ package com.eb.script.interpreter.screen.display;
 
 import com.eb.script.arrays.ArrayDynamic;
 import com.eb.script.interpreter.screen.DisplayItem;
+import com.eb.script.interpreter.screen.data.VarRefResolver;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
@@ -215,7 +216,8 @@ public class ControlUpdater {
             DisplayItem metadata = (DisplayItem) control.getProperties().get("metadata");
 
             if (varName != null) {
-                Object currentValue = screenVars.get(varName);
+                // Use VarRefResolver for case-insensitive lookup and complex expressions
+                Object currentValue = VarRefResolver.resolveVarRefValue(varName, screenVars);
                 updateControlFromValue(control, currentValue, metadata);
             }
         }

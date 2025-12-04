@@ -1,8 +1,13 @@
 package com.eb.script.interpreter.screen.display;
 
 import com.eb.script.interpreter.InterpreterContext;
+import com.eb.script.interpreter.screen.ScreenFactory;
 import com.eb.script.interpreter.screen.ScreenFactory.OnClickHandler;
+import com.eb.script.interpreter.screen.data.DataBindingManager;
 import javafx.scene.Node;
+
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Handles onChange event handlers for screen input controls.
@@ -24,18 +29,38 @@ public class DisplayChangeHandler {
      * @param onClickHandler Handler to execute the EBS code
      * @param screenName The screen name for context
      * @param context The interpreter context
+     * @param boundControls List of bound controls to refresh after execution
+     * @param screenVars The screen variables map
      */
     public static void setupChangeHandler(Node control, String changeCode,
-            OnClickHandler onClickHandler, String screenName, InterpreterContext context) {
+            OnClickHandler onClickHandler, String screenName, InterpreterContext context,
+            List<Node> boundControls, ConcurrentHashMap<String, Object> screenVars) {
         if (control == null || changeCode == null || changeCode.isEmpty() || onClickHandler == null) {
             return;
         }
         
+        // Get item name from control properties (set during control creation)
+        String itemName = (String) control.getProperties().get("itemName");
+        if (itemName == null) {
+            itemName = control.getId() != null ? control.getId() : "unknown";
+        }
+        
+        final String finalItemName = itemName;
+        
         // Create a change handler that executes the code
         Runnable changeHandler = () -> {
             try {
+                // Increment event count for debugging
+                int count = ScreenFactory.incrementEventCount(screenName, finalItemName, "onChange");
+                System.out.println("[DEBUG] onChange fired: " + screenName + "." + finalItemName + " (count: " + count + ")");
+                
                 // Execute the onChange code
                 onClickHandler.execute(changeCode);
+                
+                // After executing the onChange code, refresh all bound controls to update UI
+                if (boundControls != null && screenVars != null) {
+                    DataBindingManager.refreshBoundControls(boundControls, screenVars);
+                }
             } catch (Exception e) {
                 System.err.println("Error executing onChange code: " + e.getMessage());
                 e.printStackTrace();

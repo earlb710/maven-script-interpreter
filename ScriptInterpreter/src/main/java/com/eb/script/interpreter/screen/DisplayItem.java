@@ -38,6 +38,8 @@ public class DisplayItem {
     String labelText;
     // Label text alignment: "left", "center", "right"
     String labelTextAlignment;
+    // Label position relative to control: "left", "right", "top", "bottom"
+    String labelPosition;
     // Options/values for selection controls (ComboBox, ChoiceBox, ListView)
     List<String> options;
     // Options map for selection controls where keys are data values and values are display text
@@ -81,6 +83,37 @@ public class DisplayItem {
     public Integer displayRecords;
     // Sequence number for ordering display items (lower numbers appear first)
     public Integer seq;
+    // Tree items for TreeView - hierarchical structure
+    public List<TreeItemDef> treeItems;
+    // Whether to expand all tree nodes by default
+    public Boolean expandAll;
+    // Whether to show the root node
+    public Boolean showRoot;
+    
+    /**
+     * Inner class to define a tree item (node) with optional children
+     */
+    public static class TreeItemDef {
+        public String value;           // Display text/value of the tree item
+        public String icon;            // Optional icon path (used when no iconOpen/iconClosed specified)
+        public String iconOpen;        // Optional icon path for expanded/open state
+        public String iconClosed;      // Optional icon path for collapsed/closed state
+        public Boolean expanded;       // Whether this node is expanded by default
+        public List<TreeItemDef> children;  // Child tree items (for hierarchy)
+        
+        public TreeItemDef() {}
+        
+        public TreeItemDef(String value) {
+            this.value = value;
+            this.expanded = false;
+        }
+        
+        public TreeItemDef(String value, List<TreeItemDef> children) {
+            this.value = value;
+            this.children = children;
+            this.expanded = true;
+        }
+    }
     
     /**
      * Inner class to define a table column
@@ -190,6 +223,8 @@ public class DisplayItem {
                  "-fx-border-color: #cccccc; -fx-border-width: 1;"),
         TABLEVIEW("tableview", "screen-item-tableview",
                   "-fx-border-color: #cccccc; -fx-border-width: 1;"),
+        TREEVIEW("treeview", "screen-item-treeview",
+                 "-fx-border-color: #cccccc; -fx-border-width: 1;"),
         
         // Numeric Controls
         SPINNER("spinner", "screen-item-spinner",

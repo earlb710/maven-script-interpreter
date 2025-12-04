@@ -114,6 +114,81 @@ public class ScreenFactory {
     
     // Map to store original window widths before debug panel expansion (screenName -> originalWidth)
     private static final java.util.concurrent.ConcurrentHashMap<String, Double> screenOriginalWidths = new java.util.concurrent.ConcurrentHashMap<>();
+    
+    // Map to store event counts per item.eventType (e.g., "fileTree.onChange" -> count)
+    private static final java.util.concurrent.ConcurrentHashMap<String, java.util.concurrent.atomic.AtomicInteger> eventCounts = new java.util.concurrent.ConcurrentHashMap<>();
+    
+    // Map to store debug panel event count labels for dynamic refresh (key -> label)
+    // Key format: "screenName.itemName.eventType"
+    private static final java.util.concurrent.ConcurrentHashMap<String, javafx.scene.control.Label> eventCountLabels = new java.util.concurrent.ConcurrentHashMap<>();
+    
+    /**
+     * Increment and return the event count for a specific item.eventType combination.
+     * Used for debugging to track how many times each event fires.
+     * Also updates the corresponding label in the debug panel if it exists.
+     * 
+     * @param screenName The screen name
+     * @param itemName The item name (e.g., "fileTree")
+     * @param eventType The event type (e.g., "onChange", "onClick")
+     * @return The new count after incrementing
+     */
+    public static int incrementEventCount(String screenName, String itemName, String eventType) {
+        String key = (screenName + "." + itemName + "." + eventType).toLowerCase();
+        int newCount = eventCounts.computeIfAbsent(key, k -> new java.util.concurrent.atomic.AtomicInteger(0)).incrementAndGet();
+        
+        // Update the debug panel label if it exists
+        javafx.scene.control.Label countLabel = eventCountLabels.get(key);
+        if (countLabel != null) {
+            String countText = " [" + newCount + "]";
+            // Update on JavaFX thread
+            javafx.application.Platform.runLater(() -> {
+                // Update just the count portion of the label text
+                String currentText = countLabel.getText();
+                // Format is ".eventType [count]: code..." - we need to update the [count] portion
+                int bracketStart = currentText.indexOf('[');
+                int bracketEnd = currentText.indexOf(']');
+                if (bracketStart >= 0 && bracketEnd > bracketStart) {
+                    String newText = currentText.substring(0, bracketStart) + "[" + newCount + "]" + currentText.substring(bracketEnd + 1);
+                    countLabel.setText(newText);
+                } else if (bracketStart < 0) {
+                    // No bracket yet, find the colon and insert count before it
+                    int colonPos = currentText.indexOf(':');
+                    if (colonPos >= 0) {
+                        String newText = currentText.substring(0, colonPos) + " [" + newCount + "]" + currentText.substring(colonPos);
+                        countLabel.setText(newText);
+                    }
+                }
+            });
+        }
+        
+        return newCount;
+    }
+    
+    /**
+     * Get the current event count for a specific item.eventType combination.
+     * 
+     * @param screenName The screen name
+     * @param itemName The item name
+     * @param eventType The event type
+     * @return The current count (0 if never fired)
+     */
+    public static int getEventCount(String screenName, String itemName, String eventType) {
+        String key = (screenName + "." + itemName + "." + eventType).toLowerCase();
+        java.util.concurrent.atomic.AtomicInteger count = eventCounts.get(key);
+        return count != null ? count.get() : 0;
+    }
+    
+    /**
+     * Reset all event counts for a screen (called when screen is closed).
+     * 
+     * @param screenName The screen name
+     */
+    public static void resetEventCounts(String screenName) {
+        String prefix = (screenName + ".").toLowerCase();
+        eventCounts.keySet().removeIf(key -> key.startsWith(prefix));
+        // Also clean up event count labels
+        eventCountLabels.keySet().removeIf(key -> key.startsWith(prefix));
+    }
 
     static {
         try {
@@ -632,62 +707,72 @@ public class ScreenFactory {
         // Screen-level callbacks
         String callback = context.getScreenCallback(screenName);
         if (callback != null) {
-            addEventHandlerRow(handlersSection, "Screen", "callback", callback);
+            addEventHandlerRow(handlersSection, screenName, "Screen", "callback", callback);
             hasHandlers = true;
         }
         
         String startupCode = context.getScreenStartupCode(screenName);
         if (startupCode != null) {
-            addEventHandlerRow(handlersSection, "Screen", "onStartup", startupCode);
+            addEventHandlerRow(handlersSection, screenName, "Screen", "onStartup", startupCode);
             hasHandlers = true;
         }
         
         String cleanupCode = context.getScreenCleanupCode(screenName);
         if (cleanupCode != null) {
-            addEventHandlerRow(handlersSection, "Screen", "onCleanup", cleanupCode);
+            addEventHandlerRow(handlersSection, screenName, "Screen", "onCleanup", cleanupCode);
             hasHandlers = true;
         }
         
         String gainFocusCode = context.getScreenGainFocusCode(screenName);
         if (gainFocusCode != null) {
-            addEventHandlerRow(handlersSection, "Screen", "onGainFocus", gainFocusCode);
+            addEventHandlerRow(handlersSection, screenName, "Screen", "onGainFocus", gainFocusCode);
             hasHandlers = true;
         }
         
         String lostFocusCode = context.getScreenLostFocusCode(screenName);
         if (lostFocusCode != null) {
-            addEventHandlerRow(handlersSection, "Screen", "onLostFocus", lostFocusCode);
+            addEventHandlerRow(handlersSection, screenName, "Screen", "onLostFocus", lostFocusCode);
             hasHandlers = true;
         }
         
         // Item-level handlers
+        // Use IdentityHashSet to avoid processing the same item twice
+        // (items can be stored in the map under multiple keys: by name and by varRef)
         if (screenAreaItems != null) {
+            java.util.Set<AreaItem> processedItems = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
             for (Map.Entry<String, AreaItem> entry : screenAreaItems.entrySet()) {
                 AreaItem item = entry.getValue();
+                
+                // Skip if we've already processed this exact item instance
+                if (processedItems.contains(item)) {
+                    continue;
+                }
+                processedItems.add(item);
+                
                 String itemName = item.name != null ? item.name : entry.getKey();
                 
                 // Check item-level handlers
                 if (item.onValidate != null) {
-                    addEventHandlerRow(handlersSection, itemName, "onValidate", item.onValidate);
+                    addEventHandlerRow(handlersSection, screenName, itemName, "onValidate", item.onValidate);
                     hasHandlers = true;
                 }
                 if (item.onChange != null) {
-                    addEventHandlerRow(handlersSection, itemName, "onChange", item.onChange);
+                    addEventHandlerRow(handlersSection, screenName, itemName, "onChange", item.onChange);
                     hasHandlers = true;
                 }
                 
                 // Check displayItem handlers
                 if (item.displayItem != null) {
                     if (item.displayItem.onClick != null) {
-                        addEventHandlerRow(handlersSection, itemName, "onClick", item.displayItem.onClick);
+                        addEventHandlerRow(handlersSection, screenName, itemName, "onClick", item.displayItem.onClick);
                         hasHandlers = true;
                     }
                     if (item.displayItem.onValidate != null && item.onValidate == null) {
-                        addEventHandlerRow(handlersSection, itemName, "onValidate", item.displayItem.onValidate);
+                        addEventHandlerRow(handlersSection, screenName, itemName, "onValidate", item.displayItem.onValidate);
                         hasHandlers = true;
                     }
                     if (item.displayItem.onChange != null && item.onChange == null) {
-                        addEventHandlerRow(handlersSection, itemName, "onChange", item.displayItem.onChange);
+                        addEventHandlerRow(handlersSection, screenName, itemName, "onChange", item.displayItem.onChange);
                         hasHandlers = true;
                     }
                 }
@@ -708,11 +793,12 @@ public class ScreenFactory {
      * Clicking on the row copies the handler details (including full code) to clipboard.
      * 
      * @param section The VBox to add the row to
+     * @param screenName The screen name for event counting
      * @param itemName The name of the item (e.g., "Screen", "button1")
      * @param eventType The event type (e.g., "onClick", "onValidate")
      * @param fullCode The full handler code (for clipboard)
      */
-    private static void addEventHandlerRow(VBox section, String itemName, String eventType, String fullCode) {
+    private static void addEventHandlerRow(VBox section, String screenName, String itemName, String eventType, String fullCode) {
         HBox row = new HBox(3);
         row.setAlignment(Pos.CENTER_LEFT);
         row.setPadding(new Insets(2, 5, 2, 5));
@@ -728,10 +814,18 @@ public class ScreenFactory {
         nameLabel.setMinWidth(DEBUG_ITEM_NAME_MIN_WIDTH);
         nameLabel.setMaxWidth(DEBUG_ITEM_NAME_MAX_WIDTH);
         
-        // Event type with truncated code preview
+        // Get event count for debugging
+        int eventCount = getEventCount(screenName, itemName, eventType);
+        String countText = eventCount > 0 ? " [" + eventCount + "]" : "";
+        
+        // Event type with truncated code preview and count
         String truncatedCode = truncateCode(fullCode);
-        javafx.scene.control.Label typeLabel = new javafx.scene.control.Label("." + eventType + ": " + truncatedCode);
+        javafx.scene.control.Label typeLabel = new javafx.scene.control.Label("." + eventType + countText + ": " + truncatedCode);
         typeLabel.setStyle("-fx-text-fill: #006666;");
+        
+        // Store label reference for dynamic count updates
+        String key = (screenName + "." + itemName + "." + eventType).toLowerCase();
+        eventCountLabels.put(key, typeLabel);
         
         row.getChildren().addAll(iconLabel, nameLabel, typeLabel);
         
@@ -1150,9 +1244,19 @@ public class ScreenFactory {
         }
         
         // Item-level handlers
+        // Use IdentityHashSet to avoid processing the same item twice
+        // (items can be stored in the map under multiple keys: by name and by varRef)
         if (screenAreaItems != null) {
+            java.util.Set<AreaItem> processedItems = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
             for (Map.Entry<String, AreaItem> entry : screenAreaItems.entrySet()) {
                 AreaItem item = entry.getValue();
+                
+                // Skip if we've already processed this exact item instance
+                if (processedItems.contains(item)) {
+                    continue;
+                }
+                processedItems.add(item);
+                
                 String itemName = item.name != null ? item.name : entry.getKey();
                 
                 if (item.onValidate != null) {
@@ -2202,9 +2306,13 @@ public class ScreenFactory {
                     // Only wrap input controls, not Label or Button which display their own text
                     if (!(control instanceof javafx.scene.control.Label)
                             && !(control instanceof javafx.scene.control.Button)) {
-                        // Use vertical layout for TableView, horizontal for others
-                        boolean useVerticalLayout = (control instanceof javafx.scene.control.TableView);
-                        nodeToAdd = createLabeledControl(metadata.labelText, metadata.labelTextAlignment, control, maxLabelWidth, metadata, useVerticalLayout);
+                        // Determine layout based on labelPosition property, defaulting to "left"
+                        // For TableView default to "top" unless explicitly specified
+                        String labelPos = metadata.labelPosition;
+                        if (labelPos == null || labelPos.isEmpty()) {
+                            labelPos = (control instanceof javafx.scene.control.TableView) ? "top" : "left";
+                        }
+                        nodeToAdd = createLabeledControl(metadata.labelText, metadata.labelTextAlignment, control, maxLabelWidth, metadata, labelPos);
                     }
                 } else {
                     // No label specified - wrap control in HBox with left padding to align with labeled controls
@@ -2266,13 +2374,18 @@ public class ScreenFactory {
                     setupValidationHandler(control, validateCode, onClickHandler, screenName, context);
                 }
                 
+                // Store item name on control for event debugging
+                if (item.name != null) {
+                    control.getProperties().put("itemName", item.name);
+                }
+                
                 // Set up onChange handler for input controls
                 String changeCode = item.onChange;
                 if (changeCode == null && metadata != null) {
                     changeCode = metadata.onChange;
                 }
                 if (onClickHandler != null && changeCode != null && !changeCode.isEmpty()) {
-                    setupChangeHandler(control, changeCode, onClickHandler, screenName, context);
+                    setupChangeHandler(control, changeCode, onClickHandler, screenName, context, boundControls, screenVars);
                 }
 
                 // Apply item layout properties
@@ -3196,10 +3309,14 @@ public class ScreenFactory {
         merged.promptHelp = base.promptHelp;
         merged.labelText = base.labelText;
         merged.labelTextAlignment = base.labelTextAlignment;
+        merged.labelPosition = base.labelPosition;
         merged.options = base.options;
         merged.optionsMap = base.optionsMap;
         merged.columns = base.columns;
         merged.displayRecords = base.displayRecords;
+        merged.treeItems = base.treeItems;
+        merged.expandAll = base.expandAll;
+        merged.showRoot = base.showRoot;
         merged.labelColor = base.labelColor;
         merged.labelBold = base.labelBold;
         merged.labelItalic = base.labelItalic;
@@ -3230,10 +3347,14 @@ public class ScreenFactory {
         if (overlay.promptHelp != null) merged.promptHelp = overlay.promptHelp;
         if (overlay.labelText != null) merged.labelText = overlay.labelText;
         if (overlay.labelTextAlignment != null) merged.labelTextAlignment = overlay.labelTextAlignment;
+        if (overlay.labelPosition != null) merged.labelPosition = overlay.labelPosition;
         if (overlay.options != null) merged.options = overlay.options;
         if (overlay.optionsMap != null) merged.optionsMap = overlay.optionsMap;
         if (overlay.columns != null) merged.columns = overlay.columns;
         if (overlay.displayRecords != null) merged.displayRecords = overlay.displayRecords;
+        if (overlay.treeItems != null) merged.treeItems = overlay.treeItems;
+        if (overlay.expandAll != null) merged.expandAll = overlay.expandAll;
+        if (overlay.showRoot != null) merged.showRoot = overlay.showRoot;
         if (overlay.labelColor != null) merged.labelColor = overlay.labelColor;
         if (overlay.labelBold != null) merged.labelBold = overlay.labelBold;
         if (overlay.labelItalic != null) merged.labelItalic = overlay.labelItalic;
@@ -3475,15 +3596,33 @@ public class ScreenFactory {
      * @param control The control to wrap
      * @param minWidth The minimum width for the label
      * @param metadata DisplayItem metadata containing styling information
-     * @param useVerticalLayout If true, place label above control (VBox); if false, place label beside control (HBox)
+     * @param labelPosition Label position: "left", "right", "top", or "bottom"
      * @return The wrapped control with label
      */
-    private static Node createLabeledControl(String labelText, String alignment, Node control, double minWidth, DisplayItem metadata, boolean useVerticalLayout) {
+    private static Node createLabeledControl(String labelText, String alignment, Node control, double minWidth, DisplayItem metadata, String labelPosition) {
         javafx.scene.control.Label label = new javafx.scene.control.Label(labelText);
 
+        // Determine if vertical or horizontal layout based on position
+        boolean isVertical = "top".equals(labelPosition) || "bottom".equals(labelPosition);
+        
         // Build label style with default styling
-        String defaultAlignment = useVerticalLayout ? "center-left" : "center-right";
-        String defaultPadding = useVerticalLayout ? "0 0 5 0" : "0 10 0 0";  // bottom padding for vertical, right padding for horizontal
+        String defaultAlignment = isVertical ? "center-left" : "center-right";
+        String defaultPadding;
+        switch (labelPosition) {
+            case "top":
+                defaultPadding = "0 0 5 0";  // bottom padding
+                break;
+            case "bottom":
+                defaultPadding = "5 0 0 0";  // top padding
+                break;
+            case "right":
+                defaultPadding = "0 0 0 10"; // left padding
+                break;
+            case "left":
+            default:
+                defaultPadding = "0 10 0 0"; // right padding
+                break;
+        }
         StringBuilder styleBuilder = new StringBuilder("-fx-font-weight: normal; -fx-padding: " + defaultPadding + "; -fx-alignment: " + defaultAlignment + "; -fx-text-fill: #333333;");
 
         // Apply label styling from metadata
@@ -3515,49 +3654,43 @@ public class ScreenFactory {
 
         label.setStyle(styleBuilder.toString());
         
-        if (useVerticalLayout) {
-            // Vertical layout: label on top, control below
+        if (isVertical) {
+            // Vertical layout: label on top or bottom
             label.setMaxWidth(Double.MAX_VALUE);  // Allow label to stretch full width
             javafx.scene.layout.VBox container = new javafx.scene.layout.VBox(0);
             container.setAlignment(javafx.geometry.Pos.TOP_LEFT);
             container.setPickOnBounds(false);
-            container.getChildren().addAll(label, control);
+            
+            if ("bottom".equals(labelPosition)) {
+                container.getChildren().addAll(control, label);
+            } else {
+                // "top" is default for vertical
+                container.getChildren().addAll(label, control);
+            }
             
             // Allow the control (e.g., TableView) to grow vertically within the VBox
             javafx.scene.layout.VBox.setVgrow(control, javafx.scene.layout.Priority.ALWAYS);
             
             return container;
         } else {
-            // Horizontal layout: original behavior
+            // Horizontal layout: label on left or right
             label.setMinWidth(minWidth); // Use calculated minimum width to align labels underneath each other
             label.setMaxWidth(Region.USE_PREF_SIZE);
 
-            // Determine alignment (default to left if not specified)
-            String actualAlignment = (alignment != null) ? alignment.toLowerCase() : "left";
-
-            // Create container based on alignment
+            // Create container
             javafx.scene.layout.HBox container = new javafx.scene.layout.HBox(5);
             container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
             // Make container pick on bounds so tooltips on child controls work properly
             container.setPickOnBounds(false);
 
-            switch (actualAlignment) {
-                case "right":
-                    // Control first, then label on the right
-                    container.getChildren().addAll(control, label);
-                    container.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
-                    break;
-                case "center":
-                    // Center both
-                    container.setAlignment(javafx.geometry.Pos.CENTER);
-                    container.getChildren().addAll(label, control);
-                    break;
-                case "left":
-                default:
-                    // Label first (on the left), then control
-                    container.getChildren().addAll(label, control);
-                    container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-                    break;
+            if ("right".equals(labelPosition)) {
+                // Control first, then label on the right
+                container.getChildren().addAll(control, label);
+                container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+            } else {
+                // "left" is default - Label first (on the left), then control
+                container.getChildren().addAll(label, control);
+                container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
             }
 
             return container;
@@ -3699,11 +3832,14 @@ public class ScreenFactory {
      * @param onClickHandler Handler to execute the EBS code
      * @param screenName The screen name for context
      * @param context The interpreter context
+     * @param boundControls List of bound controls to refresh after execution
+     * @param screenVars The screen variables map
      */
     private static void setupChangeHandler(Node control, String changeCode,
-            OnClickHandler onClickHandler, String screenName, InterpreterContext context) {
+            OnClickHandler onClickHandler, String screenName, InterpreterContext context,
+            List<Node> boundControls, java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
         // Delegate to DisplayChangeHandler in the display layer
-        DisplayChangeHandler.setupChangeHandler(control, changeCode, onClickHandler, screenName, context);
+        DisplayChangeHandler.setupChangeHandler(control, changeCode, onClickHandler, screenName, context, boundControls, screenVars);
     }
 
     /**
@@ -3924,6 +4060,7 @@ public class ScreenFactory {
         clone.promptHelp = source.promptHelp;
         clone.labelText = source.labelText;
         clone.labelTextAlignment = source.labelTextAlignment;
+        clone.labelPosition = source.labelPosition;
         clone.labelColor = source.labelColor;
         clone.labelBold = source.labelBold;
         clone.labelItalic = source.labelItalic;
@@ -3971,6 +4108,36 @@ public class ScreenFactory {
             }
         }
         
+        // Clone treeItems list if present
+        if (source.treeItems != null) {
+            clone.treeItems = cloneTreeItems(source.treeItems);
+        }
+        clone.expandAll = source.expandAll;
+        clone.showRoot = source.showRoot;
+        
+        return clone;
+    }
+    
+    /**
+     * Deep clones a list of TreeItemDef objects.
+     */
+    private static List<DisplayItem.TreeItemDef> cloneTreeItems(List<DisplayItem.TreeItemDef> source) {
+        if (source == null) {
+            return null;
+        }
+        List<DisplayItem.TreeItemDef> clone = new ArrayList<>();
+        for (DisplayItem.TreeItemDef item : source) {
+            DisplayItem.TreeItemDef itemClone = new DisplayItem.TreeItemDef();
+            itemClone.value = item.value;
+            itemClone.icon = item.icon;
+            itemClone.iconOpen = item.iconOpen;
+            itemClone.iconClosed = item.iconClosed;
+            itemClone.expanded = item.expanded;
+            if (item.children != null) {
+                itemClone.children = cloneTreeItems(item.children);
+            }
+            clone.add(itemClone);
+        }
         return clone;
     }
 
