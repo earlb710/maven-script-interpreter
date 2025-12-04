@@ -1,0 +1,48 @@
+// Test ArrayFixedInt implementation
+// This script tests the array.int type for fixed-size integer arrays
+
+// Test 1: Declare a fixed-size integer array
+var intArray : array.int[5];
+print "Test 1: Created fixed int array of size 5";
+
+// Test 2: Assign values to the integer array
+intArray[0] = 10;
+intArray[1] = 20;
+intArray[2] = 30;
+intArray[3] = 40;
+intArray[4] = 50;
+print "Test 2: Assigned values {10, 20, 30, 40, 50}";
+
+// Test 3: Read values from the integer array
+print "Test 3: Array values:";
+print "  intArray[0] = " + intArray[0];
+print "  intArray[1] = " + intArray[1];
+print "  intArray[2] = " + intArray[2];
+print "  intArray[3] = " + intArray[3];
+print "  intArray[4] = " + intArray[4];
+
+// Test 4: Array length
+print "Test 4: Array length = " + intArray.length;
+
+// Test 5: Iterate using foreach
+print "Test 5: Iterate with foreach:";
+foreach (val in intArray) {
+    print "  Value: " + val;
+}
+
+// Test 6: Sum all values
+var total : int = 0;
+for (var i : int = 0; i < intArray.length; i++) {
+    total = total + intArray[i];
+}
+print "Test 6: Sum of all values = " + total;
+
+// Test 7: Declare with inline initialization
+var intArray2 : array.int[3] = {100, 200, 300};
+print "Test 7: Inline initialized array:";
+print "  intArray2[0] = " + intArray2[0];
+print "  intArray2[1] = " + intArray2[1];
+print "  intArray2[2] = " + intArray2[2];
+
+print "";
+print "All ArrayFixedInt tests completed!";

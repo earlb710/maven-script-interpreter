@@ -4,6 +4,7 @@ import com.eb.script.arrays.ArrayDef;
 import com.eb.script.arrays.ArrayDynamic;
 import com.eb.script.arrays.ArrayFixed;
 import com.eb.script.arrays.ArrayFixedByte;
+import com.eb.script.arrays.ArrayFixedInt;
 import com.eb.script.interpreter.expression.ArrayExpression;
 import com.eb.script.interpreter.expression.ArrayLiteralExpression;
 import com.eb.script.interpreter.expression.Expression;
@@ -389,6 +390,8 @@ public class InterpreterArray {
             // Create a fixed child sized to the nested literal length
             if (elemType == DataType.BYTE) {
                 return new ArrayFixedByte(Math.max(0, childLen));
+            } else if (elemType == DataType.INTEGER) {
+                return new ArrayFixedInt(Math.max(0, childLen));
             } else {
                 return new ArrayFixed(elemType, Math.max(0, childLen));
             }
@@ -488,17 +491,23 @@ public class InterpreterArray {
     private ArrayDef createEmptyArray(DataType dataType, Integer[] dims, int depth) {
         Integer len = dims[depth];
         ArrayDef ret = null;
+        boolean isLeafDimension = (depth == dims.length - 1);
+        
         if (len == null) {
             ret = new ArrayDynamic(dataType);
             len = 0;
         } else {
-            if (dataType == DataType.BYTE) {
+            // Only use specialized fixed types for the innermost (leaf) dimension
+            // since they can only hold primitive values, not nested arrays
+            if (isLeafDimension && dataType == DataType.BYTE) {
                 ret = new ArrayFixedByte(len);
+            } else if (isLeafDimension && dataType == DataType.INTEGER) {
+                ret = new ArrayFixedInt(len);
             } else {
                 ret = new ArrayFixed(dataType, len);
             }
         }
-        if (depth == dims.length - 1) {
+        if (isLeafDimension) {
             for (int i = 0; i < len; i++) {
                 ret.set(i, null);
             }
