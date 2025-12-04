@@ -182,30 +182,30 @@ public class AreaItemFactory {
                 
                 // Set the root node if treeItems are specified
                 if (metadata != null && metadata.treeItems != null && !metadata.treeItems.isEmpty()) {
-                    // Create root item - either use first item or create a hidden root
-                    TreeItem<String> rootItem;
-                    boolean showRoot = metadata.showRoot == null || metadata.showRoot;
+                    // Determine if we should show the root node
+                    // Default is true if not specified
+                    boolean showRootValue = metadata.showRoot == null ? true : metadata.showRoot;
                     
-                    if (showRoot && metadata.treeItems.size() == 1) {
-                        // Single root item with children
+                    TreeItem<String> rootItem;
+                    
+                    if (metadata.treeItems.size() == 1) {
+                        // Single root item - use it as the actual root
                         DisplayItem.TreeItemDef rootDef = metadata.treeItems.get(0);
                         rootItem = createTreeItem(rootDef);
+                        treeView.setShowRoot(showRootValue);
                     } else {
                         // Multiple root items - create a hidden container root
+                        // In this case, we always hide the synthetic container root
                         rootItem = new TreeItem<>("Root");
                         for (DisplayItem.TreeItemDef itemDef : metadata.treeItems) {
                             rootItem.getChildren().add(createTreeItem(itemDef));
                         }
                         rootItem.setExpanded(true);
+                        // For multiple roots, the container is always hidden
                         treeView.setShowRoot(false);
                     }
                     
                     treeView.setRoot(rootItem);
-                    
-                    // Apply showRoot setting
-                    if (metadata.showRoot != null) {
-                        treeView.setShowRoot(metadata.showRoot);
-                    }
                     
                     // Apply expandAll if specified
                     if (metadata.expandAll != null && metadata.expandAll) {
