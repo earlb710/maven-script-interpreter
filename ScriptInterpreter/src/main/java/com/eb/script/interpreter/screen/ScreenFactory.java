@@ -2225,11 +2225,11 @@ public class ScreenFactory {
                     }
                 }
 
-                // Set up onClick handler for buttons
+                // Set up onClick handler for buttons and other controls
                 if (onClickHandler != null && metadata != null && metadata.onClick != null && !metadata.onClick.isEmpty()) {
+                    String ebsCode = metadata.onClick;
                     if (control instanceof javafx.scene.control.Button) {
                         javafx.scene.control.Button button = (javafx.scene.control.Button) control;
-                        String ebsCode = metadata.onClick;
                         button.setOnAction(event -> {
                             try {
                                 // Use executeDirect to run code on JavaFX thread
@@ -2240,6 +2240,31 @@ public class ScreenFactory {
                             } catch (InterpreterError e) {
                                 // Print error to console if available
                                 System.err.println("Error executing button onClick: " + e.getMessage());
+                                e.printStackTrace();
+                            }
+                        });
+                    } else if (control instanceof javafx.scene.image.ImageView) {
+                        // Set up onClick handler for ImageView
+                        javafx.scene.image.ImageView imageView = (javafx.scene.image.ImageView) control;
+                        imageView.setOnMouseClicked(event -> {
+                            try {
+                                // Use executeDirect to run code on JavaFX thread
+                                onClickHandler.executeDirect(ebsCode);
+                                // After executing the onClick code, refresh all bound controls
+                                refreshBoundControls(boundControls, screenVars);
+                            } catch (InterpreterError e) {
+                                System.err.println("Error executing imageview onClick: " + e.getMessage());
+                                e.printStackTrace();
+                            }
+                        });
+                    } else {
+                        // Generic onClick handler for other controls using mouse click event
+                        control.setOnMouseClicked(event -> {
+                            try {
+                                onClickHandler.executeDirect(ebsCode);
+                                refreshBoundControls(boundControls, screenVars);
+                            } catch (InterpreterError e) {
+                                System.err.println("Error executing onClick: " + e.getMessage());
                                 e.printStackTrace();
                             }
                         });
