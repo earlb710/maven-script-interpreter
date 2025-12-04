@@ -86,55 +86,17 @@ public class DatabaseConfigDialog extends Stage {
         dbTableView.setEditable(true);
         dbTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         
-        // Variable Name column (editable) - commits edit when focus is lost
+        // Variable Name column (editable)
         TableColumn<DatabaseConfigEntry, String> nameColumn = new TableColumn<>("Variable Name");
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("varName"));
-        nameColumn.setCellFactory(column -> {
-            TextFieldTableCell<DatabaseConfigEntry, String> cell = new TextFieldTableCell<DatabaseConfigEntry, String>() {
-                private TextField textField;
-                
-                @Override
-                public void startEdit() {
-                    super.startEdit();
-                    if (getGraphic() instanceof TextField) {
-                        textField = (TextField) getGraphic();
-                        textField.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
-                            if (!isNowFocused && isEditing()) {
-                                commitEdit(textField.getText());
-                            }
-                        });
-                    }
-                }
-            };
-            cell.setConverter(new javafx.util.converter.DefaultStringConverter());
-            return cell;
-        });
+        nameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         nameColumn.setMinWidth(150);
         nameColumn.setEditable(true);
         
-        // Connection String column (editable) - commits edit when focus is lost
+        // Connection String column (editable)
         TableColumn<DatabaseConfigEntry, String> connColumn = new TableColumn<>("Database Connection String");
         connColumn.setCellValueFactory(new PropertyValueFactory<>("connectionString"));
-        connColumn.setCellFactory(column -> {
-            TextFieldTableCell<DatabaseConfigEntry, String> cell = new TextFieldTableCell<DatabaseConfigEntry, String>() {
-                private TextField textField;
-                
-                @Override
-                public void startEdit() {
-                    super.startEdit();
-                    if (getGraphic() instanceof TextField) {
-                        textField = (TextField) getGraphic();
-                        textField.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
-                            if (!isNowFocused && isEditing()) {
-                                commitEdit(textField.getText());
-                            }
-                        });
-                    }
-                }
-            };
-            cell.setConverter(new javafx.util.converter.DefaultStringConverter());
-            return cell;
-        });
+        connColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         connColumn.setMinWidth(500);
         connColumn.setEditable(true);
         

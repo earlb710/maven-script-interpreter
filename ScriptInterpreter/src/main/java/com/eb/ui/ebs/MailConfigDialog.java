@@ -172,64 +172,21 @@ public class MailConfigDialog extends Stage {
         // Variable Name column
         TableColumn<MailConfigEntry, String> nameColumn = new TableColumn<>("Variable");
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("varName"));
-        nameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         nameColumn.setMinWidth(100);
         nameColumn.setEditable(true);
+        nameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         nameColumn.setOnEditCommit(event -> {
             event.getRowValue().setVarName(event.getNewValue());
-        });
-        // Commit edit when clicking elsewhere (fix for focus loss data loss bug)
-        nameColumn.setCellFactory(column -> {
-            TextFieldTableCell<MailConfigEntry, String> cell = new TextFieldTableCell<MailConfigEntry, String>() {
-                private TextField textField;
-                
-                @Override
-                public void startEdit() {
-                    super.startEdit();
-                    // Get the text field via reflection or by accessing the graphic
-                    if (getGraphic() instanceof TextField) {
-                        textField = (TextField) getGraphic();
-                        textField.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
-                            if (!isNowFocused && isEditing()) {
-                                commitEdit(textField.getText());
-                            }
-                        });
-                    }
-                }
-            };
-            cell.setConverter(new javafx.util.converter.DefaultStringConverter());
-            return cell;
         });
         
         // URL column (without password)
         TableColumn<MailConfigEntry, String> urlColumn = new TableColumn<>("Mail URL (mail://user@host:port?protocol=imaps)");
         urlColumn.setCellValueFactory(new PropertyValueFactory<>("url"));
-        urlColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         urlColumn.setMinWidth(450);
         urlColumn.setEditable(true);
+        urlColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         urlColumn.setOnEditCommit(event -> {
             event.getRowValue().setUrl(event.getNewValue());
-        });
-        // Commit edit when clicking elsewhere (fix for focus loss data loss bug)
-        urlColumn.setCellFactory(column -> {
-            TextFieldTableCell<MailConfigEntry, String> cell = new TextFieldTableCell<MailConfigEntry, String>() {
-                private TextField textField;
-                
-                @Override
-                public void startEdit() {
-                    super.startEdit();
-                    if (getGraphic() instanceof TextField) {
-                        textField = (TextField) getGraphic();
-                        textField.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
-                            if (!isNowFocused && isEditing()) {
-                                commitEdit(textField.getText());
-                            }
-                        });
-                    }
-                }
-            };
-            cell.setConverter(new javafx.util.converter.DefaultStringConverter());
-            return cell;
         });
         
         // Password column with masked display
@@ -258,22 +215,9 @@ public class MailConfigDialog extends Stage {
         btnRemove.setDisable(true);
 
         // Enable/disable buttons based on selection
-        // Also commit any pending edits when selection changes to prevent data loss
         mailTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            // Commit any pending edits before changing selection
-            if (mailTableView.getEditingCell() != null) {
-                // Force commit by requesting focus elsewhere temporarily
-                mailTableView.requestFocus();
-            }
             boolean hasSelection = newVal != null;
             btnRemove.setDisable(!hasSelection);
-        });
-        
-        // Commit edits when focus is lost from the table
-        mailTableView.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
-            if (!isNowFocused && mailTableView.getEditingCell() != null) {
-                mailTableView.requestFocus();
-            }
         });
 
         // --- Actions ---
