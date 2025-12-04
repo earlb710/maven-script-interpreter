@@ -11,29 +11,29 @@ print "";
 
 // Function to determine file type based on name
 getFileType(name: string) return string {
-    if (call string.endsWith(name, ".java")) then {
+    if call string.endsWith(name, ".java") then {
         return "Java Source File";
     };
-    if (call string.endsWith(name, ".xml")) then {
+    if call string.endsWith(name, ".xml") then {
         return "XML File";
     };
-    if (call string.endsWith(name, ".md")) then {
+    if call string.endsWith(name, ".md") then {
         return "Markdown File";
     };
-    if (call string.endsWith(name, ".properties")) then {
+    if call string.endsWith(name, ".properties") then {
         return "Properties File";
     };
-    if (call string.endsWith(name, ".txt")) then {
+    if call string.endsWith(name, ".txt") then {
         return "Text File";
     };
-    if (name == ".gitignore") then {
+    if name == ".gitignore" then {
         return "Git Ignore File";
     };
-    if (name == "LICENSE") then {
+    if name == "LICENSE" then {
         return "License File";
     };
     // Check if it's a folder (no extension and not a special file)
-    if (call string.indexOf(name, ".") == -1) then {
+    if call string.indexOf(name, ".") == -1 then {
         return "Folder";
     };
     return "File";
@@ -42,20 +42,20 @@ getFileType(name: string) return string {
 // Function to get simulated file size
 getFileSize(name: string) return string {
     var fileType: string = call getFileType(name);
-    if (fileType == "Folder") then {
+    if fileType == "Folder" then {
         return "-";
     };
     // Simulate file sizes
-    if (call string.endsWith(name, ".java")) then {
+    if call string.endsWith(name, ".java") then {
         return "2.4 KB";
     };
-    if (call string.endsWith(name, ".xml")) then {
+    if call string.endsWith(name, ".xml") then {
         return "1.8 KB";
     };
-    if (call string.endsWith(name, ".md")) then {
+    if call string.endsWith(name, ".md") then {
         return "3.2 KB";
     };
-    if (call string.endsWith(name, ".properties")) then {
+    if call string.endsWith(name, ".properties") then {
         return "512 bytes";
     };
     return "1.0 KB";
