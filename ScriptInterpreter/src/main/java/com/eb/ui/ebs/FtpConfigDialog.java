@@ -181,7 +181,30 @@ public class FtpConfigDialog extends Stage {
         nameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         nameColumn.setMinWidth(100);
         nameColumn.setEditable(true);
-        nameColumn.setOnEditCommit(event -> event.getRowValue().setVarName(event.getNewValue()));
+        nameColumn.setOnEditCommit(event -> {
+            event.getRowValue().setVarName(event.getNewValue());
+        });
+        // Commit edit when clicking elsewhere (fix for focus loss data loss bug)
+        nameColumn.setCellFactory(column -> {
+            TextFieldTableCell<FtpConfigEntry, String> cell = new TextFieldTableCell<FtpConfigEntry, String>() {
+                private TextField textField;
+                
+                @Override
+                public void startEdit() {
+                    super.startEdit();
+                    if (getGraphic() instanceof TextField) {
+                        textField = (TextField) getGraphic();
+                        textField.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+                            if (!isNowFocused && isEditing()) {
+                                commitEdit(textField.getText());
+                            }
+                        });
+                    }
+                }
+            };
+            cell.setConverter(new javafx.util.converter.DefaultStringConverter());
+            return cell;
+        });
         
         // URL column (without password)
         TableColumn<FtpConfigEntry, String> urlColumn = new TableColumn<>("FTP URL (ftp://user@host:port or ftps://...)");
@@ -189,7 +212,30 @@ public class FtpConfigDialog extends Stage {
         urlColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         urlColumn.setMinWidth(450);
         urlColumn.setEditable(true);
-        urlColumn.setOnEditCommit(event -> event.getRowValue().setUrl(event.getNewValue()));
+        urlColumn.setOnEditCommit(event -> {
+            event.getRowValue().setUrl(event.getNewValue());
+        });
+        // Commit edit when clicking elsewhere (fix for focus loss data loss bug)
+        urlColumn.setCellFactory(column -> {
+            TextFieldTableCell<FtpConfigEntry, String> cell = new TextFieldTableCell<FtpConfigEntry, String>() {
+                private TextField textField;
+                
+                @Override
+                public void startEdit() {
+                    super.startEdit();
+                    if (getGraphic() instanceof TextField) {
+                        textField = (TextField) getGraphic();
+                        textField.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+                            if (!isNowFocused && isEditing()) {
+                                commitEdit(textField.getText());
+                            }
+                        });
+                    }
+                }
+            };
+            cell.setConverter(new javafx.util.converter.DefaultStringConverter());
+            return cell;
+        });
         
         // Password column with masked display
         TableColumn<FtpConfigEntry, String> passwordColumn = new TableColumn<>("Password");
@@ -216,9 +262,22 @@ public class FtpConfigDialog extends Stage {
         btnRemove.setDisable(true);
 
         // Enable/disable buttons based on selection
+        // Also commit any pending edits when selection changes to prevent data loss
         ftpTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            // Commit any pending edits before changing selection
+            if (ftpTableView.getEditingCell() != null) {
+                // Force commit by requesting focus elsewhere temporarily
+                ftpTableView.requestFocus();
+            }
             boolean hasSelection = newVal != null;
             btnRemove.setDisable(!hasSelection);
+        });
+        
+        // Commit edits when focus is lost from the table
+        ftpTableView.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+            if (!isNowFocused && ftpTableView.getEditingCell() != null) {
+                ftpTableView.requestFocus();
+            }
         });
 
         // --- Actions ---
