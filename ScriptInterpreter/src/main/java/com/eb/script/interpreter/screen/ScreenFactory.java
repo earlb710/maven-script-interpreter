@@ -41,10 +41,10 @@ import java.util.*;
  */
 public class ScreenFactory {
     
-    // Debug panel layout constants
-    private static final int DEBUG_PANEL_MIN_WIDTH = 250;
-    private static final int DEBUG_PANEL_PREF_WIDTH = 320;
-    private static final int DEBUG_PANEL_MAX_WIDTH = 400;
+    // Debug panel layout constants (increased by 10% from original values: 250->275, 320->352, 400->440)
+    private static final int DEBUG_PANEL_MIN_WIDTH = 275;
+    private static final int DEBUG_PANEL_PREF_WIDTH = 352;
+    private static final int DEBUG_PANEL_MAX_WIDTH = 440;
     private static final int DEBUG_AREA_INDENT_PIXELS = 15;
     private static final int DEBUG_MAX_CODE_DISPLAY_LENGTH = 50;
     private static final int DEBUG_TOOLTIP_MAX_WIDTH = 400;
@@ -114,6 +114,12 @@ public class ScreenFactory {
     
     // Map to store original window widths before debug panel expansion (screenName -> originalWidth)
     private static final java.util.concurrent.ConcurrentHashMap<String, Double> screenOriginalWidths = new java.util.concurrent.ConcurrentHashMap<>();
+    
+    // Map to store the original center content of each screen (screenName -> centerContent) for debug panel toggling
+    private static final java.util.concurrent.ConcurrentHashMap<String, javafx.scene.Node> screenCenterContents = new java.util.concurrent.ConcurrentHashMap<>();
+    
+    // Map to store the SplitPane for each screen when debug panel is shown (screenName -> SplitPane)
+    private static final java.util.concurrent.ConcurrentHashMap<String, javafx.scene.control.SplitPane> screenDebugSplitPanes = new java.util.concurrent.ConcurrentHashMap<>();
 
     static {
         try {
@@ -208,6 +214,7 @@ public class ScreenFactory {
     /**
      * Toggle the debug panel visibility for a screen.
      * Shows a scrollable panel on the right side with all screen variables and values.
+     * Uses a SplitPane with a draggable divider to allow resizing the debug panel.
      * Also expands the window width when debug is activated and restores it when deactivated.
      * 
      * @param screenName The name of the screen
@@ -229,20 +236,64 @@ public class ScreenFactory {
                 screenOriginalWidths.put(screenName.toLowerCase(), stage.getWidth());
             }
             
+            // Store the original center content before replacing with SplitPane
+            javafx.scene.Node centerContent = rootPane.getCenter();
+            if (centerContent != null && !screenCenterContents.containsKey(screenName.toLowerCase())) {
+                screenCenterContents.put(screenName.toLowerCase(), centerContent);
+            }
+            
             // Create or update the debug panel
             javafx.scene.control.ScrollPane debugPanel = createDebugPanel(screenName, context);
             screenDebugPanels.put(screenName.toLowerCase(), debugPanel);
-            rootPane.setRight(debugPanel);
+            
+            // Create a horizontal SplitPane with main content on left and debug panel on right
+            javafx.scene.control.SplitPane splitPane = new javafx.scene.control.SplitPane();
+            splitPane.setOrientation(javafx.geometry.Orientation.HORIZONTAL);
+            
+            // Add the original center content and the debug panel to the SplitPane
+            javafx.scene.Node originalCenter = screenCenterContents.get(screenName.toLowerCase());
+            if (originalCenter != null) {
+                splitPane.getItems().addAll(originalCenter, debugPanel);
+            } else {
+                splitPane.getItems().add(debugPanel);
+            }
+            
+            // Store the SplitPane reference
+            screenDebugSplitPanes.put(screenName.toLowerCase(), splitPane);
+            
+            // Replace the center content with the SplitPane
+            rootPane.setCenter(splitPane);
             
             // Expand the window width to accommodate the debug panel
             if (stage != null) {
                 double currentWidth = stage.getWidth();
                 double newWidth = currentWidth + DEBUG_PANEL_PREF_WIDTH;
                 stage.setWidth(newWidth);
+                
+                // Set the divider position after the stage is resized
+                // Calculate the divider position so the debug panel gets its preferred width
+                Platform.runLater(() -> {
+                    double totalWidth = splitPane.getWidth();
+                    if (totalWidth > 0) {
+                        double dividerPos = (totalWidth - DEBUG_PANEL_PREF_WIDTH) / totalWidth;
+                        splitPane.setDividerPositions(Math.max(0.5, Math.min(0.9, dividerPos)));
+                    } else {
+                        // Fallback: leave 352px (DEBUG_PANEL_PREF_WIDTH) for debug panel
+                        splitPane.setDividerPositions(0.7);
+                    }
+                });
             }
         } else {
-            // Hide the debug panel
-            rootPane.setRight(null);
+            // Restore the original center content
+            javafx.scene.Node originalCenter = screenCenterContents.remove(screenName.toLowerCase());
+            if (originalCenter != null) {
+                rootPane.setCenter(originalCenter);
+            }
+            
+            // Clean up the SplitPane reference
+            screenDebugSplitPanes.remove(screenName.toLowerCase());
+            
+            // Remove the debug panel reference
             screenDebugPanels.remove(screenName.toLowerCase());
             
             // Restore the original window width
@@ -422,7 +473,7 @@ public class ScreenFactory {
         scrollPane.setFitToHeight(true);
         scrollPane.setPrefWidth(DEBUG_PANEL_PREF_WIDTH);
         scrollPane.setMinWidth(DEBUG_PANEL_MIN_WIDTH);
-        scrollPane.setMaxWidth(DEBUG_PANEL_MAX_WIDTH);
+        // No max width constraint - allow resizing via SplitPane divider
         scrollPane.setStyle("-fx-background-color: #f5f5f5; -fx-border-color: #ccc; -fx-border-width: 0 0 0 1;");
         scrollPane.setHbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.setVbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
