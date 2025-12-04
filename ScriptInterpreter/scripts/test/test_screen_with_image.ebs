@@ -61,10 +61,11 @@ screen imageTestScreen = {
             "type": "image",
             "display": {
                 "type": "imageview",
-                "labelText": "Test Image:",
+                "labelText": "Test Image (Click to convert to B&W):",
                 "fitWidth": 200,
                 "fitHeight": 200,
-                "preserveRatio": true
+                "preserveRatio": true,
+                "onClick": "convertToBlackAndWhite"
             }
         },
         {
@@ -164,6 +165,7 @@ print "Screen displayed! The screen shows:";
 print "  - Header label with bold text";
 print "  - Description label";
 print "  - Test image with IMAGEVIEW control (200x200, preserve ratio)";
+print "    Click the image to convert it to black and white!";
 print "  - Text input fields (name and comments)";
 print "  - Slider for rating";
 print "  - Color picker";
@@ -171,3 +173,11 @@ print "  - Combobox for category selection";
 print "  - Checkbox for visibility setting";
 print "  - Submit button";
 print "====================================================================";
+
+// Function to convert image to black and white when clicked
+convertToBlackAndWhite() return void {
+    print "Converting image to black and white...";
+    var grayImage: image = call image.toGrayscale(imageTestScreen.testImageVar);
+    imageTestScreen.testImageVar = grayImage;
+    print "Image converted to black and white!";
+}
