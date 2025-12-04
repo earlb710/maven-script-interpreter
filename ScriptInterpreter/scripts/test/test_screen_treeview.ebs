@@ -16,109 +16,226 @@ print "";
 // - "iconClosed": icon when node is collapsed
 screen fileExplorer = {
     "title": "File Explorer - TreeView Demo with Icons",
-    "width": 600,
-    "height": 500,
+    "width": 800,
+    "height": 550,
     "maximize": false,
     "vars": [
         {
-            "name": "fileTree",
+            "name": "selectedFile",
             "type": "string",
-            "default": "",
-            "display": {
-                "type": "treeview",
-                "labelText": "Project Structure:",
-                "labelPosition": "top",
-                "displayRecords": 15,
-                "expandAll": true,
-                "showRoot": true,
-                "treeItems": [
-                    {
-                        "value": "Project Root",
-                        "iconOpen": "icons/folder-open.png",
-                        "iconClosed": "icons/folder.png",
-                        "expanded": true,
-                        "children": [
-                            {
-                                "value": "src",
-                                "iconOpen": "icons/folder-open.png",
-                                "iconClosed": "icons/folder.png",
-                                "expanded": true,
-                                "children": [
+            "default": ""
+        },
+        {
+            "name": "fileName",
+            "type": "string",
+            "default": ""
+        },
+        {
+            "name": "fileType",
+            "type": "string",
+            "default": ""
+        },
+        {
+            "name": "filePath",
+            "type": "string",
+            "default": ""
+        },
+        {
+            "name": "fileSize",
+            "type": "string",
+            "default": ""
+        },
+        {
+            "name": "lastModified",
+            "type": "string",
+            "default": ""
+        }
+    ],
+    "area": [
+        {
+            "name": "mainLayout",
+            "type": "hbox",
+            "spacing": "10",
+            "padding": "10",
+            "areas": [
+                {
+                    "name": "treeArea",
+                    "type": "vbox",
+                    "spacing": "5",
+                    "width": "350",
+                    "items": [
+                        {
+                            "name": "fileTree",
+                            "seq": 1,
+                            "display": {
+                                "type": "treeview",
+                                "labelText": "Project Structure:",
+                                "labelPosition": "top",
+                                "displayRecords": 18,
+                                "expandAll": true,
+                                "showRoot": true,
+                                "treeItems": [
                                     {
-                                        "value": "main",
+                                        "value": "Project Root",
                                         "iconOpen": "icons/folder-open.png",
                                         "iconClosed": "icons/folder.png",
                                         "expanded": true,
                                         "children": [
                                             {
-                                                "value": "java",
+                                                "value": "src",
                                                 "iconOpen": "icons/folder-open.png",
                                                 "iconClosed": "icons/folder.png",
+                                                "expanded": true,
                                                 "children": [
-                                                    {"value": "App.java", "icon": "icons/java-file.png"},
-                                                    {"value": "Config.java", "icon": "icons/java-file.png"},
-                                                    {"value": "Utils.java", "icon": "icons/java-file.png"}
+                                                    {
+                                                        "value": "main",
+                                                        "iconOpen": "icons/folder-open.png",
+                                                        "iconClosed": "icons/folder.png",
+                                                        "expanded": true,
+                                                        "children": [
+                                                            {
+                                                                "value": "java",
+                                                                "iconOpen": "icons/folder-open.png",
+                                                                "iconClosed": "icons/folder.png",
+                                                                "children": [
+                                                                    {"value": "App.java", "icon": "icons/java-file.png"},
+                                                                    {"value": "Config.java", "icon": "icons/java-file.png"},
+                                                                    {"value": "Utils.java", "icon": "icons/java-file.png"}
+                                                                ]
+                                                            },
+                                                            {
+                                                                "value": "resources",
+                                                                "iconOpen": "icons/folder-open.png",
+                                                                "iconClosed": "icons/folder.png",
+                                                                "children": [
+                                                                    {"value": "application.properties", "icon": "icons/config-file.png"},
+                                                                    {"value": "messages.properties", "icon": "icons/config-file.png"}
+                                                                ]
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "value": "test",
+                                                        "iconOpen": "icons/folder-open.png",
+                                                        "iconClosed": "icons/folder.png",
+                                                        "children": [
+                                                            {
+                                                                "value": "java",
+                                                                "iconOpen": "icons/folder-open.png",
+                                                                "iconClosed": "icons/folder.png",
+                                                                "children": [
+                                                                    {"value": "AppTest.java", "icon": "icons/java-file.png"},
+                                                                    {"value": "ConfigTest.java", "icon": "icons/java-file.png"}
+                                                                ]
+                                                            }
+                                                        ]
+                                                    }
                                                 ]
                                             },
                                             {
-                                                "value": "resources",
+                                                "value": "docs",
                                                 "iconOpen": "icons/folder-open.png",
                                                 "iconClosed": "icons/folder.png",
                                                 "children": [
-                                                    {"value": "application.properties", "icon": "icons/config-file.png"},
-                                                    {"value": "messages.properties", "icon": "icons/config-file.png"}
+                                                    {"value": "README.md", "icon": "icons/markdown-file.png"},
+                                                    {"value": "CONTRIBUTING.md", "icon": "icons/markdown-file.png"},
+                                                    {"value": "LICENSE", "icon": "icons/text-file.png"}
                                                 ]
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        "value": "test",
-                                        "iconOpen": "icons/folder-open.png",
-                                        "iconClosed": "icons/folder.png",
-                                        "children": [
+                                            },
                                             {
-                                                "value": "java",
+                                                "value": "build",
                                                 "iconOpen": "icons/folder-open.png",
                                                 "iconClosed": "icons/folder.png",
                                                 "children": [
-                                                    {"value": "AppTest.java", "icon": "icons/java-file.png"},
-                                                    {"value": "ConfigTest.java", "icon": "icons/java-file.png"}
+                                                    {"value": "target", "iconOpen": "icons/folder-open.png", "iconClosed": "icons/folder.png"},
+                                                    {"value": "output", "iconOpen": "icons/folder-open.png", "iconClosed": "icons/folder.png"}
                                                 ]
-                                            }
+                                            },
+                                            {"value": "pom.xml", "icon": "icons/xml-file.png"},
+                                            {"value": ".gitignore", "icon": "icons/git-file.png"}
                                         ]
                                     }
                                 ]
-                            },
-                            {
-                                "value": "docs",
-                                "iconOpen": "icons/folder-open.png",
-                                "iconClosed": "icons/folder.png",
-                                "children": [
-                                    {"value": "README.md", "icon": "icons/markdown-file.png"},
-                                    {"value": "CONTRIBUTING.md", "icon": "icons/markdown-file.png"},
-                                    {"value": "LICENSE", "icon": "icons/text-file.png"}
-                                ]
-                            },
-                            {
-                                "value": "build",
-                                "iconOpen": "icons/folder-open.png",
-                                "iconClosed": "icons/folder.png",
-                                "children": [
-                                    {"value": "target", "iconOpen": "icons/folder-open.png", "iconClosed": "icons/folder.png"},
-                                    {"value": "output", "iconOpen": "icons/folder-open.png", "iconClosed": "icons/folder.png"}
-                                ]
-                            },
-                            {"value": "pom.xml", "icon": "icons/xml-file.png"},
-                            {"value": ".gitignore", "icon": "icons/git-file.png"}
-                        ]
-                    }
-                ]
-            }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "detailsArea",
+                    "type": "vbox",
+                    "spacing": "8",
+                    "padding": "10",
+                    "width": "380",
+                    "style": "-fx-border-color: #cccccc; -fx-border-width: 1; -fx-border-radius: 5; -fx-background-color: #f9f9f9; -fx-background-radius: 5;",
+                    "items": [
+                        {
+                            "name": "detailsHeader",
+                            "seq": 1,
+                            "display": {
+                                "type": "label",
+                                "labelText": "File Details",
+                                "labelBold": true,
+                                "labelFontSize": "14px"
+                            }
+                        },
+                        {
+                            "name": "fileNameField",
+                            "varRef": "fileName",
+                            "seq": 2,
+                            "display": {
+                                "type": "textfield",
+                                "labelText": "Name:",
+                                "labelPosition": "left"
+                            }
+                        },
+                        {
+                            "name": "fileTypeField",
+                            "varRef": "fileType",
+                            "seq": 3,
+                            "display": {
+                                "type": "textfield",
+                                "labelText": "Type:",
+                                "labelPosition": "left"
+                            }
+                        },
+                        {
+                            "name": "filePathField",
+                            "varRef": "filePath",
+                            "seq": 4,
+                            "display": {
+                                "type": "textfield",
+                                "labelText": "Path:",
+                                "labelPosition": "left"
+                            }
+                        },
+                        {
+                            "name": "fileSizeField",
+                            "varRef": "fileSize",
+                            "seq": 5,
+                            "display": {
+                                "type": "textfield",
+                                "labelText": "Size:",
+                                "labelPosition": "left"
+                            }
+                        },
+                        {
+                            "name": "lastModifiedField",
+                            "varRef": "lastModified",
+                            "seq": 6,
+                            "display": {
+                                "type": "textfield",
+                                "labelText": "Modified:",
+                                "labelPosition": "left"
+                            }
+                        }
+                    ]
+                }
+            ]
         }
     ]
 };
 
-print "Created file explorer screen with TreeView and icons.";
+print "Created file explorer screen with TreeView and file details panel.";
 print "The tree shows a typical project directory structure.";
 print "";
 print "Icon properties:";
@@ -137,5 +254,6 @@ print "The screen displays a hierarchical file structure in a TreeView.";
 print "- Nodes can be expanded/collapsed by clicking the arrow icons";
 print "- Folder icons change based on expanded/collapsed state";
 print "- File icons remain static";
+print "- File details panel on the right shows selected item info";
 print "- showRoot: true shows the root node";
 print "- expandAll: true expands all nodes by default";
