@@ -118,8 +118,8 @@ public class BuiltinsSystem {
      * Each component is incremented independently based on the type of change.
      */
     public static final int LANGUAGE_VER = 1;  // Major language compatibility version
-    public static final int KEYWORD_VER = 0;   // Keyword version (updated when keywords change)
-    public static final int BUILTIN_VER = 5;   // Builtin version (updated when builtins change) - Added image builtins
+    public static final int KEYWORD_VER = 1;   // Keyword version - Added IMAGE data type
+    public static final int BUILTIN_VER = 6;   // Builtin version - Added EbsImage with JavaFX image support
     public static final int BUILD_VER = 1;     // Build number
     
     public static final String EBS_LANGUAGE_VERSION = LANGUAGE_VER + "." + KEYWORD_VER + "." + BUILTIN_VER + "." + BUILD_VER;

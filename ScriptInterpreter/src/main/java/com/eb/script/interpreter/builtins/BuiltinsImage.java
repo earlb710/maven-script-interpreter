@@ -1,33 +1,23 @@
 package com.eb.script.interpreter.builtins;
 
 import com.eb.script.arrays.ArrayFixedByte;
+import com.eb.script.image.EbsImage;
 import com.eb.script.interpreter.Environment;
 import com.eb.script.interpreter.InterpreterError;
 import com.eb.ui.cli.ScriptArea;
 import com.eb.util.Util;
 
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.stream.ImageInputStream;
-import java.awt.*;
-import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
-import java.awt.image.BufferedImage;
-import java.awt.image.RescaleOp;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Base64;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
  * Built-in functions for Image operations.
  * Handles image.* builtins for loading, saving, resizing, and manipulating images.
- * Images are represented as ArrayFixedByte (byte arrays) for interoperability.
+ * Images are represented as EbsImage which wraps JavaFX Image for manipulation
+ * and can be converted to/from ArrayFixedByte (byte arrays) for interoperability.
  *
  * @author Earl Bosch
  */
@@ -46,7 +36,7 @@ public class BuiltinsImage {
         return switch (name) {
             case "image.load" -> load(env, args);
             case "image.save" -> save(env, args);
-            case "image.resize" -> resize(env, args);
+            case "image.resize" -> resize(args);
             case "image.getwidth" -> getWidth(args);
             case "image.getheight" -> getHeight(args);
             case "image.getinfo" -> getInfo(args);
@@ -59,6 +49,12 @@ public class BuiltinsImage {
             case "image.adjustcontrast" -> adjustContrast(args);
             case "image.frombase64" -> fromBase64(args);
             case "image.tobase64" -> toBase64(args);
+            case "image.getbytes" -> getBytes(args);
+            case "image.getname" -> getName(args);
+            case "image.setname" -> setName(args);
+            case "image.gettype" -> getType(args);
+            case "image.settype" -> setType(args);
+            case "image.create" -> create(args);
             default -> throw new InterpreterError("Unknown Image builtin: " + name);
         };
     }
@@ -73,8 +69,8 @@ public class BuiltinsImage {
     // --- Individual builtin implementations ---
 
     /**
-     * Load an image file into an ArrayFixedByte.
-     * image.load(path) -> ARRAY (byte[])
+     * Load an image file and create an EbsImage.
+     * image.load(path) -> IMAGE
      */
     private static Object load(Environment env, Object[] args) throws InterpreterError {
         ScriptArea output = env.getOutputArea();
@@ -90,20 +86,15 @@ public class BuiltinsImage {
             }
             
             byte[] bytes = Files.readAllBytes(p);
+            String fileName = p.getFileName().toString();
             
-            // Validate that it's actually an image
-            try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
-                BufferedImage img = ImageIO.read(bais);
-                if (img == null) {
-                    throw new InterpreterError("image.load: file is not a valid image: " + path);
-                }
-            }
+            EbsImage image = new EbsImage(bytes, fileName);
             
             if (env.isEchoOn()) {
-                sysOutput(output, "Loaded image: " + path + " (" + bytes.length + " bytes)");
+                sysOutput(output, "Loaded image: " + path + " (" + image.getWidth() + "x" + image.getHeight() + ", " + image.getImageType() + ")");
             }
             
-            return new ArrayFixedByte(bytes);
+            return image;
         } catch (InterpreterError ie) {
             throw ie;
         } catch (Exception ex) {
@@ -112,13 +103,33 @@ public class BuiltinsImage {
     }
 
     /**
-     * Save image bytes to a file.
-     * image.save(bytes, path, format?) -> BOOL
-     * format defaults to inferring from file extension (png, jpg, gif, bmp)
+     * Create an EbsImage from ArrayFixedByte data.
+     * image.create(bytes, name?, type?) -> IMAGE
+     */
+    private static Object create(Object[] args) throws InterpreterError {
+        // Get bytes from first argument
+        byte[] bytes;
+        if (args[0] instanceof ArrayFixedByte afb) {
+            bytes = afb.elements;
+        } else if (args[0] instanceof byte[] ba) {
+            bytes = ba;
+        } else {
+            throw new InterpreterError("image.create: expected byte array");
+        }
+        
+        String name = args.length > 1 ? (String) args[1] : null;
+        String type = args.length > 2 ? (String) args[2] : null;
+        
+        return new EbsImage(bytes, name, type);
+    }
+
+    /**
+     * Save EbsImage to a file.
+     * image.save(image, path, format?) -> BOOL
      */
     private static Object save(Environment env, Object[] args) throws InterpreterError {
         ScriptArea output = env.getOutputArea();
-        byte[] bytes = getBytes(args[0], "image.save");
+        EbsImage image = getImage(args[0], "image.save");
         String path = (String) args[1];
         String format = args.length > 2 ? (String) args[2] : null;
         
@@ -140,17 +151,9 @@ public class BuiltinsImage {
                 format = getFormatFromPath(path);
             }
             
-            // Read the image
-            BufferedImage img = bytesToImage(bytes, "image.save");
-            
-            // Write with the specified format
-            try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-                boolean success = ImageIO.write(img, format, baos);
-                if (!success) {
-                    throw new InterpreterError("image.save: unsupported format: " + format);
-                }
-                Files.write(p, baos.toByteArray());
-            }
+            // Get bytes from image
+            ArrayFixedByte bytes = image.getBytes(format);
+            Files.write(p, bytes.elements);
             
             if (env.isEchoOn()) {
                 sysOutput(output, "Saved image: " + path + " (format: " + format + ")");
@@ -166,327 +169,137 @@ public class BuiltinsImage {
 
     /**
      * Resize an image.
-     * image.resize(bytes, width, height, keepAspect?) -> ARRAY (byte[])
+     * image.resize(image, width, height, keepAspect?) -> IMAGE
      */
-    private static Object resize(Environment env, Object[] args) throws InterpreterError {
-        byte[] bytes = getBytes(args[0], "image.resize");
+    private static Object resize(Object[] args) throws InterpreterError {
+        EbsImage image = getImage(args[0], "image.resize");
         int targetWidth = toPositiveInt(args[1], "image.resize", "width");
         int targetHeight = toPositiveInt(args[2], "image.resize", "height");
         boolean keepAspect = args.length > 3 && args[3] != null ? (Boolean) args[3] : false;
         
-        try {
-            BufferedImage original = bytesToImage(bytes, "image.resize");
-            
-            int origWidth = original.getWidth();
-            int origHeight = original.getHeight();
-            
-            int newWidth = targetWidth;
-            int newHeight = targetHeight;
-            
-            if (keepAspect) {
-                double widthRatio = (double) targetWidth / origWidth;
-                double heightRatio = (double) targetHeight / origHeight;
-                double ratio = Math.min(widthRatio, heightRatio);
-                newWidth = (int) Math.round(origWidth * ratio);
-                newHeight = (int) Math.round(origHeight * ratio);
-            }
-            
-            BufferedImage resized = new BufferedImage(newWidth, newHeight, getImageType(original));
-            Graphics2D g2d = resized.createGraphics();
-            g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2d.drawImage(original, 0, 0, newWidth, newHeight, null);
-            g2d.dispose();
-            
-            return imageToBytes(resized, detectFormat(bytes));
-        } catch (InterpreterError ie) {
-            throw ie;
-        } catch (Exception ex) {
-            throw new InterpreterError("image.resize: " + ex.getMessage());
-        }
+        return image.resize(targetWidth, targetHeight, keepAspect);
     }
 
     /**
      * Get image width.
-     * image.getWidth(bytes) -> INTEGER
+     * image.getWidth(image) -> INTEGER
      */
     private static Object getWidth(Object[] args) throws InterpreterError {
-        byte[] bytes = getBytes(args[0], "image.getWidth");
-        try {
-            BufferedImage img = bytesToImage(bytes, "image.getWidth");
-            return img.getWidth();
-        } catch (InterpreterError ie) {
-            throw ie;
-        } catch (Exception ex) {
-            throw new InterpreterError("image.getWidth: " + ex.getMessage());
-        }
+        EbsImage image = getImage(args[0], "image.getWidth");
+        return image.getWidth();
     }
 
     /**
      * Get image height.
-     * image.getHeight(bytes) -> INTEGER
+     * image.getHeight(image) -> INTEGER
      */
     private static Object getHeight(Object[] args) throws InterpreterError {
-        byte[] bytes = getBytes(args[0], "image.getHeight");
-        try {
-            BufferedImage img = bytesToImage(bytes, "image.getHeight");
-            return img.getHeight();
-        } catch (InterpreterError ie) {
-            throw ie;
-        } catch (Exception ex) {
-            throw new InterpreterError("image.getHeight: " + ex.getMessage());
-        }
+        EbsImage image = getImage(args[0], "image.getHeight");
+        return image.getHeight();
     }
 
     /**
      * Get image metadata as JSON.
-     * image.getInfo(bytes) -> JSON { width, height, format, hasAlpha }
+     * image.getInfo(image) -> JSON { width, height, type, name, hasAlpha }
      */
     private static Object getInfo(Object[] args) throws InterpreterError {
-        byte[] bytes = getBytes(args[0], "image.getInfo");
-        try {
-            BufferedImage img = bytesToImage(bytes, "image.getInfo");
-            String format = detectFormat(bytes);
-            
-            Map<String, Object> info = new LinkedHashMap<>();
-            info.put("width", img.getWidth());
-            info.put("height", img.getHeight());
-            info.put("format", format);
-            info.put("hasAlpha", img.getColorModel().hasAlpha());
-            info.put("sizeBytes", bytes.length);
-            
-            return info;
-        } catch (InterpreterError ie) {
-            throw ie;
-        } catch (Exception ex) {
-            throw new InterpreterError("image.getInfo: " + ex.getMessage());
-        }
+        EbsImage image = getImage(args[0], "image.getInfo");
+        
+        Map<String, Object> info = new LinkedHashMap<>();
+        info.put("width", image.getWidth());
+        info.put("height", image.getHeight());
+        info.put("type", image.getImageType());
+        info.put("name", image.getImageName());
+        info.put("hasAlpha", image.hasAlpha());
+        
+        return info;
     }
 
     /**
      * Crop an image.
-     * image.crop(bytes, x, y, width, height) -> ARRAY (byte[])
+     * image.crop(image, x, y, width, height) -> IMAGE
      */
     private static Object crop(Object[] args) throws InterpreterError {
-        byte[] bytes = getBytes(args[0], "image.crop");
+        EbsImage image = getImage(args[0], "image.crop");
         int x = toNonNegativeInt(args[1], "image.crop", "x");
         int y = toNonNegativeInt(args[2], "image.crop", "y");
         int width = toPositiveInt(args[3], "image.crop", "width");
         int height = toPositiveInt(args[4], "image.crop", "height");
         
-        try {
-            BufferedImage original = bytesToImage(bytes, "image.crop");
-            
-            // Validate crop bounds
-            if (x + width > original.getWidth()) {
-                throw new InterpreterError("image.crop: x + width exceeds image width");
-            }
-            if (y + height > original.getHeight()) {
-                throw new InterpreterError("image.crop: y + height exceeds image height");
-            }
-            
-            BufferedImage cropped = original.getSubimage(x, y, width, height);
-            
-            // Create a new BufferedImage to prevent issues with getSubimage
-            BufferedImage result = new BufferedImage(width, height, getImageType(original));
-            Graphics2D g2d = result.createGraphics();
-            g2d.drawImage(cropped, 0, 0, null);
-            g2d.dispose();
-            
-            return imageToBytes(result, detectFormat(bytes));
-        } catch (InterpreterError ie) {
-            throw ie;
-        } catch (Exception ex) {
-            throw new InterpreterError("image.crop: " + ex.getMessage());
-        }
+        return image.crop(x, y, width, height);
     }
 
     /**
      * Rotate an image.
-     * image.rotate(bytes, degrees) -> ARRAY (byte[])
-     * degrees: 90, 180, 270 (or any angle)
+     * image.rotate(image, degrees) -> IMAGE
      */
     private static Object rotate(Object[] args) throws InterpreterError {
-        byte[] bytes = getBytes(args[0], "image.rotate");
+        EbsImage image = getImage(args[0], "image.rotate");
         double degrees = toDouble(args[1], "image.rotate", "degrees");
         
-        try {
-            BufferedImage original = bytesToImage(bytes, "image.rotate");
-            double radians = Math.toRadians(degrees);
-            
-            // Calculate new dimensions
-            int origWidth = original.getWidth();
-            int origHeight = original.getHeight();
-            
-            double sin = Math.abs(Math.sin(radians));
-            double cos = Math.abs(Math.cos(radians));
-            int newWidth = (int) Math.floor(origWidth * cos + origHeight * sin);
-            int newHeight = (int) Math.floor(origHeight * cos + origWidth * sin);
-            
-            BufferedImage rotated = new BufferedImage(newWidth, newHeight, getImageType(original));
-            Graphics2D g2d = rotated.createGraphics();
-            
-            // Make background transparent or white depending on alpha support
-            if (original.getColorModel().hasAlpha()) {
-                g2d.setComposite(AlphaComposite.Clear);
-                g2d.fillRect(0, 0, newWidth, newHeight);
-                g2d.setComposite(AlphaComposite.SrcOver);
-            } else {
-                g2d.setColor(Color.WHITE);
-                g2d.fillRect(0, 0, newWidth, newHeight);
-            }
-            
-            g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            g2d.translate((newWidth - origWidth) / 2.0, (newHeight - origHeight) / 2.0);
-            g2d.rotate(radians, origWidth / 2.0, origHeight / 2.0);
-            g2d.drawImage(original, 0, 0, null);
-            g2d.dispose();
-            
-            return imageToBytes(rotated, detectFormat(bytes));
-        } catch (InterpreterError ie) {
-            throw ie;
-        } catch (Exception ex) {
-            throw new InterpreterError("image.rotate: " + ex.getMessage());
-        }
+        return image.rotate(degrees);
     }
 
     /**
      * Flip an image horizontally.
-     * image.flipHorizontal(bytes) -> ARRAY (byte[])
+     * image.flipHorizontal(image) -> IMAGE
      */
     private static Object flipHorizontal(Object[] args) throws InterpreterError {
-        byte[] bytes = getBytes(args[0], "image.flipHorizontal");
-        
-        try {
-            BufferedImage original = bytesToImage(bytes, "image.flipHorizontal");
-            
-            AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
-            tx.translate(-original.getWidth(), 0);
-            AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-            BufferedImage flipped = op.filter(original, null);
-            
-            return imageToBytes(flipped, detectFormat(bytes));
-        } catch (InterpreterError ie) {
-            throw ie;
-        } catch (Exception ex) {
-            throw new InterpreterError("image.flipHorizontal: " + ex.getMessage());
-        }
+        EbsImage image = getImage(args[0], "image.flipHorizontal");
+        return image.flipHorizontal();
     }
 
     /**
      * Flip an image vertically.
-     * image.flipVertical(bytes) -> ARRAY (byte[])
+     * image.flipVertical(image) -> IMAGE
      */
     private static Object flipVertical(Object[] args) throws InterpreterError {
-        byte[] bytes = getBytes(args[0], "image.flipVertical");
-        
-        try {
-            BufferedImage original = bytesToImage(bytes, "image.flipVertical");
-            
-            AffineTransform tx = AffineTransform.getScaleInstance(1, -1);
-            tx.translate(0, -original.getHeight());
-            AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-            BufferedImage flipped = op.filter(original, null);
-            
-            return imageToBytes(flipped, detectFormat(bytes));
-        } catch (InterpreterError ie) {
-            throw ie;
-        } catch (Exception ex) {
-            throw new InterpreterError("image.flipVertical: " + ex.getMessage());
-        }
+        EbsImage image = getImage(args[0], "image.flipVertical");
+        return image.flipVertical();
     }
 
     /**
      * Convert an image to grayscale.
-     * image.toGrayscale(bytes) -> ARRAY (byte[])
+     * image.toGrayscale(image) -> IMAGE
      */
     private static Object toGrayscale(Object[] args) throws InterpreterError {
-        byte[] bytes = getBytes(args[0], "image.toGrayscale");
-        
-        try {
-            BufferedImage original = bytesToImage(bytes, "image.toGrayscale");
-            
-            BufferedImage grayscale = new BufferedImage(
-                original.getWidth(), original.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
-            Graphics2D g2d = grayscale.createGraphics();
-            g2d.drawImage(original, 0, 0, null);
-            g2d.dispose();
-            
-            return imageToBytes(grayscale, detectFormat(bytes));
-        } catch (InterpreterError ie) {
-            throw ie;
-        } catch (Exception ex) {
-            throw new InterpreterError("image.toGrayscale: " + ex.getMessage());
-        }
+        EbsImage image = getImage(args[0], "image.toGrayscale");
+        return image.toGrayscale();
     }
 
     /**
      * Adjust image brightness.
-     * image.adjustBrightness(bytes, factor) -> ARRAY (byte[])
-     * factor: 1.0 = no change, greater than 1.0 = brighter, less than 1.0 = darker
+     * image.adjustBrightness(image, factor) -> IMAGE
      */
     private static Object adjustBrightness(Object[] args) throws InterpreterError {
-        byte[] bytes = getBytes(args[0], "image.adjustBrightness");
+        EbsImage image = getImage(args[0], "image.adjustBrightness");
         float factor = toFloat(args[1], "image.adjustBrightness", "factor");
         
         if (factor < 0) {
             throw new InterpreterError("image.adjustBrightness: factor must be non-negative");
         }
         
-        try {
-            BufferedImage original = bytesToImage(bytes, "image.adjustBrightness");
-            
-            // Convert to compatible format for RescaleOp if needed
-            BufferedImage compatible = ensureCompatibleImage(original);
-            
-            RescaleOp rescaleOp = new RescaleOp(factor, 0, null);
-            BufferedImage brightened = rescaleOp.filter(compatible, null);
-            
-            return imageToBytes(brightened, detectFormat(bytes));
-        } catch (InterpreterError ie) {
-            throw ie;
-        } catch (Exception ex) {
-            throw new InterpreterError("image.adjustBrightness: " + ex.getMessage());
-        }
+        return image.adjustBrightness(factor);
     }
 
     /**
      * Adjust image contrast.
-     * image.adjustContrast(bytes, factor) -> ARRAY (byte[])
-     * factor: 1.0 = no change, greater than 1.0 = more contrast, less than 1.0 = less contrast
+     * image.adjustContrast(image, factor) -> IMAGE
      */
     private static Object adjustContrast(Object[] args) throws InterpreterError {
-        byte[] bytes = getBytes(args[0], "image.adjustContrast");
+        EbsImage image = getImage(args[0], "image.adjustContrast");
         float factor = toFloat(args[1], "image.adjustContrast", "factor");
         
         if (factor < 0) {
             throw new InterpreterError("image.adjustContrast: factor must be non-negative");
         }
         
-        try {
-            BufferedImage original = bytesToImage(bytes, "image.adjustContrast");
-            
-            // Contrast adjustment: offset = 128 * (1 - factor) shifts the middle gray
-            float offset = 128.0f * (1.0f - factor);
-            
-            // Convert to compatible format for RescaleOp if needed
-            BufferedImage compatible = ensureCompatibleImage(original);
-            
-            RescaleOp rescaleOp = new RescaleOp(factor, offset, null);
-            BufferedImage adjusted = rescaleOp.filter(compatible, null);
-            
-            return imageToBytes(adjusted, detectFormat(bytes));
-        } catch (InterpreterError ie) {
-            throw ie;
-        } catch (Exception ex) {
-            throw new InterpreterError("image.adjustContrast: " + ex.getMessage());
-        }
+        return image.adjustContrast(factor);
     }
 
     /**
      * Load image from base64 encoded string.
-     * image.fromBase64(b64String) -> ARRAY (byte[])
+     * image.fromBase64(b64String) -> IMAGE
      */
     private static Object fromBase64(Object[] args) throws InterpreterError {
         String b64 = (String) args[0];
@@ -501,16 +314,7 @@ public class BuiltinsImage {
             }
             
             byte[] bytes = Base64.getDecoder().decode(b64);
-            
-            // Validate that it's actually an image
-            try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
-                BufferedImage img = ImageIO.read(bais);
-                if (img == null) {
-                    throw new InterpreterError("image.fromBase64: decoded data is not a valid image");
-                }
-            }
-            
-            return new ArrayFixedByte(bytes);
+            return new EbsImage(bytes);
         } catch (InterpreterError ie) {
             throw ie;
         } catch (IllegalArgumentException ex) {
@@ -522,26 +326,15 @@ public class BuiltinsImage {
 
     /**
      * Convert image to base64 encoded string.
-     * image.toBase64(bytes, format?) -> STRING
+     * image.toBase64(image, format?) -> STRING
      */
     private static Object toBase64(Object[] args) throws InterpreterError {
-        byte[] bytes = getBytes(args[0], "image.toBase64");
+        EbsImage image = getImage(args[0], "image.toBase64");
         String format = args.length > 1 ? (String) args[1] : null;
         
         try {
-            if (format == null || format.isBlank()) {
-                format = detectFormat(bytes);
-            }
-            
-            // Re-encode with specified format if different from original
-            BufferedImage img = bytesToImage(bytes, "image.toBase64");
-            try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-                boolean success = ImageIO.write(img, format, baos);
-                if (!success) {
-                    throw new InterpreterError("image.toBase64: unsupported format: " + format);
-                }
-                return Base64.getEncoder().encodeToString(baos.toByteArray());
-            }
+            ArrayFixedByte bytes = image.getBytes(format);
+            return Base64.getEncoder().encodeToString(bytes.elements);
         } catch (InterpreterError ie) {
             throw ie;
         } catch (Exception ex) {
@@ -549,74 +342,76 @@ public class BuiltinsImage {
         }
     }
 
+    /**
+     * Get image as ArrayFixedByte.
+     * image.getBytes(image, format?) -> ARRAY
+     */
+    private static Object getBytes(Object[] args) throws InterpreterError {
+        EbsImage image = getImage(args[0], "image.getBytes");
+        String format = args.length > 1 ? (String) args[1] : null;
+        
+        return image.getBytes(format);
+    }
+
+    /**
+     * Get image name.
+     * image.getName(image) -> STRING
+     */
+    private static Object getName(Object[] args) throws InterpreterError {
+        EbsImage image = getImage(args[0], "image.getName");
+        return image.getImageName();
+    }
+
+    /**
+     * Set image name.
+     * image.setName(image, name) -> IMAGE
+     */
+    private static Object setName(Object[] args) throws InterpreterError {
+        EbsImage image = getImage(args[0], "image.setName");
+        String name = (String) args[1];
+        image.setImageName(name);
+        return image;
+    }
+
+    /**
+     * Get image type/format.
+     * image.getType(image) -> STRING
+     */
+    private static Object getType(Object[] args) throws InterpreterError {
+        EbsImage image = getImage(args[0], "image.getType");
+        return image.getImageType();
+    }
+
+    /**
+     * Set image type/format.
+     * image.setType(image, type) -> IMAGE
+     */
+    private static Object setType(Object[] args) throws InterpreterError {
+        EbsImage image = getImage(args[0], "image.setType");
+        String type = (String) args[1];
+        image.setImageType(type);
+        return image;
+    }
+
     // --- Helper methods ---
 
     /**
-     * Extract byte array from argument (supports ArrayFixedByte and byte[]).
+     * Extract EbsImage from argument (supports EbsImage and ArrayFixedByte).
      */
-    private static byte[] getBytes(Object arg, String funcName) throws InterpreterError {
+    private static EbsImage getImage(Object arg, String funcName) throws InterpreterError {
         if (arg == null) {
-            throw new InterpreterError(funcName + ": image bytes cannot be null");
+            throw new InterpreterError(funcName + ": image cannot be null");
+        }
+        if (arg instanceof EbsImage img) {
+            return img;
         }
         if (arg instanceof ArrayFixedByte afb) {
-            return afb.elements;
+            return new EbsImage(afb);
         }
         if (arg instanceof byte[] ba) {
-            return ba;
+            return new EbsImage(ba);
         }
-        throw new InterpreterError(funcName + ": expected byte array (ArrayFixedByte)");
-    }
-
-    /**
-     * Convert byte array to BufferedImage.
-     */
-    private static BufferedImage bytesToImage(byte[] bytes, String funcName) throws InterpreterError {
-        try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
-            BufferedImage img = ImageIO.read(bais);
-            if (img == null) {
-                throw new InterpreterError(funcName + ": invalid image data");
-            }
-            return img;
-        } catch (IOException ex) {
-            throw new InterpreterError(funcName + ": error reading image: " + ex.getMessage());
-        }
-    }
-
-    /**
-     * Convert BufferedImage to byte array in specified format.
-     */
-    private static ArrayFixedByte imageToBytes(BufferedImage img, String format) throws InterpreterError {
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            boolean success = ImageIO.write(img, format, baos);
-            if (!success) {
-                // Fallback to PNG if format not supported
-                success = ImageIO.write(img, "png", baos);
-                if (!success) {
-                    throw new InterpreterError("Failed to encode image");
-                }
-            }
-            return new ArrayFixedByte(baos.toByteArray());
-        } catch (IOException ex) {
-            throw new InterpreterError("Error encoding image: " + ex.getMessage());
-        }
-    }
-
-    /**
-     * Detect image format from byte array.
-     */
-    private static String detectFormat(byte[] bytes) {
-        try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-             ImageInputStream iis = ImageIO.createImageInputStream(bais)) {
-            
-            Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
-            if (readers.hasNext()) {
-                ImageReader reader = readers.next();
-                return reader.getFormatName().toLowerCase();
-            }
-        } catch (IOException ignored) {
-            // Fall through to default
-        }
-        return "png"; // Default format
+        throw new InterpreterError(funcName + ": expected EbsImage or ArrayFixedByte");
     }
 
     /**
@@ -635,32 +430,6 @@ public class BuiltinsImage {
             };
         }
         return "png";
-    }
-
-    /**
-     * Get appropriate BufferedImage type, preserving alpha if present.
-     */
-    private static int getImageType(BufferedImage img) {
-        return img.getColorModel().hasAlpha() ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB;
-    }
-
-    /**
-     * Ensure image is in a compatible format for operations like RescaleOp.
-     */
-    private static BufferedImage ensureCompatibleImage(BufferedImage img) {
-        int type = img.getType();
-        if (type == BufferedImage.TYPE_BYTE_INDEXED || type == BufferedImage.TYPE_BYTE_BINARY
-            || type == BufferedImage.TYPE_CUSTOM) {
-            // Convert to a compatible type
-            BufferedImage compatible = new BufferedImage(
-                img.getWidth(), img.getHeight(), 
-                img.getColorModel().hasAlpha() ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB);
-            Graphics2D g2d = compatible.createGraphics();
-            g2d.drawImage(img, 0, 0, null);
-            g2d.dispose();
-            return compatible;
-        }
-        return img;
     }
 
     /**
