@@ -956,10 +956,13 @@ public class AreaItemFactory {
         try {
             javafx.scene.image.Image image = null;
             
-            // Try loading from classpath first
-            java.io.InputStream is = AreaItemFactory.class.getResourceAsStream(iconPath);
-            if (is == null && !iconPath.startsWith("/")) {
-                is = AreaItemFactory.class.getResourceAsStream("/" + iconPath);
+            // Try loading from classpath using ClassLoader (uses absolute paths from classpath root)
+            String resourcePath = iconPath.startsWith("/") ? iconPath.substring(1) : iconPath;
+            java.io.InputStream is = AreaItemFactory.class.getClassLoader().getResourceAsStream(resourcePath);
+            
+            // Also try with leading slash using Class.getResourceAsStream
+            if (is == null) {
+                is = AreaItemFactory.class.getResourceAsStream("/" + resourcePath);
             }
             
             if (is != null) {
