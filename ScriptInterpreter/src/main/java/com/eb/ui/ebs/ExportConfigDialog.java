@@ -31,6 +31,8 @@ public class ExportConfigDialog extends Stage {
     private final CheckBox chkAiConfig;
     private final CheckBox chkSafeDirectories;
     private final CheckBox chkDatabaseConfig;
+    private final CheckBox chkEmailConfig;
+    private final CheckBox chkFtpConfig;
     private final Stage parentStage;
 
     public ExportConfigDialog(Stage parentStage) {
@@ -51,6 +53,12 @@ public class ExportConfigDialog extends Stage {
         
         chkDatabaseConfig = new CheckBox("Database Config (excludes connection strings with passwords)");
         chkDatabaseConfig.setSelected(true);
+        
+        chkEmailConfig = new CheckBox("Email Config (excludes passwords)");
+        chkEmailConfig.setSelected(true);
+        
+        chkFtpConfig = new CheckBox("FTP Config (excludes passwords)");
+        chkFtpConfig.setSelected(true);
 
         // --- Buttons ---
         Button btnExport = new Button("Export…");
@@ -74,7 +82,7 @@ public class ExportConfigDialog extends Stage {
 
         VBox checkboxBox = new VBox(8);
         checkboxBox.setPadding(new Insets(10, 0, 10, 20));
-        checkboxBox.getChildren().addAll(chkColors, chkAiConfig, chkSafeDirectories, chkDatabaseConfig);
+        checkboxBox.getChildren().addAll(chkColors, chkAiConfig, chkSafeDirectories, chkDatabaseConfig, chkEmailConfig, chkFtpConfig);
 
         HBox buttonBox = new HBox(10);
         buttonBox.getChildren().addAll(btnExport, btnCancel);
@@ -89,13 +97,14 @@ public class ExportConfigDialog extends Stage {
         setScene(new Scene(layout));
         sizeToScene();
         setMinWidth(450);
-        setMinHeight(250);
+        setMinHeight(300);
     }
 
     private void onExport() {
         // Check if at least one option is selected
         if (!chkColors.isSelected() && !chkAiConfig.isSelected() && 
-            !chkSafeDirectories.isSelected() && !chkDatabaseConfig.isSelected()) {
+            !chkSafeDirectories.isSelected() && !chkDatabaseConfig.isSelected() &&
+            !chkEmailConfig.isSelected() && !chkFtpConfig.isSelected()) {
             showAlert(Alert.AlertType.WARNING, "No Selection", 
                 "Please select at least one configuration section to export.");
             return;
@@ -204,6 +213,38 @@ public class ExportConfigDialog extends Stage {
                 databaseConfigs.add(dbEntry);
             }
             exportData.put("databaseConfigs", databaseConfigs);
+        }
+        
+        // Export Email Config (excluding passwords)
+        if (chkEmailConfig.isSelected()) {
+            List<MailConfigDialog.MailConfigEntry> entries = 
+                MailConfigDialog.getMailConfigEntries();
+            
+            List<Map<String, Object>> emailConfigs = new ArrayList<>();
+            for (MailConfigDialog.MailConfigEntry entry : entries) {
+                Map<String, Object> emailEntry = new LinkedHashMap<>();
+                emailEntry.put("variableName", entry.getVarName());
+                emailEntry.put("url", entry.getUrl());
+                // Password is explicitly excluded for security
+                emailConfigs.add(emailEntry);
+            }
+            exportData.put("emailConfigs", emailConfigs);
+        }
+        
+        // Export FTP Config (excluding passwords)
+        if (chkFtpConfig.isSelected()) {
+            List<FtpConfigDialog.FtpConfigEntry> entries = 
+                FtpConfigDialog.getFtpConfigEntries();
+            
+            List<Map<String, Object>> ftpConfigs = new ArrayList<>();
+            for (FtpConfigDialog.FtpConfigEntry entry : entries) {
+                Map<String, Object> ftpEntry = new LinkedHashMap<>();
+                ftpEntry.put("variableName", entry.getVarName());
+                ftpEntry.put("url", entry.getUrl());
+                // Password is explicitly excluded for security
+                ftpConfigs.add(ftpEntry);
+            }
+            exportData.put("ftpConfigs", ftpConfigs);
         }
         
         return exportData;
