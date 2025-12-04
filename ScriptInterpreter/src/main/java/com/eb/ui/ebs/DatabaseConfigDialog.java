@@ -89,34 +89,16 @@ public class DatabaseConfigDialog extends Stage {
         // Variable Name column (editable)
         TableColumn<DatabaseConfigEntry, String> nameColumn = new TableColumn<>("Variable Name");
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("varName"));
-        nameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        nameColumn.setCellFactory(column -> new FocusCommitTextFieldCell<>(DatabaseConfigEntry::setVarName));
         nameColumn.setMinWidth(150);
         nameColumn.setEditable(true);
         
         // Connection String column (editable)
         TableColumn<DatabaseConfigEntry, String> connColumn = new TableColumn<>("Database Connection String");
         connColumn.setCellValueFactory(new PropertyValueFactory<>("connectionString"));
-        connColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        connColumn.setCellFactory(column -> new FocusCommitTextFieldCell<>(DatabaseConfigEntry::setConnectionString));
         connColumn.setMinWidth(500);
         connColumn.setEditable(true);
-        
-        // Set up edit commit handlers after both columns are declared
-        nameColumn.setOnEditCommit(event -> {
-            DatabaseConfigEntry entry = event.getRowValue();
-            entry.setVarName(event.getNewValue());
-            
-            // Move to connection string column after editing variable name
-            // Use Platform.runLater to ensure edit mode is properly ended before starting new edit
-            int row = event.getTablePosition().getRow();
-            javafx.application.Platform.runLater(() -> {
-                dbTableView.edit(row, connColumn);
-            });
-        });
-        
-        connColumn.setOnEditCommit(event -> {
-            DatabaseConfigEntry entry = event.getRowValue();
-            entry.setConnectionString(event.getNewValue());
-        });
         
         dbTableView.getColumns().add(nameColumn);
         dbTableView.getColumns().add(connColumn);
@@ -136,23 +118,10 @@ public class DatabaseConfigDialog extends Stage {
         btnCopy.setDisable(true);
 
         // Enable/disable buttons based on selection
-        // Also commit any pending edits when selection changes to prevent data loss
         dbTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            // Commit any pending edits before changing selection
-            if (dbTableView.getEditingCell() != null) {
-                // Force commit by requesting focus elsewhere temporarily
-                dbTableView.requestFocus();
-            }
             boolean hasSelection = newVal != null;
             btnRemove.setDisable(!hasSelection);
             btnCopy.setDisable(!hasSelection);
-        });
-        
-        // Commit edits when focus is lost from the table
-        dbTableView.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
-            if (!isNowFocused && dbTableView.getEditingCell() != null) {
-                dbTableView.requestFocus();
-            }
         });
 
         // --- Actions ---
@@ -334,6 +303,82 @@ public class DatabaseConfigDialog extends Stage {
         a.initOwner(this);
         a.initModality(Modality.WINDOW_MODAL);
         a.showAndWait();
+    }
+    
+    /**
+     * Custom table cell that commits edits on focus loss (not just Enter key).
+     */
+    private static class FocusCommitTextFieldCell<T> extends TableCell<T, String> {
+        private TextField textField;
+        private final java.util.function.BiConsumer<T, String> setter;
+        
+        public FocusCommitTextFieldCell(java.util.function.BiConsumer<T, String> setter) {
+            this.setter = setter;
+        }
+        
+        @Override
+        public void startEdit() {
+            super.startEdit();
+            if (textField == null) {
+                createTextField();
+            }
+            textField.setText(getItem() != null ? getItem() : "");
+            setGraphic(textField);
+            setText(null);
+            textField.selectAll();
+            textField.requestFocus();
+        }
+        
+        @Override
+        public void cancelEdit() {
+            super.cancelEdit();
+            setText(getItem());
+            setGraphic(null);
+        }
+        
+        @Override
+        protected void updateItem(String item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty) {
+                setText(null);
+                setGraphic(null);
+            } else {
+                if (isEditing()) {
+                    if (textField != null) {
+                        textField.setText(item);
+                    }
+                    setText(null);
+                    setGraphic(textField);
+                } else {
+                    setText(item);
+                    setGraphic(null);
+                }
+            }
+        }
+        
+        private void createTextField() {
+            textField = new TextField();
+            textField.setOnAction(event -> commitEdit(textField.getText()));
+            textField.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+                if (!isNowFocused && isEditing()) {
+                    commitEdit(textField.getText());
+                }
+            });
+            textField.setOnKeyPressed(event -> {
+                if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
+                    cancelEdit();
+                }
+            });
+        }
+        
+        @Override
+        public void commitEdit(String newValue) {
+            super.commitEdit(newValue);
+            T item = getTableRow().getItem();
+            if (item != null && setter != null) {
+                setter.accept(item, newValue);
+            }
+        }
     }
 
     /**
