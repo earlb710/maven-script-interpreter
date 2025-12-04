@@ -156,7 +156,7 @@ imageTestScreen.testImageVar = testImage;
 
 // Show the screen
 print "Displaying screen with image...";
-screen imageTestScreen show;
+show screen imageTestScreen;
 
 print "";
 print "====================================================================";
