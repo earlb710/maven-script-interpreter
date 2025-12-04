@@ -88,9 +88,13 @@ public class ImportConfigDialog {
                     if (response == ButtonType.OK) {
                         try {
                             applyImportedConfig(importData);
+                            String colorsNote = sections.contains("Colors") 
+                                ? "Colors have been applied immediately.\n\n" 
+                                : "";
                             showAlert(Alert.AlertType.INFORMATION, "Import Successful", 
                                 "Configuration imported successfully.\n\nSections imported: " + sectionsStr +
-                                "\n\nNote: Some changes may require restarting the application to take effect.");
+                                "\n\n" + colorsNote +
+                                "Note: Some non-color changes may require restarting the application to take effect.");
                         } catch (Exception ex) {
                             showAlert(Alert.AlertType.ERROR, "Import Failed", 
                                 "Failed to apply configuration:\n" + ex.getMessage());
@@ -110,12 +114,15 @@ public class ImportConfigDialog {
      */
     @SuppressWarnings("unchecked")
     private void applyImportedConfig(Map<String, Object> importData) throws Exception {
+        boolean colorsImported = false;
+        
         // Import Colors (console.cfg)
         if (importData.containsKey("colors")) {
             Object colorsObj = importData.get("colors");
             if (colorsObj instanceof Map) {
                 Map<String, Object> colorsData = (Map<String, Object>) colorsObj;
                 saveColorsConfig(colorsData);
+                colorsImported = true;
             }
         }
         
@@ -270,6 +277,18 @@ public class ImportConfigDialog {
                     }
                 }
             }
+        }
+        
+        // Apply colors immediately if they were imported
+        if (colorsImported) {
+            javafx.application.Platform.runLater(() -> {
+                boolean success = EbsApp.reloadConfig();
+                if (success) {
+                    System.out.println("Colors applied successfully after import");
+                } else {
+                    System.out.println("Note: Colors saved but could not be applied immediately. Restart to see changes.");
+                }
+            });
         }
     }
 
