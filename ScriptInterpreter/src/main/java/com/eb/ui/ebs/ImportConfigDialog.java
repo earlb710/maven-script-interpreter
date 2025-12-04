@@ -275,11 +275,23 @@ public class ImportConfigDialog {
 
     /**
      * Save colors configuration to console.cfg file.
+     * Handles both formats:
+     * - Full config structure with "profiles" key (from getConfig())
+     * - Simple color map (legacy format)
      */
     @SuppressWarnings("unchecked")
     private void saveColorsConfig(Map<String, Object> colorsData) throws Exception {
         Path configPath = Path.of("console.cfg");
         
+        // Check if colorsData already has the full profile structure
+        if (colorsData.containsKey("profiles")) {
+            // This is the full config structure - write it directly
+            String jsonContent = Json.prettyJson(colorsData);
+            Files.writeString(configPath, jsonContent);
+            return;
+        }
+        
+        // Otherwise, it's a simple color map - wrap it in the proper structure
         // Try to load existing config to preserve other settings
         Map<String, Object> existingConfig = null;
         if (Files.exists(configPath)) {
