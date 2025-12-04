@@ -736,9 +736,19 @@ public class ScreenFactory {
         }
         
         // Item-level handlers
+        // Use IdentityHashSet to avoid processing the same item twice
+        // (items can be stored in the map under multiple keys: by name and by varRef)
         if (screenAreaItems != null) {
+            java.util.Set<AreaItem> processedItems = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
             for (Map.Entry<String, AreaItem> entry : screenAreaItems.entrySet()) {
                 AreaItem item = entry.getValue();
+                
+                // Skip if we've already processed this exact item instance
+                if (processedItems.contains(item)) {
+                    continue;
+                }
+                processedItems.add(item);
+                
                 String itemName = item.name != null ? item.name : entry.getKey();
                 
                 // Check item-level handlers
@@ -1234,9 +1244,19 @@ public class ScreenFactory {
         }
         
         // Item-level handlers
+        // Use IdentityHashSet to avoid processing the same item twice
+        // (items can be stored in the map under multiple keys: by name and by varRef)
         if (screenAreaItems != null) {
+            java.util.Set<AreaItem> processedItems = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
             for (Map.Entry<String, AreaItem> entry : screenAreaItems.entrySet()) {
                 AreaItem item = entry.getValue();
+                
+                // Skip if we've already processed this exact item instance
+                if (processedItems.contains(item)) {
+                    continue;
+                }
+                processedItems.add(item);
+                
                 String itemName = item.name != null ? item.name : entry.getKey();
                 
                 if (item.onValidate != null) {
