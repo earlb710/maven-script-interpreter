@@ -118,9 +118,14 @@ public class ScreenFactory {
     // Map to store event counts per item.eventType (e.g., "fileTree.onChange" -> count)
     private static final java.util.concurrent.ConcurrentHashMap<String, java.util.concurrent.atomic.AtomicInteger> eventCounts = new java.util.concurrent.ConcurrentHashMap<>();
     
+    // Map to store debug panel event count labels for dynamic refresh (key -> label)
+    // Key format: "screenName.itemName.eventType"
+    private static final java.util.concurrent.ConcurrentHashMap<String, javafx.scene.control.Label> eventCountLabels = new java.util.concurrent.ConcurrentHashMap<>();
+    
     /**
      * Increment and return the event count for a specific item.eventType combination.
      * Used for debugging to track how many times each event fires.
+     * Also updates the corresponding label in the debug panel if it exists.
      * 
      * @param screenName The screen name
      * @param itemName The item name (e.g., "fileTree")
@@ -129,7 +134,34 @@ public class ScreenFactory {
      */
     public static int incrementEventCount(String screenName, String itemName, String eventType) {
         String key = (screenName + "." + itemName + "." + eventType).toLowerCase();
-        return eventCounts.computeIfAbsent(key, k -> new java.util.concurrent.atomic.AtomicInteger(0)).incrementAndGet();
+        int newCount = eventCounts.computeIfAbsent(key, k -> new java.util.concurrent.atomic.AtomicInteger(0)).incrementAndGet();
+        
+        // Update the debug panel label if it exists
+        javafx.scene.control.Label countLabel = eventCountLabels.get(key);
+        if (countLabel != null) {
+            String countText = " [" + newCount + "]";
+            // Update on JavaFX thread
+            javafx.application.Platform.runLater(() -> {
+                // Update just the count portion of the label text
+                String currentText = countLabel.getText();
+                // Format is ".eventType [count]: code..." - we need to update the [count] portion
+                int bracketStart = currentText.indexOf('[');
+                int bracketEnd = currentText.indexOf(']');
+                if (bracketStart >= 0 && bracketEnd > bracketStart) {
+                    String newText = currentText.substring(0, bracketStart) + "[" + newCount + "]" + currentText.substring(bracketEnd + 1);
+                    countLabel.setText(newText);
+                } else if (bracketStart < 0) {
+                    // No bracket yet, find the colon and insert count before it
+                    int colonPos = currentText.indexOf(':');
+                    if (colonPos >= 0) {
+                        String newText = currentText.substring(0, colonPos) + " [" + newCount + "]" + currentText.substring(colonPos);
+                        countLabel.setText(newText);
+                    }
+                }
+            });
+        }
+        
+        return newCount;
     }
     
     /**
@@ -154,6 +186,8 @@ public class ScreenFactory {
     public static void resetEventCounts(String screenName) {
         String prefix = (screenName + ".").toLowerCase();
         eventCounts.keySet().removeIf(key -> key.startsWith(prefix));
+        // Also clean up event count labels
+        eventCountLabels.keySet().removeIf(key -> key.startsWith(prefix));
     }
 
     static {
@@ -778,6 +812,10 @@ public class ScreenFactory {
         String truncatedCode = truncateCode(fullCode);
         javafx.scene.control.Label typeLabel = new javafx.scene.control.Label("." + eventType + countText + ": " + truncatedCode);
         typeLabel.setStyle("-fx-text-fill: #006666;");
+        
+        // Store label reference for dynamic count updates
+        String key = (screenName + "." + itemName + "." + eventType).toLowerCase();
+        eventCountLabels.put(key, typeLabel);
         
         row.getChildren().addAll(iconLabel, nameLabel, typeLabel);
         
@@ -2327,7 +2365,7 @@ public class ScreenFactory {
                     changeCode = metadata.onChange;
                 }
                 if (onClickHandler != null && changeCode != null && !changeCode.isEmpty()) {
-                    setupChangeHandler(control, changeCode, onClickHandler, screenName, context);
+                    setupChangeHandler(control, changeCode, onClickHandler, screenName, context, boundControls, screenVars);
                 }
 
                 // Apply item layout properties
@@ -3774,11 +3812,14 @@ public class ScreenFactory {
      * @param onClickHandler Handler to execute the EBS code
      * @param screenName The screen name for context
      * @param context The interpreter context
+     * @param boundControls List of bound controls to refresh after execution
+     * @param screenVars The screen variables map
      */
     private static void setupChangeHandler(Node control, String changeCode,
-            OnClickHandler onClickHandler, String screenName, InterpreterContext context) {
+            OnClickHandler onClickHandler, String screenName, InterpreterContext context,
+            List<Node> boundControls, java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
         // Delegate to DisplayChangeHandler in the display layer
-        DisplayChangeHandler.setupChangeHandler(control, changeCode, onClickHandler, screenName, context);
+        DisplayChangeHandler.setupChangeHandler(control, changeCode, onClickHandler, screenName, context, boundControls, screenVars);
     }
 
     /**
