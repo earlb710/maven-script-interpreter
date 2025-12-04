@@ -93,7 +93,9 @@ public class DisplayItem {
      */
     public static class TreeItemDef {
         public String value;           // Display text/value of the tree item
-        public String icon;            // Optional icon path or class
+        public String icon;            // Optional icon path (used when no iconOpen/iconClosed specified)
+        public String iconOpen;        // Optional icon path for expanded/open state
+        public String iconClosed;      // Optional icon path for collapsed/closed state
         public Boolean expanded;       // Whether this node is expanded by default
         public List<TreeItemDef> children;  // Child tree items (for hierarchy)
         

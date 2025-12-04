@@ -3999,6 +3999,8 @@ public class ScreenFactory {
             DisplayItem.TreeItemDef itemClone = new DisplayItem.TreeItemDef();
             itemClone.value = item.value;
             itemClone.icon = item.icon;
+            itemClone.iconOpen = item.iconOpen;
+            itemClone.iconClosed = item.iconClosed;
             itemClone.expanded = item.expanded;
             if (item.children != null) {
                 itemClone.children = cloneTreeItems(item.children);

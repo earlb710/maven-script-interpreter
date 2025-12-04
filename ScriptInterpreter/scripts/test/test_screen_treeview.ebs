@@ -1,17 +1,21 @@
-// Test Script: TreeView for displaying hierarchical data
-// Description: Demonstrates displaying tree items with expand/collapse functionality
+// Test Script: TreeView for displaying hierarchical data with icons
+// Description: Demonstrates displaying tree items with expand/collapse functionality and icons
 // Author: EBS Test Suite
 // Date: 2025-12-04
 
-print "=== TreeView Test - Hierarchical Data ===";
+print "=== TreeView Test - Hierarchical Data with Icons ===";
 print "";
 print "This test demonstrates displaying hierarchical data in a tree view";
-print "with expandable/collapsible nodes.";
+print "with expandable/collapsible nodes and dynamic icons.";
 print "";
 
 // Create a screen with a TreeView to display file/folder hierarchy
+// Icons can be specified as:
+// - "icon": single icon for all states
+// - "iconOpen": icon when node is expanded
+// - "iconClosed": icon when node is collapsed
 screen fileExplorer = {
-    "title": "File Explorer - TreeView Demo",
+    "title": "File Explorer - TreeView Demo with Icons",
     "width": 600,
     "height": 500,
     "maximize": false,
@@ -29,41 +33,55 @@ screen fileExplorer = {
                 "treeItems": [
                     {
                         "value": "Project Root",
+                        "iconOpen": "icons/folder-open.png",
+                        "iconClosed": "icons/folder.png",
                         "expanded": true,
                         "children": [
                             {
                                 "value": "src",
+                                "iconOpen": "icons/folder-open.png",
+                                "iconClosed": "icons/folder.png",
                                 "expanded": true,
                                 "children": [
                                     {
                                         "value": "main",
+                                        "iconOpen": "icons/folder-open.png",
+                                        "iconClosed": "icons/folder.png",
                                         "expanded": true,
                                         "children": [
                                             {
                                                 "value": "java",
+                                                "iconOpen": "icons/folder-open.png",
+                                                "iconClosed": "icons/folder.png",
                                                 "children": [
-                                                    {"value": "App.java"},
-                                                    {"value": "Config.java"},
-                                                    {"value": "Utils.java"}
+                                                    {"value": "App.java", "icon": "icons/java-file.png"},
+                                                    {"value": "Config.java", "icon": "icons/java-file.png"},
+                                                    {"value": "Utils.java", "icon": "icons/java-file.png"}
                                                 ]
                                             },
                                             {
                                                 "value": "resources",
+                                                "iconOpen": "icons/folder-open.png",
+                                                "iconClosed": "icons/folder.png",
                                                 "children": [
-                                                    {"value": "application.properties"},
-                                                    {"value": "messages.properties"}
+                                                    {"value": "application.properties", "icon": "icons/config-file.png"},
+                                                    {"value": "messages.properties", "icon": "icons/config-file.png"}
                                                 ]
                                             }
                                         ]
                                     },
                                     {
                                         "value": "test",
+                                        "iconOpen": "icons/folder-open.png",
+                                        "iconClosed": "icons/folder.png",
                                         "children": [
                                             {
                                                 "value": "java",
+                                                "iconOpen": "icons/folder-open.png",
+                                                "iconClosed": "icons/folder.png",
                                                 "children": [
-                                                    {"value": "AppTest.java"},
-                                                    {"value": "ConfigTest.java"}
+                                                    {"value": "AppTest.java", "icon": "icons/java-file.png"},
+                                                    {"value": "ConfigTest.java", "icon": "icons/java-file.png"}
                                                 ]
                                             }
                                         ]
@@ -72,21 +90,25 @@ screen fileExplorer = {
                             },
                             {
                                 "value": "docs",
+                                "iconOpen": "icons/folder-open.png",
+                                "iconClosed": "icons/folder.png",
                                 "children": [
-                                    {"value": "README.md"},
-                                    {"value": "CONTRIBUTING.md"},
-                                    {"value": "LICENSE"}
+                                    {"value": "README.md", "icon": "icons/markdown-file.png"},
+                                    {"value": "CONTRIBUTING.md", "icon": "icons/markdown-file.png"},
+                                    {"value": "LICENSE", "icon": "icons/text-file.png"}
                                 ]
                             },
                             {
                                 "value": "build",
+                                "iconOpen": "icons/folder-open.png",
+                                "iconClosed": "icons/folder.png",
                                 "children": [
-                                    {"value": "target"},
-                                    {"value": "output"}
+                                    {"value": "target", "iconOpen": "icons/folder-open.png", "iconClosed": "icons/folder.png"},
+                                    {"value": "output", "iconOpen": "icons/folder-open.png", "iconClosed": "icons/folder.png"}
                                 ]
                             },
-                            {"value": "pom.xml"},
-                            {"value": ".gitignore"}
+                            {"value": "pom.xml", "icon": "icons/xml-file.png"},
+                            {"value": ".gitignore", "icon": "icons/git-file.png"}
                         ]
                     }
                 ]
@@ -95,8 +117,13 @@ screen fileExplorer = {
     ]
 };
 
-print "Created file explorer screen with TreeView.";
+print "Created file explorer screen with TreeView and icons.";
 print "The tree shows a typical project directory structure.";
+print "";
+print "Icon properties:";
+print "- 'icon': Static icon for the node (same for all states)";
+print "- 'iconOpen': Icon shown when node is expanded";
+print "- 'iconClosed': Icon shown when node is collapsed";
 print "";
 
 // Show the screen
@@ -107,6 +134,7 @@ print "";
 print "Test completed!";
 print "The screen displays a hierarchical file structure in a TreeView.";
 print "- Nodes can be expanded/collapsed by clicking the arrow icons";
-print "- The tree demonstrates nested folder structure";
+print "- Folder icons change based on expanded/collapsed state";
+print "- File icons remain static";
 print "- showRoot: true shows the root node";
 print "- expandAll: true expands all nodes by default";

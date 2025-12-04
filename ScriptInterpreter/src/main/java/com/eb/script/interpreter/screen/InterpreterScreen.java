@@ -1913,9 +1913,23 @@ public class InterpreterScreen {
             treeItem.value = String.valueOf(itemDef.get("name"));
         }
         
-        // Extract icon path (optional)
+        // Extract icon path (optional - used when no iconOpen/iconClosed specified)
         if (itemDef.containsKey("icon")) {
             treeItem.icon = String.valueOf(itemDef.get("icon"));
+        }
+        
+        // Extract iconOpen path (optional - for expanded state)
+        if (itemDef.containsKey("iconOpen")) {
+            treeItem.iconOpen = String.valueOf(itemDef.get("iconOpen"));
+        } else if (itemDef.containsKey("iconopen")) {
+            treeItem.iconOpen = String.valueOf(itemDef.get("iconopen"));
+        }
+        
+        // Extract iconClosed path (optional - for collapsed state)
+        if (itemDef.containsKey("iconClosed")) {
+            treeItem.iconClosed = String.valueOf(itemDef.get("iconClosed"));
+        } else if (itemDef.containsKey("iconclosed")) {
+            treeItem.iconClosed = String.valueOf(itemDef.get("iconclosed"));
         }
         
         // Extract expanded state (optional)

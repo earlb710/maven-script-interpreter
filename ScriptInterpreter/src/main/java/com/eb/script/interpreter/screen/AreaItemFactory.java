@@ -877,9 +877,10 @@ public class AreaItemFactory {
     
     /**
      * Creates a TreeItem from a TreeItemDef, recursively creating children.
+     * Supports icons that change based on expanded/collapsed state.
      * 
      * @param def The TreeItemDef definition
-     * @return A TreeItem with value and children
+     * @return A TreeItem with value, icon, and children
      */
     private static TreeItem<String> createTreeItem(DisplayItem.TreeItemDef def) {
         TreeItem<String> item = new TreeItem<>(def.value != null ? def.value : "");
@@ -889,8 +890,9 @@ public class AreaItemFactory {
             item.setExpanded(def.expanded);
         }
         
-        // Recursively add children
-        if (def.children != null && !def.children.isEmpty()) {
+        // Recursively add children first (so we know if this is a branch or leaf)
+        boolean hasChildren = def.children != null && !def.children.isEmpty();
+        if (hasChildren) {
             for (DisplayItem.TreeItemDef childDef : def.children) {
                 item.getChildren().add(createTreeItem(childDef));
             }
@@ -900,7 +902,90 @@ public class AreaItemFactory {
             }
         }
         
+        // Set up icons
+        boolean hasOpenClosedIcons = def.iconOpen != null || def.iconClosed != null;
+        
+        if (hasOpenClosedIcons && hasChildren) {
+            // Dynamic icons that change based on expanded/collapsed state
+            updateTreeItemIcon(item, def, item.isExpanded());
+            
+            // Add listener for expansion state changes
+            item.expandedProperty().addListener((obs, wasExpanded, isExpanded) -> {
+                updateTreeItemIcon(item, def, isExpanded);
+            });
+        } else if (def.icon != null && !def.icon.isEmpty()) {
+            // Static icon (same for all states)
+            setTreeItemIcon(item, def.icon);
+        }
+        
         return item;
+    }
+    
+    /**
+     * Updates the icon of a tree item based on its expanded state.
+     * Uses iconOpen when expanded, iconClosed when collapsed.
+     * Falls back to icon property if specific state icon is not defined.
+     * 
+     * @param item The TreeItem to update
+     * @param def The TreeItemDef containing icon definitions
+     * @param isExpanded Whether the item is currently expanded
+     */
+    private static void updateTreeItemIcon(TreeItem<String> item, DisplayItem.TreeItemDef def, boolean isExpanded) {
+        String iconPath;
+        if (isExpanded) {
+            // Use iconOpen if available, otherwise fall back to icon
+            iconPath = def.iconOpen != null ? def.iconOpen : def.icon;
+        } else {
+            // Use iconClosed if available, otherwise fall back to icon
+            iconPath = def.iconClosed != null ? def.iconClosed : def.icon;
+        }
+        
+        if (iconPath != null && !iconPath.isEmpty()) {
+            setTreeItemIcon(item, iconPath);
+        }
+    }
+    
+    /**
+     * Sets the icon graphic for a tree item.
+     * Supports loading from classpath resources or file paths.
+     * 
+     * @param item The TreeItem to set the icon on
+     * @param iconPath The path to the icon image
+     */
+    private static void setTreeItemIcon(TreeItem<String> item, String iconPath) {
+        try {
+            javafx.scene.image.Image image = null;
+            
+            // Try loading from classpath first
+            java.io.InputStream is = AreaItemFactory.class.getResourceAsStream(iconPath);
+            if (is == null && !iconPath.startsWith("/")) {
+                is = AreaItemFactory.class.getResourceAsStream("/" + iconPath);
+            }
+            
+            if (is != null) {
+                try {
+                    image = new javafx.scene.image.Image(is);
+                } finally {
+                    is.close();
+                }
+            } else {
+                // Try loading from file system
+                java.io.File file = new java.io.File(iconPath);
+                if (file.exists()) {
+                    image = new javafx.scene.image.Image(file.toURI().toString());
+                }
+            }
+            
+            if (image != null && !image.isError()) {
+                ImageView imageView = new ImageView(image);
+                imageView.setFitHeight(16);
+                imageView.setFitWidth(16);
+                imageView.setPreserveRatio(true);
+                item.setGraphic(imageView);
+            }
+        } catch (Exception e) {
+            // Silently ignore icon loading errors - icons are optional
+        }
     }
     
     /**
