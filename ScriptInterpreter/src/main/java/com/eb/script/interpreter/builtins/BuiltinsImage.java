@@ -424,7 +424,7 @@ public class BuiltinsImage {
     /**
      * Adjust image brightness.
      * image.adjustBrightness(bytes, factor) -> ARRAY (byte[])
-     * factor: 1.0 = no change, &gt;1.0 = brighter, &lt;1.0 = darker
+     * factor: 1.0 = no change, greater than 1.0 = brighter, less than 1.0 = darker
      */
     private static Object adjustBrightness(Object[] args) throws InterpreterError {
         byte[] bytes = getBytes(args[0], "image.adjustBrightness");
@@ -454,7 +454,7 @@ public class BuiltinsImage {
     /**
      * Adjust image contrast.
      * image.adjustContrast(bytes, factor) -> ARRAY (byte[])
-     * factor: 1.0 = no change, &gt;1.0 = more contrast, &lt;1.0 = less contrast
+     * factor: 1.0 = no change, greater than 1.0 = more contrast, less than 1.0 = less contrast
      */
     private static Object adjustContrast(Object[] args) throws InterpreterError {
         byte[] bytes = getBytes(args[0], "image.adjustContrast");
