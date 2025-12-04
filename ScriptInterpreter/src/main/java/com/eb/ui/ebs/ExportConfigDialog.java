@@ -120,6 +120,8 @@ public class ExportConfigDialog extends Stage {
             new FileChooser.ExtensionFilter("All Files", "*.*")
         );
 
+        // Hide the options dialog while file browser is open
+        hide();
         File file = fc.showSaveDialog(parentStage);
         if (file != null) {
             try {
@@ -135,7 +137,12 @@ public class ExportConfigDialog extends Stage {
             } catch (Exception ex) {
                 showAlert(Alert.AlertType.ERROR, "Export Failed", 
                     "Failed to export configuration:\n" + ex.getMessage());
+                // Show dialog again so user can retry
+                show();
             }
+        } else {
+            // User cancelled the file chooser, show dialog again
+            show();
         }
     }
 
