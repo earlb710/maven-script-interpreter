@@ -286,7 +286,8 @@ public class ControlUpdater {
             DisplayItem metadata = (DisplayItem) control.getProperties().get("metadata");
 
             if (varName != null) {
-                Object currentValue = screenVars.get(varName);
+                // Use lowercase for consistent case-insensitive lookup
+                Object currentValue = screenVars.get(varName.toLowerCase());
                 updateControlFromValue(control, currentValue, metadata);
             }
         }

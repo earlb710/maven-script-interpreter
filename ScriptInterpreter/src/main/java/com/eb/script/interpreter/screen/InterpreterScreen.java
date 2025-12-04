@@ -2479,13 +2479,15 @@ public class InterpreterScreen {
 
                 // Store in screen's thread-safe variable map (legacy support)
                 // Note: ConcurrentHashMap does not allow null values, so skip null values
+                // Use lowercase for case-insensitive variable name lookup
                 if (value != null) {
-                    screenVarMap.put(varName, value);
+                    screenVarMap.put(varName.toLowerCase(), value);
                 }
 
                 // Store the variable type if specified (legacy support)
+                // Use lowercase for case-insensitive variable name lookup
                 if (varType != null) {
-                    screenVarTypeMap.put(varName, varType);
+                    screenVarTypeMap.put(varName.toLowerCase(), varType);
                 }
             }
         }
