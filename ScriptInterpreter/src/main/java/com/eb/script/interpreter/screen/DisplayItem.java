@@ -82,6 +82,18 @@ public class DisplayItem {
     // Sequence number for ordering display items (lower numbers appear first)
     public Integer seq;
     
+    // Image display properties (for IMAGEVIEW item type)
+    // Fit width for image (e.g., 100, 200) - will scale image to this width
+    public Double fitWidth;
+    // Fit height for image (e.g., 100, 200) - will scale image to this height
+    public Double fitHeight;
+    // Whether to preserve aspect ratio when scaling (default: true)
+    public Boolean preserveRatio;
+    // Whether to use smooth scaling algorithm (default: true)
+    public Boolean smooth;
+    // Image scaling mode: "fit" (fit within bounds), "fill" (fill bounds, may crop), "stretch" (stretch to bounds)
+    public String scaleMode;
+    
     /**
      * Inner class to define a table column
      */
