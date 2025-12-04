@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -368,5 +369,13 @@ public class ConsoleConfig {
      */
     public boolean isLoadedFromFile() {
         return loadedFromFile;
+    }
+    
+    /**
+     * Get the raw configuration map.
+     * @return Unmodifiable map containing the configuration data
+     */
+    public Map<String, Object> getConfig() {
+        return Collections.unmodifiableMap(config);
     }
 }
