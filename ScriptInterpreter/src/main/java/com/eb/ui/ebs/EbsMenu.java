@@ -234,8 +234,14 @@ public class EbsMenu extends MenuBar {
         colorsItem.setOnAction(e -> {
             handler.runScriptFromResource("/scripts/color_editor.ebs", "Color Editor");
         });
+        
+        MenuItem exportConfigItem = new MenuItem("Export Config…");
+        exportConfigItem.setOnAction(e -> {
+            ExportConfigDialog dialog = new ExportConfigDialog(handler.stage);
+            dialog.show();
+        });
 
-        toolsMenu.getItems().addAll(aiSetupItem, safeDirsItem, dbConfigItem, mailConfigItem, ftpConfigItem, colorsItem);
+        toolsMenu.getItems().addAll(aiSetupItem, safeDirsItem, dbConfigItem, mailConfigItem, ftpConfigItem, colorsItem, new SeparatorMenuItem(), exportConfigItem);
         getMenus().add(toolsMenu);
 
         // --- Tools Menu ---
