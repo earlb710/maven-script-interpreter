@@ -176,6 +176,57 @@ public class AreaItemFactory {
                 }
                 
                 return tableView;
+                
+            case TREEVIEW:
+                TreeView<String> treeView = new TreeView<>();
+                
+                // Set the root node if treeItems are specified
+                if (metadata != null && metadata.treeItems != null && !metadata.treeItems.isEmpty()) {
+                    // Create root item - either use first item or create a hidden root
+                    TreeItem<String> rootItem;
+                    boolean showRoot = metadata.showRoot == null || metadata.showRoot;
+                    
+                    if (showRoot && metadata.treeItems.size() == 1) {
+                        // Single root item with children
+                        DisplayItem.TreeItemDef rootDef = metadata.treeItems.get(0);
+                        rootItem = createTreeItem(rootDef);
+                    } else {
+                        // Multiple root items - create a hidden container root
+                        rootItem = new TreeItem<>("Root");
+                        for (DisplayItem.TreeItemDef itemDef : metadata.treeItems) {
+                            rootItem.getChildren().add(createTreeItem(itemDef));
+                        }
+                        rootItem.setExpanded(true);
+                        treeView.setShowRoot(false);
+                    }
+                    
+                    treeView.setRoot(rootItem);
+                    
+                    // Apply showRoot setting
+                    if (metadata.showRoot != null) {
+                        treeView.setShowRoot(metadata.showRoot);
+                    }
+                    
+                    // Apply expandAll if specified
+                    if (metadata.expandAll != null && metadata.expandAll) {
+                        expandAllNodes(rootItem);
+                    }
+                } else {
+                    // Create empty root as placeholder
+                    TreeItem<String> emptyRoot = new TreeItem<>("No items");
+                    treeView.setRoot(emptyRoot);
+                }
+                
+                // Calculate height based on displayRecords if specified
+                if (metadata != null && metadata.displayRecords != null && metadata.displayRecords > 0) {
+                    // Row height is approximately 24 pixels
+                    double calculatedHeight = (metadata.displayRecords * 24.0) + 4.0;
+                    treeView.setPrefHeight(calculatedHeight);
+                    treeView.setMinHeight(calculatedHeight);
+                    treeView.setMaxHeight(calculatedHeight);
+                }
+                
+                return treeView;
 
             // Numeric Controls
             case SPINNER:
@@ -821,6 +872,47 @@ public class AreaItemFactory {
             label.setText(String.format("%d", (int) value));
         } else {
             label.setText(String.format("%.1f", value));
+        }
+    }
+    
+    /**
+     * Creates a TreeItem from a TreeItemDef, recursively creating children.
+     * 
+     * @param def The TreeItemDef definition
+     * @return A TreeItem with value and children
+     */
+    private static TreeItem<String> createTreeItem(DisplayItem.TreeItemDef def) {
+        TreeItem<String> item = new TreeItem<>(def.value != null ? def.value : "");
+        
+        // Set expanded state
+        if (def.expanded != null) {
+            item.setExpanded(def.expanded);
+        }
+        
+        // Recursively add children
+        if (def.children != null && !def.children.isEmpty()) {
+            for (DisplayItem.TreeItemDef childDef : def.children) {
+                item.getChildren().add(createTreeItem(childDef));
+            }
+            // Expand parent nodes that have children by default
+            if (def.expanded == null) {
+                item.setExpanded(true);
+            }
+        }
+        
+        return item;
+    }
+    
+    /**
+     * Expands all nodes in a tree recursively.
+     * 
+     * @param item The root item to start expanding from
+     */
+    private static void expandAllNodes(TreeItem<String> item) {
+        if (item == null) return;
+        item.setExpanded(true);
+        for (TreeItem<String> child : item.getChildren()) {
+            expandAllNodes(child);
         }
     }
 }

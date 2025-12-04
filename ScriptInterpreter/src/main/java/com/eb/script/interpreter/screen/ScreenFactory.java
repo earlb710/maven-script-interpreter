@@ -3200,6 +3200,9 @@ public class ScreenFactory {
         merged.optionsMap = base.optionsMap;
         merged.columns = base.columns;
         merged.displayRecords = base.displayRecords;
+        merged.treeItems = base.treeItems;
+        merged.expandAll = base.expandAll;
+        merged.showRoot = base.showRoot;
         merged.labelColor = base.labelColor;
         merged.labelBold = base.labelBold;
         merged.labelItalic = base.labelItalic;
@@ -3234,6 +3237,9 @@ public class ScreenFactory {
         if (overlay.optionsMap != null) merged.optionsMap = overlay.optionsMap;
         if (overlay.columns != null) merged.columns = overlay.columns;
         if (overlay.displayRecords != null) merged.displayRecords = overlay.displayRecords;
+        if (overlay.treeItems != null) merged.treeItems = overlay.treeItems;
+        if (overlay.expandAll != null) merged.expandAll = overlay.expandAll;
+        if (overlay.showRoot != null) merged.showRoot = overlay.showRoot;
         if (overlay.labelColor != null) merged.labelColor = overlay.labelColor;
         if (overlay.labelBold != null) merged.labelBold = overlay.labelBold;
         if (overlay.labelItalic != null) merged.labelItalic = overlay.labelItalic;
@@ -3971,6 +3977,34 @@ public class ScreenFactory {
             }
         }
         
+        // Clone treeItems list if present
+        if (source.treeItems != null) {
+            clone.treeItems = cloneTreeItems(source.treeItems);
+        }
+        clone.expandAll = source.expandAll;
+        clone.showRoot = source.showRoot;
+        
+        return clone;
+    }
+    
+    /**
+     * Deep clones a list of TreeItemDef objects.
+     */
+    private static List<DisplayItem.TreeItemDef> cloneTreeItems(List<DisplayItem.TreeItemDef> source) {
+        if (source == null) {
+            return null;
+        }
+        List<DisplayItem.TreeItemDef> clone = new ArrayList<>();
+        for (DisplayItem.TreeItemDef item : source) {
+            DisplayItem.TreeItemDef itemClone = new DisplayItem.TreeItemDef();
+            itemClone.value = item.value;
+            itemClone.icon = item.icon;
+            itemClone.expanded = item.expanded;
+            if (item.children != null) {
+                itemClone.children = cloneTreeItems(item.children);
+            }
+            clone.add(itemClone);
+        }
         return clone;
     }
 

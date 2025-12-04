@@ -1,0 +1,112 @@
+// Test Script: TreeView for displaying hierarchical data
+// Description: Demonstrates displaying tree items with expand/collapse functionality
+// Author: EBS Test Suite
+// Date: 2025-12-04
+
+print "=== TreeView Test - Hierarchical Data ===";
+print "";
+print "This test demonstrates displaying hierarchical data in a tree view";
+print "with expandable/collapsible nodes.";
+print "";
+
+// Create a screen with a TreeView to display file/folder hierarchy
+screen fileExplorer = {
+    "title": "File Explorer - TreeView Demo",
+    "width": 600,
+    "height": 500,
+    "maximize": false,
+    "vars": [
+        {
+            "name": "fileTree",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "treeview",
+                "labelText": "Project Structure:",
+                "displayRecords": 15,
+                "expandAll": true,
+                "showRoot": true,
+                "treeItems": [
+                    {
+                        "value": "Project Root",
+                        "expanded": true,
+                        "children": [
+                            {
+                                "value": "src",
+                                "expanded": true,
+                                "children": [
+                                    {
+                                        "value": "main",
+                                        "expanded": true,
+                                        "children": [
+                                            {
+                                                "value": "java",
+                                                "children": [
+                                                    {"value": "App.java"},
+                                                    {"value": "Config.java"},
+                                                    {"value": "Utils.java"}
+                                                ]
+                                            },
+                                            {
+                                                "value": "resources",
+                                                "children": [
+                                                    {"value": "application.properties"},
+                                                    {"value": "messages.properties"}
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "value": "test",
+                                        "children": [
+                                            {
+                                                "value": "java",
+                                                "children": [
+                                                    {"value": "AppTest.java"},
+                                                    {"value": "ConfigTest.java"}
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "value": "docs",
+                                "children": [
+                                    {"value": "README.md"},
+                                    {"value": "CONTRIBUTING.md"},
+                                    {"value": "LICENSE"}
+                                ]
+                            },
+                            {
+                                "value": "build",
+                                "children": [
+                                    {"value": "target"},
+                                    {"value": "output"}
+                                ]
+                            },
+                            {"value": "pom.xml"},
+                            {"value": ".gitignore"}
+                        ]
+                    }
+                ]
+            }
+        }
+    ]
+};
+
+print "Created file explorer screen with TreeView.";
+print "The tree shows a typical project directory structure.";
+print "";
+
+// Show the screen
+print "Displaying file explorer screen with TreeView...";
+show screen fileExplorer;
+
+print "";
+print "Test completed!";
+print "The screen displays a hierarchical file structure in a TreeView.";
+print "- Nodes can be expanded/collapsed by clicking the arrow icons";
+print "- The tree demonstrates nested folder structure";
+print "- showRoot: true shows the root node";
+print "- expandAll: true expands all nodes by default";
