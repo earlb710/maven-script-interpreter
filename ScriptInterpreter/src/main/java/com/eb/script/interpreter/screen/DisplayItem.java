@@ -38,6 +38,8 @@ public class DisplayItem {
     String labelText;
     // Label text alignment: "left", "center", "right"
     String labelTextAlignment;
+    // Label position relative to control: "left", "right", "top", "bottom"
+    String labelPosition;
     // Options/values for selection controls (ComboBox, ChoiceBox, ListView)
     List<String> options;
     // Options map for selection controls where keys are data values and values are display text

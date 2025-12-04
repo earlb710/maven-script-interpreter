@@ -1568,6 +1568,13 @@ public class InterpreterScreen {
         } else if (displayDef.containsKey("labeltextalignment")) {
             metadata.labelTextAlignment = String.valueOf(displayDef.get("labeltextalignment")).toLowerCase();
         }
+        
+        // Extract label position (left, right, top, bottom)
+        if (displayDef.containsKey("labelPosition")) {
+            metadata.labelPosition = String.valueOf(displayDef.get("labelPosition")).toLowerCase();
+        } else if (displayDef.containsKey("labelposition")) {
+            metadata.labelPosition = String.valueOf(displayDef.get("labelposition")).toLowerCase();
+        }
 
         // Extract onClick event handler for buttons - check both camelCase and lowercase
         if (displayDef.containsKey("onClick")) {

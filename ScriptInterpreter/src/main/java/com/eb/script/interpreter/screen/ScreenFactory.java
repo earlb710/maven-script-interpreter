@@ -2202,9 +2202,13 @@ public class ScreenFactory {
                     // Only wrap input controls, not Label or Button which display their own text
                     if (!(control instanceof javafx.scene.control.Label)
                             && !(control instanceof javafx.scene.control.Button)) {
-                        // Use vertical layout for TableView, horizontal for others
-                        boolean useVerticalLayout = (control instanceof javafx.scene.control.TableView);
-                        nodeToAdd = createLabeledControl(metadata.labelText, metadata.labelTextAlignment, control, maxLabelWidth, metadata, useVerticalLayout);
+                        // Determine layout based on labelPosition property, defaulting to "left"
+                        // For TableView default to "top" unless explicitly specified
+                        String labelPos = metadata.labelPosition;
+                        if (labelPos == null || labelPos.isEmpty()) {
+                            labelPos = (control instanceof javafx.scene.control.TableView) ? "top" : "left";
+                        }
+                        nodeToAdd = createLabeledControl(metadata.labelText, metadata.labelTextAlignment, control, maxLabelWidth, metadata, labelPos);
                     }
                 } else {
                     // No label specified - wrap control in HBox with left padding to align with labeled controls
@@ -3196,6 +3200,7 @@ public class ScreenFactory {
         merged.promptHelp = base.promptHelp;
         merged.labelText = base.labelText;
         merged.labelTextAlignment = base.labelTextAlignment;
+        merged.labelPosition = base.labelPosition;
         merged.options = base.options;
         merged.optionsMap = base.optionsMap;
         merged.columns = base.columns;
@@ -3233,6 +3238,7 @@ public class ScreenFactory {
         if (overlay.promptHelp != null) merged.promptHelp = overlay.promptHelp;
         if (overlay.labelText != null) merged.labelText = overlay.labelText;
         if (overlay.labelTextAlignment != null) merged.labelTextAlignment = overlay.labelTextAlignment;
+        if (overlay.labelPosition != null) merged.labelPosition = overlay.labelPosition;
         if (overlay.options != null) merged.options = overlay.options;
         if (overlay.optionsMap != null) merged.optionsMap = overlay.optionsMap;
         if (overlay.columns != null) merged.columns = overlay.columns;
@@ -3481,15 +3487,33 @@ public class ScreenFactory {
      * @param control The control to wrap
      * @param minWidth The minimum width for the label
      * @param metadata DisplayItem metadata containing styling information
-     * @param useVerticalLayout If true, place label above control (VBox); if false, place label beside control (HBox)
+     * @param labelPosition Label position: "left", "right", "top", or "bottom"
      * @return The wrapped control with label
      */
-    private static Node createLabeledControl(String labelText, String alignment, Node control, double minWidth, DisplayItem metadata, boolean useVerticalLayout) {
+    private static Node createLabeledControl(String labelText, String alignment, Node control, double minWidth, DisplayItem metadata, String labelPosition) {
         javafx.scene.control.Label label = new javafx.scene.control.Label(labelText);
 
+        // Determine if vertical or horizontal layout based on position
+        boolean isVertical = "top".equals(labelPosition) || "bottom".equals(labelPosition);
+        
         // Build label style with default styling
-        String defaultAlignment = useVerticalLayout ? "center-left" : "center-right";
-        String defaultPadding = useVerticalLayout ? "0 0 5 0" : "0 10 0 0";  // bottom padding for vertical, right padding for horizontal
+        String defaultAlignment = isVertical ? "center-left" : "center-right";
+        String defaultPadding;
+        switch (labelPosition) {
+            case "top":
+                defaultPadding = "0 0 5 0";  // bottom padding
+                break;
+            case "bottom":
+                defaultPadding = "5 0 0 0";  // top padding
+                break;
+            case "right":
+                defaultPadding = "0 0 0 10"; // left padding
+                break;
+            case "left":
+            default:
+                defaultPadding = "0 10 0 0"; // right padding
+                break;
+        }
         StringBuilder styleBuilder = new StringBuilder("-fx-font-weight: normal; -fx-padding: " + defaultPadding + "; -fx-alignment: " + defaultAlignment + "; -fx-text-fill: #333333;");
 
         // Apply label styling from metadata
@@ -3521,49 +3545,43 @@ public class ScreenFactory {
 
         label.setStyle(styleBuilder.toString());
         
-        if (useVerticalLayout) {
-            // Vertical layout: label on top, control below
+        if (isVertical) {
+            // Vertical layout: label on top or bottom
             label.setMaxWidth(Double.MAX_VALUE);  // Allow label to stretch full width
             javafx.scene.layout.VBox container = new javafx.scene.layout.VBox(0);
             container.setAlignment(javafx.geometry.Pos.TOP_LEFT);
             container.setPickOnBounds(false);
-            container.getChildren().addAll(label, control);
+            
+            if ("bottom".equals(labelPosition)) {
+                container.getChildren().addAll(control, label);
+            } else {
+                // "top" is default for vertical
+                container.getChildren().addAll(label, control);
+            }
             
             // Allow the control (e.g., TableView) to grow vertically within the VBox
             javafx.scene.layout.VBox.setVgrow(control, javafx.scene.layout.Priority.ALWAYS);
             
             return container;
         } else {
-            // Horizontal layout: original behavior
+            // Horizontal layout: label on left or right
             label.setMinWidth(minWidth); // Use calculated minimum width to align labels underneath each other
             label.setMaxWidth(Region.USE_PREF_SIZE);
 
-            // Determine alignment (default to left if not specified)
-            String actualAlignment = (alignment != null) ? alignment.toLowerCase() : "left";
-
-            // Create container based on alignment
+            // Create container
             javafx.scene.layout.HBox container = new javafx.scene.layout.HBox(5);
             container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
             // Make container pick on bounds so tooltips on child controls work properly
             container.setPickOnBounds(false);
 
-            switch (actualAlignment) {
-                case "right":
-                    // Control first, then label on the right
-                    container.getChildren().addAll(control, label);
-                    container.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
-                    break;
-                case "center":
-                    // Center both
-                    container.setAlignment(javafx.geometry.Pos.CENTER);
-                    container.getChildren().addAll(label, control);
-                    break;
-                case "left":
-                default:
-                    // Label first (on the left), then control
-                    container.getChildren().addAll(label, control);
-                    container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-                    break;
+            if ("right".equals(labelPosition)) {
+                // Control first, then label on the right
+                container.getChildren().addAll(control, label);
+                container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+            } else {
+                // "left" is default - Label first (on the left), then control
+                container.getChildren().addAll(label, control);
+                container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
             }
 
             return container;
@@ -3930,6 +3948,7 @@ public class ScreenFactory {
         clone.promptHelp = source.promptHelp;
         clone.labelText = source.labelText;
         clone.labelTextAlignment = source.labelTextAlignment;
+        clone.labelPosition = source.labelPosition;
         clone.labelColor = source.labelColor;
         clone.labelBold = source.labelBold;
         clone.labelItalic = source.labelItalic;

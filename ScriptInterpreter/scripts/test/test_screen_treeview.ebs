@@ -27,6 +27,7 @@ screen fileExplorer = {
             "display": {
                 "type": "treeview",
                 "labelText": "Project Structure:",
+                "labelPosition": "top",
                 "displayRecords": 15,
                 "expandAll": true,
                 "showRoot": true,
