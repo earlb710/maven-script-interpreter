@@ -1835,11 +1835,13 @@ public class ScreenFactory {
         }
 
         // Store bound controls in context if provided
+        // Use lowercase for consistent lookup across the application
+        String lowerScreenName = screenName.toLowerCase();
         if (context != null && !allBoundControls.isEmpty()) {
-            context.getScreenBoundControls().put(screenName, allBoundControls);
+            context.getScreenBoundControls().put(lowerScreenName, allBoundControls);
 
             // Register refresh callback that refreshes all bound controls
-            context.getScreenRefreshCallbacks().put(screenName, () -> {
+            context.getScreenRefreshCallbacks().put(lowerScreenName, () -> {
                 // Use Platform.runLater to ensure UI updates happen on JavaFX Application Thread
                 Platform.runLater(() -> {
                     refreshBoundControls(allBoundControls, screenVars);
