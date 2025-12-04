@@ -11,19 +11,19 @@ print "";
 
 // Function to determine file type based on name
 getFileType(name: string) return string {
-    if call string.endsWith(name, ".java") then {
+    if call str.endsWith(name, ".java") then {
         return "Java Source File";
     };
-    if call string.endsWith(name, ".xml") then {
+    if call str.endsWith(name, ".xml") then {
         return "XML File";
     };
-    if call string.endsWith(name, ".md") then {
+    if call str.endsWith(name, ".md") then {
         return "Markdown File";
     };
-    if call string.endsWith(name, ".properties") then {
+    if call str.endsWith(name, ".properties") then {
         return "Properties File";
     };
-    if call string.endsWith(name, ".txt") then {
+    if call str.endsWith(name, ".txt") then {
         return "Text File";
     };
     if name == ".gitignore" then {
@@ -33,7 +33,7 @@ getFileType(name: string) return string {
         return "License File";
     };
     // Check if it's a folder (no extension and not a special file)
-    if call string.indexOf(name, ".") == -1 then {
+    if call str.indexOf(name, ".") == -1 then {
         return "Folder";
     };
     return "File";
@@ -46,16 +46,16 @@ getFileSize(name: string) return string {
         return "-";
     };
     // Simulate file sizes
-    if call string.endsWith(name, ".java") then {
+    if call str.endsWith(name, ".java") then {
         return "2.4 KB";
     };
-    if call string.endsWith(name, ".xml") then {
+    if call str.endsWith(name, ".xml") then {
         return "1.8 KB";
     };
-    if call string.endsWith(name, ".md") then {
+    if call str.endsWith(name, ".md") then {
         return "3.2 KB";
     };
-    if call string.endsWith(name, ".properties") then {
+    if call str.endsWith(name, ".properties") then {
         return "512 bytes";
     };
     return "1.0 KB";
