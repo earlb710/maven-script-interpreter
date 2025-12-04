@@ -240,8 +240,14 @@ public class EbsMenu extends MenuBar {
             ExportConfigDialog dialog = new ExportConfigDialog(handler.stage);
             dialog.show();
         });
+        
+        MenuItem importConfigItem = new MenuItem("Import Config…");
+        importConfigItem.setOnAction(e -> {
+            ImportConfigDialog dialog = new ImportConfigDialog(handler.stage);
+            dialog.showAndImport();
+        });
 
-        toolsMenu.getItems().addAll(aiSetupItem, safeDirsItem, dbConfigItem, mailConfigItem, ftpConfigItem, colorsItem, new SeparatorMenuItem(), exportConfigItem);
+        toolsMenu.getItems().addAll(aiSetupItem, safeDirsItem, dbConfigItem, mailConfigItem, ftpConfigItem, colorsItem, new SeparatorMenuItem(), exportConfigItem, importConfigItem);
         getMenus().add(toolsMenu);
 
         // --- Tools Menu ---
