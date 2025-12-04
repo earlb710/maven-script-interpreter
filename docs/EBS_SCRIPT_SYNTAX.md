@@ -2707,6 +2707,19 @@ var isOk = call http.is2xx(response);  // Returns boolean
 
 The mail functions allow you to connect to email servers (IMAP/POP3), list emails, and retrieve email content.
 
+#### Mail URL Format
+
+Mail connections can be configured using URL format:
+```
+mail://user:password@host:port?protocol=imaps
+```
+
+**Example URLs:**
+- `mail://user%40gmail.com:apppassword@imap.gmail.com:993?protocol=imaps`
+- `mail://user:password@outlook.office365.com:993?protocol=imaps`
+
+**Note:** Use URL encoding for special characters (e.g., `%40` for `@` in email addresses).
+
 ```javascript
 // Connect to mail server
 var handle = call mail.open(host, port, user, password, protocol);
@@ -2724,7 +2737,7 @@ var email = call mail.get(handle, messageId);
 call mail.close(handle);
 ```
 
-#### mail.open(host, port, user, password, protocol?)
+#### mail.open(host, port, user, password, protocol?, timeout?)
 Connects to a mail server and returns a connection handle for subsequent operations.
 
 **Parameters:**
@@ -2733,19 +2746,23 @@ Connects to a mail server and returns a connection handle for subsequent operati
 - `user` (string, required): Username or email address
 - `password` (string, required): Password or app-specific password (see note below)
 - `protocol` (string, optional): Protocol to use. Default is "imaps". Supported: "imap", "imaps", "pop3", "pop3s"
+- `timeout` (integer, optional): Connection timeout in seconds. Default is 30.
 
 **Returns:** String - a connection handle to use with other mail functions
 
-**Note on Gmail/Google Workspace:** Gmail requires an [App Password](https://support.google.com/accounts/answer/185833) when 2-Factor Authentication is enabled. Regular passwords will not work. Generate an app password from your Google Account security settings.
+**Note on Gmail/Google Workspace:** Gmail requires an [App Password](https://support.google.com/accounts/answer/185833) when 2-Factor Authentication is enabled. Regular passwords will not work. **Important:** Gmail App Passwords are 16 characters with no spaces (displayed as `xxxx xxxx xxxx xxxx` but enter without spaces). Generate one from Google Account > Security > App Passwords.
 
 **Note on SSL:** When using SSL protocols (imaps, pop3s), the implementation trusts all SSL certificates for compatibility. For production environments requiring strict certificate validation, additional configuration may be needed.
 
 ```javascript
-// Connect to Gmail via IMAPS (SSL) - use an app password, not your regular password
-var handle = call mail.open("imap.gmail.com", 993, "myemail@gmail.com", "your-app-password", "imaps");
+// Connect to Gmail via IMAPS (SSL) - use an app password (16 chars, no spaces)
+var handle = call mail.open("imap.gmail.com", 993, "myemail@gmail.com", "xxxxyyyyzzzzwwww", "imaps");
 
 // Connect to a local server without SSL
 var handle2 = call mail.open("localhost", 143, "testuser", "password", "imap");
+
+// Connect with a custom timeout (60 seconds)
+var handle3 = call mail.open("imap.gmail.com", 993, "user@gmail.com", "xxxxyyyyzzzzwwww", "imaps", 60);
 ```
 
 #### mail.folders(handle)
@@ -3539,6 +3556,79 @@ Ctrl+Enter             Execute the script in the editor
   - Variable names: `userName`, `UserName`, and `USERNAME` all refer to the same variable
 - **Screen JSON**: Keys are case-insensitive, normalized to lowercase
 - **String values**: Case-sensitive (string content preserves original case)
+
+### Reserved Keywords in Builtin Functions
+Some words like `open` and `connect` are reserved keywords used for database operations (cursor opening, connection statements). However, these words can also be used as method names in builtin functions when prefixed with their module name.
+
+**Examples of reserved keywords used as builtin method names:**
+```javascript
+// ftp.open - Opens an FTP connection
+var ftpHandle = call ftp.open("ftp.example.com", 21, "user", "pass");
+
+// mail.open - Opens a mail server connection
+var mailHandle = call mail.open("imap.gmail.com", 993, "user", "pass", "imaps");
+
+// file.open - Opens a file for reading/writing
+var fileHandle = call file.open("data.txt", "r");
+```
+
+**Reserved keywords used alone retain their original meaning:**
+```javascript
+// 'open' as a cursor keyword
+cursor myCursor = select * from users;
+open myCursor();
+
+// 'connect' as a database connection keyword
+connect db = "jdbc:oracle:thin:@localhost:1521:xe";
+```
+
+This allows the language to support both database-style syntax (`open cursor`, `connect db`) and modern builtin functions (`ftp.open`, `mail.open`) without conflicts.
+
+### Connection URL Formats
+
+Mail and FTP connections can be configured using URL strings stored in variables.
+
+#### Mail URL Format
+```
+******host:port?protocol=imaps
+```
+
+**Examples:**
+- `******imap.gmail.com:993?protocol=imaps`
+- `******outlook.office365.com:993?protocol=imaps`
+
+#### FTP URL Format
+```
+******host:port     (standard FTP)
+******host:port    (secure FTPS)
+```
+
+**Examples:**
+- `******ftp.example.com:21`
+- `******ftps.example.com:990`
+
+**Note:** URL-encode special characters in usernames and passwords:
+- Use `%40` for `@`
+- Use `%3A` for `:`
+- Use `%2F` for `/`
+
+### Using Config Variables in Scripts
+
+Variables defined in the Config dialogs (Config > Mail Server Config or Config > FTP Server Config) are automatically available as global variables in your scripts. The variable name you specify in the config becomes a script variable containing the connection URL.
+
+**Note:** Config variable names are **case-insensitive**. If you define `MyFtp` in the config, you can access it as `myftp`, `MyFtp`, or `MYFTP` in your scripts.
+
+**Example:**
+If you create a mail config with variable name `MyEmail` and URL `******imap.gmail.com:993?protocol=imaps`, you can use it in a script:
+
+```javascript
+// Config variables are case-insensitive
+print myemail;  // Outputs: ******imap.gmail.com:993?protocol=imaps
+print MyEmail;  // Same result
+
+// FTP config variable example
+print myftp;    // Outputs: ******ftp.example.com:21
+```
 
 ### Type Coercion
 ```javascript

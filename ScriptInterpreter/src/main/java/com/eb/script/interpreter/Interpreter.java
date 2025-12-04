@@ -280,14 +280,69 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                     String connStr = (String) getConnStrMethod.invoke(entryObj);
 
                     // If both variable name and connection string are present, define as global variable
+                    // Convert variable name to lowercase for case-insensitive access
                     if (varName != null && !varName.trim().isEmpty()
                             && connStr != null && !connStr.trim().isEmpty()) {
-                        environment().getEnvironmentValues().define(varName.trim(), connStr);
+                        environment().getEnvironmentValues().define(varName.trim().toLowerCase(), connStr);
                     }
                 }
             } catch (Exception e) {
                 // If we can't load database configs (e.g., class not found in non-UI mode),
                 // just continue without defining database variables
+            }
+
+            // Load mail configurations and define them as global variables
+            try {
+                Class<?> mailDialogClass = Class.forName("com.eb.ui.ebs.MailConfigDialog");
+                java.lang.reflect.Method mailMethod = mailDialogClass.getMethod("getMailConfigEntries");
+                @SuppressWarnings("unchecked")
+                java.util.List<?> mailEntries = (java.util.List<?>) mailMethod.invoke(null);
+
+                for (Object entryObj : mailEntries) {
+                    // Use reflection to get variable name and URL from MailConfigEntry
+                    java.lang.reflect.Method getVarNameMethod = entryObj.getClass().getMethod("getVarName");
+                    java.lang.reflect.Method getUrlMethod = entryObj.getClass().getMethod("getUrl");
+
+                    String varName = (String) getVarNameMethod.invoke(entryObj);
+                    String url = (String) getUrlMethod.invoke(entryObj);
+
+                    // If both variable name and URL are present, define as global variable
+                    // Convert variable name to lowercase for case-insensitive access
+                    if (varName != null && !varName.trim().isEmpty()
+                            && url != null && !url.trim().isEmpty()) {
+                        environment().getEnvironmentValues().define(varName.trim().toLowerCase(), url);
+                    }
+                }
+            } catch (Exception e) {
+                // If we can't load mail configs (e.g., class not found in non-UI mode),
+                // just continue without defining mail variables
+            }
+
+            // Load FTP configurations and define them as global variables
+            try {
+                Class<?> ftpDialogClass = Class.forName("com.eb.ui.ebs.FtpConfigDialog");
+                java.lang.reflect.Method ftpMethod = ftpDialogClass.getMethod("getFtpConfigEntries");
+                @SuppressWarnings("unchecked")
+                java.util.List<?> ftpEntries = (java.util.List<?>) ftpMethod.invoke(null);
+
+                for (Object entryObj : ftpEntries) {
+                    // Use reflection to get variable name and URL from FtpConfigEntry
+                    java.lang.reflect.Method getVarNameMethod = entryObj.getClass().getMethod("getVarName");
+                    java.lang.reflect.Method getUrlMethod = entryObj.getClass().getMethod("getUrl");
+
+                    String varName = (String) getVarNameMethod.invoke(entryObj);
+                    String url = (String) getUrlMethod.invoke(entryObj);
+
+                    // If both variable name and URL are present, define as global variable
+                    // Convert variable name to lowercase for case-insensitive access
+                    if (varName != null && !varName.trim().isEmpty()
+                            && url != null && !url.trim().isEmpty()) {
+                        environment().getEnvironmentValues().define(varName.trim().toLowerCase(), url);
+                    }
+                }
+            } catch (Exception e) {
+                // If we can't load FTP configs (e.g., class not found in non-UI mode),
+                // just continue without defining FTP variables
             }
 
             Builtins.setStackSupplier(() -> new java.util.ArrayList<>(environment().getCallStack()));

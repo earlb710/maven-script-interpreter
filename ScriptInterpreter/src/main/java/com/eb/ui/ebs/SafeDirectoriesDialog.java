@@ -15,6 +15,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
+import java.util.function.BiConsumer;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.GridPane;
@@ -100,16 +101,12 @@ public class SafeDirectoriesDialog extends Stage {
         dirColumn.setMinWidth(400);
         dirColumn.setEditable(false);
         
-        // Name column (editable)
+        // Name column (editable with focus-commit behavior)
         TableColumn<SafeDirectoryEntry, String> nameColumn = new TableColumn<>("Name (Optional)");
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        nameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        nameColumn.setCellFactory(column -> new FocusCommitTextFieldCell<>(SafeDirectoryEntry::setName));
         nameColumn.setMinWidth(200);
         nameColumn.setEditable(true);
-        nameColumn.setOnEditCommit(event -> {
-            SafeDirectoryEntry entry = event.getRowValue();
-            entry.setName(event.getNewValue());
-        });
         
         dirTableView.getColumns().add(dirColumn);
         dirTableView.getColumns().add(nameColumn);
@@ -363,5 +360,80 @@ public class SafeDirectoriesDialog extends Stage {
         }
         
         return entries;
+    }
+    
+    /**
+     * Custom TableCell that commits edits when focus is lost (not just on Enter).
+     * This prevents data loss when clicking on another row without pressing Enter.
+     */
+    private static class FocusCommitTextFieldCell<T> extends TableCell<T, String> {
+        private TextField textField;
+        private final BiConsumer<T, String> setter;
+        
+        public FocusCommitTextFieldCell(BiConsumer<T, String> setter) {
+            this.setter = setter;
+        }
+        
+        @Override
+        public void startEdit() {
+            super.startEdit();
+            if (textField == null) {
+                createTextField();
+            }
+            setText(null);
+            setGraphic(textField);
+            textField.setText(getItem() != null ? getItem() : "");
+            textField.selectAll();
+            textField.requestFocus();
+        }
+        
+        @Override
+        public void cancelEdit() {
+            // Commit the current value instead of canceling
+            if (textField != null) {
+                commitValue(textField.getText());
+            }
+            super.cancelEdit();
+            setText(getItem());
+            setGraphic(null);
+        }
+        
+        @Override
+        public void updateItem(String item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty || item == null) {
+                setText(null);
+                setGraphic(null);
+            } else if (isEditing()) {
+                if (textField != null) {
+                    textField.setText(item);
+                }
+                setText(null);
+                setGraphic(textField);
+            } else {
+                setText(item);
+                setGraphic(null);
+            }
+        }
+        
+        private void createTextField() {
+            textField = new TextField();
+            textField.setOnAction(event -> commitValue(textField.getText()));
+            
+            // Commit on focus loss
+            textField.focusedProperty().addListener((obs, oldVal, newVal) -> {
+                if (!newVal && isEditing()) {
+                    commitValue(textField.getText());
+                }
+            });
+        }
+        
+        private void commitValue(String newValue) {
+            T item = getTableRow() != null ? getTableRow().getItem() : null;
+            if (item != null && setter != null) {
+                setter.accept(item, newValue);
+            }
+            commitEdit(newValue);
+        }
     }
 }

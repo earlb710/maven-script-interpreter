@@ -1,6 +1,6 @@
 # EBS Language Reference
 
-**Documentation Version: 1.0.5.1**
+**Documentation Version: 1.0.5.8**
 
 This document serves as a pointer to the comprehensive EBS (Earl Bosch Script) language documentation.
 
@@ -81,7 +81,7 @@ EBS uses a four-part versioning system: **`language.keyword.builtin.build`**
 
 Each version component is incremented independently based on the type of change made.
 
-**Current Version: 1.0.5.1** (Language v1, Keyword v0, Builtin v5, Build 1)
+**Current Version: 1.0.5.8** (Language v1, Keyword v0, Builtin v5, Build 8)
 
 ### Getting the Language Version Programmatically
 
@@ -116,6 +116,13 @@ For the latest updates and comprehensive language reference, always refer to [do
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.0.5.8 | 2025-12-03 | Added `mail.openUrl` and `ftp.openUrl` functions for URL-based connections; Password now optional in URL (stored separately in config); Added password column with masking in config dialogs |
+| 1.0.5.7 | 2025-12-03 | Config variable names are now case-insensitive (e.g., `MyFtp` can be accessed as `myftp` in scripts) |
+| 1.0.5.6 | 2025-12-03 | Mail and FTP config variables are now automatically available as global script variables (e.g., `print myemail;`) |
+| 1.0.5.5 | 2025-12-03 | Added URL format for mail and FTP connections: `******host:port?protocol=imaps`, `******host:port`, `******host:port`; Config dialogs now store URLs |
+| 1.0.5.4 | 2025-12-03 | Added Mail Server Config and FTP Server Config dialogs under Config menu; Updated help docs for Gmail app password format (16 chars, no spaces) |
+| 1.0.5.3 | 2025-12-03 | Added optional timeout parameter for mail.open, ftp.open, and ftp.openSecure connections |
+| 1.0.5.2 | 2025-12-03 | Allow reserved keywords (`open`, `connect`) to be used as builtin method names (e.g., `ftp.open`, `mail.open`) |
 | 1.0.4.1 | 2025-12-03 | Added plugin system for loading external Java functions (EbsFunction interface) |
 | 1.0.3.1 | 2025-12-01 | Added ai.completeAsync builtin for asynchronous AI calls with callback support |
 | 1.0.2.1 | 2025-11-30 | Added 4th version component (build number); Format now language.keyword.builtin.build |

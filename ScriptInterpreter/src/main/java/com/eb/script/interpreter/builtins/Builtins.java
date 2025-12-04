@@ -1055,7 +1055,8 @@ public final class Builtins {
                 newParam("port", DataType.INTEGER, true),    // required; mail server port
                 newParam("user", DataType.STRING, true),     // required; username
                 newParam("password", DataType.STRING, true), // required; password
-                newParam("protocol", DataType.STRING, false) // optional; imap, imaps (default), pop3, pop3s
+                newParam("protocol", DataType.STRING, false), // optional; imap, imaps (default), pop3, pop3s
+                newParam("timeout", DataType.INTEGER, false) // optional; connection timeout in seconds (default 30)
         ));
         addBuiltin(info(
                 "mail.list", DataType.JSON,  // returns array of message info
@@ -1077,6 +1078,13 @@ public final class Builtins {
                 "mail.folders", DataType.JSON, // returns array of folder info
                 newParam("handle", DataType.STRING, true)    // required; connection handle
         ));
+        addBuiltin(info(
+                "mail.openUrl", DataType.STRING,  // returns connection handle
+                newParam("url", DataType.STRING, true),      // required; mail URL (mail://user@host:port?protocol=imaps)
+                newParam("password", DataType.STRING, false), // optional; password (overrides URL password if provided)
+                newParam("timeout", DataType.INTEGER, false)  // optional; connection timeout in seconds (default 30)
+        ));
+        // ==========================
         // FTP builtins
         // ==========================
         addBuiltin(info(
@@ -1084,7 +1092,8 @@ public final class Builtins {
                 newParam("host", DataType.STRING, true),        // required; FTP server hostname
                 newParam("port", DataType.INTEGER, false),      // optional; port (default 21)
                 newParam("username", DataType.STRING, false),   // optional; username (default "anonymous")
-                newParam("password", DataType.STRING, false)    // optional; password (default "")
+                newParam("password", DataType.STRING, false),   // optional; password (default "")
+                newParam("timeout", DataType.INTEGER, false)    // optional; connection timeout in seconds (default 30)
         ));
         addBuiltin(info(
                 "ftp.openSecure", DataType.STRING,
@@ -1092,7 +1101,14 @@ public final class Builtins {
                 newParam("port", DataType.INTEGER, false),      // optional; port (default 21 for explicit, 990 for implicit)
                 newParam("username", DataType.STRING, false),   // optional; username (default "anonymous")
                 newParam("password", DataType.STRING, false),   // optional; password (default "")
-                newParam("implicit", DataType.BOOL, false)      // optional; use implicit SSL mode (default false = explicit TLS)
+                newParam("implicit", DataType.BOOL, false),     // optional; use implicit SSL mode (default false = explicit TLS)
+                newParam("timeout", DataType.INTEGER, false)    // optional; connection timeout in seconds (default 30)
+        ));
+        addBuiltin(info(
+                "ftp.openUrl", DataType.STRING,  // returns connection handle
+                newParam("url", DataType.STRING, true),         // required; FTP URL (ftp://user@host:port or ftps://...)
+                newParam("password", DataType.STRING, false),   // optional; password (overrides URL password if provided)
+                newParam("timeout", DataType.INTEGER, false)    // optional; connection timeout in seconds (default 30)
         ));
         addBuiltin(info(
                 "ftp.disconnect", DataType.BOOL,
@@ -1251,6 +1267,7 @@ public final class Builtins {
         if (BuiltinsMail.handles(name)) {
             return BuiltinsMail.dispatch(env, name, args);
         }
+        
         // FTP builtins
         if (BuiltinsFtp.handles(name)) {
             return BuiltinsFtp.dispatch(env, name, args);

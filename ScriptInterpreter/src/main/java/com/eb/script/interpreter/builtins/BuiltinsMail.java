@@ -91,6 +91,7 @@ public class BuiltinsMail {
     public static Object dispatch(Environment env, String name, Object[] args) throws InterpreterError {
         return switch (name) {
             case "mail.open" -> open(args);
+            case "mail.openurl" -> openUrl(args);
             case "mail.list" -> list(args);
             case "mail.get" -> get(args);
             case "mail.close" -> close(args);
@@ -109,12 +110,13 @@ public class BuiltinsMail {
     // --- Individual builtin implementations ---
 
     /**
-     * mail.open(host, port, user, password, protocol?) -> STRING (handle)
+     * mail.open(host, port, user, password, protocol?, timeout?) -> STRING (handle)
      *
      * Opens a connection to a mail server and returns a handle for subsequent operations.
      *
      * @param args [0] host (String), [1] port (Integer), [2] user (String),
      *             [3] password (String), [4] protocol (String, optional: "imap", "imaps", "pop3", "pop3s")
+     *             [5] timeout (Integer, optional: timeout in seconds, default 30)
      * @return String handle to identify this connection
      * @throws InterpreterError if connection fails
      */
@@ -128,6 +130,7 @@ public class BuiltinsMail {
         String user = (String) args[2];
         String password = (String) args[3];
         String protocol = args.length > 4 && args[4] != null ? (String) args[4] : "imaps";
+        int timeout = args.length > 5 && args[5] != null ? ((Number) args[5]).intValue() : 30;
 
         if (host == null || host.isBlank()) {
             throw new InterpreterError("mail.open: host cannot be empty");
@@ -141,9 +144,13 @@ public class BuiltinsMail {
         if (password == null) {
             throw new InterpreterError("mail.open: password cannot be null");
         }
+        if (timeout < 1) {
+            throw new InterpreterError("mail.open: timeout must be at least 1 second");
+        }
 
         int port = portNum.intValue();
         protocol = protocol.toLowerCase();
+        int timeoutMs = timeout * 1000; // Convert to milliseconds
 
         // Validate protocol
         if (!protocol.equals("imap") && !protocol.equals("imaps") &&
@@ -172,9 +179,9 @@ public class BuiltinsMail {
                 props.put("mail." + protocol + ".ssl.trust", "*");
             }
 
-            // Timeout settings (30 seconds)
-            props.put("mail." + protocol + ".connectiontimeout", "30000");
-            props.put("mail." + protocol + ".timeout", "30000");
+            // Timeout settings (user-configurable)
+            props.put("mail." + protocol + ".connectiontimeout", String.valueOf(timeoutMs));
+            props.put("mail." + protocol + ".timeout", String.valueOf(timeoutMs));
 
             Session session = Session.getInstance(props);
             Store store = session.getStore(protocol);
@@ -189,6 +196,78 @@ public class BuiltinsMail {
         } catch (MessagingException ex) {
             throw new InterpreterError("mail.open: " + ex.getMessage());
         }
+    }
+
+    /**
+     * mail.openUrl(url, password?, timeout?) -> STRING (handle)
+     *
+     * Opens a connection to a mail server using a URL and returns a handle for subsequent operations.
+     * URL Format: mail://user[:password]@host:port?protocol=imaps
+     * Password can be omitted from URL and provided as separate parameter (for security).
+     *
+     * @param args [0] url (String), [1] password (String, optional: overrides URL password),
+     *             [2] timeout (Integer, optional: timeout in seconds, default 30)
+     * @return String handle to identify this connection
+     * @throws InterpreterError if connection fails
+     */
+    private static String openUrl(Object[] args) throws InterpreterError {
+        if (args.length < 1) {
+            throw new InterpreterError("mail.openUrl: requires url parameter");
+        }
+
+        String url = (String) args[0];
+        String passwordOverride = args.length > 1 && args[1] != null ? (String) args[1] : null;
+        int timeout = args.length > 2 && args[2] != null ? ((Number) args[2]).intValue() : 30;
+
+        if (url == null || url.isBlank()) {
+            throw new InterpreterError("mail.openUrl: url cannot be empty");
+        }
+
+        // Parse the URL using MailConfigDialog's parser
+        java.util.Map<String, String> parsed;
+        try {
+            Class<?> dialogClass = Class.forName("com.eb.ui.ebs.MailConfigDialog");
+            java.lang.reflect.Method parseMethod = dialogClass.getMethod("parseMailUrl", String.class);
+            @SuppressWarnings("unchecked")
+            java.util.Map<String, String> result = (java.util.Map<String, String>) parseMethod.invoke(null, url);
+            parsed = result;
+        } catch (Exception e) {
+            throw new InterpreterError("mail.openUrl: failed to parse URL: " + e.getMessage());
+        }
+
+        if (parsed.isEmpty()) {
+            throw new InterpreterError("mail.openUrl: invalid mail URL format. Expected: mail://user[:password]@host:port?protocol=imaps");
+        }
+
+        String host = parsed.get("host");
+        String portStr = parsed.get("port");
+        String user = parsed.get("user");
+        String password = passwordOverride != null ? passwordOverride : parsed.get("password");
+        String protocol = parsed.get("protocol");
+
+        if (host == null || host.isBlank()) {
+            throw new InterpreterError("mail.openUrl: host cannot be empty");
+        }
+        if (portStr == null || portStr.isBlank()) {
+            throw new InterpreterError("mail.openUrl: port cannot be empty");
+        }
+        if (user == null || user.isBlank()) {
+            throw new InterpreterError("mail.openUrl: user cannot be empty");
+        }
+        if (password == null || password.isBlank()) {
+            throw new InterpreterError("mail.openUrl: password is required (either in URL or as parameter)");
+        }
+
+        int port;
+        try {
+            port = Integer.parseInt(portStr);
+        } catch (NumberFormatException e) {
+            throw new InterpreterError("mail.openUrl: invalid port number: " + portStr);
+        }
+
+        // Call the existing open function with parsed parameters
+        Object[] openArgs = new Object[]{host, port, user, password, protocol, timeout};
+        return open(openArgs);
     }
 
     /**
