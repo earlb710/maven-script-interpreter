@@ -2610,11 +2610,13 @@ public class InterpreterScreen {
                 varItemsMap.put(varKey, var);
 
                 // Store in screen's thread-safe variable map (legacy support)
-                screenVarMap.put(varName, value);
+                // Use lowercase key for case-insensitive variable lookup
+                screenVarMap.put(varName.toLowerCase(), value);
 
                 // Store the variable type if specified (legacy support)
+                // Use lowercase key for case-insensitive variable lookup
                 if (varType != null) {
-                    screenVarTypeMap.put(varName, varType);
+                    screenVarTypeMap.put(varName.toLowerCase(), varType);
                 }
             }
         }
