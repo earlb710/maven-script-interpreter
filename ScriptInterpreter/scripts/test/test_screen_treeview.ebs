@@ -9,6 +9,58 @@ print "This test demonstrates displaying hierarchical data in a tree view";
 print "with expandable/collapsible nodes and dynamic icons.";
 print "";
 
+// Function to determine file type based on name
+getFileType(name: string) return string {
+    if (call string.endsWith(name, ".java")) then {
+        return "Java Source File";
+    };
+    if (call string.endsWith(name, ".xml")) then {
+        return "XML File";
+    };
+    if (call string.endsWith(name, ".md")) then {
+        return "Markdown File";
+    };
+    if (call string.endsWith(name, ".properties")) then {
+        return "Properties File";
+    };
+    if (call string.endsWith(name, ".txt")) then {
+        return "Text File";
+    };
+    if (name == ".gitignore") then {
+        return "Git Ignore File";
+    };
+    if (name == "LICENSE") then {
+        return "License File";
+    };
+    // Check if it's a folder (no extension and not a special file)
+    if (call string.indexOf(name, ".") == -1) then {
+        return "Folder";
+    };
+    return "File";
+};
+
+// Function to get simulated file size
+getFileSize(name: string) return string {
+    var fileType: string = call getFileType(name);
+    if (fileType == "Folder") then {
+        return "-";
+    };
+    // Simulate file sizes
+    if (call string.endsWith(name, ".java")) then {
+        return "2.4 KB";
+    };
+    if (call string.endsWith(name, ".xml")) then {
+        return "1.8 KB";
+    };
+    if (call string.endsWith(name, ".md")) then {
+        return "3.2 KB";
+    };
+    if (call string.endsWith(name, ".properties")) then {
+        return "512 bytes";
+    };
+    return "1.0 KB";
+};
+
 // Create a screen with a TreeView to display file/folder hierarchy
 // Icons can be specified as:
 // - "icon": single icon for all states
@@ -66,6 +118,7 @@ screen fileExplorer = {
                     "items": [
                         {
                             "name": "fileTree",
+                            "varRef": "selectedFile",
                             "seq": 1,
                             "display": {
                                 "type": "treeview",
@@ -74,6 +127,7 @@ screen fileExplorer = {
                                 "displayRecords": 18,
                                 "expandAll": true,
                                 "showRoot": true,
+                                "onChange": "set fileExplorer.fileName = fileExplorer.selectedFile; set fileExplorer.fileType = call getFileType(fileExplorer.selectedFile); set fileExplorer.fileSize = call getFileSize(fileExplorer.selectedFile); set fileExplorer.filePath = '/project/' + fileExplorer.selectedFile; set fileExplorer.lastModified = '2025-12-04 10:30';",
                                 "treeItems": [
                                     {
                                         "value": "Project Root",
@@ -243,6 +297,8 @@ print "- 'icon': Static icon for the node (same for all states)";
 print "- 'iconOpen': Icon shown when node is expanded";
 print "- 'iconClosed': Icon shown when node is collapsed";
 print "";
+print "onChange: When selecting an item, the file details panel updates";
+print "";
 
 // Show the screen
 print "Displaying file explorer screen with TreeView...";
@@ -254,6 +310,6 @@ print "The screen displays a hierarchical file structure in a TreeView.";
 print "- Nodes can be expanded/collapsed by clicking the arrow icons";
 print "- Folder icons change based on expanded/collapsed state";
 print "- File icons remain static";
-print "- File details panel on the right shows selected item info";
+print "- File details panel on the right updates when selecting items";
 print "- showRoot: true shows the root node";
 print "- expandAll: true expands all nodes by default";
