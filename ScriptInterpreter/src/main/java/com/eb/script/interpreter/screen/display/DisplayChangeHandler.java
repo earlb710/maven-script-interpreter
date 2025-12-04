@@ -1,6 +1,7 @@
 package com.eb.script.interpreter.screen.display;
 
 import com.eb.script.interpreter.InterpreterContext;
+import com.eb.script.interpreter.screen.ScreenFactory;
 import com.eb.script.interpreter.screen.ScreenFactory.OnClickHandler;
 import javafx.scene.Node;
 
@@ -31,9 +32,21 @@ public class DisplayChangeHandler {
             return;
         }
         
+        // Get item name from control properties (set during control creation)
+        String itemName = (String) control.getProperties().get("itemName");
+        if (itemName == null) {
+            itemName = control.getId() != null ? control.getId() : "unknown";
+        }
+        
+        final String finalItemName = itemName;
+        
         // Create a change handler that executes the code
         Runnable changeHandler = () -> {
             try {
+                // Increment event count for debugging
+                int count = ScreenFactory.incrementEventCount(screenName, finalItemName, "onChange");
+                System.out.println("[DEBUG] onChange fired: " + screenName + "." + finalItemName + " (count: " + count + ")");
+                
                 // Execute the onChange code
                 onClickHandler.execute(changeCode);
             } catch (Exception e) {

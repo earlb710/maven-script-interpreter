@@ -114,6 +114,47 @@ public class ScreenFactory {
     
     // Map to store original window widths before debug panel expansion (screenName -> originalWidth)
     private static final java.util.concurrent.ConcurrentHashMap<String, Double> screenOriginalWidths = new java.util.concurrent.ConcurrentHashMap<>();
+    
+    // Map to store event counts per item.eventType (e.g., "fileTree.onChange" -> count)
+    private static final java.util.concurrent.ConcurrentHashMap<String, java.util.concurrent.atomic.AtomicInteger> eventCounts = new java.util.concurrent.ConcurrentHashMap<>();
+    
+    /**
+     * Increment and return the event count for a specific item.eventType combination.
+     * Used for debugging to track how many times each event fires.
+     * 
+     * @param screenName The screen name
+     * @param itemName The item name (e.g., "fileTree")
+     * @param eventType The event type (e.g., "onChange", "onClick")
+     * @return The new count after incrementing
+     */
+    public static int incrementEventCount(String screenName, String itemName, String eventType) {
+        String key = (screenName + "." + itemName + "." + eventType).toLowerCase();
+        return eventCounts.computeIfAbsent(key, k -> new java.util.concurrent.atomic.AtomicInteger(0)).incrementAndGet();
+    }
+    
+    /**
+     * Get the current event count for a specific item.eventType combination.
+     * 
+     * @param screenName The screen name
+     * @param itemName The item name
+     * @param eventType The event type
+     * @return The current count (0 if never fired)
+     */
+    public static int getEventCount(String screenName, String itemName, String eventType) {
+        String key = (screenName + "." + itemName + "." + eventType).toLowerCase();
+        java.util.concurrent.atomic.AtomicInteger count = eventCounts.get(key);
+        return count != null ? count.get() : 0;
+    }
+    
+    /**
+     * Reset all event counts for a screen (called when screen is closed).
+     * 
+     * @param screenName The screen name
+     */
+    public static void resetEventCounts(String screenName) {
+        String prefix = (screenName + ".").toLowerCase();
+        eventCounts.keySet().removeIf(key -> key.startsWith(prefix));
+    }
 
     static {
         try {
@@ -632,31 +673,31 @@ public class ScreenFactory {
         // Screen-level callbacks
         String callback = context.getScreenCallback(screenName);
         if (callback != null) {
-            addEventHandlerRow(handlersSection, "Screen", "callback", callback);
+            addEventHandlerRow(handlersSection, screenName, "Screen", "callback", callback);
             hasHandlers = true;
         }
         
         String startupCode = context.getScreenStartupCode(screenName);
         if (startupCode != null) {
-            addEventHandlerRow(handlersSection, "Screen", "onStartup", startupCode);
+            addEventHandlerRow(handlersSection, screenName, "Screen", "onStartup", startupCode);
             hasHandlers = true;
         }
         
         String cleanupCode = context.getScreenCleanupCode(screenName);
         if (cleanupCode != null) {
-            addEventHandlerRow(handlersSection, "Screen", "onCleanup", cleanupCode);
+            addEventHandlerRow(handlersSection, screenName, "Screen", "onCleanup", cleanupCode);
             hasHandlers = true;
         }
         
         String gainFocusCode = context.getScreenGainFocusCode(screenName);
         if (gainFocusCode != null) {
-            addEventHandlerRow(handlersSection, "Screen", "onGainFocus", gainFocusCode);
+            addEventHandlerRow(handlersSection, screenName, "Screen", "onGainFocus", gainFocusCode);
             hasHandlers = true;
         }
         
         String lostFocusCode = context.getScreenLostFocusCode(screenName);
         if (lostFocusCode != null) {
-            addEventHandlerRow(handlersSection, "Screen", "onLostFocus", lostFocusCode);
+            addEventHandlerRow(handlersSection, screenName, "Screen", "onLostFocus", lostFocusCode);
             hasHandlers = true;
         }
         
@@ -668,26 +709,26 @@ public class ScreenFactory {
                 
                 // Check item-level handlers
                 if (item.onValidate != null) {
-                    addEventHandlerRow(handlersSection, itemName, "onValidate", item.onValidate);
+                    addEventHandlerRow(handlersSection, screenName, itemName, "onValidate", item.onValidate);
                     hasHandlers = true;
                 }
                 if (item.onChange != null) {
-                    addEventHandlerRow(handlersSection, itemName, "onChange", item.onChange);
+                    addEventHandlerRow(handlersSection, screenName, itemName, "onChange", item.onChange);
                     hasHandlers = true;
                 }
                 
                 // Check displayItem handlers
                 if (item.displayItem != null) {
                     if (item.displayItem.onClick != null) {
-                        addEventHandlerRow(handlersSection, itemName, "onClick", item.displayItem.onClick);
+                        addEventHandlerRow(handlersSection, screenName, itemName, "onClick", item.displayItem.onClick);
                         hasHandlers = true;
                     }
                     if (item.displayItem.onValidate != null && item.onValidate == null) {
-                        addEventHandlerRow(handlersSection, itemName, "onValidate", item.displayItem.onValidate);
+                        addEventHandlerRow(handlersSection, screenName, itemName, "onValidate", item.displayItem.onValidate);
                         hasHandlers = true;
                     }
                     if (item.displayItem.onChange != null && item.onChange == null) {
-                        addEventHandlerRow(handlersSection, itemName, "onChange", item.displayItem.onChange);
+                        addEventHandlerRow(handlersSection, screenName, itemName, "onChange", item.displayItem.onChange);
                         hasHandlers = true;
                     }
                 }
@@ -708,11 +749,12 @@ public class ScreenFactory {
      * Clicking on the row copies the handler details (including full code) to clipboard.
      * 
      * @param section The VBox to add the row to
+     * @param screenName The screen name for event counting
      * @param itemName The name of the item (e.g., "Screen", "button1")
      * @param eventType The event type (e.g., "onClick", "onValidate")
      * @param fullCode The full handler code (for clipboard)
      */
-    private static void addEventHandlerRow(VBox section, String itemName, String eventType, String fullCode) {
+    private static void addEventHandlerRow(VBox section, String screenName, String itemName, String eventType, String fullCode) {
         HBox row = new HBox(3);
         row.setAlignment(Pos.CENTER_LEFT);
         row.setPadding(new Insets(2, 5, 2, 5));
@@ -728,9 +770,13 @@ public class ScreenFactory {
         nameLabel.setMinWidth(DEBUG_ITEM_NAME_MIN_WIDTH);
         nameLabel.setMaxWidth(DEBUG_ITEM_NAME_MAX_WIDTH);
         
-        // Event type with truncated code preview
+        // Get event count for debugging
+        int eventCount = getEventCount(screenName, itemName, eventType);
+        String countText = eventCount > 0 ? " [" + eventCount + "]" : "";
+        
+        // Event type with truncated code preview and count
         String truncatedCode = truncateCode(fullCode);
-        javafx.scene.control.Label typeLabel = new javafx.scene.control.Label("." + eventType + ": " + truncatedCode);
+        javafx.scene.control.Label typeLabel = new javafx.scene.control.Label("." + eventType + countText + ": " + truncatedCode);
         typeLabel.setStyle("-fx-text-fill: #006666;");
         
         row.getChildren().addAll(iconLabel, nameLabel, typeLabel);
@@ -2268,6 +2314,11 @@ public class ScreenFactory {
                 }
                 if (onClickHandler != null && validateCode != null && !validateCode.isEmpty()) {
                     setupValidationHandler(control, validateCode, onClickHandler, screenName, context);
+                }
+                
+                // Store item name on control for event debugging
+                if (item.name != null) {
+                    control.getProperties().put("itemName", item.name);
                 }
                 
                 // Set up onChange handler for input controls
