@@ -54,34 +54,15 @@ public class DisplayChangeHandler {
                 int count = ScreenFactory.incrementEventCount(screenName, finalItemName, "onChange");
                 System.out.println("[DEBUG] onChange fired: " + screenName + "." + finalItemName + " (count: " + count + ")");
                 
-                // Debug: show screenVars before execution
-                if (screenVars != null) {
-                    System.out.println("[DEBUG] screenVars before onChange:");
-                    for (java.util.Map.Entry<String, Object> entry : screenVars.entrySet()) {
-                        System.out.println("[DEBUG]   " + entry.getKey() + " = " + entry.getValue());
-                    }
-                }
-                
                 // Execute the onChange code
-                System.out.println("[DEBUG] Executing onChange code: " + changeCode);
                 onClickHandler.execute(changeCode);
-                System.out.println("[DEBUG] onChange code executed successfully");
-                
-                // Debug: show screenVars after execution
-                if (screenVars != null) {
-                    System.out.println("[DEBUG] screenVars after onChange:");
-                    for (java.util.Map.Entry<String, Object> entry : screenVars.entrySet()) {
-                        System.out.println("[DEBUG]   " + entry.getKey() + " = " + entry.getValue());
-                    }
-                }
                 
                 // After executing the onChange code, refresh all bound controls to update UI
                 if (boundControls != null && screenVars != null) {
-                    System.out.println("[DEBUG] Refreshing " + boundControls.size() + " bound controls");
                     DataBindingManager.refreshBoundControls(boundControls, screenVars);
                 }
             } catch (Exception e) {
-                System.err.println("[DEBUG] Error executing onChange code: " + e.getMessage());
+                System.err.println("Error executing onChange code: " + e.getMessage());
                 e.printStackTrace();
             }
         };

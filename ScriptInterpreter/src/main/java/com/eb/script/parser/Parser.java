@@ -439,6 +439,10 @@ public class Parser {
             return printStatement();
         } else if (match(EbsTokenType.COMMENT)) {
             return null;
+        } else if (match(EbsTokenType.SET)) {
+            // 'set' keyword is optional syntactic sugar for screen variable assignment
+            // Just consume it and parse the assignment statement
+            return assignmentStatement();
         }
         return assignmentStatement();
     }
