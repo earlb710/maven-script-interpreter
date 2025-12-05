@@ -829,6 +829,7 @@ public class Parser {
         // Parse the type definition (similar to varDeclaration logic)
         DataType elemType = null;
         RecordType recordType = null;
+        BitmapType bitmapType = null;
         boolean isArray = false;
         Integer arraySize = null;
         Expression arrayInit = null;
@@ -922,6 +923,18 @@ public class Parser {
                     recordType = parseRecordFields();
                     consume(EbsTokenType.RBRACE, "Expected '}' after record field definitions.");
                 }
+            } else if (typeToken.type == EbsTokenType.BITMAP || 
+                      (typeToken.literal instanceof String && "bitmap".equals(((String)typeToken.literal).toLowerCase()))) {
+                // Standalone bitmap type
+                elemType = DataType.BITMAP;
+                advance(); // consume 'bitmap'
+                
+                // Parse bitmap fields
+                if (check(EbsTokenType.LBRACE)) {
+                    advance(); // consume '{'
+                    bitmapType = parseBitmapFields();
+                    consume(EbsTokenType.RBRACE, "Expected '}' after bitmap field definitions.");
+                }
             } else {
                 // Simple type
                 if (typeToken.type.getDataType() != null) {
@@ -941,6 +954,7 @@ public class Parser {
             (String) typeName.literal,
             elemType,
             recordType,
+            bitmapType,
             isArray,
             arraySize
         );
@@ -949,6 +963,8 @@ public class Parser {
         // Create TypedefStatement
         if (isArray) {
             return new TypedefStatement(typeName.line, (String) typeName.literal, elemType, recordType, arraySize);
+        } else if (bitmapType != null) {
+            return new TypedefStatement(typeName.line, (String) typeName.literal, bitmapType);
         } else if (recordType != null) {
             return new TypedefStatement(typeName.line, (String) typeName.literal, recordType);
         } else {
@@ -2223,6 +2239,18 @@ public class Parser {
         } else if (match(EbsTokenType.IDENTIFIER)) {
             EbsToken p = previous();
             String varName = (String) p.literal;
+            
+            // Check if this is a type alias being used for casting (e.g., myBitmapType(byteVar))
+            if (check(EbsTokenType.LPAREN) && !varName.contains(".")) {
+                TypeRegistry.TypeAlias alias = TypeRegistry.getTypeAlias(varName);
+                if (alias != null && alias.bitmapType != null) {
+                    // This is a bitmap type alias cast
+                    consume(EbsTokenType.LPAREN, "Expected '(' after type name for cast.");
+                    Expression valueExpr = expression();
+                    consume(EbsTokenType.RPAREN, "Expected ')' after cast expression.");
+                    return new CastExpression(p.line, DataType.BITMAP, alias.bitmapType, valueExpr);
+                }
+            }
             
             // The lexer may have combined dot-separated identifiers into one token
             // (e.g., "customer.address.city" as a single IDENTIFIER token)

@@ -1,6 +1,7 @@
 package com.eb.script.interpreter.statement;
 
 import com.eb.script.interpreter.InterpreterError;
+import com.eb.script.token.BitmapType;
 import com.eb.script.token.DataType;
 import com.eb.script.token.RecordType;
 
@@ -16,6 +17,7 @@ public class TypedefStatement extends Statement {
     public final String typeName;
     public final DataType dataType;
     public final RecordType recordType;
+    public final BitmapType bitmapType;
     public final boolean isArray;
     public final Integer arraySize; // null for dynamic arrays
     
@@ -30,6 +32,7 @@ public class TypedefStatement extends Statement {
         this.typeName = typeName;
         this.dataType = dataType;
         this.recordType = null;
+        this.bitmapType = null;
         this.isArray = false;
         this.arraySize = null;
     }
@@ -45,6 +48,23 @@ public class TypedefStatement extends Statement {
         this.typeName = typeName;
         this.dataType = DataType.RECORD;
         this.recordType = recordType;
+        this.bitmapType = null;
+        this.isArray = false;
+        this.arraySize = null;
+    }
+    
+    /**
+     * Create a typedef statement for a bitmap type
+     * @param line Line number
+     * @param typeName Name of the type alias
+     * @param bitmapType The bitmap type definition
+     */
+    public TypedefStatement(int line, String typeName, BitmapType bitmapType) {
+        super(line);
+        this.typeName = typeName;
+        this.dataType = DataType.BITMAP;
+        this.recordType = null;
+        this.bitmapType = bitmapType;
         this.isArray = false;
         this.arraySize = null;
     }
@@ -62,6 +82,7 @@ public class TypedefStatement extends Statement {
         this.typeName = typeName;
         this.dataType = dataType;
         this.recordType = recordType;
+        this.bitmapType = null;
         this.isArray = true;
         this.arraySize = arraySize;
     }
@@ -79,6 +100,8 @@ public class TypedefStatement extends Statement {
             sb.append("array.");
             if (recordType != null) {
                 sb.append(recordType.toString());
+            } else if (bitmapType != null) {
+                sb.append(bitmapType.toString());
             } else {
                 sb.append(dataType);
             }
@@ -89,6 +112,8 @@ public class TypedefStatement extends Statement {
             }
         } else if (recordType != null) {
             sb.append(recordType.toString());
+        } else if (bitmapType != null) {
+            sb.append(bitmapType.toString());
         } else {
             sb.append(dataType);
         }

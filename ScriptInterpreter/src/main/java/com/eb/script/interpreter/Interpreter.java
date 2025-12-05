@@ -378,6 +378,13 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         environment().pushCallStack(stmt.getLine(), StatementKind.STATEMENT, stmtType + " %1", stmt.name);  // name may be null
         try {
             Object value = evaluate(stmt.initializer);
+            
+            // Check if we just performed a bitmap cast and should store the inferred BitmapType
+            BitmapType inferredBitmapType = context.getLastInferredBitmapType();
+            if (inferredBitmapType != null) {
+                // Clear it immediately to prevent leaking to other variables
+                context.clearLastInferredBitmapType();
+            }
 
             if (stmt.varType != null) {
                 DataType expectedType = stmt.varType;
@@ -418,12 +425,15 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 }
             }
             
+            // Use inferred bitmap type from cast if no explicit bitmap type is specified
+            BitmapType bitmapTypeToUse = stmt.bitmapType != null ? stmt.bitmapType : inferredBitmapType;
+            
             // Store the bitmap type metadata with the variable if it's a bitmap
-            if (stmt.bitmapType != null) {
+            if (bitmapTypeToUse != null) {
                 if (stmt.isConst) {
-                    environment().getEnvironmentValues().defineConstWithBitmapType(stmt.name, value, stmt.bitmapType);
+                    environment().getEnvironmentValues().defineConstWithBitmapType(stmt.name, value, bitmapTypeToUse);
                 } else {
-                    environment().getEnvironmentValues().defineWithBitmapType(stmt.name, value, stmt.bitmapType);
+                    environment().getEnvironmentValues().defineWithBitmapType(stmt.name, value, bitmapTypeToUse);
                 }
             // Store the record type metadata with the variable if it's a record
             // Also mark as const if this is a const declaration
@@ -1939,6 +1949,17 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     public Object visitCastExpression(com.eb.script.interpreter.expression.CastExpression expr) throws InterpreterError {
         // Evaluate the value to be cast
         Object value = evaluate(expr.value);
+        
+        // Special handling for BITMAP casting (requires byte value and bitmapType definition)
+        if (expr.targetType == DataType.BITMAP && expr.bitmapType != null) {
+            // Convert the value to a byte
+            byte byteValue = BitmapType.toByteValue(value);
+            
+            // Store the bitmap type metadata so property access works
+            context.setLastInferredBitmapType(expr.bitmapType);
+            
+            return byteValue;
+        }
         
         // Special handling for RECORD and MAP casting (both require JSON objects)
         if (expr.targetType == DataType.RECORD || expr.targetType == DataType.MAP) {

@@ -1,11 +1,12 @@
 package com.eb.script.interpreter.expression;
 
+import com.eb.script.token.BitmapType;
 import com.eb.script.token.DataType;
 import com.eb.script.interpreter.InterpreterError;
 
 /**
  * Represents a type casting expression: type(value)
- * Examples: int(x), string(y), float(z)
+ * Examples: int(x), string(y), float(z), bitmapTypeAlias(byteVar)
  * 
  * @author Earl Bosch
  */
@@ -13,11 +14,17 @@ public class CastExpression extends Expression {
 
     public final int line;
     public final DataType targetType;
+    public final BitmapType bitmapType;  // For bitmap casting with field definitions
     public final Expression value;
 
     public CastExpression(int line, DataType targetType, Expression value) {
+        this(line, targetType, null, value);
+    }
+    
+    public CastExpression(int line, DataType targetType, BitmapType bitmapType, Expression value) {
         this.line = line;
         this.targetType = targetType;
+        this.bitmapType = bitmapType;
         this.value = value;
     }
 
@@ -28,6 +35,9 @@ public class CastExpression extends Expression {
 
     @Override
     public String toString() {
+        if (bitmapType != null) {
+            return bitmapType + "(" + value + ")";
+        }
         return targetType + "(" + value + ")";
     }
 
