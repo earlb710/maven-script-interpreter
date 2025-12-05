@@ -11,7 +11,8 @@
 //
 // Features:
 //   - Console display with Unicode chess symbols
-//   - Graphical screen with timer display
+//   - Graphical JavaFX GridPane chess board with SVG piece images
+//   - Timer display for both players
 //   - New Game button to reset the board
 //
 // Usage:
@@ -33,7 +34,7 @@ var KING: int = 6;
 var WHITE: int = 0;
 var BLACK: int = 1;
 
-// Chess piece Unicode symbols
+// Chess piece Unicode symbols (for console display)
 var whitePieces: string[7];
 whitePieces[0] = "";        // Empty
 whitePieces[1] = "\u2659";  // White Pawn
@@ -52,6 +53,16 @@ blackPieces[4] = "\u265D";  // Black Bishop
 blackPieces[5] = "\u265B";  // Black Queen
 blackPieces[6] = "\u265A";  // Black King
 
+// Chess piece names for image paths
+var pieceNames: string[7];
+pieceNames[0] = "";
+pieceNames[1] = "pawn";
+pieceNames[2] = "rook";
+pieceNames[3] = "knight";
+pieceNames[4] = "bishop";
+pieceNames[5] = "queen";
+pieceNames[6] = "king";
+
 // Create the chess board using array.bitmap for bitmap-encoded cell data (8x8 = 64 elements)
 var board: array.bitmap[64];
 
@@ -59,6 +70,10 @@ var board: array.bitmap[64];
 var timerWhite: int = 600;
 var timerBlack: int = 600;
 var currentPlayer: int = 0;
+
+// Board colors
+var lightSquare: string = "#F0D9B5";
+var darkSquare: string = "#B58863";
 
 // Helper functions
 boardIndex(row: int, col: int) return int {
@@ -211,48 +226,6 @@ printBoard() {
     print "";
 }
 
-// Generate board display for screen textarea
-// Note: Using dummy parameter to work around parser bug with parameter-less return functions
-generateBoardDisplay(dummy: int) return string {
-    var result: string = "";
-    
-    result = result + "      a    b    c    d    e    f    g    h\n";
-    result = result + "   +----+----+----+----+----+----+----+----+\n";
-    
-    var row: int = 0;
-    var idx: int = 0;
-    for (row = 0; row < 8; row++) {
-        var rowLabel: int = 8 - row;
-        result = result + " " + rowLabel + " |";
-        
-        var col: int = 0;
-        for (col = 0; col < 8; col++) {
-            idx = call boardIndex(row, col);
-            var cellValue: int = board[idx];
-            var piece: string = call getPieceSymbol(cellValue);
-            
-            if piece == "" then {
-                var cell = ChessCell(cellValue);
-                var cellColor: int = cell.cellColor;
-                if cellColor == 0 then {
-                    result = result + "    |";
-                } else {
-                    result = result + " .. |";
-                }
-            } else {
-                result = result + " " + piece + "  |";
-            }
-        }
-        
-        result = result + " " + rowLabel + "\n";
-        result = result + "   +----+----+----+----+----+----+----+----+\n";
-    }
-    
-    result = result + "      a    b    c    d    e    f    g    h";
-    
-    return result;
-}
-
 // Reset game function - must be defined before screen that references it
 resetGame() {
     call initializeBoard();
@@ -263,14 +236,13 @@ resetGame() {
     chessScreen.whiteTimer = call formatTimer(timerWhite);
     chessScreen.blackTimer = call formatTimer(timerBlack);
     chessScreen.statusMessage = "White to move - Game Reset!";
-    chessScreen.boardDisplay = call generateBoardDisplay(0);
 }
 
-// Define the chess screen with timer and board
+// Define the chess screen with timer and 8x8 grid board
 screen chessScreen = {
     "title": "Chess Game",
-    "width": 700,
-    "height": 750,
+    "width": 600,
+    "height": 700,
     "vars": [
         {
             "name": "whiteTimer",
@@ -286,11 +258,6 @@ screen chessScreen = {
             "name": "statusMessage",
             "type": "string",
             "default": "White to move"
-        },
-        {
-            "name": "boardDisplay",
-            "type": "string",
-            "default": ""
         }
     ],
     "area": [
@@ -370,22 +337,90 @@ screen chessScreen = {
                     ]
                 },
                 {
-                    "name": "boardArea",
+                    "name": "boardContainer",
                     "type": "vbox",
                     "spacing": "0",
-                    "padding": "20",
-                    "style": "-fx-background-color: #1a1a1a; -fx-background-radius: 8;",
-                    "items": [
+                    "padding": "10",
+                    "style": "-fx-background-color: #654321; -fx-background-radius: 5;",
+                    "areas": [
                         {
-                            "name": "boardDisplayField",
-                            "varRef": "boardDisplay",
-                            "display": {
-                                "type": "textarea",
-                                "height": 20,
-                                "itemFontSize": "16px",
-                                "itemColor": "#ffffff",
-                                "style": "-fx-font-family: monospace; -fx-background-color: #1a1a1a; -fx-control-inner-background: #1a1a1a;"
-                            }
+                            "name": "chessBoard",
+                            "type": "gridpane",
+                            "spacing": "0",
+                            "style": "-fx-hgap: 0; -fx-vgap: 0; -fx-padding: 2;",
+                            "items": [
+                                {"name": "cell00", "layoutPos": "0,0", "display": {"type": "label", "labelText": "\u265C", "labelFontSize": "40px", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell01", "layoutPos": "0,1", "display": {"type": "label", "labelText": "\u265E", "labelFontSize": "40px", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell02", "layoutPos": "0,2", "display": {"type": "label", "labelText": "\u265D", "labelFontSize": "40px", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell03", "layoutPos": "0,3", "display": {"type": "label", "labelText": "\u265B", "labelFontSize": "40px", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell04", "layoutPos": "0,4", "display": {"type": "label", "labelText": "\u265A", "labelFontSize": "40px", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell05", "layoutPos": "0,5", "display": {"type": "label", "labelText": "\u265D", "labelFontSize": "40px", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell06", "layoutPos": "0,6", "display": {"type": "label", "labelText": "\u265E", "labelFontSize": "40px", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell07", "layoutPos": "0,7", "display": {"type": "label", "labelText": "\u265C", "labelFontSize": "40px", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                
+                                {"name": "cell10", "layoutPos": "1,0", "display": {"type": "label", "labelText": "\u265F", "labelFontSize": "40px", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell11", "layoutPos": "1,1", "display": {"type": "label", "labelText": "\u265F", "labelFontSize": "40px", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell12", "layoutPos": "1,2", "display": {"type": "label", "labelText": "\u265F", "labelFontSize": "40px", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell13", "layoutPos": "1,3", "display": {"type": "label", "labelText": "\u265F", "labelFontSize": "40px", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell14", "layoutPos": "1,4", "display": {"type": "label", "labelText": "\u265F", "labelFontSize": "40px", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell15", "layoutPos": "1,5", "display": {"type": "label", "labelText": "\u265F", "labelFontSize": "40px", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell16", "layoutPos": "1,6", "display": {"type": "label", "labelText": "\u265F", "labelFontSize": "40px", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell17", "layoutPos": "1,7", "display": {"type": "label", "labelText": "\u265F", "labelFontSize": "40px", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                
+                                {"name": "cell20", "layoutPos": "2,0", "display": {"type": "label", "labelText": "", "labelFontSize": "40px", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell21", "layoutPos": "2,1", "display": {"type": "label", "labelText": "", "labelFontSize": "40px", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell22", "layoutPos": "2,2", "display": {"type": "label", "labelText": "", "labelFontSize": "40px", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell23", "layoutPos": "2,3", "display": {"type": "label", "labelText": "", "labelFontSize": "40px", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell24", "layoutPos": "2,4", "display": {"type": "label", "labelText": "", "labelFontSize": "40px", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell25", "layoutPos": "2,5", "display": {"type": "label", "labelText": "", "labelFontSize": "40px", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell26", "layoutPos": "2,6", "display": {"type": "label", "labelText": "", "labelFontSize": "40px", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell27", "layoutPos": "2,7", "display": {"type": "label", "labelText": "", "labelFontSize": "40px", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                
+                                {"name": "cell30", "layoutPos": "3,0", "display": {"type": "label", "labelText": "", "labelFontSize": "40px", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell31", "layoutPos": "3,1", "display": {"type": "label", "labelText": "", "labelFontSize": "40px", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell32", "layoutPos": "3,2", "display": {"type": "label", "labelText": "", "labelFontSize": "40px", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell33", "layoutPos": "3,3", "display": {"type": "label", "labelText": "", "labelFontSize": "40px", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell34", "layoutPos": "3,4", "display": {"type": "label", "labelText": "", "labelFontSize": "40px", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell35", "layoutPos": "3,5", "display": {"type": "label", "labelText": "", "labelFontSize": "40px", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell36", "layoutPos": "3,6", "display": {"type": "label", "labelText": "", "labelFontSize": "40px", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell37", "layoutPos": "3,7", "display": {"type": "label", "labelText": "", "labelFontSize": "40px", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                
+                                {"name": "cell40", "layoutPos": "4,0", "display": {"type": "label", "labelText": "", "labelFontSize": "40px", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell41", "layoutPos": "4,1", "display": {"type": "label", "labelText": "", "labelFontSize": "40px", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell42", "layoutPos": "4,2", "display": {"type": "label", "labelText": "", "labelFontSize": "40px", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell43", "layoutPos": "4,3", "display": {"type": "label", "labelText": "", "labelFontSize": "40px", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell44", "layoutPos": "4,4", "display": {"type": "label", "labelText": "", "labelFontSize": "40px", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell45", "layoutPos": "4,5", "display": {"type": "label", "labelText": "", "labelFontSize": "40px", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell46", "layoutPos": "4,6", "display": {"type": "label", "labelText": "", "labelFontSize": "40px", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell47", "layoutPos": "4,7", "display": {"type": "label", "labelText": "", "labelFontSize": "40px", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                
+                                {"name": "cell50", "layoutPos": "5,0", "display": {"type": "label", "labelText": "", "labelFontSize": "40px", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell51", "layoutPos": "5,1", "display": {"type": "label", "labelText": "", "labelFontSize": "40px", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell52", "layoutPos": "5,2", "display": {"type": "label", "labelText": "", "labelFontSize": "40px", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell53", "layoutPos": "5,3", "display": {"type": "label", "labelText": "", "labelFontSize": "40px", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell54", "layoutPos": "5,4", "display": {"type": "label", "labelText": "", "labelFontSize": "40px", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell55", "layoutPos": "5,5", "display": {"type": "label", "labelText": "", "labelFontSize": "40px", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell56", "layoutPos": "5,6", "display": {"type": "label", "labelText": "", "labelFontSize": "40px", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell57", "layoutPos": "5,7", "display": {"type": "label", "labelText": "", "labelFontSize": "40px", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                
+                                {"name": "cell60", "layoutPos": "6,0", "display": {"type": "label", "labelText": "\u2659", "labelFontSize": "40px", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell61", "layoutPos": "6,1", "display": {"type": "label", "labelText": "\u2659", "labelFontSize": "40px", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell62", "layoutPos": "6,2", "display": {"type": "label", "labelText": "\u2659", "labelFontSize": "40px", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell63", "layoutPos": "6,3", "display": {"type": "label", "labelText": "\u2659", "labelFontSize": "40px", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell64", "layoutPos": "6,4", "display": {"type": "label", "labelText": "\u2659", "labelFontSize": "40px", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell65", "layoutPos": "6,5", "display": {"type": "label", "labelText": "\u2659", "labelFontSize": "40px", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell66", "layoutPos": "6,6", "display": {"type": "label", "labelText": "\u2659", "labelFontSize": "40px", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell67", "layoutPos": "6,7", "display": {"type": "label", "labelText": "\u2659", "labelFontSize": "40px", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                
+                                {"name": "cell70", "layoutPos": "7,0", "display": {"type": "label", "labelText": "\u2656", "labelFontSize": "40px", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell71", "layoutPos": "7,1", "display": {"type": "label", "labelText": "\u2658", "labelFontSize": "40px", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell72", "layoutPos": "7,2", "display": {"type": "label", "labelText": "\u2657", "labelFontSize": "40px", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell73", "layoutPos": "7,3", "display": {"type": "label", "labelText": "\u2655", "labelFontSize": "40px", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell74", "layoutPos": "7,4", "display": {"type": "label", "labelText": "\u2654", "labelFontSize": "40px", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell75", "layoutPos": "7,5", "display": {"type": "label", "labelText": "\u2657", "labelFontSize": "40px", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell76", "layoutPos": "7,6", "display": {"type": "label", "labelText": "\u2658", "labelFontSize": "40px", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell77", "layoutPos": "7,7", "display": {"type": "label", "labelText": "\u2656", "labelFontSize": "40px", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center;"}}
+                            ]
                         }
                     ]
                 },
@@ -466,13 +501,12 @@ sampleCell = ChessCell(board[idx74]);
 print "  [7,4] White King: raw=" + board[idx74] + ", cellColor=" + sampleCell.cellColor + ", pieceType=" + sampleCell.pieceType + ", pieceColor=" + sampleCell.pieceColor;
 
 print "";
-print "Opening chess screen with graphical display...";
+print "Opening chess screen with graphical grid display...";
 
 // Update screen variables before showing
 chessScreen.whiteTimer = call formatTimer(timerWhite);
 chessScreen.blackTimer = call formatTimer(timerBlack);
 chessScreen.statusMessage = "White to move";
-chessScreen.boardDisplay = call generateBoardDisplay(0);
 
 // Show the chess screen
 show screen chessScreen;
