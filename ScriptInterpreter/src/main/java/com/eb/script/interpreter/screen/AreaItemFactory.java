@@ -277,7 +277,22 @@ public class AreaItemFactory {
 
             // Media/Display Controls
             case IMAGEVIEW:
-                return new ImageView();
+                ImageView imageView = new ImageView();
+                // Apply image display properties from metadata
+                if (metadata != null) {
+                    // Set fit dimensions
+                    if (metadata.fitWidth != null && metadata.fitWidth > 0) {
+                        imageView.setFitWidth(metadata.fitWidth);
+                    }
+                    if (metadata.fitHeight != null && metadata.fitHeight > 0) {
+                        imageView.setFitHeight(metadata.fitHeight);
+                    }
+                    // Set preserve ratio (default true)
+                    imageView.setPreserveRatio(metadata.preserveRatio == null || metadata.preserveRatio);
+                    // Set smooth scaling (default true)
+                    imageView.setSmooth(metadata.smooth == null || metadata.smooth);
+                }
+                return imageView;
             case MEDIAVIEW:
                 // MediaView requires javafx-media module which is not included
                 // Return a label placeholder instead

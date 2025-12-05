@@ -373,7 +373,9 @@ public class InterpreterContext {
      * @param screenName the name of the screen to refresh
      */
     public void triggerScreenRefresh(String screenName) {
-        Runnable callback = screenRefreshCallbacks.get(screenName);
+        // Use lowercase for consistent lookup since callbacks are stored with lowercase keys
+        String lowerScreenName = screenName.toLowerCase();
+        Runnable callback = screenRefreshCallbacks.get(lowerScreenName);
         if (callback != null) {
             callback.run();
         }

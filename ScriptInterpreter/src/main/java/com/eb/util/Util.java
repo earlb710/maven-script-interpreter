@@ -14,6 +14,7 @@ import com.eb.script.arrays.ArrayDef;
 import com.eb.script.arrays.ArrayDynamic;
 import com.eb.script.arrays.ArrayFixed;
 import com.eb.script.arrays.ArrayFixedByte;
+import com.eb.script.image.EbsImage;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -84,6 +85,8 @@ public class Util {
                     array.getDataType() == DataType.RECORD;
                 case MAP ->
                     array.getDataType() == DataType.MAP;
+                case IMAGE ->
+                    array.getDataType() == DataType.IMAGE;
                 case JSON ->
                     true;
                 case ANY ->
@@ -113,6 +116,8 @@ public class Util {
                     value instanceof Map;
                 case QUEUE ->
                     value instanceof com.eb.script.arrays.QueueDef;
+                case IMAGE ->
+                    value instanceof EbsImage;
                 case ANY ->
                     true;
                 default ->

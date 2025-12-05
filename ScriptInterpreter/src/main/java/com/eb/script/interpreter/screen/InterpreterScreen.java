@@ -1471,6 +1471,8 @@ public class InterpreterScreen {
                 return DataType.JSON;
             case "record":
                 return DataType.RECORD;
+            case "image":
+                return DataType.IMAGE;
             default:
                 return null;
         }
@@ -2610,11 +2612,16 @@ public class InterpreterScreen {
                 varItemsMap.put(varKey, var);
 
                 // Store in screen's thread-safe variable map (legacy support)
-                screenVarMap.put(varName, value);
+                // Note: ConcurrentHashMap does not allow null values, so skip null values
+                // Use lowercase for case-insensitive variable name lookup
+                if (value != null) {
+                    screenVarMap.put(varName.toLowerCase(), value);
+                }
 
                 // Store the variable type if specified (legacy support)
+                // Use lowercase for case-insensitive variable name lookup
                 if (varType != null) {
-                    screenVarTypeMap.put(varName, varType);
+                    screenVarTypeMap.put(varName.toLowerCase(), varType);
                 }
             }
         }
