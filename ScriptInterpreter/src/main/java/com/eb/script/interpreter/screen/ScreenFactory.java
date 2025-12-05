@@ -293,6 +293,31 @@ public class ScreenFactory {
             changedItems.remove(screenName.toLowerCase());
         }
     }
+    
+    /**
+     * Refresh the debug panel items table for a screen if it's currently open.
+     * This updates the items table to show the current state of items.
+     * 
+     * @param screenName The screen name
+     * @param context The interpreter context
+     */
+    public static void refreshDebugPanelIfOpen(String screenName, InterpreterContext context) {
+        if (screenName == null || context == null) {
+            return;
+        }
+        String lowerScreenName = screenName.toLowerCase();
+        
+        // Check if this screen has a debug panel items table
+        @SuppressWarnings("unchecked")
+        javafx.scene.control.TableView<String[]> itemsTable = 
+            (javafx.scene.control.TableView<String[]>) debugItemsTables.get(lowerScreenName);
+        
+        if (itemsTable != null) {
+            // Just refresh the table to update the display
+            // This will cause the cell factory to re-evaluate which items are changed
+            itemsTable.refresh();
+        }
+    }
 
     static {
         try {

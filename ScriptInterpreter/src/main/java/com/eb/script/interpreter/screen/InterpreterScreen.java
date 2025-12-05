@@ -341,9 +341,10 @@ public class InterpreterScreen {
                 // If no explicit areas defined but variables with display metadata exist,
                 // create a default area with items for all displayed variables
                 java.util.List<String> varsWithDisplay = new java.util.ArrayList<>();
+                String lowerScreenName = stmt.name.toLowerCase();
                 for (String key : context.getDisplayItem().keySet()) {
-                    if (key.startsWith(stmt.name + ".")) {
-                        String varName = key.substring(stmt.name.length() + 1);
+                    if (key.startsWith(lowerScreenName + ".")) {
+                        String varName = key.substring(lowerScreenName.length() + 1);
                         varsWithDisplay.add(varName);
                     }
                 }
@@ -359,8 +360,8 @@ public class InterpreterScreen {
                     // Sort variables by their seq field if present
                     List<String> sortedVarsWithDisplay = new ArrayList<>(varsWithDisplay);
                     sortedVarsWithDisplay.sort((v1, v2) -> {
-                        DisplayItem d1 = context.getDisplayItem().get(stmt.name + "." + v1);
-                        DisplayItem d2 = context.getDisplayItem().get(stmt.name + "." + v2);
+                        DisplayItem d1 = context.getDisplayItem().get(buildDisplayItemKey(stmt.name, v1));
+                        DisplayItem d2 = context.getDisplayItem().get(buildDisplayItemKey(stmt.name, v2));
                         Integer seq1 = (d1 != null && d1.seq != null) ? d1.seq : Integer.MAX_VALUE;
                         Integer seq2 = (d2 != null && d2.seq != null) ? d2.seq : Integer.MAX_VALUE;
                         return seq1.compareTo(seq2);
@@ -368,7 +369,7 @@ public class InterpreterScreen {
 
                     for (String varName : sortedVarsWithDisplay) {
                         // Get the display metadata for this variable
-                        DisplayItem varDisplayItem = context.getDisplayItem().get(stmt.name + "." + varName);
+                        DisplayItem varDisplayItem = context.getDisplayItem().get(buildDisplayItemKey(stmt.name, varName));
                         
                         // Get the variable type to determine numeric vs string
                         DataType varType = screenVarTypeMap.get(varName);
@@ -953,18 +954,23 @@ public class InterpreterScreen {
             };
             
             // Task to mark screen as "shown" - changes from now on will be tracked as modifications
-            // This is scheduled via Platform.runLater to ensure it runs AFTER any pending UI updates
-            // (e.g., from scr.setItemChoiceOptions which uses Platform.runLater)
+            // This uses a chained Platform.runLater approach: the first runLater queues a second one,
+            // ensuring the clear happens AFTER all previously queued tasks (like setItemChoiceOptions) complete.
             Runnable markShownTask = () -> {
                 context.getScreensNotYetShown().remove(finalScreenKey);
-                // Clear any items that were incorrectly marked as changed during initialization
-                ScreenFactory.clearChangedItems(finalScreenKey);
+                // Use a second runLater to ensure we run AFTER any pending UI updates
+                // (e.g., from scr.setItemChoiceOptions which uses Platform.runLater)
+                Platform.runLater(() -> {
+                    // Clear any items that were incorrectly marked as changed during initialization
+                    ScreenFactory.clearChangedItems(finalScreenKey);
+                    // Also refresh the debug panel if it's open to show the correct state
+                    ScreenFactory.refreshDebugPanelIfOpen(finalScreenKey, context);
+                });
             };
             
             if (Platform.isFxApplicationThread()) {
                 showTask.run();
                 // Queue the "mark shown" task to run after any pending Platform.runLater tasks
-                // This ensures setItemChoiceOptions and similar calls complete before items are marked as "changed"
                 Platform.runLater(markShownTask);
             } else {
                 // Queue both tasks - they will execute in order after any previously queued tasks
@@ -1513,13 +1519,25 @@ public class InterpreterScreen {
     }
 
     /**
+     * Build a key for looking up display metadata.
+     * Uses lowercase for case-insensitive lookups.
+     * 
+     * @param screenName The screen name
+     * @param varName The variable name
+     * @return The composite key in format "screenname.varname" (lowercase)
+     */
+    private static String buildDisplayItemKey(String screenName, String varName) {
+        return screenName.toLowerCase() + "." + varName.toLowerCase();
+    }
+    
+    /**
      * Helper method to store display metadata for a variable
      */
     private void storeDisplayItem(String varName, Map<String, Object> displayDef, String screenName) {
         DisplayItem metadata = parseDisplayItem(displayDef, screenName);
 
-        // Store the metadata using a composite key: screenName.varName
-        String key = screenName + "." + varName;
+        // Store the metadata using the standard key format
+        String key = buildDisplayItemKey(screenName, varName);
         context.getDisplayItem().put(key, metadata);
     }
 
