@@ -1,6 +1,8 @@
 package com.eb.script.interpreter.screen.display;
 
+import com.eb.script.interpreter.InterpreterContext;
 import com.eb.script.interpreter.screen.DisplayItem;
+import com.eb.script.interpreter.screen.ScreenStatus;
 import com.eb.script.interpreter.screen.data.VarRefResolver;
 import com.eb.script.token.DataType;
 import javafx.scene.Node;
@@ -19,6 +21,29 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Earl Bosch
  */
 public class ControlListenerFactory {
+
+    /**
+     * Marks the screen as changed when a control's value is modified.
+     * This is called from all control listeners to update the screen status.
+     * 
+     * @param control The control that was modified
+     */
+    private static void markScreenChanged(Node control) {
+        if (control == null) {
+            return;
+        }
+        Object contextObj = control.getProperties().get("interpreterContext");
+        Object screenNameObj = control.getProperties().get("screenName");
+        
+        if (contextObj instanceof InterpreterContext && screenNameObj instanceof String) {
+            InterpreterContext context = (InterpreterContext) contextObj;
+            String screenName = (String) screenNameObj;
+            // Only change status if currently CLEAN (don't downgrade from ERROR)
+            if (context.getScreenStatus(screenName) == ScreenStatus.CLEAN) {
+                context.setScreenStatus(screenName, ScreenStatus.CHANGED);
+            }
+        }
+    }
 
     /**
      * Sets up two-way variable binding for a control.
@@ -74,6 +99,7 @@ public class ControlListenerFactory {
                 Slider slider = (Slider) hbox.getChildren().get(0);
                 slider.valueProperty().addListener((obs, oldVal, newVal) -> {
                     VarRefResolver.setVarRefValue(varName, newVal.intValue(), screenVars);
+                    markScreenChanged(control);
                 });
                 return;
             }
@@ -86,10 +112,12 @@ public class ControlListenerFactory {
         } else if (control instanceof CheckBox) {
             ((CheckBox) control).selectedProperty().addListener((obs, oldVal, newVal) -> {
                 VarRefResolver.setVarRefValue(varName, newVal, screenVars);
+                markScreenChanged(control);
             });
         } else if (control instanceof Slider) {
             ((Slider) control).valueProperty().addListener((obs, oldVal, newVal) -> {
                 VarRefResolver.setVarRefValue(varName, newVal.intValue(), screenVars);
+                markScreenChanged(control);
             });
         } else if (control instanceof Spinner) {
             addSpinnerListener(control, varName, screenVars);
@@ -102,6 +130,7 @@ public class ControlListenerFactory {
         } else if (control instanceof DatePicker) {
             ((DatePicker) control).valueProperty().addListener((obs, oldVal, newVal) -> {
                 VarRefResolver.setVarRefValue(varName, newVal, screenVars);
+                markScreenChanged(control);
             });
         } else if (control instanceof TreeView) {
             @SuppressWarnings("unchecked")
@@ -109,6 +138,7 @@ public class ControlListenerFactory {
             treeView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
                 if (newVal != null) {
                     VarRefResolver.setVarRefValue(varName, newVal.getValue(), screenVars);
+                    markScreenChanged(control);
                 }
             });
         }
@@ -156,6 +186,7 @@ public class ControlListenerFactory {
                 }
             }
             VarRefResolver.setVarRefValue(varName, convertedValue, screenVars);
+            markScreenChanged(textField);
         });
     }
     
@@ -189,6 +220,7 @@ public class ControlListenerFactory {
             }
             
             VarRefResolver.setVarRefValue(varName, transformedValue, screenVars);
+            markScreenChanged(textArea);
         });
     }
     
@@ -204,6 +236,7 @@ public class ControlListenerFactory {
             spinner.valueProperty().addListener((obs, oldVal, newVal) -> {
                 if (newVal != null) {
                     VarRefResolver.setVarRefValue(varName, newVal, screenVars);
+                    markScreenChanged(control);
                 }
             });
         }
@@ -235,6 +268,7 @@ public class ControlListenerFactory {
             }
             
             VarRefResolver.setVarRefValue(varName, valueToStore, screenVars);
+            markScreenChanged(control);
         });
     }
     
@@ -264,6 +298,7 @@ public class ControlListenerFactory {
             }
             
             VarRefResolver.setVarRefValue(varName, valueToStore, screenVars);
+            markScreenChanged(control);
         });
     }
     
@@ -284,6 +319,7 @@ public class ControlListenerFactory {
                 // ColorPicker set to null - use empty string as placeholder since ConcurrentHashMap doesn't allow null
                 VarRefResolver.setVarRefValue(varName, "", screenVars);
             }
+            markScreenChanged(colorPicker);
         });
     }
     

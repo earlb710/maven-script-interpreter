@@ -2598,6 +2598,9 @@ public class ScreenFactory {
                 // Set up two-way data binding if screenVars is provided and item has a varRef
                 if (screenVars != null && item.varRef != null) {
                     setupVariableBinding(control, item.varRef, screenVars, varTypes, metadata);
+                    // Store context and screenName for screen status updates when control values change
+                    control.getProperties().put("interpreterContext", context);
+                    control.getProperties().put("screenName", screenName);
                     // Track this control so we can refresh it when variables change
                     boundControls.add(control);
                 }
