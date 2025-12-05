@@ -134,6 +134,13 @@ public class ScreenFactory {
     // Map to store debug panel status labels for real-time status updates (screenName -> label)
     private static final java.util.concurrent.ConcurrentHashMap<String, javafx.scene.control.Label> debugStatusLabels = new java.util.concurrent.ConcurrentHashMap<>();
     
+    // Map to store changed item varNames per screen for real-time debug panel updates
+    // Key format: "screenName" -> Set of changed varNames
+    private static final java.util.concurrent.ConcurrentHashMap<String, java.util.Set<String>> changedItems = new java.util.concurrent.ConcurrentHashMap<>();
+    
+    // Map to store debug panel items TableView for each screen (screenName -> TableView)
+    private static final java.util.concurrent.ConcurrentHashMap<String, javafx.scene.control.TableView<String[]>> debugItemsTables = new java.util.concurrent.ConcurrentHashMap<>();
+    
     /**
      * Increment and return the event count for a specific item.eventType combination.
      * Used for debugging to track how many times each event fires.
@@ -200,8 +207,10 @@ public class ScreenFactory {
         eventCounts.keySet().removeIf(key -> key.startsWith(prefix));
         // Also clean up event count labels
         eventCountLabels.keySet().removeIf(key -> key.startsWith(prefix));
-        // Clean up debug status label for this screen
+        // Clean up debug status label and changed items tracking for this screen
         debugStatusLabels.remove(screenName.toLowerCase());
+        changedItems.remove(screenName.toLowerCase());
+        debugItemsTables.remove(screenName.toLowerCase());
     }
     
     /**
@@ -229,6 +238,59 @@ public class ScreenFactory {
                 statusLabel.setText(statusText);
                 statusLabel.setStyle("-fx-text-fill: " + color + "; -fx-font-size: 11px;");
             });
+        }
+    }
+    
+    /**
+     * Marks an item as changed and updates the debug panel items table in real-time.
+     * This is called when a control with varRef is modified.
+     * 
+     * @param screenName The screen name
+     * @param varName The varRef/variable name of the changed item
+     */
+    public static void markItemChanged(String screenName, String varName) {
+        if (screenName == null || varName == null) {
+            return;
+        }
+        
+        String key = screenName.toLowerCase();
+        
+        // Track the changed item
+        changedItems.computeIfAbsent(key, k -> java.util.concurrent.ConcurrentHashMap.newKeySet()).add(varName);
+        
+        // Refresh the items table if visible
+        javafx.scene.control.TableView<String[]> itemsTable = debugItemsTables.get(key);
+        if (itemsTable != null) {
+            // Update on JavaFX thread
+            javafx.application.Platform.runLater(() -> {
+                itemsTable.refresh();
+            });
+        }
+    }
+    
+    /**
+     * Checks if an item has been changed in the debug panel.
+     * 
+     * @param screenName The screen name
+     * @param varName The varRef/variable name to check
+     * @return true if the item has been changed
+     */
+    public static boolean isItemChanged(String screenName, String varName) {
+        if (screenName == null || varName == null) {
+            return false;
+        }
+        java.util.Set<String> items = changedItems.get(screenName.toLowerCase());
+        return items != null && items.contains(varName);
+    }
+    
+    /**
+     * Clears all changed item markers for a screen.
+     * 
+     * @param screenName The screen name
+     */
+    public static void clearChangedItems(String screenName) {
+        if (screenName != null) {
+            changedItems.remove(screenName.toLowerCase());
         }
     }
 
@@ -419,9 +481,11 @@ public class ScreenFactory {
             // Also clear BorderPane.setRight() in case we used the fallback approach
             rootPane.setRight(null);
             
-            // Remove the debug panel reference and status label
+            // Remove the debug panel reference, status label, and changed items tracking
             screenDebugPanels.remove(screenName.toLowerCase());
             debugStatusLabels.remove(screenName.toLowerCase());
+            changedItems.remove(screenName.toLowerCase());
+            debugItemsTables.remove(screenName.toLowerCase());
             
             // Restore the original window width
             if (stage != null) {
@@ -586,15 +650,45 @@ public class ScreenFactory {
         
         if (screenAreaItems != null && !screenAreaItems.isEmpty()) {
             // Create TableView for screen items
+            // Each row is [displayName, value, varRef] - varRef is used to check if item is changed
             javafx.scene.control.TableView<String[]> itemsTable = new javafx.scene.control.TableView<>();
             itemsTable.setColumnResizePolicy(javafx.scene.control.TableView.CONSTRAINED_RESIZE_POLICY);
             itemsTable.setStyle("-fx-background-color: transparent;");
             
-            // Name column (50%)
+            // Store reference for real-time updates
+            debugItemsTables.put(screenName.toLowerCase(), itemsTable);
+            
+            // Name column (50%) - shows changed indicator if item was modified
             javafx.scene.control.TableColumn<String[], String> itemNameCol = new javafx.scene.control.TableColumn<>("Item");
             itemNameCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue()[0]));
-            itemNameCol.setStyle("-fx-alignment: CENTER-LEFT; -fx-font-weight: bold;");
+            itemNameCol.setStyle("-fx-alignment: CENTER-LEFT;");
             itemNameCol.prefWidthProperty().bind(itemsTable.widthProperty().multiply(0.5));
+            
+            // Custom cell factory to show changed indicator
+            final String finalScreenName = screenName;
+            itemNameCol.setCellFactory(col -> new javafx.scene.control.TableCell<String[], String>() {
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setText(null);
+                        setStyle("-fx-alignment: CENTER-LEFT;");
+                    } else {
+                        // Get the varRef from the row data (index 2)
+                        String[] rowData = getTableView().getItems().get(getIndex());
+                        String varRef = rowData.length > 2 ? rowData[2] : null;
+                        
+                        // Check if this item has been changed
+                        if (varRef != null && isItemChanged(finalScreenName, varRef)) {
+                            setText("⚠️ " + item);
+                            setStyle("-fx-alignment: CENTER-LEFT; -fx-font-weight: bold; -fx-text-fill: #cc6600;");
+                        } else {
+                            setText(item);
+                            setStyle("-fx-alignment: CENTER-LEFT; -fx-font-weight: bold;");
+                        }
+                    }
+                }
+            });
             
             // Value column (50%)
             javafx.scene.control.TableColumn<String[], String> itemValueCol = new javafx.scene.control.TableColumn<>("Value");
@@ -605,7 +699,7 @@ public class ScreenFactory {
             itemsTable.getColumns().add(itemNameCol);
             itemsTable.getColumns().add(itemValueCol);
             
-            // Populate data
+            // Populate data - include varRef as third element for change tracking
             java.util.List<String> sortedItemKeys = new java.util.ArrayList<>(screenAreaItems.keySet());
             java.util.Collections.sort(sortedItemKeys, String.CASE_INSENSITIVE_ORDER);
             
@@ -613,7 +707,8 @@ public class ScreenFactory {
                 AreaItem item = screenAreaItems.get(key);
                 String displayName = item.name != null ? item.name : key;
                 String valueStr = getScreenItemValue(key, item, context, screenName);
-                itemsTable.getItems().add(new String[]{displayName, valueStr});
+                String varRef = item.varRef != null ? item.varRef : "";
+                itemsTable.getItems().add(new String[]{displayName, valueStr, varRef});
             }
             
             // Allow table to expand to fill available space
@@ -1871,6 +1966,8 @@ public class ScreenFactory {
             screenRootPanes.remove(key);
             screenOriginalWidths.remove(key);
             debugStatusLabels.remove(key);
+            changedItems.remove(key);
+            debugItemsTables.remove(key);
         }
     }
     
@@ -1883,6 +1980,8 @@ public class ScreenFactory {
         screenRootPanes.clear();
         screenOriginalWidths.clear();
         debugStatusLabels.clear();
+        changedItems.clear();
+        debugItemsTables.clear();
     }
     
     /**

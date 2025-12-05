@@ -45,15 +45,23 @@ public class ControlListenerFactory {
         }
         Object contextObj = control.getProperties().get(PROP_INTERPRETER_CONTEXT);
         Object screenNameObj = control.getProperties().get(PROP_SCREEN_NAME);
+        Object varNameObj = control.getProperties().get("varName");
         
         if (contextObj instanceof InterpreterContext && screenNameObj instanceof String) {
             InterpreterContext context = (InterpreterContext) contextObj;
             String screenName = (String) screenNameObj;
+            String varName = varNameObj instanceof String ? (String) varNameObj : null;
+            
             // Only change status if currently CLEAN (don't downgrade from ERROR)
             if (context.getScreenStatus(screenName) == ScreenStatus.CLEAN) {
                 context.setScreenStatus(screenName, ScreenStatus.CHANGED);
                 // Update the debug panel status label in real-time
                 ScreenFactory.updateDebugStatusLabel(screenName, ScreenStatus.CHANGED);
+            }
+            
+            // Mark the specific item as changed in the debug panel
+            if (varName != null) {
+                ScreenFactory.markItemChanged(screenName, varName);
             }
         }
     }
