@@ -930,8 +930,6 @@ public class InterpreterScreen {
             Runnable showTask = () -> {
                 if (!stage.isShowing()) {
                     stage.show();
-                    // Mark screen as "shown" - changes from now on will be tracked as modifications
-                    context.getScreensNotYetShown().remove(finalScreenKey);
                     if (context.getOutput() != null) {
                         context.getOutput().printlnOk("Screen '" + finalScreenKey + "' shown");
                     }
@@ -954,10 +952,24 @@ public class InterpreterScreen {
                 }
             };
             
+            // Task to mark screen as "shown" - changes from now on will be tracked as modifications
+            // This is scheduled via Platform.runLater to ensure it runs AFTER any pending UI updates
+            // (e.g., from scr.setItemChoiceOptions which uses Platform.runLater)
+            Runnable markShownTask = () -> {
+                context.getScreensNotYetShown().remove(finalScreenKey);
+            };
+            
             if (Platform.isFxApplicationThread()) {
                 showTask.run();
+                // Queue the "mark shown" task to run after any pending Platform.runLater tasks
+                // This ensures setItemChoiceOptions and similar calls complete before items are marked as "changed"
+                Platform.runLater(markShownTask);
             } else {
-                Platform.runLater(showTask);
+                Platform.runLater(() -> {
+                    showTask.run();
+                    // Queue the "mark shown" task to run after any tasks that were queued before this one
+                    Platform.runLater(markShownTask);
+                });
             }
 
         } catch (InterpreterError ex) {
