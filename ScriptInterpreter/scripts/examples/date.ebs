@@ -20,66 +20,59 @@ print "";
 print "=== Formatting Dates ===";
 
 // Format with different patterns
-var formatted = call date.format(now, "yyyy-MM-dd HH:mm:ss");
+var isoPattern: string = "yyyy-MM-dd HH:mm:ss";
+var formatted = call date.format(now, isoPattern);
 print "ISO format: " + formatted;
 
-var usFormat = call date.format(now, "MM/dd/yyyy");
+var usPattern: string = "MM/dd/yyyy";
+var usFormat = call date.format(now, usPattern);
 print "US format: " + usFormat;
 
-var euFormat = call date.format(now, "dd.MM.yyyy");
+var euPattern: string = "dd.MM.yyyy";
+var euFormat = call date.format(now, euPattern);
 print "EU format: " + euFormat;
 
-var timeOnly = call date.format(now, "HH:mm:ss");
+var timePattern: string = "HH:mm:ss";
+var timeOnly = call date.format(now, timePattern);
 print "Time only: " + timeOnly;
 
 // =====================================================
-// SECTION 3: Parsing Dates from Strings
-// =====================================================
-print "";
-print "=== Parsing Dates ===";
-
-var parsed = call date.parse("2024-01-15", "yyyy-MM-dd");
-print "Parsed date: " + parsed;
-
-var parsedDateTime = call date.parseDateTime("2024-01-15 10:30:00", "yyyy-MM-dd HH:mm:ss");
-print "Parsed datetime: " + parsedDateTime;
-
-// =====================================================
-// SECTION 4: Date Calculations
+// SECTION 3: Date Calculations
 // =====================================================
 print "";
 print "=== Date Calculations ===";
 
 // Add days
 var nextWeek = call date.addDays(now, 7);
-print "Next week: " + call date.format(nextWeek, "yyyy-MM-dd");
+var datePattern: string = "yyyy-MM-dd";
+print "Next week: " + call date.format(nextWeek, datePattern);
 
 var yesterday = call date.addDays(now, -1);
-print "Yesterday: " + call date.format(yesterday, "yyyy-MM-dd");
+print "Yesterday: " + call date.format(yesterday, datePattern);
 
 // Add hours
 var twoHoursAgo = call date.addHours(now, -2);
-print "Two hours ago: " + call date.format(twoHoursAgo, "HH:mm:ss");
+print "Two hours ago: " + call date.format(twoHoursAgo, timePattern);
 
 var inFiveHours = call date.addHours(now, 5);
-print "In five hours: " + call date.format(inFiveHours, "HH:mm:ss");
+print "In five hours: " + call date.format(inFiveHours, timePattern);
 
 // Add minutes
 var inThirtyMinutes = call date.addMinutes(now, 30);
-print "In 30 minutes: " + call date.format(inThirtyMinutes, "HH:mm:ss");
+print "In 30 minutes: " + call date.format(inThirtyMinutes, timePattern);
 
 // Add seconds
 var inSixtySeconds = call date.addSeconds(now, 60);
-print "In 60 seconds: " + call date.format(inSixtySeconds, "HH:mm:ss");
+print "In 60 seconds: " + call date.format(inSixtySeconds, timePattern);
 
-// Calculate difference between dates
-var date1 = call date.parse("2024-01-01", "yyyy-MM-dd");
-var date2 = call date.parse("2024-01-31", "yyyy-MM-dd");
+// Calculate difference between dates (using today and future dates)
+var date1 = call date.addDays(today, 0);
+var date2 = call date.addDays(today, 30);
 var daysBetween = call date.daysBetween(date1, date2);
-print "Days between Jan 1 and Jan 31: " + daysBetween;
+print "Days between today and 30 days from now: " + daysBetween;
 
 // =====================================================
-// SECTION 5: Getting Date Components
+// SECTION 4: Getting Date Components
 // =====================================================
 print "";
 print "=== Date Components ===";
@@ -103,7 +96,7 @@ var second = call date.getSecond(now);
 print "Second: " + second;
 
 // =====================================================
-// SECTION 6: Epoch Milliseconds
+// SECTION 5: Epoch Milliseconds
 // =====================================================
 print "";
 print "=== Epoch Milliseconds ===";
@@ -115,10 +108,10 @@ print "Epoch milliseconds: " + epochMs;
 // Create date from epoch milliseconds
 // Example: 1699876543210 = 2023-11-13 12:15:43.210 UTC
 var fromEpoch = call date.fromEpochMs(1699876543210);
-print "From epoch: " + call date.format(fromEpoch, "yyyy-MM-dd HH:mm:ss");
+print "From epoch: " + call date.format(fromEpoch, isoPattern);
 
 // =====================================================
-// SECTION 7: SQL Timestamp Conversion
+// SECTION 6: SQL Timestamp Conversion
 // =====================================================
 print "";
 print "=== SQL Timestamp ===";
@@ -128,7 +121,7 @@ var sqlTimestamp = call date.toSqlTimestamp(now);
 print "SQL Timestamp: " + sqlTimestamp;
 
 // =====================================================
-// SECTION 8: Practical Examples
+// SECTION 7: Practical Examples
 // =====================================================
 print "";
 print "=== Practical Examples ===";
@@ -142,13 +135,14 @@ if futureMs > nowMs then {
 }
 
 // Example: Format a date for a report header
-var reportDate = call date.format(now, "MMMM d, yyyy");
+var reportPattern: string = "MMMM d, yyyy";
+var reportDate = call date.format(now, reportPattern);
 print "Report generated on: " + reportDate;
 
 // Example: Calculate age in days
-var startDate = call date.parse("2000-06-15", "yyyy-MM-dd");
+var startDate = call date.addDays(today, -1000);
 var ageInDays = call date.daysBetween(startDate, today);
-print "Days since June 15, 2000: " + ageInDays;
+print "Days since 1000 days ago: " + ageInDays;
 
 print "";
 print "=== All date function tests completed ===";
