@@ -99,27 +99,28 @@ This directory contains short, precise example scripts for each EBS language key
 | [str_findregex.ebs](str_findregex.ebs) | `str.findregex` | Find first regex match |
 | [str_findallregex.ebs](str_findallregex.ebs) | `str.findallregex` | Find all regex matches |
 
-## Date/Time Builtins (date.*) - PROPOSED
-> **Note**: These date functions are **proposed** for future implementation. The [date.ebs](date.ebs) script documents the proposed API but the functions are not yet available.
-
+## Date/Time Builtins (date.*)
 | File | Builtin | Description |
 |------|---------|-------------|
-| [date.ebs](date.ebs) | `date.now` | (Proposed) Get current instant (date + time) |
-| [date.ebs](date.ebs) | `date.today` | (Proposed) Get current date (no time) |
-| [date.ebs](date.ebs) | `date.format` | (Proposed) Format date for display |
-| [date.ebs](date.ebs) | `date.parse` | (Proposed) Parse date from string |
-| [date.ebs](date.ebs) | `date.parseDateTime` | (Proposed) Parse datetime from string |
-| [date.ebs](date.ebs) | `date.addDays` | (Proposed) Add/subtract days from date |
-| [date.ebs](date.ebs) | `date.addHours` | (Proposed) Add/subtract hours from date |
-| [date.ebs](date.ebs) | `date.daysBetween` | (Proposed) Calculate days between dates |
-| [date.ebs](date.ebs) | `date.getYear` | (Proposed) Get year component |
-| [date.ebs](date.ebs) | `date.getMonth` | (Proposed) Get month component |
-| [date.ebs](date.ebs) | `date.getDay` | (Proposed) Get day component |
-| [date.ebs](date.ebs) | `date.getHour` | (Proposed) Get hour component |
-| [date.ebs](date.ebs) | `date.getMinute` | (Proposed) Get minute component |
-| [date.ebs](date.ebs) | `date.toEpochMs` | (Proposed) Convert to epoch milliseconds |
-| [date.ebs](date.ebs) | `date.fromEpochMs` | (Proposed) Create date from epoch milliseconds |
-| [date.ebs](date.ebs) | `date.toSqlTimestamp` | (Proposed) Convert to SQL Timestamp |
+| [date.ebs](date.ebs) | `date.now` | Get current instant (date + time) |
+| [date.ebs](date.ebs) | `date.today` | Get current date (no time) |
+| [date.ebs](date.ebs) | `date.format` | Format date for display |
+| [date.ebs](date.ebs) | `date.parse` | Parse date from string |
+| [date.ebs](date.ebs) | `date.parseDateTime` | Parse datetime from string |
+| [date.ebs](date.ebs) | `date.addDays` | Add/subtract days from date |
+| [date.ebs](date.ebs) | `date.addHours` | Add/subtract hours from date |
+| [date.ebs](date.ebs) | `date.addMinutes` | Add/subtract minutes from date |
+| [date.ebs](date.ebs) | `date.addSeconds` | Add/subtract seconds from date |
+| [date.ebs](date.ebs) | `date.daysBetween` | Calculate days between dates |
+| [date.ebs](date.ebs) | `date.getYear` | Get year component |
+| [date.ebs](date.ebs) | `date.getMonth` | Get month component (1-12) |
+| [date.ebs](date.ebs) | `date.getDay` | Get day component (1-31) |
+| [date.ebs](date.ebs) | `date.getHour` | Get hour component (0-23) |
+| [date.ebs](date.ebs) | `date.getMinute` | Get minute component (0-59) |
+| [date.ebs](date.ebs) | `date.getSecond` | Get second component (0-59) |
+| [date.ebs](date.ebs) | `date.toEpochMs` | Convert to epoch milliseconds |
+| [date.ebs](date.ebs) | `date.fromEpochMs` | Create date from epoch milliseconds |
+| [date.ebs](date.ebs) | `date.toSqlTimestamp` | Convert to SQL Timestamp |
 
 ## Screen Builtins (scr.*)
 | File | Builtin | Description |

@@ -3408,52 +3408,66 @@ var ticketCategory = call ai.classify(ticketText, ticketTypes);
 print "Ticket type: " + ticketCategory;  // Output: billing
 ```
 
-### Date/Time Functions (Proposed)
+### Date/Time Functions
 
-> **Note**: The date functions described below are **proposed** for future implementation. Currently, EBS supports the `date` data type but the `date.*` builtin functions are not yet implemented. This section documents the recommended API design based on the Java date type analysis in [JAVA_DATE_TYPE_RECOMMENDATION.md](JAVA_DATE_TYPE_RECOMMENDATION.md).
+EBS provides comprehensive date and time functions using the modern Java `java.time` API internally. Date values are stored as `java.time.LocalDateTime` for datetime values and `java.time.LocalDate` for date-only values, with easy conversions for display, calculations, and SQL operations.
 
-The proposed date/time API uses the modern Java `java.time` API internally. Date values would be stored as `java.time.Instant` (representing a precise moment in UTC), with conversions for display, calculations, and SQL operations.
-
-**Proposed Key Types:**
-- **Instant**: A moment in time (UTC), ideal for storage and calculations
+**Key Types:**
 - **LocalDate**: A date without time (e.g., "2024-01-15")
 - **LocalDateTime**: A date with time (e.g., "2024-01-15T10:30:00")
 
-**Proposed API:**
+**Creating Dates:**
 ```javascript
-// Creating dates (PROPOSED - not yet implemented)
-var now: date = call date.now();         // Current instant
-var today: date = call date.today();     // Current date (no time)
+// Get current date/time
+var now = call date.now();           // Current LocalDateTime
+var today = call date.today();       // Current LocalDate (no time)
 
-// Formatting for display
-var formatted = call date.format(now, "yyyy-MM-dd HH:mm:ss");
-var usFormat = call date.format(now, "MM/dd/yyyy");
-
-// Parsing dates from strings
+// Parse dates from strings
 var parsed = call date.parse("2024-01-15", "yyyy-MM-dd");
 var parsedDateTime = call date.parseDateTime("2024-01-15 10:30:00", "yyyy-MM-dd HH:mm:ss");
+```
 
-// Date calculations
+**Formatting for Display:**
+```javascript
+var formatted = call date.format(now, "yyyy-MM-dd HH:mm:ss");
+var usFormat = call date.format(now, "MM/dd/yyyy");
+var euFormat = call date.format(now, "dd.MM.yyyy");
+```
+
+**Date Calculations:**
+```javascript
 var nextWeek = call date.addDays(now, 7);
+var yesterday = call date.addDays(now, -1);
 var twoHoursAgo = call date.addHours(now, -2);
+var inThirtyMinutes = call date.addMinutes(now, 30);
+var inSixtySeconds = call date.addSeconds(now, 60);
 var daysBetween = call date.daysBetween(date1, date2);
+```
 
-// Get components
+**Getting Date Components:**
+```javascript
 var year = call date.getYear(now);
-var month = call date.getMonth(now);
-var day = call date.getDay(now);
-var hour = call date.getHour(now);
-var minute = call date.getMinute(now);
+var month = call date.getMonth(now);    // 1-12
+var day = call date.getDay(now);        // 1-31
+var hour = call date.getHour(now);      // 0-23
+var minute = call date.getMinute(now);  // 0-59
+var second = call date.getSecond(now);  // 0-59
+```
 
-// Epoch milliseconds (useful for calculations)
+**Epoch Milliseconds:**
+```javascript
+// Convert to/from epoch milliseconds (useful for calculations)
 var epochMs = call date.toEpochMs(now);
 var fromEpoch = call date.fromEpochMs(1699876543210);
+```
 
-// SQL Timestamp conversion (for database operations)
+**SQL Timestamp Conversion:**
+```javascript
+// Convert to SQL Timestamp (for database operations)
 var sqlTimestamp = call date.toSqlTimestamp(now);
 ```
 
-**Proposed Format Pattern Examples:**
+**Format Pattern Examples:**
 | Pattern | Example Output |
 |---------|---------------|
 | `yyyy-MM-dd` | 2024-01-15 |
