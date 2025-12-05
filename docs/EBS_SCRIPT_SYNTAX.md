@@ -278,6 +278,69 @@ print PERMISSIONS.admin;    // Output: 0
 - Case-insensitive field access (exact case matches are checked first)
 - Fields are stored in a single byte
 
+#### Bitmap Type Aliases and Casting
+
+Define reusable bitmap types using the `typeof` keyword, then cast byte or int values to the bitmap type:
+
+```javascript
+// Define a reusable bitmap type alias
+StatusFlags typeof bitmap { active: 0, error: 1, warning: 2, ready: 3, busy: 4-5 };
+
+// Cast a byte value to the bitmap type
+var byteValue: byte = 42;
+var status = StatusFlags(byteValue);
+
+// Access fields on the casted value
+print status.active;    // Output: 0
+print status.error;     // Output: 1
+print status.warning;   // Output: 0
+print status.ready;     // Output: 1
+print status.busy;      // Output: 2
+
+// Also works with integer values
+var intValue: int = 255;
+var allSet = StatusFlags(intValue);
+print allSet.busy;      // Output: 3 (all bits set)
+```
+
+#### Bitmap Bit Position Verification
+
+The bit positioning follows standard conventions:
+- `flags.status=2` sets bits 0-1 to value 2, so `flags=2`
+- `flags.enabled=1` sets bit 2 to value 1, so `flags=4` (1 << 2 = 4)
+- `flags.priority=1` sets bits 3-5 to value 1, so `flags=8` (1 << 3 = 8)
+
+```javascript
+BitPos typeof bitmap { status: 0-1, enabled: 2, priority: 3-5 };
+
+var test1 = BitPos(0);
+test1.status = 2;
+print test1;  // Output: 2
+
+var test2 = BitPos(0);
+test2.enabled = 1;
+print test2;  // Output: 4
+
+var test3 = BitPos(0);
+test3.priority = 1;
+print test3;  // Output: 8
+```
+
+#### typeof with Bitmap Types
+
+The `typeof` operator works with both bitmap type aliases and bitmap variables:
+
+```javascript
+StatusFlags typeof bitmap { active: 0, error: 1, warning: 2 };
+var status = StatusFlags(42);
+
+// typeof on a type alias returns the full bitmap definition
+print typeof StatusFlags;   // Output: bitmap {active: 0, error: 1, warning: 2}
+
+// typeof on a bitmap variable returns "bitmap <aliasname>"
+print typeof status;        // Output: bitmap statusflags
+```
+
 ### Null Values
 ```javascript
 var empty = null;

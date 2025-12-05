@@ -209,6 +209,31 @@ constDecl    = "const" identifier ( ":" typeName ( arrayDims )? )? ( "=" varInit
                     PI = 3.0;  // Error: Cannot reassign constant variable 'PI'.
                *)
 
+typedefStmt  = identifier "typeof" typeDef ";" ;
+               (* Define a reusable type alias. Examples:
+                  personType typeof record{name: string, age: int};
+                  intArray typeof array.int[10];
+                  StatusFlags typeof bitmap { active: 0, error: 1, warning: 2 };
+               *)
+
+bitmapDef    = "bitmap" "{" bitmapField ( "," bitmapField )* "}" ;
+               (* Define named bit fields within a byte.
+                  Each field maps to specific bit(s) in a byte (0-7). *)
+
+bitmapField  = identifier ":" bitRange ;
+bitRange     = number | ( number "-" number ) ;
+               (* Single bit: "enabled: 2"
+                  Bit range: "status: 0-1" (bits 0 and 1)
+                  Note: Bit positions must be 0-7, fields cannot overlap *)
+
+bitmapCast   = typeAlias "(" expression ")" ;
+               (* Cast a byte or int value to a bitmap type.
+                  Example:
+                    StatusFlags typeof bitmap { active: 0, error: 1 };
+                    var status = StatusFlags(42);  // Cast byte 42 to bitmap
+                    print status.active;            // Access field value
+               *)
+
 arrayDims    = "[" ( "*" | ( expression ( "," expression )* ) )? "]" ;
 
 varInitializer

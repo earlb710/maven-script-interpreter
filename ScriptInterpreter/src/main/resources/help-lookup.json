@@ -181,6 +181,12 @@
       "short_description": "Boolean false value",
       "long_help": "The 'false' keyword represents the boolean false value.",
       "example": "var isComplete = false;\nwhile isComplete == false do {\n  // process\n}"
+    },
+    {
+      "keyword": "bitmap",
+      "short_description": "Defines named bit fields within a byte",
+      "long_help": "The 'bitmap' type defines named fields that map to bit ranges within a byte (0-7). This allows compact storage of multiple small values in a single byte, useful for flags, status bits, or packing multiple small integers. Fields are accessed using dot notation, with automatic bit shifting on read/write. Use 'typeof' to define reusable bitmap type aliases.",
+      "example": "var flags: bitmap { status: 0-1, enabled: 2, priority: 3-5 };\nflags.status = 2;\nflags.enabled = 1;\nflags.priority = 5;\nprint flags.status;  // Output: 2\n\n// Type alias and casting\nStatusFlags typeof bitmap { active: 0, error: 1 };\nvar status = StatusFlags(42);\nprint status.active;"
     }
   ],
   "builtins": [
