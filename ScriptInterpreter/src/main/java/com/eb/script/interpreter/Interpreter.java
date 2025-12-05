@@ -701,11 +701,20 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             // Check if this is a screen variable
             ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars(screenName);
             if (screenVarMap != null) {
-                if (screenVarMap.containsKey(varName)) {
+                // Check if variable exists in screenVarMap or screenVarTypes (for variables with null initial values)
+                ConcurrentHashMap<String, DataType> screenVarTypes = context.getScreenVarTypes(screenName);
+                boolean varExists = screenVarMap.containsKey(varName) || 
+                                   (screenVarTypes != null && screenVarTypes.containsKey(varName));
+                if (varExists) {
                     // Variable exists with simple name (legacy format)
-                    // ConcurrentHashMap doesn't allow null values, so convert null to empty string
-                    Object safeValue = (value != null) ? value : "";
-                    screenVarMap.put(varName, safeValue);
+                    // ConcurrentHashMap doesn't allow null values, so handle null appropriately
+                    if (value != null) {
+                        screenVarMap.put(varName, value);
+                    } else {
+                        // For null values, we need to keep track of the variable but can't store null
+                        // Remove any existing value - the variable exists but has no value
+                        screenVarMap.remove(varName);
+                    }
                     // Trigger screen refresh to update UI controls
                     context.triggerScreenRefresh(screenName);
                     return;
@@ -721,10 +730,19 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             // Check if this is a screen variable
             ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars(firstPart);
             if (screenVarMap != null) {
-                if (screenVarMap.containsKey(secondPart)) {
-                    // ConcurrentHashMap doesn't allow null values, so convert null to empty string
-                    Object safeValue = (value != null) ? value : "";
-                    screenVarMap.put(secondPart, safeValue);
+                // Check if variable exists in screenVarMap or screenVarTypes (for variables with null initial values)
+                ConcurrentHashMap<String, DataType> screenVarTypes = context.getScreenVarTypes(firstPart);
+                boolean varExists = screenVarMap.containsKey(secondPart) || 
+                                   (screenVarTypes != null && screenVarTypes.containsKey(secondPart));
+                if (varExists) {
+                    // ConcurrentHashMap doesn't allow null values, so handle null appropriately
+                    if (value != null) {
+                        screenVarMap.put(secondPart, value);
+                    } else {
+                        // For null values, we need to keep track of the variable but can't store null
+                        // Remove any existing value - the variable exists but has no value
+                        screenVarMap.remove(secondPart);
+                    }
                     // Trigger screen refresh to update UI controls
                     context.triggerScreenRefresh(firstPart);
                     return;
