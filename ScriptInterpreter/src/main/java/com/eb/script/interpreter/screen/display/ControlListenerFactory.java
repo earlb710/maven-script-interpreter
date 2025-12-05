@@ -281,7 +281,7 @@ public class ControlListenerFactory {
                     (int) (newVal.getBlue() * 255));
                 VarRefResolver.setVarRefValue(varName, colorString, screenVars);
             } else {
-                // ColorPicker set to null - remove the variable to indicate null value
+                // ColorPicker set to null - use empty string as placeholder since ConcurrentHashMap doesn't allow null
                 VarRefResolver.setVarRefValue(varName, "", screenVars);
             }
         });

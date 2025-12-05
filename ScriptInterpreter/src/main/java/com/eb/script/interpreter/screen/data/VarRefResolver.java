@@ -187,12 +187,7 @@ public class VarRefResolver {
         
         // Check if this is a simple variable name (no array access or property access)
         if (!varRef.contains("[") && !varRef.contains(".")) {
-            // ConcurrentHashMap doesn't allow null values, so remove the key if value is null
-            if (value != null) {
-                screenVars.put(varRef.toLowerCase(), value);
-            } else {
-                screenVars.remove(varRef.toLowerCase());
-            }
+            putOrRemoveIfNull(screenVars, varRef, value);
             return;
         }
         
@@ -210,12 +205,7 @@ public class VarRefResolver {
             splitPos = dotPos;
         } else {
             // No complex access, just a simple variable
-            // ConcurrentHashMap doesn't allow null values, so remove the key if value is null
-            if (value != null) {
-                screenVars.put(varRef.toLowerCase(), value);
-            } else {
-                screenVars.remove(varRef.toLowerCase());
-            }
+            putOrRemoveIfNull(screenVars, varRef, value);
             return;
         }
         
@@ -382,5 +372,22 @@ public class VarRefResolver {
         
         // No existing key found, add with provided key
         map.put(key, value);
+    }
+    
+    /**
+     * Helper method to put a value in a ConcurrentHashMap or remove the key if value is null.
+     * ConcurrentHashMap doesn't allow null values, so this handles the null case by removing the key.
+     * 
+     * @param map The ConcurrentHashMap
+     * @param key The key (will be lowercased)
+     * @param value The value to store, or null to remove the key
+     */
+    private static void putOrRemoveIfNull(ConcurrentHashMap<String, Object> map, String key, Object value) {
+        String lowerKey = key.toLowerCase();
+        if (value != null) {
+            map.put(lowerKey, value);
+        } else {
+            map.remove(lowerKey);
+        }
     }
 }
