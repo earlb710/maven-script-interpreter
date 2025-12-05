@@ -441,6 +441,10 @@ public class Parser {
             return printStatement();
         } else if (match(EbsTokenType.COMMENT)) {
             return null;
+        } else if (match(EbsTokenType.SET)) {
+            // 'set' keyword is optional syntactic sugar for screen variable assignment
+            // Just consume it and parse the assignment statement
+            return assignmentStatement();
         }
         return assignmentStatement();
     }
@@ -2166,10 +2170,14 @@ public class Parser {
     }
 
     private Expression primaryString(EbsTokenType quote) throws ParseError {
-        EbsTokenType type = peek().type;
         Expression expr = null;
-        if (match(EbsTokenType.STRING)) {
-            expr = new LiteralExpression(type, previous().literal);
+        // Accept both STRING and DATE tokens inside quoted strings.
+        // The lexer automatically converts date-formatted strings like '2025-12-04 10:30'
+        // to DATE tokens, but we need to treat them as strings within quoted literals
+        // for consistent string handling in the parser.
+        if (match(EbsTokenType.STRING, EbsTokenType.DATE)) {
+            EbsToken matchedToken = previous();
+            expr = new LiteralExpression(matchedToken.type, matchedToken.literal);
             consume(quote, "Expected termination quote after string value.");
         }
         return expr;

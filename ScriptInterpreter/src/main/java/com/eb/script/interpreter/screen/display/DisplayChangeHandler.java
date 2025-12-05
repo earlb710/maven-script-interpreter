@@ -51,8 +51,7 @@ public class DisplayChangeHandler {
         Runnable changeHandler = () -> {
             try {
                 // Increment event count for debugging
-                int count = ScreenFactory.incrementEventCount(screenName, finalItemName, "onChange");
-                System.out.println("[DEBUG] onChange fired: " + screenName + "." + finalItemName + " (count: " + count + ")");
+                ScreenFactory.incrementEventCount(screenName, finalItemName, "onChange");
                 
                 // Execute the onChange code
                 onClickHandler.execute(changeCode);
