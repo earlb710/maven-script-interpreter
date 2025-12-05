@@ -1832,12 +1832,19 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             String screenName = varExpr.name.toLowerCase(java.util.Locale.ROOT);
             ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars(screenName);
             
+            System.out.println("[DEBUG PROP] Checking property access: " + screenName + "." + expr.propertyName);
+            System.out.println("[DEBUG PROP] screenVarMap exists: " + (screenVarMap != null));
+            
             if (screenVarMap != null) {
                 // This might be a screen variable access
                 String varName = expr.propertyName.toLowerCase(java.util.Locale.ROOT);
+                System.out.println("[DEBUG PROP] Looking for key: " + varName);
+                System.out.println("[DEBUG PROP] Available keys: " + screenVarMap.keySet());
                 if (screenVarMap.containsKey(varName)) {
                     // This is a screen variable - return it
-                    return screenVarMap.get(varName);
+                    Object value = screenVarMap.get(varName);
+                    System.out.println("[DEBUG PROP] Found value: " + value);
+                    return value;
                 }
                 // If the variable doesn't exist in the screen, fall through to normal property access
                 // This allows accessing properties of the screen config JSON if needed
