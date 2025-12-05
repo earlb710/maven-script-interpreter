@@ -4,6 +4,7 @@ import com.eb.script.arrays.ArrayDynamic;
 import com.eb.script.arrays.ArrayFixedByte;
 import com.eb.script.image.EbsImage;
 import com.eb.script.interpreter.screen.DisplayItem;
+import com.eb.script.interpreter.screen.data.VarRefResolver;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -286,8 +287,8 @@ public class ControlUpdater {
             DisplayItem metadata = (DisplayItem) control.getProperties().get("metadata");
 
             if (varName != null) {
-                // Use lowercase for consistent case-insensitive lookup
-                Object currentValue = screenVars.get(varName.toLowerCase());
+                // Use VarRefResolver for case-insensitive lookup and complex expressions
+                Object currentValue = VarRefResolver.resolveVarRefValue(varName.toLowerCase(), screenVars);
                 updateControlFromValue(control, currentValue, metadata);
             }
         }

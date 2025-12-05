@@ -103,6 +103,14 @@ public class ControlListenerFactory {
             ((DatePicker) control).valueProperty().addListener((obs, oldVal, newVal) -> {
                 VarRefResolver.setVarRefValue(varName, newVal, screenVars);
             });
+        } else if (control instanceof TreeView) {
+            @SuppressWarnings("unchecked")
+            TreeView<String> treeView = (TreeView<String>) control;
+            treeView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal != null) {
+                    VarRefResolver.setVarRefValue(varName, newVal.getValue(), screenVars);
+                }
+            });
         }
     }
     
@@ -339,6 +347,10 @@ public class ControlListenerFactory {
             ((DatePicker) control).valueProperty().addListener((obs, oldVal, newVal) -> handler.run());
         } else if (control instanceof ColorPicker) {
             ((ColorPicker) control).valueProperty().addListener((obs, oldVal, newVal) -> handler.run());
+        } else if (control instanceof TreeView) {
+            @SuppressWarnings("unchecked")
+            TreeView<?> treeView = (TreeView<?>) control;
+            treeView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> handler.run());
         }
     }
 }
