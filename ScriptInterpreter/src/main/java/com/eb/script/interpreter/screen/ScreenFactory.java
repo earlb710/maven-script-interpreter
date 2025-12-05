@@ -2599,8 +2599,8 @@ public class ScreenFactory {
                 if (screenVars != null && item.varRef != null) {
                     setupVariableBinding(control, item.varRef, screenVars, varTypes, metadata);
                     // Store context and screenName for screen status updates when control values change
-                    control.getProperties().put("interpreterContext", context);
-                    control.getProperties().put("screenName", screenName);
+                    control.getProperties().put(ControlListenerFactory.PROP_INTERPRETER_CONTEXT, context);
+                    control.getProperties().put(ControlListenerFactory.PROP_SCREEN_NAME, screenName);
                     // Track this control so we can refresh it when variables change
                     boundControls.add(control);
                 }

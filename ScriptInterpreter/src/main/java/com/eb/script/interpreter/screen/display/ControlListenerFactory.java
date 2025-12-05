@@ -22,9 +22,18 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ControlListenerFactory {
 
+    /** Property key for storing interpreter context reference on controls */
+    public static final String PROP_INTERPRETER_CONTEXT = "interpreterContext";
+    
+    /** Property key for storing screen name on controls */
+    public static final String PROP_SCREEN_NAME = "screenName";
+
     /**
      * Marks the screen as changed when a control's value is modified.
      * This is called from all control listeners to update the screen status.
+     * <p>
+     * The status is only updated from CLEAN to CHANGED. If the screen is already
+     * in ERROR status, it is preserved to avoid hiding error conditions.
      * 
      * @param control The control that was modified
      */
@@ -32,8 +41,8 @@ public class ControlListenerFactory {
         if (control == null) {
             return;
         }
-        Object contextObj = control.getProperties().get("interpreterContext");
-        Object screenNameObj = control.getProperties().get("screenName");
+        Object contextObj = control.getProperties().get(PROP_INTERPRETER_CONTEXT);
+        Object screenNameObj = control.getProperties().get(PROP_SCREEN_NAME);
         
         if (contextObj instanceof InterpreterContext && screenNameObj instanceof String) {
             InterpreterContext context = (InterpreterContext) contextObj;
