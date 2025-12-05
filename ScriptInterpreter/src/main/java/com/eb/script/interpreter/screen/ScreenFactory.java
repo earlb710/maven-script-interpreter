@@ -701,14 +701,17 @@ public class ScreenFactory {
                 @Override
                 protected void updateItem(String item, boolean empty) {
                     super.updateItem(item, empty);
+                    System.err.println("[DEBUG] updateItem called: item='" + item + "', empty=" + empty + ", index=" + getIndex());
                     if (empty || item == null) {
                         setText(null);
                         setStyle("-fx-alignment: CENTER-LEFT;");
                     } else {
                         // Get the varRef and itemType from the row data
                         String[] rowData = getTableView().getItems().get(getIndex());
-                        String varRef = rowData.length > 2 ? rowData[2] : null;
+                        String varRef = rowData.length > 2 ? rowData[2] : "";
+                        if (varRef == null) varRef = "";
                         String itemType = rowData.length > 3 ? rowData[3] : "";
+                        if (itemType == null) itemType = "";
                         
                         // Get icon for item type
                         String typeIcon = getItemTypeIcon(itemType);
@@ -716,6 +719,7 @@ public class ScreenFactory {
                         // Debug output for cell rendering
                         boolean isChanged = !varRef.isEmpty() && isItemChanged(finalScreenName, varRef);
                         System.err.println("[DEBUG] Cell render: item='" + item + "', varRef='" + varRef + "', itemType='" + itemType + "', typeIcon='" + typeIcon + "', isChanged=" + isChanged);
+                        System.err.flush();
                         
                         // Check if this item has been changed
                         if (isChanged) {
