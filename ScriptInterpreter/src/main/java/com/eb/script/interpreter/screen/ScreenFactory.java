@@ -805,17 +805,21 @@ public class ScreenFactory {
         javafx.scene.control.Label iconLabel = new javafx.scene.control.Label(icon);
         iconLabel.setStyle("-fx-font-size: 11px;");
         
-        // Item name - right aligned, no max width to allow full display
+        // Item name - left aligned, 50% width
         javafx.scene.control.Label nameLabel = new javafx.scene.control.Label(itemName);
         nameLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #660066;");
         nameLabel.setMinWidth(DEBUG_ITEM_NAME_MIN_WIDTH);
-        nameLabel.setAlignment(Pos.CENTER_RIGHT);
+        nameLabel.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(nameLabel, Priority.ALWAYS);
+        nameLabel.setMaxWidth(Double.MAX_VALUE);
         
-        // Event type with truncated code preview - left aligned
+        // Event type with truncated code preview - left aligned, 50% width
         String truncatedCode = truncateCode(fullCode);
         javafx.scene.control.Label typeLabel = new javafx.scene.control.Label("." + eventType + ": " + truncatedCode);
         typeLabel.setStyle("-fx-text-fill: #006666;");
         typeLabel.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(typeLabel, Priority.ALWAYS);
+        typeLabel.setMaxWidth(Double.MAX_VALUE);
         
         row.getChildren().addAll(iconLabel, nameLabel, typeLabel);
         
@@ -919,17 +923,21 @@ public class ScreenFactory {
         row.setAlignment(Pos.CENTER_LEFT);
         row.setPadding(new Insets(1, 5, 1, 5));
         
-        // Label/key - right aligned, no max width to allow full display
+        // Label/key - left aligned, 50% width
         javafx.scene.control.Label labelNode = new javafx.scene.control.Label(label + ":");
         labelNode.setStyle("-fx-font-weight: bold; -fx-text-fill: #555; -fx-font-size: 11px;");
         labelNode.setMinWidth(DEBUG_ITEM_NAME_MIN_WIDTH);
-        labelNode.setAlignment(Pos.CENTER_RIGHT);
+        labelNode.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(labelNode, Priority.ALWAYS);
+        labelNode.setMaxWidth(Double.MAX_VALUE);
         
-        // Value - left aligned
+        // Value - left aligned, 50% width
         javafx.scene.control.Label valueNode = new javafx.scene.control.Label(value);
         valueNode.setStyle("-fx-text-fill: " + valueColor + "; -fx-font-size: 11px;");
         valueNode.setWrapText(true);
         valueNode.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(valueNode, Priority.ALWAYS);
+        valueNode.setMaxWidth(Double.MAX_VALUE);
         
         row.getChildren().addAll(labelNode, valueNode);
         
@@ -957,12 +965,14 @@ public class ScreenFactory {
         row.setPadding(new Insets(2, 5, 2, 5));
         
         // Item name with tooltip showing full qualified name (screen.item)
-        // Right aligned, no max width to allow full display
+        // Left aligned, 50% width
         String displayName = item.name != null ? item.name : key;
         javafx.scene.control.Label nameLabel = new javafx.scene.control.Label(displayName);
         nameLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #006600;");
         nameLabel.setMinWidth(DEBUG_ITEM_NAME_MIN_WIDTH);
-        nameLabel.setAlignment(Pos.CENTER_RIGHT);
+        nameLabel.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(nameLabel, Priority.ALWAYS);
+        nameLabel.setMaxWidth(Double.MAX_VALUE);
         
         // Build tooltip with full qualified name (screen.item) and item details
         StringBuilder tooltipText = new StringBuilder();
@@ -1032,11 +1042,13 @@ public class ScreenFactory {
             fullValueStr = "No variable reference";
         }
         
-        // Value label - left aligned
+        // Value label - left aligned, 50% width
         javafx.scene.control.Label valueLabel = new javafx.scene.control.Label(valueStr);
         valueLabel.setStyle("-fx-text-fill: #333;");
         valueLabel.setWrapText(true);
         valueLabel.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(valueLabel, Priority.ALWAYS);
+        valueLabel.setMaxWidth(Double.MAX_VALUE);
         javafx.scene.control.Tooltip valueTooltip = new javafx.scene.control.Tooltip(fullValueStr);
         valueTooltip.setStyle("-fx-font-size: 14px;");
         valueTooltip.setShowDelay(javafx.util.Duration.millis(500));
@@ -1404,24 +1416,28 @@ public class ScreenFactory {
         row.setPadding(new Insets(2, 5, 2, 5));
         
         // Variable name with tooltip showing full name and data type
-        // Right aligned, no max width to allow full display
+        // Left aligned, 50% width
         javafx.scene.control.Label nameLabel = new javafx.scene.control.Label(name + ":");
         nameLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #0066cc;");
         nameLabel.setMinWidth(DEBUG_ITEM_NAME_MIN_WIDTH);
-        nameLabel.setAlignment(Pos.CENTER_RIGHT);
+        nameLabel.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(nameLabel, Priority.ALWAYS);
+        nameLabel.setMaxWidth(Double.MAX_VALUE);
         String typeStr = getDataTypeString(dataType, value);
         javafx.scene.control.Tooltip nameTooltip = new javafx.scene.control.Tooltip(name + " : " + typeStr);
         nameTooltip.setStyle("-fx-font-size: 14px;");
         nameTooltip.setShowDelay(javafx.util.Duration.millis(500));
         nameLabel.setTooltip(nameTooltip);
         
-        // Variable value with tooltip showing full value - left aligned
+        // Variable value with tooltip showing full value - left aligned, 50% width
         String valueStr = formatValue(value);
         String fullValueStr = formatValueFull(value);
         javafx.scene.control.Label valueLabel = new javafx.scene.control.Label(valueStr);
         valueLabel.setStyle("-fx-text-fill: #333;");
         valueLabel.setWrapText(true);
         valueLabel.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(valueLabel, Priority.ALWAYS);
+        valueLabel.setMaxWidth(Double.MAX_VALUE);
         javafx.scene.control.Tooltip valueTooltip = new javafx.scene.control.Tooltip(fullValueStr);
         valueTooltip.setStyle("-fx-font-size: 14px;");
         valueTooltip.setShowDelay(javafx.util.Duration.millis(500));
