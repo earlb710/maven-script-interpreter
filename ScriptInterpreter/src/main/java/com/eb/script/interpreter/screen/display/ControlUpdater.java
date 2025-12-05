@@ -1,12 +1,18 @@
 package com.eb.script.interpreter.screen.display;
 
 import com.eb.script.arrays.ArrayDynamic;
+import com.eb.script.arrays.ArrayFixedByte;
+import com.eb.script.image.EbsImage;
 import com.eb.script.interpreter.screen.DisplayItem;
+import com.eb.script.interpreter.screen.data.VarRefResolver;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 
+import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -91,6 +97,72 @@ public class ControlUpdater {
             updateColorPicker(control, value);
         } else if (control instanceof DatePicker) {
             updateDatePicker(control, value);
+        } else if (control instanceof ImageView) {
+            updateImageView(control, value);
+        }
+    }
+    
+    /**
+     * Updates an ImageView control with an image value.
+     * Supports EbsImage, ArrayFixedByte (raw image bytes), or file path strings.
+     * 
+     * @param control The ImageView control
+     * @param value The image value (EbsImage, ArrayFixedByte, byte[], or String path)
+     */
+    private static void updateImageView(Node control, Object value) {
+        ImageView imageView = (ImageView) control;
+        
+        if (value == null) {
+            imageView.setImage(null);
+            return;
+        }
+        
+        try {
+            if (value instanceof EbsImage) {
+                // Use the JavaFX image directly from EbsImage
+                EbsImage ebsImage = (EbsImage) value;
+                imageView.setImage(ebsImage.getFxImage());
+            } else if (value instanceof ArrayFixedByte) {
+                // Convert byte array to JavaFX Image
+                ArrayFixedByte afb = (ArrayFixedByte) value;
+                ByteArrayInputStream bais = new ByteArrayInputStream(afb.elements);
+                Image image = new Image(bais);
+                imageView.setImage(image);
+            } else if (value instanceof byte[]) {
+                // Convert raw byte array to JavaFX Image
+                byte[] bytes = (byte[]) value;
+                ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+                Image image = new Image(bais);
+                imageView.setImage(image);
+            } else if (value instanceof String) {
+                // Try to load from file path or URL
+                String path = (String) value;
+                if (!path.isEmpty()) {
+                    try {
+                        // Try as URL first (including file: URLs)
+                        if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("file:")) {
+                            Image image = new Image(path);
+                            imageView.setImage(image);
+                        } else {
+                            // Try as file path
+                            java.io.File file = new java.io.File(path);
+                            if (file.exists()) {
+                                Image image = new Image(file.toURI().toString());
+                                imageView.setImage(image);
+                            } else {
+                                System.err.println("Warning: Image file not found: " + path);
+                            }
+                        }
+                    } catch (Exception e) {
+                        System.err.println("Warning: Failed to load image from path '" + path + "': " + e.getMessage());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            String varName = (String) control.getProperties().get("varName");
+            System.err.println("Warning: Failed to update ImageView" 
+                + (varName != null ? " (variable: " + varName + ")" : "") 
+                + ": " + e.getMessage());
         }
     }
     
@@ -215,7 +287,8 @@ public class ControlUpdater {
             DisplayItem metadata = (DisplayItem) control.getProperties().get("metadata");
 
             if (varName != null) {
-                Object currentValue = screenVars.get(varName);
+                // Use VarRefResolver for case-insensitive lookup and complex expressions
+                Object currentValue = VarRefResolver.resolveVarRefValue(varName.toLowerCase(), screenVars);
                 updateControlFromValue(control, currentValue, metadata);
             }
         }

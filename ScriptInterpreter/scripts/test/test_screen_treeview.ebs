@@ -1,0 +1,315 @@
+// Test Script: TreeView for displaying hierarchical data with icons
+// Description: Demonstrates displaying tree items with expand/collapse functionality and icons
+// Author: EBS Test Suite
+// Date: 2025-12-04
+
+print "=== TreeView Test - Hierarchical Data with Icons ===";
+print "";
+print "This test demonstrates displaying hierarchical data in a tree view";
+print "with expandable/collapsible nodes and dynamic icons.";
+print "";
+
+// Function to determine file type based on name
+getFileType(name: string) return string {
+    if call str.endsWith(name, ".java") then {
+        return "Java Source File";
+    }
+    if call str.endsWith(name, ".xml") then {
+        return "XML File";
+    }
+    if call str.endsWith(name, ".md") then {
+        return "Markdown File";
+    }
+    if call str.endsWith(name, ".properties") then {
+        return "Properties File";
+    }
+    if call str.endsWith(name, ".txt") then {
+        return "Text File";
+    }
+    if name == ".gitignore" then {
+        return "Git Ignore File";
+    }
+    if name == "LICENSE" then {
+        return "License File";
+    }
+    // Check if it's a folder (no extension and not a special file)
+    if call str.indexOf(name, ".") == -1 then {
+        return "Folder";
+    }
+    return "File";
+}
+
+// Function to get simulated file size
+getFileSize(name: string) return string {
+    var fileType: string = call getFileType(name);
+    if fileType == "Folder" then {
+        return "-";
+    }
+    // Simulate file sizes
+    if call str.endsWith(name, ".java") then {
+        return "2.4 KB";
+    }
+    if call str.endsWith(name, ".xml") then {
+        return "1.8 KB";
+    }
+    if call str.endsWith(name, ".md") then {
+        return "3.2 KB";
+    }
+    if call str.endsWith(name, ".properties") then {
+        return "512 bytes";
+    }
+    return "1.0 KB";
+}
+
+// Create a screen with a TreeView to display file/folder hierarchy
+// Icons can be specified as:
+// - "icon": single icon for all states
+// - "iconOpen": icon when node is expanded
+// - "iconClosed": icon when node is collapsed
+screen fileExplorer = {
+    "title": "File Explorer - TreeView Demo with Icons",
+    "width": 800,
+    "height": 550,
+    "maximize": false,
+    "vars": [
+        {
+            "name": "selectedFile",
+            "type": "string",
+            "default": ""
+        },
+        {
+            "name": "fileName",
+            "type": "string",
+            "default": ""
+        },
+        {
+            "name": "fileType",
+            "type": "string",
+            "default": ""
+        },
+        {
+            "name": "filePath",
+            "type": "string",
+            "default": ""
+        },
+        {
+            "name": "fileSize",
+            "type": "string",
+            "default": ""
+        },
+        {
+            "name": "lastModified",
+            "type": "string",
+            "default": ""
+        }
+    ],
+    "area": [
+        {
+            "name": "mainLayout",
+            "type": "hbox",
+            "spacing": "10",
+            "padding": "10",
+            "areas": [
+                {
+                    "name": "treeArea",
+                    "type": "vbox",
+                    "spacing": "5",
+                    "width": "350",
+                    "items": [
+                        {
+                            "name": "fileTree",
+                            "varRef": "selectedFile",
+                            "seq": 1,
+                            "display": {
+                                "type": "treeview",
+                                "labelText": "Project Structure:",
+                                "labelPosition": "top",
+                                "displayRecords": 18,
+                                "expandAll": true,
+                                "showRoot": true,
+                                "onChange": "set fileExplorer.fileName = fileExplorer.selectedFile; set fileExplorer.fileType = call getFileType(fileExplorer.selectedFile); set fileExplorer.fileSize = call getFileSize(fileExplorer.selectedFile); set fileExplorer.filePath = '/project/' + fileExplorer.selectedFile; set fileExplorer.lastModified = '2025-12-04 10:30';",
+                                "treeItems": [
+                                    {
+                                        "value": "Project Root",
+                                        "iconOpen": "icons/folder-open.png",
+                                        "iconClosed": "icons/folder.png",
+                                        "expanded": true,
+                                        "children": [
+                                            {
+                                                "value": "src",
+                                                "iconOpen": "icons/folder-open.png",
+                                                "iconClosed": "icons/folder.png",
+                                                "expanded": true,
+                                                "children": [
+                                                    {
+                                                        "value": "main",
+                                                        "iconOpen": "icons/folder-open.png",
+                                                        "iconClosed": "icons/folder.png",
+                                                        "expanded": true,
+                                                        "children": [
+                                                            {
+                                                                "value": "java",
+                                                                "iconOpen": "icons/folder-open.png",
+                                                                "iconClosed": "icons/folder.png",
+                                                                "children": [
+                                                                    {"value": "App.java", "icon": "icons/java-file.png"},
+                                                                    {"value": "Config.java", "icon": "icons/java-file.png"},
+                                                                    {"value": "Utils.java", "icon": "icons/java-file.png"}
+                                                                ]
+                                                            },
+                                                            {
+                                                                "value": "resources",
+                                                                "iconOpen": "icons/folder-open.png",
+                                                                "iconClosed": "icons/folder.png",
+                                                                "children": [
+                                                                    {"value": "application.properties", "icon": "icons/config-file.png"},
+                                                                    {"value": "messages.properties", "icon": "icons/config-file.png"}
+                                                                ]
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "value": "test",
+                                                        "iconOpen": "icons/folder-open.png",
+                                                        "iconClosed": "icons/folder.png",
+                                                        "children": [
+                                                            {
+                                                                "value": "java",
+                                                                "iconOpen": "icons/folder-open.png",
+                                                                "iconClosed": "icons/folder.png",
+                                                                "children": [
+                                                                    {"value": "AppTest.java", "icon": "icons/java-file.png"},
+                                                                    {"value": "ConfigTest.java", "icon": "icons/java-file.png"}
+                                                                ]
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "value": "docs",
+                                                "iconOpen": "icons/folder-open.png",
+                                                "iconClosed": "icons/folder.png",
+                                                "children": [
+                                                    {"value": "README.md", "icon": "icons/markdown-file.png"},
+                                                    {"value": "CONTRIBUTING.md", "icon": "icons/markdown-file.png"},
+                                                    {"value": "LICENSE", "icon": "icons/text-file.png"}
+                                                ]
+                                            },
+                                            {
+                                                "value": "build",
+                                                "iconOpen": "icons/folder-open.png",
+                                                "iconClosed": "icons/folder.png",
+                                                "children": [
+                                                    {"value": "target", "iconOpen": "icons/folder-open.png", "iconClosed": "icons/folder.png"},
+                                                    {"value": "output", "iconOpen": "icons/folder-open.png", "iconClosed": "icons/folder.png"}
+                                                ]
+                                            },
+                                            {"value": "pom.xml", "icon": "icons/xml-file.png"},
+                                            {"value": ".gitignore", "icon": "icons/git-file.png"}
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "detailsArea",
+                    "type": "vbox",
+                    "spacing": "8",
+                    "padding": "10",
+                    "width": "380",
+                    "style": "-fx-border-color: #cccccc; -fx-border-width: 1; -fx-border-radius: 5; -fx-background-color: #f9f9f9; -fx-background-radius: 5;",
+                    "items": [
+                        {
+                            "name": "detailsHeader",
+                            "seq": 1,
+                            "display": {
+                                "type": "label",
+                                "labelText": "File Details",
+                                "labelBold": true,
+                                "labelFontSize": "14px"
+                            }
+                        },
+                        {
+                            "name": "fileNameField",
+                            "varRef": "fileName",
+                            "seq": 2,
+                            "display": {
+                                "type": "textfield",
+                                "labelText": "Name:",
+                                "labelPosition": "left"
+                            }
+                        },
+                        {
+                            "name": "fileTypeField",
+                            "varRef": "fileType",
+                            "seq": 3,
+                            "display": {
+                                "type": "textfield",
+                                "labelText": "Type:",
+                                "labelPosition": "left"
+                            }
+                        },
+                        {
+                            "name": "filePathField",
+                            "varRef": "filePath",
+                            "seq": 4,
+                            "display": {
+                                "type": "textfield",
+                                "labelText": "Path:",
+                                "labelPosition": "left"
+                            }
+                        },
+                        {
+                            "name": "fileSizeField",
+                            "varRef": "fileSize",
+                            "seq": 5,
+                            "display": {
+                                "type": "textfield",
+                                "labelText": "Size:",
+                                "labelPosition": "left"
+                            }
+                        },
+                        {
+                            "name": "lastModifiedField",
+                            "varRef": "lastModified",
+                            "seq": 6,
+                            "display": {
+                                "type": "textfield",
+                                "labelText": "Modified:",
+                                "labelPosition": "left"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+};
+
+print "Created file explorer screen with TreeView and file details panel.";
+print "The tree shows a typical project directory structure.";
+print "";
+print "Icon properties:";
+print "- 'icon': Static icon for the node (same for all states)";
+print "- 'iconOpen': Icon shown when node is expanded";
+print "- 'iconClosed': Icon shown when node is collapsed";
+print "";
+print "onChange: When selecting an item, the file details panel updates";
+print "";
+
+// Show the screen
+print "Displaying file explorer screen with TreeView...";
+show screen fileExplorer;
+
+print "";
+print "Test completed!";
+print "The screen displays a hierarchical file structure in a TreeView.";
+print "- Nodes can be expanded/collapsed by clicking the arrow icons";
+print "- Folder icons change based on expanded/collapsed state";
+print "- File icons remain static";
+print "- File details panel on the right updates when selecting items";
+print "- showRoot: true shows the root node";
+print "- expandAll: true expands all nodes by default";

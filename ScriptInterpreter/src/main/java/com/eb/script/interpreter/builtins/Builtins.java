@@ -1195,6 +1195,112 @@ public final class Builtins {
                 "ftp.listConnections", DataType.JSON            // returns array of connection info
         ));
 
+        // ==========================
+        // Image builtins
+        // ==========================
+        addBuiltin(info(
+                "image.load", DataType.IMAGE,
+                newParam("path", DataType.STRING, true)          // required; path to image file
+        ));
+        addBuiltin(info(
+                "image.create", DataType.IMAGE,
+                newParam("bytes", DataType.ARRAY, true),         // required; image byte array
+                newParam("name", DataType.STRING, false),        // optional; image name
+                newParam("type", DataType.STRING, false)         // optional; image type (png, jpg, gif, bmp)
+        ));
+        addBuiltin(info(
+                "image.save", DataType.BOOL,
+                newParam("image", DataType.IMAGE, true),         // required; EbsImage
+                newParam("path", DataType.STRING, true),         // required; output file path
+                newParam("format", DataType.STRING, false)       // optional; output format (png, jpg, gif, bmp)
+        ));
+        addBuiltin(info(
+                "image.resize", DataType.IMAGE,
+                newParam("image", DataType.IMAGE, true),         // required; EbsImage
+                newParam("width", DataType.INTEGER, true),       // required; target width
+                newParam("height", DataType.INTEGER, true),      // required; target height
+                newParam("keepAspect", DataType.BOOL, false)     // optional; maintain aspect ratio
+        ));
+        addBuiltin(info(
+                "image.getWidth", DataType.INTEGER,
+                newParam("image", DataType.IMAGE, true)          // required; EbsImage
+        ));
+        addBuiltin(info(
+                "image.getHeight", DataType.INTEGER,
+                newParam("image", DataType.IMAGE, true)          // required; EbsImage
+        ));
+        addBuiltin(info(
+                "image.getInfo", DataType.JSON,
+                newParam("image", DataType.IMAGE, true)          // required; EbsImage
+        ));
+        addBuiltin(info(
+                "image.crop", DataType.IMAGE,
+                newParam("image", DataType.IMAGE, true),         // required; EbsImage
+                newParam("x", DataType.INTEGER, true),           // required; crop start x
+                newParam("y", DataType.INTEGER, true),           // required; crop start y
+                newParam("width", DataType.INTEGER, true),       // required; crop width
+                newParam("height", DataType.INTEGER, true)       // required; crop height
+        ));
+        addBuiltin(info(
+                "image.rotate", DataType.IMAGE,
+                newParam("image", DataType.IMAGE, true),         // required; EbsImage
+                newParam("degrees", DataType.DOUBLE, true)       // required; rotation angle in degrees
+        ));
+        addBuiltin(info(
+                "image.flipHorizontal", DataType.IMAGE,
+                newParam("image", DataType.IMAGE, true)          // required; EbsImage
+        ));
+        addBuiltin(info(
+                "image.flipVertical", DataType.IMAGE,
+                newParam("image", DataType.IMAGE, true)          // required; EbsImage
+        ));
+        addBuiltin(info(
+                "image.toGrayscale", DataType.IMAGE,
+                newParam("image", DataType.IMAGE, true)          // required; EbsImage
+        ));
+        addBuiltin(info(
+                "image.adjustBrightness", DataType.IMAGE,
+                newParam("image", DataType.IMAGE, true),         // required; EbsImage
+                newParam("factor", DataType.DOUBLE, true)        // required; brightness factor (1.0 = no change)
+        ));
+        addBuiltin(info(
+                "image.adjustContrast", DataType.IMAGE,
+                newParam("image", DataType.IMAGE, true),         // required; EbsImage
+                newParam("factor", DataType.DOUBLE, true)        // required; contrast factor (1.0 = no change)
+        ));
+        addBuiltin(info(
+                "image.fromBase64", DataType.IMAGE,
+                newParam("base64", DataType.STRING, true)        // required; base64 encoded image string
+        ));
+        addBuiltin(info(
+                "image.toBase64", DataType.STRING,
+                newParam("image", DataType.IMAGE, true),         // required; EbsImage
+                newParam("format", DataType.STRING, false)       // optional; output format (png, jpg, gif, bmp)
+        ));
+        addBuiltin(info(
+                "image.getBytes", DataType.ARRAY,
+                newParam("image", DataType.IMAGE, true),         // required; EbsImage
+                newParam("format", DataType.STRING, false)       // optional; output format (png, jpg, gif, bmp)
+        ));
+        addBuiltin(info(
+                "image.getName", DataType.STRING,
+                newParam("image", DataType.IMAGE, true)          // required; EbsImage
+        ));
+        addBuiltin(info(
+                "image.setName", DataType.IMAGE,
+                newParam("image", DataType.IMAGE, true),         // required; EbsImage
+                newParam("name", DataType.STRING, true)          // required; new image name
+        ));
+        addBuiltin(info(
+                "image.getType", DataType.STRING,
+                newParam("image", DataType.IMAGE, true)          // required; EbsImage
+        ));
+        addBuiltin(info(
+                "image.setType", DataType.IMAGE,
+                newParam("image", DataType.IMAGE, true),         // required; EbsImage
+                newParam("type", DataType.STRING, true)          // required; new image type
+        ));
+
         NAMES = Collections.unmodifiableSet(BUILTINS.keySet());
     }
 
@@ -1271,6 +1377,11 @@ public final class Builtins {
         // FTP builtins
         if (BuiltinsFtp.handles(name)) {
             return BuiltinsFtp.dispatch(env, name, args);
+        }
+        
+        // Image builtins
+        if (BuiltinsImage.handles(name)) {
+            return BuiltinsImage.dispatch(env, name, args);
         }
         
         // File builtins (already in BuiltinsFile)

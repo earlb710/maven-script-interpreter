@@ -176,6 +176,57 @@ public class AreaItemFactory {
                 }
                 
                 return tableView;
+                
+            case TREEVIEW:
+                TreeView<String> treeView = new TreeView<>();
+                
+                // Set the root node if treeItems are specified
+                if (metadata != null && metadata.treeItems != null && !metadata.treeItems.isEmpty()) {
+                    // Determine if we should show the root node
+                    // Default is true if not specified
+                    boolean showRootValue = metadata.showRoot == null ? true : metadata.showRoot;
+                    
+                    TreeItem<String> rootItem;
+                    
+                    if (metadata.treeItems.size() == 1) {
+                        // Single root item - use it as the actual root
+                        DisplayItem.TreeItemDef rootDef = metadata.treeItems.get(0);
+                        rootItem = createTreeItem(rootDef);
+                        treeView.setShowRoot(showRootValue);
+                    } else {
+                        // Multiple root items - create a hidden container root
+                        // In this case, we always hide the synthetic container root
+                        rootItem = new TreeItem<>("Root");
+                        for (DisplayItem.TreeItemDef itemDef : metadata.treeItems) {
+                            rootItem.getChildren().add(createTreeItem(itemDef));
+                        }
+                        rootItem.setExpanded(true);
+                        // For multiple roots, the container is always hidden
+                        treeView.setShowRoot(false);
+                    }
+                    
+                    treeView.setRoot(rootItem);
+                    
+                    // Apply expandAll if specified
+                    if (metadata.expandAll != null && metadata.expandAll) {
+                        expandAllNodes(rootItem);
+                    }
+                } else {
+                    // Create empty root as placeholder
+                    TreeItem<String> emptyRoot = new TreeItem<>("No items");
+                    treeView.setRoot(emptyRoot);
+                }
+                
+                // Calculate height based on displayRecords if specified
+                if (metadata != null && metadata.displayRecords != null && metadata.displayRecords > 0) {
+                    // Row height is approximately 24 pixels
+                    double calculatedHeight = (metadata.displayRecords * 24.0) + 4.0;
+                    treeView.setPrefHeight(calculatedHeight);
+                    treeView.setMinHeight(calculatedHeight);
+                    treeView.setMaxHeight(calculatedHeight);
+                }
+                
+                return treeView;
 
             // Numeric Controls
             case SPINNER:
@@ -226,7 +277,22 @@ public class AreaItemFactory {
 
             // Media/Display Controls
             case IMAGEVIEW:
-                return new ImageView();
+                ImageView imageView = new ImageView();
+                // Apply image display properties from metadata
+                if (metadata != null) {
+                    // Set fit dimensions
+                    if (metadata.fitWidth != null && metadata.fitWidth > 0) {
+                        imageView.setFitWidth(metadata.fitWidth);
+                    }
+                    if (metadata.fitHeight != null && metadata.fitHeight > 0) {
+                        imageView.setFitHeight(metadata.fitHeight);
+                    }
+                    // Set preserve ratio (default true)
+                    imageView.setPreserveRatio(metadata.preserveRatio == null || metadata.preserveRatio);
+                    // Set smooth scaling (default true)
+                    imageView.setSmooth(metadata.smooth == null || metadata.smooth);
+                }
+                return imageView;
             case MEDIAVIEW:
                 // MediaView requires javafx-media module which is not included
                 // Return a label placeholder instead
@@ -821,6 +887,135 @@ public class AreaItemFactory {
             label.setText(String.format("%d", (int) value));
         } else {
             label.setText(String.format("%.1f", value));
+        }
+    }
+    
+    /**
+     * Creates a TreeItem from a TreeItemDef, recursively creating children.
+     * Supports icons that change based on expanded/collapsed state.
+     * 
+     * @param def The TreeItemDef definition
+     * @return A TreeItem with value, icon, and children
+     */
+    private static TreeItem<String> createTreeItem(DisplayItem.TreeItemDef def) {
+        TreeItem<String> item = new TreeItem<>(def.value != null ? def.value : "");
+        
+        // Set expanded state
+        if (def.expanded != null) {
+            item.setExpanded(def.expanded);
+        }
+        
+        // Recursively add children first (so we know if this is a branch or leaf)
+        boolean hasChildren = def.children != null && !def.children.isEmpty();
+        if (hasChildren) {
+            for (DisplayItem.TreeItemDef childDef : def.children) {
+                item.getChildren().add(createTreeItem(childDef));
+            }
+            // Expand parent nodes that have children by default
+            if (def.expanded == null) {
+                item.setExpanded(true);
+            }
+        }
+        
+        // Set up icons
+        boolean hasOpenClosedIcons = def.iconOpen != null || def.iconClosed != null;
+        
+        if (hasOpenClosedIcons && hasChildren) {
+            // Dynamic icons that change based on expanded/collapsed state
+            updateTreeItemIcon(item, def, item.isExpanded());
+            
+            // Add listener for expansion state changes
+            item.expandedProperty().addListener((obs, wasExpanded, isExpanded) -> {
+                updateTreeItemIcon(item, def, isExpanded);
+            });
+        } else if (def.icon != null && !def.icon.isEmpty()) {
+            // Static icon (same for all states)
+            setTreeItemIcon(item, def.icon);
+        }
+        
+        return item;
+    }
+    
+    /**
+     * Updates the icon of a tree item based on its expanded state.
+     * Uses iconOpen when expanded, iconClosed when collapsed.
+     * Falls back to icon property if specific state icon is not defined.
+     * 
+     * @param item The TreeItem to update
+     * @param def The TreeItemDef containing icon definitions
+     * @param isExpanded Whether the item is currently expanded
+     */
+    private static void updateTreeItemIcon(TreeItem<String> item, DisplayItem.TreeItemDef def, boolean isExpanded) {
+        String iconPath;
+        if (isExpanded) {
+            // Use iconOpen if available, otherwise fall back to icon
+            iconPath = def.iconOpen != null ? def.iconOpen : def.icon;
+        } else {
+            // Use iconClosed if available, otherwise fall back to icon
+            iconPath = def.iconClosed != null ? def.iconClosed : def.icon;
+        }
+        
+        if (iconPath != null && !iconPath.isEmpty()) {
+            setTreeItemIcon(item, iconPath);
+        }
+    }
+    
+    /**
+     * Sets the icon graphic for a tree item.
+     * Supports loading from classpath resources or file paths.
+     * 
+     * @param item The TreeItem to set the icon on
+     * @param iconPath The path to the icon image
+     */
+    private static void setTreeItemIcon(TreeItem<String> item, String iconPath) {
+        try {
+            javafx.scene.image.Image image = null;
+            
+            // Try loading from classpath using ClassLoader (uses absolute paths from classpath root)
+            String resourcePath = iconPath.startsWith("/") ? iconPath.substring(1) : iconPath;
+            java.io.InputStream is = AreaItemFactory.class.getClassLoader().getResourceAsStream(resourcePath);
+            
+            // Also try with leading slash using Class.getResourceAsStream
+            if (is == null) {
+                is = AreaItemFactory.class.getResourceAsStream("/" + resourcePath);
+            }
+            
+            if (is != null) {
+                try {
+                    image = new javafx.scene.image.Image(is);
+                } finally {
+                    is.close();
+                }
+            } else {
+                // Try loading from file system
+                java.io.File file = new java.io.File(iconPath);
+                if (file.exists()) {
+                    image = new javafx.scene.image.Image(file.toURI().toString());
+                }
+            }
+            
+            if (image != null && !image.isError()) {
+                ImageView imageView = new ImageView(image);
+                imageView.setFitHeight(16);
+                imageView.setFitWidth(16);
+                imageView.setPreserveRatio(true);
+                item.setGraphic(imageView);
+            }
+        } catch (Exception e) {
+            // Silently ignore icon loading errors - icons are optional
+        }
+    }
+    
+    /**
+     * Expands all nodes in a tree recursively.
+     * 
+     * @param item The root item to start expanding from
+     */
+    private static void expandAllNodes(TreeItem<String> item) {
+        if (item == null) return;
+        item.setExpanded(true);
+        for (TreeItem<String> child : item.getChildren()) {
+            expandAllNodes(child);
         }
     }
 }

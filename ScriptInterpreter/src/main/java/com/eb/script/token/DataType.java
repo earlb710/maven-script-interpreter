@@ -2,6 +2,7 @@ package com.eb.script.token;
 
 import com.eb.script.json.Json;
 import com.eb.script.arrays.ArrayDef;
+import com.eb.script.image.EbsImage;
 import com.eb.util.Util;
 import java.util.Date;
 
@@ -23,6 +24,7 @@ public enum DataType {
     QUEUE(java.util.Queue.class),
     RECORD(java.util.Map.class),
     MAP(java.util.Map.class),
+    IMAGE(EbsImage.class),
     ANY(Comparable.class);
 
     public final Class dataClass;
@@ -77,6 +79,9 @@ public enum DataType {
                 case MAP -> {
                     return new Object[length];
                 }
+                case IMAGE -> {
+                    return new EbsImage[length];
+                }
                 case ANY -> {
                     return new Comparable[length];
                 }
@@ -114,6 +119,10 @@ public enum DataType {
         if (type == MAP) {
             // Accept Map objects as maps (key-value stores)
             return value instanceof java.util.Map;
+        }
+        if (type == IMAGE) {
+            // Accept EbsImage objects as images
+            return value instanceof EbsImage;
         }
         // For other types, allow subclasses (e.g., HashMap instanceof Map)
         return dataClass.isInstance(value);

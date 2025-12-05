@@ -1471,6 +1471,8 @@ public class InterpreterScreen {
                 return DataType.JSON;
             case "record":
                 return DataType.RECORD;
+            case "image":
+                return DataType.IMAGE;
             default:
                 return null;
         }
@@ -1568,6 +1570,13 @@ public class InterpreterScreen {
         } else if (displayDef.containsKey("labeltextalignment")) {
             metadata.labelTextAlignment = String.valueOf(displayDef.get("labeltextalignment")).toLowerCase();
         }
+        
+        // Extract label position (left, right, top, bottom)
+        if (displayDef.containsKey("labelPosition")) {
+            metadata.labelPosition = String.valueOf(displayDef.get("labelPosition")).toLowerCase();
+        } else if (displayDef.containsKey("labelposition")) {
+            metadata.labelPosition = String.valueOf(displayDef.get("labelposition")).toLowerCase();
+        }
 
         // Extract onClick event handler for buttons - check both camelCase and lowercase
         if (displayDef.containsKey("onClick")) {
@@ -1639,6 +1648,41 @@ public class InterpreterScreen {
             Object displayRecordsObj = displayDef.get("displayrecords");
             if (displayRecordsObj instanceof Number) {
                 metadata.displayRecords = ((Number) displayRecordsObj).intValue();
+            }
+        }
+        
+        // Extract treeItems for TreeView
+        if (displayDef.containsKey("treeItems")) {
+            Object treeItemsObj = displayDef.get("treeItems");
+            metadata.treeItems = parseTreeItems(treeItemsObj);
+        } else if (displayDef.containsKey("treeitems")) {
+            Object treeItemsObj = displayDef.get("treeitems");
+            metadata.treeItems = parseTreeItems(treeItemsObj);
+        }
+        
+        // Extract expandAll for TreeView
+        if (displayDef.containsKey("expandAll")) {
+            Object expandAllObj = displayDef.get("expandAll");
+            if (expandAllObj instanceof Boolean) {
+                metadata.expandAll = (Boolean) expandAllObj;
+            }
+        } else if (displayDef.containsKey("expandall")) {
+            Object expandAllObj = displayDef.get("expandall");
+            if (expandAllObj instanceof Boolean) {
+                metadata.expandAll = (Boolean) expandAllObj;
+            }
+        }
+        
+        // Extract showRoot for TreeView
+        if (displayDef.containsKey("showRoot")) {
+            Object showRootObj = displayDef.get("showRoot");
+            if (showRootObj instanceof Boolean) {
+                metadata.showRoot = (Boolean) showRootObj;
+            }
+        } else if (displayDef.containsKey("showroot")) {
+            Object showRootObj = displayDef.get("showroot");
+            if (showRootObj instanceof Boolean) {
+                metadata.showRoot = (Boolean) showRootObj;
             }
         }
 
@@ -1820,6 +1864,98 @@ public class InterpreterScreen {
         }
         
         return column;
+    }
+    
+    /**
+     * Parses tree items from a JSON array for TreeView.
+     * Handles both List and ArrayDynamic inputs.
+     * 
+     * @param treeItemsObj The tree items object (List or ArrayDynamic)
+     * @return A list of TreeItemDef objects representing the tree structure
+     */
+    private List<DisplayItem.TreeItemDef> parseTreeItems(Object treeItemsObj) {
+        List<DisplayItem.TreeItemDef> treeItems = new ArrayList<>();
+        
+        List<Object> itemList = null;
+        if (treeItemsObj instanceof ArrayDynamic) {
+            itemList = ((ArrayDynamic) treeItemsObj).getAll();
+        } else if (treeItemsObj instanceof List) {
+            @SuppressWarnings("unchecked")
+            List<Object> list = (List<Object>) treeItemsObj;
+            itemList = list;
+        }
+        
+        if (itemList != null) {
+            for (Object item : itemList) {
+                if (item instanceof Map) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> itemDef = (Map<String, Object>) item;
+                    DisplayItem.TreeItemDef treeItem = parseTreeItemDef(itemDef);
+                    treeItems.add(treeItem);
+                } else if (item instanceof String) {
+                    // Simple string value - create a leaf node
+                    DisplayItem.TreeItemDef treeItem = new DisplayItem.TreeItemDef((String) item);
+                    treeItems.add(treeItem);
+                }
+            }
+        }
+        
+        return treeItems;
+    }
+    
+    /**
+     * Parses a single tree item definition from a JSON map.
+     * Recursively parses children if present.
+     * 
+     * @param itemDef The JSON map containing tree item properties
+     * @return A TreeItemDef representing the tree node
+     */
+    private DisplayItem.TreeItemDef parseTreeItemDef(Map<String, Object> itemDef) {
+        DisplayItem.TreeItemDef treeItem = new DisplayItem.TreeItemDef();
+        
+        // Extract value (display text)
+        if (itemDef.containsKey("value")) {
+            treeItem.value = String.valueOf(itemDef.get("value"));
+        } else if (itemDef.containsKey("text")) {
+            treeItem.value = String.valueOf(itemDef.get("text"));
+        } else if (itemDef.containsKey("name")) {
+            treeItem.value = String.valueOf(itemDef.get("name"));
+        }
+        
+        // Extract icon path (optional - used when no iconOpen/iconClosed specified)
+        if (itemDef.containsKey("icon")) {
+            treeItem.icon = String.valueOf(itemDef.get("icon"));
+        }
+        
+        // Extract iconOpen path (optional - for expanded state)
+        if (itemDef.containsKey("iconOpen")) {
+            treeItem.iconOpen = String.valueOf(itemDef.get("iconOpen"));
+        } else if (itemDef.containsKey("iconopen")) {
+            treeItem.iconOpen = String.valueOf(itemDef.get("iconopen"));
+        }
+        
+        // Extract iconClosed path (optional - for collapsed state)
+        if (itemDef.containsKey("iconClosed")) {
+            treeItem.iconClosed = String.valueOf(itemDef.get("iconClosed"));
+        } else if (itemDef.containsKey("iconclosed")) {
+            treeItem.iconClosed = String.valueOf(itemDef.get("iconclosed"));
+        }
+        
+        // Extract expanded state (optional)
+        if (itemDef.containsKey("expanded")) {
+            Object expandedObj = itemDef.get("expanded");
+            if (expandedObj instanceof Boolean) {
+                treeItem.expanded = (Boolean) expandedObj;
+            }
+        }
+        
+        // Recursively parse children
+        if (itemDef.containsKey("children")) {
+            Object childrenObj = itemDef.get("children");
+            treeItem.children = parseTreeItems(childrenObj);
+        }
+        
+        return treeItem;
     }
 
     /**
@@ -2476,11 +2612,16 @@ public class InterpreterScreen {
                 varItemsMap.put(varKey, var);
 
                 // Store in screen's thread-safe variable map (legacy support)
-                screenVarMap.put(varName, value);
+                // Note: ConcurrentHashMap does not allow null values, so skip null values
+                // Use lowercase for case-insensitive variable name lookup
+                if (value != null) {
+                    screenVarMap.put(varName.toLowerCase(), value);
+                }
 
                 // Store the variable type if specified (legacy support)
+                // Use lowercase for case-insensitive variable name lookup
                 if (varType != null) {
-                    screenVarTypeMap.put(varName, varType);
+                    screenVarTypeMap.put(varName.toLowerCase(), varType);
                 }
             }
         }
