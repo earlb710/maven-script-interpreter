@@ -721,6 +721,16 @@ public final class Builtins {
                 "array.base64decode", DataType.ARRAY,
                 newParam("b64", DataType.STRING)
         ));
+        // array.asBitmap(byteArray) - Cast array.byte to array.bitmap
+        addBuiltin(info(
+                "array.asBitmap", DataType.ARRAY,
+                newParam("array", DataType.ARRAY, true)
+        ));
+        // array.asByte(bitmapArray) - Cast array.bitmap to array.byte
+        addBuiltin(info(
+                "array.asByte", DataType.ARRAY,
+                newParam("array", DataType.ARRAY, true)
+        ));
 
         // ==========================
         // QUEUE builtins
