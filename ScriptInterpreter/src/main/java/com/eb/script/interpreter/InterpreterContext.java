@@ -373,9 +373,14 @@ public class InterpreterContext {
      * @param screenName the name of the screen to refresh
      */
     public void triggerScreenRefresh(String screenName) {
+        System.out.println("[DEBUG REFRESH] triggerScreenRefresh called for: " + screenName);
+        System.out.println("[DEBUG REFRESH] Available callbacks: " + screenRefreshCallbacks.keySet());
         Runnable callback = screenRefreshCallbacks.get(screenName);
         if (callback != null) {
+            System.out.println("[DEBUG REFRESH] Found callback, running it...");
             callback.run();
+        } else {
+            System.out.println("[DEBUG REFRESH] No callback found for screen: " + screenName);
         }
     }
 

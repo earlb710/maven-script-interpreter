@@ -208,9 +208,13 @@ public class ControlUpdater {
     public static void refreshBoundControls(List<Node> boundControls,
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
         if (boundControls == null || screenVars == null) {
+            System.out.println("[DEBUG refreshBoundControls] Null check failed - boundControls=" + (boundControls != null) + ", screenVars=" + (screenVars != null));
             return;
         }
 
+        System.out.println("[DEBUG refreshBoundControls] Refreshing " + boundControls.size() + " controls");
+        System.out.println("[DEBUG refreshBoundControls] screenVars keys: " + screenVars.keySet());
+        
         for (Node control : boundControls) {
             String varName = (String) control.getProperties().get("varName");
             DisplayItem metadata = (DisplayItem) control.getProperties().get("metadata");
@@ -218,6 +222,7 @@ public class ControlUpdater {
             if (varName != null) {
                 // Use VarRefResolver for case-insensitive lookup and complex expressions
                 Object currentValue = VarRefResolver.resolveVarRefValue(varName, screenVars);
+                System.out.println("[DEBUG refreshBoundControls] Control varName=" + varName + ", value=" + currentValue);
                 updateControlFromValue(control, currentValue, metadata);
             }
         }

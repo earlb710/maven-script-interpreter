@@ -55,13 +55,17 @@ public class DisplayChangeHandler {
                 System.out.println("[DEBUG] onChange fired: " + screenName + "." + finalItemName + " (count: " + count + ")");
                 
                 // Execute the onChange code
+                System.out.println("[DEBUG onChange] Executing code: " + changeCode.substring(0, Math.min(100, changeCode.length())) + "...");
                 onClickHandler.execute(changeCode);
+                System.out.println("[DEBUG onChange] Code executed successfully");
                 
                 // After executing the onChange code, refresh all bound controls to update UI
                 if (boundControls != null && screenVars != null) {
+                    System.out.println("[DEBUG onChange] Refreshing " + boundControls.size() + " bound controls");
                     DataBindingManager.refreshBoundControls(boundControls, screenVars);
                 }
             } catch (Exception e) {
+                System.out.println("[DEBUG onChange] ERROR executing onChange code: " + e.getMessage());
                 System.err.println("Error executing onChange code: " + e.getMessage());
                 e.printStackTrace();
             }
