@@ -58,8 +58,10 @@ public class ControlListenerFactory {
             
             // Check if the screen is still being initialized (being created or not yet shown)
             // During initialization, changes are expected and should not mark the screen as changed
-            if (context.getScreensBeingCreated().contains(screenNameLower) ||
-                context.getScreensNotYetShown().contains(screenNameLower)) {
+            boolean beingCreated = context.getScreensBeingCreated().contains(screenNameLower);
+            boolean notYetShown = context.getScreensNotYetShown().contains(screenNameLower);
+            
+            if (beingCreated || notYetShown) {
                 return; // Skip marking as changed during initialization
             }
             

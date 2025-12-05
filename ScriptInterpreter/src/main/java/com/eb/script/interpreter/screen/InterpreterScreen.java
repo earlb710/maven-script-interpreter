@@ -957,6 +957,8 @@ public class InterpreterScreen {
             // (e.g., from scr.setItemChoiceOptions which uses Platform.runLater)
             Runnable markShownTask = () -> {
                 context.getScreensNotYetShown().remove(finalScreenKey);
+                // Clear any items that were incorrectly marked as changed during initialization
+                ScreenFactory.clearChangedItems(finalScreenKey);
             };
             
             if (Platform.isFxApplicationThread()) {
