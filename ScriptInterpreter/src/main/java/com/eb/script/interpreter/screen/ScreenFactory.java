@@ -713,8 +713,8 @@ public class ScreenFactory {
                 String displayName = item.name != null ? item.name : key;
                 String valueStr = getScreenItemValue(key, item, context, screenName);
                 String varRef = item.varRef != null ? item.varRef : "";
-                // Get the item type from displayItem
-                String itemType = getItemType(item, context);
+                // Get the item type from displayItem or fall back to displayMetadata lookup
+                String itemType = getItemType(item, context, screenName);
                 itemsTable.getItems().add(new String[]{displayName, valueStr, varRef, itemType});
             }
             
@@ -1315,13 +1315,25 @@ public class ScreenFactory {
      * @param context The interpreter context
      * @return The item type string (e.g., "colorpicker", "textfield", "combobox")
      */
-    private static String getItemType(AreaItem item, InterpreterContext context) {
+    /**
+     * Get the display type for an AreaItem.
+     * Returns the type from displayItem if available, otherwise tries to determine from varRef.
+     * 
+     * @param item The AreaItem
+     * @param context The interpreter context
+     * @param screenName The screen name (for displayMetadata lookup)
+     * @return The item type string (e.g., "colorpicker", "textfield", "combobox")
+     */
+    private static String getItemType(AreaItem item, InterpreterContext context, String screenName) {
+        // First check if displayItem has the type set directly
         if (item.displayItem != null && item.displayItem.type != null) {
             return item.displayItem.type.toLowerCase();
         }
         // Try to get the type from the displayMetadata registered with the varRef
-        if (item.varRef != null) {
-            DisplayItem displayItem = context.getDisplayItem().get(item.varRef.toLowerCase());
+        // The key format is "screenName.varName"
+        if (item.varRef != null && screenName != null) {
+            String key = screenName.toLowerCase() + "." + item.varRef.toLowerCase();
+            DisplayItem displayItem = context.getDisplayItem().get(key);
             if (displayItem != null && displayItem.type != null) {
                 return displayItem.type.toLowerCase();
             }
