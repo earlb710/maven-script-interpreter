@@ -65,7 +65,7 @@ screen imageTestScreen = {
                 "fitWidth": 200,
                 "fitHeight": 200,
                 "preserveRatio": true,
-                "onClick": "convertToBlackAndWhite"
+                "onClick": "call convertToBlackAndWhite();"
             }
         },
         {
