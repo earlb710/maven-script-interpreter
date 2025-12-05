@@ -337,7 +337,7 @@ public class ScreenFactory {
         mainContent.setPadding(new Insets(10));
         mainContent.setStyle("-fx-background-color: #f5f5f5;");
         
-        // Header with title and copy button
+        // Header with title, copy button, and close button
         HBox headerRow = new HBox(5);
         headerRow.setAlignment(Pos.CENTER_LEFT);
         
@@ -353,6 +353,19 @@ public class ScreenFactory {
         copyTooltip.setStyle("-fx-font-size: 12px;");
         copyTooltip.setShowDelay(javafx.util.Duration.millis(500));
         copyButton.setTooltip(copyTooltip);
+        
+        // Close button (top right corner)
+        javafx.scene.control.Button closeButton = new javafx.scene.control.Button("✕");
+        closeButton.setStyle("-fx-font-size: 12px; -fx-padding: 2 6 2 6; -fx-background-color: #e0e0e0; -fx-cursor: hand; -fx-text-fill: #666;");
+        javafx.scene.control.Tooltip closeTooltip = new javafx.scene.control.Tooltip("Close debug panel (Ctrl+D)");
+        closeTooltip.setStyle("-fx-font-size: 12px;");
+        closeTooltip.setShowDelay(javafx.util.Duration.millis(500));
+        closeButton.setTooltip(closeTooltip);
+        
+        // Close button action - toggle debug mode off
+        closeButton.setOnAction(e -> {
+            toggleDebugMode(screenName, context);
+        });
         
         // Get screen variables and types for copy action
         java.util.concurrent.ConcurrentHashMap<String, Object> screenVars = context.getScreenVars(screenName);
@@ -378,7 +391,7 @@ public class ScreenFactory {
             }).start();
         });
         
-        headerRow.getChildren().addAll(titleLabel, copyButton);
+        headerRow.getChildren().addAll(titleLabel, copyButton, closeButton);
         mainContent.getChildren().add(headerRow);
         
         // Separator
