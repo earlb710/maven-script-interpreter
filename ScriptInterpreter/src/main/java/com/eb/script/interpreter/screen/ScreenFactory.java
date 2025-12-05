@@ -41,15 +41,19 @@ import java.util.*;
  */
 public class ScreenFactory {
     
-    // Debug panel layout constants
-    private static final int DEBUG_PANEL_MIN_WIDTH = 250;
-    private static final int DEBUG_PANEL_PREF_WIDTH = 320;
-    private static final int DEBUG_PANEL_MAX_WIDTH = 400;
+    // Debug panel layout constants (increased by 10% from original values: 250->275, 320->352, 400->440)
+    private static final int DEBUG_PANEL_MIN_WIDTH = 275;
+    private static final int DEBUG_PANEL_PREF_WIDTH = 352;
+    private static final int DEBUG_PANEL_MAX_WIDTH = 440;
     private static final int DEBUG_AREA_INDENT_PIXELS = 15;
     private static final int DEBUG_MAX_CODE_DISPLAY_LENGTH = 50;
     private static final int DEBUG_TOOLTIP_MAX_WIDTH = 400;
+    // Key/name field minimum width - no maximum to allow expansion for long names
     private static final int DEBUG_ITEM_NAME_MIN_WIDTH = 60;
-    private static final int DEBUG_ITEM_NAME_MAX_WIDTH = 80;
+    
+    // Debug panel divider position constraints (min 50%, max 90% for main content)
+    private static final double DEBUG_DIVIDER_MIN_POSITION = 0.5;
+    private static final double DEBUG_DIVIDER_MAX_POSITION = 0.9;
     
     // Debug row styling constants
     private static final String DEBUG_ROW_HOVER_STYLE = "-fx-background-color: #d0e8ff; -fx-cursor: hand;";
@@ -115,6 +119,11 @@ public class ScreenFactory {
     // Map to store original window widths before debug panel expansion (screenName -> originalWidth)
     private static final java.util.concurrent.ConcurrentHashMap<String, Double> screenOriginalWidths = new java.util.concurrent.ConcurrentHashMap<>();
     
+    // Map to store the original center content of each screen (screenName -> centerContent) for debug panel toggling
+    private static final java.util.concurrent.ConcurrentHashMap<String, javafx.scene.Node> screenCenterContents = new java.util.concurrent.ConcurrentHashMap<>();
+    
+    // Map to store the SplitPane for each screen when debug panel is shown (screenName -> SplitPane)
+    private static final java.util.concurrent.ConcurrentHashMap<String, javafx.scene.control.SplitPane> screenDebugSplitPanes = new java.util.concurrent.ConcurrentHashMap<>();
     // Map to store event counts per item.eventType (e.g., "fileTree.onChange" -> count)
     private static final java.util.concurrent.ConcurrentHashMap<String, java.util.concurrent.atomic.AtomicInteger> eventCounts = new java.util.concurrent.ConcurrentHashMap<>();
     
@@ -283,6 +292,7 @@ public class ScreenFactory {
     /**
      * Toggle the debug panel visibility for a screen.
      * Shows a scrollable panel on the right side with all screen variables and values.
+     * Uses a SplitPane with a draggable divider to allow resizing the debug panel.
      * Also expands the window width when debug is activated and restores it when deactivated.
      * 
      * @param screenName The name of the screen
@@ -304,20 +314,79 @@ public class ScreenFactory {
                 screenOriginalWidths.put(screenName.toLowerCase(), stage.getWidth());
             }
             
+            // Store the original center content before replacing with SplitPane
+            javafx.scene.Node centerContent = rootPane.getCenter();
+            if (centerContent != null && !screenCenterContents.containsKey(screenName.toLowerCase())) {
+                screenCenterContents.put(screenName.toLowerCase(), centerContent);
+            }
+            
             // Create or update the debug panel
             javafx.scene.control.ScrollPane debugPanel = createDebugPanel(screenName, context);
             screenDebugPanels.put(screenName.toLowerCase(), debugPanel);
-            rootPane.setRight(debugPanel);
             
-            // Expand the window width to accommodate the debug panel
-            if (stage != null) {
-                double currentWidth = stage.getWidth();
-                double newWidth = currentWidth + DEBUG_PANEL_PREF_WIDTH;
-                stage.setWidth(newWidth);
+            // Create a horizontal SplitPane with main content on left and debug panel on right
+            javafx.scene.control.SplitPane splitPane = new javafx.scene.control.SplitPane();
+            splitPane.setOrientation(javafx.geometry.Orientation.HORIZONTAL);
+            
+            // Add the original center content and the debug panel to the SplitPane
+            javafx.scene.Node originalCenter = screenCenterContents.get(screenName.toLowerCase());
+            if (originalCenter != null) {
+                splitPane.getItems().addAll(originalCenter, debugPanel);
+                
+                // Store the SplitPane reference
+                screenDebugSplitPanes.put(screenName.toLowerCase(), splitPane);
+                
+                // Replace the center content with the SplitPane
+                rootPane.setCenter(splitPane);
+                
+                // Expand the window width to accommodate the debug panel
+                if (stage != null) {
+                    double currentWidth = stage.getWidth();
+                    double newWidth = currentWidth + DEBUG_PANEL_PREF_WIDTH;
+                    stage.setWidth(newWidth);
+                    
+                    // Set the divider position after the stage is resized
+                    // Calculate the divider position so the debug panel gets its preferred width
+                    Platform.runLater(() -> {
+                        double totalWidth = splitPane.getWidth();
+                        double dividerPos;
+                        if (totalWidth > 0) {
+                            dividerPos = (totalWidth - DEBUG_PANEL_PREF_WIDTH) / totalWidth;
+                        } else {
+                            // Fallback: calculate based on expected window width
+                            dividerPos = 1.0 - ((double) DEBUG_PANEL_PREF_WIDTH / newWidth);
+                        }
+                        // Clamp the divider position to ensure main content has reasonable space
+                        splitPane.setDividerPositions(
+                            Math.max(DEBUG_DIVIDER_MIN_POSITION, Math.min(DEBUG_DIVIDER_MAX_POSITION, dividerPos)));
+                    });
+                }
+            } else {
+                // No original center content available - don't show split pane with only debug panel
+                // Just show debug panel in the right side of the BorderPane as a fallback
+                rootPane.setRight(debugPanel);
+                
+                // Expand the window width to accommodate the debug panel
+                if (stage != null) {
+                    double currentWidth = stage.getWidth();
+                    double newWidth = currentWidth + DEBUG_PANEL_PREF_WIDTH;
+                    stage.setWidth(newWidth);
+                }
             }
         } else {
-            // Hide the debug panel
+            // Restore the original center content if we used a SplitPane
+            javafx.scene.Node originalCenter = screenCenterContents.remove(screenName.toLowerCase());
+            if (originalCenter != null) {
+                rootPane.setCenter(originalCenter);
+            }
+            
+            // Clean up the SplitPane reference
+            screenDebugSplitPanes.remove(screenName.toLowerCase());
+            
+            // Also clear BorderPane.setRight() in case we used the fallback approach
             rootPane.setRight(null);
+            
+            // Remove the debug panel reference
             screenDebugPanels.remove(screenName.toLowerCase());
             
             // Restore the original window width
@@ -342,14 +411,17 @@ public class ScreenFactory {
         mainContent.setPadding(new Insets(10));
         mainContent.setStyle("-fx-background-color: #f5f5f5;");
         
-        // Header with title and copy button
-        HBox headerRow = new HBox(5);
-        headerRow.setAlignment(Pos.CENTER_LEFT);
+        // Header using BorderPane for proper positioning - close button in absolute top right
+        BorderPane headerPane = new BorderPane();
+        headerPane.setPadding(new Insets(0, 0, 5, 0));
+        
+        // Left side: Title and copy button
+        HBox leftHeader = new HBox(5);
+        leftHeader.setAlignment(Pos.CENTER_LEFT);
         
         // Title
         javafx.scene.control.Label titleLabel = new javafx.scene.control.Label("Debug: " + screenName);
         titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #333;");
-        HBox.setHgrow(titleLabel, Priority.ALWAYS);
         
         // Copy button
         javafx.scene.control.Button copyButton = new javafx.scene.control.Button("📋");
@@ -358,6 +430,24 @@ public class ScreenFactory {
         copyTooltip.setStyle("-fx-font-size: 12px;");
         copyTooltip.setShowDelay(javafx.util.Duration.millis(500));
         copyButton.setTooltip(copyTooltip);
+        
+        leftHeader.getChildren().addAll(titleLabel, copyButton);
+        headerPane.setLeft(leftHeader);
+        
+        // Close button - positioned in absolute top right corner
+        javafx.scene.control.Button closeButton = new javafx.scene.control.Button("✕");
+        closeButton.setStyle("-fx-font-size: 14px; -fx-padding: 2 8 2 8; -fx-background-color: #ff6666; -fx-cursor: hand; -fx-text-fill: white; -fx-font-weight: bold;");
+        javafx.scene.control.Tooltip closeTooltip = new javafx.scene.control.Tooltip("Close debug panel (Ctrl+D)");
+        closeTooltip.setStyle("-fx-font-size: 12px;");
+        closeTooltip.setShowDelay(javafx.util.Duration.millis(500));
+        closeButton.setTooltip(closeTooltip);
+        BorderPane.setAlignment(closeButton, Pos.TOP_RIGHT);
+        headerPane.setRight(closeButton);
+        
+        // Close button action - toggle debug mode off
+        closeButton.setOnAction(e -> {
+            toggleDebugMode(screenName, context);
+        });
         
         // Get screen variables and types for copy action
         java.util.concurrent.ConcurrentHashMap<String, Object> screenVars = context.getScreenVars(screenName);
@@ -383,8 +473,7 @@ public class ScreenFactory {
             }).start();
         });
         
-        headerRow.getChildren().addAll(titleLabel, copyButton);
-        mainContent.getChildren().add(headerRow);
+        mainContent.getChildren().add(headerPane);
         
         // Separator
         javafx.scene.control.Separator separator = new javafx.scene.control.Separator();
@@ -394,7 +483,7 @@ public class ScreenFactory {
         VBox statusSection = createScreenStatusSection(screenName, context);
         mainContent.getChildren().add(statusSection);
         
-        // === VARIABLES SECTION ===
+        // === VARIABLES SECTION - Using TableView for proper alignment ===
         VBox varsSection = new VBox(3);
         varsSection.setPadding(new Insets(5));
         varsSection.setStyle("-fx-background-color: #f8f8f8;");
@@ -404,16 +493,39 @@ public class ScreenFactory {
         varsSection.getChildren().add(varsHeader);
         
         if (screenVars != null && !screenVars.isEmpty()) {
+            // Create TableView for variables
+            javafx.scene.control.TableView<String[]> varsTable = new javafx.scene.control.TableView<>();
+            varsTable.setColumnResizePolicy(javafx.scene.control.TableView.CONSTRAINED_RESIZE_POLICY);
+            varsTable.setStyle("-fx-background-color: transparent;");
+            
+            // Name column (50%)
+            javafx.scene.control.TableColumn<String[], String> nameCol = new javafx.scene.control.TableColumn<>("Name");
+            nameCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue()[0]));
+            nameCol.setStyle("-fx-alignment: CENTER-LEFT; -fx-font-weight: bold;");
+            nameCol.prefWidthProperty().bind(varsTable.widthProperty().multiply(0.5));
+            
+            // Value column (50%)
+            javafx.scene.control.TableColumn<String[], String> valueCol = new javafx.scene.control.TableColumn<>("Value");
+            valueCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue()[1]));
+            valueCol.setStyle("-fx-alignment: CENTER-LEFT;");
+            valueCol.prefWidthProperty().bind(varsTable.widthProperty().multiply(0.5));
+            
+            varsTable.getColumns().add(nameCol);
+            varsTable.getColumns().add(valueCol);
+            
+            // Populate data
             java.util.List<String> sortedKeys = new java.util.ArrayList<>(screenVars.keySet());
             java.util.Collections.sort(sortedKeys, String.CASE_INSENSITIVE_ORDER);
             
-            int rowIndex = 0;
             for (String key : sortedKeys) {
                 Object value = screenVars.get(key);
-                DataType dataType = screenVarTypes != null ? screenVarTypes.get(key) : null;
-                HBox varRow = createVariableRow(key, value, dataType, rowIndex++);
-                varsSection.getChildren().add(varRow);
+                String valueStr = formatValue(value);
+                varsTable.getItems().add(new String[]{key, valueStr});
             }
+            
+            // Set preferred height based on content
+            varsTable.setPrefHeight(Math.min(200, sortedKeys.size() * 25 + 30));
+            varsSection.getChildren().add(varsTable);
         } else {
             javafx.scene.control.Label noVarsLabel = new javafx.scene.control.Label("No variables defined");
             noVarsLabel.setStyle("-fx-font-style: italic; -fx-text-fill: #888;");
@@ -427,7 +539,7 @@ public class ScreenFactory {
         varsScrollPane.setVbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.AS_NEEDED);
         VBox.setVgrow(varsScrollPane, Priority.ALWAYS);
         
-        // === SCREEN ITEMS SECTION ===
+        // === SCREEN ITEMS SECTION - Using TableView for proper alignment ===
         VBox itemsSection = new VBox(3);
         itemsSection.setPadding(new Insets(5));
         itemsSection.setStyle("-fx-background-color: #f0f5f0;");
@@ -437,14 +549,40 @@ public class ScreenFactory {
         itemsSection.getChildren().add(itemsHeader);
         
         if (screenAreaItems != null && !screenAreaItems.isEmpty()) {
+            // Create TableView for screen items
+            javafx.scene.control.TableView<String[]> itemsTable = new javafx.scene.control.TableView<>();
+            itemsTable.setColumnResizePolicy(javafx.scene.control.TableView.CONSTRAINED_RESIZE_POLICY);
+            itemsTable.setStyle("-fx-background-color: transparent;");
+            
+            // Name column (50%)
+            javafx.scene.control.TableColumn<String[], String> itemNameCol = new javafx.scene.control.TableColumn<>("Item");
+            itemNameCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue()[0]));
+            itemNameCol.setStyle("-fx-alignment: CENTER-LEFT; -fx-font-weight: bold;");
+            itemNameCol.prefWidthProperty().bind(itemsTable.widthProperty().multiply(0.5));
+            
+            // Value column (50%)
+            javafx.scene.control.TableColumn<String[], String> itemValueCol = new javafx.scene.control.TableColumn<>("Value");
+            itemValueCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue()[1]));
+            itemValueCol.setStyle("-fx-alignment: CENTER-LEFT;");
+            itemValueCol.prefWidthProperty().bind(itemsTable.widthProperty().multiply(0.5));
+            
+            itemsTable.getColumns().add(itemNameCol);
+            itemsTable.getColumns().add(itemValueCol);
+            
+            // Populate data
             java.util.List<String> sortedItemKeys = new java.util.ArrayList<>(screenAreaItems.keySet());
             java.util.Collections.sort(sortedItemKeys, String.CASE_INSENSITIVE_ORDER);
             
             for (String key : sortedItemKeys) {
                 AreaItem item = screenAreaItems.get(key);
-                HBox itemRow = createScreenItemRow(key, item, context, screenName);
-                itemsSection.getChildren().add(itemRow);
+                String displayName = item.name != null ? item.name : key;
+                String valueStr = getScreenItemValue(key, item, context, screenName);
+                itemsTable.getItems().add(new String[]{displayName, valueStr});
             }
+            
+            // Set preferred height based on content
+            itemsTable.setPrefHeight(Math.min(200, sortedItemKeys.size() * 25 + 30));
+            itemsSection.getChildren().add(itemsTable);
         } else {
             javafx.scene.control.Label noItemsLabel = new javafx.scene.control.Label("No screen items defined");
             noItemsLabel.setStyle("-fx-font-style: italic; -fx-text-fill: #888;");
@@ -497,7 +635,7 @@ public class ScreenFactory {
         scrollPane.setFitToHeight(true);
         scrollPane.setPrefWidth(DEBUG_PANEL_PREF_WIDTH);
         scrollPane.setMinWidth(DEBUG_PANEL_MIN_WIDTH);
-        scrollPane.setMaxWidth(DEBUG_PANEL_MAX_WIDTH);
+        // No max width constraint - allow resizing via SplitPane divider
         scrollPane.setStyle("-fx-background-color: #f5f5f5; -fx-border-color: #ccc; -fx-border-width: 0 0 0 1;");
         scrollPane.setHbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.setVbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
@@ -808,12 +946,15 @@ public class ScreenFactory {
         javafx.scene.control.Label iconLabel = new javafx.scene.control.Label(icon);
         iconLabel.setStyle("-fx-font-size: 11px;");
         
-        // Item name
+        // Item name - left aligned, 50% width
         javafx.scene.control.Label nameLabel = new javafx.scene.control.Label(itemName);
         nameLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #660066;");
         nameLabel.setMinWidth(DEBUG_ITEM_NAME_MIN_WIDTH);
-        nameLabel.setMaxWidth(DEBUG_ITEM_NAME_MAX_WIDTH);
+        nameLabel.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(nameLabel, Priority.ALWAYS);
+        nameLabel.setMaxWidth(Double.MAX_VALUE);
         
+        // Event type with truncated code preview - left aligned, 50% width
         // Get event count for debugging
         int eventCount = getEventCount(screenName, itemName, eventType);
         String countText = eventCount > 0 ? " [" + eventCount + "]" : "";
@@ -822,6 +963,9 @@ public class ScreenFactory {
         String truncatedCode = truncateCode(fullCode);
         javafx.scene.control.Label typeLabel = new javafx.scene.control.Label("." + eventType + countText + ": " + truncatedCode);
         typeLabel.setStyle("-fx-text-fill: #006666;");
+        typeLabel.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(typeLabel, Priority.ALWAYS);
+        typeLabel.setMaxWidth(Double.MAX_VALUE);
         
         // Store label reference for dynamic count updates
         String key = (screenName + "." + itemName + "." + eventType).toLowerCase();
@@ -929,13 +1073,21 @@ public class ScreenFactory {
         row.setAlignment(Pos.CENTER_LEFT);
         row.setPadding(new Insets(1, 5, 1, 5));
         
+        // Label/key - left aligned, 50% width
         javafx.scene.control.Label labelNode = new javafx.scene.control.Label(label + ":");
         labelNode.setStyle("-fx-font-weight: bold; -fx-text-fill: #555; -fx-font-size: 11px;");
         labelNode.setMinWidth(DEBUG_ITEM_NAME_MIN_WIDTH);
+        labelNode.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(labelNode, Priority.ALWAYS);
+        labelNode.setMaxWidth(Double.MAX_VALUE);
         
+        // Value - left aligned, 50% width
         javafx.scene.control.Label valueNode = new javafx.scene.control.Label(value);
         valueNode.setStyle("-fx-text-fill: " + valueColor + "; -fx-font-size: 11px;");
         valueNode.setWrapText(true);
+        valueNode.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(valueNode, Priority.ALWAYS);
+        valueNode.setMaxWidth(Double.MAX_VALUE);
         
         row.getChildren().addAll(labelNode, valueNode);
         
@@ -945,6 +1097,53 @@ public class ScreenFactory {
         makeRowClickable(row, clipboardText, originalStyle);
         
         section.getChildren().add(row);
+    }
+    
+    /**
+     * Get the value of a screen item for display in TableView.
+     * 
+     * @param key The item key
+     * @param item The AreaItem
+     * @param context The interpreter context
+     * @param screenName The screen name
+     * @return The value string
+     */
+    private static String getScreenItemValue(String key, AreaItem item, InterpreterContext context, String screenName) {
+        // Try to find the bound control and get its actual value
+        List<Node> boundControls = context.getScreenBoundControls().get(screenName);
+        Node matchingControl = null;
+        if (boundControls != null) {
+            String itemKey = key.toLowerCase();
+            for (Node node : boundControls) {
+                Object userData = node.getUserData();
+                if (userData != null && userData.toString().toLowerCase().equals(itemKey)) {
+                    matchingControl = node;
+                    break;
+                }
+            }
+        }
+        
+        if (matchingControl != null) {
+            // Extract value from the actual JavaFX control
+            Object controlValue = getControlValue(matchingControl);
+            if (controlValue != null) {
+                return formatValue(controlValue);
+            } else {
+                return "(empty)";
+            }
+        } else if (item.varRef != null) {
+            // Fallback to variable value if control not found
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars = context.getScreenVars(screenName);
+            if (screenVars != null) {
+                Object value = screenVars.get(item.varRef.toLowerCase());
+                if (value != null) {
+                    return formatValue(value);
+                } else {
+                    return "(unset)";
+                }
+            }
+        }
+        return "(no varRef)";
     }
     
     /**
@@ -963,11 +1162,14 @@ public class ScreenFactory {
         row.setPadding(new Insets(2, 5, 2, 5));
         
         // Item name with tooltip showing full qualified name (screen.item)
+        // Left aligned, 50% width
         String displayName = item.name != null ? item.name : key;
         javafx.scene.control.Label nameLabel = new javafx.scene.control.Label(displayName);
         nameLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #006600;");
-        nameLabel.setMinWidth(80);
-        nameLabel.setMaxWidth(100);
+        nameLabel.setMinWidth(DEBUG_ITEM_NAME_MIN_WIDTH);
+        nameLabel.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(nameLabel, Priority.ALWAYS);
+        nameLabel.setMaxWidth(Double.MAX_VALUE);
         
         // Build tooltip with full qualified name (screen.item) and item details
         StringBuilder tooltipText = new StringBuilder();
@@ -1037,10 +1239,13 @@ public class ScreenFactory {
             fullValueStr = "No variable reference";
         }
         
+        // Value label - left aligned, 50% width
         javafx.scene.control.Label valueLabel = new javafx.scene.control.Label(valueStr);
         valueLabel.setStyle("-fx-text-fill: #333;");
         valueLabel.setWrapText(true);
-        valueLabel.setMaxWidth(130);
+        valueLabel.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(valueLabel, Priority.ALWAYS);
+        valueLabel.setMaxWidth(Double.MAX_VALUE);
         javafx.scene.control.Tooltip valueTooltip = new javafx.scene.control.Tooltip(fullValueStr);
         valueTooltip.setStyle("-fx-font-size: 14px;");
         valueTooltip.setShowDelay(javafx.util.Duration.millis(500));
@@ -1418,23 +1623,28 @@ public class ScreenFactory {
         row.setPadding(new Insets(2, 5, 2, 5));
         
         // Variable name with tooltip showing full name and data type
+        // Left aligned, 50% width
         javafx.scene.control.Label nameLabel = new javafx.scene.control.Label(name + ":");
         nameLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #0066cc;");
-        nameLabel.setMinWidth(80);
-        nameLabel.setMaxWidth(100);
+        nameLabel.setMinWidth(DEBUG_ITEM_NAME_MIN_WIDTH);
+        nameLabel.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(nameLabel, Priority.ALWAYS);
+        nameLabel.setMaxWidth(Double.MAX_VALUE);
         String typeStr = getDataTypeString(dataType, value);
         javafx.scene.control.Tooltip nameTooltip = new javafx.scene.control.Tooltip(name + " : " + typeStr);
         nameTooltip.setStyle("-fx-font-size: 14px;");
         nameTooltip.setShowDelay(javafx.util.Duration.millis(500));
         nameLabel.setTooltip(nameTooltip);
         
-        // Variable value with tooltip showing full value
+        // Variable value with tooltip showing full value - left aligned, 50% width
         String valueStr = formatValue(value);
         String fullValueStr = formatValueFull(value);
         javafx.scene.control.Label valueLabel = new javafx.scene.control.Label(valueStr);
         valueLabel.setStyle("-fx-text-fill: #333;");
         valueLabel.setWrapText(true);
-        valueLabel.setMaxWidth(150);
+        valueLabel.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(valueLabel, Priority.ALWAYS);
+        valueLabel.setMaxWidth(Double.MAX_VALUE);
         javafx.scene.control.Tooltip valueTooltip = new javafx.scene.control.Tooltip(fullValueStr);
         valueTooltip.setStyle("-fx-font-size: 14px;");
         valueTooltip.setShowDelay(javafx.util.Duration.millis(500));
