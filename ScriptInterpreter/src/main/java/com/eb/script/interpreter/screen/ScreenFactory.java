@@ -337,14 +337,17 @@ public class ScreenFactory {
         mainContent.setPadding(new Insets(10));
         mainContent.setStyle("-fx-background-color: #f5f5f5;");
         
-        // Header with title, copy button, and close button
-        HBox headerRow = new HBox(5);
-        headerRow.setAlignment(Pos.CENTER_LEFT);
+        // Header using BorderPane for proper positioning - close button in absolute top right
+        BorderPane headerPane = new BorderPane();
+        headerPane.setPadding(new Insets(0, 0, 5, 0));
+        
+        // Left side: Title and copy button
+        HBox leftHeader = new HBox(5);
+        leftHeader.setAlignment(Pos.CENTER_LEFT);
         
         // Title
         javafx.scene.control.Label titleLabel = new javafx.scene.control.Label("Debug: " + screenName);
         titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #333;");
-        HBox.setHgrow(titleLabel, Priority.ALWAYS);
         
         // Copy button
         javafx.scene.control.Button copyButton = new javafx.scene.control.Button("📋");
@@ -354,13 +357,18 @@ public class ScreenFactory {
         copyTooltip.setShowDelay(javafx.util.Duration.millis(500));
         copyButton.setTooltip(copyTooltip);
         
-        // Close button (top right corner)
+        leftHeader.getChildren().addAll(titleLabel, copyButton);
+        headerPane.setLeft(leftHeader);
+        
+        // Close button - positioned in absolute top right corner
         javafx.scene.control.Button closeButton = new javafx.scene.control.Button("✕");
-        closeButton.setStyle("-fx-font-size: 12px; -fx-padding: 2 6 2 6; -fx-background-color: #e0e0e0; -fx-cursor: hand; -fx-text-fill: #666;");
+        closeButton.setStyle("-fx-font-size: 14px; -fx-padding: 2 8 2 8; -fx-background-color: #ff6666; -fx-cursor: hand; -fx-text-fill: white; -fx-font-weight: bold;");
         javafx.scene.control.Tooltip closeTooltip = new javafx.scene.control.Tooltip("Close debug panel (Ctrl+D)");
         closeTooltip.setStyle("-fx-font-size: 12px;");
         closeTooltip.setShowDelay(javafx.util.Duration.millis(500));
         closeButton.setTooltip(closeTooltip);
+        BorderPane.setAlignment(closeButton, Pos.TOP_RIGHT);
+        headerPane.setRight(closeButton);
         
         // Close button action - toggle debug mode off
         closeButton.setOnAction(e -> {
@@ -391,8 +399,7 @@ public class ScreenFactory {
             }).start();
         });
         
-        headerRow.getChildren().addAll(titleLabel, copyButton, closeButton);
-        mainContent.getChildren().add(headerRow);
+        mainContent.getChildren().add(headerPane);
         
         // Separator
         javafx.scene.control.Separator separator = new javafx.scene.control.Separator();
@@ -402,7 +409,7 @@ public class ScreenFactory {
         VBox statusSection = createScreenStatusSection(screenName, context);
         mainContent.getChildren().add(statusSection);
         
-        // === VARIABLES SECTION ===
+        // === VARIABLES SECTION - Using TableView for proper alignment ===
         VBox varsSection = new VBox(3);
         varsSection.setPadding(new Insets(5));
         varsSection.setStyle("-fx-background-color: #f8f8f8;");
@@ -412,16 +419,39 @@ public class ScreenFactory {
         varsSection.getChildren().add(varsHeader);
         
         if (screenVars != null && !screenVars.isEmpty()) {
+            // Create TableView for variables
+            javafx.scene.control.TableView<String[]> varsTable = new javafx.scene.control.TableView<>();
+            varsTable.setColumnResizePolicy(javafx.scene.control.TableView.CONSTRAINED_RESIZE_POLICY);
+            varsTable.setStyle("-fx-background-color: transparent;");
+            
+            // Name column (50%)
+            javafx.scene.control.TableColumn<String[], String> nameCol = new javafx.scene.control.TableColumn<>("Name");
+            nameCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue()[0]));
+            nameCol.setStyle("-fx-alignment: CENTER-LEFT; -fx-font-weight: bold;");
+            nameCol.prefWidthProperty().bind(varsTable.widthProperty().multiply(0.5));
+            
+            // Value column (50%)
+            javafx.scene.control.TableColumn<String[], String> valueCol = new javafx.scene.control.TableColumn<>("Value");
+            valueCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue()[1]));
+            valueCol.setStyle("-fx-alignment: CENTER-LEFT;");
+            valueCol.prefWidthProperty().bind(varsTable.widthProperty().multiply(0.5));
+            
+            varsTable.getColumns().add(nameCol);
+            varsTable.getColumns().add(valueCol);
+            
+            // Populate data
             java.util.List<String> sortedKeys = new java.util.ArrayList<>(screenVars.keySet());
             java.util.Collections.sort(sortedKeys, String.CASE_INSENSITIVE_ORDER);
             
-            int rowIndex = 0;
             for (String key : sortedKeys) {
                 Object value = screenVars.get(key);
-                DataType dataType = screenVarTypes != null ? screenVarTypes.get(key) : null;
-                HBox varRow = createVariableRow(key, value, dataType, rowIndex++);
-                varsSection.getChildren().add(varRow);
+                String valueStr = formatValue(value);
+                varsTable.getItems().add(new String[]{key, valueStr});
             }
+            
+            // Set preferred height based on content
+            varsTable.setPrefHeight(Math.min(200, sortedKeys.size() * 25 + 30));
+            varsSection.getChildren().add(varsTable);
         } else {
             javafx.scene.control.Label noVarsLabel = new javafx.scene.control.Label("No variables defined");
             noVarsLabel.setStyle("-fx-font-style: italic; -fx-text-fill: #888;");
@@ -435,7 +465,7 @@ public class ScreenFactory {
         varsScrollPane.setVbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.AS_NEEDED);
         VBox.setVgrow(varsScrollPane, Priority.ALWAYS);
         
-        // === SCREEN ITEMS SECTION ===
+        // === SCREEN ITEMS SECTION - Using TableView for proper alignment ===
         VBox itemsSection = new VBox(3);
         itemsSection.setPadding(new Insets(5));
         itemsSection.setStyle("-fx-background-color: #f0f5f0;");
@@ -445,14 +475,40 @@ public class ScreenFactory {
         itemsSection.getChildren().add(itemsHeader);
         
         if (screenAreaItems != null && !screenAreaItems.isEmpty()) {
+            // Create TableView for screen items
+            javafx.scene.control.TableView<String[]> itemsTable = new javafx.scene.control.TableView<>();
+            itemsTable.setColumnResizePolicy(javafx.scene.control.TableView.CONSTRAINED_RESIZE_POLICY);
+            itemsTable.setStyle("-fx-background-color: transparent;");
+            
+            // Name column (50%)
+            javafx.scene.control.TableColumn<String[], String> itemNameCol = new javafx.scene.control.TableColumn<>("Item");
+            itemNameCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue()[0]));
+            itemNameCol.setStyle("-fx-alignment: CENTER-LEFT; -fx-font-weight: bold;");
+            itemNameCol.prefWidthProperty().bind(itemsTable.widthProperty().multiply(0.5));
+            
+            // Value column (50%)
+            javafx.scene.control.TableColumn<String[], String> itemValueCol = new javafx.scene.control.TableColumn<>("Value");
+            itemValueCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue()[1]));
+            itemValueCol.setStyle("-fx-alignment: CENTER-LEFT;");
+            itemValueCol.prefWidthProperty().bind(itemsTable.widthProperty().multiply(0.5));
+            
+            itemsTable.getColumns().add(itemNameCol);
+            itemsTable.getColumns().add(itemValueCol);
+            
+            // Populate data
             java.util.List<String> sortedItemKeys = new java.util.ArrayList<>(screenAreaItems.keySet());
             java.util.Collections.sort(sortedItemKeys, String.CASE_INSENSITIVE_ORDER);
             
             for (String key : sortedItemKeys) {
                 AreaItem item = screenAreaItems.get(key);
-                HBox itemRow = createScreenItemRow(key, item, context, screenName);
-                itemsSection.getChildren().add(itemRow);
+                String displayName = item.name != null ? item.name : key;
+                String valueStr = getScreenItemValue(key, item, context, screenName);
+                itemsTable.getItems().add(new String[]{displayName, valueStr});
             }
+            
+            // Set preferred height based on content
+            itemsTable.setPrefHeight(Math.min(200, sortedItemKeys.size() * 25 + 30));
+            itemsSection.getChildren().add(itemsTable);
         } else {
             javafx.scene.control.Label noItemsLabel = new javafx.scene.control.Label("No screen items defined");
             noItemsLabel.setStyle("-fx-font-style: italic; -fx-text-fill: #888;");
@@ -947,6 +1003,53 @@ public class ScreenFactory {
         makeRowClickable(row, clipboardText, originalStyle);
         
         section.getChildren().add(row);
+    }
+    
+    /**
+     * Get the value of a screen item for display in TableView.
+     * 
+     * @param key The item key
+     * @param item The AreaItem
+     * @param context The interpreter context
+     * @param screenName The screen name
+     * @return The value string
+     */
+    private static String getScreenItemValue(String key, AreaItem item, InterpreterContext context, String screenName) {
+        // Try to find the bound control and get its actual value
+        List<Node> boundControls = context.getScreenBoundControls().get(screenName);
+        Node matchingControl = null;
+        if (boundControls != null) {
+            String itemKey = key.toLowerCase();
+            for (Node node : boundControls) {
+                Object userData = node.getUserData();
+                if (userData != null && userData.toString().toLowerCase().equals(itemKey)) {
+                    matchingControl = node;
+                    break;
+                }
+            }
+        }
+        
+        if (matchingControl != null) {
+            // Extract value from the actual JavaFX control
+            Object controlValue = getControlValue(matchingControl);
+            if (controlValue != null) {
+                return formatValue(controlValue);
+            } else {
+                return "(empty)";
+            }
+        } else if (item.varRef != null) {
+            // Fallback to variable value if control not found
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars = context.getScreenVars(screenName);
+            if (screenVars != null) {
+                Object value = screenVars.get(item.varRef.toLowerCase());
+                if (value != null) {
+                    return formatValue(value);
+                } else {
+                    return "(unset)";
+                }
+            }
+        }
+        return "(no varRef)";
     }
     
     /**
