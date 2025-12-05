@@ -61,13 +61,19 @@ public class ControlListenerFactory {
             boolean beingCreated = context.getScreensBeingCreated().contains(screenNameLower);
             boolean notYetShown = context.getScreensNotYetShown().contains(screenNameLower);
             
+            // Debug message showing the check state
+            System.out.println("[DEBUG] markScreenChanged: screen='" + screenName + "', item='" + varName + 
+                "', beingCreated=" + beingCreated + ", notYetShown=" + notYetShown);
+            
             if (beingCreated || notYetShown) {
+                System.out.println("[DEBUG] markScreenChanged: SKIPPED (initialization phase)");
                 return; // Skip marking as changed during initialization
             }
             
             // Only change status if currently CLEAN (don't downgrade from ERROR)
             if (context.getScreenStatus(screenName) == ScreenStatus.CLEAN) {
                 context.setScreenStatus(screenName, ScreenStatus.CHANGED);
+                System.out.println("[DEBUG] markScreenChanged: screen status changed to CHANGED");
                 // Update the debug panel status label in real-time
                 ScreenFactory.updateDebugStatusLabel(screenName, ScreenStatus.CHANGED);
             }

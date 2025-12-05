@@ -258,6 +258,9 @@ public class ScreenFactory {
         // Track the changed item
         changedItems.computeIfAbsent(key, k -> java.util.concurrent.ConcurrentHashMap.newKeySet()).add(varName);
         
+        // Debug message for tracking item state changes
+        System.out.println("[DEBUG] markItemChanged: screen='" + screenName + "', item='" + varName + "' -> CHANGED");
+        
         // Refresh the items table if visible
         javafx.scene.control.TableView<String[]> itemsTable = debugItemsTables.get(key);
         if (itemsTable != null) {
@@ -290,7 +293,10 @@ public class ScreenFactory {
      */
     public static void clearChangedItems(String screenName) {
         if (screenName != null) {
-            changedItems.remove(screenName.toLowerCase());
+            String key = screenName.toLowerCase();
+            java.util.Set<String> removed = changedItems.remove(key);
+            // Debug message for tracking item reset
+            System.out.println("[DEBUG] clearChangedItems: screen='" + screenName + "' -> all items reset to CLEAN (removed " + (removed != null ? removed.size() : 0) + " items)");
         }
     }
     
