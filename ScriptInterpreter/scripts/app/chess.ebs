@@ -1,0 +1,482 @@
+// EBS Chess Game Application
+// ===========================
+// This script demonstrates using bitmap arrays for efficient chess board encoding.
+//
+// Board Encoding:
+//   - Uses a 1D byte array of 64 elements (8x8 chess board)
+//   - Each cell encoded as a bitmap byte:
+//     * Bit 0: Cell color (0=light, 1=dark) - for checkerboard pattern
+//     * Bits 1-6: Piece type (0=empty, 1=pawn, 2=rook, 3=knight, 4=bishop, 5=queen, 6=king)
+//     * Bit 7: Piece color (0=white, 1=black)
+//
+// Features:
+//   - Console display with Unicode chess symbols
+//   - Graphical screen with timer display
+//   - New Game button to reset the board
+//
+// Usage:
+//   Run in EBS Console: /open scripts/app/chess.ebs then Ctrl+Enter
+
+// Define the chess cell bitmap type for bit-level field access
+ChessCell typeof bitmap { cellColor: 0, pieceType: 1-6, pieceColor: 7 };
+
+// Piece type constants
+var EMPTY: int = 0;
+var PAWN: int = 1;
+var ROOK: int = 2;
+var KNIGHT: int = 3;
+var BISHOP: int = 4;
+var QUEEN: int = 5;
+var KING: int = 6;
+
+// Piece color constants
+var WHITE: int = 0;
+var BLACK: int = 1;
+
+// Chess piece Unicode symbols
+var whitePieces: string[7];
+whitePieces[0] = "";        // Empty
+whitePieces[1] = "\u2659";  // White Pawn
+whitePieces[2] = "\u2656";  // White Rook
+whitePieces[3] = "\u2658";  // White Knight
+whitePieces[4] = "\u2657";  // White Bishop
+whitePieces[5] = "\u2655";  // White Queen
+whitePieces[6] = "\u2654";  // White King
+
+var blackPieces: string[7];
+blackPieces[0] = "";        // Empty
+blackPieces[1] = "\u265F";  // Black Pawn
+blackPieces[2] = "\u265C";  // Black Rook
+blackPieces[3] = "\u265E";  // Black Knight
+blackPieces[4] = "\u265D";  // Black Bishop
+blackPieces[5] = "\u265B";  // Black Queen
+blackPieces[6] = "\u265A";  // Black King
+
+// Create the chess board as a 1D byte array of 64 elements (8x8)
+var board: byte[64];
+
+// Timer variables
+var timerWhite: int = 600;
+var timerBlack: int = 600;
+var currentPlayer: int = 0;
+
+// Helper functions
+boardIndex(row: int, col: int) return int {
+    return row * 8 + col;
+}
+
+modulo(a: int, b: int) return int {
+    var q: int = a / b;
+    return a - (q * b);
+}
+
+encodeCellValue(cellColor: int, pieceType: int, pieceColor: int) return int {
+    return cellColor + (pieceType * 2) + (pieceColor * 128);
+}
+
+getPieceSymbol(cellValue: int) return string {
+    var cell = ChessCell(cellValue);
+    var pt: int = cell.pieceType;
+    var pc: int = cell.pieceColor;
+    
+    if pt == 0 then {
+        return "";
+    }
+    
+    if pc == 0 then {
+        return whitePieces[pt];
+    } else {
+        return blackPieces[pt];
+    }
+}
+
+formatTimer(seconds: int) return string {
+    var mins: int = seconds / 60;
+    var secs: int = call modulo(seconds, 60);
+    var minsStr: string = call str.lpad(string(mins), 2, "0");
+    var secsStr: string = call str.lpad(string(secs), 2, "0");
+    return minsStr + ":" + secsStr;
+}
+
+initializeBoard() {
+    var row: int = 0;
+    var col: int = 0;
+    var idx: int = 0;
+    
+    // Initialize all cells with proper colors
+    for (row = 0; row < 8; row++) {
+        for (col = 0; col < 8; col++) {
+            var cellColor: int = call modulo(row + col, 2);
+            idx = call boardIndex(row, col);
+            board[idx] = call encodeCellValue(cellColor, EMPTY, WHITE);
+        }
+    }
+    
+    // Place black pieces (row 0 and 1)
+    board[call boardIndex(0, 0)] = call encodeCellValue(0, ROOK, BLACK);
+    board[call boardIndex(0, 1)] = call encodeCellValue(1, KNIGHT, BLACK);
+    board[call boardIndex(0, 2)] = call encodeCellValue(0, BISHOP, BLACK);
+    board[call boardIndex(0, 3)] = call encodeCellValue(1, QUEEN, BLACK);
+    board[call boardIndex(0, 4)] = call encodeCellValue(0, KING, BLACK);
+    board[call boardIndex(0, 5)] = call encodeCellValue(1, BISHOP, BLACK);
+    board[call boardIndex(0, 6)] = call encodeCellValue(0, KNIGHT, BLACK);
+    board[call boardIndex(0, 7)] = call encodeCellValue(1, ROOK, BLACK);
+    
+    // Row 1: Black pawns
+    for (col = 0; col < 8; col++) {
+        var cellColor: int = call modulo(1 + col, 2);
+        idx = call boardIndex(1, col);
+        board[idx] = call encodeCellValue(cellColor, PAWN, BLACK);
+    }
+    
+    // Row 6: White pawns
+    for (col = 0; col < 8; col++) {
+        var cellColor: int = call modulo(6 + col, 2);
+        idx = call boardIndex(6, col);
+        board[idx] = call encodeCellValue(cellColor, PAWN, WHITE);
+    }
+    
+    // Place white pieces (row 7)
+    board[call boardIndex(7, 0)] = call encodeCellValue(1, ROOK, WHITE);
+    board[call boardIndex(7, 1)] = call encodeCellValue(0, KNIGHT, WHITE);
+    board[call boardIndex(7, 2)] = call encodeCellValue(1, BISHOP, WHITE);
+    board[call boardIndex(7, 3)] = call encodeCellValue(0, QUEEN, WHITE);
+    board[call boardIndex(7, 4)] = call encodeCellValue(1, KING, WHITE);
+    board[call boardIndex(7, 5)] = call encodeCellValue(0, BISHOP, WHITE);
+    board[call boardIndex(7, 6)] = call encodeCellValue(1, KNIGHT, WHITE);
+    board[call boardIndex(7, 7)] = call encodeCellValue(0, ROOK, WHITE);
+}
+
+getBoardRow(rowNum: int) return string {
+    var result: string = "";
+    var col: int = 0;
+    var idx: int = 0;
+    
+    for (col = 0; col < 8; col++) {
+        idx = call boardIndex(rowNum, col);
+        var cellValue: int = board[idx];
+        var cell = ChessCell(cellValue);
+        var cellColor: int = cell.cellColor;
+        var piece: string = call getPieceSymbol(cellValue);
+        
+        if piece == "" then {
+            if cellColor == 0 then {
+                result = result + " . ";
+            } else {
+                result = result + " # ";
+            }
+        } else {
+            result = result + " " + piece + " ";
+        }
+        
+        if col < 7 then {
+            result = result + "|";
+        }
+    }
+    
+    return result;
+}
+
+printBoard() {
+    print "";
+    print "   Chess Board";
+    print "   ===========";
+    print "";
+    
+    var whiteTimerStr: string = call formatTimer(timerWhite);
+    var blackTimerStr: string = call formatTimer(timerBlack);
+    var currentPlayerStr: string;
+    if currentPlayer == 0 then {
+        currentPlayerStr = "White";
+    } else {
+        currentPlayerStr = "Black";
+    }
+    
+    print "   Timer: White " + whiteTimerStr + " | Black " + blackTimerStr;
+    print "   Current Turn: " + currentPlayerStr;
+    print "";
+    
+    print "     a   b   c   d   e   f   g   h";
+    print "   +---+---+---+---+---+---+---+---+";
+    
+    var row: int = 0;
+    for (row = 0; row < 8; row++) {
+        var rowLabel: int = 8 - row;
+        var rowStr: string = call getBoardRow(row);
+        print " " + rowLabel + " |" + rowStr + "| " + rowLabel;
+        print "   +---+---+---+---+---+---+---+---+";
+    }
+    
+    print "     a   b   c   d   e   f   g   h";
+    print "";
+}
+
+// Generate board display for screen textarea
+// Note: Using dummy parameter to work around parser bug with parameter-less return functions
+generateBoardDisplay(dummy: int) return string {
+    var result: string = "";
+    
+    result = result + "      a    b    c    d    e    f    g    h\n";
+    result = result + "   +----+----+----+----+----+----+----+----+\n";
+    
+    var row: int = 0;
+    var idx: int = 0;
+    for (row = 0; row < 8; row++) {
+        var rowLabel: int = 8 - row;
+        result = result + " " + rowLabel + " |";
+        
+        var col: int = 0;
+        for (col = 0; col < 8; col++) {
+            idx = call boardIndex(row, col);
+            var cellValue: int = board[idx];
+            var piece: string = call getPieceSymbol(cellValue);
+            
+            if piece == "" then {
+                var cell = ChessCell(cellValue);
+                var cellColor: int = cell.cellColor;
+                if cellColor == 0 then {
+                    result = result + "    |";
+                } else {
+                    result = result + " .. |";
+                }
+            } else {
+                result = result + " " + piece + "  |";
+            }
+        }
+        
+        result = result + " " + rowLabel + "\n";
+        result = result + "   +----+----+----+----+----+----+----+----+\n";
+    }
+    
+    result = result + "      a    b    c    d    e    f    g    h";
+    
+    return result;
+}
+
+// Reset game function - must be defined before screen that references it
+resetGame() {
+    call initializeBoard();
+    timerWhite = 600;
+    timerBlack = 600;
+    currentPlayer = 0;
+    
+    chessScreen.whiteTimer = call formatTimer(timerWhite);
+    chessScreen.blackTimer = call formatTimer(timerBlack);
+    chessScreen.statusMessage = "White to move - Game Reset!";
+    chessScreen.boardDisplay = call generateBoardDisplay(0);
+}
+
+// Define the chess screen with timer and board
+screen chessScreen = {
+    "title": "Chess Game",
+    "width": 700,
+    "height": 750,
+    "vars": [
+        {
+            "name": "whiteTimer",
+            "type": "string",
+            "default": "10:00"
+        },
+        {
+            "name": "blackTimer",
+            "type": "string",
+            "default": "10:00"
+        },
+        {
+            "name": "statusMessage",
+            "type": "string",
+            "default": "White to move"
+        },
+        {
+            "name": "boardDisplay",
+            "type": "string",
+            "default": ""
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "10",
+            "padding": "20",
+            "style": "-fx-background-color: #2c2c2c;",
+            "items": [
+                {
+                    "name": "titleLabel",
+                    "display": {
+                        "type": "label",
+                        "labelText": "\u265A Chess Game \u2654",
+                        "labelColor": "#ffffff",
+                        "labelFontSize": "24px",
+                        "labelBold": true
+                    }
+                }
+            ],
+            "areas": [
+                {
+                    "name": "timerArea",
+                    "type": "hbox",
+                    "spacing": "40",
+                    "padding": "10",
+                    "style": "-fx-background-color: #3c3c3c; -fx-background-radius: 5;",
+                    "items": [
+                        {
+                            "name": "whiteLabelTimer",
+                            "display": {
+                                "type": "label",
+                                "labelText": "\u2654 White:",
+                                "labelColor": "#ffffff",
+                                "labelFontSize": "18px"
+                            }
+                        },
+                        {
+                            "name": "whiteTimerField",
+                            "varRef": "whiteTimer",
+                            "display": {
+                                "type": "label",
+                                "labelColor": "#00ff00",
+                                "labelFontSize": "24px",
+                                "labelBold": true
+                            }
+                        },
+                        {
+                            "name": "spacerLabel",
+                            "display": {
+                                "type": "label",
+                                "labelText": "     |     ",
+                                "labelColor": "#666666",
+                                "labelFontSize": "24px"
+                            }
+                        },
+                        {
+                            "name": "blackLabelTimer",
+                            "display": {
+                                "type": "label",
+                                "labelText": "\u265A Black:",
+                                "labelColor": "#ffffff",
+                                "labelFontSize": "18px"
+                            }
+                        },
+                        {
+                            "name": "blackTimerField",
+                            "varRef": "blackTimer",
+                            "display": {
+                                "type": "label",
+                                "labelColor": "#ff6600",
+                                "labelFontSize": "24px",
+                                "labelBold": true
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "boardArea",
+                    "type": "vbox",
+                    "spacing": "0",
+                    "padding": "20",
+                    "style": "-fx-background-color: #1a1a1a; -fx-background-radius: 8;",
+                    "items": [
+                        {
+                            "name": "boardDisplayField",
+                            "varRef": "boardDisplay",
+                            "display": {
+                                "type": "textarea",
+                                "height": 20,
+                                "itemFontSize": "16px",
+                                "itemColor": "#ffffff",
+                                "style": "-fx-font-family: monospace; -fx-background-color: #1a1a1a; -fx-control-inner-background: #1a1a1a;"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "statusArea",
+                    "type": "hbox",
+                    "spacing": "20",
+                    "padding": "10",
+                    "style": "-fx-background-color: #3c3c3c; -fx-background-radius: 5;",
+                    "items": [
+                        {
+                            "name": "statusLabel",
+                            "varRef": "statusMessage",
+                            "display": {
+                                "type": "label",
+                                "labelColor": "#ffff00",
+                                "labelFontSize": "16px",
+                                "labelBold": true
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "buttonArea",
+                    "type": "hbox",
+                    "spacing": "20",
+                    "padding": "10",
+                    "items": [
+                        {
+                            "name": "newGameBtn",
+                            "display": {
+                                "type": "button",
+                                "labelText": "New Game",
+                                "onClick": "call resetGame();"
+                            }
+                        },
+                        {
+                            "name": "closeBtn",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Close",
+                                "onClick": "hide screen chessScreen;"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+};
+
+// Main program
+print "==============================================";
+print "           Chess Game Application";
+print "==============================================";
+print "";
+print "Initializing chess board...";
+
+call initializeBoard();
+call printBoard();
+
+print "";
+print "Board Encoding Information:";
+print "===========================";
+print "Each cell uses a bitmap byte:";
+print "  Bit 0: Cell color (0=light, 1=dark)";
+print "  Bits 1-6: Piece type (0=empty, 1-6=piece)";
+print "  Bit 7: Piece color (0=white, 1=black)";
+print "";
+
+print "Sample cell values:";
+var idx00: int = call boardIndex(0, 0);
+var sampleCell = ChessCell(board[idx00]);
+print "  [0,0] Black Rook: raw=" + board[idx00] + ", cellColor=" + sampleCell.cellColor + ", pieceType=" + sampleCell.pieceType + ", pieceColor=" + sampleCell.pieceColor;
+
+var idx74: int = call boardIndex(7, 4);
+sampleCell = ChessCell(board[idx74]);
+print "  [7,4] White King: raw=" + board[idx74] + ", cellColor=" + sampleCell.cellColor + ", pieceType=" + sampleCell.pieceType + ", pieceColor=" + sampleCell.pieceColor;
+
+print "";
+print "Opening chess screen with graphical display...";
+
+// Update screen variables before showing
+chessScreen.whiteTimer = call formatTimer(timerWhite);
+chessScreen.blackTimer = call formatTimer(timerBlack);
+chessScreen.statusMessage = "White to move";
+chessScreen.boardDisplay = call generateBoardDisplay(0);
+
+// Show the chess screen
+show screen chessScreen;
+
+print "";
+print "Chess screen is now displayed!";
+print "Use the New Game button to reset the board.";
