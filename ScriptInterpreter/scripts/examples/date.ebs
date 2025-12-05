@@ -1,0 +1,158 @@
+// EBS Language Reference v1.0.5.8 - See EBS_LANGUAGE_REFERENCE.md
+// Example: date functions - Date and time operations
+// Demonstrates all date.* builtin functions for display, calculations, and SQL operations
+
+// =====================================================
+// SECTION 1: Getting Current Date/Time
+// =====================================================
+print "=== Getting Current Date/Time ===";
+
+var now: date = call date.now();         // Current instant (date + time)
+print "Current instant: " + now;
+
+var today: date = call date.today();     // Current date (no time component)
+print "Today's date: " + today;
+
+// =====================================================
+// SECTION 2: Date Literals (Parsing from Strings)
+// =====================================================
+print "";
+print "=== Date Literals ===";
+
+var dateOnly: date = "2024-01-15";
+print "Date only: " + dateOnly;
+
+var dateTime: date = "2024-01-15T10:30:00";
+print "DateTime: " + dateTime;
+
+// =====================================================
+// SECTION 3: Formatting Dates for Display
+// =====================================================
+print "";
+print "=== Formatting Dates ===";
+
+// Format with different patterns
+var formatted = call date.format(now, "yyyy-MM-dd HH:mm:ss");
+print "ISO format: " + formatted;
+
+var usFormat = call date.format(now, "MM/dd/yyyy");
+print "US format: " + usFormat;
+
+var euFormat = call date.format(now, "dd.MM.yyyy");
+print "EU format: " + euFormat;
+
+var timeOnly = call date.format(now, "HH:mm:ss");
+print "Time only: " + timeOnly;
+
+var fullFormat = call date.format(now, "EEEE, MMMM d, yyyy");
+print "Full format: " + fullFormat;
+
+// =====================================================
+// SECTION 4: Parsing Dates from Strings
+// =====================================================
+print "";
+print "=== Parsing Dates ===";
+
+var parsed = call date.parse("2024-01-15", "yyyy-MM-dd");
+print "Parsed date: " + parsed;
+
+var parsedDateTime = call date.parseDateTime("2024-01-15 10:30:00", "yyyy-MM-dd HH:mm:ss");
+print "Parsed datetime: " + parsedDateTime;
+
+// =====================================================
+// SECTION 5: Date Calculations
+// =====================================================
+print "";
+print "=== Date Calculations ===";
+
+// Add days
+var nextWeek = call date.addDays(now, 7);
+print "Next week: " + call date.format(nextWeek, "yyyy-MM-dd");
+
+var yesterday = call date.addDays(now, -1);
+print "Yesterday: " + call date.format(yesterday, "yyyy-MM-dd");
+
+// Add hours
+var twoHoursAgo = call date.addHours(now, -2);
+print "Two hours ago: " + call date.format(twoHoursAgo, "HH:mm:ss");
+
+var inFiveHours = call date.addHours(now, 5);
+print "In five hours: " + call date.format(inFiveHours, "HH:mm:ss");
+
+// Calculate difference between dates
+var date1: date = "2024-01-01";
+var date2: date = "2024-01-31";
+var daysBetween = call date.daysBetween(date1, date2);
+print "Days between Jan 1 and Jan 31: " + daysBetween;
+
+// =====================================================
+// SECTION 6: Getting Date Components
+// =====================================================
+print "";
+print "=== Date Components ===";
+
+var year = call date.getYear(now);
+print "Year: " + year;
+
+var month = call date.getMonth(now);
+print "Month: " + month;
+
+var day = call date.getDay(now);
+print "Day: " + day;
+
+var hour = call date.getHour(now);
+print "Hour: " + hour;
+
+var minute = call date.getMinute(now);
+print "Minute: " + minute;
+
+// =====================================================
+// SECTION 7: Epoch Milliseconds
+// =====================================================
+print "";
+print "=== Epoch Milliseconds ===";
+
+// Convert to epoch milliseconds (useful for calculations)
+var epochMs = call date.toEpochMs(now);
+print "Epoch milliseconds: " + epochMs;
+
+// Create date from epoch milliseconds
+// Example: 1699876543210 = 2023-11-13 12:15:43.210 UTC
+var fromEpoch = call date.fromEpochMs(1699876543210);
+print "From epoch: " + call date.format(fromEpoch, "yyyy-MM-dd HH:mm:ss");
+
+// =====================================================
+// SECTION 8: SQL Timestamp Conversion
+// =====================================================
+print "";
+print "=== SQL Timestamp ===";
+
+// Convert to SQL Timestamp (for database operations)
+var sqlTimestamp = call date.toSqlTimestamp(now);
+print "SQL Timestamp: " + sqlTimestamp;
+
+// =====================================================
+// SECTION 9: Practical Examples
+// =====================================================
+print "";
+print "=== Practical Examples ===";
+
+// Example: Check if a date is in the future
+var futureDate: date = call date.addDays(now, 30);
+var nowMs = call date.toEpochMs(now);
+var futureMs = call date.toEpochMs(futureDate);
+if futureMs > nowMs then {
+    print "The date is in the future";
+}
+
+// Example: Format a date for a report header
+var reportDate = call date.format(now, "MMMM d, yyyy");
+print "Report generated on: " + reportDate;
+
+// Example: Calculate age in days (using sample date)
+var birthDate: date = "2000-06-15";  // Example date for calculation demo
+var ageInDays = call date.daysBetween(birthDate, now);
+print "Days since June 15, 2000: " + ageInDays;
+
+print "";
+print "=== All date function tests completed ===";
