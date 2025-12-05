@@ -1,0 +1,152 @@
+// bitmap_test.ebs - Test script for bitmap type functionality
+//
+// This script tests all bitmap type features and validates expected behavior.
+
+var passed: int = 0;
+var failed: int = 0;
+
+// Helper function to report test results
+function testResult(name: string, expected: string, actual: string) {
+    if (expected == actual) {
+        print "[PASS] " + name;
+        passed = passed + 1;
+    } else {
+        print "[FAIL] " + name + " - Expected: " + expected + ", Got: " + actual;
+        failed = failed + 1;
+    }
+}
+
+function testResultInt(name: string, expected: int, actual: int) {
+    if (expected == actual) {
+        print "[PASS] " + name;
+        passed = passed + 1;
+    } else {
+        print "[FAIL] " + name + " - Expected: " + expected + ", Got: " + actual;
+        failed = failed + 1;
+    }
+}
+
+print "=== Bitmap Type Tests ===";
+print "";
+
+// Test 1: Basic bitmap variable declaration
+print "--- Test 1: Basic Bitmap Declaration ---";
+var flags: bitmap { a: 0, b: 1, c: 2 };
+call testResultInt("Initial bitmap value is 0", 0, flags);
+
+// Test 2: Single bit field write and read
+print "";
+print "--- Test 2: Single Bit Field Access ---";
+flags.a = 1;
+call testResultInt("Set bit 0 (a=1)", 1, flags);
+call testResultInt("Read field a", 1, flags.a);
+
+flags.b = 1;
+call testResultInt("Set bit 1 (b=1), total=3", 3, flags);
+call testResultInt("Read field b", 1, flags.b);
+
+flags.c = 1;
+call testResultInt("Set bit 2 (c=1), total=7", 7, flags);
+call testResultInt("Read field c", 1, flags.c);
+
+// Test 3: Multi-bit field
+print "";
+print "--- Test 3: Multi-bit Field ---";
+var multi: bitmap { low: 0-3, high: 4-7 };
+multi.low = 15;
+call testResultInt("Set 4-bit field low=15", 15, multi);
+call testResultInt("Read multi-bit field low", 15, multi.low);
+
+multi.high = 10;
+call testResultInt("Set 4-bit field high=10, total=175", 175, multi);
+call testResultInt("Read multi-bit field high", 10, multi.high);
+
+// Test 4: Field overwrite
+print "";
+print "--- Test 4: Field Overwrite ---";
+var overwrite: bitmap { val: 0-3 };
+overwrite.val = 15;
+call testResultInt("Initial value", 15, overwrite.val);
+overwrite.val = 7;
+call testResultInt("After overwrite", 7, overwrite.val);
+call testResultInt("Raw value after overwrite", 7, overwrite);
+
+// Test 5: Bit position verification (from user requirements)
+print "";
+print "--- Test 5: Bit Position Verification ---";
+// flags.status=2 is equal to flags=2
+// flags.enabled=1 is equal to flags=4
+// flags.priority=1 is equal to flags=8
+
+BitPos typeof bitmap { status: 0-1, enabled: 2, priority: 3-5 };
+
+var pos1 = BitPos(0);
+pos1.status = 2;
+call testResultInt("status=2 -> raw=2", 2, pos1);
+
+var pos2 = BitPos(0);
+pos2.enabled = 1;
+call testResultInt("enabled=1 -> raw=4 (1<<2)", 4, pos2);
+
+var pos3 = BitPos(0);
+pos3.priority = 1;
+call testResultInt("priority=1 -> raw=8 (1<<3)", 8, pos3);
+
+// Test 6: Bitmap type alias and casting
+print "";
+print "--- Test 6: Type Alias and Casting ---";
+StatusBits typeof bitmap { active: 0, error: 1, warning: 2 };
+
+var byteVal: byte = 5;  // binary: 101
+var casted = StatusBits(byteVal);
+call testResultInt("Casted active (bit 0)", 1, casted.active);
+call testResultInt("Casted error (bit 1)", 0, casted.error);
+call testResultInt("Casted warning (bit 2)", 1, casted.warning);
+
+// Test 7: typeof operator
+print "";
+print "--- Test 7: typeof Operator ---";
+TypeofTest typeof bitmap { x: 0, y: 1 };
+var instance = TypeofTest(0);
+
+call testResult("typeof type alias", "bitmap {x: 0, y: 1}", typeof TypeofTest);
+call testResult("typeof instance", "bitmap typeoftest", typeof instance);
+
+// Test 8: Const bitmap
+print "";
+print "--- Test 8: Const Bitmap ---";
+const FLAGS: bitmap { on: 0, off: 1 } = 2;
+call testResultInt("Const bitmap raw value", 2, FLAGS);
+call testResultInt("Const bitmap field on", 0, FLAGS.on);
+call testResultInt("Const bitmap field off", 1, FLAGS.off);
+
+// Test 9: Complex combined operations
+print "";
+print "--- Test 9: Combined Operations ---";
+Combined typeof bitmap { a: 0-1, b: 2-3, c: 4-5 };
+var combo = Combined(0);
+combo.a = 3;  // bits 0-1 = 3
+combo.b = 2;  // bits 2-3 = 8 (2 << 2)
+combo.c = 1;  // bits 4-5 = 16 (1 << 4)
+call testResultInt("Combined raw value (3+8+16=27)", 27, combo);
+
+// Test 10: Integer casting
+print "";
+print "--- Test 10: Integer Casting ---";
+IntCast typeof bitmap { low: 0-3, high: 4-7 };
+var intVal: int = 171;  // binary: 10101011
+var fromInt = IntCast(intVal);
+call testResultInt("Cast int to bitmap low field", 11, fromInt.low);
+call testResultInt("Cast int to bitmap high field", 10, fromInt.high);
+
+// Summary
+print "";
+print "=== Test Summary ===";
+print "Passed: " + passed;
+print "Failed: " + failed;
+
+if (failed == 0) {
+    print "All tests passed!";
+} else {
+    print "Some tests failed!";
+}
