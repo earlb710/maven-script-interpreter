@@ -682,8 +682,8 @@ public class ScreenFactory {
                         // Get icon for item type
                         String typeIcon = getItemTypeIcon(itemType);
                         
-                        // Check if this item has been changed
-                        if (varRef != null && !varRef.isEmpty() && isItemChanged(finalScreenName, varRef)) {
+                        // Check if this item has been changed (varRef is never null due to line 715)
+                        if (!varRef.isEmpty() && isItemChanged(finalScreenName, varRef)) {
                             setText("⚠️ " + typeIcon + " " + item);
                             setStyle("-fx-alignment: CENTER-LEFT; -fx-font-weight: bold; -fx-text-fill: #cc6600;");
                         } else {
@@ -1389,7 +1389,7 @@ public class ScreenFactory {
             case "hyperlink":
                 return "🔗";
             case "separator":
-                return "─";
+                return "━";
             
             // Media controls
             case "imageview":
