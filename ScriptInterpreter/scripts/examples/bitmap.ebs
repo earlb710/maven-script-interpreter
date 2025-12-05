@@ -1,0 +1,120 @@
+// bitmap.ebs - Example demonstrating the bitmap data type
+//
+// A bitmap type defines named fields that map to bit ranges within a byte (0-7).
+// Each field occupies specific bits in a byte, allowing efficient storage of
+// multiple small values in a single byte.
+
+print "=== Basic Bitmap Variable ===";
+
+// Define a simple bitmap variable
+var flags: bitmap { status: 0-1, enabled: 2, priority: 3-5, reserved: 6-7 };
+
+// Initially, the bitmap value is 0
+print "Initial bitmap value: " + flags;
+
+// Set individual fields using property access
+flags.status = 2;
+flags.enabled = 1;
+flags.priority = 5;
+flags.reserved = 3;
+
+// Read the raw byte value
+print "Bitmap after setting fields: " + flags;
+
+// Read individual fields (values are automatically right-shifted)
+print "status = " + flags.status;
+print "enabled = " + flags.enabled;
+print "priority = " + flags.priority;
+print "reserved = " + flags.reserved;
+
+// Fields can also be used in expressions
+if (flags.enabled == 1) {
+    print "The enabled flag is set!";
+}
+
+if (flags.priority > 3) {
+    print "High priority detected: " + flags.priority;
+}
+
+// Change a field value
+flags.priority = 1;
+print "Changed priority to: " + flags.priority;
+
+print "Final bitmap raw value: " + flags;
+
+
+print "";
+print "=== Const Bitmap ===";
+
+// Demonstrate const bitmap
+const PERMISSIONS: bitmap { read: 0, write: 1, execute: 2, admin: 3 } = 5;
+
+print "Read permission: " + PERMISSIONS.read;
+print "Write permission: " + PERMISSIONS.write;
+print "Execute permission: " + PERMISSIONS.execute;
+print "Admin permission: " + PERMISSIONS.admin;
+
+
+print "";
+print "=== Bitmap Type Alias and Casting ===";
+
+// Define a reusable bitmap type alias
+StatusFlags typeof bitmap { active: 0, error: 1, warning: 2, ready: 3, busy: 4-5 };
+
+// Cast a byte value to the bitmap type
+var byteValue: byte = 42;
+var status = StatusFlags(byteValue);
+
+print "Original byte value: " + byteValue;
+print "status.active = " + status.active;
+print "status.error = " + status.error;
+print "status.warning = " + status.warning;
+print "status.ready = " + status.ready;
+print "status.busy = " + status.busy;
+
+
+print "";
+print "=== typeof with Bitmap ===";
+
+// typeof on bitmap type alias shows the full type definition
+print "typeof StatusFlags = " + typeof StatusFlags;
+
+// typeof on bitmap variable shows the type alias name
+print "typeof status = " + typeof status;
+
+
+print "";
+print "=== Bit Positioning Verification ===";
+
+// Verify that field positions match byte values
+// flags.status=2 is equal to flags=2 (bits 0-1)
+// flags.enabled=1 is equal to flags=4 (bit 2, so 1<<2=4)
+// flags.priority=1 is equal to flags=8 (bits 3-5, so 1<<3=8)
+
+PositionTest typeof bitmap { status: 0-1, enabled: 2, priority: 3-5 };
+
+var test1 = PositionTest(0);
+test1.status = 2;
+print "status=2 -> raw value: " + test1 + " (expected: 2)";
+
+var test2 = PositionTest(0);
+test2.enabled = 1;
+print "enabled=1 -> raw value: " + test2 + " (expected: 4)";
+
+var test3 = PositionTest(0);
+test3.priority = 1;
+print "priority=1 -> raw value: " + test3 + " (expected: 8)";
+
+
+print "";
+print "=== Combined Field Values ===";
+
+// Set multiple fields and verify combined value
+var combined = PositionTest(0);
+combined.status = 2;    // 2 in bits 0-1 = 2
+combined.enabled = 1;   // 1 in bit 2 = 4
+combined.priority = 5;  // 5 in bits 3-5 = 40
+print "Combined value: " + combined + " (expected: 46)";
+
+print "";
+print "Bitmap examples completed!";

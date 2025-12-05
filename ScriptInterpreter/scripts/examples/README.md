@@ -19,6 +19,7 @@ This directory contains short, precise example scripts for each EBS language key
 | [var.ebs](var.ebs) | `var` |
 | [const.ebs](const.ebs) | `const` |
 | [datatypes.ebs](datatypes.ebs) | `byte`, `int`, `long`, `float`, `double`, `string`, `date`, `bool`, `json`, `record` |
+| [bitmap.ebs](bitmap.ebs) | `bitmap` type - Named bit fields within a byte |
 | [array.ebs](array.ebs) | Array syntax |
 | [json.ebs](json.ebs) | `json` type |
 | [record.ebs](record.ebs) | `record` type |
@@ -176,3 +177,16 @@ When adding new keywords to EBS, create a corresponding example file following t
 ```
 
 **Important:** Always include the version reference comment as the first line of every example script. Update the version number to match the current documentation version in `EBS_LANGUAGE_REFERENCE.md`.
+
+## Test Scripts
+
+Test scripts are located in the `../tests/` directory:
+
+| File | Description |
+|------|-------------|
+| [bitmap_test.ebs](../tests/bitmap_test.ebs) | Comprehensive bitmap type tests (28 test cases) |
+
+Run test scripts with:
+```bash
+mvn exec:java -Dexec.mainClass="com.eb.script.Run" -Dexec.args="scripts/tests/bitmap_test.ebs"
+```

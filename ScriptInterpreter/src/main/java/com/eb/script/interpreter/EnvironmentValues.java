@@ -1,5 +1,6 @@
 package com.eb.script.interpreter;
 
+import com.eb.script.token.BitmapType;
 import com.eb.script.token.RecordType;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -16,6 +17,8 @@ public class EnvironmentValues {
 
     final Map<String, Object> values = new ConcurrentHashMap<>();
     final Map<String, RecordType> recordTypes = new ConcurrentHashMap<>(); // Store record type metadata
+    final Map<String, BitmapType> bitmapTypes = new ConcurrentHashMap<>(); // Store bitmap type metadata
+    final Map<String, String> bitmapTypeAliasNames = new ConcurrentHashMap<>(); // Store bitmap type alias names
     final Set<String> constants = ConcurrentHashMap.newKeySet(); // Track constant variables
     final EnvironmentValues enclosing;
 
@@ -30,6 +33,8 @@ public class EnvironmentValues {
     void clear() {
         values.clear();
         recordTypes.clear();
+        bitmapTypes.clear();
+        bitmapTypeAliasNames.clear();
         constants.clear();
     }
     
@@ -65,12 +70,61 @@ public class EnvironmentValues {
         }
     }
     
+    public void defineWithBitmapType(String name, Object value, BitmapType bitmapType) {
+        defineWithBitmapType(name, value, bitmapType, null);
+    }
+    
+    public void defineWithBitmapType(String name, Object value, BitmapType bitmapType, String typeAliasName) {
+        values.put(name, safeValue(value));
+        if (bitmapType != null) {
+            bitmapTypes.put(name, bitmapType);
+            if (typeAliasName != null) {
+                bitmapTypeAliasNames.put(name, typeAliasName);
+            }
+        }
+    }
+    
+    public void defineConstWithBitmapType(String name, Object value, BitmapType bitmapType) {
+        defineConstWithBitmapType(name, value, bitmapType, null);
+    }
+    
+    public void defineConstWithBitmapType(String name, Object value, BitmapType bitmapType, String typeAliasName) {
+        values.put(name, safeValue(value));
+        constants.add(name);
+        if (bitmapType != null) {
+            bitmapTypes.put(name, bitmapType);
+            if (typeAliasName != null) {
+                bitmapTypeAliasNames.put(name, typeAliasName);
+            }
+        }
+    }
+    
     public RecordType getRecordType(String name) {
         if (recordTypes.containsKey(name)) {
             return recordTypes.get(name);
         }
         if (enclosing != null) {
             return enclosing.getRecordType(name);
+        }
+        return null;
+    }
+    
+    public BitmapType getBitmapType(String name) {
+        if (bitmapTypes.containsKey(name)) {
+            return bitmapTypes.get(name);
+        }
+        if (enclosing != null) {
+            return enclosing.getBitmapType(name);
+        }
+        return null;
+    }
+    
+    public String getBitmapTypeAliasName(String name) {
+        if (bitmapTypeAliasNames.containsKey(name)) {
+            return bitmapTypeAliasNames.get(name);
+        }
+        if (enclosing != null) {
+            return enclosing.getBitmapTypeAliasName(name);
         }
         return null;
     }

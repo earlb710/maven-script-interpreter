@@ -79,6 +79,7 @@ All identifiers are normalized to lowercase internally, so `myVariable`, `MyVari
 | `date` | Date/time value | `now()` |
 | `json` | JSON object/array | `{"key": "value"}` |
 | `map` | Key-value map (JSON objects only) | `{"key": "value"}` |
+| `bitmap` | Byte with named bit fields | `bitmap { flag: 0, status: 1-3 }` |
 | `array` | Generic array | `array[10]`, `array[*]` |
 | `queue` | FIFO queue (use `queue.type`) | `queue.string`, `queue.int` |
 
@@ -220,6 +221,125 @@ var badCast = map(arrayData);
 - `boolean()` / `bool()` - Boolean casting
 - `record()` - JSON to record casting
 - `map()` - JSON object to map casting
+
+#### Bitmap Type
+The `bitmap` type defines named fields that map to bit ranges within a byte (0-7). This allows compact storage of multiple small values within a single byte, useful for flags, status bits, or packing multiple small integers.
+
+```javascript
+// Define a bitmap variable with named bit fields
+// Each field specifies which bit(s) it occupies in the byte
+var flags: bitmap { status: 0-1, enabled: 2, priority: 3-5, reserved: 6-7 };
+
+// Field definitions:
+// - status: 2 bits (0-1), can hold values 0-3
+// - enabled: 1 bit (2), can hold values 0-1 (boolean-like)
+// - priority: 3 bits (3-5), can hold values 0-7
+// - reserved: 2 bits (6-7), can hold values 0-3
+
+// Initially, the bitmap value is 0
+print flags;  // Output: 0
+
+// Set individual fields using property access
+flags.status = 2;
+flags.enabled = 1;
+flags.priority = 5;
+flags.reserved = 3;
+
+// Read individual fields (values are automatically right-shifted)
+print flags.status;    // Output: 2
+print flags.enabled;   // Output: 1
+print flags.priority;  // Output: 5
+print flags.reserved;  // Output: 3
+
+// Fields can be used in expressions
+if (flags.enabled == 1) {
+    print "The enabled flag is set!";
+}
+
+// Const bitmap for read-only bit masks
+const PERMISSIONS: bitmap { read: 0, write: 1, execute: 2, admin: 3 } = 5;
+// 5 = binary 0101 = read(1), write(0), execute(1), admin(0)
+print PERMISSIONS.read;     // Output: 1
+print PERMISSIONS.write;    // Output: 0
+print PERMISSIONS.execute;  // Output: 1
+print PERMISSIONS.admin;    // Output: 0
+```
+
+**Bitmap Field Syntax:**
+- Single bit: `fieldName: bitPosition` (e.g., `enabled: 2`)
+- Bit range: `fieldName: startBit-endBit` (e.g., `status: 0-1`)
+- Bit positions must be 0-7 (within a byte)
+- Fields cannot overlap
+
+**Bitmap Features:**
+- Automatic right-shift when reading field values
+- Automatic left-shift and masking when writing field values
+- Value validation against field bit width
+- Case-insensitive field access (exact case matches are checked first)
+- Fields are stored in a single byte
+
+#### Bitmap Type Aliases and Casting
+
+Define reusable bitmap types using the `typeof` keyword, then cast byte or int values to the bitmap type:
+
+```javascript
+// Define a reusable bitmap type alias
+StatusFlags typeof bitmap { active: 0, error: 1, warning: 2, ready: 3, busy: 4-5 };
+
+// Cast a byte value to the bitmap type
+var byteValue: byte = 42;
+var status = StatusFlags(byteValue);
+
+// Access fields on the casted value
+print status.active;    // Output: 0
+print status.error;     // Output: 1
+print status.warning;   // Output: 0
+print status.ready;     // Output: 1
+print status.busy;      // Output: 2
+
+// Also works with integer values
+var intValue: int = 255;
+var allSet = StatusFlags(intValue);
+print allSet.busy;      // Output: 3 (all bits set)
+```
+
+#### Bitmap Bit Position Verification
+
+The bit positioning follows standard conventions:
+- `flags.status=2` sets bits 0-1 to value 2, so `flags=2`
+- `flags.enabled=1` sets bit 2 to value 1, so `flags=4` (1 << 2 = 4)
+- `flags.priority=1` sets bits 3-5 to value 1, so `flags=8` (1 << 3 = 8)
+
+```javascript
+BitPos typeof bitmap { status: 0-1, enabled: 2, priority: 3-5 };
+
+var test1 = BitPos(0);
+test1.status = 2;
+print test1;  // Output: 2
+
+var test2 = BitPos(0);
+test2.enabled = 1;
+print test2;  // Output: 4
+
+var test3 = BitPos(0);
+test3.priority = 1;
+print test3;  // Output: 8
+```
+
+#### typeof with Bitmap Types
+
+The `typeof` operator works with both bitmap type aliases and bitmap variables:
+
+```javascript
+StatusFlags typeof bitmap { active: 0, error: 1, warning: 2 };
+var status = StatusFlags(42);
+
+// typeof on a type alias returns the full bitmap definition
+print typeof StatusFlags;   // Output: bitmap {active: 0, error: 1, warning: 2}
+
+// typeof on a bitmap variable returns "bitmap <aliasname>"
+print typeof status;        // Output: bitmap statusflags
+```
 
 ### Null Values
 ```javascript

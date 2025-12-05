@@ -6,6 +6,7 @@ A powerful script interpreter for the EBS (Earl Bosch Script) language, featurin
 
 - **Custom Scripting Language**: Full-featured scripting language with familiar syntax
 - **Type Casting**: Explicit type conversions with `int()`, `string()`, `float()`, `double()`, `byte()`, `long()`, `boolean()`, `record()`, `map()`
+- **Bitmap Type**: Define named bit fields within a byte for compact storage of flags and small values
 - **typeof Operator**: Get the type of any variable or expression at runtime (e.g., `typeof a` returns `"string"`)
 - **Exception Handling**: Robust error handling with `try-exceptions-when` syntax to catch specific or any errors
 - **Interactive Console**: JavaFX-based IDE with rich text editing

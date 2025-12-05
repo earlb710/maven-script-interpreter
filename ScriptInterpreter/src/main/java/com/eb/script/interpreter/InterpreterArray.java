@@ -13,6 +13,7 @@ import com.eb.script.interpreter.expression.PropertyExpression;
 import com.eb.script.interpreter.expression.VariableExpression;
 import com.eb.script.interpreter.statement.IndexAssignStatement;
 import com.eb.script.interpreter.statement.StatementKind;
+import com.eb.script.token.BitmapType;
 import com.eb.script.token.DataType;
 
 import java.util.List;
@@ -246,6 +247,38 @@ public class InterpreterArray {
                         } else {
                             throw interpreter.error(stmt.getLine(), "Screen '" + screenName + "' does not have a variable named '" + varName + "'.");
                         }
+                    }
+                    
+                    // Check if this is a bitmap field assignment
+                    BitmapType bitmapType = interpreter.environment().getEnvironmentValues().getBitmapType(varExpr.name);
+                    if (bitmapType != null) {
+                        // This is a bitmap variable - set the field value
+                        BitmapType.BitField field = bitmapType.getFieldIgnoreCase(propExpr.propertyName);
+                        if (field == null) {
+                            throw interpreter.error(stmt.getLine(), "Bitmap field '" + propExpr.propertyName + "' does not exist in bitmap type");
+                        }
+                        
+                        // Get current bitmap value
+                        Object bitmapValue = interpreter.environment().get(varExpr.name);
+                        byte byteValue = BitmapType.toByteValue(bitmapValue);
+                        
+                        // Evaluate and validate the new value
+                        Object newValue = interpreter.evaluate(stmt.value);
+                        int intValue;
+                        if (newValue instanceof Number) {
+                            intValue = ((Number) newValue).intValue();
+                        } else {
+                            throw interpreter.error(stmt.getLine(), "Bitmap field value must be numeric");
+                        }
+                        
+                        // Set the field value
+                        try {
+                            byte newByteValue = field.setValue(byteValue, intValue);
+                            interpreter.environment().getEnvironmentValues().assign(varExpr.name, newByteValue);
+                        } catch (IllegalArgumentException e) {
+                            throw interpreter.error(stmt.getLine(), e.getMessage());
+                        }
+                        return;
                     }
                 }
             }
