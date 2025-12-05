@@ -251,6 +251,25 @@ public class BitmapType {
         return field.setValue(data, value);
     }
     
+    /**
+     * Convert an Object value to a byte for bitmap operations.
+     * Supports Byte, Number types, and other Objects by converting to byte.
+     * @param value The value to convert
+     * @return The byte value
+     * @throws IllegalArgumentException if the value cannot be converted
+     */
+    public static byte toByteValue(Object value) {
+        if (value instanceof Byte) {
+            return (Byte) value;
+        } else if (value instanceof Number) {
+            return ((Number) value).byteValue();
+        } else if (value == null) {
+            return 0;
+        } else {
+            throw new IllegalArgumentException("Cannot convert " + value.getClass().getSimpleName() + " to byte for bitmap");
+        }
+    }
+    
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("bitmap {");

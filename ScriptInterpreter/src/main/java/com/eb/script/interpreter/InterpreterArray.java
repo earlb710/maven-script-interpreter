@@ -260,14 +260,7 @@ public class InterpreterArray {
                         
                         // Get current bitmap value
                         Object bitmapValue = interpreter.environment().get(varExpr.name);
-                        byte byteValue;
-                        if (bitmapValue instanceof Byte) {
-                            byteValue = (Byte) bitmapValue;
-                        } else if (bitmapValue instanceof Number) {
-                            byteValue = ((Number) bitmapValue).byteValue();
-                        } else {
-                            byteValue = 0;
-                        }
+                        byte byteValue = BitmapType.toByteValue(bitmapValue);
                         
                         // Evaluate and validate the new value
                         Object newValue = interpreter.evaluate(stmt.value);

@@ -79,6 +79,7 @@ All identifiers are normalized to lowercase internally, so `myVariable`, `MyVari
 | `date` | Date/time value | `now()` |
 | `json` | JSON object/array | `{"key": "value"}` |
 | `map` | Key-value map (JSON objects only) | `{"key": "value"}` |
+| `bitmap` | Byte with named bit fields | `bitmap { flag: 0, status: 1-3 }` |
 | `array` | Generic array | `array[10]`, `array[*]` |
 | `queue` | FIFO queue (use `queue.type`) | `queue.string`, `queue.int` |
 
@@ -220,6 +221,62 @@ var badCast = map(arrayData);
 - `boolean()` / `bool()` - Boolean casting
 - `record()` - JSON to record casting
 - `map()` - JSON object to map casting
+
+#### Bitmap Type
+The `bitmap` type defines named fields that map to bit ranges within a byte (0-7). This allows compact storage of multiple small values within a single byte, useful for flags, status bits, or packing multiple small integers.
+
+```javascript
+// Define a bitmap variable with named bit fields
+// Each field specifies which bit(s) it occupies in the byte
+var flags: bitmap { status: 0-1, enabled: 2, priority: 3-5, reserved: 6-7 };
+
+// Field definitions:
+// - status: 2 bits (0-1), can hold values 0-3
+// - enabled: 1 bit (2), can hold values 0-1 (boolean-like)
+// - priority: 3 bits (3-5), can hold values 0-7
+// - reserved: 2 bits (6-7), can hold values 0-3
+
+// Initially, the bitmap value is 0
+print flags;  // Output: 0
+
+// Set individual fields using property access
+flags.status = 2;
+flags.enabled = 1;
+flags.priority = 5;
+flags.reserved = 3;
+
+// Read individual fields (values are automatically right-shifted)
+print flags.status;    // Output: 2
+print flags.enabled;   // Output: 1
+print flags.priority;  // Output: 5
+print flags.reserved;  // Output: 3
+
+// Fields can be used in expressions
+if (flags.enabled == 1) {
+    print "The enabled flag is set!";
+}
+
+// Const bitmap for read-only bit masks
+const PERMISSIONS: bitmap { read: 0, write: 1, execute: 2, admin: 3 } = 5;
+// 5 = binary 0101 = read(1), write(0), execute(1), admin(0)
+print PERMISSIONS.read;     // Output: 1
+print PERMISSIONS.write;    // Output: 0
+print PERMISSIONS.execute;  // Output: 1
+print PERMISSIONS.admin;    // Output: 0
+```
+
+**Bitmap Field Syntax:**
+- Single bit: `fieldName: bitPosition` (e.g., `enabled: 2`)
+- Bit range: `fieldName: startBit-endBit` (e.g., `status: 0-1`)
+- Bit positions must be 0-7 (within a byte)
+- Fields cannot overlap
+
+**Bitmap Features:**
+- Automatic right-shift when reading field values
+- Automatic left-shift and masking when writing field values
+- Value validation against field bit width
+- Case-insensitive field access (exact case matches are checked first)
+- Fields are stored in a single byte
 
 ### Null Values
 ```javascript

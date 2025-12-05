@@ -1879,14 +1879,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             if (bitmapType != null) {
                 // This is a bitmap variable - get the field value
                 Object bitmapValue = environment().get(varExpr.name);
-                byte byteValue;
-                if (bitmapValue instanceof Byte) {
-                    byteValue = (Byte) bitmapValue;
-                } else if (bitmapValue instanceof Number) {
-                    byteValue = ((Number) bitmapValue).byteValue();
-                } else {
-                    throw error(expr.getLine(), "Bitmap variable '" + varExpr.name + "' does not contain a valid byte value");
-                }
+                byte byteValue = BitmapType.toByteValue(bitmapValue);
                 
                 BitmapType.BitField field = bitmapType.getFieldIgnoreCase(expr.propertyName);
                 if (field == null) {
