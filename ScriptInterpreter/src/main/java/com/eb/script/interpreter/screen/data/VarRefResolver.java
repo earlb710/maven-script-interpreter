@@ -187,7 +187,12 @@ public class VarRefResolver {
         
         // Check if this is a simple variable name (no array access or property access)
         if (!varRef.contains("[") && !varRef.contains(".")) {
-            screenVars.put(varRef.toLowerCase(), value);
+            // ConcurrentHashMap doesn't allow null values, so remove the key if value is null
+            if (value != null) {
+                screenVars.put(varRef.toLowerCase(), value);
+            } else {
+                screenVars.remove(varRef.toLowerCase());
+            }
             return;
         }
         
@@ -205,7 +210,12 @@ public class VarRefResolver {
             splitPos = dotPos;
         } else {
             // No complex access, just a simple variable
-            screenVars.put(varRef.toLowerCase(), value);
+            // ConcurrentHashMap doesn't allow null values, so remove the key if value is null
+            if (value != null) {
+                screenVars.put(varRef.toLowerCase(), value);
+            } else {
+                screenVars.remove(varRef.toLowerCase());
+            }
             return;
         }
         
