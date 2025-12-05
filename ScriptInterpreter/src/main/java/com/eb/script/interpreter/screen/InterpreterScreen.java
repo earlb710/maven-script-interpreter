@@ -965,11 +965,9 @@ public class InterpreterScreen {
                 // This ensures setItemChoiceOptions and similar calls complete before items are marked as "changed"
                 Platform.runLater(markShownTask);
             } else {
-                Platform.runLater(() -> {
-                    showTask.run();
-                    // Queue the "mark shown" task to run after any tasks that were queued before this one
-                    Platform.runLater(markShownTask);
-                });
+                // Queue both tasks - they will execute in order after any previously queued tasks
+                Platform.runLater(showTask);
+                Platform.runLater(markShownTask);
             }
 
         } catch (InterpreterError ex) {
