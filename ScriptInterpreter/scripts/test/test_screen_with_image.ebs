@@ -1,0 +1,183 @@
+// ============================================================================
+// TEST SCRIPT: Screen with Image Display
+// ============================================================================
+// This script tests the IMAGEVIEW screen item type along with other normal
+// screen items. It demonstrates:
+// - Loading an image using image.load()
+// - Displaying an image in a screen using IMAGEVIEW item type
+// - Combining image display with other normal controls
+// ============================================================================
+
+print "====================================================================";
+print "       TEST SCRIPT: Screen with Image Display";
+print "====================================================================";
+print "";
+
+// Load the test image from resources
+print "Loading test image...";
+var testImage: image = call image.load("src/main/resources/images/test_image.png");
+print "Image loaded successfully";
+
+// Get image info
+var imgWidth: int = call image.getWidth(testImage);
+var imgHeight: int = call image.getHeight(testImage);
+var imgName: string = call image.getName(testImage);
+var imgType: string = call image.getType(testImage);
+
+print "Image dimensions: " + imgWidth + "x" + imgHeight;
+print "Image name: " + imgName;
+print "Image type: " + imgType;
+print "";
+
+// Create a screen with the image and other normal items
+screen imageTestScreen = {
+    "title": "Image Display Test Screen",
+    "width": 500,
+    "height": 600,
+    "vars": [
+        {
+            "name": "headerLabel",
+            "type": "string",
+            "default": "Image Display Demo",
+            "display": {
+                "type": "label",
+                "labelText": "Image Display Demo",
+                "labelBold": true,
+                "labelFontSize": "18px",
+                "labelColor": "#2c3e50"
+            }
+        },
+        {
+            "name": "descriptionLabel",
+            "type": "string",
+            "default": "This screen demonstrates the IMAGEVIEW control type",
+            "display": {
+                "type": "label",
+                "labelText": "This screen demonstrates the IMAGEVIEW control type"
+            }
+        },
+        {
+            "name": "testImageVar",
+            "type": "image",
+            "display": {
+                "type": "imageview",
+                "labelText": "Test Image (Click to convert to B&W):",
+                "fitWidth": 200,
+                "fitHeight": 200,
+                "preserveRatio": true,
+                "onClick": "call convertToBlackAndWhite();"
+            }
+        },
+        {
+            "name": "separator1",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "separator"
+            }
+        },
+        {
+            "name": "userName",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Your Name:",
+                "promptHelp": "Enter your name",
+                "maxLength": 50
+            }
+        },
+        {
+            "name": "userComment",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textarea",
+                "labelText": "Comments:",
+                "promptHelp": "Enter your comments about the image",
+                "height": 3,
+                "maxLength": 200
+            }
+        },
+        {
+            "name": "imageRating",
+            "type": "int",
+            "default": 5,
+            "display": {
+                "type": "slider",
+                "labelText": "Rating (1-10):",
+                "min": 1,
+                "max": 10,
+                "showSliderValue": true
+            }
+        },
+        {
+            "name": "favoriteColor",
+            "type": "string",
+            "default": "#4a90e2",
+            "display": {
+                "type": "colorpicker",
+                "labelText": "Favorite Color:"
+            }
+        },
+        {
+            "name": "imageCategory",
+            "type": "string",
+            "default": "Test",
+            "display": {
+                "type": "combobox",
+                "labelText": "Category:",
+                "options": ["Test", "Demo", "Production", "Archive"]
+            }
+        },
+        {
+            "name": "isPublic",
+            "type": "bool",
+            "default": true,
+            "display": {
+                "type": "checkbox",
+                "labelText": "Make Public:"
+            }
+        },
+        {
+            "name": "submitButton",
+            "type": "string",
+            "default": "Submit",
+            "display": {
+                "type": "button",
+                "labelText": "Submit Feedback"
+            }
+        }
+    ]
+};
+
+// Set the image to the screen variable
+print "Setting image to screen variable...";
+imageTestScreen.testImageVar = testImage;
+
+// Show the screen
+print "Displaying screen with image...";
+show screen imageTestScreen;
+
+print "";
+print "====================================================================";
+print "Screen displayed! The screen shows:";
+print "  - Header label with bold text";
+print "  - Description label";
+print "  - Test image with IMAGEVIEW control (200x200, preserve ratio)";
+print "    Click the image to convert it to black and white!";
+print "  - Text input fields (name and comments)";
+print "  - Slider for rating";
+print "  - Color picker";
+print "  - Combobox for category selection";
+print "  - Checkbox for visibility setting";
+print "  - Submit button";
+print "====================================================================";
+
+// Function to convert image to black and white when clicked
+convertToBlackAndWhite() return void {
+    print "Converting image to black and white...";
+    var grayImage: image = call image.toGrayscale(imageTestScreen.testImageVar);
+    imageTestScreen.testImageVar = grayImage;
+    print "Image converted to black and white!";
+}

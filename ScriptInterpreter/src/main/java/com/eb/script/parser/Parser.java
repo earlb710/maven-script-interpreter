@@ -351,6 +351,8 @@ public class Parser {
             return EbsTokenType.RECORD;
         } else if (EbsTokenType.MAP.contains(str)) {
             return EbsTokenType.MAP;
+        } else if (EbsTokenType.IMAGE.contains(str)) {
+            return EbsTokenType.IMAGE;
         }
         return null;
     }
@@ -525,6 +527,7 @@ public class Parser {
                             case "double", "number" -> elemType = DataType.DOUBLE;
                             case "bool", "boolean" -> elemType = DataType.BOOL;
                             case "date" -> elemType = DataType.DATE;
+                            case "image" -> elemType = DataType.IMAGE;
                             case "record" -> {
                                 elemType = DataType.RECORD;
                                 // For array.record, field definitions come after array dimensions
@@ -547,6 +550,7 @@ public class Parser {
                             case "double", "number" -> elemType = DataType.DOUBLE;
                             case "bool", "boolean" -> elemType = DataType.BOOL;
                             case "date" -> elemType = DataType.DATE;
+                            case "image" -> elemType = DataType.IMAGE;
                             default -> throw error(t, "Unknown queue element type: " + subType);
                         }
                     } else {
@@ -667,6 +671,7 @@ public class Parser {
                         case "double", "number" -> elemType = DataType.DOUBLE;
                         case "bool", "boolean" -> elemType = DataType.BOOL;
                         case "date" -> elemType = DataType.DATE;
+                        case "image" -> elemType = DataType.IMAGE;
                         case "record" -> {
                             elemType = DataType.RECORD;
                             // For array.record, field definitions come after array dimensions
@@ -705,6 +710,7 @@ public class Parser {
                         case "double", "number" -> elemType = DataType.DOUBLE;
                         case "bool", "boolean" -> elemType = DataType.BOOL;
                         case "date" -> elemType = DataType.DATE;
+                        case "image" -> elemType = DataType.IMAGE;
                         default -> throw error(subType, "Unknown queue element type: " + subTypeName);
                     }
                 } else {
@@ -2809,6 +2815,7 @@ public class Parser {
             case "queue" -> DataType.QUEUE;
             case "record" -> DataType.RECORD;
             case "map" -> DataType.MAP;
+            case "image" -> DataType.IMAGE;
             default -> null;
         };
     }

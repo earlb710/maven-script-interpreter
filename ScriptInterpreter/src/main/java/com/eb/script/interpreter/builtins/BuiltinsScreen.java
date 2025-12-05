@@ -840,8 +840,13 @@ public class BuiltinsScreen {
             var.setValue(originalValue);
 
             // Update the screen vars map as well
+            // Note: ConcurrentHashMap does not allow null values, so remove key if value is null
             if (screenVars != null && var.getName() != null) {
-                screenVars.put(var.getName().toLowerCase(), originalValue);
+                if (originalValue != null) {
+                    screenVars.put(var.getName().toLowerCase(), originalValue);
+                } else {
+                    screenVars.remove(var.getName().toLowerCase());
+                }
             }
         }
 
@@ -894,8 +899,13 @@ public class BuiltinsScreen {
             var.setValue(defaultValue);
 
             // Update the screen vars map as well
+            // Note: ConcurrentHashMap does not allow null values, so remove key if value is null
             if (screenVars != null && var.getName() != null) {
-                screenVars.put(var.getName().toLowerCase(), defaultValue);
+                if (defaultValue != null) {
+                    screenVars.put(var.getName().toLowerCase(), defaultValue);
+                } else {
+                    screenVars.remove(var.getName().toLowerCase());
+                }
             }
         }
 

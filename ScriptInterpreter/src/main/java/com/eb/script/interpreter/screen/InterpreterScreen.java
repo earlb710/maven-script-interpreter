@@ -1471,6 +1471,8 @@ public class InterpreterScreen {
                 return DataType.JSON;
             case "record":
                 return DataType.RECORD;
+            case "image":
+                return DataType.IMAGE;
             default:
                 return null;
         }

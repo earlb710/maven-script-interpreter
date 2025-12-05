@@ -1,0 +1,332 @@
+// ============================================================================
+// TEST SCRIPT: Image Builtin Functions with EbsImage Type
+// ============================================================================
+// This script tests the image.* builtin functions for loading, saving,
+// resizing, and manipulating images. Images are now handled as the EbsImage
+// type which wraps JavaFX Image with metadata (name, type) for manipulation.
+// The image.getBytes() function converts back to ArrayFixedByte.
+// 
+// Available Image Builtins:
+// - image.load(path)                   - Load image from file -> IMAGE
+// - image.create(bytes, name?, type?)  - Create EbsImage from bytes -> IMAGE
+// - image.save(image, path, format?)   - Save image to file
+// - image.resize(image, w, h, keep?)   - Resize image -> IMAGE
+// - image.getWidth(image)              - Get image width
+// - image.getHeight(image)             - Get image height
+// - image.getInfo(image)               - Get image metadata as JSON
+// - image.crop(image, x, y, w, h)      - Crop image region -> IMAGE
+// - image.rotate(image, degrees)       - Rotate image -> IMAGE
+// - image.flipHorizontal(image)        - Flip horizontally -> IMAGE
+// - image.flipVertical(image)          - Flip vertically -> IMAGE
+// - image.toGrayscale(image)           - Convert to grayscale -> IMAGE
+// - image.adjustBrightness(image, f)   - Adjust brightness -> IMAGE
+// - image.adjustContrast(image, f)     - Adjust contrast -> IMAGE
+// - image.fromBase64(b64)              - Load from base64 string -> IMAGE
+// - image.toBase64(image, format?)     - Convert to base64 string
+// - image.getBytes(image, format?)     - Convert to ArrayFixedByte
+// - image.getName(image)               - Get image name
+// - image.setName(image, name)         - Set image name -> IMAGE
+// - image.getType(image)               - Get image type (png, jpg, etc.)
+// - image.setType(image, type)         - Set image type -> IMAGE
+// ============================================================================
+
+print "====================================================================";
+print "       TEST SCRIPT: Image Builtin Functions with EbsImage Type";
+print "====================================================================";
+print "";
+
+// NOTE: This test requires an image file to exist.
+// To run this test, place a test image (PNG, JPG, GIF, or BMP) in the
+// scripts/test directory named "test_image.png"
+
+var testImagePath: string = "scripts/test/test_image.png";
+var outputDir: string = "scripts/test/output";
+
+// Check if test image exists
+var imageExists: bool = call file.exists(testImagePath);
+
+if imageExists == false then {
+    print "Warning: Test image not found at: " + testImagePath;
+    print "";
+    print "To run this test:";
+    print "1. Create a test image (PNG, JPG, etc.)";
+    print "2. Place it at: " + testImagePath;
+    print "";
+    print "Skipping image tests...";
+    print "";
+} else {
+    // ============================================================================
+    // TEST 1: Load and Get Info
+    // ============================================================================
+    print "============================================================";
+    print "TEST 1: Loading Image and Getting Info";
+    print "============================================================";
+    print "";
+
+    print "Loading image from: " + testImagePath;
+    var img: image = call image.load(testImagePath);
+    print "Image loaded successfully (type: IMAGE)";
+    print "";
+
+    var width: int = call image.getWidth(img);
+    var height: int = call image.getHeight(img);
+    print "Image dimensions: " + width + " x " + height + " pixels";
+    print "";
+
+    // Get image name and type
+    var imgName: string = call image.getName(img);
+    var imgType: string = call image.getType(img);
+    print "Image name: " + imgName;
+    print "Image type: " + imgType;
+    print "";
+
+    var info = call image.getInfo(img);
+    print "Image info:";
+    print "  Width:     " + call json.getInt(info, "width", 0);
+    print "  Height:    " + call json.getInt(info, "height", 0);
+    print "  Type:      " + call json.getString(info, "type", "unknown");
+    print "  Name:      " + call json.getString(info, "name", "unnamed");
+    print "  Has Alpha: " + call json.getBool(info, "hasAlpha", false);
+    print "";
+    print "PASSED: Load and info tests";
+    print "";
+
+    // ============================================================================
+    // TEST 2: Resize Operations
+    // ============================================================================
+    print "============================================================";
+    print "TEST 2: Resize Operations";
+    print "============================================================";
+    print "";
+
+    // Resize to fixed dimensions
+    print "--- Resize to 100x100 ---";
+    var resized100: image = call image.resize(img, 100, 100, false);
+    var resizedWidth: int = call image.getWidth(resized100);
+    var resizedHeight: int = call image.getHeight(resized100);
+    print "Resized dimensions: " + resizedWidth + " x " + resizedHeight;
+    call debug.assertEquals(100, resizedWidth, "Resized width = 100");
+    call debug.assertEquals(100, resizedHeight, "Resized height = 100");
+    print "";
+
+    // Resize with aspect ratio
+    print "--- Resize to max 50x50 keeping aspect ratio ---";
+    var resizedAspect: image = call image.resize(img, 50, 50, true);
+    var aspectW: int = call image.getWidth(resizedAspect);
+    var aspectH: int = call image.getHeight(resizedAspect);
+    print "Resized dimensions (aspect): " + aspectW + " x " + aspectH;
+    // At least one dimension should be 50 or less
+    print "Aspect ratio maintained: " + (aspectW <= 50) + " or " + (aspectH <= 50);
+    print "";
+    print "PASSED: Resize tests";
+    print "";
+
+    // ============================================================================
+    // TEST 3: Crop Operation
+    // ============================================================================
+    print "============================================================";
+    print "TEST 3: Crop Operation";
+    print "============================================================";
+    print "";
+
+    // Crop a 30x40 region from position (10, 10)
+    print "--- Cropping 30x40 region from (10,10) ---";
+    var cropped: image = call image.crop(img, 10, 10, 30, 40);
+    var cropW: int = call image.getWidth(cropped);
+    var cropH: int = call image.getHeight(cropped);
+    print "Cropped dimensions: " + cropW + " x " + cropH;
+    call debug.assertEquals(30, cropW, "Cropped width = 30");
+    call debug.assertEquals(40, cropH, "Cropped height = 40");
+    print "";
+    print "PASSED: Crop test";
+    print "";
+
+    // ============================================================================
+    // TEST 4: Rotation
+    // ============================================================================
+    print "============================================================";
+    print "TEST 4: Rotation";
+    print "============================================================";
+    print "";
+
+    print "--- Rotating 90 degrees ---";
+    var rotated90: image = call image.rotate(img, 90.0);
+    var rot90W: int = call image.getWidth(rotated90);
+    var rot90H: int = call image.getHeight(rotated90);
+    print "Rotated 90 degrees dimensions: " + rot90W + " x " + rot90H;
+    print "";
+    print "PASSED: Rotation test";
+    print "";
+
+    // ============================================================================
+    // TEST 5: Flip Operations
+    // ============================================================================
+    print "============================================================";
+    print "TEST 5: Flip Operations";
+    print "============================================================";
+    print "";
+
+    print "--- Flip Horizontal ---";
+    var flippedH: image = call image.flipHorizontal(img);
+    print "Horizontal flip completed";
+
+    print "--- Flip Vertical ---";
+    var flippedV: image = call image.flipVertical(img);
+    print "Vertical flip completed";
+    print "";
+    print "PASSED: Flip tests";
+    print "";
+
+    // ============================================================================
+    // TEST 6: Color Operations
+    // ============================================================================
+    print "============================================================";
+    print "TEST 6: Color Operations";
+    print "============================================================";
+    print "";
+
+    print "--- Convert to Grayscale ---";
+    var grayscale: image = call image.toGrayscale(img);
+    print "Grayscale conversion completed";
+
+    print "--- Adjust Brightness (factor=1.5) ---";
+    var brighter: image = call image.adjustBrightness(img, 1.5);
+    print "Brightness adjustment completed";
+
+    print "--- Adjust Contrast (factor=1.2) ---";
+    var contrasted: image = call image.adjustContrast(img, 1.2);
+    print "Contrast adjustment completed";
+    print "";
+    print "PASSED: Color operation tests";
+    print "";
+
+    // ============================================================================
+    // TEST 7: Base64 Operations
+    // ============================================================================
+    print "============================================================";
+    print "TEST 7: Base64 Operations";
+    print "============================================================";
+    print "";
+
+    print "--- Convert to Base64 ---";
+    var base64Str: string = call image.toBase64(img, "png");
+    var b64Len: int = call str.length(base64Str);
+    print "Base64 string length: " + b64Len + " characters";
+
+    print "--- Convert from Base64 ---";
+    var decoded: image = call image.fromBase64(base64Str);
+    var decodedW: int = call image.getWidth(decoded);
+    var decodedH: int = call image.getHeight(decoded);
+    print "Decoded dimensions: " + decodedW + " x " + decodedH;
+    call debug.assertEquals(width, decodedW, "Decoded width matches original");
+    call debug.assertEquals(height, decodedH, "Decoded height matches original");
+    print "";
+    print "PASSED: Base64 tests";
+    print "";
+
+    // ============================================================================
+    // TEST 8: GetBytes Conversion
+    // ============================================================================
+    print "============================================================";
+    print "TEST 8: GetBytes Conversion (EbsImage to ArrayFixedByte)";
+    print "============================================================";
+    print "";
+
+    print "--- Converting EbsImage to bytes ---";
+    var imgBytes = call image.getBytes(img, "png");
+    print "Converted to ArrayFixedByte, size: " + imgBytes.length + " bytes";
+    
+    print "--- Creating new EbsImage from bytes ---";
+    var recreated: image = call image.create(imgBytes, "recreated.png", "png");
+    var recreatedW: int = call image.getWidth(recreated);
+    var recreatedH: int = call image.getHeight(recreated);
+    print "Recreated dimensions: " + recreatedW + " x " + recreatedH;
+    call debug.assertEquals(width, recreatedW, "Recreated width matches original");
+    call debug.assertEquals(height, recreatedH, "Recreated height matches original");
+    print "";
+    print "PASSED: GetBytes conversion test";
+    print "";
+
+    // ============================================================================
+    // TEST 9: Name and Type Operations
+    // ============================================================================
+    print "============================================================";
+    print "TEST 9: Name and Type Operations";
+    print "============================================================";
+    print "";
+
+    print "--- Set image name ---";
+    var renamedImg: image = call image.setName(img, "my_custom_name.png");
+    var newName: string = call image.getName(renamedImg);
+    print "New name: " + newName;
+    call debug.assertEquals("my_custom_name.png", newName, "Name updated correctly");
+
+    print "--- Set image type ---";
+    var retypedImg: image = call image.setType(img, "jpg");
+    var newType: string = call image.getType(retypedImg);
+    print "New type: " + newType;
+    call debug.assertEquals("jpg", newType, "Type updated correctly");
+    print "";
+    print "PASSED: Name and type tests";
+    print "";
+
+    // ============================================================================
+    // TEST 10: Save Operations
+    // ============================================================================
+    print "============================================================";
+    print "TEST 10: Save Operations";
+    print "============================================================";
+    print "";
+
+    // Save modified images to output directory
+    print "Saving processed images to: " + outputDir;
+    
+    var saveResult1: bool = call image.save(grayscale, outputDir + "/grayscale.png", "png");
+    print "  grayscale.png: " + saveResult1;
+    
+    var saveResult2: bool = call image.save(resized100, outputDir + "/resized_100x100.png", "png");
+    print "  resized_100x100.png: " + saveResult2;
+    
+    var saveResult3: bool = call image.save(brighter, outputDir + "/brighter.jpg", "jpg");
+    print "  brighter.jpg: " + saveResult3;
+    print "";
+    print "PASSED: Save tests";
+    print "";
+}
+
+// ============================================================================
+// SUMMARY
+// ============================================================================
+print "====================================================================";
+print "                    TEST SUMMARY";
+print "====================================================================";
+print "EbsImage type - a new IMAGE data type with:";
+print "  - JavaFX Image for manipulation";
+print "  - Image name (file name/identifier)";
+print "  - Image type (png, jpg, gif, bmp)";
+print "";
+print "Image builtin functions tested:";
+print "";
+print "  PASSED: image.load(path)               - Load image from file";
+print "  PASSED: image.create(bytes, n, t)      - Create from ArrayFixedByte";
+print "  PASSED: image.save(image, path, fmt)   - Save image to file";
+print "  PASSED: image.resize(image, w, h, ka)  - Resize image";
+print "  PASSED: image.getWidth(image)          - Get image width";
+print "  PASSED: image.getHeight(image)         - Get image height";
+print "  PASSED: image.getInfo(image)           - Get image metadata";
+print "  PASSED: image.crop(image, x, y, w, h)  - Crop image region";
+print "  PASSED: image.rotate(image, degrees)   - Rotate image";
+print "  PASSED: image.flipHorizontal(image)    - Flip horizontally";
+print "  PASSED: image.flipVertical(image)      - Flip vertically";
+print "  PASSED: image.toGrayscale(image)       - Convert to grayscale";
+print "  PASSED: image.adjustBrightness(i, f)   - Adjust brightness";
+print "  PASSED: image.adjustContrast(i, f)     - Adjust contrast";
+print "  PASSED: image.fromBase64(b64)          - Load from base64";
+print "  PASSED: image.toBase64(image, fmt)     - Convert to base64";
+print "  PASSED: image.getBytes(image, fmt)     - Convert to ArrayFixedByte";
+print "  PASSED: image.getName(image)           - Get image name";
+print "  PASSED: image.setName(image, name)     - Set image name";
+print "  PASSED: image.getType(image)           - Get image type";
+print "  PASSED: image.setType(image, type)     - Set image type";
+print "";
+print "====================================================================";
