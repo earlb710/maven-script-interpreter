@@ -3654,9 +3654,10 @@ public class ScreenFactory {
                 Map<String, Object> displayDef = (Map<String, Object>) displayObj;
                 item.displayItem = parseDisplayItem(displayDef, screenName);
             }
-        } else if (itemDef.containsKey("type") && item.varRef == null) {
-            // If item has a direct "type" property (e.g., button, label) without a varRef,
+        } else if (itemDef.containsKey("type")) {
+            // If item has a direct "type" property (e.g., colorpicker, button, label),
             // treat the item definition itself as the display definition
+            // This applies whether or not the item has a varRef
             item.displayItem = parseDisplayItem(itemDef, screenName);
         }
 
