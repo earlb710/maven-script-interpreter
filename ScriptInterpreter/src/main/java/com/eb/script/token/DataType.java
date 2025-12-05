@@ -24,6 +24,7 @@ public enum DataType {
     QUEUE(java.util.Queue.class),
     RECORD(java.util.Map.class),
     MAP(java.util.Map.class),
+    BITMAP(Byte.class),
     IMAGE(EbsImage.class),
     ANY(Comparable.class);
 
@@ -79,6 +80,9 @@ public enum DataType {
                 case MAP -> {
                     return new Object[length];
                 }
+                case BITMAP -> {
+                    return new Byte[length];
+                }
                 case IMAGE -> {
                     return new EbsImage[length];
                 }
@@ -123,6 +127,10 @@ public enum DataType {
         if (type == IMAGE) {
             // Accept EbsImage objects as images
             return value instanceof EbsImage;
+        }
+        if (type == BITMAP) {
+            // Accept Byte objects as bitmaps
+            return value instanceof Byte || value instanceof Number;
         }
         // For other types, allow subclasses (e.g., HashMap instanceof Map)
         return dataClass.isInstance(value);
@@ -232,6 +240,10 @@ public enum DataType {
                         }
                     }
                 }
+            }
+            case BITMAP -> {
+                // Convert to byte for bitmap type
+                value = convertToByte(value);
             }
             default -> {
             }

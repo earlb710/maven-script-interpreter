@@ -1,0 +1,47 @@
+// bitmap.ebs - Example demonstrating the bitmap data type
+//
+// A bitmap type defines named fields that map to bit ranges within a byte (0-7).
+
+// Define a simple bitmap variable
+var flags: bitmap { status: 0-1, enabled: 2, priority: 3-5, reserved: 6-7 };
+
+// Initially, the bitmap value is 0
+print "Initial bitmap value: " + flags;
+
+// Set individual fields using property access
+flags.status = 2;
+flags.enabled = 1;
+flags.priority = 5;
+flags.reserved = 3;
+
+// Read the raw byte value
+print "Bitmap after setting fields: " + flags;
+
+// Read individual fields (values are automatically right-shifted)
+print "status = " + flags.status;
+print "enabled = " + flags.enabled;
+print "priority = " + flags.priority;
+print "reserved = " + flags.reserved;
+
+// Fields can also be used in expressions
+if (flags.enabled == 1) {
+    print "The enabled flag is set!";
+}
+
+if (flags.priority > 3) {
+    print "High priority detected: " + flags.priority;
+}
+
+// Change a field value
+flags.priority = 1;
+print "Changed priority to: " + flags.priority;
+
+print "Final bitmap raw value: " + flags;
+
+// Demonstrate const bitmap
+const PERMISSIONS: bitmap { read: 0, write: 1, execute: 2, admin: 3 } = 5;
+
+print "Read permission: " + PERMISSIONS.read;
+print "Write permission: " + PERMISSIONS.write;
+print "Execute permission: " + PERMISSIONS.execute;
+print "Admin permission: " + PERMISSIONS.admin;

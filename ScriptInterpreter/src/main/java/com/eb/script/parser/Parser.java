@@ -3,6 +3,7 @@ package com.eb.script.parser;
 import com.eb.script.interpreter.builtins.Builtins;
 import com.eb.script.json.Json;
 import com.eb.script.RuntimeContext;
+import com.eb.script.token.BitmapType;
 import com.eb.script.token.Category;
 import com.eb.script.token.DataType;
 import com.eb.script.token.RecordType;
@@ -351,6 +352,8 @@ public class Parser {
             return EbsTokenType.RECORD;
         } else if (EbsTokenType.MAP.contains(str)) {
             return EbsTokenType.MAP;
+        } else if (EbsTokenType.BITMAP.contains(str)) {
+            return EbsTokenType.BITMAP;
         } else if (EbsTokenType.IMAGE.contains(str)) {
             return EbsTokenType.IMAGE;
         }
@@ -486,16 +489,32 @@ public class Parser {
         name = consume(EbsTokenType.IDENTIFIER, "Expected variable name.");
         DataType elemType = null;
         RecordType recordType = null;
+        BitmapType bitmapType = null;
         Expression[] arrayDims = null;
-        boolean consumedBraces = false; // Track if we consumed braces for record fields
+        boolean consumedBraces = false; // Track if we consumed braces for record/bitmap fields
         boolean isQueueType = false; // Track if this is a queue type declaration
 
         if (match(EbsTokenType.COLON)) {
             EbsToken t = peek();
             
+            // Check if this is a bitmap type definition
+            // Check both token type and literal value since lexer might categorize it differently
+            if (t.type == EbsTokenType.BITMAP || 
+                (t.literal instanceof String && "bitmap".equals(((String)t.literal).toLowerCase()))) {
+                elemType = DataType.BITMAP;
+                advance(); // consume 'bitmap'
+                
+                // Expect opening brace for field definitions
+                consume(EbsTokenType.LBRACE, "Expected '{' after 'bitmap' keyword.");
+                
+                // Parse bitmap fields
+                bitmapType = parseBitmapFields();
+                
+                consume(EbsTokenType.RBRACE, "Expected '}' after bitmap field definitions.");
+                consumedBraces = true;
             // Check if this is a record type definition
             // Check both token type and literal value since lexer might categorize it differently
-            if (t.type == EbsTokenType.RECORD || 
+            } else if (t.type == EbsTokenType.RECORD || 
                 (t.literal instanceof String && "record".equals(((String)t.literal).toLowerCase()))) {
                 elemType = DataType.RECORD;
                 advance(); // consume 'record'
@@ -639,7 +658,9 @@ public class Parser {
                              TypeRegistry.hasTypeAlias((String) t.literal);
             
             if (t.type != EbsTokenType.RECORD && 
+                t.type != EbsTokenType.BITMAP &&
                 !(t.literal instanceof String && "record".equals(((String)t.literal).toLowerCase())) &&
+                !(t.literal instanceof String && "bitmap".equals(((String)t.literal).toLowerCase())) &&
                 !(t.literal instanceof String && ((String)t.literal).toLowerCase().startsWith("array.record")) &&
                 !(t.literal instanceof String && ((String)t.literal).toLowerCase().startsWith("queue.")) &&
                 !isAlias) {
@@ -779,8 +800,10 @@ public class Parser {
 
         consume(EbsTokenType.SEMICOLON, "Expected ';' after variable declaration.");
         
-        // Return appropriate VarStatement based on whether it's a record type
-        if (recordType != null) {
+        // Return appropriate VarStatement based on whether it's a record or bitmap type
+        if (bitmapType != null) {
+            return new VarStatement(name.line, (String) name.literal, elemType, bitmapType, varInit, isConst);
+        } else if (recordType != null) {
             return new VarStatement(name.line, (String) name.literal, elemType, recordType, varInit, isConst);
         } else {
             return new VarStatement(name.line, (String) name.literal, elemType, varInit, isConst);
@@ -995,6 +1018,68 @@ public class Parser {
         }
         
         return recordType;
+    }
+
+    /**
+     * Parse bitmap field definitions inside { }
+     * Expected format: fieldName: startBit-endBit, fieldName: bit, ...
+     * Examples:
+     *   status: 0-1    (2 bits at positions 0-1, values 0-3)
+     *   enabled: 2     (1 bit at position 2, values 0-1)
+     *   priority: 3-5  (3 bits at positions 3-5, values 0-7)
+     *   reserved: 6-7  (2 bits at positions 6-7, values 0-3)
+     */
+    private BitmapType parseBitmapFields() throws ParseError {
+        BitmapType bitmapType = new BitmapType();
+        
+        // Parse field definitions until we hit the closing brace
+        while (!check(EbsTokenType.RBRACE) && !isAtEnd()) {
+            // Parse field name
+            EbsToken fieldName = consume(EbsTokenType.IDENTIFIER, "Expected field name in bitmap definition.");
+            
+            // Expect colon
+            consume(EbsTokenType.COLON, "Expected ':' after field name in bitmap definition.");
+            
+            // Parse bit position or range
+            EbsToken startBitToken = consume(EbsTokenType.INTEGER, "Expected bit position (0-7) after ':' in bitmap definition.");
+            int startBit = (Integer) startBitToken.literal;
+            
+            if (startBit < 0 || startBit > 7) {
+                throw error(startBitToken, "Bit position must be 0-7, got: " + startBit);
+            }
+            
+            int endBit = startBit; // Default: single bit
+            
+            // Check for range: startBit-endBit
+            if (match(EbsTokenType.MINUS)) {
+                EbsToken endBitToken = consume(EbsTokenType.INTEGER, "Expected end bit position (0-7) after '-' in bitmap definition.");
+                endBit = (Integer) endBitToken.literal;
+                
+                if (endBit < 0 || endBit > 7) {
+                    throw error(endBitToken, "End bit position must be 0-7, got: " + endBit);
+                }
+                
+                if (startBit > endBit) {
+                    throw error(endBitToken, "Start bit (" + startBit + ") must be <= end bit (" + endBit + ")");
+                }
+            }
+            
+            // Add field to bitmap type
+            try {
+                bitmapType.addField((String) fieldName.literal, startBit, endBit);
+            } catch (IllegalArgumentException e) {
+                throw error(fieldName, e.getMessage());
+            }
+            
+            // Check for comma (more fields) or closing brace (end of bitmap)
+            if (check(EbsTokenType.COMMA)) {
+                advance(); // consume comma
+            } else if (!check(EbsTokenType.RBRACE)) {
+                throw error(peek(), "Expected ',' or '}' in bitmap definition.");
+            }
+        }
+        
+        return bitmapType;
     }
 
     /**
@@ -2137,7 +2222,20 @@ public class Parser {
             expr = new LiteralExpression(type, previous().literal);
         } else if (match(EbsTokenType.IDENTIFIER)) {
             EbsToken p = previous();
-            expr = new VariableExpression(p.line, (String) p.literal);
+            String varName = (String) p.literal;
+            
+            // The lexer may have combined dot-separated identifiers into one token
+            // (e.g., "customer.address.city" as a single IDENTIFIER token)
+            // Split them and create nested PropertyExpressions
+            if (varName.contains(".")) {
+                String[] parts = varName.split("\\.");
+                expr = new VariableExpression(p.line, parts[0]);
+                for (int i = 1; i < parts.length; i++) {
+                    expr = new PropertyExpression(p.line, expr, parts[i]);
+                }
+            } else {
+                expr = new VariableExpression(p.line, varName);
+            }
         } else if (match(EbsTokenType.LPAREN)) {
             expr = expression();
             consume(EbsTokenType.RPAREN, "Expected ')' after expression.");

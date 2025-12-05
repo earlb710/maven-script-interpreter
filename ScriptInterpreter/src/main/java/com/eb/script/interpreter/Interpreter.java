@@ -3,6 +3,7 @@ package com.eb.script.interpreter;
 import com.eb.script.interpreter.screen.InterpreterScreen;
 import com.eb.util.Debugger;
 import com.eb.script.RuntimeContext;
+import com.eb.script.token.BitmapType;
 import com.eb.script.token.DataType;
 import com.eb.script.token.RecordType;
 import com.eb.script.token.ebs.EbsToken;
@@ -399,6 +400,15 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                     if (!stmt.recordType.validateValue(value)) {
                         throw error(stmt.getLine(), "Record type mismatch for variable '" + stmt.name + "': value does not match record structure");
                     }
+                } else if (expectedType == DataType.BITMAP && stmt.bitmapType != null) {
+                    // Special handling for bitmap types
+                    // Initialize to 0 if no initial value provided
+                    if (value == null) {
+                        value = (byte) 0;
+                    } else {
+                        // Convert to byte
+                        value = DataType.BITMAP.convertValue(value);
+                    }
                 } else {
                     // For non-array values, convert to the expected type
                     value = stmt.varType.convertValue(value);
@@ -408,9 +418,16 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 }
             }
             
+            // Store the bitmap type metadata with the variable if it's a bitmap
+            if (stmt.bitmapType != null) {
+                if (stmt.isConst) {
+                    environment().getEnvironmentValues().defineConstWithBitmapType(stmt.name, value, stmt.bitmapType);
+                } else {
+                    environment().getEnvironmentValues().defineWithBitmapType(stmt.name, value, stmt.bitmapType);
+                }
             // Store the record type metadata with the variable if it's a record
             // Also mark as const if this is a const declaration
-            if (stmt.recordType != null) {
+            } else if (stmt.recordType != null) {
                 if (stmt.isConst) {
                     environment().getEnvironmentValues().defineConstWithRecordType(stmt.name, value, stmt.recordType);
                 } else {
@@ -1855,6 +1872,29 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 }
                 // If the variable doesn't exist in the screen, fall through to normal property access
                 // This allows accessing properties of the screen config JSON if needed
+            }
+            
+            // Check if this is a bitmap field access
+            BitmapType bitmapType = environment().getEnvironmentValues().getBitmapType(varExpr.name);
+            if (bitmapType != null) {
+                // This is a bitmap variable - get the field value
+                Object bitmapValue = environment().get(varExpr.name);
+                byte byteValue;
+                if (bitmapValue instanceof Byte) {
+                    byteValue = (Byte) bitmapValue;
+                } else if (bitmapValue instanceof Number) {
+                    byteValue = ((Number) bitmapValue).byteValue();
+                } else {
+                    throw error(expr.getLine(), "Bitmap variable '" + varExpr.name + "' does not contain a valid byte value");
+                }
+                
+                BitmapType.BitField field = bitmapType.getFieldIgnoreCase(expr.propertyName);
+                if (field == null) {
+                    throw error(expr.getLine(), "Bitmap field '" + expr.propertyName + "' does not exist in bitmap type");
+                }
+                
+                // Extract and return the field value
+                return field.getValue(byteValue);
             }
         }
         
