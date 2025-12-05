@@ -3,6 +3,7 @@ package com.eb.script.image;
 import com.eb.script.arrays.ArrayFixedByte;
 import com.eb.script.interpreter.InterpreterError;
 
+import de.codecentric.centerdevice.javafxsvg.SvgImageLoaderFactory;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
@@ -23,15 +24,19 @@ import java.util.Iterator;
  * Image data type for EBS scripting language.
  * Wraps a JavaFX Image with metadata and provides manipulation methods.
  * All manipulations are performed on the JavaFX image.
+ * Supports PNG, JPG, GIF, BMP, and SVG image formats.
  * 
  * @author Earl Bosch
  */
 public class EbsImage {
 
+    /** Flag to track if SVG loader has been installed */
+    private static boolean svgLoaderInstalled = false;
+
     /** The JavaFX image */
     private WritableImage fxImage;
     
-    /** Image format type (png, jpg, gif, bmp) */
+    /** Image format type (png, jpg, gif, bmp, svg) */
     private String imageType;
     
     /** Image name/path (optional) */
@@ -39,6 +44,21 @@ public class EbsImage {
     
     /** Original bytes for format detection */
     private byte[] originalBytes;
+    
+    /**
+     * Install the SVG image loader factory if not already installed.
+     * This enables JavaFX to load SVG images natively.
+     */
+    public static synchronized void installSvgLoader() {
+        if (!svgLoaderInstalled) {
+            try {
+                SvgImageLoaderFactory.install();
+                svgLoaderInstalled = true;
+            } catch (Exception e) {
+                // Ignore if already installed or fails
+            }
+        }
+    }
 
     /**
      * Create an EbsImage from raw byte array data.
@@ -66,7 +86,7 @@ public class EbsImage {
      * 
      * @param bytes Raw image bytes
      * @param name Optional image name/path
-     * @param type Optional image type (png, jpg, gif, bmp)
+     * @param type Optional image type (png, jpg, gif, bmp, svg)
      * @throws InterpreterError if the bytes don't represent a valid image
      */
     public EbsImage(byte[] bytes, String name, String type) throws InterpreterError {
@@ -74,11 +94,14 @@ public class EbsImage {
             throw new InterpreterError("EbsImage: image bytes cannot be null or empty");
         }
         
+        // Ensure SVG loader is installed before loading any images
+        installSvgLoader();
+        
         this.originalBytes = bytes;
         this.imageName = name;
         
         // Detect format if not provided
-        this.imageType = (type != null && !type.isBlank()) ? type.toLowerCase() : detectFormat(bytes);
+        this.imageType = (type != null && !type.isBlank()) ? type.toLowerCase() : detectFormat(bytes, name);
         
         // Convert bytes to JavaFX Image
         try {
@@ -219,8 +242,8 @@ public class EbsImage {
                    type == javafx.scene.image.PixelFormat.Type.INT_ARGB ||
                    type == javafx.scene.image.PixelFormat.Type.INT_ARGB_PRE;
         }
-        // Fallback to format-based detection
-        return "png".equals(imageType) || "gif".equals(imageType);
+        // Fallback to format-based detection (svg also supports transparency)
+        return "png".equals(imageType) || "gif".equals(imageType) || "svg".equals(imageType);
     }
 
     // --- Conversion methods ---
@@ -545,9 +568,24 @@ public class EbsImage {
     // --- Helper methods ---
 
     /**
-     * Detect image format from byte array.
+     * Detect image format from byte array and optional file name.
+     * Supports PNG, JPG, GIF, BMP, and SVG formats.
      */
-    private static String detectFormat(byte[] bytes) {
+    private static String detectFormat(byte[] bytes, String fileName) {
+        // First check if it's an SVG by looking at the content
+        if (isSvgFormat(bytes)) {
+            return "svg";
+        }
+        
+        // Check file extension if name provided
+        if (fileName != null && !fileName.isBlank()) {
+            String ext = getExtension(fileName).toLowerCase();
+            if ("svg".equals(ext)) {
+                return "svg";
+            }
+        }
+        
+        // Use ImageIO for other formats
         try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
              ImageInputStream iis = ImageIO.createImageInputStream(bais)) {
             
@@ -564,6 +602,40 @@ public class EbsImage {
             // Fall through to default
         }
         return "png"; // Default format
+    }
+    
+    /**
+     * Check if byte array contains SVG data.
+     */
+    private static boolean isSvgFormat(byte[] bytes) {
+        if (bytes == null || bytes.length < 5) {
+            return false;
+        }
+        
+        // Skip BOM if present and find start
+        int start = 0;
+        if (bytes.length >= 3 && bytes[0] == (byte) 0xEF && bytes[1] == (byte) 0xBB && bytes[2] == (byte) 0xBF) {
+            start = 3; // UTF-8 BOM
+        }
+        
+        // Convert first ~100 bytes to string and check for SVG markers
+        int checkLen = Math.min(bytes.length - start, 100);
+        String header = new String(bytes, start, checkLen, java.nio.charset.StandardCharsets.UTF_8).trim().toLowerCase();
+        
+        return header.startsWith("<?xml") && header.contains("svg") ||
+               header.startsWith("<svg") ||
+               header.contains("<!doctype svg");
+    }
+    
+    /**
+     * Get file extension from file name.
+     */
+    private static String getExtension(String fileName) {
+        int dot = fileName.lastIndexOf('.');
+        if (dot > 0 && dot < fileName.length() - 1) {
+            return fileName.substring(dot + 1);
+        }
+        return "";
     }
 
     @Override
