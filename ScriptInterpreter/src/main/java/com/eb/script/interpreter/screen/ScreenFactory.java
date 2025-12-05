@@ -131,6 +131,9 @@ public class ScreenFactory {
     // Key format: "screenName.itemName.eventType"
     private static final java.util.concurrent.ConcurrentHashMap<String, javafx.scene.control.Label> eventCountLabels = new java.util.concurrent.ConcurrentHashMap<>();
     
+    // Map to store debug panel status labels for real-time status updates (screenName -> label)
+    private static final java.util.concurrent.ConcurrentHashMap<String, javafx.scene.control.Label> debugStatusLabels = new java.util.concurrent.ConcurrentHashMap<>();
+    
     /**
      * Increment and return the event count for a specific item.eventType combination.
      * Used for debugging to track how many times each event fires.
@@ -197,6 +200,34 @@ public class ScreenFactory {
         eventCounts.keySet().removeIf(key -> key.startsWith(prefix));
         // Also clean up event count labels
         eventCountLabels.keySet().removeIf(key -> key.startsWith(prefix));
+    }
+    
+    /**
+     * Updates the debug panel status label to reflect the current screen status.
+     * This method is called when the screen status changes to provide real-time updates.
+     * 
+     * @param screenName The screen name
+     * @param status The new screen status
+     */
+    public static void updateDebugStatusLabel(String screenName, ScreenStatus status) {
+        if (screenName == null || status == null) {
+            return;
+        }
+        
+        javafx.scene.control.Label statusLabel = debugStatusLabels.get(screenName.toLowerCase());
+        if (statusLabel != null) {
+            String statusEmoji = status == ScreenStatus.ERROR ? "❌" : 
+                                 status == ScreenStatus.CHANGED ? "⚠️" : "✓";
+            String statusText = statusEmoji + " " + status.name();
+            String color = status == ScreenStatus.ERROR ? "#cc0000" : 
+                          status == ScreenStatus.CHANGED ? "#cc6600" : "#006600";
+            
+            // Update on JavaFX thread
+            javafx.application.Platform.runLater(() -> {
+                statusLabel.setText(statusText);
+                statusLabel.setStyle("-fx-text-fill: " + color + "; -fx-font-size: 11px;");
+            });
+        }
     }
 
     static {
@@ -386,8 +417,9 @@ public class ScreenFactory {
             // Also clear BorderPane.setRight() in case we used the fallback approach
             rootPane.setRight(null);
             
-            // Remove the debug panel reference
+            // Remove the debug panel reference and status label
             screenDebugPanels.remove(screenName.toLowerCase());
+            debugStatusLabels.remove(screenName.toLowerCase());
             
             // Restore the original window width
             if (stage != null) {
@@ -666,13 +698,16 @@ public class ScreenFactory {
         statusHeader.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #444;");
         statusSection.getChildren().add(statusHeader);
         
-        // Screen status
+        // Screen status - create row manually to store label reference for real-time updates
         ScreenStatus status = context.getScreenStatus(screenName);
         String statusEmoji = status == ScreenStatus.ERROR ? "❌" : 
                              status == ScreenStatus.CHANGED ? "⚠️" : "✓";
-        addDebugRow(statusSection, "Status", statusEmoji + " " + status.name(), 
-                    status == ScreenStatus.ERROR ? "#cc0000" : 
-                    status == ScreenStatus.CHANGED ? "#cc6600" : "#006600");
+        String statusColor = status == ScreenStatus.ERROR ? "#cc0000" : 
+                            status == ScreenStatus.CHANGED ? "#cc6600" : "#006600";
+        javafx.scene.control.Label statusValueLabel = addDebugRowWithLabel(statusSection, "Status", 
+                                                        statusEmoji + " " + status.name(), statusColor);
+        // Store the label for real-time updates
+        debugStatusLabels.put(screenName.toLowerCase(), statusValueLabel);
         
         // Error message if any
         String errorMsg = context.getScreenErrorMessage(screenName);
@@ -1075,6 +1110,20 @@ public class ScreenFactory {
      * Clicking on the row copies the label and value to clipboard.
      */
     private static void addDebugRow(VBox section, String label, String value, String valueColor) {
+        addDebugRowWithLabel(section, label, value, valueColor);
+    }
+    
+    /**
+     * Helper method to add a debug row and return the value label for dynamic updates.
+     * Clicking on the row copies the label and value to clipboard.
+     * 
+     * @param section The VBox to add the row to
+     * @param label The label text
+     * @param value The value text
+     * @param valueColor The color for the value text
+     * @return The value Label node for dynamic updates
+     */
+    private static javafx.scene.control.Label addDebugRowWithLabel(VBox section, String label, String value, String valueColor) {
         HBox row = new HBox(5);
         row.setAlignment(Pos.CENTER_LEFT);
         row.setPadding(new Insets(1, 5, 1, 5));
@@ -1103,6 +1152,8 @@ public class ScreenFactory {
         makeRowClickable(row, clipboardText, originalStyle);
         
         section.getChildren().add(row);
+        
+        return valueNode;
     }
     
     /**
@@ -1817,6 +1868,7 @@ public class ScreenFactory {
             screenDebugPanels.remove(key);
             screenRootPanes.remove(key);
             screenOriginalWidths.remove(key);
+            debugStatusLabels.remove(key);
         }
     }
     
@@ -1828,6 +1880,7 @@ public class ScreenFactory {
         screenDebugPanels.clear();
         screenRootPanes.clear();
         screenOriginalWidths.clear();
+        debugStatusLabels.clear();
     }
     
     /**

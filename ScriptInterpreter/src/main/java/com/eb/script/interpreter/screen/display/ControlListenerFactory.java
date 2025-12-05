@@ -2,6 +2,7 @@ package com.eb.script.interpreter.screen.display;
 
 import com.eb.script.interpreter.InterpreterContext;
 import com.eb.script.interpreter.screen.DisplayItem;
+import com.eb.script.interpreter.screen.ScreenFactory;
 import com.eb.script.interpreter.screen.ScreenStatus;
 import com.eb.script.interpreter.screen.data.VarRefResolver;
 import com.eb.script.token.DataType;
@@ -34,6 +35,7 @@ public class ControlListenerFactory {
      * <p>
      * The status is only updated from CLEAN to CHANGED. If the screen is already
      * in ERROR status, it is preserved to avoid hiding error conditions.
+     * Also updates the debug panel status label in real-time if visible.
      * 
      * @param control The control that was modified
      */
@@ -50,6 +52,8 @@ public class ControlListenerFactory {
             // Only change status if currently CLEAN (don't downgrade from ERROR)
             if (context.getScreenStatus(screenName) == ScreenStatus.CLEAN) {
                 context.setScreenStatus(screenName, ScreenStatus.CHANGED);
+                // Update the debug panel status label in real-time
+                ScreenFactory.updateDebugStatusLabel(screenName, ScreenStatus.CHANGED);
             }
         }
     }
