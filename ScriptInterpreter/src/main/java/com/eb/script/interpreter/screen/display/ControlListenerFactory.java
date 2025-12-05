@@ -36,6 +36,9 @@ public class ControlListenerFactory {
      * The status is only updated from CLEAN to CHANGED. If the screen is already
      * in ERROR status, it is preserved to avoid hiding error conditions.
      * Also updates the debug panel status label in real-time if visible.
+     * <p>
+     * Note: If the screen is still being created (not yet shown), changes are
+     * considered part of initialization and the screen stays in CLEAN state.
      * 
      * @param control The control that was modified
      */
@@ -51,6 +54,12 @@ public class ControlListenerFactory {
             InterpreterContext context = (InterpreterContext) contextObj;
             String screenName = (String) screenNameObj;
             String varName = varNameObj instanceof String ? (String) varNameObj : null;
+            
+            // Check if the screen is still being initialized (not yet shown)
+            // During initialization, changes are expected and should not mark the screen as changed
+            if (context.getScreensBeingCreated().contains(screenName.toLowerCase())) {
+                return; // Skip marking as changed during initialization
+            }
             
             // Only change status if currently CLEAN (don't downgrade from ERROR)
             if (context.getScreenStatus(screenName) == ScreenStatus.CLEAN) {
