@@ -197,13 +197,13 @@ public final class OracleDbAdapter implements DbAdapter {
                 for (int i = 0; i < bindOrder.size(); i++) {
                     String name = bindOrder.get(i);
                     Object val = (named == null ? null : named.get(name));
-                    ps.setObject(i + 1, val);
+                    ps.setObject(i + 1, DbDateUtil.convertForJdbc(val));
                 }
             } else {
                 // Positional binds (standard ? markers)
                 if (positional != null) {
                     for (int i = 0; i < positional.size(); i++) {
-                        ps.setObject(i + 1, positional.get(i));
+                        ps.setObject(i + 1, DbDateUtil.convertForJdbc(positional.get(i)));
                     }
                 }
             }
@@ -215,7 +215,7 @@ public final class OracleDbAdapter implements DbAdapter {
             for (int c = 1; c <= cols; c++) {
                 String label = md.getColumnLabel(c);
                 if (label == null || label.isBlank()) label = md.getColumnName(c);
-                row.put(label, rs.getObject(c));
+                row.put(label, DbDateUtil.convertFromJdbc(rs.getObject(c)));
             }
             return row;
         }

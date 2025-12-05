@@ -1301,6 +1301,92 @@ public final class Builtins {
                 newParam("type", DataType.STRING, true)          // required; new image type
         ));
 
+        // ==========================
+        // DATE builtins
+        // ==========================
+        addBuiltin(info(
+                "date.now", DataType.DATE  // no params, returns current LocalDateTime
+        ));
+        addBuiltin(info(
+                "date.today", DataType.DATE  // no params, returns current LocalDate
+        ));
+        addBuiltin(info(
+                "date.format", DataType.STRING,
+                newParam("dateValue", DataType.DATE, true),
+                newParam("pattern", DataType.STRING, true)
+        ));
+        addBuiltin(info(
+                "date.parse", DataType.DATE,
+                newParam("dateString", DataType.STRING, true),
+                newParam("pattern", DataType.STRING, true)
+        ));
+        addBuiltin(info(
+                "date.parseDateTime", DataType.DATE,
+                newParam("dateTimeString", DataType.STRING, true),
+                newParam("pattern", DataType.STRING, true)
+        ));
+        addBuiltin(info(
+                "date.addDays", DataType.DATE,
+                newParam("dateValue", DataType.DATE, true),
+                newParam("days", DataType.INTEGER, true)
+        ));
+        addBuiltin(info(
+                "date.addHours", DataType.DATE,
+                newParam("dateValue", DataType.DATE, true),
+                newParam("hours", DataType.INTEGER, true)
+        ));
+        addBuiltin(info(
+                "date.addMinutes", DataType.DATE,
+                newParam("dateValue", DataType.DATE, true),
+                newParam("minutes", DataType.INTEGER, true)
+        ));
+        addBuiltin(info(
+                "date.addSeconds", DataType.DATE,
+                newParam("dateValue", DataType.DATE, true),
+                newParam("seconds", DataType.INTEGER, true)
+        ));
+        addBuiltin(info(
+                "date.daysBetween", DataType.LONG,
+                newParam("date1", DataType.DATE, true),
+                newParam("date2", DataType.DATE, true)
+        ));
+        addBuiltin(info(
+                "date.getYear", DataType.INTEGER,
+                newParam("dateValue", DataType.DATE, true)
+        ));
+        addBuiltin(info(
+                "date.getMonth", DataType.INTEGER,
+                newParam("dateValue", DataType.DATE, true)
+        ));
+        addBuiltin(info(
+                "date.getDay", DataType.INTEGER,
+                newParam("dateValue", DataType.DATE, true)
+        ));
+        addBuiltin(info(
+                "date.getHour", DataType.INTEGER,
+                newParam("dateValue", DataType.DATE, true)
+        ));
+        addBuiltin(info(
+                "date.getMinute", DataType.INTEGER,
+                newParam("dateValue", DataType.DATE, true)
+        ));
+        addBuiltin(info(
+                "date.getSecond", DataType.INTEGER,
+                newParam("dateValue", DataType.DATE, true)
+        ));
+        addBuiltin(info(
+                "date.toEpochMs", DataType.LONG,
+                newParam("dateValue", DataType.DATE, true)
+        ));
+        addBuiltin(info(
+                "date.fromEpochMs", DataType.DATE,
+                newParam("epochMs", DataType.LONG, true)
+        ));
+        addBuiltin(info(
+                "date.toSqlTimestamp", DataType.DATE,  // Returns java.sql.Timestamp
+                newParam("dateValue", DataType.DATE, true)
+        ));
+
         NAMES = Collections.unmodifiableSet(BUILTINS.keySet());
     }
 
@@ -1382,6 +1468,11 @@ public final class Builtins {
         // Image builtins
         if (BuiltinsImage.handles(name)) {
             return BuiltinsImage.dispatch(env, name, args);
+        }
+        
+        // Date builtins
+        if (BuiltinsDate.handles(name)) {
+            return BuiltinsDate.dispatch(name, args);
         }
         
         // File builtins (already in BuiltinsFile)

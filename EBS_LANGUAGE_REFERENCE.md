@@ -34,6 +34,7 @@ This document includes:
   - Screen functions
   - Debug functions
   - AI functions
+  - Date/Time functions
 - Console commands
 - Best practices and examples
 

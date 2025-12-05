@@ -1,0 +1,148 @@
+// EBS Language Reference v1.0.5.8 - See EBS_LANGUAGE_REFERENCE.md
+// Example: date functions - Date and time operations
+// Demonstrates all date.* builtin functions for display, calculations, and SQL operations
+
+// =====================================================
+// SECTION 1: Getting Current Date/Time
+// =====================================================
+print "=== Getting Current Date/Time ===";
+
+var now = call date.now();
+print "Current date/time: " + now;
+
+var today = call date.today();
+print "Today's date: " + today;
+
+// =====================================================
+// SECTION 2: Formatting Dates for Display
+// =====================================================
+print "";
+print "=== Formatting Dates ===";
+
+// Format with different patterns
+var isoPattern: string = "yyyy-MM-dd HH:mm:ss";
+var formatted = call date.format(now, isoPattern);
+print "ISO format: " + formatted;
+
+var usPattern: string = "MM/dd/yyyy";
+var usFormat = call date.format(now, usPattern);
+print "US format: " + usFormat;
+
+var euPattern: string = "dd.MM.yyyy";
+var euFormat = call date.format(now, euPattern);
+print "EU format: " + euFormat;
+
+var timePattern: string = "HH:mm:ss";
+var timeOnly = call date.format(now, timePattern);
+print "Time only: " + timeOnly;
+
+// =====================================================
+// SECTION 3: Date Calculations
+// =====================================================
+print "";
+print "=== Date Calculations ===";
+
+// Add days
+var nextWeek = call date.addDays(now, 7);
+var datePattern: string = "yyyy-MM-dd";
+print "Next week: " + call date.format(nextWeek, datePattern);
+
+var yesterday = call date.addDays(now, -1);
+print "Yesterday: " + call date.format(yesterday, datePattern);
+
+// Add hours
+var twoHoursAgo = call date.addHours(now, -2);
+print "Two hours ago: " + call date.format(twoHoursAgo, timePattern);
+
+var inFiveHours = call date.addHours(now, 5);
+print "In five hours: " + call date.format(inFiveHours, timePattern);
+
+// Add minutes
+var inThirtyMinutes = call date.addMinutes(now, 30);
+print "In 30 minutes: " + call date.format(inThirtyMinutes, timePattern);
+
+// Add seconds
+var inSixtySeconds = call date.addSeconds(now, 60);
+print "In 60 seconds: " + call date.format(inSixtySeconds, timePattern);
+
+// Calculate difference between dates (using today and future dates)
+var date1 = call date.addDays(today, 0);
+var date2 = call date.addDays(today, 30);
+var daysBetween = call date.daysBetween(date1, date2);
+print "Days between today and 30 days from now: " + daysBetween;
+
+// =====================================================
+// SECTION 4: Getting Date Components
+// =====================================================
+print "";
+print "=== Date Components ===";
+
+var year = call date.getYear(now);
+print "Year: " + year;
+
+var month = call date.getMonth(now);
+print "Month: " + month;
+
+var day = call date.getDay(now);
+print "Day: " + day;
+
+var hour = call date.getHour(now);
+print "Hour: " + hour;
+
+var minute = call date.getMinute(now);
+print "Minute: " + minute;
+
+var second = call date.getSecond(now);
+print "Second: " + second;
+
+// =====================================================
+// SECTION 5: Epoch Milliseconds
+// =====================================================
+print "";
+print "=== Epoch Milliseconds ===";
+
+// Convert to epoch milliseconds (useful for calculations)
+var epochMs = call date.toEpochMs(now);
+print "Epoch milliseconds: " + epochMs;
+
+// Create date from epoch milliseconds
+// Example: 1699876543210 = 2023-11-13 12:15:43.210 UTC
+var fromEpoch = call date.fromEpochMs(1699876543210);
+print "From epoch: " + call date.format(fromEpoch, isoPattern);
+
+// =====================================================
+// SECTION 6: SQL Timestamp Conversion
+// =====================================================
+print "";
+print "=== SQL Timestamp ===";
+
+// Convert to SQL Timestamp (for database operations)
+var sqlTimestamp = call date.toSqlTimestamp(now);
+print "SQL Timestamp: " + sqlTimestamp;
+
+// =====================================================
+// SECTION 7: Practical Examples
+// =====================================================
+print "";
+print "=== Practical Examples ===";
+
+// Example: Check if a date is in the future
+var futureDate = call date.addDays(now, 30);
+var nowMs = call date.toEpochMs(now);
+var futureMs = call date.toEpochMs(futureDate);
+if futureMs > nowMs then {
+    print "The date 30 days from now is in the future";
+}
+
+// Example: Format a date for a report header
+var reportPattern: string = "MMMM d, yyyy";
+var reportDate = call date.format(now, reportPattern);
+print "Report generated on: " + reportDate;
+
+// Example: Calculate age in days
+var startDate = call date.addDays(today, -1000);
+var ageInDays = call date.daysBetween(startDate, today);
+print "Days since 1000 days ago: " + ageInDays;
+
+print "";
+print "=== All date function tests completed ===";
