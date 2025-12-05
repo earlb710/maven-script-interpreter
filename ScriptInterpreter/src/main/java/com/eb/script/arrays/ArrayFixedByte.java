@@ -5,6 +5,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 /**
+ * A fixed-size byte array implementation that can represent either BYTE or BITMAP data types.
+ * Both BYTE and BITMAP arrays use the same underlying byte[] storage, allowing for 
+ * efficient casting between the two types.
  *
  * @author Earl Bosch
  */
@@ -25,6 +28,46 @@ public class ArrayFixedByte implements ArrayDef<Byte, byte[]> {
         this.dataType = DataType.BYTE;
         this.dimension = size;
         elements = new byte[size];
+    }
+    
+    /**
+     * Create an ArrayFixedByte with a specific data type (BYTE or BITMAP).
+     * @param elements The byte array elements
+     * @param dataType The data type (BYTE or BITMAP)
+     */
+    public ArrayFixedByte(byte[] elements, DataType dataType) {
+        if (dataType != DataType.BYTE && dataType != DataType.BITMAP) {
+            throw new IllegalArgumentException("ArrayFixedByte only supports BYTE or BITMAP data types");
+        }
+        this.dataType = dataType;
+        this.dimension = elements.length;
+        this.elements = elements;
+    }
+
+    /**
+     * Create an ArrayFixedByte with a specific size and data type (BYTE or BITMAP).
+     * @param size The array size
+     * @param dataType The data type (BYTE or BITMAP)
+     */
+    public ArrayFixedByte(int size, DataType dataType) {
+        if (dataType != DataType.BYTE && dataType != DataType.BITMAP) {
+            throw new IllegalArgumentException("ArrayFixedByte only supports BYTE or BITMAP data types");
+        }
+        this.dataType = dataType;
+        this.dimension = size;
+        elements = new byte[size];
+    }
+    
+    /**
+     * Create a copy of this array with a different data type (for casting between BYTE and BITMAP).
+     * @param targetType The target data type (BYTE or BITMAP)
+     * @return A new ArrayFixedByte with the same elements but different data type
+     */
+    public ArrayFixedByte castTo(DataType targetType) {
+        if (targetType != DataType.BYTE && targetType != DataType.BITMAP) {
+            throw new IllegalArgumentException("Can only cast ArrayFixedByte to BYTE or BITMAP");
+        }
+        return new ArrayFixedByte(elements.clone(), targetType);
     }
 
     @Override

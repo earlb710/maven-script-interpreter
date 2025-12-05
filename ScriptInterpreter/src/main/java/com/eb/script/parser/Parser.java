@@ -540,6 +540,7 @@ public class Parser {
                             case "any" -> elemType = DataType.ARRAY;
                             case "string" -> elemType = DataType.STRING;
                             case "byte" -> elemType = DataType.BYTE;
+                            case "bitmap" -> elemType = DataType.BITMAP;
                             case "int", "integer" -> elemType = DataType.INTEGER;
                             case "long" -> elemType = DataType.LONG;
                             case "float" -> elemType = DataType.FLOAT;
@@ -686,6 +687,7 @@ public class Parser {
                         case "any" -> elemType = DataType.ARRAY;  // array.any is same as array
                         case "string" -> elemType = DataType.STRING;
                         case "byte" -> elemType = DataType.BYTE;
+                        case "bitmap" -> elemType = DataType.BITMAP;
                         case "int", "integer" -> elemType = DataType.INTEGER;
                         case "long" -> elemType = DataType.LONG;
                         case "float" -> elemType = DataType.FLOAT;
@@ -2269,7 +2271,8 @@ public class Parser {
             expr = expression();
             consume(EbsTokenType.RPAREN, "Expected ')' after expression.");
             return expr;
-        } else if (match(EbsTokenType.CALL)) {
+        } else if (match(EbsTokenType.CALL) || check(EbsTokenType.BUILTIN)) {
+            // Handle both explicit call statements and builtin function calls (e.g., array.asBitmap, array.asByte)
             CallStatement c = (CallStatement) call();
             expr = new CallExpression(c);
             postParseExpressions.add(expr);

@@ -187,6 +187,12 @@
       "short_description": "Defines named bit fields within a byte",
       "long_help": "The 'bitmap' type defines named fields that map to bit ranges within a byte (0-7). This allows compact storage of multiple small values in a single byte, useful for flags, status bits, or packing multiple small integers. Fields are accessed using dot notation, with automatic bit shifting on read/write. Use 'typeof' to define reusable bitmap type aliases.",
       "example": "var flags: bitmap { status: 0-1, enabled: 2, priority: 3-5 };\nflags.status = 2;\nflags.enabled = 1;\nflags.priority = 5;\nprint flags.status;  // Output: 2\n\n// Type alias and casting\nStatusFlags typeof bitmap { active: 0, error: 1 };\nvar status = StatusFlags(42);\nprint status.active;"
+    },
+    {
+      "keyword": "array.bitmap",
+      "short_description": "Creates a bitmap array backed by ArrayFixedByte",
+      "long_help": "The 'array.bitmap' syntax creates a fixed-size array for storing bitmap data. Like array.byte, it is backed by ArrayFixedByte storage, but with BITMAP as the data type. This provides type clarity when storing data that should be interpreted as bitmap fields. Use array.asBitmap() to cast from array.byte and array.asByte() to cast to array.byte.",
+      "example": "var bitmapArray: array.bitmap[5];\nbitmapArray[0] = 255;  // All bits set\nbitmapArray[1] = 0;    // No bits set\n\n// Cast between byte and bitmap arrays\nvar byteArray: array.byte[3];\nvar castedBitmap = call array.asBitmap(byteArray);\nvar castedByte = call array.asByte(bitmapArray);\n\n// Interpret with bitmap type alias\nStatusByte typeof bitmap { active: 0, error: 1 };\nvar status = StatusByte(bitmapArray[0]);\nprint status.active;"
     }
   ],
   "builtins": [
@@ -985,6 +991,34 @@
       ],
       "return_type": "string",
       "example": "<b>var</b> <b>encoded</b> = <b>call</b> <b>array.base64encode</b>(bytes=myByteArray);"
+    },
+    {
+      "function": "array.asBitmap",
+      "short_description": "Casts a byte array to a bitmap array",
+      "long_help": "Casts an array.byte to array.bitmap. Both types use the same underlying ArrayFixedByte storage, but the<br>data type is changed from BYTE to BITMAP. This is useful when you want to interpret byte data as bitmap<br>values for flag/status processing. Returns a new array with the same data but BITMAP type.",
+      "parameters": [
+        {
+          "name": "array",
+          "type": "array",
+          "description": "The byte array (array.byte) to cast"
+        }
+      ],
+      "return_type": "array",
+      "example": "<b>var</b> byteArray: <b>array.byte</b>[5];<br>byteArray[0] = 255;<br>byteArray[1] = 128;<br><br>// Cast to bitmap array<br><b>var</b> bitmapArray = <b>call</b> <b>array.asBitmap</b>(byteArray);<br><b>print</b> bitmapArray[0];  // 255"
+    },
+    {
+      "function": "array.asByte",
+      "short_description": "Casts a bitmap array to a byte array",
+      "long_help": "Casts an array.bitmap to array.byte. Both types use the same underlying ArrayFixedByte storage, but the<br>data type is changed from BITMAP to BYTE. This is useful when you want to process bitmap data as raw bytes.<br>Returns a new array with the same data but BYTE type.",
+      "parameters": [
+        {
+          "name": "array",
+          "type": "array",
+          "description": "The bitmap array (array.bitmap) to cast"
+        }
+      ],
+      "return_type": "array",
+      "example": "<b>var</b> bitmapArray: <b>array.bitmap</b>[5];<br>bitmapArray[0] = 255;<br>bitmapArray[1] = 128;<br><br>// Cast to byte array<br><b>var</b> byteArray = <b>call</b> <b>array.asByte</b>(bitmapArray);<br><b>print</b> byteArray[0];  // 255"
     },
     {
       "function": "array.expand",

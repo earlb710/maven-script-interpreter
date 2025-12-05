@@ -429,6 +429,8 @@ public class InterpreterArray {
             // Create a fixed child sized to the nested literal length
             if (elemType == DataType.BYTE) {
                 return new ArrayFixedByte(Math.max(0, childLen));
+            } else if (elemType == DataType.BITMAP) {
+                return new ArrayFixedByte(Math.max(0, childLen), DataType.BITMAP);
             } else if (elemType == DataType.INTEGER) {
                 return new ArrayFixedInt(Math.max(0, childLen));
             } else {
@@ -540,6 +542,8 @@ public class InterpreterArray {
             // since they can only hold primitive values, not nested arrays
             if (isLeafDimension && dataType == DataType.BYTE) {
                 ret = new ArrayFixedByte(len);
+            } else if (isLeafDimension && dataType == DataType.BITMAP) {
+                ret = new ArrayFixedByte(len, DataType.BITMAP);
             } else if (isLeafDimension && dataType == DataType.INTEGER) {
                 ret = new ArrayFixedInt(len);
             } else {

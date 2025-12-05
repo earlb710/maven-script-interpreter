@@ -1,0 +1,116 @@
+// EBS Language Reference v1.0.6.9 - See EBS_LANGUAGE_REFERENCE.md
+// Example: array.bitmap - Bitmap arrays backed by ArrayFixedByte
+// Syntax: var name: array.bitmap[size];
+//
+// array.bitmap creates a byte array using ArrayFixedByte storage,
+// but with BITMAP data type. This is useful for storing multiple
+// bitmap values in an array.
+
+print "=== array.bitmap Basic Usage ===";
+
+// Create a bitmap array (backed by ArrayFixedByte)
+var bitmapArray: array.bitmap[5];
+
+// Set values (each element is a byte that can hold bitmap field data)
+bitmapArray[0] = 255;  // All bits set
+bitmapArray[1] = 0;    // No bits set
+bitmapArray[2] = 128;  // High bit set
+bitmapArray[3] = 85;   // Alternating bits (01010101)
+bitmapArray[4] = 170;  // Alternating bits (10101010)
+
+print "bitmapArray[0] = " + bitmapArray[0];
+print "bitmapArray[1] = " + bitmapArray[1];
+print "bitmapArray[2] = " + bitmapArray[2];
+print "bitmapArray[3] = " + bitmapArray[3];
+print "bitmapArray[4] = " + bitmapArray[4];
+
+
+print "";
+print "=== array.byte to array.bitmap Casting ===";
+
+// Create a byte array
+var byteArray: array.byte[4];
+byteArray[0] = 10;
+byteArray[1] = 20;
+byteArray[2] = 30;
+byteArray[3] = 40;
+
+print "Original byte array:";
+print "  byteArray[0] = " + byteArray[0];
+print "  byteArray[1] = " + byteArray[1];
+
+// Cast byte array to bitmap array
+var castedToBitmap = call array.asBitmap(byteArray);
+
+print "After casting to bitmap:";
+print "  castedToBitmap[0] = " + castedToBitmap[0];
+print "  castedToBitmap[1] = " + castedToBitmap[1];
+
+
+print "";
+print "=== array.bitmap to array.byte Casting ===";
+
+// Cast bitmap array back to byte array
+var castedToByte = call array.asByte(bitmapArray);
+
+print "After casting bitmap to byte:";
+print "  castedToByte[0] = " + castedToByte[0];
+print "  castedToByte[1] = " + castedToByte[1];
+
+
+print "";
+print "=== Roundtrip Conversion ===";
+
+// Create a byte array
+var original: array.byte[3];
+original[0] = 100;
+original[1] = 150;
+original[2] = 200;
+
+print "Original values:";
+print "  original[0] = " + original[0];
+print "  original[1] = " + original[1];
+print "  original[2] = " + original[2];
+
+// Convert byte -> bitmap -> byte
+var roundtrip = call array.asByte(call array.asBitmap(original));
+
+print "After roundtrip (byte -> bitmap -> byte):";
+print "  roundtrip[0] = " + roundtrip[0] + " (expected: 100)";
+print "  roundtrip[1] = " + roundtrip[1] + " (expected: 150)";
+print "  roundtrip[2] = " + roundtrip[2] + " (expected: 200)";
+
+
+print "";
+print "=== Use Cases ===";
+
+print "";
+print "1. Storing multiple status bytes:";
+// Each byte can hold 8 flags using bitmap fields
+var statusBytes: array.bitmap[10];
+// Each element can be interpreted with a bitmap type alias
+StatusByte typeof bitmap { active: 0, error: 1, warning: 2, ready: 3 };
+
+statusBytes[0] = 5;  // active=1, error=0, warning=1, ready=0
+var status0 = StatusByte(statusBytes[0]);
+print "   Device 0: active=" + status0.active + ", warning=" + status0.warning;
+
+statusBytes[1] = 9;  // active=1, error=0, warning=0, ready=1
+var status1 = StatusByte(statusBytes[1]);
+print "   Device 1: active=" + status1.active + ", ready=" + status1.ready;
+
+
+print "";
+print "2. Binary data processing with type awareness:";
+// array.bitmap helps identify data that should be interpreted as bitmap fields
+// while array.byte is for raw binary data
+var rawData: array.byte[4];
+rawData[0] = 1; rawData[1] = 2; rawData[2] = 3; rawData[3] = 4;
+var flagData: array.bitmap[4];
+flagData[0] = 255; flagData[1] = 254; flagData[2] = 253; flagData[3] = 252;
+print "   Raw data type is for binary processing";
+print "   Bitmap data type is for flag/status interpretation";
+
+
+print "";
+print "array.bitmap examples completed!";

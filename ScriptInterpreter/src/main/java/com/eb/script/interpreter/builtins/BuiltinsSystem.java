@@ -56,6 +56,8 @@ public class BuiltinsSystem {
             case "array.remove" -> arrayRemove(args);
             case "array.base64encode" -> base64Encode(args);
             case "array.base64decode" -> base64Decode(args);
+            case "array.asbitmap" -> arrayAsBitmap(args);
+            case "array.asbyte" -> arrayAsByte(args);
             default -> throw new InterpreterError("Unknown System builtin: " + name);
         };
     }
@@ -368,6 +370,42 @@ public class BuiltinsSystem {
         } catch (IllegalArgumentException ex) {
             throw new InterpreterError("array.base64decode: invalid base64: " + ex.getMessage());
         }
+    }
+
+    /**
+     * Cast an array.byte to array.bitmap.
+     * The underlying data remains the same, only the data type changes.
+     * @param args The arguments (array to cast)
+     * @return A new ArrayFixedByte with BITMAP data type
+     */
+    private static Object arrayAsBitmap(Object[] args) throws InterpreterError {
+        Object a0 = args[0];
+        if (a0 == null) {
+            return null;
+        }
+        if (a0 instanceof ArrayFixedByte afb) {
+            // Use the castTo method to create a copy with BITMAP data type
+            return afb.castTo(DataType.BITMAP);
+        }
+        throw new InterpreterError("array.asBitmap: expected byte array (array.byte), got " + a0.getClass().getSimpleName());
+    }
+
+    /**
+     * Cast an array.bitmap to array.byte.
+     * The underlying data remains the same, only the data type changes.
+     * @param args The arguments (array to cast)
+     * @return A new ArrayFixedByte with BYTE data type
+     */
+    private static Object arrayAsByte(Object[] args) throws InterpreterError {
+        Object a0 = args[0];
+        if (a0 == null) {
+            return null;
+        }
+        if (a0 instanceof ArrayFixedByte afb) {
+            // Use the castTo method to create a copy with BYTE data type
+            return afb.castTo(DataType.BYTE);
+        }
+        throw new InterpreterError("array.asByte: expected bitmap array (array.bitmap), got " + a0.getClass().getSimpleName());
     }
 
     // --- Helper methods ---
