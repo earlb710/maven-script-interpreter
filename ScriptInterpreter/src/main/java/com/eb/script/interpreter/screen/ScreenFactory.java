@@ -523,8 +523,9 @@ public class ScreenFactory {
                 varsTable.getItems().add(new String[]{key, valueStr});
             }
             
-            // Set preferred height based on content
-            varsTable.setPrefHeight(Math.min(200, sortedKeys.size() * 25 + 30));
+            // Allow table to expand to fill available space
+            varsTable.setMaxHeight(Double.MAX_VALUE);
+            VBox.setVgrow(varsTable, Priority.ALWAYS);
             varsSection.getChildren().add(varsTable);
         } else {
             javafx.scene.control.Label noVarsLabel = new javafx.scene.control.Label("No variables defined");
@@ -534,6 +535,7 @@ public class ScreenFactory {
         
         javafx.scene.control.ScrollPane varsScrollPane = new javafx.scene.control.ScrollPane(varsSection);
         varsScrollPane.setFitToWidth(true);
+        varsScrollPane.setFitToHeight(true);
         varsScrollPane.setStyle("-fx-background-color: transparent;");
         varsScrollPane.setHbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
         varsScrollPane.setVbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.AS_NEEDED);
@@ -580,8 +582,9 @@ public class ScreenFactory {
                 itemsTable.getItems().add(new String[]{displayName, valueStr});
             }
             
-            // Set preferred height based on content
-            itemsTable.setPrefHeight(Math.min(200, sortedItemKeys.size() * 25 + 30));
+            // Allow table to expand to fill available space
+            itemsTable.setMaxHeight(Double.MAX_VALUE);
+            VBox.setVgrow(itemsTable, Priority.ALWAYS);
             itemsSection.getChildren().add(itemsTable);
         } else {
             javafx.scene.control.Label noItemsLabel = new javafx.scene.control.Label("No screen items defined");
@@ -591,6 +594,7 @@ public class ScreenFactory {
         
         javafx.scene.control.ScrollPane itemsScrollPane = new javafx.scene.control.ScrollPane(itemsSection);
         itemsScrollPane.setFitToWidth(true);
+        itemsScrollPane.setFitToHeight(true);
         itemsScrollPane.setStyle("-fx-background-color: transparent;");
         itemsScrollPane.setHbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
         itemsScrollPane.setVbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.AS_NEEDED);
@@ -600,6 +604,7 @@ public class ScreenFactory {
         VBox areasSection = createScreenAreasSection(screenName, context);
         javafx.scene.control.ScrollPane areasScrollPane = new javafx.scene.control.ScrollPane(areasSection);
         areasScrollPane.setFitToWidth(true);
+        areasScrollPane.setFitToHeight(true);
         areasScrollPane.setStyle("-fx-background-color: transparent;");
         areasScrollPane.setHbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
         areasScrollPane.setVbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.AS_NEEDED);
@@ -609,6 +614,7 @@ public class ScreenFactory {
         VBox handlersSection = createEventHandlersSection(screenName, context, screenAreaItems);
         javafx.scene.control.ScrollPane handlersScrollPane = new javafx.scene.control.ScrollPane(handlersSection);
         handlersScrollPane.setFitToWidth(true);
+        handlersScrollPane.setFitToHeight(true);
         handlersScrollPane.setStyle("-fx-background-color: transparent;");
         handlersScrollPane.setHbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
         handlersScrollPane.setVbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.AS_NEEDED);
