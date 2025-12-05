@@ -33,6 +33,7 @@ public class InterpreterContext {
     private static final ConcurrentHashMap<String, Thread> GLOBAL_SCREEN_THREADS = new ConcurrentHashMap<>();
     private static final List<String> GLOBAL_SCREEN_CREATION_ORDER = new java.util.concurrent.CopyOnWriteArrayList<>();
     private static final Set<String> GLOBAL_SCREENS_BEING_CREATED = ConcurrentHashMap.newKeySet();
+    private static final Set<String> GLOBAL_SCREENS_NOT_YET_SHOWN = ConcurrentHashMap.newKeySet();
     
     // ThreadLocal to track current screen context for onClick and other event handlers
     private static final ThreadLocal<String> CURRENT_SCREEN_CONTEXT = new ThreadLocal<>();
@@ -193,6 +194,18 @@ public class InterpreterContext {
 
     public Set<String> getScreensBeingCreated() {
         return GLOBAL_SCREENS_BEING_CREATED;
+    }
+    
+    /**
+     * Get the set of screens that have been created but not yet shown.
+     * This is used to determine if item changes should be tracked as "changed".
+     * During the initialization phase (after creation but before shown), changes
+     * are part of normal setup and should not mark the screen as changed.
+     * 
+     * @return The set of screen names that have been created but not shown
+     */
+    public Set<String> getScreensNotYetShown() {
+        return GLOBAL_SCREENS_NOT_YET_SHOWN;
     }
 
     /**
@@ -522,6 +535,7 @@ public class InterpreterContext {
         screenAreas.clear();
         displayMetadata.clear();
         GLOBAL_SCREENS_BEING_CREATED.clear();
+        GLOBAL_SCREENS_NOT_YET_SHOWN.clear();
         screenVarSets.clear();
         screenVarItems.clear();
         screenAreaItems.clear();

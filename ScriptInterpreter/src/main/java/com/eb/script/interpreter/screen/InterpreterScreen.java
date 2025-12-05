@@ -845,6 +845,8 @@ public class InterpreterScreen {
         // Store the stage reference in global map using qualified key
         context.getScreens().put(qualifiedKey, stage);
         context.getScreensBeingCreated().remove(qualifiedKey);
+        // Track that this screen hasn't been shown yet (for change detection)
+        context.getScreensNotYetShown().add(qualifiedKey);
         context.getScreenCreationOrder().add(qualifiedKey);
 
                 if (context.getOutput() != null) {
@@ -928,6 +930,8 @@ public class InterpreterScreen {
             Runnable showTask = () -> {
                 if (!stage.isShowing()) {
                     stage.show();
+                    // Mark screen as "shown" - changes from now on will be tracked as modifications
+                    context.getScreensNotYetShown().remove(finalScreenKey);
                     if (context.getOutput() != null) {
                         context.getOutput().printlnOk("Screen '" + finalScreenKey + "' shown");
                     }

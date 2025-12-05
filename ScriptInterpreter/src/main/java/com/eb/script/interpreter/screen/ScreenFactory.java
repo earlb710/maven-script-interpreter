@@ -664,7 +664,7 @@ public class ScreenFactory {
             itemNameCol.setStyle("-fx-alignment: CENTER-LEFT;");
             itemNameCol.prefWidthProperty().bind(itemsTable.widthProperty().multiply(0.5));
             
-            // Custom cell factory to show changed indicator
+            // Custom cell factory to show type icon and changed indicator
             final String finalScreenName = screenName;
             itemNameCol.setCellFactory(col -> new javafx.scene.control.TableCell<String[], String>() {
                 @Override
@@ -674,16 +674,20 @@ public class ScreenFactory {
                         setText(null);
                         setStyle("-fx-alignment: CENTER-LEFT;");
                     } else {
-                        // Get the varRef from the row data (index 2)
+                        // Get the varRef and itemType from the row data
                         String[] rowData = getTableView().getItems().get(getIndex());
                         String varRef = rowData.length > 2 ? rowData[2] : null;
+                        String itemType = rowData.length > 3 ? rowData[3] : "";
+                        
+                        // Get icon for item type
+                        String typeIcon = getItemTypeIcon(itemType);
                         
                         // Check if this item has been changed
-                        if (varRef != null && isItemChanged(finalScreenName, varRef)) {
-                            setText("⚠️ " + item);
+                        if (varRef != null && !varRef.isEmpty() && isItemChanged(finalScreenName, varRef)) {
+                            setText("⚠️ " + typeIcon + " " + item);
                             setStyle("-fx-alignment: CENTER-LEFT; -fx-font-weight: bold; -fx-text-fill: #cc6600;");
                         } else {
-                            setText(item);
+                            setText(typeIcon + " " + item);
                             setStyle("-fx-alignment: CENTER-LEFT; -fx-font-weight: bold;");
                         }
                     }
@@ -699,7 +703,8 @@ public class ScreenFactory {
             itemsTable.getColumns().add(itemNameCol);
             itemsTable.getColumns().add(itemValueCol);
             
-            // Populate data - include varRef as third element for change tracking
+            // Populate data - include varRef and item type for change tracking and icons
+            // Array format: [displayName, value, varRef, itemType]
             java.util.List<String> sortedItemKeys = new java.util.ArrayList<>(screenAreaItems.keySet());
             java.util.Collections.sort(sortedItemKeys, String.CASE_INSENSITIVE_ORDER);
             
@@ -708,7 +713,9 @@ public class ScreenFactory {
                 String displayName = item.name != null ? item.name : key;
                 String valueStr = getScreenItemValue(key, item, context, screenName);
                 String varRef = item.varRef != null ? item.varRef : "";
-                itemsTable.getItems().add(new String[]{displayName, valueStr, varRef});
+                // Get the item type from displayItem
+                String itemType = getItemType(item, context);
+                itemsTable.getItems().add(new String[]{displayName, valueStr, varRef, itemType});
             }
             
             // Allow table to expand to fill available space
@@ -1298,6 +1305,108 @@ public class ScreenFactory {
             }
         }
         return "(no varRef)";
+    }
+    
+    /**
+     * Get the display type for an AreaItem.
+     * Returns the type from displayItem if available, otherwise tries to determine from varRef.
+     * 
+     * @param item The AreaItem
+     * @param context The interpreter context
+     * @return The item type string (e.g., "colorpicker", "textfield", "combobox")
+     */
+    private static String getItemType(AreaItem item, InterpreterContext context) {
+        if (item.displayItem != null && item.displayItem.type != null) {
+            return item.displayItem.type.toLowerCase();
+        }
+        // Try to get the type from the displayMetadata registered with the varRef
+        if (item.varRef != null) {
+            DisplayItem displayItem = context.getDisplayItem().get(item.varRef.toLowerCase());
+            if (displayItem != null && displayItem.type != null) {
+                return displayItem.type.toLowerCase();
+            }
+        }
+        return "unknown";
+    }
+    
+    /**
+     * Get an emoji icon for the given item type.
+     * Uses Unicode characters that represent the control type.
+     * 
+     * @param itemType The item type string
+     * @return An emoji icon representing the item type
+     */
+    private static String getItemTypeIcon(String itemType) {
+        if (itemType == null) {
+            return "❓";
+        }
+        switch (itemType.toLowerCase()) {
+            // Text input controls - □ (square, as requested for text items)
+            case "textfield":
+            case "textfieldpassword":
+            case "text":
+                return "□";
+            case "textarea":
+                return "▢";
+            
+            // Selection controls
+            case "combobox":
+            case "choicebox":
+                return "▼";
+            case "checkbox":
+                return "☑";
+            case "radiobutton":
+                return "◉";
+            
+            // List/Tree controls
+            case "listview":
+                return "☰";
+            case "tableview":
+                return "▦";
+            case "treeview":
+                return "⊞";
+            
+            // Numeric controls
+            case "spinner":
+                return "↕";
+            case "slider":
+                return "─";
+            
+            // Date/Time/Color controls
+            case "datepicker":
+                return "📅";
+            case "colorpicker":
+                return "🎨";
+            
+            // Button controls
+            case "button":
+                return "🔘";
+            
+            // Display-only controls
+            case "label":
+            case "labeltext":
+                return "🏷";
+            case "hyperlink":
+                return "🔗";
+            case "separator":
+                return "─";
+            
+            // Media controls
+            case "imageview":
+                return "🖼";
+            case "webview":
+                return "🌐";
+            case "chart":
+                return "📊";
+            
+            // Progress controls
+            case "progressbar":
+            case "progressindicator":
+                return "⏳";
+            
+            default:
+                return "◇";
+        }
     }
     
     /**

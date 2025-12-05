@@ -54,10 +54,12 @@ public class ControlListenerFactory {
             InterpreterContext context = (InterpreterContext) contextObj;
             String screenName = (String) screenNameObj;
             String varName = varNameObj instanceof String ? (String) varNameObj : null;
+            String screenNameLower = screenName.toLowerCase();
             
-            // Check if the screen is still being initialized (not yet shown)
+            // Check if the screen is still being initialized (being created or not yet shown)
             // During initialization, changes are expected and should not mark the screen as changed
-            if (context.getScreensBeingCreated().contains(screenName.toLowerCase())) {
+            if (context.getScreensBeingCreated().contains(screenNameLower) ||
+                context.getScreensNotYetShown().contains(screenNameLower)) {
                 return; // Skip marking as changed during initialization
             }
             
