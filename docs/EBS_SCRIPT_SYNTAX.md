@@ -1455,6 +1455,7 @@ var matrix = [[1, 2], [3, 4], [5, 6]];
 | `int[10]` | Typed | ArrayFixed | Fixed-size integer array (traditional) |
 | `array.int[10]` | Typed | ArrayFixed | Fixed-size integer array (enhanced) |
 | `array.byte[10]` | Typed | ArrayFixedByte | Byte array with optimized storage |
+| `array.bitmap[10]` | Typed | ArrayFixedByte | Bitmap array (same storage as byte, BITMAP type) |
 | `string[*]` | Typed | ArrayDynamic | Dynamic string array (traditional) |
 | `array.string[*]` | Typed | ArrayDynamic | Dynamic string array (enhanced) |
 | `array[10]` | Generic | ArrayFixed | Fixed-size generic array |
@@ -1467,6 +1468,7 @@ var matrix = [[1, 2], [3, 4], [5, 6]];
 - `array` or `array.any` - Generic array (any type)
 - `array.string` - String array
 - `array.byte` - Byte array (uses ArrayFixedByte for fixed size)
+- `array.bitmap` - Bitmap array (uses ArrayFixedByte for fixed size, same as array.byte but with BITMAP type)
 - `array.int` or `array.integer` - Integer array
 - `array.long` - Long integer array
 - `array.float` - Float array
@@ -1474,10 +1476,32 @@ var matrix = [[1, 2], [3, 4], [5, 6]];
 - `array.bool` or `array.boolean` - Boolean array
 - `array.date` - Date array
 
+### Byte and Bitmap Array Interoperability
+
+Both `array.byte` and `array.bitmap` are backed by the same `ArrayFixedByte` storage class, making them interchangeable. The difference is in the data type designation, which can be useful for type clarity in your code.
+
+```javascript
+// Create byte and bitmap arrays
+var byteArray: array.byte[5];
+var bitmapArray: array.bitmap[5];
+
+// Cast between types using built-in functions
+var castedToBitmap = call array.asBitmap(byteArray);
+var castedToByte = call array.asByte(bitmapArray);
+
+// Useful for interpreting byte data as bitmap fields
+StatusByte typeof bitmap { active: 0, error: 1, warning: 2 };
+var statusBytes: array.bitmap[10];
+statusBytes[0] = 5;  // active=1, error=0, warning=1
+var status = StatusByte(statusBytes[0]);
+print status.active;  // 1
+```
+
 **When to use each syntax:**
 - Use `int[10]` for concise traditional syntax
 - Use `array.int[10]` for explicit, consistent syntax across all types
 - Use `array[10]` or `array.any[10]` when you need mixed types
+- Use `array.bitmap[10]` when storing data that should be interpreted as bitmap fields
 - All three syntaxes work identically with `ArrayFixed` and `ArrayDynamic` implementations
 
 ### Array Access

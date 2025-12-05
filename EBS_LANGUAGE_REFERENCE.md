@@ -1,6 +1,6 @@
 # EBS Language Reference
 
-**Documentation Version: 1.0.6.9**
+**Documentation Version: 1.0.6.10**
 
 This document serves as a pointer to the comprehensive EBS (Earl Bosch Script) language documentation.
 
@@ -82,7 +82,7 @@ EBS uses a four-part versioning system: **`language.keyword.builtin.build`**
 
 Each version component is incremented independently based on the type of change made.
 
-**Current Version: 1.0.6.9** (Language v1, Keyword v0, Builtin v6, Build 9)
+**Current Version: 1.0.6.10** (Language v1, Keyword v0, Builtin v6, Build 10)
 
 ### Getting the Language Version Programmatically
 
@@ -117,6 +117,7 @@ For the latest updates and comprehensive language reference, always refer to [do
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.0.6.10 | 2025-12-05 | Added `array.bitmap` type backed by ArrayFixedByte; Added `array.asBitmap()` and `array.asByte()` for casting between byte and bitmap arrays |
 | 1.0.6.9 | 2025-12-05 | Added `bitmap` type for bit-level field access within a byte; Bitmap type aliases with `typeof` keyword; Byte/int to bitmap casting; `typeof` operator support for bitmap types and variables |
 | 1.0.5.8 | 2025-12-03 | Added `mail.openUrl` and `ftp.openUrl` functions for URL-based connections; Password now optional in URL (stored separately in config); Added password column with masking in config dialogs |
 | 1.0.5.7 | 2025-12-03 | Config variable names are now case-insensitive (e.g., `MyFtp` can be accessed as `myftp` in scripts) |
