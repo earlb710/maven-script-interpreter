@@ -200,6 +200,8 @@ public class ScreenFactory {
         eventCounts.keySet().removeIf(key -> key.startsWith(prefix));
         // Also clean up event count labels
         eventCountLabels.keySet().removeIf(key -> key.startsWith(prefix));
+        // Clean up debug status label for this screen
+        debugStatusLabels.remove(screenName.toLowerCase());
     }
     
     /**
