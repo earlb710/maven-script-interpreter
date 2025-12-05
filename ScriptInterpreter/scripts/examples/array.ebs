@@ -1,4 +1,4 @@
-// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// EBS Language Reference v1.0.6.9 - See EBS_LANGUAGE_REFERENCE.md
 // Example: array types - Fixed and dynamic arrays
 // Syntax: var name: type[size]; or var name: type[*];
 
@@ -20,3 +20,8 @@ print colors[1];
 // array.type syntax
 var bytes: array.byte[10];
 var strings: array.string[5];
+var bitmaps: array.bitmap[5];  // Same as array.byte but with BITMAP type
+
+// Cast between byte and bitmap arrays
+var castedBitmap = call array.asBitmap(bytes);
+var castedByte = call array.asByte(bitmaps);
