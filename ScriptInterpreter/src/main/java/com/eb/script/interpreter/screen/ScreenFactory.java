@@ -713,8 +713,12 @@ public class ScreenFactory {
                         // Get icon for item type
                         String typeIcon = getItemTypeIcon(itemType);
                         
-                        // Check if this item has been changed (varRef is never null due to line 715)
-                        if (!varRef.isEmpty() && isItemChanged(finalScreenName, varRef)) {
+                        // Debug output for cell rendering
+                        boolean isChanged = !varRef.isEmpty() && isItemChanged(finalScreenName, varRef);
+                        System.err.println("[DEBUG] Cell render: item='" + item + "', varRef='" + varRef + "', itemType='" + itemType + "', typeIcon='" + typeIcon + "', isChanged=" + isChanged);
+                        
+                        // Check if this item has been changed
+                        if (isChanged) {
                             setText("⚠️ " + typeIcon + " " + item);
                             setStyle("-fx-alignment: CENTER-LEFT; -fx-font-weight: bold; -fx-text-fill: #cc6600;");
                         } else {
@@ -1358,6 +1362,7 @@ public class ScreenFactory {
     private static String getItemType(AreaItem item, InterpreterContext context, String screenName) {
         // First check if displayItem has the type set directly
         if (item.displayItem != null && item.displayItem.type != null) {
+            System.err.println("[DEBUG] getItemType: item='" + item.varRef + "' -> type from displayItem: " + item.displayItem.type);
             return item.displayItem.type.toLowerCase();
         }
         // Try to get the type from the displayMetadata registered with the varRef
@@ -1366,9 +1371,12 @@ public class ScreenFactory {
             String key = screenName.toLowerCase() + "." + item.varRef.toLowerCase();
             DisplayItem displayItem = context.getDisplayItem().get(key);
             if (displayItem != null && displayItem.type != null) {
+                System.err.println("[DEBUG] getItemType: item='" + item.varRef + "' -> type from displayMetadata[" + key + "]: " + displayItem.type);
                 return displayItem.type.toLowerCase();
             }
+            System.err.println("[DEBUG] getItemType: item='" + item.varRef + "' -> displayMetadata[" + key + "] not found, keys available: " + context.getDisplayItem().keySet());
         }
+        System.err.println("[DEBUG] getItemType: item='" + item.varRef + "' -> returning 'unknown'");
         return "unknown";
     }
     
