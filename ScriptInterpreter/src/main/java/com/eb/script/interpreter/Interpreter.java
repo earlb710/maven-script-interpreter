@@ -720,19 +720,15 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
 
             // Check if this is a screen variable
             ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars(firstPart);
-            System.out.println("[DEBUG ASSIGN] Checking screen var: screen=" + firstPart + ", var=" + secondPart + ", screenVarMap=" + (screenVarMap != null ? "found with keys: " + screenVarMap.keySet() : "null"));
             if (screenVarMap != null) {
                 if (screenVarMap.containsKey(secondPart)) {
                     // ConcurrentHashMap doesn't allow null values, so convert null to empty string
                     Object safeValue = (value != null) ? value : "";
-                    System.out.println("[DEBUG ASSIGN] Setting " + firstPart + "." + secondPart + " = " + safeValue);
                     screenVarMap.put(secondPart, safeValue);
                     // Trigger screen refresh to update UI controls
-                    System.out.println("[DEBUG ASSIGN] Triggering refresh for screen: " + firstPart);
                     context.triggerScreenRefresh(firstPart);
                     return;
                 } else {
-                    System.out.println("[DEBUG ASSIGN] Variable '" + secondPart + "' not found in screen. Available keys: " + screenVarMap.keySet());
                     throw error(stmt.getLine(), "Screen '" + firstPart + "' does not have a variable named '" + secondPart + "'.");
                 }
             }
@@ -1832,19 +1828,12 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             String screenName = varExpr.name.toLowerCase(java.util.Locale.ROOT);
             ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars(screenName);
             
-            System.out.println("[DEBUG PROP] Checking property access: " + screenName + "." + expr.propertyName);
-            System.out.println("[DEBUG PROP] screenVarMap exists: " + (screenVarMap != null));
-            
             if (screenVarMap != null) {
                 // This might be a screen variable access
                 String varName = expr.propertyName.toLowerCase(java.util.Locale.ROOT);
-                System.out.println("[DEBUG PROP] Looking for key: " + varName);
-                System.out.println("[DEBUG PROP] Available keys: " + screenVarMap.keySet());
                 if (screenVarMap.containsKey(varName)) {
                     // This is a screen variable - return it
-                    Object value = screenVarMap.get(varName);
-                    System.out.println("[DEBUG PROP] Found value: " + value);
-                    return value;
+                    return screenVarMap.get(varName);
                 }
                 // If the variable doesn't exist in the screen, fall through to normal property access
                 // This allows accessing properties of the screen config JSON if needed
