@@ -2271,13 +2271,8 @@ public class Parser {
             expr = expression();
             consume(EbsTokenType.RPAREN, "Expected ')' after expression.");
             return expr;
-        } else if (match(EbsTokenType.CALL)) {
-            CallStatement c = (CallStatement) call();
-            expr = new CallExpression(c);
-            postParseExpressions.add(expr);
-            return expr;
-        } else if (check(EbsTokenType.BUILTIN)) {
-            // Handle builtin function calls directly (e.g., array.asBitmap, array.asByte)
+        } else if (match(EbsTokenType.CALL) || check(EbsTokenType.BUILTIN)) {
+            // Handle both explicit call statements and builtin function calls (e.g., array.asBitmap, array.asByte)
             CallStatement c = (CallStatement) call();
             expr = new CallExpression(c);
             postParseExpressions.add(expr);
