@@ -319,9 +319,14 @@ public class ScreenFactory {
             (javafx.scene.control.TableView<String[]>) debugItemsTables.get(lowerScreenName);
         
         if (itemsTable != null) {
-            // Just refresh the table to update the display
+            System.err.println("[DEBUG] refreshDebugPanelIfOpen: Refreshing items table for screen '" + screenName + "'");
+            // Force a complete refresh of the table to update the display
             // This will cause the cell factory to re-evaluate which items are changed
-            itemsTable.refresh();
+            Platform.runLater(() -> {
+                itemsTable.refresh();
+                // Also trigger a layout pass to ensure cells are re-rendered
+                itemsTable.layout();
+            });
         }
     }
 
