@@ -956,11 +956,14 @@ public class InterpreterScreen {
             // Task to mark screen as "shown" - changes from now on will be tracked as modifications
             // This uses a chained Platform.runLater approach: the first runLater queues a second one,
             // ensuring the clear happens AFTER all previously queued tasks (like setItemChoiceOptions) complete.
+            // IMPORTANT: We keep the screen in screensNotYetShown until the SECOND runLater completes
+            // to prevent any pending UI updates from marking items as changed.
             Runnable markShownTask = () -> {
-                context.getScreensNotYetShown().remove(finalScreenKey);
                 // Use a second runLater to ensure we run AFTER any pending UI updates
                 // (e.g., from scr.setItemChoiceOptions which uses Platform.runLater)
                 Platform.runLater(() -> {
+                    // NOW remove from screensNotYetShown - after all pending UI updates are done
+                    context.getScreensNotYetShown().remove(finalScreenKey);
                     // Clear any items that were incorrectly marked as changed during initialization
                     ScreenFactory.clearChangedItems(finalScreenKey);
                     // Also refresh the debug panel if it's open to show the correct state
