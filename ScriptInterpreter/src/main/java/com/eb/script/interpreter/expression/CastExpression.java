@@ -15,16 +15,22 @@ public class CastExpression extends Expression {
     public final int line;
     public final DataType targetType;
     public final BitmapType bitmapType;  // For bitmap casting with field definitions
+    public final String bitmapTypeAliasName;  // The name of the bitmap type alias
     public final Expression value;
 
     public CastExpression(int line, DataType targetType, Expression value) {
-        this(line, targetType, null, value);
+        this(line, targetType, null, null, value);
     }
     
     public CastExpression(int line, DataType targetType, BitmapType bitmapType, Expression value) {
+        this(line, targetType, bitmapType, null, value);
+    }
+    
+    public CastExpression(int line, DataType targetType, BitmapType bitmapType, String bitmapTypeAliasName, Expression value) {
         this.line = line;
         this.targetType = targetType;
         this.bitmapType = bitmapType;
+        this.bitmapTypeAliasName = bitmapTypeAliasName;
         this.value = value;
     }
 
@@ -35,6 +41,9 @@ public class CastExpression extends Expression {
 
     @Override
     public String toString() {
+        if (bitmapTypeAliasName != null) {
+            return bitmapTypeAliasName + "(" + value + ")";
+        }
         if (bitmapType != null) {
             return bitmapType + "(" + value + ")";
         }

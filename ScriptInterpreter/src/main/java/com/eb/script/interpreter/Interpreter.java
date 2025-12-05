@@ -381,6 +381,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             
             // Check if we just performed a bitmap cast and should store the inferred BitmapType
             BitmapType inferredBitmapType = context.getLastInferredBitmapType();
+            String inferredBitmapTypeAliasName = context.getLastInferredBitmapTypeAliasName();
             if (inferredBitmapType != null) {
                 // Clear it immediately to prevent leaking to other variables
                 context.clearLastInferredBitmapType();
@@ -427,13 +428,14 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             
             // Use inferred bitmap type from cast if no explicit bitmap type is specified
             BitmapType bitmapTypeToUse = stmt.bitmapType != null ? stmt.bitmapType : inferredBitmapType;
+            String bitmapTypeAliasNameToUse = inferredBitmapTypeAliasName;
             
             // Store the bitmap type metadata with the variable if it's a bitmap
             if (bitmapTypeToUse != null) {
                 if (stmt.isConst) {
-                    environment().getEnvironmentValues().defineConstWithBitmapType(stmt.name, value, bitmapTypeToUse);
+                    environment().getEnvironmentValues().defineConstWithBitmapType(stmt.name, value, bitmapTypeToUse, bitmapTypeAliasNameToUse);
                 } else {
-                    environment().getEnvironmentValues().defineWithBitmapType(stmt.name, value, bitmapTypeToUse);
+                    environment().getEnvironmentValues().defineWithBitmapType(stmt.name, value, bitmapTypeToUse, bitmapTypeAliasNameToUse);
                 }
             // Store the record type metadata with the variable if it's a record
             // Also mark as const if this is a const declaration
@@ -1113,11 +1115,45 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     public Object visitUnaryExpression(UnaryExpression expr) throws InterpreterError {
         // Special handling for typeof operator
         if (expr.operator.type == EbsTokenType.TYPEOF) {
-            // If the operand is a variable, we can look up its record type metadata
+            // If the operand is a variable, we can look up its type metadata
             if (expr.right instanceof VariableExpression) {
                 VariableExpression varExpr = (VariableExpression) expr.right;
                 String varName = varExpr.name;
-                Object value = evaluate(expr.right);
+                
+                // First, check if this is a type alias (e.g., typeof myFlags where myFlags is a bitmap typedef)
+                TypeRegistry.TypeAlias alias = TypeRegistry.getTypeAlias(varName);
+                if (alias != null && alias.bitmapType != null) {
+                    // Return the bitmap type definition
+                    return alias.bitmapType.toString();
+                }
+                
+                // Otherwise, try to evaluate as a variable
+                Object value;
+                try {
+                    value = evaluate(expr.right);
+                } catch (InterpreterError e) {
+                    // If the variable doesn't exist and we have a type alias, return the alias type
+                    if (alias != null) {
+                        if (alias.recordType != null) {
+                            return alias.recordType.toString();
+                        } else {
+                            return alias.dataType.toString().toLowerCase();
+                        }
+                    }
+                    throw e;
+                }
+                
+                // Check for bitmap type metadata
+                BitmapType bitmapType = environment().getEnvironmentValues().getBitmapType(varName);
+                if (bitmapType != null) {
+                    String aliasName = environment().getEnvironmentValues().getBitmapTypeAliasName(varName);
+                    if (aliasName != null) {
+                        return "bitmap " + aliasName;
+                    } else {
+                        return bitmapType.toString();
+                    }
+                }
+                
                 RecordType recordType = environment().getEnvironmentValues().getRecordType(varName);
                 return getTypeString(value, recordType);
             } else {
@@ -1799,6 +1835,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 stmt.typeName,
                 stmt.dataType,
                 stmt.recordType,
+                stmt.bitmapType,
                 stmt.isArray,
                 stmt.arraySize
             );
@@ -1956,7 +1993,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             byte byteValue = BitmapType.toByteValue(value);
             
             // Store the bitmap type metadata so property access works
-            context.setLastInferredBitmapType(expr.bitmapType);
+            context.setLastInferredBitmapType(expr.bitmapType, expr.bitmapTypeAliasName);
             
             return byteValue;
         }

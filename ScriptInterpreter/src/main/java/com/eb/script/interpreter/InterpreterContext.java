@@ -95,6 +95,10 @@ public class InterpreterContext {
     // Using ThreadLocal for thread-safety in case of concurrent script execution
     private final ThreadLocal<com.eb.script.token.BitmapType> lastInferredBitmapType = new ThreadLocal<>();
     
+    // Store the last inferred bitmap type alias name
+    // This is used to track the name of the type alias used in a bitmap cast
+    private final ThreadLocal<String> lastInferredBitmapTypeAliasName = new ThreadLocal<>();
+    
     // Store reference to the main interpreter for async callbacks
     // This allows callbacks to access functions defined in the script
     private volatile Interpreter mainInterpreter;
@@ -341,12 +345,36 @@ public class InterpreterContext {
     }
     
     /**
+     * Set the last inferred BitmapType from a bitmap type alias cast along with the alias name.
+     * This is used to associate BitmapType metadata with cast expressions.
+     * Thread-safe using ThreadLocal.
+     * 
+     * @param bitmapType the inferred BitmapType to store for the current thread
+     * @param aliasName the name of the type alias
+     */
+    public void setLastInferredBitmapType(com.eb.script.token.BitmapType bitmapType, String aliasName) {
+        lastInferredBitmapType.set(bitmapType);
+        lastInferredBitmapTypeAliasName.set(aliasName);
+    }
+    
+    /**
+     * Get the last inferred bitmap type alias name.
+     * Thread-safe using ThreadLocal.
+     * 
+     * @return the last inferred bitmap type alias name for the current thread, or null if none
+     */
+    public String getLastInferredBitmapTypeAliasName() {
+        return lastInferredBitmapTypeAliasName.get();
+    }
+    
+    /**
      * Clear the last inferred BitmapType.
      * Should be called after the BitmapType has been consumed.
      * Thread-safe using ThreadLocal.
      */
     public void clearLastInferredBitmapType() {
         lastInferredBitmapType.remove();
+        lastInferredBitmapTypeAliasName.remove();
     }
 
     /**

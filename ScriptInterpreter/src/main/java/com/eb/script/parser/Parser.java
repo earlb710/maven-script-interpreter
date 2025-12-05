@@ -835,7 +835,8 @@ public class Parser {
         Expression arrayInit = null;
         
         // Check for array.type syntax
-        if (check(EbsTokenType.ARRAY) || check(EbsTokenType.IDENTIFIER) || check(EbsTokenType.DATATYPE)) {
+        if (check(EbsTokenType.ARRAY) || check(EbsTokenType.IDENTIFIER) || check(EbsTokenType.DATATYPE) || 
+            check(EbsTokenType.RECORD) || check(EbsTokenType.BITMAP)) {
             EbsToken typeToken = peek();
             
             // Check if it's "array" keyword or identifier starting with "array"
@@ -2248,7 +2249,7 @@ public class Parser {
                     consume(EbsTokenType.LPAREN, "Expected '(' after type name for cast.");
                     Expression valueExpr = expression();
                     consume(EbsTokenType.RPAREN, "Expected ')' after cast expression.");
-                    return new CastExpression(p.line, DataType.BITMAP, alias.bitmapType, valueExpr);
+                    return new CastExpression(p.line, DataType.BITMAP, alias.bitmapType, varName, valueExpr);
                 }
             }
             
