@@ -678,8 +678,10 @@ public class Parser {
             
             if (t.type != EbsTokenType.RECORD && 
                 t.type != EbsTokenType.BITMAP &&
+                t.type != EbsTokenType.INTMAP &&
                 !(t.literal instanceof String && "record".equals(((String)t.literal).toLowerCase())) &&
                 !(t.literal instanceof String && "bitmap".equals(((String)t.literal).toLowerCase())) &&
+                !(t.literal instanceof String && "intmap".equals(((String)t.literal).toLowerCase())) &&
                 !(t.literal instanceof String && ((String)t.literal).toLowerCase().startsWith("array.record")) &&
                 !(t.literal instanceof String && ((String)t.literal).toLowerCase().startsWith("queue.")) &&
                 !isAlias) {
