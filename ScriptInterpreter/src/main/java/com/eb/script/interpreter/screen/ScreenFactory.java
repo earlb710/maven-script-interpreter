@@ -860,8 +860,8 @@ public class ScreenFactory {
                                 tooltipText.append("\nVar: ").append(varRef);
                             }
                             if (parentArea != null && !parentArea.isEmpty()) {
-                                // Limit to first two direct parents only
-                                String limitedAreaPath = limitAreaPathToTwoParents(parentArea);
+                                // Limit to first two levels only
+                                String limitedAreaPath = limitAreaPathToTwoLevels(parentArea);
                                 tooltipText.append("\nArea: ").append(limitedAreaPath);
                             }
                             tooltipText.append("\nState: ").append(state);
@@ -1734,16 +1734,16 @@ public class ScreenFactory {
     }
     
     /**
-     * Limits the area path to show only the first two direct parents.
+     * Limits the area path to show only the first two levels.
      * For example:
      * - "area1.area2.area3.area4" becomes "area1.area2"
      * - "area1.area2" stays as "area1.area2"
      * - "area1" stays as "area1"
      * 
-     * @param fullAreaPath The full area path with all parents
+     * @param fullAreaPath The full area path with all levels
      * @return The limited area path with at most two levels
      */
-    private static String limitAreaPathToTwoParents(String fullAreaPath) {
+    private static String limitAreaPathToTwoLevels(String fullAreaPath) {
         if (fullAreaPath == null || fullAreaPath.isEmpty()) {
             return fullAreaPath;
         }
