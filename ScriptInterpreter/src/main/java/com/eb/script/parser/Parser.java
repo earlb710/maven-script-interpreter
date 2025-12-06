@@ -1027,6 +1027,9 @@ public class Parser {
                             fieldType = DataType.BYTE;
                         } else if (typeAlias.dataType != null) {
                             fieldType = typeAlias.dataType;
+                        } else {
+                            // Malformed type alias - this should never happen
+                            throw error(fieldTypeToken, "Malformed type alias '" + typeName + "' - missing type definition.");
                         }
                         advance();
                     } else {
