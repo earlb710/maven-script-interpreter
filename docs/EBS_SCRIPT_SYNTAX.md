@@ -429,7 +429,7 @@ print data.flags;   // Output: 1
 
 // Initialize with a specific value
 var config = PackedData(0);
-config.id = 32767;      // Max value for 16 bits: 65535
+config.id = 65535;      // Max value for 16 bits
 config.count = 255;     // Max value for 8 bits
 config.flags = 170;     // Binary pattern
 print config;           // Output: packed integer value
