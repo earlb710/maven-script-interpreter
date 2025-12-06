@@ -748,7 +748,7 @@ public class InterpreterScreen {
             stage.setMaximized(true);
         }
         
-        // Set resizable property (default is true, so only set if false)
+        // Apply resizable property from screen configuration
         stage.setResizable(config.isResizable());
         
         // Set up screen-level focus listeners
