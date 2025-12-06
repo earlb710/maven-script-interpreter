@@ -489,31 +489,22 @@ public class ScreenFactory {
                 // Store the SplitPane reference
                 screenDebugSplitPanes.put(screenName.toLowerCase(), splitPane);
                 
-                // Replace the center content with the SplitPane
-                rootPane.setCenter(splitPane);
-                
-                // Expand the window width to accommodate the debug panel
+                // Expand the window width to accommodate the debug panel FIRST
                 if (stage != null) {
                     double currentWidth = stage.getWidth();
                     double newWidth = currentWidth + DEBUG_PANEL_PREF_WIDTH;
                     stage.setWidth(newWidth);
                     
-                    // Set the divider position after the stage is resized
-                    // Calculate the divider position so the debug panel gets its preferred width
-                    Platform.runLater(() -> {
-                        double totalWidth = splitPane.getWidth();
-                        double dividerPos;
-                        if (totalWidth > 0) {
-                            dividerPos = (totalWidth - DEBUG_PANEL_PREF_WIDTH) / totalWidth;
-                        } else {
-                            // Fallback: calculate based on expected window width
-                            dividerPos = 1.0 - ((double) DEBUG_PANEL_PREF_WIDTH / newWidth);
-                        }
-                        // Clamp the divider position to ensure main content has reasonable space
-                        splitPane.setDividerPositions(
-                            Math.max(DEBUG_DIVIDER_MIN_POSITION, Math.min(DEBUG_DIVIDER_MAX_POSITION, dividerPos)));
-                    });
+                    // Calculate and set the divider position immediately
+                    // This prevents the initial "wide" appearance before shrinking
+                    double dividerPos = 1.0 - ((double) DEBUG_PANEL_PREF_WIDTH / newWidth);
+                    // Clamp the divider position to ensure main content has reasonable space
+                    dividerPos = Math.max(DEBUG_DIVIDER_MIN_POSITION, Math.min(DEBUG_DIVIDER_MAX_POSITION, dividerPos));
+                    splitPane.setDividerPositions(dividerPos);
                 }
+                
+                // Replace the center content with the SplitPane AFTER setting width and divider
+                rootPane.setCenter(splitPane);
             } else {
                 // No original center content available - don't show split pane with only debug panel
                 // Just show debug panel in the right side of the BorderPane as a fallback
@@ -860,7 +851,9 @@ public class ScreenFactory {
                                 tooltipText.append("\nVar: ").append(varRef);
                             }
                             if (parentArea != null && !parentArea.isEmpty()) {
-                                tooltipText.append("\nArea: ").append(parentArea);
+                                // Limit to last two direct parents only
+                                String limitedAreaPath = limitAreaPathToTwoLevels(parentArea);
+                                tooltipText.append("\nArea: ").append(limitedAreaPath);
                             }
                             tooltipText.append("\nState: ").append(state);
                             // Add display info if present
@@ -910,10 +903,6 @@ public class ScreenFactory {
             if (areas != null) {
                 buildItemToAreaMap(areas, itemToAreaMap, "");
             }
-            // DEBUG: Print itemToAreaMap contents
-            System.err.println("[DEBUG] itemToAreaMap for screen '" + screenName + "': " + itemToAreaMap);
-            System.err.println("[DEBUG] areas count: " + (areas != null ? areas.size() : "null"));
-            System.err.flush();
             
             // Populate data - pre-compute display text with icon
             // Array format: [displayTextWithIcon, value, varRef, itemType, rawName, parentArea, displayInfo]
@@ -934,8 +923,6 @@ public class ScreenFactory {
                 if (itemToAreaMap.containsKey(itemNameLower)) {
                     parentArea = itemToAreaMap.get(itemNameLower);
                 } else {
-                    // DEBUG: Show lookup failure
-                    System.err.println("[DEBUG] LOOKUP MISS: key='" + key + "', itemNameLower='" + itemNameLower + "'");
                     // Try extracting from key format (setName.itemName)
                     int dotIndex = key.indexOf('.');
                     if (dotIndex > 0) {
@@ -1721,14 +1708,10 @@ public class ScreenFactory {
                 areaPath = parentPath + "." + area.name;
             }
             
-            // DEBUG: Print area info
-            System.err.println("[DEBUG] buildItemToAreaMap: area='" + area.name + "', path='" + areaPath + "', items=" + (area.items != null ? area.items.size() : 0) + ", childAreas=" + (area.childAreas != null ? area.childAreas.size() : 0));
-            
             // Add all items in this area to the map
             if (area.items != null) {
                 for (AreaItem item : area.items) {
                     if (item.name != null && !item.name.isEmpty()) {
-                        System.err.println("[DEBUG]   -> adding item '" + item.name.toLowerCase() + "' -> '" + areaPath + "'");
                         itemToAreaMap.put(item.name.toLowerCase(), areaPath);
                     }
                 }
@@ -1739,6 +1722,40 @@ public class ScreenFactory {
                 buildItemToAreaMap(area.childAreas, itemToAreaMap, areaPath);
             }
         }
+    }
+    
+    /**
+     * Limits the area path to show only the last two direct parents.
+     * For example:
+     * - "mainArea.section1.subsection1.panel1.subpanel2" becomes "panel1.subpanel2"
+     * - "area1.area2.area3" becomes "area2.area3"
+     * - "area1.area2" stays as "area1.area2"
+     * - "area1" stays as "area1"
+     * 
+     * @param fullAreaPath The full area path with all levels
+     * @return The last two levels of the area path
+     */
+    private static String limitAreaPathToTwoLevels(String fullAreaPath) {
+        if (fullAreaPath == null || fullAreaPath.isEmpty()) {
+            return fullAreaPath;
+        }
+        
+        // Find the last dot
+        int lastDot = fullAreaPath.lastIndexOf('.');
+        if (lastDot == -1) {
+            // No dots means only one level, return as-is
+            return fullAreaPath;
+        }
+        
+        // Find the second-to-last dot
+        int secondLastDot = fullAreaPath.lastIndexOf('.', lastDot - 1);
+        if (secondLastDot == -1) {
+            // Only one dot means two levels, return as-is
+            return fullAreaPath;
+        }
+        
+        // More than two levels, return substring from second-to-last dot onwards
+        return fullAreaPath.substring(secondLastDot + 1);
     }
     
     /**
