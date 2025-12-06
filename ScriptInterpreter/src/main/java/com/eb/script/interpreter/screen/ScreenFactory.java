@@ -59,9 +59,9 @@ public class ScreenFactory {
     private static final String DEBUG_ROW_HOVER_STYLE = "-fx-background-color: #d0e8ff; -fx-cursor: hand;";
     private static final String DEBUG_ROW_CLICK_STYLE = "-fx-background-color: #a0d0a0; -fx-cursor: hand;";
     
-    // Change indicator emoji and styling for debug panel items
-    // Using just the warning sign (U+26A0) without variation selector to avoid rendering issues
-    private static final String CHANGE_INDICATOR_EMOJI = "\u26A0";
+    // Change indicator for debug panel items
+    // Using simple asterisk (*) for maximum font compatibility
+    private static final String CHANGE_INDICATOR_EMOJI = "*";
     private static final String DEBUG_ITEM_NAME_BASE_STYLE = "-fx-alignment: CENTER-LEFT; -fx-font-weight: bold;";
     private static final String DEBUG_ITEM_NAME_CHANGED_STYLE = DEBUG_ITEM_NAME_BASE_STYLE + " -fx-text-fill: #cc5500;";
 
