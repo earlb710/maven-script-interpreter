@@ -832,7 +832,7 @@ public class ScreenFactory {
                             setStyle(DEBUG_ITEM_NAME_BASE_STYLE);
                         }
                         // Add tooltip with item details from row data
-                        // Array format: [displayTextWithIcon, value, varRef, itemType, rawName, parentArea]
+                        // Array format: [displayTextWithIcon, value, varRef, itemType, rawName, parentArea, displayInfo]
                         int rowIndex = getIndex();
                         if (rowIndex >= 0 && rowIndex < getTableView().getItems().size()) {
                             String[] rowData = getTableView().getItems().get(rowIndex);
@@ -840,6 +840,7 @@ public class ScreenFactory {
                             String itemType = rowData.length >= 4 ? rowData[3] : "unknown";
                             String varRef = rowData.length >= 3 ? rowData[2] : "";
                             String parentArea = rowData.length >= 6 ? rowData[5] : "";
+                            String displayInfo = rowData.length >= 7 ? rowData[6] : "";
                             
                             // Determine state
                             String state = "CLEAN";
@@ -862,8 +863,14 @@ public class ScreenFactory {
                                 tooltipText.append("\nArea: ").append(parentArea);
                             }
                             tooltipText.append("\nState: ").append(state);
+                            // Add display info if present
+                            if (displayInfo != null && !displayInfo.isEmpty()) {
+                                tooltipText.append("\n---\n").append(displayInfo);
+                            }
                             javafx.scene.control.Tooltip tooltip = new javafx.scene.control.Tooltip(tooltipText.toString());
                             tooltip.setShowDelay(javafx.util.Duration.millis(500));
+                            tooltip.setMaxWidth(DEBUG_TOOLTIP_MAX_WIDTH);
+                            tooltip.setWrapText(true);
                             setTooltip(tooltip);
                         }
                     }
@@ -896,8 +903,16 @@ public class ScreenFactory {
             itemsTable.getColumns().add(itemNameCol);
             itemsTable.getColumns().add(itemValueCol);
             
+            // Build a map from item name to area name by iterating through AreaDefinitions
+            // This is needed because screenAreaItems doesn't always include area in the key
+            Map<String, String> itemToAreaMap = new HashMap<>();
+            List<AreaDefinition> areas = context.getScreenAreas(screenName);
+            if (areas != null) {
+                buildItemToAreaMap(areas, itemToAreaMap, "");
+            }
+            
             // Populate data - pre-compute display text with icon
-            // Array format: [displayTextWithIcon, value, varRef, itemType, rawName, parentArea]
+            // Array format: [displayTextWithIcon, value, varRef, itemType, rawName, parentArea, displayInfo]
             java.util.List<String> sortedItemKeys = new java.util.ArrayList<>(screenAreaItems.keySet());
             java.util.Collections.sort(sortedItemKeys, String.CASE_INSENSITIVE_ORDER);
             
@@ -908,16 +923,27 @@ public class ScreenFactory {
                 String varRef = item.varRef != null ? item.varRef : "";
                 // Get the item type from displayItem or fall back to displayMetadata lookup
                 String itemType = getItemType(item, context, screenName);
-                // Extract parent area from key (format: "areaName.itemName" or just "itemName")
+                
+                // Look up parent area from itemToAreaMap first, then try key format
                 String parentArea = "";
-                int dotIndex = key.indexOf('.');
-                if (dotIndex > 0) {
-                    parentArea = key.substring(0, dotIndex);
+                String itemNameLower = displayName.toLowerCase();
+                if (itemToAreaMap.containsKey(itemNameLower)) {
+                    parentArea = itemToAreaMap.get(itemNameLower);
+                } else {
+                    // Try extracting from key format (setName.itemName)
+                    int dotIndex = key.indexOf('.');
+                    if (dotIndex > 0) {
+                        parentArea = key.substring(0, dotIndex);
+                    }
                 }
+                
+                // Build display info string with additional displayItem properties
+                String displayInfo = buildDisplayItemInfo(item);
+                
                 // Pre-compute the display text with icon (no ⚠️ since not changed on initial display)
                 String typeIcon = getItemTypeIcon(itemType);
                 String displayText = typeIcon + " " + displayName;
-                itemsTable.getItems().add(new String[]{displayText, valueStr, varRef, itemType, displayName, parentArea});
+                itemsTable.getItems().add(new String[]{displayText, valueStr, varRef, itemType, displayName, parentArea, displayInfo});
             }
             
             // Allow table to expand to fill available space
@@ -1670,6 +1696,113 @@ public class ScreenFactory {
             default:
                 return "◇";
         }
+    }
+    
+    /**
+     * Build a map from item name (lowercase) to area name by recursively iterating through areas.
+     * This handles nested areas.
+     * 
+     * @param areas The list of AreaDefinitions to process
+     * @param itemToAreaMap The map to populate (item name -> area name)
+     * @param parentPath The parent path for nested areas (e.g., "parentArea.childArea")
+     */
+    private static void buildItemToAreaMap(List<AreaDefinition> areas, Map<String, String> itemToAreaMap, String parentPath) {
+        if (areas == null) return;
+        
+        for (AreaDefinition area : areas) {
+            String areaPath = area.name;
+            if (parentPath != null && !parentPath.isEmpty()) {
+                areaPath = parentPath + "." + area.name;
+            }
+            
+            // Add all items in this area to the map
+            if (area.items != null) {
+                for (AreaItem item : area.items) {
+                    if (item.name != null && !item.name.isEmpty()) {
+                        itemToAreaMap.put(item.name.toLowerCase(), areaPath);
+                    }
+                }
+            }
+            
+            // Recursively process child areas
+            if (area.childAreas != null && !area.childAreas.isEmpty()) {
+                buildItemToAreaMap(area.childAreas, itemToAreaMap, areaPath);
+            }
+        }
+    }
+    
+    /**
+     * Build a display info string with additional displayItem properties.
+     * 
+     * @param item The AreaItem to get display info from
+     * @return A formatted string with display properties, or empty string if none
+     */
+    private static String buildDisplayItemInfo(AreaItem item) {
+        if (item == null) return "";
+        
+        StringBuilder info = new StringBuilder();
+        
+        // Properties from AreaItem
+        if (item.editable != null) {
+            info.append("Editable: ").append(item.editable).append("\n");
+        }
+        if (item.disabled != null) {
+            info.append("Disabled: ").append(item.disabled).append("\n");
+        }
+        if (item.visible != null) {
+            info.append("Visible: ").append(item.visible).append("\n");
+        }
+        if (item.tooltip != null && !item.tooltip.isEmpty()) {
+            info.append("Tooltip: ").append(item.tooltip).append("\n");
+        }
+        if (item.layoutPos != null && !item.layoutPos.isEmpty()) {
+            info.append("Position: ").append(item.layoutPos).append("\n");
+        }
+        if (item.prefWidth != null && !item.prefWidth.isEmpty()) {
+            info.append("Width: ").append(item.prefWidth).append("\n");
+        }
+        if (item.prefHeight != null && !item.prefHeight.isEmpty()) {
+            info.append("Height: ").append(item.prefHeight).append("\n");
+        }
+        
+        // Properties from DisplayItem
+        DisplayItem displayItem = item.displayItem;
+        if (displayItem != null) {
+            if (displayItem.mandatory) {
+                info.append("Mandatory: true\n");
+            }
+            if (displayItem.labelText != null && !displayItem.labelText.isEmpty()) {
+                info.append("Label: ").append(displayItem.labelText).append("\n");
+            }
+            if (displayItem.promptHelp != null && !displayItem.promptHelp.isEmpty()) {
+                info.append("Prompt: ").append(displayItem.promptHelp).append("\n");
+            }
+            if (displayItem.min != null) {
+                info.append("Min: ").append(displayItem.min).append("\n");
+            }
+            if (displayItem.max != null) {
+                info.append("Max: ").append(displayItem.max).append("\n");
+            }
+            if (displayItem.maxLength != null) {
+                info.append("MaxLength: ").append(displayItem.maxLength).append("\n");
+            }
+            if (displayItem.pattern != null && !displayItem.pattern.isEmpty()) {
+                info.append("Pattern: ").append(displayItem.pattern).append("\n");
+            }
+            if (displayItem.options != null && !displayItem.options.isEmpty()) {
+                info.append("Options: ").append(displayItem.options.size()).append(" items\n");
+            }
+            if (displayItem.optionsMap != null && !displayItem.optionsMap.isEmpty()) {
+                info.append("OptionsMap: ").append(displayItem.optionsMap.size()).append(" items\n");
+            }
+        }
+        
+        // Remove trailing newline
+        if (info.length() > 0 && info.charAt(info.length() - 1) == '\n') {
+            info.setLength(info.length() - 1);
+        }
+        
+        return info.toString();
     }
     
     /**
