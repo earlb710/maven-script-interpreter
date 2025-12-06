@@ -416,6 +416,7 @@ public class BuiltinsImage {
 
     /**
      * Get format from file path extension.
+     * Supports png, jpg, gif, bmp, and svg formats.
      */
     private static String getFormatFromPath(String path) {
         int dot = path.lastIndexOf('.');
@@ -426,6 +427,7 @@ public class BuiltinsImage {
                 case "png" -> "png";
                 case "gif" -> "gif";
                 case "bmp" -> "bmp";
+                case "svg" -> "svg";
                 default -> "png";
             };
         }

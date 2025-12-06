@@ -1,0 +1,589 @@
+// EBS Chess Game Application
+// ===========================
+// This script demonstrates using the array.bitmap type for efficient chess board encoding.
+//
+// Board Encoding:
+//   - Uses array.bitmap[64] to store 8x8 chess board
+//   - Each cell encoded as a bitmap byte:
+//     * Bit 0: Cell color (0=light, 1=dark) - for checkerboard pattern
+//     * Bits 1-6: Piece type (0=empty, 1=pawn, 2=rook, 3=knight, 4=bishop, 5=queen, 6=king)
+//     * Bit 7: Piece color (0=white, 1=black)
+//
+// Features:
+//   - Console display with Unicode chess symbols
+//   - Graphical JavaFX GridPane chess board with SVG piece images
+//   - Row labels (1-8) and column labels (a-h)
+//   - Timer display for both players
+//   - New Game button to reset the board
+//
+// Usage:
+//   Run in EBS Console: /open scripts/app/chess.ebs then Ctrl+Enter
+
+// Define the chess cell bitmap type for bit-level field access
+ChessCell typeof bitmap { cellColor: 0, pieceType: 1-6, pieceColor: 7 };
+
+// Define position type for x,y coordinates
+posType typeof record { x: int, y: int };
+
+// Define chess piece record type with piece name, color, and position
+// Piece codes: K=King, Q=Queen, R=Rook, B=Bishop, N=Knight, P=Pawn
+// Color codes: W=White, B=Black
+ChessPiece typeof record { piece: string, color: string, pos: posType };
+
+// Array of all 32 chess pieces with their starting positions
+var pieces: ChessPiece[32];
+
+// Piece type constants
+var EMPTY: int = 0;
+var PAWN: int = 1;
+var ROOK: int = 2;
+var KNIGHT: int = 3;
+var BISHOP: int = 4;
+var QUEEN: int = 5;
+var KING: int = 6;
+
+// Piece color constants
+var WHITE: int = 0;
+var BLACK: int = 1;
+
+// Chess piece Unicode symbols (for console display)
+var whitePieces: string[7];
+whitePieces[0] = "";        // Empty
+whitePieces[1] = "\u2659";  // White Pawn
+whitePieces[2] = "\u2656";  // White Rook
+whitePieces[3] = "\u2658";  // White Knight
+whitePieces[4] = "\u2657";  // White Bishop
+whitePieces[5] = "\u2655";  // White Queen
+whitePieces[6] = "\u2654";  // White King
+
+var blackPieces: string[7];
+blackPieces[0] = "";        // Empty
+blackPieces[1] = "\u265F";  // Black Pawn
+blackPieces[2] = "\u265C";  // Black Rook
+blackPieces[3] = "\u265E";  // Black Knight
+blackPieces[4] = "\u265D";  // Black Bishop
+blackPieces[5] = "\u265B";  // Black Queen
+blackPieces[6] = "\u265A";  // Black King
+
+// Image path base for SVG chess pieces
+var imgPath: string = "src/main/resources/images/chess/";
+
+// Create the chess board using array.bitmap for bitmap-encoded cell data (8x8 = 64 elements)
+var board: array.bitmap[64];
+
+// Timer variables
+var timerWhite: int = 600;
+var timerBlack: int = 600;
+var currentPlayer: int = 0;
+
+// Helper functions
+boardIndex(row: int, col: int) return int {
+    return row * 8 + col;
+}
+
+modulo(a: int, b: int) return int {
+    var q: int = a / b;
+    return a - (q * b);
+}
+
+encodeCellValue(cellColor: int, pieceType: int, pieceColor: int) return int {
+    return cellColor + (pieceType * 2) + (pieceColor * 128);
+}
+
+getPieceSymbol(cellValue: int) return string {
+    var cell = ChessCell(cellValue);
+    var pt: int = cell.pieceType;
+    var pc: int = cell.pieceColor;
+    
+    if pt == 0 then {
+        return "";
+    }
+    
+    if pc == 0 then {
+        return whitePieces[pt];
+    } else {
+        return blackPieces[pt];
+    }
+}
+
+formatTimer(seconds: int) return string {
+    var mins: int = seconds / 60;
+    var secs: int = call modulo(seconds, 60);
+    var minsStr: string = call str.lpad(string(mins), 2, "0");
+    var secsStr: string = call str.lpad(string(secs), 2, "0");
+    return minsStr + ":" + secsStr;
+}
+
+initializeBoard() {
+    var row: int = 0;
+    var col: int = 0;
+    var idx: int = 0;
+    
+    // Initialize all cells with proper colors
+    for (row = 0; row < 8; row++) {
+        for (col = 0; col < 8; col++) {
+            var cellColor: int = call modulo(row + col, 2);
+            idx = call boardIndex(row, col);
+            board[idx] = call encodeCellValue(cellColor, EMPTY, WHITE);
+        }
+    }
+    
+    // Place black pieces (row 0 and 1)
+    board[call boardIndex(0, 0)] = call encodeCellValue(0, ROOK, BLACK);
+    board[call boardIndex(0, 1)] = call encodeCellValue(1, KNIGHT, BLACK);
+    board[call boardIndex(0, 2)] = call encodeCellValue(0, BISHOP, BLACK);
+    board[call boardIndex(0, 3)] = call encodeCellValue(1, QUEEN, BLACK);
+    board[call boardIndex(0, 4)] = call encodeCellValue(0, KING, BLACK);
+    board[call boardIndex(0, 5)] = call encodeCellValue(1, BISHOP, BLACK);
+    board[call boardIndex(0, 6)] = call encodeCellValue(0, KNIGHT, BLACK);
+    board[call boardIndex(0, 7)] = call encodeCellValue(1, ROOK, BLACK);
+    
+    // Row 1: Black pawns
+    for (col = 0; col < 8; col++) {
+        var cellColor: int = call modulo(1 + col, 2);
+        idx = call boardIndex(1, col);
+        board[idx] = call encodeCellValue(cellColor, PAWN, BLACK);
+    }
+    
+    // Row 6: White pawns
+    for (col = 0; col < 8; col++) {
+        var cellColor: int = call modulo(6 + col, 2);
+        idx = call boardIndex(6, col);
+        board[idx] = call encodeCellValue(cellColor, PAWN, WHITE);
+    }
+    
+    // Place white pieces (row 7)
+    board[call boardIndex(7, 0)] = call encodeCellValue(1, ROOK, WHITE);
+    board[call boardIndex(7, 1)] = call encodeCellValue(0, KNIGHT, WHITE);
+    board[call boardIndex(7, 2)] = call encodeCellValue(1, BISHOP, WHITE);
+    board[call boardIndex(7, 3)] = call encodeCellValue(0, QUEEN, WHITE);
+    board[call boardIndex(7, 4)] = call encodeCellValue(1, KING, WHITE);
+    board[call boardIndex(7, 5)] = call encodeCellValue(0, BISHOP, WHITE);
+    board[call boardIndex(7, 6)] = call encodeCellValue(1, KNIGHT, WHITE);
+    board[call boardIndex(7, 7)] = call encodeCellValue(0, ROOK, WHITE);
+    
+    // Initialize pieces array with starting positions
+    // Piece codes: K=King, Q=Queen, R=Rook, B=Bishop, N=Knight, P=Pawn
+    // Color codes: W=White, B=Black
+    
+    // Black back row (row 0)
+    pieces[0] = ChessPiece { piece: "R", color: "B", pos: posType { x: 0, y: 0 } };
+    pieces[1] = ChessPiece { piece: "N", color: "B", pos: posType { x: 1, y: 0 } };
+    pieces[2] = ChessPiece { piece: "B", color: "B", pos: posType { x: 2, y: 0 } };
+    pieces[3] = ChessPiece { piece: "Q", color: "B", pos: posType { x: 3, y: 0 } };
+    pieces[4] = ChessPiece { piece: "K", color: "B", pos: posType { x: 4, y: 0 } };
+    pieces[5] = ChessPiece { piece: "B", color: "B", pos: posType { x: 5, y: 0 } };
+    pieces[6] = ChessPiece { piece: "N", color: "B", pos: posType { x: 6, y: 0 } };
+    pieces[7] = ChessPiece { piece: "R", color: "B", pos: posType { x: 7, y: 0 } };
+    
+    // Black pawns (row 1)
+    pieces[8] = ChessPiece { piece: "P", color: "B", pos: posType { x: 0, y: 1 } };
+    pieces[9] = ChessPiece { piece: "P", color: "B", pos: posType { x: 1, y: 1 } };
+    pieces[10] = ChessPiece { piece: "P", color: "B", pos: posType { x: 2, y: 1 } };
+    pieces[11] = ChessPiece { piece: "P", color: "B", pos: posType { x: 3, y: 1 } };
+    pieces[12] = ChessPiece { piece: "P", color: "B", pos: posType { x: 4, y: 1 } };
+    pieces[13] = ChessPiece { piece: "P", color: "B", pos: posType { x: 5, y: 1 } };
+    pieces[14] = ChessPiece { piece: "P", color: "B", pos: posType { x: 6, y: 1 } };
+    pieces[15] = ChessPiece { piece: "P", color: "B", pos: posType { x: 7, y: 1 } };
+    
+    // White pawns (row 6)
+    pieces[16] = ChessPiece { piece: "P", color: "W", pos: posType { x: 0, y: 6 } };
+    pieces[17] = ChessPiece { piece: "P", color: "W", pos: posType { x: 1, y: 6 } };
+    pieces[18] = ChessPiece { piece: "P", color: "W", pos: posType { x: 2, y: 6 } };
+    pieces[19] = ChessPiece { piece: "P", color: "W", pos: posType { x: 3, y: 6 } };
+    pieces[20] = ChessPiece { piece: "P", color: "W", pos: posType { x: 4, y: 6 } };
+    pieces[21] = ChessPiece { piece: "P", color: "W", pos: posType { x: 5, y: 6 } };
+    pieces[22] = ChessPiece { piece: "P", color: "W", pos: posType { x: 6, y: 6 } };
+    pieces[23] = ChessPiece { piece: "P", color: "W", pos: posType { x: 7, y: 6 } };
+    
+    // White back row (row 7)
+    pieces[24] = ChessPiece { piece: "R", color: "W", pos: posType { x: 0, y: 7 } };
+    pieces[25] = ChessPiece { piece: "N", color: "W", pos: posType { x: 1, y: 7 } };
+    pieces[26] = ChessPiece { piece: "B", color: "W", pos: posType { x: 2, y: 7 } };
+    pieces[27] = ChessPiece { piece: "Q", color: "W", pos: posType { x: 3, y: 7 } };
+    pieces[28] = ChessPiece { piece: "K", color: "W", pos: posType { x: 4, y: 7 } };
+    pieces[29] = ChessPiece { piece: "B", color: "W", pos: posType { x: 5, y: 7 } };
+    pieces[30] = ChessPiece { piece: "N", color: "W", pos: posType { x: 6, y: 7 } };
+    pieces[31] = ChessPiece { piece: "R", color: "W", pos: posType { x: 7, y: 7 } };
+}
+
+getBoardRow(rowNum: int) return string {
+    var result: string = "";
+    var col: int = 0;
+    var idx: int = 0;
+    
+    for (col = 0; col < 8; col++) {
+        idx = call boardIndex(rowNum, col);
+        var cellValue: int = board[idx];
+        var cell = ChessCell(cellValue);
+        var cellColor: int = cell.cellColor;
+        var piece: string = call getPieceSymbol(cellValue);
+        
+        if piece == "" then {
+            if cellColor == 0 then {
+                result = result + " . ";
+            } else {
+                result = result + " # ";
+            }
+        } else {
+            result = result + " " + piece + " ";
+        }
+        
+        if col < 7 then {
+            result = result + "|";
+        }
+    }
+    
+    return result;
+}
+
+printBoard() {
+    print "";
+    print "   Chess Board";
+    print "   ===========";
+    print "";
+    
+    var whiteTimerStr: string = call formatTimer(timerWhite);
+    var blackTimerStr: string = call formatTimer(timerBlack);
+    var currentPlayerStr: string;
+    if currentPlayer == 0 then {
+        currentPlayerStr = "White";
+    } else {
+        currentPlayerStr = "Black";
+    }
+    
+    print "   Timer: White " + whiteTimerStr + " | Black " + blackTimerStr;
+    print "   Current Turn: " + currentPlayerStr;
+    print "";
+    
+    print "     a   b   c   d   e   f   g   h";
+    print "   +---+---+---+---+---+---+---+---+";
+    
+    var row: int = 0;
+    for (row = 0; row < 8; row++) {
+        var rowLabel: int = 8 - row;
+        var rowStr: string = call getBoardRow(row);
+        print " " + rowLabel + " |" + rowStr + "| " + rowLabel;
+        print "   +---+---+---+---+---+---+---+---+";
+    }
+    
+    print "     a   b   c   d   e   f   g   h";
+    print "";
+}
+
+// Reset game function - must be defined before screen that references it
+resetGame() {
+    call initializeBoard();
+    timerWhite = 600;
+    timerBlack = 600;
+    currentPlayer = 0;
+    
+    chessScreen.whiteTimer = call formatTimer(timerWhite);
+    chessScreen.blackTimer = call formatTimer(timerBlack);
+    chessScreen.statusMessage = "White to move - Game Reset!";
+}
+
+// Define the chess screen with timer and 10x10 grid board (8x8 + labels)
+screen chessScreen = {
+    "title": "Chess Game",
+    "width": 650,
+    "height": 780,
+    "vars": [
+        {"name": "whiteTimer", "type": "string", "default": "10:00"},
+        {"name": "blackTimer", "type": "string", "default": "10:00"},
+        {"name": "statusMessage", "type": "string", "default": "White to move"},
+        {"name": "c00", "type": "image"},
+        {"name": "c01", "type": "image"},
+        {"name": "c02", "type": "image"},
+        {"name": "c03", "type": "image"},
+        {"name": "c04", "type": "image"},
+        {"name": "c05", "type": "image"},
+        {"name": "c06", "type": "image"},
+        {"name": "c07", "type": "image"},
+        {"name": "c10", "type": "image"},
+        {"name": "c11", "type": "image"},
+        {"name": "c12", "type": "image"},
+        {"name": "c13", "type": "image"},
+        {"name": "c14", "type": "image"},
+        {"name": "c15", "type": "image"},
+        {"name": "c16", "type": "image"},
+        {"name": "c17", "type": "image"},
+        {"name": "c60", "type": "image"},
+        {"name": "c61", "type": "image"},
+        {"name": "c62", "type": "image"},
+        {"name": "c63", "type": "image"},
+        {"name": "c64", "type": "image"},
+        {"name": "c65", "type": "image"},
+        {"name": "c66", "type": "image"},
+        {"name": "c67", "type": "image"},
+        {"name": "c70", "type": "image"},
+        {"name": "c71", "type": "image"},
+        {"name": "c72", "type": "image"},
+        {"name": "c73", "type": "image"},
+        {"name": "c74", "type": "image"},
+        {"name": "c75", "type": "image"},
+        {"name": "c76", "type": "image"},
+        {"name": "c77", "type": "image"}
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "10",
+            "padding": "20",
+            "style": "-fx-background-color: #2c2c2c;",
+            "items": [
+                {"name": "titleLabel", "display": {"type": "label", "labelText": "\u265A Chess Game \u2654", "labelColor": "#ffffff", "labelFontSize": "24px", "labelBold": true}}
+            ],
+            "areas": [
+                {
+                    "name": "timerArea",
+                    "type": "hbox",
+                    "spacing": "40",
+                    "padding": "10",
+                    "style": "-fx-background-color: #3c3c3c; -fx-background-radius: 5;",
+                    "items": [
+                        {"name": "whiteLabelTimer", "display": {"type": "label", "labelText": "\u2654 White:", "labelColor": "#ffffff", "labelFontSize": "18px"}},
+                        {"name": "whiteTimerField", "varRef": "whiteTimer", "display": {"type": "label", "labelColor": "#00ff00", "labelFontSize": "24px", "labelBold": true}},
+                        {"name": "spacerLabel", "display": {"type": "label", "labelText": "     |     ", "labelColor": "#666666", "labelFontSize": "24px"}},
+                        {"name": "blackLabelTimer", "display": {"type": "label", "labelText": "\u265A Black:", "labelColor": "#ffffff", "labelFontSize": "18px"}},
+                        {"name": "blackTimerField", "varRef": "blackTimer", "display": {"type": "label", "labelColor": "#ff6600", "labelFontSize": "24px", "labelBold": true}}
+                    ]
+                },
+                {
+                    "name": "boardContainer",
+                    "type": "vbox",
+                    "spacing": "0",
+                    "padding": "10",
+                    "style": "-fx-background-color: #654321; -fx-background-radius: 5;",
+                    "areas": [
+                        {
+                            "name": "chessBoard",
+                            "type": "gridpane",
+                            "spacing": "0",
+                            "style": "-fx-hgap: 0; -fx-vgap: 0; -fx-padding: 2;",
+                            "items": [
+                                {"name": "lblEmpty1", "layoutPos": "0,0", "display": {"type": "label", "labelText": "", "style": "-fx-min-width: 25; -fx-min-height: 25;"}},
+                                {"name": "lblColA", "layoutPos": "0,1", "display": {"type": "label", "labelText": "a", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
+                                {"name": "lblColB", "layoutPos": "0,2", "display": {"type": "label", "labelText": "b", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
+                                {"name": "lblColC", "layoutPos": "0,3", "display": {"type": "label", "labelText": "c", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
+                                {"name": "lblColD", "layoutPos": "0,4", "display": {"type": "label", "labelText": "d", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
+                                {"name": "lblColE", "layoutPos": "0,5", "display": {"type": "label", "labelText": "e", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
+                                {"name": "lblColF", "layoutPos": "0,6", "display": {"type": "label", "labelText": "f", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
+                                {"name": "lblColG", "layoutPos": "0,7", "display": {"type": "label", "labelText": "g", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
+                                {"name": "lblColH", "layoutPos": "0,8", "display": {"type": "label", "labelText": "h", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
+                                {"name": "lblEmpty2", "layoutPos": "0,9", "display": {"type": "label", "labelText": "", "style": "-fx-min-width: 25; -fx-min-height: 25;"}},
+                                
+                                {"name": "lblRow8L", "layoutPos": "1,0", "display": {"type": "label", "labelText": "8", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell00", "layoutPos": "1,1", "varRef": "c00", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "R-8a", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell01", "layoutPos": "1,2", "varRef": "c01", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "N-8b", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell02", "layoutPos": "1,3", "varRef": "c02", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "B-8c", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell03", "layoutPos": "1,4", "varRef": "c03", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "Q-8d", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell04", "layoutPos": "1,5", "varRef": "c04", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "K-8e", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell05", "layoutPos": "1,6", "varRef": "c05", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "B-8f", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell06", "layoutPos": "1,7", "varRef": "c06", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "N-8g", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell07", "layoutPos": "1,8", "varRef": "c07", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "R-8h", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "lblRow8R", "layoutPos": "1,9", "display": {"type": "label", "labelText": "8", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
+                                
+                                {"name": "lblRow7L", "layoutPos": "2,0", "display": {"type": "label", "labelText": "7", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell10", "layoutPos": "2,1", "varRef": "c10", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "P-7a", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell11", "layoutPos": "2,2", "varRef": "c11", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "P-7b", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell12", "layoutPos": "2,3", "varRef": "c12", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "P-7c", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell13", "layoutPos": "2,4", "varRef": "c13", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "P-7d", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell14", "layoutPos": "2,5", "varRef": "c14", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "P-7e", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell15", "layoutPos": "2,6", "varRef": "c15", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "P-7f", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell16", "layoutPos": "2,7", "varRef": "c16", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "P-7g", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell17", "layoutPos": "2,8", "varRef": "c17", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "P-7h", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "lblRow7R", "layoutPos": "2,9", "display": {"type": "label", "labelText": "7", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
+                                
+                                {"name": "lblRow6L", "layoutPos": "3,0", "display": {"type": "label", "labelText": "6", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell20", "layoutPos": "3,1", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell21", "layoutPos": "3,2", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell22", "layoutPos": "3,3", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell23", "layoutPos": "3,4", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell24", "layoutPos": "3,5", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell25", "layoutPos": "3,6", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell26", "layoutPos": "3,7", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell27", "layoutPos": "3,8", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "lblRow6R", "layoutPos": "3,9", "display": {"type": "label", "labelText": "6", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
+                                
+                                {"name": "lblRow5L", "layoutPos": "4,0", "display": {"type": "label", "labelText": "5", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell30", "layoutPos": "4,1", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell31", "layoutPos": "4,2", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell32", "layoutPos": "4,3", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell33", "layoutPos": "4,4", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell34", "layoutPos": "4,5", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell35", "layoutPos": "4,6", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell36", "layoutPos": "4,7", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell37", "layoutPos": "4,8", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "lblRow5R", "layoutPos": "4,9", "display": {"type": "label", "labelText": "5", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
+                                
+                                {"name": "lblRow4L", "layoutPos": "5,0", "display": {"type": "label", "labelText": "4", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell40", "layoutPos": "5,1", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell41", "layoutPos": "5,2", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell42", "layoutPos": "5,3", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell43", "layoutPos": "5,4", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell44", "layoutPos": "5,5", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell45", "layoutPos": "5,6", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell46", "layoutPos": "5,7", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell47", "layoutPos": "5,8", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "lblRow4R", "layoutPos": "5,9", "display": {"type": "label", "labelText": "4", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
+                                
+                                {"name": "lblRow3L", "layoutPos": "6,0", "display": {"type": "label", "labelText": "3", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell50", "layoutPos": "6,1", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell51", "layoutPos": "6,2", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell52", "layoutPos": "6,3", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell53", "layoutPos": "6,4", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell54", "layoutPos": "6,5", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell55", "layoutPos": "6,6", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell56", "layoutPos": "6,7", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell57", "layoutPos": "6,8", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "lblRow3R", "layoutPos": "6,9", "display": {"type": "label", "labelText": "3", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
+                                
+                                {"name": "lblRow2L", "layoutPos": "7,0", "display": {"type": "label", "labelText": "2", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell60", "layoutPos": "7,1", "varRef": "c60", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "P-2a", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell61", "layoutPos": "7,2", "varRef": "c61", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "P-2b", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell62", "layoutPos": "7,3", "varRef": "c62", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "P-2c", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell63", "layoutPos": "7,4", "varRef": "c63", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "P-2d", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell64", "layoutPos": "7,5", "varRef": "c64", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "P-2e", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell65", "layoutPos": "7,6", "varRef": "c65", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "P-2f", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell66", "layoutPos": "7,7", "varRef": "c66", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "P-2g", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell67", "layoutPos": "7,8", "varRef": "c67", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "P-2h", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "lblRow2R", "layoutPos": "7,9", "display": {"type": "label", "labelText": "2", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
+                                
+                                {"name": "lblRow1L", "layoutPos": "8,0", "display": {"type": "label", "labelText": "1", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell70", "layoutPos": "8,1", "varRef": "c70", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "R-1a", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell71", "layoutPos": "8,2", "varRef": "c71", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "N-1b", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell72", "layoutPos": "8,3", "varRef": "c72", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "B-1c", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell73", "layoutPos": "8,4", "varRef": "c73", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "Q-1d", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell74", "layoutPos": "8,5", "varRef": "c74", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "K-1e", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell75", "layoutPos": "8,6", "varRef": "c75", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "B-1f", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell76", "layoutPos": "8,7", "varRef": "c76", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "N-1g", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell77", "layoutPos": "8,8", "varRef": "c77", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "R-1h", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "lblRow1R", "layoutPos": "8,9", "display": {"type": "label", "labelText": "1", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
+                                
+                                {"name": "lblEmpty3", "layoutPos": "9,0", "display": {"type": "label", "labelText": "", "style": "-fx-min-width: 25; -fx-min-height: 25;"}},
+                                {"name": "lblColA2", "layoutPos": "9,1", "display": {"type": "label", "labelText": "a", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
+                                {"name": "lblColB2", "layoutPos": "9,2", "display": {"type": "label", "labelText": "b", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
+                                {"name": "lblColC2", "layoutPos": "9,3", "display": {"type": "label", "labelText": "c", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
+                                {"name": "lblColD2", "layoutPos": "9,4", "display": {"type": "label", "labelText": "d", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
+                                {"name": "lblColE2", "layoutPos": "9,5", "display": {"type": "label", "labelText": "e", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
+                                {"name": "lblColF2", "layoutPos": "9,6", "display": {"type": "label", "labelText": "f", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
+                                {"name": "lblColG2", "layoutPos": "9,7", "display": {"type": "label", "labelText": "g", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
+                                {"name": "lblColH2", "layoutPos": "9,8", "display": {"type": "label", "labelText": "h", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
+                                {"name": "lblEmpty4", "layoutPos": "9,9", "display": {"type": "label", "labelText": "", "style": "-fx-min-width: 25; -fx-min-height: 25;"}}
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "statusArea",
+                    "type": "hbox",
+                    "spacing": "20",
+                    "padding": "10",
+                    "style": "-fx-background-color: #3c3c3c; -fx-background-radius: 5;",
+                    "items": [
+                        {"name": "statusLabel", "varRef": "statusMessage", "display": {"type": "label", "labelColor": "#ffff00", "labelFontSize": "16px", "labelBold": true}}
+                    ]
+                },
+                {
+                    "name": "buttonArea",
+                    "type": "hbox",
+                    "spacing": "20",
+                    "padding": "10",
+                    "items": [
+                        {"name": "newGameBtn", "display": {"type": "button", "labelText": "New Game", "onClick": "call resetGame();"}},
+                        {"name": "closeBtn", "display": {"type": "button", "labelText": "Close", "onClick": "hide screen chessScreen;"}}
+                    ]
+                }
+            ]
+        }
+    ]
+};
+
+// Main program
+print "==============================================";
+print "           Chess Game Application";
+print "==============================================";
+print "";
+print "Initializing chess board...";
+
+call initializeBoard();
+call printBoard();
+
+print "";
+print "Board Encoding Information:";
+print "===========================";
+print "Each cell uses a bitmap byte:";
+print "  Bit 0: Cell color (0=light, 1=dark)";
+print "  Bits 1-6: Piece type (0=empty, 1-6=piece)";
+print "  Bit 7: Piece color (0=white, 1=black)";
+print "";
+
+print "Sample cell values:";
+var idx00: int = call boardIndex(0, 0);
+var sampleCell = ChessCell(board[idx00]);
+print "  [0,0] Black Rook: raw=" + board[idx00] + ", cellColor=" + sampleCell.cellColor + ", pieceType=" + sampleCell.pieceType + ", pieceColor=" + sampleCell.pieceColor;
+
+var idx74: int = call boardIndex(7, 4);
+sampleCell = ChessCell(board[idx74]);
+print "  [7,4] White King: raw=" + board[idx74] + ", cellColor=" + sampleCell.cellColor + ", pieceType=" + sampleCell.pieceType + ", pieceColor=" + sampleCell.pieceColor;
+
+print "";
+print "Loading chess piece SVG images...";
+
+// Load SVG images for pieces - Row 0 (black back row)
+chessScreen.c00 = call image.load(imgPath + "black_rook.svg");
+chessScreen.c01 = call image.load(imgPath + "black_knight.svg");
+chessScreen.c02 = call image.load(imgPath + "black_bishop.svg");
+chessScreen.c03 = call image.load(imgPath + "black_queen.svg");
+chessScreen.c04 = call image.load(imgPath + "black_king.svg");
+chessScreen.c05 = call image.load(imgPath + "black_bishop.svg");
+chessScreen.c06 = call image.load(imgPath + "black_knight.svg");
+chessScreen.c07 = call image.load(imgPath + "black_rook.svg");
+
+// Load SVG images for pieces - Row 1 (black pawns)
+chessScreen.c10 = call image.load(imgPath + "black_pawn.svg");
+chessScreen.c11 = call image.load(imgPath + "black_pawn.svg");
+chessScreen.c12 = call image.load(imgPath + "black_pawn.svg");
+chessScreen.c13 = call image.load(imgPath + "black_pawn.svg");
+chessScreen.c14 = call image.load(imgPath + "black_pawn.svg");
+chessScreen.c15 = call image.load(imgPath + "black_pawn.svg");
+chessScreen.c16 = call image.load(imgPath + "black_pawn.svg");
+chessScreen.c17 = call image.load(imgPath + "black_pawn.svg");
+
+// Load SVG images for pieces - Row 6 (white pawns)
+chessScreen.c60 = call image.load(imgPath + "white_pawn.svg");
+chessScreen.c61 = call image.load(imgPath + "white_pawn.svg");
+chessScreen.c62 = call image.load(imgPath + "white_pawn.svg");
+chessScreen.c63 = call image.load(imgPath + "white_pawn.svg");
+chessScreen.c64 = call image.load(imgPath + "white_pawn.svg");
+chessScreen.c65 = call image.load(imgPath + "white_pawn.svg");
+chessScreen.c66 = call image.load(imgPath + "white_pawn.svg");
+chessScreen.c67 = call image.load(imgPath + "white_pawn.svg");
+
+// Load SVG images for pieces - Row 7 (white back row)
+chessScreen.c70 = call image.load(imgPath + "white_rook.svg");
+chessScreen.c71 = call image.load(imgPath + "white_knight.svg");
+chessScreen.c72 = call image.load(imgPath + "white_bishop.svg");
+chessScreen.c73 = call image.load(imgPath + "white_queen.svg");
+chessScreen.c74 = call image.load(imgPath + "white_king.svg");
+chessScreen.c75 = call image.load(imgPath + "white_bishop.svg");
+chessScreen.c76 = call image.load(imgPath + "white_knight.svg");
+chessScreen.c77 = call image.load(imgPath + "white_rook.svg");
+
+print "Chess piece images loaded!";
+print "";
+print "Opening chess screen with graphical grid display...";
+
+// Update screen variables before showing
+chessScreen.whiteTimer = call formatTimer(timerWhite);
+chessScreen.blackTimer = call formatTimer(timerBlack);
+chessScreen.statusMessage = "White to move";
+
+// Show the chess screen
+show screen chessScreen;
+
+print "";
+print "Chess screen is now displayed!";
+print "Use the New Game button to reset the board.";
