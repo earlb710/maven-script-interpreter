@@ -22,6 +22,9 @@
 // Define the chess cell bitmap type for bit-level field access
 ChessCell typeof bitmap { cellColor: 0, pieceType: 1-6, pieceColor: 7 };
 
+// Define position record type for x,y coordinates
+pos typeof record { x: int, y: int };
+
 // Piece type constants
 var EMPTY: int = 0;
 var PAWN: int = 1;
