@@ -1015,7 +1015,22 @@ public class Parser {
                     fieldType = tokenType.getDataType();
                     advance();
                 } else {
-                    throw error(fieldTypeToken, "Unknown type '" + typeName + "' in record field definition.");
+                    // Check if this is a user-defined type alias (typedef)
+                    TypeRegistry.TypeAlias typeAlias = TypeRegistry.getTypeAlias(typeName);
+                    if (typeAlias != null) {
+                        // This is a type alias - use its record type if it's a record typedef
+                        if (typeAlias.recordType != null) {
+                            nestedRecordType = typeAlias.recordType;
+                            fieldType = DataType.RECORD;
+                        } else if (typeAlias.dataType != null) {
+                            fieldType = typeAlias.dataType;
+                        } else {
+                            throw error(fieldTypeToken, "Type alias '" + typeName + "' cannot be used as a record field type.");
+                        }
+                        advance();
+                    } else {
+                        throw error(fieldTypeToken, "Unknown type '" + typeName + "' in record field definition.");
+                    }
                 }
             } else {
                 throw error(fieldTypeToken, "Expected type name after ':' in record field definition.");

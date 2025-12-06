@@ -1,0 +1,30 @@
+// Test: Using typedef in record field definitions
+print "=== Test: typedef in record fields ===";
+print "";
+
+// Define a simple record type alias
+posType typeof record { x: int, y: int };
+
+// Use the typedef as a field type in another record
+var person: record {
+    name: string,
+    age: int,
+    location: posType
+};
+
+// Assign values
+person = {
+    "name": "Alice",
+    "age": 30,
+    "location": {
+        "x": 100,
+        "y": 200
+    }
+};
+
+print "Person: " + person;
+print "Location X: " + person.location.x;
+print "Location Y: " + person.location.y;
+
+print "";
+print "=== Test passed ===";
