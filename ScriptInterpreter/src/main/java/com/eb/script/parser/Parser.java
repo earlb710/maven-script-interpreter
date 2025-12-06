@@ -1028,7 +1028,8 @@ public class Parser {
                         } else if (typeAlias.dataType != null) {
                             fieldType = typeAlias.dataType;
                         } else {
-                            // Malformed type alias - this should never happen
+                            // Safety check: TypeAlias constructor guarantees at least one type is non-null,
+                            // but this guards against potential TypeRegistry corruption or concurrent modification
                             throw error(fieldTypeToken, "Malformed type alias '" + typeName + "' - missing type definition.");
                         }
                         advance();
