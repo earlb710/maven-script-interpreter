@@ -341,7 +341,7 @@ screen chessScreen = {
                     "type": "hbox",
                     "spacing": "40",
                     "padding": "10",
-                    "style": "-fx-background-color: #3c3c3c; -fx-background-radius: 5;",
+                    "style": "-fx-background-color: #3c3c3c; -fx-background-radius: 5; -fx-alignment: center;",
                     "items": [
                         {"name": "whiteLabelTimer", "display": {"type": "label", "labelText": "\u2654 White:", "labelColor": "#ffffff", "labelFontSize": "18px"}},
                         {"name": "whiteTimerField", "varRef": "whiteTimer", "display": {"type": "label", "labelColor": "#00ff00", "labelFontSize": "24px", "labelBold": true}},
