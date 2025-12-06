@@ -910,6 +910,10 @@ public class ScreenFactory {
             if (areas != null) {
                 buildItemToAreaMap(areas, itemToAreaMap, "");
             }
+            // DEBUG: Print itemToAreaMap contents
+            System.err.println("[DEBUG] itemToAreaMap for screen '" + screenName + "': " + itemToAreaMap);
+            System.err.println("[DEBUG] areas count: " + (areas != null ? areas.size() : "null"));
+            System.err.flush();
             
             // Populate data - pre-compute display text with icon
             // Array format: [displayTextWithIcon, value, varRef, itemType, rawName, parentArea, displayInfo]
@@ -930,6 +934,8 @@ public class ScreenFactory {
                 if (itemToAreaMap.containsKey(itemNameLower)) {
                     parentArea = itemToAreaMap.get(itemNameLower);
                 } else {
+                    // DEBUG: Show lookup failure
+                    System.err.println("[DEBUG] LOOKUP MISS: key='" + key + "', itemNameLower='" + itemNameLower + "'");
                     // Try extracting from key format (setName.itemName)
                     int dotIndex = key.indexOf('.');
                     if (dotIndex > 0) {
@@ -1715,10 +1721,14 @@ public class ScreenFactory {
                 areaPath = parentPath + "." + area.name;
             }
             
+            // DEBUG: Print area info
+            System.err.println("[DEBUG] buildItemToAreaMap: area='" + area.name + "', path='" + areaPath + "', items=" + (area.items != null ? area.items.size() : 0) + ", childAreas=" + (area.childAreas != null ? area.childAreas.size() : 0));
+            
             // Add all items in this area to the map
             if (area.items != null) {
                 for (AreaItem item : area.items) {
                     if (item.name != null && !item.name.isEmpty()) {
+                        System.err.println("[DEBUG]   -> adding item '" + item.name.toLowerCase() + "' -> '" + areaPath + "'");
                         itemToAreaMap.put(item.name.toLowerCase(), areaPath);
                     }
                 }
