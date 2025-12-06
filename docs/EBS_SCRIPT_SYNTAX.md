@@ -79,6 +79,7 @@ All identifiers are normalized to lowercase internally, so `myVariable`, `MyVari
 | `date` | Date/time value | `now()` |
 | `json` | JSON object/array | `{"key": "value"}` |
 | `map` | Key-value map (JSON objects only) | `{"key": "value"}` |
+| `record` | Structured type with named fields | `record {name: string, age: int}` |
 | `bitmap` | Byte with named bit fields | `bitmap { flag: 0, status: 1-3 }` |
 | `array` | Generic array | `array[10]`, `array[*]` |
 | `queue` | FIFO queue (use `queue.type`) | `queue.string`, `queue.int` |
