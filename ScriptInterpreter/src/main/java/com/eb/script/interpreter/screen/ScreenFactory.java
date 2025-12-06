@@ -58,6 +58,12 @@ public class ScreenFactory {
     // Debug row styling constants
     private static final String DEBUG_ROW_HOVER_STYLE = "-fx-background-color: #d0e8ff; -fx-cursor: hand;";
     private static final String DEBUG_ROW_CLICK_STYLE = "-fx-background-color: #a0d0a0; -fx-cursor: hand;";
+    
+    // Change indicator for debug panel items
+    // Using simple asterisk (*) for maximum font compatibility
+    private static final String CHANGE_INDICATOR_EMOJI = "*";
+    private static final String DEBUG_ITEM_NAME_BASE_STYLE = "-fx-alignment: CENTER-LEFT; -fx-font-weight: bold;";
+    private static final String DEBUG_ITEM_NAME_CHANGED_STYLE = DEBUG_ITEM_NAME_BASE_STYLE + " -fx-text-fill: #cc5500;";
 
     /**
      * Functional interface for executing onClick EBS code
@@ -131,6 +137,16 @@ public class ScreenFactory {
     // Key format: "screenName.itemName.eventType"
     private static final java.util.concurrent.ConcurrentHashMap<String, javafx.scene.control.Label> eventCountLabels = new java.util.concurrent.ConcurrentHashMap<>();
     
+    // Map to store debug panel status labels for real-time status updates (screenName -> label)
+    private static final java.util.concurrent.ConcurrentHashMap<String, javafx.scene.control.Label> debugStatusLabels = new java.util.concurrent.ConcurrentHashMap<>();
+    
+    // Map to store changed item varNames per screen for real-time debug panel updates
+    // Key format: "screenName" -> Set of changed varNames
+    private static final java.util.concurrent.ConcurrentHashMap<String, java.util.Set<String>> changedItems = new java.util.concurrent.ConcurrentHashMap<>();
+    
+    // Map to store debug panel items TableView for each screen (screenName -> TableView)
+    private static final java.util.concurrent.ConcurrentHashMap<String, javafx.scene.control.TableView<String[]>> debugItemsTables = new java.util.concurrent.ConcurrentHashMap<>();
+    
     /**
      * Increment and return the event count for a specific item.eventType combination.
      * Used for debugging to track how many times each event fires.
@@ -197,6 +213,143 @@ public class ScreenFactory {
         eventCounts.keySet().removeIf(key -> key.startsWith(prefix));
         // Also clean up event count labels
         eventCountLabels.keySet().removeIf(key -> key.startsWith(prefix));
+        // Clean up debug status label and changed items tracking for this screen
+        debugStatusLabels.remove(screenName.toLowerCase());
+        changedItems.remove(screenName.toLowerCase());
+        debugItemsTables.remove(screenName.toLowerCase());
+    }
+    
+    /**
+     * Updates the debug panel status label to reflect the current screen status.
+     * This method is called when the screen status changes to provide real-time updates.
+     * 
+     * @param screenName The screen name
+     * @param status The new screen status
+     */
+    public static void updateDebugStatusLabel(String screenName, ScreenStatus status) {
+        if (screenName == null || status == null) {
+            return;
+        }
+        
+        javafx.scene.control.Label statusLabel = debugStatusLabels.get(screenName.toLowerCase());
+        if (statusLabel != null) {
+            String statusEmoji = status == ScreenStatus.ERROR ? "\u274C" : 
+                                 status == ScreenStatus.CHANGED ? CHANGE_INDICATOR_EMOJI : "\u2713";
+            String statusText = statusEmoji + " " + status.name();
+            String color = status == ScreenStatus.ERROR ? "#cc0000" : 
+                          status == ScreenStatus.CHANGED ? "#cc6600" : "#006600";
+            
+            // Update on JavaFX thread
+            javafx.application.Platform.runLater(() -> {
+                statusLabel.setText(statusText);
+                statusLabel.setStyle("-fx-text-fill: " + color + "; -fx-font-size: 11px;");
+            });
+        }
+    }
+    
+    /**
+     * Marks an item as changed and updates the debug panel items table in real-time.
+     * This is called when a control with varRef is modified.
+     * 
+     * @param screenName The screen name
+     * @param varName The varRef/variable name of the changed item
+     */
+    public static void markItemChanged(String screenName, String varName) {
+        if (screenName == null || varName == null) {
+            return;
+        }
+        
+        String key = screenName.toLowerCase();
+        
+        // Track the changed item
+        changedItems.computeIfAbsent(key, k -> java.util.concurrent.ConcurrentHashMap.newKeySet()).add(varName);
+        
+        // Update the items table if visible - find the row and update its display text
+        javafx.scene.control.TableView<String[]> itemsTable = debugItemsTables.get(key);
+        if (itemsTable != null) {
+            // Update on JavaFX thread
+            javafx.application.Platform.runLater(() -> {
+                // Find the row with this varRef and update its display text
+                for (String[] row : itemsTable.getItems()) {
+                    if (row.length >= 5 && varName.equals(row[2])) {
+                        // row[2] is varRef, row[3] is itemType, row[4] is rawName
+                        String typeIcon = getItemTypeIcon(row[3]);
+                        String rawName = row[4];
+                        // Format: type icon, then change icon, then name (e.g., "🎨 ⚠️ background")
+                        row[0] = typeIcon + " " + CHANGE_INDICATOR_EMOJI + " " + rawName;
+                        break;
+                    }
+                }
+                itemsTable.refresh();
+            });
+        }
+    }
+    
+    /**
+     * Checks if an item has been changed in the debug panel.
+     * 
+     * @param screenName The screen name
+     * @param varName The varRef/variable name to check
+     * @return true if the item has been changed
+     */
+    public static boolean isItemChanged(String screenName, String varName) {
+        if (screenName == null || varName == null) {
+            return false;
+        }
+        java.util.Set<String> items = changedItems.get(screenName.toLowerCase());
+        return items != null && items.contains(varName);
+    }
+    
+    /**
+     * Clears all changed item markers for a screen.
+     * 
+     * @param screenName The screen name
+     */
+    public static void clearChangedItems(String screenName) {
+        if (screenName != null) {
+            String key = screenName.toLowerCase();
+            changedItems.remove(key);
+            
+            // Also update the items table to remove ⚠️ prefixes
+            javafx.scene.control.TableView<String[]> itemsTable = debugItemsTables.get(key);
+            if (itemsTable != null) {
+                // Reset all row display texts to remove ⚠️ prefix
+                for (String[] row : itemsTable.getItems()) {
+                    if (row.length >= 5) {
+                        String typeIcon = getItemTypeIcon(row[3]);
+                        String rawName = row[4];
+                        row[0] = typeIcon + " " + rawName;
+                    }
+                }
+                itemsTable.refresh();
+            }
+        }
+    }
+    
+    /**
+     * Refresh the debug panel items table for a screen if it's currently open.
+     * This updates the items table to show the current state of items.
+     * 
+     * @param screenName The screen name
+     * @param context The interpreter context
+     */
+    public static void refreshDebugPanelIfOpen(String screenName, InterpreterContext context) {
+        if (screenName == null || context == null) {
+            return;
+        }
+        String lowerScreenName = screenName.toLowerCase();
+        
+        // Check if this screen has a debug panel items table
+        @SuppressWarnings("unchecked")
+        javafx.scene.control.TableView<String[]> itemsTable = 
+            (javafx.scene.control.TableView<String[]>) debugItemsTables.get(lowerScreenName);
+        
+        if (itemsTable != null) {
+            // Force a complete refresh of the table
+            Platform.runLater(() -> {
+                itemsTable.refresh();
+            });
+        }
     }
 
     static {
@@ -386,8 +539,11 @@ public class ScreenFactory {
             // Also clear BorderPane.setRight() in case we used the fallback approach
             rootPane.setRight(null);
             
-            // Remove the debug panel reference
+            // Remove the debug panel reference, status label, and changed items tracking
             screenDebugPanels.remove(screenName.toLowerCase());
+            debugStatusLabels.remove(screenName.toLowerCase());
+            changedItems.remove(screenName.toLowerCase());
+            debugItemsTables.remove(screenName.toLowerCase());
             
             // Restore the original window width
             if (stage != null) {
@@ -498,33 +654,118 @@ public class ScreenFactory {
             varsTable.setColumnResizePolicy(javafx.scene.control.TableView.CONSTRAINED_RESIZE_POLICY);
             varsTable.setStyle("-fx-background-color: transparent;");
             
-            // Name column (50%)
+            // Name column (50%) - with tooltip showing variable name and type
+            // Array format: [name, valueStr, typeStr]
             javafx.scene.control.TableColumn<String[], String> nameCol = new javafx.scene.control.TableColumn<>("Name");
             nameCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue()[0]));
             nameCol.setStyle("-fx-alignment: CENTER-LEFT; -fx-font-weight: bold;");
             nameCol.prefWidthProperty().bind(varsTable.widthProperty().multiply(0.5));
+            nameCol.setCellFactory(col -> new javafx.scene.control.TableCell<String[], String>() {
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setText(null);
+                        setTooltip(null);
+                    } else {
+                        setText(item);
+                        // Get type string from row data
+                        int rowIndex = getIndex();
+                        String typeStr = "unknown";
+                        if (rowIndex >= 0 && rowIndex < getTableView().getItems().size()) {
+                            String[] rowData = getTableView().getItems().get(rowIndex);
+                            if (rowData.length >= 3 && rowData[2] != null) {
+                                typeStr = rowData[2];
+                            }
+                        }
+                        StringBuilder tooltipText = new StringBuilder();
+                        tooltipText.append("Variable: ").append(item);
+                        tooltipText.append("\nType: ").append(typeStr);
+                        javafx.scene.control.Tooltip tooltip = new javafx.scene.control.Tooltip(tooltipText.toString());
+                        tooltip.setShowDelay(javafx.util.Duration.millis(500));
+                        tooltip.setMaxWidth(DEBUG_TOOLTIP_MAX_WIDTH);
+                        tooltip.setWrapText(true);
+                        setTooltip(tooltip);
+                    }
+                }
+            });
             
-            // Value column (50%)
+            // Value column (50%) - with tooltip showing full value
             javafx.scene.control.TableColumn<String[], String> valueCol = new javafx.scene.control.TableColumn<>("Value");
             valueCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue()[1]));
             valueCol.setStyle("-fx-alignment: CENTER-LEFT;");
             valueCol.prefWidthProperty().bind(varsTable.widthProperty().multiply(0.5));
+            valueCol.setCellFactory(col -> new javafx.scene.control.TableCell<String[], String>() {
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setText(null);
+                        setTooltip(null);
+                    } else {
+                        setText(item);
+                        javafx.scene.control.Tooltip tooltip = new javafx.scene.control.Tooltip(item);
+                        tooltip.setShowDelay(javafx.util.Duration.millis(500));
+                        tooltip.setMaxWidth(DEBUG_TOOLTIP_MAX_WIDTH);
+                        tooltip.setWrapText(true);
+                        setTooltip(tooltip);
+                    }
+                }
+            });
             
             varsTable.getColumns().add(nameCol);
             varsTable.getColumns().add(valueCol);
             
-            // Populate data
+            // Populate data - Array format: [name, valueStr, typeStr]
             java.util.List<String> sortedKeys = new java.util.ArrayList<>(screenVars.keySet());
             java.util.Collections.sort(sortedKeys, String.CASE_INSENSITIVE_ORDER);
             
             for (String key : sortedKeys) {
                 Object value = screenVars.get(key);
                 String valueStr = formatValue(value);
-                varsTable.getItems().add(new String[]{key, valueStr});
+                DataType dataType = screenVarTypes != null ? screenVarTypes.get(key) : null;
+                String typeStr = getDetailedTypeString(dataType, value);
+                varsTable.getItems().add(new String[]{key, valueStr, typeStr});
             }
             
-            // Set preferred height based on content
-            varsTable.setPrefHeight(Math.min(200, sortedKeys.size() * 25 + 30));
+            // Allow table to expand to fill available space
+            varsTable.setMaxHeight(Double.MAX_VALUE);
+            VBox.setVgrow(varsTable, Priority.ALWAYS);
+            
+            // Add row click handler to copy variable to clipboard
+            varsTable.setRowFactory(tv -> {
+                javafx.scene.control.TableRow<String[]> row = new javafx.scene.control.TableRow<>();
+                row.setOnMouseClicked(event -> {
+                    if (!row.isEmpty()) {
+                        String[] rowData = row.getItem();
+                        String name = rowData[0];
+                        String value = rowData[1];
+                        String clipboardText = name + " = " + value;
+                        javafx.scene.input.Clipboard clipboard = javafx.scene.input.Clipboard.getSystemClipboard();
+                        javafx.scene.input.ClipboardContent content = new javafx.scene.input.ClipboardContent();
+                        content.putString(clipboardText);
+                        clipboard.setContent(content);
+                        // Show feedback in row
+                        String originalStyle = row.getStyle();
+                        row.setStyle("-fx-background-color: #90EE90;");
+                        new Thread(() -> {
+                            try {
+                                Thread.sleep(300);
+                                Platform.runLater(() -> row.setStyle(originalStyle));
+                            } catch (InterruptedException ex) {
+                                // Ignore
+                            }
+                        }).start();
+                        // Also show feedback via status bar if available
+                        com.eb.ui.ebs.StatusBar statusBar = context.getScreenStatusBars().get(screenName);
+                        if (statusBar != null) {
+                            statusBar.setMessage("Copied to clipboard: " + name);
+                        }
+                    }
+                });
+                return row;
+            });
+            
             varsSection.getChildren().add(varsTable);
         } else {
             javafx.scene.control.Label noVarsLabel = new javafx.scene.control.Label("No variables defined");
@@ -534,6 +775,7 @@ public class ScreenFactory {
         
         javafx.scene.control.ScrollPane varsScrollPane = new javafx.scene.control.ScrollPane(varsSection);
         varsScrollPane.setFitToWidth(true);
+        varsScrollPane.setFitToHeight(true);
         varsScrollPane.setStyle("-fx-background-color: transparent;");
         varsScrollPane.setHbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
         varsScrollPane.setVbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.AS_NEEDED);
@@ -550,26 +792,131 @@ public class ScreenFactory {
         
         if (screenAreaItems != null && !screenAreaItems.isEmpty()) {
             // Create TableView for screen items
+            // Each row is [displayName, value, varRef] - varRef is used to check if item is changed
             javafx.scene.control.TableView<String[]> itemsTable = new javafx.scene.control.TableView<>();
             itemsTable.setColumnResizePolicy(javafx.scene.control.TableView.CONSTRAINED_RESIZE_POLICY);
             itemsTable.setStyle("-fx-background-color: transparent;");
             
-            // Name column (50%)
+            // Store reference for real-time updates
+            debugItemsTables.put(screenName.toLowerCase(), itemsTable);
+            
+            // Name column (50%) - shows type icon and changed indicator if item was modified
+            // The display text with icon is pre-computed and stored in data.getValue()[0]
+            // Array format: [displayTextWithIcon, value, varRef, itemType, rawName]
             javafx.scene.control.TableColumn<String[], String> itemNameCol = new javafx.scene.control.TableColumn<>("Item");
             itemNameCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue()[0]));
             itemNameCol.setStyle("-fx-alignment: CENTER-LEFT; -fx-font-weight: bold;");
             itemNameCol.prefWidthProperty().bind(itemsTable.widthProperty().multiply(0.5));
             
-            // Value column (50%)
+            // Cell factory to apply dark orange color for changed items (contains ⚠️) and add tooltip
+            // Note: Pre-computing display text avoids JavaFX cell factory timing issues
+            // where cell factories may be called before data is fully initialized
+            // Capture screenName and context for lambda
+            final String itemsScreenName = screenName;
+            final InterpreterContext itemsContext = context;
+            itemNameCol.setCellFactory(col -> new javafx.scene.control.TableCell<String[], String>() {
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setText(null);
+                        setTooltip(null);
+                        setStyle(DEBUG_ITEM_NAME_BASE_STYLE);
+                    } else {
+                        setText(item);
+                        // Dark orange color for changed items (format: "typeIcon ⚠️ name")
+                        boolean isChanged = item.contains(CHANGE_INDICATOR_EMOJI);
+                        if (isChanged) {
+                            setStyle(DEBUG_ITEM_NAME_CHANGED_STYLE);
+                        } else {
+                            setStyle(DEBUG_ITEM_NAME_BASE_STYLE);
+                        }
+                        // Add tooltip with item details from row data
+                        // Array format: [displayTextWithIcon, value, varRef, itemType, rawName, parentArea, displayInfo]
+                        int rowIndex = getIndex();
+                        if (rowIndex >= 0 && rowIndex < getTableView().getItems().size()) {
+                            String[] rowData = getTableView().getItems().get(rowIndex);
+                            String rawName = rowData.length >= 5 ? rowData[4] : item;
+                            String itemType = rowData.length >= 4 ? rowData[3] : "unknown";
+                            String varRef = rowData.length >= 3 ? rowData[2] : "";
+                            String parentArea = rowData.length >= 6 ? rowData[5] : "";
+                            String displayInfo = rowData.length >= 7 ? rowData[6] : "";
+                            
+                            // Determine state
+                            String state = "CLEAN";
+                            if (isChanged) {
+                                state = "CHANGED";
+                            }
+                            // Check if screen has error status
+                            ScreenStatus screenStatus = itemsContext.getScreenStatus(itemsScreenName);
+                            if (screenStatus == ScreenStatus.ERROR) {
+                                state = "ERROR";
+                            }
+                            
+                            StringBuilder tooltipText = new StringBuilder();
+                            tooltipText.append("Item: ").append(rawName);
+                            tooltipText.append("\nType: ").append(itemType);
+                            if (varRef != null && !varRef.isEmpty()) {
+                                tooltipText.append("\nVar: ").append(varRef);
+                            }
+                            if (parentArea != null && !parentArea.isEmpty()) {
+                                tooltipText.append("\nArea: ").append(parentArea);
+                            }
+                            tooltipText.append("\nState: ").append(state);
+                            // Add display info if present
+                            if (displayInfo != null && !displayInfo.isEmpty()) {
+                                tooltipText.append("\n---\n").append(displayInfo);
+                            }
+                            javafx.scene.control.Tooltip tooltip = new javafx.scene.control.Tooltip(tooltipText.toString());
+                            tooltip.setShowDelay(javafx.util.Duration.millis(500));
+                            tooltip.setMaxWidth(DEBUG_TOOLTIP_MAX_WIDTH);
+                            tooltip.setWrapText(true);
+                            setTooltip(tooltip);
+                        }
+                    }
+                }
+            });
+            
+            // Value column (50%) - with tooltip showing full value
             javafx.scene.control.TableColumn<String[], String> itemValueCol = new javafx.scene.control.TableColumn<>("Value");
             itemValueCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue()[1]));
             itemValueCol.setStyle("-fx-alignment: CENTER-LEFT;");
             itemValueCol.prefWidthProperty().bind(itemsTable.widthProperty().multiply(0.5));
+            itemValueCol.setCellFactory(col -> new javafx.scene.control.TableCell<String[], String>() {
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setText(null);
+                        setTooltip(null);
+                    } else {
+                        setText(item);
+                        javafx.scene.control.Tooltip tooltip = new javafx.scene.control.Tooltip(item);
+                        tooltip.setShowDelay(javafx.util.Duration.millis(500));
+                        tooltip.setMaxWidth(DEBUG_TOOLTIP_MAX_WIDTH);
+                        tooltip.setWrapText(true);
+                        setTooltip(tooltip);
+                    }
+                }
+            });
             
             itemsTable.getColumns().add(itemNameCol);
             itemsTable.getColumns().add(itemValueCol);
             
-            // Populate data
+            // Build a map from item name to area name by iterating through AreaDefinitions
+            // This is needed because screenAreaItems doesn't always include area in the key
+            Map<String, String> itemToAreaMap = new HashMap<>();
+            List<AreaDefinition> areas = context.getScreenAreas(screenName);
+            if (areas != null) {
+                buildItemToAreaMap(areas, itemToAreaMap, "");
+            }
+            // DEBUG: Print itemToAreaMap contents
+            System.err.println("[DEBUG] itemToAreaMap for screen '" + screenName + "': " + itemToAreaMap);
+            System.err.println("[DEBUG] areas count: " + (areas != null ? areas.size() : "null"));
+            System.err.flush();
+            
+            // Populate data - pre-compute display text with icon
+            // Array format: [displayTextWithIcon, value, varRef, itemType, rawName, parentArea, displayInfo]
             java.util.List<String> sortedItemKeys = new java.util.ArrayList<>(screenAreaItems.keySet());
             java.util.Collections.sort(sortedItemKeys, String.CASE_INSENSITIVE_ORDER);
             
@@ -577,11 +924,86 @@ public class ScreenFactory {
                 AreaItem item = screenAreaItems.get(key);
                 String displayName = item.name != null ? item.name : key;
                 String valueStr = getScreenItemValue(key, item, context, screenName);
-                itemsTable.getItems().add(new String[]{displayName, valueStr});
+                String varRef = item.varRef != null ? item.varRef : "";
+                // Get the item type from displayItem or fall back to displayMetadata lookup
+                String itemType = getItemType(item, context, screenName);
+                
+                // Look up parent area from itemToAreaMap first, then try key format
+                String parentArea = "";
+                String itemNameLower = displayName.toLowerCase();
+                if (itemToAreaMap.containsKey(itemNameLower)) {
+                    parentArea = itemToAreaMap.get(itemNameLower);
+                } else {
+                    // DEBUG: Show lookup failure
+                    System.err.println("[DEBUG] LOOKUP MISS: key='" + key + "', itemNameLower='" + itemNameLower + "'");
+                    // Try extracting from key format (setName.itemName)
+                    int dotIndex = key.indexOf('.');
+                    if (dotIndex > 0) {
+                        parentArea = key.substring(0, dotIndex);
+                    }
+                }
+                
+                // Build display info string with additional displayItem properties
+                String displayInfo = buildDisplayItemInfo(item);
+                
+                // Pre-compute the display text with icon (no ⚠️ since not changed on initial display)
+                String typeIcon = getItemTypeIcon(itemType);
+                String displayText = typeIcon + " " + displayName;
+                itemsTable.getItems().add(new String[]{displayText, valueStr, varRef, itemType, displayName, parentArea, displayInfo});
             }
             
-            // Set preferred height based on content
-            itemsTable.setPrefHeight(Math.min(200, sortedItemKeys.size() * 25 + 30));
+            // Allow table to expand to fill available space
+            itemsTable.setMaxHeight(Double.MAX_VALUE);
+            VBox.setVgrow(itemsTable, Priority.ALWAYS);
+            
+            // Add row click handler to copy item to clipboard
+            // Capture screenName in final variable for lambda
+            final String finalScreenName = screenName;
+            itemsTable.setRowFactory(tv -> {
+                javafx.scene.control.TableRow<String[]> row = new javafx.scene.control.TableRow<>();
+                row.setOnMouseClicked(event -> {
+                    if (!row.isEmpty()) {
+                        String[] rowData = row.getItem();
+                        // Array format: [displayTextWithIcon, value, varRef, itemType, rawName]
+                        String displayText = rowData[0];
+                        String value = rowData[1];
+                        String varRef = rowData.length > 2 ? rowData[2] : "";
+                        String itemType = rowData.length > 3 ? rowData[3] : "unknown";
+                        String rawName = rowData.length > 4 ? rowData[4] : displayText;
+                        
+                        StringBuilder clipboardBuilder = new StringBuilder();
+                        clipboardBuilder.append("Item: ").append(rawName);
+                        clipboardBuilder.append("\nType: ").append(itemType);
+                        if (varRef != null && !varRef.isEmpty()) {
+                            clipboardBuilder.append("\nVar: ").append(varRef);
+                        }
+                        clipboardBuilder.append("\nValue: ").append(value);
+                        
+                        javafx.scene.input.Clipboard clipboard = javafx.scene.input.Clipboard.getSystemClipboard();
+                        javafx.scene.input.ClipboardContent content = new javafx.scene.input.ClipboardContent();
+                        content.putString(clipboardBuilder.toString());
+                        clipboard.setContent(content);
+                        // Show feedback in row
+                        String originalStyle = row.getStyle();
+                        row.setStyle("-fx-background-color: #90EE90;");
+                        new Thread(() -> {
+                            try {
+                                Thread.sleep(300);
+                                Platform.runLater(() -> row.setStyle(originalStyle));
+                            } catch (InterruptedException ex) {
+                                // Ignore
+                            }
+                        }).start();
+                        // Also show feedback via status bar if available
+                        com.eb.ui.ebs.StatusBar statusBar = context.getScreenStatusBars().get(finalScreenName);
+                        if (statusBar != null) {
+                            statusBar.setMessage("Copied to clipboard: " + rawName);
+                        }
+                    }
+                });
+                return row;
+            });
+            
             itemsSection.getChildren().add(itemsTable);
         } else {
             javafx.scene.control.Label noItemsLabel = new javafx.scene.control.Label("No screen items defined");
@@ -591,6 +1013,7 @@ public class ScreenFactory {
         
         javafx.scene.control.ScrollPane itemsScrollPane = new javafx.scene.control.ScrollPane(itemsSection);
         itemsScrollPane.setFitToWidth(true);
+        itemsScrollPane.setFitToHeight(true);
         itemsScrollPane.setStyle("-fx-background-color: transparent;");
         itemsScrollPane.setHbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
         itemsScrollPane.setVbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.AS_NEEDED);
@@ -600,6 +1023,7 @@ public class ScreenFactory {
         VBox areasSection = createScreenAreasSection(screenName, context);
         javafx.scene.control.ScrollPane areasScrollPane = new javafx.scene.control.ScrollPane(areasSection);
         areasScrollPane.setFitToWidth(true);
+        areasScrollPane.setFitToHeight(true);
         areasScrollPane.setStyle("-fx-background-color: transparent;");
         areasScrollPane.setHbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
         areasScrollPane.setVbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.AS_NEEDED);
@@ -609,6 +1033,7 @@ public class ScreenFactory {
         VBox handlersSection = createEventHandlersSection(screenName, context, screenAreaItems);
         javafx.scene.control.ScrollPane handlersScrollPane = new javafx.scene.control.ScrollPane(handlersSection);
         handlersScrollPane.setFitToWidth(true);
+        handlersScrollPane.setFitToHeight(true);
         handlersScrollPane.setStyle("-fx-background-color: transparent;");
         handlersScrollPane.setHbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
         handlersScrollPane.setVbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.AS_NEEDED);
@@ -660,13 +1085,16 @@ public class ScreenFactory {
         statusHeader.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #444;");
         statusSection.getChildren().add(statusHeader);
         
-        // Screen status
+        // Screen status - create row manually to store label reference for real-time updates
         ScreenStatus status = context.getScreenStatus(screenName);
-        String statusEmoji = status == ScreenStatus.ERROR ? "❌" : 
-                             status == ScreenStatus.CHANGED ? "⚠️" : "✓";
-        addDebugRow(statusSection, "Status", statusEmoji + " " + status.name(), 
-                    status == ScreenStatus.ERROR ? "#cc0000" : 
-                    status == ScreenStatus.CHANGED ? "#cc6600" : "#006600");
+        String statusEmoji = status == ScreenStatus.ERROR ? "\u274C" : 
+                             status == ScreenStatus.CHANGED ? CHANGE_INDICATOR_EMOJI : "\u2713";
+        String statusColor = status == ScreenStatus.ERROR ? "#cc0000" : 
+                            status == ScreenStatus.CHANGED ? "#cc6600" : "#006600";
+        javafx.scene.control.Label statusValueLabel = addDebugRowWithLabel(statusSection, "Status", 
+                                                        statusEmoji + " " + status.name(), statusColor);
+        // Store the label for real-time updates
+        debugStatusLabels.put(screenName.toLowerCase(), statusValueLabel);
         
         // Error message if any
         String errorMsg = context.getScreenErrorMessage(screenName);
@@ -1069,6 +1497,20 @@ public class ScreenFactory {
      * Clicking on the row copies the label and value to clipboard.
      */
     private static void addDebugRow(VBox section, String label, String value, String valueColor) {
+        addDebugRowWithLabel(section, label, value, valueColor);
+    }
+    
+    /**
+     * Helper method to add a debug row and return the value label for dynamic updates.
+     * Clicking on the row copies the label and value to clipboard.
+     * 
+     * @param section The VBox to add the row to
+     * @param label The label text
+     * @param value The value text
+     * @param valueColor The color for the value text
+     * @return The value Label node for dynamic updates
+     */
+    private static javafx.scene.control.Label addDebugRowWithLabel(VBox section, String label, String value, String valueColor) {
         HBox row = new HBox(5);
         row.setAlignment(Pos.CENTER_LEFT);
         row.setPadding(new Insets(1, 5, 1, 5));
@@ -1097,6 +1539,8 @@ public class ScreenFactory {
         makeRowClickable(row, clipboardText, originalStyle);
         
         section.getChildren().add(row);
+        
+        return valueNode;
     }
     
     /**
@@ -1144,6 +1588,231 @@ public class ScreenFactory {
             }
         }
         return "(no varRef)";
+    }
+    
+    /**
+     * Get the display type for an AreaItem.
+     * Returns the type from displayItem if available, otherwise tries to determine from varRef.
+     * 
+     * @param item The AreaItem
+     * @param context The interpreter context
+     * @return The item type string (e.g., "colorpicker", "textfield", "combobox")
+     */
+    /**
+     * Get the display type for an AreaItem.
+     * Returns the type from displayItem if available, otherwise tries to determine from varRef.
+     * 
+     * @param item The AreaItem
+     * @param context The interpreter context
+     * @param screenName The screen name (for displayMetadata lookup)
+     * @return The item type string (e.g., "colorpicker", "textfield", "combobox")
+     */
+    private static String getItemType(AreaItem item, InterpreterContext context, String screenName) {
+        // First check if displayItem has the type set directly
+        if (item.displayItem != null && item.displayItem.type != null) {
+            return item.displayItem.type.toLowerCase();
+        }
+        // Try to get the type from the displayMetadata registered with the varRef
+        // The key format is "screenName.varName"
+        if (item.varRef != null && screenName != null) {
+            String key = screenName.toLowerCase() + "." + item.varRef.toLowerCase();
+            DisplayItem displayItem = context.getDisplayItem().get(key);
+            if (displayItem != null && displayItem.type != null) {
+                return displayItem.type.toLowerCase();
+            }
+        }
+        return "unknown";
+    }
+    
+    /**
+     * Get an emoji icon for the given item type.
+     * Uses Unicode characters that represent the control type.
+     * 
+     * @param itemType The item type string
+     * @return An emoji icon representing the item type
+     */
+    private static String getItemTypeIcon(String itemType) {
+        if (itemType == null) {
+            return "❓";
+        }
+        switch (itemType.toLowerCase()) {
+            // Text input controls - □ (square, as requested for text items)
+            case "textfield":
+            case "textfieldpassword":
+            case "text":
+                return "□";
+            case "textarea":
+                return "▢";
+            
+            // Selection controls
+            case "combobox":
+            case "choicebox":
+                return "▼";
+            case "checkbox":
+                return "☑";
+            case "radiobutton":
+                return "◉";
+            
+            // List/Tree controls
+            case "listview":
+                return "☰";
+            case "tableview":
+                return "▦";
+            case "treeview":
+                return "⊞";
+            
+            // Numeric controls
+            case "spinner":
+                return "↕";
+            case "slider":
+                return "─";
+            
+            // Date/Time/Color controls
+            case "datepicker":
+                return "📅";
+            case "colorpicker":
+                return "🎨";
+            
+            // Button controls
+            case "button":
+                return "🔘";
+            
+            // Display-only controls
+            case "label":
+            case "labeltext":
+                return "🏷";
+            case "hyperlink":
+                return "🔗";
+            case "separator":
+                return "━";
+            
+            // Media controls
+            case "imageview":
+                return "🖼";
+            case "webview":
+                return "🌐";
+            case "chart":
+                return "📊";
+            
+            // Progress controls
+            case "progressbar":
+            case "progressindicator":
+                return "⏳";
+            
+            default:
+                return "◇";
+        }
+    }
+    
+    /**
+     * Build a map from item name (lowercase) to area name by recursively iterating through areas.
+     * This handles nested areas.
+     * 
+     * @param areas The list of AreaDefinitions to process
+     * @param itemToAreaMap The map to populate (item name -> area name)
+     * @param parentPath The parent path for nested areas (e.g., "parentArea.childArea")
+     */
+    private static void buildItemToAreaMap(List<AreaDefinition> areas, Map<String, String> itemToAreaMap, String parentPath) {
+        if (areas == null) return;
+        
+        for (AreaDefinition area : areas) {
+            String areaPath = area.name;
+            if (parentPath != null && !parentPath.isEmpty()) {
+                areaPath = parentPath + "." + area.name;
+            }
+            
+            // DEBUG: Print area info
+            System.err.println("[DEBUG] buildItemToAreaMap: area='" + area.name + "', path='" + areaPath + "', items=" + (area.items != null ? area.items.size() : 0) + ", childAreas=" + (area.childAreas != null ? area.childAreas.size() : 0));
+            
+            // Add all items in this area to the map
+            if (area.items != null) {
+                for (AreaItem item : area.items) {
+                    if (item.name != null && !item.name.isEmpty()) {
+                        System.err.println("[DEBUG]   -> adding item '" + item.name.toLowerCase() + "' -> '" + areaPath + "'");
+                        itemToAreaMap.put(item.name.toLowerCase(), areaPath);
+                    }
+                }
+            }
+            
+            // Recursively process child areas
+            if (area.childAreas != null && !area.childAreas.isEmpty()) {
+                buildItemToAreaMap(area.childAreas, itemToAreaMap, areaPath);
+            }
+        }
+    }
+    
+    /**
+     * Build a display info string with additional displayItem properties.
+     * 
+     * @param item The AreaItem to get display info from
+     * @return A formatted string with display properties, or empty string if none
+     */
+    private static String buildDisplayItemInfo(AreaItem item) {
+        if (item == null) return "";
+        
+        StringBuilder info = new StringBuilder();
+        
+        // Properties from AreaItem
+        if (item.editable != null) {
+            info.append("Editable: ").append(item.editable).append("\n");
+        }
+        if (item.disabled != null) {
+            info.append("Disabled: ").append(item.disabled).append("\n");
+        }
+        if (item.visible != null) {
+            info.append("Visible: ").append(item.visible).append("\n");
+        }
+        if (item.tooltip != null && !item.tooltip.isEmpty()) {
+            info.append("Tooltip: ").append(item.tooltip).append("\n");
+        }
+        if (item.layoutPos != null && !item.layoutPos.isEmpty()) {
+            info.append("Position: ").append(item.layoutPos).append("\n");
+        }
+        if (item.prefWidth != null && !item.prefWidth.isEmpty()) {
+            info.append("Width: ").append(item.prefWidth).append("\n");
+        }
+        if (item.prefHeight != null && !item.prefHeight.isEmpty()) {
+            info.append("Height: ").append(item.prefHeight).append("\n");
+        }
+        
+        // Properties from DisplayItem
+        DisplayItem displayItem = item.displayItem;
+        if (displayItem != null) {
+            if (displayItem.mandatory) {
+                info.append("Mandatory: true\n");
+            }
+            if (displayItem.labelText != null && !displayItem.labelText.isEmpty()) {
+                info.append("Label: ").append(displayItem.labelText).append("\n");
+            }
+            if (displayItem.promptHelp != null && !displayItem.promptHelp.isEmpty()) {
+                info.append("Prompt: ").append(displayItem.promptHelp).append("\n");
+            }
+            if (displayItem.min != null) {
+                info.append("Min: ").append(displayItem.min).append("\n");
+            }
+            if (displayItem.max != null) {
+                info.append("Max: ").append(displayItem.max).append("\n");
+            }
+            if (displayItem.maxLength != null) {
+                info.append("MaxLength: ").append(displayItem.maxLength).append("\n");
+            }
+            if (displayItem.pattern != null && !displayItem.pattern.isEmpty()) {
+                info.append("Pattern: ").append(displayItem.pattern).append("\n");
+            }
+            if (displayItem.options != null && !displayItem.options.isEmpty()) {
+                info.append("Options: ").append(displayItem.options.size()).append(" items\n");
+            }
+            if (displayItem.optionsMap != null && !displayItem.optionsMap.isEmpty()) {
+                info.append("OptionsMap: ").append(displayItem.optionsMap.size()).append(" items\n");
+            }
+        }
+        
+        // Remove trailing newline
+        if (info.length() > 0 && info.charAt(info.length() - 1) == '\n') {
+            info.setLength(info.length() - 1);
+        }
+        
+        return info.toString();
     }
     
     /**
@@ -1705,6 +2374,88 @@ public class ScreenFactory {
     }
     
     /**
+     * Get a detailed type string including record definition for tooltips.
+     * Similar to "print typeof" functionality.
+     * 
+     * @param dataType The DataType from the context (can be null)
+     * @param value The actual value to infer type from if DataType is null
+     * @return A detailed string representation of the data type with record definition
+     */
+    private static String getDetailedTypeString(DataType dataType, Object value) {
+        if (value == null) {
+            return "null";
+        }
+        
+        // Check for arrays first
+        if (value instanceof ArrayDef) {
+            ArrayDef<?, ?> arrayDef = (ArrayDef<?, ?>) value;
+            DataType elementType = arrayDef.getDataType();
+            boolean isFixed = arrayDef.isFixed();
+            int size = arrayDef.size();
+            
+            StringBuilder sb = new StringBuilder("array.");
+            sb.append(getDataTypeName(elementType));
+            
+            if (isFixed) {
+                sb.append("[").append(size).append("]");
+            } else {
+                sb.append("[]");
+            }
+            
+            return sb.toString();
+        }
+        
+        // Check for records (Map type)
+        if (value instanceof java.util.Map) {
+            @SuppressWarnings("unchecked")
+            java.util.Map<String, Object> map = (java.util.Map<String, Object>) value;
+            StringBuilder sb = new StringBuilder("record {");
+            boolean first = true;
+            for (java.util.Map.Entry<String, Object> entry : map.entrySet()) {
+                if (!first) {
+                    sb.append(", ");
+                }
+                first = false;
+                sb.append(entry.getKey()).append(": ");
+                // Get type of field value
+                Object fieldValue = entry.getValue();
+                if (fieldValue == null) {
+                    sb.append("null");
+                } else if (fieldValue instanceof String) {
+                    sb.append("string");
+                } else if (fieldValue instanceof Integer) {
+                    sb.append("int");
+                } else if (fieldValue instanceof Long) {
+                    sb.append("long");
+                } else if (fieldValue instanceof Double || fieldValue instanceof Float) {
+                    sb.append("float");
+                } else if (fieldValue instanceof Boolean) {
+                    sb.append("bool");
+                } else if (fieldValue instanceof java.util.Map) {
+                    sb.append("record");
+                } else {
+                    sb.append(fieldValue.getClass().getSimpleName().toLowerCase());
+                }
+            }
+            sb.append("}");
+            return sb.toString();
+        }
+        
+        // Fall back to simple type string
+        return getDataTypeString(dataType, value);
+    }
+    
+    /**
+     * Get the data type name as a lowercase string.
+     */
+    private static String getDataTypeName(DataType dataType) {
+        if (dataType == null) {
+            return "unknown";
+        }
+        return dataType.name().toLowerCase();
+    }
+    
+    /**
      * Format a value for display in the debug panel.
      * 
      * @param value The value to format
@@ -1811,6 +2562,9 @@ public class ScreenFactory {
             screenDebugPanels.remove(key);
             screenRootPanes.remove(key);
             screenOriginalWidths.remove(key);
+            debugStatusLabels.remove(key);
+            changedItems.remove(key);
+            debugItemsTables.remove(key);
         }
     }
     
@@ -1822,6 +2576,9 @@ public class ScreenFactory {
         screenDebugPanels.clear();
         screenRootPanes.clear();
         screenOriginalWidths.clear();
+        debugStatusLabels.clear();
+        changedItems.clear();
+        debugItemsTables.clear();
     }
     
     /**
@@ -2592,6 +3349,9 @@ public class ScreenFactory {
                 // Set up two-way data binding if screenVars is provided and item has a varRef
                 if (screenVars != null && item.varRef != null) {
                     setupVariableBinding(control, item.varRef, screenVars, varTypes, metadata);
+                    // Store context and screenName for screen status updates when control values change
+                    control.getProperties().put(ControlListenerFactory.PROP_INTERPRETER_CONTEXT, context);
+                    control.getProperties().put(ControlListenerFactory.PROP_SCREEN_NAME, screenName);
                     // Track this control so we can refresh it when variables change
                     boundControls.add(control);
                 }
@@ -3382,9 +4142,10 @@ public class ScreenFactory {
                 Map<String, Object> displayDef = (Map<String, Object>) displayObj;
                 item.displayItem = parseDisplayItem(displayDef, screenName);
             }
-        } else if (itemDef.containsKey("type") && item.varRef == null) {
-            // If item has a direct "type" property (e.g., button, label) without a varRef,
+        } else if (itemDef.containsKey("type")) {
+            // If item has a direct "type" property (e.g., colorpicker, button, label),
             // treat the item definition itself as the display definition
+            // This applies whether or not the item has a varRef
             item.displayItem = parseDisplayItem(itemDef, screenName);
         }
 

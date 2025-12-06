@@ -1,6 +1,9 @@
 package com.eb.script.interpreter.screen.display;
 
+import com.eb.script.interpreter.InterpreterContext;
 import com.eb.script.interpreter.screen.DisplayItem;
+import com.eb.script.interpreter.screen.ScreenFactory;
+import com.eb.script.interpreter.screen.ScreenStatus;
 import com.eb.script.interpreter.screen.data.VarRefResolver;
 import com.eb.script.token.DataType;
 import javafx.scene.Node;
@@ -19,6 +22,62 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Earl Bosch
  */
 public class ControlListenerFactory {
+
+    /** Property key for storing interpreter context reference on controls */
+    public static final String PROP_INTERPRETER_CONTEXT = "interpreterContext";
+    
+    /** Property key for storing screen name on controls */
+    public static final String PROP_SCREEN_NAME = "screenName";
+
+    /**
+     * Marks the screen as changed when a control's value is modified.
+     * This is called from all control listeners to update the screen status.
+     * <p>
+     * The status is only updated from CLEAN to CHANGED. If the screen is already
+     * in ERROR status, it is preserved to avoid hiding error conditions.
+     * Also updates the debug panel status label in real-time if visible.
+     * <p>
+     * Note: If the screen is still being created (not yet shown), changes are
+     * considered part of initialization and the screen stays in CLEAN state.
+     * 
+     * @param control The control that was modified
+     */
+    private static void markScreenChanged(Node control) {
+        if (control == null) {
+            return;
+        }
+        Object contextObj = control.getProperties().get(PROP_INTERPRETER_CONTEXT);
+        Object screenNameObj = control.getProperties().get(PROP_SCREEN_NAME);
+        Object varNameObj = control.getProperties().get("varName");
+        
+        if (contextObj instanceof InterpreterContext && screenNameObj instanceof String) {
+            InterpreterContext context = (InterpreterContext) contextObj;
+            String screenName = (String) screenNameObj;
+            String varName = varNameObj instanceof String ? (String) varNameObj : null;
+            String screenNameLower = screenName.toLowerCase();
+            
+            // Check if the screen is still being initialized (being created or not yet shown)
+            // During initialization, changes are expected and should not mark the screen as changed
+            boolean beingCreated = context.getScreensBeingCreated().contains(screenNameLower);
+            boolean notYetShown = context.getScreensNotYetShown().contains(screenNameLower);
+            
+            if (beingCreated || notYetShown) {
+                return; // Skip marking as changed during initialization
+            }
+            
+            // Only change status if currently CLEAN (don't downgrade from ERROR)
+            if (context.getScreenStatus(screenName) == ScreenStatus.CLEAN) {
+                context.setScreenStatus(screenName, ScreenStatus.CHANGED);
+                // Update the debug panel status label in real-time
+                ScreenFactory.updateDebugStatusLabel(screenName, ScreenStatus.CHANGED);
+            }
+            
+            // Mark the specific item as changed in the debug panel
+            if (varName != null) {
+                ScreenFactory.markItemChanged(screenName, varName);
+            }
+        }
+    }
 
     /**
      * Sets up two-way variable binding for a control.
@@ -74,6 +133,7 @@ public class ControlListenerFactory {
                 Slider slider = (Slider) hbox.getChildren().get(0);
                 slider.valueProperty().addListener((obs, oldVal, newVal) -> {
                     VarRefResolver.setVarRefValue(varName, newVal.intValue(), screenVars);
+                    markScreenChanged(control);
                 });
                 return;
             }
@@ -86,10 +146,12 @@ public class ControlListenerFactory {
         } else if (control instanceof CheckBox) {
             ((CheckBox) control).selectedProperty().addListener((obs, oldVal, newVal) -> {
                 VarRefResolver.setVarRefValue(varName, newVal, screenVars);
+                markScreenChanged(control);
             });
         } else if (control instanceof Slider) {
             ((Slider) control).valueProperty().addListener((obs, oldVal, newVal) -> {
                 VarRefResolver.setVarRefValue(varName, newVal.intValue(), screenVars);
+                markScreenChanged(control);
             });
         } else if (control instanceof Spinner) {
             addSpinnerListener(control, varName, screenVars);
@@ -102,6 +164,7 @@ public class ControlListenerFactory {
         } else if (control instanceof DatePicker) {
             ((DatePicker) control).valueProperty().addListener((obs, oldVal, newVal) -> {
                 VarRefResolver.setVarRefValue(varName, newVal, screenVars);
+                markScreenChanged(control);
             });
         } else if (control instanceof TreeView) {
             @SuppressWarnings("unchecked")
@@ -109,6 +172,7 @@ public class ControlListenerFactory {
             treeView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
                 if (newVal != null) {
                     VarRefResolver.setVarRefValue(varName, newVal.getValue(), screenVars);
+                    markScreenChanged(control);
                 }
             });
         }
@@ -156,6 +220,7 @@ public class ControlListenerFactory {
                 }
             }
             VarRefResolver.setVarRefValue(varName, convertedValue, screenVars);
+            markScreenChanged(textField);
         });
     }
     
@@ -189,6 +254,7 @@ public class ControlListenerFactory {
             }
             
             VarRefResolver.setVarRefValue(varName, transformedValue, screenVars);
+            markScreenChanged(textArea);
         });
     }
     
@@ -204,6 +270,7 @@ public class ControlListenerFactory {
             spinner.valueProperty().addListener((obs, oldVal, newVal) -> {
                 if (newVal != null) {
                     VarRefResolver.setVarRefValue(varName, newVal, screenVars);
+                    markScreenChanged(control);
                 }
             });
         }
@@ -235,6 +302,7 @@ public class ControlListenerFactory {
             }
             
             VarRefResolver.setVarRefValue(varName, valueToStore, screenVars);
+            markScreenChanged(control);
         });
     }
     
@@ -264,6 +332,7 @@ public class ControlListenerFactory {
             }
             
             VarRefResolver.setVarRefValue(varName, valueToStore, screenVars);
+            markScreenChanged(control);
         });
     }
     
@@ -284,6 +353,7 @@ public class ControlListenerFactory {
                 // ColorPicker set to null - use empty string as placeholder since ConcurrentHashMap doesn't allow null
                 VarRefResolver.setVarRefValue(varName, "", screenVars);
             }
+            markScreenChanged(colorPicker);
         });
     }
     
