@@ -2526,10 +2526,16 @@ public class Parser {
                 }
             }
             
-            // Check if this is a type alias being used for casting (e.g., myBitmapType(byteVar))
+            // Check if this is a type alias being used for casting (e.g., myBitmapType(byteVar), myIntmapType(intVar))
             if (check(EbsTokenType.LPAREN) && !varName.contains(".")) {
                 TypeRegistry.TypeAlias alias = TypeRegistry.getTypeAlias(varName);
-                if (alias != null && alias.bitmapType != null) {
+                if (alias != null && alias.intmapType != null) {
+                    // This is an intmap type alias cast
+                    consume(EbsTokenType.LPAREN, "Expected '(' after type name for cast.");
+                    Expression valueExpr = expression();
+                    consume(EbsTokenType.RPAREN, "Expected ')' after cast expression.");
+                    return new CastExpression(p.line, DataType.INTMAP, alias.intmapType, varName, valueExpr);
+                } else if (alias != null && alias.bitmapType != null) {
                     // This is a bitmap type alias cast
                     consume(EbsTokenType.LPAREN, "Expected '(' after type name for cast.");
                     Expression valueExpr = expression();

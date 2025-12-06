@@ -4,6 +4,7 @@ import com.eb.script.interpreter.screen.InterpreterScreen;
 import com.eb.util.Debugger;
 import com.eb.script.RuntimeContext;
 import com.eb.script.token.BitmapType;
+import com.eb.script.token.IntmapType;
 import com.eb.script.token.DataType;
 import com.eb.script.token.RecordType;
 import com.eb.script.token.ebs.EbsToken;
@@ -386,6 +387,14 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 // Clear it immediately to prevent leaking to other variables
                 context.clearLastInferredBitmapType();
             }
+            
+            // Check if we just performed an intmap cast and should store the inferred IntmapType
+            IntmapType inferredIntmapType = context.getLastInferredIntmapType();
+            String inferredIntmapTypeAliasName = context.getLastInferredIntmapTypeAliasName();
+            if (inferredIntmapType != null) {
+                // Clear it immediately to prevent leaking to other variables
+                context.clearLastInferredIntmapType();
+            }
 
             if (stmt.varType != null) {
                 DataType expectedType = stmt.varType;
@@ -417,6 +426,15 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                         // Convert to byte
                         value = DataType.BITMAP.convertValue(value);
                     }
+                } else if (expectedType == DataType.INTMAP && stmt.intmapType != null) {
+                    // Special handling for intmap types
+                    // Initialize to 0 if no initial value provided
+                    if (value == null) {
+                        value = 0;
+                    } else {
+                        // Convert to int
+                        value = DataType.INTMAP.convertValue(value);
+                    }
                 } else {
                     // For non-array values, convert to the expected type
                     value = stmt.varType.convertValue(value);
@@ -430,8 +448,19 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             BitmapType bitmapTypeToUse = stmt.bitmapType != null ? stmt.bitmapType : inferredBitmapType;
             String bitmapTypeAliasNameToUse = inferredBitmapTypeAliasName;
             
+            // Use inferred intmap type from cast if no explicit intmap type is specified
+            IntmapType intmapTypeToUse = stmt.intmapType != null ? stmt.intmapType : inferredIntmapType;
+            String intmapTypeAliasNameToUse = inferredIntmapTypeAliasName;
+            
+            // Store the intmap type metadata with the variable if it's an intmap
+            if (intmapTypeToUse != null) {
+                if (stmt.isConst) {
+                    environment().getEnvironmentValues().defineConstWithIntmapType(stmt.name, value, intmapTypeToUse, intmapTypeAliasNameToUse);
+                } else {
+                    environment().getEnvironmentValues().defineWithIntmapType(stmt.name, value, intmapTypeToUse, intmapTypeAliasNameToUse);
+                }
             // Store the bitmap type metadata with the variable if it's a bitmap
-            if (bitmapTypeToUse != null) {
+            } else if (bitmapTypeToUse != null) {
                 if (stmt.isConst) {
                     environment().getEnvironmentValues().defineConstWithBitmapType(stmt.name, value, bitmapTypeToUse, bitmapTypeAliasNameToUse);
                 } else {
@@ -1836,6 +1865,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 stmt.dataType,
                 stmt.recordType,
                 stmt.bitmapType,
+                stmt.intmapType,
                 stmt.isArray,
                 stmt.arraySize
             );
@@ -1986,6 +2016,17 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     public Object visitCastExpression(com.eb.script.interpreter.expression.CastExpression expr) throws InterpreterError {
         // Evaluate the value to be cast
         Object value = evaluate(expr.value);
+        
+        // Special handling for INTMAP casting (requires int value and intmapType definition)
+        if (expr.targetType == DataType.INTMAP && expr.intmapType != null) {
+            // Convert the value to an int
+            int intValue = IntmapType.toIntValue(value);
+            
+            // Store the intmap type metadata so property access works
+            context.setLastInferredIntmapType(expr.intmapType, expr.intmapTypeAliasName);
+            
+            return intValue;
+        }
         
         // Special handling for BITMAP casting (requires byte value and bitmapType definition)
         if (expr.targetType == DataType.BITMAP && expr.bitmapType != null) {

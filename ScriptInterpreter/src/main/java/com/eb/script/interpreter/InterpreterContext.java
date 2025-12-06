@@ -100,6 +100,15 @@ public class InterpreterContext {
     // This is used to track the name of the type alias used in a bitmap cast
     private final ThreadLocal<String> lastInferredBitmapTypeAliasName = new ThreadLocal<>();
     
+    // Store the last inferred IntmapType from an intmap type alias cast
+    // This is used to associate IntmapType metadata with cast expressions
+    // Using ThreadLocal for thread-safety in case of concurrent script execution
+    private final ThreadLocal<com.eb.script.token.IntmapType> lastInferredIntmapType = new ThreadLocal<>();
+    
+    // Store the last inferred intmap type alias name
+    // This is used to track the name of the type alias used in an intmap cast
+    private final ThreadLocal<String> lastInferredIntmapTypeAliasName = new ThreadLocal<>();
+    
     // Store reference to the main interpreter for async callbacks
     // This allows callbacks to access functions defined in the script
     private volatile Interpreter mainInterpreter;
@@ -388,6 +397,54 @@ public class InterpreterContext {
     public void clearLastInferredBitmapType() {
         lastInferredBitmapType.remove();
         lastInferredBitmapTypeAliasName.remove();
+    }
+    
+    /**
+     * Get the last inferred IntmapType from an intmap type alias cast.
+     * Thread-safe using ThreadLocal.
+     * @return the last inferred IntmapType for the current thread, or null if none
+     */
+    public com.eb.script.token.IntmapType getLastInferredIntmapType() {
+        return lastInferredIntmapType.get();
+    }
+    
+    /**
+     * Set the last inferred IntmapType from an intmap type alias cast.
+     * Thread-safe using ThreadLocal.
+     * @param intmapType the IntmapType to set for the current thread
+     */
+    public void setLastInferredIntmapType(com.eb.script.token.IntmapType intmapType) {
+        setLastInferredIntmapType(intmapType, null);
+    }
+    
+    /**
+     * Set the last inferred IntmapType from an intmap type alias cast along with the alias name.
+     * Thread-safe using ThreadLocal.
+     * @param intmapType the IntmapType to set for the current thread
+     * @param aliasName the type alias name to associate with this intmap
+     */
+    public void setLastInferredIntmapType(com.eb.script.token.IntmapType intmapType, String aliasName) {
+        lastInferredIntmapType.set(intmapType);
+        lastInferredIntmapTypeAliasName.set(aliasName);
+    }
+    
+    /**
+     * Get the last inferred intmap type alias name.
+     * Thread-safe using ThreadLocal.
+     * @return the last inferred intmap type alias name for the current thread, or null if none
+     */
+    public String getLastInferredIntmapTypeAliasName() {
+        return lastInferredIntmapTypeAliasName.get();
+    }
+    
+    /**
+     * Clear the last inferred IntmapType.
+     * Should be called after the IntmapType has been consumed.
+     * Thread-safe using ThreadLocal.
+     */
+    public void clearLastInferredIntmapType() {
+        lastInferredIntmapType.remove();
+        lastInferredIntmapTypeAliasName.remove();
     }
 
     /**
