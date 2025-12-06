@@ -1312,6 +1312,97 @@ public final class Builtins {
         ));
 
         // ==========================
+        // Vector Image builtins
+        // ==========================
+        addBuiltin(info(
+                "vector.load", DataType.VECTOR_IMAGE,
+                newParam("path", DataType.STRING, true)          // required; path to SVG file
+        ));
+        addBuiltin(info(
+                "vector.create", DataType.VECTOR_IMAGE,
+                newParam("bytes", DataType.ARRAY, true),         // required; SVG byte array
+                newParam("name", DataType.STRING, false)         // optional; vector image name
+        ));
+        addBuiltin(info(
+                "vector.save", DataType.BOOL,
+                newParam("vectorImage", DataType.VECTOR_IMAGE, true),  // required; EbsVectorImage
+                newParam("path", DataType.STRING, true)                // required; output file path
+        ));
+        addBuiltin(info(
+                "vector.getWidth", DataType.DOUBLE,
+                newParam("vectorImage", DataType.VECTOR_IMAGE, true)   // required; EbsVectorImage
+        ));
+        addBuiltin(info(
+                "vector.getHeight", DataType.DOUBLE,
+                newParam("vectorImage", DataType.VECTOR_IMAGE, true)   // required; EbsVectorImage
+        ));
+        addBuiltin(info(
+                "vector.getInfo", DataType.JSON,
+                newParam("vectorImage", DataType.VECTOR_IMAGE, true)   // required; EbsVectorImage
+        ));
+        addBuiltin(info(
+                "vector.scale", DataType.VECTOR_IMAGE,
+                newParam("vectorImage", DataType.VECTOR_IMAGE, true),  // required; EbsVectorImage
+                newParam("scaleX", DataType.DOUBLE, true),             // required; horizontal scale factor
+                newParam("scaleY", DataType.DOUBLE, true)              // required; vertical scale factor
+        ));
+        addBuiltin(info(
+                "vector.setFillColor", DataType.VECTOR_IMAGE,
+                newParam("vectorImage", DataType.VECTOR_IMAGE, true),  // required; EbsVectorImage
+                newParam("color", DataType.STRING, true)               // required; hex color (e.g., "#ff0000")
+        ));
+        addBuiltin(info(
+                "vector.setStrokeColor", DataType.VECTOR_IMAGE,
+                newParam("vectorImage", DataType.VECTOR_IMAGE, true),  // required; EbsVectorImage
+                newParam("color", DataType.STRING, true)               // required; hex color (e.g., "#000000")
+        ));
+        addBuiltin(info(
+                "vector.setStrokeWidth", DataType.VECTOR_IMAGE,
+                newParam("vectorImage", DataType.VECTOR_IMAGE, true),  // required; EbsVectorImage
+                newParam("width", DataType.DOUBLE, true)               // required; stroke width
+        ));
+        addBuiltin(info(
+                "vector.rotate", DataType.VECTOR_IMAGE,
+                newParam("vectorImage", DataType.VECTOR_IMAGE, true),  // required; EbsVectorImage
+                newParam("degrees", DataType.DOUBLE, true)             // required; rotation angle in degrees
+        ));
+        addBuiltin(info(
+                "vector.setDimensions", DataType.VECTOR_IMAGE,
+                newParam("vectorImage", DataType.VECTOR_IMAGE, true),  // required; EbsVectorImage
+                newParam("width", DataType.DOUBLE, true),              // required; new width
+                newParam("height", DataType.DOUBLE, true)              // required; new height
+        ));
+        addBuiltin(info(
+                "vector.toRaster", DataType.IMAGE,
+                newParam("vectorImage", DataType.VECTOR_IMAGE, true),  // required; EbsVectorImage
+                newParam("width", DataType.INTEGER, false),            // optional; raster width
+                newParam("height", DataType.INTEGER, false)            // optional; raster height
+        ));
+        addBuiltin(info(
+                "vector.toImage", DataType.IMAGE,
+                newParam("vectorImage", DataType.VECTOR_IMAGE, true),  // required; EbsVectorImage (alias for toRaster)
+                newParam("width", DataType.INTEGER, false),            // optional; raster width
+                newParam("height", DataType.INTEGER, false)            // optional; raster height
+        ));
+        addBuiltin(info(
+                "vector.toBytes", DataType.ARRAY,
+                newParam("vectorImage", DataType.VECTOR_IMAGE, true)   // required; EbsVectorImage
+        ));
+        addBuiltin(info(
+                "vector.toString", DataType.STRING,
+                newParam("vectorImage", DataType.VECTOR_IMAGE, true)   // required; EbsVectorImage
+        ));
+        addBuiltin(info(
+                "vector.getName", DataType.STRING,
+                newParam("vectorImage", DataType.VECTOR_IMAGE, true)   // required; EbsVectorImage
+        ));
+        addBuiltin(info(
+                "vector.setName", DataType.VECTOR_IMAGE,
+                newParam("vectorImage", DataType.VECTOR_IMAGE, true),  // required; EbsVectorImage
+                newParam("name", DataType.STRING, true)                // required; new vector image name
+        ));
+
+        // ==========================
         // DATE builtins
         // ==========================
         addBuiltin(info(
@@ -1478,6 +1569,11 @@ public final class Builtins {
         // Image builtins
         if (BuiltinsImage.handles(name)) {
             return BuiltinsImage.dispatch(env, name, args);
+        }
+        
+        // Vector Image builtins
+        if (BuiltinsVectorImage.handles(name)) {
+            return BuiltinsVectorImage.dispatch(env, name, args);
         }
         
         // Date builtins

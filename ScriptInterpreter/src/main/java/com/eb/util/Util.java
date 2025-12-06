@@ -89,6 +89,8 @@ public class Util {
                     array.getDataType() == DataType.MAP;
                 case IMAGE ->
                     array.getDataType() == DataType.IMAGE;
+                case VECTOR_IMAGE ->
+                    array.getDataType() == DataType.VECTOR_IMAGE;
                 case JSON ->
                     true;
                 case ANY ->
@@ -120,6 +122,8 @@ public class Util {
                     value instanceof com.eb.script.arrays.QueueDef;
                 case IMAGE ->
                     value instanceof EbsImage;
+                case VECTOR_IMAGE ->
+                    value instanceof com.eb.script.image.EbsVectorImage;
                 case ANY ->
                     true;
                 default ->
