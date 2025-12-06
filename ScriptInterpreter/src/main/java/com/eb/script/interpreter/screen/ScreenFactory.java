@@ -653,17 +653,49 @@ public class ScreenFactory {
             varsTable.setColumnResizePolicy(javafx.scene.control.TableView.CONSTRAINED_RESIZE_POLICY);
             varsTable.setStyle("-fx-background-color: transparent;");
             
-            // Name column (50%)
+            // Name column (50%) - with tooltip showing variable name
             javafx.scene.control.TableColumn<String[], String> nameCol = new javafx.scene.control.TableColumn<>("Name");
             nameCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue()[0]));
             nameCol.setStyle("-fx-alignment: CENTER-LEFT; -fx-font-weight: bold;");
             nameCol.prefWidthProperty().bind(varsTable.widthProperty().multiply(0.5));
+            nameCol.setCellFactory(col -> new javafx.scene.control.TableCell<String[], String>() {
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setText(null);
+                        setTooltip(null);
+                    } else {
+                        setText(item);
+                        javafx.scene.control.Tooltip tooltip = new javafx.scene.control.Tooltip("Variable: " + item);
+                        tooltip.setShowDelay(javafx.util.Duration.millis(500));
+                        setTooltip(tooltip);
+                    }
+                }
+            });
             
-            // Value column (50%)
+            // Value column (50%) - with tooltip showing full value
             javafx.scene.control.TableColumn<String[], String> valueCol = new javafx.scene.control.TableColumn<>("Value");
             valueCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue()[1]));
             valueCol.setStyle("-fx-alignment: CENTER-LEFT;");
             valueCol.prefWidthProperty().bind(varsTable.widthProperty().multiply(0.5));
+            valueCol.setCellFactory(col -> new javafx.scene.control.TableCell<String[], String>() {
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setText(null);
+                        setTooltip(null);
+                    } else {
+                        setText(item);
+                        javafx.scene.control.Tooltip tooltip = new javafx.scene.control.Tooltip(item);
+                        tooltip.setShowDelay(javafx.util.Duration.millis(500));
+                        tooltip.setMaxWidth(DEBUG_TOOLTIP_MAX_WIDTH);
+                        tooltip.setWrapText(true);
+                        setTooltip(tooltip);
+                    }
+                }
+            });
             
             varsTable.getColumns().add(nameCol);
             varsTable.getColumns().add(valueCol);
@@ -723,7 +755,7 @@ public class ScreenFactory {
             itemNameCol.setStyle("-fx-alignment: CENTER-LEFT; -fx-font-weight: bold;");
             itemNameCol.prefWidthProperty().bind(itemsTable.widthProperty().multiply(0.5));
             
-            // Cell factory to apply dark orange color for changed items (contains ⚠️)
+            // Cell factory to apply dark orange color for changed items (contains ⚠️) and add tooltip
             // Note: Pre-computing display text avoids JavaFX cell factory timing issues
             // where cell factories may be called before data is fully initialized
             itemNameCol.setCellFactory(col -> new javafx.scene.control.TableCell<String[], String>() {
@@ -732,6 +764,7 @@ public class ScreenFactory {
                     super.updateItem(item, empty);
                     if (empty || item == null) {
                         setText(null);
+                        setTooltip(null);
                         setStyle(DEBUG_ITEM_NAME_BASE_STYLE);
                     } else {
                         setText(item);
@@ -741,15 +774,49 @@ public class ScreenFactory {
                         } else {
                             setStyle(DEBUG_ITEM_NAME_BASE_STYLE);
                         }
+                        // Add tooltip with item details from row data
+                        int rowIndex = getIndex();
+                        if (rowIndex >= 0 && rowIndex < getTableView().getItems().size()) {
+                            String[] rowData = getTableView().getItems().get(rowIndex);
+                            String rawName = rowData.length >= 5 ? rowData[4] : item;
+                            String itemType = rowData.length >= 4 ? rowData[3] : "unknown";
+                            String varRef = rowData.length >= 3 ? rowData[2] : "";
+                            StringBuilder tooltipText = new StringBuilder();
+                            tooltipText.append("Item: ").append(rawName);
+                            tooltipText.append("\nType: ").append(itemType);
+                            if (varRef != null && !varRef.isEmpty()) {
+                                tooltipText.append("\nVar: ").append(varRef);
+                            }
+                            javafx.scene.control.Tooltip tooltip = new javafx.scene.control.Tooltip(tooltipText.toString());
+                            tooltip.setShowDelay(javafx.util.Duration.millis(500));
+                            setTooltip(tooltip);
+                        }
                     }
                 }
             });
             
-            // Value column (50%)
+            // Value column (50%) - with tooltip showing full value
             javafx.scene.control.TableColumn<String[], String> itemValueCol = new javafx.scene.control.TableColumn<>("Value");
             itemValueCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue()[1]));
             itemValueCol.setStyle("-fx-alignment: CENTER-LEFT;");
             itemValueCol.prefWidthProperty().bind(itemsTable.widthProperty().multiply(0.5));
+            itemValueCol.setCellFactory(col -> new javafx.scene.control.TableCell<String[], String>() {
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setText(null);
+                        setTooltip(null);
+                    } else {
+                        setText(item);
+                        javafx.scene.control.Tooltip tooltip = new javafx.scene.control.Tooltip(item);
+                        tooltip.setShowDelay(javafx.util.Duration.millis(500));
+                        tooltip.setMaxWidth(DEBUG_TOOLTIP_MAX_WIDTH);
+                        tooltip.setWrapText(true);
+                        setTooltip(tooltip);
+                    }
+                }
+            });
             
             itemsTable.getColumns().add(itemNameCol);
             itemsTable.getColumns().add(itemValueCol);
