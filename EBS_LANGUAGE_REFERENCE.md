@@ -117,6 +117,7 @@ For the latest updates and comprehensive language reference, always refer to [do
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.0.6.11 | 2025-12-06 | Added `intmap` type for 32-bit field mapping (0-31 bits) using integer storage; Added `array.intmap` backed by ArrayFixedInt; Added `array.asIntmap()` and `array.asInt()` for casting; Intmap type aliases with `typeof` keyword; Int to intmap casting |
 | 1.0.6.10 | 2025-12-05 | Added `array.bitmap` type backed by ArrayFixedByte; Added `array.asBitmap()` and `array.asByte()` for casting between byte and bitmap arrays |
 | 1.0.6.9 | 2025-12-05 | Added `bitmap` type for bit-level field access within a byte; Bitmap type aliases with `typeof` keyword; Byte/int to bitmap casting; `typeof` operator support for bitmap types and variables |
 | 1.0.5.8 | 2025-12-03 | Added `mail.openUrl` and `ftp.openUrl` functions for URL-based connections; Password now optional in URL (stored separately in config); Added password column with masking in config dialogs |
