@@ -349,10 +349,18 @@ public class BuiltinsVectorImage {
         double dx = toDouble(args[1], "vector.applyDropShadow", "dx");
         double dy = toDouble(args[2], "vector.applyDropShadow", "dy");
         double blur = toDouble(args[3], "vector.applyDropShadow", "blur");
+        
+        // Validate color parameter
+        if (args[4] == null) {
+            throw new InterpreterError("vector.applyDropShadow: color cannot be null");
+        }
+        if (!(args[4] instanceof String)) {
+            throw new InterpreterError("vector.applyDropShadow: color must be a string");
+        }
         String color = (String) args[4];
         
-        if (color == null || color.isBlank()) {
-            throw new InterpreterError("vector.applyDropShadow: color cannot be null or empty");
+        if (color.isBlank()) {
+            throw new InterpreterError("vector.applyDropShadow: color cannot be empty");
         }
         
         return image.applyDropShadow(dx, dy, blur, color);

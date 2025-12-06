@@ -592,11 +592,11 @@ public class EbsVectorImage {
             // Create feColorMatrix for grayscale
             Element colorMatrix = newDoc.createElementNS("http://www.w3.org/2000/svg", "feColorMatrix");
             colorMatrix.setAttribute("type", "matrix");
-            // Standard grayscale matrix
+            // Standard luminance grayscale matrix (matches human perception)
             colorMatrix.setAttribute("values", 
-                "0.33 0.33 0.33 0 0 " +
-                "0.33 0.33 0.33 0 0 " +
-                "0.33 0.33 0.33 0 0 " +
+                "0.2126 0.7152 0.0722 0 0 " +
+                "0.2126 0.7152 0.0722 0 0 " +
+                "0.2126 0.7152 0.0722 0 0 " +
                 "0 0 0 1 0");
             filter.appendChild(colorMatrix);
             
@@ -675,7 +675,7 @@ public class EbsVectorImage {
             colorMatrix.setAttribute("type", "matrix");
             // Brightness matrix - multiply RGB channels by factor
             colorMatrix.setAttribute("values", 
-                String.format("%f 0 0 0 0 0 %f 0 0 0 0 0 %f 0 0 0 0 0 1 0", factor, factor, factor));
+                String.format("%.6f 0 0 0 0 0 %.6f 0 0 0 0 0 %.6f 0 0 0 0 0 1 0", factor, factor, factor));
             filter.appendChild(colorMatrix);
             
             defs.appendChild(filter);
