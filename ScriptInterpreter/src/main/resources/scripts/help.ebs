@@ -12,14 +12,103 @@ print "";
 print "Loading syntax help screen...";
 print "";
 
+// Load help data from JSON file
+var helpData: json = null;
+try {
+    var jsonContent: string = call file.readTextFile(path="../resources/help-lookup.json");
+    helpData = call json.jsonFromString(jsonString=jsonContent);
+    print "Help data loaded from JSON";
+} exceptions when ex {
+    print "Warning: Could not load help-lookup.json: " + ex;
+    print "Using fallback help content";
+}
+
+// Function to format HTML-like content for display
+formatHelpHtml(title: string, sections: json) return string {
+    var html: string = "";
+    html = html + "═══════════════════════════════════════════════════════\n";
+    html = html + "  " + title + "\n";
+    html = html + "═══════════════════════════════════════════════════════\n\n";
+    
+    if sections != null then {
+        foreach section in sections {
+            var sectionTitle: string = call json.getString(root=section, path="title", default="");
+            var sectionContent: string = call json.getString(root=section, path="content", default="");
+            
+            if sectionTitle != "" then {
+                html = html + "▸ " + sectionTitle + "\n";
+                html = html + "───────────────────────────────────────────────────────\n";
+            }
+            
+            if sectionContent != "" then {
+                html = html + sectionContent + "\n\n";
+            }
+        }
+    }
+    
+    return html;
+}
+
+// Function to get keyword help from JSON
+getKeywordHelp(keyword: string) return string {
+    if helpData == null then {
+        return "Help data not available.";
+    }
+    
+    var keywords: json = call json.get(root=helpData, path="keywords");
+    if keywords == null then {
+        return "Keywords data not found.";
+    }
+    
+    foreach kw in keywords {
+        var kwName: string = call json.getString(root=kw, path="keyword", default="");
+        if kwName == keyword then {
+            var desc: string = call json.getString(root=kw, path="short_description", default="");
+            var longHelp: string = call json.getString(root=kw, path="long_help", default="");
+            var example: string = call json.getString(root=kw, path="example", default="");
+            
+            var content: string = "";
+            content = content + "KEYWORD: " + keyword + "\n";
+            content = content + "───────────────────────────────────────────────────────\n\n";
+            
+            if desc != "" then {
+                content = content + "DESCRIPTION:\n";
+                content = content + desc + "\n\n";
+            }
+            
+            if longHelp != "" then {
+                content = content + "DETAILS:\n";
+                // Remove HTML tags for textarea display
+                var cleanHelp: string = call str.replace(source=longHelp, target="<br>", replacement="\n");
+                cleanHelp = call str.replace(source=cleanHelp, target="<b>", replacement="");
+                cleanHelp = call str.replace(source=cleanHelp, target="</b>", replacement="");
+                cleanHelp = call str.replace(source=cleanHelp, target="<code>", replacement="");
+                cleanHelp = call str.replace(source=cleanHelp, target="</code>", replacement="");
+                content = content + cleanHelp + "\n\n";
+            }
+            
+            if example != "" then {
+                content = content + "EXAMPLE:\n";
+                content = content + example + "\n";
+            }
+            
+            return content;
+        }
+    }
+    
+    return "No help found for keyword: " + keyword;
+}
+
 // Function to get help content based on selected topic
 getHelpContent(topic: string) return string {
     var content: string = "";
     
     // Syntax topics
     if topic == "Syntax" then {
-        content = "=== EBS (Earl Bosch Script) Syntax ===\n\n";
-        content = content + "EBS is a dynamically-typed scripting language with:\n";
+        content = "═══════════════════════════════════════════════════════\n";
+        content = content + "  EBS (Earl Bosch Script) Syntax\n";
+        content = content + "═══════════════════════════════════════════════════════\n\n";
+        content = content + "EBS is a dynamically-typed scripting language with:\n\n";
         content = content + "• Familiar C-like syntax\n";
         content = content + "• Native JSON support\n";
         content = content + "• Integrated database capabilities\n";
@@ -31,30 +120,41 @@ getHelpContent(topic: string) return string {
     }
     
     if topic == "structure" then {
-        content = "=== Program Structure ===\n\n";
+        content = "═══════════════════════════════════════════════════════\n";
+        content = content + "  Program Structure\n";
+        content = content + "═══════════════════════════════════════════════════════\n\n";
         content = content + "Select a sub-topic from the tree to view detailed information:\n\n";
-        content = content + "• Basic Syntax - Comments, statements, blocks\n";
-        content = content + "• Variables - Variable declarations and types\n";
-        content = content + "• Operators - Arithmetic, comparison, logical\n";
-        content = content + "• Functions - Function definitions and calls\n";
-        content = content + "• Imports - Code organization with imports\n";
+        content = content + "▸ basic - Statements, comments, blocks, case handling\n";
+        content = content + "▸ variables - Variable declarations, types, constants\n";
+        content = content + "▸ operators - Arithmetic, comparison, logical operators\n";
+        content = content + "▸ functions - Function definitions and calls\n";
+        content = content + "▸ imports - Code organization with imports\n";
         return content;
     }
     
     if topic == "structure_basic" then {
-        content = "=== Basic Syntax ===\n\n";
-        content = content + "STATEMENTS:\n";
+        content = "═══════════════════════════════════════════════════════\n";
+        content = content + "  Basic Syntax\n";
+        content = content + "═══════════════════════════════════════════════════════\n\n";
+        content = content + "▸ STATEMENTS\n";
+        content = content + "───────────────────────────────────────────────────────\n";
         content = content + "• Statements end with semicolon (;)\n";
         content = content + "• Multiple statements per line allowed\n";
         content = content + "• Blocks use curly braces { }\n\n";
-        content = content + "COMMENTS:\n";
-        content = content + "  // Single line comment\n";
-        content = content + "  // Comments start with //\n\n";
-        content = content + "CASE INSENSITIVITY:\n";
+        content = content + "▸ COMMENTS\n";
+        content = content + "───────────────────────────────────────────────────────\n";
+        content = content + call getKeywordHelp(keyword="//");
+        if call str.contains(str=content, sub="No help found") then {
+            content = content + "  // Single line comment\n";
+            content = content + "  // Comments start with //\n\n";
+        }
+        content = content + "\n▸ CASE INSENSITIVITY\n";
+        content = content + "───────────────────────────────────────────────────────\n";
         content = content + "  var userName = \"Alice\";\n";
         content = content + "  print USERNAME;  // Works: prints \"Alice\"\n";
         content = content + "  print UserName;  // Works: prints \"Alice\"\n\n";
-        content = content + "EXAMPLE:\n";
+        content = content + "▸ EXAMPLE\n";
+        content = content + "───────────────────────────────────────────────────────\n";
         content = content + "  // This is a comment\n";
         content = content + "  var message: string = \"Hello, World!\";\n";
         content = content + "  print message;\n";
@@ -62,43 +162,51 @@ getHelpContent(topic: string) return string {
     }
     
     if topic == "structure_variables" then {
-        content = "=== Variables ===\n\n";
-        content = content + "VARIABLE DECLARATION:\n";
-        content = content + "  var name: type = value;\n\n";
-        content = content + "EXAMPLES:\n";
-        content = content + "  var count: int = 42;\n";
-        content = content + "  var name: string = \"Alice\";\n";
-        content = content + "  var price: double = 19.99;\n";
-        content = content + "  var flag: bool = true;\n\n";
-        content = content + "TYPE INFERENCE:\n";
+        content = "═══════════════════════════════════════════════════════\n";
+        content = content + "  Variables\n";
+        content = content + "═══════════════════════════════════════════════════════\n\n";
+        
+        // Get var keyword help from JSON
+        var varHelp: string = call getKeywordHelp(keyword="var");
+        content = content + varHelp + "\n";
+        
+        content = content + "▸ TYPE INFERENCE\n";
+        content = content + "───────────────────────────────────────────────────────\n";
         content = content + "  var x = 42;        // Inferred as int\n";
         content = content + "  var y = \"text\";    // Inferred as string\n\n";
-        content = content + "CONSTANTS:\n";
+        content = content + "▸ CONSTANTS\n";
+        content = content + "───────────────────────────────────────────────────────\n";
         content = content + "  const PI: double = 3.14159;\n";
         content = content + "  const MAX_SIZE: int = 100;\n";
         return content;
     }
     
     if topic == "structure_operators" then {
-        content = "=== Operators ===\n\n";
-        content = content + "ARITHMETIC OPERATORS:\n";
+        content = "═══════════════════════════════════════════════════════\n";
+        content = content + "  Operators\n";
+        content = content + "═══════════════════════════════════════════════════════\n\n";
+        content = content + "▸ ARITHMETIC OPERATORS\n";
+        content = content + "───────────────────────────────────────────────────────\n";
         content = content + "  +   Addition\n";
         content = content + "  -   Subtraction\n";
         content = content + "  *   Multiplication\n";
         content = content + "  /   Division\n";
         content = content + "  %   Modulo\n\n";
-        content = content + "COMPARISON OPERATORS:\n";
+        content = content + "▸ COMPARISON OPERATORS\n";
+        content = content + "───────────────────────────────────────────────────────\n";
         content = content + "  ==  Equal to\n";
         content = content + "  !=  Not equal to\n";
         content = content + "  <   Less than\n";
         content = content + "  >   Greater than\n";
         content = content + "  <=  Less than or equal\n";
         content = content + "  >=  Greater than or equal\n\n";
-        content = content + "LOGICAL OPERATORS:\n";
+        content = content + "▸ LOGICAL OPERATORS\n";
+        content = content + "───────────────────────────────────────────────────────\n";
         content = content + "  and   Logical AND\n";
         content = content + "  or    Logical OR\n";
         content = content + "  not   Logical NOT\n\n";
-        content = content + "EXAMPLE:\n";
+        content = content + "▸ EXAMPLE\n";
+        content = content + "───────────────────────────────────────────────────────\n";
         content = content + "  var x = 10;\n";
         content = content + "  var y = 20;\n";
         content = content + "  if x < y and x > 0 then {\n";
@@ -108,20 +216,29 @@ getHelpContent(topic: string) return string {
     }
     
     if topic == "structure_functions" then {
-        content = "=== Functions ===\n\n";
-        content = content + "FUNCTION DEFINITION:\n";
+        content = "═══════════════════════════════════════════════════════\n";
+        content = content + "  Functions\n";
+        content = content + "═══════════════════════════════════════════════════════\n\n";
+        content = content + "▸ FUNCTION DEFINITION\n";
+        content = content + "───────────────────────────────────────────────────────\n";
         content = content + "  functionName(param1: type, param2: type) return returnType {\n";
         content = content + "      // function body\n";
         content = content + "      return value;\n";
         content = content + "  }\n\n";
-        content = content + "EXAMPLE:\n";
+        content = content + "▸ EXAMPLE\n";
+        content = content + "───────────────────────────────────────────────────────\n";
         content = content + "  add(a: int, b: int) return int {\n";
         content = content + "      return a + b;\n";
         content = content + "  }\n\n";
-        content = content + "CALLING FUNCTIONS:\n";
-        content = content + "  var result = call add(5, 10);\n";
-        content = content + "  print result;  // Output: 15\n\n";
-        content = content + "NO RETURN VALUE:\n";
+        content = content + "▸ CALLING FUNCTIONS\n";
+        content = content + "───────────────────────────────────────────────────────\n";
+        
+        // Get call keyword help from JSON
+        var callHelp: string = call getKeywordHelp(keyword="call");
+        content = content + callHelp + "\n";
+        
+        content = content + "\n▸ NO RETURN VALUE\n";
+        content = content + "───────────────────────────────────────────────────────\n";
         content = content + "  greet(name: string) {\n";
         content = content + "      print \"Hello, \" + name;\n";
         content = content + "  }\n";
@@ -129,17 +246,23 @@ getHelpContent(topic: string) return string {
     }
     
     if topic == "structure_imports" then {
-        content = "=== Imports ===\n\n";
-        content = content + "IMPORTING MODULES:\n";
+        content = "═══════════════════════════════════════════════════════\n";
+        content = content + "  Imports\n";
+        content = content + "═══════════════════════════════════════════════════════\n\n";
+        content = content + "▸ IMPORTING MODULES\n";
+        content = content + "───────────────────────────────────────────────────────\n";
         content = content + "  import \"path/to/module.ebs\";\n\n";
-        content = content + "EXAMPLE:\n";
+        content = content + "▸ EXAMPLE\n";
+        content = content + "───────────────────────────────────────────────────────\n";
         content = content + "  import \"utils/string_helpers.ebs\";\n";
         content = content + "  import \"lib/math_functions.ebs\";\n\n";
-        content = content + "USAGE:\n";
+        content = content + "▸ USAGE\n";
+        content = content + "───────────────────────────────────────────────────────\n";
         content = content + "• Functions from imported files are available\n";
         content = content + "• Variables from imported files are accessible\n";
         content = content + "• Imports are processed at parse time\n\n";
-        content = content + "NOTE:\n";
+        content = content + "▸ NOTE\n";
+        content = content + "───────────────────────────────────────────────────────\n";
         content = content + "• Import paths are relative to script location\n";
         content = content + "• Circular imports are not allowed\n";
         return content;
@@ -171,32 +294,35 @@ getHelpContent(topic: string) return string {
     }
     
     if topic == "flow" then {
-        content = "=== Control Flow ===\n\n";
+        content = "═══════════════════════════════════════════════════════\n";
+        content = content + "  Control Flow\n";
+        content = content + "═══════════════════════════════════════════════════════\n\n";
         content = content + "Select a sub-topic from the tree to view detailed information:\n\n";
-        content = content + "• Conditionals - if-then-else statements\n";
-        content = content + "• Loops - while, for, foreach, do-while\n";
-        content = content + "• Break/Continue - Loop control\n";
-        content = content + "• Exceptions - Error handling\n";
+        content = content + "▸ conditionals - if-then-else statements\n";
+        content = content + "▸ loops - while, for, foreach, do-while\n";
+        content = content + "▸ break_continue - Loop control\n";
+        content = content + "▸ exceptions - Error handling\n";
         return content;
     }
     
     if topic == "flow_conditionals" then {
-        content = "=== Conditionals ===\n\n";
-        content = content + "IF-THEN-ELSE:\n";
-        content = content + "  if condition then {\n";
-        content = content + "      // code\n";
-        content = content + "  } else {\n";
-        content = content + "      // code\n";
-        content = content + "  }\n\n";
-        content = content + "ELSE IF:\n";
-        content = content + "  if condition1 then {\n";
-        content = content + "      // code\n";
-        content = content + "  } else if condition2 then {\n";
-        content = content + "      // code\n";
-        content = content + "  } else {\n";
-        content = content + "      // code\n";
-        content = content + "  }\n\n";
-        content = content + "EXAMPLE:\n";
+        content = "═══════════════════════════════════════════════════════\n";
+        content = content + "  Conditionals\n";
+        content = content + "═══════════════════════════════════════════════════════\n\n";
+        
+        // Get if keyword help from JSON
+        var ifHelp: string = call getKeywordHelp(keyword="if");
+        content = content + ifHelp + "\n";
+        
+        content = content + "\n▸ ELSE IF\n";
+        content = content + "───────────────────────────────────────────────────────\n";
+        
+        // Get else keyword help from JSON
+        var elseHelp: string = call getKeywordHelp(keyword="else");
+        content = content + elseHelp + "\n";
+        
+        content = content + "\n▸ CHAINED CONDITIONS\n";
+        content = content + "───────────────────────────────────────────────────────\n";
         content = content + "  var score: int = 85;\n";
         content = content + "  if score >= 90 then {\n";
         content = content + "      print \"Grade: A\";\n";
@@ -209,24 +335,31 @@ getHelpContent(topic: string) return string {
     }
     
     if topic == "flow_loops" then {
-        content = "=== Loops ===\n\n";
-        content = content + "WHILE LOOP:\n";
-        content = content + "  while condition {\n";
-        content = content + "      // code\n";
-        content = content + "  }\n\n";
-        content = content + "FOR LOOP:\n";
+        content = "═══════════════════════════════════════════════════════\n";
+        content = content + "  Loops\n";
+        content = content + "═══════════════════════════════════════════════════════\n\n";
+        
+        // Get while keyword help from JSON
+        var whileHelp: string = call getKeywordHelp(keyword="while");
+        content = content + whileHelp + "\n";
+        
+        content = content + "\n▸ FOR LOOP\n";
+        content = content + "───────────────────────────────────────────────────────\n";
         content = content + "  for var i = 0 to 10 {\n";
         content = content + "      // code\n";
         content = content + "  }\n\n";
-        content = content + "FOREACH LOOP:\n";
-        content = content + "  foreach item in array {\n";
-        content = content + "      print item;\n";
-        content = content + "  }\n\n";
-        content = content + "DO-WHILE LOOP:\n";
+        
+        // Get foreach keyword help from JSON
+        var foreachHelp: string = call getKeywordHelp(keyword="foreach");
+        content = content + foreachHelp + "\n";
+        
+        content = content + "\n▸ DO-WHILE LOOP\n";
+        content = content + "───────────────────────────────────────────────────────\n";
         content = content + "  do {\n";
         content = content + "      // code\n";
         content = content + "  } while condition;\n\n";
-        content = content + "EXAMPLE:\n";
+        content = content + "▸ EXAMPLE\n";
+        content = content + "───────────────────────────────────────────────────────\n";
         content = content + "  var i: int = 0;\n";
         content = content + "  while i < 5 {\n";
         content = content + "      print \"Count: \" + i;\n";
@@ -236,47 +369,45 @@ getHelpContent(topic: string) return string {
     }
     
     if topic == "flow_break_continue" then {
-        content = "=== Break and Continue ===\n\n";
-        content = content + "BREAK STATEMENT:\n";
-        content = content + "• Exits the current loop immediately\n";
-        content = content + "• Can be used in while, for, foreach loops\n\n";
-        content = content + "EXAMPLE:\n";
-        content = content + "  for var i = 0 to 10 {\n";
-        content = content + "      if i == 5 then {\n";
-        content = content + "          break;  // Exit loop when i is 5\n";
-        content = content + "      }\n";
-        content = content + "      print i;\n";
-        content = content + "  }\n\n";
-        content = content + "CONTINUE STATEMENT:\n";
-        content = content + "• Skips to next iteration of loop\n";
-        content = content + "• Current iteration ends immediately\n\n";
-        content = content + "EXAMPLE:\n";
-        content = content + "  for var i = 0 to 10 {\n";
-        content = content + "      if i % 2 == 0 then {\n";
-        content = content + "          continue;  // Skip even numbers\n";
-        content = content + "      }\n";
-        content = content + "      print i;  // Only prints odd numbers\n";
-        content = content + "  }\n";
+        content = "═══════════════════════════════════════════════════════\n";
+        content = content + "  Break and Continue\n";
+        content = content + "═══════════════════════════════════════════════════════\n\n";
+        
+        // Get break keyword help from JSON
+        var breakHelp: string = call getKeywordHelp(keyword="break");
+        content = content + breakHelp + "\n";
+        
+        content = content + "\n";
+        
+        // Get continue keyword help from JSON
+        var continueHelp: string = call getKeywordHelp(keyword="continue");
+        content = content + continueHelp + "\n";
+        
         return content;
     }
     
     if topic == "flow_exceptions" then {
-        content = "=== Exception Handling ===\n\n";
-        content = content + "TRY-EXCEPTIONS-WHEN:\n";
+        content = "═══════════════════════════════════════════════════════\n";
+        content = content + "  Exception Handling\n";
+        content = content + "═══════════════════════════════════════════════════════\n\n";
+        content = content + "▸ TRY-EXCEPTIONS-WHEN\n";
+        content = content + "───────────────────────────────────────────────────────\n";
         content = content + "  try {\n";
         content = content + "      // code that might throw exception\n";
         content = content + "  } exceptions when ex {\n";
         content = content + "      // handle exception\n";
         content = content + "      print \"Error: \" + ex;\n";
         content = content + "  }\n\n";
-        content = content + "EXAMPLE:\n";
+        content = content + "▸ EXAMPLE\n";
+        content = content + "───────────────────────────────────────────────────────\n";
         content = content + "  try {\n";
         content = content + "      var result = call file.readTextFile(\"data.txt\");\n";
         content = content + "      print result;\n";
         content = content + "  } exceptions when ex {\n";
         content = content + "      print \"Failed to read file: \" + ex;\n";
         content = content + "  }\n\n";
-        content = content + "NOTES:\n";
+        content = content + "▸ NOTES\n";
+        content = content + "───────────────────────────────────────────────────────\n";
         content = content + "• Exception variable (ex) contains error message\n";
         content = content + "• Use for file I/O, database operations, etc.\n";
         content = content + "• Prevents script from crashing on errors\n";
