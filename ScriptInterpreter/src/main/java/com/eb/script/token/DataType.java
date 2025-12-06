@@ -3,6 +3,7 @@ package com.eb.script.token;
 import com.eb.script.json.Json;
 import com.eb.script.arrays.ArrayDef;
 import com.eb.script.image.EbsImage;
+import com.eb.script.image.EbsVectorImage;
 import com.eb.util.Util;
 import java.util.Date;
 
@@ -26,6 +27,7 @@ public enum DataType {
     MAP(java.util.Map.class),
     BITMAP(Byte.class),
     IMAGE(EbsImage.class),
+    VECTOR_IMAGE(EbsVectorImage.class),
     ANY(Comparable.class);
 
     public final Class dataClass;
@@ -86,6 +88,9 @@ public enum DataType {
                 case IMAGE -> {
                     return new EbsImage[length];
                 }
+                case VECTOR_IMAGE -> {
+                    return new EbsVectorImage[length];
+                }
                 case ANY -> {
                     return new Comparable[length];
                 }
@@ -127,6 +132,10 @@ public enum DataType {
         if (type == IMAGE) {
             // Accept EbsImage objects as images
             return value instanceof EbsImage;
+        }
+        if (type == VECTOR_IMAGE) {
+            // Accept EbsVectorImage objects as vector images
+            return value instanceof EbsVectorImage;
         }
         if (type == BITMAP) {
             // Accept Byte objects as bitmaps

@@ -1,0 +1,161 @@
+// ============================================================
+// EBS Test Script: Vector Image Basic Manipulations
+// Tests: vector.scale, vector.rotate, vector.setdimensions
+// ============================================================
+
+print "========================================";
+print "  Vector Image Basic Manipulation Tests";
+print "========================================";
+print "";
+
+var testCount: int = 0;
+var passCount: int = 0;
+var failCount: int = 0;
+
+// Test 1: Scale uniformly
+print "Test 1: Scale vector image uniformly (2x) with vector.scale()";
+testCount = testCount + 1;
+try {
+    var svg = call vector.load("src/main/resources/images/chess/white_king.svg");
+    var originalW: double = call vector.getwidth(svg);
+    var originalH: double = call vector.getheight(svg);
+    
+    var scaled = call vector.scale(svg, 2.0, 2.0);
+    var newW: double = call vector.getwidth(scaled);
+    var newH: double = call vector.getheight(scaled);
+    
+    print "  Original: " + originalW + "x" + originalH;
+    print "  Scaled:   " + newW + "x" + newH;
+    print "  ✓ PASS: Scaled 2x uniformly";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  ✗ FAIL: " + msg;
+        failCount = failCount + 1;
+    }
+}
+print "";
+
+// Test 2: Scale non-uniformly
+print "Test 2: Scale non-uniformly (width 3x, height 1.5x)";
+testCount = testCount + 1;
+try {
+    var svg = call vector.load("src/main/resources/images/chess/black_queen.svg");
+    var originalW: double = call vector.getwidth(svg);
+    var originalH: double = call vector.getheight(svg);
+    
+    var scaled = call vector.scale(svg, 3.0, 1.5);
+    var newW: double = call vector.getwidth(scaled);
+    var newH: double = call vector.getheight(scaled);
+    
+    print "  Original: " + originalW + "x" + originalH;
+    print "  Scaled:   " + newW + "x" + newH;
+    print "  ✓ PASS: Scaled non-uniformly";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  ✗ FAIL: " + msg;
+        failCount = failCount + 1;
+    }
+}
+print "";
+
+// Test 3: Rotate 45 degrees
+print "Test 3: Rotate vector image 45 degrees with vector.rotate()";
+testCount = testCount + 1;
+try {
+    var svg = call vector.load("src/main/resources/images/chess/white_rook.svg");
+    var rotated = call vector.rotate(svg, 45.0);
+    var saved: bool = call vector.save(rotated, "/tmp/test_rotated_45.svg");
+    
+    print "  Rotated 45 degrees";
+    if saved then {
+        print "  ✓ PASS: Rotated and saved";
+        passCount = passCount + 1;
+    } else {
+        print "  ✗ FAIL: Failed to save";
+        failCount = failCount + 1;
+    }
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  ✗ FAIL: " + msg;
+        failCount = failCount + 1;
+    }
+}
+print "";
+
+// Test 4: Rotate 90 degrees
+print "Test 4: Rotate 90 degrees";
+testCount = testCount + 1;
+try {
+    var svg = call vector.load("src/main/resources/images/chess/black_bishop.svg");
+    var rotated = call vector.rotate(svg, 90.0);
+    print "  Rotated 90 degrees";
+    print "  ✓ PASS: Rotation successful";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  ✗ FAIL: " + msg;
+        failCount = failCount + 1;
+    }
+}
+print "";
+
+// Test 5: Set custom dimensions
+print "Test 5: Set custom dimensions with vector.setdimensions()";
+testCount = testCount + 1;
+try {
+    var svg = call vector.load("src/main/resources/images/chess/white_knight.svg");
+    var resized = call vector.setdimensions(svg, 100.0, 100.0);
+    var w: double = call vector.getwidth(resized);
+    var h: double = call vector.getheight(resized);
+    
+    print "  New dimensions: " + w + "x" + h;
+    print "  ✓ PASS: Set custom dimensions";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  ✗ FAIL: " + msg;
+        failCount = failCount + 1;
+    }
+}
+print "";
+
+// Test 6: Chain operations (scale then rotate)
+print "Test 6: Chain operations - scale 2x then rotate 30 degrees";
+testCount = testCount + 1;
+try {
+    var svg = call vector.load("src/main/resources/images/chess/black_pawn.svg");
+    var scaled = call vector.scale(svg, 2.0, 2.0);
+    var rotated = call vector.rotate(scaled, 30.0);
+    var saved: bool = call vector.save(rotated, "/tmp/test_scaled_rotated.svg");
+    
+    print "  Chained: scale 2x + rotate 30°";
+    if saved then {
+        print "  ✓ PASS: Chained operations successful";
+        passCount = passCount + 1;
+    } else {
+        print "  ✗ FAIL: Failed to save";
+        failCount = failCount + 1;
+    }
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  ✗ FAIL: " + msg;
+        failCount = failCount + 1;
+    }
+}
+print "";
+
+// Summary
+print "========================================";
+print "  Test Summary";
+print "========================================";
+print "Total Tests:  " + testCount;
+print "Passed:       " + passCount;
+print "Failed:       " + failCount;
+if failCount == 0 then {
+    print "Result:       ALL TESTS PASSED ✓";
+} else {
+    print "Result:       SOME TESTS FAILED ✗";
+}
+print "========================================";

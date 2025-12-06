@@ -3,13 +3,17 @@ package com.eb.script.image;
 import com.eb.script.arrays.ArrayFixedByte;
 import com.eb.script.interpreter.InterpreterError;
 
-import de.codecentric.centerdevice.javafxsvg.SvgImageLoaderFactory;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
+
+import org.apache.batik.transcoder.TranscoderException;
+import org.apache.batik.transcoder.TranscoderInput;
+import org.apache.batik.transcoder.TranscoderOutput;
+import org.apache.batik.transcoder.image.ImageTranscoder;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -30,9 +34,6 @@ import java.util.Iterator;
  */
 public class EbsImage {
 
-    /** Flag to track if SVG loader has been installed */
-    private static boolean svgLoaderInstalled = false;
-
     /** The JavaFX image */
     private WritableImage fxImage;
     
@@ -46,17 +47,53 @@ public class EbsImage {
     private byte[] originalBytes;
     
     /**
-     * Install the SVG image loader factory if not already installed.
-     * This enables JavaFX to load SVG images natively.
+     * Custom Batik transcoder that converts SVG to BufferedImage.
+     * This transcoder is used to load SVG images in a JavaFX-compatible format.
+     * The transcoding process is synchronous and thread-safe.
      */
-    public static synchronized void installSvgLoader() {
-        if (!svgLoaderInstalled) {
-            try {
-                SvgImageLoaderFactory.install();
-                svgLoaderInstalled = true;
-            } catch (Exception e) {
-                // Ignore if already installed or fails
+    private static class BufferedImageTranscoder extends ImageTranscoder {
+        private BufferedImage bufferedImage;
+        
+        @Override
+        public BufferedImage createImage(int width, int height) {
+            return new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        }
+        
+        @Override
+        public void writeImage(BufferedImage img, TranscoderOutput output) throws TranscoderException {
+            this.bufferedImage = img;
+        }
+        
+        public BufferedImage getBufferedImage() {
+            return bufferedImage;
+        }
+    }
+    
+    /**
+     * Load an SVG image using Apache Batik transcoder.
+     * Converts SVG to BufferedImage, then to JavaFX Image.
+     * 
+     * @param bytes SVG file bytes
+     * @return BufferedImage representation of the SVG
+     * @throws IOException if SVG cannot be loaded
+     */
+    private static BufferedImage loadSvgImage(byte[] bytes) throws IOException {
+        try {
+            ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+            TranscoderInput input = new TranscoderInput(bais);
+            
+            // Use BufferedImageTranscoder to convert SVG to BufferedImage
+            BufferedImageTranscoder transcoder = new BufferedImageTranscoder();
+            transcoder.transcode(input, null);
+            
+            BufferedImage image = transcoder.getBufferedImage();
+            if (image == null) {
+                throw new IOException("Failed to transcode SVG: transcoder returned null image");
             }
+            
+            return image;
+        } catch (TranscoderException e) {
+            throw new IOException("Failed to transcode SVG image: " + e.getMessage(), e);
         }
     }
 
@@ -94,9 +131,6 @@ public class EbsImage {
             throw new InterpreterError("EbsImage: image bytes cannot be null or empty");
         }
         
-        // Ensure SVG loader is installed before loading any images
-        installSvgLoader();
-        
         this.originalBytes = bytes;
         this.imageName = name;
         
@@ -105,24 +139,31 @@ public class EbsImage {
         
         // Convert bytes to JavaFX Image
         try {
-            ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-            Image img = new Image(bais);
-            
-            if (img.isError()) {
-                throw new InterpreterError("EbsImage: invalid image data - " + img.getException().getMessage());
-            }
-            
-            // Create a writable copy
-            int width = (int) img.getWidth();
-            int height = (int) img.getHeight();
-            this.fxImage = new WritableImage(width, height);
-            
-            PixelReader reader = img.getPixelReader();
-            PixelWriter writer = this.fxImage.getPixelWriter();
-            
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    writer.setColor(x, y, reader.getColor(x, y));
+            // Handle SVG using Batik transcoder
+            if ("svg".equals(this.imageType)) {
+                BufferedImage bufferedImage = loadSvgImage(bytes);
+                this.fxImage = SwingFXUtils.toFXImage(bufferedImage, null);
+            } else {
+                // Handle other formats using JavaFX Image
+                ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+                Image img = new Image(bais);
+                
+                if (img.isError()) {
+                    throw new InterpreterError("EbsImage: invalid image data - " + img.getException().getMessage());
+                }
+                
+                // Create a writable copy
+                int width = (int) img.getWidth();
+                int height = (int) img.getHeight();
+                this.fxImage = new WritableImage(width, height);
+                
+                PixelReader reader = img.getPixelReader();
+                PixelWriter writer = this.fxImage.getPixelWriter();
+                
+                for (int y = 0; y < height; y++) {
+                    for (int x = 0; x < width; x++) {
+                        writer.setColor(x, y, reader.getColor(x, y));
+                    }
                 }
             }
         } catch (InterpreterError ie) {
