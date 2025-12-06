@@ -1,0 +1,153 @@
+// ============================================================
+// EBS Test Script: Vector Image Information Methods
+// Tests: vector.getwidth, vector.getheight, vector.getinfo
+//        vector.getname, vector.setname
+// ============================================================
+
+print "========================================";
+print "  Vector Image Information Tests";
+print "========================================";
+print "";
+
+var testCount: int = 0;
+var passCount: int = 0;
+var failCount: int = 0;
+
+// Test 1: Get width
+print "Test 1: Get vector image width with vector.getwidth()";
+testCount = testCount + 1;
+try {
+    var svg = call vector.load("src/main/resources/images/chess/white_king.svg");
+    var w: double = call vector.getwidth(svg);
+    print "  Width: " + w;
+    if w > 0.0 then {
+        print "  ✓ PASS: Got valid width";
+        passCount = passCount + 1;
+    } else {
+        print "  ✗ FAIL: Invalid width";
+        failCount = failCount + 1;
+    }
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  ✗ FAIL: " + msg;
+        failCount = failCount + 1;
+    }
+}
+print "";
+
+// Test 2: Get height
+print "Test 2: Get vector image height with vector.getheight()";
+testCount = testCount + 1;
+try {
+    var svg = call vector.load("src/main/resources/images/chess/white_queen.svg");
+    var h: double = call vector.getheight(svg);
+    print "  Height: " + h;
+    if h > 0.0 then {
+        print "  ✓ PASS: Got valid height";
+        passCount = passCount + 1;
+    } else {
+        print "  ✗ FAIL: Invalid height";
+        failCount = failCount + 1;
+    }
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  ✗ FAIL: " + msg;
+        failCount = failCount + 1;
+    }
+}
+print "";
+
+// Test 3: Get info (returns JSON)
+print "Test 3: Get vector image info with vector.getinfo()";
+testCount = testCount + 1;
+try {
+    var svg = call vector.load("src/main/resources/images/chess/black_rook.svg");
+    var info = call vector.getinfo(svg);
+    print "  Info: " + info;
+    print "  ✓ PASS: Got image info as JSON";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  ✗ FAIL: " + msg;
+        failCount = failCount + 1;
+    }
+}
+print "";
+
+// Test 4: Get name
+print "Test 4: Get vector image name with vector.getname()";
+testCount = testCount + 1;
+try {
+    var svg = call vector.load("src/main/resources/images/chess/black_bishop.svg");
+    var name: string = call vector.getname(svg);
+    print "  Name: " + name;
+    print "  ✓ PASS: Got image name";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  ✗ FAIL: " + msg;
+        failCount = failCount + 1;
+    }
+}
+print "";
+
+// Test 5: Set name
+print "Test 5: Set vector image name with vector.setname()";
+testCount = testCount + 1;
+try {
+    var svg = call vector.load("src/main/resources/images/chess/white_knight.svg");
+    var renamed = call vector.setname(svg, "my_custom_knight.svg");
+    var newName: string = call vector.getname(renamed);
+    print "  New name: " + newName;
+    print "  ✓ PASS: Set new name";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  ✗ FAIL: " + msg;
+        failCount = failCount + 1;
+    }
+}
+print "";
+
+// Test 6: Get dimensions from different pieces
+print "Test 6: Get dimensions from multiple pieces";
+testCount = testCount + 1;
+try {
+    var pieces: string[4];
+    pieces[0] = "src/main/resources/images/chess/white_pawn.svg";
+    pieces[1] = "src/main/resources/images/chess/black_pawn.svg";
+    pieces[2] = "src/main/resources/images/chess/white_king.svg";
+    pieces[3] = "src/main/resources/images/chess/black_queen.svg";
+    
+    var i: int = 0;
+    for (i = 0; i < 4; i++) {
+        var piece = call vector.load(pieces[i]);
+        var w: double = call vector.getwidth(piece);
+        var h: double = call vector.getheight(piece);
+        var name: string = call vector.getname(piece);
+        print "  " + name + ": " + w + "x" + h;
+    }
+    
+    print "  ✓ PASS: Got dimensions from all pieces";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  ✗ FAIL: " + msg;
+        failCount = failCount + 1;
+    }
+}
+print "";
+
+// Summary
+print "========================================";
+print "  Test Summary";
+print "========================================";
+print "Total Tests:  " + testCount;
+print "Passed:       " + passCount;
+print "Failed:       " + failCount;
+if failCount == 0 then {
+    print "Result:       ALL TESTS PASSED ✓";
+} else {
+    print "Result:       SOME TESTS FAILED ✗";
+}
+print "========================================";

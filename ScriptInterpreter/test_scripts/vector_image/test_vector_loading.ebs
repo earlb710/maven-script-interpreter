@@ -1,0 +1,130 @@
+// ============================================================
+// EBS Test Script: Vector Image Loading and Saving
+// Tests: vector.load, vector.save, vector.create
+// ============================================================
+
+print "========================================";
+print "  Vector Image Loading and Saving Tests";
+print "========================================";
+print "";
+
+var testCount: int = 0;
+var passCount: int = 0;
+var failCount: int = 0;
+
+// Test 1: Load SVG file
+print "Test 1: Load SVG file with vector.load()";
+testCount = testCount + 1;
+try {
+    var svg = call vector.load("src/main/resources/images/chess/white_king.svg");
+    print "  ✓ PASS: Loaded " + svg;
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  ✗ FAIL: " + msg;
+        failCount = failCount + 1;
+    }
+}
+print "";
+
+// Test 2: Save SVG file
+print "Test 2: Save vector image with vector.save()";
+testCount = testCount + 1;
+try {
+    var svg = call vector.load("src/main/resources/images/chess/white_rook.svg");
+    var saved: bool = call vector.save(svg, "/tmp/test_rook.svg");
+    if saved then {
+        print "  ✓ PASS: Saved successfully";
+        passCount = passCount + 1;
+    } else {
+        print "  ✗ FAIL: Save returned false";
+        failCount = failCount + 1;
+    }
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  ✗ FAIL: " + msg;
+        failCount = failCount + 1;
+    }
+}
+print "";
+
+// Test 3: Create vector image from bytes
+print "Test 3: Create vector image from bytes with vector.create()";
+testCount = testCount + 1;
+try {
+    var svg = call vector.load("src/main/resources/images/chess/black_queen.svg");
+    var bytes = call vector.toBytes(svg);
+    var created = call vector.create(bytes, "created_queen.svg");
+    print "  ✓ PASS: Created " + created;
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  ✗ FAIL: " + msg;
+        failCount = failCount + 1;
+    }
+}
+print "";
+
+// Test 4: Load multiple SVG files
+print "Test 4: Load multiple different chess pieces";
+testCount = testCount + 1;
+try {
+    var pieces: string[6];
+    pieces[0] = "src/main/resources/images/chess/white_king.svg";
+    pieces[1] = "src/main/resources/images/chess/white_queen.svg";
+    pieces[2] = "src/main/resources/images/chess/black_rook.svg";
+    pieces[3] = "src/main/resources/images/chess/black_bishop.svg";
+    pieces[4] = "src/main/resources/images/chess/white_knight.svg";
+    pieces[5] = "src/main/resources/images/chess/black_pawn.svg";
+    
+    var i: int = 0;
+    var loaded: int = 0;
+    for (i = 0; i < 6; i++) {
+        var piece = call vector.load(pieces[i]);
+        loaded = loaded + 1;
+    }
+    
+    print "  ✓ PASS: Loaded " + loaded + " pieces";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  ✗ FAIL: " + msg;
+        failCount = failCount + 1;
+    }
+}
+print "";
+
+// Test 5: Save with different path
+print "Test 5: Save to custom directory";
+testCount = testCount + 1;
+try {
+    var svg = call vector.load("src/main/resources/images/chess/white_pawn.svg");
+    var saved: bool = call vector.save(svg, "/tmp/vector_tests/custom_pawn.svg");
+    if saved then {
+        print "  ✓ PASS: Saved to custom directory";
+        passCount = passCount + 1;
+    } else {
+        print "  ✗ FAIL: Save returned false";
+        failCount = failCount + 1;
+    }
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  ✗ FAIL: " + msg;
+        failCount = failCount + 1;
+    }
+}
+print "";
+
+// Summary
+print "========================================";
+print "  Test Summary";
+print "========================================";
+print "Total Tests:  " + testCount;
+print "Passed:       " + passCount;
+print "Failed:       " + failCount;
+if failCount == 0 then {
+    print "Result:       ALL TESTS PASSED ✓";
+} else {
+    print "Result:       SOME TESTS FAILED ✗";
+}
+print "========================================";

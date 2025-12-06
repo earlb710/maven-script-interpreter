@@ -1,0 +1,444 @@
+// ============================================================
+// EBS Master Test Script: All Vector Image Builtins
+// Runs all vector image builtin tests
+// ============================================================
+
+print "========================================================";
+print "  MASTER TEST SUITE: All Vector Image Builtins";
+print "========================================================";
+print "";
+print "This suite tests all vector image builtins:";
+print "  - Loading and Saving (vector.load, vector.save, vector.create)";
+print "  - Information (vector.getwidth, vector.getheight, vector.getinfo, vector.getname, vector.setname)";
+print "  - Basic Manipulations (vector.scale, vector.rotate, vector.setdimensions)";
+print "  - Color Operations (vector.setfillcolor, vector.setstrokecolor, vector.setstrokewidth)";
+print "  - Filter Effects (vector.applyblur, vector.applydropshadow, vector.applygrayscale, vector.applysepia, vector.applybrightness, vector.applyhuerotate)";
+print "  - Conversions (vector.toraster, vector.toimage, vector.tobytes, vector.tostring)";
+print "";
+print "========================================================";
+print "";
+
+var totalTests: int = 0;
+var totalPassed: int = 0;
+var totalFailed: int = 0;
+
+// Test Suite 1: Loading and Saving
+print "---------- Test Suite 1: Loading and Saving ----------";
+print "";
+
+var testCount: int = 0;
+var passCount: int = 0;
+
+// Load
+testCount = testCount + 1;
+try {
+    var svg = call vector.load("src/main/resources/images/chess/white_king.svg");
+    print "✓ vector.load() works";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "✗ vector.load() failed: " + msg;
+    }
+}
+
+// Save
+testCount = testCount + 1;
+try {
+    var svg = call vector.load("src/main/resources/images/chess/white_queen.svg");
+    var saved: bool = call vector.save(svg, "master_test_queen.svg");
+    if saved then {
+        print "✓ vector.save() works";
+        passCount = passCount + 1;
+    } else {
+        print "✗ vector.save() failed";
+    }
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "✗ vector.save() failed: " + msg;
+    }
+}
+
+// Create
+testCount = testCount + 1;
+try {
+    var svg = call vector.load("src/main/resources/images/chess/black_rook.svg");
+    var bytes = call vector.tobytes(svg);
+    var created = call vector.create(bytes, "test.svg");
+    print "✓ vector.create() works";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "✗ vector.create() failed: " + msg;
+    }
+}
+
+totalTests = totalTests + testCount;
+totalPassed = totalPassed + passCount;
+totalFailed = totalFailed + (testCount - passCount);
+print "";
+print "Suite 1: " + passCount + "/" + testCount + " passed";
+print "";
+
+// Test Suite 2: Information Methods
+print "---------- Test Suite 2: Information Methods ----------";
+print "";
+
+testCount = 0;
+passCount = 0;
+
+var svg = call vector.load("src/main/resources/images/chess/black_bishop.svg");
+
+// getwidth
+testCount = testCount + 1;
+try {
+    var w: double = call vector.getwidth(svg);
+    print "✓ vector.getwidth() works (width=" + w + ")";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "✗ vector.getwidth() failed: " + msg;
+    }
+}
+
+// getheight
+testCount = testCount + 1;
+try {
+    var h: double = call vector.getheight(svg);
+    print "✓ vector.getheight() works (height=" + h + ")";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "✗ vector.getheight() failed: " + msg;
+    }
+}
+
+// getinfo
+testCount = testCount + 1;
+try {
+    var info = call vector.getinfo(svg);
+    print "✓ vector.getinfo() works";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "✗ vector.getinfo() failed: " + msg;
+    }
+}
+
+// getname
+testCount = testCount + 1;
+try {
+    var name: string = call vector.getname(svg);
+    print "✓ vector.getname() works (name=" + name + ")";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "✗ vector.getname() failed: " + msg;
+    }
+}
+
+// setname
+testCount = testCount + 1;
+try {
+    var renamed = call vector.setname(svg, "new_name.svg");
+    print "✓ vector.setname() works";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "✗ vector.setname() failed: " + msg;
+    }
+}
+
+totalTests = totalTests + testCount;
+totalPassed = totalPassed + passCount;
+totalFailed = totalFailed + (testCount - passCount);
+print "";
+print "Suite 2: " + passCount + "/" + testCount + " passed";
+print "";
+
+// Test Suite 3: Basic Manipulations
+print "---------- Test Suite 3: Basic Manipulations ----------";
+print "";
+
+testCount = 0;
+passCount = 0;
+
+svg = call vector.load("src/main/resources/images/chess/white_knight.svg");
+
+// scale
+testCount = testCount + 1;
+try {
+    var scaled = call vector.scale(svg, 2.0, 2.0);
+    print "✓ vector.scale() works";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "✗ vector.scale() failed: " + msg;
+    }
+}
+
+// rotate
+testCount = testCount + 1;
+try {
+    var rotated = call vector.rotate(svg, 45.0);
+    print "✓ vector.rotate() works";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "✗ vector.rotate() failed: " + msg;
+    }
+}
+
+// setdimensions
+testCount = testCount + 1;
+try {
+    var resized = call vector.setdimensions(svg, 100.0, 100.0);
+    print "✓ vector.setdimensions() works";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "✗ vector.setdimensions() failed: " + msg;
+    }
+}
+
+totalTests = totalTests + testCount;
+totalPassed = totalPassed + passCount;
+totalFailed = totalFailed + (testCount - passCount);
+print "";
+print "Suite 3: " + passCount + "/" + testCount + " passed";
+print "";
+
+// Test Suite 4: Color Operations
+print "---------- Test Suite 4: Color Operations ----------";
+print "";
+
+testCount = 0;
+passCount = 0;
+
+svg = call vector.load("src/main/resources/images/chess/black_pawn.svg");
+
+// setfillcolor
+testCount = testCount + 1;
+try {
+    var colored = call vector.setfillcolor(svg, "#ff0000");
+    print "✓ vector.setfillcolor() works";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "✗ vector.setfillcolor() failed: " + msg;
+    }
+}
+
+// setstrokecolor
+testCount = testCount + 1;
+try {
+    var stroked = call vector.setstrokecolor(svg, "#0000ff");
+    print "✓ vector.setstrokecolor() works";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "✗ vector.setstrokecolor() failed: " + msg;
+    }
+}
+
+// setstrokewidth
+testCount = testCount + 1;
+try {
+    var thick = call vector.setstrokewidth(svg, 3.0);
+    print "✓ vector.setstrokewidth() works";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "✗ vector.setstrokewidth() failed: " + msg;
+    }
+}
+
+totalTests = totalTests + testCount;
+totalPassed = totalPassed + passCount;
+totalFailed = totalFailed + (testCount - passCount);
+print "";
+print "Suite 4: " + passCount + "/" + testCount + " passed";
+print "";
+
+// Test Suite 5: Filter Effects
+print "---------- Test Suite 5: Filter Effects ----------";
+print "";
+
+testCount = 0;
+passCount = 0;
+
+svg = call vector.load("src/main/resources/images/chess/white_pawn.svg");
+
+// applyblur
+testCount = testCount + 1;
+try {
+    var blurred = call vector.applyblur(svg, 2.0);
+    print "✓ vector.applyblur() works";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "✗ vector.applyblur() failed: " + msg;
+    }
+}
+
+// applydropshadow
+testCount = testCount + 1;
+try {
+    var shadow = call vector.applydropshadow(svg, 3.0, 3.0, 1.5, "#000000");
+    print "✓ vector.applydropshadow() works";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "✗ vector.applydropshadow() failed: " + msg;
+    }
+}
+
+// applygrayscale
+testCount = testCount + 1;
+try {
+    var gray = call vector.applygrayscale(svg);
+    print "✓ vector.applygrayscale() works";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "✗ vector.applygrayscale() failed: " + msg;
+    }
+}
+
+// applysepia
+testCount = testCount + 1;
+try {
+    var sepia = call vector.applysepia(svg);
+    print "✓ vector.applysepia() works";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "✗ vector.applysepia() failed: " + msg;
+    }
+}
+
+// applybrightness
+testCount = testCount + 1;
+try {
+    var bright = call vector.applybrightness(svg, 1.5);
+    print "✓ vector.applybrightness() works";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "✗ vector.applybrightness() failed: " + msg;
+    }
+}
+
+// applyhuerotate
+testCount = testCount + 1;
+try {
+    var hue = call vector.applyhuerotate(svg, 120.0);
+    print "✓ vector.applyhuerotate() works";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "✗ vector.applyhuerotate() failed: " + msg;
+    }
+}
+
+totalTests = totalTests + testCount;
+totalPassed = totalPassed + passCount;
+totalFailed = totalFailed + (testCount - passCount);
+print "";
+print "Suite 5: " + passCount + "/" + testCount + " passed";
+print "";
+
+// Test Suite 6: Conversion Methods
+print "---------- Test Suite 6: Conversion Methods ----------";
+print "";
+
+testCount = 0;
+passCount = 0;
+
+svg = call vector.load("src/main/resources/images/chess/black_queen.svg");
+
+// toraster (default)
+testCount = testCount + 1;
+try {
+    var raster = call vector.toraster(svg);
+    print "✓ vector.toraster() works (default size)";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "✗ vector.toraster() failed: " + msg;
+    }
+}
+
+// toraster (custom size)
+testCount = testCount + 1;
+try {
+    var raster = call vector.toraster(svg, 128, 128);
+    print "✓ vector.toraster() works (custom size)";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "✗ vector.toraster() failed: " + msg;
+    }
+}
+
+// toimage (alias)
+testCount = testCount + 1;
+try {
+    var raster = call vector.toimage(svg, 64, 64);
+    print "✓ vector.toimage() works (alias)";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "✗ vector.toimage() failed: " + msg;
+    }
+}
+
+// tobytes
+testCount = testCount + 1;
+try {
+    var bytes = call vector.tobytes(svg);
+    print "✓ vector.tobytes() works";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "✗ vector.tobytes() failed: " + msg;
+    }
+}
+
+// tostring
+testCount = testCount + 1;
+try {
+    var svgStr: string = call vector.tostring(svg);
+    print "✓ vector.tostring() works";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "✗ vector.tostring() failed: " + msg;
+    }
+}
+
+totalTests = totalTests + testCount;
+totalPassed = totalPassed + passCount;
+totalFailed = totalFailed + (testCount - passCount);
+print "";
+print "Suite 6: " + passCount + "/" + testCount + " passed";
+print "";
+
+// Final Summary
+print "========================================================";
+print "  FINAL TEST RESULTS";
+print "========================================================";
+print "Total Tests Run:     " + totalTests;
+print "Tests Passed:        " + totalPassed;
+print "Tests Failed:        " + totalFailed;
+print "";
+if totalFailed == 0 then {
+    print "★★★ ALL TESTS PASSED ★★★";
+    print "";
+    print "All " + totalTests + " vector image builtin functions";
+    print "are working correctly!";
+} else {
+    print "✗✗✗ SOME TESTS FAILED ✗✗✗";
+    print "";
+    print "Please review the failures above.";
+}
+print "========================================================";

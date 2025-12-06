@@ -1,0 +1,179 @@
+// ============================================================
+// EBS Test Script: Vector Image Color Manipulations
+// Tests: vector.setfillcolor, vector.setstrokecolor, 
+//        vector.setstrokewidth
+// ============================================================
+
+print "========================================";
+print "  Vector Image Color Manipulation Tests";
+print "========================================";
+print "";
+
+var testCount: int = 0;
+var passCount: int = 0;
+var failCount: int = 0;
+
+// Test 1: Set fill color to red
+print "Test 1: Set fill color to red with vector.setfillcolor()";
+testCount = testCount + 1;
+try {
+    var svg = call vector.load("src/main/resources/images/chess/white_king.svg");
+    var red = call vector.setfillcolor(svg, "#ff0000");
+    var saved: bool = call vector.save(red, "/tmp/test_red_king.svg");
+    
+    if saved then {
+        print "  ✓ PASS: Set fill color to red";
+        passCount = passCount + 1;
+    } else {
+        print "  ✗ FAIL: Failed to save";
+        failCount = failCount + 1;
+    }
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  ✗ FAIL: " + msg;
+        failCount = failCount + 1;
+    }
+}
+print "";
+
+// Test 2: Set fill color to blue
+print "Test 2: Set fill color to blue";
+testCount = testCount + 1;
+try {
+    var svg = call vector.load("src/main/resources/images/chess/white_queen.svg");
+    var blue = call vector.setfillcolor(svg, "#0000ff");
+    print "  ✓ PASS: Set fill color to blue";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  ✗ FAIL: " + msg;
+        failCount = failCount + 1;
+    }
+}
+print "";
+
+// Test 3: Set fill color to green
+print "Test 3: Set fill color to green";
+testCount = testCount + 1;
+try {
+    var svg = call vector.load("src/main/resources/images/chess/black_rook.svg");
+    var green = call vector.setfillcolor(svg, "#00ff00");
+    var saved: bool = call vector.save(green, "/tmp/test_green_rook.svg");
+    
+    if saved then {
+        print "  ✓ PASS: Set fill color to green";
+        passCount = passCount + 1;
+    } else {
+        print "  ✗ FAIL: Failed to save";
+        failCount = failCount + 1;
+    }
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  ✗ FAIL: " + msg;
+        failCount = failCount + 1;
+    }
+}
+print "";
+
+// Test 4: Set stroke color
+print "Test 4: Set stroke color to purple with vector.setstrokecolor()";
+testCount = testCount + 1;
+try {
+    var svg = call vector.load("src/main/resources/images/chess/black_bishop.svg");
+    var purple = call vector.setstrokecolor(svg, "#800080");
+    print "  ✓ PASS: Set stroke color to purple";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  ✗ FAIL: " + msg;
+        failCount = failCount + 1;
+    }
+}
+print "";
+
+// Test 5: Set stroke width
+print "Test 5: Set stroke width to 3.0 with vector.setstrokewidth()";
+testCount = testCount + 1;
+try {
+    var svg = call vector.load("src/main/resources/images/chess/white_knight.svg");
+    var thick = call vector.setstrokewidth(svg, 3.0);
+    var saved: bool = call vector.save(thick, "/tmp/test_thick_knight.svg");
+    
+    if saved then {
+        print "  ✓ PASS: Set stroke width to 3.0";
+        passCount = passCount + 1;
+    } else {
+        print "  ✗ FAIL: Failed to save";
+        failCount = failCount + 1;
+    }
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  ✗ FAIL: " + msg;
+        failCount = failCount + 1;
+    }
+}
+print "";
+
+// Test 6: Combine fill and stroke
+print "Test 6: Combine fill color (orange) and stroke color (black)";
+testCount = testCount + 1;
+try {
+    var svg = call vector.load("src/main/resources/images/chess/black_pawn.svg");
+    var colored = call vector.setfillcolor(svg, "#ff8800");
+    colored = call vector.setstrokecolor(colored, "#000000");
+    colored = call vector.setstrokewidth(colored, 2.0);
+    var saved: bool = call vector.save(colored, "/tmp/test_orange_pawn.svg");
+    
+    if saved then {
+        print "  ✓ PASS: Combined fill and stroke colors";
+        passCount = passCount + 1;
+    } else {
+        print "  ✗ FAIL: Failed to save";
+        failCount = failCount + 1;
+    }
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  ✗ FAIL: " + msg;
+        failCount = failCount + 1;
+    }
+}
+print "";
+
+// Test 7: Multiple color variations
+print "Test 7: Create multiple color variations";
+testCount = testCount + 1;
+try {
+    var svg = call vector.load("src/main/resources/images/chess/white_pawn.svg");
+    
+    var red = call vector.setfillcolor(svg, "#ff0000");
+    call vector.save(red, "/tmp/test_pawn_red.svg");
+    
+    var blue = call vector.setfillcolor(svg, "#0000ff");
+    call vector.save(blue, "/tmp/test_pawn_blue.svg");
+    
+    var yellow = call vector.setfillcolor(svg, "#ffff00");
+    call vector.save(yellow, "/tmp/test_pawn_yellow.svg");
+    
+    print "  ✓ PASS: Created 3 color variations";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  ✗ FAIL: " + msg;
+        failCount = failCount + 1;
+    }
+}
+print "";
+
+// Summary
+print "========================================";
+print "  Test Summary";
+print "========================================";
+print "Total Tests:  " + testCount;
+print "Passed:       " + passCount;
+print "Failed:       " + failCount;
+if failCount == 0 then {
+    print "Result:       ALL TESTS PASSED ✓";
+} else {
+    print "Result:       SOME TESTS FAILED ✗";
+}
+print "========================================";

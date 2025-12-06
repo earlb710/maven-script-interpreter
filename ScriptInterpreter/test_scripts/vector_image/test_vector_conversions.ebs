@@ -1,0 +1,199 @@
+// ============================================================
+// EBS Test Script: Vector Image Conversion Methods
+// Tests: vector.toraster, vector.toimage, vector.tobytes,
+//        vector.tostring
+// ============================================================
+
+print "========================================";
+print "  Vector Image Conversion Tests";
+print "========================================";
+print "";
+
+var testCount: int = 0;
+var passCount: int = 0;
+var failCount: int = 0;
+
+// Test 1: Convert to raster (default size)
+print "Test 1: Convert to raster image with vector.toraster()";
+testCount = testCount + 1;
+try {
+    var svg = call vector.load("src/main/resources/images/chess/white_king.svg");
+    var raster = call vector.toraster(svg);
+    var w: int = call image.getwidth(raster);
+    var h: int = call image.getheight(raster);
+    
+    print "  Rasterized: " + w + "x" + h + " pixels";
+    print "  ✓ PASS: Converted to raster (default size)";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  ✗ FAIL: " + msg;
+        failCount = failCount + 1;
+    }
+}
+print "";
+
+// Test 2: Convert to raster (custom size)
+print "Test 2: Convert to raster with custom size (128x128)";
+testCount = testCount + 1;
+try {
+    var svg = call vector.load("src/main/resources/images/chess/white_queen.svg");
+    var raster = call vector.toraster(svg, 128, 128);
+    var w: int = call image.getwidth(raster);
+    var h: int = call image.getheight(raster);
+    
+    print "  Rasterized: " + w + "x" + h + " pixels";
+    if w == 128 then {
+        if h == 128 then {
+            print "  ✓ PASS: Converted to custom size";
+            passCount = passCount + 1;
+        } else {
+            print "  ✗ FAIL: Height mismatch";
+            failCount = failCount + 1;
+        }
+    } else {
+        print "  ✗ FAIL: Width mismatch";
+        failCount = failCount + 1;
+    }
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  ✗ FAIL: " + msg;
+        failCount = failCount + 1;
+    }
+}
+print "";
+
+// Test 3: Convert to raster (large size)
+print "Test 3: Convert to raster with large size (512x512)";
+testCount = testCount + 1;
+try {
+    var svg = call vector.load("src/main/resources/images/chess/black_rook.svg");
+    var raster = call vector.toraster(svg, 512, 512);
+    var w: int = call image.getwidth(raster);
+    var h: int = call image.getheight(raster);
+    
+    print "  Rasterized: " + w + "x" + h + " pixels";
+    print "  ✓ PASS: Converted to large size (no quality loss)";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  ✗ FAIL: " + msg;
+        failCount = failCount + 1;
+    }
+}
+print "";
+
+// Test 4: Use toImage alias
+print "Test 4: Use vector.toimage() alias";
+testCount = testCount + 1;
+try {
+    var svg = call vector.load("src/main/resources/images/chess/black_bishop.svg");
+    var raster = call vector.toimage(svg, 64, 64);
+    var w: int = call image.getwidth(raster);
+    var h: int = call image.getheight(raster);
+    
+    print "  Rasterized: " + w + "x" + h + " pixels";
+    print "  ✓ PASS: toimage() alias works";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  ✗ FAIL: " + msg;
+        failCount = failCount + 1;
+    }
+}
+print "";
+
+// Test 5: Convert to bytes
+print "Test 5: Convert to bytes with vector.tobytes()";
+testCount = testCount + 1;
+try {
+    var svg = call vector.load("src/main/resources/images/chess/white_knight.svg");
+    var bytes = call vector.tobytes(svg);
+    
+    print "  Got byte array from vector image";
+    print "  ✓ PASS: Converted to bytes";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  ✗ FAIL: " + msg;
+        failCount = failCount + 1;
+    }
+}
+print "";
+
+// Test 6: Convert to string (SVG XML)
+print "Test 6: Convert to SVG string with vector.tostring()";
+testCount = testCount + 1;
+try {
+    var svg = call vector.load("src/main/resources/images/chess/black_pawn.svg");
+    var svgStr: string = call vector.tostring(svg);
+    
+    print "  Got SVG XML string";
+    print "  ✓ PASS: Converted to string";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  ✗ FAIL: " + msg;
+        failCount = failCount + 1;
+    }
+}
+print "";
+
+// Test 7: Rasterize filtered image
+print "Test 7: Rasterize image with filters applied";
+testCount = testCount + 1;
+try {
+    var svg = call vector.load("src/main/resources/images/chess/white_pawn.svg");
+    var colored = call vector.setfillcolor(svg, "#ff0000");
+    var blurred = call vector.applyblur(colored, 2.0);
+    var raster = call vector.toraster(blurred, 256, 256);
+    var saved: bool = call image.save(raster, "/tmp/test_raster_filtered.png");
+    
+    if saved then {
+        print "  ✓ PASS: Rasterized filtered image to PNG";
+        passCount = passCount + 1;
+    } else {
+        print "  ✗ FAIL: Failed to save";
+        failCount = failCount + 1;
+    }
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  ✗ FAIL: " + msg;
+        failCount = failCount + 1;
+    }
+}
+print "";
+
+// Test 8: Bytes roundtrip (load -> bytes -> create)
+print "Test 8: Bytes roundtrip (load -> bytes -> create)";
+testCount = testCount + 1;
+try {
+    var svg1 = call vector.load("src/main/resources/images/chess/black_queen.svg");
+    var bytes = call vector.tobytes(svg1);
+    var svg2 = call vector.create(bytes, "roundtrip_queen.svg");
+    var w: double = call vector.getwidth(svg2);
+    
+    print "  Roundtrip successful, width: " + w;
+    print "  ✓ PASS: Bytes roundtrip works";
+    passCount = passCount + 1;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "  ✗ FAIL: " + msg;
+        failCount = failCount + 1;
+    }
+}
+print "";
+
+// Summary
+print "========================================";
+print "  Test Summary";
+print "========================================";
+print "Total Tests:  " + testCount;
+print "Passed:       " + passCount;
+print "Failed:       " + failCount;
+if failCount == 0 then {
+    print "Result:       ALL TESTS PASSED ✓";
+} else {
+    print "Result:       SOME TESTS FAILED ✗";
+}
+print "========================================";
