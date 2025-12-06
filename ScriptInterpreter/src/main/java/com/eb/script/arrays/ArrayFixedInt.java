@@ -5,6 +5,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 /**
+ * A fixed-size int array implementation that can represent either INTEGER or INTMAP data types.
+ * Both INTEGER and INTMAP arrays use the same underlying int[] storage, allowing for 
+ * efficient casting between the two types.
  *
  * @author Earl Bosch
  */
@@ -25,6 +28,46 @@ public class ArrayFixedInt implements ArrayDef<Integer, int[]> {
         this.dataType = DataType.INTEGER;
         this.dimension = size;
         elements = new int[size];
+    }
+    
+    /**
+     * Create an ArrayFixedInt with a specific data type (INTEGER or INTMAP).
+     * @param elements The int array elements
+     * @param dataType The data type (INTEGER or INTMAP)
+     */
+    public ArrayFixedInt(int[] elements, DataType dataType) {
+        if (dataType != DataType.INTEGER && dataType != DataType.INTMAP) {
+            throw new IllegalArgumentException("ArrayFixedInt only supports INTEGER or INTMAP data types");
+        }
+        this.dataType = dataType;
+        this.dimension = elements.length;
+        this.elements = elements;
+    }
+
+    /**
+     * Create an ArrayFixedInt with a specific size and data type (INTEGER or INTMAP).
+     * @param size The array size
+     * @param dataType The data type (INTEGER or INTMAP)
+     */
+    public ArrayFixedInt(int size, DataType dataType) {
+        if (dataType != DataType.INTEGER && dataType != DataType.INTMAP) {
+            throw new IllegalArgumentException("ArrayFixedInt only supports INTEGER or INTMAP data types");
+        }
+        this.dataType = dataType;
+        this.dimension = size;
+        elements = new int[size];
+    }
+    
+    /**
+     * Create a copy of this array with a different data type (for casting between INTEGER and INTMAP).
+     * @param targetType The target data type (INTEGER or INTMAP)
+     * @return A new ArrayFixedInt with the same elements but different data type
+     */
+    public ArrayFixedInt castTo(DataType targetType) {
+        if (targetType != DataType.INTEGER && targetType != DataType.INTMAP) {
+            throw new IllegalArgumentException("Can only cast ArrayFixedInt to INTEGER or INTMAP");
+        }
+        return new ArrayFixedInt(elements.clone(), targetType);
     }
 
     @Override
