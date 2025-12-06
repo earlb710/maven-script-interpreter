@@ -40,3 +40,4 @@ ScriptInterpreter/test-images-resized/
 
 # Generated console configuration CSS
 console-config.css
+*.backup
