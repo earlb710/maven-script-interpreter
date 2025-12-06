@@ -1409,7 +1409,8 @@ public class Parser {
             consume(EbsTokenType.COLON, "Expected ':' after field name in record literal.");
             
             // Add field name with quotes to JSON (escape field name for JSON safety)
-            jsonBuilder.append("\"").append(escapeJsonString((String) fieldName.literal)).append("\":");
+            String fieldNameStr = fieldName.literal != null ? (String) fieldName.literal : "";
+            jsonBuilder.append("\"").append(escapeJsonString(fieldNameStr)).append("\":");
             
             // Parse field value - could be another record literal, string, number, etc.
             String fieldValue = parseRecordFieldValue();
@@ -1476,6 +1477,12 @@ public class Parser {
             
             EbsToken identifier = advance();
             if (check(EbsTokenType.LBRACE)) {
+                // Validate that the identifier is a type alias
+                String typeName = identifier.literal != null ? (String) identifier.literal : "";
+                TypeRegistry.TypeAlias alias = TypeRegistry.getTypeAlias(typeName);
+                if (alias == null) {
+                    throw error(identifier, "Unknown type '" + typeName + "' in record literal. Only type aliases can be used.");
+                }
                 // This is a nested record literal, parse it recursively
                 LiteralExpression nestedRecord = parseRecordLiteral();
                 // Convert the parsed JSON object back to string
@@ -1493,7 +1500,8 @@ public class Parser {
         if (match(EbsTokenType.QUOTE1, EbsTokenType.QUOTE2)) {
             EbsToken quoteType = previous();
             if (match(EbsTokenType.STRING, EbsTokenType.DATE)) {
-                String strValue = (String) previous().literal;
+                Object literalValue = previous().literal;
+                String strValue = literalValue != null ? (String) literalValue : "";
                 consume(quoteType.type, "Expected closing quote.");
                 // Use proper JSON string escaping
                 return "\"" + escapeJsonString(strValue) + "\"";
