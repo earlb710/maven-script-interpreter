@@ -48,6 +48,8 @@ public class EbsImage {
     
     /**
      * Custom Batik transcoder that converts SVG to BufferedImage.
+     * This transcoder is used to load SVG images in a JavaFX-compatible format.
+     * The transcoding process is synchronous and thread-safe.
      */
     private static class BufferedImageTranscoder extends ImageTranscoder {
         private BufferedImage bufferedImage;
@@ -84,9 +86,14 @@ public class EbsImage {
             BufferedImageTranscoder transcoder = new BufferedImageTranscoder();
             transcoder.transcode(input, null);
             
-            return transcoder.getBufferedImage();
-        } catch (Exception e) {
-            throw new IOException("Failed to load SVG image: " + e.getMessage(), e);
+            BufferedImage image = transcoder.getBufferedImage();
+            if (image == null) {
+                throw new IOException("Failed to transcode SVG: transcoder returned null image");
+            }
+            
+            return image;
+        } catch (TranscoderException e) {
+            throw new IOException("Failed to transcode SVG image: " + e.getMessage(), e);
         }
     }
 
