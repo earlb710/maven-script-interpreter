@@ -288,7 +288,6 @@ screen chessScreen = {
     "title": "Chess Game",
     "width": 650,
     "height": 780,
-    "resizable": false,
     "vars": [
         {"name": "whiteTimer", "type": "string", "default": "10:00"},
         {"name": "blackTimer", "type": "string", "default": "10:00"},
@@ -356,6 +355,10 @@ screen chessScreen = {
                     "type": "vbox",
                     "spacing": "0",
                     "padding": "10",
+                    "minWidth": "624",
+                    "maxWidth": "624",
+                    "minHeight": "624",
+                    "maxHeight": "624",
                     "style": "-fx-background-color: #654321; -fx-background-radius: 5;",
                     "areas": [
                         {
