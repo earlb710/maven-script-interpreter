@@ -81,7 +81,7 @@ All identifiers are normalized to lowercase internally, so `myVariable`, `MyVari
 | `map` | Key-value map (JSON objects only) | `{"key": "value"}` |
 | `record` | Structured type with named fields | `record {name: string, age: int}` |
 | `bitmap` | Byte with named bit fields (8-bit, 0-7) | `bitmap { flag: 0, status: 1-3 }` |
-| `intmap` | Integer with named bit fields (32-bit, 0-31) | `intmap { id: 0-15, flags: 16-23 }` |
+| `intmap` | Integer with named bit fields (32-bit, 0-31) | `intmap { enabled: 0, mode: 1-7, id: 8-31 }` |
 | `array` | Generic array | `array[10]`, `array[*]` |
 | `queue` | FIFO queue (use `queue.type`) | `queue.string`, `queue.int` |
 
@@ -398,8 +398,8 @@ print FLAGS.admin;    // Output: 1
 - Fields cannot overlap
 
 **Intmap vs Bitmap:**
-- **bitmap**: 8-bit storage (byte), bit positions 0-7, stores values up to 255
-- **intmap**: 32-bit storage (integer), bit positions 0-31, stores values up to 4,294,967,295
+- **bitmap**: 8-bit storage (byte), bit positions 0-7, maximum 255 as an unsigned byte value
+- **intmap**: 32-bit storage (integer), bit positions 0-31, uses signed 32-bit integer (-2,147,483,648 to 2,147,483,647)
 - Use bitmap for small flags and values (saves memory)
 - Use intmap when you need more bits or larger field values
 
