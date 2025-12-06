@@ -77,6 +77,8 @@ public class Util {
                     array.getDataType() == DataType.BITMAP;
                 case INTEGER, LONG ->
                     array.getDataType() == DataType.INTEGER || array.getDataType() == DataType.LONG;
+                case INTMAP ->
+                    array.getDataType() == DataType.INTMAP;
                 case FLOAT, DOUBLE ->
                     array.getDataType() == DataType.FLOAT || array.getDataType() == DataType.DOUBLE;
                 case STRING ->

@@ -110,9 +110,14 @@ configs[0] = 1;     // enabled=1, mode=0, level=0, id=0
 configs[1] = 271;   // enabled=1, mode=7, level=1, id=0
 configs[2] = 4111;  // enabled=1, mode=7, level=1, id=1
 
-print "   Config 0: enabled=" + ConfigData(configs[0]).enabled;
-print "   Config 1: mode=" + ConfigData(configs[1]).mode + ", level=" + ConfigData(configs[1]).level;
-print "   Config 2: id=" + ConfigData(configs[2]).id;
+var cfg0 = ConfigData(configs[0]);
+print "   Config 0: enabled=" + cfg0.enabled;
+
+var cfg1 = ConfigData(configs[1]);
+print "   Config 1: mode=" + cfg1.mode + ", level=" + cfg1.level;
+
+var cfg2 = ConfigData(configs[2]);
+print "   Config 2: id=" + cfg2.id;
 
 
 print "";
@@ -125,8 +130,11 @@ var packed: array.intmap[2];
 packed[0] = 255;           // flags=255, priority=0, user_id=0
 packed[1] = 16843009;      // flags=1, priority=1, user_id=257
 
-print "   Packed[0]: flags=" + PackedFlags(packed[0]).flags;
-print "   Packed[1]: user_id=" + PackedFlags(packed[1]).user_id;
+var p0 = PackedFlags(packed[0]);
+print "   Packed[0]: flags=" + p0.flags;
+
+var p1 = PackedFlags(packed[1]);
+print "   Packed[1]: user_id=" + p1.user_id;
 
 
 print "";
