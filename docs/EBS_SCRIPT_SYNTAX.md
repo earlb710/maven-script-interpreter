@@ -350,6 +350,103 @@ if empty == null then {
 }
 ```
 
+### Record Literal Syntax
+
+EBS supports a clean, readable syntax for initializing records using type aliases. This syntax eliminates the need for quotes around field names, making code more concise and less ambiguous.
+
+#### Basic Record Literal
+
+```javascript
+// Define a type alias
+posType typeof record { x: int, y: int };
+
+// Initialize using record literal syntax (no quotes on field names)
+var position = posType { x: 10, y: 20 };
+
+print position.x;  // Output: 10
+print position.y;  // Output: 20
+```
+
+#### Nested Record Literals
+
+Record literals support nesting recursively, allowing complex data structures to be initialized cleanly:
+
+```javascript
+// Define nested type aliases
+addressType typeof record { street: string, city: string, zipCode: string };
+contactType typeof record { email: string, phone: string, address: addressType };
+personType typeof record { name: string, age: int, contact: contactType };
+
+// Initialize with nested record literals
+var person = personType {
+    name: "Jane Smith",
+    age: 30,
+    contact: contactType {
+        email: "jane@example.com",
+        phone: "555-1234",
+        address: addressType {
+            street: "123 Main St",
+            city: "Springfield",
+            zipCode: "12345"
+        }
+    }
+};
+
+// Access nested fields
+print person.contact.address.city;  // Output: Springfield
+```
+
+#### Record Literals in Arrays
+
+Record literals work seamlessly with array assignments:
+
+```javascript
+// Define type aliases
+posType typeof record { x: int, y: int };
+ChessPiece typeof record { piece: string, color: string, pos: posType };
+
+// Initialize array with record literals
+var pieces: ChessPiece[3];
+pieces[0] = ChessPiece { piece: "K", color: "W", pos: posType { x: 4, y: 0 } };
+pieces[1] = ChessPiece { piece: "Q", color: "W", pos: posType { x: 3, y: 0 } };
+pieces[2] = ChessPiece { piece: "R", color: "W", pos: posType { x: 0, y: 0 } };
+
+print pieces[0].piece;  // Output: K
+```
+
+#### Comparison: Record Literal vs JSON Syntax
+
+```javascript
+// Traditional JSON object syntax (with quotes on keys)
+var position1 = {"x": 10, "y": 20};
+
+// New record literal syntax (no quotes on keys)
+var position2 = posType { x: 10, y: 20 };
+
+// Both create the same internal representation
+// But record literal syntax provides:
+// - Type validation at parse time
+// - Cleaner, more readable code
+// - Less ambiguity (clearly indicates a typed record)
+```
+
+**Record Literal Features:**
+- No quotes required on field names
+- Supports nested record literals recursively
+- Type alias validation at parse time
+- Proper JSON escaping for string values
+- Null safety checks
+- Compatible with all existing record operations
+
+**Supported Value Types in Record Literals:**
+- String literals (quoted): `"text"`
+- Numbers: `42`, `3.14`, `999L`
+- Booleans: `true`, `false`
+- Null: `null`
+- Nested record literals: `TypeName { ... }`
+
+**Note:** Variables cannot be used directly in record literals. All values must be literal expressions or nested record literals.
+
 ---
 
 ## Variables

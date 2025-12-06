@@ -22,7 +22,7 @@ This directory contains short, precise example scripts for each EBS language key
 | [bitmap.ebs](bitmap.ebs) | `bitmap` type - Named bit fields within a byte |
 | [array.ebs](array.ebs) | Array syntax |
 | [json.ebs](json.ebs) | `json` type |
-| [record.ebs](record.ebs) | `record` type |
+| [record.ebs](record.ebs) | `record` type - Structured data with nested records and literal syntax |
 | [casting.ebs](casting.ebs) | Type casting |
 | [null.ebs](null.ebs) | `null` |
 | [true_false.ebs](true_false.ebs) | `true`, `false` |

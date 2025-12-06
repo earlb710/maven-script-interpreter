@@ -193,6 +193,12 @@
       "short_description": "Creates a bitmap array backed by ArrayFixedByte",
       "long_help": "The 'array.bitmap' syntax creates a fixed-size array for storing bitmap data. Like array.byte, it is backed by ArrayFixedByte storage, but with BITMAP as the data type. This provides type clarity when storing data that should be interpreted as bitmap fields. Use array.asBitmap() to cast from array.byte and array.asByte() to cast to array.byte.",
       "example": "var bitmapArray: array.bitmap[5];\nbitmapArray[0] = 255;  // All bits set\nbitmapArray[1] = 0;    // No bits set\n\n// Cast between byte and bitmap arrays\nvar byteArray: array.byte[3];\nvar castedBitmap = call array.asBitmap(byteArray);\nvar castedByte = call array.asByte(bitmapArray);\n\n// Interpret with bitmap type alias\nStatusByte typeof bitmap { active: 0, error: 1 };\nvar status = StatusByte(bitmapArray[0]);\nprint status.active;"
+    },
+    {
+      "keyword": "record",
+      "short_description": "Defines structured data with named, typed fields",
+      "long_help": "The 'record' type defines structured data with named fields and their types. Records provide type validation and support nested structures. Records can be initialized using JSON syntax or the cleaner record literal syntax (TypeName { field: value }). Use 'typeof' to define reusable record type aliases. Supports nested records (records within records) and can be used in arrays.",
+      "example": "// Basic record\nvar person: record {name: string, age: int};\nperson = {\"name\": \"Alice\", \"age\": 25};\nprint person.name;\n\n// Record literal syntax (no quotes on keys)\nposType typeof record { x: int, y: int };\nvar pos = posType { x: 10, y: 20 };\n\n// Nested records\nvar employee: record {\n  name: string,\n  contact: record { email: string, phone: string }\n};\n\n// Type alias with nested record literal\nChessPiece typeof record { piece: string, pos: posType };\nvar king = ChessPiece { piece: \"K\", pos: posType { x: 4, y: 0 } };"
     }
   ],
   "builtins": [

@@ -110,8 +110,13 @@ print numbers.length;  // Get length
 // Type aliases (typeof keyword)
 personType typeof record{name: string, age: int};
 var person: personType;
-person = {"name": "Alice", "age": 30};
+person = {"name": "Alice", "age": 30};  // JSON syntax
 print person;  // Print the record
+
+// Record literal syntax (cleaner initialization)
+posType typeof record { x: int, y: int };
+var pos = posType { x: 10, y: 20 };  // No quotes on field names
+print pos.x;  // Output: 10
 
 // Database operations
 connect db = "jdbc:oracle:thin:@localhost:1521:xe";
