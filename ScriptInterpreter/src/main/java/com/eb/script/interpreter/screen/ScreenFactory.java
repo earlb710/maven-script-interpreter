@@ -60,7 +60,8 @@ public class ScreenFactory {
     private static final String DEBUG_ROW_CLICK_STYLE = "-fx-background-color: #a0d0a0; -fx-cursor: hand;";
     
     // Change indicator emoji and styling for debug panel items
-    private static final String CHANGE_INDICATOR_EMOJI = "⚠️";
+    // Using just the warning sign (U+26A0) without variation selector to avoid rendering issues
+    private static final String CHANGE_INDICATOR_EMOJI = "\u26A0";
     private static final String DEBUG_ITEM_NAME_BASE_STYLE = "-fx-alignment: CENTER-LEFT; -fx-font-weight: bold;";
     private static final String DEBUG_ITEM_NAME_CHANGED_STYLE = DEBUG_ITEM_NAME_BASE_STYLE + " -fx-text-fill: #cc5500;";
 
@@ -232,8 +233,8 @@ public class ScreenFactory {
         
         javafx.scene.control.Label statusLabel = debugStatusLabels.get(screenName.toLowerCase());
         if (statusLabel != null) {
-            String statusEmoji = status == ScreenStatus.ERROR ? "❌" : 
-                                 status == ScreenStatus.CHANGED ? "⚠️" : "✓";
+            String statusEmoji = status == ScreenStatus.ERROR ? "\u274C" : 
+                                 status == ScreenStatus.CHANGED ? CHANGE_INDICATOR_EMOJI : "\u2713";
             String statusText = statusEmoji + " " + status.name();
             String color = status == ScreenStatus.ERROR ? "#cc0000" : 
                           status == ScreenStatus.CHANGED ? "#cc6600" : "#006600";
@@ -925,8 +926,8 @@ public class ScreenFactory {
         
         // Screen status - create row manually to store label reference for real-time updates
         ScreenStatus status = context.getScreenStatus(screenName);
-        String statusEmoji = status == ScreenStatus.ERROR ? "❌" : 
-                             status == ScreenStatus.CHANGED ? "⚠️" : "✓";
+        String statusEmoji = status == ScreenStatus.ERROR ? "\u274C" : 
+                             status == ScreenStatus.CHANGED ? CHANGE_INDICATOR_EMOJI : "\u2713";
         String statusColor = status == ScreenStatus.ERROR ? "#cc0000" : 
                             status == ScreenStatus.CHANGED ? "#cc6600" : "#006600";
         javafx.scene.control.Label statusValueLabel = addDebugRowWithLabel(statusSection, "Status", 
