@@ -70,7 +70,8 @@ public class BuiltinsImage {
 
     /**
      * Load an image file and create an EbsImage.
-     * image.load(path) -> IMAGE
+     * image.load(path, width?, height?) -> IMAGE
+     * If width and height are provided, the image is automatically resized.
      */
     private static Object load(Environment env, Object[] args) throws InterpreterError {
         ScriptArea output = env.getOutputArea();
@@ -90,8 +91,19 @@ public class BuiltinsImage {
             
             EbsImage image = new EbsImage(bytes, fileName);
             
-            if (env.isEchoOn()) {
-                sysOutput(output, "Loaded image: " + path + " (" + image.getWidth() + "x" + image.getHeight() + ", " + image.getImageType() + ")");
+            // Auto-resize if width and height are provided
+            if (args.length > 1 && args[1] != null && args[2] != null) {
+                int targetWidth = toPositiveInt(args[1], "image.load", "width");
+                int targetHeight = toPositiveInt(args[2], "image.load", "height");
+                image = image.resize(targetWidth, targetHeight, false);
+                
+                if (env.isEchoOn()) {
+                    sysOutput(output, "Loaded and resized image: " + path + " to " + targetWidth + "x" + targetHeight + " (" + image.getImageType() + ")");
+                }
+            } else {
+                if (env.isEchoOn()) {
+                    sysOutput(output, "Loaded image: " + path + " (" + image.getWidth() + "x" + image.getHeight() + ", " + image.getImageType() + ")");
+                }
             }
             
             return image;

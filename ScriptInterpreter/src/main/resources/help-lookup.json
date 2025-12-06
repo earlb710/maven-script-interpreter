@@ -3046,17 +3046,29 @@
     },
     {
       "function": "image.load",
-      "short_description": "Loads an image file",
-      "long_help": "Loads an image from the specified file path and creates an EbsImage object. Supports PNG, JPEG, GIF, and BMP formats. The path is relative to the sandbox directory.",
+      "short_description": "Loads an image file with optional auto-resize",
+      "long_help": "Loads an image from the specified file path and creates an EbsImage object. Supports PNG, JPEG, GIF, and BMP formats. The path is relative to the sandbox directory. Optionally provide width and height to automatically resize the image upon loading.",
       "parameters": [
         {
           "name": "path",
           "type": "string",
           "description": "Path to the image file"
+        },
+        {
+          "name": "width",
+          "type": "int",
+          "optional": true,
+          "description": "Target width for auto-resize"
+        },
+        {
+          "name": "height",
+          "type": "int",
+          "optional": true,
+          "description": "Target height for auto-resize"
         }
       ],
       "return_type": "image",
-      "example": "<b>var</b> img = <b>call</b> image.load(path=\"images/photo.jpg\");<br><b>print</b> \"Loaded: \" + img.getWidth() + \"x\" + img.getHeight();"
+      "example": "<b>var</b> img = <b>call</b> image.load(path=\"images/photo.jpg\");<br><b>// Load and auto-resize:</b><br><b>var</b> resized = <b>call</b> image.load(path=\"images/photo.jpg\", width=800, height=600);"
     },
     {
       "function": "image.create",
