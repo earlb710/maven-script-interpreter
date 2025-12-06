@@ -533,44 +533,44 @@ print "";
 print "Loading chess piece SVG images...";
 
 // Load SVG images for pieces - Row 0 (black back row)
-chessScreen.c00 = call image.load(imgPath + "black_rook.svg");
-chessScreen.c01 = call image.load(imgPath + "black_knight.svg");
-chessScreen.c02 = call image.load(imgPath + "black_bishop.svg");
-chessScreen.c03 = call image.load(imgPath + "black_queen.svg");
-chessScreen.c04 = call image.load(imgPath + "black_king.svg");
-chessScreen.c05 = call image.load(imgPath + "black_bishop.svg");
-chessScreen.c06 = call image.load(imgPath + "black_knight.svg");
-chessScreen.c07 = call image.load(imgPath + "black_rook.svg");
+chessScreen.c00 = call image.load(imgPath + "black_rook.svg", width=50, height=50);
+chessScreen.c01 = call image.load(imgPath + "black_knight.svg", width=50, height=50);
+chessScreen.c02 = call image.load(imgPath + "black_bishop.svg", width=50, height=50);
+chessScreen.c03 = call image.load(imgPath + "black_queen.svg", width=50, height=50);
+chessScreen.c04 = call image.load(imgPath + "black_king.svg", width=50, height=50);
+chessScreen.c05 = call image.load(imgPath + "black_bishop.svg", width=50, height=50);
+chessScreen.c06 = call image.load(imgPath + "black_knight.svg", width=50, height=50);
+chessScreen.c07 = call image.load(imgPath + "black_rook.svg", width=50, height=50);
 
 // Load SVG images for pieces - Row 1 (black pawns)
-chessScreen.c10 = call image.load(imgPath + "black_pawn.svg");
-chessScreen.c11 = call image.load(imgPath + "black_pawn.svg");
-chessScreen.c12 = call image.load(imgPath + "black_pawn.svg");
-chessScreen.c13 = call image.load(imgPath + "black_pawn.svg");
-chessScreen.c14 = call image.load(imgPath + "black_pawn.svg");
-chessScreen.c15 = call image.load(imgPath + "black_pawn.svg");
-chessScreen.c16 = call image.load(imgPath + "black_pawn.svg");
-chessScreen.c17 = call image.load(imgPath + "black_pawn.svg");
+chessScreen.c10 = call image.load(imgPath + "black_pawn.svg", width=50, height=50);
+chessScreen.c11 = call image.load(imgPath + "black_pawn.svg", width=50, height=50);
+chessScreen.c12 = call image.load(imgPath + "black_pawn.svg", width=50, height=50);
+chessScreen.c13 = call image.load(imgPath + "black_pawn.svg", width=50, height=50);
+chessScreen.c14 = call image.load(imgPath + "black_pawn.svg", width=50, height=50);
+chessScreen.c15 = call image.load(imgPath + "black_pawn.svg", width=50, height=50);
+chessScreen.c16 = call image.load(imgPath + "black_pawn.svg", width=50, height=50);
+chessScreen.c17 = call image.load(imgPath + "black_pawn.svg", width=50, height=50);
 
 // Load SVG images for pieces - Row 6 (white pawns)
-chessScreen.c60 = call image.load(imgPath + "white_pawn.svg");
-chessScreen.c61 = call image.load(imgPath + "white_pawn.svg");
-chessScreen.c62 = call image.load(imgPath + "white_pawn.svg");
-chessScreen.c63 = call image.load(imgPath + "white_pawn.svg");
-chessScreen.c64 = call image.load(imgPath + "white_pawn.svg");
-chessScreen.c65 = call image.load(imgPath + "white_pawn.svg");
-chessScreen.c66 = call image.load(imgPath + "white_pawn.svg");
-chessScreen.c67 = call image.load(imgPath + "white_pawn.svg");
+chessScreen.c60 = call image.load(imgPath + "white_pawn.svg", width=50, height=50);
+chessScreen.c61 = call image.load(imgPath + "white_pawn.svg", width=50, height=50);
+chessScreen.c62 = call image.load(imgPath + "white_pawn.svg", width=50, height=50);
+chessScreen.c63 = call image.load(imgPath + "white_pawn.svg", width=50, height=50);
+chessScreen.c64 = call image.load(imgPath + "white_pawn.svg", width=50, height=50);
+chessScreen.c65 = call image.load(imgPath + "white_pawn.svg", width=50, height=50);
+chessScreen.c66 = call image.load(imgPath + "white_pawn.svg", width=50, height=50);
+chessScreen.c67 = call image.load(imgPath + "white_pawn.svg", width=50, height=50);
 
 // Load SVG images for pieces - Row 7 (white back row)
-chessScreen.c70 = call image.load(imgPath + "white_rook.svg");
-chessScreen.c71 = call image.load(imgPath + "white_knight.svg");
-chessScreen.c72 = call image.load(imgPath + "white_bishop.svg");
-chessScreen.c73 = call image.load(imgPath + "white_queen.svg");
-chessScreen.c74 = call image.load(imgPath + "white_king.svg");
-chessScreen.c75 = call image.load(imgPath + "white_bishop.svg");
-chessScreen.c76 = call image.load(imgPath + "white_knight.svg");
-chessScreen.c77 = call image.load(imgPath + "white_rook.svg");
+chessScreen.c70 = call image.load(imgPath + "white_rook.svg", width=50, height=50);
+chessScreen.c71 = call image.load(imgPath + "white_knight.svg", width=50, height=50);
+chessScreen.c72 = call image.load(imgPath + "white_bishop.svg", width=50, height=50);
+chessScreen.c73 = call image.load(imgPath + "white_queen.svg", width=50, height=50);
+chessScreen.c74 = call image.load(imgPath + "white_king.svg", width=50, height=50);
+chessScreen.c75 = call image.load(imgPath + "white_bishop.svg", width=50, height=50);
+chessScreen.c76 = call image.load(imgPath + "white_knight.svg", width=50, height=50);
+chessScreen.c77 = call image.load(imgPath + "white_rook.svg", width=50, height=50);
 
 print "Chess piece images loaded!";
 print "";
