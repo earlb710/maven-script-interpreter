@@ -860,7 +860,7 @@ public class ScreenFactory {
                                 tooltipText.append("\nVar: ").append(varRef);
                             }
                             if (parentArea != null && !parentArea.isEmpty()) {
-                                // Limit to first two levels only
+                                // Limit to last two direct parents only
                                 String limitedAreaPath = limitAreaPathToTwoLevels(parentArea);
                                 tooltipText.append("\nArea: ").append(limitedAreaPath);
                             }
@@ -1734,36 +1734,36 @@ public class ScreenFactory {
     }
     
     /**
-     * Limits the area path to show only the first two levels.
+     * Limits the area path to show only the last two direct parents.
      * For example:
-     * - "area1.area2.area3.area4" becomes "area1.area2"
+     * - "mainArea.section1.subsection1.panel1.subpanel2" becomes "panel1.subpanel2"
      * - "area1.area2" stays as "area1.area2"
      * - "area1" stays as "area1"
      * 
      * @param fullAreaPath The full area path with all levels
-     * @return The limited area path with at most two levels
+     * @return The limited area path with at most two direct parent levels
      */
     private static String limitAreaPathToTwoLevels(String fullAreaPath) {
         if (fullAreaPath == null || fullAreaPath.isEmpty()) {
             return fullAreaPath;
         }
         
-        // Find the first dot
-        int firstDot = fullAreaPath.indexOf('.');
-        if (firstDot == -1) {
+        // Find the last dot
+        int lastDot = fullAreaPath.lastIndexOf('.');
+        if (lastDot == -1) {
             // No dots means only one level, return as-is
             return fullAreaPath;
         }
         
-        // Find the second dot
-        int secondDot = fullAreaPath.indexOf('.', firstDot + 1);
-        if (secondDot == -1) {
+        // Find the second-to-last dot
+        int secondLastDot = fullAreaPath.lastIndexOf('.', lastDot - 1);
+        if (secondLastDot == -1) {
             // Only one dot means two levels, return as-is
             return fullAreaPath;
         }
         
-        // More than two levels, return substring up to second dot
-        return fullAreaPath.substring(0, secondDot);
+        // More than two levels, return substring from second-to-last dot onwards
+        return fullAreaPath.substring(secondLastDot + 1);
     }
     
     /**
