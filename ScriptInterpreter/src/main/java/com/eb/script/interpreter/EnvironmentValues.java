@@ -1,6 +1,7 @@
 package com.eb.script.interpreter;
 
 import com.eb.script.token.BitmapType;
+import com.eb.script.token.IntmapType;
 import com.eb.script.token.RecordType;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -19,6 +20,8 @@ public class EnvironmentValues {
     final Map<String, RecordType> recordTypes = new ConcurrentHashMap<>(); // Store record type metadata
     final Map<String, BitmapType> bitmapTypes = new ConcurrentHashMap<>(); // Store bitmap type metadata
     final Map<String, String> bitmapTypeAliasNames = new ConcurrentHashMap<>(); // Store bitmap type alias names
+    final Map<String, IntmapType> intmapTypes = new ConcurrentHashMap<>(); // Store intmap type metadata
+    final Map<String, String> intmapTypeAliasNames = new ConcurrentHashMap<>(); // Store intmap type alias names
     final Set<String> constants = ConcurrentHashMap.newKeySet(); // Track constant variables
     final EnvironmentValues enclosing;
 
@@ -35,6 +38,8 @@ public class EnvironmentValues {
         recordTypes.clear();
         bitmapTypes.clear();
         bitmapTypeAliasNames.clear();
+        intmapTypes.clear();
+        intmapTypeAliasNames.clear();
         constants.clear();
     }
     
@@ -125,6 +130,55 @@ public class EnvironmentValues {
         }
         if (enclosing != null) {
             return enclosing.getBitmapTypeAliasName(name);
+        }
+        return null;
+    }
+    
+    public void defineWithIntmapType(String name, Object value, IntmapType intmapType) {
+        defineWithIntmapType(name, value, intmapType, null);
+    }
+    
+    public void defineWithIntmapType(String name, Object value, IntmapType intmapType, String typeAliasName) {
+        values.put(name, safeValue(value));
+        if (intmapType != null) {
+            intmapTypes.put(name, intmapType);
+            if (typeAliasName != null) {
+                intmapTypeAliasNames.put(name, typeAliasName);
+            }
+        }
+    }
+    
+    public void defineConstWithIntmapType(String name, Object value, IntmapType intmapType) {
+        defineConstWithIntmapType(name, value, intmapType, null);
+    }
+    
+    public void defineConstWithIntmapType(String name, Object value, IntmapType intmapType, String typeAliasName) {
+        values.put(name, safeValue(value));
+        constants.add(name);
+        if (intmapType != null) {
+            intmapTypes.put(name, intmapType);
+            if (typeAliasName != null) {
+                intmapTypeAliasNames.put(name, typeAliasName);
+            }
+        }
+    }
+    
+    public IntmapType getIntmapType(String name) {
+        if (intmapTypes.containsKey(name)) {
+            return intmapTypes.get(name);
+        }
+        if (enclosing != null) {
+            return enclosing.getIntmapType(name);
+        }
+        return null;
+    }
+    
+    public String getIntmapTypeAliasName(String name) {
+        if (intmapTypeAliasNames.containsKey(name)) {
+            return intmapTypeAliasNames.get(name);
+        }
+        if (enclosing != null) {
+            return enclosing.getIntmapTypeAliasName(name);
         }
         return null;
     }

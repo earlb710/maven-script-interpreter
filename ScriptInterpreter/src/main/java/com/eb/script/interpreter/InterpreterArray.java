@@ -14,6 +14,7 @@ import com.eb.script.interpreter.expression.VariableExpression;
 import com.eb.script.interpreter.statement.IndexAssignStatement;
 import com.eb.script.interpreter.statement.StatementKind;
 import com.eb.script.token.BitmapType;
+import com.eb.script.token.IntmapType;
 import com.eb.script.token.DataType;
 
 import java.util.List;
@@ -249,6 +250,38 @@ public class InterpreterArray {
                         }
                     }
                     
+                    // Check if this is an intmap field assignment
+                    IntmapType intmapType = interpreter.environment().getEnvironmentValues().getIntmapType(varExpr.name);
+                    if (intmapType != null) {
+                        // This is an intmap variable - set the field value
+                        IntmapType.IntField field = intmapType.getFieldIgnoreCase(propExpr.propertyName);
+                        if (field == null) {
+                            throw interpreter.error(stmt.getLine(), "Intmap field '" + propExpr.propertyName + "' does not exist in intmap type");
+                        }
+                        
+                        // Get current intmap value
+                        Object intmapValue = interpreter.environment().get(varExpr.name);
+                        int currentIntValue = IntmapType.toIntValue(intmapValue);
+                        
+                        // Evaluate and validate the new value
+                        Object newValue = interpreter.evaluate(stmt.value);
+                        int newFieldValue;
+                        if (newValue instanceof Number) {
+                            newFieldValue = ((Number) newValue).intValue();
+                        } else {
+                            throw interpreter.error(stmt.getLine(), "Intmap field value must be numeric");
+                        }
+                        
+                        // Set the field value
+                        try {
+                            int newIntValue = field.setValue(currentIntValue, newFieldValue);
+                            interpreter.environment().getEnvironmentValues().assign(varExpr.name, newIntValue);
+                        } catch (IllegalArgumentException e) {
+                            throw interpreter.error(stmt.getLine(), e.getMessage());
+                        }
+                        return;
+                    }
+                    
                     // Check if this is a bitmap field assignment
                     BitmapType bitmapType = interpreter.environment().getEnvironmentValues().getBitmapType(varExpr.name);
                     if (bitmapType != null) {
@@ -433,6 +466,8 @@ public class InterpreterArray {
                 return new ArrayFixedByte(Math.max(0, childLen), DataType.BITMAP);
             } else if (elemType == DataType.INTEGER) {
                 return new ArrayFixedInt(Math.max(0, childLen));
+            } else if (elemType == DataType.INTMAP) {
+                return new ArrayFixedInt(Math.max(0, childLen), DataType.INTMAP);
             } else {
                 return new ArrayFixed(elemType, Math.max(0, childLen));
             }
@@ -546,6 +581,8 @@ public class InterpreterArray {
                 ret = new ArrayFixedByte(len, DataType.BITMAP);
             } else if (isLeafDimension && dataType == DataType.INTEGER) {
                 ret = new ArrayFixedInt(len);
+            } else if (isLeafDimension && dataType == DataType.INTMAP) {
+                ret = new ArrayFixedInt(len, DataType.INTMAP);
             } else {
                 ret = new ArrayFixed(dataType, len);
             }

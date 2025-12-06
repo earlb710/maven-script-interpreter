@@ -731,6 +731,16 @@ public final class Builtins {
                 "array.asByte", DataType.ARRAY,
                 newParam("array", DataType.ARRAY, true)
         ));
+        // array.asIntmap(intArray) - Cast array.int to array.intmap
+        addBuiltin(info(
+                "array.asIntmap", DataType.ARRAY,
+                newParam("array", DataType.ARRAY, true)
+        ));
+        // array.asInt(intmapArray) - Cast array.intmap to array.int
+        addBuiltin(info(
+                "array.asInt", DataType.ARRAY,
+                newParam("array", DataType.ARRAY, true)
+        ));
 
         // ==========================
         // QUEUE builtins
