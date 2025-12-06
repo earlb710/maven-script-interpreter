@@ -258,14 +258,22 @@ public class ScreenFactory {
         // Track the changed item
         changedItems.computeIfAbsent(key, k -> java.util.concurrent.ConcurrentHashMap.newKeySet()).add(varName);
         
-        // Debug message for tracking item state changes
-        System.err.println("[DEBUG] markItemChanged: screen='" + screenName + "', item='" + varName + "' -> CHANGED");
-        
-        // Refresh the items table if visible
+        // Update the items table if visible - find the row and update its display text
         javafx.scene.control.TableView<String[]> itemsTable = debugItemsTables.get(key);
         if (itemsTable != null) {
             // Update on JavaFX thread
             javafx.application.Platform.runLater(() -> {
+                // Find the row with this varRef and update its display text
+                for (String[] row : itemsTable.getItems()) {
+                    if (row.length >= 5 && varName.equals(row[2])) {
+                        // row[2] is varRef, row[3] is itemType, row[4] is rawName
+                        String typeIcon = getItemTypeIcon(row[3]);
+                        String rawName = row[4];
+                        // Add ⚠️ prefix to indicate changed
+                        row[0] = "⚠️ " + typeIcon + " " + rawName;
+                        break;
+                    }
+                }
                 itemsTable.refresh();
             });
         }
@@ -294,9 +302,21 @@ public class ScreenFactory {
     public static void clearChangedItems(String screenName) {
         if (screenName != null) {
             String key = screenName.toLowerCase();
-            java.util.Set<String> removed = changedItems.remove(key);
-            // Debug message for tracking item reset
-            System.err.println("[DEBUG] clearChangedItems: screen='" + screenName + "' -> all items reset to CLEAN (removed " + (removed != null ? removed.size() : 0) + " items)");
+            changedItems.remove(key);
+            
+            // Also update the items table to remove ⚠️ prefixes
+            javafx.scene.control.TableView<String[]> itemsTable = debugItemsTables.get(key);
+            if (itemsTable != null) {
+                // Reset all row display texts to remove ⚠️ prefix
+                for (String[] row : itemsTable.getItems()) {
+                    if (row.length >= 5) {
+                        String typeIcon = getItemTypeIcon(row[3]);
+                        String rawName = row[4];
+                        row[0] = typeIcon + " " + rawName;
+                    }
+                }
+                itemsTable.refresh();
+            }
         }
     }
     
@@ -319,13 +339,9 @@ public class ScreenFactory {
             (javafx.scene.control.TableView<String[]>) debugItemsTables.get(lowerScreenName);
         
         if (itemsTable != null) {
-            System.err.println("[DEBUG] refreshDebugPanelIfOpen: Refreshing items table for screen '" + screenName + "'");
-            // Force a complete refresh of the table to update the display
-            // This will cause the cell factory to re-evaluate which items are changed
+            // Force a complete refresh of the table
             Platform.runLater(() -> {
                 itemsTable.refresh();
-                // Also trigger a layout pass to ensure cells are re-rendered
-                itemsTable.layout();
             });
         }
     }
@@ -694,49 +710,13 @@ public class ScreenFactory {
             // Store reference for real-time updates
             debugItemsTables.put(screenName.toLowerCase(), itemsTable);
             
-            // Name column (50%) - shows changed indicator if item was modified
+            // Name column (50%) - shows type icon and changed indicator if item was modified
+            // The display text with icon is pre-computed and stored in data.getValue()[0]
+            // Array format: [displayTextWithIcon, value, varRef, itemType, rawName]
             javafx.scene.control.TableColumn<String[], String> itemNameCol = new javafx.scene.control.TableColumn<>("Item");
             itemNameCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue()[0]));
-            itemNameCol.setStyle("-fx-alignment: CENTER-LEFT;");
+            itemNameCol.setStyle("-fx-alignment: CENTER-LEFT; -fx-font-weight: bold;");
             itemNameCol.prefWidthProperty().bind(itemsTable.widthProperty().multiply(0.5));
-            
-            // Custom cell factory to show type icon and changed indicator
-            final String finalScreenName = screenName;
-            itemNameCol.setCellFactory(col -> new javafx.scene.control.TableCell<String[], String>() {
-                @Override
-                protected void updateItem(String item, boolean empty) {
-                    super.updateItem(item, empty);
-                    System.err.println("[DEBUG] updateItem called: item='" + item + "', empty=" + empty + ", index=" + getIndex());
-                    if (empty || item == null) {
-                        setText(null);
-                        setStyle("-fx-alignment: CENTER-LEFT;");
-                    } else {
-                        // Get the varRef and itemType from the row data
-                        String[] rowData = getTableView().getItems().get(getIndex());
-                        String varRef = rowData.length > 2 ? rowData[2] : "";
-                        if (varRef == null) varRef = "";
-                        String itemType = rowData.length > 3 ? rowData[3] : "";
-                        if (itemType == null) itemType = "";
-                        
-                        // Get icon for item type
-                        String typeIcon = getItemTypeIcon(itemType);
-                        
-                        // Debug output for cell rendering
-                        boolean isChanged = !varRef.isEmpty() && isItemChanged(finalScreenName, varRef);
-                        System.err.println("[DEBUG] Cell render: item='" + item + "', varRef='" + varRef + "', itemType='" + itemType + "', typeIcon='" + typeIcon + "', isChanged=" + isChanged);
-                        System.err.flush();
-                        
-                        // Check if this item has been changed
-                        if (isChanged) {
-                            setText("⚠️ " + typeIcon + " " + item);
-                            setStyle("-fx-alignment: CENTER-LEFT; -fx-font-weight: bold; -fx-text-fill: #cc6600;");
-                        } else {
-                            setText(typeIcon + " " + item);
-                            setStyle("-fx-alignment: CENTER-LEFT; -fx-font-weight: bold;");
-                        }
-                    }
-                }
-            });
             
             // Value column (50%)
             javafx.scene.control.TableColumn<String[], String> itemValueCol = new javafx.scene.control.TableColumn<>("Value");
@@ -747,8 +727,8 @@ public class ScreenFactory {
             itemsTable.getColumns().add(itemNameCol);
             itemsTable.getColumns().add(itemValueCol);
             
-            // Populate data - include varRef and item type for change tracking and icons
-            // Array format: [displayName, value, varRef, itemType]
+            // Populate data - pre-compute display text with icon
+            // Array format: [displayTextWithIcon, value, varRef, itemType, rawName]
             java.util.List<String> sortedItemKeys = new java.util.ArrayList<>(screenAreaItems.keySet());
             java.util.Collections.sort(sortedItemKeys, String.CASE_INSENSITIVE_ORDER);
             
@@ -759,7 +739,10 @@ public class ScreenFactory {
                 String varRef = item.varRef != null ? item.varRef : "";
                 // Get the item type from displayItem or fall back to displayMetadata lookup
                 String itemType = getItemType(item, context, screenName);
-                itemsTable.getItems().add(new String[]{displayName, valueStr, varRef, itemType});
+                // Pre-compute the display text with icon (no ⚠️ since not changed on initial display)
+                String typeIcon = getItemTypeIcon(itemType);
+                String displayText = typeIcon + " " + displayName;
+                itemsTable.getItems().add(new String[]{displayText, valueStr, varRef, itemType, displayName});
             }
             
             // Allow table to expand to fill available space
@@ -1371,7 +1354,6 @@ public class ScreenFactory {
     private static String getItemType(AreaItem item, InterpreterContext context, String screenName) {
         // First check if displayItem has the type set directly
         if (item.displayItem != null && item.displayItem.type != null) {
-            System.err.println("[DEBUG] getItemType: item='" + item.varRef + "' -> type from displayItem: " + item.displayItem.type);
             return item.displayItem.type.toLowerCase();
         }
         // Try to get the type from the displayMetadata registered with the varRef
@@ -1380,12 +1362,9 @@ public class ScreenFactory {
             String key = screenName.toLowerCase() + "." + item.varRef.toLowerCase();
             DisplayItem displayItem = context.getDisplayItem().get(key);
             if (displayItem != null && displayItem.type != null) {
-                System.err.println("[DEBUG] getItemType: item='" + item.varRef + "' -> type from displayMetadata[" + key + "]: " + displayItem.type);
                 return displayItem.type.toLowerCase();
             }
-            System.err.println("[DEBUG] getItemType: item='" + item.varRef + "' -> displayMetadata[" + key + "] not found, keys available: " + context.getDisplayItem().keySet());
         }
-        System.err.println("[DEBUG] getItemType: item='" + item.varRef + "' -> returning 'unknown'");
         return "unknown";
     }
     

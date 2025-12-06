@@ -44,18 +44,11 @@ public class ControlListenerFactory {
      */
     private static void markScreenChanged(Node control) {
         if (control == null) {
-            System.err.println("[DEBUG] markScreenChanged: control is null");
             return;
         }
         Object contextObj = control.getProperties().get(PROP_INTERPRETER_CONTEXT);
         Object screenNameObj = control.getProperties().get(PROP_SCREEN_NAME);
         Object varNameObj = control.getProperties().get("varName");
-        
-        // Debug: Show what properties are available
-        System.err.println("[DEBUG] markScreenChanged CALLED - control=" + control.getClass().getSimpleName() + 
-            ", hasContext=" + (contextObj != null) + 
-            ", hasScreenName=" + (screenNameObj != null) +
-            ", varName=" + varNameObj);
         
         if (contextObj instanceof InterpreterContext && screenNameObj instanceof String) {
             InterpreterContext context = (InterpreterContext) contextObj;
@@ -68,19 +61,13 @@ public class ControlListenerFactory {
             boolean beingCreated = context.getScreensBeingCreated().contains(screenNameLower);
             boolean notYetShown = context.getScreensNotYetShown().contains(screenNameLower);
             
-            // Debug message showing the check state
-            System.err.println("[DEBUG] markScreenChanged: screen='" + screenName + "', item='" + varName + 
-                "', beingCreated=" + beingCreated + ", notYetShown=" + notYetShown);
-            
             if (beingCreated || notYetShown) {
-                System.err.println("[DEBUG] markScreenChanged: SKIPPED (initialization phase)");
                 return; // Skip marking as changed during initialization
             }
             
             // Only change status if currently CLEAN (don't downgrade from ERROR)
             if (context.getScreenStatus(screenName) == ScreenStatus.CLEAN) {
                 context.setScreenStatus(screenName, ScreenStatus.CHANGED);
-                System.err.println("[DEBUG] markScreenChanged: screen status changed to CHANGED");
                 // Update the debug panel status label in real-time
                 ScreenFactory.updateDebugStatusLabel(screenName, ScreenStatus.CHANGED);
             }
@@ -89,11 +76,6 @@ public class ControlListenerFactory {
             if (varName != null) {
                 ScreenFactory.markItemChanged(screenName, varName);
             }
-        } else {
-            // Debug: Properties not set on this control
-            System.err.println("[DEBUG] markScreenChanged: PROPERTIES MISSING - contextObj=" + 
-                (contextObj != null ? contextObj.getClass().getSimpleName() : "null") +
-                ", screenNameObj=" + screenNameObj);
         }
     }
 
