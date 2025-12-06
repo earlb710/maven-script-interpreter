@@ -58,6 +58,11 @@ public class ScreenFactory {
     // Debug row styling constants
     private static final String DEBUG_ROW_HOVER_STYLE = "-fx-background-color: #d0e8ff; -fx-cursor: hand;";
     private static final String DEBUG_ROW_CLICK_STYLE = "-fx-background-color: #a0d0a0; -fx-cursor: hand;";
+    
+    // Change indicator emoji and styling for debug panel items
+    private static final String CHANGE_INDICATOR_EMOJI = "⚠️";
+    private static final String DEBUG_ITEM_NAME_BASE_STYLE = "-fx-alignment: CENTER-LEFT; -fx-font-weight: bold;";
+    private static final String DEBUG_ITEM_NAME_CHANGED_STYLE = DEBUG_ITEM_NAME_BASE_STYLE + " -fx-text-fill: #cc5500;";
 
     /**
      * Functional interface for executing onClick EBS code
@@ -270,7 +275,7 @@ public class ScreenFactory {
                         String typeIcon = getItemTypeIcon(row[3]);
                         String rawName = row[4];
                         // Format: type icon, then change icon, then name (e.g., "🎨 ⚠️ background")
-                        row[0] = typeIcon + " ⚠️ " + rawName;
+                        row[0] = typeIcon + " " + CHANGE_INDICATOR_EMOJI + " " + rawName;
                         break;
                     }
                 }
@@ -727,14 +732,14 @@ public class ScreenFactory {
                     super.updateItem(item, empty);
                     if (empty || item == null) {
                         setText(null);
-                        setStyle("-fx-alignment: CENTER-LEFT; -fx-font-weight: bold;");
+                        setStyle(DEBUG_ITEM_NAME_BASE_STYLE);
                     } else {
                         setText(item);
                         // Dark orange color for changed items (format: "typeIcon ⚠️ name")
-                        if (item.contains("⚠️")) {
-                            setStyle("-fx-alignment: CENTER-LEFT; -fx-font-weight: bold; -fx-text-fill: #cc5500;");
+                        if (item.contains(CHANGE_INDICATOR_EMOJI)) {
+                            setStyle(DEBUG_ITEM_NAME_CHANGED_STYLE);
                         } else {
-                            setStyle("-fx-alignment: CENTER-LEFT; -fx-font-weight: bold;");
+                            setStyle(DEBUG_ITEM_NAME_BASE_STYLE);
                         }
                     }
                 }
