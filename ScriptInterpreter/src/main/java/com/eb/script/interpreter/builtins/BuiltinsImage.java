@@ -92,7 +92,7 @@ public class BuiltinsImage {
             EbsImage image = new EbsImage(bytes, fileName);
             
             // Auto-resize if width and height are provided
-            if (args.length > 1 && args[1] != null && args[2] != null) {
+            if (args.length > 2 && args[1] != null && args[2] != null) {
                 int targetWidth = toPositiveInt(args[1], "image.load", "width");
                 int targetHeight = toPositiveInt(args[2], "image.load", "height");
                 image = image.resize(targetWidth, targetHeight, false);
