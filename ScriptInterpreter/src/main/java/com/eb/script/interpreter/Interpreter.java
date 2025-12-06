@@ -1951,6 +1951,22 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 // This allows accessing properties of the screen config JSON if needed
             }
             
+            // Check if this is an intmap field access
+            IntmapType intmapType = environment().getEnvironmentValues().getIntmapType(varExpr.name);
+            if (intmapType != null) {
+                // This is an intmap variable - get the field value
+                Object intmapValue = environment().get(varExpr.name);
+                int intValue = IntmapType.toIntValue(intmapValue);
+                
+                IntmapType.IntField field = intmapType.getFieldIgnoreCase(expr.propertyName);
+                if (field == null) {
+                    throw error(expr.getLine(), "Intmap field '" + expr.propertyName + "' does not exist in intmap type");
+                }
+                
+                // Extract and return the field value
+                return field.getValue(intValue);
+            }
+            
             // Check if this is a bitmap field access
             BitmapType bitmapType = environment().getEnvironmentValues().getBitmapType(varExpr.name);
             if (bitmapType != null) {
