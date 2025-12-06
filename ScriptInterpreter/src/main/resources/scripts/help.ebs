@@ -23,41 +23,29 @@ try {
     print "Using fallback help content";
 }
 
-// Function to format HTML-like content for display
-formatHelpHtml(title: string, sections: json) return string {
-    var html: string = "";
-    html = html + "═══════════════════════════════════════════════════════\n";
-    html = html + "  " + title + "\n";
-    html = html + "═══════════════════════════════════════════════════════\n\n";
-    
-    if sections != null then {
-        foreach section in sections {
-            var sectionTitle: string = call json.getString(root=section, path="title", default="");
-            var sectionContent: string = call json.getString(root=section, path="content", default="");
-            
-            if sectionTitle != "" then {
-                html = html + "▸ " + sectionTitle + "\n";
-                html = html + "───────────────────────────────────────────────────────\n";
-            }
-            
-            if sectionContent != "" then {
-                html = html + sectionContent + "\n\n";
-            }
-        }
-    }
-    
-    return html;
+// Function to strip HTML tags from content
+stripHtmlTags(text: string) return string {
+    var cleaned: string = text;
+    // Remove common HTML tags
+    cleaned = call str.replace(source=cleaned, target="<br>", replacement="\n");
+    cleaned = call str.replace(source=cleaned, target="<b>", replacement="");
+    cleaned = call str.replace(source=cleaned, target="</b>", replacement="");
+    cleaned = call str.replace(source=cleaned, target="<code>", replacement="");
+    cleaned = call str.replace(source=cleaned, target="</code>", replacement="");
+    cleaned = call str.replace(source=cleaned, target="<i>", replacement="");
+    cleaned = call str.replace(source=cleaned, target="</i>", replacement="");
+    return cleaned;
 }
 
 // Function to get keyword help from JSON
 getKeywordHelp(keyword: string) return string {
     if helpData == null then {
-        return "Help data not available.";
+        return "";
     }
     
     var keywords: json = call json.get(root=helpData, path="keywords");
     if keywords == null then {
-        return "Keywords data not found.";
+        return "";
     }
     
     foreach kw in keywords {
@@ -79,11 +67,7 @@ getKeywordHelp(keyword: string) return string {
             if longHelp != "" then {
                 content = content + "DETAILS:\n";
                 // Remove HTML tags for textarea display
-                var cleanHelp: string = call str.replace(source=longHelp, target="<br>", replacement="\n");
-                cleanHelp = call str.replace(source=cleanHelp, target="<b>", replacement="");
-                cleanHelp = call str.replace(source=cleanHelp, target="</b>", replacement="");
-                cleanHelp = call str.replace(source=cleanHelp, target="<code>", replacement="");
-                cleanHelp = call str.replace(source=cleanHelp, target="</code>", replacement="");
+                var cleanHelp: string = call stripHtmlTags(text=longHelp);
                 content = content + cleanHelp + "\n\n";
             }
             
@@ -96,7 +80,7 @@ getKeywordHelp(keyword: string) return string {
         }
     }
     
-    return "No help found for keyword: " + keyword;
+    return "";
 }
 
 // Function to get help content based on selected topic
@@ -143,10 +127,12 @@ getHelpContent(topic: string) return string {
         content = content + "• Blocks use curly braces { }\n\n";
         content = content + "▸ COMMENTS\n";
         content = content + "───────────────────────────────────────────────────────\n";
-        content = content + call getKeywordHelp(keyword="//");
-        if call str.contains(str=content, sub="No help found") then {
+        var commentHelp: string = call getKeywordHelp(keyword="//");
+        if commentHelp != "" then {
+            content = content + commentHelp;
+        } else {
             content = content + "  // Single line comment\n";
-            content = content + "  // Comments start with //\n\n";
+            content = content + "  // Comments start with //\n";
         }
         content = content + "\n▸ CASE INSENSITIVITY\n";
         content = content + "───────────────────────────────────────────────────────\n";
