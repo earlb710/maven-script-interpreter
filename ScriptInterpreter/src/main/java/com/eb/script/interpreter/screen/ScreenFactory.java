@@ -654,7 +654,8 @@ public class ScreenFactory {
             varsTable.setColumnResizePolicy(javafx.scene.control.TableView.CONSTRAINED_RESIZE_POLICY);
             varsTable.setStyle("-fx-background-color: transparent;");
             
-            // Name column (50%) - with tooltip showing variable name
+            // Name column (50%) - with tooltip showing variable name and type
+            // Array format: [name, valueStr, typeStr]
             javafx.scene.control.TableColumn<String[], String> nameCol = new javafx.scene.control.TableColumn<>("Name");
             nameCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue()[0]));
             nameCol.setStyle("-fx-alignment: CENTER-LEFT; -fx-font-weight: bold;");
@@ -668,8 +669,22 @@ public class ScreenFactory {
                         setTooltip(null);
                     } else {
                         setText(item);
-                        javafx.scene.control.Tooltip tooltip = new javafx.scene.control.Tooltip("Variable: " + item);
+                        // Get type string from row data
+                        int rowIndex = getIndex();
+                        String typeStr = "unknown";
+                        if (rowIndex >= 0 && rowIndex < getTableView().getItems().size()) {
+                            String[] rowData = getTableView().getItems().get(rowIndex);
+                            if (rowData.length >= 3 && rowData[2] != null) {
+                                typeStr = rowData[2];
+                            }
+                        }
+                        StringBuilder tooltipText = new StringBuilder();
+                        tooltipText.append("Variable: ").append(item);
+                        tooltipText.append("\nType: ").append(typeStr);
+                        javafx.scene.control.Tooltip tooltip = new javafx.scene.control.Tooltip(tooltipText.toString());
                         tooltip.setShowDelay(javafx.util.Duration.millis(500));
+                        tooltip.setMaxWidth(DEBUG_TOOLTIP_MAX_WIDTH);
+                        tooltip.setWrapText(true);
                         setTooltip(tooltip);
                     }
                 }
@@ -701,14 +716,16 @@ public class ScreenFactory {
             varsTable.getColumns().add(nameCol);
             varsTable.getColumns().add(valueCol);
             
-            // Populate data
+            // Populate data - Array format: [name, valueStr, typeStr]
             java.util.List<String> sortedKeys = new java.util.ArrayList<>(screenVars.keySet());
             java.util.Collections.sort(sortedKeys, String.CASE_INSENSITIVE_ORDER);
             
             for (String key : sortedKeys) {
                 Object value = screenVars.get(key);
                 String valueStr = formatValue(value);
-                varsTable.getItems().add(new String[]{key, valueStr});
+                DataType dataType = screenVarTypes != null ? screenVarTypes.get(key) : null;
+                String typeStr = getDetailedTypeString(dataType, value);
+                varsTable.getItems().add(new String[]{key, valueStr, typeStr});
             }
             
             // Allow table to expand to fill available space
@@ -794,6 +811,9 @@ public class ScreenFactory {
             // Cell factory to apply dark orange color for changed items (contains ⚠️) and add tooltip
             // Note: Pre-computing display text avoids JavaFX cell factory timing issues
             // where cell factories may be called before data is fully initialized
+            // Capture screenName and context for lambda
+            final String itemsScreenName = screenName;
+            final InterpreterContext itemsContext = context;
             itemNameCol.setCellFactory(col -> new javafx.scene.control.TableCell<String[], String>() {
                 @Override
                 protected void updateItem(String item, boolean empty) {
@@ -805,24 +825,43 @@ public class ScreenFactory {
                     } else {
                         setText(item);
                         // Dark orange color for changed items (format: "typeIcon ⚠️ name")
-                        if (item.contains(CHANGE_INDICATOR_EMOJI)) {
+                        boolean isChanged = item.contains(CHANGE_INDICATOR_EMOJI);
+                        if (isChanged) {
                             setStyle(DEBUG_ITEM_NAME_CHANGED_STYLE);
                         } else {
                             setStyle(DEBUG_ITEM_NAME_BASE_STYLE);
                         }
                         // Add tooltip with item details from row data
+                        // Array format: [displayTextWithIcon, value, varRef, itemType, rawName, parentArea]
                         int rowIndex = getIndex();
                         if (rowIndex >= 0 && rowIndex < getTableView().getItems().size()) {
                             String[] rowData = getTableView().getItems().get(rowIndex);
                             String rawName = rowData.length >= 5 ? rowData[4] : item;
                             String itemType = rowData.length >= 4 ? rowData[3] : "unknown";
                             String varRef = rowData.length >= 3 ? rowData[2] : "";
+                            String parentArea = rowData.length >= 6 ? rowData[5] : "";
+                            
+                            // Determine state
+                            String state = "CLEAN";
+                            if (isChanged) {
+                                state = "CHANGED";
+                            }
+                            // Check if screen has error status
+                            ScreenStatus screenStatus = itemsContext.getScreenStatus(itemsScreenName);
+                            if (screenStatus == ScreenStatus.ERROR) {
+                                state = "ERROR";
+                            }
+                            
                             StringBuilder tooltipText = new StringBuilder();
                             tooltipText.append("Item: ").append(rawName);
                             tooltipText.append("\nType: ").append(itemType);
                             if (varRef != null && !varRef.isEmpty()) {
                                 tooltipText.append("\nVar: ").append(varRef);
                             }
+                            if (parentArea != null && !parentArea.isEmpty()) {
+                                tooltipText.append("\nArea: ").append(parentArea);
+                            }
+                            tooltipText.append("\nState: ").append(state);
                             javafx.scene.control.Tooltip tooltip = new javafx.scene.control.Tooltip(tooltipText.toString());
                             tooltip.setShowDelay(javafx.util.Duration.millis(500));
                             setTooltip(tooltip);
@@ -858,7 +897,7 @@ public class ScreenFactory {
             itemsTable.getColumns().add(itemValueCol);
             
             // Populate data - pre-compute display text with icon
-            // Array format: [displayTextWithIcon, value, varRef, itemType, rawName]
+            // Array format: [displayTextWithIcon, value, varRef, itemType, rawName, parentArea]
             java.util.List<String> sortedItemKeys = new java.util.ArrayList<>(screenAreaItems.keySet());
             java.util.Collections.sort(sortedItemKeys, String.CASE_INSENSITIVE_ORDER);
             
@@ -869,10 +908,16 @@ public class ScreenFactory {
                 String varRef = item.varRef != null ? item.varRef : "";
                 // Get the item type from displayItem or fall back to displayMetadata lookup
                 String itemType = getItemType(item, context, screenName);
+                // Extract parent area from key (format: "areaName.itemName" or just "itemName")
+                String parentArea = "";
+                int dotIndex = key.indexOf('.');
+                if (dotIndex > 0) {
+                    parentArea = key.substring(0, dotIndex);
+                }
                 // Pre-compute the display text with icon (no ⚠️ since not changed on initial display)
                 String typeIcon = getItemTypeIcon(itemType);
                 String displayText = typeIcon + " " + displayName;
-                itemsTable.getItems().add(new String[]{displayText, valueStr, varRef, itemType, displayName});
+                itemsTable.getItems().add(new String[]{displayText, valueStr, varRef, itemType, displayName, parentArea});
             }
             
             // Allow table to expand to fill available space
@@ -2183,6 +2228,88 @@ public class ScreenFactory {
             return "array";
         }
         return value.getClass().getSimpleName().toLowerCase();
+    }
+    
+    /**
+     * Get a detailed type string including record definition for tooltips.
+     * Similar to "print typeof" functionality.
+     * 
+     * @param dataType The DataType from the context (can be null)
+     * @param value The actual value to infer type from if DataType is null
+     * @return A detailed string representation of the data type with record definition
+     */
+    private static String getDetailedTypeString(DataType dataType, Object value) {
+        if (value == null) {
+            return "null";
+        }
+        
+        // Check for arrays first
+        if (value instanceof ArrayDef) {
+            ArrayDef<?, ?> arrayDef = (ArrayDef<?, ?>) value;
+            DataType elementType = arrayDef.getDataType();
+            boolean isFixed = arrayDef.isFixed();
+            int size = arrayDef.size();
+            
+            StringBuilder sb = new StringBuilder("array.");
+            sb.append(getDataTypeName(elementType));
+            
+            if (isFixed) {
+                sb.append("[").append(size).append("]");
+            } else {
+                sb.append("[]");
+            }
+            
+            return sb.toString();
+        }
+        
+        // Check for records (Map type)
+        if (value instanceof java.util.Map) {
+            @SuppressWarnings("unchecked")
+            java.util.Map<String, Object> map = (java.util.Map<String, Object>) value;
+            StringBuilder sb = new StringBuilder("record {");
+            boolean first = true;
+            for (java.util.Map.Entry<String, Object> entry : map.entrySet()) {
+                if (!first) {
+                    sb.append(", ");
+                }
+                first = false;
+                sb.append(entry.getKey()).append(": ");
+                // Get type of field value
+                Object fieldValue = entry.getValue();
+                if (fieldValue == null) {
+                    sb.append("null");
+                } else if (fieldValue instanceof String) {
+                    sb.append("string");
+                } else if (fieldValue instanceof Integer) {
+                    sb.append("int");
+                } else if (fieldValue instanceof Long) {
+                    sb.append("long");
+                } else if (fieldValue instanceof Double || fieldValue instanceof Float) {
+                    sb.append("float");
+                } else if (fieldValue instanceof Boolean) {
+                    sb.append("bool");
+                } else if (fieldValue instanceof java.util.Map) {
+                    sb.append("record");
+                } else {
+                    sb.append(fieldValue.getClass().getSimpleName().toLowerCase());
+                }
+            }
+            sb.append("}");
+            return sb.toString();
+        }
+        
+        // Fall back to simple type string
+        return getDataTypeString(dataType, value);
+    }
+    
+    /**
+     * Get the data type name as a lowercase string.
+     */
+    private static String getDataTypeName(DataType dataType) {
+        if (dataType == null) {
+            return "unknown";
+        }
+        return dataType.name().toLowerCase();
     }
     
     /**
