@@ -288,6 +288,7 @@ screen chessScreen = {
     "title": "Chess Game",
     "width": 650,
     "height": 780,
+    "resizable": false,
     "vars": [
         {"name": "whiteTimer", "type": "string", "default": "10:00"},
         {"name": "blackTimer", "type": "string", "default": "10:00"},
