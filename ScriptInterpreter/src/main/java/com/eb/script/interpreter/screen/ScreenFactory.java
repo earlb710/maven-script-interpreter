@@ -1748,16 +1748,22 @@ public class ScreenFactory {
             return fullAreaPath;
         }
         
-        // Split the path by dots
-        String[] parts = fullAreaPath.split("\\.");
-        
-        // If there are 2 or fewer parts, return as-is
-        if (parts.length <= 2) {
+        // Find the first dot
+        int firstDot = fullAreaPath.indexOf('.');
+        if (firstDot == -1) {
+            // No dots means only one level, return as-is
             return fullAreaPath;
         }
         
-        // Return only the first two parts
-        return parts[0] + "." + parts[1];
+        // Find the second dot
+        int secondDot = fullAreaPath.indexOf('.', firstDot + 1);
+        if (secondDot == -1) {
+            // Only one dot means two levels, return as-is
+            return fullAreaPath;
+        }
+        
+        // More than two levels, return substring up to second dot
+        return fullAreaPath.substring(0, secondDot);
     }
     
     /**
