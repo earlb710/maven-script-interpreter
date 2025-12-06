@@ -1,0 +1,27 @@
+// Test: Using bitmap typedef in record field definitions
+print "=== Test: bitmap typedef in record fields ===";
+print "";
+
+// Define a bitmap type alias
+StatusByte typeof bitmap { enabled: 0, priority: 1-3, flags: 4-7 };
+
+// Use the typedef as a field type in a record
+var device: record {
+    name: string,
+    id: int,
+    status: StatusByte
+};
+
+// Assign values - bitmap field is initialized as a byte (0)
+device = {
+    "name": "Sensor A",
+    "id": 101,
+    "status": 0
+};
+
+print "Device: " + device;
+print "Device name: " + device.name;
+print "Device status (byte): " + device.status;
+
+print "";
+print "=== Test passed ===";

@@ -1,5 +1,5 @@
 // EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
-// Example: record type - Structured data
+// Example: record type - Structured data with support for nested records
 // Syntax: var name: record {field: type, ...};
 
 // Define record with explicit type
@@ -17,3 +17,36 @@ person.age = 30;
 var data: json = {"id": 1, "title": "Hello"};
 var item = record(data);
 print typeof item;
+
+// Nested records - records within records
+var employee: record {
+    id: int,
+    name: string,
+    contact: record {
+        email: string,
+        phone: string,
+        address: record {
+            street: string,
+            city: string,
+            zipCode: string
+        }
+    }
+};
+
+employee = {
+    "id": 1001,
+    "name": "Jane Smith",
+    "contact": {
+        "email": "jane@example.com",
+        "phone": "555-1234",
+        "address": {
+            "street": "123 Main St",
+            "city": "Springfield",
+            "zipCode": "12345"
+        }
+    }
+};
+
+print "Employee: " + employee.name;
+print "Email: " + employee.contact.email;
+print "City: " + employee.contact.address.city;

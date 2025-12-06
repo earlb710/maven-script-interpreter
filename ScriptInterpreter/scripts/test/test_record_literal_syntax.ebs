@@ -1,0 +1,44 @@
+// Test: Record literal syntax with unquoted keys
+print "=== Test: Record Literal Syntax ===";
+print "";
+
+// Define type aliases
+posType typeof record { x: int, y: int };
+ChessPiece typeof record { piece: string, color: string, pos: posType };
+
+// Test 1: Simple record literal
+print "Test 1: Simple record literal with posType";
+var position = posType { x: 10, y: 20 };
+print "Position: " + position;
+print "Position X: " + position.x;
+print "Position Y: " + position.y;
+print "";
+
+// Test 2: Nested record literal
+print "Test 2: Nested record literal with ChessPiece";
+var piece = ChessPiece { piece: "R", color: "B", pos: posType { x: 0, y: 0 } };
+print "Piece: " + piece;
+print "Piece type: " + piece.piece;
+print "Piece color: " + piece.color;
+print "Piece position: " + piece.pos;
+var piecePos = piece.pos;
+print "Piece position X: " + piecePos.x;
+print "Piece position Y: " + piecePos.y;
+print "";
+
+// Test 3: Array element assignment with record literal
+print "Test 3: Array element assignment";
+var pieces: ChessPiece[3];
+pieces[0] = ChessPiece { piece: "K", color: "W", pos: posType { x: 4, y: 0 } };
+pieces[1] = ChessPiece { piece: "Q", color: "W", pos: posType { x: 3, y: 0 } };
+pieces[2] = ChessPiece { piece: "R", color: "W", pos: posType { x: 0, y: 0 } };
+
+var p0 = pieces[0];
+var p1 = pieces[1];
+var p2 = pieces[2];
+print "First piece: " + p0.piece + " at position " + p0.pos;
+print "Second piece: " + p1.piece + " at position " + p1.pos;
+print "Third piece: " + p2.piece + " at position " + p2.pos;
+print "";
+
+print "=== All Record Literal Tests Passed ===";

@@ -1015,7 +1015,27 @@ public class Parser {
                     fieldType = tokenType.getDataType();
                     advance();
                 } else {
-                    throw error(fieldTypeToken, "Unknown type '" + typeName + "' in record field definition.");
+                    // Check if this is a user-defined type alias (typedef)
+                    TypeRegistry.TypeAlias typeAlias = TypeRegistry.getTypeAlias(typeName);
+                    if (typeAlias != null) {
+                        // This is a type alias - use its type based on what it represents
+                        if (typeAlias.recordType != null) {
+                            nestedRecordType = typeAlias.recordType;
+                            fieldType = DataType.RECORD;
+                        } else if (typeAlias.bitmapType != null) {
+                            // Bitmap types are stored as BYTE in records
+                            fieldType = DataType.BYTE;
+                        } else if (typeAlias.dataType != null) {
+                            fieldType = typeAlias.dataType;
+                        } else {
+                            // Safety check: TypeAlias constructor guarantees at least one type is non-null,
+                            // but this guards against potential TypeRegistry corruption or concurrent modification
+                            throw error(fieldTypeToken, "Malformed type alias '" + typeName + "' - missing type definition.");
+                        }
+                        advance();
+                    } else {
+                        throw error(fieldTypeToken, "Unknown type '" + typeName + "' in record field definition.");
+                    }
                 }
             } else {
                 throw error(fieldTypeToken, "Expected type name after ':' in record field definition.");
@@ -1365,6 +1385,159 @@ public class Parser {
             currToken = savedCurrToken;
             prevToken = savedPrevToken;
         }
+    }
+
+    /**
+     * Parse a record literal with unquoted keys: TypeName { field: value, field: value }
+     * This provides a cleaner, more readable syntax for record initialization.
+     * Example: ChessPiece { piece: "R", color: "B", pos: posType { x: 0, y: 0 } }
+     */
+    private LiteralExpression parseRecordLiteral() throws ParseError {
+        consume(EbsTokenType.LBRACE, "Expected '{' to start record literal.");
+        
+        StringBuilder jsonBuilder = new StringBuilder("{");
+        boolean first = true;
+        
+        while (!check(EbsTokenType.RBRACE) && !isAtEnd()) {
+            if (!first) {
+                jsonBuilder.append(",");
+            }
+            first = false;
+            
+            // Parse field name (unquoted identifier)
+            EbsToken fieldName = consume(EbsTokenType.IDENTIFIER, "Expected field name in record literal.");
+            consume(EbsTokenType.COLON, "Expected ':' after field name in record literal.");
+            
+            // Add field name with quotes to JSON (escape field name for JSON safety)
+            String fieldNameStr = fieldName.literal != null ? (String) fieldName.literal : "";
+            jsonBuilder.append("\"").append(escapeJsonString(fieldNameStr)).append("\":");
+            
+            // Parse field value - could be another record literal, string, number, etc.
+            String fieldValue = parseRecordFieldValue();
+            jsonBuilder.append(fieldValue);
+            
+            // Optional comma between fields
+            if (check(EbsTokenType.COMMA)) {
+                advance();
+            }
+        }
+        
+        consume(EbsTokenType.RBRACE, "Expected '}' to end record literal.");
+        jsonBuilder.append("}");
+        
+        // Parse the constructed JSON string
+        String jsonText = jsonBuilder.toString();
+        Object value = Json.parse(jsonText, false);  // false = case-sensitive field names
+        return new com.eb.script.interpreter.expression.LiteralExpression(com.eb.script.token.DataType.JSON, value);
+    }
+    
+    /**
+     * Escape a string for safe inclusion in JSON.
+     * Handles quotes, backslashes, and control characters.
+     */
+    private String escapeJsonString(String s) {
+        if (s == null) return "";
+        StringBuilder sb = new StringBuilder(s.length() + 8);
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            switch (c) {
+                case '"' -> sb.append("\\\"");
+                case '\\' -> sb.append("\\\\");
+                case '\b' -> sb.append("\\b");
+                case '\f' -> sb.append("\\f");
+                case '\n' -> sb.append("\\n");
+                case '\r' -> sb.append("\\r");
+                case '\t' -> sb.append("\\t");
+                default -> {
+                    if (c < 0x20) {
+                        sb.append(String.format("\\u%04x", (int) c));
+                    } else {
+                        sb.append(c);
+                    }
+                }
+            }
+        }
+        return sb.toString();
+    }
+    
+    /**
+     * Parse a field value in a record literal, which could be:
+     * - A string literal (quoted)
+     * - A number
+     * - A boolean
+     * - A nested record literal (TypeName { ... })
+     * - An identifier followed by { } (recursive record literal)
+     */
+    private String parseRecordFieldValue() throws ParseError {
+        // Check if this is a nested record literal: identifier followed by {
+        if (check(EbsTokenType.IDENTIFIER)) {
+            int savedCurrent = current;
+            EbsToken savedCurrToken = currToken;
+            EbsToken savedPrevToken = prevToken;
+            
+            EbsToken identifier = advance();
+            if (check(EbsTokenType.LBRACE)) {
+                // Validate that the identifier is a type alias
+                String typeName = identifier.literal != null ? (String) identifier.literal : "";
+                TypeRegistry.TypeAlias alias = TypeRegistry.getTypeAlias(typeName);
+                if (alias == null) {
+                    throw error(identifier, "Unknown type '" + typeName + "' in record literal. Only type aliases can be used.");
+                }
+                // This is a nested record literal, parse it recursively
+                LiteralExpression nestedRecord = parseRecordLiteral();
+                // Convert the parsed JSON object back to string
+                return Json.compactJson(nestedRecord.value);
+            } else {
+                // Not a record literal, restore position and treat as error
+                current = savedCurrent;
+                currToken = savedCurrToken;
+                prevToken = savedPrevToken;
+                throw error(peek(), "Expected literal value in record literal. Variables are not allowed.");
+            }
+        }
+        
+        // String literal
+        if (match(EbsTokenType.QUOTE1, EbsTokenType.QUOTE2)) {
+            EbsToken quoteType = previous();
+            if (match(EbsTokenType.STRING, EbsTokenType.DATE)) {
+                Object literalValue = previous().literal;
+                String strValue = literalValue != null ? (String) literalValue : "";
+                consume(quoteType.type, "Expected closing quote.");
+                // Use proper JSON string escaping
+                return "\"" + escapeJsonString(strValue) + "\"";
+            } else {
+                throw error(peek(), "Expected string value after opening quote.");
+            }
+        }
+        
+        // Number literals
+        if (match(EbsTokenType.INTEGER)) {
+            return previous().literal.toString();
+        }
+        if (match(EbsTokenType.LONG)) {
+            return previous().literal.toString();
+        }
+        if (match(EbsTokenType.FLOAT)) {
+            return previous().literal.toString();
+        }
+        if (match(EbsTokenType.DOUBLE)) {
+            return previous().literal.toString();
+        }
+        
+        // Boolean literals
+        if (match(EbsTokenType.BOOL_TRUE)) {
+            return "true";
+        }
+        if (match(EbsTokenType.BOOL_FALSE)) {
+            return "false";
+        }
+        
+        // Null literal
+        if (match(EbsTokenType.NULL)) {
+            return "null";
+        }
+        
+        throw error(peek(), "Expected literal value (string, number, boolean, null, or nested record) in record literal.");
     }
 
     private LiteralExpression parseJsonLiteralFromSource() throws ParseError {
@@ -2242,6 +2415,16 @@ public class Parser {
         } else if (match(EbsTokenType.IDENTIFIER)) {
             EbsToken p = previous();
             String varName = (String) p.literal;
+            
+            // Check if this is a record literal: TypeName { ... }
+            if (check(EbsTokenType.LBRACE) && !varName.contains(".")) {
+                // Check if this is a type alias (for record literals)
+                TypeRegistry.TypeAlias alias = TypeRegistry.getTypeAlias(varName);
+                if (alias != null) {
+                    // This is a record literal with the syntax: TypeName { field: value, ... }
+                    return parseRecordLiteral();
+                }
+            }
             
             // Check if this is a type alias being used for casting (e.g., myBitmapType(byteVar))
             if (check(EbsTokenType.LPAREN) && !varName.contains(".")) {
