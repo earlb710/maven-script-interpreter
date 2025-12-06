@@ -489,31 +489,22 @@ public class ScreenFactory {
                 // Store the SplitPane reference
                 screenDebugSplitPanes.put(screenName.toLowerCase(), splitPane);
                 
-                // Replace the center content with the SplitPane
-                rootPane.setCenter(splitPane);
-                
-                // Expand the window width to accommodate the debug panel
+                // Expand the window width to accommodate the debug panel FIRST
                 if (stage != null) {
                     double currentWidth = stage.getWidth();
                     double newWidth = currentWidth + DEBUG_PANEL_PREF_WIDTH;
                     stage.setWidth(newWidth);
                     
-                    // Set the divider position after the stage is resized
-                    // Calculate the divider position so the debug panel gets its preferred width
-                    Platform.runLater(() -> {
-                        double totalWidth = splitPane.getWidth();
-                        double dividerPos;
-                        if (totalWidth > 0) {
-                            dividerPos = (totalWidth - DEBUG_PANEL_PREF_WIDTH) / totalWidth;
-                        } else {
-                            // Fallback: calculate based on expected window width
-                            dividerPos = 1.0 - ((double) DEBUG_PANEL_PREF_WIDTH / newWidth);
-                        }
-                        // Clamp the divider position to ensure main content has reasonable space
-                        splitPane.setDividerPositions(
-                            Math.max(DEBUG_DIVIDER_MIN_POSITION, Math.min(DEBUG_DIVIDER_MAX_POSITION, dividerPos)));
-                    });
+                    // Calculate and set the divider position immediately
+                    // This prevents the initial "wide" appearance before shrinking
+                    double dividerPos = 1.0 - ((double) DEBUG_PANEL_PREF_WIDTH / newWidth);
+                    // Clamp the divider position to ensure main content has reasonable space
+                    dividerPos = Math.max(DEBUG_DIVIDER_MIN_POSITION, Math.min(DEBUG_DIVIDER_MAX_POSITION, dividerPos));
+                    splitPane.setDividerPositions(dividerPos);
                 }
+                
+                // Replace the center content with the SplitPane AFTER setting width and divider
+                rootPane.setCenter(splitPane);
             } else {
                 // No original center content available - don't show split pane with only debug panel
                 // Just show debug panel in the right side of the BorderPane as a fallback
