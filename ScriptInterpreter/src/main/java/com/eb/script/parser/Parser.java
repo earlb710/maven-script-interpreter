@@ -1408,8 +1408,8 @@ public class Parser {
             EbsToken fieldName = consume(EbsTokenType.IDENTIFIER, "Expected field name in record literal.");
             consume(EbsTokenType.COLON, "Expected ':' after field name in record literal.");
             
-            // Add field name with quotes to JSON
-            jsonBuilder.append("\"").append(fieldName.literal).append("\":");
+            // Add field name with quotes to JSON (escape field name for JSON safety)
+            jsonBuilder.append("\"").append(escapeJsonString((String) fieldName.literal)).append("\":");
             
             // Parse field value - could be another record literal, string, number, etc.
             String fieldValue = parseRecordFieldValue();
@@ -1426,8 +1426,37 @@ public class Parser {
         
         // Parse the constructed JSON string
         String jsonText = jsonBuilder.toString();
-        Object value = Json.parse(jsonText, false);
+        Object value = Json.parse(jsonText, false);  // false = case-sensitive field names
         return new com.eb.script.interpreter.expression.LiteralExpression(com.eb.script.token.DataType.JSON, value);
+    }
+    
+    /**
+     * Escape a string for safe inclusion in JSON.
+     * Handles quotes, backslashes, and control characters.
+     */
+    private String escapeJsonString(String s) {
+        if (s == null) return "";
+        StringBuilder sb = new StringBuilder(s.length() + 8);
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            switch (c) {
+                case '"' -> sb.append("\\\"");
+                case '\\' -> sb.append("\\\\");
+                case '\b' -> sb.append("\\b");
+                case '\f' -> sb.append("\\f");
+                case '\n' -> sb.append("\\n");
+                case '\r' -> sb.append("\\r");
+                case '\t' -> sb.append("\\t");
+                default -> {
+                    if (c < 0x20) {
+                        sb.append(String.format("\\u%04x", (int) c));
+                    } else {
+                        sb.append(c);
+                    }
+                }
+            }
+        }
+        return sb.toString();
     }
     
     /**
@@ -1466,7 +1495,8 @@ public class Parser {
             if (match(EbsTokenType.STRING, EbsTokenType.DATE)) {
                 String strValue = (String) previous().literal;
                 consume(quoteType.type, "Expected closing quote.");
-                return "\"" + strValue.replace("\"", "\\\"") + "\"";
+                // Use proper JSON string escaping
+                return "\"" + escapeJsonString(strValue) + "\"";
             } else {
                 throw error(peek(), "Expected string value after opening quote.");
             }

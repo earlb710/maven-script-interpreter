@@ -1,0 +1,28 @@
+// Test: Record literal with special characters in strings
+print "=== Test: Record Literal with Special Characters ===";
+print "";
+
+// Define type alias
+TestRecord typeof record { name: string, message: string };
+
+// Test 1: String with quotes
+print "Test 1: String with quotes";
+var rec1 = TestRecord { name: "John \"The Best\" Doe", message: "He said \"Hello\"" };
+print "Record 1: " + rec1;
+print "Name: " + rec1.name;
+print "Message: " + rec1.message;
+print "";
+
+// Test 2: String with backslashes
+print "Test 2: String with backslashes";
+var rec2 = TestRecord { name: "Path: C:\\Users\\John", message: "Escape: \\" };
+print "Record 2: " + rec2;
+print "";
+
+// Test 3: String with special characters
+print "Test 3: String with tabs and newlines";
+var rec3 = TestRecord { name: "Tab\tTest", message: "Line1\nLine2" };
+print "Record 3: " + rec3;
+print "";
+
+print "=== All Special Character Tests Passed ===";
