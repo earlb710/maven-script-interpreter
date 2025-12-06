@@ -1737,11 +1737,12 @@ public class ScreenFactory {
      * Limits the area path to show only the last two direct parents.
      * For example:
      * - "mainArea.section1.subsection1.panel1.subpanel2" becomes "panel1.subpanel2"
+     * - "area1.area2.area3" becomes "area2.area3"
      * - "area1.area2" stays as "area1.area2"
      * - "area1" stays as "area1"
      * 
      * @param fullAreaPath The full area path with all levels
-     * @return The limited area path with at most two direct parent levels
+     * @return The last two levels of the area path
      */
     private static String limitAreaPathToTwoLevels(String fullAreaPath) {
         if (fullAreaPath == null || fullAreaPath.isEmpty()) {
