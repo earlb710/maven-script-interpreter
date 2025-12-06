@@ -159,7 +159,7 @@ public class BuiltinsVectorImage {
 
     /**
      * Get vector image width.
-     * vector.getWidth(vectorImage) -> DOUBLE
+     * vector.getwidth(vectorImage) -> DOUBLE
      */
     private static Object getWidth(Object[] args) throws InterpreterError {
         EbsVectorImage image = getVectorImage(args[0], "vector.getWidth");
@@ -168,7 +168,7 @@ public class BuiltinsVectorImage {
 
     /**
      * Get vector image height.
-     * vector.getHeight(vectorImage) -> DOUBLE
+     * vector.getheight(vectorImage) -> DOUBLE
      */
     private static Object getHeight(Object[] args) throws InterpreterError {
         EbsVectorImage image = getVectorImage(args[0], "vector.getHeight");
@@ -177,7 +177,7 @@ public class BuiltinsVectorImage {
 
     /**
      * Get vector image metadata as JSON.
-     * vector.getInfo(vectorImage) -> JSON { width, height, name }
+     * vector.getinfo(vectorImage) -> JSON { width, height, name }
      */
     private static Object getInfo(Object[] args) throws InterpreterError {
         EbsVectorImage image = getVectorImage(args[0], "vector.getInfo");
