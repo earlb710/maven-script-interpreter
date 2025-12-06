@@ -52,6 +52,12 @@ public class BuiltinsVectorImage {
             case "vector.tostring" -> toSvgString(args);
             case "vector.getname" -> getName(args);
             case "vector.setname" -> setName(args);
+            case "vector.applyblur" -> applyBlur(args);
+            case "vector.applydropshadow" -> applyDropShadow(args);
+            case "vector.applygrayscale" -> applyGrayscale(args);
+            case "vector.applysepia" -> applySepia(args);
+            case "vector.applybrightness" -> applyBrightness(args);
+            case "vector.applyhuerotate" -> applyHueRotate(args);
             default -> throw new InterpreterError("Unknown Vector Image builtin: " + name);
         };
     }
@@ -319,6 +325,77 @@ public class BuiltinsVectorImage {
         String name = (String) args[1];
         image.setImageName(name);
         return image;
+    }
+
+    // --- Filter Effect methods ---
+
+    /**
+     * Apply blur filter to vector image.
+     * vector.applyBlur(vectorImage, radius) -> VECTOR_IMAGE
+     */
+    private static Object applyBlur(Object[] args) throws InterpreterError {
+        EbsVectorImage image = getVectorImage(args[0], "vector.applyBlur");
+        double radius = toDouble(args[1], "vector.applyBlur", "radius");
+        
+        return image.applyBlur(radius);
+    }
+
+    /**
+     * Apply drop shadow filter to vector image.
+     * vector.applyDropShadow(vectorImage, dx, dy, blur, color) -> VECTOR_IMAGE
+     */
+    private static Object applyDropShadow(Object[] args) throws InterpreterError {
+        EbsVectorImage image = getVectorImage(args[0], "vector.applyDropShadow");
+        double dx = toDouble(args[1], "vector.applyDropShadow", "dx");
+        double dy = toDouble(args[2], "vector.applyDropShadow", "dy");
+        double blur = toDouble(args[3], "vector.applyDropShadow", "blur");
+        String color = (String) args[4];
+        
+        if (color == null || color.isBlank()) {
+            throw new InterpreterError("vector.applyDropShadow: color cannot be null or empty");
+        }
+        
+        return image.applyDropShadow(dx, dy, blur, color);
+    }
+
+    /**
+     * Apply grayscale filter to vector image.
+     * vector.applyGrayscale(vectorImage) -> VECTOR_IMAGE
+     */
+    private static Object applyGrayscale(Object[] args) throws InterpreterError {
+        EbsVectorImage image = getVectorImage(args[0], "vector.applyGrayscale");
+        return image.applyGrayscale();
+    }
+
+    /**
+     * Apply sepia filter to vector image.
+     * vector.applySepia(vectorImage) -> VECTOR_IMAGE
+     */
+    private static Object applySepia(Object[] args) throws InterpreterError {
+        EbsVectorImage image = getVectorImage(args[0], "vector.applySepia");
+        return image.applySepia();
+    }
+
+    /**
+     * Apply brightness adjustment to vector image.
+     * vector.applyBrightness(vectorImage, factor) -> VECTOR_IMAGE
+     */
+    private static Object applyBrightness(Object[] args) throws InterpreterError {
+        EbsVectorImage image = getVectorImage(args[0], "vector.applyBrightness");
+        double factor = toDouble(args[1], "vector.applyBrightness", "factor");
+        
+        return image.applyBrightness(factor);
+    }
+
+    /**
+     * Apply hue rotation to vector image.
+     * vector.applyHueRotate(vectorImage, degrees) -> VECTOR_IMAGE
+     */
+    private static Object applyHueRotate(Object[] args) throws InterpreterError {
+        EbsVectorImage image = getVectorImage(args[0], "vector.applyHueRotate");
+        double degrees = toDouble(args[1], "vector.applyHueRotate", "degrees");
+        
+        return image.applyHueRotate(degrees);
     }
 
     // --- Helper methods ---

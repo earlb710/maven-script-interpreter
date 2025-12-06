@@ -458,6 +458,294 @@ public class EbsVectorImage {
         }
     }
     
+    // --- SVG Filter Effects ---
+    
+    /**
+     * Apply a Gaussian blur filter to the SVG.
+     * 
+     * @param radius Blur radius (stdDeviation)
+     * @return A new EbsVectorImage with blur filter applied
+     */
+    public EbsVectorImage applyBlur(double radius) throws InterpreterError {
+        try {
+            SVGDocument newDoc = (SVGDocument) svgDocument.cloneNode(true);
+            Element root = newDoc.getDocumentElement();
+            
+            // Create defs element if it doesn't exist
+            Element defs = getOrCreateDefs(newDoc);
+            
+            // Create filter element
+            Element filter = newDoc.createElementNS("http://www.w3.org/2000/svg", "filter");
+            String filterId = "blur_" + System.currentTimeMillis();
+            filter.setAttribute("id", filterId);
+            
+            // Create feGaussianBlur element
+            Element blur = newDoc.createElementNS("http://www.w3.org/2000/svg", "feGaussianBlur");
+            blur.setAttribute("stdDeviation", String.valueOf(radius));
+            filter.appendChild(blur);
+            
+            defs.appendChild(filter);
+            
+            // Apply filter to root
+            root.setAttribute("filter", "url(#" + filterId + ")");
+            
+            return new EbsVectorImage(newDoc, imageName);
+        } catch (Exception ex) {
+            throw new InterpreterError("EbsVectorImage.applyBlur: " + ex.getMessage());
+        }
+    }
+    
+    /**
+     * Apply a drop shadow filter to the SVG.
+     * 
+     * @param dx Horizontal offset
+     * @param dy Vertical offset
+     * @param blur Blur radius
+     * @param color Shadow color (hex format, e.g., "#000000")
+     * @return A new EbsVectorImage with drop shadow filter applied
+     */
+    public EbsVectorImage applyDropShadow(double dx, double dy, double blur, String color) throws InterpreterError {
+        try {
+            SVGDocument newDoc = (SVGDocument) svgDocument.cloneNode(true);
+            Element root = newDoc.getDocumentElement();
+            
+            // Create defs element if it doesn't exist
+            Element defs = getOrCreateDefs(newDoc);
+            
+            // Create filter element
+            Element filter = newDoc.createElementNS("http://www.w3.org/2000/svg", "filter");
+            String filterId = "dropshadow_" + System.currentTimeMillis();
+            filter.setAttribute("id", filterId);
+            filter.setAttribute("x", "-50%");
+            filter.setAttribute("y", "-50%");
+            filter.setAttribute("width", "200%");
+            filter.setAttribute("height", "200%");
+            
+            // Create feGaussianBlur for shadow
+            Element blurElem = newDoc.createElementNS("http://www.w3.org/2000/svg", "feGaussianBlur");
+            blurElem.setAttribute("in", "SourceAlpha");
+            blurElem.setAttribute("stdDeviation", String.valueOf(blur));
+            blurElem.setAttribute("result", "blur");
+            filter.appendChild(blurElem);
+            
+            // Create feOffset for shadow position
+            Element offset = newDoc.createElementNS("http://www.w3.org/2000/svg", "feOffset");
+            offset.setAttribute("in", "blur");
+            offset.setAttribute("dx", String.valueOf(dx));
+            offset.setAttribute("dy", String.valueOf(dy));
+            offset.setAttribute("result", "offsetBlur");
+            filter.appendChild(offset);
+            
+            // Create feFlood for shadow color
+            Element flood = newDoc.createElementNS("http://www.w3.org/2000/svg", "feFlood");
+            flood.setAttribute("flood-color", color);
+            flood.setAttribute("result", "floodColor");
+            filter.appendChild(flood);
+            
+            // Create feComposite to apply color to shadow
+            Element composite1 = newDoc.createElementNS("http://www.w3.org/2000/svg", "feComposite");
+            composite1.setAttribute("in", "floodColor");
+            composite1.setAttribute("in2", "offsetBlur");
+            composite1.setAttribute("operator", "in");
+            composite1.setAttribute("result", "shadow");
+            filter.appendChild(composite1);
+            
+            // Merge shadow with original
+            Element merge = newDoc.createElementNS("http://www.w3.org/2000/svg", "feMerge");
+            Element mergeNode1 = newDoc.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
+            mergeNode1.setAttribute("in", "shadow");
+            merge.appendChild(mergeNode1);
+            Element mergeNode2 = newDoc.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
+            mergeNode2.setAttribute("in", "SourceGraphic");
+            merge.appendChild(mergeNode2);
+            filter.appendChild(merge);
+            
+            defs.appendChild(filter);
+            
+            // Apply filter to root
+            root.setAttribute("filter", "url(#" + filterId + ")");
+            
+            return new EbsVectorImage(newDoc, imageName);
+        } catch (Exception ex) {
+            throw new InterpreterError("EbsVectorImage.applyDropShadow: " + ex.getMessage());
+        }
+    }
+    
+    /**
+     * Apply a grayscale filter using color matrix.
+     * 
+     * @return A new EbsVectorImage with grayscale filter applied
+     */
+    public EbsVectorImage applyGrayscale() throws InterpreterError {
+        try {
+            SVGDocument newDoc = (SVGDocument) svgDocument.cloneNode(true);
+            Element root = newDoc.getDocumentElement();
+            
+            // Create defs element if it doesn't exist
+            Element defs = getOrCreateDefs(newDoc);
+            
+            // Create filter element
+            Element filter = newDoc.createElementNS("http://www.w3.org/2000/svg", "filter");
+            String filterId = "grayscale_" + System.currentTimeMillis();
+            filter.setAttribute("id", filterId);
+            
+            // Create feColorMatrix for grayscale
+            Element colorMatrix = newDoc.createElementNS("http://www.w3.org/2000/svg", "feColorMatrix");
+            colorMatrix.setAttribute("type", "matrix");
+            // Standard grayscale matrix
+            colorMatrix.setAttribute("values", 
+                "0.33 0.33 0.33 0 0 " +
+                "0.33 0.33 0.33 0 0 " +
+                "0.33 0.33 0.33 0 0 " +
+                "0 0 0 1 0");
+            filter.appendChild(colorMatrix);
+            
+            defs.appendChild(filter);
+            
+            // Apply filter to root
+            root.setAttribute("filter", "url(#" + filterId + ")");
+            
+            return new EbsVectorImage(newDoc, imageName);
+        } catch (Exception ex) {
+            throw new InterpreterError("EbsVectorImage.applyGrayscale: " + ex.getMessage());
+        }
+    }
+    
+    /**
+     * Apply a sepia filter using color matrix.
+     * 
+     * @return A new EbsVectorImage with sepia filter applied
+     */
+    public EbsVectorImage applySepia() throws InterpreterError {
+        try {
+            SVGDocument newDoc = (SVGDocument) svgDocument.cloneNode(true);
+            Element root = newDoc.getDocumentElement();
+            
+            // Create defs element if it doesn't exist
+            Element defs = getOrCreateDefs(newDoc);
+            
+            // Create filter element
+            Element filter = newDoc.createElementNS("http://www.w3.org/2000/svg", "filter");
+            String filterId = "sepia_" + System.currentTimeMillis();
+            filter.setAttribute("id", filterId);
+            
+            // Create feColorMatrix for sepia
+            Element colorMatrix = newDoc.createElementNS("http://www.w3.org/2000/svg", "feColorMatrix");
+            colorMatrix.setAttribute("type", "matrix");
+            // Standard sepia matrix
+            colorMatrix.setAttribute("values", 
+                "0.393 0.769 0.189 0 0 " +
+                "0.349 0.686 0.168 0 0 " +
+                "0.272 0.534 0.131 0 0 " +
+                "0 0 0 1 0");
+            filter.appendChild(colorMatrix);
+            
+            defs.appendChild(filter);
+            
+            // Apply filter to root
+            root.setAttribute("filter", "url(#" + filterId + ")");
+            
+            return new EbsVectorImage(newDoc, imageName);
+        } catch (Exception ex) {
+            throw new InterpreterError("EbsVectorImage.applySepia: " + ex.getMessage());
+        }
+    }
+    
+    /**
+     * Apply brightness adjustment using color matrix.
+     * 
+     * @param factor Brightness factor (1.0 = no change, >1.0 = brighter, <1.0 = darker)
+     * @return A new EbsVectorImage with brightness adjusted
+     */
+    public EbsVectorImage applyBrightness(double factor) throws InterpreterError {
+        try {
+            SVGDocument newDoc = (SVGDocument) svgDocument.cloneNode(true);
+            Element root = newDoc.getDocumentElement();
+            
+            // Create defs element if it doesn't exist
+            Element defs = getOrCreateDefs(newDoc);
+            
+            // Create filter element
+            Element filter = newDoc.createElementNS("http://www.w3.org/2000/svg", "filter");
+            String filterId = "brightness_" + System.currentTimeMillis();
+            filter.setAttribute("id", filterId);
+            
+            // Create feColorMatrix for brightness
+            Element colorMatrix = newDoc.createElementNS("http://www.w3.org/2000/svg", "feColorMatrix");
+            colorMatrix.setAttribute("type", "matrix");
+            // Brightness matrix - multiply RGB channels by factor
+            colorMatrix.setAttribute("values", 
+                String.format("%f 0 0 0 0 0 %f 0 0 0 0 0 %f 0 0 0 0 0 1 0", factor, factor, factor));
+            filter.appendChild(colorMatrix);
+            
+            defs.appendChild(filter);
+            
+            // Apply filter to root
+            root.setAttribute("filter", "url(#" + filterId + ")");
+            
+            return new EbsVectorImage(newDoc, imageName);
+        } catch (Exception ex) {
+            throw new InterpreterError("EbsVectorImage.applyBrightness: " + ex.getMessage());
+        }
+    }
+    
+    /**
+     * Apply hue rotation using color matrix.
+     * 
+     * @param degrees Hue rotation in degrees (0-360)
+     * @return A new EbsVectorImage with hue rotated
+     */
+    public EbsVectorImage applyHueRotate(double degrees) throws InterpreterError {
+        try {
+            SVGDocument newDoc = (SVGDocument) svgDocument.cloneNode(true);
+            Element root = newDoc.getDocumentElement();
+            
+            // Create defs element if it doesn't exist
+            Element defs = getOrCreateDefs(newDoc);
+            
+            // Create filter element
+            Element filter = newDoc.createElementNS("http://www.w3.org/2000/svg", "filter");
+            String filterId = "huerotate_" + System.currentTimeMillis();
+            filter.setAttribute("id", filterId);
+            
+            // Create feColorMatrix for hue rotation
+            Element colorMatrix = newDoc.createElementNS("http://www.w3.org/2000/svg", "feColorMatrix");
+            colorMatrix.setAttribute("type", "hueRotate");
+            colorMatrix.setAttribute("values", String.valueOf(degrees));
+            filter.appendChild(colorMatrix);
+            
+            defs.appendChild(filter);
+            
+            // Apply filter to root
+            root.setAttribute("filter", "url(#" + filterId + ")");
+            
+            return new EbsVectorImage(newDoc, imageName);
+        } catch (Exception ex) {
+            throw new InterpreterError("EbsVectorImage.applyHueRotate: " + ex.getMessage());
+        }
+    }
+    
+    /**
+     * Helper method to get or create the defs element.
+     */
+    private Element getOrCreateDefs(SVGDocument doc) {
+        Element root = doc.getDocumentElement();
+        org.w3c.dom.NodeList defsList = root.getElementsByTagName("defs");
+        
+        if (defsList.getLength() > 0) {
+            return (Element) defsList.item(0);
+        } else {
+            Element defs = doc.createElementNS("http://www.w3.org/2000/svg", "defs");
+            // Insert defs as first child
+            if (root.hasChildNodes()) {
+                root.insertBefore(defs, root.getFirstChild());
+            } else {
+                root.appendChild(defs);
+            }
+            return defs;
+        }
+    }
+    
     @Override
     public String toString() {
         return "EbsVectorImage{" +

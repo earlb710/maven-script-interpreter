@@ -1401,6 +1401,39 @@ public final class Builtins {
                 newParam("vectorImage", DataType.VECTOR_IMAGE, true),  // required; EbsVectorImage
                 newParam("name", DataType.STRING, true)                // required; new vector image name
         ));
+        
+        // Vector Image filter effects
+        addBuiltin(info(
+                "vector.applyBlur", DataType.VECTOR_IMAGE,
+                newParam("vectorImage", DataType.VECTOR_IMAGE, true),  // required; EbsVectorImage
+                newParam("radius", DataType.DOUBLE, true)              // required; blur radius
+        ));
+        addBuiltin(info(
+                "vector.applyDropShadow", DataType.VECTOR_IMAGE,
+                newParam("vectorImage", DataType.VECTOR_IMAGE, true),  // required; EbsVectorImage
+                newParam("dx", DataType.DOUBLE, true),                 // required; horizontal offset
+                newParam("dy", DataType.DOUBLE, true),                 // required; vertical offset
+                newParam("blur", DataType.DOUBLE, true),               // required; blur radius
+                newParam("color", DataType.STRING, true)               // required; shadow color (hex)
+        ));
+        addBuiltin(info(
+                "vector.applyGrayscale", DataType.VECTOR_IMAGE,
+                newParam("vectorImage", DataType.VECTOR_IMAGE, true)   // required; EbsVectorImage
+        ));
+        addBuiltin(info(
+                "vector.applySepia", DataType.VECTOR_IMAGE,
+                newParam("vectorImage", DataType.VECTOR_IMAGE, true)   // required; EbsVectorImage
+        ));
+        addBuiltin(info(
+                "vector.applyBrightness", DataType.VECTOR_IMAGE,
+                newParam("vectorImage", DataType.VECTOR_IMAGE, true),  // required; EbsVectorImage
+                newParam("factor", DataType.DOUBLE, true)              // required; brightness factor (1.0 = no change)
+        ));
+        addBuiltin(info(
+                "vector.applyHueRotate", DataType.VECTOR_IMAGE,
+                newParam("vectorImage", DataType.VECTOR_IMAGE, true),  // required; EbsVectorImage
+                newParam("degrees", DataType.DOUBLE, true)             // required; hue rotation (0-360)
+        ));
 
         // ==========================
         // DATE builtins
