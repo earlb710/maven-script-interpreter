@@ -714,6 +714,41 @@ public class ScreenFactory {
             // Allow table to expand to fill available space
             varsTable.setMaxHeight(Double.MAX_VALUE);
             VBox.setVgrow(varsTable, Priority.ALWAYS);
+            
+            // Add row click handler to copy variable to clipboard
+            varsTable.setRowFactory(tv -> {
+                javafx.scene.control.TableRow<String[]> row = new javafx.scene.control.TableRow<>();
+                row.setOnMouseClicked(event -> {
+                    if (!row.isEmpty()) {
+                        String[] rowData = row.getItem();
+                        String name = rowData[0];
+                        String value = rowData[1];
+                        String clipboardText = name + " = " + value;
+                        javafx.scene.input.Clipboard clipboard = javafx.scene.input.Clipboard.getSystemClipboard();
+                        javafx.scene.input.ClipboardContent content = new javafx.scene.input.ClipboardContent();
+                        content.putString(clipboardText);
+                        clipboard.setContent(content);
+                        // Show feedback in row
+                        String originalStyle = row.getStyle();
+                        row.setStyle("-fx-background-color: #90EE90;");
+                        new Thread(() -> {
+                            try {
+                                Thread.sleep(300);
+                                Platform.runLater(() -> row.setStyle(originalStyle));
+                            } catch (InterruptedException ex) {
+                                // Ignore
+                            }
+                        }).start();
+                        // Also show feedback via status bar if available
+                        com.eb.ui.ebs.StatusBar statusBar = context.getScreenStatusBars().get(screenName);
+                        if (statusBar != null) {
+                            statusBar.setMessage("Copied to clipboard: " + name);
+                        }
+                    }
+                });
+                return row;
+            });
+            
             varsSection.getChildren().add(varsTable);
         } else {
             javafx.scene.control.Label noVarsLabel = new javafx.scene.control.Label("No variables defined");
@@ -843,6 +878,55 @@ public class ScreenFactory {
             // Allow table to expand to fill available space
             itemsTable.setMaxHeight(Double.MAX_VALUE);
             VBox.setVgrow(itemsTable, Priority.ALWAYS);
+            
+            // Add row click handler to copy item to clipboard
+            // Capture screenName in final variable for lambda
+            final String finalScreenName = screenName;
+            itemsTable.setRowFactory(tv -> {
+                javafx.scene.control.TableRow<String[]> row = new javafx.scene.control.TableRow<>();
+                row.setOnMouseClicked(event -> {
+                    if (!row.isEmpty()) {
+                        String[] rowData = row.getItem();
+                        // Array format: [displayTextWithIcon, value, varRef, itemType, rawName]
+                        String displayText = rowData[0];
+                        String value = rowData[1];
+                        String varRef = rowData.length > 2 ? rowData[2] : "";
+                        String itemType = rowData.length > 3 ? rowData[3] : "unknown";
+                        String rawName = rowData.length > 4 ? rowData[4] : displayText;
+                        
+                        StringBuilder clipboardBuilder = new StringBuilder();
+                        clipboardBuilder.append("Item: ").append(rawName);
+                        clipboardBuilder.append("\nType: ").append(itemType);
+                        if (varRef != null && !varRef.isEmpty()) {
+                            clipboardBuilder.append("\nVar: ").append(varRef);
+                        }
+                        clipboardBuilder.append("\nValue: ").append(value);
+                        
+                        javafx.scene.input.Clipboard clipboard = javafx.scene.input.Clipboard.getSystemClipboard();
+                        javafx.scene.input.ClipboardContent content = new javafx.scene.input.ClipboardContent();
+                        content.putString(clipboardBuilder.toString());
+                        clipboard.setContent(content);
+                        // Show feedback in row
+                        String originalStyle = row.getStyle();
+                        row.setStyle("-fx-background-color: #90EE90;");
+                        new Thread(() -> {
+                            try {
+                                Thread.sleep(300);
+                                Platform.runLater(() -> row.setStyle(originalStyle));
+                            } catch (InterruptedException ex) {
+                                // Ignore
+                            }
+                        }).start();
+                        // Also show feedback via status bar if available
+                        com.eb.ui.ebs.StatusBar statusBar = context.getScreenStatusBars().get(finalScreenName);
+                        if (statusBar != null) {
+                            statusBar.setMessage("Copied to clipboard: " + rawName);
+                        }
+                    }
+                });
+                return row;
+            });
+            
             itemsSection.getChildren().add(itemsTable);
         } else {
             javafx.scene.control.Label noItemsLabel = new javafx.scene.control.Label("No screen items defined");
