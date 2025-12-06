@@ -269,8 +269,8 @@ public class ScreenFactory {
                         // row[2] is varRef, row[3] is itemType, row[4] is rawName
                         String typeIcon = getItemTypeIcon(row[3]);
                         String rawName = row[4];
-                        // Add ⚠️ prefix to indicate changed
-                        row[0] = "⚠️ " + typeIcon + " " + rawName;
+                        // Format: type icon, then change icon, then name (e.g., "🎨 ⚠️ background")
+                        row[0] = typeIcon + " ⚠️ " + rawName;
                         break;
                     }
                 }
@@ -717,6 +717,28 @@ public class ScreenFactory {
             itemNameCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue()[0]));
             itemNameCol.setStyle("-fx-alignment: CENTER-LEFT; -fx-font-weight: bold;");
             itemNameCol.prefWidthProperty().bind(itemsTable.widthProperty().multiply(0.5));
+            
+            // Cell factory to apply dark orange color for changed items (contains ⚠️)
+            // Note: Pre-computing display text avoids JavaFX cell factory timing issues
+            // where cell factories may be called before data is fully initialized
+            itemNameCol.setCellFactory(col -> new javafx.scene.control.TableCell<String[], String>() {
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setText(null);
+                        setStyle("-fx-alignment: CENTER-LEFT; -fx-font-weight: bold;");
+                    } else {
+                        setText(item);
+                        // Dark orange color for changed items (format: "typeIcon ⚠️ name")
+                        if (item.contains("⚠️")) {
+                            setStyle("-fx-alignment: CENTER-LEFT; -fx-font-weight: bold; -fx-text-fill: #cc5500;");
+                        } else {
+                            setStyle("-fx-alignment: CENTER-LEFT; -fx-font-weight: bold;");
+                        }
+                    }
+                }
+            });
             
             // Value column (50%)
             javafx.scene.control.TableColumn<String[], String> itemValueCol = new javafx.scene.control.TableColumn<>("Value");

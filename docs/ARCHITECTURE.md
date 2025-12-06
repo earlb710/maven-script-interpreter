@@ -765,6 +765,58 @@ Error Reporting:
 - More built-in functions
 - Enhanced error messages with suggestions
 
+## JavaFX UI Patterns
+
+### Avoiding Cell Factory Timing Issues
+
+When using JavaFX TableView cell factories, timing issues can occur where the cell factory is called before data is fully initialized or after `Platform.runLater()` tasks have completed. This can result in incorrect visual state.
+
+**Problem:**
+```java
+// Cell factory determines visual state by inspecting data
+col.setCellFactory(col -> new TableCell<>() {
+    @Override
+    protected void updateItem(String item, boolean empty) {
+        super.updateItem(item, empty);
+        // This may be called at unpredictable times due to JavaFX internals
+        boolean isChanged = checkIfChanged(item);  // May race with other updates
+        setStyle(isChanged ? changedStyle : normalStyle);
+    }
+});
+```
+
+**Solution: Pre-compute display state in data**
+```java
+// Pre-compute the display text with all visual indicators
+String displayText = typeIcon + (isChanged ? " ⚠️ " : " ") + name;
+tableData.add(new String[]{displayText, value, ...});
+
+// Cell factory just reads pre-computed state from the string
+col.setCellFactory(col -> new TableCell<>() {
+    @Override
+    protected void updateItem(String item, boolean empty) {
+        super.updateItem(item, empty);
+        setText(item);
+        // Check for indicator in the pre-computed string
+        if (item != null && item.contains("⚠️")) {
+            setStyle(changedStyle);
+        } else {
+            setStyle(normalStyle);
+        }
+    }
+});
+
+// When state changes, update the pre-computed display text
+row[0] = typeIcon + " ⚠️ " + name;  // Update data directly
+tableView.refresh();  // Force re-render
+```
+
+**Key principles:**
+1. Store all visual state indicators in the data model (pre-computed strings)
+2. Cell factory reads state from the data, doesn't compute it
+3. State changes update the data model, then call `tableView.refresh()`
+4. Use chained `Platform.runLater()` calls when multiple async operations must complete before final state
+
 ## Java Requirements
 
 - Java 21 or higher
