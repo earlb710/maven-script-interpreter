@@ -32,19 +32,116 @@ getHelpContent(topic: string) return string {
     
     if topic == "structure" then {
         content = "=== Program Structure ===\n\n";
-        content = content + "BASIC SYNTAX:\n";
+        content = content + "Select a sub-topic from the tree to view detailed information:\n\n";
+        content = content + "• Basic Syntax - Comments, statements, blocks\n";
+        content = content + "• Variables - Variable declarations and types\n";
+        content = content + "• Operators - Arithmetic, comparison, logical\n";
+        content = content + "• Functions - Function definitions and calls\n";
+        content = content + "• Imports - Code organization with imports\n";
+        return content;
+    }
+    
+    if topic == "structure_basic" then {
+        content = "=== Basic Syntax ===\n\n";
+        content = content + "STATEMENTS:\n";
         content = content + "• Statements end with semicolon (;)\n";
-        content = content + "• Comments start with //\n";
-        content = content + "• Blocks use curly braces { }\n";
-        content = content + "• Case-insensitive for identifiers\n\n";
-        content = content + "EXAMPLE:\n";
-        content = content + "  // This is a comment\n";
-        content = content + "  var message: string = \"Hello, World!\";\n";
-        content = content + "  print message;\n\n";
+        content = content + "• Multiple statements per line allowed\n";
+        content = content + "• Blocks use curly braces { }\n\n";
+        content = content + "COMMENTS:\n";
+        content = content + "  // Single line comment\n";
+        content = content + "  // Comments start with //\n\n";
         content = content + "CASE INSENSITIVITY:\n";
         content = content + "  var userName = \"Alice\";\n";
         content = content + "  print USERNAME;  // Works: prints \"Alice\"\n";
-        content = content + "  print UserName;  // Works: prints \"Alice\"\n";
+        content = content + "  print UserName;  // Works: prints \"Alice\"\n\n";
+        content = content + "EXAMPLE:\n";
+        content = content + "  // This is a comment\n";
+        content = content + "  var message: string = \"Hello, World!\";\n";
+        content = content + "  print message;\n";
+        return content;
+    }
+    
+    if topic == "structure_variables" then {
+        content = "=== Variables ===\n\n";
+        content = content + "VARIABLE DECLARATION:\n";
+        content = content + "  var name: type = value;\n\n";
+        content = content + "EXAMPLES:\n";
+        content = content + "  var count: int = 42;\n";
+        content = content + "  var name: string = \"Alice\";\n";
+        content = content + "  var price: double = 19.99;\n";
+        content = content + "  var flag: bool = true;\n\n";
+        content = content + "TYPE INFERENCE:\n";
+        content = content + "  var x = 42;        // Inferred as int\n";
+        content = content + "  var y = \"text\";    // Inferred as string\n\n";
+        content = content + "CONSTANTS:\n";
+        content = content + "  const PI: double = 3.14159;\n";
+        content = content + "  const MAX_SIZE: int = 100;\n";
+        return content;
+    }
+    
+    if topic == "structure_operators" then {
+        content = "=== Operators ===\n\n";
+        content = content + "ARITHMETIC OPERATORS:\n";
+        content = content + "  +   Addition\n";
+        content = content + "  -   Subtraction\n";
+        content = content + "  *   Multiplication\n";
+        content = content + "  /   Division\n";
+        content = content + "  %   Modulo\n\n";
+        content = content + "COMPARISON OPERATORS:\n";
+        content = content + "  ==  Equal to\n";
+        content = content + "  !=  Not equal to\n";
+        content = content + "  <   Less than\n";
+        content = content + "  >   Greater than\n";
+        content = content + "  <=  Less than or equal\n";
+        content = content + "  >=  Greater than or equal\n\n";
+        content = content + "LOGICAL OPERATORS:\n";
+        content = content + "  and   Logical AND\n";
+        content = content + "  or    Logical OR\n";
+        content = content + "  not   Logical NOT\n\n";
+        content = content + "EXAMPLE:\n";
+        content = content + "  var x = 10;\n";
+        content = content + "  var y = 20;\n";
+        content = content + "  if x < y and x > 0 then {\n";
+        content = content + "      print \"x is positive and less than y\";\n";
+        content = content + "  }\n";
+        return content;
+    }
+    
+    if topic == "structure_functions" then {
+        content = "=== Functions ===\n\n";
+        content = content + "FUNCTION DEFINITION:\n";
+        content = content + "  functionName(param1: type, param2: type) return returnType {\n";
+        content = content + "      // function body\n";
+        content = content + "      return value;\n";
+        content = content + "  }\n\n";
+        content = content + "EXAMPLE:\n";
+        content = content + "  add(a: int, b: int) return int {\n";
+        content = content + "      return a + b;\n";
+        content = content + "  }\n\n";
+        content = content + "CALLING FUNCTIONS:\n";
+        content = content + "  var result = call add(5, 10);\n";
+        content = content + "  print result;  // Output: 15\n\n";
+        content = content + "NO RETURN VALUE:\n";
+        content = content + "  greet(name: string) {\n";
+        content = content + "      print \"Hello, \" + name;\n";
+        content = content + "  }\n";
+        return content;
+    }
+    
+    if topic == "structure_imports" then {
+        content = "=== Imports ===\n\n";
+        content = content + "IMPORTING MODULES:\n";
+        content = content + "  import \"path/to/module.ebs\";\n\n";
+        content = content + "EXAMPLE:\n";
+        content = content + "  import \"utils/string_helpers.ebs\";\n";
+        content = content + "  import \"lib/math_functions.ebs\";\n\n";
+        content = content + "USAGE:\n";
+        content = content + "• Functions from imported files are available\n";
+        content = content + "• Variables from imported files are accessible\n";
+        content = content + "• Imports are processed at parse time\n\n";
+        content = content + "NOTE:\n";
+        content = content + "• Import paths are relative to script location\n";
+        content = content + "• Circular imports are not allowed\n";
         return content;
     }
     
@@ -75,12 +172,44 @@ getHelpContent(topic: string) return string {
     
     if topic == "flow" then {
         content = "=== Control Flow ===\n\n";
+        content = content + "Select a sub-topic from the tree to view detailed information:\n\n";
+        content = content + "• Conditionals - if-then-else statements\n";
+        content = content + "• Loops - while, for, foreach, do-while\n";
+        content = content + "• Break/Continue - Loop control\n";
+        content = content + "• Exceptions - Error handling\n";
+        return content;
+    }
+    
+    if topic == "flow_conditionals" then {
+        content = "=== Conditionals ===\n\n";
         content = content + "IF-THEN-ELSE:\n";
         content = content + "  if condition then {\n";
         content = content + "      // code\n";
         content = content + "  } else {\n";
         content = content + "      // code\n";
         content = content + "  }\n\n";
+        content = content + "ELSE IF:\n";
+        content = content + "  if condition1 then {\n";
+        content = content + "      // code\n";
+        content = content + "  } else if condition2 then {\n";
+        content = content + "      // code\n";
+        content = content + "  } else {\n";
+        content = content + "      // code\n";
+        content = content + "  }\n\n";
+        content = content + "EXAMPLE:\n";
+        content = content + "  var score: int = 85;\n";
+        content = content + "  if score >= 90 then {\n";
+        content = content + "      print \"Grade: A\";\n";
+        content = content + "  } else if score >= 80 then {\n";
+        content = content + "      print \"Grade: B\";\n";
+        content = content + "  } else {\n";
+        content = content + "      print \"Grade: C\";\n";
+        content = content + "  }\n";
+        return content;
+    }
+    
+    if topic == "flow_loops" then {
+        content = "=== Loops ===\n\n";
         content = content + "WHILE LOOP:\n";
         content = content + "  while condition {\n";
         content = content + "      // code\n";
@@ -91,12 +220,66 @@ getHelpContent(topic: string) return string {
         content = content + "  }\n\n";
         content = content + "FOREACH LOOP:\n";
         content = content + "  foreach item in array {\n";
-        content = content + "      // code\n";
+        content = content + "      print item;\n";
         content = content + "  }\n\n";
         content = content + "DO-WHILE LOOP:\n";
         content = content + "  do {\n";
         content = content + "      // code\n";
-        content = content + "  } while condition;\n";
+        content = content + "  } while condition;\n\n";
+        content = content + "EXAMPLE:\n";
+        content = content + "  var i: int = 0;\n";
+        content = content + "  while i < 5 {\n";
+        content = content + "      print \"Count: \" + i;\n";
+        content = content + "      i = i + 1;\n";
+        content = content + "  }\n";
+        return content;
+    }
+    
+    if topic == "flow_break_continue" then {
+        content = "=== Break and Continue ===\n\n";
+        content = content + "BREAK STATEMENT:\n";
+        content = content + "• Exits the current loop immediately\n";
+        content = content + "• Can be used in while, for, foreach loops\n\n";
+        content = content + "EXAMPLE:\n";
+        content = content + "  for var i = 0 to 10 {\n";
+        content = content + "      if i == 5 then {\n";
+        content = content + "          break;  // Exit loop when i is 5\n";
+        content = content + "      }\n";
+        content = content + "      print i;\n";
+        content = content + "  }\n\n";
+        content = content + "CONTINUE STATEMENT:\n";
+        content = content + "• Skips to next iteration of loop\n";
+        content = content + "• Current iteration ends immediately\n\n";
+        content = content + "EXAMPLE:\n";
+        content = content + "  for var i = 0 to 10 {\n";
+        content = content + "      if i % 2 == 0 then {\n";
+        content = content + "          continue;  // Skip even numbers\n";
+        content = content + "      }\n";
+        content = content + "      print i;  // Only prints odd numbers\n";
+        content = content + "  }\n";
+        return content;
+    }
+    
+    if topic == "flow_exceptions" then {
+        content = "=== Exception Handling ===\n\n";
+        content = content + "TRY-EXCEPTIONS-WHEN:\n";
+        content = content + "  try {\n";
+        content = content + "      // code that might throw exception\n";
+        content = content + "  } exceptions when ex {\n";
+        content = content + "      // handle exception\n";
+        content = content + "      print \"Error: \" + ex;\n";
+        content = content + "  }\n\n";
+        content = content + "EXAMPLE:\n";
+        content = content + "  try {\n";
+        content = content + "      var result = call file.readTextFile(\"data.txt\");\n";
+        content = content + "      print result;\n";
+        content = content + "  } exceptions when ex {\n";
+        content = content + "      print \"Failed to read file: \" + ex;\n";
+        content = content + "  }\n\n";
+        content = content + "NOTES:\n";
+        content = content + "• Exception variable (ex) contains error message\n";
+        content = content + "• Use for file I/O, database operations, etc.\n";
+        content = content + "• Prevents script from crashing on errors\n";
         return content;
     }
     
@@ -343,9 +526,28 @@ screen helpScreen = {
                                                 "value": "Syntax",
                                                 "expanded": true,
                                                 "children": [
-                                                    {"value": "structure"},
+                                                    {
+                                                        "value": "structure",
+                                                        "expanded": true,
+                                                        "children": [
+                                                            {"value": "structure_basic"},
+                                                            {"value": "structure_variables"},
+                                                            {"value": "structure_operators"},
+                                                            {"value": "structure_functions"},
+                                                            {"value": "structure_imports"}
+                                                        ]
+                                                    },
                                                     {"value": "data"},
-                                                    {"value": "flow"},
+                                                    {
+                                                        "value": "flow",
+                                                        "expanded": true,
+                                                        "children": [
+                                                            {"value": "flow_conditionals"},
+                                                            {"value": "flow_loops"},
+                                                            {"value": "flow_break_continue"},
+                                                            {"value": "flow_exceptions"}
+                                                        ]
+                                                    },
                                                     {"value": "keywords"},
                                                     {"value": "builtins"},
                                                     {"value": "screen"}
