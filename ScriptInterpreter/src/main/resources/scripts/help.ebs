@@ -1,0 +1,112 @@
+// ============================================================================
+// help.ebs - EBS Syntax Help Screen
+// ============================================================================
+// This script displays a help screen with EBS syntax information.
+// ============================================================================
+
+print "====================================================================";
+print "       EBS Syntax Help";
+print "====================================================================";
+print "";
+print "Loading syntax help screen...";
+print "";
+
+// Create the help screen
+screen helpScreen = {
+    "title": "EBS Syntax Help",
+    "width": 900,
+    "height": 700,
+    "vars": [
+        {
+            "name": "helpContent",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textarea",
+                "labelText": "",
+                "editable": false,
+                "rows": 30,
+                "cols": 80,
+                "wrapText": true
+            }
+        }
+    ]
+};
+
+// Build the help content
+var helpText: string = "";
+helpText = helpText + "=== EBS (Earl Bosch Script) Syntax Quick Reference ===\n\n";
+
+helpText = helpText + "BASIC SYNTAX:\n";
+helpText = helpText + "  - Statements end with semicolon (;)\n";
+helpText = helpText + "  - Comments start with //\n";
+helpText = helpText + "  - Blocks use curly braces { }\n";
+helpText = helpText + "  - Case-insensitive for identifiers\n\n";
+
+helpText = helpText + "VARIABLES:\n";
+helpText = helpText + "  var name: string = \"value\";\n";
+helpText = helpText + "  var count: int = 42;\n";
+helpText = helpText + "  var price: double = 19.99;\n";
+helpText = helpText + "  var flag: bool = true;\n\n";
+
+helpText = helpText + "CONTROL FLOW:\n";
+helpText = helpText + "  if condition then { ... } else { ... }\n";
+helpText = helpText + "  while condition { ... }\n";
+helpText = helpText + "  for var i = 0 to 10 { ... }\n";
+helpText = helpText + "  foreach item in array { ... }\n\n";
+
+helpText = helpText + "FUNCTIONS:\n";
+helpText = helpText + "  functionName(param1: type, param2: type) return returnType {\n";
+helpText = helpText + "      // function body\n";
+helpText = helpText + "      return value;\n";
+helpText = helpText + "  }\n\n";
+
+helpText = helpText + "ARRAYS:\n";
+helpText = helpText + "  var arr: array[10] = array[10];  // Fixed size\n";
+helpText = helpText + "  var dynArr: array[*] = array[*]; // Dynamic\n";
+helpText = helpText + "  dynArr.push(\"item\");\n";
+helpText = helpText + "  var item = dynArr[0];\n\n";
+
+helpText = helpText + "JSON:\n";
+helpText = helpText + "  var obj: json = {\"name\": \"Alice\", \"age\": 30};\n";
+helpText = helpText + "  var name = obj.name;\n";
+helpText = helpText + "  var jsonStr = call json.stringify(obj);\n\n";
+
+helpText = helpText + "BUILT-IN FUNCTIONS (examples):\n";
+helpText = helpText + "  print value;  // Print to console\n";
+helpText = helpText + "  call string.toUpper(text);\n";
+helpText = helpText + "  call string.toLower(text);\n";
+helpText = helpText + "  call string.trim(text);\n";
+helpText = helpText + "  call string.substring(text, start, end);\n";
+helpText = helpText + "  call array.length(arr);\n";
+helpText = helpText + "  call math.abs(num);\n";
+helpText = helpText + "  call math.max(a, b);\n";
+helpText = helpText + "  call file.readTextFile(path);\n";
+helpText = helpText + "  call file.writeTextFile(path, content);\n\n";
+
+helpText = helpText + "CONSOLE COMMANDS:\n";
+helpText = helpText + "  /help                    - Show console help\n";
+helpText = helpText + "  /list files [path]       - List files\n";
+helpText = helpText + "  /list openfiles          - Show open files\n";
+helpText = helpText + "  /set debug [on|off]      - Toggle debug mode\n";
+helpText = helpText + "  /clear                   - Clear console\n";
+helpText = helpText + "  /reset                   - Reset interpreter\n\n";
+
+helpText = helpText + "SCREEN/UI:\n";
+helpText = helpText + "  screen myScreen = { \"title\": \"My App\", ... };\n";
+helpText = helpText + "  show screen myScreen;\n";
+helpText = helpText + "  hide screen myScreen;\n";
+helpText = helpText + "  close screen myScreen;\n\n";
+
+helpText = helpText + "For complete documentation, see:\n";
+helpText = helpText + "  - docs/EBS_SCRIPT_SYNTAX.md\n";
+helpText = helpText + "  - EBS_LANGUAGE_REFERENCE.md\n";
+helpText = helpText + "  - ScriptInterpreter/scripts/examples/\n";
+
+// Set the help content in the screen
+call scr.setValue(helpScreen, "helpContent", helpText);
+
+// Show the screen
+show screen helpScreen;
+
+print "Syntax help screen displayed.";

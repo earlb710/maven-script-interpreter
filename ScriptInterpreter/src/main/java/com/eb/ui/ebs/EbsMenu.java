@@ -30,6 +30,20 @@ public class EbsMenu extends MenuBar {
         recentMenu = new Menu("Recent files");
         screensMenu = new Menu("Screens");
         handler.loadRecentFiles();
+        
+        // --- Help Menu (first menu) ---
+        Menu helpMenu = new Menu("Help");
+        
+        // Syntax Help menu item
+        MenuItem syntaxHelpItem = new MenuItem("Syntax Help");
+        syntaxHelpItem.setAccelerator(new KeyCodeCombination(KeyCode.F1));
+        syntaxHelpItem.setOnAction(e -> {
+            handler.runScriptFromResource("/scripts/help.ebs", "Syntax Help");
+        });
+        
+        helpMenu.getItems().add(syntaxHelpItem);
+        getMenus().add(helpMenu);
+        
         Menu fileMenu = new Menu("File");
 
         // --- New Script File ---
