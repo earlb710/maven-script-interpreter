@@ -23,7 +23,13 @@
 ChessCell typeof bitmap { cellColor: 0, pieceType: 1-6, pieceColor: 7 };
 
 // Define position record type for x,y coordinates
-pos typeof record { x: int, y: int };
+posType typeof record { x: int, y: int };
+
+// Define chess piece record type with piece name, color, and position
+ChessPiece typeof record { piece: string, color: string, pos: posType };
+
+// Array of all 32 chess pieces with their starting positions
+var pieces: ChessPiece[32];
 
 // Piece type constants
 var EMPTY: int = 0;
@@ -153,6 +159,47 @@ initializeBoard() {
     board[call boardIndex(7, 5)] = call encodeCellValue(0, BISHOP, WHITE);
     board[call boardIndex(7, 6)] = call encodeCellValue(1, KNIGHT, WHITE);
     board[call boardIndex(7, 7)] = call encodeCellValue(0, ROOK, WHITE);
+    
+    // Initialize pieces array with starting positions
+    // Black back row (row 0)
+    pieces[0] = ChessPiece { piece: "rook", color: "black", pos: posType { x: 0, y: 0 } };
+    pieces[1] = ChessPiece { piece: "knight", color: "black", pos: posType { x: 1, y: 0 } };
+    pieces[2] = ChessPiece { piece: "bishop", color: "black", pos: posType { x: 2, y: 0 } };
+    pieces[3] = ChessPiece { piece: "queen", color: "black", pos: posType { x: 3, y: 0 } };
+    pieces[4] = ChessPiece { piece: "king", color: "black", pos: posType { x: 4, y: 0 } };
+    pieces[5] = ChessPiece { piece: "bishop", color: "black", pos: posType { x: 5, y: 0 } };
+    pieces[6] = ChessPiece { piece: "knight", color: "black", pos: posType { x: 6, y: 0 } };
+    pieces[7] = ChessPiece { piece: "rook", color: "black", pos: posType { x: 7, y: 0 } };
+    
+    // Black pawns (row 1)
+    pieces[8] = ChessPiece { piece: "pawn", color: "black", pos: posType { x: 0, y: 1 } };
+    pieces[9] = ChessPiece { piece: "pawn", color: "black", pos: posType { x: 1, y: 1 } };
+    pieces[10] = ChessPiece { piece: "pawn", color: "black", pos: posType { x: 2, y: 1 } };
+    pieces[11] = ChessPiece { piece: "pawn", color: "black", pos: posType { x: 3, y: 1 } };
+    pieces[12] = ChessPiece { piece: "pawn", color: "black", pos: posType { x: 4, y: 1 } };
+    pieces[13] = ChessPiece { piece: "pawn", color: "black", pos: posType { x: 5, y: 1 } };
+    pieces[14] = ChessPiece { piece: "pawn", color: "black", pos: posType { x: 6, y: 1 } };
+    pieces[15] = ChessPiece { piece: "pawn", color: "black", pos: posType { x: 7, y: 1 } };
+    
+    // White pawns (row 6)
+    pieces[16] = ChessPiece { piece: "pawn", color: "white", pos: posType { x: 0, y: 6 } };
+    pieces[17] = ChessPiece { piece: "pawn", color: "white", pos: posType { x: 1, y: 6 } };
+    pieces[18] = ChessPiece { piece: "pawn", color: "white", pos: posType { x: 2, y: 6 } };
+    pieces[19] = ChessPiece { piece: "pawn", color: "white", pos: posType { x: 3, y: 6 } };
+    pieces[20] = ChessPiece { piece: "pawn", color: "white", pos: posType { x: 4, y: 6 } };
+    pieces[21] = ChessPiece { piece: "pawn", color: "white", pos: posType { x: 5, y: 6 } };
+    pieces[22] = ChessPiece { piece: "pawn", color: "white", pos: posType { x: 6, y: 6 } };
+    pieces[23] = ChessPiece { piece: "pawn", color: "white", pos: posType { x: 7, y: 6 } };
+    
+    // White back row (row 7)
+    pieces[24] = ChessPiece { piece: "rook", color: "white", pos: posType { x: 0, y: 7 } };
+    pieces[25] = ChessPiece { piece: "knight", color: "white", pos: posType { x: 1, y: 7 } };
+    pieces[26] = ChessPiece { piece: "bishop", color: "white", pos: posType { x: 2, y: 7 } };
+    pieces[27] = ChessPiece { piece: "queen", color: "white", pos: posType { x: 3, y: 7 } };
+    pieces[28] = ChessPiece { piece: "king", color: "white", pos: posType { x: 4, y: 7 } };
+    pieces[29] = ChessPiece { piece: "bishop", color: "white", pos: posType { x: 5, y: 7 } };
+    pieces[30] = ChessPiece { piece: "knight", color: "white", pos: posType { x: 6, y: 7 } };
+    pieces[31] = ChessPiece { piece: "rook", color: "white", pos: posType { x: 7, y: 7 } };
 }
 
 getBoardRow(rowNum: int) return string {
