@@ -50,7 +50,7 @@ foreach line in builtinLines {
                 var builtinInfo: json = {};
                 builtinInfo = call json.set(builtinInfo, "name", builtinName);
                 builtinInfo = call json.set(builtinInfo, "signature", lineContent);
-                call array.push(builtinsArray, builtinInfo);
+                call array.add(builtinsArray, builtinInfo);
             }
         } else if trimmedLine == "" then {
             // Empty line - could be end of section or spacing within section
@@ -74,7 +74,7 @@ if builtinsArray != null then {
             var builtinValue: string = "builtin_" + builtinName;
             var childNode: json = {};
             childNode = call json.set(childNode, "value", builtinValue);
-            call array.push(builtinChildren, childNode);
+            call array.add(builtinChildren, childNode);
         }
     }
 }
@@ -84,47 +84,47 @@ print "Built tree with " + call str.toString(treeChildCount) + " builtin nodes";
 
 // Build the complete tree structure dynamically
 var structureChildren: array[*];
-call array.push(structureChildren, call json.set({}, "value", "structure_basic"));
-call array.push(structureChildren, call json.set({}, "value", "structure_variables"));
-call array.push(structureChildren, call json.set({}, "value", "structure_operators"));
-call array.push(structureChildren, call json.set({}, "value", "structure_functions"));
-call array.push(structureChildren, call json.set({}, "value", "structure_imports"));
+call array.add(structureChildren, call json.set({}, "value", "structure_basic"));
+call array.add(structureChildren, call json.set({}, "value", "structure_variables"));
+call array.add(structureChildren, call json.set({}, "value", "structure_operators"));
+call array.add(structureChildren, call json.set({}, "value", "structure_functions"));
+call array.add(structureChildren, call json.set({}, "value", "structure_imports"));
 
 var flowChildren: array[*];
-call array.push(flowChildren, call json.set({}, "value", "flow_conditionals"));
-call array.push(flowChildren, call json.set({}, "value", "flow_loops"));
-call array.push(flowChildren, call json.set({}, "value", "flow_break_continue"));
-call array.push(flowChildren, call json.set({}, "value", "flow_exceptions"));
+call array.add(flowChildren, call json.set({}, "value", "flow_conditionals"));
+call array.add(flowChildren, call json.set({}, "value", "flow_loops"));
+call array.add(flowChildren, call json.set({}, "value", "flow_break_continue"));
+call array.add(flowChildren, call json.set({}, "value", "flow_exceptions"));
 
 var syntaxChildren: array[*];
 var structureNode: json = {};
 structureNode = call json.set(structureNode, "value", "structure");
 structureNode = call json.set(structureNode, "expanded", true);
 structureNode = call json.set(structureNode, "children", structureChildren);
-call array.push(syntaxChildren, structureNode);
+call array.add(syntaxChildren, structureNode);
 
-call array.push(syntaxChildren, call json.set({}, "value", "data"));
+call array.add(syntaxChildren, call json.set({}, "value", "data"));
 
 var flowNode: json = {};
 flowNode = call json.set(flowNode, "value", "flow");
 flowNode = call json.set(flowNode, "expanded", true);
 flowNode = call json.set(flowNode, "children", flowChildren);
-call array.push(syntaxChildren, flowNode);
+call array.add(syntaxChildren, flowNode);
 
-call array.push(syntaxChildren, call json.set({}, "value", "keywords"));
+call array.add(syntaxChildren, call json.set({}, "value", "keywords"));
 
 var builtinsNode: json = {};
 builtinsNode = call json.set(builtinsNode, "value", "builtins");
 builtinsNode = call json.set(builtinsNode, "expanded", false);
 builtinsNode = call json.set(builtinsNode, "children", builtinChildren);
-call array.push(syntaxChildren, builtinsNode);
+call array.add(syntaxChildren, builtinsNode);
 
-call array.push(syntaxChildren, call json.set({}, "value", "screen"));
+call array.add(syntaxChildren, call json.set({}, "value", "screen"));
 
 var examplesChildren: array[*];
-call array.push(examplesChildren, call json.set({}, "value", "examples_keywords"));
-call array.push(examplesChildren, call json.set({}, "value", "examples_builtins"));
-call array.push(examplesChildren, call json.set({}, "value", "examples_screen"));
+call array.add(examplesChildren, call json.set({}, "value", "examples_keywords"));
+call array.add(examplesChildren, call json.set({}, "value", "examples_builtins"));
+call array.add(examplesChildren, call json.set({}, "value", "examples_screen"));
 
 var rootChildren: array[*];
 
@@ -132,13 +132,13 @@ var syntaxRootNode: json = {};
 syntaxRootNode = call json.set(syntaxRootNode, "value", "Syntax");
 syntaxRootNode = call json.set(syntaxRootNode, "expanded", true);
 syntaxRootNode = call json.set(syntaxRootNode, "children", syntaxChildren);
-call array.push(rootChildren, syntaxRootNode);
+call array.add(rootChildren, syntaxRootNode);
 
 var examplesRootNode: json = {};
 examplesRootNode = call json.set(examplesRootNode, "value", "Examples");
 examplesRootNode = call json.set(examplesRootNode, "expanded", true);
 examplesRootNode = call json.set(examplesRootNode, "children", examplesChildren);
-call array.push(rootChildren, examplesRootNode);
+call array.add(rootChildren, examplesRootNode);
 
 var treeStructure: json = {};
 treeStructure = call json.set(treeStructure, "value", "Help Topics");
@@ -854,11 +854,11 @@ treeDisplay = call json.set(treeDisplay, "onChange", "set helpScreen.helpContent
 
 // Wrap tree structure in array
 var treeItemsArray: array[*];
-call array.push(treeItemsArray, treeStructure);
+call array.add(treeItemsArray, treeStructure);
 treeDisplay = call json.set(treeDisplay, "treeItems", treeItemsArray);
 
 helpTreeItem = call json.set(helpTreeItem, "display", treeDisplay);
-call array.push(treeAreaItems, helpTreeItem);
+call array.add(treeAreaItems, helpTreeItem);
 
 var treeArea: json = {};
 treeArea = call json.set(treeArea, "name", "treeArea");
@@ -868,7 +868,7 @@ treeArea = call json.set(treeArea, "width", "250");
 treeArea = call json.set(treeArea, "style", "-fx-border-color: #cccccc; -fx-border-width: 0 1 0 0;");
 treeArea = call json.set(treeArea, "items", treeAreaItems);
 
-call array.push(mainLayoutAreas, treeArea);
+call array.add(mainLayoutAreas, treeArea);
 
 // Content area
 var contentAreaItems: array[*];
@@ -886,7 +886,7 @@ contentDisplay = call json.set(contentDisplay, "wrapText", true);
 contentDisplay = call json.set(contentDisplay, "style", "-fx-font-family: 'Consolas', 'Monaco', 'Courier New', monospace; -fx-font-size: 12px;");
 
 helpContentItem = call json.set(helpContentItem, "display", contentDisplay);
-call array.push(contentAreaItems, helpContentItem);
+call array.add(contentAreaItems, helpContentItem);
 
 var contentArea: json = {};
 contentArea = call json.set(contentArea, "name", "contentArea");
@@ -895,7 +895,7 @@ contentArea = call json.set(contentArea, "spacing", "5");
 contentArea = call json.set(contentArea, "padding", "10");
 contentArea = call json.set(contentArea, "items", contentAreaItems);
 
-call array.push(mainLayoutAreas, contentArea);
+call array.add(mainLayoutAreas, contentArea);
 
 // Main layout
 var mainLayout: json = {};
@@ -906,7 +906,7 @@ mainLayout = call json.set(mainLayout, "padding", "0");
 mainLayout = call json.set(mainLayout, "areas", mainLayoutAreas);
 
 var areaArray: array[*];
-call array.push(areaArray, mainLayout);
+call array.add(areaArray, mainLayout);
 
 screenJson = call json.set(screenJson, "area", areaArray);
 
