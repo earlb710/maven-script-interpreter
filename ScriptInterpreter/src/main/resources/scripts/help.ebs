@@ -33,14 +33,14 @@ var systemHelpText: string = call system.help();
 // Parse the help text to extract builtin information
 // The format is: "builtin.name(param1:type, param2:type?) : returnType"
 var builtinLines: array = call str.split(systemHelpText, "\n", 0);
-var builtinsArray: array[*];
+var builtinsArray: array[*] = [];
 var inBuiltinsSection: bool = false;
 
 foreach line in builtinLines {
     var trimmedLine: string = call str.trim(line);
     if trimmedLine == "Builtins:" then {
         inBuiltinsSection = true;
-    } else if inBuiltinsSection == true then {
+    } else if inBuiltinsSection then {
         if trimmedLine != "" && call str.startsWith(trimmedLine, " ") then {
             // Extract builtin name from line like "  array.add(array:array, value:any, index:integer?) : null"
             var lineContent: string = call str.trim(trimmedLine);
@@ -52,8 +52,11 @@ foreach line in builtinLines {
                 builtinInfo = call json.set(builtinInfo, "signature", lineContent);
                 call array.push(builtinsArray, builtinInfo);
             }
-        } else if trimmedLine != "" && !call str.startsWith(trimmedLine, " ") then {
-            // We've reached the end of the builtins section
+        } else if trimmedLine == "" then {
+            // Empty line - could be end of section or spacing within section
+            // Continue to allow for spacing within the builtins section
+        } else {
+            // Non-indented, non-empty line marks end of builtins section
             inBuiltinsSection = false;
         }
     }
