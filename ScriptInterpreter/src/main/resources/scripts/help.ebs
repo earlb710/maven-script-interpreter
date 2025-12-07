@@ -15,25 +15,116 @@ print "";
 // Load help data from JSON file
 var helpData: json = null;
 try {
-    var jsonContent: string = call file.readTextFile(path="../resources/help-lookup.json");
-    helpData = call json.jsonFromString(jsonString=jsonContent);
+    var jsonContent: string = call file.readTextFile("../resources/help-lookup.json");
+    helpData = call json.jsonFromString(jsonContent);
     print "Help data loaded from JSON";
-} exceptions when ex {
-    print "Warning: Could not load help-lookup.json: " + ex;
-    print "Using fallback help content";
+} exceptions {
+    when ex {
+        print "Warning: Could not load help-lookup.json: " + ex;
+        print "Using fallback help content";
+    }
 }
+
+// Get all builtins from system registry
+print "Loading builtins from registry...";
+var systemHelpData: json = call system.help();
+var builtinsArray: json = call json.get(systemHelpData, "builtins");
+var builtinCount: int = call array.length(builtinsArray);
+print "Loaded " + call str.toString(builtinCount) + " builtins";
+
+// Build builtin tree children dynamically
+var builtinChildren: array[*];
+if builtinsArray != null then {
+    foreach builtin in builtinsArray {
+        var builtinName: string = call json.getString(builtin, "name", "");
+        if builtinName != "" then {
+            var builtinValue: string = "builtin_" + builtinName;
+            var childNode: json = {};
+            childNode = call json.set(childNode, "value", builtinValue);
+            call array.push(builtinChildren, childNode);
+        }
+    }
+}
+
+var treeChildCount: int = call array.length(builtinChildren);
+print "Built tree with " + call str.toString(treeChildCount) + " builtin nodes";
+
+// Build the complete tree structure dynamically
+var structureChildren: array[*];
+call array.push(structureChildren, call json.set({}, "value", "structure_basic"));
+call array.push(structureChildren, call json.set({}, "value", "structure_variables"));
+call array.push(structureChildren, call json.set({}, "value", "structure_operators"));
+call array.push(structureChildren, call json.set({}, "value", "structure_functions"));
+call array.push(structureChildren, call json.set({}, "value", "structure_imports"));
+
+var flowChildren: array[*];
+call array.push(flowChildren, call json.set({}, "value", "flow_conditionals"));
+call array.push(flowChildren, call json.set({}, "value", "flow_loops"));
+call array.push(flowChildren, call json.set({}, "value", "flow_break_continue"));
+call array.push(flowChildren, call json.set({}, "value", "flow_exceptions"));
+
+var syntaxChildren: array[*];
+var structureNode: json = {};
+structureNode = call json.set(structureNode, "value", "structure");
+structureNode = call json.set(structureNode, "expanded", true);
+structureNode = call json.set(structureNode, "children", structureChildren);
+call array.push(syntaxChildren, structureNode);
+
+call array.push(syntaxChildren, call json.set({}, "value", "data"));
+
+var flowNode: json = {};
+flowNode = call json.set(flowNode, "value", "flow");
+flowNode = call json.set(flowNode, "expanded", true);
+flowNode = call json.set(flowNode, "children", flowChildren);
+call array.push(syntaxChildren, flowNode);
+
+call array.push(syntaxChildren, call json.set({}, "value", "keywords"));
+
+var builtinsNode: json = {};
+builtinsNode = call json.set(builtinsNode, "value", "builtins");
+builtinsNode = call json.set(builtinsNode, "expanded", false);
+builtinsNode = call json.set(builtinsNode, "children", builtinChildren);
+call array.push(syntaxChildren, builtinsNode);
+
+call array.push(syntaxChildren, call json.set({}, "value", "screen"));
+
+var examplesChildren: array[*];
+call array.push(examplesChildren, call json.set({}, "value", "examples_keywords"));
+call array.push(examplesChildren, call json.set({}, "value", "examples_builtins"));
+call array.push(examplesChildren, call json.set({}, "value", "examples_screen"));
+
+var rootChildren: array[*];
+
+var syntaxRootNode: json = {};
+syntaxRootNode = call json.set(syntaxRootNode, "value", "Syntax");
+syntaxRootNode = call json.set(syntaxRootNode, "expanded", true);
+syntaxRootNode = call json.set(syntaxRootNode, "children", syntaxChildren);
+call array.push(rootChildren, syntaxRootNode);
+
+var examplesRootNode: json = {};
+examplesRootNode = call json.set(examplesRootNode, "value", "Examples");
+examplesRootNode = call json.set(examplesRootNode, "expanded", true);
+examplesRootNode = call json.set(examplesRootNode, "children", examplesChildren);
+call array.push(rootChildren, examplesRootNode);
+
+var treeStructure: json = {};
+treeStructure = call json.set(treeStructure, "value", "Help Topics");
+treeStructure = call json.set(treeStructure, "expanded", true);
+treeStructure = call json.set(treeStructure, "children", rootChildren);
+
+print "Tree structure built with dynamic builtins";
 
 // Function to strip HTML tags from content
 stripHtmlTags(text: string) return string {
     var cleaned: string = text;
     // Remove common HTML tags
-    cleaned = call str.replace(source=cleaned, target="<br>", replacement="\n");
-    cleaned = call str.replace(source=cleaned, target="<b>", replacement="");
-    cleaned = call str.replace(source=cleaned, target="</b>", replacement="");
-    cleaned = call str.replace(source=cleaned, target="<code>", replacement="");
-    cleaned = call str.replace(source=cleaned, target="</code>", replacement="");
-    cleaned = call str.replace(source=cleaned, target="<i>", replacement="");
-    cleaned = call str.replace(source=cleaned, target="</i>", replacement="");
+    cleaned = call str.replace(cleaned, "<br>", "\n");
+    cleaned = call str.replace(cleaned, "<b>", "");
+    cleaned = call str.replace(cleaned, "</b>", "");
+    cleaned = call str.replace(cleaned, "<code>", "");
+    cleaned = call str.replace(cleaned, "</code>", "");
+    cleaned = call str.replace(cleaned, "<i>", "");
+    cleaned = call str.replace(cleaned, "</i>", "");
     return cleaned;
 }
 
@@ -43,18 +134,18 @@ getKeywordHelp(keyword: string) return string {
         return "";
     }
     
-    var keywords: json = call json.get(root=helpData, path="keywords");
+    var keywords: json = call json.get(helpData, "keywords");
     if keywords == null then {
         return "";
     }
     
     foreach kw in keywords {
-        var kwName: string = call json.getString(root=kw, path="keyword", default="");
+        var kwName: string = call json.getString(kw, "keyword", "");
         if kwName == keyword then {
-            var desc: string = call json.getString(root=kw, path="short_description", default="");
-            var longHelp: string = call json.getString(root=kw, path="long_help", default="");
-            var example: string = call json.getString(root=kw, path="example", default="");
-            var format: string = call json.getString(root=kw, path="format", default="text");
+            var desc: string = call json.getString(kw, "short_description", "");
+            var longHelp: string = call json.getString(kw, "long_help", "");
+            var example: string = call json.getString(kw, "example", "");
+            var format: string = call json.getString(kw, "format", "text");
             
             var content: string = "";
             content = content + "KEYWORD: " + keyword + "\n";
@@ -70,7 +161,7 @@ getKeywordHelp(keyword: string) return string {
                 // Process content based on format
                 if format == "html" then {
                     // Remove HTML tags for textarea display
-                    var cleanHelp: string = call stripHtmlTags(text=longHelp);
+                    var cleanHelp: string = call stripHtmlTags(longHelp);
                     content = content + cleanHelp + "\n\n";
                 } else {
                     // Plain text, use as-is
@@ -82,7 +173,7 @@ getKeywordHelp(keyword: string) return string {
                 content = content + "EXAMPLE:\n";
                 // Process example based on format
                 if format == "html" then {
-                    var cleanExample: string = call stripHtmlTags(text=example);
+                    var cleanExample: string = call stripHtmlTags(example);
                     content = content + cleanExample + "\n";
                 } else {
                     content = content + example + "\n";
@@ -96,9 +187,113 @@ getKeywordHelp(keyword: string) return string {
     return "";
 }
 
+// Function to get builtin help from system registry
+getBuiltinHelp(builtinName: string) return string {
+    if builtinsArray == null then {
+        return "Builtins data not available.";
+    }
+    
+    foreach builtin in builtinsArray {
+        var name: string = call json.getString(builtin, "name", "");
+        if name == builtinName then {
+            var returnType: string = call json.getString(builtin, "returnType", "void");
+            var params: json = call json.get(builtin, "params");
+            
+            var content: string = "";
+            content = content + "═══════════════════════════════════════════════════════\n";
+            content = content + "  " + name + "\n";
+            content = content + "═══════════════════════════════════════════════════════\n\n";
+            
+            content = content + "▸ SIGNATURE\n";
+            content = content + "───────────────────────────────────────────────────────\n";
+            content = content + "call " + name + "(";
+            
+            if params != null then {
+                var paramCount: int = call array.length(params);
+                if paramCount > 0 then {
+                    var idx: int = 0;
+                    foreach param in params {
+                        var paramName: string = call json.getString(param, "name", "");
+                        var paramType: string = call json.getString(param, "type", "any");
+                        var mandatory: bool = call json.getBool(param, "mandatory", true);
+                        
+                        if idx > 0 then {
+                            content = content + ", ";
+                        }
+                        
+                        content = content + paramName + ": " + paramType;
+                        if mandatory == false then {
+                            content = content + " [optional]";
+                        }
+                        
+                        idx = idx + 1;
+                    }
+                }
+            }
+            
+            content = content + ")\n";
+            content = content + "Returns: " + returnType + "\n\n";
+            
+            // Try to get additional help from JSON lookup
+            if helpData != null then {
+                var builtinsJsonArray: json = call json.get(helpData, "builtins");
+                if builtinsJsonArray != null then {
+                    foreach builtinJson in builtinsJsonArray {
+                        var funcName: string = call json.getString(builtinJson, "function", "");
+                        if funcName == builtinName then {
+                            var shortDesc: string = call json.getString(builtinJson, "short_description", "");
+                            var longHelp: string = call json.getString(builtinJson, "long_help", "");
+                            var example: string = call json.getString(builtinJson, "example", "");
+                            var format: string = call json.getString(builtinJson, "format", "text");
+                            
+                            if shortDesc != "" then {
+                                content = content + "▸ DESCRIPTION\n";
+                                content = content + "───────────────────────────────────────────────────────\n";
+                                content = content + shortDesc + "\n\n";
+                            }
+                            
+                            if longHelp != "" then {
+                                content = content + "▸ DETAILS\n";
+                                content = content + "───────────────────────────────────────────────────────\n";
+                                if format == "html" then {
+                                    var cleanHelp: string = call stripHtmlTags(longHelp);
+                                    content = content + cleanHelp + "\n\n";
+                                } else {
+                                    content = content + longHelp + "\n\n";
+                                }
+                            }
+                            
+                            if example != "" then {
+                                content = content + "▸ EXAMPLE\n";
+                                content = content + "───────────────────────────────────────────────────────\n";
+                                if format == "html" then {
+                                    var cleanExample: string = call stripHtmlTags(example);
+                                    content = content + cleanExample + "\n";
+                                } else {
+                                    content = content + example + "\n";
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return content;
+        }
+    }
+    
+    return "No help found for builtin: " + builtinName;
+}
+
 // Function to get help content based on selected topic
 getHelpContent(topic: string) return string {
     var content: string = "";
+    
+    // Handle dynamic builtin topics
+    if call str.startsWith(topic, "builtin_") then {
+        var builtinName: string = call str.substring(topic, 8);
+        return call getBuiltinHelp(builtinName);
+    }
     
     // Syntax topics
     if topic == "Syntax" then {
@@ -647,54 +842,7 @@ screen helpScreen = {
                                 "expandAll": true,
                                 "showRoot": false,
                                 "onChange": "set helpScreen.helpContent = call getHelpContent(helpScreen.selectedTopic);",
-                                "treeItems": [
-                                    {
-                                        "value": "Help Topics",
-                                        "expanded": true,
-                                        "children": [
-                                            {
-                                                "value": "Syntax",
-                                                "expanded": true,
-                                                "children": [
-                                                    {
-                                                        "value": "structure",
-                                                        "expanded": true,
-                                                        "children": [
-                                                            {"value": "structure_basic"},
-                                                            {"value": "structure_variables"},
-                                                            {"value": "structure_operators"},
-                                                            {"value": "structure_functions"},
-                                                            {"value": "structure_imports"}
-                                                        ]
-                                                    },
-                                                    {"value": "data"},
-                                                    {
-                                                        "value": "flow",
-                                                        "expanded": true,
-                                                        "children": [
-                                                            {"value": "flow_conditionals"},
-                                                            {"value": "flow_loops"},
-                                                            {"value": "flow_break_continue"},
-                                                            {"value": "flow_exceptions"}
-                                                        ]
-                                                    },
-                                                    {"value": "keywords"},
-                                                    {"value": "builtins"},
-                                                    {"value": "screen"}
-                                                ]
-                                            },
-                                            {
-                                                "value": "Examples",
-                                                "expanded": true,
-                                                "children": [
-                                                    {"value": "examples_keywords"},
-                                                    {"value": "examples_builtins"},
-                                                    {"value": "examples_screen"}
-                                                ]
-                                            }
-                                        ]
-                                    }
-                                ]
+                                "treeItems": [treeStructure]
                             }
                         }
                     ]
