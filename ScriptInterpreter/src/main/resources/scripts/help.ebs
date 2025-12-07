@@ -62,7 +62,7 @@ foreach line in builtinLines {
     }
 }
 
-var builtinCount: int = call array.length(builtinsArray);
+var builtinCount: int = builtinsArray.length;
 print "Loaded " + call str.toString(builtinCount) + " builtins";
 
 // Build builtin tree children dynamically
@@ -79,7 +79,7 @@ if builtinsArray != null then {
     }
 }
 
-var treeChildCount: int = call array.length(builtinChildren);
+var treeChildCount: int = builtinChildren.length;
 print "Built tree with " + call str.toString(treeChildCount) + " builtin nodes";
 
 // Build the complete tree structure dynamically
@@ -654,10 +654,10 @@ getHelpContent(topic: string) return string {
         content = content + "  call string.indexOf(text, search)\n";
         content = content + "  call string.length(text)\n\n";
         content = content + "ARRAY FUNCTIONS:\n";
-        content = content + "  call array.length(arr)\n";
-        content = content + "  call array.push(arr, value)\n";
-        content = content + "  call array.pop(arr)\n";
-        content = content + "  call array.sort(arr)\n\n";
+        content = content + "  arr.length        // Get array length (property access)\n";
+        content = content + "  call array.add(arr, value)   // Add element\n";
+        content = content + "  call array.remove(arr, idx)  // Remove element\n";
+        content = content + "  call array.sort(arr)         // Sort array\n\n";
         content = content + "MATH FUNCTIONS:\n";
         content = content + "  call math.abs(num)\n";
         content = content + "  call math.max(a, b)\n";
