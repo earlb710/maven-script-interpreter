@@ -4,6 +4,7 @@ import com.eb.script.interpreter.screen.DisplayItem.ItemType;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import javafx.scene.image.ImageView;
@@ -288,7 +289,6 @@ public class AreaItemFactory {
                 // Apply image display properties from metadata
                 if (metadata != null) {
                     // Set fit dimensions for ImageView only
-                    // Don't constrain the StackPane - let CSS styles control container size
                     if (metadata.fitWidth != null && metadata.fitWidth > 0) {
                         imageView.setFitWidth(metadata.fitWidth);
                     }
@@ -300,6 +300,11 @@ public class AreaItemFactory {
                     // Set smooth scaling (default true)
                     imageView.setSmooth(metadata.smooth == null || metadata.smooth);
                 }
+                
+                // Prevent StackPane from growing beyond its content
+                // This fixes GridPane layout issues where StackPane takes extra horizontal space
+                imageContainer.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+                
                 return imageContainer;
             case MEDIAVIEW:
                 // MediaView requires javafx-media module which is not included
