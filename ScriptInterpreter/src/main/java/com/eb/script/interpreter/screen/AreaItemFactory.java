@@ -292,7 +292,22 @@ public class AreaItemFactory {
                     // Set smooth scaling (default true)
                     imageView.setSmooth(metadata.smooth == null || metadata.smooth);
                 }
-                return imageView;
+                // Wrap ImageView in StackPane to support background colors
+                // ImageView itself doesn't support -fx-background-color
+                javafx.scene.layout.StackPane imageContainer = new javafx.scene.layout.StackPane(imageView);
+                imageContainer.setAlignment(javafx.geometry.Pos.CENTER);
+                // Constrain the container to prevent oversizing
+                if (metadata != null) {
+                    if (metadata.fitWidth != null && metadata.fitWidth > 0) {
+                        imageContainer.setMaxWidth(metadata.fitWidth);
+                        imageContainer.setPrefWidth(metadata.fitWidth);
+                    }
+                    if (metadata.fitHeight != null && metadata.fitHeight > 0) {
+                        imageContainer.setMaxHeight(metadata.fitHeight);
+                        imageContainer.setPrefHeight(metadata.fitHeight);
+                    }
+                }
+                return imageContainer;
             case MEDIAVIEW:
                 // MediaView requires javafx-media module which is not included
                 // Return a label placeholder instead
