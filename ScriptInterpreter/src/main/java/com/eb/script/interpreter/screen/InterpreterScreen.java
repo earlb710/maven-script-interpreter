@@ -2178,6 +2178,18 @@ public class InterpreterScreen {
         if (recordRefObj != null) {
             area.recordRef = String.valueOf(recordRefObj);
         }
+        
+        // Extract disableLabelAlignment property
+        Object disableLabelAlignmentObj = getCaseInsensitive(areaDef, "disableLabelAlignment");
+        if (disableLabelAlignmentObj != null) {
+            if (disableLabelAlignmentObj instanceof Boolean) {
+                area.disableLabelAlignment = (Boolean) disableLabelAlignmentObj;
+            } else {
+                // Try to parse string as boolean
+                String strVal = String.valueOf(disableLabelAlignmentObj).toLowerCase();
+                area.disableLabelAlignment = strVal.equals("true") || strVal.equals("yes") || strVal.equals("1");
+            }
+        }
 
         area.screenName = screenName;
 

@@ -66,6 +66,9 @@ public class AreaDefinition {
     // Record reference - the array variable name to use when expanding items (e.g., "clients")
     // Combined with item's varRef to form full reference (e.g., recordRef="clients" + varRef="age" -> "clients[N].age")
     public String recordRef;
+    // Disable label alignment - when true, controls without labels won't be wrapped in HBox for alignment
+    // Useful for grid layouts (like chess boards) where label alignment creates unwanted spacing
+    public Boolean disableLabelAlignment;
     
     @Override
     public String toString() {

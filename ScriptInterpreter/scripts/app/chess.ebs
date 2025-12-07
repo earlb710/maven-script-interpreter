@@ -365,6 +365,7 @@ screen chessScreen = {
                             "name": "chessBoard",
                             "type": "gridpane",
                             "spacing": "0",
+                            "disableLabelAlignment": true,
                             "style": "-fx-hgap: 0; -fx-vgap: 0; -fx-padding: 2;",
                             "items": [
                                 {"name": "lblEmpty1", "layoutPos": "0,0", "display": {"type": "label", "labelText": "", "style": "-fx-min-width: 25; -fx-min-height: 25;"}},
