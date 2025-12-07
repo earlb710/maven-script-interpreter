@@ -1220,7 +1220,9 @@ public final class Builtins {
         // ==========================
         addBuiltin(info(
                 "image.load", DataType.IMAGE,
-                newParam("path", DataType.STRING, true)          // required; path to image file
+                newParam("path", DataType.STRING, true),         // required; path to image file
+                newParam("width", DataType.INTEGER, false),      // optional; target width for auto-resize
+                newParam("height", DataType.INTEGER, false)      // optional; target height for auto-resize
         ));
         addBuiltin(info(
                 "image.create", DataType.IMAGE,

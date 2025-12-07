@@ -217,6 +217,7 @@ public class InterpreterScreen {
             int width = config.containsKey("width") ? ((Number) config.get("width")).intValue() : 800;
             int height = config.containsKey("height") ? ((Number) config.get("height")).intValue() : 600;
             boolean maximize = config.containsKey("maximize") && Boolean.TRUE.equals(config.get("maximize"));
+            boolean resizable = !config.containsKey("resizable") || Boolean.TRUE.equals(config.get("resizable")); // default true
             
             // Extract startup and cleanup inline code if present
             String startupCode = config.containsKey("startup") ? String.valueOf(config.get("startup")) : null;
@@ -516,7 +517,7 @@ public class InterpreterScreen {
 
             // Store the screen configuration for lazy initialization
             ScreenConfig screenConfig = new ScreenConfig(
-                stmt.name, title, width, height, maximize,
+                stmt.name, title, width, height, maximize, resizable,
                 screenVarMap, screenVarTypeMap,
                 varSetsMap, varItemsMap, areaItemsMap,
                 areas,
@@ -746,6 +747,9 @@ public class InterpreterScreen {
         if (config.isMaximize()) {
             stage.setMaximized(true);
         }
+        
+        // Apply resizable property from screen configuration
+        stage.setResizable(config.isResizable());
         
         // Set up screen-level focus listeners
         String screenGainFocusCode = config.getGainFocusCode();
@@ -2173,6 +2177,17 @@ public class InterpreterScreen {
         Object recordRefObj = getCaseInsensitive(areaDef, "recordRef");
         if (recordRefObj != null) {
             area.recordRef = String.valueOf(recordRefObj);
+        }
+        
+        // Extract disableLabelAlignment property
+        Object disableLabelAlignmentObj = getCaseInsensitive(areaDef, "disableLabelAlignment");
+        if (disableLabelAlignmentObj != null) {
+            if (disableLabelAlignmentObj instanceof Boolean) {
+                area.disableLabelAlignment = (Boolean) disableLabelAlignmentObj;
+            } else {
+                // Parse string as boolean - supports "true", "false" (case-insensitive)
+                area.disableLabelAlignment = Boolean.parseBoolean(String.valueOf(disableLabelAlignmentObj));
+            }
         }
 
         area.screenName = screenName;

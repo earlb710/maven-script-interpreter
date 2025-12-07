@@ -46,6 +46,20 @@ var KING: int = 6;
 var WHITE: int = 0;
 var BLACK: int = 1;
 
+// UI Color scheme - Named colors for easy customization via config screen
+var COLOR_BG_MAIN: string = "#2c2c2c";           // Main background - dark gray
+var COLOR_BG_TIMER: string = "#3c3c3c";          // Timer area background - medium dark gray
+var COLOR_BG_BOARD: string = "#654321";          // Board container background - brown
+var COLOR_CELL_LIGHT: string = "#ffffff";        // Light chess squares - white
+var COLOR_CELL_DARK: string = "#000000";         // Dark chess squares - black
+var COLOR_TEXT_WHITE: string = "#ffffff";        // White text - for labels on dark backgrounds
+var COLOR_TEXT_SEPARATOR: string = "#cccccc";    // Separator text - light gray (improved from #666666)
+var COLOR_TIMER_WHITE: string = "#00ff00";       // White player timer - bright green
+var COLOR_TIMER_BLACK: string = "#ff6600";       // Black player timer - orange
+var COLOR_BUTTON_NEW_GAME: string = "#ffff00";   // New Game button - yellow
+var COLOR_MOVE_HISTORY_BG: string = "#2c2c2c";   // Move history background
+var COLOR_MOVE_HISTORY_TEXT: string = "#ffffff"; // Move history text color
+
 // Chess piece Unicode symbols (for console display)
 var whitePieces: string[7];
 whitePieces[0] = "";        // Empty
@@ -286,12 +300,13 @@ resetGame() {
 // Define the chess screen with timer and 10x10 grid board (8x8 + labels)
 screen chessScreen = {
     "title": "Chess Game",
-    "width": 650,
+    "width": 980,
     "height": 780,
     "vars": [
         {"name": "whiteTimer", "type": "string", "default": "10:00"},
         {"name": "blackTimer", "type": "string", "default": "10:00"},
         {"name": "statusMessage", "type": "string", "default": "White to move"},
+        {"name": "moveHistory", "type": "string", "default": "Game started...\n"},
         {"name": "c00", "type": "image"},
         {"name": "c01", "type": "image"},
         {"name": "c02", "type": "image"},
@@ -331,9 +346,9 @@ screen chessScreen = {
             "type": "vbox",
             "spacing": "10",
             "padding": "20",
-            "style": "-fx-background-color: #2c2c2c;",
+            "style": "-fx-background-color: $COLOR_BG_MAIN;",
             "items": [
-                {"name": "titleLabel", "display": {"type": "label", "labelText": "\u265A Chess Game \u2654", "labelColor": "#ffffff", "labelFontSize": "24px", "labelBold": true}}
+                {"name": "titleLabel", "display": {"type": "label", "labelText": "\u265A Chess Game \u2654", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "24px", "labelBold": true}}
             ],
             "areas": [
                 {
@@ -341,141 +356,180 @@ screen chessScreen = {
                     "type": "hbox",
                     "spacing": "40",
                     "padding": "10",
-                    "style": "-fx-background-color: #3c3c3c; -fx-background-radius: 5;",
+                    "style": "-fx-background-color: $COLOR_BG_TIMER; -fx-background-radius: 5; -fx-alignment: center;",
                     "items": [
-                        {"name": "whiteLabelTimer", "display": {"type": "label", "labelText": "\u2654 White:", "labelColor": "#ffffff", "labelFontSize": "18px"}},
-                        {"name": "whiteTimerField", "varRef": "whiteTimer", "display": {"type": "label", "labelColor": "#00ff00", "labelFontSize": "24px", "labelBold": true}},
-                        {"name": "spacerLabel", "display": {"type": "label", "labelText": "     |     ", "labelColor": "#666666", "labelFontSize": "24px"}},
-                        {"name": "blackLabelTimer", "display": {"type": "label", "labelText": "\u265A Black:", "labelColor": "#ffffff", "labelFontSize": "18px"}},
-                        {"name": "blackTimerField", "varRef": "blackTimer", "display": {"type": "label", "labelColor": "#ff6600", "labelFontSize": "24px", "labelBold": true}}
+                        {"name": "whiteLabelTimer", "display": {"type": "label", "labelText": "\u2654 White:", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "18px"}},
+                        {"name": "whiteTimerField", "varRef": "whiteTimer", "display": {"type": "label", "labelColor": "$COLOR_TIMER_WHITE", "labelFontSize": "24px", "labelBold": true}},
+                        {"name": "spacerLabel", "display": {"type": "label", "labelText": "     |     ", "labelColor": "$COLOR_TEXT_SEPARATOR", "labelFontSize": "24px"}},
+                        {"name": "blackLabelTimer", "display": {"type": "label", "labelText": "\u265A Black:", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "18px"}},
+                        {"name": "blackTimerField", "varRef": "blackTimer", "display": {"type": "label", "labelColor": "$COLOR_TIMER_BLACK", "labelFontSize": "24px", "labelBold": true}}
                     ]
                 },
                 {
-                    "name": "boardContainer",
-                    "type": "vbox",
+                    "name": "boardAndHistoryContainer",
+                    "type": "hbox",
                     "spacing": "0",
-                    "padding": "10",
-                    "style": "-fx-background-color: #654321; -fx-background-radius: 5;",
+                    "padding": "0",
+                    "style": "-fx-background-color: $COLOR_BG_MAIN;",
                     "areas": [
                         {
-                            "name": "chessBoard",
-                            "type": "gridpane",
+                            "name": "boardContainer",
+                            "type": "vbox",
                             "spacing": "0",
-                            "style": "-fx-hgap: 0; -fx-vgap: 0; -fx-padding: 2;",
+                            "padding": "10",
+                            "minWidth": "624",
+                            "maxWidth": "624",
+                            "minHeight": "624",
+                            "maxHeight": "624",
+                            "style": "-fx-background-color: $COLOR_BG_BOARD; -fx-background-radius: 5;",
+                            "areas": [
+                                {
+                                    "name": "chessBoard",
+                                    "type": "gridpane",
+                                    "spacing": "0",
+                                    "disableLabelAlignment": true,
+                                    "style": "-fx-hgap: 0; -fx-vgap: 0; -fx-padding: 2;",
                             "items": [
                                 {"name": "lblEmpty1", "layoutPos": "0,0", "display": {"type": "label", "labelText": "", "style": "-fx-min-width: 25; -fx-min-height: 25;"}},
-                                {"name": "lblColA", "layoutPos": "0,1", "display": {"type": "label", "labelText": "a", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
-                                {"name": "lblColB", "layoutPos": "0,2", "display": {"type": "label", "labelText": "b", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
-                                {"name": "lblColC", "layoutPos": "0,3", "display": {"type": "label", "labelText": "c", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
-                                {"name": "lblColD", "layoutPos": "0,4", "display": {"type": "label", "labelText": "d", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
-                                {"name": "lblColE", "layoutPos": "0,5", "display": {"type": "label", "labelText": "e", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
-                                {"name": "lblColF", "layoutPos": "0,6", "display": {"type": "label", "labelText": "f", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
-                                {"name": "lblColG", "layoutPos": "0,7", "display": {"type": "label", "labelText": "g", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
-                                {"name": "lblColH", "layoutPos": "0,8", "display": {"type": "label", "labelText": "h", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
+                                {"name": "lblColA", "layoutPos": "0,1", "display": {"type": "label", "labelText": "a", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
+                                {"name": "lblColB", "layoutPos": "0,2", "display": {"type": "label", "labelText": "b", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
+                                {"name": "lblColC", "layoutPos": "0,3", "display": {"type": "label", "labelText": "c", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
+                                {"name": "lblColD", "layoutPos": "0,4", "display": {"type": "label", "labelText": "d", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
+                                {"name": "lblColE", "layoutPos": "0,5", "display": {"type": "label", "labelText": "e", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
+                                {"name": "lblColF", "layoutPos": "0,6", "display": {"type": "label", "labelText": "f", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
+                                {"name": "lblColG", "layoutPos": "0,7", "display": {"type": "label", "labelText": "g", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
+                                {"name": "lblColH", "layoutPos": "0,8", "display": {"type": "label", "labelText": "h", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
                                 {"name": "lblEmpty2", "layoutPos": "0,9", "display": {"type": "label", "labelText": "", "style": "-fx-min-width: 25; -fx-min-height: 25;"}},
                                 
-                                {"name": "lblRow8L", "layoutPos": "1,0", "display": {"type": "label", "labelText": "8", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
-                                {"name": "cell00", "layoutPos": "1,1", "varRef": "c00", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "R-8a", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
-                                {"name": "cell01", "layoutPos": "1,2", "varRef": "c01", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "N-8b", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
-                                {"name": "cell02", "layoutPos": "1,3", "varRef": "c02", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "B-8c", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
-                                {"name": "cell03", "layoutPos": "1,4", "varRef": "c03", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "Q-8d", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
-                                {"name": "cell04", "layoutPos": "1,5", "varRef": "c04", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "K-8e", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
-                                {"name": "cell05", "layoutPos": "1,6", "varRef": "c05", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "B-8f", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
-                                {"name": "cell06", "layoutPos": "1,7", "varRef": "c06", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "N-8g", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
-                                {"name": "cell07", "layoutPos": "1,8", "varRef": "c07", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "R-8h", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
-                                {"name": "lblRow8R", "layoutPos": "1,9", "display": {"type": "label", "labelText": "8", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "lblRow8L", "layoutPos": "1,0", "display": {"type": "label", "labelText": "8", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell00", "layoutPos": "1,1", "varRef": "c00", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "preserveRatio": false, "tooltip": "R-8a", "style": "-fx-background-color: $COLOR_CELL_LIGHT; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell01", "layoutPos": "1,2", "varRef": "c01", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "preserveRatio": false, "tooltip": "N-8b", "style": "-fx-background-color: $COLOR_CELL_DARK; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell02", "layoutPos": "1,3", "varRef": "c02", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "preserveRatio": false, "tooltip": "B-8c", "style": "-fx-background-color: $COLOR_CELL_LIGHT; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell03", "layoutPos": "1,4", "varRef": "c03", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "preserveRatio": false, "tooltip": "Q-8d", "style": "-fx-background-color: $COLOR_CELL_DARK; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell04", "layoutPos": "1,5", "varRef": "c04", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "preserveRatio": false, "tooltip": "K-8e", "style": "-fx-background-color: $COLOR_CELL_LIGHT; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell05", "layoutPos": "1,6", "varRef": "c05", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "preserveRatio": false, "tooltip": "B-8f", "style": "-fx-background-color: $COLOR_CELL_DARK; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell06", "layoutPos": "1,7", "varRef": "c06", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "preserveRatio": false, "tooltip": "N-8g", "style": "-fx-background-color: $COLOR_CELL_LIGHT; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell07", "layoutPos": "1,8", "varRef": "c07", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "preserveRatio": false, "tooltip": "R-8h", "style": "-fx-background-color: $COLOR_CELL_DARK; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "lblRow8R", "layoutPos": "1,9", "display": {"type": "label", "labelText": "8", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
                                 
-                                {"name": "lblRow7L", "layoutPos": "2,0", "display": {"type": "label", "labelText": "7", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
-                                {"name": "cell10", "layoutPos": "2,1", "varRef": "c10", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "P-7a", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
-                                {"name": "cell11", "layoutPos": "2,2", "varRef": "c11", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "P-7b", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
-                                {"name": "cell12", "layoutPos": "2,3", "varRef": "c12", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "P-7c", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
-                                {"name": "cell13", "layoutPos": "2,4", "varRef": "c13", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "P-7d", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
-                                {"name": "cell14", "layoutPos": "2,5", "varRef": "c14", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "P-7e", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
-                                {"name": "cell15", "layoutPos": "2,6", "varRef": "c15", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "P-7f", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
-                                {"name": "cell16", "layoutPos": "2,7", "varRef": "c16", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "P-7g", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
-                                {"name": "cell17", "layoutPos": "2,8", "varRef": "c17", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "P-7h", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
-                                {"name": "lblRow7R", "layoutPos": "2,9", "display": {"type": "label", "labelText": "7", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "lblRow7L", "layoutPos": "2,0", "display": {"type": "label", "labelText": "7", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell10", "layoutPos": "2,1", "varRef": "c10", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "preserveRatio": false, "tooltip": "P-7a", "style": "-fx-background-color: $COLOR_CELL_DARK; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell11", "layoutPos": "2,2", "varRef": "c11", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "preserveRatio": false, "tooltip": "P-7b", "style": "-fx-background-color: $COLOR_CELL_LIGHT; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell12", "layoutPos": "2,3", "varRef": "c12", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "preserveRatio": false, "tooltip": "P-7c", "style": "-fx-background-color: $COLOR_CELL_DARK; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell13", "layoutPos": "2,4", "varRef": "c13", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "preserveRatio": false, "tooltip": "P-7d", "style": "-fx-background-color: $COLOR_CELL_LIGHT; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell14", "layoutPos": "2,5", "varRef": "c14", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "preserveRatio": false, "tooltip": "P-7e", "style": "-fx-background-color: $COLOR_CELL_DARK; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell15", "layoutPos": "2,6", "varRef": "c15", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "preserveRatio": false, "tooltip": "P-7f", "style": "-fx-background-color: $COLOR_CELL_LIGHT; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell16", "layoutPos": "2,7", "varRef": "c16", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "preserveRatio": false, "tooltip": "P-7g", "style": "-fx-background-color: $COLOR_CELL_DARK; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell17", "layoutPos": "2,8", "varRef": "c17", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "preserveRatio": false, "tooltip": "P-7h", "style": "-fx-background-color: $COLOR_CELL_LIGHT; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "lblRow7R", "layoutPos": "2,9", "display": {"type": "label", "labelText": "7", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
                                 
-                                {"name": "lblRow6L", "layoutPos": "3,0", "display": {"type": "label", "labelText": "6", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
-                                {"name": "cell20", "layoutPos": "3,1", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60;"}},
-                                {"name": "cell21", "layoutPos": "3,2", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60;"}},
-                                {"name": "cell22", "layoutPos": "3,3", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60;"}},
-                                {"name": "cell23", "layoutPos": "3,4", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60;"}},
-                                {"name": "cell24", "layoutPos": "3,5", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60;"}},
-                                {"name": "cell25", "layoutPos": "3,6", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60;"}},
-                                {"name": "cell26", "layoutPos": "3,7", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60;"}},
-                                {"name": "cell27", "layoutPos": "3,8", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60;"}},
-                                {"name": "lblRow6R", "layoutPos": "3,9", "display": {"type": "label", "labelText": "6", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "lblRow6L", "layoutPos": "3,0", "display": {"type": "label", "labelText": "6", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell20", "layoutPos": "3,1", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: $COLOR_CELL_LIGHT; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell21", "layoutPos": "3,2", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: $COLOR_CELL_DARK; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell22", "layoutPos": "3,3", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: $COLOR_CELL_LIGHT; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell23", "layoutPos": "3,4", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: $COLOR_CELL_DARK; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell24", "layoutPos": "3,5", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: $COLOR_CELL_LIGHT; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell25", "layoutPos": "3,6", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: $COLOR_CELL_DARK; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell26", "layoutPos": "3,7", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: $COLOR_CELL_LIGHT; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell27", "layoutPos": "3,8", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: $COLOR_CELL_DARK; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "lblRow6R", "layoutPos": "3,9", "display": {"type": "label", "labelText": "6", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
                                 
-                                {"name": "lblRow5L", "layoutPos": "4,0", "display": {"type": "label", "labelText": "5", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
-                                {"name": "cell30", "layoutPos": "4,1", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60;"}},
-                                {"name": "cell31", "layoutPos": "4,2", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60;"}},
-                                {"name": "cell32", "layoutPos": "4,3", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60;"}},
-                                {"name": "cell33", "layoutPos": "4,4", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60;"}},
-                                {"name": "cell34", "layoutPos": "4,5", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60;"}},
-                                {"name": "cell35", "layoutPos": "4,6", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60;"}},
-                                {"name": "cell36", "layoutPos": "4,7", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60;"}},
-                                {"name": "cell37", "layoutPos": "4,8", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60;"}},
-                                {"name": "lblRow5R", "layoutPos": "4,9", "display": {"type": "label", "labelText": "5", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "lblRow5L", "layoutPos": "4,0", "display": {"type": "label", "labelText": "5", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell30", "layoutPos": "4,1", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: $COLOR_CELL_DARK; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell31", "layoutPos": "4,2", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: $COLOR_CELL_LIGHT; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell32", "layoutPos": "4,3", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: $COLOR_CELL_DARK; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell33", "layoutPos": "4,4", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: $COLOR_CELL_LIGHT; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell34", "layoutPos": "4,5", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: $COLOR_CELL_DARK; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell35", "layoutPos": "4,6", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: $COLOR_CELL_LIGHT; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell36", "layoutPos": "4,7", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: $COLOR_CELL_DARK; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell37", "layoutPos": "4,8", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: $COLOR_CELL_LIGHT; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "lblRow5R", "layoutPos": "4,9", "display": {"type": "label", "labelText": "5", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
                                 
-                                {"name": "lblRow4L", "layoutPos": "5,0", "display": {"type": "label", "labelText": "4", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
-                                {"name": "cell40", "layoutPos": "5,1", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60;"}},
-                                {"name": "cell41", "layoutPos": "5,2", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60;"}},
-                                {"name": "cell42", "layoutPos": "5,3", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60;"}},
-                                {"name": "cell43", "layoutPos": "5,4", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60;"}},
-                                {"name": "cell44", "layoutPos": "5,5", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60;"}},
-                                {"name": "cell45", "layoutPos": "5,6", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60;"}},
-                                {"name": "cell46", "layoutPos": "5,7", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60;"}},
-                                {"name": "cell47", "layoutPos": "5,8", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60;"}},
-                                {"name": "lblRow4R", "layoutPos": "5,9", "display": {"type": "label", "labelText": "4", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "lblRow4L", "layoutPos": "5,0", "display": {"type": "label", "labelText": "4", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell40", "layoutPos": "5,1", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: $COLOR_CELL_LIGHT; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell41", "layoutPos": "5,2", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: $COLOR_CELL_DARK; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell42", "layoutPos": "5,3", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: $COLOR_CELL_LIGHT; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell43", "layoutPos": "5,4", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: $COLOR_CELL_DARK; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell44", "layoutPos": "5,5", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: $COLOR_CELL_LIGHT; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell45", "layoutPos": "5,6", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: $COLOR_CELL_DARK; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell46", "layoutPos": "5,7", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: $COLOR_CELL_LIGHT; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell47", "layoutPos": "5,8", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: $COLOR_CELL_DARK; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "lblRow4R", "layoutPos": "5,9", "display": {"type": "label", "labelText": "4", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
                                 
-                                {"name": "lblRow3L", "layoutPos": "6,0", "display": {"type": "label", "labelText": "3", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
-                                {"name": "cell50", "layoutPos": "6,1", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60;"}},
-                                {"name": "cell51", "layoutPos": "6,2", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60;"}},
-                                {"name": "cell52", "layoutPos": "6,3", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60;"}},
-                                {"name": "cell53", "layoutPos": "6,4", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60;"}},
-                                {"name": "cell54", "layoutPos": "6,5", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60;"}},
-                                {"name": "cell55", "layoutPos": "6,6", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60;"}},
-                                {"name": "cell56", "layoutPos": "6,7", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60;"}},
-                                {"name": "cell57", "layoutPos": "6,8", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60;"}},
-                                {"name": "lblRow3R", "layoutPos": "6,9", "display": {"type": "label", "labelText": "3", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "lblRow3L", "layoutPos": "6,0", "display": {"type": "label", "labelText": "3", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell50", "layoutPos": "6,1", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: $COLOR_CELL_DARK; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell51", "layoutPos": "6,2", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: $COLOR_CELL_LIGHT; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell52", "layoutPos": "6,3", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: $COLOR_CELL_DARK; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell53", "layoutPos": "6,4", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: $COLOR_CELL_LIGHT; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell54", "layoutPos": "6,5", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: $COLOR_CELL_DARK; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell55", "layoutPos": "6,6", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: $COLOR_CELL_LIGHT; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell56", "layoutPos": "6,7", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: $COLOR_CELL_DARK; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "cell57", "layoutPos": "6,8", "display": {"type": "label", "labelText": "", "style": "-fx-background-color: $COLOR_CELL_LIGHT; -fx-min-width: 60; -fx-min-height: 60;"}},
+                                {"name": "lblRow3R", "layoutPos": "6,9", "display": {"type": "label", "labelText": "3", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
                                 
-                                {"name": "lblRow2L", "layoutPos": "7,0", "display": {"type": "label", "labelText": "2", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
-                                {"name": "cell60", "layoutPos": "7,1", "varRef": "c60", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "P-2a", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
-                                {"name": "cell61", "layoutPos": "7,2", "varRef": "c61", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "P-2b", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
-                                {"name": "cell62", "layoutPos": "7,3", "varRef": "c62", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "P-2c", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
-                                {"name": "cell63", "layoutPos": "7,4", "varRef": "c63", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "P-2d", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
-                                {"name": "cell64", "layoutPos": "7,5", "varRef": "c64", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "P-2e", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
-                                {"name": "cell65", "layoutPos": "7,6", "varRef": "c65", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "P-2f", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
-                                {"name": "cell66", "layoutPos": "7,7", "varRef": "c66", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "P-2g", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
-                                {"name": "cell67", "layoutPos": "7,8", "varRef": "c67", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "P-2h", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
-                                {"name": "lblRow2R", "layoutPos": "7,9", "display": {"type": "label", "labelText": "2", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "lblRow2L", "layoutPos": "7,0", "display": {"type": "label", "labelText": "2", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell60", "layoutPos": "7,1", "varRef": "c60", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "preserveRatio": false, "tooltip": "P-2a", "style": "-fx-background-color: $COLOR_CELL_LIGHT; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell61", "layoutPos": "7,2", "varRef": "c61", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "preserveRatio": false, "tooltip": "P-2b", "style": "-fx-background-color: $COLOR_CELL_DARK; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell62", "layoutPos": "7,3", "varRef": "c62", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "preserveRatio": false, "tooltip": "P-2c", "style": "-fx-background-color: $COLOR_CELL_LIGHT; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell63", "layoutPos": "7,4", "varRef": "c63", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "preserveRatio": false, "tooltip": "P-2d", "style": "-fx-background-color: $COLOR_CELL_DARK; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell64", "layoutPos": "7,5", "varRef": "c64", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "preserveRatio": false, "tooltip": "P-2e", "style": "-fx-background-color: $COLOR_CELL_LIGHT; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell65", "layoutPos": "7,6", "varRef": "c65", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "preserveRatio": false, "tooltip": "P-2f", "style": "-fx-background-color: $COLOR_CELL_DARK; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell66", "layoutPos": "7,7", "varRef": "c66", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "preserveRatio": false, "tooltip": "P-2g", "style": "-fx-background-color: $COLOR_CELL_LIGHT; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell67", "layoutPos": "7,8", "varRef": "c67", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "preserveRatio": false, "tooltip": "P-2h", "style": "-fx-background-color: $COLOR_CELL_DARK; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "lblRow2R", "layoutPos": "7,9", "display": {"type": "label", "labelText": "2", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
                                 
-                                {"name": "lblRow1L", "layoutPos": "8,0", "display": {"type": "label", "labelText": "1", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
-                                {"name": "cell70", "layoutPos": "8,1", "varRef": "c70", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "R-1a", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
-                                {"name": "cell71", "layoutPos": "8,2", "varRef": "c71", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "N-1b", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
-                                {"name": "cell72", "layoutPos": "8,3", "varRef": "c72", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "B-1c", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
-                                {"name": "cell73", "layoutPos": "8,4", "varRef": "c73", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "Q-1d", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
-                                {"name": "cell74", "layoutPos": "8,5", "varRef": "c74", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "K-1e", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
-                                {"name": "cell75", "layoutPos": "8,6", "varRef": "c75", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "B-1f", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
-                                {"name": "cell76", "layoutPos": "8,7", "varRef": "c76", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "N-1g", "style": "-fx-background-color: #B58863; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
-                                {"name": "cell77", "layoutPos": "8,8", "varRef": "c77", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "tooltip": "R-1h", "style": "-fx-background-color: #F0D9B5; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
-                                {"name": "lblRow1R", "layoutPos": "8,9", "display": {"type": "label", "labelText": "1", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "lblRow1L", "layoutPos": "8,0", "display": {"type": "label", "labelText": "1", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
+                                {"name": "cell70", "layoutPos": "8,1", "varRef": "c70", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "preserveRatio": false, "tooltip": "R-1a", "style": "-fx-background-color: $COLOR_CELL_DARK; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell71", "layoutPos": "8,2", "varRef": "c71", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "preserveRatio": false, "tooltip": "N-1b", "style": "-fx-background-color: $COLOR_CELL_LIGHT; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell72", "layoutPos": "8,3", "varRef": "c72", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "preserveRatio": false, "tooltip": "B-1c", "style": "-fx-background-color: $COLOR_CELL_DARK; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell73", "layoutPos": "8,4", "varRef": "c73", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "preserveRatio": false, "tooltip": "Q-1d", "style": "-fx-background-color: $COLOR_CELL_LIGHT; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell74", "layoutPos": "8,5", "varRef": "c74", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "preserveRatio": false, "tooltip": "K-1e", "style": "-fx-background-color: $COLOR_CELL_DARK; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell75", "layoutPos": "8,6", "varRef": "c75", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "preserveRatio": false, "tooltip": "B-1f", "style": "-fx-background-color: $COLOR_CELL_LIGHT; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell76", "layoutPos": "8,7", "varRef": "c76", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "preserveRatio": false, "tooltip": "N-1g", "style": "-fx-background-color: $COLOR_CELL_DARK; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "cell77", "layoutPos": "8,8", "varRef": "c77", "display": {"type": "imageview", "fitWidth": 50, "fitHeight": 50, "preserveRatio": false, "tooltip": "R-1h", "style": "-fx-background-color: $COLOR_CELL_LIGHT; -fx-min-width: 60; -fx-min-height: 60; -fx-alignment: center; -fx-padding: 5;"}},
+                                {"name": "lblRow1R", "layoutPos": "8,9", "display": {"type": "label", "labelText": "1", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
                                 
                                 {"name": "lblEmpty3", "layoutPos": "9,0", "display": {"type": "label", "labelText": "", "style": "-fx-min-width: 25; -fx-min-height: 25;"}},
-                                {"name": "lblColA2", "layoutPos": "9,1", "display": {"type": "label", "labelText": "a", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
-                                {"name": "lblColB2", "layoutPos": "9,2", "display": {"type": "label", "labelText": "b", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
-                                {"name": "lblColC2", "layoutPos": "9,3", "display": {"type": "label", "labelText": "c", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
-                                {"name": "lblColD2", "layoutPos": "9,4", "display": {"type": "label", "labelText": "d", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
-                                {"name": "lblColE2", "layoutPos": "9,5", "display": {"type": "label", "labelText": "e", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
-                                {"name": "lblColF2", "layoutPos": "9,6", "display": {"type": "label", "labelText": "f", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
-                                {"name": "lblColG2", "layoutPos": "9,7", "display": {"type": "label", "labelText": "g", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
-                                {"name": "lblColH2", "layoutPos": "9,8", "display": {"type": "label", "labelText": "h", "labelColor": "#ffffff", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
+                                {"name": "lblColA2", "layoutPos": "9,1", "display": {"type": "label", "labelText": "a", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
+                                {"name": "lblColB2", "layoutPos": "9,2", "display": {"type": "label", "labelText": "b", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
+                                {"name": "lblColC2", "layoutPos": "9,3", "display": {"type": "label", "labelText": "c", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
+                                {"name": "lblColD2", "layoutPos": "9,4", "display": {"type": "label", "labelText": "d", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
+                                {"name": "lblColE2", "layoutPos": "9,5", "display": {"type": "label", "labelText": "e", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
+                                {"name": "lblColF2", "layoutPos": "9,6", "display": {"type": "label", "labelText": "f", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
+                                {"name": "lblColG2", "layoutPos": "9,7", "display": {"type": "label", "labelText": "g", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
+                                {"name": "lblColH2", "layoutPos": "9,8", "display": {"type": "label", "labelText": "h", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
                                 {"name": "lblEmpty4", "layoutPos": "9,9", "display": {"type": "label", "labelText": "", "style": "-fx-min-width: 25; -fx-min-height: 25;"}}
                             ]
                         }
                     ]
                 },
+                {
+                    "name": "moveHistoryContainer",
+                    "type": "vbox",
+                    "spacing": "5",
+                    "padding": "10",
+                    "minWidth": "300",
+                    "maxWidth": "300",
+                    "minHeight": "624",
+                    "maxHeight": "624",
+                    "style": "-fx-background-color: $COLOR_MOVE_HISTORY_BG; -fx-background-radius: 5;",
+                    "items": [
+                        {"name": "moveHistoryTitle", "display": {"type": "label", "labelText": "Move History", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "16px", "labelBold": true}, "labelPos": "top"}
+                    ],
+                    "areas": [
+                        {
+                            "name": "moveHistoryArea",
+                            "type": "vbox",
+                            "spacing": "0",
+                            "padding": "0",
+                            "items": [
+                                {"name": "moveHistoryText", "varRef": "moveHistory", "display": {"type": "textarea", "editable": false, "wrapText": true, "prefRowCount": 30, "style": "-fx-control-inner-background: $COLOR_MOVE_HISTORY_BG; -fx-text-fill: $COLOR_MOVE_HISTORY_TEXT; -fx-font-family: 'Courier New'; -fx-font-size: 12px; -fx-border-color: #555555; -fx-border-width: 1;"}, "labelPos": "top"}
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
                 {
                     "name": "statusArea",
                     "type": "hbox",
@@ -483,7 +537,7 @@ screen chessScreen = {
                     "padding": "10",
                     "style": "-fx-background-color: #3c3c3c; -fx-background-radius: 5;",
                     "items": [
-                        {"name": "statusLabel", "varRef": "statusMessage", "display": {"type": "label", "labelColor": "#ffff00", "labelFontSize": "16px", "labelBold": true}}
+                        {"name": "statusLabel", "varRef": "statusMessage", "display": {"type": "label", "labelColor": "$COLOR_BUTTON_NEW_GAME", "labelFontSize": "16px", "labelBold": true}}
                     ]
                 },
                 {
