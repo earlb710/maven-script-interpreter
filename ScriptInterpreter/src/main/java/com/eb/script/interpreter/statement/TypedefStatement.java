@@ -2,6 +2,7 @@ package com.eb.script.interpreter.statement;
 
 import com.eb.script.interpreter.InterpreterError;
 import com.eb.script.token.BitmapType;
+import com.eb.script.token.IntmapType;
 import com.eb.script.token.DataType;
 import com.eb.script.token.RecordType;
 
@@ -18,6 +19,7 @@ public class TypedefStatement extends Statement {
     public final DataType dataType;
     public final RecordType recordType;
     public final BitmapType bitmapType;
+    public final IntmapType intmapType;
     public final boolean isArray;
     public final Integer arraySize; // null for dynamic arrays
     
@@ -33,6 +35,7 @@ public class TypedefStatement extends Statement {
         this.dataType = dataType;
         this.recordType = null;
         this.bitmapType = null;
+        this.intmapType = null;
         this.isArray = false;
         this.arraySize = null;
     }
@@ -49,6 +52,7 @@ public class TypedefStatement extends Statement {
         this.dataType = DataType.RECORD;
         this.recordType = recordType;
         this.bitmapType = null;
+        this.intmapType = null;
         this.isArray = false;
         this.arraySize = null;
     }
@@ -65,6 +69,24 @@ public class TypedefStatement extends Statement {
         this.dataType = DataType.BITMAP;
         this.recordType = null;
         this.bitmapType = bitmapType;
+        this.intmapType = null;
+        this.isArray = false;
+        this.arraySize = null;
+    }
+    
+    /**
+     * Create a typedef statement for an intmap type
+     * @param line Line number
+     * @param typeName Name of the type alias
+     * @param intmapType The intmap type definition
+     */
+    public TypedefStatement(int line, String typeName, IntmapType intmapType) {
+        super(line);
+        this.typeName = typeName;
+        this.dataType = DataType.INTMAP;
+        this.recordType = null;
+        this.bitmapType = null;
+        this.intmapType = intmapType;
         this.isArray = false;
         this.arraySize = null;
     }
@@ -83,6 +105,7 @@ public class TypedefStatement extends Statement {
         this.dataType = dataType;
         this.recordType = recordType;
         this.bitmapType = null;
+        this.intmapType = null;
         this.isArray = true;
         this.arraySize = arraySize;
     }
@@ -102,6 +125,8 @@ public class TypedefStatement extends Statement {
                 sb.append(recordType.toString());
             } else if (bitmapType != null) {
                 sb.append(bitmapType.toString());
+            } else if (intmapType != null) {
+                sb.append(intmapType.toString());
             } else {
                 sb.append(dataType);
             }
@@ -114,6 +139,8 @@ public class TypedefStatement extends Statement {
             sb.append(recordType.toString());
         } else if (bitmapType != null) {
             sb.append(bitmapType.toString());
+        } else if (intmapType != null) {
+            sb.append(intmapType.toString());
         } else {
             sb.append(dataType);
         }

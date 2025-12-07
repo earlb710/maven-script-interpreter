@@ -26,6 +26,7 @@ public enum DataType {
     RECORD(java.util.Map.class),
     MAP(java.util.Map.class),
     BITMAP(Byte.class),
+    INTMAP(Integer.class),
     IMAGE(EbsImage.class),
     VECTOR_IMAGE(EbsVectorImage.class),
     ANY(Comparable.class);
@@ -85,6 +86,9 @@ public enum DataType {
                 case BITMAP -> {
                     return new Byte[length];
                 }
+                case INTMAP -> {
+                    return new Integer[length];
+                }
                 case IMAGE -> {
                     return new EbsImage[length];
                 }
@@ -140,6 +144,10 @@ public enum DataType {
         if (type == BITMAP) {
             // Accept Byte objects as bitmaps
             return value instanceof Byte || value instanceof Number;
+        }
+        if (type == INTMAP) {
+            // Accept Integer objects as intmaps
+            return value instanceof Integer || value instanceof Number;
         }
         // For other types, allow subclasses (e.g., HashMap instanceof Map)
         return dataClass.isInstance(value);
@@ -254,6 +262,10 @@ public enum DataType {
                 // Convert to byte for bitmap type
                 value = convertToByte(value);
             }
+            case INTMAP -> {
+                // Convert to int for intmap type
+                value = convertToInt(value);
+            }
             default -> {
             }
         }
@@ -299,6 +311,22 @@ public enum DataType {
             return (byte) i;
         }
         throw new RuntimeException("Cannot convert " + v.getClass().getSimpleName() + " to byte");
+    }
+
+    private static int convertToInt(Object v) {
+        if (v == null) {
+            return 0;
+        }
+        if (v instanceof Integer i) {
+            return i;
+        }
+        if (v instanceof Number n) {
+            return n.intValue();
+        }
+        if (v instanceof String s) {
+            return Integer.parseInt(s.trim());
+        }
+        throw new RuntimeException("Cannot convert " + v.getClass().getSimpleName() + " to int");
     }
 
     private static int convertFromByte(Byte v) {

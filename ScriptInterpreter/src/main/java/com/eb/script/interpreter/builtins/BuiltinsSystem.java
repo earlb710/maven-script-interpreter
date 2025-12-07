@@ -6,6 +6,7 @@ import com.eb.script.interpreter.InterpreterError;
 import com.eb.script.arrays.ArrayDef;
 import com.eb.script.arrays.ArrayDynamic;
 import com.eb.script.arrays.ArrayFixedByte;
+import com.eb.script.arrays.ArrayFixedInt;
 import com.eb.script.token.DataType;
 import com.eb.ui.ebs.EbsApp;
 import java.nio.charset.StandardCharsets;
@@ -58,6 +59,8 @@ public class BuiltinsSystem {
             case "array.base64decode" -> base64Decode(args);
             case "array.asbitmap" -> arrayAsBitmap(args);
             case "array.asbyte" -> arrayAsByte(args);
+            case "array.asintmap" -> arrayAsIntmap(args);
+            case "array.asint" -> arrayAsInt(args);
             default -> throw new InterpreterError("Unknown System builtin: " + name);
         };
     }
@@ -406,6 +409,42 @@ public class BuiltinsSystem {
             return afb.castTo(DataType.BYTE);
         }
         throw new InterpreterError("array.asByte: expected bitmap array (array.bitmap), got " + a0.getClass().getSimpleName());
+    }
+
+    /**
+     * Cast an array.int to array.intmap.
+     * The underlying data remains the same, only the data type changes.
+     * @param args The arguments (array to cast)
+     * @return A new ArrayFixedInt with INTMAP data type
+     */
+    private static Object arrayAsIntmap(Object[] args) throws InterpreterError {
+        Object a0 = args[0];
+        if (a0 == null) {
+            return null;
+        }
+        if (a0 instanceof ArrayFixedInt afi) {
+            // Use the castTo method to create a copy with INTMAP data type
+            return afi.castTo(DataType.INTMAP);
+        }
+        throw new InterpreterError("array.asIntmap: expected int array (array.int), got " + a0.getClass().getSimpleName());
+    }
+
+    /**
+     * Cast an array.intmap to array.int.
+     * The underlying data remains the same, only the data type changes.
+     * @param args The arguments (array to cast)
+     * @return A new ArrayFixedInt with INTEGER data type
+     */
+    private static Object arrayAsInt(Object[] args) throws InterpreterError {
+        Object a0 = args[0];
+        if (a0 == null) {
+            return null;
+        }
+        if (a0 instanceof ArrayFixedInt afi) {
+            // Use the castTo method to create a copy with INTEGER data type
+            return afi.castTo(DataType.INTEGER);
+        }
+        throw new InterpreterError("array.asInt: expected intmap array (array.intmap), got " + a0.getClass().getSimpleName());
     }
 
     // --- Helper methods ---

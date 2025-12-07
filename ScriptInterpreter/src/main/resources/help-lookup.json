@@ -189,10 +189,22 @@
       "example": "var flags: bitmap { status: 0-1, enabled: 2, priority: 3-5 };\nflags.status = 2;\nflags.enabled = 1;\nflags.priority = 5;\nprint flags.status;  // Output: 2\n\n// Type alias and casting\nStatusFlags typeof bitmap { active: 0, error: 1 };\nvar status = StatusFlags(42);\nprint status.active;"
     },
     {
+      "keyword": "intmap",
+      "short_description": "Defines named bit fields within an integer",
+      "long_help": "The 'intmap' type extends bitmap to 32-bit integers, defining named fields that map to bit ranges within an integer (0-31). This allows storing larger values and more fields than bitmap, making it ideal for packing multiple values, IDs, flags, or configuration data into a single integer. Fields are accessed using dot notation, with automatic bit shifting on read/write. Use 'typeof' to define reusable intmap type aliases.",
+      "example": "var config: intmap { enabled: 0, mode: 1-3, level: 4-11, id: 12-31 };\nconfig.enabled = 1;\nconfig.mode = 5;\nconfig.level = 128;\nconfig.id = 65535;\nprint config.level;  // Output: 128\n\n// Type alias and casting\nPackedData typeof intmap { id: 0-15, count: 16-23, flags: 24-31 };\nvar data = PackedData(16842752);\nprint data.count;"
+    },
+    {
       "keyword": "array.bitmap",
       "short_description": "Creates a bitmap array backed by ArrayFixedByte",
       "long_help": "The 'array.bitmap' syntax creates a fixed-size array for storing bitmap data. Like array.byte, it is backed by ArrayFixedByte storage, but with BITMAP as the data type. This provides type clarity when storing data that should be interpreted as bitmap fields. Use array.asBitmap() to cast from array.byte and array.asByte() to cast to array.byte.",
       "example": "var bitmapArray: array.bitmap[5];\nbitmapArray[0] = 255;  // All bits set\nbitmapArray[1] = 0;    // No bits set\n\n// Cast between byte and bitmap arrays\nvar byteArray: array.byte[3];\nvar castedBitmap = call array.asBitmap(byteArray);\nvar castedByte = call array.asByte(bitmapArray);\n\n// Interpret with bitmap type alias\nStatusByte typeof bitmap { active: 0, error: 1 };\nvar status = StatusByte(bitmapArray[0]);\nprint status.active;"
+    },
+    {
+      "keyword": "array.intmap",
+      "short_description": "Creates an intmap array backed by ArrayFixedInt",
+      "long_help": "The 'array.intmap' syntax creates a fixed-size array for storing intmap data. Like array.int, it is backed by ArrayFixedInt storage, but with INTMAP as the data type. This provides type clarity when storing data that should be interpreted as intmap fields. Use array.asIntmap() to cast from array.int and array.asInt() to cast to array.int.",
+      "example": "var intmapArray: array.intmap[5];\nintmapArray[0] = 1048832;  // Some packed configuration\nintmapArray[1] = 0;\n\n// Cast between int and intmap arrays\nvar intArray: array.int[3];\nvar castedIntmap = call array.asIntmap(intArray);\nvar castedInt = call array.asInt(intmapArray);\n\n// Interpret with intmap type alias\nConfigData typeof intmap { enabled: 0, mode: 1-3, level: 4-11, id: 12-31 };\nvar config = ConfigData(intmapArray[0]);\nprint config.enabled;\nprint config.id;"
     },
     {
       "keyword": "record",
@@ -1025,6 +1037,34 @@
       ],
       "return_type": "array",
       "example": "<b>var</b> bitmapArray: <b>array.bitmap</b>[5];<br>bitmapArray[0] = 255;<br>bitmapArray[1] = 128;<br><br>// Cast to byte array<br><b>var</b> byteArray = <b>call</b> <b>array.asByte</b>(bitmapArray);<br><b>print</b> byteArray[0];  // 255"
+    },
+    {
+      "function": "array.asIntmap",
+      "short_description": "Casts an integer array to an intmap array",
+      "long_help": "Casts an array.int to array.intmap. Both types use the same underlying ArrayFixedInt storage, but the<br>data type is changed from INTEGER to INTMAP. This is useful when you want to interpret integer data as intmap<br>values for bit-field processing. Returns a new array with the same data but INTMAP type.",
+      "parameters": [
+        {
+          "name": "array",
+          "type": "array",
+          "description": "The integer array (array.int) to cast"
+        }
+      ],
+      "return_type": "array",
+      "example": "<b>var</b> intArray: <b>array.int</b>[5];<br>intArray[0] = 1048832;<br>intArray[1] = 65535;<br><br>// Cast to intmap array<br><b>var</b> intmapArray = <b>call</b> <b>array.asIntmap</b>(intArray);<br><b>print</b> intmapArray[0];  // 1048832"
+    },
+    {
+      "function": "array.asInt",
+      "short_description": "Casts an intmap array to an integer array",
+      "long_help": "Casts an array.intmap to array.int. Both types use the same underlying ArrayFixedInt storage, but the<br>data type is changed from INTMAP to INTEGER. This is useful when you want to process intmap data as raw integers.<br>Returns a new array with the same data but INTEGER type.",
+      "parameters": [
+        {
+          "name": "array",
+          "type": "array",
+          "description": "The intmap array (array.intmap) to cast"
+        }
+      ],
+      "return_type": "array",
+      "example": "<b>var</b> intmapArray: <b>array.intmap</b>[5];<br>intmapArray[0] = 1048832;<br>intmapArray[1] = 65535;<br><br>// Cast to integer array<br><b>var</b> intArray = <b>call</b> <b>array.asInt</b>(intmapArray);<br><b>print</b> intArray[0];  // 1048832"
     },
     {
       "function": "array.expand",

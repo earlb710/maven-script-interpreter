@@ -1,0 +1,141 @@
+// array_intmap.ebs - Example demonstrating array.intmap arrays
+// Syntax: var name: array.intmap[size];
+//
+// array.intmap creates an int array using ArrayFixedInt storage,
+// but with INTMAP data type. This is useful for storing multiple
+// intmap values in an array for efficient bit-field storage.
+
+print "=== array.intmap Basic Usage ===";
+
+// Create an intmap array (backed by ArrayFixedInt)
+var intmapArray: array.intmap[5];
+
+// Set values (each element is a 32-bit int that can hold intmap field data)
+intmapArray[0] = 4294967295;  // All bits set (max unsigned 32-bit value)
+intmapArray[1] = 0;           // No bits set
+intmapArray[2] = 2147483648;  // High bit set
+intmapArray[3] = 1431655765;  // Alternating bits pattern
+intmapArray[4] = 2863311530;  // Another alternating bits pattern
+
+print "intmapArray[0] = " + intmapArray[0];
+print "intmapArray[1] = " + intmapArray[1];
+print "intmapArray[2] = " + intmapArray[2];
+print "intmapArray[3] = " + intmapArray[3];
+print "intmapArray[4] = " + intmapArray[4];
+
+
+print "";
+print "=== array.int to array.intmap Casting ===";
+
+// Create an int array
+var intArray: array.int[4];
+intArray[0] = 1000;
+intArray[1] = 2000;
+intArray[2] = 3000;
+intArray[3] = 4000;
+
+print "Original int array:";
+print "  intArray[0] = " + intArray[0];
+print "  intArray[1] = " + intArray[1];
+
+// Cast int array to intmap array
+var castedToIntmap = call array.asIntmap(intArray);
+
+print "After casting to intmap:";
+print "  castedToIntmap[0] = " + castedToIntmap[0];
+print "  castedToIntmap[1] = " + castedToIntmap[1];
+
+
+print "";
+print "=== array.intmap to array.int Casting ===";
+
+// Cast intmap array back to int array
+var castedToInt = call array.asInt(intmapArray);
+
+print "After casting intmap to int:";
+print "  castedToInt[0] = " + castedToInt[0];
+print "  castedToInt[1] = " + castedToInt[1];
+
+
+print "";
+print "=== Roundtrip Conversion ===";
+
+// Create an int array
+var original: array.int[3];
+original[0] = 10000;
+original[1] = 20000;
+original[2] = 30000;
+
+print "Original values:";
+print "  original[0] = " + original[0];
+print "  original[1] = " + original[1];
+print "  original[2] = " + original[2];
+
+// Convert int -> intmap -> int
+var roundtrip = call array.asInt(call array.asIntmap(original));
+
+print "After roundtrip (int -> intmap -> int):";
+print "  roundtrip[0] = " + roundtrip[0] + " (expected: 10000)";
+print "  roundtrip[1] = " + roundtrip[1] + " (expected: 20000)";
+print "  roundtrip[2] = " + roundtrip[2] + " (expected: 30000)";
+
+
+print "";
+print "=== Use Cases ===";
+
+print "";
+print "1. Storing multiple status integers with intmap fields:";
+// Each int can hold multiple fields using intmap type aliases
+var statusInts: array.intmap[10];
+// Each element can be interpreted with an intmap type alias
+StatusInt typeof intmap { active: 0, error: 1, warning: 2, ready: 3, progress: 4-11, task_id: 12-31 };
+
+statusInts[0] = 5;  // active=1, error=0, warning=1, ready=0, progress=0, task_id=0
+var status0 = StatusInt(statusInts[0]);
+print "   Device 0: active=" + status0.active + ", warning=" + status0.warning;
+
+statusInts[1] = 9;  // active=1, error=0, warning=0, ready=1, progress=0, task_id=0
+var status1 = StatusInt(statusInts[1]);
+print "   Device 1: active=" + status1.active + ", ready=" + status1.ready;
+
+
+print "";
+print "2. Packed configuration data:";
+// array.intmap helps identify data that should be interpreted as intmap fields
+// while array.int is for raw integer data
+ConfigData typeof intmap { enabled: 0, mode: 1-3, level: 4-11, id: 12-31 };
+
+var configs: array.intmap[3];
+configs[0] = 1;     // enabled=1, mode=0, level=0, id=0
+configs[1] = 271;   // enabled=1, mode=7, level=1, id=0
+configs[2] = 4111;  // enabled=1, mode=7, level=1, id=1
+
+var cfg0 = ConfigData(configs[0]);
+print "   Config 0: enabled=" + cfg0.enabled;
+
+var cfg1 = ConfigData(configs[1]);
+print "   Config 1: mode=" + cfg1.mode + ", level=" + cfg1.level;
+
+var cfg2 = ConfigData(configs[2]);
+print "   Config 2: id=" + cfg2.id;
+
+
+print "";
+print "3. Efficient storage with 32-bit capacity:";
+// Intmap provides 4x the bit capacity of bitmap (32 bits vs 8 bits)
+// Useful for packing more data per array element
+PackedFlags typeof intmap { flags: 0-7, priority: 8-15, user_id: 16-31 };
+
+var packed: array.intmap[2];
+packed[0] = 255;           // flags=255, priority=0, user_id=0
+packed[1] = 16843009;      // flags=1, priority=1, user_id=257
+
+var p0 = PackedFlags(packed[0]);
+print "   Packed[0]: flags=" + p0.flags;
+
+var p1 = PackedFlags(packed[1]);
+print "   Packed[1]: user_id=" + p1.user_id;
+
+
+print "";
+print "array.intmap examples completed!";

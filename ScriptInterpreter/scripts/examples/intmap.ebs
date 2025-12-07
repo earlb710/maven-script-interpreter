@@ -1,0 +1,141 @@
+// intmap.ebs - Example demonstrating the intmap data type
+//
+// An intmap type defines named fields that map to bit ranges within a 32-bit integer (0-31).
+// Each field occupies specific bits in an integer, allowing efficient storage of
+// multiple values in a single 32-bit integer - much more capacity than bitmap's 8 bits.
+
+print "=== Basic Intmap Variable ===";
+
+// Define an intmap variable with fields spanning all 32 bits
+var flags: intmap { status: 0-3, enabled: 4, priority: 5-9, category: 10-15, reserved: 16-31 };
+
+// Initially, the intmap value is 0
+print "Initial intmap value: " + flags;
+
+// Set individual fields using property access
+flags.status = 5;
+flags.enabled = 1;
+flags.priority = 20;
+flags.category = 42;
+flags.reserved = 12345;
+
+// Read the raw integer value
+print "Intmap after setting fields: " + flags;
+
+// Read individual fields (values are automatically right-shifted)
+print "status = " + flags.status;
+print "enabled = " + flags.enabled;
+print "priority = " + flags.priority;
+print "category = " + flags.category;
+print "reserved = " + flags.reserved;
+
+// Fields can be used in expressions
+if (flags.enabled == 1) {
+    print "The enabled flag is set!";
+}
+
+if (flags.priority > 15) {
+    print "High priority detected: " + flags.priority;
+}
+
+// Change a field value
+flags.priority = 2;
+print "Changed priority to: " + flags.priority;
+
+print "Final intmap raw value: " + flags;
+
+
+print "";
+print "=== Const Intmap ===";
+
+// Demonstrate const intmap with larger bit fields
+const PERMISSIONS: intmap { read: 0, write: 1, execute: 2, admin: 3, group_id: 4-15, user_id: 16-31 } = 65543;
+
+print "Read permission: " + PERMISSIONS.read;
+print "Write permission: " + PERMISSIONS.write;
+print "Execute permission: " + PERMISSIONS.execute;
+print "Admin permission: " + PERMISSIONS.admin;
+print "Group ID: " + PERMISSIONS.group_id;
+print "User ID: " + PERMISSIONS.user_id;
+
+
+print "";
+print "=== Intmap Type Alias and Casting ===";
+
+// Define a reusable intmap type alias with 32-bit fields
+StatusFlags typeof intmap { active: 0, error: 1, warning: 2, ready: 3, busy: 4-5, progress: 6-13, task_id: 14-31 };
+
+// Cast an int value to the intmap type
+var intValue: int = 123456;
+var status = StatusFlags(intValue);
+
+print "Original int value: " + intValue;
+print "status.active = " + status.active;
+print "status.error = " + status.error;
+print "status.warning = " + status.warning;
+print "status.ready = " + status.ready;
+print "status.busy = " + status.busy;
+print "status.progress = " + status.progress;
+print "status.task_id = " + status.task_id;
+
+
+print "";
+print "=== typeof with Intmap ===";
+
+// typeof on intmap type alias shows the full type definition
+print "typeof StatusFlags = " + typeof StatusFlags;
+
+// typeof on intmap variable shows the type alias name
+print "typeof status = " + typeof status;
+
+
+print "";
+print "=== Bit Positioning Verification ===";
+
+// Verify that field positions match integer values
+// flags.status=5 should be equal to 5 in bits 0-3
+// flags.enabled=1 should be equal to 16 (1<<4) in bit 4
+
+PositionTest typeof intmap { status: 0-3, enabled: 4, priority: 5-9 };
+
+var test1 = PositionTest(0);
+test1.status = 5;
+print "status=5 -> raw value: " + test1 + " (expected: 5)";
+
+var test2 = PositionTest(0);
+test2.enabled = 1;
+print "enabled=1 -> raw value: " + test2 + " (expected: 16)";
+
+var test3 = PositionTest(0);
+test3.priority = 10;
+print "priority=10 -> raw value: " + test3 + " (expected: 320)";
+
+
+print "";
+print "=== Combined Field Values ===";
+
+// Set multiple fields and verify combined value
+var combined = PositionTest(0);
+combined.status = 5;      // 5 in bits 0-3 = 5
+combined.enabled = 1;     // 1 in bit 4 = 16
+combined.priority = 10;   // 10 in bits 5-9 = 320
+print "Combined value: " + combined + " (expected: 341)";
+
+
+print "";
+print "=== Large Bit Fields ===";
+
+// Demonstrate using larger bit ranges for more capacity
+PackedData typeof intmap { id: 0-15, count: 16-23, flags: 24-31 };
+
+var data = PackedData(0);
+data.id = 32767;      // 16 bits can hold 0-65535
+data.count = 255;     // 8 bits can hold 0-255
+data.flags = 170;     // 8 bits can hold 0-255
+
+print "Packed data with id=" + data.id + ", count=" + data.count + ", flags=" + data.flags;
+print "Raw value: " + data;
+
+
+print "";
+print "Intmap examples completed!";

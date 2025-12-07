@@ -1,6 +1,7 @@
 package com.eb.script.interpreter.statement;
 
 import com.eb.script.token.BitmapType;
+import com.eb.script.token.IntmapType;
 import com.eb.script.token.DataType;
 import com.eb.script.token.RecordType;
 import com.eb.script.interpreter.InterpreterError;
@@ -14,35 +15,41 @@ public class VarStatement extends Statement {
     public final DataType varType;
     public final RecordType recordType; // Record type definition (if varType is RECORD)
     public final BitmapType bitmapType; // Bitmap type definition (if varType is BITMAP)
+    public final IntmapType intmapType; // Intmap type definition (if varType is INTMAP)
     public final Expression initializer;
     public final boolean isConst; // Whether this is a const declaration (cannot be reassigned)
 
     public VarStatement(int line, String name, DataType type, Expression initializer) {
-        this(line, name, type, null, null, initializer, false);
+        this(line, name, type, null, null, null, initializer, false);
     }
     
     public VarStatement(int line, String name, DataType type, Expression initializer, boolean isConst) {
-        this(line, name, type, null, null, initializer, isConst);
+        this(line, name, type, null, null, null, initializer, isConst);
     }
     
     public VarStatement(int line, String name, DataType type, RecordType recordType, Expression initializer) {
-        this(line, name, type, recordType, null, initializer, false);
+        this(line, name, type, recordType, null, null, initializer, false);
     }
     
     public VarStatement(int line, String name, DataType type, RecordType recordType, Expression initializer, boolean isConst) {
-        this(line, name, type, recordType, null, initializer, isConst);
+        this(line, name, type, recordType, null, null, initializer, isConst);
     }
     
     public VarStatement(int line, String name, DataType type, BitmapType bitmapType, Expression initializer, boolean isConst) {
-        this(line, name, type, null, bitmapType, initializer, isConst);
+        this(line, name, type, null, bitmapType, null, initializer, isConst);
     }
     
-    public VarStatement(int line, String name, DataType type, RecordType recordType, BitmapType bitmapType, Expression initializer, boolean isConst) {
+    public VarStatement(int line, String name, DataType type, IntmapType intmapType, Expression initializer, boolean isConst) {
+        this(line, name, type, null, null, intmapType, initializer, isConst);
+    }
+    
+    public VarStatement(int line, String name, DataType type, RecordType recordType, BitmapType bitmapType, IntmapType intmapType, Expression initializer, boolean isConst) {
         super(line);
         this.name = name;
         this.varType = type;
         this.recordType = recordType;
         this.bitmapType = bitmapType;
+        this.intmapType = intmapType;
         this.initializer = initializer;
         this.isConst = isConst;
     }
@@ -71,6 +78,7 @@ public class VarStatement extends Statement {
         this.varType = tokenType.type.getDataType();
         this.recordType = null;
         this.bitmapType = null;
+        this.intmapType = null;
         this.initializer = initializer;
         this.isConst = false;
     }

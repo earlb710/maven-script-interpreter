@@ -1,0 +1,323 @@
+// test_intmap_all.ebs - Comprehensive test for all intmap functionality
+// This test validates intmap data type, array.intmap, type aliases, casting, and integration
+
+print "======================================";
+print "   INTMAP COMPREHENSIVE TEST SUITE";
+print "======================================";
+print "";
+
+var testsPassed: int = 0;
+var testsFailed: int = 0;
+
+// Helper function to report test results
+reportTest(testName: string, passed: bool) {
+    if (passed) {
+        print "[PASS] " + testName;
+        testsPassed = testsPassed + 1;
+    } else {
+        print "[FAIL] " + testName;
+        testsFailed = testsFailed + 1;
+    }
+}
+
+print "=== TEST 1: Basic Intmap Declaration and Field Access ===";
+var config: intmap { enabled: 0, mode: 1-3, level: 4-11, id: 12-31 };
+
+// Test initial value
+call reportTest("Initial intmap value is 0", config == 0);
+
+// Test field assignments
+config.enabled = 1;
+config.mode = 5;
+config.level = 128;
+config.id = 65535;
+
+// Test field reads
+call reportTest("Field enabled reads correctly", config.enabled == 1);
+call reportTest("Field mode reads correctly", config.mode == 5);
+call reportTest("Field level reads correctly", config.level == 128);
+call reportTest("Field id reads correctly", config.id == 65535);
+
+print "";
+
+
+print "=== TEST 2: Intmap Type Aliases (typeof) ===";
+StatusFlags typeof intmap { active: 0, error: 1, warning: 2, ready: 3, busy: 4-5, progress: 6-13, task_id: 14-31 };
+
+// Test casting with type alias
+var status = StatusFlags(123456);
+call reportTest("Type alias casting works", status != null);
+call reportTest("Type alias field access works", status.progress == 137);
+
+// Test typeof operator
+var typeStr = typeof StatusFlags;
+call reportTest("typeof on type alias works", typeStr == "intmap");
+
+print "";
+
+
+print "=== TEST 3: Const Intmap ===";
+const PERMISSIONS: intmap { read: 0, write: 1, execute: 2, admin: 3, group_id: 4-11, user_id: 12-31 } = 7;
+
+call reportTest("Const intmap read field works", PERMISSIONS.read == 1);
+call reportTest("Const intmap write field works", PERMISSIONS.write == 1);
+call reportTest("Const intmap execute field works", PERMISSIONS.execute == 1);
+call reportTest("Const intmap admin field works", PERMISSIONS.admin == 0);
+
+print "";
+
+
+print "=== TEST 4: Intmap Bit Positioning ===";
+BitPos typeof intmap { status: 0-1, enabled: 2, priority: 3-7 };
+
+var test1 = BitPos(0);
+test1.status = 2;
+call reportTest("Bit position 0-1: status=2 gives value 2", test1 == 2);
+
+var test2 = BitPos(0);
+test2.enabled = 1;
+call reportTest("Bit position 2: enabled=1 gives value 4", test2 == 4);
+
+var test3 = BitPos(0);
+test3.priority = 10;
+call reportTest("Bit position 3-7: priority=10 gives value 80", test3 == 80);
+
+print "";
+
+
+print "=== TEST 5: Combined Field Values ===";
+CombinedTest typeof intmap { a: 0-1, b: 2, c: 3-7 };
+var combined = CombinedTest(0);
+combined.a = 1;
+combined.b = 1;
+combined.c = 5;
+var expectedValue = 1 + 4 + 40; // a=1, b=1<<2=4, c=5<<3=40
+call reportTest("Combined field values calculate correctly", combined == expectedValue);
+
+print "";
+
+
+print "=== TEST 6: Array.intmap Declaration ===";
+var intmapArray: array.intmap[5];
+
+// Test array element assignment and retrieval
+intmapArray[0] = 100;
+intmapArray[1] = 200;
+intmapArray[2] = 300;
+intmapArray[3] = 400;
+intmapArray[4] = 500;
+
+call reportTest("Array.intmap element [0] stores correctly", intmapArray[0] == 100);
+call reportTest("Array.intmap element [1] stores correctly", intmapArray[1] == 200);
+call reportTest("Array.intmap element [4] stores correctly", intmapArray[4] == 500);
+
+print "";
+
+
+print "=== TEST 7: Array Casting - array.asIntmap ===";
+var intArray: array.int[3];
+intArray[0] = 1000;
+intArray[1] = 2000;
+intArray[2] = 3000;
+
+var castedToIntmap = call array.asIntmap(intArray);
+call reportTest("array.asIntmap preserves values [0]", castedToIntmap[0] == 1000);
+call reportTest("array.asIntmap preserves values [1]", castedToIntmap[1] == 2000);
+call reportTest("array.asIntmap preserves values [2]", castedToIntmap[2] == 3000);
+
+print "";
+
+
+print "=== TEST 8: Array Casting - array.asInt ===";
+var intmapArray2: array.intmap[3];
+intmapArray2[0] = 5000;
+intmapArray2[1] = 6000;
+intmapArray2[2] = 7000;
+
+var castedToInt = call array.asInt(intmapArray2);
+call reportTest("array.asInt preserves values [0]", castedToInt[0] == 5000);
+call reportTest("array.asInt preserves values [1]", castedToInt[1] == 6000);
+call reportTest("array.asInt preserves values [2]", castedToInt[2] == 7000);
+
+print "";
+
+
+print "=== TEST 9: Roundtrip Array Conversion ===";
+var original: array.int[3];
+original[0] = 10000;
+original[1] = 20000;
+original[2] = 30000;
+
+var asIntmap = call array.asIntmap(original);
+var roundtrip = call array.asInt(asIntmap);
+
+call reportTest("Roundtrip conversion preserves [0]", roundtrip[0] == 10000);
+call reportTest("Roundtrip conversion preserves [1]", roundtrip[1] == 20000);
+call reportTest("Roundtrip conversion preserves [2]", roundtrip[2] == 30000);
+
+print "";
+
+
+print "=== TEST 10: Intmap with Type Alias in Array ===";
+ConfigData typeof intmap { enabled: 0, mode: 1-3, level: 4-11, id: 12-31 };
+
+var configs: array.intmap[3];
+configs[0] = 1;     // enabled=1
+configs[1] = 271;   // enabled=1, mode=7, level=16
+configs[2] = 4111;  // enabled=1, mode=7, level=16, id=1
+
+var cfg0 = ConfigData(configs[0]);
+call reportTest("Array element cast: cfg0.enabled", cfg0.enabled == 1);
+
+var cfg1 = ConfigData(configs[1]);
+call reportTest("Array element cast: cfg1.mode", cfg1.mode == 7);
+call reportTest("Array element cast: cfg1.level", cfg1.level == 16);
+
+print "";
+
+
+print "=== TEST 11: Intmap in Record Fields ===";
+StatusType typeof intmap { active: 0, error: 1, warning: 2 };
+
+var device: record {
+    name: string,
+    id: int,
+    status: StatusType
+};
+
+device = {
+    "name": "Sensor A",
+    "id": 101,
+    "status": 5
+};
+
+call reportTest("Record with intmap field: name", device.name == "Sensor A");
+call reportTest("Record with intmap field: id", device.id == 101);
+call reportTest("Record with intmap field: status", device.status == 5);
+
+// Cast status to access fields
+var deviceStatus = StatusType(device.status);
+call reportTest("Record intmap field cast: active", deviceStatus.active == 1);
+call reportTest("Record intmap field cast: warning", deviceStatus.warning == 1);
+
+print "";
+
+
+print "=== TEST 12: Large Bit Fields ===";
+LargeFields typeof intmap { small: 0-7, medium: 8-15, large: 16-31 };
+
+var large = LargeFields(0);
+large.small = 255;    // 8 bits max
+large.medium = 255;   // 8 bits max
+large.large = 65535;  // 16 bits max
+
+call reportTest("Large field: small=255", large.small == 255);
+call reportTest("Large field: medium=255", large.medium == 255);
+call reportTest("Large field: large=65535", large.large == 65535);
+
+print "";
+
+
+print "=== TEST 13: Single Bit Fields ===";
+SingleBits typeof intmap { bit0: 0, bit1: 1, bit2: 2, bit3: 3, bit4: 4 };
+
+var single = SingleBits(0);
+single.bit0 = 1;
+single.bit2 = 1;
+single.bit4 = 1;
+var expectedBits = 1 + 4 + 16; // bits 0, 2, 4
+
+call reportTest("Single bit fields: bit0", single.bit0 == 1);
+call reportTest("Single bit fields: bit1", single.bit1 == 0);
+call reportTest("Single bit fields: bit2", single.bit2 == 1);
+call reportTest("Single bit fields: combined value", single == expectedBits);
+
+print "";
+
+
+print "=== TEST 14: Full 32-bit Range ===";
+FullRange typeof intmap { data: 0-31 };
+
+var fullRange = FullRange(0);
+fullRange.data = 2147483647; // Max positive int (31 bits)
+
+call reportTest("Full 32-bit range: max positive", fullRange.data == 2147483647);
+
+print "";
+
+
+print "=== TEST 15: Zero Values ===";
+ZeroTest typeof intmap { field1: 0-7, field2: 8-15, field3: 16-31 };
+
+var zeroTest = ZeroTest(0);
+call reportTest("Zero values: field1 is 0", zeroTest.field1 == 0);
+call reportTest("Zero values: field2 is 0", zeroTest.field2 == 0);
+call reportTest("Zero values: field3 is 0", zeroTest.field3 == 0);
+call reportTest("Zero values: intmap is 0", zeroTest == 0);
+
+print "";
+
+
+print "=== TEST 16: Overwrite Field Values ===";
+OverwriteTest typeof intmap { field: 0-7 };
+
+var overwrite = OverwriteTest(0);
+overwrite.field = 100;
+call reportTest("Overwrite: initial set to 100", overwrite.field == 100);
+
+overwrite.field = 50;
+call reportTest("Overwrite: changed to 50", overwrite.field == 50);
+
+overwrite.field = 255;
+call reportTest("Overwrite: changed to 255", overwrite.field == 255);
+
+overwrite.field = 0;
+call reportTest("Overwrite: changed to 0", overwrite.field == 0);
+
+print "";
+
+
+print "=== TEST 17: Multiple Fields Same Intmap ===";
+MultiField typeof intmap { a: 0-3, b: 4-7, c: 8-11, d: 12-15, e: 16-31 };
+
+var multi = MultiField(0);
+multi.a = 15;
+multi.b = 15;
+multi.c = 15;
+multi.d = 15;
+multi.e = 65535;
+
+call reportTest("Multiple fields: a=15", multi.a == 15);
+call reportTest("Multiple fields: b=15", multi.b == 15);
+call reportTest("Multiple fields: c=15", multi.c == 15);
+call reportTest("Multiple fields: d=15", multi.d == 15);
+call reportTest("Multiple fields: e=65535", multi.e == 65535);
+
+print "";
+
+
+print "=== TEST 18: Intmap vs Bitmap Comparison ===";
+// Demonstrate that intmap provides more capacity than bitmap
+IntmapCapacity typeof intmap { data: 0-15 };
+var intmapTest = IntmapCapacity(0);
+intmapTest.data = 65535; // 16 bits can hold 65535
+call reportTest("Intmap capacity: 16-bit field holds 65535", intmapTest.data == 65535);
+
+print "";
+
+
+print "======================================";
+print "   TEST SUMMARY";
+print "======================================";
+print "Tests Passed: " + testsPassed;
+print "Tests Failed: " + testsFailed;
+print "Total Tests:  " + (testsPassed + testsFailed);
+print "";
+
+if (testsFailed == 0) {
+    print "✓ ALL TESTS PASSED!";
+} else {
+    print "✗ SOME TESTS FAILED";
+}
+
+print "======================================";

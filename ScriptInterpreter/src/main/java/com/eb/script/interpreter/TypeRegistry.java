@@ -1,6 +1,7 @@
 package com.eb.script.interpreter;
 
 import com.eb.script.token.BitmapType;
+import com.eb.script.token.IntmapType;
 import com.eb.script.token.DataType;
 import com.eb.script.token.RecordType;
 import java.util.Map;
@@ -23,18 +24,24 @@ public class TypeRegistry {
         public final DataType dataType;
         public final RecordType recordType;
         public final BitmapType bitmapType;
+        public final IntmapType intmapType;
         public final boolean isArray;
         public final Integer arraySize; // null for dynamic arrays
         
         public TypeAlias(String name, DataType dataType, RecordType recordType, boolean isArray, Integer arraySize) {
-            this(name, dataType, recordType, null, isArray, arraySize);
+            this(name, dataType, recordType, null, null, isArray, arraySize);
         }
         
         public TypeAlias(String name, DataType dataType, RecordType recordType, BitmapType bitmapType, boolean isArray, Integer arraySize) {
+            this(name, dataType, recordType, bitmapType, null, isArray, arraySize);
+        }
+        
+        public TypeAlias(String name, DataType dataType, RecordType recordType, BitmapType bitmapType, IntmapType intmapType, boolean isArray, Integer arraySize) {
             this.name = name;
             this.dataType = dataType;
             this.recordType = recordType;
             this.bitmapType = bitmapType;
+            this.intmapType = intmapType;
             this.isArray = isArray;
             this.arraySize = arraySize;
         }
@@ -48,6 +55,8 @@ public class TypeRegistry {
                     sb.append(recordType.toString());
                 } else if (bitmapType != null) {
                     sb.append(bitmapType.toString());
+                } else if (intmapType != null) {
+                    sb.append(intmapType.toString());
                 } else {
                     sb.append(dataType);
                 }
@@ -60,6 +69,8 @@ public class TypeRegistry {
                 sb.append(recordType.toString());
             } else if (bitmapType != null) {
                 sb.append(bitmapType.toString());
+            } else if (intmapType != null) {
+                sb.append(intmapType.toString());
             } else {
                 sb.append(dataType);
             }

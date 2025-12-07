@@ -4,6 +4,7 @@ import com.eb.script.interpreter.builtins.Builtins;
 import com.eb.script.json.Json;
 import com.eb.script.RuntimeContext;
 import com.eb.script.token.BitmapType;
+import com.eb.script.token.IntmapType;
 import com.eb.script.token.Category;
 import com.eb.script.token.DataType;
 import com.eb.script.token.RecordType;
@@ -490,8 +491,9 @@ public class Parser {
         DataType elemType = null;
         RecordType recordType = null;
         BitmapType bitmapType = null;
+        IntmapType intmapType = null;
         Expression[] arrayDims = null;
-        boolean consumedBraces = false; // Track if we consumed braces for record/bitmap fields
+        boolean consumedBraces = false; // Track if we consumed braces for record/bitmap/intmap fields
         boolean isQueueType = false; // Track if this is a queue type declaration
 
         if (match(EbsTokenType.COLON)) {
@@ -511,6 +513,21 @@ public class Parser {
                 bitmapType = parseBitmapFields();
                 
                 consume(EbsTokenType.RBRACE, "Expected '}' after bitmap field definitions.");
+                consumedBraces = true;
+            // Check if this is an intmap type definition
+            // Check both token type and literal value since lexer might categorize it differently
+            } else if (t.type == EbsTokenType.INTMAP || 
+                (t.literal instanceof String && "intmap".equals(((String)t.literal).toLowerCase()))) {
+                elemType = DataType.INTMAP;
+                advance(); // consume 'intmap'
+                
+                // Expect opening brace for field definitions
+                consume(EbsTokenType.LBRACE, "Expected '{' after 'intmap' keyword.");
+                
+                // Parse intmap fields
+                intmapType = parseIntmapFields();
+                
+                consume(EbsTokenType.RBRACE, "Expected '}' after intmap field definitions.");
                 consumedBraces = true;
             // Check if this is a record type definition
             // Check both token type and literal value since lexer might categorize it differently
@@ -541,6 +558,7 @@ public class Parser {
                             case "string" -> elemType = DataType.STRING;
                             case "byte" -> elemType = DataType.BYTE;
                             case "bitmap" -> elemType = DataType.BITMAP;
+                            case "intmap" -> elemType = DataType.INTMAP;
                             case "int", "integer" -> elemType = DataType.INTEGER;
                             case "long" -> elemType = DataType.LONG;
                             case "float" -> elemType = DataType.FLOAT;
@@ -660,8 +678,10 @@ public class Parser {
             
             if (t.type != EbsTokenType.RECORD && 
                 t.type != EbsTokenType.BITMAP &&
+                t.type != EbsTokenType.INTMAP &&
                 !(t.literal instanceof String && "record".equals(((String)t.literal).toLowerCase())) &&
                 !(t.literal instanceof String && "bitmap".equals(((String)t.literal).toLowerCase())) &&
+                !(t.literal instanceof String && "intmap".equals(((String)t.literal).toLowerCase())) &&
                 !(t.literal instanceof String && ((String)t.literal).toLowerCase().startsWith("array.record")) &&
                 !(t.literal instanceof String && ((String)t.literal).toLowerCase().startsWith("queue.")) &&
                 !isAlias) {
@@ -688,6 +708,7 @@ public class Parser {
                         case "string" -> elemType = DataType.STRING;
                         case "byte" -> elemType = DataType.BYTE;
                         case "bitmap" -> elemType = DataType.BITMAP;
+                        case "intmap" -> elemType = DataType.INTMAP;
                         case "int", "integer" -> elemType = DataType.INTEGER;
                         case "long" -> elemType = DataType.LONG;
                         case "float" -> elemType = DataType.FLOAT;
@@ -802,8 +823,10 @@ public class Parser {
 
         consume(EbsTokenType.SEMICOLON, "Expected ';' after variable declaration.");
         
-        // Return appropriate VarStatement based on whether it's a record or bitmap type
-        if (bitmapType != null) {
+        // Return appropriate VarStatement based on whether it's a record, bitmap, or intmap type
+        if (intmapType != null) {
+            return new VarStatement(name.line, (String) name.literal, elemType, intmapType, varInit, isConst);
+        } else if (bitmapType != null) {
             return new VarStatement(name.line, (String) name.literal, elemType, bitmapType, varInit, isConst);
         } else if (recordType != null) {
             return new VarStatement(name.line, (String) name.literal, elemType, recordType, varInit, isConst);
@@ -832,13 +855,14 @@ public class Parser {
         DataType elemType = null;
         RecordType recordType = null;
         BitmapType bitmapType = null;
+        IntmapType intmapType = null;
         boolean isArray = false;
         Integer arraySize = null;
         Expression arrayInit = null;
         
         // Check for array.type syntax
         if (check(EbsTokenType.ARRAY) || check(EbsTokenType.IDENTIFIER) || check(EbsTokenType.DATATYPE) || 
-            check(EbsTokenType.RECORD) || check(EbsTokenType.BITMAP)) {
+            check(EbsTokenType.RECORD) || check(EbsTokenType.BITMAP) || check(EbsTokenType.INTMAP)) {
             EbsToken typeToken = peek();
             
             // Check if it's "array" keyword or identifier starting with "array"
@@ -938,6 +962,18 @@ public class Parser {
                     bitmapType = parseBitmapFields();
                     consume(EbsTokenType.RBRACE, "Expected '}' after bitmap field definitions.");
                 }
+            } else if (typeToken.type == EbsTokenType.INTMAP || 
+                      (typeToken.literal instanceof String && "intmap".equals(((String)typeToken.literal).toLowerCase()))) {
+                // Standalone intmap type
+                elemType = DataType.INTMAP;
+                advance(); // consume 'intmap'
+                
+                // Parse intmap fields
+                if (check(EbsTokenType.LBRACE)) {
+                    advance(); // consume '{'
+                    intmapType = parseIntmapFields();
+                    consume(EbsTokenType.RBRACE, "Expected '}' after intmap field definitions.");
+                }
             } else {
                 // Simple type
                 if (typeToken.type.getDataType() != null) {
@@ -958,6 +994,7 @@ public class Parser {
             elemType,
             recordType,
             bitmapType,
+            intmapType,
             isArray,
             arraySize
         );
@@ -966,6 +1003,8 @@ public class Parser {
         // Create TypedefStatement
         if (isArray) {
             return new TypedefStatement(typeName.line, (String) typeName.literal, elemType, recordType, arraySize);
+        } else if (intmapType != null) {
+            return new TypedefStatement(typeName.line, (String) typeName.literal, intmapType);
         } else if (bitmapType != null) {
             return new TypedefStatement(typeName.line, (String) typeName.literal, bitmapType);
         } else if (recordType != null) {
@@ -1119,6 +1158,69 @@ public class Parser {
         }
         
         return bitmapType;
+    }
+
+    /**
+     * Parse intmap field definitions inside { }
+     * Expected format: fieldName: startBit-endBit, fieldName: bit, ...
+     * Examples:
+     *   status: 0-1      (2 bits at positions 0-1, values 0-3)
+     *   enabled: 2       (1 bit at position 2, values 0-1)
+     *   priority: 3-7    (5 bits at positions 3-7, values 0-31)
+     *   flags: 8-15      (8 bits at positions 8-15, values 0-255)
+     *   reserved: 16-31  (16 bits at positions 16-31, values 0-65535)
+     */
+    private IntmapType parseIntmapFields() throws ParseError {
+        IntmapType intmapType = new IntmapType();
+        
+        // Parse field definitions until we hit the closing brace
+        while (!check(EbsTokenType.RBRACE) && !isAtEnd()) {
+            // Parse field name
+            EbsToken fieldName = consume(EbsTokenType.IDENTIFIER, "Expected field name in intmap definition.");
+            
+            // Expect colon
+            consume(EbsTokenType.COLON, "Expected ':' after field name in intmap definition.");
+            
+            // Parse bit position or range
+            EbsToken startBitToken = consume(EbsTokenType.INTEGER, "Expected bit position (0-31) after ':' in intmap definition.");
+            int startBit = (Integer) startBitToken.literal;
+            
+            if (startBit < 0 || startBit > 31) {
+                throw error(startBitToken, "Bit position must be 0-31, got: " + startBit);
+            }
+            
+            int endBit = startBit; // Default: single bit
+            
+            // Check for range: startBit-endBit
+            if (match(EbsTokenType.MINUS)) {
+                EbsToken endBitToken = consume(EbsTokenType.INTEGER, "Expected end bit position (0-31) after '-' in intmap definition.");
+                endBit = (Integer) endBitToken.literal;
+                
+                if (endBit < 0 || endBit > 31) {
+                    throw error(endBitToken, "End bit position must be 0-31, got: " + endBit);
+                }
+                
+                if (startBit > endBit) {
+                    throw error(endBitToken, "Start bit (" + startBit + ") must be <= end bit (" + endBit + ")");
+                }
+            }
+            
+            // Add field to intmap type
+            try {
+                intmapType.addField((String) fieldName.literal, startBit, endBit);
+            } catch (IllegalArgumentException e) {
+                throw error(fieldName, e.getMessage());
+            }
+            
+            // Check for comma (more fields) or closing brace (end of intmap)
+            if (check(EbsTokenType.COMMA)) {
+                advance(); // consume comma
+            } else if (!check(EbsTokenType.RBRACE)) {
+                throw error(peek(), "Expected ',' or '}' in intmap definition.");
+            }
+        }
+        
+        return intmapType;
     }
 
     /**
@@ -2426,10 +2528,16 @@ public class Parser {
                 }
             }
             
-            // Check if this is a type alias being used for casting (e.g., myBitmapType(byteVar))
+            // Check if this is a type alias being used for casting (e.g., myBitmapType(byteVar), myIntmapType(intVar))
             if (check(EbsTokenType.LPAREN) && !varName.contains(".")) {
                 TypeRegistry.TypeAlias alias = TypeRegistry.getTypeAlias(varName);
-                if (alias != null && alias.bitmapType != null) {
+                if (alias != null && alias.intmapType != null) {
+                    // This is an intmap type alias cast
+                    consume(EbsTokenType.LPAREN, "Expected '(' after type name for cast.");
+                    Expression valueExpr = expression();
+                    consume(EbsTokenType.RPAREN, "Expected ')' after cast expression.");
+                    return new CastExpression(p.line, DataType.INTMAP, alias.intmapType, varName, valueExpr);
+                } else if (alias != null && alias.bitmapType != null) {
                     // This is a bitmap type alias cast
                     consume(EbsTokenType.LPAREN, "Expected '(' after type name for cast.");
                     Expression valueExpr = expression();

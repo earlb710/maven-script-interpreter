@@ -80,7 +80,8 @@ All identifiers are normalized to lowercase internally, so `myVariable`, `MyVari
 | `json` | JSON object/array | `{"key": "value"}` |
 | `map` | Key-value map (JSON objects only) | `{"key": "value"}` |
 | `record` | Structured type with named fields | `record {name: string, age: int}` |
-| `bitmap` | Byte with named bit fields | `bitmap { flag: 0, status: 1-3 }` |
+| `bitmap` | Byte with named bit fields (8-bit, 0-7) | `bitmap { flag: 0, status: 1-3 }` |
+| `intmap` | Integer with named bit fields (32-bit, 0-31) | `intmap { enabled: 0, mode: 1-7, id: 8-31 }` |
 | `array` | Generic array | `array[10]`, `array[*]` |
 | `queue` | FIFO queue (use `queue.type`) | `queue.string`, `queue.int` |
 
@@ -340,6 +341,136 @@ print typeof StatusFlags;   // Output: bitmap {active: 0, error: 1, warning: 2}
 
 // typeof on a bitmap variable returns "bitmap <aliasname>"
 print typeof status;        // Output: bitmap statusflags
+```
+
+#### Intmap Type
+
+The `intmap` type extends the bitmap concept to 32-bit integers, defining named fields that map to bit ranges within an integer (0-31). This allows storing larger values and more fields than bitmap, making it ideal for packing multiple values, IDs, flags, or configuration data into a single integer.
+
+```javascript
+// Define an intmap variable with named bit fields
+// Each field specifies which bit(s) it occupies in the integer (0-31)
+var config: intmap { enabled: 0, mode: 1-3, level: 4-11, id: 12-31 };
+
+// Field definitions:
+// - enabled: 1 bit (0), can hold values 0-1 (boolean-like)
+// - mode: 3 bits (1-3), can hold values 0-7
+// - level: 8 bits (4-11), can hold values 0-255
+// - id: 20 bits (12-31), can hold values 0-1048575
+
+// Initially, the intmap value is 0
+print config;  // Output: 0
+
+// Set individual fields using property access
+config.enabled = 1;
+config.mode = 5;
+config.level = 128;
+config.id = 65535;
+
+// Read individual fields (values are automatically right-shifted)
+print config.enabled;   // Output: 1
+print config.mode;      // Output: 5
+print config.level;     // Output: 128
+print config.id;        // Output: 65535
+
+// Fields can be used in expressions
+if (config.enabled == 1) {
+    print "Configuration is enabled";
+}
+
+if (config.level > 100) {
+    print "High level: " + config.level;
+}
+
+// Const intmap for read-only configurations
+const FLAGS: intmap { read: 0, write: 1, execute: 2, admin: 3-5 } = 15;
+// 15 = binary ...01111 = read(1), write(1), execute(1), admin(1)
+print FLAGS.read;     // Output: 1
+print FLAGS.write;    // Output: 1
+print FLAGS.execute;  // Output: 1
+print FLAGS.admin;    // Output: 1
+```
+
+**Intmap Field Syntax:**
+- Single bit: `fieldName: bitPosition` (e.g., `enabled: 0`)
+- Bit range: `fieldName: startBit-endBit` (e.g., `id: 0-15`)
+- Bit positions must be 0-31 (within a 32-bit integer)
+- Fields cannot overlap
+
+**Intmap vs Bitmap:**
+- **bitmap**: 8-bit storage (byte), bit positions 0-7, maximum 255 as an unsigned byte value
+- **intmap**: 32-bit storage (integer), bit positions 0-31, uses signed 32-bit integer (-2,147,483,648 to 2,147,483,647)
+- Use bitmap for small flags and values (saves memory)
+- Use intmap when you need more bits or larger field values
+
+**Intmap Features:**
+- Automatic right-shift when reading field values
+- Automatic left-shift and masking when writing field values
+- Value validation against field bit width
+- Case-insensitive field access (exact case matches are checked first)
+- Fields are stored in a single 32-bit integer
+
+#### Intmap Type Aliases and Casting
+
+Define reusable intmap types using the `typeof` keyword, then cast int values to the intmap type:
+
+```javascript
+// Define a reusable intmap type alias
+PackedData typeof intmap { id: 0-15, count: 16-23, flags: 24-31 };
+
+// Cast an integer value to the intmap type
+var intValue: int = 16842752;
+var data = PackedData(intValue);
+
+// Access fields on the casted value
+print data.id;      // Output: 0
+print data.count;   // Output: 1
+print data.flags;   // Output: 1
+
+// Initialize with a specific value
+var config = PackedData(0);
+config.id = 65535;      // Max value for 16 bits
+config.count = 255;     // Max value for 8 bits
+config.flags = 170;     // Binary pattern
+print config;           // Output: packed integer value
+```
+
+#### Intmap Bit Position Verification
+
+The bit positioning follows standard conventions (same as bitmap but extended to 32 bits):
+- `config.enabled=1` sets bit 0 to value 1, so the integer value includes 1
+- `config.mode=5` sets bits 1-3 to value 5, so the integer value includes (5 << 1)
+- `config.id=1000` sets bits 12-31 to value 1000, so the integer value includes (1000 << 12)
+
+```javascript
+PackedFlags typeof intmap { status: 0-1, enabled: 2, priority: 3-7 };
+
+var test1 = PackedFlags(0);
+test1.status = 2;
+print test1;  // Output: 2
+
+var test2 = PackedFlags(0);
+test2.enabled = 1;
+print test2;  // Output: 4
+
+var test3 = PackedFlags(0);
+test3.priority = 10;
+print test3;  // Output: 80 (10 << 3)
+```
+
+#### typeof with Intmap Types
+
+The `typeof` operator works with both intmap type aliases and intmap variables:
+
+```javascript
+ConfigData typeof intmap { enabled: 0, mode: 1-3, level: 4-11 };
+var config = ConfigData(42);
+
+// typeof on a type alias returns the full intmap definition
+print typeof ConfigData;   // Output: intmap {enabled: 0, mode: 1-3, level: 4-11}
+
+// typeof on an intmap variable returns "intmap <aliasname>"
+print typeof config;       // Output: intmap configdata
 ```
 
 ### Null Values
@@ -1565,9 +1696,10 @@ var matrix = [[1, 2], [3, 4], [5, 6]];
 
 - `array` or `array.any` - Generic array (any type)
 - `array.string` - String array
-- `array.byte` - Byte array (uses ArrayFixedByte for fixed size)
-- `array.bitmap` - Bitmap array (uses ArrayFixedByte for fixed size, same as array.byte but with BITMAP type)
-- `array.int` or `array.integer` - Integer array
+- `array.byte` - Byte array (uses ArrayFixedByte for fixed size, 8-bit signed integers)
+- `array.bitmap` - Bitmap array (uses ArrayFixedByte for fixed size, 8-bit with named fields)
+- `array.int` or `array.integer` - Integer array (uses ArrayFixedInt for fixed size, 32-bit signed integers)
+- `array.intmap` - Intmap array (uses ArrayFixedInt for fixed size, 32-bit with named fields)
 - `array.long` - Long integer array
 - `array.float` - Float array
 - `array.double` or `array.number` - Double/number array
@@ -1593,6 +1725,28 @@ var statusBytes: array.bitmap[10];
 statusBytes[0] = 5;  // active=1, error=0, warning=1
 var status = StatusByte(statusBytes[0]);
 print status.active;  // 1
+```
+
+### Integer and Intmap Array Interoperability
+
+Similarly, `array.int` and `array.intmap` are backed by the same `ArrayFixedInt` storage class, making them interchangeable. Use intmap arrays when you need to store bit-packed data structures with named fields.
+
+```javascript
+// Create integer and intmap arrays
+var intArray: array.int[5];
+var intmapArray: array.intmap[5];
+
+// Cast between types using built-in functions
+var castedToIntmap = call array.asIntmap(intArray);
+var castedToInt = call array.asInt(intmapArray);
+
+// Useful for interpreting integer data as intmap fields
+ConfigData typeof intmap { enabled: 0, mode: 1-3, level: 4-11, id: 12-31 };
+var configs: array.intmap[10];
+configs[0] = 1048832;  // Some packed configuration value
+var config = ConfigData(configs[0]);
+print config.enabled;  // Extract enabled bit
+print config.id;       // Extract id field
 ```
 
 **When to use each syntax:**
@@ -3262,9 +3416,88 @@ call array.add(array, value);           // Add to end
 call array.add(array, value, index);    // Insert at index
 var removed = call array.remove(array, index);  // Remove at index, returns removed value
 
+// Type casting for byte/bitmap arrays
+var bitmapArray = call array.asBitmap(byteArray);
+var byteArray = call array.asByte(bitmapArray);
+
+// Type casting for int/intmap arrays
+var intmapArray = call array.asIntmap(intArray);
+var intArray = call array.asInt(intmapArray);
+
 // Encoding
 var encoded = call array.base64encode(byteArray);
 var decoded = call array.base64decode(encodedString);
+```
+
+#### array.asBitmap(array)
+Casts an `array.byte` to `array.bitmap`. Both types use the same ArrayFixedByte storage, so this is a zero-cost type conversion.
+
+**Parameters:**
+- `array` (array.byte, required): The byte array to cast
+
+**Returns:** array.bitmap - The same array with BITMAP type designation
+
+```javascript
+var byteArray: array.byte[5];
+byteArray[0] = 15;
+
+var bitmapArray = call array.asBitmap(byteArray);
+// Now can use bitmap type aliases for field access
+StatusFlags typeof bitmap { read: 0, write: 1, execute: 2, admin: 3 };
+var flags = StatusFlags(bitmapArray[0]);
+print flags.read;  // 1
+```
+
+#### array.asByte(array)
+Casts an `array.bitmap` to `array.byte`. Both types use the same ArrayFixedByte storage, so this is a zero-cost type conversion.
+
+**Parameters:**
+- `array` (array.bitmap, required): The bitmap array to cast
+
+**Returns:** array.byte - The same array with BYTE type designation
+
+```javascript
+var bitmapArray: array.bitmap[5];
+bitmapArray[0] = 15;
+
+var byteArray = call array.asByte(bitmapArray);
+print byteArray[0];  // 15 (raw byte value)
+```
+
+#### array.asIntmap(array)
+Casts an `array.int` to `array.intmap`. Both types use the same ArrayFixedInt storage, so this is a zero-cost type conversion.
+
+**Parameters:**
+- `array` (array.int, required): The integer array to cast
+
+**Returns:** array.intmap - The same array with INTMAP type designation
+
+```javascript
+var intArray: array.int[5];
+intArray[0] = 1048832;
+
+var intmapArray = call array.asIntmap(intArray);
+// Now can use intmap type aliases for field access
+ConfigData typeof intmap { enabled: 0, mode: 1-3, level: 4-11, id: 12-31 };
+var config = ConfigData(intmapArray[0]);
+print config.enabled;  // Extract enabled bit
+print config.id;       // Extract id field
+```
+
+#### array.asInt(array)
+Casts an `array.intmap` to `array.int`. Both types use the same ArrayFixedInt storage, so this is a zero-cost type conversion.
+
+**Parameters:**
+- `array` (array.intmap, required): The intmap array to cast
+
+**Returns:** array.int - The same array with INTEGER type designation
+
+```javascript
+var intmapArray: array.intmap[5];
+intmapArray[0] = 1048832;
+
+var intArray = call array.asInt(intmapArray);
+print intArray[0];  // 1048832 (raw integer value)
 ```
 
 ### Queue Functions
