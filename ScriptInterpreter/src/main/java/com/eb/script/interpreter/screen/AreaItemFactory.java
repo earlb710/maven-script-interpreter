@@ -1,8 +1,10 @@
 package com.eb.script.interpreter.screen;
 
 import com.eb.script.interpreter.screen.DisplayItem.ItemType;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import javafx.scene.image.ImageView;
 import javafx.scene.chart.BarChart;
@@ -278,34 +280,30 @@ public class AreaItemFactory {
             // Media/Display Controls
             case IMAGEVIEW:
                 ImageView imageView = new ImageView();
+                // Wrap ImageView in StackPane to support background colors
+                // ImageView itself doesn't support -fx-background-color
+                StackPane imageContainer = new StackPane(imageView);
+                imageContainer.setAlignment(Pos.CENTER);
+                
                 // Apply image display properties from metadata
                 if (metadata != null) {
-                    // Set fit dimensions
+                    // Set fit dimensions for ImageView
                     if (metadata.fitWidth != null && metadata.fitWidth > 0) {
                         imageView.setFitWidth(metadata.fitWidth);
+                        // Constrain container to prevent oversizing
+                        imageContainer.setMaxWidth(metadata.fitWidth);
+                        imageContainer.setPrefWidth(metadata.fitWidth);
                     }
                     if (metadata.fitHeight != null && metadata.fitHeight > 0) {
                         imageView.setFitHeight(metadata.fitHeight);
+                        // Constrain container to prevent oversizing
+                        imageContainer.setMaxHeight(metadata.fitHeight);
+                        imageContainer.setPrefHeight(metadata.fitHeight);
                     }
                     // Set preserve ratio (default true)
                     imageView.setPreserveRatio(metadata.preserveRatio == null || metadata.preserveRatio);
                     // Set smooth scaling (default true)
                     imageView.setSmooth(metadata.smooth == null || metadata.smooth);
-                }
-                // Wrap ImageView in StackPane to support background colors
-                // ImageView itself doesn't support -fx-background-color
-                javafx.scene.layout.StackPane imageContainer = new javafx.scene.layout.StackPane(imageView);
-                imageContainer.setAlignment(javafx.geometry.Pos.CENTER);
-                // Constrain the container to prevent oversizing
-                if (metadata != null) {
-                    if (metadata.fitWidth != null && metadata.fitWidth > 0) {
-                        imageContainer.setMaxWidth(metadata.fitWidth);
-                        imageContainer.setPrefWidth(metadata.fitWidth);
-                    }
-                    if (metadata.fitHeight != null && metadata.fitHeight > 0) {
-                        imageContainer.setMaxHeight(metadata.fitHeight);
-                        imageContainer.setPrefHeight(metadata.fitHeight);
-                    }
                 }
                 return imageContainer;
             case MEDIAVIEW:
