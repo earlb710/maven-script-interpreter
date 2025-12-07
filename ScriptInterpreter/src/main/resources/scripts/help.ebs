@@ -15,13 +15,14 @@ print "";
 // Load help data from JSON file
 var helpData: json = null;
 try {
-    var jsonContent: string = call file.readTextFile("../resources/help-lookup.json");
+    // Try to read from resources directory using absolute path
+    var jsonContent: string = call file.readTextFile("help-lookup.json");
     helpData = call json.jsonFromString(jsonContent);
     print "Help data loaded from JSON";
 } exceptions {
     when ex {
         print "Warning: Could not load help-lookup.json: " + ex;
-        print "Using fallback help content";
+        print "Help will be displayed without JSON-based keyword descriptions";
     }
 }
 

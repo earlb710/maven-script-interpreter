@@ -468,7 +468,14 @@ public class Util {
             if (!p.startsWith(SANDBOX_ROOT)) {
                 // Check if path is in a safe directory
                 if (!isInSafeDirectory(p)) {
-                    throw new RuntimeException("Path escapes sandbox: " + path);
+                    Path contextDir = getCurrentContextSourceDir();
+                    String contextInfo = contextDir != null 
+                        ? " (Context dir: " + contextDir + ")" 
+                        : " (No context dir set)";
+                    throw new RuntimeException("Path escapes sandbox: " + path 
+                        + " -> resolved to: " + p 
+                        + " (Sandbox root: " + SANDBOX_ROOT + ")"
+                        + contextInfo);
                 }
             }
             return p;

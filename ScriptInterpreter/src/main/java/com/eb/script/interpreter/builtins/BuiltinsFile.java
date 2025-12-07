@@ -323,7 +323,16 @@ public class BuiltinsFile {
             }
             return ret;
         } catch (Exception ex) {
-            throw new InterpreterError("file.readFile: " + ex.getMessage());
+            // Provide more detailed error information including the resolved path
+            String detailedMessage = "file.readFile: " + ex.getMessage();
+            if (ex instanceof java.nio.file.NoSuchFileException) {
+                detailedMessage += " (File not found - check that the file exists and the path is correct)";
+            } else if (ex instanceof java.nio.file.AccessDeniedException) {
+                detailedMessage += " (Access denied - check file permissions)";
+            } else if (ex.getCause() != null) {
+                detailedMessage += " [Cause: " + ex.getCause().getMessage() + "]";
+            }
+            throw new InterpreterError(detailedMessage);
         }
     }
 
