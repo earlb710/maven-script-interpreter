@@ -122,9 +122,9 @@ call array.add(syntaxChildren, builtinsNode);
 call array.add(syntaxChildren, call json.set({}, "value", "screen"));
 
 var examplesChildren: array[*];
-call array.add(examplesChildren, call json.set({}, "value", "examples_keywords"));
-call array.add(examplesChildren, call json.set({}, "value", "examples_builtins"));
-call array.add(examplesChildren, call json.set({}, "value", "examples_screen"));
+call array.add(examplesChildren, call json.set({}, "value", "Keywords"));
+call array.add(examplesChildren, call json.set({}, "value", "Builtins"));
+call array.add(examplesChildren, call json.set({}, "value", "Screen"));
 
 var rootChildren: array[*];
 
@@ -712,7 +712,7 @@ getHelpContent(topic: string) return string {
         return content;
     }
     
-    if topic == "examples_keywords" then {
+    if topic == "Keywords" || topic == "examples_keywords" then {
         content = "=== Keyword Examples ===\n\n";
         content = content + "FUNCTION EXAMPLE:\n";
         content = content + "  calculateSum(a: int, b: int) return int {\n";
@@ -740,7 +740,7 @@ getHelpContent(topic: string) return string {
         return content;
     }
     
-    if topic == "examples_builtins" then {
+    if topic == "Builtins" || topic == "examples_builtins" then {
         content = "=== Built-in Function Examples ===\n\n";
         content = content + "STRING MANIPULATION:\n";
         content = content + "  var text: string = \"  Hello World  \";\n";
@@ -768,7 +768,7 @@ getHelpContent(topic: string) return string {
         return content;
     }
     
-    if topic == "examples_screen" then {
+    if topic == "Screen" || topic == "examples_screen" then {
         content = "=== Screen/UI Examples ===\n\n";
         content = content + "SIMPLE FORM SCREEN:\n";
         content = content + "  screen loginForm = {\n";
@@ -881,7 +881,7 @@ var contentDisplay: json = {};
 contentDisplay = call json.set(contentDisplay, "type", "textarea");
 contentDisplay = call json.set(contentDisplay, "labelText", "");
 contentDisplay = call json.set(contentDisplay, "editable", false);
-contentDisplay = call json.set(contentDisplay, "displayRecords", 35);
+contentDisplay = call json.set(contentDisplay, "displayRecords", 30);
 contentDisplay = call json.set(contentDisplay, "wrapText", true);
 contentDisplay = call json.set(contentDisplay, "style", "-fx-font-family: 'Consolas', 'Monaco', 'Courier New', monospace; -fx-font-size: 12px;");
 
