@@ -1,0 +1,926 @@
+// ============================================================================
+// help.ebs - EBS Syntax Help Screen
+// ============================================================================
+// This script displays a help screen with a tree view on the left for
+// navigation and a content area on the right for displaying help documents.
+// ============================================================================
+
+print "====================================================================";
+print "       EBS Syntax Help";
+print "====================================================================";
+print "";
+print "Loading syntax help screen...";
+print "";
+
+// Load help data from JSON file
+var helpData: json = null;
+try {
+    // Read from resources directory using relative path from resources root
+    var jsonContent: string = call file.readTextFile("help-lookup.json");
+    helpData = call json.jsonFromString(jsonContent);
+    print "Help data loaded from JSON";
+} exceptions {
+    when ex {
+        print "Warning: Could not load help-lookup.json: " + ex;
+        print "Help will be displayed without JSON-based keyword descriptions";
+    }
+}
+
+// Get all builtins from system registry
+print "Loading builtins from registry...";
+var systemHelpText: string = call system.help();
+
+// Parse the help text to extract builtin information
+// The format is: "builtin.name(param1:type, param2:type?) : returnType"
+var builtinLines: array = call str.split(systemHelpText, "\n", 0);
+var builtinsArray: array[*] = [];
+var inBuiltinsSection: bool = false;
+
+foreach line in builtinLines {
+    var trimmedLine: string = call str.trim(line);
+    if trimmedLine == "Builtins:" then {
+        inBuiltinsSection = true;
+    } else if inBuiltinsSection then {
+        if trimmedLine != "" && call str.startsWith(trimmedLine, " ") then {
+            // Extract builtin name from line like "  array.add(array:array, value:any, index:integer?) : null"
+            var lineContent: string = call str.trim(trimmedLine);
+            var parenIndex: int = call str.indexOf(lineContent, "(", 0);
+            if parenIndex > 0 then {
+                var builtinName: string = call str.substring(lineContent, 0, parenIndex);
+                var builtinInfo: json = {};
+                builtinInfo = call json.set(builtinInfo, "name", builtinName);
+                builtinInfo = call json.set(builtinInfo, "signature", lineContent);
+                call array.add(builtinsArray, builtinInfo);
+            }
+        } else if trimmedLine == "" then {
+            // Empty line - could be end of section or spacing within section
+            // Continue to allow for spacing within the builtins section
+        } else {
+            // Non-indented, non-empty line marks end of builtins section
+            inBuiltinsSection = false;
+        }
+    }
+}
+
+var builtinCount: int = builtinsArray.length;
+print "Loaded " + call str.toString(builtinCount) + " builtins";
+
+// Build builtin tree children dynamically
+var builtinChildren: array[*];
+if builtinsArray != null then {
+    foreach builtin in builtinsArray {
+        var builtinName: string = call json.getString(builtin, "name", "");
+        if builtinName != "" then {
+            var builtinValue: string = "builtin_" + builtinName;
+            var childNode: json = {};
+            childNode = call json.set(childNode, "value", builtinValue);
+            call array.add(builtinChildren, childNode);
+        }
+    }
+}
+
+var treeChildCount: int = builtinChildren.length;
+print "Built tree with " + call str.toString(treeChildCount) + " builtin nodes";
+
+// Build the complete tree structure dynamically
+var structureChildren: array[*];
+call array.add(structureChildren, call json.set({}, "value", "structure_basic"));
+call array.add(structureChildren, call json.set({}, "value", "structure_variables"));
+call array.add(structureChildren, call json.set({}, "value", "structure_operators"));
+call array.add(structureChildren, call json.set({}, "value", "structure_functions"));
+call array.add(structureChildren, call json.set({}, "value", "structure_imports"));
+
+var flowChildren: array[*];
+call array.add(flowChildren, call json.set({}, "value", "flow_conditionals"));
+call array.add(flowChildren, call json.set({}, "value", "flow_loops"));
+call array.add(flowChildren, call json.set({}, "value", "flow_break_continue"));
+call array.add(flowChildren, call json.set({}, "value", "flow_exceptions"));
+
+var syntaxChildren: array[*];
+var structureNode: json = {};
+structureNode = call json.set(structureNode, "value", "structure");
+structureNode = call json.set(structureNode, "expanded", true);
+structureNode = call json.set(structureNode, "children", structureChildren);
+call array.add(syntaxChildren, structureNode);
+
+call array.add(syntaxChildren, call json.set({}, "value", "data"));
+
+var flowNode: json = {};
+flowNode = call json.set(flowNode, "value", "flow");
+flowNode = call json.set(flowNode, "expanded", true);
+flowNode = call json.set(flowNode, "children", flowChildren);
+call array.add(syntaxChildren, flowNode);
+
+call array.add(syntaxChildren, call json.set({}, "value", "keywords"));
+
+var builtinsNode: json = {};
+builtinsNode = call json.set(builtinsNode, "value", "builtins");
+builtinsNode = call json.set(builtinsNode, "expanded", false);
+builtinsNode = call json.set(builtinsNode, "children", builtinChildren);
+call array.add(syntaxChildren, builtinsNode);
+
+call array.add(syntaxChildren, call json.set({}, "value", "screen"));
+
+var examplesChildren: array[*];
+call array.add(examplesChildren, call json.set({}, "value", "Keywords"));
+call array.add(examplesChildren, call json.set({}, "value", "Builtins"));
+call array.add(examplesChildren, call json.set({}, "value", "Screen"));
+
+var rootChildren: array[*];
+
+var syntaxRootNode: json = {};
+syntaxRootNode = call json.set(syntaxRootNode, "value", "Syntax");
+syntaxRootNode = call json.set(syntaxRootNode, "expanded", true);
+syntaxRootNode = call json.set(syntaxRootNode, "children", syntaxChildren);
+call array.add(rootChildren, syntaxRootNode);
+
+var examplesRootNode: json = {};
+examplesRootNode = call json.set(examplesRootNode, "value", "Examples");
+examplesRootNode = call json.set(examplesRootNode, "expanded", true);
+examplesRootNode = call json.set(examplesRootNode, "children", examplesChildren);
+call array.add(rootChildren, examplesRootNode);
+
+var treeStructure: json = {};
+treeStructure = call json.set(treeStructure, "value", "Help Topics");
+treeStructure = call json.set(treeStructure, "expanded", true);
+treeStructure = call json.set(treeStructure, "children", rootChildren);
+
+print "Tree structure built with dynamic builtins";
+
+// Function to strip HTML tags from content
+stripHtmlTags(text: string) return string {
+    var cleaned: string = text;
+    // Remove common HTML tags
+    cleaned = call str.replace(cleaned, "<br>", "\n");
+    cleaned = call str.replace(cleaned, "<b>", "");
+    cleaned = call str.replace(cleaned, "</b>", "");
+    cleaned = call str.replace(cleaned, "<code>", "");
+    cleaned = call str.replace(cleaned, "</code>", "");
+    cleaned = call str.replace(cleaned, "<i>", "");
+    cleaned = call str.replace(cleaned, "</i>", "");
+    return cleaned;
+}
+
+// Function to get keyword help from JSON
+getKeywordHelp(keyword: string) return string {
+    if helpData == null then {
+        return "";
+    }
+    
+    var keywords: json = call json.get(helpData, "keywords");
+    if keywords == null then {
+        return "";
+    }
+    
+    foreach kw in keywords {
+        var kwName: string = call json.getString(kw, "keyword", "");
+        if kwName == keyword then {
+            var desc: string = call json.getString(kw, "short_description", "");
+            var longHelp: string = call json.getString(kw, "long_help", "");
+            var example: string = call json.getString(kw, "example", "");
+            var format: string = call json.getString(kw, "format", "text");
+            
+            var content: string = "";
+            content = content + "KEYWORD: " + keyword + "\n";
+            content = content + "───────────────────────────────────────────────────────\n\n";
+            
+            if desc != "" then {
+                content = content + "DESCRIPTION:\n";
+                content = content + desc + "\n\n";
+            }
+            
+            if longHelp != "" then {
+                content = content + "DETAILS:\n";
+                // Process content based on format
+                if format == "html" then {
+                    // Remove HTML tags for textarea display
+                    var cleanHelp: string = call stripHtmlTags(longHelp);
+                    content = content + cleanHelp + "\n\n";
+                } else {
+                    // Plain text, use as-is
+                    content = content + longHelp + "\n\n";
+                }
+            }
+            
+            if example != "" then {
+                content = content + "EXAMPLE:\n";
+                // Process example based on format
+                if format == "html" then {
+                    var cleanExample: string = call stripHtmlTags(example);
+                    content = content + cleanExample + "\n";
+                } else {
+                    content = content + example + "\n";
+                }
+            }
+            
+            return content;
+        }
+    }
+    
+    return "";
+}
+
+// Function to get builtin help from system registry
+getBuiltinHelp(builtinName: string) return string {
+    if builtinsArray == null then {
+        return "Builtins data not available.";
+    }
+    
+    // First try to get detailed help from system.help(keyword)
+    var detailedHelp: string = call system.help(builtinName);
+    if detailedHelp != "" && !call str.contains(detailedHelp, "No help found") then {
+        return detailedHelp;
+    }
+    
+    // Fall back to signature from parsed help data
+    foreach builtin in builtinsArray {
+        var name: string = call json.getString(builtin, "name", "");
+        if name == builtinName then {
+            var signature: string = call json.getString(builtin, "signature", "");
+            
+            var content: string = "";
+            content = content + "═══════════════════════════════════════════════════════\n";
+            content = content + "  " + name + "\n";
+            content = content + "═══════════════════════════════════════════════════════\n\n";
+            
+            content = content + "▸ SIGNATURE\n";
+            content = content + "───────────────────────────────────────────────────────\n";
+            content = content + "call " + signature + "\n";
+            content = content + "\n";
+            
+            // Try to get additional help from JSON lookup
+            if helpData != null then {
+                var builtinsJsonArray: json = call json.get(helpData, "builtins");
+                if builtinsJsonArray != null then {
+                    foreach builtinJson in builtinsJsonArray {
+                        var funcName: string = call json.getString(builtinJson, "function", "");
+                        if funcName == builtinName then {
+                            var shortDesc: string = call json.getString(builtinJson, "short_description", "");
+                            var longHelp: string = call json.getString(builtinJson, "long_help", "");
+                            var example: string = call json.getString(builtinJson, "example", "");
+                            var format: string = call json.getString(builtinJson, "format", "text");
+                            
+                            if shortDesc != "" then {
+                                content = content + "▸ DESCRIPTION\n";
+                                content = content + "───────────────────────────────────────────────────────\n";
+                                content = content + shortDesc + "\n\n";
+                            }
+                            
+                            if longHelp != "" then {
+                                content = content + "▸ DETAILS\n";
+                                content = content + "───────────────────────────────────────────────────────\n";
+                                if format == "html" then {
+                                    var cleanHelp: string = call stripHtmlTags(longHelp);
+                                    content = content + cleanHelp + "\n\n";
+                                } else {
+                                    content = content + longHelp + "\n\n";
+                                }
+                            }
+                            
+                            if example != "" then {
+                                content = content + "▸ EXAMPLE\n";
+                                content = content + "───────────────────────────────────────────────────────\n";
+                                if format == "html" then {
+                                    var cleanExample: string = call stripHtmlTags(example);
+                                    content = content + cleanExample + "\n";
+                                } else {
+                                    content = content + example + "\n";
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return content;
+        }
+    }
+    
+    return "No help found for builtin: " + builtinName;
+}
+
+// Function to get help content based on selected topic
+getHelpContent(topic: string) return string {
+    var content: string = "";
+    
+    // Handle dynamic builtin topics
+    if call str.startsWith(topic, "builtin_") then {
+        var builtinName: string = call str.substring(topic, 8);
+        return call getBuiltinHelp(builtinName);
+    }
+    
+    // Syntax topics
+    if topic == "Syntax" then {
+        content = "═══════════════════════════════════════════════════════\n";
+        content = content + "  EBS (Earl Bosch Script) Syntax\n";
+        content = content + "═══════════════════════════════════════════════════════\n\n";
+        content = content + "EBS is a dynamically-typed scripting language with:\n\n";
+        content = content + "• Familiar C-like syntax\n";
+        content = content + "• Native JSON support\n";
+        content = content + "• Integrated database capabilities\n";
+        content = content + "• JavaFX-based UI screen support\n";
+        content = content + "• Rich set of built-in functions\n";
+        content = content + "• Interactive REPL environment\n\n";
+        content = content + "Select a topic from the tree to view detailed information.";
+        return content;
+    }
+    
+    if topic == "structure" then {
+        content = "═══════════════════════════════════════════════════════\n";
+        content = content + "  Program Structure\n";
+        content = content + "═══════════════════════════════════════════════════════\n\n";
+        content = content + "Select a sub-topic from the tree to view detailed information:\n\n";
+        content = content + "▸ basic - Statements, comments, blocks, case handling\n";
+        content = content + "▸ variables - Variable declarations, types, constants\n";
+        content = content + "▸ operators - Arithmetic, comparison, logical operators\n";
+        content = content + "▸ functions - Function definitions and calls\n";
+        content = content + "▸ imports - Code organization with imports\n";
+        return content;
+    }
+    
+    if topic == "structure_basic" then {
+        content = "═══════════════════════════════════════════════════════\n";
+        content = content + "  Basic Syntax\n";
+        content = content + "═══════════════════════════════════════════════════════\n\n";
+        content = content + "▸ STATEMENTS\n";
+        content = content + "───────────────────────────────────────────────────────\n";
+        content = content + "• Statements end with semicolon (;)\n";
+        content = content + "• Multiple statements per line allowed\n";
+        content = content + "• Blocks use curly braces { }\n\n";
+        content = content + "▸ COMMENTS\n";
+        content = content + "───────────────────────────────────────────────────────\n";
+        var commentHelp: string = call getKeywordHelp(keyword="//");
+        if commentHelp != "" then {
+            content = content + commentHelp;
+        } else {
+            content = content + "  // Single line comment\n";
+            content = content + "  // Comments start with //\n";
+        }
+        content = content + "\n▸ CASE INSENSITIVITY\n";
+        content = content + "───────────────────────────────────────────────────────\n";
+        content = content + "  var userName = \"Alice\";\n";
+        content = content + "  print USERNAME;  // Works: prints \"Alice\"\n";
+        content = content + "  print UserName;  // Works: prints \"Alice\"\n\n";
+        content = content + "▸ EXAMPLE\n";
+        content = content + "───────────────────────────────────────────────────────\n";
+        content = content + "  // This is a comment\n";
+        content = content + "  var message: string = \"Hello, World!\";\n";
+        content = content + "  print message;\n";
+        return content;
+    }
+    
+    if topic == "structure_variables" then {
+        content = "═══════════════════════════════════════════════════════\n";
+        content = content + "  Variables\n";
+        content = content + "═══════════════════════════════════════════════════════\n\n";
+        
+        // Get var keyword help from JSON
+        var varHelp: string = call getKeywordHelp(keyword="var");
+        content = content + varHelp + "\n";
+        
+        content = content + "▸ TYPE INFERENCE\n";
+        content = content + "───────────────────────────────────────────────────────\n";
+        content = content + "  var x = 42;        // Inferred as int\n";
+        content = content + "  var y = \"text\";    // Inferred as string\n\n";
+        content = content + "▸ CONSTANTS\n";
+        content = content + "───────────────────────────────────────────────────────\n";
+        content = content + "  const PI: double = 3.14159;\n";
+        content = content + "  const MAX_SIZE: int = 100;\n";
+        return content;
+    }
+    
+    if topic == "structure_operators" then {
+        content = "═══════════════════════════════════════════════════════\n";
+        content = content + "  Operators\n";
+        content = content + "═══════════════════════════════════════════════════════\n\n";
+        content = content + "▸ ARITHMETIC OPERATORS\n";
+        content = content + "───────────────────────────────────────────────────────\n";
+        content = content + "  +   Addition\n";
+        content = content + "  -   Subtraction\n";
+        content = content + "  *   Multiplication\n";
+        content = content + "  /   Division\n";
+        content = content + "  %   Modulo\n\n";
+        content = content + "▸ COMPARISON OPERATORS\n";
+        content = content + "───────────────────────────────────────────────────────\n";
+        content = content + "  ==  Equal to\n";
+        content = content + "  !=  Not equal to\n";
+        content = content + "  <   Less than\n";
+        content = content + "  >   Greater than\n";
+        content = content + "  <=  Less than or equal\n";
+        content = content + "  >=  Greater than or equal\n\n";
+        content = content + "▸ LOGICAL OPERATORS\n";
+        content = content + "───────────────────────────────────────────────────────\n";
+        content = content + "  and   Logical AND\n";
+        content = content + "  or    Logical OR\n";
+        content = content + "  not   Logical NOT\n\n";
+        content = content + "▸ EXAMPLE\n";
+        content = content + "───────────────────────────────────────────────────────\n";
+        content = content + "  var x = 10;\n";
+        content = content + "  var y = 20;\n";
+        content = content + "  if x < y and x > 0 then {\n";
+        content = content + "      print \"x is positive and less than y\";\n";
+        content = content + "  }\n";
+        return content;
+    }
+    
+    if topic == "structure_functions" then {
+        content = "═══════════════════════════════════════════════════════\n";
+        content = content + "  Functions\n";
+        content = content + "═══════════════════════════════════════════════════════\n\n";
+        content = content + "▸ FUNCTION DEFINITION\n";
+        content = content + "───────────────────────────────────────────────────────\n";
+        content = content + "  functionName(param1: type, param2: type) return returnType {\n";
+        content = content + "      // function body\n";
+        content = content + "      return value;\n";
+        content = content + "  }\n\n";
+        content = content + "▸ EXAMPLE\n";
+        content = content + "───────────────────────────────────────────────────────\n";
+        content = content + "  add(a: int, b: int) return int {\n";
+        content = content + "      return a + b;\n";
+        content = content + "  }\n\n";
+        content = content + "▸ CALLING FUNCTIONS\n";
+        content = content + "───────────────────────────────────────────────────────\n";
+        
+        // Get call keyword help from JSON
+        var callHelp: string = call getKeywordHelp(keyword="call");
+        content = content + callHelp + "\n";
+        
+        content = content + "\n▸ NO RETURN VALUE\n";
+        content = content + "───────────────────────────────────────────────────────\n";
+        content = content + "  greet(name: string) {\n";
+        content = content + "      print \"Hello, \" + name;\n";
+        content = content + "  }\n";
+        return content;
+    }
+    
+    if topic == "structure_imports" then {
+        content = "═══════════════════════════════════════════════════════\n";
+        content = content + "  Imports\n";
+        content = content + "═══════════════════════════════════════════════════════\n\n";
+        content = content + "▸ IMPORTING MODULES\n";
+        content = content + "───────────────────────────────────────────────────────\n";
+        content = content + "  import \"path/to/module.ebs\";\n\n";
+        content = content + "▸ EXAMPLE\n";
+        content = content + "───────────────────────────────────────────────────────\n";
+        content = content + "  import \"utils/string_helpers.ebs\";\n";
+        content = content + "  import \"lib/math_functions.ebs\";\n\n";
+        content = content + "▸ USAGE\n";
+        content = content + "───────────────────────────────────────────────────────\n";
+        content = content + "• Functions from imported files are available\n";
+        content = content + "• Variables from imported files are accessible\n";
+        content = content + "• Imports are processed at parse time\n\n";
+        content = content + "▸ NOTE\n";
+        content = content + "───────────────────────────────────────────────────────\n";
+        content = content + "• Import paths are relative to script location\n";
+        content = content + "• Circular imports are not allowed\n";
+        return content;
+    }
+    
+    if topic == "data" then {
+        content = "=== Data Types ===\n\n";
+        content = content + "PRIMITIVE TYPES:\n";
+        content = content + "• int / integer - 32-bit integer (42)\n";
+        content = content + "• long - 64-bit integer (9999999999)\n";
+        content = content + "• float - Single-precision (3.14)\n";
+        content = content + "• double - Double-precision (3.14159)\n";
+        content = content + "• byte - 8-bit integer (127)\n";
+        content = content + "• string - Text (\"Hello\")\n";
+        content = content + "• bool / boolean - true, false\n";
+        content = content + "• date - Date/time value\n";
+        content = content + "• json - JSON object/array\n";
+        content = content + "• array - Generic array\n\n";
+        content = content + "VARIABLES:\n";
+        content = content + "  var name: string = \"value\";\n";
+        content = content + "  var count: int = 42;\n";
+        content = content + "  var price: double = 19.99;\n";
+        content = content + "  var flag: bool = true;\n\n";
+        content = content + "TYPE CASTING:\n";
+        content = content + "  var num: int = int(\"42\");\n";
+        content = content + "  var text: string = string(123);\n";
+        content = content + "  var flag: bool = boolean(\"true\");\n";
+        return content;
+    }
+    
+    if topic == "flow" then {
+        content = "═══════════════════════════════════════════════════════\n";
+        content = content + "  Control Flow\n";
+        content = content + "═══════════════════════════════════════════════════════\n\n";
+        content = content + "Select a sub-topic from the tree to view detailed information:\n\n";
+        content = content + "▸ conditionals - if-then-else statements\n";
+        content = content + "▸ loops - while, for, foreach, do-while\n";
+        content = content + "▸ break_continue - Loop control\n";
+        content = content + "▸ exceptions - Error handling\n";
+        return content;
+    }
+    
+    if topic == "flow_conditionals" then {
+        content = "═══════════════════════════════════════════════════════\n";
+        content = content + "  Conditionals\n";
+        content = content + "═══════════════════════════════════════════════════════\n\n";
+        
+        // Get if keyword help from JSON
+        var ifHelp: string = call getKeywordHelp(keyword="if");
+        content = content + ifHelp + "\n";
+        
+        content = content + "\n▸ ELSE IF\n";
+        content = content + "───────────────────────────────────────────────────────\n";
+        
+        // Get else keyword help from JSON
+        var elseHelp: string = call getKeywordHelp(keyword="else");
+        content = content + elseHelp + "\n";
+        
+        content = content + "\n▸ CHAINED CONDITIONS\n";
+        content = content + "───────────────────────────────────────────────────────\n";
+        content = content + "  var score: int = 85;\n";
+        content = content + "  if score >= 90 then {\n";
+        content = content + "      print \"Grade: A\";\n";
+        content = content + "  } else if score >= 80 then {\n";
+        content = content + "      print \"Grade: B\";\n";
+        content = content + "  } else {\n";
+        content = content + "      print \"Grade: C\";\n";
+        content = content + "  }\n";
+        return content;
+    }
+    
+    if topic == "flow_loops" then {
+        content = "═══════════════════════════════════════════════════════\n";
+        content = content + "  Loops\n";
+        content = content + "═══════════════════════════════════════════════════════\n\n";
+        
+        // Get while keyword help from JSON
+        var whileHelp: string = call getKeywordHelp(keyword="while");
+        content = content + whileHelp + "\n";
+        
+        content = content + "\n▸ FOR LOOP\n";
+        content = content + "───────────────────────────────────────────────────────\n";
+        content = content + "  for var i = 0 to 10 {\n";
+        content = content + "      // code\n";
+        content = content + "  }\n\n";
+        
+        // Get foreach keyword help from JSON
+        var foreachHelp: string = call getKeywordHelp(keyword="foreach");
+        content = content + foreachHelp + "\n";
+        
+        content = content + "\n▸ DO-WHILE LOOP\n";
+        content = content + "───────────────────────────────────────────────────────\n";
+        content = content + "  do {\n";
+        content = content + "      // code\n";
+        content = content + "  } while condition;\n\n";
+        content = content + "▸ EXAMPLE\n";
+        content = content + "───────────────────────────────────────────────────────\n";
+        content = content + "  var i: int = 0;\n";
+        content = content + "  while i < 5 {\n";
+        content = content + "      print \"Count: \" + i;\n";
+        content = content + "      i = i + 1;\n";
+        content = content + "  }\n";
+        return content;
+    }
+    
+    if topic == "flow_break_continue" then {
+        content = "═══════════════════════════════════════════════════════\n";
+        content = content + "  Break and Continue\n";
+        content = content + "═══════════════════════════════════════════════════════\n\n";
+        
+        // Get break keyword help from JSON
+        var breakHelp: string = call getKeywordHelp(keyword="break");
+        content = content + breakHelp + "\n";
+        
+        content = content + "\n";
+        
+        // Get continue keyword help from JSON
+        var continueHelp: string = call getKeywordHelp(keyword="continue");
+        content = content + continueHelp + "\n";
+        
+        return content;
+    }
+    
+    if topic == "flow_exceptions" then {
+        content = "═══════════════════════════════════════════════════════\n";
+        content = content + "  Exception Handling\n";
+        content = content + "═══════════════════════════════════════════════════════\n\n";
+        content = content + "▸ TRY-EXCEPTIONS-WHEN\n";
+        content = content + "───────────────────────────────────────────────────────\n";
+        content = content + "  try {\n";
+        content = content + "      // code that might throw exception\n";
+        content = content + "  } exceptions when ex {\n";
+        content = content + "      // handle exception\n";
+        content = content + "      print \"Error: \" + ex;\n";
+        content = content + "  }\n\n";
+        content = content + "▸ EXAMPLE\n";
+        content = content + "───────────────────────────────────────────────────────\n";
+        content = content + "  try {\n";
+        content = content + "      var result = call file.readTextFile(\"data.txt\");\n";
+        content = content + "      print result;\n";
+        content = content + "  } exceptions when ex {\n";
+        content = content + "      print \"Failed to read file: \" + ex;\n";
+        content = content + "  }\n\n";
+        content = content + "▸ NOTES\n";
+        content = content + "───────────────────────────────────────────────────────\n";
+        content = content + "• Exception variable (ex) contains error message\n";
+        content = content + "• Use for file I/O, database operations, etc.\n";
+        content = content + "• Prevents script from crashing on errors\n";
+        return content;
+    }
+    
+    if topic == "keywords" then {
+        content = "=== Keywords ===\n\n";
+        content = content + "FUNCTION DEFINITION:\n";
+        content = content + "  functionName(param1: type, param2: type) return returnType {\n";
+        content = content + "      // function body\n";
+        content = content + "      return value;\n";
+        content = content + "  }\n\n";
+        content = content + "ARRAYS:\n";
+        content = content + "  var arr: array[10] = array[10];     // Fixed size\n";
+        content = content + "  var dynArr: array[*] = array[*];    // Dynamic\n";
+        content = content + "  dynArr.push(\"item\");\n";
+        content = content + "  var item = dynArr[0];\n\n";
+        content = content + "JSON:\n";
+        content = content + "  var obj: json = {\"name\": \"Alice\", \"age\": 30};\n";
+        content = content + "  var name = obj.name;\n";
+        content = content + "  var jsonStr = call json.stringify(obj);\n\n";
+        content = content + "CONSTANTS:\n";
+        content = content + "  const PI: double = 3.14159;\n";
+        content = content + "  const MAX_SIZE: int = 100;\n";
+        return content;
+    }
+    
+    if topic == "builtins" then {
+        content = "=== Built-in Functions ===\n\n";
+        content = content + "STRING FUNCTIONS:\n";
+        content = content + "  call string.toUpper(text)\n";
+        content = content + "  call string.toLower(text)\n";
+        content = content + "  call string.trim(text)\n";
+        content = content + "  call string.substring(text, start, end)\n";
+        content = content + "  call string.indexOf(text, search)\n";
+        content = content + "  call string.length(text)\n\n";
+        content = content + "ARRAY FUNCTIONS:\n";
+        content = content + "  arr.length        // Get array length (property access)\n";
+        content = content + "  call array.add(arr, value)   // Add element\n";
+        content = content + "  call array.remove(arr, idx)  // Remove element\n";
+        content = content + "  call array.sort(arr)         // Sort array\n\n";
+        content = content + "MATH FUNCTIONS:\n";
+        content = content + "  call math.abs(num)\n";
+        content = content + "  call math.max(a, b)\n";
+        content = content + "  call math.min(a, b)\n";
+        content = content + "  call math.round(num)\n";
+        content = content + "  call math.sqrt(num)\n\n";
+        content = content + "FILE I/O:\n";
+        content = content + "  call file.readTextFile(path)\n";
+        content = content + "  call file.writeTextFile(path, content)\n";
+        content = content + "  call file.exists(path)\n";
+        return content;
+    }
+    
+    if topic == "screen" then {
+        content = "=== Screen/UI Windows ===\n\n";
+        content = content + "SCREEN DECLARATION:\n";
+        content = content + "  screen myWindow = {\n";
+        content = content + "      \"title\": \"My Application\",\n";
+        content = content + "      \"width\": 800,\n";
+        content = content + "      \"height\": 600,\n";
+        content = content + "      \"vars\": [ /* variables */ ]\n";
+        content = content + "  };\n\n";
+        content = content + "SCREEN OPERATIONS:\n";
+        content = content + "  show screen myWindow;\n";
+        content = content + "  hide screen myWindow;\n";
+        content = content + "  close screen myWindow;\n\n";
+        content = content + "SCREEN FUNCTIONS:\n";
+        content = content + "  call scr.setValue(screenName, varName, value)\n";
+        content = content + "  call scr.getValue(screenName, varName)\n";
+        content = content + "  call scr.setProperty(screenName, itemName, property, value)\n";
+        content = content + "  call scr.getProperty(screenName, itemName, property)\n\n";
+        content = content + "CONSOLE COMMANDS:\n";
+        content = content + "  /help                - Show console help\n";
+        content = content + "  /list files [path]   - List files\n";
+        content = content + "  /list openfiles      - Show open files\n";
+        content = content + "  /set debug [on|off]  - Toggle debug mode\n";
+        content = content + "  /clear               - Clear console\n";
+        content = content + "  /reset               - Reset interpreter\n";
+        return content;
+    }
+    
+    // Examples topics
+    if topic == "Examples" then {
+        content = "=== EBS Code Examples ===\n\n";
+        content = content + "This section contains practical examples demonstrating\n";
+        content = content + "various EBS features and built-in functions.\n\n";
+        content = content + "Select a topic from the tree to view example code.\n\n";
+        content = content + "Available examples:\n";
+        content = content + "• Keywords - Examples of language keywords\n";
+        content = content + "• Builtins - Examples of built-in functions\n";
+        content = content + "• Screen - Examples of screen/UI creation\n";
+        return content;
+    }
+    
+    if topic == "Keywords" || topic == "examples_keywords" then {
+        content = "=== Keyword Examples ===\n\n";
+        content = content + "FUNCTION EXAMPLE:\n";
+        content = content + "  calculateSum(a: int, b: int) return int {\n";
+        content = content + "      return a + b;\n";
+        content = content + "  }\n";
+        content = content + "  var result = call calculateSum(10, 20);\n";
+        content = content + "  print result;  // Output: 30\n\n";
+        content = content + "ARRAY EXAMPLE:\n";
+        content = content + "  var fruits: array[*] = array[*];\n";
+        content = content + "  fruits.push(\"apple\");\n";
+        content = content + "  fruits.push(\"banana\");\n";
+        content = content + "  fruits.push(\"orange\");\n";
+        content = content + "  foreach fruit in fruits {\n";
+        content = content + "      print fruit;\n";
+        content = content + "  }\n\n";
+        content = content + "CONDITIONAL EXAMPLE:\n";
+        content = content + "  var score: int = 85;\n";
+        content = content + "  if score >= 90 then {\n";
+        content = content + "      print \"Grade: A\";\n";
+        content = content + "  } else if score >= 80 then {\n";
+        content = content + "      print \"Grade: B\";\n";
+        content = content + "  } else {\n";
+        content = content + "      print \"Grade: C\";\n";
+        content = content + "  }\n";
+        return content;
+    }
+    
+    if topic == "Builtins" || topic == "examples_builtins" then {
+        content = "=== Built-in Function Examples ===\n\n";
+        content = content + "STRING MANIPULATION:\n";
+        content = content + "  var text: string = \"  Hello World  \";\n";
+        content = content + "  var trimmed = call string.trim(text);\n";
+        content = content + "  var upper = call string.toUpper(trimmed);\n";
+        content = content + "  print upper;  // Output: HELLO WORLD\n\n";
+        content = content + "FILE OPERATIONS:\n";
+        content = content + "  var filePath: string = \"data.txt\";\n";
+        content = content + "  if call file.exists(filePath) then {\n";
+        content = content + "      var content = call file.readTextFile(filePath);\n";
+        content = content + "      print \"File content: \" + content;\n";
+        content = content + "  } else {\n";
+        content = content + "      call file.writeTextFile(filePath, \"Hello, File!\");\n";
+        content = content + "      print \"File created\";\n";
+        content = content + "  }\n\n";
+        content = content + "MATH OPERATIONS:\n";
+        content = content + "  var numbers: array[*] = array[*];\n";
+        content = content + "  numbers.push(42);\n";
+        content = content + "  numbers.push(-15);\n";
+        content = content + "  numbers.push(28);\n";
+        content = content + "  var maxVal = call math.max(numbers[0], numbers[1]);\n";
+        content = content + "  var absVal = call math.abs(numbers[1]);\n";
+        content = content + "  print \"Max: \" + maxVal;\n";
+        content = content + "  print \"Absolute: \" + absVal;\n";
+        return content;
+    }
+    
+    if topic == "Screen" || topic == "examples_screen" then {
+        content = "=== Screen/UI Examples ===\n\n";
+        content = content + "SIMPLE FORM SCREEN:\n";
+        content = content + "  screen loginForm = {\n";
+        content = content + "      \"title\": \"Login\",\n";
+        content = content + "      \"width\": 400,\n";
+        content = content + "      \"height\": 300,\n";
+        content = content + "      \"vars\": [\n";
+        content = content + "          {\n";
+        content = content + "              \"name\": \"username\",\n";
+        content = content + "              \"type\": \"string\",\n";
+        content = content + "              \"display\": {\n";
+        content = content + "                  \"type\": \"textfield\",\n";
+        content = content + "                  \"labelText\": \"Username:\"\n";
+        content = content + "              }\n";
+        content = content + "          },\n";
+        content = content + "          {\n";
+        content = content + "              \"name\": \"password\",\n";
+        content = content + "              \"type\": \"string\",\n";
+        content = content + "              \"display\": {\n";
+        content = content + "                  \"type\": \"passwordfield\",\n";
+        content = content + "                  \"labelText\": \"Password:\"\n";
+        content = content + "              }\n";
+        content = content + "          }\n";
+        content = content + "      ]\n";
+        content = content + "  };\n";
+        content = content + "  show screen loginForm;\n\n";
+        content = content + "ACCESSING SCREEN VALUES:\n";
+        content = content + "  var user = call scr.getValue(loginForm, \"username\");\n";
+        content = content + "  var pass = call scr.getValue(loginForm, \"password\");\n";
+        content = content + "  print \"User: \" + user;\n";
+        return content;
+    }
+    
+    // Default content
+    content = "=== EBS Help ===\n\n";
+    content = content + "Select a topic from the tree on the left\n";
+    content = content + "to view help documentation.\n\n";
+    content = content + "For complete documentation, see:\n";
+    content = content + "• docs/EBS_SCRIPT_SYNTAX.md\n";
+    content = content + "• EBS_LANGUAGE_REFERENCE.md\n";
+    content = content + "• ScriptInterpreter/scripts/examples/\n";
+    
+    return content;
+}
+
+// Build the screen JSON programmatically
+var screenJson: json = {
+    "title": "EBS Syntax Help",
+    "width": 1000,
+    "height": 700,
+    "vars": [
+        {
+            "name": "selectedTopic",
+            "type": "string",
+            "default": ""
+        },
+        {
+            "name": "helpContent",
+            "type": "string",
+            "default": ""
+        }
+    ],
+    "area": []
+};
+
+// Build the area array
+var mainLayoutAreas: array[*];
+
+// Tree area
+var treeAreaItems: array[*];
+var helpTreeItem: json = {};
+helpTreeItem = call json.set(helpTreeItem, "name", "helpTree");
+helpTreeItem = call json.set(helpTreeItem, "varRef", "selectedTopic");
+helpTreeItem = call json.set(helpTreeItem, "seq", 1);
+
+var treeDisplay: json = {};
+treeDisplay = call json.set(treeDisplay, "type", "treeview");
+treeDisplay = call json.set(treeDisplay, "labelText", "");
+treeDisplay = call json.set(treeDisplay, "displayRecords", 30);
+treeDisplay = call json.set(treeDisplay, "prefHeight", "600");
+treeDisplay = call json.set(treeDisplay, "expandAll", true);
+treeDisplay = call json.set(treeDisplay, "showRoot", false);
+treeDisplay = call json.set(treeDisplay, "onChange", "call scr.setProperty(\"helpScreen.helpContentView\", \"text\", call getHelpContent(helpScreen.selectedTopic));");
+
+// Wrap tree structure in array
+var treeItemsArray: array[*];
+call array.add(treeItemsArray, treeStructure);
+treeDisplay = call json.set(treeDisplay, "treeItems", treeItemsArray);
+
+helpTreeItem = call json.set(helpTreeItem, "display", treeDisplay);
+call array.add(treeAreaItems, helpTreeItem);
+
+var treeArea: json = {};
+treeArea = call json.set(treeArea, "name", "treeArea");
+treeArea = call json.set(treeArea, "type", "vbox");
+treeArea = call json.set(treeArea, "spacing", "0");
+treeArea = call json.set(treeArea, "width", "250");
+treeArea = call json.set(treeArea, "style", "-fx-border-color: #cccccc; -fx-border-width: 0 1 0 0;");
+treeArea = call json.set(treeArea, "items", treeAreaItems);
+
+call array.add(mainLayoutAreas, treeArea);
+
+// Content area
+var contentAreaItems: array[*];
+var helpContentItem: json = {};
+helpContentItem = call json.set(helpContentItem, "name", "helpContentView");
+helpContentItem = call json.set(helpContentItem, "varRef", "helpContent");
+helpContentItem = call json.set(helpContentItem, "seq", 1);
+
+var contentDisplay: json = {};
+contentDisplay = call json.set(contentDisplay, "type", "textarea");
+contentDisplay = call json.set(contentDisplay, "labelText", "");
+contentDisplay = call json.set(contentDisplay, "editable", false);
+contentDisplay = call json.set(contentDisplay, "displayRecords", 30);
+contentDisplay = call json.set(contentDisplay, "wrapText", true);
+contentDisplay = call json.set(contentDisplay, "prefHeight", "600");
+contentDisplay = call json.set(contentDisplay, "style", "-fx-font-family: 'Consolas', 'Monaco', 'Courier New', monospace; -fx-font-size: 12px;");
+
+helpContentItem = call json.set(helpContentItem, "display", contentDisplay);
+call array.add(contentAreaItems, helpContentItem);
+
+var contentArea: json = {};
+contentArea = call json.set(contentArea, "name", "contentArea");
+contentArea = call json.set(contentArea, "type", "vbox");
+contentArea = call json.set(contentArea, "spacing", "5");
+contentArea = call json.set(contentArea, "padding", "10");
+contentArea = call json.set(contentArea, "items", contentAreaItems);
+
+call array.add(mainLayoutAreas, contentArea);
+
+// Main layout
+var mainLayout: json = {};
+mainLayout = call json.set(mainLayout, "name", "mainLayout");
+mainLayout = call json.set(mainLayout, "type", "hbox");
+mainLayout = call json.set(mainLayout, "spacing", "0");
+mainLayout = call json.set(mainLayout, "padding", "0");
+mainLayout = call json.set(mainLayout, "areas", mainLayoutAreas);
+
+var areaArray: array[*];
+call array.add(areaArray, mainLayout);
+
+screenJson = call json.set(screenJson, "area", areaArray);
+
+print "Screen JSON built programmatically";
+
+// Create the help screen from JSON variable
+screen helpScreen = screenJson;
+
+// Set initial content (use item name, not varRef)
+call scr.setProperty("helpScreen.helpContentView", "text", call getHelpContent(""));
+
+// Show the screen
+show screen helpScreen;
+
+print "Syntax help screen displayed with tree navigation.";

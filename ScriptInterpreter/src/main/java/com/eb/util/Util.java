@@ -466,11 +466,28 @@ public class Util {
 
     public static Path resolveSandboxedPath(String path) {
         if (path != null) {
-            Path p = SANDBOX_ROOT.resolve(path).normalize();
+            Path inputPath = Path.of(path);
+            Path p;
+            
+            // If a context directory is set and the path is relative, resolve from context directory first
+            Path contextDir = getCurrentContextSourceDir();
+            if (contextDir != null && !inputPath.isAbsolute()) {
+                p = contextDir.resolve(path).normalize();
+            } else {
+                // Otherwise resolve from SANDBOX_ROOT
+                p = SANDBOX_ROOT.resolve(path).normalize();
+            }
+            
             if (!p.startsWith(SANDBOX_ROOT)) {
                 // Check if path is in a safe directory
                 if (!isInSafeDirectory(p)) {
-                    throw new RuntimeException("Path escapes sandbox: " + path);
+                    String contextInfo = contextDir != null 
+                        ? " (Context dir: " + contextDir + ")" 
+                        : " (No context dir set)";
+                    throw new RuntimeException("Path escapes sandbox: " + path 
+                        + " -> resolved to: " + p 
+                        + " (Sandbox root: " + SANDBOX_ROOT + ")"
+                        + contextInfo);
                 }
             }
             return p;

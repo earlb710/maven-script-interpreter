@@ -45,6 +45,12 @@ public class EbsConsoleHandler extends EbsHandler {
     private static final int MAX_ERROR_MESSAGE_LENGTH = 60;
     /** Length to truncate error message to (with room for "...") */
     private static final int TRUNCATED_MESSAGE_LENGTH = 57;
+    
+    /** 
+     * Cached resources directory path for application screens.
+     * Lazily initialized on first use.
+     */
+    private static Path cachedResourcesDir = null;
 
     protected final Stage stage;
     protected final Deque<Path> recentFiles = new ArrayDeque<>(); // Most recent at the head
@@ -736,9 +742,60 @@ public class EbsConsoleHandler extends EbsHandler {
     }
     
     /**
+     * Gets the resources directory path, calculating it once and caching for reuse.
+     * Attempts multiple strategies to locate the resources directory:
+     * 1. Use the current working directory structure (for development)
+     * 2. Use the class location (for packaged JAR)
+     * 
+     * @return Path to resources directory, or null if not found
+     */
+    private static synchronized Path getResourcesDirectory() {
+        if (cachedResourcesDir != null) {
+            return cachedResourcesDir;
+        }
+        
+        // Strategy 1: Try standard development structure (user.dir/ScriptInterpreter/src/main/resources)
+        Path devPath = Path.of(System.getProperty("user.dir"), "ScriptInterpreter", "src", "main", "resources")
+                .toAbsolutePath().normalize();
+        if (Files.exists(devPath) && Files.isDirectory(devPath)) {
+            cachedResourcesDir = devPath;
+            return cachedResourcesDir;
+        }
+        
+        // Strategy 2: Try from user.dir/resources (alternative structure)
+        Path altPath = Path.of(System.getProperty("user.dir"), "resources")
+                .toAbsolutePath().normalize();
+        if (Files.exists(altPath) && Files.isDirectory(altPath)) {
+            cachedResourcesDir = altPath;
+            return cachedResourcesDir;
+        }
+        
+        // Strategy 3: Try to infer from class location (for packaged JAR)
+        try {
+            java.net.URL resourceUrl = EbsConsoleHandler.class.getResource("/help-lookup.json");
+            if (resourceUrl != null && "file".equals(resourceUrl.getProtocol())) {
+                Path resourceFile = Path.of(resourceUrl.toURI());
+                Path resourceDir = resourceFile.getParent();
+                if (resourceDir != null && Files.exists(resourceDir) && Files.isDirectory(resourceDir)) {
+                    cachedResourcesDir = resourceDir;
+                    return cachedResourcesDir;
+                }
+            }
+        } catch (Exception e) {
+            // Ignore, will return null below
+        }
+        
+        // Unable to locate resources directory
+        return null;
+    }
+    
+    /**
      * Run a script from a resource path. This method is designed to be called from menu actions
      * and other places that need to execute EBS scripts. It runs the script in a background
      * thread to avoid blocking the UI.
+     * 
+     * For application screens called from menus, this method temporarily sets the resources
+     * directory as a safe directory so scripts can access resources like help-lookup.json.
      * 
      * @param resourcePath The path to the script resource (e.g., "/scripts/config_changes.ebs")
      * @param scriptName A friendly name for the script (used in log messages)
@@ -763,8 +820,17 @@ public class EbsConsoleHandler extends EbsHandler {
                 });
             }
             
+            // Set the resources directory as safe for application screens
+            // This allows scripts to access resources like help-lookup.json
+            Path resourcesDir = getResourcesDirectory();
+            
             // Execute script in background thread like the Run button does
             Thread t = new Thread(() -> {
+                // Set the resources directory as the context source directory for this script execution
+                // Only set if we successfully located the resources directory
+                if (resourcesDir != null) {
+                    Util.setCurrentContextSourceDir(resourcesDir);
+                }
                 try {
                     // Submit script for execution
                     submit(script);
@@ -790,6 +856,12 @@ public class EbsConsoleHandler extends EbsHandler {
                             statusBar.setMessage(displayMsg, errorMsg);
                         }
                     });
+                } finally {
+                    // Clear the context source directory after execution
+                    // Only clear if we set it
+                    if (resourcesDir != null) {
+                        Util.clearCurrentContextSourceDir();
+                    }
                 }
             }, "script-runner");  // Use fixed thread name to avoid potential issues with special characters
             t.setDaemon(true);
