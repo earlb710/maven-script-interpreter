@@ -15,7 +15,7 @@ print "";
 // Load help data from JSON file
 var helpData: json = null;
 try {
-    // Try to read from resources directory using absolute path
+    // Read from resources directory using relative path from resources root
     var jsonContent: string = call file.readTextFile("help-lookup.json");
     helpData = call json.jsonFromString(jsonContent);
     print "Help data loaded from JSON";

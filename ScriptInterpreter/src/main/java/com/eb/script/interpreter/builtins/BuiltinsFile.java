@@ -323,8 +323,17 @@ public class BuiltinsFile {
             }
             return ret;
         } catch (Exception ex) {
-            // Provide more detailed error information including the resolved path
-            String detailedMessage = "file.readFile: " + ex.getMessage();
+            // Provide detailed error information including the attempted path and resolved path
+            String detailedMessage = "file.readFile: " + filePath;
+            try {
+                Path resolvedPath = Util.resolveSandboxedPath(filePath);
+                detailedMessage += " (resolved to: " + resolvedPath + ")";
+            } catch (Exception pathEx) {
+                // If path resolution itself fails, include that error
+                detailedMessage += " (path resolution failed: " + pathEx.getMessage() + ")";
+            }
+            detailedMessage += " - " + ex.getMessage();
+            
             if (ex instanceof java.nio.file.NoSuchFileException) {
                 detailedMessage += " (File not found - check that the file exists and the path is correct)";
             } else if (ex instanceof java.nio.file.AccessDeniedException) {
