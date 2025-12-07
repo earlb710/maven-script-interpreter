@@ -28,8 +28,37 @@ try {
 
 // Get all builtins from system registry
 print "Loading builtins from registry...";
-var systemHelpData: json = call system.help();
-var builtinsArray: json = call json.get(systemHelpData, "builtins");
+var systemHelpText: string = call system.help();
+
+// Parse the help text to extract builtin information
+// The format is: "builtin.name(param1:type, param2:type?) : returnType"
+var builtinLines: array = call str.split(systemHelpText, "\n", 0);
+var builtinsArray: array[*];
+var inBuiltinsSection: bool = false;
+
+foreach line in builtinLines {
+    var trimmedLine: string = call str.trim(line);
+    if trimmedLine == "Builtins:" then {
+        inBuiltinsSection = true;
+    } else if inBuiltinsSection == true then {
+        if trimmedLine != "" && call str.startsWith(trimmedLine, " ") then {
+            // Extract builtin name from line like "  array.add(array:array, value:any, index:integer?) : null"
+            var lineContent: string = call str.trim(trimmedLine);
+            var parenIndex: int = call str.indexOf(lineContent, "(", 0);
+            if parenIndex > 0 then {
+                var builtinName: string = call str.substring(lineContent, 0, parenIndex);
+                var builtinInfo: json = {};
+                builtinInfo = call json.set(builtinInfo, "name", builtinName);
+                builtinInfo = call json.set(builtinInfo, "signature", lineContent);
+                call array.push(builtinsArray, builtinInfo);
+            }
+        } else if trimmedLine != "" && !call str.startsWith(trimmedLine, " ") then {
+            // We've reached the end of the builtins section
+            inBuiltinsSection = false;
+        }
+    }
+}
+
 var builtinCount: int = call array.length(builtinsArray);
 print "Loaded " + call str.toString(builtinCount) + " builtins";
 
@@ -194,11 +223,17 @@ getBuiltinHelp(builtinName: string) return string {
         return "Builtins data not available.";
     }
     
+    // First try to get detailed help from system.help(keyword)
+    var detailedHelp: string = call system.help(builtinName);
+    if detailedHelp != "" && !call str.contains(detailedHelp, "No help found") then {
+        return detailedHelp;
+    }
+    
+    // Fall back to signature from parsed help data
     foreach builtin in builtinsArray {
         var name: string = call json.getString(builtin, "name", "");
         if name == builtinName then {
-            var returnType: string = call json.getString(builtin, "returnType", "void");
-            var params: json = call json.get(builtin, "params");
+            var signature: string = call json.getString(builtin, "signature", "");
             
             var content: string = "";
             content = content + "═══════════════════════════════════════════════════════\n";
@@ -207,33 +242,8 @@ getBuiltinHelp(builtinName: string) return string {
             
             content = content + "▸ SIGNATURE\n";
             content = content + "───────────────────────────────────────────────────────\n";
-            content = content + "call " + name + "(";
-            
-            if params != null then {
-                var paramCount: int = call array.length(params);
-                if paramCount > 0 then {
-                    var idx: int = 0;
-                    foreach param in params {
-                        var paramName: string = call json.getString(param, "name", "");
-                        var paramType: string = call json.getString(param, "type", "any");
-                        var mandatory: bool = call json.getBool(param, "mandatory", true);
-                        
-                        if idx > 0 then {
-                            content = content + ", ";
-                        }
-                        
-                        content = content + paramName + ": " + paramType;
-                        if mandatory == false then {
-                            content = content + " [optional]";
-                        }
-                        
-                        idx = idx + 1;
-                    }
-                }
-            }
-            
-            content = content + ")\n";
-            content = content + "Returns: " + returnType + "\n\n";
+            content = content + "call " + signature + "\n";
+            content = content + "\n";
             
             // Try to get additional help from JSON lookup
             if helpData != null then {
