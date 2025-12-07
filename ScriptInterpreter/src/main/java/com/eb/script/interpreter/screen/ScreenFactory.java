@@ -3304,8 +3304,7 @@ public class ScreenFactory {
                     // No label specified - wrap control in HBox with left padding to align with labeled controls
                     // This ensures controls without labels still align properly with labeled controls
                     // Skip this wrapping if disableLabelAlignment is true (useful for grid layouts like chess boards)
-                    boolean skipAlignment = (areaDef.disableLabelAlignment != null && areaDef.disableLabelAlignment);
-                    if (!skipAlignment
+                    if (!Boolean.TRUE.equals(areaDef.disableLabelAlignment)
                             && !(control instanceof javafx.scene.control.Label)
                             && !(control instanceof javafx.scene.control.Button)
                             && !(control instanceof javafx.scene.control.TableView)) {

@@ -2185,9 +2185,8 @@ public class InterpreterScreen {
             if (disableLabelAlignmentObj instanceof Boolean) {
                 area.disableLabelAlignment = (Boolean) disableLabelAlignmentObj;
             } else {
-                // Try to parse string as boolean
-                String strVal = String.valueOf(disableLabelAlignmentObj).toLowerCase();
-                area.disableLabelAlignment = strVal.equals("true") || strVal.equals("yes") || strVal.equals("1");
+                // Parse string as boolean - supports "true", "false" (case-insensitive)
+                area.disableLabelAlignment = Boolean.parseBoolean(String.valueOf(disableLabelAlignmentObj));
             }
         }
 
