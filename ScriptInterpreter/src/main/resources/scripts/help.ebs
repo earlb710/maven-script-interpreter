@@ -883,6 +883,7 @@ contentDisplay = call json.set(contentDisplay, "labelText", "");
 contentDisplay = call json.set(contentDisplay, "editable", false);
 contentDisplay = call json.set(contentDisplay, "displayRecords", 30);
 contentDisplay = call json.set(contentDisplay, "wrapText", true);
+contentDisplay = call json.set(contentDisplay, "prefHeight", "600");
 contentDisplay = call json.set(contentDisplay, "style", "-fx-font-family: 'Consolas', 'Monaco', 'Courier New', monospace; -fx-font-size: 12px;");
 
 helpContentItem = call json.set(helpContentItem, "display", contentDisplay);
