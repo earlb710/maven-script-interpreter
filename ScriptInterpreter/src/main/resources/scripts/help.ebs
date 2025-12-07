@@ -916,7 +916,7 @@ print "Screen JSON built programmatically";
 screen helpScreen = screenJson;
 
 // Set initial content
-call scr.setValue(helpScreen, "helpContent", call getHelpContent(""));
+call scr.setProperty("helpScreen.helpContent", "text", call getHelpContent(""));
 
 // Show the screen
 show screen helpScreen;
