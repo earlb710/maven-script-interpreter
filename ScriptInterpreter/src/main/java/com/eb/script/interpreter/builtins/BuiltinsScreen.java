@@ -21,6 +21,11 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class BuiltinsScreen {
 
+    // Constants for snapshot configuration
+    private static final String DEFAULT_SNAPSHOT_FORMAT = "png";
+    private static final String SNAPSHOT_NAME_SUFFIX = "_screenshot";
+    private static final int SNAPSHOT_TIMEOUT_SECONDS = 10;
+
     /**
      * scr.showScreen(screenName?) -> BOOL Shows a screen. If screenName is null
      * or empty, uses the current screen from context. Returns true on success.
@@ -1282,9 +1287,9 @@ public class BuiltinsScreen {
         String screenName = (args.length > 0 && args[0] != null) ? (String) args[0] : null;
 
         // If no screen name provided, determine from thread context
-        if (screenName == null || screenName.isEmpty()) {
+        if (screenName == null || screenName.isBlank()) {
             screenName = context.getCurrentScreen();
-            if (screenName == null) {
+            if (screenName == null || screenName.isBlank()) {
                 throw new InterpreterError(
                         "scr.snapshot: No screen name specified and not executing in a screen context. "
                         + "Provide a screen name or call from within screen event handlers.");
@@ -1332,10 +1337,12 @@ public class BuiltinsScreen {
                 }
 
                 // Create EbsImage from the snapshot
+                // Note: Format and naming are configured via class constants
+                // DEFAULT_SNAPSHOT_FORMAT = "png", SNAPSHOT_NAME_SUFFIX = "_screenshot"
                 com.eb.script.image.EbsImage ebsImage = new com.eb.script.image.EbsImage(
                     snapshot, 
-                    finalScreenName + "_screenshot", 
-                    "png"
+                    finalScreenName + SNAPSHOT_NAME_SUFFIX, 
+                    DEFAULT_SNAPSHOT_FORMAT
                 );
                 
                 imageRef.set(ebsImage);
@@ -1351,11 +1358,13 @@ public class BuiltinsScreen {
             }
         });
 
-        // Wait for the snapshot to complete (with timeout)
+        // Wait for the snapshot to complete (with configurable timeout)
+        // SNAPSHOT_TIMEOUT_SECONDS can be adjusted for complex screens
         try {
-            boolean completed = latch.await(5, java.util.concurrent.TimeUnit.SECONDS);
+            boolean completed = latch.await(SNAPSHOT_TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS);
             if (!completed) {
-                throw new InterpreterError("scr.snapshot: Timeout waiting for screenshot capture.");
+                throw new InterpreterError("scr.snapshot: Timeout waiting for screenshot capture (waited " 
+                    + SNAPSHOT_TIMEOUT_SECONDS + " seconds).");
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
