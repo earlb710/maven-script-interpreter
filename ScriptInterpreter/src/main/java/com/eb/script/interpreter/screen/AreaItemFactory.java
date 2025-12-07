@@ -287,18 +287,13 @@ public class AreaItemFactory {
                 
                 // Apply image display properties from metadata
                 if (metadata != null) {
-                    // Set fit dimensions for ImageView
+                    // Set fit dimensions for ImageView only
+                    // Don't constrain the StackPane - let CSS styles control container size
                     if (metadata.fitWidth != null && metadata.fitWidth > 0) {
                         imageView.setFitWidth(metadata.fitWidth);
-                        // Constrain container to prevent oversizing
-                        imageContainer.setMaxWidth(metadata.fitWidth);
-                        imageContainer.setPrefWidth(metadata.fitWidth);
                     }
                     if (metadata.fitHeight != null && metadata.fitHeight > 0) {
                         imageView.setFitHeight(metadata.fitHeight);
-                        // Constrain container to prevent oversizing
-                        imageContainer.setMaxHeight(metadata.fitHeight);
-                        imageContainer.setPrefHeight(metadata.fitHeight);
                     }
                     // Set preserve ratio (default true)
                     imageView.setPreserveRatio(metadata.preserveRatio == null || metadata.preserveRatio);
