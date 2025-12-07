@@ -54,6 +54,7 @@ getKeywordHelp(keyword: string) return string {
             var desc: string = call json.getString(root=kw, path="short_description", default="");
             var longHelp: string = call json.getString(root=kw, path="long_help", default="");
             var example: string = call json.getString(root=kw, path="example", default="");
+            var format: string = call json.getString(root=kw, path="format", default="text");
             
             var content: string = "";
             content = content + "KEYWORD: " + keyword + "\n";
@@ -66,14 +67,26 @@ getKeywordHelp(keyword: string) return string {
             
             if longHelp != "" then {
                 content = content + "DETAILS:\n";
-                // Remove HTML tags for textarea display
-                var cleanHelp: string = call stripHtmlTags(text=longHelp);
-                content = content + cleanHelp + "\n\n";
+                // Process content based on format
+                if format == "html" then {
+                    // Remove HTML tags for textarea display
+                    var cleanHelp: string = call stripHtmlTags(text=longHelp);
+                    content = content + cleanHelp + "\n\n";
+                } else {
+                    // Plain text, use as-is
+                    content = content + longHelp + "\n\n";
+                }
             }
             
             if example != "" then {
                 content = content + "EXAMPLE:\n";
-                content = content + example + "\n";
+                // Process example based on format
+                if format == "html" then {
+                    var cleanExample: string = call stripHtmlTags(text=example);
+                    content = content + cleanExample + "\n";
+                } else {
+                    content = content + example + "\n";
+                }
             }
             
             return content;

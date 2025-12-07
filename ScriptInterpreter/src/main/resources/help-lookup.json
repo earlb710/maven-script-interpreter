@@ -4,6 +4,7 @@
   "keywords": [
     {
       "keyword": "var",
+      "format": "text",
       "short_description": "Declares a variable",
       "long_help": "The 'var' keyword is used to declare a new variable. Variables can hold values of any data type including strings, numbers, booleans, JSON objects, and arrays. You can optionally specify the data type using the syntax 'var name:type = value;' (e.g., var x:int=10;).",
       "example": "var myName = \"John\";\nvar age = 25;\nvar isActive = true;\nvar x:int = 10;\nvar count:long = 1000000;"
@@ -82,6 +83,7 @@
     },
     {
       "keyword": "connect",
+      "format": "html",
       "short_description": "Establishes database connection",
       "long_help": "The 'connect' keyword creates a new database connection using a JDBC connection string. Supports Oracle, MySQL, and PostgreSQL.<br><br><b>Note:</b> The word 'connect' is a reserved keyword for database connections. Builtin functions can also use 'connect' as a method name when prefixed with their module name, similar to how <code>ftp.open</code> and <code>mail.open</code> work.",
       "example": "connect db = \"jdbc:oracle:thin:@//host:1521/service\";\nconnect mysqlDb = \"jdbc:mysql://localhost:3306/mydb\";"
@@ -100,6 +102,7 @@
     },
     {
       "keyword": "open",
+      "format": "html",
       "short_description": "Opens a database cursor",
       "long_help": "The 'open' keyword executes a cursor query with optional bind parameters, preparing it for iteration.<br><br><b>Note:</b> The word 'open' can also be used as a method name in builtin functions when prefixed with a module name (e.g., <code>ftp.open</code>, <code>mail.open</code>, <code>file.open</code>). When used alone, it acts as a cursor keyword.",
       "example": "// As a cursor keyword:\nopen c(id: 123, status: \"active\");\n\n// As a builtin method:\nvar handle = call ftp.open(\"ftp.example.com\");"
@@ -204,6 +207,7 @@
   "builtins": [
     {
       "function": "file.readTextFile",
+      "format": "html",
       "short_description": "Reads text file contents",
       "long_help": "Reads the entire contents of a text file and returns it as a string. The file must be in a safe directory or the<br>script's own directory.",
       "parameters": [
