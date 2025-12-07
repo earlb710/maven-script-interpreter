@@ -740,6 +740,9 @@ public class EbsConsoleHandler extends EbsHandler {
      * and other places that need to execute EBS scripts. It runs the script in a background
      * thread to avoid blocking the UI.
      * 
+     * For application screens called from menus, this method temporarily sets the resources
+     * directory as a safe directory so scripts can access resources like help-lookup.json.
+     * 
      * @param resourcePath The path to the script resource (e.g., "/scripts/config_changes.ebs")
      * @param scriptName A friendly name for the script (used in log messages)
      */
@@ -763,8 +766,14 @@ public class EbsConsoleHandler extends EbsHandler {
                 });
             }
             
+            // Set the resources directory as safe for application screens
+            // This allows scripts to access resources like help-lookup.json
+            Path resourcesDir = Path.of(System.getProperty("user.dir"), "ScriptInterpreter", "src", "main", "resources").toAbsolutePath().normalize();
+            
             // Execute script in background thread like the Run button does
             Thread t = new Thread(() -> {
+                // Set the resources directory as the context source directory for this script execution
+                Util.setCurrentContextSourceDir(resourcesDir);
                 try {
                     // Submit script for execution
                     submit(script);
@@ -790,6 +799,9 @@ public class EbsConsoleHandler extends EbsHandler {
                             statusBar.setMessage(displayMsg, errorMsg);
                         }
                     });
+                } finally {
+                    // Clear the context source directory after execution
+                    Util.clearCurrentContextSourceDir();
                 }
             }, "script-runner");  // Use fixed thread name to avoid potential issues with special characters
             t.setDaemon(true);
