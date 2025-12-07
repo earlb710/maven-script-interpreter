@@ -850,7 +850,7 @@ treeDisplay = call json.set(treeDisplay, "labelText", "");
 treeDisplay = call json.set(treeDisplay, "displayRecords", 30);
 treeDisplay = call json.set(treeDisplay, "expandAll", true);
 treeDisplay = call json.set(treeDisplay, "showRoot", false);
-treeDisplay = call json.set(treeDisplay, "onChange", "set helpScreen.helpContent = call getHelpContent(helpScreen.selectedTopic);");
+treeDisplay = call json.set(treeDisplay, "onChange", "call scr.setProperty(\"helpScreen.helpContentView\", \"text\", call getHelpContent(helpScreen.selectedTopic));");
 
 // Wrap tree structure in array
 var treeItemsArray: array[*];
@@ -915,8 +915,8 @@ print "Screen JSON built programmatically";
 // Create the help screen from JSON variable
 screen helpScreen = screenJson;
 
-// Set initial content
-call scr.setProperty("helpScreen.helpContent", "text", call getHelpContent(""));
+// Set initial content (use item name, not varRef)
+call scr.setProperty("helpScreen.helpContentView", "text", call getHelpContent(""));
 
 // Show the screen
 show screen helpScreen;
