@@ -50,8 +50,8 @@ var BLACK: int = 1;
 var COLOR_BG_MAIN: string = "#2c2c2c";           // Main background - dark gray
 var COLOR_BG_TIMER: string = "#3c3c3c";          // Timer area background - medium dark gray
 var COLOR_BG_BOARD: string = "#654321";          // Board container background - brown
-var COLOR_CELL_LIGHT: string = "#F0D9B5";        // Light chess squares - beige
-var COLOR_CELL_DARK: string = "#B58863";         // Dark chess squares - brown
+var COLOR_CELL_LIGHT: string = "#ffffff";        // Light chess squares - white
+var COLOR_CELL_DARK: string = "#000000";         // Dark chess squares - black
 var COLOR_TEXT_WHITE: string = "#ffffff";        // White text - for labels on dark backgrounds
 var COLOR_TEXT_SEPARATOR: string = "#cccccc";    // Separator text - light gray (improved from #666666)
 var COLOR_TIMER_WHITE: string = "#00ff00";       // White player timer - bright green
@@ -368,7 +368,7 @@ screen chessScreen = {
                 {
                     "name": "boardAndHistoryContainer",
                     "type": "hbox",
-                    "spacing": "10",
+                    "spacing": "0",
                     "padding": "0",
                     "style": "-fx-background-color: $COLOR_BG_MAIN;",
                     "areas": [
@@ -510,9 +510,11 @@ screen chessScreen = {
                     "padding": "10",
                     "minWidth": "300",
                     "maxWidth": "300",
+                    "minHeight": "624",
+                    "maxHeight": "624",
                     "style": "-fx-background-color: $COLOR_MOVE_HISTORY_BG; -fx-background-radius: 5;",
                     "items": [
-                        {"name": "moveHistoryTitle", "display": {"type": "label", "labelText": "Move History", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "16px", "labelBold": true}}
+                        {"name": "moveHistoryTitle", "display": {"type": "label", "labelText": "Move History", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "16px", "labelBold": true}, "labelPos": "top"}
                     ],
                     "areas": [
                         {
@@ -521,7 +523,7 @@ screen chessScreen = {
                             "spacing": "0",
                             "padding": "0",
                             "items": [
-                                {"name": "moveHistoryText", "varRef": "moveHistory", "display": {"type": "textarea", "editable": false, "wrapText": true, "prefRowCount": 30, "style": "-fx-control-inner-background: $COLOR_MOVE_HISTORY_BG; -fx-text-fill: $COLOR_MOVE_HISTORY_TEXT; -fx-font-family: 'Courier New'; -fx-font-size: 12px; -fx-border-color: #555555; -fx-border-width: 1;"}}
+                                {"name": "moveHistoryText", "varRef": "moveHistory", "display": {"type": "textarea", "editable": false, "wrapText": true, "prefRowCount": 30, "style": "-fx-control-inner-background: $COLOR_MOVE_HISTORY_BG; -fx-text-fill: $COLOR_MOVE_HISTORY_TEXT; -fx-font-family: 'Courier New'; -fx-font-size: 12px; -fx-border-color: #555555; -fx-border-width: 1;"}, "labelPos": "top"}
                             ]
                         }
                     ]
