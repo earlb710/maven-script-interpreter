@@ -1274,6 +1274,109 @@ public class BuiltinsScreen {
     }
 
     /**
+     * scr.snapshot(screenName?) -> IMAGE
+     * Takes a screenshot of the specified screen (or current screen if not specified).
+     * Returns an EbsImage containing the captured screenshot.
+     */
+    public static Object screenSnapshot(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (args.length > 0 && args[0] != null) ? (String) args[0] : null;
+
+        // If no screen name provided, determine from thread context
+        if (screenName == null || screenName.isEmpty()) {
+            screenName = context.getCurrentScreen();
+            if (screenName == null) {
+                throw new InterpreterError(
+                        "scr.snapshot: No screen name specified and not executing in a screen context. "
+                        + "Provide a screen name or call from within screen event handlers.");
+            }
+        }
+        
+        // Normalize screen name to lowercase to match how screens are stored
+        screenName = screenName.toLowerCase();
+
+        // Check if screen exists
+        if (!context.getScreens().containsKey(screenName)) {
+            throw new InterpreterError("scr.snapshot: Screen '" + screenName + "' does not exist or is not shown.");
+        }
+
+        javafx.stage.Stage stage = context.getScreens().get(screenName);
+        if (stage == null) {
+            throw new InterpreterError("scr.snapshot: Screen '" + screenName + "' is still being initialized.");
+        }
+
+        final String finalScreenName = screenName;
+        
+        // Capture the screenshot on JavaFX Application Thread using CountDownLatch for synchronization
+        final java.util.concurrent.atomic.AtomicReference<com.eb.script.image.EbsImage> imageRef 
+            = new java.util.concurrent.atomic.AtomicReference<>();
+        final java.util.concurrent.atomic.AtomicReference<InterpreterError> errorRef 
+            = new java.util.concurrent.atomic.AtomicReference<>();
+        final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
+
+        javafx.application.Platform.runLater(() -> {
+            try {
+                javafx.scene.Scene scene = stage.getScene();
+                if (scene == null) {
+                    errorRef.set(new InterpreterError("scr.snapshot: Screen '" + finalScreenName + "' has no scene to capture."));
+                    latch.countDown();
+                    return;
+                }
+
+                // Take the snapshot
+                javafx.scene.image.WritableImage snapshot = scene.snapshot(null);
+                
+                if (snapshot == null) {
+                    errorRef.set(new InterpreterError("scr.snapshot: Failed to capture screenshot of screen '" + finalScreenName + "'."));
+                    latch.countDown();
+                    return;
+                }
+
+                // Create EbsImage from the snapshot
+                com.eb.script.image.EbsImage ebsImage = new com.eb.script.image.EbsImage(
+                    snapshot, 
+                    finalScreenName + "_screenshot", 
+                    "png"
+                );
+                
+                imageRef.set(ebsImage);
+                
+                if (context.getOutput() != null) {
+                    context.getOutput().printlnOk("Screenshot captured from screen '" + finalScreenName + "' (" 
+                        + (int)snapshot.getWidth() + "x" + (int)snapshot.getHeight() + " pixels)");
+                }
+            } catch (Exception e) {
+                errorRef.set(new InterpreterError("scr.snapshot: Error capturing screenshot: " + e.getMessage()));
+            } finally {
+                latch.countDown();
+            }
+        });
+
+        // Wait for the snapshot to complete (with timeout)
+        try {
+            boolean completed = latch.await(5, java.util.concurrent.TimeUnit.SECONDS);
+            if (!completed) {
+                throw new InterpreterError("scr.snapshot: Timeout waiting for screenshot capture.");
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new InterpreterError("scr.snapshot: Interrupted while waiting for screenshot capture.");
+        }
+
+        // Check if there was an error
+        if (errorRef.get() != null) {
+            throw errorRef.get();
+        }
+
+        // Return the captured image
+        com.eb.script.image.EbsImage result = imageRef.get();
+        if (result == null) {
+            throw new InterpreterError("scr.snapshot: Failed to capture screenshot (result was null).");
+        }
+        
+        return result;
+    }
+
+    /**
      * Helper method to recursively find an area by name.
      */
     private static AreaDefinition findAreaByName(List<AreaDefinition> areas, String areaName) {

@@ -1,0 +1,74 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: scr.snapshot builtin - Capture a screenshot of a screen
+// Syntax: call scr.snapshot("screenName") or call scr.snapshot() from within screen context
+// Returns: IMAGE (EbsImage) containing the captured screenshot
+
+// Define a simple test screen
+screen testScreen = {
+    "title": "Screenshot Test Screen",
+    "width": 500,
+    "height": 400,
+    "vars": [
+        {
+            "name": "heading",
+            "type": "string",
+            "default": "Welcome to the Screenshot Test",
+            "display": {
+                "type": "label"
+            }
+        },
+        {
+            "name": "message",
+            "type": "string",
+            "default": "This screen will be captured as a screenshot",
+            "display": {
+                "type": "label"
+            }
+        },
+        {
+            "name": "captureBtn",
+            "type": "string",
+            "default": "Capture Screenshot",
+            "display": {
+                "type": "button",
+                "onClick": "captureScreenshot"
+            }
+        }
+    ]
+};
+
+// Show the screen
+show screen testScreen;
+print "Test screen is now visible";
+
+// Function to capture the screenshot
+captureScreenshot() return void {
+    print "Capturing screenshot of testScreen...";
+    
+    // Capture the screenshot
+    image ebsImage = call scr.snapshot("testScreen");
+    
+    // Get image information
+    int width = call image.getWidth(ebsImage);
+    int height = call image.getHeight(ebsImage);
+    string name = call image.getName(ebsImage);
+    string type = call image.getType(ebsImage);
+    
+    print "Screenshot captured successfully!";
+    print "  Name: " + name;
+    print "  Type: " + type;
+    print "  Dimensions: " + width + "x" + height + " pixels";
+    
+    // Save the screenshot to a file
+    string filePath = "testScreen_screenshot.png";
+    bool saved = call image.save(ebsImage, filePath);
+    
+    if (saved) {
+        print "Screenshot saved to: " + filePath;
+    } else {
+        print "Failed to save screenshot";
+    }
+}
+
+print "Click the 'Capture Screenshot' button to test the functionality";
+print "The screenshot will be saved as testScreen_screenshot.png";
