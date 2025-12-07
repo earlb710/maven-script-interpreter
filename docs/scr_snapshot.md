@@ -3,6 +3,16 @@
 ## Overview
 The `scr.snapshot` builtin function captures a screenshot of a JavaFX screen and stores it as an `EbsImage` object.
 
+## Keyboard Shortcut
+You can also capture screenshots using **Ctrl+P** while a screen is active. This saves the screenshot to the system temp directory with format `{screenName}_{sequence}.png` and an auto-incrementing sequence number.
+
+Example: If you press Ctrl+P three times on a screen named "myScreen", it will create:
+- `{TEMP_DIR}/myScreen_001.png`
+- `{TEMP_DIR}/myScreen_002.png`
+- `{TEMP_DIR}/myScreen_003.png`
+
+Where `{TEMP_DIR}` is the system temporary directory (e.g., `/tmp/` on Linux/Mac, `C:\Users\{user}\AppData\Local\Temp\` on Windows).
+
 ## Syntax
 ```ebs
 image ebsImage = call scr.snapshot(screenName?)
@@ -109,6 +119,18 @@ The function throws an `InterpreterError` in the following cases:
 - Screen has no scene to capture
 - Screenshot capture fails
 - Timeout waiting for capture (10 seconds)
+
+## Keyboard Shortcut Details
+
+The **Ctrl+P** keyboard shortcut provides quick screenshot capture:
+- **Location**: Screenshots are saved to the system temporary directory (`java.io.tmpdir`)
+- **Naming**: Format is `{screenName}_{sequence}.png` where sequence is a 3-digit number (001, 002, etc.)
+- **Sequence**: Each screen maintains its own counter that increments with each capture
+- **Format**: Always saves as PNG format
+- **Feedback**: Success message is printed to console output with full file path
+- **Cross-platform**: Uses system temp directory, works on Windows, Linux, and macOS
+
+This is useful for quick debugging, documentation, or capturing screen states during development.
 
 ## Implementation Notes
 
