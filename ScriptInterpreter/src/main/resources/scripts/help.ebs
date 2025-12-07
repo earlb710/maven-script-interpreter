@@ -800,8 +800,8 @@ getHelpContent(topic: string) return string {
     return content;
 }
 
-// Create the help screen with tree view on left and content on right
-screen helpScreen = {
+// Build the screen JSON programmatically
+var screenJson: json = {
     "title": "EBS Syntax Help",
     "width": 1000,
     "height": 700,
@@ -817,61 +817,89 @@ screen helpScreen = {
             "default": ""
         }
     ],
-    "area": [
-        {
-            "name": "mainLayout",
-            "type": "hbox",
-            "spacing": "0",
-            "padding": "0",
-            "areas": [
-                {
-                    "name": "treeArea",
-                    "type": "vbox",
-                    "spacing": "0",
-                    "width": "250",
-                    "style": "-fx-border-color: #cccccc; -fx-border-width: 0 1 0 0;",
-                    "items": [
-                        {
-                            "name": "helpTree",
-                            "varRef": "selectedTopic",
-                            "seq": 1,
-                            "display": {
-                                "type": "treeview",
-                                "labelText": "",
-                                "displayRecords": 30,
-                                "expandAll": true,
-                                "showRoot": false,
-                                "onChange": "set helpScreen.helpContent = call getHelpContent(helpScreen.selectedTopic);",
-                                "treeItems": [treeStructure]
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "contentArea",
-                    "type": "vbox",
-                    "spacing": "5",
-                    "padding": "10",
-                    "items": [
-                        {
-                            "name": "helpContentView",
-                            "varRef": "helpContent",
-                            "seq": 1,
-                            "display": {
-                                "type": "textarea",
-                                "labelText": "",
-                                "editable": false,
-                                "displayRecords": 35,
-                                "wrapText": true,
-                                "style": "-fx-font-family: 'Consolas', 'Monaco', 'Courier New', monospace; -fx-font-size: 12px;"
-                            }
-                        }
-                    ]
-                }
-            ]
-        }
-    ]
+    "area": []
 };
+
+// Build the area array
+var mainLayoutAreas: array[*];
+
+// Tree area
+var treeAreaItems: array[*];
+var helpTreeItem: json = {};
+helpTreeItem = call json.set(helpTreeItem, "name", "helpTree");
+helpTreeItem = call json.set(helpTreeItem, "varRef", "selectedTopic");
+helpTreeItem = call json.set(helpTreeItem, "seq", 1);
+
+var treeDisplay: json = {};
+treeDisplay = call json.set(treeDisplay, "type", "treeview");
+treeDisplay = call json.set(treeDisplay, "labelText", "");
+treeDisplay = call json.set(treeDisplay, "displayRecords", 30);
+treeDisplay = call json.set(treeDisplay, "expandAll", true);
+treeDisplay = call json.set(treeDisplay, "showRoot", false);
+treeDisplay = call json.set(treeDisplay, "onChange", "set helpScreen.helpContent = call getHelpContent(helpScreen.selectedTopic);");
+
+// Wrap tree structure in array
+var treeItemsArray: array[*];
+call array.push(treeItemsArray, treeStructure);
+treeDisplay = call json.set(treeDisplay, "treeItems", treeItemsArray);
+
+helpTreeItem = call json.set(helpTreeItem, "display", treeDisplay);
+call array.push(treeAreaItems, helpTreeItem);
+
+var treeArea: json = {};
+treeArea = call json.set(treeArea, "name", "treeArea");
+treeArea = call json.set(treeArea, "type", "vbox");
+treeArea = call json.set(treeArea, "spacing", "0");
+treeArea = call json.set(treeArea, "width", "250");
+treeArea = call json.set(treeArea, "style", "-fx-border-color: #cccccc; -fx-border-width: 0 1 0 0;");
+treeArea = call json.set(treeArea, "items", treeAreaItems);
+
+call array.push(mainLayoutAreas, treeArea);
+
+// Content area
+var contentAreaItems: array[*];
+var helpContentItem: json = {};
+helpContentItem = call json.set(helpContentItem, "name", "helpContentView");
+helpContentItem = call json.set(helpContentItem, "varRef", "helpContent");
+helpContentItem = call json.set(helpContentItem, "seq", 1);
+
+var contentDisplay: json = {};
+contentDisplay = call json.set(contentDisplay, "type", "textarea");
+contentDisplay = call json.set(contentDisplay, "labelText", "");
+contentDisplay = call json.set(contentDisplay, "editable", false);
+contentDisplay = call json.set(contentDisplay, "displayRecords", 35);
+contentDisplay = call json.set(contentDisplay, "wrapText", true);
+contentDisplay = call json.set(contentDisplay, "style", "-fx-font-family: 'Consolas', 'Monaco', 'Courier New', monospace; -fx-font-size: 12px;");
+
+helpContentItem = call json.set(helpContentItem, "display", contentDisplay);
+call array.push(contentAreaItems, helpContentItem);
+
+var contentArea: json = {};
+contentArea = call json.set(contentArea, "name", "contentArea");
+contentArea = call json.set(contentArea, "type", "vbox");
+contentArea = call json.set(contentArea, "spacing", "5");
+contentArea = call json.set(contentArea, "padding", "10");
+contentArea = call json.set(contentArea, "items", contentAreaItems);
+
+call array.push(mainLayoutAreas, contentArea);
+
+// Main layout
+var mainLayout: json = {};
+mainLayout = call json.set(mainLayout, "name", "mainLayout");
+mainLayout = call json.set(mainLayout, "type", "hbox");
+mainLayout = call json.set(mainLayout, "spacing", "0");
+mainLayout = call json.set(mainLayout, "padding", "0");
+mainLayout = call json.set(mainLayout, "areas", mainLayoutAreas);
+
+var areaArray: array[*];
+call array.push(areaArray, mainLayout);
+
+screenJson = call json.set(screenJson, "area", areaArray);
+
+print "Screen JSON built programmatically";
+
+// Create the help screen from JSON variable
+screen helpScreen = screenJson;
 
 // Set initial content
 call scr.setValue(helpScreen, "helpContent", call getHelpContent(""));
