@@ -102,8 +102,11 @@ public class ControlUpdater {
         } else if (control instanceof javafx.scene.layout.StackPane) {
             // Check if StackPane contains an ImageView (wrapped for background support)
             javafx.scene.layout.StackPane stackPane = (javafx.scene.layout.StackPane) control;
-            if (!stackPane.getChildren().isEmpty() && stackPane.getChildren().get(0) instanceof ImageView) {
-                updateImageView(stackPane.getChildren().get(0), value);
+            if (!stackPane.getChildren().isEmpty()) {
+                Node firstChild = stackPane.getChildren().get(0);
+                if (firstChild != null && firstChild instanceof ImageView) {
+                    updateImageView(firstChild, value);
+                }
             }
         }
     }
