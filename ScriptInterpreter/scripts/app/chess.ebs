@@ -57,6 +57,8 @@ var COLOR_TEXT_SEPARATOR: string = "#cccccc";    // Separator text - light gray 
 var COLOR_TIMER_WHITE: string = "#00ff00";       // White player timer - bright green
 var COLOR_TIMER_BLACK: string = "#ff6600";       // Black player timer - orange
 var COLOR_BUTTON_NEW_GAME: string = "#ffff00";   // New Game button - yellow
+var COLOR_MOVE_HISTORY_BG: string = "#2c2c2c";   // Move history background
+var COLOR_MOVE_HISTORY_TEXT: string = "#ffffff"; // Move history text color
 
 // Chess piece Unicode symbols (for console display)
 var whitePieces: string[7];
@@ -298,12 +300,13 @@ resetGame() {
 // Define the chess screen with timer and 10x10 grid board (8x8 + labels)
 screen chessScreen = {
     "title": "Chess Game",
-    "width": 650,
+    "width": 980,
     "height": 780,
     "vars": [
         {"name": "whiteTimer", "type": "string", "default": "10:00"},
         {"name": "blackTimer", "type": "string", "default": "10:00"},
         {"name": "statusMessage", "type": "string", "default": "White to move"},
+        {"name": "moveHistory", "type": "string", "default": "Game started...\n"},
         {"name": "c00", "type": "image"},
         {"name": "c01", "type": "image"},
         {"name": "c02", "type": "image"},
@@ -363,22 +366,29 @@ screen chessScreen = {
                     ]
                 },
                 {
-                    "name": "boardContainer",
-                    "type": "vbox",
-                    "spacing": "0",
-                    "padding": "10",
-                    "minWidth": "624",
-                    "maxWidth": "624",
-                    "minHeight": "624",
-                    "maxHeight": "624",
-                    "style": "-fx-background-color: $COLOR_BG_BOARD; -fx-background-radius: 5;",
+                    "name": "boardAndHistoryContainer",
+                    "type": "hbox",
+                    "spacing": "10",
+                    "padding": "0",
+                    "style": "-fx-background-color: $COLOR_BG_MAIN;",
                     "areas": [
                         {
-                            "name": "chessBoard",
-                            "type": "gridpane",
+                            "name": "boardContainer",
+                            "type": "vbox",
                             "spacing": "0",
-                            "disableLabelAlignment": true,
-                            "style": "-fx-hgap: 0; -fx-vgap: 0; -fx-padding: 2;",
+                            "padding": "10",
+                            "minWidth": "624",
+                            "maxWidth": "624",
+                            "minHeight": "624",
+                            "maxHeight": "624",
+                            "style": "-fx-background-color: $COLOR_BG_BOARD; -fx-background-radius: 5;",
+                            "areas": [
+                                {
+                                    "name": "chessBoard",
+                                    "type": "gridpane",
+                                    "spacing": "0",
+                                    "disableLabelAlignment": true,
+                                    "style": "-fx-hgap: 0; -fx-vgap: 0; -fx-padding: 2;",
                             "items": [
                                 {"name": "lblEmpty1", "layoutPos": "0,0", "display": {"type": "label", "labelText": "", "style": "-fx-min-width: 25; -fx-min-height: 25;"}},
                                 {"name": "lblColA", "layoutPos": "0,1", "display": {"type": "label", "labelText": "a", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 60; -fx-min-height: 25; -fx-alignment: center;"}},
@@ -493,6 +503,31 @@ screen chessScreen = {
                         }
                     ]
                 },
+                {
+                    "name": "moveHistoryContainer",
+                    "type": "vbox",
+                    "spacing": "5",
+                    "padding": "10",
+                    "minWidth": "300",
+                    "maxWidth": "300",
+                    "style": "-fx-background-color: $COLOR_MOVE_HISTORY_BG; -fx-background-radius: 5;",
+                    "items": [
+                        {"name": "moveHistoryTitle", "display": {"type": "label", "labelText": "Move History", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "16px", "labelBold": true}}
+                    ],
+                    "areas": [
+                        {
+                            "name": "moveHistoryArea",
+                            "type": "vbox",
+                            "spacing": "0",
+                            "padding": "0",
+                            "items": [
+                                {"name": "moveHistoryText", "varRef": "moveHistory", "display": {"type": "textarea", "editable": false, "wrapText": true, "prefRowCount": 30, "style": "-fx-control-inner-background: $COLOR_MOVE_HISTORY_BG; -fx-text-fill: $COLOR_MOVE_HISTORY_TEXT; -fx-font-family: 'Courier New'; -fx-font-size: 12px; -fx-border-color: #555555; -fx-border-width: 1;"}}
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
                 {
                     "name": "statusArea",
                     "type": "hbox",
