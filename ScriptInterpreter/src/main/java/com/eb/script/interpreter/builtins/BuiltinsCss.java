@@ -643,6 +643,8 @@ public class BuiltinsCss {
      * @return A URL string that can be loaded by JavaFX, or null if not found
      */
     private static String resolveCssUrl(String cssPath) {
+        System.out.println("DEBUG: Resolving CSS path: " + cssPath);
+        
         // Try as classpath resource first
         String resourcePath = cssPath;
         if (!resourcePath.startsWith("/")) {
@@ -653,40 +655,51 @@ public class BuiltinsCss {
             resourcePath = "/css/" + cssPath;
         }
 
+        System.out.println("DEBUG: Trying classpath resource: " + resourcePath);
         URL resourceUrl = BuiltinsCss.class.getResource(resourcePath);
         if (resourceUrl != null) {
+            System.out.println("DEBUG: Found via classpath: " + resourceUrl.toExternalForm());
             return resourceUrl.toExternalForm();
         }
 
         // Also try without the /css/ prefix
         if (!cssPath.startsWith("/")) {
-            resourceUrl = BuiltinsCss.class.getResource("/" + cssPath);
+            String altPath = "/" + cssPath;
+            System.out.println("DEBUG: Trying classpath resource (alternative): " + altPath);
+            resourceUrl = BuiltinsCss.class.getResource(altPath);
             if (resourceUrl != null) {
+                System.out.println("DEBUG: Found via classpath (alternative): " + resourceUrl.toExternalForm());
                 return resourceUrl.toExternalForm();
             }
         }
 
         // Try as file path
+        System.out.println("DEBUG: Trying as file path: " + cssPath);
         Path filePath = Path.of(cssPath);
         if (Files.exists(filePath)) {
+            System.out.println("DEBUG: Found as file: " + filePath.toUri().toString());
             return filePath.toUri().toString();
         }
 
         // Try resolving with sandbox
         try {
+            System.out.println("DEBUG: Trying sandbox resolution");
             Path sandboxedPath = com.eb.util.Util.resolveSandboxedPath(cssPath);
             if (Files.exists(sandboxedPath)) {
+                System.out.println("DEBUG: Found via sandbox: " + sandboxedPath.toUri().toString());
                 return sandboxedPath.toUri().toString();
             }
         } catch (Exception e) {
-            // Ignore sandbox resolution errors
+            System.out.println("DEBUG: Sandbox resolution failed: " + e.getMessage());
         }
 
         // If it looks like a URL already, return it as-is
         if (cssPath.startsWith("file:") || cssPath.startsWith("http:") || cssPath.startsWith("https:")) {
+            System.out.println("DEBUG: Treating as direct URL: " + cssPath);
             return cssPath;
         }
 
+        System.out.println("DEBUG: CSS file not found via any method");
         return null;
     }
 

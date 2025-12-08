@@ -1,6 +1,10 @@
 // Example: css.loadCss - Load custom CSS stylesheet into a screen
 // Demonstrates dynamic CSS loading for screen styling
 
+// NOTE: The custom-screen.css file is in the classpath at:
+//       ScriptInterpreter/src/main/resources/css/custom-screen.css
+// This allows it to be found by the css.loadCss builtin automatically
+
 // Define a screen with CSS classes
 screen styledScreen = {
     "title": "CSS Loading Example",
@@ -40,7 +44,7 @@ screen styledScreen = {
 show screen styledScreen;
 
 // Load custom CSS after screen is shown
-// Can use relative path if CSS is in same directory
+// The builtin will find custom-screen.css in the classpath at /css/custom-screen.css
 call css.loadCss("styledscreen", "custom-screen.css");
 
 print "Screen displayed with custom CSS applied";
