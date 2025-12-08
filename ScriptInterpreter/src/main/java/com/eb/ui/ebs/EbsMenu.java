@@ -54,6 +54,20 @@ public class EbsMenu extends MenuBar {
             handler.chooseOpenFile();
             refreshRecentMenu();
         });
+        
+        // --- New Project ---
+        MenuItem newProjectItem = new MenuItem("New Project…");
+        newProjectItem.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.CONTROL_DOWN, KeyCombination.SHIFT_DOWN));
+        newProjectItem.setOnAction(event -> {
+            handler.createNewProject();
+        });
+        
+        // --- Open Project ---
+        MenuItem openProjectItem = new MenuItem("Open Project…");
+        openProjectItem.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_DOWN, KeyCombination.SHIFT_DOWN));
+        openProjectItem.setOnAction(event -> {
+            handler.openProject();
+        });
 
         // --- Recent files submenu ---
         refreshRecentMenu();  // builds its items from 'recentFiles'
@@ -103,7 +117,7 @@ public class EbsMenu extends MenuBar {
             }
         });
 
-        fileMenu.getItems().addAll(newItem, openItem, recentMenu, new SeparatorMenuItem(), exitItem);
+        fileMenu.getItems().addAll(newItem, openItem, new SeparatorMenuItem(), newProjectItem, openProjectItem, new SeparatorMenuItem(), recentMenu, new SeparatorMenuItem(), exitItem);
         getMenus().add(fileMenu);
 
         // --- Edit Menu ---

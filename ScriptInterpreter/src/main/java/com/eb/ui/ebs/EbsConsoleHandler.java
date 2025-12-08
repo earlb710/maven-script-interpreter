@@ -874,4 +874,206 @@ public class EbsConsoleHandler extends EbsHandler {
             });
         }
     }
+    
+    /**
+     * Create a new project with a project.json file.
+     * Prompts user to select a directory and creates a default project.json.
+     */
+    public void createNewProject() {
+        try {
+            // Show directory chooser dialog
+            javafx.stage.DirectoryChooser dirChooser = new javafx.stage.DirectoryChooser();
+            dirChooser.setTitle("Select Directory for New Project");
+            dirChooser.setInitialDirectory(Util.SANDBOX_ROOT.toFile());
+            
+            File selectedDir = dirChooser.showDialog(stage);
+            if (selectedDir == null) {
+                return; // User cancelled
+            }
+            
+            // Create project.json
+            Path projectJsonPath = selectedDir.toPath().resolve("project.json");
+            
+            // Check if project.json already exists
+            if (Files.exists(projectJsonPath)) {
+                Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                        "Project file already exists in this directory:\n" + projectJsonPath + "\n\nOverwrite it?",
+                        ButtonType.OK, ButtonType.CANCEL);
+                confirm.setHeaderText("Project Already Exists");
+                confirm.initOwner(stage);
+                confirm.initModality(Modality.APPLICATION_MODAL);
+                var res = confirm.showAndWait();
+                if (res.isEmpty() || res.get() == ButtonType.CANCEL) {
+                    return;
+                }
+            }
+            
+            // Create default project configuration
+            String projectName = selectedDir.getName();
+            String projectJson = createDefaultProjectJson(projectName, selectedDir.getAbsolutePath());
+            
+            // Write project.json
+            Files.writeString(projectJsonPath, projectJson, StandardCharsets.UTF_8);
+            
+            // Load the project into global environment
+            loadProjectJson(projectJsonPath);
+            
+            ScriptArea output = env.getOutputArea();
+            output.printlnOk("New project created: " + projectJsonPath);
+            output.printlnInfo("Project loaded into global variable 'project'");
+            
+        } catch (Exception ex) {
+            submitErrors("Failed to create new project: " + ex.getMessage());
+        }
+    }
+    
+    /**
+     * Open an existing project by selecting a project.json file.
+     */
+    public void openProject() {
+        try {
+            FileChooser fc = new FileChooser();
+            fc.setTitle("Open Project");
+            fc.setInitialDirectory(Util.SANDBOX_ROOT.toFile());
+            fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Project Files", "project.json"));
+            fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("All Files", "*.*"));
+            
+            File projectFile = fc.showOpenDialog(stage);
+            if (projectFile == null) {
+                return; // User cancelled
+            }
+            
+            Path projectJsonPath = projectFile.toPath();
+            
+            // Load the project into global environment
+            loadProjectJson(projectJsonPath);
+            
+            ScriptArea output = env.getOutputArea();
+            output.printlnOk("Project opened: " + projectJsonPath);
+            output.printlnInfo("Project loaded into global variable 'project'");
+            
+        } catch (Exception ex) {
+            submitErrors("Failed to open project: " + ex.getMessage());
+        }
+    }
+    
+    /**
+     * Create default project.json content.
+     */
+    private String createDefaultProjectJson(String projectName, String projectDirectory) {
+        StringBuilder json = new StringBuilder();
+        json.append("{\n");
+        json.append("  \"name\": \"").append(escapeJson(projectName)).append("\",\n");
+        json.append("  \"directory\": \"").append(escapeJson(projectDirectory)).append("\",\n");
+        json.append("  \"description\": \"EBS Script Project\",\n");
+        json.append("  \"version\": \"1.0.0\",\n");
+        json.append("  \"css\": [\n");
+        json.append("    \"console.css\"\n");
+        json.append("  ],\n");
+        json.append("  \"mainScript\": \"main.ebs\",\n");
+        json.append("  \"settings\": {\n");
+        json.append("    \"autoLoad\": true\n");
+        json.append("  }\n");
+        json.append("}\n");
+        return json.toString();
+    }
+    
+    /**
+     * Load project.json into global environment and apply CSS files.
+     */
+    private void loadProjectJson(Path projectJsonPath) throws Exception {
+        // Read and parse project.json
+        String jsonContent = Files.readString(projectJsonPath, StandardCharsets.UTF_8);
+        Object projectObj = Json.parse(jsonContent);
+        
+        if (!(projectObj instanceof Map)) {
+            throw new Exception("Invalid project.json: root must be a JSON object");
+        }
+        
+        @SuppressWarnings("unchecked")
+        Map<String, Object> project = (Map<String, Object>) projectObj;
+        
+        // Store project in global environment
+        env.getBaseEnvironmentValues().define("project", project);
+        
+        // Apply CSS files if specified
+        if (project.containsKey("css")) {
+            Object cssObj = project.get("css");
+            if (cssObj instanceof java.util.List) {
+                @SuppressWarnings("unchecked")
+                java.util.List<Object> cssList = (java.util.List<Object>) cssObj;
+                applyCssFiles(cssList, projectJsonPath.getParent());
+            }
+        }
+    }
+    
+    /**
+     * Apply CSS files to the main scene.
+     */
+    private void applyCssFiles(java.util.List<Object> cssList, Path projectDir) {
+        javafx.application.Platform.runLater(() -> {
+            try {
+                javafx.scene.Scene scene = stage.getScene();
+                if (scene == null) {
+                    return;
+                }
+                
+                for (Object cssObj : cssList) {
+                    if (cssObj instanceof String) {
+                        String cssPath = (String) cssObj;
+                        
+                        // Try to resolve CSS path relative to project directory
+                        Path cssFile = projectDir.resolve(cssPath);
+                        String cssUrl = null;
+                        
+                        if (Files.exists(cssFile)) {
+                            // File exists in project directory
+                            cssUrl = cssFile.toUri().toString();
+                        } else {
+                            // Try as classpath resource
+                            String resourcePath = cssPath;
+                            if (!resourcePath.startsWith("/")) {
+                                resourcePath = "/" + resourcePath;
+                            }
+                            if (!resourcePath.startsWith("/css/")) {
+                                resourcePath = "/css/" + cssPath;
+                            }
+                            
+                            java.net.URL resource = getClass().getResource(resourcePath);
+                            if (resource != null) {
+                                cssUrl = resource.toExternalForm();
+                            }
+                        }
+                        
+                        if (cssUrl != null && !scene.getStylesheets().contains(cssUrl)) {
+                            scene.getStylesheets().add(cssUrl);
+                            ScriptArea output = env.getOutputArea();
+                            if (output != null) {
+                                output.printlnInfo("CSS loaded: " + cssPath);
+                            }
+                        }
+                    }
+                }
+            } catch (Exception ex) {
+                ScriptArea output = env.getOutputArea();
+                if (output != null) {
+                    output.printlnWarn("Failed to load some CSS files: " + ex.getMessage());
+                }
+            }
+        });
+    }
+    
+    /**
+     * Escape special characters for JSON strings.
+     */
+    private String escapeJson(String s) {
+        if (s == null) {
+            return "";
+        }
+        return s.replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\r", "\\r")
+                .replace("\n", "\\n")
+                .replace("\t", "\\t");
+    }
 }
