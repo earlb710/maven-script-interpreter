@@ -1734,8 +1734,22 @@ public class InterpreterScreen {
         // Extract label styling properties (for the label wrapper text)
         if (displayDef.containsKey("labelColor")) {
             metadata.labelColor = String.valueOf(displayDef.get("labelColor"));
+            // Substitute variables in labelColor (e.g., $COLOR_TEXT_RULER -> #ffcc00)
+            try {
+                metadata.labelColor = substituteVariablesInStyle(metadata.labelColor, line);
+            } catch (InterpreterError e) {
+                // Log warning and continue with unsubstituted color
+                System.err.println("Warning: Could not substitute variables in labelColor: " + e.getMessage());
+            }
         } else if (displayDef.containsKey("labelcolor")) {
             metadata.labelColor = String.valueOf(displayDef.get("labelcolor"));
+            // Substitute variables in labelColor (e.g., $COLOR_TEXT_RULER -> #ffcc00)
+            try {
+                metadata.labelColor = substituteVariablesInStyle(metadata.labelColor, line);
+            } catch (InterpreterError e) {
+                // Log warning and continue with unsubstituted color
+                System.err.println("Warning: Could not substitute variables in labelcolor: " + e.getMessage());
+            }
         }
 
         if (displayDef.containsKey("labelBold")) {
