@@ -8,6 +8,7 @@ import javafx.geometry.Insets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 /**
  * TreeView component for displaying opened projects.
@@ -202,7 +203,11 @@ public class ProjectTreeView extends VBox {
     private void refreshTreeView() {
         rootItem.getChildren().clear();
         
-        for (ProjectListManager.ProjectEntry entry : projectListManager.getProjects()) {
+        List<ProjectListManager.ProjectEntry> entries = projectListManager.getProjects();
+        System.out.println("RefreshTreeView: Found " + entries.size() + " projects to display");
+        
+        for (ProjectListManager.ProjectEntry entry : entries) {
+            System.out.println("  Adding project to tree: " + entry.getName() + " at " + entry.getPath());
             TreeItem<String> projectItem = new TreeItem<>(entry.getName());
             
             // Store full path in a label's user data (workaround for storing path)
@@ -216,5 +221,7 @@ public class ProjectTreeView extends VBox {
             
             rootItem.getChildren().add(projectItem);
         }
+        
+        System.out.println("RefreshTreeView: Tree now has " + rootItem.getChildren().size() + " child items");
     }
 }
