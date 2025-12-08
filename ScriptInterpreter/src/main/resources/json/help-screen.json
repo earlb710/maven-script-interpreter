@@ -50,7 +50,7 @@
                 "vgrow": "ALWAYS",
                 "expandAll": true,
                 "showRoot": false,
-                "onChange": "call scr.setProperty(\"helpScreen.helpContentView\", \"text\", call getHelpContent(helpScreen.selectedTopic));",
+                "onChange": "call scr.setProperty(\"helpScreen.helpContentView\", \"text\", call convertToHtml(call getHelpContent(helpScreen.selectedTopic)));",
                 "treeItems": []
               }
             }
@@ -69,11 +69,9 @@
               "varRef": "helpContent",
               "seq": 1,
               "display": {
-                "type": "textarea",
+                "type": "webview",
                 "labelText": "Help Content",
                 "labelPosition": "TOP",
-                "editable": false,
-                "wrapText": true,
                 "minWidth": "200",
                 "prefWidth": "400",
                 "maxWidth": "MAX",
@@ -81,8 +79,7 @@
                 "prefHeight": "100",
                 "maxHeight": "MAX",
                 "hgrow": "ALWAYS",
-                "vgrow": "ALWAYS",
-                "style": "-fx-font-family: 'Consolas', 'Monaco', 'Courier New', monospace; -fx-font-size: 12px;"
+                "vgrow": "ALWAYS"
               }
             }
           ]

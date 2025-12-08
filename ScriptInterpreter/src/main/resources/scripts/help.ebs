@@ -240,6 +240,25 @@ if areaArray != null && areaArray.length > 0 then {
     }
 }
 
+// Function to convert plain text to HTML with <pre> tag
+convertToHtml(text: string) return string {
+    // Escape HTML special characters
+    var html: string = text;
+    html = call str.replace(html, "&", "&amp;");
+    html = call str.replace(html, "<", "&lt;");
+    html = call str.replace(html, ">", "&gt;");
+    
+    // Wrap in HTML structure with pre tag for monospace formatting
+    var result: string = "<!DOCTYPE html><html><head><style>";
+    result = result + "body { margin: 10px; font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 12px; }";
+    result = result + "pre { margin: 0; white-space: pre-wrap; word-wrap: break-word; }";
+    result = result + "</style></head><body><pre>";
+    result = result + html;
+    result = result + "</pre></body></html>";
+    
+    return result;
+}
+
 // Function to strip HTML tags from content
 stripHtmlTags(text: string) return string {
     var cleaned: string = text;
@@ -518,8 +537,8 @@ getHelpContent(topic: string) return string {
 // Create the help screen from the modified JSON
 screen helpScreen = screenJson;
 
-// Set initial content (use item name, not varRef)
-call scr.setProperty("helpScreen.helpContentView", "text", call getHelpContent(""));
+// Set initial content (use item name, not varRef) - wrap in HTML for WebView
+call scr.setProperty("helpScreen.helpContentView", "text", call convertToHtml(call getHelpContent("")));
 
 // Show the screen
 show screen helpScreen;
