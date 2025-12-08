@@ -204,6 +204,42 @@ treeStructure = call json.set(treeStructure, "children", rootChildren);
 
 print "Tree structure built with dynamic builtins";
 
+// Load the screen definition from JSON file
+print "Loading screen definition from JSON...";
+var screenJsonText: string = call file.readTextResource("json/help-screen.json");
+var screenJson: json = call json.jsonFromString(screenJsonText);
+print "Screen definition loaded";
+
+// Inject the dynamic tree structure into the screen definition
+// Navigate to the treeItems property and set it
+var areaArray: json = call json.get(screenJson, "area");
+if areaArray != null && areaArray.length > 0 then {
+    var mainLayout: json = areaArray[0];
+    var areas: json = call json.get(mainLayout, "areas");
+    if areas != null && areas.length > 0 then {
+        var treeArea: json = areas[0];
+        var items: json = call json.get(treeArea, "items");
+        if items != null && items.length > 0 then {
+            var helpTreeItem: json = items[0];
+            var display: json = call json.get(helpTreeItem, "display");
+            if display != null then {
+                // Wrap tree structure in array and set it
+                var treeItemsArray: array[*];
+                call array.add(treeItemsArray, treeStructure);
+                display = call json.set(display, "treeItems", treeItemsArray);
+                helpTreeItem = call json.set(helpTreeItem, "display", display);
+                items = call json.set(items, 0, helpTreeItem);
+                treeArea = call json.set(treeArea, "items", items);
+                areas = call json.set(areas, 0, treeArea);
+                mainLayout = call json.set(mainLayout, "areas", areas);
+                areaArray = call json.set(areaArray, 0, mainLayout);
+                screenJson = call json.set(screenJson, "area", areaArray);
+                print "Tree items injected into screen definition";
+            }
+        }
+    }
+}
+
 // Function to strip HTML tags from content
 stripHtmlTags(text: string) return string {
     var cleaned: string = text;
@@ -479,119 +515,7 @@ getHelpContent(topic: string) return string {
     return content;
 }
 
-// Build the screen JSON programmatically
-var screenJson: json = {
-    "title": "EBS Syntax Help",
-    "width": 1000,
-    "height": 700,
-    "vars": [
-        {
-            "name": "selectedTopic",
-            "type": "string",
-            "default": ""
-        },
-        {
-            "name": "helpContent",
-            "type": "string",
-            "default": ""
-        }
-    ],
-    "area": []
-};
-
-// Build the area array
-var mainLayoutAreas: array[*];
-
-// Tree area
-var treeAreaItems: array[*];
-var helpTreeItem: json = {};
-helpTreeItem = call json.set(helpTreeItem, "name", "helpTree");
-helpTreeItem = call json.set(helpTreeItem, "varRef", "selectedTopic");
-helpTreeItem = call json.set(helpTreeItem, "seq", 1);
-
-var treeDisplay: json = {};
-treeDisplay = call json.set(treeDisplay, "type", "treeview");
-treeDisplay = call json.set(treeDisplay, "labelText", "Help Topic");
-treeDisplay = call json.set(treeDisplay, "labelPosition", "TOP");
-treeDisplay = call json.set(treeDisplay, "displayRecords", 30);
-treeDisplay = call json.set(treeDisplay, "minHeight", "200");
-treeDisplay = call json.set(treeDisplay, "prefHeight", "400");
-treeDisplay = call json.set(treeDisplay, "maxHeight", "MAX");
-treeDisplay = call json.set(treeDisplay, "vgrow", "ALWAYS");
-treeDisplay = call json.set(treeDisplay, "expandAll", true);
-treeDisplay = call json.set(treeDisplay, "showRoot", false);
-treeDisplay = call json.set(treeDisplay, "onChange", "call scr.setProperty(\"helpScreen.helpContentView\", \"text\", call getHelpContent(helpScreen.selectedTopic));");
-
-// Wrap tree structure in array
-var treeItemsArray: array[*];
-call array.add(treeItemsArray, treeStructure);
-treeDisplay = call json.set(treeDisplay, "treeItems", treeItemsArray);
-
-helpTreeItem = call json.set(helpTreeItem, "display", treeDisplay);
-call array.add(treeAreaItems, helpTreeItem);
-
-var treeArea: json = {};
-treeArea = call json.set(treeArea, "name", "treeArea");
-treeArea = call json.set(treeArea, "type", "vbox");
-treeArea = call json.set(treeArea, "spacing", "0");
-treeArea = call json.set(treeArea, "minWidth", "250");
-treeArea = call json.set(treeArea, "prefWidth", "250");
-treeArea = call json.set(treeArea, "maxWidth", "250");
-treeArea = call json.set(treeArea, "vgrow", "ALWAYS");
-treeArea = call json.set(treeArea, "style", "-fx-border-color: #cccccc; -fx-border-width: 0 1 0 0;");
-treeArea = call json.set(treeArea, "items", treeAreaItems);
-
-call array.add(mainLayoutAreas, treeArea);
-
-// Content area
-var contentAreaItems: array[*];
-var helpContentItem: json = {};
-helpContentItem = call json.set(helpContentItem, "name", "helpContentView");
-helpContentItem = call json.set(helpContentItem, "varRef", "helpContent");
-helpContentItem = call json.set(helpContentItem, "seq", 1);
-
-var contentDisplay: json = {};
-contentDisplay = call json.set(contentDisplay, "type", "textarea");
-contentDisplay = call json.set(contentDisplay, "labelText", "Help Content");
-contentDisplay = call json.set(contentDisplay, "labelPosition", "TOP");
-contentDisplay = call json.set(contentDisplay, "editable", false);
-contentDisplay = call json.set(contentDisplay, "displayRecords", 30);
-contentDisplay = call json.set(contentDisplay, "wrapText", true);
-contentDisplay = call json.set(contentDisplay, "prefHeight", "100");
-contentDisplay = call json.set(contentDisplay, "maxHeight", "MAX");
-contentDisplay = call json.set(contentDisplay, "vgrow", "ALWAYS");
-contentDisplay = call json.set(contentDisplay, "style", "-fx-font-family: 'Consolas', 'Monaco', 'Courier New', monospace; -fx-font-size: 12px;");
-
-helpContentItem = call json.set(helpContentItem, "display", contentDisplay);
-call array.add(contentAreaItems, helpContentItem);
-
-var contentArea: json = {};
-contentArea = call json.set(contentArea, "name", "contentArea");
-contentArea = call json.set(contentArea, "type", "vbox");
-contentArea = call json.set(contentArea, "spacing", "5");
-contentArea = call json.set(contentArea, "padding", "10");
-contentArea = call json.set(contentArea, "hgrow", "ALWAYS");
-contentArea = call json.set(contentArea, "vgrow", "ALWAYS");
-contentArea = call json.set(contentArea, "items", contentAreaItems);
-
-call array.add(mainLayoutAreas, contentArea);
-
-// Main layout
-var mainLayout: json = {};
-mainLayout = call json.set(mainLayout, "name", "mainLayout");
-mainLayout = call json.set(mainLayout, "type", "hbox");
-mainLayout = call json.set(mainLayout, "spacing", "0");
-mainLayout = call json.set(mainLayout, "padding", "0");
-mainLayout = call json.set(mainLayout, "areas", mainLayoutAreas);
-
-var areaArray: array[*];
-call array.add(areaArray, mainLayout);
-
-screenJson = call json.set(screenJson, "area", areaArray);
-
-print "Screen JSON built programmatically";
-
-// Create the help screen from JSON variable
+// Create the help screen from the modified JSON
 screen helpScreen = screenJson;
 
 // Set initial content (use item name, not varRef)

@@ -1,0 +1,85 @@
+{
+  "title": "EBS Syntax Help",
+  "width": 1000,
+  "height": 700,
+  "vars": [
+    {
+      "name": "selectedTopic",
+      "type": "string",
+      "default": ""
+    },
+    {
+      "name": "helpContent",
+      "type": "string",
+      "default": ""
+    }
+  ],
+  "area": [
+    {
+      "name": "mainLayout",
+      "type": "hbox",
+      "spacing": "0",
+      "padding": "0",
+      "areas": [
+        {
+          "name": "treeArea",
+          "type": "vbox",
+          "spacing": "0",
+          "minWidth": "250",
+          "prefWidth": "250",
+          "maxWidth": "250",
+          "vgrow": "ALWAYS",
+          "style": "-fx-border-color: #cccccc; -fx-border-width: 0 1 0 0;",
+          "items": [
+            {
+              "name": "helpTree",
+              "varRef": "selectedTopic",
+              "seq": 1,
+              "display": {
+                "type": "treeview",
+                "labelText": "Help Topic",
+                "labelPosition": "TOP",
+                "displayRecords": 30,
+                "minHeight": "200",
+                "prefHeight": "400",
+                "maxHeight": "MAX",
+                "vgrow": "ALWAYS",
+                "expandAll": true,
+                "showRoot": false,
+                "onChange": "call scr.setProperty(\"helpScreen.helpContentView\", \"text\", call getHelpContent(helpScreen.selectedTopic));",
+                "treeItems": []
+              }
+            }
+          ]
+        },
+        {
+          "name": "contentArea",
+          "type": "vbox",
+          "spacing": "5",
+          "padding": "10",
+          "hgrow": "ALWAYS",
+          "vgrow": "ALWAYS",
+          "items": [
+            {
+              "name": "helpContentView",
+              "varRef": "helpContent",
+              "seq": 1,
+              "display": {
+                "type": "textarea",
+                "labelText": "Help Content",
+                "labelPosition": "TOP",
+                "editable": false,
+                "displayRecords": 30,
+                "wrapText": true,
+                "prefHeight": "100",
+                "maxHeight": "MAX",
+                "vgrow": "ALWAYS",
+                "style": "-fx-font-family: 'Consolas', 'Monaco', 'Courier New', monospace; -fx-font-size: 12px;"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
