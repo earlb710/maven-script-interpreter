@@ -1467,6 +1467,198 @@ public final class Builtins {
         ));
 
         // ==========================
+        // CANVAS builtins (JavaFX drawing)
+        // ==========================
+        addBuiltin(info(
+                "canvas.create", DataType.CANVAS,
+                newParam("width", DataType.INTEGER, true),             // required; canvas width
+                newParam("height", DataType.INTEGER, true),            // required; canvas height
+                newParam("name", DataType.STRING, false)               // optional; canvas name
+        ));
+        addBuiltin(info(
+                "canvas.save", DataType.BOOL,
+                newParam("canvas", DataType.CANVAS, true),             // required; EbsCanvas
+                newParam("path", DataType.STRING, true),               // required; output file path
+                newParam("format", DataType.STRING, false)             // optional; format (png, jpg, gif, bmp)
+        ));
+        addBuiltin(info(
+                "canvas.toImage", DataType.IMAGE,
+                newParam("canvas", DataType.CANVAS, true)              // required; EbsCanvas
+        ));
+        addBuiltin(info(
+                "canvas.clear", null,
+                newParam("canvas", DataType.CANVAS, true)              // required; EbsCanvas
+        ));
+        addBuiltin(info(
+                "canvas.getWidth", DataType.INTEGER,
+                newParam("canvas", DataType.CANVAS, true)              // required; EbsCanvas
+        ));
+        addBuiltin(info(
+                "canvas.getHeight", DataType.INTEGER,
+                newParam("canvas", DataType.CANVAS, true)              // required; EbsCanvas
+        ));
+        addBuiltin(info(
+                "canvas.snapshot", DataType.IMAGE,
+                newParam("canvas", DataType.CANVAS, true),             // required; EbsCanvas
+                newParam("x", DataType.DOUBLE, false),                 // optional; snapshot x
+                newParam("y", DataType.DOUBLE, false),                 // optional; snapshot y
+                newParam("width", DataType.DOUBLE, false),             // optional; snapshot width
+                newParam("height", DataType.DOUBLE, false)             // optional; snapshot height
+        ));
+        addBuiltin(info(
+                "canvas.getName", DataType.STRING,
+                newParam("canvas", DataType.CANVAS, true)              // required; EbsCanvas
+        ));
+        addBuiltin(info(
+                "canvas.setName", DataType.CANVAS,
+                newParam("canvas", DataType.CANVAS, true),             // required; EbsCanvas
+                newParam("name", DataType.STRING, true)                // required; new canvas name
+        ));
+
+        // Draw builtins
+        addBuiltin(info(
+                "draw.line", null,
+                newParam("canvas", DataType.CANVAS, true),             // required; EbsCanvas
+                newParam("x1", DataType.DOUBLE, true),                 // required; start x
+                newParam("y1", DataType.DOUBLE, true),                 // required; start y
+                newParam("x2", DataType.DOUBLE, true),                 // required; end x
+                newParam("y2", DataType.DOUBLE, true)                  // required; end y
+        ));
+        addBuiltin(info(
+                "draw.rect", null,
+                newParam("canvas", DataType.CANVAS, true),             // required; EbsCanvas
+                newParam("x", DataType.DOUBLE, true),                  // required; x position
+                newParam("y", DataType.DOUBLE, true),                  // required; y position
+                newParam("width", DataType.DOUBLE, true),              // required; width
+                newParam("height", DataType.DOUBLE, true),             // required; height
+                newParam("fill", DataType.BOOL, false)                 // optional; fill flag
+        ));
+        addBuiltin(info(
+                "draw.circle", null,
+                newParam("canvas", DataType.CANVAS, true),             // required; EbsCanvas
+                newParam("x", DataType.DOUBLE, true),                  // required; center x
+                newParam("y", DataType.DOUBLE, true),                  // required; center y
+                newParam("radius", DataType.DOUBLE, true),             // required; radius
+                newParam("fill", DataType.BOOL, false)                 // optional; fill flag
+        ));
+        addBuiltin(info(
+                "draw.ellipse", null,
+                newParam("canvas", DataType.CANVAS, true),             // required; EbsCanvas
+                newParam("x", DataType.DOUBLE, true),                  // required; x position
+                newParam("y", DataType.DOUBLE, true),                  // required; y position
+                newParam("width", DataType.DOUBLE, true),              // required; width
+                newParam("height", DataType.DOUBLE, true),             // required; height
+                newParam("fill", DataType.BOOL, false)                 // optional; fill flag
+        ));
+        addBuiltin(info(
+                "draw.arc", null,
+                newParam("canvas", DataType.CANVAS, true),             // required; EbsCanvas
+                newParam("x", DataType.DOUBLE, true),                  // required; center x
+                newParam("y", DataType.DOUBLE, true),                  // required; center y
+                newParam("radius", DataType.DOUBLE, true),             // required; radius
+                newParam("startAngle", DataType.DOUBLE, true),         // required; start angle
+                newParam("length", DataType.DOUBLE, true),             // required; arc length
+                newParam("fill", DataType.BOOL, false)                 // optional; fill flag
+        ));
+        addBuiltin(info(
+                "draw.polygon", null,
+                newParam("canvas", DataType.CANVAS, true),             // required; EbsCanvas
+                newParam("points", DataType.ARRAY, true),              // required; array of coordinates
+                newParam("fill", DataType.BOOL, false)                 // optional; fill flag
+        ));
+        addBuiltin(info(
+                "draw.text", null,
+                newParam("canvas", DataType.CANVAS, true),             // required; EbsCanvas
+                newParam("text", DataType.STRING, true),               // required; text to draw
+                newParam("x", DataType.DOUBLE, true),                  // required; x position
+                newParam("y", DataType.DOUBLE, true)                   // required; y position
+        ));
+        addBuiltin(info(
+                "draw.image", null,
+                newParam("canvas", DataType.CANVAS, true),             // required; EbsCanvas
+                newParam("image", DataType.IMAGE, true),               // required; EbsImage
+                newParam("x", DataType.DOUBLE, true),                  // required; x position
+                newParam("y", DataType.DOUBLE, true),                  // required; y position
+                newParam("width", DataType.DOUBLE, false),             // optional; width
+                newParam("height", DataType.DOUBLE, false)             // optional; height
+        ));
+
+        // Style builtins
+        addBuiltin(info(
+                "style.setStroke", null,
+                newParam("canvas", DataType.CANVAS, true),             // required; EbsCanvas
+                newParam("color", DataType.STRING, true),              // required; hex color
+                newParam("lineWidth", DataType.DOUBLE, false)          // optional; line width
+        ));
+        addBuiltin(info(
+                "style.setFill", null,
+                newParam("canvas", DataType.CANVAS, true),             // required; EbsCanvas
+                newParam("color", DataType.STRING, true)               // required; hex color
+        ));
+        addBuiltin(info(
+                "style.setFont", null,
+                newParam("canvas", DataType.CANVAS, true),             // required; EbsCanvas
+                newParam("fontName", DataType.STRING, true),           // required; font name
+                newParam("fontSize", DataType.DOUBLE, true)            // required; font size
+        ));
+        addBuiltin(info(
+                "style.setLineCap", null,
+                newParam("canvas", DataType.CANVAS, true),             // required; EbsCanvas
+                newParam("cap", DataType.STRING, true)                 // required; cap style (BUTT, ROUND, SQUARE)
+        ));
+        addBuiltin(info(
+                "style.setLineJoin", null,
+                newParam("canvas", DataType.CANVAS, true),             // required; EbsCanvas
+                newParam("join", DataType.STRING, true)                // required; join style (MITER, BEVEL, ROUND)
+        ));
+
+        // Effect builtins
+        addBuiltin(info(
+                "effect.setShadow", null,
+                newParam("canvas", DataType.CANVAS, true),             // required; EbsCanvas
+                newParam("blur", DataType.DOUBLE, true),               // required; blur radius
+                newParam("offsetX", DataType.DOUBLE, true),            // required; x offset
+                newParam("offsetY", DataType.DOUBLE, true),            // required; y offset
+                newParam("color", DataType.STRING, true)               // required; shadow color
+        ));
+        addBuiltin(info(
+                "effect.clearShadow", null,
+                newParam("canvas", DataType.CANVAS, true)              // required; EbsCanvas
+        ));
+        addBuiltin(info(
+                "effect.setGlobalAlpha", null,
+                newParam("canvas", DataType.CANVAS, true),             // required; EbsCanvas
+                newParam("alpha", DataType.DOUBLE, true)               // required; alpha (0.0-1.0)
+        ));
+
+        // Transform builtins
+        addBuiltin(info(
+                "transform.save", null,
+                newParam("canvas", DataType.CANVAS, true)              // required; EbsCanvas
+        ));
+        addBuiltin(info(
+                "transform.restore", null,
+                newParam("canvas", DataType.CANVAS, true)              // required; EbsCanvas
+        ));
+        addBuiltin(info(
+                "transform.translate", null,
+                newParam("canvas", DataType.CANVAS, true),             // required; EbsCanvas
+                newParam("x", DataType.DOUBLE, true),                  // required; x translation
+                newParam("y", DataType.DOUBLE, true)                   // required; y translation
+        ));
+        addBuiltin(info(
+                "transform.rotate", null,
+                newParam("canvas", DataType.CANVAS, true),             // required; EbsCanvas
+                newParam("degrees", DataType.DOUBLE, true)             // required; rotation angle
+        ));
+        addBuiltin(info(
+                "transform.scale", null,
+                newParam("canvas", DataType.CANVAS, true),             // required; EbsCanvas
+                newParam("x", DataType.DOUBLE, true),                  // required; x scale factor
+                newParam("y", DataType.DOUBLE, true)                   // required; y scale factor
+        ));
+
+        // ==========================
         // DATE builtins
         // ==========================
         addBuiltin(info(
@@ -1638,6 +1830,11 @@ public final class Builtins {
         // Vector Image builtins
         if (BuiltinsVectorImage.handles(name)) {
             return BuiltinsVectorImage.dispatch(env, name, args);
+        }
+        
+        // Graphics builtins (Canvas, Draw, Style, Effect, Transform)
+        if (BuiltinsGraphics.handles(name)) {
+            return BuiltinsGraphics.dispatch(env, name, args);
         }
         
         // Date builtins
