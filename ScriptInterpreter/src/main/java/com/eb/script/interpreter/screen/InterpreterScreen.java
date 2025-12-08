@@ -1549,6 +1549,10 @@ public class InterpreterScreen {
     }
 
     private DisplayItem parseDisplayItem(Map<String, Object> displayDef, String screenName) {
+        return parseDisplayItem(displayDef, screenName, 0);
+    }
+
+    private DisplayItem parseDisplayItem(Map<String, Object> displayDef, String screenName, int line) {
         DisplayItem metadata = new DisplayItem();
 
         // Extract display type and convert to enum (case-insensitive lookup)
@@ -1851,6 +1855,14 @@ public class InterpreterScreen {
         // Extract or set default style
         if (displayDef.containsKey("style")) {
             metadata.style = String.valueOf(displayDef.get("style"));
+            // Substitute variables in style (e.g., $COLOR_CELL_LIGHT -> #ffffff)
+            try {
+                metadata.style = substituteVariablesInStyle(metadata.style, line);
+            } catch (InterpreterError e) {
+                // Log warning and continue with unsubstituted style
+                // This is preferable to breaking the screen creation
+                System.err.println("Warning: Could not substitute variables in style: " + e.getMessage());
+            }
         } else {
             // Use default style from the enum
             metadata.style = metadata.itemType.getDefaultStyle();
@@ -2073,6 +2085,8 @@ public class InterpreterScreen {
         // Extract or set default style
         if (areaDef.containsKey("style")) {
             area.style = String.valueOf(areaDef.get("style"));
+            // Substitute variables in style (e.g., $COLOR_CELL_LIGHT -> #ffffff)
+            area.style = substituteVariablesInStyle(area.style, line);
         } else {
             // Use default style from the enum
             area.style = area.areaType.getDefaultStyle();
@@ -2721,5 +2735,43 @@ public class InterpreterScreen {
                 throw new InterpreterError("IO error executing " + eventType + " code: " + e.getMessage());
             }
         }
+    }
+    
+    /**
+     * Substitutes variables in a style string. Replaces $VARIABLE_NAME patterns with their actual values
+     * from the interpreter environment.
+     * 
+     * @param style The style string that may contain $VARIABLE_NAME patterns
+     * @param line The line number for error reporting
+     * @return The style string with variables substituted
+     * @throws InterpreterError if a referenced variable doesn't exist
+     */
+    private String substituteVariablesInStyle(String style, int line) throws InterpreterError {
+        if (style == null || style.isEmpty()) {
+            return style;
+        }
+        
+        // Pattern to match $VARIABLE_NAME (word characters only)
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("\\$([A-Za-z_][A-Za-z0-9_]*)");
+        java.util.regex.Matcher matcher = pattern.matcher(style);
+        
+        StringBuffer result = new StringBuffer();
+        while (matcher.find()) {
+            String varName = matcher.group(1).toLowerCase(); // Variable names are case-insensitive
+            
+            try {
+                Object value = interpreter.environment().get(varName);
+                // Replace the $VARIABLE with its string value
+                String replacement = value != null ? String.valueOf(value) : "";
+                // Use quoteReplacement to handle special characters in replacement string
+                matcher.appendReplacement(result, java.util.regex.Matcher.quoteReplacement(replacement));
+            } catch (InterpreterError e) {
+                // Variable not found - throw error with context
+                throw interpreter.error(line, "Variable reference '$" + matcher.group(1) + "' in style not found in scope");
+            }
+        }
+        matcher.appendTail(result);
+        
+        return result.toString();
     }
 }
