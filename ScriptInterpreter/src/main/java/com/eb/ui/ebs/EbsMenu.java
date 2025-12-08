@@ -44,12 +44,6 @@ public class EbsMenu extends MenuBar {
         // --- Open file… ---
         MenuItem openItem = new MenuItem("Open file…");
         openItem.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_DOWN));
-        openItem.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent t) {
-                throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-            }
-        });
         openItem.setOnAction(event -> {
             handler.chooseOpenFile();
             refreshRecentMenu();

@@ -1031,12 +1031,15 @@ public class EbsConsoleHandler extends EbsHandler {
                             cssUrl = cssFile.toUri().toString();
                         } else {
                             // Try as classpath resource
+                            // Only prepend /css/ if the path doesn't already contain a directory structure
                             String resourcePath = cssPath;
                             if (!resourcePath.startsWith("/")) {
                                 resourcePath = "/" + resourcePath;
                             }
-                            if (!resourcePath.startsWith("/css/")) {
-                                resourcePath = "/css/" + cssPath;
+                            // Only add /css/ prefix if path is a simple filename without directory separators
+                            // (i.e., no '/' after the first character)
+                            if (resourcePath.indexOf('/', 1) < 0 && !resourcePath.startsWith("/css/")) {
+                                resourcePath = "/css" + resourcePath;
                             }
                             
                             java.net.URL resource = getClass().getResource(resourcePath);
@@ -1045,11 +1048,46 @@ public class EbsConsoleHandler extends EbsHandler {
                             }
                         }
                         
-                        if (cssUrl != null && !scene.getStylesheets().contains(cssUrl)) {
-                            scene.getStylesheets().add(cssUrl);
-                            ScriptArea output = env.getOutputArea();
-                            if (output != null) {
-                                output.printlnInfo("CSS loaded: " + cssPath);
+                        if (cssUrl != null) {
+                            // Normalize URL for comparison by converting to URI and back
+                            try {
+                                java.net.URI normalizedUri = new java.net.URI(cssUrl).normalize();
+                                String normalizedUrl = normalizedUri.toString();
+                                
+                                // Check if already loaded using normalized URL
+                                boolean alreadyLoaded = false;
+                                for (String existingUrl : scene.getStylesheets()) {
+                                    try {
+                                        String existingNormalized = new java.net.URI(existingUrl).normalize().toString();
+                                        if (existingNormalized.equals(normalizedUrl)) {
+                                            alreadyLoaded = true;
+                                            break;
+                                        }
+                                    } catch (Exception ignored) {
+                                        // If normalization fails, compare directly
+                                        if (existingUrl.equals(cssUrl)) {
+                                            alreadyLoaded = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                
+                                if (!alreadyLoaded) {
+                                    scene.getStylesheets().add(cssUrl);
+                                    ScriptArea output = env.getOutputArea();
+                                    if (output != null) {
+                                        output.printlnInfo("CSS loaded: " + cssPath);
+                                    }
+                                }
+                            } catch (java.net.URISyntaxException e) {
+                                // Fallback to simple contains check if URI parsing fails
+                                if (!scene.getStylesheets().contains(cssUrl)) {
+                                    scene.getStylesheets().add(cssUrl);
+                                    ScriptArea output = env.getOutputArea();
+                                    if (output != null) {
+                                        output.printlnInfo("CSS loaded: " + cssPath);
+                                    }
+                                }
                             }
                         }
                     }
