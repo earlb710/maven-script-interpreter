@@ -70,9 +70,10 @@ public class ProjectListManager {
                 projectsPath = Paths.get("..", PROJECTS_FILE);
             }
             
-            // If still not found, start with empty list
+            // If still not found, create empty file and start with empty list
             if (!Files.exists(projectsPath)) {
-                System.out.println("Projects file not found: " + PROJECTS_FILE + ", starting with empty list.");
+                System.out.println("Projects file not found: " + PROJECTS_FILE + ", creating empty file.");
+                createEmptyProjectsFile();
                 return;
             }
             
@@ -87,6 +88,10 @@ public class ProjectListManager {
                 if (projectsArray instanceof List) {
                     @SuppressWarnings("unchecked")
                     List<Object> projectsList = (List<Object>) projectsArray;
+                    
+                    if (projectsList.isEmpty()) {
+                        System.out.println("No projects found in " + PROJECTS_FILE + ". Use File → New Project or File → Open Project to add projects.");
+                    }
                     
                     for (Object projectObj : projectsList) {
                         String path = null;
@@ -117,6 +122,23 @@ public class ProjectListManager {
             System.err.println("Error reading " + PROJECTS_FILE + ": " + e.getMessage());
         } catch (Exception e) {
             System.err.println("Error parsing " + PROJECTS_FILE + ": " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Create an empty console-projects.json file.
+     */
+    private void createEmptyProjectsFile() {
+        try {
+            Map<String, Object> root = new LinkedHashMap<>();
+            root.put("projects", new ArrayList<>());
+            String jsonContent = Json.prettyJson(root);
+            Path projectsPath = Paths.get(PROJECTS_FILE);
+            Files.writeString(projectsPath, jsonContent);
+            System.out.println("Created empty " + PROJECTS_FILE);
+        } catch (Exception e) {
+            System.err.println("Error creating " + PROJECTS_FILE + ": " + e.getMessage());
         }
     }
     
