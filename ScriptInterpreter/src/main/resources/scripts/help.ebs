@@ -15,10 +15,9 @@ print "";
 // Load help data from JSON file
 var helpData: json = null;
 try {
-    // Read from classpath root (target/classes or src/main/resources)
-    // When running, sandbox root is typically the project/target directory
-    // File is at classes/help-lookup.json relative to sandbox root
-    var jsonContent: string = call file.readTextFile("classes/help-lookup.json");
+    // Read from classpath root - context directory is already set to classes/
+    // File is at same level as scripts folder in classpath
+    var jsonContent: string = call file.readTextFile("help-lookup.json");
     helpData = call json.jsonFromString(jsonContent);
     print "Help data loaded from JSON";
 } exceptions {
