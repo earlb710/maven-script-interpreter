@@ -1,0 +1,73 @@
+// Example script demonstrating JavaFX canvas effects and transformations
+// Shadows, transparency, and transformations
+
+print "Creating canvas for effects demo...")
+var canvas: canvas = call canvas.create(500, 500, "effects_demo")
+
+// Set white background
+call style.setFill(canvas, "#FFFFFF")
+call draw.rect(canvas, 0, 0, 500, 500, true)
+
+// Draw with drop shadow effect
+print "Drawing shapes with shadows...")
+call effect.setShadow(canvas, 10.0, 5.0, 5.0, "#808080")
+call style.setFill(canvas, "#FF6347")
+call draw.circle(canvas, 100, 100, 50, true)
+
+// Clear shadow for next shape
+call effect.clearShadow(canvas)
+
+// Draw with semi-transparency
+print "Drawing with alpha transparency...")
+call effect.setGlobalAlpha(canvas, 0.5)
+call style.setFill(canvas, "#4169E1")
+call draw.rect(canvas, 150, 50, 100, 100, true)
+
+// Reset alpha
+call effect.setGlobalAlpha(canvas, 1.0)
+
+// Use transformations - save state first
+print "Using transformations...")
+call transform.save(canvas)
+
+// Translate and draw
+call transform.translate(canvas, 300.0, 100.0)
+call style.setFill(canvas, "#32CD32")
+call draw.rect(canvas, 0, 0, 60, 60, true)
+
+// Restore to original position
+call transform.restore(canvas)
+
+// Rotate and draw
+call transform.save(canvas)
+call transform.translate(canvas, 400.0, 200.0)
+call transform.rotate(canvas, 45.0)
+call style.setFill(canvas, "#FF00FF")
+call draw.rect(canvas, -30, -30, 60, 60, true)
+call transform.restore(canvas)
+
+// Scale and draw
+call transform.save(canvas)
+call transform.translate(canvas, 100.0, 300.0)
+call transform.scale(canvas, 2.0, 1.0)
+call style.setFill(canvas, "#FFA500")
+call draw.circle(canvas, 0, 0, 30, true)
+call transform.restore(canvas)
+
+// Draw text with shadow
+call effect.setShadow(canvas, 5.0, 2.0, 2.0, "#000000")
+call style.setFill(canvas, "#8B4513")
+call style.setFont(canvas, "Arial", 24.0)
+call draw.text(canvas, "Effects & Transforms", 100, 450)
+
+// Clear effect
+call effect.clearShadow(canvas)
+
+// Save the result
+print "Saving canvas to file...")
+var success: bool = call canvas.save(canvas, "effects_demo.png")
+if success then
+    print "Canvas saved successfully to effects_demo.png")
+else
+    print "Failed to save canvas")
+endif

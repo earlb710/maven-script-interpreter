@@ -1,0 +1,139 @@
+// Example script demonstrating drawing patterns and gradients using JavaFX canvas
+// Creating interesting patterns with loops
+
+print "Creating canvas for patterns demo...")
+var canvas: canvas = call canvas.create(600, 600, "patterns_demo")
+
+// Set white background
+call style.setFill(canvas, "#FFFFFF")
+call draw.rect(canvas, 0, 0, 600, 600, true)
+
+// Draw a grid pattern
+print "Drawing grid pattern...")
+call style.setStroke(canvas, "#CCCCCC", 1.0)
+var i: int = 0
+while i < 600 do
+    call draw.line(canvas, i, 0, i, 600)
+    call draw.line(canvas, 0, i, 600, i)
+    i = i + 50
+endwhile
+
+// Draw concentric circles
+print "Drawing concentric circles...")
+call style.setStroke(canvas, "#0000FF", 2.0)
+var radius: int = 20
+while radius <= 100 do
+    call draw.circle(canvas, 150, 150, radius, false)
+    radius = radius + 20
+endwhile
+
+// Draw a spiral (simplified without trig functions)
+print "Drawing spiral-like pattern...")
+call style.setStroke(canvas, "#FF0000", 2.0)
+var angle: int = 0
+var r: int = 10
+var centerX: int = 450
+var centerY: int = 150
+var prevX: int = centerX
+var prevY: int = centerY
+
+while angle < 72 do
+    // Approximate circular pattern using simple geometry
+    // Using 8 points around circle at increasing radius
+    pointAngle : int = angle % 8
+    x : int = centerX
+    y : int = centerY
+    
+    if pointAngle == 0 then
+        x = centerX + r
+        y = centerY
+    endif
+    if pointAngle == 1 then
+        x = centerX + r
+        y = centerY - r
+    endif
+    if pointAngle == 2 then
+        x = centerX
+        y = centerY - r
+    endif
+    if pointAngle == 3 then
+        x = centerX - r
+        y = centerY - r
+    endif
+    if pointAngle == 4 then
+        x = centerX - r
+        y = centerY
+    endif
+    if pointAngle == 5 then
+        x = centerX - r
+        y = centerY + r
+    endif
+    if pointAngle == 6 then
+        x = centerX
+        y = centerY + r
+    endif
+    if pointAngle == 7 then
+        x = centerX + r
+        y = centerY + r
+    endif
+    
+    call draw.line(canvas, prevX, prevY, x, y)
+    
+    prevX = x
+    prevY = y
+    angle = angle + 1
+    r = r + 2
+endwhile
+
+// Draw a checkerboard pattern
+print "Drawing checkerboard pattern...")
+var row: int = 0
+while row < 6 do
+    col : int = 0
+    while col < 6 do
+        sum : int = row + col
+        remainder : int = sum % 2
+        if remainder == 0 then
+            call style.setFill(canvas, "#000000")
+        else
+            call style.setFill(canvas, "#FFFFFF")
+        endif
+        
+        x : int = 50 + col * 40
+        y : int = 350 + row * 40
+        call draw.rect(canvas, x, y, 40, 40, true)
+        col = col + 1
+    endwhile
+    row = row + 1
+endwhile
+
+// Draw color bars
+print "Drawing color bars...")
+var colors: array.string = array(5)
+colors[0] = "#FF0000"
+colors[1] = "#00FF00"
+colors[2] = "#0000FF"
+colors[3] = "#FFFF00"
+colors[4] = "#FF00FF"
+
+var i: int = 0
+while i < 5 do
+    call style.setFill(canvas, colors[i])
+    x : int = 350 + i * 40
+    call draw.rect(canvas, x, 350, 40, 240, true)
+    i = i + 1
+endwhile
+
+// Add title
+call style.setFill(canvas, "#000000")
+call style.setFont(canvas, "Arial", 28.0)
+call draw.text(canvas, "Canvas Patterns", 200, 50)
+
+// Save the result
+print "Saving canvas to file...")
+var success: bool = call canvas.save(canvas, "patterns_demo.png")
+if success then
+    print "Canvas saved successfully to patterns_demo.png")
+else
+    print "Failed to save canvas")
+endif

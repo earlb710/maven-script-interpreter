@@ -1,0 +1,55 @@
+// Example script demonstrating JavaFX canvas drawing functions
+// Basic shapes and colors
+
+print "Creating canvas...";
+var myCanvas: canvas = call canvas.create(400, 400, "basic_shapes");
+
+// Set background to white
+call style.setFill(myCanvas, "#FFFFFF");
+call draw.rect(myCanvas, 0, 0, 400, 400, true);
+
+// Draw a red circle
+call style.setFill(myCanvas, "#FF0000");
+call draw.circle(myCanvas, 100, 100, 50, true);
+
+// Draw a blue rectangle
+call style.setFill(myCanvas, "#0000FF");
+call draw.rect(myCanvas, 200, 50, 100, 100, true);
+
+// Draw a green ellipse
+call style.setFill(myCanvas, "#00FF00");
+call draw.ellipse(myCanvas, 50, 200, 150, 80, true);
+
+// Draw a yellow arc
+call style.setFill(myCanvas, "#FFFF00");
+call draw.arc(myCanvas, 300, 250, 60, 45, 270, true);
+
+// Draw a purple polygon (triangle)
+var points: array.int[6] = array(6);
+points[0] = 300;
+points[1] = 100;
+points[2] = 350;
+points[3] = 150;
+points[4] = 250;
+points[5] = 150;
+call style.setFill(myCanvas, "#800080");
+call draw.polygon(myCanvas, points, true);
+
+// Draw some black outlined shapes
+call style.setStroke(myCanvas, "#000000", 2.0);
+call draw.circle(myCanvas, 200, 300, 40, false);
+call draw.rect(myCanvas, 100, 250, 80, 60, false);
+
+// Add text
+call style.setFill(myCanvas, "#000000");
+call style.setFont(myCanvas, "Arial", 20.0);
+call draw.text(myCanvas, "JavaFX Drawing!", 120, 380);
+
+// Save the canvas as an image
+print "Saving canvas to file...";
+var success: bool = call canvas.save(myCanvas, "basic_shapes.png");
+if success then {
+    print "Canvas saved successfully to basic_shapes.png";
+} else {
+    print "Failed to save canvas";
+}
