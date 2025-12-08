@@ -1,0 +1,13 @@
+{
+  "name": "ExampleProject",
+  "directory": "/path/to/project",
+  "description": "EBS Script Project",
+  "version": "1.0.0",
+  "css": [
+    "console.css"
+  ],
+  "mainScript": "main.ebs",
+  "settings": {
+    "autoLoad": true
+  }
+}

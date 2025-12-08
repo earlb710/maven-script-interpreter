@@ -1,0 +1,31 @@
+// Example script demonstrating project management features
+// This script shows how to access and use the global project variable
+
+println("=== Project Information ===")
+
+// Note: To use this script, first load a project using:
+// File → New Project (Ctrl+Shift+N) or File → Open Project (Ctrl+Shift+O)
+
+println("Name: " + project.name)
+println("Directory: " + project.directory)
+println("Description: " + project.description)
+println("Version: " + project.version)
+
+// Display CSS files
+println("\nCSS Files:")
+array cssFiles = project.css
+int i = 0
+while (i < array.length(cssFiles)) do
+    println("  - " + cssFiles[i])
+    i = i + 1
+end
+
+// Display main script
+println("\nMain Script: " + project.mainScript)
+
+// Display settings
+println("\nSettings:")
+println("  Auto Load: " + project.settings.autoLoad)
+
+println("\n=== End Project Information ===")
+println("You can access project.* variables in your own scripts!")
