@@ -524,10 +524,9 @@ screen chessScreen = {
                             "type": "vbox",
                             "spacing": "0",
                             "padding": "0",
-                            "minHeight": "580",
-                            "maxHeight": "580",
+                            "disableLabelAlignment": true,
                             "items": [
-                                {"name": "moveHistoryText", "varRef": "moveHistory", "display": {"type": "textarea", "editable": false, "wrapText": true, "prefRowCount": 30, "style": "-fx-control-inner-background: $COLOR_MOVE_HISTORY_BG; -fx-text-fill: $COLOR_MOVE_HISTORY_TEXT; -fx-font-family: 'Courier New'; -fx-font-size: 12px; -fx-border-color: #555555; -fx-border-width: 1;"}, "labelPos": "top"}
+                                {"name": "moveHistoryText", "varRef": "moveHistory", "display": {"type": "textarea", "editable": false, "wrapText": true, "prefHeight": "580", "style": "-fx-control-inner-background: $COLOR_MOVE_HISTORY_BG; -fx-text-fill: $COLOR_MOVE_HISTORY_TEXT; -fx-font-family: 'Courier New'; -fx-font-size: 12px; -fx-border-color: #555555; -fx-border-width: 1;"}, "labelPos": "top"}
                             ]
                         }
                     ]
