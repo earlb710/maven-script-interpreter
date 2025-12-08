@@ -19,6 +19,7 @@ import com.eb.script.token.DataType;
 import com.eb.ui.cli.ScriptArea;
 import com.eb.util.Util;
 import javafx.application.Platform;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -31,6 +32,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
+import javax.imageio.ImageIO;
 import java.util.*;
 
 /**
@@ -132,6 +134,8 @@ public class ScreenFactory {
     private static final java.util.concurrent.ConcurrentHashMap<String, javafx.scene.control.SplitPane> screenDebugSplitPanes = new java.util.concurrent.ConcurrentHashMap<>();
     // Map to store event counts per item.eventType (e.g., "fileTree.onChange" -> count)
     private static final java.util.concurrent.ConcurrentHashMap<String, java.util.concurrent.atomic.AtomicInteger> eventCounts = new java.util.concurrent.ConcurrentHashMap<>();
+    // Map to store screenshot sequence numbers per screen (screenName -> sequence number)
+    private static final java.util.concurrent.ConcurrentHashMap<String, java.util.concurrent.atomic.AtomicInteger> screenshotCounters = new java.util.concurrent.ConcurrentHashMap<>();
     
     // Map to store debug panel event count labels for dynamic refresh (key -> label)
     // Key format: "screenName.itemName.eventType"
@@ -2624,6 +2628,72 @@ public class ScreenFactory {
     }
     
     /**
+     * Capture a screenshot of the specified screen using Ctrl+P shortcut.
+     * Saves the screenshot to system temp directory with screen name and sequence number.
+     * 
+     * @param screenName The name of the screen to capture
+     * @param stage The JavaFX Stage containing the screen
+     * @param context The interpreter context
+     */
+    public static void captureScreenshotToFile(String screenName, Stage stage, InterpreterContext context) {
+        try {
+            // Get the scene from the stage
+            Scene scene = stage.getScene();
+            if (scene == null) {
+                System.err.println("Cannot capture screenshot: no scene available for screen '" + screenName + "'");
+                return;
+            }
+            
+            // Take the snapshot
+            javafx.scene.image.WritableImage snapshot = scene.snapshot(null);
+            if (snapshot == null) {
+                System.err.println("Failed to capture screenshot for screen '" + screenName + "'");
+                return;
+            }
+            
+            // Get or initialize the screenshot counter for this screen
+            java.util.concurrent.atomic.AtomicInteger counter = screenshotCounters.computeIfAbsent(
+                screenName, 
+                k -> new java.util.concurrent.atomic.AtomicInteger(0)
+            );
+            int sequence = counter.incrementAndGet();
+            
+            // Create filename using system temp directory for cross-platform compatibility
+            String tempDir = System.getProperty("java.io.tmpdir");
+            String filename = String.format("%s%s_%03d.png", tempDir, screenName, sequence);
+            
+            // Save to file
+            java.io.File file = new java.io.File(filename);
+            ImageIO.write(
+                SwingFXUtils.fromFXImage(snapshot, null),
+                "png",
+                file
+            );
+            
+            // Log success
+            String message = String.format("Screenshot saved: %s (%dx%d pixels)", 
+                filename, 
+                (int)snapshot.getWidth(), 
+                (int)snapshot.getHeight()
+            );
+            System.out.println(message);
+            
+            // Also print to console output if available
+            if (context != null && context.getOutput() != null) {
+                context.getOutput().printlnOk(message);
+            }
+            
+        } catch (Exception e) {
+            String errorMsg = "Error capturing screenshot for screen '" + screenName + "': " + e.getMessage();
+            System.err.println(errorMsg);
+            if (context != null && context.getOutput() != null) {
+                context.getOutput().printlnError(errorMsg);
+            }
+            e.printStackTrace();
+        }
+    }
+    
+    /**
      * Log debug information about a JavaFX Node and its properties.
      * Only logs when debug mode is enabled.
      */
@@ -2980,6 +3050,11 @@ public class ScreenFactory {
                     logSceneGraph(screenRoot, 0, "/");
                     System.out.println("=".repeat(80));
                 }
+                event.consume(); // Prevent the event from propagating further
+            }
+            // Add Ctrl+P key handler to capture screenshot
+            else if (event.getCode() == KeyCode.P && event.isControlDown()) {
+                captureScreenshotToFile(screenName, stage, context);
                 event.consume(); // Prevent the event from propagating further
             }
         });

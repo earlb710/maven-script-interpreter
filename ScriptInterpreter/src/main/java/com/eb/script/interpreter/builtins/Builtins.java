@@ -1025,6 +1025,10 @@ public final class Builtins {
                 newParam("screenName", DataType.STRING, true), // required; screen name
                 newParam("itemName", DataType.STRING, true) // required; item name
         ));
+        addBuiltin(info(
+                "scr.snapshot", DataType.IMAGE,
+                newParam("screenName", DataType.STRING, false) // optional; screen name (if null, uses current screen)
+        ));
 
         // ==========================
         // CSS builtins
@@ -1705,6 +1709,7 @@ public final class Builtins {
             case "scr.setareaproperty" -> BuiltinsScreen.screenSetAreaProperty(context, args);
             case "scr.setitemchoiceoptions" -> BuiltinsScreen.screenSetItemChoiceOptions(context, args);
             case "scr.getitemchoiceoptions" -> BuiltinsScreen.screenGetItemChoiceOptions(context, args);
+            case "scr.snapshot" -> BuiltinsScreen.screenSnapshot(context, args);
             default -> throw new InterpreterError("Unknown screen builtin: " + name);
         };
     }

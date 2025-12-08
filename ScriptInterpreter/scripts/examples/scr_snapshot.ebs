@@ -1,0 +1,101 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: scr.snapshot builtin - Capture a screenshot of a screen
+// 
+// Two modes:
+// 1. call scr.snapshot("screenName") - Returns IMAGE for manipulation
+// 2. call scr.snapshot() - Saves to temp directory (same as Ctrl+P)
+
+// Define a simple test screen
+screen testScreen = {
+    "title": "Screenshot Test Screen",
+    "width": 500,
+    "height": 400,
+    "vars": [
+        {
+            "name": "heading",
+            "type": "string",
+            "default": "Screenshot Test - Two Modes",
+            "display": {
+                "type": "label"
+            }
+        },
+        {
+            "name": "message",
+            "type": "string",
+            "default": "Test both screenshot modes",
+            "display": {
+                "type": "label"
+            }
+        },
+        {
+            "name": "quickCaptureBtn",
+            "type": "string",
+            "default": "Quick Capture (to temp)",
+            "display": {
+                "type": "button",
+                "onClick": "quickCapture"
+            }
+        },
+        {
+            "name": "fullCaptureBtn",
+            "type": "string",
+            "default": "Full Capture (return image)",
+            "display": {
+                "type": "button",
+                "onClick": "fullCapture"
+            }
+        }
+    ]
+};
+
+// Show the screen
+show screen testScreen;
+print "Test screen is now visible";
+
+// Mode 1: Quick capture to temp directory (no parameters)
+quickCapture() return void {
+    print "Quick capture (no parameters) - saving to temp directory...";
+    
+    // This saves directly to temp directory with auto-incrementing sequence
+    // Same behavior as pressing Ctrl+P
+    call scr.snapshot();
+    
+    print "Screenshot saved to system temp directory";
+    print "File: {TEMP_DIR}/testscreen_XXX.png (where XXX is sequence number)";
+}
+
+// Mode 2: Full capture with screen name - returns EbsImage for manipulation
+fullCapture() return void {
+    print "Full capture (with screen name) - returns EbsImage...";
+    
+    // Capture the screenshot and get EbsImage object
+    var ebsImage: image = call scr.snapshot("testScreen");
+    
+    // Get image information
+    var width: int = call image.getWidth(ebsImage);
+    var height: int = call image.getHeight(ebsImage);
+    var name: string = call image.getName(ebsImage);
+    var type: string = call image.getType(ebsImage);
+    
+    print "Screenshot captured successfully!";
+    print "  Name: " + name;
+    print "  Type: " + type;
+    print "  Dimensions: " + width + "x" + height + " pixels";
+    
+    // Save the screenshot to a specific file
+    var filePath: string = "testScreen_custom.png";
+    var saved: bool = call image.save(ebsImage, filePath);
+    
+    if (saved) {
+        print "Screenshot saved to: " + filePath;
+    } else {
+        print "Failed to save screenshot";
+    }
+}
+
+print "";
+print "=== Screenshot Test Instructions ===";
+print "1. Click 'Quick Capture' to save to temp directory (like Ctrl+P)";
+print "2. Click 'Full Capture' to get EbsImage and save to custom location";
+print "3. Or press Ctrl+P for quick capture anytime";
+print "";
