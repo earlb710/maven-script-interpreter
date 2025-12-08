@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -484,7 +485,14 @@ public class EbsTab extends Tab {
         Button clearBtn = new Button("Clear");
         clearBtn.setOnAction(e -> outputArea.clear());
 
-        HBox buttons = new HBox(8, runBtn, clearBtn);
+        // Show the "start in" directory (script's parent directory)
+        Path startInDir = tabContext.path.getParent();
+        String startInText = startInDir != null ? startInDir.toString() : System.getProperty("user.dir");
+        Label startInLabel = new Label("Start in: " + startInText);
+        startInLabel.setStyle("-fx-font-size: 10px; -fx-text-fill: #666;");
+        startInLabel.setTooltip(new Tooltip("File operations use relative paths from this directory"));
+
+        HBox buttons = new HBox(8, runBtn, clearBtn, startInLabel);
         buttons.setStyle("-fx-padding: 6 4 0 0;");
 
         VBox bottom = new VBox(2, new Label("Output:"), outputAreaFrame, buttons);
