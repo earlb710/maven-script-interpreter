@@ -513,6 +513,11 @@ public final class Builtins {
         ));
 
         addBuiltin(info(
+                "file.readTextResource", DataType.STRING,
+                newParam("resourcePath", DataType.STRING)
+        ));
+
+        addBuiltin(info(
                 "file.writeTextFile", DataType.BOOL,
                 newParam("path", DataType.STRING),
                 newParam("content", DataType.STRING)
@@ -1669,6 +1674,7 @@ public final class Builtins {
             case "file.write" -> BuiltinsFile.write(env, args);
             case "file.eof" -> BuiltinsFile.eof(env, args);
             case "file.readtextfile" -> BuiltinsFile.readTextFile(env, args);
+            case "file.readtextresource" -> BuiltinsFile.readTextResource(env, args);
             case "file.readbinfile" -> BuiltinsFile.readBinFile(env, args);
             case "file.writetextfile" -> BuiltinsFile.writeTextFile(env, args);
             case "file.writebinfile" -> BuiltinsFile.writeBinFile(env, args);

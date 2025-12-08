@@ -3913,11 +3913,51 @@ public class ScreenFactory {
     private static void addChildAreaToContainer(Region container, Region childArea, AreaType areaType, AreaDefinition childAreaDef) {
         if (container instanceof VBox) {
             ((VBox) container).getChildren().add(childArea);
+            
+            // Apply VBox-specific grow properties from child area definition
+            if (childAreaDef != null && childAreaDef.vgrow != null && !childAreaDef.vgrow.isEmpty()) {
+                try {
+                    Priority priority = Priority.valueOf(childAreaDef.vgrow.toUpperCase());
+                    VBox.setVgrow(childArea, priority);
+                } catch (IllegalArgumentException e) {
+                    // Ignore invalid values
+                }
+            }
         } else if (container instanceof HBox) {
             ((HBox) container).getChildren().add(childArea);
+            
+            // Apply HBox-specific grow properties from child area definition
+            if (childAreaDef != null && childAreaDef.hgrow != null && !childAreaDef.hgrow.isEmpty()) {
+                try {
+                    Priority priority = Priority.valueOf(childAreaDef.hgrow.toUpperCase());
+                    HBox.setHgrow(childArea, priority);
+                } catch (IllegalArgumentException e) {
+                    // Ignore invalid values
+                }
+            }
         } else if (container instanceof GridPane) {
             // For GridPane, just add to next available position
             ((GridPane) container).getChildren().add(childArea);
+            
+            // Apply GridPane grow properties from child area definition
+            if (childAreaDef != null) {
+                if (childAreaDef.hgrow != null && !childAreaDef.hgrow.isEmpty()) {
+                    try {
+                        Priority priority = Priority.valueOf(childAreaDef.hgrow.toUpperCase());
+                        GridPane.setHgrow(childArea, priority);
+                    } catch (IllegalArgumentException e) {
+                        // Ignore invalid values
+                    }
+                }
+                if (childAreaDef.vgrow != null && !childAreaDef.vgrow.isEmpty()) {
+                    try {
+                        Priority priority = Priority.valueOf(childAreaDef.vgrow.toUpperCase());
+                        GridPane.setVgrow(childArea, priority);
+                    } catch (IllegalArgumentException e) {
+                        // Ignore invalid values
+                    }
+                }
+            }
         } else if (container instanceof BorderPane) {
             // For BorderPane, default to center if not specified
             BorderPane borderPane = (BorderPane) container;

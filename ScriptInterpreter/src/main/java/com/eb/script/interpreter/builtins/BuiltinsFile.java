@@ -345,6 +345,39 @@ public class BuiltinsFile {
         }
     }
 
+    //  file.readTextResource(resourcePath) -> STRING (UTF-8)
+    //  Reads a text file from the classpath resources (read-only access)
+    //  This is for loading application resources like help files, not user files
+    public static String readTextResource(Environment env, Object... args) throws InterpreterError {
+        String resourcePath = (String) args[0];
+        if (resourcePath == null || resourcePath.isBlank()) {
+            return null;  // null-safe like other string builtins
+        }
+        
+        try {
+            // Load from classpath using ClassLoader
+            InputStream is = BuiltinsFile.class.getClassLoader().getResourceAsStream(resourcePath);
+            if (is == null) {
+                throw new InterpreterError("Resource not found: " + resourcePath);
+            }
+            
+            // Read the stream content
+            String content = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+            is.close();
+            
+            ScriptArea output = env.getOutputArea();
+            if (env.isEchoOn()) {
+                sysOutput(output, "Read " + content.length() + " characters from resource " + resourcePath);
+            }
+            
+            return content;
+        } catch (InterpreterError ie) {
+            throw ie;
+        } catch (Exception ex) {
+            throw new InterpreterError("file.readTextResource: " + resourcePath + " - " + ex.getMessage());
+        }
+    }
+
     public static FileData readBinFile(String filePath) throws InterpreterError, IOException {
         Path p = Util.resolveSandboxedPath(filePath);
         byte[] buf = Files.readAllBytes(p);
