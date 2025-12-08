@@ -1319,6 +1319,8 @@ public class BuiltinsScreen {
             case "lostfocus" -> area.lostFocus;
             case "numberofrecords" -> area.numberOfRecords;
             case "recordref" -> area.recordRef;
+            case "hgrow" -> area.hgrow;
+            case "vgrow" -> area.vgrow;
             default -> throw new InterpreterError("scr.getAreaProperty: unknown property '" + propertyName + "'");
         };
     }
@@ -1350,6 +1352,8 @@ public class BuiltinsScreen {
             case "grouplabeloffset" -> area.groupLabelOffset = value != null ? String.valueOf(value) : null;
             case "spacing" -> area.spacing = value != null ? String.valueOf(value) : null;
             case "padding" -> area.padding = value != null ? String.valueOf(value) : null;
+            case "hgrow" -> area.hgrow = value != null ? String.valueOf(value) : null;
+            case "vgrow" -> area.vgrow = value != null ? String.valueOf(value) : null;
             case "gainfocus" -> area.gainFocus = value != null ? String.valueOf(value) : null;
             case "lostfocus" -> area.lostFocus = value != null ? String.valueOf(value) : null;
             case "numberofrecords" -> {

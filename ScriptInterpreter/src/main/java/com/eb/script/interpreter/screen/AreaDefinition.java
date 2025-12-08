@@ -69,6 +69,10 @@ public class AreaDefinition {
     // Disable label alignment - when true, controls without labels won't be wrapped in HBox for alignment
     // Useful for grid layouts (like chess boards) where label alignment creates unwanted spacing
     public Boolean disableLabelAlignment;
+    // Horizontal grow priority for this area when added to HBox or GridPane (ALWAYS, SOMETIMES, NEVER)
+    public String hgrow;
+    // Vertical grow priority for this area when added to VBox or GridPane (ALWAYS, SOMETIMES, NEVER)
+    public String vgrow;
     
     @Override
     public String toString() {
