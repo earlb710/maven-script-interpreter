@@ -490,7 +490,8 @@ public class EbsTab extends Tab {
         String startInText = startInDir != null ? startInDir.toString() : System.getProperty("user.dir");
         Label startInLabel = new Label("Start in: " + startInText);
         startInLabel.getStyleClass().add("start-in-label");
-        startInLabel.setTooltip(new Tooltip("File operations use relative paths from this directory"));
+        startInLabel.setMaxWidth(400); // Limit width to prevent layout issues with long paths
+        startInLabel.setTooltip(new Tooltip("File operations use relative paths from this directory\n" + startInText));
 
         HBox buttons = new HBox(8, runBtn, clearBtn, startInLabel);
         buttons.setStyle("-fx-padding: 6 4 0 0;");
