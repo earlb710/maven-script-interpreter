@@ -486,10 +486,10 @@ public class EbsTab extends Tab {
         clearBtn.setOnAction(e -> outputArea.clear());
 
         // Show the "start in" directory (script's parent directory)
-        Path startInDir = tabContext.path.getParent();
+        Path startInDir = tabContext.path != null ? tabContext.path.getParent() : null;
         String startInText = startInDir != null ? startInDir.toString() : System.getProperty("user.dir");
         Label startInLabel = new Label("Start in: " + startInText);
-        startInLabel.setStyle("-fx-font-size: 10px; -fx-text-fill: #666;");
+        startInLabel.getStyleClass().add("start-in-label");
         startInLabel.setTooltip(new Tooltip("File operations use relative paths from this directory"));
 
         HBox buttons = new HBox(8, runBtn, clearBtn, startInLabel);
