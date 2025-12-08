@@ -29,11 +29,7 @@ screen styledScreen = {
                     "name": "loadButton",
                     "type": "button",
                     "text": "Load Custom CSS",
-                    "onClick": {
-                        // Load CSS from classpath
-                        call css.loadCss("styledscreen", "custom-screen.css");
-                        print "Custom CSS loaded!";
-                    }
+                    "onClick": "call css.loadCss('styledscreen', 'custom-screen.css'); print 'Custom CSS loaded!';"
                 }
             ]
         }

@@ -3438,10 +3438,7 @@ screen myScreen = {
                     "name": "loadTheme",
                     "type": "button",
                     "text": "Load Dark Theme",
-                    "onClick": {
-                        // Load custom CSS from same directory as script
-                        call css.loadCss("myscreen", "dark-theme.css");
-                    }
+                    "onClick": "call css.loadCss('myscreen', 'dark-theme.css');"
                 }
             ]
         }
@@ -3501,19 +3498,13 @@ screen themeDemo = {
                     "name": "darkBtn",
                     "type": "button",
                     "text": "Dark Theme",
-                    "onClick": {
-                        call css.unloadCss("themedemo", "light-theme.css");
-                        call css.loadCss("themedemo", "dark-theme.css");
-                    }
+                    "onClick": "call css.unloadCss('themedemo', 'light-theme.css'); call css.loadCss('themedemo', 'dark-theme.css');"
                 },
                 {
                     "name": "lightBtn",
                     "type": "button",
                     "text": "Light Theme",
-                    "onClick": {
-                        call css.unloadCss("themedemo", "dark-theme.css");
-                        call css.loadCss("themedemo", "light-theme.css");
-                    }
+                    "onClick": "call css.unloadCss('themedemo', 'dark-theme.css'); call css.loadCss('themedemo', 'light-theme.css');"
                 }
             ]
         }

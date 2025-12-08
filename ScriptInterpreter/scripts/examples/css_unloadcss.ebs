@@ -31,39 +31,19 @@ screen themeScreen = {
                     "name": "darkThemeButton",
                     "type": "button",
                     "text": "Load Dark Theme",
-                    "onClick": {
-                        if currentTheme != "none" then {
-                            call css.unloadCss("themescreen", currentTheme + ".css");
-                        }
-                        call css.loadCss("themescreen", "dark-theme.css");
-                        currentTheme = "dark-theme";
-                        print "Dark theme loaded";
-                    }
+                    "onClick": "if currentTheme != 'none' then { call css.unloadCss('themescreen', currentTheme + '.css'); } call css.loadCss('themescreen', 'dark-theme.css'); currentTheme = 'dark-theme'; print 'Dark theme loaded';"
                 },
                 {
                     "name": "lightThemeButton",
                     "type": "button",
                     "text": "Load Light Theme",
-                    "onClick": {
-                        if currentTheme != "none" then {
-                            call css.unloadCss("themescreen", currentTheme + ".css");
-                        }
-                        call css.loadCss("themescreen", "light-theme.css");
-                        currentTheme = "light-theme";
-                        print "Light theme loaded";
-                    }
+                    "onClick": "if currentTheme != 'none' then { call css.unloadCss('themescreen', currentTheme + '.css'); } call css.loadCss('themescreen', 'light-theme.css'); currentTheme = 'light-theme'; print 'Light theme loaded';"
                 },
                 {
                     "name": "clearButton",
                     "type": "button",
                     "text": "Clear All Themes",
-                    "onClick": {
-                        if currentTheme != "none" then {
-                            call css.unloadCss("themescreen", currentTheme + ".css");
-                            currentTheme = "none";
-                            print "All custom themes removed";
-                        }
-                    }
+                    "onClick": "if currentTheme != 'none' then { call css.unloadCss('themescreen', currentTheme + '.css'); currentTheme = 'none'; print 'All custom themes removed'; }"
                 }
             ]
         }

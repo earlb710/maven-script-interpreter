@@ -171,19 +171,13 @@ screen styledScreen = {
                     "name": "loadStyleButton",
                     "type": "button",
                     "text": "Load Custom Theme",
-                    "onClick": {
-                        call css.loadCss("styledscreen", "my-theme.css");
-                        print "Custom theme loaded!";
-                    }
+                    "onClick": "call css.loadCss('styledscreen', 'my-theme.css'); print 'Custom theme loaded!';"
                 },
                 {
                     "name": "unloadStyleButton",
                     "type": "button",
                     "text": "Unload Custom Theme",
-                    "onClick": {
-                        call css.unloadCss("styledscreen", "my-theme.css");
-                        print "Custom theme removed!";
-                    }
+                    "onClick": "call css.unloadCss('styledscreen', 'my-theme.css'); print 'Custom theme removed!';"
                 }
             ]
         }

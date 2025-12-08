@@ -32,39 +32,25 @@ screen testScreen = {
                     "type": "button",
                     "text": "Load Custom CSS",
                     "cssClass": "custom-button",
-                    "onClick": {
-                        print "Loading custom CSS...";
-                        call css.loadCss("testscreen", "custom-screen.css");
-                        print "Custom CSS loaded! Notice the style changes.";
-                    }
+                    "onClick": "print 'Loading custom CSS...'; call css.loadCss('testscreen', 'custom-screen.css'); print 'Custom CSS loaded! Notice the style changes.';"
                 },
                 {
                     "name": "unloadButton",
                     "type": "button",
                     "text": "Unload Custom CSS",
-                    "onClick": {
-                        print "Unloading custom CSS...";
-                        call css.unloadCss("testscreen", "custom-screen.css");
-                        print "Custom CSS unloaded! Styles reverted to default.";
-                    }
+                    "onClick": "print 'Unloading custom CSS...'; call css.unloadCss('testscreen', 'custom-screen.css'); print 'Custom CSS unloaded! Styles reverted to default.';"
                 },
                 {
                     "name": "findButton",
                     "type": "button",
                     "text": "Find Available CSS Files",
-                    "onClick": {
-                        print "Searching for CSS files...";
-                        var cssFiles = call css.findCss();
-                        print "CSS files found";
-                    }
+                    "onClick": "print 'Searching for CSS files...'; var cssFiles = call css.findCss(); print 'CSS files found';"
                 },
                 {
                     "name": "closeButton",
                     "type": "button",
                     "text": "Close Screen",
-                    "onClick": {
-                        call scr.closeScreen("testscreen");
-                    }
+                    "onClick": "call scr.closeScreen('testscreen');"
                 }
             ]
         }
