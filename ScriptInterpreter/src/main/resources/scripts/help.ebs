@@ -511,7 +511,8 @@ helpTreeItem = call json.set(helpTreeItem, "seq", 1);
 
 var treeDisplay: json = {};
 treeDisplay = call json.set(treeDisplay, "type", "treeview");
-treeDisplay = call json.set(treeDisplay, "labelText", "");
+treeDisplay = call json.set(treeDisplay, "labelText", "Help Topic");
+treeDisplay = call json.set(treeDisplay, "labelPosition", "TOP");
 treeDisplay = call json.set(treeDisplay, "displayRecords", 30);
 treeDisplay = call json.set(treeDisplay, "prefHeight", "100");
 treeDisplay = call json.set(treeDisplay, "maxHeight", "MAX");
@@ -549,7 +550,8 @@ helpContentItem = call json.set(helpContentItem, "seq", 1);
 
 var contentDisplay: json = {};
 contentDisplay = call json.set(contentDisplay, "type", "textarea");
-contentDisplay = call json.set(contentDisplay, "labelText", "");
+contentDisplay = call json.set(contentDisplay, "labelText", "Help Content");
+contentDisplay = call json.set(contentDisplay, "labelPosition", "TOP");
 contentDisplay = call json.set(contentDisplay, "editable", false);
 contentDisplay = call json.set(contentDisplay, "displayRecords", 30);
 contentDisplay = call json.set(contentDisplay, "wrapText", true);
