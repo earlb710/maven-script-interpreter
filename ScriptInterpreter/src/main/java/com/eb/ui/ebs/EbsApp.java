@@ -150,14 +150,14 @@ public class EbsApp {
         handler.setUI_outputArea(console.getOutputArea());
         handler.setUI_tabPane(handler, mainTabs);
         
-        // Create project tree view on the right side
+        // Create project tree view on the left side
         ProjectTreeView projectTreeView = new ProjectTreeView(handler);
         handler.setProjectTreeView(projectTreeView);
         
-        // Use SplitPane to put tree on the right
+        // Use SplitPane to put tree on the left
         javafx.scene.control.SplitPane splitPane = new javafx.scene.control.SplitPane();
-        splitPane.getItems().addAll(mainTabs, projectTreeView);
-        splitPane.setDividerPositions(0.75); // 75% for main content, 25% for tree
+        splitPane.getItems().addAll(projectTreeView, mainTabs);
+        splitPane.setDividerPositions(0.25); // 25% for tree, 75% for main content
 
         // --- Menu bar ---
         MenuBar menuBar = new EbsMenu(handler);
