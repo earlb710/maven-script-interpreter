@@ -1,0 +1,75 @@
+// Example: css.unloadCss - Remove CSS stylesheet from a screen
+// Demonstrates dynamic CSS unloading for theme switching
+
+var currentTheme: string = "none";
+
+// Define a screen with theme switching
+screen themeScreen = {
+    title: "CSS Theme Switcher",
+    width: 500,
+    height: 350,
+    
+    area mainArea = {
+        type: "vbox",
+        spacing: "15",
+        padding: "20",
+        
+        items: [
+            {
+                name: "titleLabel",
+                type: "label",
+                text: "Theme Switcher Demo",
+                cssClass: "theme-title"
+            },
+            {
+                name: "infoLabel",
+                type: "label",
+                text: "Switch between themes to see CSS loading/unloading",
+                cssClass: "theme-info"
+            },
+            {
+                name: "darkThemeButton",
+                type: "button",
+                text: "Load Dark Theme",
+                onClick: {
+                    if currentTheme != "none" then {
+                        call css.unloadCss("themescreen", currentTheme + ".css");
+                    }
+                    call css.loadCss("themescreen", "dark-theme.css");
+                    currentTheme = "dark-theme";
+                    print "Dark theme loaded";
+                }
+            },
+            {
+                name: "lightThemeButton",
+                type: "button",
+                text: "Load Light Theme",
+                onClick: {
+                    if currentTheme != "none" then {
+                        call css.unloadCss("themescreen", currentTheme + ".css");
+                    }
+                    call css.loadCss("themescreen", "light-theme.css");
+                    currentTheme = "light-theme";
+                    print "Light theme loaded";
+                }
+            },
+            {
+                name: "clearButton",
+                type: "button",
+                text: "Clear All Themes",
+                onClick: {
+                    if currentTheme != "none" then {
+                        call css.unloadCss("themescreen", currentTheme + ".css");
+                        currentTheme = "none";
+                        print "All custom themes removed";
+                    }
+                }
+            }
+        ]
+    }
+};
+
+// Show the screen
+show screen themeScreen;
+
+print "Theme switcher ready. Click buttons to switch themes.";

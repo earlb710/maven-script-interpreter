@@ -71,6 +71,37 @@ Example `console.cfg`:
 
 See [CONSOLE_CONFIG_GUIDE.md](CONSOLE_CONFIG_GUIDE.md) for complete configuration options and examples.
 
+## Organizing Screen Applications
+
+**Best Practice for Screen Apps with Custom CSS:**
+
+When creating applications with screens and custom styling, organize your files in a dedicated directory:
+
+```
+my-screen-app/
+├── my-app.ebs          # Main EBS script with screen definitions
+├── custom-theme.css    # Custom CSS for your screens
+└── README.md           # Optional documentation
+```
+
+This organization:
+- Keeps related files together (easier to manage and deploy)
+- Enables relative CSS paths from the EBS script location
+- Simplifies version control and sharing
+- Provides clear separation between different screen applications
+
+**Example:**
+```javascript
+// In my-screen-app/my-app.ebs
+screen myScreen = { title: "My App" };
+show screen myScreen;
+
+// Load CSS from same directory using relative path
+call css.loadCss("myscreen", "custom-theme.css");
+```
+
+See `ScriptInterpreter/scripts/examples/css-screen-demo/` for a complete working example.
+
 ## Language Overview
 
 ### Basic Syntax

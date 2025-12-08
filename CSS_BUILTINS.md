@@ -2,6 +2,41 @@
 
 The EBS scripting language provides built-in functions for dynamically loading and managing CSS stylesheets for screens at runtime. This allows screens to have their own custom styling without requiring application restarts.
 
+## Best Practice: Organizing Screen Applications
+
+**When creating applications with screens and custom CSS**, organize your files in a dedicated directory structure. This keeps your EBS scripts and CSS files together:
+
+```
+my-screen-app/
+├── my-app.ebs          # Main EBS script with screen definitions
+├── custom-theme.css    # Custom CSS for your screens
+├── dark-theme.css      # Alternative theme (optional)
+└── README.md           # Optional documentation
+```
+
+**Benefits of this organization:**
+- Related files stay together (easier to manage and deploy)
+- CSS files can use relative paths from the EBS script location
+- Easy to share or version control as a complete unit
+- Clear separation of different screen applications
+- Simplified path resolution when loading CSS
+
+**Example:**
+```javascript
+// In my-screen-app/my-app.ebs
+screen myScreen = { 
+    title: "My Application",
+    // ... screen definition
+};
+
+show screen myScreen;
+
+// Load CSS from same directory using relative path
+#css.loadCss("myscreen", "custom-theme.css");
+```
+
+See the complete example in: `ScriptInterpreter/scripts/examples/css-screen-demo/`
+
 ## Available Builtins
 
 ### css.loadCss(screenName, cssPath)
