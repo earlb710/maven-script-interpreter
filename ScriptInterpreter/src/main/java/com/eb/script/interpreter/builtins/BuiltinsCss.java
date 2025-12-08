@@ -1,9 +1,11 @@
 package com.eb.script.interpreter.builtins;
 
 import com.eb.script.arrays.ArrayDynamic;
+import com.eb.script.interpreter.InterpreterContext;
 import com.eb.script.interpreter.InterpreterError;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -38,15 +40,18 @@ public class BuiltinsCss {
     /**
      * Dispatch a CSS builtin by name.
      *
+     * @param context The interpreter context
      * @param name Lowercase builtin name (e.g., "css.getvalue")
      * @param args Arguments passed to the builtin
      * @return Result of the builtin call
      * @throws InterpreterError if the call fails
      */
-    public static Object dispatch(String name, Object[] args) throws InterpreterError {
+    public static Object dispatch(InterpreterContext context, String name, Object[] args) throws InterpreterError {
         return switch (name) {
             case "css.getvalue" -> getValue(args);
             case "css.findcss" -> findCss(args);
+            case "css.loadcss" -> loadCss(context, args);
+            case "css.unloadcss" -> unloadCss(context, args);
             default -> throw new InterpreterError("Unknown CSS builtin: " + name);
         };
     }
@@ -455,6 +460,218 @@ public class BuiltinsCss {
                 properties.put(propertyName, propertyValue);
             }
         }
+    }
+
+    /**
+     * css.loadCss(screenName, cssPath) -> BOOL
+     * Loads a CSS stylesheet and applies it to the specified screen.
+     * 
+     * @param context The interpreter context
+     * @param args args[0] = screenName (String) - name of the screen to apply CSS to
+     *             args[1] = cssPath (String) - path to CSS file (can be classpath resource or file path)
+     * @return Boolean true if successful
+     * @throws InterpreterError if the screen doesn't exist or CSS file cannot be loaded
+     */
+    private static Object loadCss(InterpreterContext context, Object[] args) throws InterpreterError {
+        if (args.length < 2) {
+            throw new InterpreterError("css.loadCss requires 2 arguments: screenName, cssPath");
+        }
+
+        String screenName = (String) args[0];
+        String cssPath = (String) args[1];
+
+        if (screenName == null || screenName.isBlank()) {
+            throw new InterpreterError("css.loadCss: screenName cannot be null or empty");
+        }
+        if (cssPath == null || cssPath.isBlank()) {
+            throw new InterpreterError("css.loadCss: cssPath cannot be null or empty");
+        }
+
+        // Normalize screen name to lowercase
+        screenName = screenName.toLowerCase();
+
+        if (context == null) {
+            throw new InterpreterError("css.loadCss: No interpreter context available");
+        }
+
+        // Check if screen exists
+        if (!context.getScreens().containsKey(screenName)) {
+            throw new InterpreterError("css.loadCss: Screen '" + screenName + "' does not exist or is not shown");
+        }
+
+        javafx.stage.Stage stage = context.getScreens().get(screenName);
+        if (stage == null) {
+            throw new InterpreterError("css.loadCss: Screen '" + screenName + "' is still being initialized");
+        }
+
+        // Resolve the CSS URL
+        String cssUrl = resolveCssUrl(cssPath);
+        if (cssUrl == null) {
+            throw new InterpreterError("css.loadCss: CSS file not found: " + cssPath);
+        }
+
+        final String finalScreenName = screenName;
+        final String finalCssUrl = cssUrl;
+
+        // Apply CSS on JavaFX Application Thread
+        javafx.application.Platform.runLater(() -> {
+            try {
+                javafx.scene.Scene scene = stage.getScene();
+                if (scene != null) {
+                    // Check if CSS is already loaded to avoid duplicates
+                    if (!scene.getStylesheets().contains(finalCssUrl)) {
+                        scene.getStylesheets().add(finalCssUrl);
+                        System.out.println("CSS loaded for screen '" + finalScreenName + "': " + finalCssUrl);
+                    } else {
+                        System.out.println("CSS already loaded for screen '" + finalScreenName + "': " + finalCssUrl);
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Error loading CSS for screen '" + finalScreenName + "': " + e.getMessage());
+                e.printStackTrace();
+            }
+        });
+
+        return true;
+    }
+
+    /**
+     * css.unloadCss(screenName, cssPath) -> BOOL
+     * Removes a CSS stylesheet from the specified screen.
+     * 
+     * @param context The interpreter context
+     * @param args args[0] = screenName (String) - name of the screen to remove CSS from
+     *             args[1] = cssPath (String) - path to CSS file to remove
+     * @return Boolean true if successful
+     * @throws InterpreterError if the screen doesn't exist
+     */
+    private static Object unloadCss(InterpreterContext context, Object[] args) throws InterpreterError {
+        if (args.length < 2) {
+            throw new InterpreterError("css.unloadCss requires 2 arguments: screenName, cssPath");
+        }
+
+        String screenName = (String) args[0];
+        String cssPath = (String) args[1];
+
+        if (screenName == null || screenName.isBlank()) {
+            throw new InterpreterError("css.unloadCss: screenName cannot be null or empty");
+        }
+        if (cssPath == null || cssPath.isBlank()) {
+            throw new InterpreterError("css.unloadCss: cssPath cannot be null or empty");
+        }
+
+        // Normalize screen name to lowercase
+        screenName = screenName.toLowerCase();
+
+        if (context == null) {
+            throw new InterpreterError("css.unloadCss: No interpreter context available");
+        }
+
+        // Check if screen exists
+        if (!context.getScreens().containsKey(screenName)) {
+            throw new InterpreterError("css.unloadCss: Screen '" + screenName + "' does not exist or is not shown");
+        }
+
+        javafx.stage.Stage stage = context.getScreens().get(screenName);
+        if (stage == null) {
+            throw new InterpreterError("css.unloadCss: Screen '" + screenName + "' is still being initialized");
+        }
+
+        // Resolve the CSS URL
+        String cssUrl = resolveCssUrl(cssPath);
+        if (cssUrl == null) {
+            // If we can't resolve it, try to remove by matching the path as-is
+            cssUrl = cssPath;
+        }
+
+        final String finalScreenName = screenName;
+        final String finalCssUrl = cssUrl;
+
+        // Remove CSS on JavaFX Application Thread
+        javafx.application.Platform.runLater(() -> {
+            try {
+                javafx.scene.Scene scene = stage.getScene();
+                if (scene != null) {
+                    // Try to remove by exact match first
+                    boolean removed = scene.getStylesheets().remove(finalCssUrl);
+                    
+                    // If not found, try to find by partial match (in case URL format differs)
+                    if (!removed) {
+                        String pathToMatch = finalCssUrl.toLowerCase();
+                        removed = scene.getStylesheets().removeIf(url -> url.toLowerCase().contains(pathToMatch));
+                    }
+
+                    if (removed) {
+                        System.out.println("CSS unloaded from screen '" + finalScreenName + "': " + finalCssUrl);
+                    } else {
+                        System.out.println("CSS not found on screen '" + finalScreenName + "': " + finalCssUrl);
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Error unloading CSS from screen '" + finalScreenName + "': " + e.getMessage());
+                e.printStackTrace();
+            }
+        });
+
+        return true;
+    }
+
+    /**
+     * Resolve a CSS path to a URL that can be loaded by JavaFX.
+     * Tries multiple resolution strategies:
+     * 1. Classpath resource (with /css/ prefix if needed)
+     * 2. File system path (absolute or sandboxed)
+     * 3. Direct URL
+     * 
+     * @param cssPath The CSS path to resolve
+     * @return A URL string that can be loaded by JavaFX, or null if not found
+     */
+    private static String resolveCssUrl(String cssPath) {
+        // Try as classpath resource first
+        String resourcePath = cssPath;
+        if (!resourcePath.startsWith("/")) {
+            resourcePath = "/" + resourcePath;
+        }
+        if (!resourcePath.startsWith("/css/") && !resourcePath.contains("/")) {
+            // Try adding css/ prefix for simple filenames
+            resourcePath = "/css/" + cssPath;
+        }
+
+        URL resourceUrl = BuiltinsCss.class.getResource(resourcePath);
+        if (resourceUrl != null) {
+            return resourceUrl.toExternalForm();
+        }
+
+        // Also try without the /css/ prefix
+        if (!cssPath.startsWith("/")) {
+            resourceUrl = BuiltinsCss.class.getResource("/" + cssPath);
+            if (resourceUrl != null) {
+                return resourceUrl.toExternalForm();
+            }
+        }
+
+        // Try as file path
+        Path filePath = Path.of(cssPath);
+        if (Files.exists(filePath)) {
+            return filePath.toUri().toString();
+        }
+
+        // Try resolving with sandbox
+        try {
+            Path sandboxedPath = com.eb.util.Util.resolveSandboxedPath(cssPath);
+            if (Files.exists(sandboxedPath)) {
+                return sandboxedPath.toUri().toString();
+            }
+        } catch (Exception e) {
+            // Ignore sandbox resolution errors
+        }
+
+        // If it looks like a URL already, return it as-is
+        if (cssPath.startsWith("file:") || cssPath.startsWith("http:") || cssPath.startsWith("https:")) {
+            return cssPath;
+        }
+
+        return null;
     }
 
     /**
