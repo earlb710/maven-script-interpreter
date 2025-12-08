@@ -57,6 +57,7 @@ public class ProjectListManager {
     
     /**
      * Load projects from console-projects.json file.
+     * Reads project paths and loads project names from each project.json file.
      */
     public void loadProjects() {
         projects.clear();
@@ -88,13 +89,23 @@ public class ProjectListManager {
                     List<Object> projectsList = (List<Object>) projectsArray;
                     
                     for (Object projectObj : projectsList) {
-                        if (projectObj instanceof Map) {
+                        String path = null;
+                        
+                        // Support both old format (with name) and new format (path only)
+                        if (projectObj instanceof String) {
+                            // New format: just a path string
+                            path = (String) projectObj;
+                        } else if (projectObj instanceof Map) {
+                            // Old format: object with name and path
                             @SuppressWarnings("unchecked")
                             Map<String, Object> projectMap = (Map<String, Object>) projectObj;
-                            String name = (String) projectMap.get("name");
-                            String path = (String) projectMap.get("path");
-                            
-                            if (name != null && path != null) {
+                            path = (String) projectMap.get("path");
+                        }
+                        
+                        if (path != null) {
+                            // Read project name from the project.json file
+                            String name = readProjectNameFromFile(path);
+                            if (name != null) {
                                 projects.add(new ProjectEntry(name, path));
                             }
                         }
@@ -110,22 +121,51 @@ public class ProjectListManager {
     }
     
     /**
+     * Read project name from a project.json file.
+     * 
+     * @param projectJsonPath Path to the project.json file
+     * @return Project name, or null if cannot be read
+     */
+    private String readProjectNameFromFile(String projectJsonPath) {
+        try {
+            Path path = Paths.get(projectJsonPath);
+            if (!Files.exists(path)) {
+                System.err.println("Project file not found: " + projectJsonPath);
+                return null;
+            }
+            
+            String jsonContent = Files.readString(path);
+            Object parsed = Json.parse(jsonContent);
+            
+            if (parsed instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> projectMap = (Map<String, Object>) parsed;
+                Object nameObj = projectMap.get("name");
+                if (nameObj instanceof String) {
+                    return (String) nameObj;
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error reading project name from " + projectJsonPath + ": " + e.getMessage());
+        }
+        return null;
+    }
+    
+    /**
      * Save projects to console-projects.json file.
+     * Stores only the paths, not the names.
      */
     public void saveProjects() {
         try {
-            // Build JSON structure
+            // Build JSON structure - store only paths
             Map<String, Object> root = new LinkedHashMap<>();
-            List<Map<String, String>> projectsList = new ArrayList<>();
+            List<String> projectPaths = new ArrayList<>();
             
             for (ProjectEntry entry : projects) {
-                Map<String, String> projectMap = new LinkedHashMap<>();
-                projectMap.put("name", entry.getName());
-                projectMap.put("path", entry.getPath());
-                projectsList.add(projectMap);
+                projectPaths.add(entry.getPath());
             }
             
-            root.put("projects", projectsList);
+            root.put("projects", projectPaths);
             
             // Convert to JSON string
             String jsonContent = Json.prettyJson(root);
@@ -134,7 +174,7 @@ public class ProjectListManager {
             Path projectsPath = Paths.get(PROJECTS_FILE);
             Files.writeString(projectsPath, jsonContent);
             
-            System.out.println("Saved " + projects.size() + " projects to " + PROJECTS_FILE);
+            System.out.println("Saved " + projects.size() + " project paths to " + PROJECTS_FILE);
         } catch (IOException e) {
             System.err.println("Error writing " + PROJECTS_FILE + ": " + e.getMessage());
         } catch (Exception e) {

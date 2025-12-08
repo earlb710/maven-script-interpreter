@@ -8,6 +8,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Window;
 import java.io.File;
+import java.nio.file.Path;
 
 /**
  * Dialog for creating a new project.
@@ -64,9 +65,10 @@ public class NewProjectDialog extends Dialog<NewProjectDialog.ProjectInfo> {
         projectNameField.setPromptText("Enter project name");
         projectNameField.setPrefWidth(300);
         
-        // Project path field (populated with current console path)
+        // Project path field (populated with console path + "/projects")
         projectPathField = new TextField();
-        projectPathField.setText(Util.SANDBOX_ROOT.toString());
+        Path defaultProjectsPath = Util.SANDBOX_ROOT.resolve("projects");
+        projectPathField.setText(defaultProjectsPath.toString());
         projectPathField.setPrefWidth(300);
         
         // Browse button to select directory
