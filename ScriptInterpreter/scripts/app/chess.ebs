@@ -205,6 +205,7 @@ getPawnMoves(x: int, y: int, direction: string) {
 }
 
 getRookMoves(x: int, y: int, direction: string) {
+    // Note: direction parameter is not used for rook moves but kept for API consistency
     var moves: json = [];
     var move: json;
     var i: int;
@@ -245,6 +246,7 @@ getRookMoves(x: int, y: int, direction: string) {
 }
 
 getKnightMoves(x: int, y: int, direction: string) {
+    // Note: direction parameter is not used for knight moves but kept for API consistency
     var moves: json = [];
     var move: json;
     
@@ -310,6 +312,7 @@ getKnightMoves(x: int, y: int, direction: string) {
 }
 
 getBishopMoves(x: int, y: int, direction: string) {
+    // Note: direction parameter is not used for bishop moves but kept for API consistency
     var moves: json = [];
     var move: json;
     var i: int;
@@ -368,6 +371,7 @@ getBishopMoves(x: int, y: int, direction: string) {
 }
 
 getQueenMoves(x: int, y: int, direction: string) {
+    // Note: direction parameter is not used for queen moves but kept for API consistency
     var moves: json = [];
     var rookMoves: json;
     var bishopMoves: json;
@@ -381,19 +385,20 @@ getQueenMoves(x: int, y: int, direction: string) {
     // Add all rook moves
     len = call json.length(rookMoves);
     for (i = 0; i < len; i++) {
-        call json.add(moves, rookMoves[i]);
+        call json.add(moves, call json.get(rookMoves, i));
     }
     
     // Add all bishop moves
     len = call json.length(bishopMoves);
     for (i = 0; i < len; i++) {
-        call json.add(moves, bishopMoves[i]);
+        call json.add(moves, call json.get(bishopMoves, i));
     }
     
     return moves;
 }
 
 getKingMoves(x: int, y: int, direction: string) {
+    // Note: direction parameter is not used for king moves but kept for API consistency
     var moves: json = [];
     var move: json;
     
