@@ -41,6 +41,9 @@
                 "type": "treeview",
                 "labelText": "Help Topic",
                 "labelPosition": "TOP",
+                "minWidth": "200",
+                "prefWidth": "250",
+                "maxWidth": "250",
                 "minHeight": "200",
                 "prefHeight": "400",
                 "maxHeight": "MAX",
@@ -71,8 +74,13 @@
                 "labelPosition": "TOP",
                 "editable": false,
                 "wrapText": true,
+                "minWidth": "200",
+                "prefWidth": "400",
+                "maxWidth": "MAX",
+                "minHeight": "200",
                 "prefHeight": "100",
                 "maxHeight": "MAX",
+                "hgrow": "ALWAYS",
                 "vgrow": "ALWAYS",
                 "style": "-fx-font-family: 'Consolas', 'Monaco', 'Courier New', monospace; -fx-font-size: 12px;"
               }
