@@ -62,22 +62,31 @@ public class ProjectListManager {
     public void loadProjects() {
         projects.clear();
         try {
+            // Show where we're looking for the file
+            String currentDir = System.getProperty("user.dir");
+            System.out.println("Loading projects from directory: " + currentDir);
+            
             // Try current directory first
             Path projectsPath = Paths.get(PROJECTS_FILE);
+            System.out.println("Trying: " + projectsPath.toAbsolutePath());
             
             // If not found in current directory, try parent directory
             if (!Files.exists(projectsPath)) {
                 projectsPath = Paths.get("..", PROJECTS_FILE);
+                System.out.println("Not found, trying parent: " + projectsPath.toAbsolutePath());
             }
             
             // If still not found, create empty file and start with empty list
             if (!Files.exists(projectsPath)) {
-                System.out.println("Projects file not found: " + PROJECTS_FILE + ", creating empty file.");
+                System.out.println("Projects file not found at: " + projectsPath.toAbsolutePath());
+                System.out.println("Creating empty " + PROJECTS_FILE + " in current directory");
                 createEmptyProjectsFile();
                 return;
             }
             
+            System.out.println("Found projects file at: " + projectsPath.toAbsolutePath());
             String jsonContent = Files.readString(projectsPath);
+            System.out.println("File content: " + jsonContent.substring(0, Math.min(200, jsonContent.length())) + "...");
             Object parsed = Json.parse(jsonContent);
             
             if (parsed instanceof Map) {
