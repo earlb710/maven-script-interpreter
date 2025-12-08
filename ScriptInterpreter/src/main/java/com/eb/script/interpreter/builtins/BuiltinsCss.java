@@ -466,11 +466,16 @@ public class BuiltinsCss {
      * css.loadCss(screenName, cssPath) -> BOOL
      * Loads a CSS stylesheet and applies it to the specified screen.
      * 
+     * Note: This operation is asynchronous - it returns immediately and schedules
+     * the CSS loading on the JavaFX Application Thread. This is consistent with other
+     * screen builtins that modify UI state. The return value indicates the operation
+     * was successfully scheduled, not that the CSS was successfully applied.
+     * 
      * @param context The interpreter context
      * @param args args[0] = screenName (String) - name of the screen to apply CSS to
      *             args[1] = cssPath (String) - path to CSS file (can be classpath resource or file path)
-     * @return Boolean true if successful
-     * @throws InterpreterError if the screen doesn't exist or CSS file cannot be loaded
+     * @return Boolean true if the operation was successfully scheduled
+     * @throws InterpreterError if the screen doesn't exist or CSS file cannot be found
      */
     private static Object loadCss(InterpreterContext context, Object[] args) throws InterpreterError {
         if (args.length < 2) {
@@ -539,10 +544,15 @@ public class BuiltinsCss {
      * css.unloadCss(screenName, cssPath) -> BOOL
      * Removes a CSS stylesheet from the specified screen.
      * 
+     * Note: This operation is asynchronous - it returns immediately and schedules
+     * the CSS removal on the JavaFX Application Thread. This is consistent with other
+     * screen builtins that modify UI state. The return value indicates the operation
+     * was successfully scheduled, not that the CSS was successfully removed.
+     * 
      * @param context The interpreter context
      * @param args args[0] = screenName (String) - name of the screen to remove CSS from
      *             args[1] = cssPath (String) - path to CSS file to remove
-     * @return Boolean true if successful
+     * @return Boolean true if the operation was successfully scheduled
      * @throws InterpreterError if the screen doesn't exist
      */
     private static Object unloadCss(InterpreterContext context, Object[] args) throws InterpreterError {
@@ -595,10 +605,16 @@ public class BuiltinsCss {
                     // Try to remove by exact match first
                     boolean removed = scene.getStylesheets().remove(finalCssUrl);
                     
-                    // If not found, try to find by partial match (in case URL format differs)
-                    if (!removed) {
-                        String pathToMatch = finalCssUrl.toLowerCase();
-                        removed = scene.getStylesheets().removeIf(url -> url.toLowerCase().contains(pathToMatch));
+                    // If not found, try to find by filename match at end of path
+                    // This handles different URL formats for the same file
+                    if (!removed && finalCssUrl != null) {
+                        String filename = finalCssUrl;
+                        int lastSlash = filename.lastIndexOf('/');
+                        if (lastSlash >= 0) {
+                            filename = filename.substring(lastSlash + 1);
+                        }
+                        final String matchFilename = filename;
+                        removed = scene.getStylesheets().removeIf(url -> url.endsWith("/" + matchFilename));
                     }
 
                     if (removed) {
