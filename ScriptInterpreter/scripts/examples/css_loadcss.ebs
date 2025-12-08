@@ -3,40 +3,41 @@
 
 // Define a screen with CSS classes
 screen styledScreen = {
-    title: "CSS Loading Example",
-    width: 500,
-    height: 300,
-    
-    area mainArea = {
-        type: "vbox",
-        spacing: "15",
-        padding: "20",
-        
-        items: [
-            {
-                name: "titleLabel",
-                type: "label",
-                text: "Dynamic CSS Loading",
-                cssClass: "demo-title"
-            },
-            {
-                name: "infoLabel",
-                type: "label",
-                text: "Click the button to load custom styles",
-                cssClass: "demo-info"
-            },
-            {
-                name: "loadButton",
-                type: "button",
-                text: "Load Custom CSS",
-                onClick: {
-                    // Load CSS from classpath
-                    call css.loadCss("styledscreen", "custom-screen.css");
-                    print "Custom CSS loaded!";
+    "title": "CSS Loading Example",
+    "width": 500,
+    "height": 300,
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "15",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "titleLabel",
+                    "type": "label",
+                    "text": "Dynamic CSS Loading",
+                    "cssClass": "demo-title"
+                },
+                {
+                    "name": "infoLabel",
+                    "type": "label",
+                    "text": "Click the button to load custom styles",
+                    "cssClass": "demo-info"
+                },
+                {
+                    "name": "loadButton",
+                    "type": "button",
+                    "text": "Load Custom CSS",
+                    "onClick": {
+                        // Load CSS from classpath
+                        call css.loadCss("styledscreen", "custom-screen.css");
+                        print "Custom CSS loaded!";
+                    }
                 }
-            }
-        ]
-    }
+            ]
+        }
+    ]
 };
 
 // Show the screen

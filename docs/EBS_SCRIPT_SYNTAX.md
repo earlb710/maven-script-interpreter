@@ -3420,29 +3420,32 @@ Dynamically loads a CSS stylesheet and applies it to the specified screen at run
 ```javascript
 // Define a screen with CSS classes
 screen myScreen = {
-    title: "Styled Application",
-    width: 600,
-    height: 400,
-    area mainArea = {
-        type: "vbox",
-        items: [
-            {
-                name: "title",
-                type: "label",
-                text: "Welcome",
-                cssClass: "custom-title"  // Reference CSS class
-            },
-            {
-                name: "loadTheme",
-                type: "button",
-                text: "Load Dark Theme",
-                onClick: {
-                    // Load custom CSS from same directory as script
-                    call css.loadCss("myscreen", "dark-theme.css");
+    "title": "Styled Application",
+    "width": 600,
+    "height": 400,
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "items": [
+                {
+                    "name": "title",
+                    "type": "label",
+                    "text": "Welcome",
+                    "cssClass": "custom-title"  // Reference CSS class
+                },
+                {
+                    "name": "loadTheme",
+                    "type": "button",
+                    "text": "Load Dark Theme",
+                    "onClick": {
+                        // Load custom CSS from same directory as script
+                        call css.loadCss("myscreen", "dark-theme.css");
+                    }
                 }
-            }
-        ]
-    }
+            ]
+        }
+    ]
 };
 
 show screen myScreen;
@@ -3490,28 +3493,31 @@ switchTheme(themeName: string) {
 
 // Usage in button click handlers
 screen themeDemo = {
-    area controls = {
-        items: [
-            {
-                name: "darkBtn",
-                type: "button",
-                text: "Dark Theme",
-                onClick: {
-                    call css.unloadCss("themedemo", "light-theme.css");
-                    call css.loadCss("themedemo", "dark-theme.css");
+    "area": [
+        {
+            "name": "controls",
+            "items": [
+                {
+                    "name": "darkBtn",
+                    "type": "button",
+                    "text": "Dark Theme",
+                    "onClick": {
+                        call css.unloadCss("themedemo", "light-theme.css");
+                        call css.loadCss("themedemo", "dark-theme.css");
+                    }
+                },
+                {
+                    "name": "lightBtn",
+                    "type": "button",
+                    "text": "Light Theme",
+                    "onClick": {
+                        call css.unloadCss("themedemo", "dark-theme.css");
+                        call css.loadCss("themedemo", "light-theme.css");
+                    }
                 }
-            },
-            {
-                name: "lightBtn",
-                type: "button",
-                text: "Light Theme",
-                onClick: {
-                    call css.unloadCss("themedemo", "dark-theme.css");
-                    call css.loadCss("themedemo", "light-theme.css");
-                }
-            }
-        ]
-    }
+            ]
+        }
+    ]
 };
 ```
 

@@ -25,14 +25,14 @@ my-screen-app/
 ```javascript
 // In my-screen-app/my-app.ebs
 screen myScreen = { 
-    title: "My Application",
+    "title": "My Application"
     // ... screen definition
 };
 
 show screen myScreen;
 
 // Load CSS from same directory using relative path
-#css.loadCss("myscreen", "custom-theme.css");
+call css.loadCss("myscreen", "custom-theme.css");
 ```
 
 See the complete example in: `ScriptInterpreter/scripts/examples/css-screen-demo/`
@@ -145,48 +145,49 @@ Here's a complete example showing how to create a screen with custom CSS loading
 ```ebs
 // Define a screen
 screen styledScreen = {
-    title: "Custom Styled Screen",
-    width: 600,
-    height: 400,
-    
-    area mainArea = {
-        type: "vbox",
-        spacing: "10",
-        padding: "20",
-        
-        items: [
-            {
-                name: "titleLabel",
-                type: "label",
-                text: "Custom Styled Screen",
-                cssClass: "my-title"
-            },
-            {
-                name: "contentField",
-                type: "textfield",
-                text: "Enter text here",
-                cssClass: "my-input"
-            },
-            {
-                name: "loadStyleButton",
-                type: "button",
-                text: "Load Custom Theme",
-                onClick: {
-                    #css.loadCss("styledscreen", "my-theme.css");
-                    print "Custom theme loaded!";
+    "title": "Custom Styled Screen",
+    "width": 600,
+    "height": 400,
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "10",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "titleLabel",
+                    "type": "label",
+                    "text": "Custom Styled Screen",
+                    "cssClass": "my-title"
+                },
+                {
+                    "name": "contentField",
+                    "type": "textfield",
+                    "text": "Enter text here",
+                    "cssClass": "my-input"
+                },
+                {
+                    "name": "loadStyleButton",
+                    "type": "button",
+                    "text": "Load Custom Theme",
+                    "onClick": {
+                        call css.loadCss("styledscreen", "my-theme.css");
+                        print "Custom theme loaded!";
+                    }
+                },
+                {
+                    "name": "unloadStyleButton",
+                    "type": "button",
+                    "text": "Unload Custom Theme",
+                    "onClick": {
+                        call css.unloadCss("styledscreen", "my-theme.css");
+                        print "Custom theme removed!";
+                    }
                 }
-            },
-            {
-                name: "unloadStyleButton",
-                type: "button",
-                text: "Unload Custom Theme",
-                onClick: {
-                    #css.unloadCss("styledscreen", "my-theme.css");
-                    print "Custom theme removed!";
-                }
-            }
-        ]
-    }
+            ]
+        }
+    ]
 };
 
 show screen styledScreen;

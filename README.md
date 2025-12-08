@@ -93,7 +93,7 @@ This organization:
 **Example:**
 ```javascript
 // In my-screen-app/my-app.ebs
-screen myScreen = { title: "My App" };
+screen myScreen = { "title": "My App" };
 show screen myScreen;
 
 // Load CSS from same directory using relative path
