@@ -123,29 +123,44 @@ public class ProjectListManager {
                     
                     if (projectsList.isEmpty()) {
                         System.out.println("No projects found in " + PROJECTS_FILE + ". Use File → New Project or File → Open Project to add projects.");
+                    } else {
+                        System.out.println("Processing " + projectsList.size() + " project entries from JSON...");
                     }
                     
+                    int index = 0;
                     for (Object projectObj : projectsList) {
-                        String path = null;
-                        
-                        // Support both old format (with name) and new format (path only)
-                        if (projectObj instanceof String) {
-                            // New format: just a path string
-                            path = (String) projectObj;
-                        } else if (projectObj instanceof Map) {
-                            // Old format: object with name and path
-                            @SuppressWarnings("unchecked")
-                            Map<String, Object> projectMap = (Map<String, Object>) projectObj;
-                            path = (String) projectMap.get("path");
-                        }
-                        
-                        if (path != null) {
-                            // Read project name from the project.json file
-                            String name = readProjectNameFromFile(path);
-                            if (name != null) {
-                                projects.add(new ProjectEntry(name, path));
+                        try {
+                            System.out.println("  Entry " + index + ": " + projectObj);
+                            String path = null;
+                            
+                            // Support both old format (with name) and new format (path only)
+                            if (projectObj instanceof String) {
+                                // New format: just a path string
+                                path = (String) projectObj;
+                            } else if (projectObj instanceof Map) {
+                                // Old format: object with name and path
+                                @SuppressWarnings("unchecked")
+                                Map<String, Object> projectMap = (Map<String, Object>) projectObj;
+                                path = (String) projectMap.get("path");
                             }
+                            
+                            if (path != null) {
+                                // Read project name from the project.json file
+                                String name = readProjectNameFromFile(path);
+                                if (name != null) {
+                                    projects.add(new ProjectEntry(name, path));
+                                    System.out.println("  Successfully added project: " + name);
+                                } else {
+                                    System.err.println("  Failed to read project name from: " + path);
+                                }
+                            } else {
+                                System.err.println("  No path found in project entry");
+                            }
+                        } catch (Exception e) {
+                            System.err.println("  ERROR processing project entry " + index + ": " + e.getMessage());
+                            e.printStackTrace();
                         }
+                        index++;
                     }
                     System.out.println("Loaded " + projects.size() + " projects from " + PROJECTS_FILE);
                 }
