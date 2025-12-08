@@ -65,6 +65,17 @@ foreach line in builtinLines {
 var builtinCount: int = builtinsArray.length;
 print "Loaded " + call str.toString(builtinCount) + " builtins";
 
+// Load category information from help data
+var builtinCategoryNames: json = null;
+var builtinCategoryOrder: json = null;
+if helpData != null then {
+    var topics: json = call json.get(helpData, "topics");
+    if topics != null then {
+        builtinCategoryNames = call json.get(topics, "builtin_categories");
+        builtinCategoryOrder = call json.get(topics, "builtin_category_order");
+    }
+}
+
 // Categorize builtins by module
 var builtinsByCategory: json = {};
 if builtinsArray != null then {
@@ -94,55 +105,36 @@ if builtinsArray != null then {
     }
 }
 
-// Build categorized builtin tree
+// Build categorized builtin tree using category order from JSON
 var builtinChildren: array[*];
-
-// Define category display names and order
-var categoryNames: array[*] = [
-    "str", "array", "json", "file", "http", "ai",
-    "image", "vector", "ftp", "mail", "scr", "debug",
-    "system", "classTree", "plugin", "echo", "sleep", "custom", "other"
-];
-
-var categoryDisplayNames: json = {
-    "str": "String Functions",
-    "array": "Array Functions",
-    "json": "JSON Functions",
-    "file": "File I/O",
-    "http": "HTTP/Network",
-    "ai": "AI/Machine Learning",
-    "image": "Image Processing",
-    "vector": "Vector Graphics (SVG)",
-    "ftp": "FTP Operations",
-    "mail": "Email",
-    "scr": "Screen/UI Functions",
-    "debug": "Debugging & Testing",
-    "system": "System Functions",
-    "classTree": "Code Analysis",
-    "plugin": "Plugin System",
-    "echo": "Echo Functions",
-    "sleep": "Timing Functions",
-    "custom": "Custom Functions",
-    "other": "Other Functions"
-};
-
 var totalBuiltins: int = 0;
-foreach categoryKey in categoryNames {
-    var categoryArray: json = call json.get(builtinsByCategory, categoryKey);
-    if categoryArray != null && categoryArray.length > 0 then {
-        var displayName: string = call json.getString(categoryDisplayNames, categoryKey, categoryKey);
-        var categoryNode: json = {};
-        categoryNode = call json.set(categoryNode, "value", "builtin_cat_" + categoryKey);
-        categoryNode = call json.set(categoryNode, "expanded", false);
-        categoryNode = call json.set(categoryNode, "children", categoryArray);
-        call array.add(builtinChildren, categoryNode);
-        totalBuiltins = totalBuiltins + categoryArray.length;
+
+if builtinCategoryOrder != null then {
+    foreach categoryKey in builtinCategoryOrder {
+        var categoryArray: json = call json.get(builtinsByCategory, categoryKey);
+        if categoryArray != null && categoryArray.length > 0 then {
+            // Get display name from JSON, fallback to key
+            var displayName: string = categoryKey;
+            if builtinCategoryNames != null then {
+                var jsonDisplayName: string = call json.getString(builtinCategoryNames, categoryKey, "");
+                if jsonDisplayName != "" then {
+                    displayName = jsonDisplayName;
+                }
+            }
+            
+            var categoryNode: json = {};
+            categoryNode = call json.set(categoryNode, "value", "builtin_cat_" + categoryKey);
+            categoryNode = call json.set(categoryNode, "expanded", false);
+            categoryNode = call json.set(categoryNode, "children", categoryArray);
+            call array.add(builtinChildren, categoryNode);
+            totalBuiltins = totalBuiltins + categoryArray.length;
+        }
     }
 }
 
 print "Built categorized tree with " + call str.toString(totalBuiltins) + " builtins in " + call str.toString(builtinChildren.length) + " categories";
 
-// Build the complete tree structure dynamically with enhanced organization
+// Build the complete tree structure dynamically
 var structureChildren: array[*];
 call array.add(structureChildren, call json.set({}, "value", "structure_basic"));
 call array.add(structureChildren, call json.set({}, "value", "structure_variables"));
@@ -156,24 +148,9 @@ call array.add(flowChildren, call json.set({}, "value", "flow_loops"));
 call array.add(flowChildren, call json.set({}, "value", "flow_break_continue"));
 call array.add(flowChildren, call json.set({}, "value", "flow_exceptions"));
 
-// Enhanced data types section with categories
-var dataTypesChildren: array[*];
-call array.add(dataTypesChildren, call json.set({}, "value", "data_primitives"));
-call array.add(dataTypesChildren, call json.set({}, "value", "data_collections"));
-call array.add(dataTypesChildren, call json.set({}, "value", "data_advanced"));
-
-// Enhanced keywords section with categories
-var keywordsChildren: array[*];
-call array.add(keywordsChildren, call json.set({}, "value", "kw_variables"));
-call array.add(keywordsChildren, call json.set({}, "value", "kw_control"));
-call array.add(keywordsChildren, call json.set({}, "value", "kw_database"));
-call array.add(keywordsChildren, call json.set({}, "value", "kw_screen"));
-call array.add(keywordsChildren, call json.set({}, "value", "kw_datatypes"));
-call array.add(keywordsChildren, call json.set({}, "value", "kw_other"));
-
 var syntaxChildren: array[*];
 
-// Add Getting Started section
+// Add Getting Started as first item
 call array.add(syntaxChildren, call json.set({}, "value", "getting_started"));
 
 var structureNode: json = {};
@@ -182,11 +159,7 @@ structureNode = call json.set(structureNode, "expanded", false);
 structureNode = call json.set(structureNode, "children", structureChildren);
 call array.add(syntaxChildren, structureNode);
 
-var dataTypesNode: json = {};
-dataTypesNode = call json.set(dataTypesNode, "value", "data");
-dataTypesNode = call json.set(dataTypesNode, "expanded", false);
-dataTypesNode = call json.set(dataTypesNode, "children", dataTypesChildren);
-call array.add(syntaxChildren, dataTypesNode);
+call array.add(syntaxChildren, call json.set({}, "value", "data"));
 
 var flowNode: json = {};
 flowNode = call json.set(flowNode, "value", "flow");
@@ -194,11 +167,7 @@ flowNode = call json.set(flowNode, "expanded", false);
 flowNode = call json.set(flowNode, "children", flowChildren);
 call array.add(syntaxChildren, flowNode);
 
-var keywordsNode: json = {};
-keywordsNode = call json.set(keywordsNode, "value", "keywords");
-keywordsNode = call json.set(keywordsNode, "expanded", false);
-keywordsNode = call json.set(keywordsNode, "children", keywordsChildren);
-call array.add(syntaxChildren, keywordsNode);
+call array.add(syntaxChildren, call json.set({}, "value", "keywords"));
 
 var builtinsNode: json = {};
 builtinsNode = call json.set(builtinsNode, "value", "builtins");
@@ -217,7 +186,7 @@ var rootChildren: array[*];
 
 var syntaxRootNode: json = {};
 syntaxRootNode = call json.set(syntaxRootNode, "value", "Syntax");
-syntaxRootNode = call json.set(syntaxRootNode, "expanded", true);
+syntaxRootNode = call json.set(syntaxRootNode, "expanded", false);
 syntaxRootNode = call json.set(syntaxRootNode, "children", syntaxChildren);
 call array.add(rootChildren, syntaxRootNode);
 
@@ -307,6 +276,43 @@ getKeywordHelp(keyword: string) return string {
     return "";
 }
 
+// Function to get topic content from JSON
+getTopicFromJson(topicKey: string) return string {
+    if helpData == null then {
+        return "";
+    }
+    
+    var topics: json = call json.get(helpData, "topics");
+    if topics == null then {
+        return "";
+    }
+    
+    var topic: json = call json.get(topics, topicKey);
+    if topic == null then {
+        return "";
+    }
+    
+    var title: string = call json.getString(topic, "title", "");
+    var content: string = call json.getString(topic, "content", "");
+    
+    if title == "" && content == "" then {
+        return "";
+    }
+    
+    var result: string = "";
+    if title != "" then {
+        result = "═══════════════════════════════════════════════════════\n";
+        result = result + "  " + title + "\n";
+        result = result + "═══════════════════════════════════════════════════════\n\n";
+    }
+    
+    if content != "" then {
+        result = result + content;
+    }
+    
+    return result;
+}
+
 // Function to get builtin help from system registry
 getBuiltinHelp(builtinName: string) return string {
     if builtinsArray == null then {
@@ -393,7 +399,22 @@ getHelpContent(topic: string) return string {
     // Handle builtin category overview pages
     if call str.startsWith(topic, "builtin_cat_") then {
         var categoryKey: string = call str.substring(topic, 12);
-        var displayName: string = call json.getString(categoryDisplayNames, categoryKey, categoryKey);
+        
+        // Get category display name from JSON
+        var displayName: string = categoryKey;
+        if helpData != null then {
+            var topics: json = call json.get(helpData, "topics");
+            if topics != null then {
+                var categoryNames: json = call json.get(topics, "builtin_categories");
+                if categoryNames != null then {
+                    var jsonName: string = call json.getString(categoryNames, categoryKey, "");
+                    if jsonName != "" then {
+                        displayName = jsonName;
+                    }
+                }
+            }
+        }
+        
         var categoryArray: json = call json.get(builtinsByCategory, categoryKey);
         var funcCount: int = 0;
         if categoryArray != null then {
@@ -428,37 +449,13 @@ getHelpContent(topic: string) return string {
         return call getBuiltinHelp(builtinName);
     }
     
-    // Getting Started
-    if topic == "getting_started" then {
-        content = "═══════════════════════════════════════════════════════\n";
-        content = content + "  Getting Started with EBS\n";
-        content = content + "═══════════════════════════════════════════════════════\n\n";
-        content = content + "Welcome to EBS (Earl Bosch Script)!\n\n";
-        content = content + "▸ QUICK START\n";
-        content = content + "───────────────────────────────────────────────────────\n";
-        content = content + "1. Write your first script:\n";
-        content = content + "   var message: string = \"Hello, World!\";\n";
-        content = content + "   print message;\n\n";
-        content = content + "2. Run it in the console or save as .ebs file\n\n";
-        content = content + "▸ KEY FEATURES\n";
-        content = content + "───────────────────────────────────────────────────────\n";
-        content = content + "• Variables with type annotations or inference\n";
-        content = content + "• Control flow (if/then/else, while, for, foreach)\n";
-        content = content + "• Functions with parameters and return values\n";
-        content = content + "• Arrays (fixed and dynamic) and JSON objects\n";
-        content = content + "• Database operations (connect, cursor, SQL)\n";
-        content = content + "• File I/O and HTTP requests\n";
-        content = content + "• JavaFX screen/UI support\n";
-        content = content + "• Rich set of 200+ built-in functions\n\n";
-        content = content + "▸ NEXT STEPS\n";
-        content = content + "───────────────────────────────────────────────────────\n";
-        content = content + "• Explore 'Program Structure' for syntax basics\n";
-        content = content + "• Check 'Data Types' for available types\n";
-        content = content + "• Browse 'Built-in Functions' by category\n";
-        content = content + "• View 'Examples' for practical code samples\n";
-        return content;
+    // Try to get content from JSON first for known topics
+    var jsonContent: string = call getTopicFromJson(topic);
+    if jsonContent != "" then {
+        return jsonContent;
     }
     
+    // Fallback to hard-coded content for topics not yet in JSON
     // Syntax topics
     if topic == "Syntax" then {
         content = "═══════════════════════════════════════════════════════\n";
@@ -627,18 +624,31 @@ getHelpContent(topic: string) return string {
     }
     
     if topic == "data" then {
-        content = "═══════════════════════════════════════════════════════\n";
-        content = content + "  Data Types\n";
-        content = content + "═══════════════════════════════════════════════════════\n\n";
-        content = content + "EBS supports a rich set of data types for various use cases.\n\n";
-        content = content + "Select a sub-topic from the tree to view detailed information:\n\n";
-        content = content + "▸ Primitive Types - Basic data types (int, string, bool, etc.)\n";
-        content = content + "▸ Collections - Arrays and JSON objects\n";
-        content = content + "▸ Advanced Types - Bitmap, intmap, record, and specialized types\n";
+        content = "=== Data Types ===\n\n";
+        content = content + "PRIMITIVE TYPES:\n";
+        content = content + "• int / integer - 32-bit integer (42)\n";
+        content = content + "• long - 64-bit integer (9999999999)\n";
+        content = content + "• float - Single-precision (3.14)\n";
+        content = content + "• double - Double-precision (3.14159)\n";
+        content = content + "• byte - 8-bit integer (127)\n";
+        content = content + "• string - Text (\"Hello\")\n";
+        content = content + "• bool / boolean - true, false\n";
+        content = content + "• date - Date/time value\n";
+        content = content + "• json - JSON object/array\n";
+        content = content + "• array - Generic array\n\n";
+        content = content + "VARIABLES:\n";
+        content = content + "  var name: string = \"value\";\n";
+        content = content + "  var count: int = 42;\n";
+        content = content + "  var price: double = 19.99;\n";
+        content = content + "  var flag: bool = true;\n\n";
+        content = content + "TYPE CASTING:\n";
+        content = content + "  var num: int = int(\"42\");\n";
+        content = content + "  var text: string = string(123);\n";
+        content = content + "  var flag: bool = boolean(\"true\");\n";
         return content;
     }
     
-    if topic == "data_primitives" then {
+    if topic == "flow" then {
         content = "═══════════════════════════════════════════════════════\n";
         content = content + "  Control Flow\n";
         content = content + "═══════════════════════════════════════════════════════\n\n";

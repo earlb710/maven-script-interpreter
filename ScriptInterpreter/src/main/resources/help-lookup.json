@@ -2576,7 +2576,7 @@
     {
       "function": "mail.folders",
       "short_description": "Lists available mail folders",
-      "long_help": "Lists all available folders in the mail account. Returns a JSON array of folder information including folder name, type, message count and unread count.<br><br><b>Folder types:</b><br>• messages - folder can contain messages<br>• folders - folder can contain subfolders<br>• messages,folders - folder can contain both",
+      "long_help": "Lists all available folders in the mail account. Returns a JSON array of folder information including folder name, type, message count and unread count.<br><br><b>Folder types:</b><br>\u2022 messages - folder can contain messages<br>\u2022 folders - folder can contain subfolders<br>\u2022 messages,folders - folder can contain both",
       "parameters": [
         {
           "name": "handle",
@@ -2590,7 +2590,7 @@
     {
       "function": "mail.list",
       "short_description": "Lists emails in a folder",
-      "long_help": "Lists emails in the specified folder with pagination support. Returns a JSON array of message summaries.<br><br><b>Returned fields:</b><br>• id - Message number (use with mail.get)<br>• subject - Email subject<br>• from - Sender email address<br>• fromName - Sender display name<br>• date - Sent date as milliseconds since epoch<br>• dateStr - Formatted date string<br>• size - Message size in bytes<br>• read - Boolean indicating if message has been read",
+      "long_help": "Lists emails in the specified folder with pagination support. Returns a JSON array of message summaries.<br><br><b>Returned fields:</b><br>\u2022 id - Message number (use with mail.get)<br>\u2022 subject - Email subject<br>\u2022 from - Sender email address<br>\u2022 fromName - Sender display name<br>\u2022 date - Sent date as milliseconds since epoch<br>\u2022 dateStr - Formatted date string<br>\u2022 size - Message size in bytes<br>\u2022 read - Boolean indicating if message has been read",
       "parameters": [
         {
           "name": "handle",
@@ -2622,7 +2622,7 @@
     {
       "function": "mail.get",
       "short_description": "Retrieves full email content",
-      "long_help": "Retrieves the full content of a specific email by its message ID.<br><br><b>Returned fields:</b><br>• id - Message number<br>• subject - Email subject<br>• from - Array of sender address objects (address, name)<br>• to - Array of recipient addresses<br>• cc - Array of CC addresses<br>• bcc - Array of BCC addresses<br>• date - Sent date as milliseconds<br>• dateStr - Formatted date string<br>• size - Message size in bytes<br>• read - Boolean indicating if read<br>• contentType - MIME content type<br>• body - Email body text (plain or HTML)<br>• attachments - Array of attachment info (filename, contentType, size)",
+      "long_help": "Retrieves the full content of a specific email by its message ID.<br><br><b>Returned fields:</b><br>\u2022 id - Message number<br>\u2022 subject - Email subject<br>\u2022 from - Array of sender address objects (address, name)<br>\u2022 to - Array of recipient addresses<br>\u2022 cc - Array of CC addresses<br>\u2022 bcc - Array of BCC addresses<br>\u2022 date - Sent date as milliseconds<br>\u2022 dateStr - Formatted date string<br>\u2022 size - Message size in bytes<br>\u2022 read - Boolean indicating if read<br>\u2022 contentType - MIME content type<br>\u2022 body - Email body text (plain or HTML)<br>\u2022 attachments - Array of attachment info (filename, contentType, size)",
       "parameters": [
         {
           "name": "handle",
@@ -2655,7 +2655,7 @@
     {
       "function": "EbsFunction",
       "short_description": "Interface that plugin classes must implement",
-      "long_help": "The EbsFunction interface defines the contract for custom plugin functions. Classes implementing this interface can be<br>loaded via #plugin.load() and called using #custom.alias(...) syntax.<br><br><b>Required Methods:</b><br>• <b>String getName()</b> - Returns the display name for logging<br>• <b>String getDescription()</b> - Returns description for help text<br>• <b>Object execute(Object[] args)</b> - Main execution method<br><br><b>Optional Methods (have defaults):</b><br>• <b>void initialize(Map&lt;String, Object&gt; config)</b> - Called on load with config<br>• <b>void cleanup()</b> - Called on unload for resource cleanup<br>• <b>Map&lt;String, Object&gt; getSignature()</b> - Returns parameter/return type metadata<br>• <b>String getSignatureString()</b> - Returns signature as JSON string<br><br>Use <b>/help EbsFunction.java</b> to see the full Java interface code.",
+      "long_help": "The EbsFunction interface defines the contract for custom plugin functions. Classes implementing this interface can be<br>loaded via #plugin.load() and called using #custom.alias(...) syntax.<br><br><b>Required Methods:</b><br>\u2022 <b>String getName()</b> - Returns the display name for logging<br>\u2022 <b>String getDescription()</b> - Returns description for help text<br>\u2022 <b>Object execute(Object[] args)</b> - Main execution method<br><br><b>Optional Methods (have defaults):</b><br>\u2022 <b>void initialize(Map&lt;String, Object&gt; config)</b> - Called on load with config<br>\u2022 <b>void cleanup()</b> - Called on unload for resource cleanup<br>\u2022 <b>Map&lt;String, Object&gt; getSignature()</b> - Returns parameter/return type metadata<br>\u2022 <b>String getSignatureString()</b> - Returns signature as JSON string<br><br>Use <b>/help EbsFunction.java</b> to see the full Java interface code.",
       "parameters": [],
       "return_type": "interface",
       "example": "<b>public class</b> MyFunction <b>implements</b> EbsFunction {<br>    <b>public</b> String getName() { <b>return</b> \"My Function\"; }<br>    <b>public</b> String getDescription() { <b>return</b> \"Does something\"; }<br>    <b>public</b> Object execute(Object[] args) {<br>        <b>return</b> \"Result: \" + args[0];<br>    }<br>}<br><br>// Optional: Define signature as JSON string<br><b>public</b> String getSignatureString() {<br>    <b>return</b> \"\"\"<br>        {<br>          \"parameters\": [<br>            {\"name\": \"input\", \"type\": \"string\", \"required\": true, \"description\": \"Input text\"},<br>            {\"name\": \"count\", \"type\": \"int\", \"required\": false, \"description\": \"Repeat count\"}<br>          ],<br>          \"returnType\": \"string\",<br>          \"returnDescription\": \"Processed output\"<br>        }<br>        \"\"\";<br>}"
@@ -2709,7 +2709,7 @@
     {
       "function": "ftp.openUrl",
       "short_description": "Opens an FTP connection using a URL",
-      "long_help": "Opens a connection to an FTP or FTPS server using a URL string. The URL contains server details while password can be provided separately for security.<br><br><b>URL Formats:</b><br>• FTP: <code>ftp://user@host:port</code><br>• FTPS: <code>ftps://user@host:port</code><br><br>Password can be included in URL as <code>ftp://user:password@host:port</code> but for security, it's recommended to store password separately.<br><br><b>Use with config variables:</b> Define connection in Config > FTP Server Config, then use the variable in scripts.",
+      "long_help": "Opens a connection to an FTP or FTPS server using a URL string. The URL contains server details while password can be provided separately for security.<br><br><b>URL Formats:</b><br>\u2022 FTP: <code>ftp://user@host:port</code><br>\u2022 FTPS: <code>ftps://user@host:port</code><br><br>Password can be included in URL as <code>ftp://user:password@host:port</code> but for security, it's recommended to store password separately.<br><br><b>Use with config variables:</b> Define connection in Config > FTP Server Config, then use the variable in scripts.",
       "parameters": [
         {
           "name": "url",
@@ -3941,5 +3941,59 @@
       "return_type": "vector_image",
       "example": "<b>var</b> svg = <b>call</b> vector.load(path=\"logo.svg\");<br><b>var</b> rotated = <b>call</b> vector.applyHueRotate(svg, degrees=180.0);"
     }
-  ]
+  ],
+  "topics": {
+    "getting_started": {
+      "title": "Getting Started with EBS",
+      "content": "Welcome to EBS (Earl Bosch Script)!\n\n\u25b8 QUICK START\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n1. Write your first script:\n   var message: string = \"Hello, World!\";\n   print message;\n\n2. Run it in the console or save as .ebs file\n\n\u25b8 KEY FEATURES\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n\u2022 Variables with type annotations or inference\n\u2022 Control flow (if/then/else, while, for, foreach)\n\u2022 Functions with parameters and return values\n\u2022 Arrays (fixed and dynamic) and JSON objects\n\u2022 Database operations (connect, cursor, SQL)\n\u2022 File I/O and HTTP requests\n\u2022 JavaFX screen/UI support\n\u2022 Rich set of 200+ built-in functions\n\n\u25b8 NEXT STEPS\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n\u2022 Explore 'Program Structure' for syntax basics\n\u2022 Check 'Data Types' for available types\n\u2022 Browse 'Built-in Functions' by category\n\u2022 View 'Examples' for practical code samples"
+    },
+    "builtin_cat_overview": {
+      "title": "{category_name}",
+      "template": "This category contains {count} functions.\\n\\nSelect a function from the tree to view its documentation.\\n\\n\u25b8 FUNCTIONS IN THIS CATEGORY\\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\\n{function_list}"
+    },
+    "builtin_categories": {
+      "str": "String Functions",
+      "array": "Array Functions",
+      "json": "JSON Functions",
+      "file": "File I/O",
+      "http": "HTTP/Network",
+      "ai": "AI/Machine Learning",
+      "image": "Image Processing",
+      "vector": "Vector Graphics (SVG)",
+      "ftp": "FTP Operations",
+      "mail": "Email",
+      "scr": "Screen/UI Functions",
+      "debug": "Debugging & Testing",
+      "system": "System Functions",
+      "classTree": "Code Analysis",
+      "plugin": "Plugin System",
+      "echo": "Echo Functions",
+      "sleep": "Timing Functions",
+      "custom": "Custom Functions",
+      "EbsFunction": "EBS Functions",
+      "other": "Other Functions"
+    },
+    "builtin_category_order": [
+      "str",
+      "array",
+      "json",
+      "file",
+      "http",
+      "ai",
+      "image",
+      "vector",
+      "ftp",
+      "mail",
+      "scr",
+      "debug",
+      "system",
+      "classTree",
+      "plugin",
+      "echo",
+      "sleep",
+      "custom",
+      "EbsFunction",
+      "other"
+    ]
+  }
 }
