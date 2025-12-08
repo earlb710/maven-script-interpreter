@@ -130,6 +130,334 @@ formatTimer(seconds: int) return string {
     return minsStr + ":" + secsStr;
 }
 
+// Chess piece move calculation functions
+// These functions return all possible theoretical moves for each piece type
+// Parameters:
+//   x, y: Current position (0-7)
+//   direction: "up" or "down" (board direction, used for pawns)
+// Returns: dynamic array of posType records with possible moves
+
+getPawnMoves(x: int, y: int, direction: string) {
+    var moves: json = [];
+    var move: json;
+    
+    if direction == "up" then {
+        // Moving up the board (decreasing y)
+        // Forward move
+        if y > 0 then {
+            move = {"x": 0, "y": 0};
+            call json.set(move, "x", x);
+            call json.set(move, "y", y - 1);
+            call json.add(moves, move);
+        }
+        // Initial double move (from row 6 for white)
+        if y == 6 then {
+            move = {"x": 0, "y": 0};
+            call json.set(move, "x", x);
+            call json.set(move, "y", y - 2);
+            call json.add(moves, move);
+        }
+        // Diagonal captures
+        if y > 0 and x > 0 then {
+            move = {"x": 0, "y": 0};
+            call json.set(move, "x", x - 1);
+            call json.set(move, "y", y - 1);
+            call json.add(moves, move);
+        }
+        if y > 0 and x < 7 then {
+            move = {"x": 0, "y": 0};
+            call json.set(move, "x", x + 1);
+            call json.set(move, "y", y - 1);
+            call json.add(moves, move);
+        }
+    } else {
+        // Moving down the board (increasing y)
+        // Forward move
+        if y < 7 then {
+            move = {"x": 0, "y": 0};
+            call json.set(move, "x", x);
+            call json.set(move, "y", y + 1);
+            call json.add(moves, move);
+        }
+        // Initial double move (from row 1 for black)
+        if y == 1 then {
+            move = {"x": 0, "y": 0};
+            call json.set(move, "x", x);
+            call json.set(move, "y", y + 2);
+            call json.add(moves, move);
+        }
+        // Diagonal captures
+        if y < 7 and x > 0 then {
+            move = {"x": 0, "y": 0};
+            call json.set(move, "x", x - 1);
+            call json.set(move, "y", y + 1);
+            call json.add(moves, move);
+        }
+        if y < 7 and x < 7 then {
+            move = {"x": 0, "y": 0};
+            call json.set(move, "x", x + 1);
+            call json.set(move, "y", y + 1);
+            call json.add(moves, move);
+        }
+    }
+    
+    return moves;
+}
+
+getRookMoves(x: int, y: int, direction: string) {
+    var moves: json = [];
+    var move: json;
+    var i: int;
+    
+    // Horizontal moves (right)
+    for (i = x + 1; i < 8; i++) {
+        move = {"x": 0, "y": 0};
+        call json.set(move, "x", i);
+        call json.set(move, "y", y);
+        call json.add(moves, move);
+    }
+    
+    // Horizontal moves (left)
+    for (i = x - 1; i >= 0; i--) {
+        move = {"x": 0, "y": 0};
+        call json.set(move, "x", i);
+        call json.set(move, "y", y);
+        call json.add(moves, move);
+    }
+    
+    // Vertical moves (down)
+    for (i = y + 1; i < 8; i++) {
+        move = {"x": 0, "y": 0};
+        call json.set(move, "x", x);
+        call json.set(move, "y", i);
+        call json.add(moves, move);
+    }
+    
+    // Vertical moves (up)
+    for (i = y - 1; i >= 0; i--) {
+        move = {"x": 0, "y": 0};
+        call json.set(move, "x", x);
+        call json.set(move, "y", i);
+        call json.add(moves, move);
+    }
+    
+    return moves;
+}
+
+getKnightMoves(x: int, y: int, direction: string) {
+    var moves: json = [];
+    var move: json;
+    
+    // Knight moves in L-shape: 2 squares in one direction, 1 in perpendicular
+    // Up 2, right 1
+    if y >= 2 and x < 7 then {
+        move = {"x": 0, "y": 0};
+        call json.set(move, "x", x + 1);
+        call json.set(move, "y", y - 2);
+        call json.add(moves, move);
+    }
+    // Up 2, left 1
+    if y >= 2 and x > 0 then {
+        move = {"x": 0, "y": 0};
+        call json.set(move, "x", x - 1);
+        call json.set(move, "y", y - 2);
+        call json.add(moves, move);
+    }
+    // Right 2, up 1
+    if x <= 5 and y > 0 then {
+        move = {"x": 0, "y": 0};
+        call json.set(move, "x", x + 2);
+        call json.set(move, "y", y - 1);
+        call json.add(moves, move);
+    }
+    // Right 2, down 1
+    if x <= 5 and y < 7 then {
+        move = {"x": 0, "y": 0};
+        call json.set(move, "x", x + 2);
+        call json.set(move, "y", y + 1);
+        call json.add(moves, move);
+    }
+    // Down 2, right 1
+    if y <= 5 and x < 7 then {
+        move = {"x": 0, "y": 0};
+        call json.set(move, "x", x + 1);
+        call json.set(move, "y", y + 2);
+        call json.add(moves, move);
+    }
+    // Down 2, left 1
+    if y <= 5 and x > 0 then {
+        move = {"x": 0, "y": 0};
+        call json.set(move, "x", x - 1);
+        call json.set(move, "y", y + 2);
+        call json.add(moves, move);
+    }
+    // Left 2, up 1
+    if x >= 2 and y > 0 then {
+        move = {"x": 0, "y": 0};
+        call json.set(move, "x", x - 2);
+        call json.set(move, "y", y - 1);
+        call json.add(moves, move);
+    }
+    // Left 2, down 1
+    if x >= 2 and y < 7 then {
+        move = {"x": 0, "y": 0};
+        call json.set(move, "x", x - 2);
+        call json.set(move, "y", y + 1);
+        call json.add(moves, move);
+    }
+    
+    return moves;
+}
+
+getBishopMoves(x: int, y: int, direction: string) {
+    var moves: json = [];
+    var move: json;
+    var i: int;
+    var newX: int;
+    var newY: int;
+    
+    // Diagonal up-right
+    newX = x + 1;
+    newY = y - 1;
+    while newX < 8 and newY >= 0 {
+        move = {"x": 0, "y": 0};
+        call json.set(move, "x", newX);
+        call json.set(move, "y", newY);
+        call json.add(moves, move);
+        newX = newX + 1;
+        newY = newY - 1;
+    }
+    
+    // Diagonal up-left
+    newX = x - 1;
+    newY = y - 1;
+    while newX >= 0 and newY >= 0 {
+        move = {"x": 0, "y": 0};
+        call json.set(move, "x", newX);
+        call json.set(move, "y", newY);
+        call json.add(moves, move);
+        newX = newX - 1;
+        newY = newY - 1;
+    }
+    
+    // Diagonal down-right
+    newX = x + 1;
+    newY = y + 1;
+    while newX < 8 and newY < 8 {
+        move = {"x": 0, "y": 0};
+        call json.set(move, "x", newX);
+        call json.set(move, "y", newY);
+        call json.add(moves, move);
+        newX = newX + 1;
+        newY = newY + 1;
+    }
+    
+    // Diagonal down-left
+    newX = x - 1;
+    newY = y + 1;
+    while newX >= 0 and newY < 8 {
+        move = {"x": 0, "y": 0};
+        call json.set(move, "x", newX);
+        call json.set(move, "y", newY);
+        call json.add(moves, move);
+        newX = newX - 1;
+        newY = newY + 1;
+    }
+    
+    return moves;
+}
+
+getQueenMoves(x: int, y: int, direction: string) {
+    var moves: json = [];
+    var rookMoves: json;
+    var bishopMoves: json;
+    var i: int;
+    var len: int;
+    
+    // Queen combines rook and bishop moves
+    rookMoves = call getRookMoves(x, y, direction);
+    bishopMoves = call getBishopMoves(x, y, direction);
+    
+    // Add all rook moves
+    len = call json.length(rookMoves);
+    for (i = 0; i < len; i++) {
+        call json.add(moves, rookMoves[i]);
+    }
+    
+    // Add all bishop moves
+    len = call json.length(bishopMoves);
+    for (i = 0; i < len; i++) {
+        call json.add(moves, bishopMoves[i]);
+    }
+    
+    return moves;
+}
+
+getKingMoves(x: int, y: int, direction: string) {
+    var moves: json = [];
+    var move: json;
+    
+    // King can move one square in any direction
+    // Up
+    if y > 0 then {
+        move = {"x": 0, "y": 0};
+        call json.set(move, "x", x);
+        call json.set(move, "y", y - 1);
+        call json.add(moves, move);
+    }
+    // Down
+    if y < 7 then {
+        move = {"x": 0, "y": 0};
+        call json.set(move, "x", x);
+        call json.set(move, "y", y + 1);
+        call json.add(moves, move);
+    }
+    // Left
+    if x > 0 then {
+        move = {"x": 0, "y": 0};
+        call json.set(move, "x", x - 1);
+        call json.set(move, "y", y);
+        call json.add(moves, move);
+    }
+    // Right
+    if x < 7 then {
+        move = {"x": 0, "y": 0};
+        call json.set(move, "x", x + 1);
+        call json.set(move, "y", y);
+        call json.add(moves, move);
+    }
+    // Up-left
+    if y > 0 and x > 0 then {
+        move = {"x": 0, "y": 0};
+        call json.set(move, "x", x - 1);
+        call json.set(move, "y", y - 1);
+        call json.add(moves, move);
+    }
+    // Up-right
+    if y > 0 and x < 7 then {
+        move = {"x": 0, "y": 0};
+        call json.set(move, "x", x + 1);
+        call json.set(move, "y", y - 1);
+        call json.add(moves, move);
+    }
+    // Down-left
+    if y < 7 and x > 0 then {
+        move = {"x": 0, "y": 0};
+        call json.set(move, "x", x - 1);
+        call json.set(move, "y", y + 1);
+        call json.add(moves, move);
+    }
+    // Down-right
+    if y < 7 and x < 7 then {
+        move = {"x": 0, "y": 0};
+        call json.set(move, "x", x + 1);
+        call json.set(move, "y", y + 1);
+        call json.add(moves, move);
+    }
+    
+    return moves;
+}
+
 initializeBoard() {
     var row: int = 0;
     var col: int = 0;

@@ -1,0 +1,6 @@
+// Very simple test
+var moves: json = [];
+print "Before add, moves length: " + call json.length(moves);
+call json.add(moves, 6);
+print "After add, moves length: " + call json.length(moves);
+print "Test completed!";
