@@ -1103,15 +1103,47 @@ public class EbsConsoleHandler extends EbsHandler {
     
     /**
      * Escape special characters for JSON strings.
+     * Handles standard JSON escape sequences including control characters.
      */
     private String escapeJson(String s) {
         if (s == null) {
             return "";
         }
-        return s.replace("\\", "\\\\")
-                .replace("\"", "\\\"")
-                .replace("\r", "\\r")
-                .replace("\n", "\\n")
-                .replace("\t", "\\t");
+        StringBuilder result = new StringBuilder(s.length());
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            switch (c) {
+                case '\\':
+                    result.append("\\\\");
+                    break;
+                case '"':
+                    result.append("\\\"");
+                    break;
+                case '\b':
+                    result.append("\\b");
+                    break;
+                case '\f':
+                    result.append("\\f");
+                    break;
+                case '\n':
+                    result.append("\\n");
+                    break;
+                case '\r':
+                    result.append("\\r");
+                    break;
+                case '\t':
+                    result.append("\\t");
+                    break;
+                default:
+                    // Escape control characters as unicode escapes
+                    if (c < 0x20 || c == 0x7F) {
+                        result.append(String.format("\\u%04x", (int) c));
+                    } else {
+                        result.append(c);
+                    }
+                    break;
+            }
+        }
+        return result.toString();
     }
 }
