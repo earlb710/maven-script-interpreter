@@ -77,8 +77,8 @@ public class ProjectTreeView extends VBox {
         setPadding(new Insets(5));
         setSpacing(5);
         
-        // Load projects from file
-        loadProjects();
+        // Load projects from file after UI is initialized
+        javafx.application.Platform.runLater(() -> loadProjects());
     }
     
     /**
