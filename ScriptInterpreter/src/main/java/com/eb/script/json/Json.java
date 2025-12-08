@@ -88,10 +88,15 @@ public final class Json {
         }
         while (true) {
             skipWs();
-            if (peek() != '"') {
-                throw error("Expected object key string");
+            // Support both quoted strings and unquoted identifiers as keys
+            String key;
+            if (peek() == '"') {
+                key = readString();
+            } else if (isIdentifierStart(peek())) {
+                key = readIdentifier();
+            } else {
+                throw error("Expected object key (quoted string or identifier)");
             }
-            String key = readString();
             skipWs();
             expect(':');
             skipWs();
@@ -201,6 +206,20 @@ public final class Json {
         if (!match("null")) {
             throw error("Invalid null");
         }
+    }
+    
+    private String readIdentifier() {
+        // Read an unquoted identifier (for JSON object keys)
+        int start = i;
+        if (eof() || !isIdentifierStart(peek())) {
+            throw error("Expected identifier");
+        }
+        
+        while (!eof() && isIdentifierPart(peek())) {
+            next();
+        }
+        
+        return s.substring(start, i);
     }
     
     private VariableReference readVariableReference() {
