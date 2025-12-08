@@ -886,22 +886,30 @@ public class EbsConsoleHandler extends EbsHandler {
     
     /**
      * Create a new project with a project.json file.
-     * Prompts user to select a directory and creates a default project.json.
+     * Shows a dialog asking for project name and path.
      */
     public void createNewProject() {
         try {
-            // Show directory chooser dialog
-            javafx.stage.DirectoryChooser dirChooser = new javafx.stage.DirectoryChooser();
-            dirChooser.setTitle("Select Directory for New Project");
-            dirChooser.setInitialDirectory(Util.SANDBOX_ROOT.toFile());
+            // Show new project dialog
+            NewProjectDialog dialog = new NewProjectDialog(stage);
+            var result = dialog.showAndWait();
             
-            File selectedDir = dirChooser.showDialog(stage);
-            if (selectedDir == null) {
+            if (result.isEmpty()) {
                 return; // User cancelled
             }
             
-            // Create project.json
-            Path projectJsonPath = selectedDir.toPath().resolve("project.json");
+            NewProjectDialog.ProjectInfo projectInfo = result.get();
+            String projectName = projectInfo.getName();
+            String projectPath = projectInfo.getPath();
+            
+            // Create the project directory if it doesn't exist
+            Path projectDir = Path.of(projectPath);
+            if (!Files.exists(projectDir)) {
+                Files.createDirectories(projectDir);
+            }
+            
+            // Create project.json path
+            Path projectJsonPath = projectDir.resolve("project.json");
             
             // Check if project.json already exists
             if (Files.exists(projectJsonPath)) {
@@ -917,9 +925,8 @@ public class EbsConsoleHandler extends EbsHandler {
                 }
             }
             
-            // Create default project configuration
-            String projectName = selectedDir.getName();
-            String projectJson = createDefaultProjectJson(projectName, selectedDir.getAbsolutePath());
+            // Create default project configuration with the specified name
+            String projectJson = createDefaultProjectJson(projectName, projectDir.toAbsolutePath().toString());
             
             // Write project.json
             Files.writeString(projectJsonPath, projectJson, StandardCharsets.UTF_8);
