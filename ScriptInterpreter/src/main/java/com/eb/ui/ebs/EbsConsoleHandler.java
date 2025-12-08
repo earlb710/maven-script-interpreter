@@ -55,10 +55,19 @@ public class EbsConsoleHandler extends EbsHandler {
     protected final Stage stage;
     protected final Deque<Path> recentFiles = new ArrayDeque<>(); // Most recent at the head
     private int newScriptSequence = 1; // Sequence number for new script files
+    private ProjectTreeView projectTreeView; // Reference to the project tree view
 
     public EbsConsoleHandler(Stage stage, RuntimeContext ctx) {
         super(ctx);
         this.stage = stage;
+    }
+    
+    /**
+     * Set the project tree view reference.
+     * @param projectTreeView The project tree view component
+     */
+    public void setProjectTreeView(ProjectTreeView projectTreeView) {
+        this.projectTreeView = projectTreeView;
     }
 
     /**
@@ -918,6 +927,11 @@ public class EbsConsoleHandler extends EbsHandler {
             // Load the project into global environment
             loadProjectJson(projectJsonPath);
             
+            // Add to project tree view
+            if (projectTreeView != null) {
+                projectTreeView.addProject(projectName, projectJsonPath.toString());
+            }
+            
             ScriptArea output = env.getOutputArea();
             output.printlnOk("New project created: " + projectJsonPath);
             output.printlnInfo("Project loaded into global variable 'project'");
@@ -945,15 +959,48 @@ public class EbsConsoleHandler extends EbsHandler {
             
             Path projectJsonPath = projectFile.toPath();
             
+            // Open the project
+            openProjectByPath(projectJsonPath);
+            
+        } catch (Exception ex) {
+            submitErrors("Failed to open project: " + ex.getMessage());
+        }
+    }
+    
+    /**
+     * Open a project by its path.
+     * Used by both the File menu and the project tree view.
+     * 
+     * @param projectJsonPath Path to the project.json file
+     */
+    public void openProjectByPath(Path projectJsonPath) {
+        try {
             // Load the project into global environment
             loadProjectJson(projectJsonPath);
+            
+            // Extract project name from the loaded project
+            Object projectObj = env.get("project");
+            String projectName = "Unknown Project";
+            if (projectObj instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> project = (Map<String, Object>) projectObj;
+                Object nameObj = project.get("name");
+                if (nameObj instanceof String) {
+                    projectName = (String) nameObj;
+                }
+            }
+            
+            // Add to project tree view
+            if (projectTreeView != null) {
+                projectTreeView.addProject(projectName, projectJsonPath.toString());
+            }
             
             ScriptArea output = env.getOutputArea();
             output.printlnOk("Project opened: " + projectJsonPath);
             output.printlnInfo("Project loaded into global variable 'project'");
             
         } catch (Exception ex) {
-            submitErrors("Failed to open project: " + ex.getMessage());
+            throw new RuntimeException("Failed to open project: " + ex.getMessage(), ex);
         }
     }
     
