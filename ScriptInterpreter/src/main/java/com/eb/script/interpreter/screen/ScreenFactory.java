@@ -3276,6 +3276,56 @@ public class ScreenFactory {
         // Create the container using AreaContainerFactory
         Region container = AreaContainerFactory.createContainer(areaDef);
         
+        // Apply width/height constraints if specified
+        if (areaDef.minWidth != null && !areaDef.minWidth.isEmpty()) {
+            try {
+                double width = parseSize(areaDef.minWidth);
+                container.setMinWidth(width);
+            } catch (NumberFormatException e) {
+                // Ignore invalid values
+            }
+        }
+        if (areaDef.prefWidth != null && !areaDef.prefWidth.isEmpty()) {
+            try {
+                double width = parseSize(areaDef.prefWidth);
+                container.setPrefWidth(width);
+            } catch (NumberFormatException e) {
+                // Ignore invalid values
+            }
+        }
+        if (areaDef.maxWidth != null && !areaDef.maxWidth.isEmpty()) {
+            try {
+                double width = parseSize(areaDef.maxWidth);
+                container.setMaxWidth(width);
+            } catch (NumberFormatException e) {
+                // Ignore invalid values
+            }
+        }
+        if (areaDef.minHeight != null && !areaDef.minHeight.isEmpty()) {
+            try {
+                double height = parseSize(areaDef.minHeight);
+                container.setMinHeight(height);
+            } catch (NumberFormatException e) {
+                // Ignore invalid values
+            }
+        }
+        if (areaDef.prefHeight != null && !areaDef.prefHeight.isEmpty()) {
+            try {
+                double height = parseSize(areaDef.prefHeight);
+                container.setPrefHeight(height);
+            } catch (NumberFormatException e) {
+                // Ignore invalid values
+            }
+        }
+        if (areaDef.maxHeight != null && !areaDef.maxHeight.isEmpty()) {
+            try {
+                double height = parseSize(areaDef.maxHeight);
+                container.setMaxHeight(height);
+            } catch (NumberFormatException e) {
+                // Ignore invalid values
+            }
+        }
+        
         // Register area container for runtime property updates
         if (context != null && areaDef.name != null && !areaDef.name.isEmpty()) {
             // Set userData on the container for identification
@@ -4246,6 +4296,18 @@ public class ScreenFactory {
                 }
             }
         }
+
+        // Extract grow properties for layout management
+        area.hgrow = getStringValue(areaDef, "hgrow", null);
+        area.vgrow = getStringValue(areaDef, "vgrow", null);
+        
+        // Extract width/height constraints
+        area.minWidth = getStringValue(areaDef, "minWidth", getStringValue(areaDef, "min_width", null));
+        area.prefWidth = getStringValue(areaDef, "prefWidth", getStringValue(areaDef, "pref_width", null));
+        area.maxWidth = getStringValue(areaDef, "maxWidth", getStringValue(areaDef, "max_width", null));
+        area.minHeight = getStringValue(areaDef, "minHeight", getStringValue(areaDef, "min_height", null));
+        area.prefHeight = getStringValue(areaDef, "prefHeight", getStringValue(areaDef, "pref_height", null));
+        area.maxHeight = getStringValue(areaDef, "maxHeight", getStringValue(areaDef, "max_height", null));
 
         return area;
     }
