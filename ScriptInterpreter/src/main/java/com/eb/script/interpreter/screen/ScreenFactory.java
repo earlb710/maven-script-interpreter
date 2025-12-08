@@ -3010,7 +3010,7 @@ public class ScreenFactory {
         // Wrap content in ScrollPane to handle overflow when content is larger than window
         ScrollPane scrollPane = new ScrollPane(rootContainer);
         scrollPane.setFitToWidth(true);  // Make content fit to scroll pane width
-        scrollPane.setFitToHeight(false); // Allow vertical scrolling when needed
+        scrollPane.setFitToHeight(true); // Make content fit to scroll pane height to allow proper resizing
         scrollPane.setStyle("-fx-background-color: transparent;");
 
         // Create status bar for the screen
