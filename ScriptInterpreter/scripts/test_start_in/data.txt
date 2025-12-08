@@ -1,0 +1,2 @@
+This is test data for the start in directory feature.
+Line 2 of test data.
