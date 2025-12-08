@@ -9,17 +9,27 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Minimal, dependency-free JSON parser. Converts JSON strings to Java objects:
+ * <ul>
+ * <li>Object -> LinkedHashMap&lt;String, Object&gt;</li>
+ * <li>Array -> ArrayList&lt;Object&gt;</li>
+ * <li>Number -> Integer/Long/Double (auto)</li>
+ * <li>Boolean -> Boolean</li>
+ * <li>String -> String</li>
+ * <li>null -> null</li>
+ * </ul>
+ *
+ * <p>Supports both standard JSON and JavaScript-style syntax:
+ * <ul>
+ * <li>Quoted keys: {"name": "value"} - Standard JSON format</li>
+ * <li>Unquoted keys: {name: "value"} - JavaScript-style (identifiers only)</li>
+ * <li>Both styles can be mixed in the same document</li>
+ * </ul>
+ *
+ * <p>Usage: Object v = Json.parse("{\"x\":1,\"y\":[true,null,\"ok\"]}");
+ * if (v instanceof Map) { ... }
  *
  * @author Earl Bosch
- *
- * Minimal, dependency-free JSON parser. Converts JSON strings to Java objects:
- * - Object -> LinkedHashMap<String, Object>
- * - Array -> ArrayList<Object>
- * - Number -> Integer/Long/Double (auto) - Boolean -> Boolean - String ->
- * String - null -> null
- *
- * Usage: Object v = Json.parse("{\"x\":1,\"y\":[true,null,\"ok\"]}"); if (v
- * instanceof Map) { ... }
  */
 public final class Json {
 
@@ -88,10 +98,15 @@ public final class Json {
         }
         while (true) {
             skipWs();
-            if (peek() != '"') {
-                throw error("Expected object key string");
+            // Support both quoted strings and unquoted identifiers as keys
+            String key;
+            if (peek() == '"') {
+                key = readString();
+            } else if (isIdentifierStart(peek())) {
+                key = readIdentifier();
+            } else {
+                throw error("Expected object key (quoted string or identifier)");
             }
-            String key = readString();
             skipWs();
             expect(':');
             skipWs();
@@ -201,6 +216,20 @@ public final class Json {
         if (!match("null")) {
             throw error("Invalid null");
         }
+    }
+    
+    private String readIdentifier() {
+        // Read an unquoted identifier (for JSON object keys)
+        int start = i;
+        if (eof() || !isIdentifierStart(peek())) {
+            throw error("Expected identifier");
+        }
+        
+        while (!eof() && isIdentifierPart(peek())) {
+            next();
+        }
+        
+        return s.substring(start, i);
     }
     
     private VariableReference readVariableReference() {

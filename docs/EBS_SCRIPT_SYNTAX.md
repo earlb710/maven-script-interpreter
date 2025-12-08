@@ -1888,12 +1888,26 @@ call json.insert(list, 0, 0);        // Insert at index: [0, 1, 2, 3, 4]
 
 #### Parse and Stringify
 ```javascript
+// Standard JSON with quoted keys
 var jsonString = '{"name": "Bob", "age": 25}';
 var obj = call json.jsonfromstring(jsonString);
+
+// JavaScript-style JSON with unquoted keys (also supported)
+var jsonString2 = '{name: "Charlie", age: 35}';
+var obj2 = call json.jsonfromstring(jsonString2);
+
+// Mixed quoted and unquoted keys
+var jsonString3 = '{firstName: "David", "last-name": "Smith"}';
+var obj3 = call json.jsonfromstring(jsonString3);
 
 var person: json = {"name": "Alice", "age": 30};
 var str = call string.tostring(person);  // Convert to string
 ```
+
+**Note**: The JSON parser supports both quoted and unquoted keys:
+- **Quoted keys**: `{"name": "value"}` - Standard JSON format, required for keys with special characters or spaces
+- **Unquoted keys**: `{name: "value"}` - JavaScript-style syntax, only allowed for valid identifiers (letters, digits, underscore)
+- Both styles can be mixed in the same JSON document
 
 #### Validation and Schema
 ```javascript
