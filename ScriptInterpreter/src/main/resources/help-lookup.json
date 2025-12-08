@@ -2576,7 +2576,7 @@
     {
       "function": "mail.folders",
       "short_description": "Lists available mail folders",
-      "long_help": "Lists all available folders in the mail account. Returns a JSON array of folder information including folder name, type, message count and unread count.<br><br><b>Folder types:</b><br>\u2022 messages - folder can contain messages<br>\u2022 folders - folder can contain subfolders<br>\u2022 messages,folders - folder can contain both",
+      "long_help": "Lists all available folders in the mail account. Returns a JSON array of folder information including folder name, type, message count and unread count.<br><br><b>Folder types:</b><br>• messages - folder can contain messages<br>• folders - folder can contain subfolders<br>• messages,folders - folder can contain both",
       "parameters": [
         {
           "name": "handle",
@@ -2590,7 +2590,7 @@
     {
       "function": "mail.list",
       "short_description": "Lists emails in a folder",
-      "long_help": "Lists emails in the specified folder with pagination support. Returns a JSON array of message summaries.<br><br><b>Returned fields:</b><br>\u2022 id - Message number (use with mail.get)<br>\u2022 subject - Email subject<br>\u2022 from - Sender email address<br>\u2022 fromName - Sender display name<br>\u2022 date - Sent date as milliseconds since epoch<br>\u2022 dateStr - Formatted date string<br>\u2022 size - Message size in bytes<br>\u2022 read - Boolean indicating if message has been read",
+      "long_help": "Lists emails in the specified folder with pagination support. Returns a JSON array of message summaries.<br><br><b>Returned fields:</b><br>• id - Message number (use with mail.get)<br>• subject - Email subject<br>• from - Sender email address<br>• fromName - Sender display name<br>• date - Sent date as milliseconds since epoch<br>• dateStr - Formatted date string<br>• size - Message size in bytes<br>• read - Boolean indicating if message has been read",
       "parameters": [
         {
           "name": "handle",
@@ -2622,7 +2622,7 @@
     {
       "function": "mail.get",
       "short_description": "Retrieves full email content",
-      "long_help": "Retrieves the full content of a specific email by its message ID.<br><br><b>Returned fields:</b><br>\u2022 id - Message number<br>\u2022 subject - Email subject<br>\u2022 from - Array of sender address objects (address, name)<br>\u2022 to - Array of recipient addresses<br>\u2022 cc - Array of CC addresses<br>\u2022 bcc - Array of BCC addresses<br>\u2022 date - Sent date as milliseconds<br>\u2022 dateStr - Formatted date string<br>\u2022 size - Message size in bytes<br>\u2022 read - Boolean indicating if read<br>\u2022 contentType - MIME content type<br>\u2022 body - Email body text (plain or HTML)<br>\u2022 attachments - Array of attachment info (filename, contentType, size)",
+      "long_help": "Retrieves the full content of a specific email by its message ID.<br><br><b>Returned fields:</b><br>• id - Message number<br>• subject - Email subject<br>• from - Array of sender address objects (address, name)<br>• to - Array of recipient addresses<br>• cc - Array of CC addresses<br>• bcc - Array of BCC addresses<br>• date - Sent date as milliseconds<br>• dateStr - Formatted date string<br>• size - Message size in bytes<br>• read - Boolean indicating if read<br>• contentType - MIME content type<br>• body - Email body text (plain or HTML)<br>• attachments - Array of attachment info (filename, contentType, size)",
       "parameters": [
         {
           "name": "handle",
@@ -2655,7 +2655,7 @@
     {
       "function": "EbsFunction",
       "short_description": "Interface that plugin classes must implement",
-      "long_help": "The EbsFunction interface defines the contract for custom plugin functions. Classes implementing this interface can be<br>loaded via #plugin.load() and called using #custom.alias(...) syntax.<br><br><b>Required Methods:</b><br>\u2022 <b>String getName()</b> - Returns the display name for logging<br>\u2022 <b>String getDescription()</b> - Returns description for help text<br>\u2022 <b>Object execute(Object[] args)</b> - Main execution method<br><br><b>Optional Methods (have defaults):</b><br>\u2022 <b>void initialize(Map&lt;String, Object&gt; config)</b> - Called on load with config<br>\u2022 <b>void cleanup()</b> - Called on unload for resource cleanup<br>\u2022 <b>Map&lt;String, Object&gt; getSignature()</b> - Returns parameter/return type metadata<br>\u2022 <b>String getSignatureString()</b> - Returns signature as JSON string<br><br>Use <b>/help EbsFunction.java</b> to see the full Java interface code.",
+      "long_help": "The EbsFunction interface defines the contract for custom plugin functions. Classes implementing this interface can be<br>loaded via #plugin.load() and called using #custom.alias(...) syntax.<br><br><b>Required Methods:</b><br>• <b>String getName()</b> - Returns the display name for logging<br>• <b>String getDescription()</b> - Returns description for help text<br>• <b>Object execute(Object[] args)</b> - Main execution method<br><br><b>Optional Methods (have defaults):</b><br>• <b>void initialize(Map&lt;String, Object&gt; config)</b> - Called on load with config<br>• <b>void cleanup()</b> - Called on unload for resource cleanup<br>• <b>Map&lt;String, Object&gt; getSignature()</b> - Returns parameter/return type metadata<br>• <b>String getSignatureString()</b> - Returns signature as JSON string<br><br>Use <b>/help EbsFunction.java</b> to see the full Java interface code.",
       "parameters": [],
       "return_type": "interface",
       "example": "<b>public class</b> MyFunction <b>implements</b> EbsFunction {<br>    <b>public</b> String getName() { <b>return</b> \"My Function\"; }<br>    <b>public</b> String getDescription() { <b>return</b> \"Does something\"; }<br>    <b>public</b> Object execute(Object[] args) {<br>        <b>return</b> \"Result: \" + args[0];<br>    }<br>}<br><br>// Optional: Define signature as JSON string<br><b>public</b> String getSignatureString() {<br>    <b>return</b> \"\"\"<br>        {<br>          \"parameters\": [<br>            {\"name\": \"input\", \"type\": \"string\", \"required\": true, \"description\": \"Input text\"},<br>            {\"name\": \"count\", \"type\": \"int\", \"required\": false, \"description\": \"Repeat count\"}<br>          ],<br>          \"returnType\": \"string\",<br>          \"returnDescription\": \"Processed output\"<br>        }<br>        \"\"\";<br>}"
@@ -2709,7 +2709,7 @@
     {
       "function": "ftp.openUrl",
       "short_description": "Opens an FTP connection using a URL",
-      "long_help": "Opens a connection to an FTP or FTPS server using a URL string. The URL contains server details while password can be provided separately for security.<br><br><b>URL Formats:</b><br>\u2022 FTP: <code>ftp://user@host:port</code><br>\u2022 FTPS: <code>ftps://user@host:port</code><br><br>Password can be included in URL as <code>ftp://user:password@host:port</code> but for security, it's recommended to store password separately.<br><br><b>Use with config variables:</b> Define connection in Config > FTP Server Config, then use the variable in scripts.",
+      "long_help": "Opens a connection to an FTP or FTPS server using a URL string. The URL contains server details while password can be provided separately for security.<br><br><b>URL Formats:</b><br>• FTP: <code>ftp://user@host:port</code><br>• FTPS: <code>ftps://user@host:port</code><br><br>Password can be included in URL as <code>ftp://user:password@host:port</code> but for security, it's recommended to store password separately.<br><br><b>Use with config variables:</b> Define connection in Config > FTP Server Config, then use the variable in scripts.",
       "parameters": [
         {
           "name": "url",
@@ -3945,11 +3945,11 @@
   "topics": {
     "getting_started": {
       "title": "Getting Started with EBS",
-      "content": "Welcome to EBS (Earl Bosch Script)!\n\n\u25b8 QUICK START\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n1. Write your first script:\n   var message: string = \"Hello, World!\";\n   print message;\n\n2. Run it in the console or save as .ebs file\n\n\u25b8 KEY FEATURES\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n\u2022 Variables with type annotations or inference\n\u2022 Control flow (if/then/else, while, for, foreach)\n\u2022 Functions with parameters and return values\n\u2022 Arrays (fixed and dynamic) and JSON objects\n\u2022 Database operations (connect, cursor, SQL)\n\u2022 File I/O and HTTP requests\n\u2022 JavaFX screen/UI support\n\u2022 Rich set of 200+ built-in functions\n\n\u25b8 NEXT STEPS\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n\u2022 Explore 'Program Structure' for syntax basics\n\u2022 Check 'Data Types' for available types\n\u2022 Browse 'Built-in Functions' by category\n\u2022 View 'Examples' for practical code samples"
+      "content": "Welcome to EBS (Earl Bosch Script)!\n\n▸ QUICK START\n───────────────────────────────────────────────────────\n1. Write your first script:\n   var message: string = \"Hello, World!\";\n   print message;\n\n2. Run it in the console or save as .ebs file\n\n▸ KEY FEATURES\n───────────────────────────────────────────────────────\n• Variables with type annotations or inference\n• Control flow (if/then/else, while, for, foreach)\n• Functions with parameters and return values\n• Arrays (fixed and dynamic) and JSON objects\n• Database operations (connect, cursor, SQL)\n• File I/O and HTTP requests\n• JavaFX screen/UI support\n• Rich set of 200+ built-in functions\n\n▸ NEXT STEPS\n───────────────────────────────────────────────────────\n• Explore 'Program Structure' for syntax basics\n• Check 'Data Types' for available types\n• Browse 'Built-in Functions' by category\n• View 'Examples' for practical code samples"
     },
     "builtin_cat_overview": {
       "title": "{category_name}",
-      "template": "This category contains {count} functions.\\n\\nSelect a function from the tree to view its documentation.\\n\\n\u25b8 FUNCTIONS IN THIS CATEGORY\\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\\n{function_list}"
+      "template": "This category contains {count} functions.\\n\\nSelect a function from the tree to view its documentation.\\n\\n▸ FUNCTIONS IN THIS CATEGORY\\n───────────────────────────────────────────────────────\\n{function_list}"
     },
     "builtin_categories": {
       "str": "String Functions",
@@ -3994,6 +3994,102 @@
       "custom",
       "EbsFunction",
       "other"
-    ]
+    ],
+    "Syntax": {
+      "title": "EBS (Earl Bosch Script) Syntax",
+      "content": "  EBS (Earl Bosch Script) Syntax\\n═══════════════════════════════════════════════════════\\n\\nEBS is a dynamically-typed scripting language with:\\n\\n• Familiar C-like syntax\\n• Native JSON support\\n• Integrated database capabilities\\n• JavaFX-based UI screen support\\n• Rich set of built-in functions\\n• Interactive REPL environment\\n\\nSelect a topic from the tree to view detailed information."
+    },
+    "structure": {
+      "title": "Program Structure",
+      "content": "  Program Structure\\n═══════════════════════════════════════════════════════\\n\\nSelect a sub-topic from the tree to view detailed information:\\n\\n▸ basic - Statements, comments, blocks, case handling\\n▸ variables - Variable declarations, types, constants\\n▸ operators - Arithmetic, comparison, logical operators\\n▸ functions - Function definitions and calls\\n▸ imports - Code organization with imports\\n"
+    },
+    "structure_basic": {
+      "title": "Basic Syntax",
+      "content": "  Basic Syntax\\n═══════════════════════════════════════════════════════\\n\\n▸ STATEMENTS\\n───────────────────────────────────────────────────────\\n• Statements end with semicolon (;)\\n• Multiple statements per line allowed\\n• Blocks use curly braces { }\\n\\n▸ COMMENTS\\n───────────────────────────────────────────────────────\\n  // Single line comment\\n  // Comments start with //\\n\\n▸ CASE INSENSITIVITY\\n───────────────────────────────────────────────────────\\n  var userName = \\  print USERNAME;  // Works: prints \\  print UserName;  // Works: prints \\▸ EXAMPLE\\n───────────────────────────────────────────────────────\\n  // This is a comment\\n  var message: string = \\  print message;\\n"
+    },
+    "structure_variables": {
+      "title": "Variables",
+      "content": "  Variables\\n═══════════════════════════════════════════════════════\\n\\n▸ TYPE INFERENCE\\n───────────────────────────────────────────────────────\\n  var x = 42;        // Inferred as int\\n  var y = \\▸ CONSTANTS\\n───────────────────────────────────────────────────────\\n  const PI: double = 3.14159;\\n  const MAX_SIZE: int = 100;\\n"
+    },
+    "structure_operators": {
+      "title": "Operators",
+      "content": "  Operators\\n═══════════════════════════════════════════════════════\\n\\n▸ ARITHMETIC OPERATORS\\n───────────────────────────────────────────────────────\\n  +   Addition\\n  -   Subtraction\\n  *   Multiplication\\n  /   Division\\n  %   Modulo\\n\\n▸ COMPARISON OPERATORS\\n───────────────────────────────────────────────────────\\n  ==  Equal to\\n  !=  Not equal to\\n  <   Less than\\n  >   Greater than\\n  <=  Less than or equal\\n  >=  Greater than or equal\\n\\n▸ LOGICAL OPERATORS\\n───────────────────────────────────────────────────────\\n  and   Logical AND\\n  or    Logical OR\\n  not   Logical NOT\\n\\n▸ EXAMPLE\\n───────────────────────────────────────────────────────\\n  var x = 10;\\n  var y = 20;\\n  if x < y and x > 0 then {\\n      print \\  }\\n"
+    },
+    "structure_functions": {
+      "title": "Functions",
+      "content": "  Functions\\n═══════════════════════════════════════════════════════\\n\\n▸ FUNCTION DEFINITION\\n───────────────────────────────────────────────────────\\n  functionName(param1: type, param2: type) return returnType {\\n      // function body\\n      return value;\\n  }\\n\\n▸ EXAMPLE\\n───────────────────────────────────────────────────────\\n  add(a: int, b: int) return int {\\n      return a + b;\\n  }\\n\\n▸ CALLING FUNCTIONS\\n───────────────────────────────────────────────────────\\n\\n▸ NO RETURN VALUE\\n───────────────────────────────────────────────────────\\n  greet(name: string) {\\n      print \\  }\\n"
+    },
+    "structure_imports": {
+      "title": "Imports",
+      "content": "  Imports\\n═══════════════════════════════════════════════════════\\n\\n▸ IMPORTING MODULES\\n───────────────────────────────────────────────────────\\n  import \\▸ EXAMPLE\\n───────────────────────────────────────────────────────\\n  import \\  import \\▸ USAGE\\n───────────────────────────────────────────────────────\\n• Functions from imported files are available\\n• Variables from imported files are accessible\\n• Imports are processed at parse time\\n\\n▸ NOTE\\n───────────────────────────────────────────────────────\\n• Import paths are relative to script location\\n• Circular imports are not allowed\\n"
+    },
+    "data": {
+      "title": "var count: int = 42;",
+      "content": "PRIMITIVE TYPES:\\n• int / integer - 32-bit integer (42)\\n• long - 64-bit integer (9999999999)\\n• float - Single-precision (3.14)\\n• double - Double-precision (3.14159)\\n• byte - 8-bit integer (127)\\n• string - Text (\\• bool / boolean - true, false\\n• date - Date/time value\\n• json - JSON object/array\\n• array - Generic array\\n\\nVARIABLES:\\n  var name: string = \\  var count: int = 42;\\n  var price: double = 19.99;\\n  var flag: bool = true;\\n\\nTYPE CASTING:\\n  var num: int = int(\\  var text: string = string(123);\\n  var flag: bool = boolean(\\"
+    },
+    "flow": {
+      "title": "Control Flow",
+      "content": "  Control Flow\\n═══════════════════════════════════════════════════════\\n\\nSelect a sub-topic from the tree to view detailed information:\\n\\n▸ conditionals - if-then-else statements\\n▸ loops - while, for, foreach, do-while\\n▸ break_continue - Loop control\\n▸ exceptions - Error handling\\n"
+    },
+    "flow_conditionals": {
+      "title": "Conditionals",
+      "content": "  Conditionals\\n═══════════════════════════════════════════════════════\\n\\n\\n▸ ELSE IF\\n───────────────────────────────────────────────────────\\n\\n▸ CHAINED CONDITIONS\\n───────────────────────────────────────────────────────\\n  var score: int = 85;\\n  if score >= 90 then {\\n      print \\  } else if score >= 80 then {\\n      print \\  } else {\\n      print \\  }\\n"
+    },
+    "flow_loops": {
+      "title": "Loops",
+      "content": "  Loops\\n═══════════════════════════════════════════════════════\\n\\n\\n▸ FOR LOOP\\n───────────────────────────────────────────────────────\\n  for var i = 0 to 10 {\\n      // code\\n  }\\n\\n\\n▸ DO-WHILE LOOP\\n───────────────────────────────────────────────────────\\n  do {\\n      // code\\n  } while condition;\\n\\n▸ EXAMPLE\\n───────────────────────────────────────────────────────\\n  var i: int = 0;\\n  while i < 5 {\\n      print \\      i = i + 1;\\n  }\\n"
+    },
+    "flow_break_continue": {
+      "title": "Break and Continue",
+      "content": "  Break and Continue\\n═══════════════════════════════════════════════════════\\n\\n\\n"
+    },
+    "flow_exceptions": {
+      "title": "Exception Handling",
+      "content": "  Exception Handling\\n═══════════════════════════════════════════════════════\\n\\n▸ TRY-EXCEPTIONS-WHEN\\n───────────────────────────────────────────────────────\\n  try {\\n      // code that might throw exception\\n  } exceptions when ex {\\n      // handle exception\\n      print \\  }\\n\\n▸ EXAMPLE\\n───────────────────────────────────────────────────────\\n  try {\\n      var result = call file.readTextFile(\\      print result;\\n  } exceptions when ex {\\n      print \\  }\\n\\n▸ NOTES\\n───────────────────────────────────────────────────────\\n• Exception variable (ex) contains error message\\n• Use for file I/O, database operations, etc.\\n• Prevents script from crashing on errors\\n"
+    },
+    "keywords": {
+      "title": "functionName(param1: type, param2: type) return returnType {",
+      "content": "FUNCTION DEFINITION:\\n  functionName(param1: type, param2: type) return returnType {\\n      // function body\\n      return value;\\n  }\\n\\nARRAYS:\\n  var arr: array[10] = array[10];     // Fixed size\\n  var dynArr: array[*] = array[*];    // Dynamic\\n  dynArr.push(\\  var item = dynArr[0];\\n\\nJSON:\\n  var obj: json = {\\  var name = obj.name;\\n  var jsonStr = call json.stringify(obj);\\n\\nCONSTANTS:\\n  const PI: double = 3.14159;\\n  const MAX_SIZE: int = 100;\\n"
+    },
+    "builtins": {
+      "title": "call string.toUpper(text)",
+      "content": "STRING FUNCTIONS:\\n  call string.toUpper(text)\\n  call string.toLower(text)\\n  call string.trim(text)\\n  call string.substring(text, start, end)\\n  call string.indexOf(text, search)\\n  call string.length(text)\\n\\nARRAY FUNCTIONS:\\n  arr.length        // Get array length (property access)\\n  call array.add(arr, value)   // Add element\\n  call array.remove(arr, idx)  // Remove element\\n  call array.sort(arr)         // Sort array\\n\\nMATH FUNCTIONS:\\n  call math.abs(num)\\n  call math.max(a, b)\\n  call math.min(a, b)\\n  call math.round(num)\\n  call math.sqrt(num)\\n\\nFILE I/O:\\n  call file.readTextFile(path)\\n  call file.writeTextFile(path, content)\\n  call file.exists(path)\\n"
+    },
+    "screen": {
+      "title": "screen myWindow = {",
+      "content": "SCREEN DECLARATION:\\n  screen myWindow = {\\n      \\      \\      \\      \\  };\\n\\nSCREEN OPERATIONS:\\n  show screen myWindow;\\n  hide screen myWindow;\\n  close screen myWindow;\\n\\nSCREEN FUNCTIONS:\\n  call scr.setValue(screenName, varName, value)\\n  call scr.getValue(screenName, varName)\\n  call scr.setProperty(screenName, itemName, property, value)\\n  call scr.getProperty(screenName, itemName, property)\\n\\nCONSOLE COMMANDS:\\n  /help                - Show console help\\n  /list files [path]   - List files\\n  /list openfiles      - Show open files\\n  /set debug [on|off]  - Toggle debug mode\\n  /clear               - Clear console\\n  /reset               - Reset interpreter\\n"
+    },
+    "Examples": {
+      "title": "Examples",
+      "content": "This section contains practical examples demonstrating\\nvarious EBS features and built-in functions.\\n\\nSelect a topic from the tree to view example code.\\n\\nAvailable examples:\\n• Keywords - Examples of language keywords\\n• Builtins - Examples of built-in functions\\n• Screen - Examples of screen/UI creation\\n"
+    },
+    "Keywords": {
+      "title": "Keyword Examples",
+      "content": "FUNCTION EXAMPLE:\n  calculateSum(a: int, b: int) return int {\n      return a + b;\n  }\n  var result = call calculateSum(10, 20);\n  print result;  // Output: 30\n\nARRAY EXAMPLE:\n  var fruits: array[*] = array[*];\n  fruits.push(\"apple\");\n  fruits.push(\"banana\");\n  fruits.push(\"orange\");\n  foreach fruit in fruits {\n      print fruit;\n  }\n\nCONDITIONAL EXAMPLE:\n  var score: int = 85;\n  if score >= 90 then {\n      print \"Grade: A\";\n  } else if score >= 80 then {\n      print \"Grade: B\";\n  } else {\n      print \"Grade: C\";\n  }"
+    },
+    "examples_keywords": {
+      "title": "Keyword Examples",
+      "content": "FUNCTION EXAMPLE:\n  calculateSum(a: int, b: int) return int {\n      return a + b;\n  }\n  var result = call calculateSum(10, 20);\n  print result;  // Output: 30\n\nARRAY EXAMPLE:\n  var fruits: array[*] = array[*];\n  fruits.push(\"apple\");\n  fruits.push(\"banana\");\n  fruits.push(\"orange\");\n  foreach fruit in fruits {\n      print fruit;\n  }\n\nCONDITIONAL EXAMPLE:\n  var score: int = 85;\n  if score >= 90 then {\n      print \"Grade: A\";\n  } else if score >= 80 then {\n      print \"Grade: B\";\n  } else {\n      print \"Grade: C\";\n  }"
+    },
+    "Builtins": {
+      "title": "Built-in Function Examples",
+      "content": "STRING MANIPULATION:\n  var text: string = \"  Hello World  \";\n  var trimmed = call string.trim(text);\n  var upper = call string.toUpper(trimmed);\n  print upper;  // Output: HELLO WORLD\n\nFILE OPERATIONS:\n  var filePath: string = \"data.txt\";\n  if call file.exists(filePath) then {\n      var content = call file.readTextFile(filePath);\n      print \"File content: \" + content;\n  } else {\n      call file.writeTextFile(filePath, \"Hello, File!\");\n      print \"File created\";\n  }\n\nMATH OPERATIONS:\n  var numbers: array[*] = array[*];\n  numbers.push(42);\n  numbers.push(-15);\n  numbers.push(28);\n  var maxVal = call math.max(numbers[0], numbers[1]);\n  var absVal = call math.abs(numbers[1]);\n  print \"Max: \" + maxVal;\n  print \"Absolute: \" + absVal;"
+    },
+    "examples_builtins": {
+      "title": "Built-in Function Examples",
+      "content": "STRING MANIPULATION:\n  var text: string = \"  Hello World  \";\n  var trimmed = call string.trim(text);\n  var upper = call string.toUpper(trimmed);\n  print upper;  // Output: HELLO WORLD\n\nFILE OPERATIONS:\n  var filePath: string = \"data.txt\";\n  if call file.exists(filePath) then {\n      var content = call file.readTextFile(filePath);\n      print \"File content: \" + content;\n  } else {\n      call file.writeTextFile(filePath, \"Hello, File!\");\n      print \"File created\";\n  }\n\nMATH OPERATIONS:\n  var numbers: array[*] = array[*];\n  numbers.push(42);\n  numbers.push(-15);\n  numbers.push(28);\n  var maxVal = call math.max(numbers[0], numbers[1]);\n  var absVal = call math.abs(numbers[1]);\n  print \"Max: \" + maxVal;\n  print \"Absolute: \" + absVal;"
+    },
+    "Screen": {
+      "title": "Screen/UI Examples",
+      "content": "SIMPLE FORM SCREEN:\n  screen loginForm = {\n      \"title\": \"Login\",\n      \"width\": 400,\n      \"height\": 300,\n      \"vars\": [\n          {\n              \"name\": \"username\",\n              \"type\": \"string\",\n              \"display\": {\n                  \"type\": \"textfield\",\n                  \"labelText\": \"Username:\"\n              }\n          },\n          {\n              \"name\": \"password\",\n              \"type\": \"string\",\n              \"display\": {\n                  \"type\": \"passwordfield\",\n                  \"labelText\": \"Password:\"\n              }\n          }\n      ]\n  };\n  show screen loginForm;\n\nACCESSING SCREEN VALUES:\n  var user = call scr.getValue(loginForm, \"username\");\n  var pass = call scr.getValue(loginForm, \"password\");\n  print \"User: \" + user;"
+    },
+    "examples_screen": {
+      "title": "Screen/UI Examples",
+      "content": "SIMPLE FORM SCREEN:\n  screen loginForm = {\n      \"title\": \"Login\",\n      \"width\": 400,\n      \"height\": 300,\n      \"vars\": [\n          {\n              \"name\": \"username\",\n              \"type\": \"string\",\n              \"display\": {\n                  \"type\": \"textfield\",\n                  \"labelText\": \"Username:\"\n              }\n          },\n          {\n              \"name\": \"password\",\n              \"type\": \"string\",\n              \"display\": {\n                  \"type\": \"passwordfield\",\n                  \"labelText\": \"Password:\"\n              }\n          }\n      ]\n  };\n  show screen loginForm;\n\nACCESSING SCREEN VALUES:\n  var user = call scr.getValue(loginForm, \"username\");\n  var pass = call scr.getValue(loginForm, \"password\");\n  print \"User: \" + user;"
+    },
+    "default": {
+      "title": "EBS Help",
+      "content": "Select a topic from the tree on the left\nto view help documentation.\n\nFor complete documentation, see:\n• docs/EBS_SCRIPT_SYNTAX.md\n• EBS_LANGUAGE_REFERENCE.md\n• ScriptInterpreter/scripts/examples/"
+    }
   }
 }
