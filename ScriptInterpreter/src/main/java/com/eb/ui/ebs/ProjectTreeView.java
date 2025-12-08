@@ -86,39 +86,47 @@ public class ProjectTreeView extends VBox {
      * Setup context menu for tree items.
      */
     private void setupContextMenu() {
-        ContextMenu contextMenu = new ContextMenu();
-        
-        MenuItem openItem = new MenuItem("Open Project");
-        openItem.setOnAction(e -> {
+        // Use a dynamic context menu that changes based on what's selected
+        treeView.setOnContextMenuRequested(event -> {
             TreeItem<String> selectedItem = treeView.getSelectionModel().getSelectedItem();
-            if (selectedItem != null && selectedItem != rootItem) {
-                openSelectedProject(selectedItem);
+            
+            ContextMenu contextMenu = new ContextMenu();
+            
+            if (selectedItem == rootItem || selectedItem == null) {
+                // Context menu for root "Projects" node
+                MenuItem newProjectItem = new MenuItem("New Project...");
+                newProjectItem.setOnAction(e -> handler.createNewProject());
+                
+                MenuItem openProjectItem = new MenuItem("Open Project...");
+                openProjectItem.setOnAction(e -> handler.openProject());
+                
+                contextMenu.getItems().addAll(newProjectItem, openProjectItem);
+                
+                // Add Clear All if there are projects
+                if (!rootItem.getChildren().isEmpty()) {
+                    MenuItem clearAllItem = new MenuItem("Clear All Projects");
+                    clearAllItem.setOnAction(e -> {
+                        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                                "Remove all projects from the list?",
+                                ButtonType.OK, ButtonType.CANCEL);
+                        confirm.setHeaderText("Clear Projects");
+                        var result = confirm.showAndWait();
+                        if (result.isPresent() && result.get() == ButtonType.OK) {
+                            clearAllProjects();
+                        }
+                    });
+                    contextMenu.getItems().addAll(new SeparatorMenuItem(), clearAllItem);
+                }
+            } else {
+                // Context menu for individual project node
+                MenuItem removeItem = new MenuItem("Remove from List");
+                removeItem.setOnAction(e -> removeSelectedProject(selectedItem));
+                
+                contextMenu.getItems().add(removeItem);
             }
+            
+            contextMenu.show(treeView, event.getScreenX(), event.getScreenY());
         });
-        
-        MenuItem removeItem = new MenuItem("Remove from List");
-        removeItem.setOnAction(e -> {
-            TreeItem<String> selectedItem = treeView.getSelectionModel().getSelectedItem();
-            if (selectedItem != null && selectedItem != rootItem) {
-                removeSelectedProject(selectedItem);
-            }
-        });
-        
-        MenuItem clearAllItem = new MenuItem("Clear All Projects");
-        clearAllItem.setOnAction(e -> {
-            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
-                    "Remove all projects from the list?",
-                    ButtonType.OK, ButtonType.CANCEL);
-            confirm.setHeaderText("Clear Projects");
-            var result = confirm.showAndWait();
-            if (result.isPresent() && result.get() == ButtonType.OK) {
-                clearAllProjects();
-            }
-        });
-        
-        contextMenu.getItems().addAll(openItem, removeItem, new SeparatorMenuItem(), clearAllItem);
-        
-        treeView.setContextMenu(contextMenu);
     }
     
     /**
