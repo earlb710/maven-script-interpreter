@@ -1,0 +1,78 @@
+// Test script for css.loadCss and css.unloadCss builtins
+
+print "=== Testing CSS Load/Unload Builtins ===";
+
+// Define a simple test screen
+screen testScreen = {
+    title: "CSS Loading Test",
+    width: 600,
+    height: 400,
+    
+    area mainArea = {
+        type: "vbox",
+        spacing: "10",
+        padding: "20",
+        cssClass: "custom-area",
+        
+        items: [
+            {
+                name: "titleLabel",
+                type: "label",
+                text: "CSS Loading Test Screen",
+                cssClass: "custom-label"
+            },
+            {
+                name: "messageField",
+                type: "textfield",
+                text: "This field can be styled with custom CSS",
+                cssClass: "custom-textfield"
+            },
+            {
+                name: "loadButton",
+                type: "button",
+                text: "Load Custom CSS",
+                cssClass: "custom-button",
+                onClick: {
+                    print "Loading custom CSS...";
+                    #css.loadCss("testscreen", "custom-screen.css");
+                    print "Custom CSS loaded! Notice the style changes.";
+                }
+            },
+            {
+                name: "unloadButton",
+                type: "button",
+                text: "Unload Custom CSS",
+                onClick: {
+                    print "Unloading custom CSS...";
+                    #css.unloadCss("testscreen", "custom-screen.css");
+                    print "Custom CSS unloaded! Styles reverted to default.";
+                }
+            },
+            {
+                name: "findButton",
+                type: "button",
+                text: "Find Available CSS Files",
+                onClick: {
+                    print "Searching for CSS files...";
+                    var cssFiles = #css.findCss();
+                    var numFiles = #array.length(cssFiles);
+                    print "Found " + numFiles + " CSS files";
+                }
+            },
+            {
+                name: "closeButton",
+                type: "button",
+                text: "Close Screen",
+                onClick: {
+                    #scr.closeScreen("testscreen");
+                }
+            }
+        ]
+    }
+};
+
+// Show the screen
+show screen testScreen;
+
+print "Screen displayed. Click 'Load Custom CSS' to apply custom styles.";
+print "Note: The custom CSS defines styles for .custom-button, .custom-label, .custom-textfield, and .custom-area";

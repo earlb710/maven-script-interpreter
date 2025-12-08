@@ -1,0 +1,38 @@
+/* Custom CSS for testing css.loadCss builtin */
+
+/* Custom button style */
+.custom-button {
+    -fx-background-color: #4CAF50;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 10px 20px;
+    -fx-background-radius: 5px;
+}
+
+.custom-button:hover {
+    -fx-background-color: #45a049;
+}
+
+/* Custom label style */
+.custom-label {
+    -fx-text-fill: #2196F3;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+/* Custom text field style */
+.custom-textfield {
+    -fx-background-color: #f0f0f0;
+    -fx-border-color: #2196F3;
+    -fx-border-width: 2px;
+    -fx-border-radius: 3px;
+    -fx-padding: 5px;
+}
+
+/* Custom area style */
+.custom-area {
+    -fx-background-color: #fff3cd;
+    -fx-border-color: #ffc107;
+    -fx-border-width: 2px;
+    -fx-padding: 15px;
+}
