@@ -3418,6 +3418,123 @@ foreach cssFile in allCss {
 - Returns relative paths for classpath resources (e.g., "css/console.css")
 - Recursive directory search when searching filesystem paths
 
+#### css.loadCss(screenName, cssPath)
+Dynamically loads a CSS stylesheet and applies it to the specified screen at runtime. Enables custom styling and theme switching without restarting the application.
+
+**Parameters:**
+- `screenName` (string, required): Name of the screen to apply CSS to (case-insensitive)
+- `cssPath` (string, required): Path to the CSS file. Supports multiple formats:
+  - Classpath resources: `"css/custom.css"` or `"custom.css"` (auto-prefixes `/css/`)
+  - Relative paths: `"my-theme.css"` (resolves in sandbox/current directory)
+  - Absolute paths: `"/path/to/styles.css"`
+  - URLs: `"file:///path/to/styles.css"`
+
+**Returns:** Boolean - true if CSS loading was successfully scheduled
+
+```javascript
+// Define a screen with CSS classes
+screen myScreen = {
+    "title": "Styled Application",
+    "width": 600,
+    "height": 400,
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "items": [
+                {
+                    "name": "title",
+                    "type": "label",
+                    "text": "Welcome",
+                    "cssClass": "custom-title"  // Reference CSS class
+                },
+                {
+                    "name": "loadTheme",
+                    "type": "button",
+                    "text": "Load Dark Theme",
+                    "onClick": "call css.loadCss('myscreen', 'dark-theme.css');"
+                }
+            ]
+        }
+    ]
+};
+
+show screen myScreen;
+
+// Load CSS after showing screen
+call css.loadCss("myscreen", "custom-styles.css");
+```
+
+**Important Notes:**
+- Screen must be shown before loading CSS
+- CSS applies immediately to the JavaFX scene
+- Duplicate CSS files are automatically prevented
+- Operation is asynchronous (returns immediately, CSS loads on JavaFX thread)
+- **Best Practice**: Organize screen apps with CSS files in their own directory
+
+**Recommended Directory Structure:**
+```
+my-screen-app/
+├── my-app.ebs          # EBS script with screen definitions
+├── custom-theme.css    # CSS file for styling
+└── README.md           # Optional documentation
+```
+
+#### css.unloadCss(screenName, cssPath)
+Removes a previously loaded CSS stylesheet from the specified screen, reverting to default or remaining styles.
+
+**Parameters:**
+- `screenName` (string, required): Name of the screen to remove CSS from (case-insensitive)
+- `cssPath` (string, required): Path to the CSS file to remove (same format as loadCss)
+
+**Returns:** Boolean - true if CSS removal was successfully scheduled
+
+```javascript
+// Remove custom CSS from screen
+call css.unloadCss("myscreen", "dark-theme.css");
+
+// Example: Theme switcher
+switchTheme(themeName: string) {
+    // Unload current theme
+    call css.unloadCss("myscreen", currentTheme);
+    // Load new theme
+    call css.loadCss("myscreen", themeName + ".css");
+    currentTheme = themeName;
+}
+
+// Usage in button click handlers
+screen themeDemo = {
+    "area": [
+        {
+            "name": "controls",
+            "items": [
+                {
+                    "name": "darkBtn",
+                    "type": "button",
+                    "text": "Dark Theme",
+                    "onClick": "call css.unloadCss('themedemo', 'light-theme.css'); call css.loadCss('themedemo', 'dark-theme.css');"
+                },
+                {
+                    "name": "lightBtn",
+                    "type": "button",
+                    "text": "Light Theme",
+                    "onClick": "call css.unloadCss('themedemo', 'dark-theme.css'); call css.loadCss('themedemo', 'light-theme.css');"
+                }
+            ]
+        }
+    ]
+};
+```
+
+**Use Cases:**
+- **Theme Switching**: Toggle between light/dark themes
+- **Dynamic Styling**: Apply conditional styles based on application state
+- **Screen-Specific Styles**: Load/unload CSS per screen
+- **A/B Testing**: Switch styles for user testing
+
+**Complete Example:**
+See `ScriptInterpreter/scripts/examples/css-screen-demo/` for a full working example with organized CSS files.
+
 ### Array Functions
 ```javascript
 // Array manipulation

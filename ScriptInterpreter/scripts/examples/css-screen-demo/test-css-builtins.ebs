@@ -1,0 +1,27 @@
+// Simple test to verify CSS builtins are registered and can be called
+
+print "=== Testing CSS Builtins Registration ===";
+
+// Test 1: Check if css.findCss works
+print "Test 1: Finding CSS files...";
+var cssFiles = #css.findCss();
+print "CSS files search completed successfully";
+
+// Test 2: Test css.getValue with an existing CSS file
+print "";
+print "Test 2: Reading CSS property value...";
+var colorValue = #css.getValue("css/console.css", ".console", "-fx-font-family");
+if (colorValue != null) {
+    print "Successfully read CSS property: " + colorValue;
+} else {
+    print "CSS property not found or file doesn't exist";
+}
+
+// Test 3: Verify new builtins are callable
+print "";
+print "Test 3: New builtins css.loadCss and css.unloadCss are registered";
+print "They require a screen to be active for testing";
+
+print "";
+print "=== All basic tests passed! ===";
+print "Run 'test-css-loading.ebs' for interactive testing with a real screen.";

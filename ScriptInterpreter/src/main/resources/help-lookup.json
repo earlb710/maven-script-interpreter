@@ -3940,6 +3940,83 @@
       ],
       "return_type": "vector_image",
       "example": "<b>var</b> svg = <b>call</b> vector.load(path=\"logo.svg\");<br><b>var</b> rotated = <b>call</b> vector.applyHueRotate(svg, degrees=180.0);"
+    },
+    {
+      "function": "css.getValue",
+      "short_description": "Reads CSS property from stylesheet",
+      "long_help": "Retrieves a CSS property value from a stylesheet file. Supports classpath resources and filesystem paths. Returns null if selector or property is not found.",
+      "parameters": [
+        {
+          "name": "cssPath",
+          "type": "string",
+          "description": "Path to CSS file (classpath or filesystem)"
+        },
+        {
+          "name": "selector",
+          "type": "string",
+          "description": "CSS selector (e.g., '.error', '#main')"
+        },
+        {
+          "name": "property",
+          "type": "string",
+          "description": "CSS property name (e.g., '-fx-fill')"
+        }
+      ],
+      "return_type": "string",
+      "example": "<b>var</b> color = <b>call</b> css.getValue(cssPath=\"css/console.css\", selector=\".error\", property=\"-fx-fill\");<br><b>print</b> color;"
+    },
+    {
+      "function": "css.findCss",
+      "short_description": "Finds available CSS files",
+      "long_help": "Searches for all available CSS stylesheet files and returns their paths as an array. Searches classpath resources and filesystem paths.",
+      "parameters": [
+        {
+          "name": "searchPath",
+          "type": "string",
+          "optional": true,
+          "description": "Base path to search (optional)"
+        }
+      ],
+      "return_type": "array",
+      "example": "<b>var</b> cssFiles = <b>call</b> css.findCss();<br><b>foreach</b> file <b>in</b> cssFiles <b>do</b> {<br>  <b>print</b> file;<br>}"
+    },
+    {
+      "function": "css.loadCss",
+      "short_description": "Loads CSS into screen dynamically",
+      "long_help": "Dynamically loads a CSS stylesheet and applies it to the specified screen at runtime. Enables custom styling and theme switching without restarting. Screen must be shown before loading CSS. <br><br><b>Best Practice:</b> Organize screen apps with EBS and CSS files in their own directory.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string",
+          "description": "Name of screen to apply CSS to"
+        },
+        {
+          "name": "cssPath",
+          "type": "string",
+          "description": "Path to CSS file (supports multiple formats)"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>screen</b> myScreen = { title: \"Demo\" };<br><b>show screen</b> myScreen;<br><b>call</b> css.loadCss(screenName=\"myscreen\", cssPath=\"custom-theme.css\");"
+    },
+    {
+      "function": "css.unloadCss",
+      "short_description": "Removes CSS from screen",
+      "long_help": "Removes a previously loaded CSS stylesheet from the specified screen, reverting to default or remaining styles. Useful for theme switching and dynamic styling.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string",
+          "description": "Name of screen to remove CSS from"
+        },
+        {
+          "name": "cssPath",
+          "type": "string",
+          "description": "Path to CSS file to remove"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>call</b> css.unloadCss(screenName=\"myscreen\", cssPath=\"dark-theme.css\");<br><b>call</b> css.loadCss(screenName=\"myscreen\", cssPath=\"light-theme.css\");"
     }
   ]
 }

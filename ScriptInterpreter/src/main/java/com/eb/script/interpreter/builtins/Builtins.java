@@ -1043,6 +1043,16 @@ public final class Builtins {
                 "css.findCss", DataType.ARRAY,
                 newParam("searchPath", DataType.STRING, false)  // optional; base path to search in
         ));
+        addBuiltin(info(
+                "css.loadCss", DataType.BOOL,
+                newParam("screenName", DataType.STRING, true),  // required; name of the screen
+                newParam("cssPath", DataType.STRING, true)      // required; path to CSS file
+        ));
+        addBuiltin(info(
+                "css.unloadCss", DataType.BOOL,
+                newParam("screenName", DataType.STRING, true),  // required; name of the screen
+                newParam("cssPath", DataType.STRING, true)      // required; path to CSS file
+        ));
 
         // ==========================
         // Plugin builtins (external Java function loading)
@@ -1597,7 +1607,7 @@ public final class Builtins {
         
         // CSS builtins
         if (BuiltinsCss.handles(name)) {
-            return BuiltinsCss.dispatch(name, args);
+            return BuiltinsCss.dispatch(context, name, args);
         }
         
         // Plugin builtins (external Java function loading)
