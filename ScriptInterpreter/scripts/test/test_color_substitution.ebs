@@ -1,0 +1,40 @@
+// Test script to verify color variable substitution in styles
+// This tests the fix for the chess checkered board issue
+
+// Define color variables
+var TEST_COLOR_LIGHT: string = "#f0d9b5";  // Light beige for chess board
+var TEST_COLOR_DARK: string = "#b58863";   // Dark brown for chess board
+var TEST_BG_COLOR: string = "#2c2c2c";     // Dark gray background
+
+// Create a simple screen with colored cells to test variable substitution
+screen testColorSubstitution = {
+    "title": "Color Variable Substitution Test",
+    "width": 400,
+    "height": 300,
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "10",
+            "padding": "20",
+            "style": "-fx-background-color: $TEST_BG_COLOR;",
+            "items": [
+                {"name": "title", "display": {"type": "label", "labelText": "Testing Color Variable Substitution", "labelColor": "#ffffff", "labelFontSize": "16px", "labelBold": true}},
+                {"name": "lightCell", "display": {"type": "label", "labelText": "Light Cell", "style": "-fx-background-color: $TEST_COLOR_LIGHT; -fx-min-width: 100; -fx-min-height: 50; -fx-alignment: center;"}},
+                {"name": "darkCell", "display": {"type": "label", "labelText": "Dark Cell", "style": "-fx-background-color: $TEST_COLOR_DARK; -fx-min-width: 100; -fx-min-height: 50; -fx-alignment: center; -fx-text-fill: white;"}},
+                {"name": "status", "display": {"type": "label", "labelText": "If you see colored cells above, variable substitution is working!", "labelColor": "#00ff00"}}
+            ]
+        }
+    ]
+};
+
+print "Testing color variable substitution in styles...";
+print "TEST_COLOR_LIGHT = " + TEST_COLOR_LIGHT;
+print "TEST_COLOR_DARK = " + TEST_COLOR_DARK;
+print "TEST_BG_COLOR = " + TEST_BG_COLOR;
+print "";
+print "Opening test screen...";
+
+show screen testColorSubstitution;
+
+print "Test screen displayed. Check if colors are correctly substituted.";
