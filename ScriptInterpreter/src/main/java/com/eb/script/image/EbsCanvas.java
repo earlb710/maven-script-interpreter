@@ -3,6 +3,7 @@ package com.eb.script.image;
 import com.eb.script.arrays.ArrayFixedByte;
 import com.eb.script.interpreter.InterpreterError;
 
+import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -20,6 +21,8 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Stack;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Canvas data type for EBS scripting language.
@@ -42,6 +45,30 @@ public class EbsCanvas {
     
     /** Stack for save/restore transformation states */
     private final Stack<GraphicsState> stateStack;
+    
+    /** Flag to track if JavaFX toolkit has been initialized */
+    private static volatile boolean javafxInitialized = false;
+    
+    /**
+     * Initialize JavaFX toolkit if not already initialized.
+     * This is required for headless operation.
+     */
+    private static void ensureJavaFXInitialized() {
+        if (!javafxInitialized) {
+            synchronized (EbsCanvas.class) {
+                if (!javafxInitialized) {
+                    try {
+                        // Initialize JavaFX toolkit
+                        Platform.startup(() -> {});
+                        javafxInitialized = true;
+                    } catch (IllegalStateException e) {
+                        // Toolkit already initialized
+                        javafxInitialized = true;
+                    }
+                }
+            }
+        }
+    }
     
     /**
      * Internal class to store graphics state for save/restore operations.
@@ -97,6 +124,10 @@ public class EbsCanvas {
         if (width <= 0 || height <= 0) {
             throw new IllegalArgumentException("Canvas dimensions must be positive");
         }
+        
+        // Ensure JavaFX is initialized
+        ensureJavaFXInitialized();
+        
         this.canvas = new Canvas(width, height);
         this.gc = canvas.getGraphicsContext2D();
         this.canvasName = name;
