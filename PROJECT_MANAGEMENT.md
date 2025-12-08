@@ -2,7 +2,7 @@
 
 ## Overview
 
-The EBS Console now supports project management through `project.json` files. Projects can be created and opened via the File menu, allowing you to organize your EBS scripts and configure project-wide settings like default CSS stylesheets. **A TreeView on the right side of the console displays all opened projects, with automatic persistence to `console-projects.json`.**
+The EBS Console now supports project management through `project.json` files. Projects can be created and opened via the File menu, allowing you to organize your EBS scripts and configure project-wide settings like default CSS stylesheets. **A TreeView on the left side of the console displays all opened projects, with automatic persistence to `console-projects.json`.**
 
 ## Menu Items
 
@@ -27,7 +27,7 @@ Opens an existing project:
 
 ## Projects TreeView
 
-A TreeView component is displayed on the right side of the console (25% width by default), showing all opened projects.
+A TreeView component is displayed on the left side of the console (25% width by default), showing all opened projects.
 
 ### Features
 

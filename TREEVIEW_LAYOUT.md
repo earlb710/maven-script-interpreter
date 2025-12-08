@@ -2,41 +2,36 @@
 
 ## New Console Layout
 
-The console now features a **SplitPane** layout with the Projects TreeView on the right side:
+The console now features a **SplitPane** layout with the Projects TreeView on the left side:
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
 │  File  Edit  Config  Tools  Screens  Help                         │
-├─────────────────────────────────────────────┬──────────────────────┤
-│                                             │  Projects            │
-│  ┌──────────────────────────────────────┐  │  ├─ ProjectName1     │
-│  │ Console Tab │ Script1.ebs │ Script2 │  │  ├─ ProjectName2     │
-│  ├──────────────────────────────────────┤  │  └─ ProjectName3     │
-│  │                                      │  │                      │
-│  │  Console Output Area                 │  │  (TreeView)          │
-│  │  > Loaded project: MyProject         │  │                      │
-│  │  > Project configuration loaded      │  │  Right-click for:    │
-│  │                                      │  │  • Open Project      │
-│  │                                      │  │  • Remove from List  │
-│  │                                      │  │  • Clear All         │
-│  │  Input: █                            │  │                      │
-│  └──────────────────────────────────────┘  │  Double-click to     │
-│                                             │  open project        │
-│  Main Tabs Area (75% default width)        │  (25% default width) │
-└─────────────────────────────────────────────┴──────────────────────┘
+├──────────────────────┬─────────────────────────────────────────────┤
+│  Projects            │                                             │
+│  ├─ ProjectName1     │  ┌──────────────────────────────────────┐  │
+│  ├─ ProjectName2     │  │ Console Tab │ Script1.ebs │ Script2 │  │
+│  └─ ProjectName3     │  ├──────────────────────────────────────┤  │
+│                      │  │                                      │  │
+│  (TreeView)          │  │  Console Output Area                 │  │
+│                      │  │  > Loaded project: MyProject         │  │
+│  Right-click for:    │  │  > Project configuration loaded      │  │
+│  • Open Project      │  │                                      │  │
+│  • Remove from List  │  │                                      │  │
+│  • Clear All         │  │                                      │  │
+│                      │  │  Input: █                            │  │
+│  Double-click to     │  └──────────────────────────────────────┘  │
+│  open project        │                                             │
+│                      │  Main Tabs Area (75% default width)        │
+│  (25% default width) │                                             │
+└──────────────────────┴─────────────────────────────────────────────┘
 │  Status Bar: Ready                                                 │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
 ## Layout Components
 
-### Main Area (Left - 75% width)
-- **Menu Bar:** File, Edit, Config, Tools, Screens, Help
-- **Tab Pane:** Console tab and opened script file tabs
-- **Console Output:** Script execution output
-- **Console Input:** Command input area
-
-### Projects TreeView (Right - 25% width)
+### Projects TreeView (Left - 25% width)
 - **Root Node:** "Projects" (always visible)
 - **Project Entries:** Each opened project as a child node
   - Shows project name
@@ -46,10 +41,16 @@ The console now features a **SplitPane** layout with the Projects TreeView on th
   - Right-click: Context menu
   - Hover: View full path in tooltip
 
+### Main Area (Right - 75% width)
+- **Menu Bar:** File, Edit, Config, Tools, Screens, Help
+- **Tab Pane:** Console tab and opened script file tabs
+- **Console Output:** Script execution output
+- **Console Input:** Command input area
+
 ### Divider
 - **Resizable:** Drag left/right to adjust panel sizes
-- **Default Position:** 75% / 25% split
-- **Range:** Can be adjusted from 50% to 90%
+- **Default Position:** 25% / 75% split
+- **Range:** Can be adjusted from 10% to 50%
 
 ### Status Bar (Bottom)
 - Shows current status and error messages
