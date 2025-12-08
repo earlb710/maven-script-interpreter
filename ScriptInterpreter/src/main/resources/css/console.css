@@ -367,3 +367,10 @@
     -fx-padding: 0 2 0 2;
 }
 
+/* ===== Start In directory label styling ===== */
+.start-in-label {
+    -fx-font-size: 10px;
+    -fx-text-fill: #666666;
+    -fx-text-overrun: leading-ellipsis; /* Truncate long paths with ellipsis at start */
+}
+

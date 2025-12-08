@@ -1,0 +1,22 @@
+// Test script to verify that relative file paths work from the script's directory
+// This script should read data.txt which is in the same directory
+
+print "Testing relative file path resolution...";
+print "Script directory should be used as 'start in' directory";
+print "";
+
+// Try to read data.txt using a relative path
+var handle: string = call file.open(path="data.txt", mode="r");
+
+if handle != null then {
+    print "✓ Successfully opened data.txt using relative path";
+    
+    var content: string = call file.read(handle=handle);
+    print "File content:";
+    print content;
+    
+    call file.close(handle=handle);
+    print "✓ File operations completed successfully";
+} else {
+    print "✗ Failed to open data.txt using relative path";
+}
