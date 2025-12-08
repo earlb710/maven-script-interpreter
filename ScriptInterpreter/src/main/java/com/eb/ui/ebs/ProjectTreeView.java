@@ -51,6 +51,21 @@ public class ProjectTreeView extends VBox {
             }
         });
         
+        // Setup selection listener to show path in status bar
+        treeView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null && newValue != rootItem) {
+                // Get the project path from user data
+                Object userData = newValue.getGraphic() != null ? newValue.getGraphic().getUserData() : null;
+                if (userData instanceof String) {
+                    String projectPath = (String) userData;
+                    StatusBar statusBar = handler.getStatusBar();
+                    if (statusBar != null) {
+                        statusBar.setStatus(projectPath);
+                    }
+                }
+            }
+        });
+        
         // Setup context menu
         setupContextMenu();
         
