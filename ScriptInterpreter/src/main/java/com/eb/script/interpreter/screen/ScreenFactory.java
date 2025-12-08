@@ -4862,8 +4862,9 @@ public class ScreenFactory {
                 container.getChildren().addAll(label, control);
             }
             
-            // Allow the control (e.g., TableView) to grow vertically within the VBox
+            // Allow the control (e.g., TableView, TextArea) to grow both vertically and horizontally within the VBox
             javafx.scene.layout.VBox.setVgrow(control, javafx.scene.layout.Priority.ALWAYS);
+            javafx.scene.layout.HBox.setHgrow(control, javafx.scene.layout.Priority.ALWAYS);
             
             return container;
         } else {
