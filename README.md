@@ -17,7 +17,7 @@ A powerful script interpreter for the EBS (Earl Bosch Script) language, featurin
 - **Database Integration**: Built-in SQL support with cursors and connections
 - **Type Aliases**: Define reusable type aliases for complex types with the `typeof` keyword
 - **Array Support**: Multi-dimensional arrays with type safety
-- **JSON Support**: Native JSON parsing, validation, and schema support
+- **JSON Support**: Native JSON parsing with support for both standard quoted keys and JavaScript-style unquoted keys, validation, and schema support
 - **File I/O**: Built-in file operations
 - **Extensible**: Easy to add custom built-in functions
 
@@ -80,7 +80,8 @@ See [CONSOLE_CONFIG_GUIDE.md](CONSOLE_CONFIG_GUIDE.md) for complete configuratio
 var name: string = "World";
 var count: int = 42;
 var items: int[5];  // Fixed-size array
-var data: json = {"key": "value"};
+var data: json = {"key": "value"};  // Standard JSON with quoted keys
+var config: json = {theme: "dark", volume: 80};  // JavaScript-style unquoted keys (NEW)
 var settings: map = {"theme": "dark", "volume": 80};  // Map type
 
 // Control flow
@@ -134,6 +135,8 @@ use db {
 }
 close connection db;
 ```
+
+> **Note on JSON Syntax**: The EBS JSON parser supports both standard JSON with quoted keys (`{"name": "value"}`) and JavaScript-style unquoted keys (`{name: "value"}`). Both formats can be used interchangeably or mixed in the same document. Unquoted keys must be valid identifiers (letters, digits, underscore) and cannot start with a digit. Keys with special characters (hyphens, spaces, etc.) must be quoted.
 
 ### Type Casting
 
