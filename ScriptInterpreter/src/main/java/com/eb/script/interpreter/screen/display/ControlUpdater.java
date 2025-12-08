@@ -11,6 +11,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
+import javafx.scene.web.WebView;
 
 import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
@@ -54,6 +55,11 @@ public class ControlUpdater {
             ((TextField) control).setText(value != null ? String.valueOf(value) : "");
         } else if (control instanceof TextArea) {
             ((TextArea) control).setText(value != null ? String.valueOf(value) : "");
+        } else if (control instanceof WebView) {
+            // For WebView, load the content as HTML
+            WebView webView = (WebView) control;
+            String content = value != null ? String.valueOf(value) : "";
+            webView.getEngine().loadContent(content);
         } else if (control instanceof CheckBox) {
             ((CheckBox) control).setSelected(value instanceof Boolean && (Boolean) value);
         } else if (control instanceof Slider) {
