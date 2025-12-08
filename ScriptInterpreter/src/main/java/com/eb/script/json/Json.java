@@ -9,17 +9,27 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Minimal, dependency-free JSON parser. Converts JSON strings to Java objects:
+ * <ul>
+ * <li>Object -> LinkedHashMap&lt;String, Object&gt;</li>
+ * <li>Array -> ArrayList&lt;Object&gt;</li>
+ * <li>Number -> Integer/Long/Double (auto)</li>
+ * <li>Boolean -> Boolean</li>
+ * <li>String -> String</li>
+ * <li>null -> null</li>
+ * </ul>
+ *
+ * <p>Supports both standard JSON and JavaScript-style syntax:
+ * <ul>
+ * <li>Quoted keys: {"name": "value"} - Standard JSON format</li>
+ * <li>Unquoted keys: {name: "value"} - JavaScript-style (identifiers only)</li>
+ * <li>Both styles can be mixed in the same document</li>
+ * </ul>
+ *
+ * <p>Usage: Object v = Json.parse("{\"x\":1,\"y\":[true,null,\"ok\"]}");
+ * if (v instanceof Map) { ... }
  *
  * @author Earl Bosch
- *
- * Minimal, dependency-free JSON parser. Converts JSON strings to Java objects:
- * - Object -> LinkedHashMap<String, Object>
- * - Array -> ArrayList<Object>
- * - Number -> Integer/Long/Double (auto) - Boolean -> Boolean - String ->
- * String - null -> null
- *
- * Usage: Object v = Json.parse("{\"x\":1,\"y\":[true,null,\"ok\"]}"); if (v
- * instanceof Map) { ... }
  */
 public final class Json {
 
