@@ -2635,7 +2635,7 @@ public class ScreenFactory {
      * @param stage The JavaFX Stage containing the screen
      * @param context The interpreter context
      */
-    private static void captureScreenshot(String screenName, Stage stage, InterpreterContext context) {
+    public static void captureScreenshotToFile(String screenName, Stage stage, InterpreterContext context) {
         try {
             // Get the scene from the stage
             Scene scene = stage.getScene();
@@ -3054,7 +3054,7 @@ public class ScreenFactory {
             }
             // Add Ctrl+P key handler to capture screenshot
             else if (event.getCode() == KeyCode.P && event.isControlDown()) {
-                captureScreenshot(screenName, stage, context);
+                captureScreenshotToFile(screenName, stage, context);
                 event.consume(); // Prevent the event from propagating further
             }
         });

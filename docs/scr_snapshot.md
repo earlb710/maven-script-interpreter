@@ -1,7 +1,9 @@
 # scr.snapshot Builtin Function
 
 ## Overview
-The `scr.snapshot` builtin function captures a screenshot of a JavaFX screen and stores it as an `EbsImage` object.
+The `scr.snapshot` builtin function captures a screenshot of a JavaFX screen. It has two modes of operation:
+- **With screen name parameter**: Returns an `EbsImage` object for manipulation
+- **Without parameters**: Saves screenshot directly to temp directory (same as Ctrl+P)
 
 ## Keyboard Shortcut
 You can also capture screenshots using **Ctrl+P** while a screen is active. This saves the screenshot to the system temp directory with format `{screenName}_{sequence}.png` and an auto-incrementing sequence number.
@@ -14,24 +16,32 @@ Example: If you press Ctrl+P three times on a screen named "myScreen", it will c
 Where `{TEMP_DIR}` is the system temporary directory (e.g., `/tmp/` on Linux/Mac, `C:\Users\{user}\AppData\Local\Temp\` on Windows).
 
 ## Syntax
+
+### Mode 1: Return EbsImage (with screen name)
 ```ebs
-image ebsImage = call scr.snapshot(screenName?)
+image ebsImage = call scr.snapshot(screenName)
+```
+
+### Mode 2: Save to temp directory (no parameters)
+```ebs
+call scr.snapshot()  // Same as pressing Ctrl+P
 ```
 
 ## Parameters
 - `screenName` (optional, string): The name of the screen to capture
-  - If omitted, uses the current screen context (must be called from within screen event handlers)
-  - If provided, captures the specified screen
+  - **If provided**: Returns an EbsImage object for manipulation
+  - **If omitted**: Saves directly to temp directory with auto-incrementing sequence (same as Ctrl+P) and returns null
 
 ## Return Value
-Returns an `IMAGE` (EbsImage) object containing the captured screenshot in PNG format.
+- **With screen name**: Returns an `IMAGE` (EbsImage) object containing the captured screenshot in PNG format
+- **Without parameters**: Returns `null` after saving to temp directory
 
 ## Features
 - Uses JavaFX's Scene.snapshot() method for high-quality screen capture
 - Thread-safe implementation with proper synchronization
 - Comprehensive error handling
 - Default 10-second timeout for complex screens
-- Automatic naming: `{screenName}_screenshot`
+- Two operation modes: in-memory (with parameter) or save-to-file (without parameter)
 
 ## Examples
 
@@ -57,37 +67,62 @@ screen myScreen = {
 show screen myScreen;
 
 captureScreenshot() return void {
-    // Capture current screen (myScreen)
-    image screenshot = call scr.snapshot();
-    
-    // Save to file
-    call image.save(screenshot, "my_screenshot.png");
-    print "Screenshot saved!";
+    // Mode 1: Save directly to temp directory (no parameters - same as Ctrl+P)
+    call scr.snapshot();
+    print "Screenshot saved to temp directory!";
 }
 ```
 
-### Example 2: Capture by screen name
+### Example 2: Capture and manipulate (with screen name)
 ```ebs
 show screen testScreen;
 
-// Capture a specific screen by name
-image screenshot = call scr.snapshot("testScreen");
+// Capture a specific screen by name and get EbsImage object
+var screenshot: image = call scr.snapshot("testScreen");
 
 // Get image information
-int width = call image.getWidth(screenshot);
-int height = call image.getHeight(screenshot);
+var width: int = call image.getWidth(screenshot);
+var height: int = call image.getHeight(screenshot);
 print "Captured " + width + "x" + height + " screenshot";
 
-// Save to file
+// Save to specific location
 call image.save(screenshot, "testScreen_capture.png");
 ```
 
-## Working with Captured Screenshots
+### Example 3: Quick capture without parameters
+```ebs
+screen myScreen = {
+    "title": "My Screen",
+    "width": 500,
+    "height": 400,
+    "vars": [
+        {
+            "name": "quickCaptureBtn",
+            "type": "string",
+            "default": "Quick Capture",
+            "display": {
+                "type": "button",
+                "onClick": "quickCapture"
+            }
+        }
+    ]
+};
 
-Once captured, you can use all standard image builtins:
+show screen myScreen;
+
+quickCapture() return void {
+    // Quick capture to temp directory - same as pressing Ctrl+P
+    call scr.snapshot();
+    // Screenshot automatically saved to {TEMP_DIR}/myScreen_001.png (or next sequence)
+}
+```
+
+## Working with Captured Screenshots (when using screen name parameter)
+
+Once captured with a screen name parameter, you can use all standard image builtins:
 
 ```ebs
-image screenshot = call scr.snapshot("myScreen");
+var screenshot: image = call scr.snapshot("myScreen");
 
 // Get image properties
 int width = call image.getWidth(screenshot);
