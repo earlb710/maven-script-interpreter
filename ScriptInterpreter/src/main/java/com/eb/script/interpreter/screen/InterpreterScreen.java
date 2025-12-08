@@ -2086,7 +2086,12 @@ public class InterpreterScreen {
         if (areaDef.containsKey("style")) {
             area.style = String.valueOf(areaDef.get("style"));
             // Substitute variables in style (e.g., $COLOR_CELL_LIGHT -> #ffffff)
-            area.style = substituteVariablesInStyle(area.style, line);
+            try {
+                area.style = substituteVariablesInStyle(area.style, line);
+            } catch (InterpreterError e) {
+                // Re-throw to maintain consistent error handling during screen creation
+                throw e;
+            }
         } else {
             // Use default style from the enum
             area.style = area.areaType.getDefaultStyle();
@@ -2744,7 +2749,7 @@ public class InterpreterScreen {
      * @param style The style string that may contain $VARIABLE_NAME patterns
      * @param line The line number for error reporting
      * @return The style string with variables substituted
-     * @throws InterpreterError if a referenced variable doesn't exist
+     * @throws InterpreterError if a referenced variable doesn't exist or has a null value
      */
     private String substituteVariablesInStyle(String style, int line) throws InterpreterError {
         if (style == null || style.isEmpty()) {
@@ -2755,15 +2760,19 @@ public class InterpreterScreen {
         java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("\\$([A-Za-z_][A-Za-z0-9_]*)");
         java.util.regex.Matcher matcher = pattern.matcher(style);
         
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
         while (matcher.find()) {
             String varName = matcher.group(1).toLowerCase(); // Variable names are case-insensitive
             
             try {
                 Object value = interpreter.environment().get(varName);
+                // Check if value is null - this would result in invalid CSS
+                if (value == null) {
+                    throw interpreter.error(line, "Variable reference '$" + matcher.group(1) + "' in style has null value");
+                }
                 // Replace the $VARIABLE with its string value
-                String replacement = value != null ? String.valueOf(value) : "";
-                // Use quoteReplacement to handle special characters in replacement string
+                String replacement = String.valueOf(value);
+                // Use appendReplacement which handles special characters properly
                 matcher.appendReplacement(result, java.util.regex.Matcher.quoteReplacement(replacement));
             } catch (InterpreterError e) {
                 // Variable not found - throw error with context
