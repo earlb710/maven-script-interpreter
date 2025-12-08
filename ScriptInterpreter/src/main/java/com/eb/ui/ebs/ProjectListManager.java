@@ -20,6 +20,7 @@ public class ProjectListManager {
     
     private static final String PROJECTS_FILE = "console-projects.json";
     private final List<ProjectEntry> projects = new ArrayList<>();
+    private Path projectsFilePath = null; // Cached resolved path for the projects file
     
     /**
      * Represents a project entry with name and path.
@@ -56,35 +57,57 @@ public class ProjectListManager {
     }
     
     /**
+     * Resolve the path to the console-projects.json file.
+     * Uses the same strategy as console.cfg: current directory, then parent directory.
+     * Caches the result for consistent load/save location.
+     * 
+     * @return Path to console-projects.json file
+     */
+    private Path resolveProjectsFilePath() {
+        if (projectsFilePath != null) {
+            return projectsFilePath;
+        }
+        
+        // Try current directory first
+        Path path = Paths.get(PROJECTS_FILE);
+        if (Files.exists(path)) {
+            projectsFilePath = path.toAbsolutePath();
+            System.out.println("Found " + PROJECTS_FILE + " at: " + projectsFilePath);
+            return projectsFilePath;
+        }
+        
+        // Try parent directory
+        path = Paths.get("..", PROJECTS_FILE);
+        if (Files.exists(path)) {
+            projectsFilePath = path.toAbsolutePath();
+            System.out.println("Found " + PROJECTS_FILE + " in parent dir at: " + projectsFilePath);
+            return projectsFilePath;
+        }
+        
+        // Not found - will create in current directory
+        projectsFilePath = Paths.get(PROJECTS_FILE).toAbsolutePath();
+        System.out.println(PROJECTS_FILE + " will be created at: " + projectsFilePath);
+        return projectsFilePath;
+    }
+    
+    /**
      * Load projects from console-projects.json file.
      * Reads project paths and loads project names from each project.json file.
      */
     public void loadProjects() {
         projects.clear();
         try {
-            // Show where we're looking for the file
-            String currentDir = System.getProperty("user.dir");
-            System.out.println("Loading projects from directory: " + currentDir);
+            // Resolve the file path (checks current dir, parent dir, or sets default)
+            Path projectsPath = resolveProjectsFilePath();
             
-            // Try current directory first
-            Path projectsPath = Paths.get(PROJECTS_FILE);
-            System.out.println("Trying: " + projectsPath.toAbsolutePath());
-            
-            // If not found in current directory, try parent directory
+            // If file doesn't exist yet, create empty file and start with empty list
             if (!Files.exists(projectsPath)) {
-                projectsPath = Paths.get("..", PROJECTS_FILE);
-                System.out.println("Not found, trying parent: " + projectsPath.toAbsolutePath());
-            }
-            
-            // If still not found, create empty file and start with empty list
-            if (!Files.exists(projectsPath)) {
-                System.out.println("Projects file not found at: " + projectsPath.toAbsolutePath());
-                System.out.println("Creating empty " + PROJECTS_FILE + " in current directory");
+                System.out.println("Projects file not found, creating empty file at: " + projectsPath);
                 createEmptyProjectsFile();
                 return;
             }
             
-            System.out.println("Found projects file at: " + projectsPath.toAbsolutePath());
+            System.out.println("Loading projects from: " + projectsPath);
             String jsonContent = Files.readString(projectsPath);
             System.out.println("File content: " + jsonContent.substring(0, Math.min(200, jsonContent.length())) + "...");
             Object parsed = Json.parse(jsonContent);
@@ -136,16 +159,16 @@ public class ProjectListManager {
     }
     
     /**
-     * Create an empty console-projects.json file.
+     * Create an empty console-projects.json file at the resolved location.
      */
     private void createEmptyProjectsFile() {
         try {
             Map<String, Object> root = new LinkedHashMap<>();
             root.put("projects", new ArrayList<>());
             String jsonContent = Json.prettyJson(root);
-            Path projectsPath = Paths.get(PROJECTS_FILE);
-            Files.writeString(projectsPath, jsonContent);
-            System.out.println("Created empty " + PROJECTS_FILE);
+            Path path = resolveProjectsFilePath(); // Use consistent path
+            Files.writeString(path, jsonContent);
+            System.out.println("Created empty " + PROJECTS_FILE + " at: " + path);
         } catch (Exception e) {
             System.err.println("Error creating " + PROJECTS_FILE + ": " + e.getMessage());
         }
@@ -193,7 +216,7 @@ public class ProjectListManager {
     }
     
     /**
-     * Save projects to console-projects.json file.
+     * Save projects to console-projects.json file at the resolved location.
      * Stores only the paths, not the names.
      */
     public void saveProjects() {
@@ -211,11 +234,11 @@ public class ProjectListManager {
             // Convert to JSON string
             String jsonContent = Json.prettyJson(root);
             
-            // Write to file in current directory
-            Path projectsPath = Paths.get(PROJECTS_FILE);
-            Files.writeString(projectsPath, jsonContent);
+            // Write to file at the resolved path (consistent with load location)
+            Path path = resolveProjectsFilePath();
+            Files.writeString(path, jsonContent);
             
-            System.out.println("Saved " + projects.size() + " project paths to " + PROJECTS_FILE);
+            System.out.println("Saved " + projects.size() + " project paths to " + path);
         } catch (IOException e) {
             System.err.println("Error writing " + PROJECTS_FILE + ": " + e.getMessage());
         } catch (Exception e) {
