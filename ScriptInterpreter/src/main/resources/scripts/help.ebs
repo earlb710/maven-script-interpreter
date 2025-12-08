@@ -537,6 +537,7 @@ treeArea = call json.set(treeArea, "spacing", "0");
 treeArea = call json.set(treeArea, "minWidth", "250");
 treeArea = call json.set(treeArea, "prefWidth", "250");
 treeArea = call json.set(treeArea, "maxWidth", "250");
+treeArea = call json.set(treeArea, "vgrow", "ALWAYS");
 treeArea = call json.set(treeArea, "style", "-fx-border-color: #cccccc; -fx-border-width: 0 1 0 0;");
 treeArea = call json.set(treeArea, "items", treeAreaItems);
 
@@ -570,6 +571,7 @@ contentArea = call json.set(contentArea, "type", "vbox");
 contentArea = call json.set(contentArea, "spacing", "5");
 contentArea = call json.set(contentArea, "padding", "10");
 contentArea = call json.set(contentArea, "hgrow", "ALWAYS");
+contentArea = call json.set(contentArea, "vgrow", "ALWAYS");
 contentArea = call json.set(contentArea, "items", contentAreaItems);
 
 call array.add(mainLayoutAreas, contentArea);
