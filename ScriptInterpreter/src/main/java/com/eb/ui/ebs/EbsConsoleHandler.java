@@ -433,7 +433,8 @@ public class EbsConsoleHandler extends EbsHandler {
         }
         try {
             p = p.toAbsolutePath().normalize();
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            System.err.println("Warning: Could not normalize path: " + e.getMessage());
         }
 
         final Path pf = p;
@@ -495,7 +496,8 @@ public class EbsConsoleHandler extends EbsHandler {
                     recentFiles.add(Path.of(v));
                 }
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            System.err.println("Warning: Could not load recent files from preferences: " + e.getMessage());
         }
     }
 
@@ -516,7 +518,8 @@ public class EbsConsoleHandler extends EbsHandler {
                 i++;
             }
             prefs.flush();
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            System.err.println("Warning: Could not save recent files to preferences: " + e.getMessage());
         }
     }
 
@@ -1117,8 +1120,9 @@ public class EbsConsoleHandler extends EbsHandler {
                                             alreadyLoaded = true;
                                             break;
                                         }
-                                    } catch (Exception ignored) {
+                                    } catch (Exception e) {
                                         // If normalization fails, compare directly
+                                        System.err.println("Warning: Could not normalize URL for comparison: " + e.getMessage());
                                         if (existingUrl.equals(cssUrl)) {
                                             alreadyLoaded = true;
                                             break;

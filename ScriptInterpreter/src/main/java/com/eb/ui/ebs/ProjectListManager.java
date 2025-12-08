@@ -167,6 +167,7 @@ public class ProjectListManager {
             }
         } catch (IOException e) {
             System.err.println("Error reading " + PROJECTS_FILE + ": " + e.getMessage());
+            e.printStackTrace();
         } catch (Exception e) {
             System.err.println("Error parsing " + PROJECTS_FILE + ": " + e.getMessage());
             e.printStackTrace();
@@ -186,6 +187,7 @@ public class ProjectListManager {
             System.out.println("Created empty " + PROJECTS_FILE + " at: " + path);
         } catch (Exception e) {
             System.err.println("Error creating " + PROJECTS_FILE + ": " + e.getMessage());
+            e.printStackTrace();
         }
     }
     
@@ -256,8 +258,10 @@ public class ProjectListManager {
             System.out.println("Saved " + projects.size() + " project paths to " + path);
         } catch (IOException e) {
             System.err.println("Error writing " + PROJECTS_FILE + ": " + e.getMessage());
+            e.printStackTrace();
         } catch (Exception e) {
             System.err.println("Error saving projects: " + e.getMessage());
+            e.printStackTrace();
         }
     }
     
