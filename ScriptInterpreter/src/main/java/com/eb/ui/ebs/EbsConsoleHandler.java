@@ -1387,11 +1387,27 @@ public class EbsConsoleHandler extends EbsHandler {
             Map<String, Object> project = (Map<String, Object>) projectObj;
             
             // Get or create files array
-            @SuppressWarnings("unchecked")
-            java.util.List<String> filesList = (java.util.List<String>) project.get("files");
+            Object filesObj = project.get("files");
+            java.util.List<String> filesList = null;
+            
+            // Handle ArrayDynamic (used by EBS JSON parser) or standard List
+            if (filesObj instanceof com.eb.script.arrays.ArrayDynamic) {
+                com.eb.script.arrays.ArrayDynamic arrayDynamic = (com.eb.script.arrays.ArrayDynamic) filesObj;
+                filesList = new java.util.ArrayList<>();
+                for (int i = 0; i < arrayDynamic.size(); i++) {
+                    Object item = arrayDynamic.get(i);
+                    if (item instanceof String) {
+                        filesList.add((String) item);
+                    }
+                }
+            } else if (filesObj instanceof java.util.List) {
+                @SuppressWarnings("unchecked")
+                java.util.List<String> list = (java.util.List<String>) filesObj;
+                filesList = new java.util.ArrayList<>(list); // Create mutable copy
+            }
+            
             if (filesList == null) {
                 filesList = new java.util.ArrayList<>();
-                project.put("files", filesList);
             }
             
             // Make file path relative to project directory if possible
