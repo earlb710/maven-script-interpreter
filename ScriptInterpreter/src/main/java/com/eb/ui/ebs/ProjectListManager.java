@@ -110,16 +110,24 @@ public class ProjectListManager {
             System.out.println("Loading projects from: " + projectsPath);
             String jsonContent = Files.readString(projectsPath);
             System.out.println("File content: " + jsonContent.substring(0, Math.min(200, jsonContent.length())) + "...");
+            
+            System.out.println("DEBUG: About to parse JSON...");
             Object parsed = Json.parse(jsonContent);
+            System.out.println("DEBUG: Parsed object type: " + (parsed == null ? "null" : parsed.getClass().getName()));
             
             if (parsed instanceof Map) {
+                System.out.println("DEBUG: Parsed is a Map, getting 'projects' key...");
                 @SuppressWarnings("unchecked")
                 Map<String, Object> projectsMap = (Map<String, Object>) parsed;
+                System.out.println("DEBUG: Map keys: " + projectsMap.keySet());
                 Object projectsArray = projectsMap.get("projects");
+                System.out.println("DEBUG: projectsArray type: " + (projectsArray == null ? "null" : projectsArray.getClass().getName()));
                 
                 if (projectsArray instanceof List) {
+                    System.out.println("DEBUG: projectsArray is a List!");
                     @SuppressWarnings("unchecked")
                     List<Object> projectsList = (List<Object>) projectsArray;
+                    System.out.println("DEBUG: projectsList size: " + projectsList.size());
                     
                     if (projectsList.isEmpty()) {
                         System.out.println("No projects found in " + PROJECTS_FILE + ". Use File → New Project or File → Open Project to add projects.");
@@ -163,7 +171,11 @@ public class ProjectListManager {
                         index++;
                     }
                     System.out.println("Loaded " + projects.size() + " projects from " + PROJECTS_FILE);
+                } else {
+                    System.err.println("DEBUG: projectsArray is NOT a List! It's: " + (projectsArray == null ? "null" : projectsArray.getClass().getName()));
                 }
+            } else {
+                System.err.println("DEBUG: Parsed is NOT a Map! It's: " + (parsed == null ? "null" : parsed.getClass().getName()));
             }
         } catch (IOException e) {
             System.err.println("Error reading " + PROJECTS_FILE + ": " + e.getMessage());
