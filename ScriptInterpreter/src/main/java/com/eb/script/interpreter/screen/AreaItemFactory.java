@@ -3,6 +3,7 @@ package com.eb.script.interpreter.screen;
 import com.eb.script.interpreter.screen.DisplayItem.ItemType;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
@@ -307,6 +308,26 @@ public class AreaItemFactory {
                 imageContainer.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
                 
                 return imageContainer;
+            case CANVASVIEW:
+                // Create a JavaFX Canvas for drawing
+                Canvas canvas = new Canvas();
+                // Wrap Canvas in StackPane for consistent layout handling
+                StackPane canvasContainer = new StackPane(canvas);
+                canvasContainer.setAlignment(Pos.CENTER);
+                
+                // Apply canvas display properties from metadata
+                if (metadata != null) {
+                    // Set canvas dimensions (default 400x400 if not specified)
+                    double canvasWidth = (metadata.fitWidth != null && metadata.fitWidth > 0) ? metadata.fitWidth : 400;
+                    double canvasHeight = (metadata.fitHeight != null && metadata.fitHeight > 0) ? metadata.fitHeight : 400;
+                    canvas.setWidth(canvasWidth);
+                    canvas.setHeight(canvasHeight);
+                }
+                
+                // Prevent StackPane from growing beyond its content
+                canvasContainer.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+                
+                return canvasContainer;
             case MEDIAVIEW:
                 // MediaView requires javafx-media module which is not included
                 // Return a label placeholder instead

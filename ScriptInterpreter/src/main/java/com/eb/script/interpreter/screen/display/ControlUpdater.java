@@ -2,10 +2,13 @@ package com.eb.script.interpreter.screen.display;
 
 import com.eb.script.arrays.ArrayDynamic;
 import com.eb.script.arrays.ArrayFixedByte;
+import com.eb.script.image.EbsCanvas;
 import com.eb.script.image.EbsImage;
 import com.eb.script.interpreter.screen.DisplayItem;
 import com.eb.script.interpreter.screen.data.VarRefResolver;
 import javafx.scene.Node;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -105,6 +108,8 @@ public class ControlUpdater {
             updateDatePicker(control, value);
         } else if (control instanceof ImageView) {
             updateImageView(control, value);
+        } else if (control instanceof Canvas) {
+            updateCanvasView(control, value);
         } else if (control instanceof javafx.scene.layout.StackPane) {
             // Check if StackPane contains an ImageView (wrapped for background support)
             javafx.scene.layout.StackPane stackPane = (javafx.scene.layout.StackPane) control;
@@ -112,6 +117,8 @@ public class ControlUpdater {
                 Node firstChild = stackPane.getChildren().get(0);
                 if (firstChild != null && firstChild instanceof ImageView) {
                     updateImageView(firstChild, value);
+                } else if (firstChild != null && firstChild instanceof Canvas) {
+                    updateCanvasView(firstChild, value);
                 }
             }
         }
@@ -176,6 +183,50 @@ public class ControlUpdater {
         } catch (Exception e) {
             String varName = (String) control.getProperties().get("varName");
             System.err.println("Warning: Failed to update ImageView" 
+                + (varName != null ? " (variable: " + varName + ")" : "") 
+                + ": " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Updates a Canvas control with a canvas value.
+     * Supports EbsCanvas objects by copying their drawing content to the screen canvas.
+     * 
+     * @param control The Canvas control
+     * @param value The canvas value (EbsCanvas)
+     */
+    private static void updateCanvasView(Node control, Object value) {
+        Canvas canvas = (Canvas) control;
+        
+        if (value == null) {
+            // Clear the canvas
+            GraphicsContext gc = canvas.getGraphicsContext2D();
+            gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+            return;
+        }
+        
+        try {
+            if (value instanceof EbsCanvas) {
+                EbsCanvas ebsCanvas = (EbsCanvas) value;
+                
+                // Get the source canvas from EbsCanvas
+                Canvas sourceCanvas = ebsCanvas.getCanvas();
+                
+                // Resize target canvas to match source if needed
+                if (canvas.getWidth() != sourceCanvas.getWidth() || 
+                    canvas.getHeight() != sourceCanvas.getHeight()) {
+                    canvas.setWidth(sourceCanvas.getWidth());
+                    canvas.setHeight(sourceCanvas.getHeight());
+                }
+                
+                // Copy the content from source canvas to target canvas
+                GraphicsContext gc = canvas.getGraphicsContext2D();
+                gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+                gc.drawImage(sourceCanvas.snapshot(null, null), 0, 0);
+            }
+        } catch (Exception e) {
+            String varName = (String) control.getProperties().get("varName");
+            System.err.println("Warning: Failed to update Canvas" 
                 + (varName != null ? " (variable: " + varName + ")" : "") 
                 + ": " + e.getMessage());
         }

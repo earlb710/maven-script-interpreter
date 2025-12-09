@@ -1,0 +1,14 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: canvas.create, canvas.save - Simple canvas creation and save test
+// Demonstrates: Basic canvas operations without variable storage
+
+print "=== Canvas Drawing Test ===";
+print "";
+
+// Test canvas creation
+print "Test 1: Creating canvas...";
+call canvas.save(call canvas.create(200, 200, "test1"), "test_canvas_simple.png");
+print "Created and saved simple canvas";
+print "";
+
+print "Test complete!";

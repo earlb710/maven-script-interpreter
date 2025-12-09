@@ -1,0 +1,140 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: Canvas patterns and loops - Drawing patterns using loops and basic geometry
+// Demonstrates: Grid pattern, concentric circles, spiral approximation, checkerboard, color bars
+
+print "Creating canvas for patterns demo...";
+var myCanvas: canvas = call canvas.create(600, 600, "patterns_demo");
+
+// Set white background
+call style.setFill(myCanvas, "#FFFFFF");
+call draw.rect(myCanvas, 0, 0, 600, 600, true);
+
+// Draw a grid pattern
+print "Drawing grid pattern...";
+call style.setStroke(myCanvas, "#CCCCCC", 1.0);
+var i: int = 0;
+while i < 600 do {
+    call draw.line(myCanvas, i, 0, i, 600);
+    call draw.line(myCanvas, 0, i, 600, i);
+    i = i + 50;
+}
+
+// Draw concentric circles
+print "Drawing concentric circles...";
+call style.setStroke(myCanvas, "#0000FF", 2.0);
+var radius: int = 20;
+while radius <= 100 do {
+    call draw.circle(myCanvas, 150, 150, radius, false);
+    radius = radius + 20;
+}
+
+// Draw a spiral (simplified without trig functions)
+print "Drawing spiral-like pattern...";
+call style.setStroke(myCanvas, "#FF0000", 2.0);
+var angle: int = 0;
+var r: int = 10;
+var centerX: int = 450;
+var centerY: int = 150;
+var prevX: int = centerX;
+var prevY: int = centerY;
+
+while angle < 72 do {
+    // Approximate circular pattern using simple geometry
+    // Using 8 points around circle at increasing radius
+    var pointAngle: int = angle % 8;
+    var x: int = centerX;
+    var y: int = centerY;
+    
+    if pointAngle == 0 then {
+        x = centerX + r;
+        y = centerY;
+    }
+    if pointAngle == 1 then {
+        x = centerX + r;
+        y = centerY - r;
+    }
+    if pointAngle == 2 then {
+        x = centerX;
+        y = centerY - r;
+    }
+    if pointAngle == 3 then {
+        x = centerX - r;
+        y = centerY - r;
+    }
+    if pointAngle == 4 then {
+        x = centerX - r;
+        y = centerY;
+    }
+    if pointAngle == 5 then {
+        x = centerX - r;
+        y = centerY + r;
+    }
+    if pointAngle == 6 then {
+        x = centerX;
+        y = centerY + r;
+    }
+    if pointAngle == 7 then {
+        x = centerX + r;
+        y = centerY + r;
+    }
+    
+    call draw.line(myCanvas, prevX, prevY, x, y);
+    
+    prevX = x;
+    prevY = y;
+    angle = angle + 1;
+    r = r + 2;
+}
+
+// Draw a checkerboard pattern
+print "Drawing checkerboard pattern...";
+var row: int = 0;
+while row < 6 do {
+    var col: int = 0;
+    while col < 6 do {
+        var sum: int = row + col;
+        var remainder: int = sum % 2;
+        if remainder == 0 then {
+            call style.setFill(myCanvas, "#000000");
+        } else {
+            call style.setFill(myCanvas, "#FFFFFF");
+        }
+        
+        var xPos: int = 50 + col * 40;
+        var yPos: int = 350 + row * 40;
+        call draw.rect(myCanvas, xPos, yPos, 40, 40, true);
+        col = col + 1;
+    }
+    row = row + 1;
+}
+
+// Draw color bars
+print "Drawing color bars...";
+var colors: string[5];
+colors[0] = "#FF0000";
+colors[1] = "#00FF00";
+colors[2] = "#0000FF";
+colors[3] = "#FFFF00";
+colors[4] = "#FF00FF";
+
+var idx: int = 0;
+while idx < 5 do {
+    call style.setFill(myCanvas, colors[idx]);
+    var xBar: int = 350 + idx * 40;
+    call draw.rect(myCanvas, xBar, 350, 40, 240, true);
+    idx = idx + 1;
+}
+
+// Add title
+call style.setFill(myCanvas, "#000000");
+call style.setFont(myCanvas, "Arial", 28.0);
+call draw.text(myCanvas, "Canvas Patterns", 200, 50);
+
+// Save the result
+print "Saving canvas to file...";
+var success: bool = call canvas.save(myCanvas, "patterns_demo.png");
+if success then {
+    print "Canvas saved successfully to patterns_demo.png";
+} else {
+    print "Failed to save canvas";
+}

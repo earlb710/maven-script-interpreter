@@ -1,0 +1,74 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: draw.image, canvas.toImage - Drawing images on canvas with transformations
+// Demonstrates: Image creation from canvas, image drawing, scaling, transformations, patterns
+
+print "Creating canvas for image drawing demo...";
+var myCanvas: canvas = call canvas.create(600, 400, "image_demo");
+
+// Set white background
+call style.setFill(myCanvas, "#FFFFFF");
+call draw.rect(myCanvas, 0, 0, 600, 400, true);
+
+// Try to create a simple test image
+print "Creating a test image...";
+var testCanvas: canvas = call canvas.create(100, 100, "test_image");
+call style.setFill(testCanvas, "#FF6347");
+call draw.circle(testCanvas, 50, 50, 40, true);
+call style.setFill(testCanvas, "#FFFFFF");
+call draw.circle(testCanvas, 50, 50, 20, true);
+var testImage: image = call canvas.toImage(testCanvas);
+
+// Draw the test image at different positions and sizes
+print "Drawing image at various positions...";
+
+// Original size
+call draw.image(myCanvas, testImage, 50, 50);
+
+// Scaled up
+call draw.image(myCanvas, testImage, 200, 50, 150, 150);
+
+// Scaled down
+call draw.image(myCanvas, testImage, 400, 50, 50, 50);
+
+// Draw with transformations
+call transform.save(myCanvas);
+call transform.translate(myCanvas, 100.0, 250.0);
+call transform.rotate(myCanvas, 45.0);
+call draw.image(myCanvas, testImage, -50, -50, 100, 100);
+call transform.restore(myCanvas);
+
+// Draw with semi-transparency
+call effect.setGlobalAlpha(myCanvas, 0.5);
+call draw.image(myCanvas, testImage, 250, 200, 120, 120);
+call effect.setGlobalAlpha(myCanvas, 1.0);
+
+// Draw multiple copies in a pattern
+print "Creating image pattern...";
+var x: int = 400;
+while x < 550 do {
+    var y: int = 200;
+    while y < 350 do {
+        call draw.image(myCanvas, testImage, x, y, 40, 40);
+        y = y + 50;
+    }
+    x = x + 50;
+}
+
+// Add border and text
+call style.setStroke(myCanvas, "#000000", 3.0);
+call draw.rect(myCanvas, 0, 0, 600, 400, false);
+
+call style.setFill(myCanvas, "#000000");
+call style.setFont(myCanvas, "Arial", 20.0);
+call draw.text(myCanvas, "Drawing Images on Canvas", 150, 30);
+
+// Save the result
+print "Saving canvas to file...";
+var success: bool = call canvas.save(myCanvas, "image_demo.png");
+if success then {
+    print "Canvas saved successfully to image_demo.png";
+} else {
+    print "Failed to save canvas";
+}
+
+print "Demo complete!";

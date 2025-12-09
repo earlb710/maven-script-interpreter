@@ -93,6 +93,8 @@ public class Util {
                     array.getDataType() == DataType.IMAGE;
                 case VECTOR_IMAGE ->
                     array.getDataType() == DataType.VECTOR_IMAGE;
+                case CANVAS ->
+                    array.getDataType() == DataType.CANVAS;
                 case JSON ->
                     true;
                 case ANY ->
@@ -126,6 +128,8 @@ public class Util {
                     value instanceof EbsImage;
                 case VECTOR_IMAGE ->
                     value instanceof com.eb.script.image.EbsVectorImage;
+                case CANVAS ->
+                    value instanceof com.eb.script.image.EbsCanvas;
                 case ANY ->
                     true;
                 default ->

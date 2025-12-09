@@ -4,6 +4,7 @@ import com.eb.script.json.Json;
 import com.eb.script.arrays.ArrayDef;
 import com.eb.script.image.EbsImage;
 import com.eb.script.image.EbsVectorImage;
+import com.eb.script.image.EbsCanvas;
 import com.eb.util.Util;
 import java.util.Date;
 
@@ -29,6 +30,7 @@ public enum DataType {
     INTMAP(Integer.class),
     IMAGE(EbsImage.class),
     VECTOR_IMAGE(EbsVectorImage.class),
+    CANVAS(EbsCanvas.class),
     ANY(Comparable.class);
 
     public final Class dataClass;
@@ -95,6 +97,9 @@ public enum DataType {
                 case VECTOR_IMAGE -> {
                     return new EbsVectorImage[length];
                 }
+                case CANVAS -> {
+                    return new EbsCanvas[length];
+                }
                 case ANY -> {
                     return new Comparable[length];
                 }
@@ -140,6 +145,10 @@ public enum DataType {
         if (type == VECTOR_IMAGE) {
             // Accept EbsVectorImage objects as vector images
             return value instanceof EbsVectorImage;
+        }
+        if (type == CANVAS) {
+            // Accept EbsCanvas objects as canvases
+            return value instanceof EbsCanvas;
         }
         if (type == BITMAP) {
             // Accept Byte objects as bitmaps

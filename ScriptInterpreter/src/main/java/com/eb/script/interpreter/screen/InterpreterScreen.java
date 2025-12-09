@@ -1502,6 +1502,13 @@ public class InterpreterScreen {
                 return DataType.RECORD;
             case "image":
                 return DataType.IMAGE;
+            case "canvas":
+                return DataType.CANVAS;
+            case "vector":
+            case "vector_image":
+                return DataType.VECTOR_IMAGE;
+            case "intmap":
+                return DataType.INTMAP;
             default:
                 return null;
         }

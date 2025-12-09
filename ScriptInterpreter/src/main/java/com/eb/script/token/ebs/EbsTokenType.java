@@ -49,6 +49,8 @@ public enum EbsTokenType implements LexerToken {
     BITMAP(PrintStyle.DATA, DataType.BITMAP, "bitmap"),
     INTMAP(PrintStyle.DATA, DataType.INTMAP, "intmap"),
     IMAGE(PrintStyle.DATA, DataType.IMAGE, "image"),
+    VECTOR_IMAGE(PrintStyle.DATA, DataType.VECTOR_IMAGE, "vector"),
+    CANVAS(PrintStyle.DATA, DataType.CANVAS, "canvas"),
     // Identifiers
     IDENTIFIER(PrintStyle.INFO, ""),
     BUILTIN(PrintStyle.BUILTIN, ""),

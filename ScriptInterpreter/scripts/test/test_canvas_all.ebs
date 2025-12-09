@@ -1,0 +1,559 @@
+// ============================================================================
+// TEST SCRIPT: Canvas Drawing Builtins (JavaFX Canvas API)
+// ============================================================================
+// This script tests all canvas drawing builtins including:
+// - canvas.* (creation, save, conversion, properties)
+// - draw.* (shapes, text, images)
+// - style.* (colors, fonts, line styling)
+// - effect.* (shadows, transparency)
+// - transform.* (translate, rotate, scale, save/restore)
+// ============================================================================
+
+print "====================================================================";
+print "       TEST SCRIPT: Canvas Drawing Builtins";
+print "====================================================================";
+print "";
+
+var testsPassed: int = 0;
+var testsFailed: int = 0;
+
+// Helper function to report test results
+reportTest(testName: string, passed: bool) {
+    if passed then {
+        print "[PASS] " + testName;
+        testsPassed = testsPassed + 1;
+    } else {
+        print "[FAIL] " + testName;
+        testsFailed = testsFailed + 1;
+    }
+}
+
+// ============================================================================
+// TEST 1: Canvas Creation and Properties
+// ============================================================================
+print "============================================================";
+print "TEST 1: Canvas Creation and Properties";
+print "============================================================";
+print "";
+
+print "--- Test 1.1: Create canvas with dimensions ---";
+var myCanvas1: canvas = call canvas.create(400, 300, "test_canvas");
+call reportTest("Canvas created successfully", myCanvas1 != null);
+print "";
+
+print "--- Test 1.2: Get canvas dimensions ---";
+var width1: int = call canvas.getWidth(myCanvas1);
+var height1: int = call canvas.getHeight(myCanvas1);
+call reportTest("Canvas width is 400", width1 == 400);
+call reportTest("Canvas height is 300", height1 == 300);
+print "";
+
+print "--- Test 1.3: Canvas name operations ---";
+var name1: string = call canvas.getName(myCanvas1);
+call reportTest("Canvas name is 'test_canvas'", name1 == "test_canvas");
+call canvas.setName(myCanvas1, "renamed_canvas");
+var name2: string = call canvas.getName(myCanvas1);
+call reportTest("Canvas renamed to 'renamed_canvas'", name2 == "renamed_canvas");
+print "";
+
+// ============================================================================
+// TEST 2: Drawing Basic Shapes
+// ============================================================================
+print "============================================================";
+print "TEST 2: Drawing Basic Shapes";
+print "============================================================";
+print "";
+
+print "--- Test 2.1: Draw lines ---";
+var myCanvas2: canvas = call canvas.create(200, 200, "lines");
+call style.setStroke(myCanvas2, "#000000", 2.0);
+call draw.line(myCanvas2, 10, 10, 190, 190);
+call draw.line(myCanvas2, 10, 190, 190, 10);
+call reportTest("Lines drawn without error", true);
+print "";
+
+print "--- Test 2.2: Draw rectangles (outline and filled) ---";
+var myCanvas3: canvas = call canvas.create(200, 200, "rectangles");
+call style.setStroke(myCanvas3, "#FF0000", 2.0);
+call draw.rect(myCanvas3, 10, 10, 80, 60, false);
+call style.setFill(myCanvas3, "#0000FF");
+call draw.rect(myCanvas3, 110, 10, 80, 60, true);
+call reportTest("Rectangles drawn without error", true);
+print "";
+
+print "--- Test 2.3: Draw circles (outline and filled) ---";
+var myCanvas4: canvas = call canvas.create(200, 200, "circles");
+call style.setStroke(myCanvas4, "#00FF00", 2.0);
+call draw.circle(myCanvas4, 50, 50, 40, false);
+call style.setFill(myCanvas4, "#FF00FF");
+call draw.circle(myCanvas4, 150, 50, 40, true);
+call reportTest("Circles drawn without error", true);
+print "";
+
+print "--- Test 2.4: Draw ellipses ---";
+var myCanvas5: canvas = call canvas.create(200, 200, "ellipses");
+call style.setStroke(myCanvas5, "#FFFF00", 2.0);
+call draw.ellipse(myCanvas5, 10, 50, 80, 40, false);
+call style.setFill(myCanvas5, "#00FFFF");
+call draw.ellipse(myCanvas5, 110, 50, 80, 40, true);
+call reportTest("Ellipses drawn without error", true);
+print "";
+
+print "--- Test 2.5: Draw arcs ---";
+var myCanvas6: canvas = call canvas.create(200, 200, "arcs");
+call style.setStroke(myCanvas6, "#FF6347", 2.0);
+call draw.arc(myCanvas6, 100, 100, 50, 0, 180, false);
+call style.setFill(myCanvas6, "#4169E1");
+call draw.arc(myCanvas6, 100, 100, 30, 45, 90, true);
+call reportTest("Arcs drawn without error", true);
+print "";
+
+print "--- Test 2.6: Draw polygon ---";
+var myCanvas7: canvas = call canvas.create(200, 200, "polygon");
+var points: int[6];
+points[0] = 100;
+points[1] = 20;
+points[2] = 150;
+points[3] = 80;
+points[4] = 50;
+points[5] = 80;
+call style.setFill(myCanvas7, "#800080");
+call draw.polygon(myCanvas7, points, true);
+call reportTest("Polygon drawn without error", true);
+print "";
+
+// ============================================================================
+// TEST 3: Text Drawing and Font Styling
+// ============================================================================
+print "============================================================";
+print "TEST 3: Text Drawing and Font Styling";
+print "============================================================";
+print "";
+
+print "--- Test 3.1: Draw text with default font ---";
+var myCanvas8: canvas = call canvas.create(300, 100, "text");
+call style.setFill(myCanvas8, "#000000");
+call draw.text(myCanvas8, "Hello Canvas!", 10, 30);
+call reportTest("Text drawn without error", true);
+print "";
+
+print "--- Test 3.2: Draw text with custom font ---";
+call style.setFont(myCanvas8, "Arial", 24.0);
+call style.setFill(myCanvas8, "#FF0000");
+call draw.text(myCanvas8, "Custom Font!", 10, 70);
+call reportTest("Text with custom font drawn without error", true);
+print "";
+
+// ============================================================================
+// TEST 4: Color and Style Operations
+// ============================================================================
+print "============================================================";
+print "TEST 4: Color and Style Operations";
+print "============================================================";
+print "";
+
+print "--- Test 4.1: Set fill colors (hex codes) ---";
+var myCanvas9: canvas = call canvas.create(200, 50, "colors");
+call style.setFill(myCanvas9, "#FF0000");
+call draw.rect(myCanvas9, 10, 10, 30, 30, true);
+call style.setFill(myCanvas9, "#00FF00");
+call draw.rect(myCanvas9, 50, 10, 30, 30, true);
+call style.setFill(myCanvas9, "#0000FF");
+call draw.rect(myCanvas9, 90, 10, 30, 30, true);
+call reportTest("Fill colors with hex codes work", true);
+print "";
+
+print "--- Test 4.2: Set stroke with line width ---";
+var myCanvas10: canvas = call canvas.create(200, 100, "strokes");
+call style.setStroke(myCanvas10, "#000000", 1.0);
+call draw.rect(myCanvas10, 10, 10, 50, 30, false);
+call style.setStroke(myCanvas10, "#FF0000", 5.0);
+call draw.rect(myCanvas10, 70, 10, 50, 30, false);
+call style.setStroke(myCanvas10, "#0000FF", 10.0);
+call draw.rect(myCanvas10, 130, 10, 50, 30, false);
+call reportTest("Stroke with different line widths works", true);
+print "";
+
+print "--- Test 4.3: Set line cap style ---";
+var myCanvas11: canvas = call canvas.create(200, 100, "linecaps");
+call style.setStroke(myCanvas11, "#000000", 10.0);
+call style.setLineCap(myCanvas11, "BUTT");
+call draw.line(myCanvas11, 20, 30, 180, 30);
+call style.setLineCap(myCanvas11, "ROUND");
+call draw.line(myCanvas11, 20, 50, 180, 50);
+call style.setLineCap(myCanvas11, "SQUARE");
+call draw.line(myCanvas11, 20, 70, 180, 70);
+call reportTest("Line cap styles work", true);
+print "";
+
+print "--- Test 4.4: Set line join style ---";
+var myCanvas12: canvas = call canvas.create(200, 150, "linejoins");
+var joinPoints: int[6];
+joinPoints[0] = 50;
+joinPoints[1] = 50;
+joinPoints[2] = 100;
+joinPoints[3] = 20;
+joinPoints[4] = 150;
+joinPoints[5] = 50;
+call style.setStroke(myCanvas12, "#000000", 10.0);
+call style.setLineJoin(myCanvas12, "MITER");
+call draw.polygon(myCanvas12, joinPoints, false);
+call reportTest("Line join styles work", true);
+print "";
+
+// ============================================================================
+// TEST 5: Effects (Shadows and Transparency)
+// ============================================================================
+print "============================================================";
+print "TEST 5: Effects (Shadows and Transparency)";
+print "============================================================";
+print "";
+
+print "--- Test 5.1: Drop shadow effect ---";
+var myCanvas13: canvas = call canvas.create(200, 200, "shadow");
+call effect.setShadow(myCanvas13, 10.0, 5.0, 5.0, "#808080");
+call style.setFill(myCanvas13, "#FF6347");
+call draw.circle(myCanvas13, 100, 100, 50, true);
+call reportTest("Drop shadow effect applied", true);
+print "";
+
+print "--- Test 5.2: Clear shadow effect ---";
+call effect.clearShadow(myCanvas13);
+call style.setFill(myCanvas13, "#4169E1");
+call draw.rect(myCanvas13, 130, 130, 50, 50, true);
+call reportTest("Shadow cleared", true);
+print "";
+
+print "--- Test 5.3: Global alpha (transparency) ---";
+var myCanvas14: canvas = call canvas.create(200, 200, "alpha");
+call style.setFill(myCanvas14, "#FF0000");
+call draw.rect(myCanvas14, 50, 50, 100, 100, true);
+call effect.setGlobalAlpha(myCanvas14, 0.5);
+call style.setFill(myCanvas14, "#0000FF");
+call draw.rect(myCanvas14, 75, 75, 100, 100, true);
+call reportTest("Global alpha applied", true);
+print "";
+
+print "--- Test 5.4: Reset alpha to opaque ---";
+call effect.setGlobalAlpha(myCanvas14, 1.0);
+call style.setFill(myCanvas14, "#00FF00");
+call draw.circle(myCanvas14, 150, 150, 30, true);
+call reportTest("Alpha reset to 1.0", true);
+print "";
+
+// ============================================================================
+// TEST 6: Transformations
+// ============================================================================
+print "============================================================";
+print "TEST 6: Transformations";
+print "============================================================";
+print "";
+
+print "--- Test 6.1: Save and restore transformation state ---";
+var myCanvas15: canvas = call canvas.create(200, 200, "transforms");
+call transform.save(myCanvas15);
+call style.setFill(myCanvas15, "#FF0000");
+call draw.rect(myCanvas15, 50, 50, 50, 50, true);
+call transform.restore(myCanvas15);
+call reportTest("Transform save/restore works", true);
+print "";
+
+print "--- Test 6.2: Translate transformation ---";
+call transform.save(myCanvas15);
+call transform.translate(myCanvas15, 100.0, 100.0);
+call style.setFill(myCanvas15, "#00FF00");
+call draw.rect(myCanvas15, 0, 0, 50, 50, true);
+call transform.restore(myCanvas15);
+call reportTest("Translate transformation works", true);
+print "";
+
+print "--- Test 6.3: Rotate transformation ---";
+call transform.save(myCanvas15);
+call transform.translate(myCanvas15, 100.0, 100.0);
+call transform.rotate(myCanvas15, 45.0);
+call style.setFill(myCanvas15, "#0000FF");
+call draw.rect(myCanvas15, -25, -25, 50, 50, true);
+call transform.restore(myCanvas15);
+call reportTest("Rotate transformation works", true);
+print "";
+
+print "--- Test 6.4: Scale transformation ---";
+call transform.save(myCanvas15);
+call transform.translate(myCanvas15, 100.0, 100.0);
+call transform.scale(myCanvas15, 2.0, 1.0);
+call style.setFill(myCanvas15, "#FF00FF");
+call draw.circle(myCanvas15, 0, 0, 20, true);
+call transform.restore(myCanvas15);
+call reportTest("Scale transformation works", true);
+print "";
+
+// ============================================================================
+// TEST 7: Canvas Operations (Clear, ToImage, Save)
+// ============================================================================
+print "============================================================";
+print "TEST 7: Canvas Operations";
+print "============================================================";
+print "";
+
+print "--- Test 7.1: Clear canvas ---";
+var myCanvas16: canvas = call canvas.create(100, 100, "clear_test");
+call style.setFill(myCanvas16, "#FF0000");
+call draw.rect(myCanvas16, 0, 0, 100, 100, true);
+call canvas.clear(myCanvas16);
+call reportTest("Canvas cleared", true);
+print "";
+
+print "--- Test 7.2: Convert canvas to image ---";
+var myCanvas17: canvas = call canvas.create(100, 100, "to_image");
+call style.setFill(myCanvas17, "#00FF00");
+call draw.circle(myCanvas17, 50, 50, 40, true);
+var img1: image = call canvas.toImage(myCanvas17);
+call reportTest("Canvas converted to image", img1 != null);
+print "";
+
+print "--- Test 7.3: Save canvas to file ---";
+var myCanvas18: canvas = call canvas.create(100, 100, "save_test");
+call style.setFill(myCanvas18, "#FFFFFF");
+call draw.rect(myCanvas18, 0, 0, 100, 100, true);
+call style.setFill(myCanvas18, "#0000FF");
+call draw.circle(myCanvas18, 50, 50, 30, true);
+var saved: bool = call canvas.save(myCanvas18, "test_canvas_output.png");
+call reportTest("Canvas saved to file", saved == true);
+print "";
+
+// ============================================================================
+// TEST 8: Image Drawing on Canvas
+// ============================================================================
+print "============================================================";
+print "TEST 8: Image Drawing on Canvas";
+print "============================================================";
+print "";
+
+print "--- Test 8.1: Create image from canvas and draw it ---";
+var mySrcCanvas: canvas = call canvas.create(50, 50, "src");
+call style.setFill(mySrcCanvas, "#FF6347");
+call draw.circle(mySrcCanvas, 25, 25, 20, true);
+var srcImg: image = call canvas.toImage(mySrcCanvas);
+
+var myDestCanvas: canvas = call canvas.create(200, 200, "dest");
+call style.setFill(myDestCanvas, "#FFFFFF");
+call draw.rect(myDestCanvas, 0, 0, 200, 200, true);
+call draw.image(myDestCanvas, srcImg, 10, 10);
+call reportTest("Image drawn on canvas at original size", true);
+print "";
+
+print "--- Test 8.2: Draw scaled image ---";
+call draw.image(myDestCanvas, srcImg, 70, 10, 100, 100);
+call reportTest("Image drawn scaled up", true);
+print "";
+
+print "--- Test 8.3: Draw image with transformation ---";
+call transform.save(myDestCanvas);
+call transform.translate(myDestCanvas, 150.0, 150.0);
+call transform.rotate(myDestCanvas, 45.0);
+call draw.image(myDestCanvas, srcImg, -25, -25, 50, 50);
+call transform.restore(myDestCanvas);
+call reportTest("Image drawn with rotation", true);
+print "";
+
+// ============================================================================
+// TEST 9: Complex Drawing Scenario
+// ============================================================================
+print "============================================================";
+print "TEST 9: Complex Drawing Scenario";
+print "============================================================";
+print "";
+
+print "--- Test 9.1: Create complex scene ---";
+var myScene: canvas = call canvas.create(400, 300, "complex_scene");
+
+// Background
+call style.setFill(myScene, "#87CEEB");
+call draw.rect(myScene, 0, 0, 400, 300, true);
+
+// Sun with shadow
+call effect.setShadow(myScene, 8.0, 3.0, 3.0, "#FFA500");
+call style.setFill(myScene, "#FFFF00");
+call draw.circle(myScene, 350, 50, 30, true);
+call effect.clearShadow(myScene);
+
+// Ground
+call style.setFill(myScene, "#90EE90");
+call draw.rect(myScene, 0, 200, 400, 100, true);
+
+// House with transformations
+call transform.save(myScene);
+call style.setFill(myScene, "#8B4513");
+call draw.rect(myScene, 100, 150, 100, 80, true);
+
+// Roof (triangle)
+var roofPoints: int[6];
+roofPoints[0] = 150;
+roofPoints[1] = 100;
+roofPoints[2] = 80;
+roofPoints[3] = 150;
+roofPoints[4] = 220;
+roofPoints[5] = 150;
+call style.setFill(myScene, "#A0522D");
+call draw.polygon(myScene, roofPoints, true);
+call transform.restore(myScene);
+
+// Window with transparency
+call effect.setGlobalAlpha(myScene, 0.7);
+call style.setFill(myScene, "#ADD8E6");
+call draw.rect(myScene, 130, 170, 40, 40, true);
+call effect.setGlobalAlpha(myScene, 1.0);
+
+// Text
+call style.setFill(myScene, "#000000");
+call style.setFont(myScene, "Arial", 20.0);
+call draw.text(myScene, "My House", 140, 260);
+
+var sceneSaved: bool = call canvas.save(myScene, "test_complex_scene.png");
+call reportTest("Complex scene created and saved", sceneSaved == true);
+print "";
+
+// ============================================================================
+// TEST SUMMARY
+// ============================================================================
+print "";
+print "====================================================================";
+print "                      TEST SUMMARY";
+print "====================================================================";
+print "Tests Passed: " + call str.tostring(testsPassed);
+print "Tests Failed: " + call str.tostring(testsFailed);
+var totalTests: int = testsPassed + testsFailed;
+print "Total Tests:  " + call str.tostring(totalTests);
+
+if testsFailed == 0 then {
+    print "";
+    print "*** ALL TESTS PASSED! ***";
+    print "";
+} else {
+    print "";
+    print "*** SOME TESTS FAILED ***";
+    print "";
+}
+print "====================================================================";
+
+// ============================================================================
+// VISUAL DISPLAY: Show Canvas on Screen
+// ============================================================================
+print "";
+print "====================================================================";
+print "                   CANVAS DISPLAY DEMO";
+print "====================================================================";
+print "";
+
+print "Creating display screen with canvas image...";
+
+// Convert the complex scene canvas to an image for display
+var sceneImage: image = call canvas.toImage(myScene);
+
+// Create a screen to display the canvas
+screen canvasDisplayScreen = {
+    "title": "Canvas Drawing Test - Visual Display",
+    "width": 500,
+    "height": 600,
+    "vars": [
+        {
+            "name": "titleLabel",
+            "type": "string",
+            "default": "Canvas Drawing Test Results",
+            "display": {
+                "type": "label",
+                "labelText": "Canvas Drawing Test Results",
+                "seq": 1
+            }
+        },
+        {
+            "name": "descLabel",
+            "type": "string",
+            "default": "The image below shows a complex scene drawn using canvas builtins",
+            "display": {
+                "type": "label",
+                "labelText": "The image below shows a complex scene drawn using canvas builtins",
+                "seq": 2
+            }
+        },
+        {
+            "name": "canvasDisplay",
+            "type": "canvas",
+            "display": {
+                "type": "canvasview",
+                "labelText": "Complex Scene (House with Sun and Ground):",
+                "fitWidth": 400,
+                "fitHeight": 300,
+                "seq": 3
+            }
+        },
+        {
+            "name": "separator1",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "separator",
+                "seq": 4
+            }
+        },
+        {
+            "name": "statsLabel",
+            "type": "string",
+            "default": "Test Statistics",
+            "display": {
+                "type": "label",
+                "labelText": "Test Statistics:",
+                "seq": 5
+            }
+        },
+        {
+            "name": "passedLabel",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "label",
+                "labelText": "",
+                "seq": 6
+            }
+        },
+        {
+            "name": "failedLabel",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "label",
+                "labelText": "",
+                "seq": 7
+            }
+        },
+        {
+            "name": "closeButton",
+            "type": "string",
+            "default": "Close",
+            "display": {
+                "type": "button",
+                "labelText": "Close Window",
+                "seq": 8,
+                "onClick": "close screen;"
+            }
+        }
+    ]
+};
+
+// Set the canvas directly to the screen (no conversion to image needed!)
+canvasDisplayScreen.canvasDisplay = myScene;
+
+// Set the test statistics labels
+var passedText: string = "Tests Passed: " + call str.tostring(testsPassed);
+var failedText: string = "Tests Failed: " + call str.tostring(testsFailed);
+canvasDisplayScreen.passedLabel = passedText;
+canvasDisplayScreen.failedLabel = failedText;
+
+// Show the screen
+print "Displaying canvas on screen...";
+print "Close the window to continue...";
+show screen canvasDisplayScreen;
+
+print "";
+print "Screen closed.";
+print "====================================================================";
