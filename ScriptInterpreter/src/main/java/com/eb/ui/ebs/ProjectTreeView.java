@@ -97,6 +97,7 @@ public class ProjectTreeView extends VBox {
             TreeItem<String> selectedItem = treeView.getSelectionModel().getSelectedItem();
             
             ContextMenu contextMenu = new ContextMenu();
+            contextMenu.setAutoHide(true); // Enable auto-hide when clicking outside
             currentContextMenu = contextMenu;
             
             if (selectedItem == rootItem || selectedItem == null) {
@@ -133,6 +134,13 @@ public class ProjectTreeView extends VBox {
             }
             
             contextMenu.show(treeView, event.getScreenX(), event.getScreenY());
+        });
+        
+        // Add mouse click handler to hide menu when clicking elsewhere
+        treeView.setOnMousePressed(event -> {
+            if (event.getButton() == MouseButton.PRIMARY && currentContextMenu != null && currentContextMenu.isShowing()) {
+                currentContextMenu.hide();
+            }
         });
     }
     
