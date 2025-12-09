@@ -430,7 +430,7 @@ public class ProjectTreeView extends VBox {
     
     /**
      * Load files from project directory and add them as children to the project tree item.
-     * Now scans the entire project directory recursively.
+     * Scans the entire project directory recursively and also loads directories from project.json.
      * 
      * @param projectItem The project tree item to add files to
      * @param projectJsonPath Path to the project.json file
@@ -447,8 +447,9 @@ public class ProjectTreeView extends VBox {
                 return;
             }
             
-            // Get mainScript from project.json for ordering
+            // Get mainScript and directories from project.json
             String mainScript = null;
+            java.util.List<String> extraDirectories = new java.util.ArrayList<>();
             try {
                 String jsonContent = Files.readString(jsonPath);
                 Object projectObj = com.eb.script.json.Json.parse(jsonContent);
@@ -456,17 +457,55 @@ public class ProjectTreeView extends VBox {
                 if (projectObj instanceof Map) {
                     @SuppressWarnings("unchecked")
                     Map<String, Object> project = (Map<String, Object>) projectObj;
+                    
+                    // Get mainScript
                     Object mainScriptObj = project.get("mainScript");
                     mainScript = mainScriptObj instanceof String ? (String) mainScriptObj : null;
+                    
+                    // Get directories array
+                    Object dirsObj = project.get("directories");
+                    if (dirsObj instanceof com.eb.script.arrays.ArrayDynamic) {
+                        com.eb.script.arrays.ArrayDynamic arrayDynamic = (com.eb.script.arrays.ArrayDynamic) dirsObj;
+                        for (int i = 0; i < arrayDynamic.size(); i++) {
+                            Object item = arrayDynamic.get(i);
+                            if (item instanceof String) {
+                                extraDirectories.add((String) item);
+                            }
+                        }
+                    } else if (dirsObj instanceof java.util.List) {
+                        @SuppressWarnings("unchecked")
+                        java.util.List<Object> list = (java.util.List<Object>) dirsObj;
+                        for (Object item : list) {
+                            if (item instanceof String) {
+                                extraDirectories.add((String) item);
+                            }
+                        }
+                    }
                 }
             } catch (Exception e) {
-                System.err.println("Error reading mainScript from project.json: " + e.getMessage());
+                System.err.println("Error reading project.json: " + e.getMessage());
             }
             
             // Load all files and directories from project directory
             java.util.List<Path> paths = new java.util.ArrayList<>();
+            java.util.Set<String> addedPaths = new java.util.HashSet<>();
+            
             try (var stream = Files.list(projectDir)) {
-                stream.forEach(paths::add);
+                stream.forEach(p -> {
+                    paths.add(p);
+                    addedPaths.add(p.toString());
+                });
+            }
+            
+            // Add directories from project.json that aren't already in the list
+            for (String dirPath : extraDirectories) {
+                Path dir = projectDir.resolve(dirPath);
+                String normalizedPath = dir.normalize().toString();
+                
+                if (!addedPaths.contains(normalizedPath)) {
+                    paths.add(dir);
+                    addedPaths.add(normalizedPath);
+                }
             }
             
             // Sort: mainScript first, then directories, then files, alphabetically
