@@ -454,6 +454,7 @@ getHelpContent(topic: string) return string {
     var content: string = "";
     
     // Check if this is a builtin function name (contains a dot like "str.trim")
+    // Using > 0 because valid builtin names have at least one char before the dot (e.g., "str.trim")
     var dotIndex: int = call str.indexOf(topic, ".", 0);
     if dotIndex > 0 then {
         // This is a builtin function
@@ -461,43 +462,35 @@ getHelpContent(topic: string) return string {
     }
     
     // Check if this topic matches a category display name
-    if helpData != null && builtinCategoryNames != null then {
+    if builtinCategoryNames != null && builtinCategoryOrder != null then {
         // Iterate through category names to find a match
-        var topics: json = call json.get(helpData, "topics");
-        if topics != null then {
-            var categoryNames: json = call json.get(topics, "builtin_categories");
-            var categoryOrder: json = call json.get(topics, "builtin_category_order");
-            
-            if categoryNames != null && categoryOrder != null then {
-                foreach categoryKey in categoryOrder {
-                    var displayName: string = call json.getString(categoryNames, categoryKey, "");
-                    if displayName == topic then {
-                        // Found matching category - show overview
-                        var categoryArray: json = call json.get(builtinsByCategory, categoryKey);
-                        var funcCount: int = 0;
-                        if categoryArray != null then {
-                            funcCount = categoryArray.length;
-                        }
-                        
-                        content = "═══════════════════════════════════════════════════════\n";
-                        content = content + "  " + displayName + "\n";
-                        content = content + "═══════════════════════════════════════════════════════\n\n";
-                        content = content + "This category contains " + call str.toString(funcCount) + " functions.\n\n";
-                        content = content + "Select a function from the tree to view its documentation.\n\n";
-                        
-                        // List functions in this category
-                        if categoryArray != null then {
-                            content = content + "▸ FUNCTIONS IN THIS CATEGORY\n";
-                            content = content + "───────────────────────────────────────────────────────\n";
-                            foreach funcNode in categoryArray {
-                                var funcValue: string = call json.getString(funcNode, "value", "");
-                                content = content + "  • " + funcValue + "\n";
-                            }
-                        }
-                        
-                        return content;
+        foreach categoryKey in builtinCategoryOrder {
+            var displayName: string = call json.getString(builtinCategoryNames, categoryKey, "");
+            if displayName == topic then {
+                // Found matching category - show overview
+                var categoryArray: json = call json.get(builtinsByCategory, categoryKey);
+                var funcCount: int = 0;
+                if categoryArray != null then {
+                    funcCount = categoryArray.length;
+                }
+                
+                content = "═══════════════════════════════════════════════════════\n";
+                content = content + "  " + displayName + "\n";
+                content = content + "═══════════════════════════════════════════════════════\n\n";
+                content = content + "This category contains " + call str.toString(funcCount) + " functions.\n\n";
+                content = content + "Select a function from the tree to view its documentation.\n\n";
+                
+                // List functions in this category
+                if categoryArray != null then {
+                    content = content + "▸ FUNCTIONS IN THIS CATEGORY\n";
+                    content = content + "───────────────────────────────────────────────────────\n";
+                    foreach funcNode in categoryArray {
+                        var funcValue: string = call json.getString(funcNode, "value", "");
+                        content = content + "  • " + funcValue + "\n";
                     }
                 }
+                
+                return content;
             }
         }
     }
