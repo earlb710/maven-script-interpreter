@@ -173,16 +173,18 @@ getPawnMoves(x: int, y: int, color: int) {
         }
     }
     
+    // Calculate enemy color once
+    var enemyColor: int;
+    if color == WHITE then {
+        enemyColor = BLACK;
+    } else {
+        enemyColor = WHITE;
+    }
+    
     // Capture left diagonal
     var captureLeftX: int = x - 1;
     var captureLeftY: int = y + direction;
     if call isValidPosition(captureLeftX, captureLeftY) then {
-        var enemyColor: int;
-        if color == WHITE then {
-            enemyColor = BLACK;
-        } else {
-            enemyColor = WHITE;
-        }
         if call isOccupiedByColor(captureLeftX, captureLeftY, enemyColor) then {
             var captureLeft: posType = call createPos(captureLeftX, captureLeftY);
             call array.add(moves, captureLeft);
@@ -193,12 +195,6 @@ getPawnMoves(x: int, y: int, color: int) {
     var captureRightX: int = x + 1;
     var captureRightY: int = y + direction;
     if call isValidPosition(captureRightX, captureRightY) then {
-        var enemyColor: int;
-        if color == WHITE then {
-            enemyColor = BLACK;
-        } else {
-            enemyColor = WHITE;
-        }
         if call isOccupiedByColor(captureRightX, captureRightY, enemyColor) then {
             var captureRight: posType = call createPos(captureRightX, captureRightY);
             call array.add(moves, captureRight);
