@@ -44,15 +44,23 @@ public class EbsMenu extends MenuBar {
         // --- Open file… ---
         MenuItem openItem = new MenuItem("Open file…");
         openItem.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_DOWN));
-        openItem.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent t) {
-                throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-            }
-        });
         openItem.setOnAction(event -> {
             handler.chooseOpenFile();
             refreshRecentMenu();
+        });
+        
+        // --- New Project ---
+        MenuItem newProjectItem = new MenuItem("New Project…");
+        newProjectItem.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.CONTROL_DOWN, KeyCombination.SHIFT_DOWN));
+        newProjectItem.setOnAction(event -> {
+            handler.createNewProject();
+        });
+        
+        // --- Open Project ---
+        MenuItem openProjectItem = new MenuItem("Open Project…");
+        openProjectItem.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_DOWN, KeyCombination.SHIFT_DOWN));
+        openProjectItem.setOnAction(event -> {
+            handler.openProject();
         });
 
         // --- Recent files submenu ---
@@ -103,7 +111,7 @@ public class EbsMenu extends MenuBar {
             }
         });
 
-        fileMenu.getItems().addAll(newItem, openItem, recentMenu, new SeparatorMenuItem(), exitItem);
+        fileMenu.getItems().addAll(newItem, openItem, new SeparatorMenuItem(), newProjectItem, openProjectItem, new SeparatorMenuItem(), recentMenu, new SeparatorMenuItem(), exitItem);
         getMenus().add(fileMenu);
 
         // --- Edit Menu ---
