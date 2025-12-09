@@ -111,17 +111,12 @@ public class ProjectListManager {
             String jsonContent = Files.readString(projectsPath);
             System.out.println("File content: " + jsonContent.substring(0, Math.min(200, jsonContent.length())) + "...");
             
-            System.out.println("DEBUG: About to parse JSON...");
             Object parsed = Json.parse(jsonContent);
-            System.out.println("DEBUG: Parsed object type: " + (parsed == null ? "null" : parsed.getClass().getName()));
             
             if (parsed instanceof Map) {
-                System.out.println("DEBUG: Parsed is a Map, getting 'projects' key...");
                 @SuppressWarnings("unchecked")
                 Map<String, Object> projectsMap = (Map<String, Object>) parsed;
-                System.out.println("DEBUG: Map keys: " + projectsMap.keySet());
                 Object projectsArray = projectsMap.get("projects");
-                System.out.println("DEBUG: projectsArray type: " + (projectsArray == null ? "null" : projectsArray.getClass().getName()));
                 
                 // Handle ArrayDynamic (used by EBS JSON parser) or standard List
                 List<Object> projectsList = null;
@@ -129,8 +124,6 @@ public class ProjectListManager {
                 if (projectsArray instanceof com.eb.script.arrays.ArrayDynamic) {
                     // EBS JSON parser returns ArrayDynamic
                     com.eb.script.arrays.ArrayDynamic arrayDynamic = (com.eb.script.arrays.ArrayDynamic) projectsArray;
-                    System.out.println("DEBUG: projectsArray is ArrayDynamic!");
-                    System.out.println("DEBUG: ArrayDynamic size: " + arrayDynamic.size());
                     
                     // Convert ArrayDynamic to List for processing
                     projectsList = new ArrayList<>();
@@ -138,25 +131,18 @@ public class ProjectListManager {
                         projectsList.add(arrayDynamic.get(i));
                     }
                 } else if (projectsArray instanceof List) {
-                    System.out.println("DEBUG: projectsArray is a List!");
                     @SuppressWarnings("unchecked")
                     List<Object> list = (List<Object>) projectsArray;
                     projectsList = list;
                 }
                 
                 if (projectsList != null) {
-                    System.out.println("DEBUG: projectsList size: " + projectsList.size());
-                    
                     if (projectsList.isEmpty()) {
                         System.out.println("No projects found in " + PROJECTS_FILE + ". Use File → New Project or File → Open Project to add projects.");
-                    } else {
-                        System.out.println("Processing " + projectsList.size() + " project entries from JSON...");
                     }
                     
-                    int index = 0;
                     for (Object projectObj : projectsList) {
                         try {
-                            System.out.println("  Entry " + index + ": " + projectObj);
                             String path = null;
                             
                             // Support both old format (with name) and new format (path only)
@@ -175,7 +161,6 @@ public class ProjectListManager {
                                 String name = readProjectNameFromFile(path);
                                 if (name != null) {
                                     projects.add(new ProjectEntry(name, path));
-                                    System.out.println("  Successfully added project: " + name);
                                 } else {
                                     System.err.println("  Failed to read project name from: " + path);
                                 }
@@ -183,17 +168,15 @@ public class ProjectListManager {
                                 System.err.println("  No path found in project entry");
                             }
                         } catch (Exception e) {
-                            System.err.println("  ERROR processing project entry " + index + ": " + e.getMessage());
+                            System.err.println("ERROR processing project entry: " + e.getMessage());
                             e.printStackTrace();
                         }
-                        index++;
                     }
-                    System.out.println("Loaded " + projects.size() + " projects from " + PROJECTS_FILE);
-                } else {
-                    System.err.println("DEBUG: projectsArray is neither List nor ArrayDynamic! It's: " + (projectsArray == null ? "null" : projectsArray.getClass().getName()));
+                    
+                    if (projects.size() > 0) {
+                        System.out.println("Loaded " + projects.size() + " projects from " + PROJECTS_FILE);
+                    }
                 }
-            } else {
-                System.err.println("DEBUG: Parsed is NOT a Map! It's: " + (parsed == null ? "null" : parsed.getClass().getName()));
             }
         } catch (IOException e) {
             System.err.println("Error reading " + PROJECTS_FILE + ": " + e.getMessage());

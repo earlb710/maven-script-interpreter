@@ -212,16 +212,14 @@ public class ProjectTreeView extends VBox {
         rootItem.getChildren().clear();
         
         List<ProjectListManager.ProjectEntry> entries = projectListManager.getProjects();
-        System.out.println("RefreshTreeView: Found " + entries.size() + " projects to display");
         
         for (ProjectListManager.ProjectEntry entry : entries) {
-            System.out.println("  Adding project to tree: " + entry.getName() + " at " + entry.getPath());
             TreeItem<String> projectItem = new TreeItem<>(entry.getName());
             
-            // Store full path in a label's user data (workaround for storing path)
-            Label label = new Label();
-            label.setUserData(entry.getPath());
-            projectItem.setGraphic(label);
+            // Add folder icon using Unicode emoji
+            Label iconLabel = new Label("\uD83D\uDCC1"); // 📁 folder emoji
+            iconLabel.setUserData(entry.getPath());
+            projectItem.setGraphic(iconLabel);
             
             // Set tooltip with full path
             Tooltip tooltip = new Tooltip(entry.getPath());
@@ -229,7 +227,5 @@ public class ProjectTreeView extends VBox {
             
             rootItem.getChildren().add(projectItem);
         }
-        
-        System.out.println("RefreshTreeView: Tree now has " + rootItem.getChildren().size() + " child items");
     }
 }
