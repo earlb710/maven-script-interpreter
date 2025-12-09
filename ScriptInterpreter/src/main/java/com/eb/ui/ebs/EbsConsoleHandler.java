@@ -1204,4 +1204,133 @@ public class EbsConsoleHandler extends EbsHandler {
         }
         return result.toString();
     }
+    
+    /**
+     * Create a new file in a project.
+     * Shows a dialog asking for file type, name, and path.
+     * 
+     * @param projectPath The path to the project directory (used as default path)
+     */
+    public void createNewFile(String projectPath) {
+        try {
+            // Show new file dialog
+            NewFileDialog dialog = new NewFileDialog(stage, projectPath);
+            var result = dialog.showAndWait();
+            
+            if (result.isEmpty()) {
+                return; // User cancelled
+            }
+            
+            NewFileDialog.FileInfo fileInfo = result.get();
+            String fullPath = fileInfo.getFullPath();
+            Path filePath = Path.of(fullPath);
+            
+            // Create directory if it doesn't exist
+            Path parentDir = filePath.getParent();
+            if (parentDir != null && !Files.exists(parentDir)) {
+                Files.createDirectories(parentDir);
+            }
+            
+            // Check if file already exists
+            if (Files.exists(filePath)) {
+                Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                        "File already exists:\n" + fullPath + "\n\nOverwrite it?",
+                        ButtonType.OK, ButtonType.CANCEL);
+                confirm.setHeaderText("File Already Exists");
+                confirm.initOwner(stage);
+                confirm.initModality(Modality.APPLICATION_MODAL);
+                var res = confirm.showAndWait();
+                if (res.isEmpty() || res.get() == ButtonType.CANCEL) {
+                    return;
+                }
+            }
+            
+            // Create file with appropriate default content based on type
+            String defaultContent = getDefaultContentForFileType(fileInfo.getType());
+            Files.writeString(filePath, defaultContent, StandardCharsets.UTF_8);
+            
+            // Open the file in a tab using the same approach as /open command
+            Path p = Util.resolveSandboxedPath(fullPath);
+            String handle = (String) Builtins.callBuiltin(env, "file.open", fullPath, "rw");
+            FileContext ofile = new FileContext(handle, p, "rw");
+            tabHandler.showTab(new TabContext(p.getFileName().toString(), p, ofile), true);
+            
+            ScriptArea output = env.getOutputArea();
+            output.printlnOk("File created: " + fullPath);
+            
+        } catch (Exception ex) {
+            submitErrors("Failed to create new file: " + ex.getMessage());
+        }
+    }
+    
+    /**
+     * Add an existing file to the project by opening it in a tab.
+     * Shows a file chooser dialog.
+     * 
+     * @param projectPath The path to the project directory (used as initial directory)
+     */
+    public void addExistingFile(String projectPath) {
+        try {
+            FileChooser fc = new FileChooser();
+            fc.setTitle("Add Existing File");
+            
+            // Set initial directory to project path
+            File initialDir = new File(projectPath);
+            if (initialDir.exists() && initialDir.isDirectory()) {
+                fc.setInitialDirectory(initialDir);
+            } else {
+                fc.setInitialDirectory(Util.SANDBOX_ROOT.toFile());
+            }
+            
+            // Add file type filters
+            fc.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("EBS Scripts", "*.ebs"),
+                new FileChooser.ExtensionFilter("JSON Files", "*.json"),
+                new FileChooser.ExtensionFilter("CSS Files", "*.css"),
+                new FileChooser.ExtensionFilter("Markdown Files", "*.md"),
+                new FileChooser.ExtensionFilter("All Files", "*.*")
+            );
+            
+            File selectedFile = fc.showOpenDialog(stage);
+            if (selectedFile == null) {
+                return; // User cancelled
+            }
+            
+            Path filePath = selectedFile.toPath();
+            String fullPath = filePath.toString();
+            
+            // Add to MRU
+            addRecentFile(filePath);
+            
+            // Open the file in a tab using the same approach as /open command
+            Path p = Util.resolveSandboxedPath(fullPath);
+            String handle = (String) Builtins.callBuiltin(env, "file.open", fullPath, "rw");
+            FileContext ofile = new FileContext(handle, p, "rw");
+            tabHandler.showTab(new TabContext(p.getFileName().toString(), p, ofile), true);
+            
+            ScriptArea output = env.getOutputArea();
+            output.printlnOk("File opened: " + fullPath);
+            
+        } catch (Exception ex) {
+            submitErrors("Failed to add file: " + ex.getMessage());
+        }
+    }
+    
+    /**
+     * Get default content for a file based on its type.
+     */
+    private String getDefaultContentForFileType(NewFileDialog.FileType fileType) {
+        switch (fileType) {
+            case EBS_SCRIPT:
+                return "// EBS Script\n// Type your code here\n\n";
+            case JSON:
+                return "{\n  \n}\n";
+            case CSS:
+                return "/* CSS Styles */\n\n";
+            case MARKDOWN:
+                return "# Markdown Document\n\n";
+            default:
+                return "";
+        }
+    }
 }

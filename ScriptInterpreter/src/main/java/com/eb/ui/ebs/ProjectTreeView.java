@@ -127,10 +127,38 @@ public class ProjectTreeView extends VBox {
                 }
             } else {
                 // Context menu for individual project node
+                // Get the project path from user data
+                Object userData = selectedItem.getGraphic() != null ? selectedItem.getGraphic().getUserData() : null;
+                String projectPath = userData instanceof String ? (String) userData : null;
+                
+                // Extract project directory from project.json path
+                String projectDir = projectPath;
+                if (projectPath != null && projectPath.endsWith("project.json")) {
+                    Path jsonPath = Path.of(projectPath);
+                    if (jsonPath.getParent() != null) {
+                        projectDir = jsonPath.getParent().toString();
+                    }
+                }
+                
+                MenuItem newFileItem = new MenuItem("New File...");
+                final String finalProjectDir = projectDir;
+                newFileItem.setOnAction(e -> {
+                    if (finalProjectDir != null) {
+                        handler.createNewFile(finalProjectDir);
+                    }
+                });
+                
+                MenuItem addFileItem = new MenuItem("Add File...");
+                addFileItem.setOnAction(e -> {
+                    if (finalProjectDir != null) {
+                        handler.addExistingFile(finalProjectDir);
+                    }
+                });
+                
                 MenuItem removeItem = new MenuItem("Remove from List");
                 removeItem.setOnAction(e -> removeSelectedProject(selectedItem));
                 
-                contextMenu.getItems().add(removeItem);
+                contextMenu.getItems().addAll(newFileItem, addFileItem, new SeparatorMenuItem(), removeItem);
             }
             
             contextMenu.show(treeView, event.getScreenX(), event.getScreenY());
