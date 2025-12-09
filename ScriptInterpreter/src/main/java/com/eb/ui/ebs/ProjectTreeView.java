@@ -444,7 +444,7 @@ public class ProjectTreeView extends VBox {
     }
     
     /**
-     * Open the selected project.
+     * Open the selected project (show project properties dialog).
      */
     private void openSelectedProject(TreeItem<String> item) {
         String projectPath = (String) item.getValue();
@@ -458,7 +458,8 @@ public class ProjectTreeView extends VBox {
             try {
                 Path path = Paths.get(projectPath);
                 if (Files.exists(path)) {
-                    handler.openProjectByPath(path);
+                    // Show project properties dialog
+                    showProjectPropertiesDialog(item, path);
                 } else {
                     Alert alert = new Alert(Alert.AlertType.WARNING,
                             "Project file not found:\n" + projectPath + "\n\nRemove it from the list?",
@@ -475,6 +476,96 @@ public class ProjectTreeView extends VBox {
                 alert.setHeaderText("Error");
                 alert.showAndWait();
             }
+        }
+    }
+    
+    /**
+     * Show project properties dialog and update project.json if changes are made.
+     * 
+     * @param projectItem The project tree item
+     * @param projectJsonPath Path to the project.json file
+     */
+    private void showProjectPropertiesDialog(TreeItem<String> projectItem, Path projectJsonPath) {
+        try {
+            // Read current project.json
+            String jsonContent = Files.readString(projectJsonPath);
+            Object projectObj = com.eb.script.json.Json.parse(jsonContent);
+            
+            if (!(projectObj instanceof Map)) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid project.json format.");
+                alert.showAndWait();
+                return;
+            }
+            
+            @SuppressWarnings("unchecked")
+            Map<String, Object> projectData = (Map<String, Object>) projectObj;
+            
+            // Show dialog
+            ProjectPropertiesDialog dialog = new ProjectPropertiesDialog(
+                getScene().getWindow(), 
+                projectJsonPath, 
+                projectData
+            );
+            
+            var result = dialog.showAndWait();
+            if (result.isPresent()) {
+                ProjectPropertiesDialog.ProjectProperties props = result.get();
+                
+                // Update project.json
+                projectData.put("name", props.getName());
+                
+                // Only set non-empty values
+                if (!props.getMainScript().isEmpty()) {
+                    projectData.put("mainScript", props.getMainScript());
+                } else {
+                    projectData.remove("mainScript");
+                }
+                
+                if (!props.getCssFile().isEmpty()) {
+                    projectData.put("cssFile", props.getCssFile());
+                } else {
+                    projectData.remove("cssFile");
+                }
+                
+                if (!props.getResourceDir().isEmpty()) {
+                    projectData.put("resourceDir", props.getResourceDir());
+                } else {
+                    projectData.remove("resourceDir");
+                }
+                
+                if (!props.getTestDir().isEmpty()) {
+                    projectData.put("testDir", props.getTestDir());
+                } else {
+                    projectData.remove("testDir");
+                }
+                
+                if (!props.getTempDir().isEmpty()) {
+                    projectData.put("tempDir", props.getTempDir());
+                } else {
+                    projectData.remove("tempDir");
+                }
+                
+                // Write updated project.json
+                String updatedJson = com.eb.script.json.Json.prettyJson(projectData);
+                Files.writeString(projectJsonPath, updatedJson);
+                
+                // Refresh the project in the tree
+                projectItem.getChildren().clear();
+                loadProjectFiles(projectItem, projectJsonPath.toString());
+                
+                // Update project display name if version exists
+                String displayName = getProjectDisplayName(projectJsonPath.toString(), props.getName());
+                projectItem.setValue(displayName);
+                
+                System.out.println("Project properties updated: " + projectJsonPath);
+            }
+            
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, 
+                "Failed to update project properties: " + e.getMessage());
+            alert.setHeaderText("Error");
+            alert.showAndWait();
+            e.printStackTrace();
         }
     }
     
