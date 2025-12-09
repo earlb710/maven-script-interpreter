@@ -45,6 +45,7 @@ public class ProjectTreeView extends VBox {
         // Create tree view
         treeView = new TreeView<>(rootItem);
         treeView.setShowRoot(true);
+        treeView.getStyleClass().add("project-tree");
         VBox.setVgrow(treeView, Priority.ALWAYS);
         
         // Setup double-click to open project or file
@@ -77,9 +78,10 @@ public class ProjectTreeView extends VBox {
         
         // Add components
         Label titleLabel = new Label("Projects");
-        titleLabel.setStyle("-fx-font-weight: bold; -fx-padding: 5;");
+        titleLabel.getStyleClass().add("project-tree-title");
         
         getChildren().addAll(titleLabel, treeView);
+        getStyleClass().add("project-tree-panel");
         setPadding(new Insets(5));
         setSpacing(5);
         
@@ -607,9 +609,9 @@ public class ProjectTreeView extends VBox {
         // Store path in user data
         label.setUserData(path);
         
-        // Set red text if doesn't exist
+        // Set red text if doesn't exist - use CSS class
         if (!exists) {
-            label.setTextFill(Color.RED);
+            label.getStyleClass().add("project-tree-error");
         }
         
         return label;

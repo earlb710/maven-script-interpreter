@@ -374,3 +374,110 @@
     -fx-text-overrun: leading-ellipsis; /* Truncate long paths with ellipsis at start */
 }
 
+/* ===== Project Tree View styling ===== */
+/* Panel background - the outer VBox container */
+.project-tree-panel {
+    -fx-background-color: #e8e8e8;
+    -fx-padding: 5;
+    -fx-spacing: 5;
+}
+
+/* Project tree title label */
+.project-tree-title {
+    -fx-font-weight: bold;
+    -fx-padding: 5;
+    -fx-text-fill: #1a1a1a;
+}
+
+/* Tree view background */
+.project-tree {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #c0c0c0;
+    -fx-border-width: 1;
+}
+
+/* Tree cell styling */
+.project-tree .tree-cell {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #1a1a1a;
+    -fx-padding: 2 4 2 4;
+}
+
+/* Tree cell hover state */
+.project-tree .tree-cell:hover {
+    -fx-background-color: #e6f3ff;
+}
+
+/* Tree cell selected state */
+.project-tree .tree-cell:selected {
+    -fx-background-color: #0078d7;
+    -fx-text-fill: #ffffff;
+}
+
+/* Tree cell selected and focused */
+.project-tree .tree-cell:selected:focused {
+    -fx-background-color: #0078d7;
+    -fx-text-fill: #ffffff;
+}
+
+/* Error text color for missing files (with ! prefix) */
+.project-tree-error {
+    -fx-text-fill: #d13438;
+}
+
+/* Selected error items should still use selection text color */
+.project-tree .tree-cell:selected .project-tree-error {
+    -fx-text-fill: #ffffff;
+}
+
+/* Tree disclosure node (expand/collapse arrows) */
+.project-tree .tree-disclosure-node {
+    -fx-background-color: transparent;
+}
+
+.project-tree .tree-disclosure-node .arrow {
+    -fx-background-color: #1a1a1a;
+}
+
+/* Scrollbar styling for project tree */
+.project-tree .scroll-bar:vertical {
+    -fx-background-color: #f0f0f0;
+}
+
+.project-tree .scroll-bar:vertical .thumb {
+    -fx-background-color: #c0c0c0;
+    -fx-background-radius: 4;
+}
+
+.project-tree .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #a0a0a0;
+}
+
+.project-tree .scroll-bar:vertical .track {
+    -fx-background-color: #f0f0f0;
+}
+
+.project-tree .scroll-bar:horizontal {
+    -fx-background-color: #f0f0f0;
+}
+
+.project-tree .scroll-bar:horizontal .thumb {
+    -fx-background-color: #c0c0c0;
+    -fx-background-radius: 4;
+}
+
+.project-tree .scroll-bar:horizontal .thumb:hover {
+    -fx-background-color: #a0a0a0;
+}
+
+.project-tree .scroll-bar:horizontal .track {
+    -fx-background-color: #f0f0f0;
+}
+
+/* Remove focus border */
+.project-tree:focused {
+    -fx-background-color: #ffffff;
+    -fx-background-insets: 0;
+    -fx-border-color: #0078d7;
+}
+
