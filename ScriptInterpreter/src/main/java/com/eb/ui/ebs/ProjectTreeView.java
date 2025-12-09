@@ -23,6 +23,7 @@ public class ProjectTreeView extends VBox {
     private final TreeItem<String> rootItem;
     private final ProjectListManager projectListManager;
     private final EbsConsoleHandler handler;
+    private ContextMenu currentContextMenu;
     
     /**
      * Create a new ProjectTreeView.
@@ -88,9 +89,15 @@ public class ProjectTreeView extends VBox {
     private void setupContextMenu() {
         // Use a dynamic context menu that changes based on what's selected
         treeView.setOnContextMenuRequested(event -> {
+            // Hide any existing context menu
+            if (currentContextMenu != null && currentContextMenu.isShowing()) {
+                currentContextMenu.hide();
+            }
+            
             TreeItem<String> selectedItem = treeView.getSelectionModel().getSelectedItem();
             
             ContextMenu contextMenu = new ContextMenu();
+            currentContextMenu = contextMenu;
             
             if (selectedItem == rootItem || selectedItem == null) {
                 // Context menu for root "Projects" node
