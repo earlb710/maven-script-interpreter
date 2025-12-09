@@ -110,11 +110,13 @@ if builtinsArray != null then {
             }
             
             // Get or create category array (use map to store EBS arrays, not JSON)
-            var categoryArray: array[*];
             // Check if category exists in map
             var existingArray: array[*] = builtinsByCategory[category];
+            var categoryArray: array[*];
             if existingArray != null then {
                 categoryArray = existingArray;
+            } else {
+                categoryArray = [];
             }
             
             // Add builtin to category
