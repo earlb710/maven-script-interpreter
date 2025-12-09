@@ -542,13 +542,13 @@ screen canvasDisplayScreen = {
 };
 
 // Set the canvas image to the screen
-call screen.setvar(canvasDisplayScreen, "canvasDisplay", sceneImage);
+canvasDisplayScreen.canvasDisplay = sceneImage;
 
 // Set the test statistics labels
 var passedText: string = "Tests Passed: " + call str.tostring(testsPassed);
 var failedText: string = "Tests Failed: " + call str.tostring(testsFailed);
-call screen.setvar(canvasDisplayScreen, "passedLabel", passedText);
-call screen.setvar(canvasDisplayScreen, "failedLabel", failedText);
+canvasDisplayScreen.passedLabel = passedText;
+canvasDisplayScreen.failedLabel = failedText;
 
 // Show the screen
 print "Displaying canvas on screen...";
