@@ -1,5 +1,6 @@
-// Example script demonstrating JavaFX canvas drawing functions
-// Basic shapes and colors
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: canvas.create, draw.*, style.* - Drawing basic shapes and colors on canvas
+// Demonstrates: Canvas creation, shape drawing (rect, circle, ellipse, arc, polygon), styling, text, and saving
 
 print "Creating canvas...";
 var myCanvas: canvas = call canvas.create(400, 400, "basic_shapes");

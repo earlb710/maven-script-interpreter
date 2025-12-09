@@ -1,5 +1,6 @@
-// Simple canvas drawing test script
-// This tests the canvas builtins without complex type declarations
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: canvas.create, canvas.save - Simple canvas creation and save test
+// Demonstrates: Basic canvas operations without variable storage
 
 print "=== Canvas Drawing Test ===";
 print "";

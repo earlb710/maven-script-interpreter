@@ -53,6 +53,67 @@ This directory contains short, precise example scripts for each EBS language key
 |------|----------|
 | [import.ebs](import.ebs) | `import` |
 
+## Canvas & Graphics (JavaFX Drawing)
+| File | Builtins | Description |
+|------|----------|-------------|
+| [canvas_simple_test.ebs](canvas_simple_test.ebs) | `canvas.create`, `canvas.save` | Simple canvas creation and save test |
+| [canvas_basic_shapes.ebs](canvas_basic_shapes.ebs) | `canvas.*`, `draw.*`, `style.*` | Drawing basic shapes (rect, circle, ellipse, arc, polygon), colors, text |
+| [canvas_effects.ebs](canvas_effects.ebs) | `effect.*`, `transform.*` | Drop shadows, transparency, translate, rotate, scale |
+| [canvas_images.ebs](canvas_images.ebs) | `draw.image`, `canvas.toImage` | Drawing images on canvas with transformations and patterns |
+| [canvas_patterns.ebs](canvas_patterns.ebs) | Loop-based patterns | Grid, concentric circles, spiral approximation, checkerboard, color bars |
+
+### Canvas Builtins (canvas.*)
+| Builtin | Description |
+|---------|-------------|
+| `canvas.create(width, height, name?)` | Create new canvas with dimensions |
+| `canvas.save(canvas, path, format?)` | Save canvas to file (PNG, JPG, etc.) |
+| `canvas.toImage(canvas)` | Convert canvas to IMAGE type |
+| `canvas.clear(canvas)` | Clear entire canvas |
+| `canvas.getWidth(canvas)` | Get canvas width |
+| `canvas.getHeight(canvas)` | Get canvas height |
+| `canvas.snapshot(canvas, x?, y?, width?, height?)` | Take snapshot of canvas region |
+| `canvas.getName(canvas)` | Get canvas name |
+| `canvas.setName(canvas, name)` | Set canvas name |
+
+### Drawing Builtins (draw.*)
+| Builtin | Description |
+|---------|-------------|
+| `draw.line(canvas, x1, y1, x2, y2)` | Draw line from (x1,y1) to (x2,y2) |
+| `draw.rect(canvas, x, y, width, height, fill?)` | Draw/fill rectangle |
+| `draw.circle(canvas, x, y, radius, fill?)` | Draw/fill circle centered at (x,y) |
+| `draw.ellipse(canvas, x, y, width, height, fill?)` | Draw/fill ellipse |
+| `draw.arc(canvas, x, y, radius, startAngle, length, fill?)` | Draw/fill arc (angles in degrees) |
+| `draw.polygon(canvas, points[], fill?)` | Draw/fill polygon from coordinate array |
+| `draw.text(canvas, text, x, y)` | Draw text at position |
+| `draw.image(canvas, image, x, y, width?, height?)` | Draw IMAGE on canvas |
+
+### Style Builtins (style.*)
+| Builtin | Description |
+|---------|-------------|
+| `style.setStroke(canvas, color, lineWidth?)` | Set stroke color and width for outlines |
+| `style.setFill(canvas, color)` | Set fill color for shapes and text |
+| `style.setFont(canvas, fontName, fontSize)` | Set font for text drawing |
+| `style.setLineCap(canvas, cap)` | Set line cap style (BUTT, ROUND, SQUARE) |
+| `style.setLineJoin(canvas, join)` | Set line join style (MITER, BEVEL, ROUND) |
+
+### Effect Builtins (effect.*)
+| Builtin | Description |
+|---------|-------------|
+| `effect.setShadow(canvas, blur, offsetX, offsetY, color)` | Apply drop shadow effect |
+| `effect.clearShadow(canvas)` | Remove shadow effect |
+| `effect.setGlobalAlpha(canvas, alpha)` | Set transparency (0.0-1.0) |
+
+### Transform Builtins (transform.*)
+| Builtin | Description |
+|---------|-------------|
+| `transform.save(canvas)` | Save current transformation state |
+| `transform.restore(canvas)` | Restore saved transformation state |
+| `transform.translate(canvas, x, y)` | Translate coordinate system |
+| `transform.rotate(canvas, degrees)` | Rotate coordinate system |
+| `transform.scale(canvas, x, y)` | Scale coordinate system |
+
+**Color Formats**: Colors support hex codes (`#RGB`, `#RRGGBB`, `#RRGGBBAA`) and named colors (e.g., `"red"`, `"blue"`).
+
 ## UI/Screens
 | File | Keywords |
 |------|----------|
