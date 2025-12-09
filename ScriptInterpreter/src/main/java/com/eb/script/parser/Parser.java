@@ -355,8 +355,14 @@ public class Parser {
             return EbsTokenType.MAP;
         } else if (EbsTokenType.BITMAP.contains(str)) {
             return EbsTokenType.BITMAP;
+        } else if (EbsTokenType.INTMAP.contains(str)) {
+            return EbsTokenType.INTMAP;
         } else if (EbsTokenType.IMAGE.contains(str)) {
             return EbsTokenType.IMAGE;
+        } else if (EbsTokenType.VECTOR_IMAGE.contains(str)) {
+            return EbsTokenType.VECTOR_IMAGE;
+        } else if (EbsTokenType.CANVAS.contains(str)) {
+            return EbsTokenType.CANVAS;
         }
         return null;
     }
