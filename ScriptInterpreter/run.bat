@@ -14,9 +14,17 @@ if not exist "target\classes" (
     )
 )
 
-REM Run with required JVM arguments for JavaFX WebView
-java --add-exports javafx.graphics/com.sun.javafx.sg.prism=ALL-UNNAMED ^
-     --add-exports javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED ^
-     --add-exports javafx.graphics/com.sun.javafx.util=ALL-UNNAMED ^
-     -cp target\classes ^
-     com.eb.ui.cli.MainApp %*
+REM Get the module path from Maven (store in a temporary file)
+call mvn dependency:build-classpath -Dmdep.pathSeparator=; -q -DincludeScope=compile -Dsilent=true > modulepath.tmp
+set /p MODULE_PATH=<modulepath.tmp
+del modulepath.tmp
+
+REM Run with module system and required JVM arguments for JavaFX WebView
+java --module-path "target\classes;%MODULE_PATH%" ^
+     --add-modules com.eb.scriptinterpreter ^
+     --add-exports javafx.graphics/com.sun.javafx.sg.prism=com.eb.scriptinterpreter,ALL-UNNAMED ^
+     --add-exports javafx.graphics/com.sun.javafx.scene=com.eb.scriptinterpreter,ALL-UNNAMED ^
+     --add-exports javafx.graphics/com.sun.javafx.util=com.eb.scriptinterpreter,ALL-UNNAMED ^
+     --add-exports javafx.web/com.sun.webkit=com.eb.scriptinterpreter,ALL-UNNAMED ^
+     --module com.eb.scriptinterpreter/com.eb.ui.cli.MainApp %*
+

@@ -14,7 +14,7 @@
 run.bat
 ```
 
-These scripts automatically include the required JVM arguments for JavaFX WebView support.
+These scripts automatically run the application with the Java module system and include the required JVM arguments for JavaFX WebView support.
 
 ## Alternative Launch Methods
 
@@ -25,48 +25,80 @@ mvn javafx:run
 
 ### Using IntelliJ IDEA or Other IDEs:
 
-When running `com.eb.ui.cli.MainApp` from your IDE, you **must** add the following VM options:
+When running `com.eb.ui.cli.MainApp` from your IDE, you **must** configure it to run with the module system and add the following VM options:
 
 ```
---add-exports javafx.graphics/com.sun.javafx.sg.prism=ALL-UNNAMED
---add-exports javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED
---add-exports javafx.graphics/com.sun.javafx.util=ALL-UNNAMED
+--module-path target/classes:${MAVEN_CLASSPATH}
+--add-modules com.eb.scriptinterpreter
+--add-exports javafx.graphics/com.sun.javafx.sg.prism=com.eb.scriptinterpreter,ALL-UNNAMED
+--add-exports javafx.graphics/com.sun.javafx.scene=com.eb.scriptinterpreter,ALL-UNNAMED
+--add-exports javafx.graphics/com.sun.javafx.util=com.eb.scriptinterpreter,ALL-UNNAMED
+--add-exports javafx.web/com.sun.webkit=com.eb.scriptinterpreter,ALL-UNNAMED
+--module com.eb.scriptinterpreter/com.eb.ui.cli.MainApp
 ```
 
 **In IntelliJ IDEA:**
 1. Run → Edit Configurations...
 2. Select your MainApp configuration
-3. Add to "VM options" field: `--add-exports javafx.graphics/com.sun.javafx.sg.prism=ALL-UNNAMED --add-exports javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED --add-exports javafx.graphics/com.sun.javafx.util=ALL-UNNAMED`
-4. Apply and OK
+3. Set "Module" to use module path
+4. Add to "VM options" field (replace `${MAVEN_CLASSPATH}` with your actual classpath):
+   ```
+   --module-path target/classes:${MAVEN_CLASSPATH}
+   --add-modules com.eb.scriptinterpreter
+   --add-exports javafx.graphics/com.sun.javafx.sg.prism=com.eb.scriptinterpreter,ALL-UNNAMED
+   --add-exports javafx.graphics/com.sun.javafx.scene=com.eb.scriptinterpreter,ALL-UNNAMED
+   --add-exports javafx.graphics/com.sun.javafx.util=com.eb.scriptinterpreter,ALL-UNNAMED
+   --add-exports javafx.web/com.sun.webkit=com.eb.scriptinterpreter,ALL-UNNAMED
+   ```
+5. Set Main class to: `com.eb.scriptinterpreter/com.eb.ui.cli.MainApp`
+6. Apply and OK
 
 **In Eclipse:**
 1. Run → Run Configurations...
 2. Select your MainApp configuration
 3. Go to "Arguments" tab
-4. Add to "VM arguments": `--add-exports javafx.graphics/com.sun.javafx.sg.prism=ALL-UNNAMED --add-exports javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED --add-exports javafx.graphics/com.sun.javafx.util=ALL-UNNAMED`
-5. Apply
+4. Add to "VM arguments" (adjust classpath as needed):
+   ```
+   --module-path target/classes:${MAVEN_CLASSPATH}
+   --add-modules com.eb.scriptinterpreter
+   --add-exports javafx.graphics/com.sun.javafx.sg.prism=com.eb.scriptinterpreter,ALL-UNNAMED
+   --add-exports javafx.graphics/com.sun.javafx.scene=com.eb.scriptinterpreter,ALL-UNNAMED
+   --add-exports javafx.graphics/com.sun.javafx.util=com.eb.scriptinterpreter,ALL-UNNAMED
+   --add-exports javafx.web/com.sun.webkit=com.eb.scriptinterpreter,ALL-UNNAMED
+   ```
+5. Set Main class to: `com.eb.scriptinterpreter/com.eb.ui.cli.MainApp`
+6. Apply
 
 ### Running directly with java:
 ```bash
 # First compile
 mvn compile
 
-# Then run with required JVM arguments
-java --add-exports javafx.graphics/com.sun.javafx.sg.prism=ALL-UNNAMED \
-     --add-exports javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED \
-     --add-exports javafx.graphics/com.sun.javafx.util=ALL-UNNAMED \
-     -cp target/classes \
-     com.eb.ui.cli.MainApp
+# Get the module path (classpath of dependencies)
+MODULE_PATH=$(mvn dependency:build-classpath -Dmdep.pathSeparator=: -q -DincludeScope=compile -Dsilent=true | tail -1)
+
+# Then run with module system and required JVM arguments
+java --module-path "target/classes:${MODULE_PATH}" \
+     --add-modules com.eb.scriptinterpreter \
+     --add-exports javafx.graphics/com.sun.javafx.sg.prism=com.eb.scriptinterpreter,ALL-UNNAMED \
+     --add-exports javafx.graphics/com.sun.javafx.scene=com.eb.scriptinterpreter,ALL-UNNAMED \
+     --add-exports javafx.graphics/com.sun.javafx.util=com.eb.scriptinterpreter,ALL-UNNAMED \
+     --add-exports javafx.web/com.sun.webkit=com.eb.scriptinterpreter,ALL-UNNAMED \
+     --module com.eb.scriptinterpreter/com.eb.ui.cli.MainApp
 ```
 
-## Why is this JVM argument required?
+## Why are these JVM arguments required?
 
-The JavaFX WebView component requires access to internal JavaFX graphics classes that are not exported by default in Java's module system:
-- `com.sun.javafx.sg.prism` package - Required for WebView's rendering engine (NGWebView extends NGGroup)
-- `com.sun.javafx.scene` package - Required for WebView's scene graph helpers (WebViewHelper extends ParentHelper)
-- `com.sun.javafx.util` package - Required for WebView's utility classes (Utils internal class)
+The application now uses the Java Platform Module System (JPMS). The JavaFX WebView component and some third-party libraries (like javafxsvg and Batik) require access to internal JavaFX packages that are not exported by default:
 
-The `--add-exports` arguments explicitly export these internal packages to allow WebView to function properly.
+- `javafx.graphics/com.sun.javafx.sg.prism` - Required for WebView's rendering engine (NGWebView extends NGGroup)
+- `javafx.graphics/com.sun.javafx.scene` - Required for WebView's scene graph helpers (WebViewHelper extends ParentHelper)
+- `javafx.graphics/com.sun.javafx.util` - Required for WebView's utility classes (Utils internal class)
+- `javafx.web/com.sun.webkit` - Required for WebView's WebKit engine internals
+
+The exports are made to:
+- `com.eb.scriptinterpreter` - Our named module
+- `ALL-UNNAMED` - Automatic modules (third-party libraries without module-info)
 
 Without these arguments, you'll encounter an `IllegalAccessError` when trying to use WebView controls in screens.
 
@@ -75,8 +107,13 @@ Without these arguments, you'll encounter an `IllegalAccessError` when trying to
 **Error: IllegalAccessError with NGWebView**
 ```
 java.lang.IllegalAccessError: superclass access check failed: 
-class com.sun.javafx.sg.prism.web.NGWebView cannot access 
-class com.sun.javafx.sg.prism.NGGroup
+class com.sun.javafx.sg.prism.web.NGWebView (in unnamed module) cannot access 
+class com.sun.javafx.sg.prism.NGGroup (in module javafx.graphics)
 ```
 
-**Solution:** Ensure you're using one of the launch methods above that includes the required JVM argument.
+**Solution:** Ensure you're using one of the launch methods above that includes:
+1. The `--module-path` and `--module` arguments (to run with the module system)
+2. The required `--add-exports` arguments with `ALL-UNNAMED` target
+
+**Common Mistake:** Running with `-cp` (classpath) instead of `--module-path` will cause WebView to fail because the automatic modules won't have access to JavaFX internals.
+
