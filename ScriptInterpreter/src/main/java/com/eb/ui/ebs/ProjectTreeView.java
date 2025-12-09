@@ -411,10 +411,10 @@ public class ProjectTreeView extends VBox {
             String displayName = getProjectDisplayName(entry.getPath(), entry.getName());
             TreeItem<String> projectItem = new TreeItem<>(displayName);
             
-            // Add project icon from resources (folder-open.png for projects)
+            // Add project icon from resources (project.png for projects)
             Label iconLabel = new Label();
             try {
-                Image projectImage = new Image(getClass().getResourceAsStream("/icons/folder-open.png"));
+                Image projectImage = new Image(getClass().getResourceAsStream("/icons/project.png"));
                 ImageView projectIcon = new ImageView(projectImage);
                 projectIcon.setFitWidth(16);
                 projectIcon.setFitHeight(16);
@@ -557,6 +557,7 @@ public class ProjectTreeView extends VBox {
             // Load all files and directories from project directory
             java.util.List<Path> paths = new java.util.ArrayList<>();
             java.util.Set<String> addedPaths = new java.util.HashSet<>();
+            java.util.Set<String> linkedFolders = new java.util.HashSet<>();
             
             try (var stream = Files.list(projectDir)) {
                 stream.forEach(p -> {
@@ -573,6 +574,10 @@ public class ProjectTreeView extends VBox {
                 if (!addedPaths.contains(normalizedPath)) {
                     paths.add(dir);
                     addedPaths.add(normalizedPath);
+                    linkedFolders.add(normalizedPath); // Mark as linked folder
+                } else {
+                    // Even if the directory exists in project dir, mark it as linked if it's in extraDirectories
+                    linkedFolders.add(normalizedPath);
                 }
             }
             
@@ -610,13 +615,14 @@ public class ProjectTreeView extends VBox {
                 
                 boolean isDirectory = Files.isDirectory(path);
                 boolean fileExists = Files.exists(path);
+                boolean isLinkedFolder = isDirectory && linkedFolders.contains(path.normalize().toString());
                 
                 // Add "!" prefix if doesn't exist
                 String displayName = fileExists ? fileName : "! " + fileName;
                 TreeItem<String> item = new TreeItem<>(displayName);
                 
                 // Create label with icon
-                Label label = createFileOrDirLabel(fileName, path.toString(), fileExists, isDirectory);
+                Label label = createFileOrDirLabel(fileName, path.toString(), fileExists, isDirectory, isLinkedFolder);
                 item.setGraphic(label);
                 
                 // Set tooltip
@@ -647,15 +653,17 @@ public class ProjectTreeView extends VBox {
      * @param path The full path
      * @param exists Whether the file/directory exists
      * @param isDirectory Whether this is a directory
+     * @param isLinkedFolder Whether this is a linked folder from project.json directories array
      * @return Label with icon and appropriate styling
      */
-    private Label createFileOrDirLabel(String fileName, String path, boolean exists, boolean isDirectory) {
+    private Label createFileOrDirLabel(String fileName, String path, boolean exists, boolean isDirectory, boolean isLinkedFolder) {
         Label label = new Label();
         
         if (isDirectory) {
-            // Directory icon
+            // Directory icon - use folder_ref.png for linked folders, folder.png for regular folders
             try {
-                Image folderImage = new Image(getClass().getResourceAsStream("/icons/folder.png"));
+                String iconPath = isLinkedFolder ? "/icons/folder_ref.png" : "/icons/folder.png";
+                Image folderImage = new Image(getClass().getResourceAsStream(iconPath));
                 ImageView folderIcon = new ImageView(folderImage);
                 folderIcon.setFitWidth(16);
                 folderIcon.setFitHeight(16);
@@ -1325,27 +1333,8 @@ public class ProjectTreeView extends VBox {
                 boolean isDirectory = Files.isDirectory(path);
                 TreeItem<String> item = new TreeItem<>(fileName);
                 
-                // Create label with icon
-                Label label = new Label();
-                if (isDirectory) {
-                    try {
-                        Image folderImage = new Image(getClass().getResourceAsStream("/icons/folder.png"));
-                        ImageView folderIcon = new ImageView(folderImage);
-                        folderIcon.setFitWidth(16);
-                        folderIcon.setFitHeight(16);
-                        folderIcon.setPreserveRatio(true);
-                        label.setGraphic(folderIcon);
-                    } catch (Exception e) {
-                        // Fallback to emoji
-                    }
-                } else {
-                    ImageView icon = getIconForFileType(fileName);
-                    if (icon != null) {
-                        label.setGraphic(icon);
-                    }
-                }
-                
-                label.setUserData(path.toString());
+                // Create label with icon - subdirectories are not linked folders
+                Label label = createFileOrDirLabel(fileName, path.toString(), true, isDirectory, false);
                 item.setGraphic(label);
                 
                 // Set tooltip
