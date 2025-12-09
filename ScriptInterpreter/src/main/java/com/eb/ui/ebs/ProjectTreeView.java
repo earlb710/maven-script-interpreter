@@ -132,13 +132,7 @@ public class ProjectTreeView extends VBox {
                 String projectPath = userData instanceof String ? (String) userData : null;
                 
                 // Extract project directory from project.json path
-                String projectDir = projectPath;
-                if (projectPath != null && projectPath.endsWith("project.json")) {
-                    Path jsonPath = Path.of(projectPath);
-                    if (jsonPath.getParent() != null) {
-                        projectDir = jsonPath.getParent().toString();
-                    }
-                }
+                String projectDir = getProjectDirectory(projectPath);
                 
                 MenuItem newFileItem = new MenuItem("New File...");
                 final String finalProjectDir = projectDir;
@@ -170,6 +164,22 @@ public class ProjectTreeView extends VBox {
                 currentContextMenu.hide();
             }
         });
+    }
+    
+    /**
+     * Extract the project directory from a project.json path.
+     * 
+     * @param projectPath Path to project.json file
+     * @return The directory containing the project.json, or the original path if not a project.json
+     */
+    private String getProjectDirectory(String projectPath) {
+        if (projectPath != null && projectPath.endsWith("project.json")) {
+            Path jsonPath = Path.of(projectPath);
+            if (jsonPath.getParent() != null) {
+                return jsonPath.getParent().toString();
+            }
+        }
+        return projectPath;
     }
     
     /**

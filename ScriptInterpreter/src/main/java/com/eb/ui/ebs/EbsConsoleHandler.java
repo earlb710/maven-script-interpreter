@@ -1320,17 +1320,11 @@ public class EbsConsoleHandler extends EbsHandler {
      * Get default content for a file based on its type.
      */
     private String getDefaultContentForFileType(NewFileDialog.FileType fileType) {
-        switch (fileType) {
-            case EBS_SCRIPT:
-                return "// EBS Script\n// Type your code here\n\n";
-            case JSON:
-                return "{\n  \n}\n";
-            case CSS:
-                return "/* CSS Styles */\n\n";
-            case MARKDOWN:
-                return "# Markdown Document\n\n";
-            default:
-                return "";
-        }
+        return switch (fileType) {
+            case EBS_SCRIPT -> "// EBS Script\n// Type your code here\n\n";
+            case JSON -> "{\n  \n}\n";
+            case CSS -> "/* CSS Styles */\n\n";
+            case MARKDOWN -> "# Markdown Document\n\n";
+        };
     }
 }
