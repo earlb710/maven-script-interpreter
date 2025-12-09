@@ -411,18 +411,18 @@ public class ProjectTreeView extends VBox {
             String displayName = getProjectDisplayName(entry.getPath(), entry.getName());
             TreeItem<String> projectItem = new TreeItem<>(displayName);
             
-            // Add folder icon from resources
+            // Add project icon from resources (folder-open.png for projects)
             Label iconLabel = new Label();
             try {
-                Image folderImage = new Image(getClass().getResourceAsStream("/icons/folder.png"));
-                ImageView folderIcon = new ImageView(folderImage);
-                folderIcon.setFitWidth(16);
-                folderIcon.setFitHeight(16);
-                folderIcon.setPreserveRatio(true);
-                iconLabel.setGraphic(folderIcon);
+                Image projectImage = new Image(getClass().getResourceAsStream("/icons/folder-open.png"));
+                ImageView projectIcon = new ImageView(projectImage);
+                projectIcon.setFitWidth(16);
+                projectIcon.setFitHeight(16);
+                projectIcon.setPreserveRatio(true);
+                iconLabel.setGraphic(projectIcon);
             } catch (Exception e) {
                 // Fallback to emoji if icon not found
-                iconLabel.setText("\uD83D\uDCC1"); // 📁 folder emoji
+                iconLabel.setText("\uD83D\uDCC2"); // 📂 open folder emoji for projects
             }
             iconLabel.setUserData(entry.getPath());
             projectItem.setGraphic(iconLabel);
