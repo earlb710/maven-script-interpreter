@@ -27,6 +27,7 @@ import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Tab;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -1363,14 +1364,24 @@ public class EbsConsoleHandler extends EbsHandler {
             // Add to MRU
             addRecentFile(filePath);
             
-            // Open the file in a tab using the same approach as /open command
+            // Check if file is already open in a tab
             Path p = Util.resolveSandboxedPath(fullPath);
-            String handle = (String) Builtins.callBuiltin(env, "file.open", fullPath, "rw");
-            FileContext ofile = new FileContext(handle, p, "rw");
-            tabHandler.showTab(new TabContext(p.getFileName().toString(), p, ofile), true);
+            Tab existingTab = tabHandler.findTabByPath(p);
             
-            ScriptArea output = env.getOutputArea();
-            output.printlnOk("File opened: " + fullPath);
+            if (existingTab != null) {
+                // File is already open, just select the tab
+                tabHandler.selectTab(existingTab);
+                ScriptArea output = env.getOutputArea();
+                output.printlnOk("Switched to file: " + fullPath);
+            } else {
+                // Open the file in a new tab
+                String handle = (String) Builtins.callBuiltin(env, "file.open", fullPath, "rw");
+                FileContext ofile = new FileContext(handle, p, "rw");
+                tabHandler.showTab(new TabContext(p.getFileName().toString(), p, ofile), true);
+                
+                ScriptArea output = env.getOutputArea();
+                output.printlnOk("File opened: " + fullPath);
+            }
             
         } catch (Exception ex) {
             submitErrors("Failed to open file: " + ex.getMessage());
