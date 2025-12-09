@@ -125,6 +125,43 @@ public class TabHandler implements TabOpener {
     }
 
     /**
+     * Find an existing tab by file path.
+     * 
+     * @param filePath The path to search for
+     * @return The tab if found, null otherwise
+     */
+    public Tab findTabByPath(Path filePath) {
+        if (filePath == null) {
+            return null;
+        }
+        
+        // Normalize the path for comparison
+        Path normalizedPath = filePath.toAbsolutePath().normalize();
+        
+        for (Tab t : tabPane.getTabs()) {
+            Object ud = t.getUserData();
+            if (ud instanceof TabContext ctx && ctx.path != null) {
+                Path tabPath = ctx.path.toAbsolutePath().normalize();
+                if (tabPath.equals(normalizedPath)) {
+                    return t;
+                }
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Select an existing tab.
+     * 
+     * @param tab The tab to select
+     */
+    public void selectTab(Tab tab) {
+        if (tab != null && tabPane.getTabs().contains(tab)) {
+            tabPane.getSelectionModel().select(tab);
+        }
+    }
+
+    /**
      * Plain text viewer for non-ebs files.
      */
     private Region buildPlainViewer(TabContext ctx, Charset charset) {

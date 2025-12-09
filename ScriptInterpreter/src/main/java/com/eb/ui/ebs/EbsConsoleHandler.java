@@ -27,6 +27,7 @@ import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Tab;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -1204,5 +1205,333 @@ public class EbsConsoleHandler extends EbsHandler {
             }
         }
         return result.toString();
+    }
+    
+    /**
+     * Create a new file in a project.
+     * Shows a dialog asking for file type, name, and path.
+     * 
+     * @param projectJsonPath The path to the project.json file
+     */
+    public void createNewFile(String projectJsonPath) {
+        try {
+            // Extract project directory from project.json path
+            Path jsonPath = Path.of(projectJsonPath);
+            Path projectDir = jsonPath.getParent();
+            String projectPath = projectDir != null ? projectDir.toString() : projectJsonPath;
+            
+            // Show new file dialog
+            NewFileDialog dialog = new NewFileDialog(stage, projectPath);
+            var result = dialog.showAndWait();
+            
+            if (result.isEmpty()) {
+                return; // User cancelled
+            }
+            
+            NewFileDialog.FileInfo fileInfo = result.get();
+            String fullPath = fileInfo.getFullPath();
+            Path filePath = Path.of(fullPath);
+            
+            // Create directory if it doesn't exist
+            Path parentDir = filePath.getParent();
+            if (parentDir != null && !Files.exists(parentDir)) {
+                Files.createDirectories(parentDir);
+            }
+            
+            // Check if file already exists
+            if (Files.exists(filePath)) {
+                Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                        "File already exists:\n" + fullPath + "\n\nOverwrite it?",
+                        ButtonType.OK, ButtonType.CANCEL);
+                confirm.setHeaderText("File Already Exists");
+                confirm.initOwner(stage);
+                confirm.initModality(Modality.APPLICATION_MODAL);
+                var res = confirm.showAndWait();
+                if (res.isEmpty() || res.get() == ButtonType.CANCEL) {
+                    return;
+                }
+            }
+            
+            // Create file with appropriate default content based on type
+            String defaultContent = getDefaultContentForFileType(fileInfo.getType());
+            Files.writeString(filePath, defaultContent, StandardCharsets.UTF_8);
+            
+            // DO NOT add file to project.json - just create it on filesystem
+            // Tree view will automatically show it when refreshed
+            
+            // Open the file in a tab using the same approach as /open command
+            Path p = Util.resolveSandboxedPath(fullPath);
+            String handle = (String) Builtins.callBuiltin(env, "file.open", fullPath, "rw");
+            FileContext ofile = new FileContext(handle, p, "rw");
+            tabHandler.showTab(new TabContext(p.getFileName().toString(), p, ofile), true);
+            
+            ScriptArea output = env.getOutputArea();
+            output.printlnOk("File created: " + fullPath);
+            
+            // Refresh the tree view to show the new file
+            if (projectTreeView != null) {
+                projectTreeView.refreshProjectFiles(projectJsonPath);
+            }
+            
+        } catch (Exception ex) {
+            submitErrors("Failed to create new file: " + ex.getMessage());
+        }
+    }
+    
+    /**
+     * Add an existing file to the project by opening it in a tab.
+     * Shows a file chooser dialog.
+     * 
+     * @param projectJsonPath The path to the project.json file
+     */
+    public void addExistingFile(String projectJsonPath) {
+        try {
+            // Extract project directory from project.json path
+            Path jsonPath = Path.of(projectJsonPath);
+            Path projectDir = jsonPath.getParent();
+            String projectPath = projectDir != null ? projectDir.toString() : projectJsonPath;
+            
+            FileChooser fc = new FileChooser();
+            fc.setTitle("Add Existing File");
+            
+            // Set initial directory to project path
+            File initialDir = new File(projectPath);
+            if (initialDir.exists() && initialDir.isDirectory()) {
+                fc.setInitialDirectory(initialDir);
+            } else {
+                fc.setInitialDirectory(Util.SANDBOX_ROOT.toFile());
+            }
+            
+            // Add file type filters
+            fc.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("EBS Scripts", "*.ebs"),
+                new FileChooser.ExtensionFilter("JSON Files", "*.json"),
+                new FileChooser.ExtensionFilter("CSS Files", "*.css"),
+                new FileChooser.ExtensionFilter("Markdown Files", "*.md"),
+                new FileChooser.ExtensionFilter("All Files", "*.*")
+            );
+            
+            File selectedFile = fc.showOpenDialog(stage);
+            if (selectedFile == null) {
+                return; // User cancelled
+            }
+            
+            Path filePath = selectedFile.toPath();
+            String fullPath = filePath.toString();
+            
+            // Add to MRU
+            addRecentFile(filePath);
+            
+            // Add file to project.json
+            if (Files.exists(jsonPath)) {
+                addFileToProjectJson(jsonPath, filePath);
+            }
+            
+            // Open the file in a tab using the same approach as /open command
+            Path p = Util.resolveSandboxedPath(fullPath);
+            String handle = (String) Builtins.callBuiltin(env, "file.open", fullPath, "rw");
+            FileContext ofile = new FileContext(handle, p, "rw");
+            tabHandler.showTab(new TabContext(p.getFileName().toString(), p, ofile), true);
+            
+            ScriptArea output = env.getOutputArea();
+            output.printlnOk("File opened: " + fullPath);
+            
+        } catch (Exception ex) {
+            submitErrors("Failed to add file: " + ex.getMessage());
+        }
+    }
+    
+    /**
+     * Get default content for a file based on its type.
+     */
+    private String getDefaultContentForFileType(NewFileDialog.FileType fileType) {
+        return switch (fileType) {
+            case EBS_SCRIPT -> "// EBS Script\n// Type your code here\n\n";
+            case JSON -> "{\n  \n}\n";
+            case CSS -> "/* CSS Styles */\n\n";
+            case MARKDOWN -> "# Markdown Document\n\n";
+        };
+    }
+    
+    /**
+     * Open a file from the tree view.
+     * 
+     * @param filePath Path to the file to open
+     */
+    public void openFileFromTreeView(Path filePath) {
+        try {
+            String fullPath = filePath.toString();
+            
+            // Add to MRU
+            addRecentFile(filePath);
+            
+            // Check if file is already open in a tab
+            Path p = Util.resolveSandboxedPath(fullPath);
+            Tab existingTab = tabHandler.findTabByPath(p);
+            
+            if (existingTab != null) {
+                // File is already open, just select the tab
+                tabHandler.selectTab(existingTab);
+                ScriptArea output = env.getOutputArea();
+                output.printlnOk("Switched to file: " + fullPath);
+            } else {
+                // Open the file in a new tab
+                String handle = (String) Builtins.callBuiltin(env, "file.open", fullPath, "rw");
+                FileContext ofile = new FileContext(handle, p, "rw");
+                tabHandler.showTab(new TabContext(p.getFileName().toString(), p, ofile), true);
+                
+                ScriptArea output = env.getOutputArea();
+                output.printlnOk("File opened: " + fullPath);
+            }
+            
+        } catch (Exception ex) {
+            submitErrors("Failed to open file: " + ex.getMessage());
+        }
+    }
+    
+    /**
+     * Add a file to the project.json file and update the tree view.
+     * 
+     * @param projectJsonPath Path to the project.json file
+     * @param filePath Path to the file to add
+     */
+    private void addFileToProjectJson(Path projectJsonPath, Path filePath) {
+        try {
+            // Read and parse project.json
+            String jsonContent = Files.readString(projectJsonPath, StandardCharsets.UTF_8);
+            Object projectObj = Json.parse(jsonContent);
+            
+            if (!(projectObj instanceof Map)) {
+                System.err.println("Invalid project.json: root must be a JSON object");
+                return;
+            }
+            
+            @SuppressWarnings("unchecked")
+            Map<String, Object> project = (Map<String, Object>) projectObj;
+            
+            // Get or create files array
+            Object filesObj = project.get("files");
+            java.util.List<String> filesList = null;
+            
+            // Handle ArrayDynamic (used by EBS JSON parser) or standard List
+            if (filesObj instanceof com.eb.script.arrays.ArrayDynamic) {
+                com.eb.script.arrays.ArrayDynamic arrayDynamic = (com.eb.script.arrays.ArrayDynamic) filesObj;
+                filesList = new java.util.ArrayList<>();
+                for (int i = 0; i < arrayDynamic.size(); i++) {
+                    Object item = arrayDynamic.get(i);
+                    if (item instanceof String) {
+                        filesList.add((String) item);
+                    }
+                }
+            } else if (filesObj instanceof java.util.List) {
+                @SuppressWarnings("unchecked")
+                java.util.List<String> list = (java.util.List<String>) filesObj;
+                filesList = new java.util.ArrayList<>(list); // Create mutable copy
+            }
+            
+            if (filesList == null) {
+                filesList = new java.util.ArrayList<>();
+            }
+            
+            // Make file path relative to project directory if possible
+            Path projectDir = projectJsonPath.getParent();
+            String relativePath;
+            try {
+                relativePath = projectDir.relativize(filePath).toString();
+            } catch (IllegalArgumentException e) {
+                // If files are on different drives or can't be relativized, use absolute path
+                relativePath = filePath.toString();
+            }
+            
+            // Add file if not already in list
+            if (!filesList.contains(relativePath)) {
+                filesList.add(relativePath);
+                
+                // Update the project map with the modified files list
+                project.put("files", filesList);
+                
+                // Write updated project.json
+                String updatedJson = Json.prettyJson(project);
+                Files.writeString(projectJsonPath, updatedJson, StandardCharsets.UTF_8);
+                
+                // Refresh the tree view
+                if (projectTreeView != null) {
+                    projectTreeView.refreshProjectFiles(projectJsonPath.toString());
+                }
+                
+                System.out.println("Added file to project.json: " + relativePath);
+            }
+            
+        } catch (Exception ex) {
+            System.err.println("Failed to add file to project.json: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+    
+    /**
+     * Create a new file in a specific directory within a project.
+     * Shows a dialog asking for file type, name, and path.
+     * 
+     * @param projectJsonPath The path to the project.json file
+     * @param directoryPath The path to the directory where the file should be created
+     */
+    public void createNewFileInDirectory(String projectJsonPath, String directoryPath) {
+        try {
+            // Show new file dialog with the directory as default path
+            NewFileDialog dialog = new NewFileDialog(stage, directoryPath);
+            var result = dialog.showAndWait();
+            
+            if (result.isEmpty()) {
+                return; // User cancelled
+            }
+            
+            NewFileDialog.FileInfo fileInfo = result.get();
+            String fullPath = fileInfo.getFullPath();
+            Path filePath = Path.of(fullPath);
+            
+            // Create directory if it doesn't exist
+            Path parentDir = filePath.getParent();
+            if (parentDir != null && !Files.exists(parentDir)) {
+                Files.createDirectories(parentDir);
+            }
+            
+            // Check if file already exists
+            if (Files.exists(filePath)) {
+                Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                        "File already exists:\n" + fullPath + "\n\nOverwrite it?",
+                        ButtonType.OK, ButtonType.CANCEL);
+                confirm.setHeaderText("File Already Exists");
+                confirm.initOwner(stage);
+                confirm.initModality(Modality.APPLICATION_MODAL);
+                var res = confirm.showAndWait();
+                if (res.isEmpty() || res.get() == ButtonType.CANCEL) {
+                    return;
+                }
+            }
+            
+            // Create file with appropriate default content based on type
+            String defaultContent = getDefaultContentForFileType(fileInfo.getType());
+            Files.writeString(filePath, defaultContent, StandardCharsets.UTF_8);
+            
+            // DO NOT add file to project.json - just create it on filesystem
+            // Tree view will automatically show it when refreshed
+            
+            // Open the file in a tab using the same approach as /open command
+            Path p = Util.resolveSandboxedPath(fullPath);
+            String handle = (String) Builtins.callBuiltin(env, "file.open", fullPath, "rw");
+            FileContext ofile = new FileContext(handle, p, "rw");
+            tabHandler.showTab(new TabContext(p.getFileName().toString(), p, ofile), true);
+            
+            ScriptArea output = env.getOutputArea();
+            output.printlnOk("File created: " + fullPath);
+            
+            // Refresh the tree view
+            if (projectTreeView != null) {
+                projectTreeView.refreshProjectFiles(projectJsonPath);
+            }
+            
+        } catch (Exception ex) {
+            submitErrors("Failed to create new file: " + ex.getMessage());
+        }
     }
 }
