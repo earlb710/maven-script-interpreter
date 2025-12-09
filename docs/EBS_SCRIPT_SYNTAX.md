@@ -1750,11 +1750,14 @@ print config.id;       // Extract id field
 ```
 
 **When to use each syntax:**
-- Use `int[10]` for concise traditional syntax
-- Use `array.int[10]` for explicit, consistent syntax across all types
+- Use `int[10]` for concise traditional syntax (small arrays, < 100 elements)
+- Use `array.int[10]` for explicit, consistent syntax across all types (better performance for large arrays ≥ 100 elements)
 - Use `array[10]` or `array.any[10]` when you need mixed types
 - Use `array.bitmap[10]` when storing data that should be interpreted as bitmap fields
-- All three syntaxes work identically with `ArrayFixed` and `ArrayDynamic` implementations
+- **Important**: `int[n]` and `array.int[n]` have different internal implementations affecting performance and memory usage
+  - `int[n]` uses `Object[]` with boxed `Integer` objects (higher memory, boxing/unboxing overhead)
+  - `array.int[n]` uses primitive `int[]` (lower memory, faster access, no boxing)
+  - See [Array Syntax Guide](ARRAY_SYNTAX_GUIDE.md) for detailed comparison and usage recommendations
 
 ### Array Access
 ```javascript
