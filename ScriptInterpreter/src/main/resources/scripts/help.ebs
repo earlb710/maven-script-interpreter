@@ -94,7 +94,8 @@ if helpData != null then {
 }
 
 // Categorize builtins by module
-var builtinsByCategory: json = {};
+// Use a map to store category name -> array of builtins
+var builtinsByCategory: map;
 print "[DEBUG] Starting to categorize builtins...";
 if builtinsArray != null then {
     print "[DEBUG] builtinsArray has " + call str.toString(builtinsArray.length) + " items";
@@ -108,10 +109,12 @@ if builtinsArray != null then {
                 category = call str.substring(builtinName, 0, dotIndex);
             }
             
-            // Get or create category array
-            var categoryArray: json = call json.get(builtinsByCategory, category);
-            if categoryArray == null then {
-                categoryArray = [];
+            // Get or create category array (use map to store EBS arrays, not JSON)
+            var categoryArray: array[*];
+            // Check if category exists in map
+            var existingArray: array[*] = builtinsByCategory[category];
+            if existingArray != null then {
+                categoryArray = existingArray;
             }
             
             // Add builtin to category
@@ -119,7 +122,7 @@ if builtinsArray != null then {
             var childNode: json = {};
             childNode = call json.set(childNode, "value", builtinName);
             call array.add(categoryArray, childNode);
-            builtinsByCategory = call json.set(builtinsByCategory, category, categoryArray);
+            builtinsByCategory[category] = categoryArray;
         }
     }
     print "[DEBUG] Categorization complete";
@@ -136,7 +139,8 @@ if builtinCategoryOrder != null then {
     print "[DEBUG] Processing " + call str.toString(builtinCategoryOrder.length) + " category keys";
     foreach categoryKey in builtinCategoryOrder {
         print "[DEBUG] Processing category: " + categoryKey;
-        var categoryArray: json = call json.get(builtinsByCategory, categoryKey);
+        // Get category array from map using bracket notation
+        var categoryArray: array[*] = builtinsByCategory[categoryKey];
         if categoryArray != null && categoryArray.length > 0 then {
             print "[DEBUG] Category '" + categoryKey + "' has " + call str.toString(categoryArray.length) + " functions";
             // Get display name from JSON, fallback to key
@@ -511,7 +515,7 @@ getHelpContent(topic: string) return string {
             var displayName: string = call json.getString(builtinCategoryNames, categoryKey, "");
             if displayName == topic then {
                 // Found matching category - show overview
-                var categoryArray: json = call json.get(builtinsByCategory, categoryKey);
+                var categoryArray: array[*] = builtinsByCategory[categoryKey];
                 var funcCount: int = 0;
                 if categoryArray != null then {
                     funcCount = categoryArray.length;
