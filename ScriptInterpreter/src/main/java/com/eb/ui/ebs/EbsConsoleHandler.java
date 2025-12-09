@@ -1452,4 +1452,74 @@ public class EbsConsoleHandler extends EbsHandler {
             ex.printStackTrace();
         }
     }
+    
+    /**
+     * Create a new file in a specific directory within a project.
+     * Shows a dialog asking for file type, name, and path.
+     * 
+     * @param projectJsonPath The path to the project.json file
+     * @param directoryPath The path to the directory where the file should be created
+     */
+    public void createNewFileInDirectory(String projectJsonPath, String directoryPath) {
+        try {
+            // Show new file dialog with the directory as default path
+            NewFileDialog dialog = new NewFileDialog(stage, directoryPath);
+            var result = dialog.showAndWait();
+            
+            if (result.isEmpty()) {
+                return; // User cancelled
+            }
+            
+            NewFileDialog.FileInfo fileInfo = result.get();
+            String fullPath = fileInfo.getFullPath();
+            Path filePath = Path.of(fullPath);
+            
+            // Create directory if it doesn't exist
+            Path parentDir = filePath.getParent();
+            if (parentDir != null && !Files.exists(parentDir)) {
+                Files.createDirectories(parentDir);
+            }
+            
+            // Check if file already exists
+            if (Files.exists(filePath)) {
+                Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                        "File already exists:\n" + fullPath + "\n\nOverwrite it?",
+                        ButtonType.OK, ButtonType.CANCEL);
+                confirm.setHeaderText("File Already Exists");
+                confirm.initOwner(stage);
+                confirm.initModality(Modality.APPLICATION_MODAL);
+                var res = confirm.showAndWait();
+                if (res.isEmpty() || res.get() == ButtonType.CANCEL) {
+                    return;
+                }
+            }
+            
+            // Create file with appropriate default content based on type
+            String defaultContent = getDefaultContentForFileType(fileInfo.getType());
+            Files.writeString(filePath, defaultContent, StandardCharsets.UTF_8);
+            
+            // Add file to project.json
+            Path jsonPath = Path.of(projectJsonPath);
+            if (Files.exists(jsonPath)) {
+                addFileToProjectJson(jsonPath, filePath);
+            }
+            
+            // Open the file in a tab using the same approach as /open command
+            Path p = Util.resolveSandboxedPath(fullPath);
+            String handle = (String) Builtins.callBuiltin(env, "file.open", fullPath, "rw");
+            FileContext ofile = new FileContext(handle, p, "rw");
+            tabHandler.showTab(new TabContext(p.getFileName().toString(), p, ofile), true);
+            
+            ScriptArea output = env.getOutputArea();
+            output.printlnOk("File created: " + fullPath);
+            
+            // Refresh the tree view
+            if (projectTreeView != null) {
+                projectTreeView.refreshProjectFiles(projectJsonPath);
+            }
+            
+        } catch (Exception ex) {
+            submitErrors("Failed to create new file: " + ex.getMessage());
+        }
+    }
 }
