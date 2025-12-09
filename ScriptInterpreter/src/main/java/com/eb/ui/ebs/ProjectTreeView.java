@@ -49,6 +49,38 @@ public class ProjectTreeView extends VBox {
         treeView.getStyleClass().add("project-tree");
         VBox.setVgrow(treeView, Priority.ALWAYS);
         
+        // Set custom cell factory to apply error styling
+        treeView.setCellFactory(tv -> {
+            TreeCell<String> cell = new TreeCell<>() {
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    
+                    if (empty || item == null) {
+                        setText(null);
+                        setGraphic(null);
+                        getStyleClass().remove("project-tree-error");
+                    } else {
+                        setText(item);
+                        TreeItem<String> treeItem = getTreeItem();
+                        if (treeItem != null && treeItem.getGraphic() != null) {
+                            setGraphic(treeItem.getGraphic());
+                        }
+                        
+                        // Apply error style if the graphic has error flag
+                        getStyleClass().remove("project-tree-error");
+                        if (treeItem != null && treeItem.getGraphic() instanceof Label) {
+                            Label label = (Label) treeItem.getGraphic();
+                            if (label.getProperties().containsKey("hasError")) {
+                                getStyleClass().add("project-tree-error");
+                            }
+                        }
+                    }
+                }
+            };
+            return cell;
+        });
+        
         // Setup double-click to open project or file
         treeView.setOnMouseClicked(event -> {
             if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
@@ -361,10 +393,37 @@ public class ProjectTreeView extends VBox {
                 if (Files.exists(path)) {
                     handler.openFileFromTreeView(path);
                 } else {
-                    Alert alert = new Alert(Alert.AlertType.WARNING,
-                            "File not found:\n" + filePath);
+                    // File doesn't exist - offer to create it
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
+                            "File not found:\n" + filePath + "\n\nWould you like to create it?",
+                            ButtonType.YES, ButtonType.NO);
                     alert.setHeaderText("File Not Found");
-                    alert.showAndWait();
+                    var result = alert.showAndWait();
+                    if (result.isPresent() && result.get() == ButtonType.YES) {
+                        // Create the file
+                        try {
+                            Files.createFile(path);
+                            
+                            // Refresh the project to update the tree view
+                            TreeItem<String> projectNode = findProjectNode(item);
+                            if (projectNode != null) {
+                                Object projectData = projectNode.getGraphic() != null ? projectNode.getGraphic().getUserData() : null;
+                                String projectJsonPath = projectData instanceof String ? (String) projectData : null;
+                                if (projectJsonPath != null) {
+                                    projectNode.getChildren().clear();
+                                    loadProjectFiles(projectNode, projectJsonPath);
+                                }
+                            }
+                            
+                            // Open the newly created file
+                            handler.openFileFromTreeView(path);
+                        } catch (Exception ex) {
+                            Alert errorAlert = new Alert(Alert.AlertType.ERROR,
+                                    "Failed to create file: " + ex.getMessage());
+                            errorAlert.setHeaderText("Creation Error");
+                            errorAlert.showAndWait();
+                        }
+                    }
                 }
             } catch (Exception ex) {
                 Alert alert = new Alert(Alert.AlertType.ERROR,
@@ -659,6 +718,12 @@ public class ProjectTreeView extends VBox {
                 
                 // Create label with icon
                 Label label = createFileOrDirLabel(fileName, path.toString(), fileExists, isDirectory, isLinkedFolder);
+                
+                // Store error flag in the label's properties for non-existent files
+                if (!fileExists && !isDirectory) {
+                    label.getProperties().put("hasError", true);
+                }
+                
                 item.setGraphic(label);
                 
                 // Set tooltip
