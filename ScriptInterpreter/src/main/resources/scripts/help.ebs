@@ -48,7 +48,8 @@ foreach line in builtinLines {
             var parenIndex: int = call str.indexOf(trimmedLine, "(", 0);
             if parenIndex > 0 then {
                 var builtinName: string = call str.substring(trimmedLine, 0, parenIndex);
-                var builtinInfo: json = {};
+                // Create a fresh JSON object for each builtin to avoid reference issues
+                var builtinInfo: json = call json.jsonFromString("{}");
                 builtinInfo = call json.set(builtinInfo, "name", builtinName);
                 builtinInfo = call json.set(builtinInfo, "signature", trimmedLine);
                 call array.add(builtinsArray, builtinInfo);
