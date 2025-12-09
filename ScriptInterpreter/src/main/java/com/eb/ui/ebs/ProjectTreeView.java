@@ -28,6 +28,7 @@ public class ProjectTreeView extends VBox {
     private final ProjectListManager projectListManager;
     private final EbsConsoleHandler handler;
     private ContextMenu currentContextMenu;
+    private ProjectFileWatcher fileWatcher;
     
     /**
      * Create a new ProjectTreeView.
@@ -58,16 +59,29 @@ public class ProjectTreeView extends VBox {
             }
         });
         
-        // Setup selection listener to show path in status bar
+        // Setup selection listener to show directory in status bar message
         treeView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null && newValue != rootItem) {
-                // Get the project path from user data
+                // Get the path from user data
                 Object userData = newValue.getGraphic() != null ? newValue.getGraphic().getUserData() : null;
                 if (userData instanceof String) {
-                    String projectPath = (String) userData;
+                    String itemPath = (String) userData;
                     StatusBar statusBar = handler.getStatusBar();
                     if (statusBar != null) {
-                        statusBar.setStatus(projectPath);
+                        // Extract directory from the path
+                        Path path = Paths.get(itemPath);
+                        String directory;
+                        
+                        if (Files.isDirectory(path)) {
+                            // If it's a directory (project or folder), show it directly
+                            directory = path.toString();
+                        } else {
+                            // If it's a file, show its parent directory
+                            Path parentPath = path.getParent();
+                            directory = parentPath != null ? parentPath.toString() : path.toString();
+                        }
+                        
+                        statusBar.setMessage(directory);
                     }
                 }
             }
@@ -84,6 +98,15 @@ public class ProjectTreeView extends VBox {
         getStyleClass().add("project-tree-panel");
         setPadding(new Insets(5));
         setSpacing(5);
+        
+        // Initialize file watcher
+        try {
+            fileWatcher = new ProjectFileWatcher(this);
+            fileWatcher.start();
+        } catch (Exception e) {
+            System.err.println("Error starting file watcher: " + e.getMessage());
+            fileWatcher = null;
+        }
         
         // Load projects from file after UI is initialized
         javafx.application.Platform.runLater(() -> loadProjects());
@@ -384,6 +407,21 @@ public class ProjectTreeView extends VBox {
             loadProjectFiles(projectItem, entry.getPath());
             
             rootItem.getChildren().add(projectItem);
+            
+            // Register this project directory with the file watcher
+            if (fileWatcher != null) {
+                try {
+                    Path jsonPath = Paths.get(entry.getPath());
+                    if (Files.exists(jsonPath)) {
+                        Path projectDir = jsonPath.getParent();
+                        if (projectDir != null && Files.isDirectory(projectDir)) {
+                            fileWatcher.registerProject(projectDir);
+                        }
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error registering project with file watcher: " + e.getMessage());
+                }
+            }
         }
     }
     
@@ -989,6 +1027,41 @@ public class ProjectTreeView extends VBox {
             
         } catch (Exception e) {
             System.err.println("Error loading directory contents: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Refreshes all projects in the tree view.
+     * Called by the file watcher when changes are detected.
+     */
+    public void refreshProjects() {
+        loadProjects();
+    }
+    
+    /**
+     * Expands all project nodes in the tree view.
+     */
+    public void expandAllProjects() {
+        for (TreeItem<String> projectItem : rootItem.getChildren()) {
+            projectItem.setExpanded(true);
+        }
+    }
+    
+    /**
+     * Returns the file watcher for this tree view.
+     * 
+     * @return the file watcher, or null if it couldn't be created
+     */
+    public ProjectFileWatcher getFileWatcher() {
+        return fileWatcher;
+    }
+    
+    /**
+     * Stops the file watcher when the tree view is no longer needed.
+     */
+    public void shutdown() {
+        if (fileWatcher != null) {
+            fileWatcher.stop();
         }
     }
 }
