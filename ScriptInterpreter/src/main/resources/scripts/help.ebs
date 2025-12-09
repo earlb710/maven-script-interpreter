@@ -116,13 +116,22 @@ if builtinsArray != null then {
                 debugCount = debugCount + 1;
             }
             
-            // Get or create category array (json.add will handle creation and appending)
-            // Add builtin to category
-            // Use the builtin name as the display value (e.g., "str.trim")
+            // Get or create category array from JSON object
+            var categoryArray: json = call json.get(builtinsByCategory, category);
+            if categoryArray == null then {
+                // Create new array for this category
+                categoryArray = [];
+            }
+            
+            // Create child node with builtin name as a JSON object
             var childNode: json = {};
             childNode = call json.set(childNode, "value", builtinName);
-            // json.add appends childNode to the array at 'category' path, creating it if needed
-            builtinsByCategory = call json.add(builtinsByCategory, category, childNode);
+            
+            // Append childNode to the category array (JSON arrays support push-like behavior)
+            categoryArray[categoryArray.length] = childNode;
+            
+            // Store the updated array back in the map
+            builtinsByCategory = call json.set(builtinsByCategory, category, categoryArray);
         }
     }
     print "[DEBUG] Categorization complete";
