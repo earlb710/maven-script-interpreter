@@ -797,13 +797,14 @@ public class ProjectTreeView extends VBox {
                 boolean isDirectory = Files.isDirectory(path);
                 boolean fileExists = Files.exists(path);
                 boolean isLinkedFolder = isDirectory && linkedFolders.contains(path.normalize().toString());
+                boolean isMainScript = mainScript != null && fileName.equals(mainScript);
                 
-                // Add "!" prefix if doesn't exist
-                String displayName = fileExists ? fileName : "! " + fileName;
+                // Don't add "!" prefix for missing files anymore
+                String displayName = fileName;
                 TreeItem<String> item = new TreeItem<>(displayName);
                 
                 // Create label with icon
-                Label label = createFileOrDirLabel(fileName, path.toString(), fileExists, isDirectory, isLinkedFolder);
+                Label label = createFileOrDirLabel(fileName, path.toString(), fileExists, isDirectory, isLinkedFolder, isMainScript);
                 
                 // Store error flag in the label's properties for non-existent files
                 if (!fileExists && !isDirectory) {
@@ -841,9 +842,10 @@ public class ProjectTreeView extends VBox {
      * @param exists Whether the file/directory exists
      * @param isDirectory Whether this is a directory
      * @param isLinkedFolder Whether this is a linked folder from project.json directories array
+     * @param isMainScript Whether this is the main script file from project.json
      * @return Label with icon and appropriate styling
      */
-    private Label createFileOrDirLabel(String fileName, String path, boolean exists, boolean isDirectory, boolean isLinkedFolder) {
+    private Label createFileOrDirLabel(String fileName, String path, boolean exists, boolean isDirectory, boolean isLinkedFolder, boolean isMainScript) {
         Label label = new Label();
         
         if (isDirectory) {
@@ -861,7 +863,7 @@ public class ProjectTreeView extends VBox {
             }
         } else {
             // File icon
-            ImageView icon = getIconForFileType(fileName);
+            ImageView icon = getIconForFileType(fileName, exists, isMainScript);
             if (icon != null) {
                 label.setGraphic(icon);
             }
@@ -887,14 +889,23 @@ public class ProjectTreeView extends VBox {
      * Get the appropriate icon for a file based on its extension.
      * 
      * @param fileName The name of the file
+     * @param exists Whether the file exists
+     * @param isMainScript Whether this is the main script file
      * @return ImageView with the appropriate icon, or null if icon not found
      */
-    private ImageView getIconForFileType(String fileName) {
+    private ImageView getIconForFileType(String fileName, boolean exists, boolean isMainScript) {
         String iconPath = null;
         String lowerName = fileName.toLowerCase();
         
         if (lowerName.endsWith(".ebs")) {
-            iconPath = "/icons/text-file.png"; // EBS script file
+            // EBS script file - use special icons
+            if (isMainScript) {
+                iconPath = "/icons/script-file-run.png"; // Main script file
+            } else if (!exists) {
+                iconPath = "/icons/script-file-missing.png"; // Missing script file
+            } else {
+                iconPath = "/icons/script-file.png"; // Normal script file
+            }
         } else if (lowerName.endsWith(".json")) {
             iconPath = "/icons/config-file.png"; // JSON config file
         } else if (lowerName.endsWith(".css")) {
@@ -1204,7 +1215,7 @@ public class ProjectTreeView extends VBox {
                 Label label = (Label) fileItem.getGraphic();
                 if (label != null) {
                     label.setUserData(newPath.toString());
-                    ImageView icon = getIconForFileType(newName);
+                    ImageView icon = getIconForFileType(newName, true, false);
                     if (icon != null) {
                         label.setGraphic(icon);
                     }
@@ -1656,8 +1667,8 @@ public class ProjectTreeView extends VBox {
                 boolean isDirectory = Files.isDirectory(path);
                 TreeItem<String> item = new TreeItem<>(fileName);
                 
-                // Create label with icon - subdirectories are not linked folders
-                Label label = createFileOrDirLabel(fileName, path.toString(), true, isDirectory, false);
+                // Create label with icon - subdirectories are not linked folders and not main script
+                Label label = createFileOrDirLabel(fileName, path.toString(), true, isDirectory, false, false);
                 item.setGraphic(label);
                 
                 // Set tooltip
