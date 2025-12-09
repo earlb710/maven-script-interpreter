@@ -10,8 +10,8 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:3.1.0:exec</goal>
             </goals>
             <properties>
-                <exec.vmArgs>--module-path "C:\Installed\javafx-sdk-25\lib" --add-modules=javafx.controls</exec.vmArgs>
-                <exec.args>${exec.vmArgs} -classpath %classpath ${exec.mainClass} ${exec.appArgs}</exec.args>
+                <exec.vmArgs>--module-path %classpath --add-modules com.eb.scriptinterpreter --add-exports javafx.graphics/com.sun.javafx.sg.prism=com.eb.scriptinterpreter,ALL-UNNAMED --add-exports javafx.graphics/com.sun.javafx.scene=com.eb.scriptinterpreter,ALL-UNNAMED --add-exports javafx.graphics/com.sun.javafx.util=com.eb.scriptinterpreter,ALL-UNNAMED --add-exports javafx.web/com.sun.webkit=com.eb.scriptinterpreter,ALL-UNNAMED</exec.vmArgs>
+                <exec.args>${exec.vmArgs} --module com.eb.scriptinterpreter/com.eb.ui.cli.MainApp ${exec.appArgs}</exec.args>
                 <exec.appArgs></exec.appArgs>
                 <exec.mainClass>com.eb.ui.cli.MainApp</exec.mainClass>
                 <exec.executable>java</exec.executable>
@@ -27,8 +27,8 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:3.1.0:exec</goal>
             </goals>
             <properties>
-                <exec.vmArgs>--module-path "C:\Installed\javafx-sdk-25\lib" --add-modules=javafx.controls -agentlib:jdwp=transport=dt_socket,server=n,address=${jpda.address}</exec.vmArgs>
-                <exec.args>${exec.vmArgs} -classpath %classpath ${exec.mainClass} ${exec.appArgs}</exec.args>
+                <exec.vmArgs>--module-path %classpath --add-modules com.eb.scriptinterpreter --add-exports javafx.graphics/com.sun.javafx.sg.prism=com.eb.scriptinterpreter,ALL-UNNAMED --add-exports javafx.graphics/com.sun.javafx.scene=com.eb.scriptinterpreter,ALL-UNNAMED --add-exports javafx.graphics/com.sun.javafx.util=com.eb.scriptinterpreter,ALL-UNNAMED --add-exports javafx.web/com.sun.webkit=com.eb.scriptinterpreter,ALL-UNNAMED -agentlib:jdwp=transport=dt_socket,server=n,address=${jpda.address}</exec.vmArgs>
+                <exec.args>${exec.vmArgs} --module com.eb.scriptinterpreter/com.eb.ui.cli.MainApp ${exec.appArgs}</exec.args>
                 <exec.appArgs></exec.appArgs>
                 <exec.mainClass>com.eb.ui.cli.MainApp</exec.mainClass>
                 <exec.executable>java</exec.executable>
@@ -45,11 +45,12 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:3.1.0:exec</goal>
             </goals>
             <properties>
-                <exec.vmArgs>--module-path "C:\Installed\javafx-sdk-25\lib" --add-modules=javafx.controls</exec.vmArgs>
-                <exec.args>${exec.vmArgs} -classpath %classpath ${exec.mainClass} ${exec.appArgs}</exec.args>
+                <exec.vmArgs>--module-path %classpath --add-modules com.eb.scriptinterpreter --add-exports javafx.graphics/com.sun.javafx.sg.prism=com.eb.scriptinterpreter,ALL-UNNAMED --add-exports javafx.graphics/com.sun.javafx.scene=com.eb.scriptinterpreter,ALL-UNNAMED --add-exports javafx.graphics/com.sun.javafx.util=com.eb.scriptinterpreter,ALL-UNNAMED --add-exports javafx.web/com.sun.webkit=com.eb.scriptinterpreter,ALL-UNNAMED</exec.vmArgs>
+                <exec.args>${exec.vmArgs} --module com.eb.scriptinterpreter/com.eb.ui.cli.MainApp ${exec.appArgs}</exec.args>
                 <exec.mainClass>com.eb.ui.cli.MainApp</exec.mainClass>
                 <exec.executable>java</exec.executable>
                 <exec.appArgs></exec.appArgs>
             </properties>
         </action>
     </actions>
+
