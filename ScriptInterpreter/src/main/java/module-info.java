@@ -40,11 +40,13 @@ module com.eb.scriptinterpreter {
     
     // JavaFX SVG Support - provides Batik integration
     // Batik is provided as automatic modules, we need to require them explicitly
+    // Note: We only require the Batik modules we actually use to avoid issues with
+    //       batik-script which has a broken module descriptor
     requires javafxsvg;
     requires batik.transcoder;
     requires batik.anim;
     requires batik.awt.util;
-    requires batik.bridge;
+    // requires batik.bridge;  // Excluded - pulls in batik-script with broken module descriptor
     requires batik.css;
     requires batik.dom;
     requires batik.gvt;
