@@ -205,10 +205,27 @@ public class ProjectTreeView extends VBox {
                         }
                     });
                     
+                    MenuItem newDirItem = new MenuItem("New Directory...");
+                    newDirItem.setOnAction(e -> createNewDirectory(selectedItem, path));
+                    
+                    MenuItem renameDirItem = new MenuItem("Rename Directory...");
+                    renameDirItem.setOnAction(e -> renameDirectory(selectedItem, path));
+                    
+                    MenuItem deleteDirItem = new MenuItem("Delete Directory...");
+                    deleteDirItem.setOnAction(e -> deleteDirectory(selectedItem, path));
+                    
                     MenuItem refreshItem = new MenuItem("Refresh");
                     refreshItem.setOnAction(e -> refreshDirectoryNode(selectedItem, path));
                     
-                    contextMenu.getItems().addAll(newFileItem, refreshItem);
+                    contextMenu.getItems().addAll(
+                        newFileItem,
+                        newDirItem,
+                        new SeparatorMenuItem(),
+                        renameDirItem,
+                        deleteDirItem,
+                        new SeparatorMenuItem(),
+                        refreshItem
+                    );
                 } else if (isFile) {
                     // Context menu for file node
                     MenuItem renameFileItem = new MenuItem("Rename File...");
@@ -742,6 +759,219 @@ public class ProjectTreeView extends VBox {
             current = current.getParent();
         }
         return current;
+    }
+    
+    /**
+     * Create a new subdirectory within the given directory.
+     * 
+     * @param dirItem The parent directory tree item
+     * @param dirPath The parent directory path
+     */
+    private void createNewDirectory(TreeItem<String> dirItem, String dirPath) {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("New Directory");
+        dialog.setHeaderText("Create new directory in: " + Path.of(dirPath).getFileName());
+        dialog.setContentText("Directory name:");
+        
+        dialog.showAndWait().ifPresent(newName -> {
+            if (newName == null || newName.trim().isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Directory name cannot be empty.");
+                alert.setHeaderText("Invalid Name");
+                alert.showAndWait();
+                return;
+            }
+            
+            try {
+                Path parentPath = Path.of(dirPath);
+                Path newDirPath = parentPath.resolve(newName.trim());
+                
+                if (Files.exists(newDirPath)) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, 
+                        "A directory with that name already exists.");
+                    alert.setHeaderText("Directory Exists");
+                    alert.showAndWait();
+                    return;
+                }
+                
+                // Create the directory
+                Files.createDirectory(newDirPath);
+                
+                // Refresh the parent directory in tree to show the new directory
+                refreshDirectoryNode(dirItem, dirPath);
+                
+                System.out.println("Directory created: " + newDirPath);
+                
+            } catch (Exception e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, 
+                    "Failed to create directory: " + e.getMessage());
+                alert.setHeaderText("Creation Error");
+                alert.showAndWait();
+            }
+        });
+    }
+    
+    /**
+     * Rename a directory.
+     * 
+     * @param dirItem The directory tree item
+     * @param dirPath The current directory path
+     */
+    private void renameDirectory(TreeItem<String> dirItem, String dirPath) {
+        Path currentPath = Path.of(dirPath);
+        TextInputDialog dialog = new TextInputDialog(currentPath.getFileName().toString());
+        dialog.setTitle("Rename Directory");
+        dialog.setHeaderText("Rename directory");
+        dialog.setContentText("New name:");
+        
+        dialog.showAndWait().ifPresent(newName -> {
+            if (newName == null || newName.trim().isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Directory name cannot be empty.");
+                alert.setHeaderText("Invalid Name");
+                alert.showAndWait();
+                return;
+            }
+            
+            try {
+                Path newPath = currentPath.getParent().resolve(newName.trim());
+                
+                if (Files.exists(newPath)) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, 
+                        "A directory with that name already exists.");
+                    alert.setHeaderText("Directory Exists");
+                    alert.showAndWait();
+                    return;
+                }
+                
+                // Rename the directory
+                Files.move(currentPath, newPath);
+                
+                // Update tree item
+                dirItem.setValue(newName.trim());
+                Label label = (Label) dirItem.getGraphic();
+                if (label != null) {
+                    label.setUserData(newPath.toString());
+                }
+                
+                // Refresh tooltip
+                Tooltip.install(dirItem.getGraphic(), new Tooltip(newPath.toString()));
+                
+                // Reload directory contents with new path
+                dirItem.getChildren().clear();
+                loadDirectoryContents(dirItem, newPath);
+                
+                System.out.println("Directory renamed: " + newPath);
+                
+            } catch (Exception e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, 
+                    "Failed to rename directory: " + e.getMessage());
+                alert.setHeaderText("Rename Error");
+                alert.showAndWait();
+            }
+        });
+    }
+    
+    /**
+     * Delete a directory after confirmation, showing file count.
+     * 
+     * @param dirItem The directory tree item
+     * @param dirPath The directory path to delete
+     */
+    private void deleteDirectory(TreeItem<String> dirItem, String dirPath) {
+        try {
+            Path path = Path.of(dirPath);
+            
+            // Count files and subdirectories
+            long[] counts = countFilesAndDirectories(path);
+            long fileCount = counts[0];
+            long dirCount = counts[1];
+            
+            // Build confirmation message
+            StringBuilder message = new StringBuilder("Are you sure you want to delete this directory");
+            if (fileCount > 0 || dirCount > 0) {
+                message.append(" containing:");
+                if (fileCount > 0) {
+                    message.append("\n• ").append(fileCount).append(" file").append(fileCount > 1 ? "s" : "");
+                }
+                if (dirCount > 0) {
+                    message.append("\n• ").append(dirCount).append(" subdirector").append(dirCount > 1 ? "ies" : "y");
+                }
+            }
+            message.append("?\n\nThis action cannot be undone.");
+            
+            Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION);
+            confirmDialog.setTitle("Delete Directory");
+            confirmDialog.setHeaderText("Delete directory: " + path.getFileName());
+            confirmDialog.setContentText(message.toString());
+            
+            confirmDialog.showAndWait().ifPresent(response -> {
+                if (response == ButtonType.OK) {
+                    try {
+                        // Delete directory and all its contents recursively
+                        deleteDirectoryRecursively(path);
+                        
+                        // Remove from tree view
+                        TreeItem<String> parent = dirItem.getParent();
+                        if (parent != null) {
+                            parent.getChildren().remove(dirItem);
+                        }
+                        
+                        System.out.println("Directory deleted: " + dirPath);
+                        
+                    } catch (Exception e) {
+                        Alert alert = new Alert(Alert.AlertType.ERROR, 
+                            "Failed to delete directory: " + e.getMessage());
+                        alert.setHeaderText("Delete Error");
+                        alert.showAndWait();
+                    }
+                }
+            });
+            
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, 
+                "Failed to analyze directory: " + e.getMessage());
+            alert.setHeaderText("Error");
+            alert.showAndWait();
+        }
+    }
+    
+    /**
+     * Count files and subdirectories in a directory recursively.
+     * 
+     * @param directory The directory to count
+     * @return Array with [fileCount, directoryCount]
+     */
+    private long[] countFilesAndDirectories(Path directory) throws Exception {
+        long[] counts = {0, 0}; // [files, directories]
+        
+        Files.walk(directory)
+            .forEach(path -> {
+                if (!path.equals(directory)) {
+                    if (Files.isDirectory(path)) {
+                        counts[1]++;
+                    } else if (Files.isRegularFile(path)) {
+                        counts[0]++;
+                    }
+                }
+            });
+        
+        return counts;
+    }
+    
+    /**
+     * Delete a directory and all its contents recursively.
+     * 
+     * @param directory The directory to delete
+     */
+    private void deleteDirectoryRecursively(Path directory) throws Exception {
+        Files.walk(directory)
+            .sorted(java.util.Comparator.reverseOrder())
+            .forEach(path -> {
+                try {
+                    Files.delete(path);
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to delete: " + path, e);
+                }
+            });
     }
     
     /**
