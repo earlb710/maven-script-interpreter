@@ -1849,7 +1849,7 @@ public class ProjectTreeView extends VBox {
             findAllMatches(rootItem, searchText.toLowerCase(), lastSearchResults);
         }
         
-        // Move to next match
+        // Move to next match (if any matches found)
         if (!lastSearchResults.isEmpty()) {
             currentSearchIndex = (currentSearchIndex + 1) % lastSearchResults.size();
             TreeItem<String> match = lastSearchResults.get(currentSearchIndex);
