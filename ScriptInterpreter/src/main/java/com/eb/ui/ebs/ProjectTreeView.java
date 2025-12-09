@@ -739,7 +739,7 @@ public class ProjectTreeView extends VBox {
     }
     
     /**
-     * Add a directory to the project view.
+     * Add a directory to the project view and save it to project.json.
      * 
      * @param projectItem The project tree item
      * @param projectJsonPath The project.json path
@@ -755,9 +755,73 @@ public class ProjectTreeView extends VBox {
         
         java.io.File selectedDir = chooser.showDialog(treeView.getScene().getWindow());
         if (selectedDir != null) {
-            // Refresh the project to show the new directory
-            projectItem.getChildren().clear();
-            loadProjectFiles(projectItem, projectJsonPath);
+            try {
+                // Read project.json
+                Path jsonPath = Path.of(projectJsonPath);
+                String jsonContent = Files.readString(jsonPath);
+                Object projectObj = com.eb.script.json.Json.parse(jsonContent);
+                
+                if (projectObj instanceof Map) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> project = (Map<String, Object>) projectObj;
+                    
+                    // Get or create directories array
+                    Object dirsObj = project.get("directories");
+                    java.util.List<String> dirsList = null;
+                    
+                    // Handle ArrayDynamic or standard List
+                    if (dirsObj instanceof com.eb.script.arrays.ArrayDynamic) {
+                        com.eb.script.arrays.ArrayDynamic arrayDynamic = (com.eb.script.arrays.ArrayDynamic) dirsObj;
+                        dirsList = new java.util.ArrayList<>();
+                        for (int i = 0; i < arrayDynamic.size(); i++) {
+                            Object item = arrayDynamic.get(i);
+                            if (item instanceof String) {
+                                dirsList.add((String) item);
+                            }
+                        }
+                    } else if (dirsObj instanceof java.util.List) {
+                        @SuppressWarnings("unchecked")
+                        java.util.List<String> list = (java.util.List<String>) dirsObj;
+                        dirsList = new java.util.ArrayList<>(list);
+                    }
+                    
+                    if (dirsList == null) {
+                        dirsList = new java.util.ArrayList<>();
+                    }
+                    
+                    // Make directory path relative to project directory if possible
+                    Path selectedPath = selectedDir.toPath();
+                    String relativePath;
+                    try {
+                        relativePath = projectDir.relativize(selectedPath).toString();
+                    } catch (IllegalArgumentException e) {
+                        // If can't be relativized, use absolute path
+                        relativePath = selectedPath.toString();
+                    }
+                    
+                    // Add directory if not already in list
+                    if (!dirsList.contains(relativePath)) {
+                        dirsList.add(relativePath);
+                        
+                        // Update the project map with the modified directories list
+                        project.put("directories", dirsList);
+                        
+                        // Write updated project.json
+                        String updatedJson = com.eb.script.json.Json.prettyJson(project);
+                        Files.writeString(jsonPath, updatedJson);
+                        
+                        System.out.println("Added directory to project.json: " + relativePath);
+                    }
+                }
+                
+                // Refresh the project to show the directory
+                projectItem.getChildren().clear();
+                loadProjectFiles(projectItem, projectJsonPath);
+                
+            } catch (Exception e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to add directory: " + e.getMessage());
+                alert.showAndWait();
+            }
         }
     }
     

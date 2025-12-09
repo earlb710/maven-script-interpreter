@@ -1254,10 +1254,8 @@ public class EbsConsoleHandler extends EbsHandler {
             String defaultContent = getDefaultContentForFileType(fileInfo.getType());
             Files.writeString(filePath, defaultContent, StandardCharsets.UTF_8);
             
-            // Add file to project.json
-            if (Files.exists(jsonPath)) {
-                addFileToProjectJson(jsonPath, filePath);
-            }
+            // DO NOT add file to project.json - just create it on filesystem
+            // Tree view will automatically show it when refreshed
             
             // Open the file in a tab using the same approach as /open command
             Path p = Util.resolveSandboxedPath(fullPath);
@@ -1267,6 +1265,11 @@ public class EbsConsoleHandler extends EbsHandler {
             
             ScriptArea output = env.getOutputArea();
             output.printlnOk("File created: " + fullPath);
+            
+            // Refresh the tree view to show the new file
+            if (projectTreeView != null) {
+                projectTreeView.refreshProjectFiles(projectJsonPath);
+            }
             
         } catch (Exception ex) {
             submitErrors("Failed to create new file: " + ex.getMessage());
@@ -1498,11 +1501,8 @@ public class EbsConsoleHandler extends EbsHandler {
             String defaultContent = getDefaultContentForFileType(fileInfo.getType());
             Files.writeString(filePath, defaultContent, StandardCharsets.UTF_8);
             
-            // Add file to project.json
-            Path jsonPath = Path.of(projectJsonPath);
-            if (Files.exists(jsonPath)) {
-                addFileToProjectJson(jsonPath, filePath);
-            }
+            // DO NOT add file to project.json - just create it on filesystem
+            // Tree view will automatically show it when refreshed
             
             // Open the file in a tab using the same approach as /open command
             Path p = Util.resolveSandboxedPath(fullPath);
