@@ -1,0 +1,95 @@
+// Simple test for chess move functions
+// This script tests the new move calculation functions
+
+posType typeof record { x: int, y: int };
+
+// Helper function to display moves
+printMove(move: json) {
+    var xval: int = call json.getint(move, "x");
+    var yval: int = call json.getint(move, "y");
+    print "  - (" + xval + ", " + yval + ")";
+}
+
+// Pawn move function
+getPawnMoves(x: int, y: int, direction: string) {
+    var moves: json = [];
+    var move: json;
+    
+    if direction == "up" then {
+        if y > 0 then {
+            move = {"x": 0, "y": 0};
+            call json.set(move, "x", x);
+            call json.set(move, "y", y - 1);
+            call json.add(moves, move);
+        }
+        if y == 6 then {
+            move = {"x": 0, "y": 0};
+            call json.set(move, "x", x);
+            call json.set(move, "y", y - 2);
+            call json.add(moves, move);
+        }
+        if y > 0 and x > 0 then {
+            move = {"x": 0, "y": 0};
+            call json.set(move, "x", x - 1);
+            call json.set(move, "y", y - 1);
+            call json.add(moves, move);
+        }
+        if y > 0 and x < 7 then {
+            move = {"x": 0, "y": 0};
+            call json.set(move, "x", x + 1);
+            call json.set(move, "y", y - 1);
+            call json.add(moves, move);
+        }
+    } else {
+        if y < 7 then {
+            move = {"x": 0, "y": 0};
+            call json.set(move, "x", x);
+            call json.set(move, "y", y + 1);
+            call json.add(moves, move);
+        }
+        if y == 1 then {
+            move = {"x": 0, "y": 0};
+            call json.set(move, "x", x);
+            call json.set(move, "y", y + 2);
+            call json.add(moves, move);
+        }
+        if y < 7 and x > 0 then {
+            move = {"x": 0, "y": 0};
+            call json.set(move, "x", x - 1);
+            call json.set(move, "y", y + 1);
+            call json.add(moves, move);
+        }
+        if y < 7 and x < 7 then {
+            move = {"x": 0, "y": 0};
+            call json.set(move, "x", x + 1);
+            call json.set(move, "y", y + 1);
+            call json.add(moves, move);
+        }
+    }
+    
+    return moves;
+}
+
+// Test Pawn
+print "Testing Pawn Moves:";
+print "===================";
+print "White Pawn at (1, 6) moving up:";
+var pawnMoves: json = call getPawnMoves(1, 6, "up");
+var len: int = call json.length(pawnMoves);
+print "Found " + len + " moves:";
+var i: int;
+for (i = 0; i < len; i++) {
+    call printMove(call json.get(pawnMoves, i));
+}
+
+print "";
+print "Black Pawn at (3, 1) moving down:";
+var pawnMovesBlack: json = call getPawnMoves(3, 1, "down");
+len = call json.length(pawnMovesBlack);
+print "Found " + len + " moves:";
+for (i = 0; i < len; i++) {
+    call printMove(call json.get(pawnMovesBlack, i));
+}
+
+print "";
+print "Test completed!";
