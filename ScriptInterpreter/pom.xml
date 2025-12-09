@@ -75,14 +75,14 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
                 <configuration>
-                    <mainClass>com.eb.ui.cli.MainApp</mainClass>
+                    <mainClass>com.eb.scriptinterpreter/com.eb.ui.cli.MainApp</mainClass>
                     <options>
                         <option>--add-exports</option>
-                        <option>javafx.graphics/com.sun.javafx.sg.prism=ALL-UNNAMED</option>
+                        <option>javafx.graphics/com.sun.javafx.sg.prism=com.eb.scriptinterpreter</option>
                         <option>--add-exports</option>
-                        <option>javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED</option>
+                        <option>javafx.graphics/com.sun.javafx.scene=com.eb.scriptinterpreter</option>
                         <option>--add-exports</option>
-                        <option>javafx.graphics/com.sun.javafx.util=ALL-UNNAMED</option>
+                        <option>javafx.graphics/com.sun.javafx.util=com.eb.scriptinterpreter</option>
                     </options>
                 </configuration>
             </plugin>
