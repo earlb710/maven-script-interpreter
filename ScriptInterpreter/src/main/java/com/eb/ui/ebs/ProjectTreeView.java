@@ -214,21 +214,49 @@ public class ProjectTreeView extends VBox {
                     MenuItem removeDirItem = new MenuItem("Remove Directory...");
                     removeDirItem.setOnAction(e -> removeDirectoryFromProject(selectedItem, path));
                     
+                    // Get main script for run option
+                    String mainScript = getMainScript(path);
+                    MenuItem runProjectItem = null;
+                    if (mainScript != null && !mainScript.isEmpty()) {
+                        runProjectItem = new MenuItem("Run " + mainScript);
+                        runProjectItem.setOnAction(e -> {
+                            Path projectDir = Path.of(path).getParent();
+                            if (projectDir != null) {
+                                Path scriptPath = projectDir.resolve(mainScript);
+                                handler.runScriptFile(scriptPath);
+                            }
+                        });
+                    }
+                    
                     MenuItem renameProjectItem = new MenuItem("Rename Project...");
                     renameProjectItem.setOnAction(e -> renameProject(selectedItem, path));
                     
                     MenuItem removeItem = new MenuItem("Remove from List");
                     removeItem.setOnAction(e -> removeSelectedProject(selectedItem));
                     
-                    contextMenu.getItems().addAll(
-                        newFileItem, 
-                        addDirItem, 
-                        removeDirItem,
-                        new SeparatorMenuItem(),
-                        renameProjectItem,
-                        new SeparatorMenuItem(),
-                        removeItem
-                    );
+                    if (runProjectItem != null) {
+                        contextMenu.getItems().addAll(
+                            runProjectItem,
+                            new SeparatorMenuItem(),
+                            newFileItem, 
+                            addDirItem, 
+                            removeDirItem,
+                            new SeparatorMenuItem(),
+                            renameProjectItem,
+                            new SeparatorMenuItem(),
+                            removeItem
+                        );
+                    } else {
+                        contextMenu.getItems().addAll(
+                            newFileItem, 
+                            addDirItem, 
+                            removeDirItem,
+                            new SeparatorMenuItem(),
+                            renameProjectItem,
+                            new SeparatorMenuItem(),
+                            removeItem
+                        );
+                    }
                 } else if (isDirectory) {
                     // Context menu for directory node
                     MenuItem newFileItem = new MenuItem("New File...");
@@ -285,6 +313,15 @@ public class ProjectTreeView extends VBox {
                     }
                 } else if (isFile) {
                     // Context menu for file node
+                    // Check if this is a script file (.ebs)
+                    boolean isScriptFile = path.toLowerCase().endsWith(".ebs");
+                    
+                    MenuItem runScriptItem = null;
+                    if (isScriptFile) {
+                        runScriptItem = new MenuItem("Run Script");
+                        runScriptItem.setOnAction(e -> handler.runScriptFile(Path.of(path)));
+                    }
+                    
                     MenuItem renameFileItem = new MenuItem("Rename File...");
                     renameFileItem.setOnAction(e -> renameFile(selectedItem, path));
                     
@@ -294,12 +331,23 @@ public class ProjectTreeView extends VBox {
                     MenuItem deleteFileItem = new MenuItem("Delete");
                     deleteFileItem.setOnAction(e -> deleteFile(selectedItem, path));
                     
-                    contextMenu.getItems().addAll(
-                        renameFileItem,
-                        copyFileItem,
-                        new SeparatorMenuItem(),
-                        deleteFileItem
-                    );
+                    if (runScriptItem != null) {
+                        contextMenu.getItems().addAll(
+                            runScriptItem,
+                            new SeparatorMenuItem(),
+                            renameFileItem,
+                            copyFileItem,
+                            new SeparatorMenuItem(),
+                            deleteFileItem
+                        );
+                    } else {
+                        contextMenu.getItems().addAll(
+                            renameFileItem,
+                            copyFileItem,
+                            new SeparatorMenuItem(),
+                            deleteFileItem
+                        );
+                    }
                 }
             }
             
@@ -583,6 +631,38 @@ public class ProjectTreeView extends VBox {
         } catch (Exception e) {
             System.err.println("Error reading project display name: " + e.getMessage());
             return defaultName;
+        }
+    }
+    
+    /**
+     * Get the main script name from project.json.
+     * 
+     * @param projectJsonPath Path to the project.json file
+     * @return The main script name, or null if not found
+     */
+    private String getMainScript(String projectJsonPath) {
+        try {
+            Path jsonPath = Path.of(projectJsonPath);
+            if (!Files.exists(jsonPath)) {
+                return null;
+            }
+            
+            String jsonContent = Files.readString(jsonPath);
+            Object projectObj = com.eb.script.json.Json.parse(jsonContent);
+            
+            if (!(projectObj instanceof Map)) {
+                return null;
+            }
+            
+            @SuppressWarnings("unchecked")
+            Map<String, Object> project = (Map<String, Object>) projectObj;
+            
+            Object mainScriptObj = project.get("mainScript");
+            return mainScriptObj instanceof String ? (String) mainScriptObj : null;
+            
+        } catch (Exception e) {
+            System.err.println("Error reading main script from project.json: " + e.getMessage());
+            return null;
         }
     }
     

@@ -890,6 +890,84 @@ public class EbsConsoleHandler extends EbsHandler {
     }
     
     /**
+     * Run a script file from a file path.
+     * 
+     * @param filePath The path to the script file
+     */
+    public void runScriptFile(Path filePath) {
+        try {
+            if (!Files.exists(filePath)) {
+                ScriptArea output = env.getOutputArea();
+                javafx.application.Platform.runLater(() -> {
+                    output.printlnError("ERROR: File not found: " + filePath);
+                });
+                return;
+            }
+            
+            String script = Files.readString(filePath, StandardCharsets.UTF_8);
+            String scriptName = filePath.getFileName().toString();
+            
+            // Update status bar
+            if (statusBar != null) {
+                javafx.application.Platform.runLater(() -> {
+                    statusBar.setStatus("Running " + scriptName);
+                    statusBar.clearMessage();
+                });
+            }
+            
+            // Get the directory containing the script
+            Path scriptDir = filePath.getParent();
+            
+            // Execute script in background thread
+            Thread t = new Thread(() -> {
+                // Set the script's directory as the context source directory
+                if (scriptDir != null) {
+                    Util.setCurrentContextSourceDir(scriptDir);
+                }
+                try {
+                    // Submit script for execution
+                    submit(script);
+                    
+                    // Update status bar on completion
+                    javafx.application.Platform.runLater(() -> {
+                        if (statusBar != null) {
+                            statusBar.clearStatus();
+                            statusBar.setMessage(scriptName + " completed");
+                        }
+                    });
+                } catch (Exception ex) {
+                    // Error message
+                    ScriptArea output = env.getOutputArea();
+                    javafx.application.Platform.runLater(() -> {
+                        output.printlnError("✗ Error running " + scriptName + ": " + Util.formatExceptionWith2Origin(ex));
+                        if (statusBar != null) {
+                            statusBar.clearStatus();
+                            String errorMsg = ex.getMessage() != null ? ex.getMessage() : ex.getClass().getSimpleName();
+                            String displayMsg = errorMsg.length() > MAX_ERROR_MESSAGE_LENGTH 
+                                ? errorMsg.substring(0, TRUNCATED_MESSAGE_LENGTH) + "..." 
+                                : errorMsg;
+                            statusBar.setMessage(displayMsg, errorMsg);
+                        }
+                    });
+                } finally {
+                    // Clear the context source directory after execution
+                    if (scriptDir != null) {
+                        Util.clearCurrentContextSourceDir();
+                    }
+                }
+            }, "script-runner");
+            t.setDaemon(true);
+            t.start();
+            
+        } catch (Exception ex) {
+            ScriptArea output = env.getOutputArea();
+            javafx.application.Platform.runLater(() -> {
+                output.printlnError("ERROR loading script: " + ex.getMessage());
+            });
+        }
+    }
+    
+    /**
      * Create a new project with a project.json file.
      * Shows a dialog asking for project name and path.
      */
