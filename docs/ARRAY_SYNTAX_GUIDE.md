@@ -221,8 +221,8 @@ var largeArray1: int[10000];
 var largeArray2: array.int[10000];
 
 // For 10,000 elements:
-// - largeArray1: ~160 KB memory (16 bytes per Integer object × 10,000)
-// - largeArray2: ~40 KB memory (4 bytes per int × 10,000)
+// - largeArray1: 160 KB memory (16 bytes per Integer object × 10,000)
+// - largeArray2: 40 KB memory (4 bytes per int × 10,000)
 ```
 
 ### Example 3: Numeric Computation
@@ -327,8 +327,9 @@ Memory constrained environment?
 - [EBS Script Syntax Reference](EBS_SCRIPT_SYNTAX.md) - Complete language syntax
 - [README.md](../README.md) - Project overview and array features
 - Example scripts:
-  - `ScriptInterpreter/scripts/test/test_array_type_syntax.ebs`
-  - `ScriptInterpreter/scripts/test/test_array_fixed_int.ebs`
+  - `ScriptInterpreter/scripts/examples/array_syntax_comparison.ebs` - Comprehensive demonstration of differences
+  - `ScriptInterpreter/scripts/test/test_array_type_syntax.ebs` - Syntax validation tests
+  - `ScriptInterpreter/scripts/test/test_array_fixed_int.ebs` - ArrayFixedInt implementation tests
 
 ---
 
