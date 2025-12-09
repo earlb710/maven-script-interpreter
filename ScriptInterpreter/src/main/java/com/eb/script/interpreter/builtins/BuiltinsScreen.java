@@ -1705,6 +1705,9 @@ public class BuiltinsScreen {
                     ((javafx.scene.control.TextField) control).setText(textValue);
                 } else if (control instanceof javafx.scene.control.TextArea) {
                     ((javafx.scene.control.TextArea) control).setText(textValue);
+                } else if (control instanceof javafx.scene.web.WebView) {
+                    // For WebView, load the content as HTML
+                    ((javafx.scene.web.WebView) control).getEngine().loadContent(textValue);
                 } else if (control instanceof javafx.scene.control.Label) {
                     ((javafx.scene.control.Label) control).setText(textValue);
                 } else if (control instanceof javafx.scene.control.Button) {
