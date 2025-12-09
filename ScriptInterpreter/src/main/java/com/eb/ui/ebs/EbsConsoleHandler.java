@@ -1209,10 +1209,15 @@ public class EbsConsoleHandler extends EbsHandler {
      * Create a new file in a project.
      * Shows a dialog asking for file type, name, and path.
      * 
-     * @param projectPath The path to the project directory (used as default path)
+     * @param projectJsonPath The path to the project.json file
      */
-    public void createNewFile(String projectPath) {
+    public void createNewFile(String projectJsonPath) {
         try {
+            // Extract project directory from project.json path
+            Path jsonPath = Path.of(projectJsonPath);
+            Path projectDir = jsonPath.getParent();
+            String projectPath = projectDir != null ? projectDir.toString() : projectJsonPath;
+            
             // Show new file dialog
             NewFileDialog dialog = new NewFileDialog(stage, projectPath);
             var result = dialog.showAndWait();
@@ -1249,10 +1254,9 @@ public class EbsConsoleHandler extends EbsHandler {
             String defaultContent = getDefaultContentForFileType(fileInfo.getType());
             Files.writeString(filePath, defaultContent, StandardCharsets.UTF_8);
             
-            // Add file to project.json if within project directory
-            Path projectJsonPath = Path.of(projectPath).resolve("project.json");
-            if (Files.exists(projectJsonPath)) {
-                addFileToProjectJson(projectJsonPath, filePath);
+            // Add file to project.json
+            if (Files.exists(jsonPath)) {
+                addFileToProjectJson(jsonPath, filePath);
             }
             
             // Open the file in a tab using the same approach as /open command
@@ -1273,10 +1277,15 @@ public class EbsConsoleHandler extends EbsHandler {
      * Add an existing file to the project by opening it in a tab.
      * Shows a file chooser dialog.
      * 
-     * @param projectPath The path to the project directory (used as initial directory)
+     * @param projectJsonPath The path to the project.json file
      */
-    public void addExistingFile(String projectPath) {
+    public void addExistingFile(String projectJsonPath) {
         try {
+            // Extract project directory from project.json path
+            Path jsonPath = Path.of(projectJsonPath);
+            Path projectDir = jsonPath.getParent();
+            String projectPath = projectDir != null ? projectDir.toString() : projectJsonPath;
+            
             FileChooser fc = new FileChooser();
             fc.setTitle("Add Existing File");
             
@@ -1308,10 +1317,9 @@ public class EbsConsoleHandler extends EbsHandler {
             // Add to MRU
             addRecentFile(filePath);
             
-            // Add file to project.json if within project directory
-            Path projectJsonPath = Path.of(projectPath).resolve("project.json");
-            if (Files.exists(projectJsonPath)) {
-                addFileToProjectJson(projectJsonPath, filePath);
+            // Add file to project.json
+            if (Files.exists(jsonPath)) {
+                addFileToProjectJson(jsonPath, filePath);
             }
             
             // Open the file in a tab using the same approach as /open command

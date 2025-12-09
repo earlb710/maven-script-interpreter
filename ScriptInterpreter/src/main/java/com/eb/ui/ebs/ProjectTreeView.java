@@ -128,32 +128,22 @@ public class ProjectTreeView extends VBox {
                 }
             } else {
                 // Context menu for individual project node
-                // Get the project path from user data
+                // Get the project.json path from user data
                 Object userData = selectedItem.getGraphic() != null ? selectedItem.getGraphic().getUserData() : null;
-                String projectPath = userData instanceof String ? (String) userData : null;
+                String projectJsonPath = userData instanceof String ? (String) userData : null;
                 
-                // Extract project directory from project.json path
-                String projectDir = getProjectDirectory(projectPath);
-                
-                MenuItem newFileItem = new MenuItem("New File...");
-                final String finalProjectDir = projectDir;
-                newFileItem.setOnAction(e -> {
-                    if (finalProjectDir != null) {
-                        handler.createNewFile(finalProjectDir);
-                    }
-                });
-                
-                MenuItem addFileItem = new MenuItem("Add File...");
-                addFileItem.setOnAction(e -> {
-                    if (finalProjectDir != null) {
-                        handler.addExistingFile(finalProjectDir);
-                    }
-                });
-                
-                MenuItem removeItem = new MenuItem("Remove from List");
-                removeItem.setOnAction(e -> removeSelectedProject(selectedItem));
-                
-                contextMenu.getItems().addAll(newFileItem, addFileItem, new SeparatorMenuItem(), removeItem);
+                if (projectJsonPath != null) {
+                    MenuItem newFileItem = new MenuItem("New File...");
+                    newFileItem.setOnAction(e -> handler.createNewFile(projectJsonPath));
+                    
+                    MenuItem addFileItem = new MenuItem("Add File...");
+                    addFileItem.setOnAction(e -> handler.addExistingFile(projectJsonPath));
+                    
+                    MenuItem removeItem = new MenuItem("Remove from List");
+                    removeItem.setOnAction(e -> removeSelectedProject(selectedItem));
+                    
+                    contextMenu.getItems().addAll(newFileItem, addFileItem, new SeparatorMenuItem(), removeItem);
+                }
             }
             
             contextMenu.show(treeView, event.getScreenX(), event.getScreenY());
@@ -310,7 +300,9 @@ public class ProjectTreeView extends VBox {
         List<ProjectListManager.ProjectEntry> entries = projectListManager.getProjects();
         
         for (ProjectListManager.ProjectEntry entry : entries) {
-            TreeItem<String> projectItem = new TreeItem<>(entry.getName());
+            // Get project name with version
+            String displayName = getProjectDisplayName(entry.getPath(), entry.getName());
+            TreeItem<String> projectItem = new TreeItem<>(displayName);
             
             // Add folder icon using Unicode emoji
             Label iconLabel = new Label("\uD83D\uDCC1"); // 📁 folder emoji
@@ -325,6 +317,49 @@ public class ProjectTreeView extends VBox {
             loadProjectFiles(projectItem, entry.getPath());
             
             rootItem.getChildren().add(projectItem);
+        }
+    }
+    
+    /**
+     * Get the display name for a project (name - version).
+     * 
+     * @param projectJsonPath Path to the project.json file
+     * @param defaultName Default name to use if version not found
+     * @return Display name in format "ProjectName - vX.X.X"
+     */
+    private String getProjectDisplayName(String projectJsonPath, String defaultName) {
+        try {
+            Path jsonPath = Path.of(projectJsonPath);
+            if (!Files.exists(jsonPath)) {
+                return defaultName;
+            }
+            
+            String jsonContent = Files.readString(jsonPath);
+            Object projectObj = com.eb.script.json.Json.parse(jsonContent);
+            
+            if (!(projectObj instanceof Map)) {
+                return defaultName;
+            }
+            
+            @SuppressWarnings("unchecked")
+            Map<String, Object> project = (Map<String, Object>) projectObj;
+            
+            // Get name and version
+            Object nameObj = project.get("name");
+            Object versionObj = project.get("version");
+            
+            String name = nameObj instanceof String ? (String) nameObj : defaultName;
+            String version = versionObj instanceof String ? (String) versionObj : null;
+            
+            if (version != null && !version.isEmpty()) {
+                return name + " - v" + version;
+            } else {
+                return name;
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Error reading project display name: " + e.getMessage());
+            return defaultName;
         }
     }
     
