@@ -3010,7 +3010,7 @@ public class ScreenFactory {
         // Wrap content in ScrollPane to handle overflow when content is larger than window
         ScrollPane scrollPane = new ScrollPane(rootContainer);
         scrollPane.setFitToWidth(true);  // Make content fit to scroll pane width
-        scrollPane.setFitToHeight(false); // Allow vertical scrolling when needed
+        scrollPane.setFitToHeight(true); // Make content fit to scroll pane height to allow proper resizing
         scrollPane.setStyle("-fx-background-color: transparent;");
 
         // Create status bar for the screen
@@ -3275,6 +3275,56 @@ public class ScreenFactory {
             List<Node> boundControls) {
         // Create the container using AreaContainerFactory
         Region container = AreaContainerFactory.createContainer(areaDef);
+        
+        // Apply width/height constraints if specified
+        if (areaDef.minWidth != null && !areaDef.minWidth.isEmpty()) {
+            try {
+                double width = parseSize(areaDef.minWidth);
+                container.setMinWidth(width);
+            } catch (NumberFormatException e) {
+                // Ignore invalid values
+            }
+        }
+        if (areaDef.prefWidth != null && !areaDef.prefWidth.isEmpty()) {
+            try {
+                double width = parseSize(areaDef.prefWidth);
+                container.setPrefWidth(width);
+            } catch (NumberFormatException e) {
+                // Ignore invalid values
+            }
+        }
+        if (areaDef.maxWidth != null && !areaDef.maxWidth.isEmpty()) {
+            try {
+                double width = parseSize(areaDef.maxWidth);
+                container.setMaxWidth(width);
+            } catch (NumberFormatException e) {
+                // Ignore invalid values
+            }
+        }
+        if (areaDef.minHeight != null && !areaDef.minHeight.isEmpty()) {
+            try {
+                double height = parseSize(areaDef.minHeight);
+                container.setMinHeight(height);
+            } catch (NumberFormatException e) {
+                // Ignore invalid values
+            }
+        }
+        if (areaDef.prefHeight != null && !areaDef.prefHeight.isEmpty()) {
+            try {
+                double height = parseSize(areaDef.prefHeight);
+                container.setPrefHeight(height);
+            } catch (NumberFormatException e) {
+                // Ignore invalid values
+            }
+        }
+        if (areaDef.maxHeight != null && !areaDef.maxHeight.isEmpty()) {
+            try {
+                double height = parseSize(areaDef.maxHeight);
+                container.setMaxHeight(height);
+            } catch (NumberFormatException e) {
+                // Ignore invalid values
+            }
+        }
         
         // Register area container for runtime property updates
         if (context != null && areaDef.name != null && !areaDef.name.isEmpty()) {
@@ -4247,6 +4297,18 @@ public class ScreenFactory {
             }
         }
 
+        // Extract grow properties for layout management
+        area.hgrow = getStringValue(areaDef, "hgrow", null);
+        area.vgrow = getStringValue(areaDef, "vgrow", null);
+        
+        // Extract width/height constraints
+        area.minWidth = getStringValue(areaDef, "minWidth", getStringValue(areaDef, "min_width", null));
+        area.prefWidth = getStringValue(areaDef, "prefWidth", getStringValue(areaDef, "pref_width", null));
+        area.maxWidth = getStringValue(areaDef, "maxWidth", getStringValue(areaDef, "max_width", null));
+        area.minHeight = getStringValue(areaDef, "minHeight", getStringValue(areaDef, "min_height", null));
+        area.prefHeight = getStringValue(areaDef, "prefHeight", getStringValue(areaDef, "pref_height", null));
+        area.maxHeight = getStringValue(areaDef, "maxHeight", getStringValue(areaDef, "max_height", null));
+
         return area;
     }
 
@@ -4800,8 +4862,9 @@ public class ScreenFactory {
                 container.getChildren().addAll(label, control);
             }
             
-            // Allow the control (e.g., TableView) to grow vertically within the VBox
+            // Allow the control (e.g., TableView, TextArea) to grow both vertically and horizontally within the VBox
             javafx.scene.layout.VBox.setVgrow(control, javafx.scene.layout.Priority.ALWAYS);
+            javafx.scene.layout.HBox.setHgrow(control, javafx.scene.layout.Priority.ALWAYS);
             
             return container;
         } else {

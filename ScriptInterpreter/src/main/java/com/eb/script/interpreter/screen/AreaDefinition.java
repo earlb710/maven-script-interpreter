@@ -73,6 +73,13 @@ public class AreaDefinition {
     public String hgrow;
     // Vertical grow priority for this area when added to VBox or GridPane (ALWAYS, SOMETIMES, NEVER)
     public String vgrow;
+    // Width/height constraints for this area
+    public String minWidth;
+    public String prefWidth;
+    public String maxWidth;
+    public String minHeight;
+    public String prefHeight;
+    public String maxHeight;
     
     @Override
     public String toString() {

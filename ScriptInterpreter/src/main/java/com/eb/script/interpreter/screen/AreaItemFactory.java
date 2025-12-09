@@ -11,6 +11,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.web.WebView;
 
 /**
  * Factory class for creating JavaFX UI controls from AreaItem definitions.
@@ -311,9 +312,8 @@ public class AreaItemFactory {
                 // Return a label placeholder instead
                 return new Label("[MediaView - javafx-media module required]");
             case WEBVIEW:
-                // WebView requires javafx-web module which is not included
-                // Return a label placeholder instead
-                return new Label("[WebView - javafx-web module required]");
+                // Create WebView for displaying HTML content
+                return new WebView();
             case CHART:
                 // Create a default bar chart as placeholder
                 CategoryAxis xAxis = new CategoryAxis();

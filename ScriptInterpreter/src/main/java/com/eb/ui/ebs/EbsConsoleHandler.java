@@ -545,6 +545,7 @@ public class EbsConsoleHandler extends EbsHandler {
         fc.setInitialDirectory(Util.SANDBOX_ROOT.toFile());
         //  filter
         fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("EBS Scripts", "*.ebs"));
+        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("JSON files", "*.json"));
         fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Log files", "*.log"));
         var f = fc.showOpenDialog(stage);
         if (f != null) {
