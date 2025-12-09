@@ -110,7 +110,7 @@ while row < 6 do {
 
 // Draw color bars
 print "Drawing color bars...";
-var colors: array.string[5] = array(5);
+var colors: string[5];
 colors[0] = "#FF0000";
 colors[1] = "#00FF00";
 colors[2] = "#0000FF";
