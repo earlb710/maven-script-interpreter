@@ -17,5 +17,6 @@ fi
 # Run with required JVM arguments for JavaFX WebView
 java --add-exports javafx.graphics/com.sun.javafx.sg.prism=ALL-UNNAMED \
      --add-exports javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED \
+     --add-exports javafx.graphics/com.sun.javafx.util=ALL-UNNAMED \
      -cp target/classes \
      com.eb.ui.cli.MainApp "$@"

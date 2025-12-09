@@ -81,6 +81,8 @@
                         <option>javafx.graphics/com.sun.javafx.sg.prism=ALL-UNNAMED</option>
                         <option>--add-exports</option>
                         <option>javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED</option>
+                        <option>--add-exports</option>
+                        <option>javafx.graphics/com.sun.javafx.util=ALL-UNNAMED</option>
                     </options>
                 </configuration>
             </plugin>

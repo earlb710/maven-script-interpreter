@@ -7,3 +7,4 @@ This file contains JVM arguments that Maven will automatically apply when runnin
 Currently configured arguments:
 - `--add-exports javafx.graphics/com.sun.javafx.sg.prism=ALL-UNNAMED`: Required for JavaFX WebView rendering engine (NGWebView internal class).
 - `--add-exports javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED`: Required for JavaFX WebView scene graph helpers (WebViewHelper internal class).
+- `--add-exports javafx.graphics/com.sun.javafx.util=ALL-UNNAMED`: Required for JavaFX WebView utility classes (Utils internal class).
