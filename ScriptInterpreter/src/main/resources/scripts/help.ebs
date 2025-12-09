@@ -537,8 +537,9 @@ getHelpContent(topic: string) return string {
 // Create the help screen from the modified JSON
 screen helpScreen = screenJson;
 
-// Set initial content (use item name, not varRef) - wrap in HTML for WebView
-call scr.setProperty("helpScreen.helpContentView", "text", call convertToHtml(call getHelpContent("")));
+// Set initial content by setting the screen variable (not scr.setProperty)
+// The WebView is bound to helpContent variable, so we set that instead
+helpScreen.helpContent = call convertToHtml(call getHelpContent(""));
 
 // Show the screen
 show screen helpScreen;

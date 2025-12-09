@@ -50,7 +50,7 @@
                 "vgrow": "ALWAYS",
                 "expandAll": true,
                 "showRoot": false,
-                "onChange": "call scr.setProperty(\"helpScreen.helpContentView\", \"text\", call convertToHtml(call getHelpContent(helpScreen.selectedTopic)));",
+                "onChange": "helpScreen.helpContent = call convertToHtml(call getHelpContent(helpScreen.selectedTopic));",
                 "treeItems": []
               }
             }
