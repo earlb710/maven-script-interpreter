@@ -109,19 +109,12 @@ if builtinsArray != null then {
                 category = call str.substring(builtinName, 0, dotIndex);
             }
             
-            // Get or create category array (keep as JSON arrays for storage)
-            var categoryArray: json = call json.get(builtinsByCategory, category);
-            if categoryArray == null then {
-                categoryArray = [];
-            }
-            
+            // Get or create category array (json.add will handle creation and appending)
             // Add builtin to category
             // Use the builtin name as the display value (e.g., "str.trim")
             var childNode: json = {};
             childNode = call json.set(childNode, "value", builtinName);
-            // Since categoryArray is a JSON array, we need to use json.add with the root object
-            // But since we want to append to the array itself, we'll rebuild it
-            var newCategoryArray: json = categoryArray;
+            // json.add appends childNode to the array at 'category' path, creating it if needed
             builtinsByCategory = call json.add(builtinsByCategory, category, childNode);
         }
     }
