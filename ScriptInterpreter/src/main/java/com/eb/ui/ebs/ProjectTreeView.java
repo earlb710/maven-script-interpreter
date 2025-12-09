@@ -591,6 +591,17 @@ public class ProjectTreeView extends VBox {
                 });
             }
             
+            // Add mainScript even if it doesn't exist
+            if (mainScript != null && !mainScript.isEmpty()) {
+                Path mainScriptPath = projectDir.resolve(mainScript);
+                String normalizedMainScriptPath = mainScriptPath.normalize().toString();
+                
+                if (!addedPaths.contains(normalizedMainScriptPath)) {
+                    paths.add(mainScriptPath);
+                    addedPaths.add(normalizedMainScriptPath);
+                }
+            }
+            
             // Add directories from project.json that aren't already in the list
             for (String dirPath : extraDirectories) {
                 Path dir = projectDir.resolve(dirPath);
