@@ -42,15 +42,15 @@ foreach line in builtinLines {
     if trimmedLine == "Builtins:" then {
         inBuiltinsSection = true;
     } else if inBuiltinsSection then {
-        if trimmedLine != "" && call str.startsWith(trimmedLine, " ") then {
+        // Check if the original line (not trimmed) starts with space to identify indented builtin lines
+        if trimmedLine != "" && call str.startsWith(line, " ") then {
             // Extract builtin name from line like "  array.add(array:array, value:any, index:integer?) : null"
-            var lineContent: string = call str.trim(trimmedLine);
-            var parenIndex: int = call str.indexOf(lineContent, "(", 0);
+            var parenIndex: int = call str.indexOf(trimmedLine, "(", 0);
             if parenIndex > 0 then {
-                var builtinName: string = call str.substring(lineContent, 0, parenIndex);
+                var builtinName: string = call str.substring(trimmedLine, 0, parenIndex);
                 var builtinInfo: json = {};
                 builtinInfo = call json.set(builtinInfo, "name", builtinName);
-                builtinInfo = call json.set(builtinInfo, "signature", lineContent);
+                builtinInfo = call json.set(builtinInfo, "signature", trimmedLine);
                 call array.add(builtinsArray, builtinInfo);
             }
         } else if trimmedLine == "" then {
