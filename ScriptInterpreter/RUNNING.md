@@ -53,6 +53,9 @@ When running `com.eb.ui.cli.MainApp` from your IDE, you **must** configure it to
 5. Set Main class to: `com.eb.scriptinterpreter/com.eb.ui.cli.MainApp`
 6. Apply and OK
 
+**In NetBeans:**
+The project includes a properly configured `nbactions.xml` file that automatically uses the module system with all required exports when you run the project from NetBeans (F6 or Run → Run Project). No additional configuration needed.
+
 **In Eclipse:**
 1. Run → Run Configurations...
 2. Select your MainApp configuration
