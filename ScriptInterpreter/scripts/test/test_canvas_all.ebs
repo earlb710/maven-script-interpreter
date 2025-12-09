@@ -535,7 +535,7 @@ screen canvasDisplayScreen = {
                 "type": "button",
                 "labelText": "Close Window",
                 "seq": 8,
-                "onClick": "call screen.close();"
+                "onClick": "close screen;"
             }
         }
     ]
@@ -553,7 +553,7 @@ call screen.setvar(canvasDisplayScreen, "failedLabel", failedText);
 // Show the screen
 print "Displaying canvas on screen...";
 print "Close the window to continue...";
-call screen.show(canvasDisplayScreen);
+show screen canvasDisplayScreen;
 
 print "";
 print "Screen closed.";
