@@ -5,6 +5,9 @@ import javafx.scene.layout.VBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.input.MouseButton;
 import javafx.geometry.Insets;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.paint.Color;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -311,8 +314,19 @@ public class ProjectTreeView extends VBox {
             String displayName = getProjectDisplayName(entry.getPath(), entry.getName());
             TreeItem<String> projectItem = new TreeItem<>(displayName);
             
-            // Add folder icon using Unicode emoji
-            Label iconLabel = new Label("\uD83D\uDCC1"); // 📁 folder emoji
+            // Add folder icon from resources
+            Label iconLabel = new Label();
+            try {
+                Image folderImage = new Image(getClass().getResourceAsStream("/icons/folder.png"));
+                ImageView folderIcon = new ImageView(folderImage);
+                folderIcon.setFitWidth(16);
+                folderIcon.setFitHeight(16);
+                folderIcon.setPreserveRatio(true);
+                iconLabel.setGraphic(folderIcon);
+            } catch (Exception e) {
+                // Fallback to emoji if icon not found
+                iconLabel.setText("\uD83D\uDCC1"); // 📁 folder emoji
+            }
             iconLabel.setUserData(entry.getPath());
             projectItem.setGraphic(iconLabel);
             
@@ -393,6 +407,10 @@ public class ProjectTreeView extends VBox {
             @SuppressWarnings("unchecked")
             Map<String, Object> project = (Map<String, Object>) projectObj;
             
+            // Get mainScript
+            Object mainScriptObj = project.get("mainScript");
+            String mainScript = mainScriptObj instanceof String ? (String) mainScriptObj : null;
+            
             // Get files array
             Object filesObj = project.get("files");
             if (filesObj == null) {
@@ -414,24 +432,36 @@ public class ProjectTreeView extends VBox {
             } else if (filesObj instanceof java.util.List) {
                 @SuppressWarnings("unchecked")
                 java.util.List<String> list = (java.util.List<String>) filesObj;
-                filesList = list;
+                filesList = new java.util.ArrayList<>(list); // Create mutable copy
             }
             
             if (filesList != null && !filesList.isEmpty()) {
                 Path projectDir = jsonPath.getParent();
                 
-                for (String filePathStr : filesList) {
+                // Sort files: mainScript first, then others
+                java.util.List<String> sortedFiles = new java.util.ArrayList<>();
+                if (mainScript != null && filesList.contains(mainScript)) {
+                    sortedFiles.add(mainScript);
+                }
+                for (String file : filesList) {
+                    if (!file.equals(mainScript)) {
+                        sortedFiles.add(file);
+                    }
+                }
+                
+                for (String filePathStr : sortedFiles) {
                     // Resolve relative paths
                     Path filePath = projectDir.resolve(filePathStr);
                     String fileName = filePath.getFileName().toString();
+                    boolean fileExists = Files.exists(filePath);
                     
-                    TreeItem<String> fileItem = new TreeItem<>(fileName);
+                    // Add "!" prefix if file doesn't exist
+                    String displayName = fileExists ? fileName : "! " + fileName;
+                    TreeItem<String> fileItem = new TreeItem<>(displayName);
                     
-                    // Add file type icon
-                    String icon = getIconForFileType(fileName);
-                    Label fileIconLabel = new Label(icon);
-                    fileIconLabel.setUserData(filePath.toString());
-                    fileItem.setGraphic(fileIconLabel);
+                    // Create label with icon
+                    Label fileLabel = createFileLabel(fileName, filePath.toString(), fileExists);
+                    fileItem.setGraphic(fileLabel);
                     
                     // Set tooltip with full path
                     Tooltip fileTooltip = new Tooltip(filePath.toString());
@@ -450,23 +480,74 @@ public class ProjectTreeView extends VBox {
     }
     
     /**
+     * Create a label with icon for a file.
+     * 
+     * @param fileName The name of the file
+     * @param filePath The full path to the file
+     * @param fileExists Whether the file exists
+     * @return Label with icon and appropriate styling
+     */
+    private Label createFileLabel(String fileName, String filePath, boolean fileExists) {
+        Label label = new Label();
+        
+        // Get icon for file type
+        ImageView icon = getIconForFileType(fileName);
+        if (icon != null) {
+            label.setGraphic(icon);
+        }
+        
+        // Store file path in user data
+        label.setUserData(filePath);
+        
+        // Set red text if file doesn't exist
+        if (!fileExists) {
+            label.setTextFill(Color.RED);
+        }
+        
+        return label;
+    }
+    
+    /**
      * Get the appropriate icon for a file based on its extension.
      * 
      * @param fileName The name of the file
-     * @return Unicode emoji icon for the file type
+     * @return ImageView with the appropriate icon, or null if icon not found
      */
-    private String getIconForFileType(String fileName) {
+    private ImageView getIconForFileType(String fileName) {
+        String iconPath = null;
         String lowerName = fileName.toLowerCase();
+        
         if (lowerName.endsWith(".ebs")) {
-            return "\uD83D\uDCDC"; // 📜 scroll (for scripts)
+            iconPath = "/icons/text-file.png"; // EBS script file
         } else if (lowerName.endsWith(".json")) {
-            return "\uD83D\uDCC4"; // 📄 page facing up (for JSON)
+            iconPath = "/icons/config-file.png"; // JSON config file
         } else if (lowerName.endsWith(".css")) {
-            return "\uD83C\uDFA8"; // 🎨 artist palette (for CSS)
+            iconPath = "/icons/text-file.png"; // CSS file
         } else if (lowerName.endsWith(".md")) {
-            return "\uD83D\uDCD6"; // 📖 open book (for Markdown)
+            iconPath = "/icons/markdown-file.png"; // Markdown file
+        } else if (lowerName.endsWith(".xml")) {
+            iconPath = "/icons/xml-file.png"; // XML file
+        } else if (lowerName.endsWith(".java")) {
+            iconPath = "/icons/java-file.png"; // Java file
+        } else if (lowerName.endsWith(".png") || lowerName.endsWith(".jpg") || 
+                   lowerName.endsWith(".jpeg") || lowerName.endsWith(".gif")) {
+            iconPath = "/icons/image-file.png"; // Image file
+        } else if (lowerName.endsWith(".git") || lowerName.endsWith(".gitignore")) {
+            iconPath = "/icons/git-file.png"; // Git file
         } else {
-            return "\uD83D\uDCC4"; // 📄 generic file
+            iconPath = "/icons/file.png"; // Generic file
+        }
+        
+        try {
+            Image image = new Image(getClass().getResourceAsStream(iconPath));
+            ImageView imageView = new ImageView(image);
+            imageView.setFitWidth(16);
+            imageView.setFitHeight(16);
+            imageView.setPreserveRatio(true);
+            return imageView;
+        } catch (Exception e) {
+            System.err.println("Failed to load icon: " + iconPath);
+            return null;
         }
     }
     
