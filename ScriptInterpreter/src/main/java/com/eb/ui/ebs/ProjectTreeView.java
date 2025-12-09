@@ -35,6 +35,9 @@ public class ProjectTreeView extends VBox {
     private final ComboBox<String> searchComboBox;
     private final java.util.Deque<String> recentSearches;
     private static final int MAX_RECENT_SEARCHES = 10;
+    private String lastSearchText;
+    private java.util.List<TreeItem<String>> lastSearchResults;
+    private int currentSearchIndex;
     
     /**
      * Create a new ProjectTreeView.
@@ -45,6 +48,8 @@ public class ProjectTreeView extends VBox {
         this.handler = handler;
         this.projectListManager = new ProjectListManager();
         this.recentSearches = new ArrayDeque<>(MAX_RECENT_SEARCHES);
+        this.lastSearchResults = new java.util.ArrayList<>();
+        this.currentSearchIndex = -1;
         
         // Create root item
         rootItem = new TreeItem<>("Projects");
@@ -158,9 +163,9 @@ public class ProjectTreeView extends VBox {
         });
         
         // Create search bar container
-        HBox searchBar = new HBox(5);
+        HBox searchBar = new HBox(2);
         searchBar.getChildren().addAll(searchComboBox, searchButton);
-        searchBar.setPadding(new Insets(0, 0, 5, 0));
+        searchBar.setPadding(new Insets(0, 0, 2, 0));
         
         // Add components
         Label titleLabel = new Label("Projects");
@@ -1828,11 +1833,64 @@ public class ProjectTreeView extends VBox {
         
         searchText = searchText.trim();
         
-        // Add to recent searches
-        addToRecentSearches(searchText);
+        // Check if this is the same search (find next) or a new search
+        boolean isNewSearch = lastSearchText == null || !lastSearchText.equals(searchText);
         
-        // Perform the search
-        searchInTree(rootItem, searchText.toLowerCase());
+        if (isNewSearch) {
+            // New search - reset and find all matches
+            lastSearchText = searchText;
+            lastSearchResults.clear();
+            currentSearchIndex = -1;
+            
+            // Add to recent searches
+            addToRecentSearches(searchText);
+            
+            // Find all matches
+            findAllMatches(rootItem, searchText.toLowerCase(), lastSearchResults);
+        }
+        
+        // Move to next match
+        if (!lastSearchResults.isEmpty()) {
+            currentSearchIndex = (currentSearchIndex + 1) % lastSearchResults.size();
+            TreeItem<String> match = lastSearchResults.get(currentSearchIndex);
+            
+            // Expand parents
+            TreeItem<String> parent = match.getParent();
+            while (parent != null) {
+                parent.setExpanded(true);
+                parent = parent.getParent();
+            }
+            
+            // Select and scroll to match
+            treeView.getSelectionModel().select(match);
+            treeView.scrollTo(treeView.getRow(match));
+        }
+    }
+    
+    /**
+     * Find all matching items in the tree.
+     * 
+     * @param item The tree item to search from
+     * @param searchText The search text (lowercase)
+     * @param results List to collect matching items
+     */
+    private void findAllMatches(TreeItem<String> item, String searchText, java.util.List<TreeItem<String>> results) {
+        if (item == null) {
+            return;
+        }
+        
+        // Check if current item matches (exclude root)
+        if (item != rootItem) {
+            String itemText = item.getValue();
+            if (itemText != null && itemText.toLowerCase().contains(searchText)) {
+                results.add(item);
+            }
+        }
+        
+        // Search in children
+        for (TreeItem<String> child : item.getChildren()) {
+            findAllMatches(child, searchText, results);
+        }
     }
     
     /**
@@ -1854,53 +1912,6 @@ public class ProjectTreeView extends VBox {
         
         // Update combo box items
         searchComboBox.getItems().setAll(recentSearches);
-    }
-    
-    /**
-     * Search in the tree recursively and select/expand matching items.
-     * 
-     * @param item The tree item to search from
-     * @param searchText The search text (lowercase)
-     * @return true if a match was found in this branch
-     */
-    private boolean searchInTree(TreeItem<String> item, String searchText) {
-        if (item == null) {
-            return false;
-        }
-        
-        boolean foundInChildren = false;
-        
-        // Search in children first
-        for (TreeItem<String> child : item.getChildren()) {
-            if (searchInTree(child, searchText)) {
-                foundInChildren = true;
-            }
-        }
-        
-        // Check if current item matches
-        String itemText = item.getValue();
-        if (itemText != null && itemText.toLowerCase().contains(searchText)) {
-            // Expand parent to show this item
-            if (item.getParent() != null) {
-                item.getParent().setExpanded(true);
-            }
-            
-            // Select the first match
-            if (!foundInChildren && item != rootItem) {
-                treeView.getSelectionModel().select(item);
-                treeView.scrollTo(treeView.getSelectionModel().getSelectedIndex());
-                return true;  // Stop after first match
-            }
-            
-            return true;
-        }
-        
-        // Expand if children have matches
-        if (foundInChildren) {
-            item.setExpanded(true);
-        }
-        
-        return foundInChildren;
     }
     
     /**
