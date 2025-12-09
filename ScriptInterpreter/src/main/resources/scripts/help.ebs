@@ -116,22 +116,13 @@ if builtinsArray != null then {
                 debugCount = debugCount + 1;
             }
             
-            // Get or create category array from JSON object
-            var categoryArray: json = call json.get(builtinsByCategory, category);
-            if categoryArray == null then {
-                // Create new array for this category
-                categoryArray = [];
-            }
-            
             // Create child node with builtin name as a JSON object
             var childNode: json = {};
             childNode = call json.set(childNode, "value", builtinName);
             
-            // Append childNode to the category array (JSON arrays support push-like behavior)
-            categoryArray[categoryArray.length] = childNode;
-            
-            // Store the updated array back in the map
-            builtinsByCategory = call json.set(builtinsByCategory, category, categoryArray);
+            // Use json.add to append to the array at the category path
+            // json.add automatically creates the array if it doesn't exist and appends the item
+            builtinsByCategory = call json.add(builtinsByCategory, category, childNode);
         }
     }
     print "[DEBUG] Categorization complete";
@@ -148,23 +139,23 @@ if builtinCategoryOrder != null then {
     print "[DEBUG] Processing " + call str.toString(builtinCategoryOrder.length) + " category keys";
     foreach categoryKey in builtinCategoryOrder {
         print "[DEBUG] Processing category: " + categoryKey;
-        // Get category array from json
-        var categoryArray: json = call json.get(builtinsByCategory, categoryKey);
+        // Get category array from json using json.getArray to properly handle JSON arrays
+        var categoryArray: json = call json.getArray(builtinsByCategory, categoryKey);
         if categoryArray != null && categoryArray.length > 0 then {
             print "[DEBUG] Category '" + categoryKey + "' has " + call str.toString(categoryArray.length) + " functions";
             // Debug: print first 3 function names
             if categoryArray.length > 0 then {
-                var firstFunc: json = categoryArray[0];
+                var firstFunc: json = call json.get(categoryArray, "0");
                 var firstName: string = call json.getString(firstFunc, "value", "");
                 print "[DEBUG]   First function: " + firstName;
             }
             if categoryArray.length > 1 then {
-                var secondFunc: json = categoryArray[1];
+                var secondFunc: json = call json.get(categoryArray, "1");
                 var secondName: string = call json.getString(secondFunc, "value", "");
                 print "[DEBUG]   Second function: " + secondName;
             }
             if categoryArray.length > 2 then {
-                var thirdFunc: json = categoryArray[2];
+                var thirdFunc: json = call json.get(categoryArray, "2");
                 var thirdName: string = call json.getString(thirdFunc, "value", "");
                 print "[DEBUG]   Third function: " + thirdName;
             }
