@@ -1681,10 +1681,11 @@ var matrix = [[1, 2], [3, 4], [5, 6]];
 
 | Syntax | Type | Backed By | Usage |
 |--------|------|-----------|-------|
-| `int[10]` | Typed | ArrayFixed | Fixed-size integer array (traditional) |
-| `array.int[10]` | Typed | ArrayFixed | Fixed-size integer array (enhanced) |
-| `array.byte[10]` | Typed | ArrayFixedByte | Byte array with optimized storage |
+| `int[10]` | Typed | ArrayFixed | Fixed-size integer array (traditional, uses Object[] with boxed Integer) |
+| `array.int[10]` | Typed | ArrayFixedInt | Fixed-size integer array (enhanced, uses primitive int[]) |
+| `array.byte[10]` | Typed | ArrayFixedByte | Byte array with optimized storage (primitive byte[]) |
 | `array.bitmap[10]` | Typed | ArrayFixedByte | Bitmap array (same storage as byte, BITMAP type) |
+| `array.intmap[10]` | Typed | ArrayFixedInt | Intmap array (same storage as int, INTMAP type) |
 | `string[*]` | Typed | ArrayDynamic | Dynamic string array (traditional) |
 | `array.string[*]` | Typed | ArrayDynamic | Dynamic string array (enhanced) |
 | `array[10]` | Generic | ArrayFixed | Fixed-size generic array |

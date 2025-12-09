@@ -57,10 +57,12 @@ var numbers: array.int[6];
 
 | Syntax | Storage | Memory per Element | Example: 1000 elements |
 |--------|---------|-------------------|------------------------|
-| `int[1000]` | `Object[]` with `Integer` objects | ~16-24 bytes | ~16-24 KB |
+| `int[1000]` | `Object[]` with `Integer` objects | ~16 bytes* | ~16 KB |
 | `array.int[1000]` | `int[]` primitive | 4 bytes | 4 KB |
 
-**Memory Savings**: The `array.int` syntax uses approximately **4-6x less memory** for integer arrays.
+\* Java Integer objects have 16 bytes overhead (12-byte object header + 4-byte int value), plus array reference storage.
+
+**Memory Savings**: The `array.int` syntax uses approximately **4x less memory** for integer arrays.
 
 ### CPU Performance
 
@@ -297,7 +299,7 @@ Both syntaxes are fully compatible and work with all EBS features:
 | Aspect | `int[6]` Traditional | `array.int[6]` Enhanced |
 |--------|---------------------|------------------------|
 | **Storage** | `Object[]` (boxed Integer) | `int[]` (primitive) |
-| **Memory** | Higher (16-24 bytes/element) | Lower (4 bytes/element) |
+| **Memory** | Higher (~16 bytes/element) | Lower (4 bytes/element) |
 | **Performance** | Slower (boxing/unboxing) | Faster (direct access) |
 | **Use Case** | Small arrays, prototypes | Large arrays, performance-critical |
 | **Best For** | < 100 elements | ≥ 100 elements or hot loops |
