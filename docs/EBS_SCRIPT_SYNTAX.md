@@ -1681,10 +1681,11 @@ var matrix = [[1, 2], [3, 4], [5, 6]];
 
 | Syntax | Type | Backed By | Usage |
 |--------|------|-----------|-------|
-| `int[10]` | Typed | ArrayFixed | Fixed-size integer array (traditional) |
-| `array.int[10]` | Typed | ArrayFixed | Fixed-size integer array (enhanced) |
-| `array.byte[10]` | Typed | ArrayFixedByte | Byte array with optimized storage |
+| `int[10]` | Typed | ArrayFixed | Fixed-size integer array (traditional, uses Object[] with boxed Integer) |
+| `array.int[10]` | Typed | ArrayFixedInt | Fixed-size integer array (enhanced, uses primitive int[]) |
+| `array.byte[10]` | Typed | ArrayFixedByte | Byte array with optimized storage (primitive byte[]) |
 | `array.bitmap[10]` | Typed | ArrayFixedByte | Bitmap array (same storage as byte, BITMAP type) |
+| `array.intmap[10]` | Typed | ArrayFixedInt | Intmap array (same storage as int, INTMAP type) |
 | `string[*]` | Typed | ArrayDynamic | Dynamic string array (traditional) |
 | `array.string[*]` | Typed | ArrayDynamic | Dynamic string array (enhanced) |
 | `array[10]` | Generic | ArrayFixed | Fixed-size generic array |
@@ -1750,11 +1751,14 @@ print config.id;       // Extract id field
 ```
 
 **When to use each syntax:**
-- Use `int[10]` for concise traditional syntax
-- Use `array.int[10]` for explicit, consistent syntax across all types
+- Use `int[10]` for concise traditional syntax (small arrays, < 100 elements)
+- Use `array.int[10]` for explicit, consistent syntax across all types (better performance for large arrays ≥ 100 elements)
 - Use `array[10]` or `array.any[10]` when you need mixed types
 - Use `array.bitmap[10]` when storing data that should be interpreted as bitmap fields
-- All three syntaxes work identically with `ArrayFixed` and `ArrayDynamic` implementations
+- **Important**: `int[n]` and `array.int[n]` have different internal implementations affecting performance and memory usage
+  - `int[n]` uses `Object[]` with boxed `Integer` objects (higher memory, boxing/unboxing overhead)
+  - `array.int[n]` uses primitive `int[]` (lower memory, faster access, no boxing)
+  - See [Array Syntax Guide](ARRAY_SYNTAX_GUIDE.md) for detailed comparison and usage recommendations
 
 ### Array Access
 ```javascript

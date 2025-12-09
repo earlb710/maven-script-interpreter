@@ -1,0 +1,252 @@
+// EBS Language Reference v1.0.6.11 - See EBS_LANGUAGE_REFERENCE.md
+// Demonstrates the differences between int[n] and array.int[n] syntax
+
+print "=== Array Syntax Comparison: int[n] vs array.int[n] ===";
+print "";
+
+// ============================================================================
+// PART 1: Basic Usage - Both Work Identically
+// ============================================================================
+print "PART 1: Basic Usage Comparison";
+print "--------------------------------";
+
+// Traditional syntax
+var traditional: int[5];
+traditional[0] = 10;
+traditional[1] = 20;
+traditional[2] = 30;
+traditional[3] = 40;
+traditional[4] = 50;
+
+// Enhanced syntax
+var enhanced: array.int[5];
+enhanced[0] = 10;
+enhanced[1] = 20;
+enhanced[2] = 30;
+enhanced[3] = 40;
+enhanced[4] = 50;
+
+print "Traditional int[5]:";
+print "  traditional[0] = " + traditional[0];
+print "  traditional[2] = " + traditional[2];
+print "  traditional[4] = " + traditional[4];
+print "";
+
+print "Enhanced array.int[5]:";
+print "  enhanced[0] = " + enhanced[0];
+print "  enhanced[2] = " + enhanced[2];
+print "  enhanced[4] = " + enhanced[4];
+print "";
+
+print "✓ Both syntaxes work identically from user perspective";
+print "";
+
+// ============================================================================
+// PART 2: Storage Differences
+// ============================================================================
+print "PART 2: Storage Implementation Differences";
+print "-------------------------------------------";
+print "";
+print "Traditional (int[5]):";
+print "  - Uses ArrayFixed class";
+print "  - Storage: Object[] (array of Objects)";
+print "  - Elements: Boxed Integer objects";
+print "  - Memory: ~16 bytes per element";
+print "  - Access: Requires boxing/unboxing";
+print "";
+print "Enhanced (array.int[5]):";
+print "  - Uses ArrayFixedInt class";
+print "  - Storage: int[] (primitive array)";
+print "  - Elements: Primitive int values";
+print "  - Memory: 4 bytes per element";
+print "  - Access: Direct primitive access";
+print "";
+
+// ============================================================================
+// PART 3: Memory Usage Comparison
+// ============================================================================
+print "PART 3: Memory Usage Example";
+print "-----------------------------";
+print "";
+print "For an array of 1000 integers:";
+print "";
+print "Traditional int[1000]:";
+print "  - Object[] with 1000 Integer objects";
+print "  - Memory: ~16 KB (16 bytes × 1000)";
+print "  - Extra overhead: Object headers, references";
+print "";
+print "Enhanced array.int[1000]:";
+print "  - Primitive int[] with 1000 values";
+print "  - Memory: 4 KB (4 bytes × 1000)";
+print "  - Savings: ~12 KB (4x more efficient!)";
+print "";
+
+// ============================================================================
+// PART 4: Performance Impact Demo
+// ============================================================================
+print "PART 4: Performance Impact";
+print "---------------------------";
+print "";
+print "Operations that cause performance differences:";
+print "";
+print "1. ARRAY ACCESS";
+print "   Traditional: array[i] requires UNBOXING (Integer → int)";
+print "   Enhanced: array[i] uses DIRECT access (no conversion)";
+print "";
+print "2. ARRAY ASSIGNMENT";
+print "   Traditional: array[i] = value requires BOXING (int → Integer)";
+print "   Enhanced: array[i] = value uses DIRECT assignment";
+print "";
+print "3. ITERATION";
+print "   Traditional: Each access boxes/unboxes repeatedly";
+print "   Enhanced: Pure primitive operations (faster)";
+print "";
+
+// Demonstrate in a loop
+print "Example: Summing array elements";
+print "";
+
+var arr1: int[100];
+var arr2: array.int[100];
+
+// Fill both arrays
+for (var i: int = 0; i < 100; i++) {
+    arr1[i] = i + 1;
+    arr2[i] = i + 1;
+}
+
+// Sum traditional array (with boxing/unboxing)
+var sum1: int = 0;
+for (var i: int = 0; i < 100; i++) {
+    sum1 = sum1 + arr1[i];  // Unboxing happens here
+}
+
+// Sum enhanced array (pure primitive)
+var sum2: int = 0;
+for (var i: int = 0; i < 100; i++) {
+    sum2 = sum2 + arr2[i];  // Direct primitive access
+}
+
+print "Traditional int[100] sum: " + sum1;
+print "Enhanced array.int[100] sum: " + sum2;
+print "";
+print "Note: Enhanced version runs faster with no boxing/unboxing overhead";
+print "";
+
+// ============================================================================
+// PART 5: When to Use Each
+// ============================================================================
+print "PART 5: When to Use Each Syntax";
+print "--------------------------------";
+print "";
+print "USE array.int[n] (ENHANCED) WHEN:";
+print "  ✓ Arrays with 100+ elements";
+print "  ✓ Performance-critical code";
+print "  ✓ Frequently accessed arrays";
+print "  ✓ Arrays in tight loops";
+print "  ✓ Memory-constrained environments";
+print "  ✓ Large numeric datasets";
+print "";
+print "USE int[n] (TRADITIONAL) WHEN:";
+print "  ✓ Small arrays (< 100 elements)";
+print "  ✓ Quick prototypes or scripts";
+print "  ✓ Brevity/conciseness preferred";
+print "  ✓ Legacy code compatibility";
+print "  ✓ Performance difference is negligible";
+print "";
+
+// ============================================================================
+// PART 6: Real-World Use Cases
+// ============================================================================
+print "PART 6: Real-World Use Cases";
+print "-----------------------------";
+print "";
+print "GOOD USES FOR array.int[n]:";
+print "  • Sensor data arrays: array.int[10000]";
+print "  • Image pixel data: array.int[1920, 1080]";
+print "  • Game scores: array.int[1000]";
+print "  • Matrix computations: array.int[100, 100]";
+print "  • Scientific data: array.int[1000000]";
+print "";
+print "GOOD USES FOR int[n]:";
+print "  • Configuration values: int[5]";
+print "  • Week days: int[7]";
+print "  • Monthly data: int[12]";
+print "  • Small lookup tables: int[10]";
+print "  • Test data: int[20]";
+print "";
+
+// ============================================================================
+// PART 7: Other Array Types
+// ============================================================================
+print "PART 7: Other Optimized Array Types";
+print "------------------------------------";
+print "";
+print "array.byte[n]  → Uses byte[] (primitive storage)";
+print "array.bitmap[n] → Uses byte[] (for bit fields)";
+print "array.intmap[n] → Uses int[] (for bit fields)";
+print "";
+print "Other types still use Object[] storage:";
+print "  array.long[n], array.float[n], array.double[n]";
+print "  array.string[n], array.bool[n]";
+print "";
+
+// ============================================================================
+// PART 8: Quick Reference
+// ============================================================================
+print "PART 8: Quick Reference Table";
+print "------------------------------";
+print "";
+print "Aspect            | int[n]              | array.int[n]";
+print "------------------|---------------------|-------------------";
+print "Storage           | Object[] (boxed)    | int[] (primitive)";
+print "Memory/element    | ~16 bytes           | 4 bytes";
+print "Performance       | Slower (boxing)     | Faster (direct)";
+print "Best for          | Small arrays        | Large arrays";
+print "Element threshold | < 100 elements      | ≥ 100 elements";
+print "";
+
+// ============================================================================
+// PART 9: Practical Example
+// ============================================================================
+print "PART 9: Practical Example - Matrix Operations";
+print "----------------------------------------------";
+print "";
+
+// Small matrix - traditional is fine
+var smallMatrix: int[3, 3];
+smallMatrix[0, 0] = 1;
+smallMatrix[1, 1] = 2;
+smallMatrix[2, 2] = 3;
+print "Small 3x3 matrix (int[3,3]): diagonal = " + smallMatrix[0,0] + ", " + smallMatrix[1,1] + ", " + smallMatrix[2,2];
+
+// Large matrix - enhanced is better
+var largeMatrix: array.int[10, 10];
+for (var i: int = 0; i < 10; i++) {
+    largeMatrix[i, i] = i + 1;
+}
+print "Large 10x10 matrix (array.int[10,10]): diagonal sum calculated";
+
+var diagonalSum: int = 0;
+for (var i: int = 0; i < 10; i++) {
+    diagonalSum = diagonalSum + largeMatrix[i, i];
+}
+print "  Diagonal sum: " + diagonalSum + " (should be 55)";
+print "";
+
+// ============================================================================
+// SUMMARY
+// ============================================================================
+print "=== SUMMARY ===";
+print "";
+print "Key Takeaway:";
+print "  Both syntaxes work identically from a user's perspective,";
+print "  but array.int[n] is MORE EFFICIENT for large arrays and";
+print "  performance-critical code due to primitive storage.";
+print "";
+print "Rule of Thumb:";
+print "  • Small arrays (< 100): Use int[n] (concise)";
+print "  • Large arrays (≥ 100): Use array.int[n] (efficient)";
+print "  • Hot loops/performance: Use array.int[n] (faster)";
+print "";
+print "=== End of Demonstration ===";

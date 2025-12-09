@@ -20,7 +20,11 @@ This directory contains short, precise example scripts for each EBS language key
 | [const.ebs](const.ebs) | `const` |
 | [datatypes.ebs](datatypes.ebs) | `byte`, `int`, `long`, `float`, `double`, `string`, `date`, `bool`, `json`, `record` |
 | [bitmap.ebs](bitmap.ebs) | `bitmap` type - Named bit fields within a byte |
+| [intmap.ebs](intmap.ebs) | `intmap` type - Named bit fields within an integer |
 | [array.ebs](array.ebs) | Array syntax |
+| [array_syntax_comparison.ebs](array_syntax_comparison.ebs) | **Array Syntax Differences** - Comprehensive comparison of `int[n]` vs `array.int[n]` |
+| [array_bitmap.ebs](array_bitmap.ebs) | `array.bitmap` - Bitmap arrays |
+| [array_intmap.ebs](array_intmap.ebs) | `array.intmap` - Intmap arrays |
 | [json.ebs](json.ebs) | `json` type |
 | [record.ebs](record.ebs) | `record` type - Structured data with nested records and literal syntax |
 | [casting.ebs](casting.ebs) | Type casting |

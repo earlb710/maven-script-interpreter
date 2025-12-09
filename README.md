@@ -140,6 +140,10 @@ var numbers = [1, 2, 3, 4, 5];
 print numbers[0];  // Access elements
 print numbers.length;  // Get length
 
+// Array syntax comparison (see docs/ARRAY_SYNTAX_GUIDE.md for details):
+var traditional: int[100];      // Uses Object[] storage (boxed Integer)
+var enhanced: array.int[100];   // Uses int[] storage (primitive, faster for large arrays)
+
 // Type aliases (typeof keyword)
 personType typeof record{name: string, age: int};
 var person: personType;
@@ -679,6 +683,7 @@ Press `Ctrl+D` again to hide the debug panel.
 ## Documentation
 
 - **[EBS Script Syntax Reference](docs/EBS_SCRIPT_SYNTAX.md)** - Complete language syntax guide including type aliases (typeof)
+- **[Array Syntax Guide](docs/ARRAY_SYNTAX_GUIDE.md)** - Comprehensive guide explaining differences between `int[n]` and `array.int[n]` syntax, including performance and memory usage comparisons
 - **[Python vs EBS String Functions](docs/PYTHON_VS_EBS_STRING_FUNCTIONS.md)** - Comparison guide for Python developers learning EBS Script
 - **[EBS Script vs Oracle PL/SQL](docs/EBS_VS_ORACLE_PLSQL.md)** - Comprehensive comparison guide for PL/SQL developers learning EBS Script
 - **[Architecture & Flow Documentation](ARCHITECTURE.md)** - Comprehensive documentation of the system architecture, data flow, and internal workings
