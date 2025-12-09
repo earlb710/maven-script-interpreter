@@ -82,13 +82,23 @@ public class NewFileDialog extends Dialog<NewFileDialog.FileInfo> {
         
         /**
          * Get the full file path including the filename with extension.
+         * @throws IllegalArgumentException if name or path is null or empty
          */
         public String getFullPath() {
+            // Validate inputs
+            if (name == null || name.trim().isEmpty()) {
+                throw new IllegalArgumentException("File name cannot be null or empty");
+            }
+            if (path == null || path.trim().isEmpty()) {
+                throw new IllegalArgumentException("File path cannot be null or empty");
+            }
+            
             Path dirPath = Paths.get(path);
-            String fileName = name;
+            String fileName = name.trim();
             
             // Add extension if not already present
-            if (!fileName.endsWith(type.getExtension())) {
+            // Check if the filename already has the correct extension
+            if (!fileName.toLowerCase().endsWith(type.getExtension().toLowerCase())) {
                 fileName += type.getExtension();
             }
             
@@ -190,11 +200,14 @@ public class NewFileDialog extends Dialog<NewFileDialog.FileInfo> {
         setResultConverter(dialogButton -> {
             if (dialogButton == okButtonType) {
                 FileType type = fileTypeCombo.getValue();
-                String name = fileNameField.getText().trim();
-                String path = filePathField.getText().trim();
+                String name = fileNameField.getText();
+                String path = filePathField.getText();
                 
-                if (type != null && !name.isEmpty() && !path.isEmpty()) {
-                    return new FileInfo(type, name, path);
+                // Validate all inputs are non-null and non-empty (after trimming)
+                if (type != null && 
+                    name != null && !name.trim().isEmpty() && 
+                    path != null && !path.trim().isEmpty()) {
+                    return new FileInfo(type, name.trim(), path.trim());
                 }
             }
             return null;
