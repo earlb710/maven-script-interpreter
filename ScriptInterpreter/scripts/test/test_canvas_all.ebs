@@ -478,13 +478,12 @@ screen canvasDisplayScreen = {
         },
         {
             "name": "canvasDisplay",
-            "type": "image",
+            "type": "canvas",
             "display": {
-                "type": "imageview",
+                "type": "canvasview",
                 "labelText": "Complex Scene (House with Sun and Ground):",
                 "fitWidth": 400,
                 "fitHeight": 300,
-                "preserveRatio": true,
                 "seq": 3
             }
         },
@@ -541,8 +540,8 @@ screen canvasDisplayScreen = {
     ]
 };
 
-// Set the canvas image to the screen
-canvasDisplayScreen.canvasDisplay = sceneImage;
+// Set the canvas directly to the screen (no conversion to image needed!)
+canvasDisplayScreen.canvasDisplay = myScene;
 
 // Set the test statistics labels
 var passedText: string = "Tests Passed: " + call str.tostring(testsPassed);
