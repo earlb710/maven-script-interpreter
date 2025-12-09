@@ -402,6 +402,12 @@ public class ProjectTreeView extends VBox {
                     if (result.isPresent() && result.get() == ButtonType.YES) {
                         // Create the file
                         try {
+                            // Ensure parent directories exist
+                            Path parentDir = path.getParent();
+                            if (parentDir != null && !Files.exists(parentDir)) {
+                                Files.createDirectories(parentDir);
+                            }
+                            
                             Files.createFile(path);
                             
                             // Refresh the project to update the tree view
