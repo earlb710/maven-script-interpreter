@@ -1249,6 +1249,12 @@ public class EbsConsoleHandler extends EbsHandler {
             String defaultContent = getDefaultContentForFileType(fileInfo.getType());
             Files.writeString(filePath, defaultContent, StandardCharsets.UTF_8);
             
+            // Add file to project.json if within project directory
+            Path projectJsonPath = Path.of(projectPath).resolve("project.json");
+            if (Files.exists(projectJsonPath)) {
+                addFileToProjectJson(projectJsonPath, filePath);
+            }
+            
             // Open the file in a tab using the same approach as /open command
             Path p = Util.resolveSandboxedPath(fullPath);
             String handle = (String) Builtins.callBuiltin(env, "file.open", fullPath, "rw");
@@ -1302,6 +1308,12 @@ public class EbsConsoleHandler extends EbsHandler {
             // Add to MRU
             addRecentFile(filePath);
             
+            // Add file to project.json if within project directory
+            Path projectJsonPath = Path.of(projectPath).resolve("project.json");
+            if (Files.exists(projectJsonPath)) {
+                addFileToProjectJson(projectJsonPath, filePath);
+            }
+            
             // Open the file in a tab using the same approach as /open command
             Path p = Util.resolveSandboxedPath(fullPath);
             String handle = (String) Builtins.callBuiltin(env, "file.open", fullPath, "rw");
@@ -1326,5 +1338,91 @@ public class EbsConsoleHandler extends EbsHandler {
             case CSS -> "/* CSS Styles */\n\n";
             case MARKDOWN -> "# Markdown Document\n\n";
         };
+    }
+    
+    /**
+     * Open a file from the tree view.
+     * 
+     * @param filePath Path to the file to open
+     */
+    public void openFileFromTreeView(Path filePath) {
+        try {
+            String fullPath = filePath.toString();
+            
+            // Add to MRU
+            addRecentFile(filePath);
+            
+            // Open the file in a tab using the same approach as /open command
+            Path p = Util.resolveSandboxedPath(fullPath);
+            String handle = (String) Builtins.callBuiltin(env, "file.open", fullPath, "rw");
+            FileContext ofile = new FileContext(handle, p, "rw");
+            tabHandler.showTab(new TabContext(p.getFileName().toString(), p, ofile), true);
+            
+            ScriptArea output = env.getOutputArea();
+            output.printlnOk("File opened: " + fullPath);
+            
+        } catch (Exception ex) {
+            submitErrors("Failed to open file: " + ex.getMessage());
+        }
+    }
+    
+    /**
+     * Add a file to the project.json file and update the tree view.
+     * 
+     * @param projectJsonPath Path to the project.json file
+     * @param filePath Path to the file to add
+     */
+    private void addFileToProjectJson(Path projectJsonPath, Path filePath) {
+        try {
+            // Read and parse project.json
+            String jsonContent = Files.readString(projectJsonPath, StandardCharsets.UTF_8);
+            Object projectObj = Json.parse(jsonContent);
+            
+            if (!(projectObj instanceof Map)) {
+                System.err.println("Invalid project.json: root must be a JSON object");
+                return;
+            }
+            
+            @SuppressWarnings("unchecked")
+            Map<String, Object> project = (Map<String, Object>) projectObj;
+            
+            // Get or create files array
+            @SuppressWarnings("unchecked")
+            java.util.List<String> filesList = (java.util.List<String>) project.get("files");
+            if (filesList == null) {
+                filesList = new java.util.ArrayList<>();
+                project.put("files", filesList);
+            }
+            
+            // Make file path relative to project directory if possible
+            Path projectDir = projectJsonPath.getParent();
+            String relativePath;
+            try {
+                relativePath = projectDir.relativize(filePath).toString();
+            } catch (IllegalArgumentException e) {
+                // If files are on different drives or can't be relativized, use absolute path
+                relativePath = filePath.toString();
+            }
+            
+            // Add file if not already in list
+            if (!filesList.contains(relativePath)) {
+                filesList.add(relativePath);
+                
+                // Write updated project.json
+                String updatedJson = Json.prettyJson(project);
+                Files.writeString(projectJsonPath, updatedJson, StandardCharsets.UTF_8);
+                
+                // Refresh the tree view
+                if (projectTreeView != null) {
+                    projectTreeView.refreshProjectFiles(projectJsonPath.toString());
+                }
+                
+                System.out.println("Added file to project.json: " + relativePath);
+            }
+            
+        } catch (Exception ex) {
+            System.err.println("Failed to add file to project.json: " + ex.getMessage());
+            ex.printStackTrace();
+        }
     }
 }

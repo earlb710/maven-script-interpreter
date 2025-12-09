@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 
 /**
  * TreeView component for displaying opened projects.
@@ -43,12 +44,12 @@ public class ProjectTreeView extends VBox {
         treeView.setShowRoot(true);
         VBox.setVgrow(treeView, Priority.ALWAYS);
         
-        // Setup double-click to open project
+        // Setup double-click to open project or file
         treeView.setOnMouseClicked(event -> {
             if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
                 TreeItem<String> selectedItem = treeView.getSelectionModel().getSelectedItem();
                 if (selectedItem != null && selectedItem != rootItem) {
-                    openSelectedProject(selectedItem);
+                    openSelectedItem(selectedItem);
                 }
             }
         });
@@ -183,6 +184,21 @@ public class ProjectTreeView extends VBox {
     }
     
     /**
+     * Open the selected item (project or file).
+     */
+    private void openSelectedItem(TreeItem<String> item) {
+        // Check if this is a file (has a parent that's not root) or a project (parent is root)
+        TreeItem<String> parent = item.getParent();
+        if (parent != null && parent != rootItem) {
+            // This is a file - open it
+            openSelectedFile(item);
+        } else {
+            // This is a project - open project
+            openSelectedProject(item);
+        }
+    }
+    
+    /**
      * Open the selected project.
      */
     private void openSelectedProject(TreeItem<String> item) {
@@ -211,6 +227,33 @@ public class ProjectTreeView extends VBox {
             } catch (Exception ex) {
                 Alert alert = new Alert(Alert.AlertType.ERROR,
                         "Failed to open project: " + ex.getMessage());
+                alert.setHeaderText("Error");
+                alert.showAndWait();
+            }
+        }
+    }
+    
+    /**
+     * Open the selected file.
+     */
+    private void openSelectedFile(TreeItem<String> item) {
+        // Get file path from user data
+        Object userData = item.getGraphic() != null ? item.getGraphic().getUserData() : null;
+        if (userData instanceof String) {
+            String filePath = (String) userData;
+            try {
+                Path path = Paths.get(filePath);
+                if (Files.exists(path)) {
+                    handler.openFileFromTreeView(path);
+                } else {
+                    Alert alert = new Alert(Alert.AlertType.WARNING,
+                            "File not found:\n" + filePath);
+                    alert.setHeaderText("File Not Found");
+                    alert.showAndWait();
+                }
+            } catch (Exception ex) {
+                Alert alert = new Alert(Alert.AlertType.ERROR,
+                        "Failed to open file: " + ex.getMessage());
                 alert.setHeaderText("Error");
                 alert.showAndWait();
             }
@@ -278,7 +321,130 @@ public class ProjectTreeView extends VBox {
             Tooltip tooltip = new Tooltip(entry.getPath());
             Tooltip.install(projectItem.getGraphic(), tooltip);
             
+            // Load and add files from project.json
+            loadProjectFiles(projectItem, entry.getPath());
+            
             rootItem.getChildren().add(projectItem);
+        }
+    }
+    
+    /**
+     * Load files from a project.json and add them as children to the project tree item.
+     * 
+     * @param projectItem The project tree item to add files to
+     * @param projectJsonPath Path to the project.json file
+     */
+    private void loadProjectFiles(TreeItem<String> projectItem, String projectJsonPath) {
+        try {
+            Path jsonPath = Path.of(projectJsonPath);
+            if (!Files.exists(jsonPath)) {
+                return;
+            }
+            
+            String jsonContent = Files.readString(jsonPath);
+            Object projectObj = com.eb.script.json.Json.parse(jsonContent);
+            
+            if (!(projectObj instanceof Map)) {
+                return;
+            }
+            
+            @SuppressWarnings("unchecked")
+            Map<String, Object> project = (Map<String, Object>) projectObj;
+            
+            // Get files array
+            Object filesObj = project.get("files");
+            if (filesObj == null) {
+                return;
+            }
+            
+            java.util.List<String> filesList = null;
+            
+            // Handle ArrayDynamic (used by EBS JSON parser) or standard List
+            if (filesObj instanceof com.eb.script.arrays.ArrayDynamic) {
+                com.eb.script.arrays.ArrayDynamic arrayDynamic = (com.eb.script.arrays.ArrayDynamic) filesObj;
+                filesList = new java.util.ArrayList<>();
+                for (int i = 0; i < arrayDynamic.size(); i++) {
+                    Object item = arrayDynamic.get(i);
+                    if (item instanceof String) {
+                        filesList.add((String) item);
+                    }
+                }
+            } else if (filesObj instanceof java.util.List) {
+                @SuppressWarnings("unchecked")
+                java.util.List<String> list = (java.util.List<String>) filesObj;
+                filesList = list;
+            }
+            
+            if (filesList != null && !filesList.isEmpty()) {
+                Path projectDir = jsonPath.getParent();
+                
+                for (String filePathStr : filesList) {
+                    // Resolve relative paths
+                    Path filePath = projectDir.resolve(filePathStr);
+                    String fileName = filePath.getFileName().toString();
+                    
+                    TreeItem<String> fileItem = new TreeItem<>(fileName);
+                    
+                    // Add file type icon
+                    String icon = getIconForFileType(fileName);
+                    Label fileIconLabel = new Label(icon);
+                    fileIconLabel.setUserData(filePath.toString());
+                    fileItem.setGraphic(fileIconLabel);
+                    
+                    // Set tooltip with full path
+                    Tooltip fileTooltip = new Tooltip(filePath.toString());
+                    Tooltip.install(fileItem.getGraphic(), fileTooltip);
+                    
+                    projectItem.getChildren().add(fileItem);
+                }
+                
+                // Expand project to show files
+                projectItem.setExpanded(true);
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Error loading project files: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Get the appropriate icon for a file based on its extension.
+     * 
+     * @param fileName The name of the file
+     * @return Unicode emoji icon for the file type
+     */
+    private String getIconForFileType(String fileName) {
+        String lowerName = fileName.toLowerCase();
+        if (lowerName.endsWith(".ebs")) {
+            return "\uD83D\uDCDC"; // 📜 scroll (for scripts)
+        } else if (lowerName.endsWith(".json")) {
+            return "\uD83D\uDCC4"; // 📄 page facing up (for JSON)
+        } else if (lowerName.endsWith(".css")) {
+            return "\uD83C\uDFA8"; // 🎨 artist palette (for CSS)
+        } else if (lowerName.endsWith(".md")) {
+            return "\uD83D\uDCD6"; // 📖 open book (for Markdown)
+        } else {
+            return "\uD83D\uDCC4"; // 📄 generic file
+        }
+    }
+    
+    /**
+     * Refresh the files for a specific project in the tree view.
+     * 
+     * @param projectJsonPath Path to the project.json file
+     */
+    public void refreshProjectFiles(String projectJsonPath) {
+        // Find the project item in the tree
+        for (TreeItem<String> projectItem : rootItem.getChildren()) {
+            Object userData = projectItem.getGraphic() != null ? projectItem.getGraphic().getUserData() : null;
+            if (userData instanceof String && userData.equals(projectJsonPath)) {
+                // Clear existing file children
+                projectItem.getChildren().clear();
+                
+                // Reload files
+                loadProjectFiles(projectItem, projectJsonPath);
+                break;
+            }
         }
     }
 }
