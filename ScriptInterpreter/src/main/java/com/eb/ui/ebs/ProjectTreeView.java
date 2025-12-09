@@ -164,6 +164,13 @@ public class ProjectTreeView extends VBox {
                 boolean isDirectory = path != null && Files.isDirectory(Path.of(path));
                 boolean isFile = path != null && Files.isRegularFile(Path.of(path));
                 
+                // Check if directory is a linked folder
+                boolean isLinkedFolder = false;
+                if (isDirectory && selectedItem.getGraphic() instanceof Label) {
+                    Label label = (Label) selectedItem.getGraphic();
+                    isLinkedFolder = label.getProperties().containsKey("isLinkedFolder");
+                }
+                
                 if (isProject) {
                     // Context menu for project node
                     MenuItem newFileItem = new MenuItem("New File...");
@@ -211,21 +218,39 @@ public class ProjectTreeView extends VBox {
                     MenuItem renameDirItem = new MenuItem("Rename Directory...");
                     renameDirItem.setOnAction(e -> renameDirectory(selectedItem, path));
                     
-                    MenuItem deleteDirItem = new MenuItem("Delete Directory...");
-                    deleteDirItem.setOnAction(e -> deleteDirectory(selectedItem, path));
-                    
                     MenuItem refreshItem = new MenuItem("Refresh");
                     refreshItem.setOnAction(e -> refreshDirectoryNode(selectedItem, path));
                     
-                    contextMenu.getItems().addAll(
-                        newFileItem,
-                        newDirItem,
-                        new SeparatorMenuItem(),
-                        renameDirItem,
-                        deleteDirItem,
-                        new SeparatorMenuItem(),
-                        refreshItem
-                    );
+                    if (isLinkedFolder) {
+                        // For linked folders, show "Remove from Project" instead of "Delete Directory..."
+                        MenuItem removeFromProjectItem = new MenuItem("Remove from Project");
+                        removeFromProjectItem.setOnAction(e -> removeLinkedFolderFromProject(selectedItem, path));
+                        
+                        contextMenu.getItems().addAll(
+                            newFileItem,
+                            newDirItem,
+                            new SeparatorMenuItem(),
+                            renameDirItem,
+                            new SeparatorMenuItem(),
+                            removeFromProjectItem,
+                            new SeparatorMenuItem(),
+                            refreshItem
+                        );
+                    } else {
+                        // For regular directories, show normal menu with delete option
+                        MenuItem deleteDirItem = new MenuItem("Delete Directory...");
+                        deleteDirItem.setOnAction(e -> deleteDirectory(selectedItem, path));
+                        
+                        contextMenu.getItems().addAll(
+                            newFileItem,
+                            newDirItem,
+                            new SeparatorMenuItem(),
+                            renameDirItem,
+                            deleteDirItem,
+                            new SeparatorMenuItem(),
+                            refreshItem
+                        );
+                    }
                 } else if (isFile) {
                     // Context menu for file node
                     MenuItem renameFileItem = new MenuItem("Rename File...");
@@ -682,6 +707,11 @@ public class ProjectTreeView extends VBox {
         
         // Store path in user data
         label.setUserData(path);
+        
+        // Store linked folder flag in properties
+        if (isLinkedFolder) {
+            label.getProperties().put("isLinkedFolder", true);
+        }
         
         // Set red text if doesn't exist - use CSS class
         if (!exists) {
@@ -1282,6 +1312,137 @@ public class ProjectTreeView extends VBox {
             projectItem.getChildren().clear();
             loadProjectFiles(projectItem, projectJsonPath);
         });
+    }
+    
+    /**
+     * Remove a linked folder from the project.
+     * Removes the directory from the project.json directories array.
+     * 
+     * @param dirItem The directory tree item
+     * @param dirPath The directory path
+     */
+    private void removeLinkedFolderFromProject(TreeItem<String> dirItem, String dirPath) {
+        // Find the project node
+        TreeItem<String> projectNode = findProjectNode(dirItem);
+        if (projectNode == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Could not find project for this directory.");
+            alert.showAndWait();
+            return;
+        }
+        
+        Object projectData = projectNode.getGraphic() != null ? projectNode.getGraphic().getUserData() : null;
+        String projectJsonPath = projectData instanceof String ? (String) projectData : null;
+        
+        if (projectJsonPath == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Could not find project.json path.");
+            alert.showAndWait();
+            return;
+        }
+        
+        try {
+            // Read project.json
+            Path jsonPath = Path.of(projectJsonPath);
+            String jsonContent = Files.readString(jsonPath);
+            Object projectObj = com.eb.script.json.Json.parse(jsonContent);
+            
+            if (projectObj instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> project = (Map<String, Object>) projectObj;
+                
+                // Get directories array
+                Object dirsObj = project.get("directories");
+                java.util.List<String> dirsList = null;
+                
+                // Handle ArrayDynamic or standard List
+                if (dirsObj instanceof com.eb.script.arrays.ArrayDynamic) {
+                    com.eb.script.arrays.ArrayDynamic arrayDynamic = (com.eb.script.arrays.ArrayDynamic) dirsObj;
+                    dirsList = new java.util.ArrayList<>();
+                    for (int i = 0; i < arrayDynamic.size(); i++) {
+                        Object item = arrayDynamic.get(i);
+                        if (item instanceof String) {
+                            dirsList.add((String) item);
+                        }
+                    }
+                } else if (dirsObj instanceof java.util.List) {
+                    @SuppressWarnings("unchecked")
+                    java.util.List<String> list = (java.util.List<String>) dirsObj;
+                    dirsList = new java.util.ArrayList<>(list);
+                }
+                
+                if (dirsList != null && !dirsList.isEmpty()) {
+                    // Convert the directory path to relative path to match what's in project.json
+                    Path projectDir = jsonPath.getParent();
+                    Path linkedDirPath = Path.of(dirPath);
+                    String pathToRemove = null;
+                    
+                    // Try to find the matching entry in the directories list
+                    for (String dir : dirsList) {
+                        Path resolvedPath = projectDir.resolve(dir).normalize();
+                        if (resolvedPath.equals(linkedDirPath.normalize())) {
+                            pathToRemove = dir;
+                            break;
+                        }
+                    }
+                    
+                    if (pathToRemove != null) {
+                        // Make variables effectively final for lambda
+                        final String finalPathToRemove = pathToRemove;
+                        final java.util.List<String> finalDirsList = dirsList;
+                        final Map<String, Object> finalProject = project;
+                        final Path finalJsonPath = jsonPath;
+                        final TreeItem<String> finalProjectNode = projectNode;
+                        final String finalProjectJsonPath = projectJsonPath;
+                        
+                        // Confirm removal
+                        Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION);
+                        confirmDialog.setTitle("Remove Linked Folder");
+                        confirmDialog.setHeaderText("Remove folder from project?");
+                        confirmDialog.setContentText("This will remove the directory reference from project.json.\nThe actual directory will not be deleted.");
+                        
+                        confirmDialog.showAndWait().ifPresent(response -> {
+                            if (response == ButtonType.OK) {
+                                try {
+                                    finalDirsList.remove(finalPathToRemove);
+                                    
+                                    // Update the project map
+                                    finalProject.put("directories", finalDirsList);
+                                    
+                                    // Write updated project.json
+                                    String updatedJson = com.eb.script.json.Json.prettyJson(finalProject);
+                                    Files.writeString(finalJsonPath, updatedJson);
+                                    
+                                    System.out.println("Removed directory from project.json: " + finalPathToRemove);
+                                    
+                                    // Refresh the project view
+                                    finalProjectNode.getChildren().clear();
+                                    loadProjectFiles(finalProjectNode, finalProjectJsonPath);
+                                    
+                                } catch (Exception e) {
+                                    Alert alert = new Alert(Alert.AlertType.ERROR, 
+                                        "Failed to remove directory: " + e.getMessage());
+                                    alert.setHeaderText("Error");
+                                    alert.showAndWait();
+                                }
+                            }
+                        });
+                    } else {
+                        Alert alert = new Alert(Alert.AlertType.WARNING, 
+                            "Could not find this directory in project.json directories list.");
+                        alert.setHeaderText("Not Found");
+                        alert.showAndWait();
+                    }
+                } else {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION, 
+                        "No directories found in project.json.");
+                    alert.showAndWait();
+                }
+            }
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, 
+                "Failed to remove directory from project: " + e.getMessage());
+            alert.setHeaderText("Error");
+            alert.showAndWait();
+        }
     }
     
     /**
