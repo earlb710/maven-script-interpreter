@@ -76,6 +76,10 @@
                 <version>0.0.8</version>
                 <configuration>
                     <mainClass>com.eb.ui.cli.MainApp</mainClass>
+                    <options>
+                        <option>--add-exports</option>
+                        <option>javafx.graphics/com.sun.javafx.sg.prism=ALL-UNNAMED</option>
+                    </options>
                 </configuration>
             </plugin>
         </plugins>        
