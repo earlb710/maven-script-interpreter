@@ -420,13 +420,13 @@
     -fx-text-fill: #ffffff;
 }
 
-/* Error text color for missing files (with ! prefix) */
-.project-tree-error {
+/* Error text color for missing files */
+.project-tree .tree-cell.project-tree-error {
     -fx-text-fill: #d13438;
 }
 
 /* Selected error items should still use selection text color */
-.project-tree .tree-cell:selected .project-tree-error {
+.project-tree .tree-cell:selected.project-tree-error {
     -fx-text-fill: #ffffff;
 }
 
