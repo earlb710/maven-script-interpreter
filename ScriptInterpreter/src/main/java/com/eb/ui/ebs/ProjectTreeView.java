@@ -2,8 +2,10 @@ package com.eb.ui.ebs;
 
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.KeyCode;
 import javafx.geometry.Insets;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -13,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayDeque;
 
 /**
  * TreeView component for displaying opened projects.
@@ -29,6 +32,9 @@ public class ProjectTreeView extends VBox {
     private final EbsConsoleHandler handler;
     private ContextMenu currentContextMenu;
     private ProjectFileWatcher fileWatcher;
+    private final ComboBox<String> searchComboBox;
+    private final java.util.Deque<String> recentSearches;
+    private static final int MAX_RECENT_SEARCHES = 10;
     
     /**
      * Create a new ProjectTreeView.
@@ -38,6 +44,7 @@ public class ProjectTreeView extends VBox {
     public ProjectTreeView(EbsConsoleHandler handler) {
         this.handler = handler;
         this.projectListManager = new ProjectListManager();
+        this.recentSearches = new ArrayDeque<>(MAX_RECENT_SEARCHES);
         
         // Create root item
         rootItem = new TreeItem<>("Projects");
@@ -122,11 +129,44 @@ public class ProjectTreeView extends VBox {
         // Setup context menu
         setupContextMenu();
         
+        // Create search combo box
+        searchComboBox = new ComboBox<>();
+        searchComboBox.setEditable(true);
+        searchComboBox.setPromptText("Search files...");
+        HBox.setHgrow(searchComboBox, Priority.ALWAYS);
+        searchComboBox.setPrefWidth(200);
+        
+        // Add search icon button
+        Button searchButton = new Button();
+        try {
+            Image searchIcon = new Image(getClass().getResourceAsStream("/icons/search.png"));
+            ImageView searchIconView = new ImageView(searchIcon);
+            searchIconView.setFitWidth(16);
+            searchIconView.setFitHeight(16);
+            searchIconView.setPreserveRatio(true);
+            searchButton.setGraphic(searchIconView);
+        } catch (Exception e) {
+            searchButton.setText("🔍");
+        }
+        searchButton.setOnAction(e -> performSearch());
+        
+        // Handle Enter key in search box
+        searchComboBox.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ENTER) {
+                performSearch();
+            }
+        });
+        
+        // Create search bar container
+        HBox searchBar = new HBox(5);
+        searchBar.getChildren().addAll(searchComboBox, searchButton);
+        searchBar.setPadding(new Insets(0, 0, 5, 0));
+        
         // Add components
         Label titleLabel = new Label("Projects");
         titleLabel.getStyleClass().add("project-tree-title");
         
-        getChildren().addAll(titleLabel, treeView);
+        getChildren().addAll(titleLabel, searchBar, treeView);
         getStyleClass().add("project-tree-panel");
         setPadding(new Insets(5));
         setSpacing(5);
@@ -208,6 +248,9 @@ public class ProjectTreeView extends VBox {
                     MenuItem newFileItem = new MenuItem("New File...");
                     newFileItem.setOnAction(e -> handler.createNewFile(path));
                     
+                    MenuItem newDirItem = new MenuItem("New Directory...");
+                    newDirItem.setOnAction(e -> createNewDirectoryInProject(selectedItem, path));
+                    
                     MenuItem addDirItem = new MenuItem("Add Directory...");
                     addDirItem.setOnAction(e -> addDirectoryToProject(selectedItem, path));
                     
@@ -238,7 +281,8 @@ public class ProjectTreeView extends VBox {
                         contextMenu.getItems().addAll(
                             runProjectItem,
                             new SeparatorMenuItem(),
-                            newFileItem, 
+                            newFileItem,
+                            newDirItem,
                             addDirItem, 
                             removeDirItem,
                             new SeparatorMenuItem(),
@@ -248,7 +292,8 @@ public class ProjectTreeView extends VBox {
                         );
                     } else {
                         contextMenu.getItems().addAll(
-                            newFileItem, 
+                            newFileItem,
+                            newDirItem,
                             addDirItem, 
                             removeDirItem,
                             new SeparatorMenuItem(),
@@ -1022,6 +1067,64 @@ public class ProjectTreeView extends VBox {
     }
     
     /**
+     * Create a new directory in a project.
+     * 
+     * @param projectItem The project tree item
+     * @param projectJsonPath Path to the project.json file
+     */
+    private void createNewDirectoryInProject(TreeItem<String> projectItem, String projectJsonPath) {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("New Directory");
+        dialog.setHeaderText("Create new directory in project");
+        dialog.setContentText("Directory name:");
+        
+        dialog.showAndWait().ifPresent(newName -> {
+            if (newName == null || newName.trim().isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Directory name cannot be empty.");
+                alert.setHeaderText("Invalid Name");
+                alert.showAndWait();
+                return;
+            }
+            
+            try {
+                Path jsonPath = Path.of(projectJsonPath);
+                Path projectDir = jsonPath.getParent();
+                
+                if (projectDir == null) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "Could not determine project directory.");
+                    alert.showAndWait();
+                    return;
+                }
+                
+                Path newDirPath = projectDir.resolve(newName.trim());
+                
+                if (Files.exists(newDirPath)) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, 
+                        "A directory with that name already exists.");
+                    alert.setHeaderText("Directory Exists");
+                    alert.showAndWait();
+                    return;
+                }
+                
+                // Create the directory
+                Files.createDirectory(newDirPath);
+                
+                // Refresh the project to show the new directory
+                projectItem.getChildren().clear();
+                loadProjectFiles(projectItem, projectJsonPath);
+                
+                System.out.println("Directory created in project: " + newDirPath);
+                
+            } catch (Exception e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, 
+                    "Failed to create directory: " + e.getMessage());
+                alert.setHeaderText("Creation Error");
+                alert.showAndWait();
+            }
+        });
+    }
+    
+    /**
      * Rename a directory.
      * 
      * @param dirItem The directory tree item
@@ -1712,6 +1815,92 @@ public class ProjectTreeView extends VBox {
      */
     public ProjectFileWatcher getFileWatcher() {
         return fileWatcher;
+    }
+    
+    /**
+     * Perform search in the project tree.
+     */
+    private void performSearch() {
+        String searchText = searchComboBox.getEditor().getText();
+        if (searchText == null || searchText.trim().isEmpty()) {
+            return;
+        }
+        
+        searchText = searchText.trim();
+        
+        // Add to recent searches
+        addToRecentSearches(searchText);
+        
+        // Perform the search
+        searchInTree(rootItem, searchText.toLowerCase());
+    }
+    
+    /**
+     * Add a search term to recent searches.
+     * 
+     * @param searchText The search text to add
+     */
+    private void addToRecentSearches(String searchText) {
+        // Remove if already exists
+        recentSearches.remove(searchText);
+        
+        // Add to front
+        recentSearches.addFirst(searchText);
+        
+        // Keep only last 10
+        while (recentSearches.size() > MAX_RECENT_SEARCHES) {
+            recentSearches.removeLast();
+        }
+        
+        // Update combo box items
+        searchComboBox.getItems().setAll(recentSearches);
+    }
+    
+    /**
+     * Search in the tree recursively and select/expand matching items.
+     * 
+     * @param item The tree item to search from
+     * @param searchText The search text (lowercase)
+     * @return true if a match was found in this branch
+     */
+    private boolean searchInTree(TreeItem<String> item, String searchText) {
+        if (item == null) {
+            return false;
+        }
+        
+        boolean foundInChildren = false;
+        
+        // Search in children first
+        for (TreeItem<String> child : item.getChildren()) {
+            if (searchInTree(child, searchText)) {
+                foundInChildren = true;
+            }
+        }
+        
+        // Check if current item matches
+        String itemText = item.getValue();
+        if (itemText != null && itemText.toLowerCase().contains(searchText)) {
+            // Expand parent to show this item
+            if (item.getParent() != null) {
+                item.getParent().setExpanded(true);
+            }
+            
+            // Select the first match
+            if (!foundInChildren && item != rootItem) {
+                treeView.getSelectionModel().select(item);
+                treeView.scrollTo(treeView.getSelectionModel().getSelectedIndex());
+                return true;  // Stop after first match
+            }
+            
+            return true;
+        }
+        
+        // Expand if children have matches
+        if (foundInChildren) {
+            item.setExpanded(true);
+        }
+        
+        return foundInChildren;
     }
     
     /**
