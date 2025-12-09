@@ -99,6 +99,7 @@ var builtinsByCategory: json = {};
 print "[DEBUG] Starting to categorize builtins...";
 if builtinsArray != null then {
     print "[DEBUG] builtinsArray has " + call str.toString(builtinsArray.length) + " items";
+    var debugCount: int = 0;
     foreach builtin in builtinsArray {
         var builtinName: string = call json.getString(builtin, "name", "");
         if builtinName != "" then {
@@ -107,6 +108,12 @@ if builtinsArray != null then {
             var category: string = "other";
             if dotIndex > 0 then {
                 category = call str.substring(builtinName, 0, dotIndex);
+            }
+            
+            // Debug first 5 categorizations
+            if debugCount < 5 then {
+                print "[DEBUG] Categorizing: " + builtinName + " -> category: " + category;
+                debugCount = debugCount + 1;
             }
             
             // Get or create category array (json.add will handle creation and appending)
