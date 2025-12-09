@@ -70,16 +70,34 @@ print "Loaded " + call str.toString(builtinCount) + " builtins";
 var builtinCategoryNames: json = null;
 var builtinCategoryOrder: json = null;
 if helpData != null then {
+    print "[DEBUG] helpData is available";
     var topics: json = call json.get(helpData, "topics");
     if topics != null then {
+        print "[DEBUG] topics data loaded";
         builtinCategoryNames = call json.get(topics, "builtin_categories");
         builtinCategoryOrder = call json.get(topics, "builtin_category_order");
+        if builtinCategoryNames != null then {
+            print "[DEBUG] builtinCategoryNames loaded";
+        } else {
+            print "[DEBUG] WARNING: builtinCategoryNames is null";
+        }
+        if builtinCategoryOrder != null then {
+            print "[DEBUG] builtinCategoryOrder loaded with " + call str.toString(builtinCategoryOrder.length) + " categories";
+        } else {
+            print "[DEBUG] WARNING: builtinCategoryOrder is null";
+        }
+    } else {
+        print "[DEBUG] WARNING: topics is null";
     }
+} else {
+    print "[DEBUG] WARNING: helpData is null";
 }
 
 // Categorize builtins by module
 var builtinsByCategory: json = {};
+print "[DEBUG] Starting to categorize builtins...";
 if builtinsArray != null then {
+    print "[DEBUG] builtinsArray has " + call str.toString(builtinsArray.length) + " items";
     foreach builtin in builtinsArray {
         var builtinName: string = call json.getString(builtin, "name", "");
         if builtinName != "" then {
@@ -104,22 +122,30 @@ if builtinsArray != null then {
             builtinsByCategory = call json.set(builtinsByCategory, category, categoryArray);
         }
     }
+    print "[DEBUG] Categorization complete";
+} else {
+    print "[DEBUG] WARNING: builtinsArray is null";
 }
 
 // Build categorized builtin tree using category order from JSON
 var builtinChildren: array[*];
 var totalBuiltins: int = 0;
 
+print "[DEBUG] Building categorized builtin tree...";
 if builtinCategoryOrder != null then {
+    print "[DEBUG] Processing " + call str.toString(builtinCategoryOrder.length) + " category keys";
     foreach categoryKey in builtinCategoryOrder {
+        print "[DEBUG] Processing category: " + categoryKey;
         var categoryArray: json = call json.get(builtinsByCategory, categoryKey);
         if categoryArray != null && categoryArray.length > 0 then {
+            print "[DEBUG] Category '" + categoryKey + "' has " + call str.toString(categoryArray.length) + " functions";
             // Get display name from JSON, fallback to key
             var displayName: string = categoryKey;
             if builtinCategoryNames != null then {
                 var jsonDisplayName: string = call json.getString(builtinCategoryNames, categoryKey, "");
                 if jsonDisplayName != "" then {
                     displayName = jsonDisplayName;
+                    print "[DEBUG] Using display name: " + displayName;
                 }
             }
             
@@ -130,8 +156,17 @@ if builtinCategoryOrder != null then {
             categoryNode = call json.set(categoryNode, "children", categoryArray);
             call array.add(builtinChildren, categoryNode);
             totalBuiltins = totalBuiltins + categoryArray.length;
+            print "[DEBUG] Added category node with display name: " + displayName;
+        } else {
+            if categoryArray == null then {
+                print "[DEBUG] WARNING: No functions found for category: " + categoryKey;
+            } else {
+                print "[DEBUG] WARNING: Category '" + categoryKey + "' array is empty";
+            }
         }
     }
+} else {
+    print "[DEBUG] WARNING: builtinCategoryOrder is null - cannot build tree";
 }
 
 print "Built categorized tree with " + call str.toString(totalBuiltins) + " builtins in " + call str.toString(builtinChildren.length) + " categories";
@@ -175,6 +210,7 @@ var builtinsNode: json = {};
 builtinsNode = call json.set(builtinsNode, "value", "builtins");
 builtinsNode = call json.set(builtinsNode, "expanded", false);
 builtinsNode = call json.set(builtinsNode, "children", builtinChildren);
+print "[DEBUG] Builtins node created with " + call str.toString(builtinChildren.length) + " children";
 call array.add(syntaxChildren, builtinsNode);
 
 call array.add(syntaxChildren, call json.set({}, "value", "screen"));
@@ -204,6 +240,8 @@ treeStructure = call json.set(treeStructure, "expanded", true);
 treeStructure = call json.set(treeStructure, "children", rootChildren);
 
 print "Tree structure built with dynamic builtins";
+print "[DEBUG] Root children count: " + call str.toString(rootChildren.length);
+print "[DEBUG] Syntax children count: " + call str.toString(syntaxChildren.length);
 
 // Load the screen definition from JSON file
 print "Loading screen definition from JSON...";
@@ -227,6 +265,7 @@ if areaArray != null && areaArray.length > 0 then {
                 // Wrap tree structure in array and set it
                 var treeItemsArray: array[*];
                 call array.add(treeItemsArray, treeStructure);
+                print "[DEBUG] Tree structure wrapped in array";
                 display = call json.set(display, "treeItems", treeItemsArray);
                 helpTreeItem = call json.set(helpTreeItem, "display", display);
                 items = call json.set(items, 0, helpTreeItem);
@@ -236,6 +275,9 @@ if areaArray != null && areaArray.length > 0 then {
                 areaArray = call json.set(areaArray, 0, mainLayout);
                 screenJson = call json.set(screenJson, "area", areaArray);
                 print "Tree items injected into screen definition";
+                print "[DEBUG] Tree injection complete - treeItemsArray length: " + call str.toString(treeItemsArray.length);
+            } else {
+                print "[DEBUG] WARNING: display is null - cannot inject tree";
             }
         }
     }
