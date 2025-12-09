@@ -450,9 +450,36 @@ public class EbsCanvas {
      * Convert canvas to EbsImage.
      */
     public EbsImage toImage() throws InterpreterError {
-        WritableImage snapshot = new WritableImage((int) canvas.getWidth(), (int) canvas.getHeight());
-        canvas.snapshot(null, snapshot);
+        AtomicReference<WritableImage> snapshotRef = new AtomicReference<>();
+        AtomicReference<Exception> errorRef = new AtomicReference<>();
+        CountDownLatch latch = new CountDownLatch(1);
         
+        // Run snapshot on FX thread
+        Platform.runLater(() -> {
+            try {
+                WritableImage snapshot = new WritableImage((int) canvas.getWidth(), (int) canvas.getHeight());
+                canvas.snapshot(null, snapshot);
+                snapshotRef.set(snapshot);
+            } catch (Exception e) {
+                errorRef.set(e);
+            } finally {
+                latch.countDown();
+            }
+        });
+        
+        // Wait for completion
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new InterpreterError("Interrupted while taking canvas snapshot");
+        }
+        
+        if (errorRef.get() != null) {
+            throw new InterpreterError("Failed to take canvas snapshot: " + errorRef.get().getMessage());
+        }
+        
+        WritableImage snapshot = snapshotRef.get();
         try {
             BufferedImage buffered = SwingFXUtils.fromFXImage(snapshot, null);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -470,11 +497,38 @@ public class EbsCanvas {
      * Take a snapshot of a portion of the canvas as EbsImage.
      */
     public EbsImage snapshot(double x, double y, double width, double height) throws InterpreterError {
-        WritableImage snapshot = new WritableImage((int) width, (int) height);
-        javafx.scene.SnapshotParameters params = new javafx.scene.SnapshotParameters();
-        params.setViewport(new javafx.geometry.Rectangle2D(x, y, width, height));
-        canvas.snapshot(params, snapshot);
+        AtomicReference<WritableImage> snapshotRef = new AtomicReference<>();
+        AtomicReference<Exception> errorRef = new AtomicReference<>();
+        CountDownLatch latch = new CountDownLatch(1);
         
+        // Run snapshot on FX thread
+        Platform.runLater(() -> {
+            try {
+                WritableImage snapshot = new WritableImage((int) width, (int) height);
+                javafx.scene.SnapshotParameters params = new javafx.scene.SnapshotParameters();
+                params.setViewport(new javafx.geometry.Rectangle2D(x, y, width, height));
+                canvas.snapshot(params, snapshot);
+                snapshotRef.set(snapshot);
+            } catch (Exception e) {
+                errorRef.set(e);
+            } finally {
+                latch.countDown();
+            }
+        });
+        
+        // Wait for completion
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new InterpreterError("Interrupted while taking canvas snapshot");
+        }
+        
+        if (errorRef.get() != null) {
+            throw new InterpreterError("Failed to take canvas snapshot: " + errorRef.get().getMessage());
+        }
+        
+        WritableImage snapshot = snapshotRef.get();
         try {
             BufferedImage buffered = SwingFXUtils.fromFXImage(snapshot, null);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -496,13 +550,41 @@ public class EbsCanvas {
             format = "png";
         }
         
-        WritableImage snapshot = new WritableImage((int) canvas.getWidth(), (int) canvas.getHeight());
-        canvas.snapshot(null, snapshot);
+        final String finalFormat = format;
+        AtomicReference<WritableImage> snapshotRef = new AtomicReference<>();
+        AtomicReference<Exception> errorRef = new AtomicReference<>();
+        CountDownLatch latch = new CountDownLatch(1);
         
+        // Run snapshot on FX thread
+        Platform.runLater(() -> {
+            try {
+                WritableImage snapshot = new WritableImage((int) canvas.getWidth(), (int) canvas.getHeight());
+                canvas.snapshot(null, snapshot);
+                snapshotRef.set(snapshot);
+            } catch (Exception e) {
+                errorRef.set(e);
+            } finally {
+                latch.countDown();
+            }
+        });
+        
+        // Wait for completion
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new InterpreterError("Interrupted while taking canvas snapshot");
+        }
+        
+        if (errorRef.get() != null) {
+            throw new InterpreterError("Failed to take canvas snapshot: " + errorRef.get().getMessage());
+        }
+        
+        WritableImage snapshot = snapshotRef.get();
         try {
             BufferedImage buffered = SwingFXUtils.fromFXImage(snapshot, null);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ImageIO.write(buffered, format.toLowerCase(), baos);
+            ImageIO.write(buffered, finalFormat.toLowerCase(), baos);
             return new ArrayFixedByte(baos.toByteArray());
         } catch (IOException e) {
             throw new InterpreterError("Failed to convert canvas to bytes: " + e.getMessage());
