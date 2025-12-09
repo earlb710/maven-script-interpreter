@@ -77,12 +77,16 @@
                 <configuration>
                     <mainClass>com.eb.scriptinterpreter/com.eb.ui.cli.MainApp</mainClass>
                     <options>
+                        <!-- Export JavaFX internal packages to our module and automatic modules (ALL-UNNAMED) -->
+                        <!-- These are needed for javafxsvg, Batik, and WebView internals -->
                         <option>--add-exports</option>
-                        <option>javafx.graphics/com.sun.javafx.sg.prism=com.eb.scriptinterpreter</option>
+                        <option>javafx.graphics/com.sun.javafx.sg.prism=com.eb.scriptinterpreter,ALL-UNNAMED</option>
                         <option>--add-exports</option>
-                        <option>javafx.graphics/com.sun.javafx.scene=com.eb.scriptinterpreter</option>
+                        <option>javafx.graphics/com.sun.javafx.scene=com.eb.scriptinterpreter,ALL-UNNAMED</option>
                         <option>--add-exports</option>
-                        <option>javafx.graphics/com.sun.javafx.util=com.eb.scriptinterpreter</option>
+                        <option>javafx.graphics/com.sun.javafx.util=com.eb.scriptinterpreter,ALL-UNNAMED</option>
+                        <option>--add-exports</option>
+                        <option>javafx.web/com.sun.webkit=com.eb.scriptinterpreter,ALL-UNNAMED</option>
                     </options>
                 </configuration>
             </plugin>

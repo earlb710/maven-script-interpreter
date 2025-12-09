@@ -28,7 +28,9 @@ Strategic `opens` directives for:
 ### 2. Maven POM Update
 Updated `javafx-maven-plugin` configuration:
 - Changed mainClass from `com.eb.ui.cli.MainApp` to `com.eb.scriptinterpreter/com.eb.ui.cli.MainApp` (module path syntax)
-- Updated `--add-exports` options from `ALL-UNNAMED` to `com.eb.scriptinterpreter`
+- Added `--add-exports` options to export JavaFX internal packages to both `com.eb.scriptinterpreter` and `ALL-UNNAMED`
+- Exports to `ALL-UNNAMED` are necessary for automatic modules (like javafxsvg, Batik) to access JavaFX internals
+- Added exports for `javafx.graphics/com.sun.javafx.sg.prism`, `javafx.graphics/com.sun.javafx.scene`, `javafx.graphics/com.sun.javafx.util`, and `javafx.web/com.sun.webkit`
 
 ### 3. Split Package Resolution
 Resolved split package issue with Batik libraries:
