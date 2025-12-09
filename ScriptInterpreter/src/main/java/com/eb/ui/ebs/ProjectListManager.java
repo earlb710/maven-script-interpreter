@@ -107,9 +107,7 @@ public class ProjectListManager {
                 return;
             }
             
-            System.out.println("Loading projects from: " + projectsPath);
             String jsonContent = Files.readString(projectsPath);
-            System.out.println("File content: " + jsonContent.substring(0, Math.min(200, jsonContent.length())) + "...");
             
             Object parsed = Json.parse(jsonContent);
             
@@ -161,11 +159,7 @@ public class ProjectListManager {
                                 String name = readProjectNameFromFile(path);
                                 if (name != null) {
                                     projects.add(new ProjectEntry(name, path));
-                                } else {
-                                    System.err.println("  Failed to read project name from: " + path);
                                 }
-                            } else {
-                                System.err.println("  No path found in project entry");
                             }
                         } catch (Exception e) {
                             System.err.println("ERROR processing project entry: " + e.getMessage());
@@ -213,11 +207,9 @@ public class ProjectListManager {
     private String readProjectNameFromFile(String projectJsonPath) {
         try {
             Path path = Paths.get(projectJsonPath);
-            System.out.println("Attempting to read project from: " + projectJsonPath);
-            System.out.println("  Resolved path: " + path.toAbsolutePath());
             
             if (!Files.exists(path)) {
-                System.err.println("  ERROR: Project file not found at: " + path.toAbsolutePath());
+                System.err.println("ERROR: Project file not found at: " + path.toAbsolutePath());
                 return null;
             }
             
@@ -229,17 +221,15 @@ public class ProjectListManager {
                 Map<String, Object> projectMap = (Map<String, Object>) parsed;
                 Object nameObj = projectMap.get("name");
                 if (nameObj instanceof String) {
-                    String name = (String) nameObj;
-                    System.out.println("  Successfully read project name: " + name);
-                    return name;
+                    return (String) nameObj;
                 } else {
-                    System.err.println("  ERROR: 'name' field not found or not a string in " + projectJsonPath);
+                    System.err.println("ERROR: 'name' field not found or not a string in " + projectJsonPath);
                 }
             } else {
-                System.err.println("  ERROR: Project file is not a valid JSON object: " + projectJsonPath);
+                System.err.println("ERROR: Project file is not a valid JSON object: " + projectJsonPath);
             }
         } catch (Exception e) {
-            System.err.println("  ERROR reading project name from " + projectJsonPath + ": " + e.getMessage());
+            System.err.println("ERROR reading project name from " + projectJsonPath + ": " + e.getMessage());
             e.printStackTrace();
         }
         return null;
