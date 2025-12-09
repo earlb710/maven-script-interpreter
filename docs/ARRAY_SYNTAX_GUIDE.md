@@ -60,7 +60,7 @@ var numbers: array.int[6];
 | `int[1000]` | `Object[]` with `Integer` objects | ~16 bytes* | ~16 KB |
 | `array.int[1000]` | `int[]` primitive | 4 bytes | 4 KB |
 
-\* Java Integer objects have 16 bytes overhead (12-byte object header + 4-byte int value), plus array reference storage.
+\* Each Integer object: 16 bytes (12-byte object header + 4-byte int value). Array reference overhead is negligible for large arrays and not included in per-element calculation.
 
 **Memory Savings**: The `array.int` syntax uses approximately **4x less memory** for integer arrays.
 
@@ -221,8 +221,8 @@ var largeArray1: int[10000];
 var largeArray2: array.int[10000];
 
 // For 10,000 elements:
-// - largeArray1: ~160-240 KB memory
-// - largeArray2: ~40 KB memory
+// - largeArray1: ~160 KB memory (16 bytes per Integer object × 10,000)
+// - largeArray2: ~40 KB memory (4 bytes per int × 10,000)
 ```
 
 ### Example 3: Numeric Computation
