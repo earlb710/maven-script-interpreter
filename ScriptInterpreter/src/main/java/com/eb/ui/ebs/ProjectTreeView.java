@@ -214,7 +214,18 @@ public class ProjectTreeView extends VBox {
                     MenuItem renameFileItem = new MenuItem("Rename File...");
                     renameFileItem.setOnAction(e -> renameFile(selectedItem, path));
                     
-                    contextMenu.getItems().add(renameFileItem);
+                    MenuItem copyFileItem = new MenuItem("Copy...");
+                    copyFileItem.setOnAction(e -> copyFile(selectedItem, path));
+                    
+                    MenuItem deleteFileItem = new MenuItem("Delete");
+                    deleteFileItem.setOnAction(e -> deleteFile(selectedItem, path));
+                    
+                    contextMenu.getItems().addAll(
+                        renameFileItem,
+                        copyFileItem,
+                        new SeparatorMenuItem(),
+                        deleteFileItem
+                    );
                 }
             }
             
@@ -774,6 +785,100 @@ public class ProjectTreeView extends VBox {
                 
             } catch (Exception e) {
                 Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to rename file: " + e.getMessage());
+                alert.showAndWait();
+            }
+        });
+    }
+    
+    /**
+     * Delete a file after confirmation.
+     * 
+     * @param fileItem The file tree item
+     * @param filePath The file path to delete
+     */
+    private void deleteFile(TreeItem<String> fileItem, String filePath) {
+        Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmDialog.setTitle("Delete File");
+        confirmDialog.setHeaderText("Delete file: " + Path.of(filePath).getFileName());
+        confirmDialog.setContentText("Are you sure you want to delete this file?\nThis action cannot be undone.");
+        
+        confirmDialog.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                try {
+                    Path path = Path.of(filePath);
+                    Files.delete(path);
+                    
+                    // Remove from tree view
+                    TreeItem<String> parent = fileItem.getParent();
+                    if (parent != null) {
+                        parent.getChildren().remove(fileItem);
+                    }
+                    
+                    System.out.println("File deleted: " + filePath);
+                    
+                } catch (Exception e) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, 
+                        "Failed to delete file: " + e.getMessage());
+                    alert.setHeaderText("Delete Error");
+                    alert.showAndWait();
+                }
+            }
+        });
+    }
+    
+    /**
+     * Copy a file with a new name.
+     * 
+     * @param fileItem The file tree item
+     * @param filePath The source file path
+     */
+    private void copyFile(TreeItem<String> fileItem, String filePath) {
+        Path sourcePath = Path.of(filePath);
+        String originalFileName = sourcePath.getFileName().toString();
+        
+        TextInputDialog dialog = new TextInputDialog(originalFileName);
+        dialog.setTitle("Copy File");
+        dialog.setHeaderText("Copy file: " + originalFileName);
+        dialog.setContentText("New name:");
+        
+        dialog.showAndWait().ifPresent(newName -> {
+            if (newName == null || newName.trim().isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "File name cannot be empty.");
+                alert.setHeaderText("Invalid Name");
+                alert.showAndWait();
+                return;
+            }
+            
+            try {
+                Path targetPath = sourcePath.getParent().resolve(newName.trim());
+                
+                if (Files.exists(targetPath)) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, 
+                        "A file with that name already exists.");
+                    alert.setHeaderText("File Exists");
+                    alert.showAndWait();
+                    return;
+                }
+                
+                // Copy the file
+                Files.copy(sourcePath, targetPath);
+                
+                // Refresh the parent directory in tree to show the new file
+                TreeItem<String> parent = fileItem.getParent();
+                if (parent != null) {
+                    Object parentData = parent.getGraphic() != null ? parent.getGraphic().getUserData() : null;
+                    if (parentData instanceof String) {
+                        String parentPath = (String) parentData;
+                        refreshDirectoryNode(parent, parentPath);
+                    }
+                }
+                
+                System.out.println("File copied: " + targetPath);
+                
+            } catch (Exception e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, 
+                    "Failed to copy file: " + e.getMessage());
+                alert.setHeaderText("Copy Error");
                 alert.showAndWait();
             }
         });
