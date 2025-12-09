@@ -454,7 +454,8 @@ getHelpContent(topic: string) return string {
     var content: string = "";
     
     // Check if this is a builtin function name (contains a dot like "str.trim")
-    // Using > 0 because valid builtin names have at least one char before the dot (e.g., "str.trim")
+    // Valid builtin names have at least one char before the dot (e.g., "str.trim", "array.add")
+    // Note: Other help topics use underscores (e.g., "structure_basic"), so dot detection is safe
     var dotIndex: int = call str.indexOf(topic, ".", 0);
     if dotIndex > 0 then {
         // This is a builtin function
