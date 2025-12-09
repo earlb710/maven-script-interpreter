@@ -25,23 +25,24 @@ mvn javafx:run
 
 ### Using IntelliJ IDEA or Other IDEs:
 
-When running `com.eb.ui.cli.MainApp` from your IDE, you **must** add the following VM option:
+When running `com.eb.ui.cli.MainApp` from your IDE, you **must** add the following VM options:
 
 ```
 --add-exports javafx.graphics/com.sun.javafx.sg.prism=ALL-UNNAMED
+--add-exports javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED
 ```
 
 **In IntelliJ IDEA:**
 1. Run → Edit Configurations...
 2. Select your MainApp configuration
-3. Add to "VM options" field: `--add-exports javafx.graphics/com.sun.javafx.sg.prism=ALL-UNNAMED`
+3. Add to "VM options" field: `--add-exports javafx.graphics/com.sun.javafx.sg.prism=ALL-UNNAMED --add-exports javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED`
 4. Apply and OK
 
 **In Eclipse:**
 1. Run → Run Configurations...
 2. Select your MainApp configuration
 3. Go to "Arguments" tab
-4. Add to "VM arguments": `--add-exports javafx.graphics/com.sun.javafx.sg.prism=ALL-UNNAMED`
+4. Add to "VM arguments": `--add-exports javafx.graphics/com.sun.javafx.sg.prism=ALL-UNNAMED --add-exports javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED`
 5. Apply
 
 ### Running directly with java:
@@ -51,13 +52,18 @@ mvn compile
 
 # Then run with required JVM arguments
 java --add-exports javafx.graphics/com.sun.javafx.sg.prism=ALL-UNNAMED \
+     --add-exports javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED \
      -cp target/classes \
      com.eb.ui.cli.MainApp
 ```
 
 ## Why is this JVM argument required?
 
-The JavaFX WebView component requires access to internal JavaFX graphics classes (`com.sun.javafx.sg.prism` package) that are not exported by default in Java's module system. The `--add-exports` argument explicitly exports these internal packages to allow WebView to function properly.
+The JavaFX WebView component requires access to internal JavaFX graphics classes that are not exported by default in Java's module system:
+- `com.sun.javafx.sg.prism` package - Required for WebView's rendering engine (NGWebView extends NGGroup)
+- `com.sun.javafx.scene` package - Required for WebView's scene graph helpers (WebViewHelper extends ParentHelper)
+
+The `--add-exports` arguments explicitly export these internal packages to allow WebView to function properly.
 
 Without this argument, you'll encounter an `IllegalAccessError` when trying to use WebView controls in screens.
 
