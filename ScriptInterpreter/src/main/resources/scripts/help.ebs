@@ -136,6 +136,22 @@ if builtinCategoryOrder != null then {
         var categoryArray: json = call json.get(builtinsByCategory, categoryKey);
         if categoryArray != null && categoryArray.length > 0 then {
             print "[DEBUG] Category '" + categoryKey + "' has " + call str.toString(categoryArray.length) + " functions";
+            // Debug: print first 3 function names
+            if categoryArray.length > 0 then {
+                var firstFunc: json = categoryArray[0];
+                var firstName: string = call json.getString(firstFunc, "value", "");
+                print "[DEBUG]   First function: " + firstName;
+            }
+            if categoryArray.length > 1 then {
+                var secondFunc: json = categoryArray[1];
+                var secondName: string = call json.getString(secondFunc, "value", "");
+                print "[DEBUG]   Second function: " + secondName;
+            }
+            if categoryArray.length > 2 then {
+                var thirdFunc: json = categoryArray[2];
+                var thirdName: string = call json.getString(thirdFunc, "value", "");
+                print "[DEBUG]   Third function: " + thirdName;
+            }
             // Get display name from JSON, fallback to key
             var displayName: string = categoryKey;
             if builtinCategoryNames != null then {
