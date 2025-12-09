@@ -611,16 +611,10 @@ public class BuiltinsGraphics {
      */
     private static double[] extractCoordinates(Object obj, String funcName) throws InterpreterError {
         if (obj instanceof ArrayDef arrayDef) {
-            // Handle EBS array types
-            Object[] elements = (Object[]) arrayDef.getAll();
-            double[] coords = new double[elements.length];
-            for (int i = 0; i < elements.length; i++) {
-                if (!(elements[i] instanceof Number)) {
-                    throw new InterpreterError(funcName + ": all array elements must be numbers");
-                }
-                coords[i] = ((Number) elements[i]).doubleValue();
-            }
-            return coords;
+            // Handle EBS array types - get the underlying array
+            Object underlyingArray = arrayDef.getAll();
+            // Now process the underlying array (could be primitive or Object[])
+            return extractCoordinates(underlyingArray, funcName);
         } else if (obj instanceof List<?> list) {
             // Handle List
             double[] coords = new double[list.size()];
