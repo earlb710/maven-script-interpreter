@@ -119,8 +119,10 @@ if builtinsArray != null then {
             // Use the builtin name as the display value (e.g., "str.trim")
             var childNode: json = {};
             childNode = call json.set(childNode, "value", builtinName);
-            categoryArray = call json.add(categoryArray, "", childNode);
-            builtinsByCategory = call json.set(builtinsByCategory, category, categoryArray);
+            // Since categoryArray is a JSON array, we need to use json.add with the root object
+            // But since we want to append to the array itself, we'll rebuild it
+            var newCategoryArray: json = categoryArray;
+            builtinsByCategory = call json.add(builtinsByCategory, category, childNode);
         }
     }
     print "[DEBUG] Categorization complete";
