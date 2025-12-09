@@ -141,21 +141,21 @@ if builtinCategoryOrder != null then {
         print "[DEBUG] Processing category: " + categoryKey;
         // Get category array from json using json.getArray to properly handle JSON arrays
         var categoryArray: json = call json.getArray(builtinsByCategory, categoryKey);
-        if categoryArray != null && categoryArray.length > 0 then {
-            print "[DEBUG] Category '" + categoryKey + "' has " + call str.toString(categoryArray.length) + " functions";
-            // Debug: print first 3 function names
-            if categoryArray.length > 0 then {
-                var firstFunc: json = call json.get(categoryArray, "0");
+        if categoryArray != null then {
+            print "[DEBUG] Category '" + categoryKey + "' found";
+            // Debug: print first 3 function names if they exist
+            var firstFunc: json = call json.get(categoryArray, "0");
+            if firstFunc != null then {
                 var firstName: string = call json.getString(firstFunc, "value", "");
                 print "[DEBUG]   First function: " + firstName;
             }
-            if categoryArray.length > 1 then {
-                var secondFunc: json = call json.get(categoryArray, "1");
+            var secondFunc: json = call json.get(categoryArray, "1");
+            if secondFunc != null then {
                 var secondName: string = call json.getString(secondFunc, "value", "");
                 print "[DEBUG]   Second function: " + secondName;
             }
-            if categoryArray.length > 2 then {
-                var thirdFunc: json = call json.get(categoryArray, "2");
+            var thirdFunc: json = call json.get(categoryArray, "2");
+            if thirdFunc != null then {
                 var thirdName: string = call json.getString(thirdFunc, "value", "");
                 print "[DEBUG]   Third function: " + thirdName;
             }
@@ -175,14 +175,10 @@ if builtinCategoryOrder != null then {
             categoryNode = call json.set(categoryNode, "expanded", false);
             categoryNode = call json.set(categoryNode, "children", categoryArray);
             call array.add(builtinChildren, categoryNode);
-            totalBuiltins = totalBuiltins + categoryArray.length;
+            totalBuiltins = totalBuiltins + 1; // Count categories, not individual functions
             print "[DEBUG] Added category node with display name: " + displayName;
         } else {
-            if categoryArray == null then {
-                print "[DEBUG] WARNING: No functions found for category: " + categoryKey;
-            } else {
-                print "[DEBUG] WARNING: Category '" + categoryKey + "' array is empty";
-            }
+            print "[DEBUG] WARNING: No functions found for category: " + categoryKey;
         }
     }
 } else {
@@ -532,15 +528,11 @@ getHelpContent(topic: string) return string {
             if displayName == topic then {
                 // Found matching category - show overview
                 var categoryArray: json = call json.get(builtinsByCategory, categoryKey);
-                var funcCount: int = 0;
-                if categoryArray != null then {
-                    funcCount = categoryArray.length;
-                }
                 
                 content = "═══════════════════════════════════════════════════════\n";
                 content = content + "  " + displayName + "\n";
                 content = content + "═══════════════════════════════════════════════════════\n\n";
-                content = content + "This category contains " + call str.toString(funcCount) + " functions.\n\n";
+                content = content + "This category contains builtin functions.\n\n";
                 content = content + "Select a function from the tree to view its documentation.\n\n";
                 
                 // List functions in this category
