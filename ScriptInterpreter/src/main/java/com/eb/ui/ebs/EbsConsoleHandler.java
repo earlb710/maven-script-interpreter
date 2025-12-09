@@ -1432,6 +1432,9 @@ public class EbsConsoleHandler extends EbsHandler {
             if (!filesList.contains(relativePath)) {
                 filesList.add(relativePath);
                 
+                // Update the project map with the modified files list
+                project.put("files", filesList);
+                
                 // Write updated project.json
                 String updatedJson = Json.prettyJson(project);
                 Files.writeString(projectJsonPath, updatedJson, StandardCharsets.UTF_8);

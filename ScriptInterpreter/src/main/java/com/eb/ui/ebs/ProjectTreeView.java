@@ -299,6 +299,13 @@ public class ProjectTreeView extends VBox {
         
         List<ProjectListManager.ProjectEntry> entries = projectListManager.getProjects();
         
+        // Sort entries alphabetically by name (case-insensitive)
+        entries.sort((e1, e2) -> {
+            String name1 = getProjectDisplayName(e1.getPath(), e1.getName());
+            String name2 = getProjectDisplayName(e2.getPath(), e2.getName());
+            return name1.compareToIgnoreCase(name2);
+        });
+        
         for (ProjectListManager.ProjectEntry entry : entries) {
             // Get project name with version
             String displayName = getProjectDisplayName(entry.getPath(), entry.getName());
