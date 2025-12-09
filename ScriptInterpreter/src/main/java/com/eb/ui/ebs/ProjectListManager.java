@@ -123,10 +123,28 @@ public class ProjectListManager {
                 Object projectsArray = projectsMap.get("projects");
                 System.out.println("DEBUG: projectsArray type: " + (projectsArray == null ? "null" : projectsArray.getClass().getName()));
                 
-                if (projectsArray instanceof List) {
+                // Handle ArrayDynamic (used by EBS JSON parser) or standard List
+                List<Object> projectsList = null;
+                
+                if (projectsArray instanceof com.eb.script.arrays.ArrayDynamic) {
+                    // EBS JSON parser returns ArrayDynamic
+                    com.eb.script.arrays.ArrayDynamic arrayDynamic = (com.eb.script.arrays.ArrayDynamic) projectsArray;
+                    System.out.println("DEBUG: projectsArray is ArrayDynamic!");
+                    System.out.println("DEBUG: ArrayDynamic size: " + arrayDynamic.size());
+                    
+                    // Convert ArrayDynamic to List for processing
+                    projectsList = new ArrayList<>();
+                    for (int i = 0; i < arrayDynamic.size(); i++) {
+                        projectsList.add(arrayDynamic.get(i));
+                    }
+                } else if (projectsArray instanceof List) {
                     System.out.println("DEBUG: projectsArray is a List!");
                     @SuppressWarnings("unchecked")
-                    List<Object> projectsList = (List<Object>) projectsArray;
+                    List<Object> list = (List<Object>) projectsArray;
+                    projectsList = list;
+                }
+                
+                if (projectsList != null) {
                     System.out.println("DEBUG: projectsList size: " + projectsList.size());
                     
                     if (projectsList.isEmpty()) {
@@ -172,7 +190,7 @@ public class ProjectListManager {
                     }
                     System.out.println("Loaded " + projects.size() + " projects from " + PROJECTS_FILE);
                 } else {
-                    System.err.println("DEBUG: projectsArray is NOT a List! It's: " + (projectsArray == null ? "null" : projectsArray.getClass().getName()));
+                    System.err.println("DEBUG: projectsArray is neither List nor ArrayDynamic! It's: " + (projectsArray == null ? "null" : projectsArray.getClass().getName()));
                 }
             } else {
                 System.err.println("DEBUG: Parsed is NOT a Map! It's: " + (parsed == null ? "null" : parsed.getClass().getName()));
