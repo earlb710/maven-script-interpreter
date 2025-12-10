@@ -24,6 +24,8 @@ import java.util.Map;
  */
 public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.ProjectProperties> {
     
+    private static final double MIN_TEXT_FIELD_WIDTH = 300.0;
+    
     private final TextField projectNameField;
     private final TextField projectDirField;
     private final TextField mainScriptField;
@@ -119,7 +121,7 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         
         ColumnConstraints col1 = new ColumnConstraints();
         col1.setHgrow(Priority.ALWAYS); // Text field column grows
-        col1.setMinWidth(300); // Minimum width for text fields
+        col1.setMinWidth(MIN_TEXT_FIELD_WIDTH); // Minimum width for text fields
         
         ColumnConstraints col2 = new ColumnConstraints();
         col2.setHgrow(Priority.NEVER); // Browse button column doesn't grow
