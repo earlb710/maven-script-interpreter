@@ -334,7 +334,7 @@ convertToHtml(text: string) return string {
             var j: int = 0;
             while j < lineLen {
                 var ch: string = call str.substring(trimmedLine, j, j + 1);
-                if ch != "═" and ch != "=" and ch != "-" {
+                if ch != "═" and ch != "=" and ch != "-" then {
                     allSeparators = false;
                     break;
                 }
