@@ -442,26 +442,27 @@ public class ProjectTreeView extends VBox {
      * Open the selected item (project or file).
      */
     private void openSelectedItem(TreeItem<String> item) {
-        // Get the path from user data to check if it's a directory
-        Object userData = item.getGraphic() != null ? item.getGraphic().getUserData() : null;
-        if (userData instanceof String) {
-            String itemPath = (String) userData;
-            Path path = Paths.get(itemPath);
-            
-            // If it's a directory (folder), just toggle expansion instead of opening
-            if (Files.isDirectory(path)) {
-                item.setExpanded(!item.isExpanded());
-                return;
-            }
-        }
-        
         // Check if this is a file (has a parent that's not root) or a project (parent is root)
         TreeItem<String> parent = item.getParent();
         if (parent != null && parent != rootItem) {
+            // This is a child of a project (could be file or folder)
+            // Get the path from user data to check if it's a directory
+            Object userData = item.getGraphic() != null ? item.getGraphic().getUserData() : null;
+            if (userData instanceof String) {
+                String itemPath = (String) userData;
+                Path path = Paths.get(itemPath);
+                
+                // If it's a directory (folder), just toggle expansion instead of opening
+                if (Files.isDirectory(path)) {
+                    item.setExpanded(!item.isExpanded());
+                    return;
+                }
+            }
+            
             // This is a file - open it
             openSelectedFile(item);
         } else {
-            // This is a project - open project
+            // This is a project - open project (don't toggle expand/collapse)
             openSelectedProject(item);
         }
     }
