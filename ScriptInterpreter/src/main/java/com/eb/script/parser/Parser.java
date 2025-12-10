@@ -1431,6 +1431,12 @@ public class Parser {
             advance();
             int depth = 1;
             
+            // Check for empty braces {} immediately after opening brace
+            if (check(EbsTokenType.RBRACE)) {
+                // Empty braces {} should be treated as an empty JSON object
+                return true;
+            }
+            
             // Look ahead to find a colon at depth 1
             while (!isAtEnd() && depth > 0) {
                 if (check(EbsTokenType.LBRACE) || check(EbsTokenType.LBRACKET)) {
