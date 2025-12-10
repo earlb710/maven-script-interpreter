@@ -234,6 +234,8 @@ public class EbsTab extends Tab {
                 dispArea.replaceText("");
                 outputArea.printlnInfo("New file: " + tabContext.path.getFileName());
                 suppressDirty = false;
+                // Clear undo history for new files
+                dispArea.getUndoManager().forgetHistory();
                 return;
             }
             
@@ -243,6 +245,8 @@ public class EbsTab extends Tab {
             dispArea.replaceText(ret.stringData);
             outputArea.printlnOk(ret.fileContext.path.toString() + " : " + ret.fileContext.size);
             suppressDirty = false;
+            // Clear undo history after loading file so undo doesn't go past the loaded state
+            dispArea.getUndoManager().forgetHistory();
         } catch (Exception ex) {
             outputArea.printlnError("load error:" + ex.getMessage());
         }
@@ -863,6 +867,8 @@ public class EbsTab extends Tab {
         suppressDirty = true;
         dispArea.replaceText(content);
         suppressDirty = false;
+        // Clear undo history so undo doesn't remove the initial content
+        dispArea.getUndoManager().forgetHistory();
         markDirty();  // Mark as dirty since it's a new unsaved file
     }
 
