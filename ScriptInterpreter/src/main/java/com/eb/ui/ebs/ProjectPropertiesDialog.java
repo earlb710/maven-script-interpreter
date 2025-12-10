@@ -457,35 +457,13 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
             okBtn.setDisable(newValue == null || newValue.trim().isEmpty());
         });
         
-        mainScriptField.textProperty().addListener((obs, old, newVal) -> {
-            fieldsEdited = true;
-            okBtn.setDisable(projectNameField.getText().trim().isEmpty());
-        });
-        
-        cssFileField.textProperty().addListener((obs, old, newVal) -> {
-            fieldsEdited = true;
-            okBtn.setDisable(projectNameField.getText().trim().isEmpty());
-        });
-        
-        resourceDirField.textProperty().addListener((obs, old, newVal) -> {
-            fieldsEdited = true;
-            okBtn.setDisable(projectNameField.getText().trim().isEmpty());
-        });
-        
-        testDirField.textProperty().addListener((obs, old, newVal) -> {
-            fieldsEdited = true;
-            okBtn.setDisable(projectNameField.getText().trim().isEmpty());
-        });
-        
-        tempDirField.textProperty().addListener((obs, old, newVal) -> {
-            fieldsEdited = true;
-            okBtn.setDisable(projectNameField.getText().trim().isEmpty());
-        });
-        
-        docDirField.textProperty().addListener((obs, old, newVal) -> {
-            fieldsEdited = true;
-            okBtn.setDisable(projectNameField.getText().trim().isEmpty());
-        });
+        // Add field change listener for all other fields
+        addFieldChangeListener(mainScriptField, okBtn);
+        addFieldChangeListener(cssFileField, okBtn);
+        addFieldChangeListener(resourceDirField, okBtn);
+        addFieldChangeListener(testDirField, okBtn);
+        addFieldChangeListener(tempDirField, okBtn);
+        addFieldChangeListener(docDirField, okBtn);
         
         // Set result converter
         setResultConverter(dialogButton -> {
@@ -518,12 +496,7 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
                 linkedDirectories.add(dirPath);
                 linkedDirTable.getItems().add(dirPath);
                 fieldsEdited = true;
-                
-                // Enable OK button
-                Button okBtn = (Button) getDialogPane().lookupButton(ButtonType.OK);
-                if (!projectNameField.getText().trim().isEmpty()) {
-                    okBtn.setDisable(false);
-                }
+                updateOkButtonState();
             } else {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION, 
                     "This directory is already linked to the project.");
@@ -542,12 +515,30 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
             linkedDirectories.remove(selected);
             linkedDirTable.getItems().remove(selected);
             fieldsEdited = true;
-            
-            // Enable OK button
-            Button okBtn = (Button) getDialogPane().lookupButton(ButtonType.OK);
-            if (!projectNameField.getText().trim().isEmpty()) {
-                okBtn.setDisable(false);
-            }
+            updateOkButtonState();
+        }
+    }
+    
+    /**
+     * Add a field change listener that tracks edits and updates OK button.
+     * 
+     * @param field The text field to monitor
+     * @param okBtn The OK button to enable/disable
+     */
+    private void addFieldChangeListener(TextField field, Button okBtn) {
+        field.textProperty().addListener((obs, old, newVal) -> {
+            fieldsEdited = true;
+            okBtn.setDisable(projectNameField.getText().trim().isEmpty());
+        });
+    }
+    
+    /**
+     * Update the OK button state based on project name validity.
+     */
+    private void updateOkButtonState() {
+        Button okBtn = (Button) getDialogPane().lookupButton(ButtonType.OK);
+        if (!projectNameField.getText().trim().isEmpty()) {
+            okBtn.setDisable(false);
         }
     }
     
