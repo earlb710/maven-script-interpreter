@@ -1,0 +1,121 @@
+// Comprehensive test covering all screen component types
+// Tests typeof for all supported JavaFX components
+
+print "All Screen Component Types Test";
+print "================================";
+print "";
+
+// Define a screen with all major component types
+screen allComponents = {
+    "title": "All Components Test",
+    "width": 600,
+    "height": 800,
+    "sets": [
+        {
+            "setname": "textInputs",
+            "vars": [
+                {"name": "field1", "type": "string", "default": "text", "display": {"type": "textfield"}},
+                {"name": "field2", "type": "string", "default": "area", "display": {"type": "textarea"}},
+                {"name": "field3", "type": "string", "default": "pass", "display": {"type": "passwordfield"}}
+            ]
+        },
+        {
+            "setname": "selections",
+            "vars": [
+                {"name": "check1", "type": "bool", "default": true, "display": {"type": "checkbox"}},
+                {"name": "radio1", "type": "bool", "default": false, "display": {"type": "radiobutton"}},
+                {"name": "toggle1", "type": "bool", "default": false, "display": {"type": "togglebutton"}},
+                {"name": "combo1", "type": "string", "default": "opt1", "display": {"type": "combobox"}},
+                {"name": "choice1", "type": "string", "default": "opt1", "display": {"type": "choicebox"}}
+            ]
+        },
+        {
+            "setname": "numeric",
+            "vars": [
+                {"name": "spin1", "type": "int", "default": 5, "display": {"type": "spinner"}},
+                {"name": "slide1", "type": "int", "default": 50, "display": {"type": "slider"}}
+            ]
+        },
+        {
+            "setname": "datetime",
+            "vars": [
+                {"name": "date1", "type": "date", "default": null, "display": {"type": "datepicker"}}
+            ]
+        },
+        {
+            "setname": "buttons",
+            "vars": [
+                {"name": "btn1", "type": "string", "default": "Click", "display": {"type": "button"}}
+            ]
+        },
+        {
+            "setname": "display",
+            "vars": [
+                {"name": "lbl1", "type": "string", "default": "Label", "display": {"type": "label"}},
+                {"name": "lbl2", "type": "string", "default": "LabelText", "display": {"type": "labeltext"}},
+                {"name": "txt1", "type": "string", "default": "Text", "display": {"type": "text"}},
+                {"name": "link1", "type": "string", "default": "Link", "display": {"type": "hyperlink"}}
+            ]
+        }
+    ]
+};
+
+print "Text Input Components:";
+print "----------------------";
+print "textfield:     " + typeof allComponents.field1;
+print "textarea:      " + typeof allComponents.field2;
+print "passwordfield: " + typeof allComponents.field3;
+print "";
+
+print "Selection Components:";
+print "---------------------";
+print "checkbox:      " + typeof allComponents.check1;
+print "radiobutton:   " + typeof allComponents.radio1;
+print "togglebutton:  " + typeof allComponents.toggle1;
+print "combobox:      " + typeof allComponents.combo1;
+print "choicebox:     " + typeof allComponents.choice1;
+print "";
+
+print "Numeric Components:";
+print "-------------------";
+print "spinner:       " + typeof allComponents.spin1;
+print "slider:        " + typeof allComponents.slide1;
+print "";
+
+print "Date/Time Components:";
+print "---------------------";
+print "datepicker:    " + typeof allComponents.date1;
+print "";
+
+print "Button Components:";
+print "------------------";
+print "button:        " + typeof allComponents.btn1;
+print "";
+
+print "Display Components:";
+print "-------------------";
+print "label:         " + typeof allComponents.lbl1;
+print "labeltext:     " + typeof allComponents.lbl2;
+print "text:          " + typeof allComponents.txt1;
+print "hyperlink:     " + typeof allComponents.link1;
+print "";
+
+// Test type declarations for various components
+print "Type Declarations Test:";
+print "-----------------------";
+var myTextField : screen.textfield = allComponents.field1;
+var myTextArea : screen.textarea = allComponents.field2;
+var myCheckbox : screen.checkbox = allComponents.check1;
+var myButton : screen.button = allComponents.btn1;
+var mySpinner : screen.spinner = allComponents.spin1;
+var mySlider : screen.slider = allComponents.slide1;
+
+print "✓ textfield declared: " + myTextField;
+print "✓ textarea declared: " + myTextArea;
+print "✓ checkbox declared: " + myCheckbox;
+print "✓ button declared: " + myButton;
+print "✓ spinner declared: " + mySpinner;
+print "✓ slider declared: " + mySlider;
+print "";
+
+print "✓ All component types test passed!";
