@@ -1065,8 +1065,10 @@ public class EbsConsoleHandler extends EbsHandler {
             
             // Create AI instruction file
             Path instructionFilePath = projectDir.resolve(".copilot-instructions.md");
-            String instructionContent = createAiInstructionFile(projectName, projectDir.toAbsolutePath().toString());
-            Files.writeString(instructionFilePath, instructionContent, StandardCharsets.UTF_8);
+            if (!Files.exists(instructionFilePath)) {
+                String instructionContent = createAiInstructionFile(projectName, projectDir.toAbsolutePath().toString());
+                Files.writeString(instructionFilePath, instructionContent, StandardCharsets.UTF_8);
+            }
             
             // Load the project into global environment
             loadProjectJson(projectJsonPath);
@@ -1079,7 +1081,9 @@ public class EbsConsoleHandler extends EbsHandler {
             ScriptArea output = env.getOutputArea();
             output.printlnOk("New project created: " + projectJsonPath);
             output.printlnInfo("Project loaded into global variable 'project'");
-            output.printlnInfo("AI instruction file created: " + projectDir.resolve(".copilot-instructions.md"));
+            if (Files.exists(instructionFilePath)) {
+                output.printlnInfo("AI instruction file created: " + instructionFilePath);
+            }
             
         } catch (Exception ex) {
             submitErrors("Failed to create new project: " + ex.getMessage());
