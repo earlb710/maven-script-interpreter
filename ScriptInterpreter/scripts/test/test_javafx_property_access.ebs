@@ -1,0 +1,71 @@
+// Test script for .javafx property access
+// Tests accessing JavaFX component information through myScreen.var.javafx
+
+print "JavaFX Component Access Test";
+print "=============================";
+print "";
+
+// Define a screen with various component types
+screen testScreen = {
+    "title": "JavaFX Test",
+    "width": 400,
+    "height": 300,
+    "sets": [
+        {
+            "setname": "controls",
+            "vars": [
+                {
+                    "name": "username",
+                    "type": "string",
+                    "default": "testuser",
+                    "display": {
+                        "type": "textfield"
+                    }
+                },
+                {
+                    "name": "comments",
+                    "type": "string",
+                    "default": "Enter your comments here",
+                    "display": {
+                        "type": "textarea"
+                    }
+                },
+                {
+                    "name": "submitBtn",
+                    "type": "string",
+                    "default": "Submit",
+                    "display": {
+                        "type": "button"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+print "Screen created with controls: username (textfield), comments (textarea), submitBtn (button)";
+print "";
+
+// Test 1: Check typeof still works
+print "TEST 1: typeof operator";
+print "-----------------------";
+print "typeof testScreen.username = " + typeof testScreen.username;
+print "typeof testScreen.comments = " + typeof testScreen.comments;
+print "typeof testScreen.submitBtn = " + typeof testScreen.submitBtn;
+print "";
+
+// Test 2: Access JavaFX component information
+print "TEST 2: .javafx property access";
+print "--------------------------------";
+print "";
+print "testScreen.username.javafx:";
+print testScreen.username.javafx;
+print "";
+print "testScreen.comments.javafx:";
+print testScreen.comments.javafx;
+print "";
+print "testScreen.submitBtn.javafx:";
+print testScreen.submitBtn.javafx;
+print "";
+
+print "✓ JavaFX property access test completed!";

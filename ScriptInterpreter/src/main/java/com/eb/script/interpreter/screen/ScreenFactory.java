@@ -3500,6 +3500,19 @@ public class ScreenFactory {
                     control.getProperties().put(ControlListenerFactory.PROP_SCREEN_NAME, screenName);
                     // Track this control so we can refresh it when variables change
                     boundControls.add(control);
+                    
+                    // Store the JavaFX Node reference in the ScreenComponentType
+                    if (context != null) {
+                        java.util.concurrent.ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenComponentType> componentTypes = 
+                            context.getScreenComponentTypes(screenName);
+                        if (componentTypes != null) {
+                            String varNameLower = item.varRef.toLowerCase(java.util.Locale.ROOT);
+                            com.eb.script.interpreter.screen.ScreenComponentType componentType = componentTypes.get(varNameLower);
+                            if (componentType != null) {
+                                componentType.setJavaFXNode(control);
+                            }
+                        }
+                    }
                 }
                 
                 // Also add controls with names (like buttons) to boundControls even without varRef
