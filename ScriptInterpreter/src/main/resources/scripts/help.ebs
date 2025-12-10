@@ -329,7 +329,7 @@ convertToHtml(text: string) return string {
         // Check if line contains only ═, =, or - characters (more than 5)
         var isHrLine: bool = false;
         var lineLen: int = call str.length(trimmedLine);
-        if lineLen > 5 {
+        if lineLen > 5 then {
             var allSeparators: bool = true;
             var j: int = 0;
             while j < lineLen {
@@ -340,12 +340,12 @@ convertToHtml(text: string) return string {
                 }
                 j = j + 1;
             }
-            if allSeparators {
+            if allSeparators then {
                 isHrLine = true;
             }
         }
         
-        if isHrLine {
+        if isHrLine then {
             // Replace separator lines with <hr>
             call array.add(processedLines, "<hr>");
         } else {
