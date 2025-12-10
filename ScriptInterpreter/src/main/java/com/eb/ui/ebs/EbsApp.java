@@ -75,7 +75,7 @@ public class EbsApp {
         
         initUI(root);
         
-        Scene scene = new Scene(root, 1100, 720);
+        Scene scene = new Scene(root, 1400, 900);
         scene.getStylesheets().add(getClass().getResource("/css/console.css").toExternalForm());
         
         primaryStage.setScene(scene);
