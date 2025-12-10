@@ -419,17 +419,7 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         linkedDirBox.getChildren().addAll(linkedDirLabel, linkedDirTable);
         mainContainer.getChildren().add(linkedDirBox);
         
-        getDialogPane().setContent(mainContainer);
-        
-        // Initialize create button states
-        updateCreateButtonStates();
-        
-        // Add OK and Cancel buttons
-        ButtonType okButton = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
-        ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
-        getDialogPane().getButtonTypes().addAll(okButton, cancelButton);
-        
-        // Add "Link Directory" and "Remove Link" buttons at bottom left
+        // Add "Link Directory" and "Remove Link" buttons directly to the dialog
         Button linkDirButton = new Button("Link Directory");
         linkDirButton.setOnAction(e -> linkDirectory());
         
@@ -444,8 +434,17 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         
         HBox buttonBox = new HBox(10, linkDirButton, removeLinkButton);
         buttonBox.setPadding(new Insets(10, 0, 0, 0));
-        getDialogPane().setExpandableContent(buttonBox);
-        getDialogPane().setExpanded(true);
+        mainContainer.getChildren().add(buttonBox);
+        
+        getDialogPane().setContent(mainContainer);
+        
+        // Initialize create button states
+        updateCreateButtonStates();
+        
+        // Add OK and Cancel buttons
+        ButtonType okButton = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+        getDialogPane().getButtonTypes().addAll(okButton, cancelButton);
         
         // Enable/Disable OK button based on field changes and valid project name
         Button okBtn = (Button) getDialogPane().lookupButton(okButton);
