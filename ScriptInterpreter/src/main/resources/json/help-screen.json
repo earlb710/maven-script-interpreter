@@ -46,7 +46,7 @@
                 "prefWidth": "250",
                 "maxWidth": "250",
                 "minHeight": "200",
-                "prefHeight": "400",
+                "prefHeight": "200",
                 "maxHeight": "MAX",
                 "vgrow": "ALWAYS",
                 "expandAll": true,
