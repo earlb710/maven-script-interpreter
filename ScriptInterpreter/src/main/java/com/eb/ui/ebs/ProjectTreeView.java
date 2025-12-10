@@ -61,7 +61,7 @@ public class ProjectTreeView extends VBox {
         treeView.getStyleClass().add("project-tree");
         VBox.setVgrow(treeView, Priority.ALWAYS);
         
-        // Set custom cell factory to apply error styling
+        // Set custom cell factory to apply error styling and handle double-clicks
         treeView.setCellFactory(tv -> {
             TreeCell<String> cell = new TreeCell<>() {
                 @Override
@@ -90,18 +90,19 @@ public class ProjectTreeView extends VBox {
                     }
                 }
             };
-            return cell;
-        });
-        
-        // Setup double-click to open project or file
-        treeView.setOnMouseClicked(event -> {
-            if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
-                TreeItem<String> selectedItem = treeView.getSelectionModel().getSelectedItem();
-                if (selectedItem != null && selectedItem != rootItem) {
-                    openSelectedItem(selectedItem);
-                    event.consume(); // Prevent default TreeView expand/collapse behavior
+            
+            // Add mouse click handler to prevent default expand/collapse on double-click
+            cell.setOnMouseClicked(event -> {
+                if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
+                    TreeItem<String> selectedItem = cell.getTreeItem();
+                    if (selectedItem != null && selectedItem != rootItem && !cell.isEmpty()) {
+                        openSelectedItem(selectedItem);
+                        event.consume(); // Consume the event at cell level to prevent default behavior
+                    }
                 }
-            }
+            });
+            
+            return cell;
         });
         
         // Setup selection listener to show directory in status bar message
