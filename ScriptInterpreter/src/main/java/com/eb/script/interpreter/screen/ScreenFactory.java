@@ -3539,6 +3539,46 @@ public class ScreenFactory {
 
                 // Apply item layout properties
                 applyItemLayoutProperties(control, item);
+                
+                // If the control was wrapped (e.g., with a label), also apply width constraints to the wrapper
+                // This ensures the wrapper container respects the same width limits as the control inside
+                if (nodeToAdd != control && nodeToAdd instanceof Region) {
+                    Region wrapper = (Region) nodeToAdd;
+                    // Only apply width constraints to the wrapper, not height (height should be flexible for label+control)
+                    if (item.minWidth != null && !item.minWidth.isEmpty()) {
+                        try {
+                            double width = parseSize(item.minWidth);
+                            if (width > 0) {
+                                wrapper.setMinWidth(width);
+                                System.out.println("[LAYOUT] Wrapper for item '" + item.name + "': setMinWidth(" + width + ")");
+                            }
+                        } catch (NumberFormatException e) {
+                            // Ignore
+                        }
+                    }
+                    if (item.prefWidth != null && !item.prefWidth.isEmpty()) {
+                        try {
+                            double width = parseSize(item.prefWidth);
+                            if (width > 0) {
+                                wrapper.setPrefWidth(width);
+                                System.out.println("[LAYOUT] Wrapper for item '" + item.name + "': setPrefWidth(" + width + ")");
+                            }
+                        } catch (NumberFormatException e) {
+                            // Ignore
+                        }
+                    }
+                    if (item.maxWidth != null && !item.maxWidth.isEmpty()) {
+                        try {
+                            double width = parseSize(item.maxWidth);
+                            if (width > 0) {
+                                wrapper.setMaxWidth(width);
+                                System.out.println("[LAYOUT] Wrapper for item '" + item.name + "': setMaxWidth(" + width + ")");
+                            }
+                        } catch (NumberFormatException e) {
+                            // Ignore
+                        }
+                    }
+                }
 
                 // Add item to container based on container type
                 addItemToContainer(container, nodeToAdd, item, areaDef.areaType);
