@@ -4045,6 +4045,9 @@ public class ScreenFactory {
             return -1;
         } else if (size.equalsIgnoreCase("auto")) {
             return -1;
+        } else if (size.equalsIgnoreCase("MAX")) {
+            // "MAX" means use maximum possible size
+            return Double.MAX_VALUE;
         } else {
             return Double.parseDouble(size);
         }

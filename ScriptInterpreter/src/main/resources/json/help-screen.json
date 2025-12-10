@@ -30,6 +30,7 @@
           "minWidth": "250",
           "prefWidth": "250",
           "maxWidth": "250",
+          "hgrow": "NEVER",
           "vgrow": "ALWAYS",
           "style": "-fx-border-color: #cccccc; -fx-border-width: 0 1 0 0;",
           "items": [
