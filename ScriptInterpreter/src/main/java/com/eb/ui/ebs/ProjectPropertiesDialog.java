@@ -2,8 +2,10 @@ package com.eb.ui.ebs;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -109,12 +111,29 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
-        grid.setPadding(new Insets(20, 150, 10, 10));
+        grid.setPadding(new Insets(20, 20, 10, 10));
+        
+        // Configure column constraints to allow growth
+        ColumnConstraints col0 = new ColumnConstraints();
+        col0.setHgrow(Priority.NEVER); // Label column doesn't grow
+        
+        ColumnConstraints col1 = new ColumnConstraints();
+        col1.setHgrow(Priority.ALWAYS); // Text field column grows
+        col1.setMinWidth(300); // Minimum width for text fields
+        
+        ColumnConstraints col2 = new ColumnConstraints();
+        col2.setHgrow(Priority.NEVER); // Browse button column doesn't grow
+        
+        ColumnConstraints col3 = new ColumnConstraints();
+        col3.setHgrow(Priority.NEVER); // Create button column doesn't grow
+        
+        grid.getColumnConstraints().addAll(col0, col1, col2, col3);
         
         // Project Name field
         projectNameField = new TextField();
         projectNameField.setPromptText("Project name");
-        projectNameField.setPrefWidth(300);
+        projectNameField.setMaxWidth(Double.MAX_VALUE);
+        GridPane.setHgrow(projectNameField, Priority.ALWAYS);
         Object nameObj = currentProperties.get("name");
         if (nameObj != null) {
             projectNameField.setText(nameObj.toString());
@@ -124,13 +143,15 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         projectDirField = new TextField();
         projectDirField.setText(projectDir.toString());
         projectDirField.setEditable(false);
-        projectDirField.setStyle("-fx-opacity: 1.0;"); // Keep text visible even when not editable
-        projectDirField.setPrefWidth(300);
+        projectDirField.setMaxWidth(Double.MAX_VALUE);
+        GridPane.setHgrow(projectDirField, Priority.ALWAYS);
+        // Remove the opacity override to let it use default grayed-out style
         
         // Main Script field with browse and create buttons
         mainScriptField = new TextField();
         mainScriptField.setPromptText("main.ebs");
-        mainScriptField.setPrefWidth(200);
+        mainScriptField.setMaxWidth(Double.MAX_VALUE);
+        GridPane.setHgrow(mainScriptField, Priority.ALWAYS);
         Object mainScriptObj = currentProperties.get("mainScript");
         if (mainScriptObj != null) {
             mainScriptField.setText(mainScriptObj.toString());
@@ -170,7 +191,8 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         // CSS File field with browse and create buttons
         cssFileField = new TextField();
         cssFileField.setPromptText("styles.css");
-        cssFileField.setPrefWidth(200);
+        cssFileField.setMaxWidth(Double.MAX_VALUE);
+        GridPane.setHgrow(cssFileField, Priority.ALWAYS);
         Object cssFileObj = currentProperties.get("cssFile");
         if (cssFileObj != null) {
             cssFileField.setText(cssFileObj.toString());
@@ -209,7 +231,8 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         // Resource Directory field with browse button
         resourceDirField = new TextField();
         resourceDirField.setPromptText("resources");
-        resourceDirField.setPrefWidth(250);
+        resourceDirField.setMaxWidth(Double.MAX_VALUE);
+        GridPane.setHgrow(resourceDirField, Priority.ALWAYS);
         Object resourceDirObj = currentProperties.get("resourceDir");
         if (resourceDirObj != null) {
             resourceDirField.setText(resourceDirObj.toString());
@@ -227,7 +250,8 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         // Test Directory field with browse button
         testDirField = new TextField();
         testDirField.setPromptText("tests");
-        testDirField.setPrefWidth(250);
+        testDirField.setMaxWidth(Double.MAX_VALUE);
+        GridPane.setHgrow(testDirField, Priority.ALWAYS);
         Object testDirObj = currentProperties.get("testDir");
         if (testDirObj != null) {
             testDirField.setText(testDirObj.toString());
@@ -245,7 +269,8 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         // Temp Directory field with browse button
         tempDirField = new TextField();
         tempDirField.setPromptText("temp");
-        tempDirField.setPrefWidth(250);
+        tempDirField.setMaxWidth(Double.MAX_VALUE);
+        GridPane.setHgrow(tempDirField, Priority.ALWAYS);
         Object tempDirObj = currentProperties.get("tempDir");
         if (tempDirObj != null) {
             tempDirField.setText(tempDirObj.toString());
@@ -263,7 +288,8 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         // Document Directory field with browse button
         docDirField = new TextField();
         docDirField.setPromptText("docs");
-        docDirField.setPrefWidth(250);
+        docDirField.setMaxWidth(Double.MAX_VALUE);
+        GridPane.setHgrow(docDirField, Priority.ALWAYS);
         Object docDirObj = currentProperties.get("docDir");
         if (docDirObj != null) {
             docDirField.setText(docDirObj.toString());
