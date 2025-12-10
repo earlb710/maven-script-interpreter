@@ -112,19 +112,18 @@ public class NewProjectDialog extends Dialog<NewProjectDialog.ProjectInfo> {
         
         // Track if user has manually edited the path
         final boolean[] pathManuallyEdited = {false};
+        final boolean[] updatingFromNameField = {false};
         
         // Listen to path field changes to detect manual edits
         projectPathField.textProperty().addListener((observable, oldValue, newValue) -> {
-            // If the path changed and it's not from our auto-update, mark as manually edited
+            // If we're updating from the name field, don't mark as manually edited
+            if (updatingFromNameField[0]) {
+                return;
+            }
+            
+            // If the path changed and it's not empty/null, mark as manually edited
             if (newValue != null && oldValue != null && !newValue.equals(oldValue)) {
-                // Check if this change is from our project name listener or user input
-                String projectName = projectNameField.getText();
-                if (projectName != null && !projectName.isEmpty()) {
-                    String expectedPath = defaultProjectsPath.resolve(projectName.trim().replaceAll("\\s+", "-")).toString();
-                    if (!newValue.equals(expectedPath)) {
-                        pathManuallyEdited[0] = true;
-                    }
-                }
+                pathManuallyEdited[0] = true;
             }
         });
         
@@ -134,9 +133,14 @@ public class NewProjectDialog extends Dialog<NewProjectDialog.ProjectInfo> {
             
             // Auto-update project path with dashes replacing spaces
             if (!pathManuallyEdited[0] && newValue != null && !newValue.trim().isEmpty()) {
-                String sanitizedName = newValue.trim().replaceAll("\\s+", "-");
-                String newPath = defaultProjectsPath.resolve(sanitizedName).toString();
-                projectPathField.setText(newPath);
+                updatingFromNameField[0] = true;
+                try {
+                    String sanitizedName = sanitizeProjectName(newValue);
+                    String newPath = defaultProjectsPath.resolve(sanitizedName).toString();
+                    projectPathField.setText(newPath);
+                } finally {
+                    updatingFromNameField[0] = false;
+                }
             }
         });
         
@@ -155,5 +159,15 @@ public class NewProjectDialog extends Dialog<NewProjectDialog.ProjectInfo> {
         
         // Focus on project name field
         javafx.application.Platform.runLater(() -> projectNameField.requestFocus());
+    }
+    
+    /**
+     * Sanitize project name by trimming and replacing spaces with dashes.
+     * 
+     * @param name The project name to sanitize
+     * @return Sanitized project name suitable for use as a directory name
+     */
+    private String sanitizeProjectName(String name) {
+        return name.trim().replaceAll("\\s+", "-");
     }
 }
