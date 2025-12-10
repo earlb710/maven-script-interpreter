@@ -48,6 +48,7 @@
                 "minHeight": "200",
                 "prefHeight": "200",
                 "maxHeight": "MAX",
+                "hgrow": "NEVER",
                 "vgrow": "ALWAYS",
                 "expandAll": true,
                 "showRoot": false,
