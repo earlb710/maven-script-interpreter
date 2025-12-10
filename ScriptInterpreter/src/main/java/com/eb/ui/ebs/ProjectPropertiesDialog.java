@@ -119,6 +119,13 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
             projectNameField.setText(nameObj.toString());
         }
         
+        // Project Directory field (display only)
+        TextField projectDirField = new TextField();
+        projectDirField.setText(projectDir.toString());
+        projectDirField.setEditable(false);
+        projectDirField.setStyle("-fx-opacity: 1.0;"); // Keep text visible even when not editable
+        projectDirField.setPrefWidth(300);
+        
         // Main Script field with browse and create buttons
         mainScriptField = new TextField();
         mainScriptField.setPromptText("main.ebs");
@@ -274,6 +281,9 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         int row = 0;
         grid.add(new Label("Project Name:"), 0, row);
         grid.add(projectNameField, 1, row++, 3, 1);
+        
+        grid.add(new Label("Project Directory:"), 0, row);
+        grid.add(projectDirField, 1, row++, 3, 1);
         
         grid.add(new Label("Main Script:"), 0, row);
         grid.add(mainScriptField, 1, row);
