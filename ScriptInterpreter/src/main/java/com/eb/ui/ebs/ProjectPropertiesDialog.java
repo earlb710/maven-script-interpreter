@@ -16,6 +16,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 
+import static javafx.application.Platform.runLater;
+
 /**
  * Dialog for editing project properties.
  * Allows user to modify project name, main script, CSS file, and directory paths.
@@ -25,6 +27,7 @@ import java.util.Map;
 public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.ProjectProperties> {
     
     private static final double MIN_TEXT_FIELD_WIDTH = 300.0;
+    private static final String READ_ONLY_FIELD_STYLE = "-fx-background-color: #f0f0f0; -fx-opacity: 1.0;";
     
     private final TextField projectNameField;
     private final TextField projectDirField;
@@ -148,8 +151,8 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         projectDirField.setMaxWidth(Double.MAX_VALUE);
         GridPane.setHgrow(projectDirField, Priority.ALWAYS);
         // Set light gray background and position cursor at end to show last part of path
-        projectDirField.setStyle("-fx-background-color: #f0f0f0; -fx-opacity: 1.0;");
-        javafx.application.Platform.runLater(() -> {
+        projectDirField.setStyle(READ_ONLY_FIELD_STYLE);
+        runLater(() -> {
             projectDirField.positionCaret(projectDirField.getText().length());
         });
         
