@@ -4072,6 +4072,11 @@ public class ScreenFactory {
             if (borderPane.getCenter() == null) {
                 borderPane.setCenter(childArea);
             }
+        } else if (container instanceof javafx.scene.control.SplitPane) {
+            javafx.scene.control.SplitPane splitPane = (javafx.scene.control.SplitPane) container;
+            splitPane.getItems().add(childArea);
+            System.out.println("[LAYOUT] ChildArea '" + (childAreaDef != null ? childAreaDef.name : "<unnamed>") + "': Added to SplitPane");
+            // Note: SplitPane doesn't use hgrow/vgrow properties - divider position controls sizing
         } else if (container instanceof StackPane) {
             ((StackPane) container).getChildren().add(childArea);
         } else if (container instanceof FlowPane) {

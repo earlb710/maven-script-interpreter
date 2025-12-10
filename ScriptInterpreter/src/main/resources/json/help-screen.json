@@ -17,7 +17,7 @@
   "area": [
     {
       "name": "mainLayout",
-      "type": "hbox",
+      "type": "splitpane",
       "spacing": "0",
       "padding": "0",
       "hgrow": "ALWAYS",
