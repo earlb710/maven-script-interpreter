@@ -895,6 +895,15 @@ public class EbsConsoleHandler extends EbsHandler {
      * @param filePath The path to the script file
      */
     public void runScriptFile(Path filePath) {
+        runScriptFile(filePath, null);
+    }
+    
+    /**
+     * Run a script file with optional project context.
+     * @param filePath Path to the script file to run
+     * @param projectJsonPath Optional path to project.json for loading project settings like resourceDir
+     */
+    public void runScriptFile(Path filePath, Path projectJsonPath) {
         try {
             if (!Files.exists(filePath)) {
                 ScriptArea output = env.getOutputArea();
@@ -918,12 +927,48 @@ public class EbsConsoleHandler extends EbsHandler {
             // Get the directory containing the script
             Path scriptDir = filePath.getParent();
             
+            // Read project settings if project.json provided
+            String resourceDirPath = null;
+            if (projectJsonPath != null && Files.exists(projectJsonPath)) {
+                try {
+                    String jsonContent = Files.readString(projectJsonPath, StandardCharsets.UTF_8);
+                    Map<String, Object> projectData = (Map<String, Object>) Json.parse(jsonContent);
+                    String resourceDir = (String) projectData.get("resourceDir");
+                    
+                    if (resourceDir != null && !resourceDir.isEmpty()) {
+                        Path projectDir = projectJsonPath.getParent();
+                        if (projectDir != null) {
+                            Path fullResourcePath = projectDir.resolve(resourceDir).toAbsolutePath().normalize();
+                            if (Files.exists(fullResourcePath) && Files.isDirectory(fullResourcePath)) {
+                                resourceDirPath = fullResourcePath.toString();
+                            }
+                        }
+                    }
+                } catch (Exception ex) {
+                    // Log but don't fail - resourceDir is optional
+                    System.err.println("Warning: Could not read resourceDir from project.json: " + ex.getMessage());
+                }
+            }
+            
+            final String finalResourceDirPath = resourceDirPath;
+            
             // Execute script in background thread
             Thread t = new Thread(() -> {
                 // Set the script's directory as the context source directory
                 if (scriptDir != null) {
                     Util.setCurrentContextSourceDir(scriptDir);
                 }
+                
+                // Set resource directory if available
+                if (finalResourceDirPath != null) {
+                    Util.setResourceDir(Path.of(finalResourceDirPath));
+                    // Also set as global variable in environment
+                    env.getBaseEnvironmentValues().define("resourceDir", finalResourceDirPath);
+                } else {
+                    // Set empty string if no resource directory
+                    env.getBaseEnvironmentValues().define("resourceDir", "");
+                }
+                
                 try {
                     // Submit script for execution
                     submit(script);
@@ -953,6 +998,10 @@ public class EbsConsoleHandler extends EbsHandler {
                     // Clear the context source directory after execution
                     if (scriptDir != null) {
                         Util.clearCurrentContextSourceDir();
+                    }
+                    // Clear the resource directory after execution
+                    if (finalResourceDirPath != null) {
+                        Util.clearResourceDir();
                     }
                 }
             }, "script-runner");

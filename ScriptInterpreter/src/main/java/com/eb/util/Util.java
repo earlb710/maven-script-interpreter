@@ -41,6 +41,9 @@ public class Util {
     // ThreadLocal to store the current RuntimeContext's source path directory
     private static final ThreadLocal<Path> currentContextSourceDir = new ThreadLocal<>();
     
+    // ThreadLocal to store the resource directory from project.json
+    private static final ThreadLocal<Path> resourceDir = new ThreadLocal<>();
+    
     /**
      * Sets the source directory for the current executing context.
      * This directory will be considered safe for file operations.
@@ -61,6 +64,28 @@ public class Util {
      */
     public static Path getCurrentContextSourceDir() {
         return currentContextSourceDir.get();
+    }
+    
+    /**
+     * Sets the resource directory for the current executing context.
+     * This is typically loaded from project.json resourceDir field.
+     */
+    public static void setResourceDir(Path path) {
+        resourceDir.set(path);
+    }
+    
+    /**
+     * Clears the resource directory.
+     */
+    public static void clearResourceDir() {
+        resourceDir.remove();
+    }
+    
+    /**
+     * Gets the resource directory, if set.
+     */
+    public static Path getResourceDir() {
+        return resourceDir.get();
     }
 
     public static boolean checkDataType(DataType expectedType, Object value) {
@@ -473,21 +498,68 @@ public class Util {
             Path inputPath = Path.of(path);
             Path p;
             
-            // If a context directory is set and the path is relative, resolve from context directory first
-            Path contextDir = getCurrentContextSourceDir();
-            if (contextDir != null && !inputPath.isAbsolute()) {
-                p = contextDir.resolve(path).normalize();
+            // If path is relative, try multiple resolution strategies
+            if (!inputPath.isAbsolute()) {
+                Path contextDir = getCurrentContextSourceDir();
+                Path resDir = getResourceDir();
+                
+                // Strategy 1: Try context directory (script directory) first
+                if (contextDir != null) {
+                    p = contextDir.resolve(path).normalize();
+                    // Only use this if it exists, otherwise try other strategies
+                    if (java.nio.file.Files.exists(p)) {
+                        // Validate this path
+                        if (!p.startsWith(SANDBOX_ROOT) && !isInSafeDirectory(p)) {
+                            String contextInfo = " (Context dir: " + contextDir + ")";
+                            throw new RuntimeException("Path escapes sandbox: " + path 
+                                + " -> resolved to: " + p 
+                                + " (Sandbox root: " + SANDBOX_ROOT + ")"
+                                + contextInfo);
+                        }
+                        return p;
+                    }
+                }
+                
+                // Strategy 2: Try resource directory from project.json
+                if (resDir != null) {
+                    p = resDir.resolve(path).normalize();
+                    // Only use this if it exists, otherwise try sandbox root
+                    if (java.nio.file.Files.exists(p)) {
+                        // Validate this path
+                        if (!p.startsWith(SANDBOX_ROOT) && !isInSafeDirectory(p)) {
+                            String contextInfo = " (Resource dir: " + resDir + ")";
+                            throw new RuntimeException("Path escapes sandbox: " + path 
+                                + " -> resolved to: " + p 
+                                + " (Sandbox root: " + SANDBOX_ROOT + ")"
+                                + contextInfo);
+                        }
+                        return p;
+                    }
+                }
+                
+                // Strategy 3: Fall back to SANDBOX_ROOT
+                p = SANDBOX_ROOT.resolve(path).normalize();
             } else {
-                // Otherwise resolve from SANDBOX_ROOT
+                // Absolute path - resolve directly from SANDBOX_ROOT
                 p = SANDBOX_ROOT.resolve(path).normalize();
             }
             
+            // Final validation
             if (!p.startsWith(SANDBOX_ROOT)) {
                 // Check if path is in a safe directory
                 if (!isInSafeDirectory(p)) {
-                    String contextInfo = contextDir != null 
-                        ? " (Context dir: " + contextDir + ")" 
-                        : " (No context dir set)";
+                    Path contextDir = getCurrentContextSourceDir();
+                    Path resDir = getResourceDir();
+                    String contextInfo = "";
+                    if (contextDir != null) {
+                        contextInfo += " (Context dir: " + contextDir + ")";
+                    }
+                    if (resDir != null) {
+                        contextInfo += " (Resource dir: " + resDir + ")";
+                    }
+                    if (contextInfo.isEmpty()) {
+                        contextInfo = " (No context/resource dir set)";
+                    }
                     throw new RuntimeException("Path escapes sandbox: " + path 
                         + " -> resolved to: " + p 
                         + " (Sandbox root: " + SANDBOX_ROOT + ")"

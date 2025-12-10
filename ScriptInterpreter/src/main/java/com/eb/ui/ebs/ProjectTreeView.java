@@ -271,7 +271,8 @@ public class ProjectTreeView extends VBox {
                             Path projectDir = Path.of(path).getParent();
                             if (projectDir != null) {
                                 Path scriptPath = projectDir.resolve(mainScript);
-                                handler.runScriptFile(scriptPath);
+                                // Pass project.json path so resourceDir can be loaded
+                                handler.runScriptFile(scriptPath, Path.of(path));
                             }
                         });
                     }
@@ -374,7 +375,11 @@ public class ProjectTreeView extends VBox {
                     MenuItem runScriptItem = null;
                     if (isScriptFile) {
                         runScriptItem = new MenuItem("Run Script");
-                        runScriptItem.setOnAction(e -> handler.runScriptFile(Path.of(path)));
+                        runScriptItem.setOnAction(e -> {
+                            // Try to find parent project.json for resourceDir support
+                            Path projectJsonPath = findProjectJsonForFile(Path.of(path));
+                            handler.runScriptFile(Path.of(path), projectJsonPath);
+                        });
                     }
                     
                     MenuItem renameFileItem = new MenuItem("Rename File...");
@@ -810,6 +815,65 @@ public class ProjectTreeView extends VBox {
             System.err.println("Error reading main script from project.json: " + e.getMessage());
             return null;
         }
+    }
+    
+    /**
+     * Find the project.json file for a given file path by traversing up the tree.
+     * Used to provide project context (like resourceDir) when running scripts.
+     * 
+     * @param filePath Path to the file
+     * @return Path to project.json if found in the project tree, null otherwise
+     */
+    private Path findProjectJsonForFile(Path filePath) {
+        try {
+            // Get the absolute path
+            Path absPath = filePath.toAbsolutePath().normalize();
+            
+            // Search up the tree items to find the project node
+            TreeItem<String> current = findTreeItemForPath(rootItem, absPath.toString());
+            if (current == null) {
+                return null;
+            }
+            
+            // Walk up to find a project node (one that has project.json as its path)
+            while (current != null) {
+                if (current.getGraphic() instanceof Label) {
+                    Label label = (Label) current.getGraphic();
+                    String path = (String) label.getProperties().get("path");
+                    if (path != null && path.endsWith("project.json")) {
+                        return Path.of(path);
+                    }
+                }
+                current = current.getParent();
+            }
+            
+            return null;
+        } catch (Exception e) {
+            System.err.println("Error finding project.json for file: " + e.getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Helper method to find a tree item by its file path.
+     */
+    private TreeItem<String> findTreeItemForPath(TreeItem<String> item, String targetPath) {
+        if (item.getGraphic() instanceof Label) {
+            Label label = (Label) item.getGraphic();
+            String path = (String) label.getProperties().get("path");
+            if (path != null && path.equals(targetPath)) {
+                return item;
+            }
+        }
+        
+        for (TreeItem<String> child : item.getChildren()) {
+            TreeItem<String> result = findTreeItemForPath(child, targetPath);
+            if (result != null) {
+                return result;
+            }
+        }
+        
+        return null;
     }
     
     /**
