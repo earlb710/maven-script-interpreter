@@ -328,13 +328,15 @@ convertToHtml(text: string) return string {
         
         // Check if line contains only ═, =, or - characters (more than 5)
         var isHrLine: bool = false;
-        if call str.length(trimmedLine) > 5 {
+        var lineLen: int = call str.length(trimmedLine);
+        if lineLen > 5 {
             var allSeparators: bool = true;
             var j: int = 0;
-            while j < call str.length(trimmedLine) {
+            while j < lineLen {
                 var ch: string = call str.substring(trimmedLine, j, j + 1);
                 if ch != "═" and ch != "=" and ch != "-" {
                     allSeparators = false;
+                    break;
                 }
                 j = j + 1;
             }
