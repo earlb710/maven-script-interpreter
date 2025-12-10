@@ -23,6 +23,7 @@ import java.util.Map;
 public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.ProjectProperties> {
     
     private final TextField projectNameField;
+    private final TextField projectDirField;
     private final TextField mainScriptField;
     private final TextField cssFileField;
     private final TextField resourceDirField;
@@ -120,7 +121,7 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         }
         
         // Project Directory field (display only)
-        TextField projectDirField = new TextField();
+        projectDirField = new TextField();
         projectDirField.setText(projectDir.toString());
         projectDirField.setEditable(false);
         projectDirField.setStyle("-fx-opacity: 1.0;"); // Keep text visible even when not editable
