@@ -99,6 +99,7 @@ public class ProjectTreeView extends VBox {
                 TreeItem<String> selectedItem = treeView.getSelectionModel().getSelectedItem();
                 if (selectedItem != null && selectedItem != rootItem) {
                     openSelectedItem(selectedItem);
+                    event.consume(); // Prevent default TreeView expand/collapse behavior
                 }
             }
         });
@@ -139,7 +140,7 @@ public class ProjectTreeView extends VBox {
         searchComboBox.setEditable(true);
         searchComboBox.setPromptText("Search files...");
         HBox.setHgrow(searchComboBox, Priority.ALWAYS);
-        searchComboBox.setPrefWidth(200);
+        searchComboBox.setMaxWidth(Double.MAX_VALUE);
         
         // Add search icon button
         Button searchButton = new Button();
