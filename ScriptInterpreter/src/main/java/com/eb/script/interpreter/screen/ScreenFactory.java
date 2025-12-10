@@ -3664,6 +3664,14 @@ public class ScreenFactory {
             || (areaDef.lostFocus != null && !areaDef.lostFocus.trim().isEmpty())) {
             setupAreaFocusListeners(container, areaDef, screenName, context, onClickHandler);
         }
+        
+        // Configure SplitPane divider position if this is a SplitPane
+        if (container instanceof javafx.scene.control.SplitPane) {
+            javafx.scene.control.SplitPane splitPane = (javafx.scene.control.SplitPane) container;
+            // Set initial divider position to 25% (0.25) for the first pane
+            splitPane.setDividerPositions(0.25);
+            System.out.println("[LAYOUT] SplitPane '" + areaDef.name + "': Set divider position to 0.25 (25%)");
+        }
 
         return container;
     }
