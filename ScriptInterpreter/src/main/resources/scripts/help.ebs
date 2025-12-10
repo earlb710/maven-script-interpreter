@@ -42,15 +42,16 @@ foreach line in builtinLines {
     if trimmedLine == "Builtins:" then {
         inBuiltinsSection = true;
     } else if inBuiltinsSection then {
-        if trimmedLine != "" && call str.startsWith(trimmedLine, " ") then {
+        // Check if the original line (not trimmed) starts with space to identify indented builtin lines
+        if trimmedLine != "" && call str.startsWith(line, " ") then {
             // Extract builtin name from line like "  array.add(array:array, value:any, index:integer?) : null"
-            var lineContent: string = call str.trim(trimmedLine);
-            var parenIndex: int = call str.indexOf(lineContent, "(", 0);
+            var parenIndex: int = call str.indexOf(trimmedLine, "(", 0);
             if parenIndex > 0 then {
-                var builtinName: string = call str.substring(lineContent, 0, parenIndex);
-                var builtinInfo: json = {};
+                var builtinName: string = call str.substring(trimmedLine, 0, parenIndex);
+                // Create a fresh JSON object for each builtin to avoid reference issues
+                var builtinInfo: json = call json.jsonFromString("{}");
                 builtinInfo = call json.set(builtinInfo, "name", builtinName);
-                builtinInfo = call json.set(builtinInfo, "signature", lineContent);
+                builtinInfo = call json.set(builtinInfo, "signature", trimmedLine);
                 call array.add(builtinsArray, builtinInfo);
             }
         } else if trimmedLine == "" then {
@@ -70,16 +71,37 @@ print "Loaded " + call str.toString(builtinCount) + " builtins";
 var builtinCategoryNames: json = null;
 var builtinCategoryOrder: json = null;
 if helpData != null then {
+    print "[DEBUG] helpData is available";
     var topics: json = call json.get(helpData, "topics");
     if topics != null then {
+        print "[DEBUG] topics data loaded";
         builtinCategoryNames = call json.get(topics, "builtin_categories");
         builtinCategoryOrder = call json.get(topics, "builtin_category_order");
+        if builtinCategoryNames != null then {
+            print "[DEBUG] builtinCategoryNames loaded";
+        } else {
+            print "[DEBUG] WARNING: builtinCategoryNames is null";
+        }
+        if builtinCategoryOrder != null then {
+            print "[DEBUG] builtinCategoryOrder loaded with " + call str.toString(builtinCategoryOrder.length) + " categories";
+        } else {
+            print "[DEBUG] WARNING: builtinCategoryOrder is null";
+        }
+    } else {
+        print "[DEBUG] WARNING: topics is null";
     }
+} else {
+    print "[DEBUG] WARNING: helpData is null";
 }
 
 // Categorize builtins by module
-var builtinsByCategory: json = {};
+// Use json to store arrays of builtins for each category
+// Use json.jsonFromString to create a fresh JSON object to avoid circular references
+var builtinsByCategory: json = call json.jsonFromString("{}");
+print "[DEBUG] Starting to categorize builtins...";
 if builtinsArray != null then {
+    print "[DEBUG] builtinsArray has " + call str.toString(builtinsArray.length) + " items";
+    var debugCount: int = 0;
     foreach builtin in builtinsArray {
         var builtinName: string = call json.getString(builtin, "name", "");
         if builtinName != "" then {
@@ -90,47 +112,81 @@ if builtinsArray != null then {
                 category = call str.substring(builtinName, 0, dotIndex);
             }
             
-            // Get or create category array
-            var categoryArray: json = call json.get(builtinsByCategory, category);
-            if categoryArray == null then {
-                categoryArray = [];
+            // Debug first 5 categorizations
+            if debugCount < 5 then {
+                print "[DEBUG] Categorizing: " + builtinName + " -> category: " + category;
+                debugCount = debugCount + 1;
             }
             
-            // Add builtin to category
-            var builtinValue: string = "builtin_" + builtinName;
-            var childNode: json = {};
-            childNode = call json.set(childNode, "value", builtinValue);
-            call array.add(categoryArray, childNode);
-            builtinsByCategory = call json.set(builtinsByCategory, category, categoryArray);
+            // Create child node with builtin name as a JSON object
+            // Use json.jsonFromString to create a fresh JSON object to avoid circular references
+            var childNode: json = call json.jsonFromString("{}");
+            childNode = call json.set(childNode, "value", builtinName);
+            
+            // Use json.add to append to the array at the category path
+            // json.add automatically creates the array if it doesn't exist and appends the item
+            builtinsByCategory = call json.add(builtinsByCategory, category, childNode);
         }
     }
+    print "[DEBUG] Categorization complete";
+} else {
+    print "[DEBUG] WARNING: builtinsArray is null";
 }
 
 // Build categorized builtin tree using category order from JSON
 var builtinChildren: array[*];
 var totalBuiltins: int = 0;
 
+print "[DEBUG] Building categorized builtin tree...";
 if builtinCategoryOrder != null then {
+    print "[DEBUG] Processing " + call str.toString(builtinCategoryOrder.length) + " category keys";
     foreach categoryKey in builtinCategoryOrder {
-        var categoryArray: json = call json.get(builtinsByCategory, categoryKey);
-        if categoryArray != null && categoryArray.length > 0 then {
+        print "[DEBUG] Processing category: " + categoryKey;
+        // Get category array from json using json.getArray to properly handle JSON arrays
+        var categoryArray: json = call json.getArray(builtinsByCategory, categoryKey);
+        if categoryArray != null then {
+            print "[DEBUG] Category '" + categoryKey + "' found";
+            // Debug: print first 3 function names if they exist
+            var firstFunc: json = call json.get(categoryArray, "0");
+            if firstFunc != null then {
+                var firstName: string = call json.getString(firstFunc, "value", "");
+                print "[DEBUG]   First function: " + firstName;
+            }
+            var secondFunc: json = call json.get(categoryArray, "1");
+            if secondFunc != null then {
+                var secondName: string = call json.getString(secondFunc, "value", "");
+                print "[DEBUG]   Second function: " + secondName;
+            }
+            var thirdFunc: json = call json.get(categoryArray, "2");
+            if thirdFunc != null then {
+                var thirdName: string = call json.getString(thirdFunc, "value", "");
+                print "[DEBUG]   Third function: " + thirdName;
+            }
             // Get display name from JSON, fallback to key
             var displayName: string = categoryKey;
             if builtinCategoryNames != null then {
                 var jsonDisplayName: string = call json.getString(builtinCategoryNames, categoryKey, "");
                 if jsonDisplayName != "" then {
                     displayName = jsonDisplayName;
+                    print "[DEBUG] Using display name: " + displayName;
                 }
             }
             
-            var categoryNode: json = {};
-            categoryNode = call json.set(categoryNode, "value", "builtin_cat_" + categoryKey);
+            // Use displayName as the tree node value for visibility
+            // Use json.jsonFromString to create a fresh JSON object to avoid circular references
+            var categoryNode: json = call json.jsonFromString("{}");
+            categoryNode = call json.set(categoryNode, "value", displayName);
             categoryNode = call json.set(categoryNode, "expanded", false);
             categoryNode = call json.set(categoryNode, "children", categoryArray);
             call array.add(builtinChildren, categoryNode);
-            totalBuiltins = totalBuiltins + categoryArray.length;
+            totalBuiltins = totalBuiltins + 1; // Count categories, not individual functions
+            print "[DEBUG] Added category node with display name: " + displayName;
+        } else {
+            print "[DEBUG] WARNING: No functions found for category: " + categoryKey;
         }
     }
+} else {
+    print "[DEBUG] WARNING: builtinCategoryOrder is null - cannot build tree";
 }
 
 print "Built categorized tree with " + call str.toString(totalBuiltins) + " builtins in " + call str.toString(builtinChildren.length) + " categories";
@@ -154,7 +210,8 @@ var syntaxChildren: array[*];
 // Add Getting Started as first item
 call array.add(syntaxChildren, call json.set({}, "value", "getting_started"));
 
-var structureNode: json = {};
+// Use json.jsonFromString to create a fresh JSON object to avoid circular references
+var structureNode: json = call json.jsonFromString("{}");
 structureNode = call json.set(structureNode, "value", "structure");
 structureNode = call json.set(structureNode, "expanded", false);
 structureNode = call json.set(structureNode, "children", structureChildren);
@@ -162,7 +219,8 @@ call array.add(syntaxChildren, structureNode);
 
 call array.add(syntaxChildren, call json.set({}, "value", "data"));
 
-var flowNode: json = {};
+// Use json.jsonFromString to create a fresh JSON object to avoid circular references
+var flowNode: json = call json.jsonFromString("{}");
 flowNode = call json.set(flowNode, "value", "flow");
 flowNode = call json.set(flowNode, "expanded", false);
 flowNode = call json.set(flowNode, "children", flowChildren);
@@ -170,10 +228,12 @@ call array.add(syntaxChildren, flowNode);
 
 call array.add(syntaxChildren, call json.set({}, "value", "keywords"));
 
-var builtinsNode: json = {};
+// Use json.jsonFromString to create a fresh JSON object to avoid circular references
+var builtinsNode: json = call json.jsonFromString("{}");
 builtinsNode = call json.set(builtinsNode, "value", "builtins");
 builtinsNode = call json.set(builtinsNode, "expanded", false);
 builtinsNode = call json.set(builtinsNode, "children", builtinChildren);
+print "[DEBUG] Builtins node created with " + call str.toString(builtinChildren.length) + " children";
 call array.add(syntaxChildren, builtinsNode);
 
 call array.add(syntaxChildren, call json.set({}, "value", "screen"));
@@ -185,24 +245,29 @@ call array.add(examplesChildren, call json.set({}, "value", "Screen"));
 
 var rootChildren: array[*];
 
-var syntaxRootNode: json = {};
+// Use json.jsonFromString to create a fresh JSON object to avoid circular references
+var syntaxRootNode: json = call json.jsonFromString("{}");
 syntaxRootNode = call json.set(syntaxRootNode, "value", "Syntax");
 syntaxRootNode = call json.set(syntaxRootNode, "expanded", false);
 syntaxRootNode = call json.set(syntaxRootNode, "children", syntaxChildren);
 call array.add(rootChildren, syntaxRootNode);
 
-var examplesRootNode: json = {};
+// Use json.jsonFromString to create a fresh JSON object to avoid circular references
+var examplesRootNode: json = call json.jsonFromString("{}");
 examplesRootNode = call json.set(examplesRootNode, "value", "Examples");
 examplesRootNode = call json.set(examplesRootNode, "expanded", true);
 examplesRootNode = call json.set(examplesRootNode, "children", examplesChildren);
 call array.add(rootChildren, examplesRootNode);
 
-var treeStructure: json = {};
+// Use json.jsonFromString to create a fresh JSON object to avoid circular references
+var treeStructure: json = call json.jsonFromString("{}");
 treeStructure = call json.set(treeStructure, "value", "Help Topics");
 treeStructure = call json.set(treeStructure, "expanded", true);
 treeStructure = call json.set(treeStructure, "children", rootChildren);
 
 print "Tree structure built with dynamic builtins";
+print "[DEBUG] Root children count: " + call str.toString(rootChildren.length);
+print "[DEBUG] Syntax children count: " + call str.toString(syntaxChildren.length);
 
 // Load the screen definition from JSON file
 print "Loading screen definition from JSON...";
@@ -226,6 +291,7 @@ if areaArray != null && areaArray.length > 0 then {
                 // Wrap tree structure in array and set it
                 var treeItemsArray: array[*];
                 call array.add(treeItemsArray, treeStructure);
+                print "[DEBUG] Tree structure wrapped in array";
                 display = call json.set(display, "treeItems", treeItemsArray);
                 helpTreeItem = call json.set(helpTreeItem, "display", display);
                 items = call json.set(items, 0, helpTreeItem);
@@ -235,6 +301,9 @@ if areaArray != null && areaArray.length > 0 then {
                 areaArray = call json.set(areaArray, 0, mainLayout);
                 screenJson = call json.set(screenJson, "area", areaArray);
                 print "Tree items injected into screen definition";
+                print "[DEBUG] Tree injection complete - treeItemsArray length: " + call str.toString(treeItemsArray.length);
+            } else {
+                print "[DEBUG] WARNING: display is null - cannot inject tree";
             }
         }
     }
@@ -242,19 +311,61 @@ if areaArray != null && areaArray.length > 0 then {
 
 // Function to convert plain text to HTML with <pre> tag
 convertToHtml(text: string) return string {
-    // Escape HTML special characters
+    // Escape HTML special characters first
     var html: string = text;
     html = call str.replace(html, "&", "&amp;");
     html = call str.replace(html, "<", "&lt;");
     html = call str.replace(html, ">", "&gt;");
     
-    // Wrap in HTML structure with pre tag for monospace formatting
+    // Split into lines to process line by line
+    var lines: array = call str.split(html, "\n");
+    var processedLines: array = [];
+    
+    var i: int = 0;
+    while i < lines.length {
+        var line: string = lines[i];
+        var trimmedLine: string = call str.trim(line);
+        
+        // Check if line contains only ═, =, or - characters (more than 5)
+        var isHrLine: bool = false;
+        var lineLen: int = trimmedLine.length;
+        if lineLen > 5 then {
+            var allSeparators: bool = true;
+            var j: int = 0;
+            while j < lineLen {
+                var ch: string = call str.substring(trimmedLine, j, j + 1);
+                if ch != "═" and ch != "=" and ch != "-" then {
+                    allSeparators = false;
+                    break;
+                }
+                j = j + 1;
+            }
+            if allSeparators then {
+                isHrLine = true;
+            }
+        }
+        
+        if isHrLine then {
+            // Replace separator lines with <hr>
+            call array.add(processedLines, "<hr>");
+        } else {
+            // Add the line as-is
+            call array.add(processedLines, line);
+        }
+        
+        i = i + 1;
+    }
+    
+    // Join lines with <br>
+    var bodyContent: string = call str.join(processedLines, "<br>");
+    
+    // Wrap in HTML structure without pre tag
     var result: string = "<!DOCTYPE html><html><head><style>";
     result = result + "body { margin: 10px; font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 12px; }";
-    result = result + "pre { margin: 0; white-space: pre-wrap; word-wrap: break-word; }";
-    result = result + "</style></head><body><pre>";
-    result = result + html;
-    result = result + "</pre></body></html>";
+    result = result + "hr { border: 0; border-top: 1px solid #ccc; margin: 10px 0; }";
+    result = result + "</style></head><body>";
+    result = result + bodyContent;
+    result = result + "</body></html>";
     
     return result;
 }
@@ -452,57 +563,43 @@ getBuiltinHelp(builtinName: string) return string {
 getHelpContent(topic: string) return string {
     var content: string = "";
     
-    // Handle builtin category overview pages
-    if call str.startsWith(topic, "builtin_cat_") then {
-        var categoryKey: string = call str.substring(topic, 12);
-        
-        // Get category display name from JSON
-        var displayName: string = categoryKey;
-        if helpData != null then {
-            var topics: json = call json.get(helpData, "topics");
-            if topics != null then {
-                var categoryNames: json = call json.get(topics, "builtin_categories");
-                if categoryNames != null then {
-                    var jsonName: string = call json.getString(categoryNames, categoryKey, "");
-                    if jsonName != "" then {
-                        displayName = jsonName;
-                    }
-                }
-            }
-        }
-        
-        var categoryArray: json = call json.get(builtinsByCategory, categoryKey);
-        var funcCount: int = 0;
-        if categoryArray != null then {
-            funcCount = categoryArray.length;
-        }
-        
-        content = "═══════════════════════════════════════════════════════\n";
-        content = content + "  " + displayName + "\n";
-        content = content + "═══════════════════════════════════════════════════════\n\n";
-        content = content + "This category contains " + call str.toString(funcCount) + " functions.\n\n";
-        content = content + "Select a function from the tree to view its documentation.\n\n";
-        
-        // List functions in this category
-        if categoryArray != null then {
-            content = content + "▸ FUNCTIONS IN THIS CATEGORY\n";
-            content = content + "───────────────────────────────────────────────────────\n";
-            foreach funcNode in categoryArray {
-                var funcValue: string = call json.getString(funcNode, "value", "");
-                if call str.startsWith(funcValue, "builtin_") then {
-                    var funcName: string = call str.substring(funcValue, 8);
-                    content = content + "  • " + funcName + "\n";
-                }
-            }
-        }
-        
-        return content;
+    // Check if this is a builtin function name (contains a dot like "str.trim")
+    // Valid builtin names have at least one char before the dot (e.g., "str.trim", "array.add")
+    // Note: Other help topics use underscores (e.g., "structure_basic"), so dot detection is safe
+    var dotIndex: int = call str.indexOf(topic, ".", 0);
+    if dotIndex > 0 then {
+        // This is a builtin function
+        return call getBuiltinHelp(topic);
     }
     
-    // Handle dynamic builtin topics
-    if call str.startsWith(topic, "builtin_") then {
-        var builtinName: string = call str.substring(topic, 8);
-        return call getBuiltinHelp(builtinName);
+    // Check if this topic matches a category display name
+    if builtinCategoryNames != null && builtinCategoryOrder != null then {
+        // Iterate through category names to find a match
+        foreach categoryKey in builtinCategoryOrder {
+            var displayName: string = call json.getString(builtinCategoryNames, categoryKey, "");
+            if displayName == topic then {
+                // Found matching category - show overview
+                var categoryArray: json = call json.get(builtinsByCategory, categoryKey);
+                
+                content = "═══════════════════════════════════════════════════════\n";
+                content = content + "  " + displayName + "\n";
+                content = content + "═══════════════════════════════════════════════════════\n\n";
+                content = content + "This category contains builtin functions.\n\n";
+                content = content + "Select a function from the tree to view its documentation.\n\n";
+                
+                // List functions in this category
+                if categoryArray != null then {
+                    content = content + "▸ FUNCTIONS IN THIS CATEGORY\n";
+                    content = content + "───────────────────────────────────────────────────────\n";
+                    foreach funcNode in categoryArray {
+                        var funcValue: string = call json.getString(funcNode, "value", "");
+                        content = content + "  • " + funcValue + "\n";
+                    }
+                }
+                
+                return content;
+            }
+        }
     }
     
     // Handle example topic aliases (Keywords/examples_keywords, etc.)
@@ -537,8 +634,9 @@ getHelpContent(topic: string) return string {
 // Create the help screen from the modified JSON
 screen helpScreen = screenJson;
 
-// Set initial content (use item name, not varRef) - wrap in HTML for WebView
-call scr.setProperty("helpScreen.helpContentView", "text", call convertToHtml(call getHelpContent("")));
+// Set initial content by setting the screen variable (not scr.setProperty)
+// The WebView is bound to helpContent variable, so we set that instead
+helpScreen.helpContent = call convertToHtml(call getHelpContent(""));
 
 // Show the screen
 show screen helpScreen;
