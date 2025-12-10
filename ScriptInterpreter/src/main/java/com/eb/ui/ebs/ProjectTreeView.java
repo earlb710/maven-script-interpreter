@@ -164,6 +164,14 @@ public class ProjectTreeView extends VBox {
             }
         });
         
+        // Add Ctrl+F3 keyboard shortcut for "Find Next"
+        setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.F3 && e.isControlDown()) {
+                performSearch();
+                e.consume();
+            }
+        });
+        
         // Create search bar container
         HBox searchBar = new HBox(2);
         searchBar.getChildren().addAll(searchComboBox, searchButton);
