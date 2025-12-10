@@ -5,12 +5,6 @@
 // navigation and a content area on the right for displaying help documents.
 // ============================================================================
 
-print "====================================================================";
-print "       EBS Syntax Help";
-print "====================================================================";
-print "";
-print "Loading syntax help screen...";
-print "";
 
 // Load help data from JSON file
 var helpData: json = null;
@@ -28,7 +22,6 @@ try {
 }
 
 // Get all builtins from system registry
-print "Loading builtins from registry...";
 var systemHelpText: string = call system.help();
 
 // Parse the help text to extract builtin information
@@ -65,42 +58,31 @@ foreach line in builtinLines {
 }
 
 var builtinCount: int = builtinsArray.length;
-print "Loaded " + call str.toString(builtinCount) + " builtins";
 
 // Load category information from help data
 var builtinCategoryNames: json = null;
 var builtinCategoryOrder: json = null;
 if helpData != null then {
-    print "[DEBUG] helpData is available";
     var topics: json = call json.get(helpData, "topics");
     if topics != null then {
-        print "[DEBUG] topics data loaded";
         builtinCategoryNames = call json.get(topics, "builtin_categories");
         builtinCategoryOrder = call json.get(topics, "builtin_category_order");
         if builtinCategoryNames != null then {
-            print "[DEBUG] builtinCategoryNames loaded";
         } else {
-            print "[DEBUG] WARNING: builtinCategoryNames is null";
         }
         if builtinCategoryOrder != null then {
-            print "[DEBUG] builtinCategoryOrder loaded with " + call str.toString(builtinCategoryOrder.length) + " categories";
         } else {
-            print "[DEBUG] WARNING: builtinCategoryOrder is null";
         }
     } else {
-        print "[DEBUG] WARNING: topics is null";
     }
 } else {
-    print "[DEBUG] WARNING: helpData is null";
 }
 
 // Categorize builtins by module
 // Use json to store arrays of builtins for each category
 // Use json.jsonFromString to create a fresh JSON object to avoid circular references
 var builtinsByCategory: json = call json.jsonFromString("{}");
-print "[DEBUG] Starting to categorize builtins...";
 if builtinsArray != null then {
-    print "[DEBUG] builtinsArray has " + call str.toString(builtinsArray.length) + " items";
     var debugCount: int = 0;
     foreach builtin in builtinsArray {
         var builtinName: string = call json.getString(builtin, "name", "");
@@ -114,7 +96,6 @@ if builtinsArray != null then {
             
             // Debug first 5 categorizations
             if debugCount < 5 then {
-                print "[DEBUG] Categorizing: " + builtinName + " -> category: " + category;
                 debugCount = debugCount + 1;
             }
             
@@ -128,39 +109,30 @@ if builtinsArray != null then {
             builtinsByCategory = call json.add(builtinsByCategory, category, childNode);
         }
     }
-    print "[DEBUG] Categorization complete";
 } else {
-    print "[DEBUG] WARNING: builtinsArray is null";
 }
 
 // Build categorized builtin tree using category order from JSON
 var builtinChildren: array[*];
 var totalBuiltins: int = 0;
 
-print "[DEBUG] Building categorized builtin tree...";
 if builtinCategoryOrder != null then {
-    print "[DEBUG] Processing " + call str.toString(builtinCategoryOrder.length) + " category keys";
     foreach categoryKey in builtinCategoryOrder {
-        print "[DEBUG] Processing category: " + categoryKey;
         // Get category array from json using json.getArray to properly handle JSON arrays
         var categoryArray: json = call json.getArray(builtinsByCategory, categoryKey);
         if categoryArray != null then {
-            print "[DEBUG] Category '" + categoryKey + "' found";
             // Debug: print first 3 function names if they exist
             var firstFunc: json = call json.get(categoryArray, "0");
             if firstFunc != null then {
                 var firstName: string = call json.getString(firstFunc, "value", "");
-                print "[DEBUG]   First function: " + firstName;
             }
             var secondFunc: json = call json.get(categoryArray, "1");
             if secondFunc != null then {
                 var secondName: string = call json.getString(secondFunc, "value", "");
-                print "[DEBUG]   Second function: " + secondName;
             }
             var thirdFunc: json = call json.get(categoryArray, "2");
             if thirdFunc != null then {
                 var thirdName: string = call json.getString(thirdFunc, "value", "");
-                print "[DEBUG]   Third function: " + thirdName;
             }
             // Get display name from JSON, fallback to key
             var displayName: string = categoryKey;
@@ -168,7 +140,6 @@ if builtinCategoryOrder != null then {
                 var jsonDisplayName: string = call json.getString(builtinCategoryNames, categoryKey, "");
                 if jsonDisplayName != "" then {
                     displayName = jsonDisplayName;
-                    print "[DEBUG] Using display name: " + displayName;
                 }
             }
             
@@ -180,16 +151,12 @@ if builtinCategoryOrder != null then {
             categoryNode = call json.set(categoryNode, "children", categoryArray);
             call array.add(builtinChildren, categoryNode);
             totalBuiltins = totalBuiltins + 1; // Count categories, not individual functions
-            print "[DEBUG] Added category node with display name: " + displayName;
         } else {
-            print "[DEBUG] WARNING: No functions found for category: " + categoryKey;
         }
     }
 } else {
-    print "[DEBUG] WARNING: builtinCategoryOrder is null - cannot build tree";
 }
 
-print "Built categorized tree with " + call str.toString(totalBuiltins) + " builtins in " + call str.toString(builtinChildren.length) + " categories";
 
 // Build the complete tree structure dynamically
 var structureChildren: array[*];
@@ -233,7 +200,6 @@ var builtinsNode: json = call json.jsonFromString("{}");
 builtinsNode = call json.set(builtinsNode, "value", "builtins");
 builtinsNode = call json.set(builtinsNode, "expanded", false);
 builtinsNode = call json.set(builtinsNode, "children", builtinChildren);
-print "[DEBUG] Builtins node created with " + call str.toString(builtinChildren.length) + " children";
 call array.add(syntaxChildren, builtinsNode);
 
 call array.add(syntaxChildren, call json.set({}, "value", "screen"));
@@ -265,15 +231,10 @@ treeStructure = call json.set(treeStructure, "value", "Help Topics");
 treeStructure = call json.set(treeStructure, "expanded", true);
 treeStructure = call json.set(treeStructure, "children", rootChildren);
 
-print "Tree structure built with dynamic builtins";
-print "[DEBUG] Root children count: " + call str.toString(rootChildren.length);
-print "[DEBUG] Syntax children count: " + call str.toString(syntaxChildren.length);
 
 // Load the screen definition from JSON file
-print "Loading screen definition from JSON...";
 var screenJsonText: string = call file.readTextResource("json/help-screen.json");
 var screenJson: json = call json.jsonFromString(screenJsonText);
-print "Screen definition loaded";
 
 // Inject the dynamic tree structure into the screen definition
 // Navigate to the treeItems property and set it
@@ -291,7 +252,6 @@ if areaArray != null && areaArray.length > 0 then {
                 // Wrap tree structure in array and set it
                 var treeItemsArray: array[*];
                 call array.add(treeItemsArray, treeStructure);
-                print "[DEBUG] Tree structure wrapped in array";
                 display = call json.set(display, "treeItems", treeItemsArray);
                 helpTreeItem = call json.set(helpTreeItem, "display", display);
                 items = call json.set(items, 0, helpTreeItem);
@@ -301,9 +261,7 @@ if areaArray != null && areaArray.length > 0 then {
                 areaArray = call json.set(areaArray, 0, mainLayout);
                 screenJson = call json.set(screenJson, "area", areaArray);
                 print "Tree items injected into screen definition";
-                print "[DEBUG] Tree injection complete - treeItemsArray length: " + call str.toString(treeItemsArray.length);
             } else {
-                print "[DEBUG] WARNING: display is null - cannot inject tree";
             }
         }
     }
@@ -311,14 +269,8 @@ if areaArray != null && areaArray.length > 0 then {
 
 // Function to convert plain text to HTML with <pre> tag
 convertToHtml(text: string) return string {
-    // Escape HTML special characters first
-    var html: string = text;
-    html = call str.replace(html, "&", "&amp;");
-    html = call str.replace(html, "<", "&lt;");
-    html = call str.replace(html, ">", "&gt;");
-    
     // Split into lines to process line by line
-    var lines: array = call str.split(html, "\n");
+    var lines: array = call str.split(text, "\n");
     var processedLines: array = [];
     
     var i: int = 0;
@@ -641,4 +593,3 @@ helpScreen.helpContent = call convertToHtml(call getHelpContent(""));
 // Show the screen
 show screen helpScreen;
 
-print "Syntax help screen displayed with tree navigation.";

@@ -276,7 +276,7 @@ public class DisplayItem {
         MEDIAVIEW("mediaview", "screen-item-mediaview",
                   ""),
         WEBVIEW("webview", "screen-item-webview",
-                "-fx-pref-width: 800; -fx-pref-height: 600;"),
+                ""),
         CHART("chart", "screen-item-chart",
               "-fx-padding: 10;"),
         

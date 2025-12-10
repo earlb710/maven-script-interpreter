@@ -3533,6 +3533,43 @@ public class ScreenFactory {
 
                 // Apply item layout properties
                 applyItemLayoutProperties(control, item);
+                
+                // If the control was wrapped (e.g., with a label), also apply width constraints to the wrapper
+                // This ensures the wrapper container respects the same width limits as the control inside
+                if (nodeToAdd != control && nodeToAdd instanceof Region) {
+                    Region wrapper = (Region) nodeToAdd;
+                    // Only apply width constraints to the wrapper, not height (height should be flexible for label+control)
+                    if (item.minWidth != null && !item.minWidth.isEmpty()) {
+                        try {
+                            double width = parseSize(item.minWidth);
+                            if (width > 0) {
+                                wrapper.setMinWidth(width);
+                            }
+                        } catch (NumberFormatException e) {
+                            // Ignore
+                        }
+                    }
+                    if (item.prefWidth != null && !item.prefWidth.isEmpty()) {
+                        try {
+                            double width = parseSize(item.prefWidth);
+                            if (width > 0) {
+                                wrapper.setPrefWidth(width);
+                            }
+                        } catch (NumberFormatException e) {
+                            // Ignore
+                        }
+                    }
+                    if (item.maxWidth != null && !item.maxWidth.isEmpty()) {
+                        try {
+                            double width = parseSize(item.maxWidth);
+                            if (width > 0) {
+                                wrapper.setMaxWidth(width);
+                            }
+                        } catch (NumberFormatException e) {
+                            // Ignore
+                        }
+                    }
+                }
 
                 // Add item to container based on container type
                 addItemToContainer(container, nodeToAdd, item, areaDef.areaType);
@@ -3617,6 +3654,13 @@ public class ScreenFactory {
         if ((areaDef.gainFocus != null && !areaDef.gainFocus.trim().isEmpty()) 
             || (areaDef.lostFocus != null && !areaDef.lostFocus.trim().isEmpty())) {
             setupAreaFocusListeners(container, areaDef, screenName, context, onClickHandler);
+        }
+        
+        // Configure SplitPane divider position if this is a SplitPane
+        if (container instanceof javafx.scene.control.SplitPane) {
+            javafx.scene.control.SplitPane splitPane = (javafx.scene.control.SplitPane) container;
+            // Set initial divider position to 25% (0.25) for the first pane
+            splitPane.setDividerPositions(0.25);
         }
 
         return container;
@@ -4016,6 +4060,10 @@ public class ScreenFactory {
             if (borderPane.getCenter() == null) {
                 borderPane.setCenter(childArea);
             }
+        } else if (container instanceof javafx.scene.control.SplitPane) {
+            javafx.scene.control.SplitPane splitPane = (javafx.scene.control.SplitPane) container;
+            splitPane.getItems().add(childArea);
+            // Note: SplitPane doesn't use hgrow/vgrow properties - divider position controls sizing
         } else if (container instanceof StackPane) {
             ((StackPane) container).getChildren().add(childArea);
         } else if (container instanceof FlowPane) {
@@ -4045,6 +4093,9 @@ public class ScreenFactory {
             return -1;
         } else if (size.equalsIgnoreCase("auto")) {
             return -1;
+        } else if (size.equalsIgnoreCase("MAX")) {
+            // "MAX" means use maximum possible size
+            return Double.MAX_VALUE;
         } else {
             return Double.parseDouble(size);
         }

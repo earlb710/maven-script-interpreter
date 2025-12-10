@@ -17,7 +17,7 @@
   "area": [
     {
       "name": "mainLayout",
-      "type": "hbox",
+      "type": "splitpane",
       "spacing": "0",
       "padding": "0",
       "hgrow": "ALWAYS",
@@ -27,9 +27,9 @@
           "name": "treeArea",
           "type": "vbox",
           "spacing": "0",
-          "minWidth": "250",
+          "minWidth": "200",
           "prefWidth": "250",
-          "maxWidth": "250",
+          "hgrow": "NEVER",
           "vgrow": "ALWAYS",
           "style": "-fx-border-color: #cccccc; -fx-border-width: 0 1 0 0;",
           "items": [
@@ -43,10 +43,10 @@
                 "labelPosition": "TOP",
                 "minWidth": "200",
                 "prefWidth": "250",
-                "maxWidth": "250",
                 "minHeight": "200",
-                "prefHeight": "400",
+                "prefHeight": "200",
                 "maxHeight": "MAX",
+                "hgrow": "NEVER",
                 "vgrow": "ALWAYS",
                 "expandAll": true,
                 "showRoot": false,
