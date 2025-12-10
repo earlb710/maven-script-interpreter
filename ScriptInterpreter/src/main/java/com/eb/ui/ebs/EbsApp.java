@@ -157,7 +157,10 @@ public class EbsApp {
         // Use SplitPane to put tree on the left
         javafx.scene.control.SplitPane splitPane = new javafx.scene.control.SplitPane();
         splitPane.getItems().addAll(projectTreeView, mainTabs);
-        splitPane.setDividerPositions(0.10); // 10% for tree, 90% for main content
+        splitPane.setDividerPositions(0.20); // 20% for tree, 80% for main content
+        
+        // Set minimum width for project tree (12% of window)
+        projectTreeView.minWidthProperty().bind(splitPane.widthProperty().multiply(0.12));
 
         // --- Menu bar ---
         MenuBar menuBar = new EbsMenu(handler);
