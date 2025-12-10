@@ -118,7 +118,8 @@ if builtinsArray != null then {
             }
             
             // Create child node with builtin name as a JSON object
-            var childNode: json = {};
+            // Use json.jsonFromString to create a fresh JSON object to avoid circular references
+            var childNode: json = call json.jsonFromString("{}");
             childNode = call json.set(childNode, "value", builtinName);
             
             // Use json.add to append to the array at the category path
