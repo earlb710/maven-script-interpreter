@@ -54,6 +54,8 @@ import org.fxmisc.richtext.model.StyleSpansBuilder;
 
 import javafx.animation.PauseTransition;
 import javafx.util.Duration;
+import javafx.scene.control.TextInputDialog;
+import java.util.Optional;
 
 public class EbsTab extends Tab {
 
@@ -160,11 +162,35 @@ public class EbsTab extends Tab {
                 // Ctrl+Delete: delete spaces onward if on space, delete word if on text
                 handleCtrlDelete(dispArea);
                 e.consume();
+            } else if (e.getCode() == KeyCode.TAB && e.isShiftDown() && !e.isControlDown()) {
+                // Shift+Tab: unindent/outdent selected lines
+                handleShiftTabUnindent(dispArea);
+                e.consume();
             } else if (e.getCode() == KeyCode.TAB && !e.isControlDown() && !e.isShiftDown()) {
                 // Tab: indent multiple lines if selected, normal behavior for single line
                 if (handleTabIndent(dispArea)) {
                     e.consume();
                 }
+            } else if (e.isControlDown() && e.getCode() == KeyCode.G) {
+                // Ctrl+G: go to line number
+                handleGoToLine(dispArea);
+                e.consume();
+            } else if (e.isControlDown() && e.getCode() == KeyCode.SLASH) {
+                // Ctrl+/: toggle line comments
+                handleToggleLineComments(dispArea);
+                e.consume();
+            } else if (e.isAltDown() && e.getCode() == KeyCode.UP) {
+                // Alt+Up: move line(s) up
+                handleMoveLineUp(dispArea);
+                e.consume();
+            } else if (e.isAltDown() && e.getCode() == KeyCode.DOWN) {
+                // Alt+Down: move line(s) down
+                handleMoveLineDown(dispArea);
+                e.consume();
+            } else if (e.getCode() == KeyCode.ENTER && !e.isControlDown() && !e.isShiftDown()) {
+                // Enter: auto-indent to match the previous line's indentation
+                handleAutoIndent(dispArea);
+                e.consume();
             }
         });
         
@@ -1609,6 +1635,351 @@ public class EbsTab extends Tab {
         area.selectRange(lineStart, newEnd);
         
         return true; // Event handled
+    }
+    
+    /**
+     * Handle Enter key press for auto-indentation.
+     * When Enter is pressed, insert a newline followed by the same indentation as the current line.
+     * Only spaces and tabs are considered as indentation characters.
+     * @param area The ScriptArea to operate on
+     */
+    private void handleAutoIndent(ScriptArea area) {
+        int caretPos = area.getCaretPosition();
+        String text = area.getText();
+        
+        // Guard against empty text
+        if (text.isEmpty()) {
+            area.insertText(caretPos, "\n");
+            return;
+        }
+        
+        // Find the start of the current line
+        int lineStart = caretPos;
+        while (lineStart > 0 && text.charAt(lineStart - 1) != '\n') {
+            lineStart--;
+        }
+        
+        // Determine the full indentation of the current line (scan from line start)
+        int indentEnd = lineStart;
+        while (indentEnd < text.length() && 
+               (text.charAt(indentEnd) == ' ' || text.charAt(indentEnd) == '\t')) {
+            indentEnd++;
+        }
+        
+        // Extract the indentation characters
+        String indentation = text.substring(lineStart, indentEnd);
+        
+        // Insert newline + indentation at caret position
+        // The caret will automatically be positioned after the inserted text
+        area.insertText(caretPos, "\n" + indentation);
+    }
+    
+    /**
+     * Handle Shift+Tab key press for unindenting/outdenting.
+     * Removes one tab or up to 4 spaces from the beginning of each selected line.
+     * @param area The ScriptArea to operate on
+     */
+    private void handleShiftTabUnindent(ScriptArea area) {
+        int selStart = area.getSelection().getStart();
+        int selEnd = area.getSelection().getEnd();
+        String text = area.getText();
+        
+        // Find the start of the line containing selStart
+        int lineStart = selStart;
+        while (lineStart > 0 && text.charAt(lineStart - 1) != '\n') {
+            lineStart--;
+        }
+        
+        // Find the end of the line containing selEnd
+        int lineEnd = selEnd;
+        // If selection ends exactly at start of a line (not including that line), adjust back
+        if (selEnd > 0 && text.charAt(selEnd - 1) == '\n') {
+            lineEnd = selEnd - 1;
+        }
+        while (lineEnd < text.length() && text.charAt(lineEnd) != '\n') {
+            lineEnd++;
+        }
+        
+        // Unindent all lines in the range
+        String selectedText = text.substring(lineStart, lineEnd);
+        String[] lines = selectedText.split("\n", -1);
+        StringBuilder unindented = new StringBuilder();
+        
+        for (int i = 0; i < lines.length; i++) {
+            if (i > 0) {
+                unindented.append('\n');
+            }
+            String line = lines[i];
+            // Remove one tab or up to 4 spaces from the beginning
+            if (line.startsWith("\t")) {
+                unindented.append(line.substring(1));
+            } else {
+                // Remove up to 4 leading spaces
+                int spacesToRemove = 0;
+                for (int j = 0; j < Math.min(4, line.length()); j++) {
+                    if (line.charAt(j) == ' ') {
+                        spacesToRemove++;
+                    } else {
+                        break;
+                    }
+                }
+                unindented.append(line.substring(spacesToRemove));
+            }
+        }
+        
+        // Replace the text
+        area.replaceText(lineStart, lineEnd, unindented.toString());
+        
+        // Restore selection to cover the unindented text
+        int newEnd = lineStart + unindented.length();
+        area.selectRange(lineStart, newEnd);
+    }
+    
+    /**
+     * Handle Ctrl+G key press for go to line number.
+     * Shows a dialog to enter a line number and jumps to that line.
+     * @param area The ScriptArea to operate on
+     */
+    private void handleGoToLine(ScriptArea area) {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Go to Line");
+        dialog.setHeaderText("Enter line number:");
+        dialog.setContentText("Line:");
+        
+        // Get current line for default value
+        int currentLine = area.getCurrentParagraph() + 1;
+        dialog.getEditor().setText(String.valueOf(currentLine));
+        dialog.getEditor().selectAll();
+        
+        Optional<String> result = dialog.showAndWait();
+        result.ifPresent(lineStr -> {
+            try {
+                int lineNumber = Integer.parseInt(lineStr.trim());
+                int totalLines = area.getParagraphs().size();
+                
+                // Validate line number
+                if (lineNumber < 1) {
+                    lineNumber = 1;
+                } else if (lineNumber > totalLines) {
+                    lineNumber = totalLines;
+                }
+                
+                // Move to the line (0-indexed)
+                int targetParagraph = lineNumber - 1;
+                area.moveTo(targetParagraph, 0);
+                area.requestFollowCaret();
+                area.requestFocus();
+            } catch (NumberFormatException ex) {
+                // Invalid input, do nothing
+            }
+        });
+    }
+    
+    /**
+     * Handle Ctrl+/ key press for toggling line comments.
+     * Adds // at the beginning of uncommented lines or removes it from commented lines.
+     * @param area The ScriptArea to operate on
+     */
+    private void handleToggleLineComments(ScriptArea area) {
+        int selStart = area.getSelection().getStart();
+        int selEnd = area.getSelection().getEnd();
+        String text = area.getText();
+        
+        // Find the start of the line containing selStart
+        int lineStart = selStart;
+        while (lineStart > 0 && text.charAt(lineStart - 1) != '\n') {
+            lineStart--;
+        }
+        
+        // Find the end of the line containing selEnd (or selStart if no selection)
+        int lineEnd = selEnd;
+        // If selection ends exactly at start of a line (not including that line), adjust back
+        if (selStart != selEnd && selEnd > 0 && selEnd < text.length() && text.charAt(selEnd - 1) == '\n') {
+            lineEnd = selEnd - 1;
+        }
+        while (lineEnd < text.length() && text.charAt(lineEnd) != '\n') {
+            lineEnd++;
+        }
+        
+        // Get all lines in the range
+        String selectedText = text.substring(lineStart, lineEnd);
+        String[] lines = selectedText.split("\n", -1);
+        
+        // Check if all non-empty lines are commented
+        boolean allCommented = true;
+        for (String line : lines) {
+            String trimmed = line.trim();
+            if (!trimmed.isEmpty() && !trimmed.startsWith("//")) {
+                allCommented = false;
+                break;
+            }
+        }
+        
+        // Toggle comments
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < lines.length; i++) {
+            if (i > 0) {
+                result.append('\n');
+            }
+            String line = lines[i];
+            if (allCommented) {
+                // Remove comment: find first occurrence of "//" and remove it
+                int commentIdx = line.indexOf("//");
+                if (commentIdx >= 0) {
+                    result.append(line.substring(0, commentIdx));
+                    // Skip the // and any single space after it
+                    int afterComment = commentIdx + 2;
+                    if (afterComment < line.length() && line.charAt(afterComment) == ' ') {
+                        afterComment++;
+                    }
+                    if (afterComment < line.length()) {
+                        result.append(line.substring(afterComment));
+                    }
+                } else {
+                    result.append(line);
+                }
+            } else {
+                // Add comment at the beginning (after any leading whitespace)
+                int firstNonSpace = 0;
+                while (firstNonSpace < line.length() && 
+                       (line.charAt(firstNonSpace) == ' ' || line.charAt(firstNonSpace) == '\t')) {
+                    firstNonSpace++;
+                }
+                result.append(line.substring(0, firstNonSpace));
+                result.append("// ");
+                result.append(line.substring(firstNonSpace));
+            }
+        }
+        
+        // Replace the text
+        area.replaceText(lineStart, lineEnd, result.toString());
+        
+        // Restore selection to cover the modified text
+        int newEnd = lineStart + result.length();
+        area.selectRange(lineStart, newEnd);
+    }
+    
+    /**
+     * Handle Alt+Up key press for moving line(s) up.
+     * Moves the current line or selected lines up by one line.
+     * @param area The ScriptArea to operate on
+     */
+    private void handleMoveLineUp(ScriptArea area) {
+        int selStart = area.getSelection().getStart();
+        int selEnd = area.getSelection().getEnd();
+        String text = area.getText();
+        
+        // Find the start of the line containing selStart
+        int lineStart = selStart;
+        while (lineStart > 0 && text.charAt(lineStart - 1) != '\n') {
+            lineStart--;
+        }
+        
+        // Can't move up if already at first line
+        if (lineStart == 0) {
+            return;
+        }
+        
+        // Find the end of the line containing selEnd
+        int lineEnd = selEnd;
+        // If selection ends exactly at start of a line (not including that line), adjust back
+        if (selEnd > 0 && text.charAt(selEnd - 1) == '\n') {
+            lineEnd = selEnd - 1;
+        }
+        while (lineEnd < text.length() && text.charAt(lineEnd) != '\n') {
+            lineEnd++;
+        }
+        
+        // Find the start of the previous line
+        int prevLineStart = lineStart - 1; // Skip the newline before current line
+        while (prevLineStart > 0 && text.charAt(prevLineStart - 1) != '\n') {
+            prevLineStart--;
+        }
+        
+        // Extract the lines
+        String prevLine = text.substring(prevLineStart, lineStart); // Includes trailing newline
+        String currentLines = text.substring(lineStart, lineEnd);
+        
+        // Check if currentLines needs a newline at the end
+        boolean hasTrailingNewline = lineEnd < text.length() && text.charAt(lineEnd) == '\n';
+        
+        // Swap the lines
+        String replacement = currentLines + (hasTrailingNewline ? "\n" : "") + prevLine;
+        
+        // Replace the text
+        area.replaceText(prevLineStart, lineEnd + (hasTrailingNewline ? 1 : 0), replacement);
+        
+        // Update selection to follow the moved lines
+        int offset = prevLineStart;
+        int newSelStart = offset + (selStart - lineStart);
+        int newSelEnd = offset + (selEnd - lineStart);
+        area.selectRange(newSelStart, newSelEnd);
+    }
+    
+    /**
+     * Handle Alt+Down key press for moving line(s) down.
+     * Moves the current line or selected lines down by one line.
+     * @param area The ScriptArea to operate on
+     */
+    private void handleMoveLineDown(ScriptArea area) {
+        int selStart = area.getSelection().getStart();
+        int selEnd = area.getSelection().getEnd();
+        String text = area.getText();
+        
+        // Find the start of the line containing selStart
+        int lineStart = selStart;
+        while (lineStart > 0 && text.charAt(lineStart - 1) != '\n') {
+            lineStart--;
+        }
+        
+        // Find the end of the line containing selEnd
+        int lineEnd = selEnd;
+        // If selection ends exactly at start of a line (not including that line), adjust back
+        if (selEnd > 0 && text.charAt(selEnd - 1) == '\n') {
+            lineEnd = selEnd - 1;
+        }
+        while (lineEnd < text.length() && text.charAt(lineEnd) != '\n') {
+            lineEnd++;
+        }
+        
+        // Check if there's a newline after current selection
+        boolean hasNewlineAfter = lineEnd < text.length() && text.charAt(lineEnd) == '\n';
+        if (hasNewlineAfter) {
+            lineEnd++; // Include the newline
+        }
+        
+        // Can't move down if already at last line
+        if (lineEnd >= text.length()) {
+            return;
+        }
+        
+        // Find the end of the next line
+        int nextLineEnd = lineEnd;
+        while (nextLineEnd < text.length() && text.charAt(nextLineEnd) != '\n') {
+            nextLineEnd++;
+        }
+        
+        // Check if there's a newline after the next line
+        boolean nextHasNewline = nextLineEnd < text.length() && text.charAt(nextLineEnd) == '\n';
+        if (nextHasNewline) {
+            nextLineEnd++; // Include the newline
+        }
+        
+        // Extract the lines
+        String currentLines = text.substring(lineStart, lineEnd);
+        String nextLine = text.substring(lineEnd, nextLineEnd);
+        
+        // Swap the lines
+        String replacement = nextLine + currentLines;
+        
+        // Replace the text
+        area.replaceText(lineStart, nextLineEnd, replacement);
+        
+        // Update selection to follow the moved lines
+        int offset = lineStart + nextLine.length();
+        int newSelStart = offset + (selStart - lineStart);
+        int newSelEnd = offset + (selEnd - lineStart);
+        area.selectRange(newSelStart, newSelEnd);
     }
 
 }
