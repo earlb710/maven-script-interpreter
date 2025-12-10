@@ -1,5 +1,6 @@
 package com.eb.ui.ebs;
 
+import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.ColumnConstraints;
@@ -397,7 +398,7 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
             linkedDirTable.setMaxHeight(200);
             
             TableColumn<String, String> pathColumn = new TableColumn<>("Directory Path");
-            pathColumn.setCellValueFactory(param -> new javafx.beans.property.SimpleStringProperty(param.getValue()));
+            pathColumn.setCellValueFactory(param -> new SimpleStringProperty(param.getValue()));
             pathColumn.setPrefWidth(500);
             
             linkedDirTable.getColumns().add(pathColumn);
