@@ -1617,12 +1617,19 @@ public class EbsTab extends Tab {
     
     /**
      * Handle Enter key press for auto-indentation.
-     * When Enter is pressed, insert a newline followed by the same indentation as the previous line.
+     * When Enter is pressed, insert a newline followed by the same indentation as the current line.
+     * Only spaces and tabs are considered as indentation characters.
      * @param area The ScriptArea to operate on
      */
     private void handleAutoIndent(ScriptArea area) {
         int caretPos = area.getCaretPosition();
         String text = area.getText();
+        
+        // Guard against empty text
+        if (text.isEmpty()) {
+            area.insertText(caretPos, "\n");
+            return;
+        }
         
         // Find the start of the current line
         int lineStart = caretPos;
@@ -1630,9 +1637,10 @@ public class EbsTab extends Tab {
             lineStart--;
         }
         
-        // Determine the indentation of the current line
+        // Determine the full indentation of the current line (scan from line start)
         int indentEnd = lineStart;
-        while (indentEnd < text.length() && (text.charAt(indentEnd) == ' ' || text.charAt(indentEnd) == '\t')) {
+        while (indentEnd < text.length() && 
+               (text.charAt(indentEnd) == ' ' || text.charAt(indentEnd) == '\t')) {
             indentEnd++;
         }
         
@@ -1640,6 +1648,7 @@ public class EbsTab extends Tab {
         String indentation = text.substring(lineStart, indentEnd);
         
         // Insert newline + indentation at caret position
+        // The caret will automatically be positioned after the inserted text
         area.insertText(caretPos, "\n" + indentation);
     }
 
