@@ -579,6 +579,12 @@ public class ProjectTreeView extends VBox {
                     projectData.remove("tempDir");
                 }
                 
+                if (!props.getDocDir().isEmpty()) {
+                    projectData.put("docDir", props.getDocDir());
+                } else {
+                    projectData.remove("docDir");
+                }
+                
                 // Write updated project.json
                 String updatedJson = com.eb.script.json.Json.prettyJson(projectData);
                 Files.writeString(projectJsonPath, updatedJson);

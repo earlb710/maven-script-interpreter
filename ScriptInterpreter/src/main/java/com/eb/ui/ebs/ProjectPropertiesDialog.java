@@ -28,11 +28,13 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
     private final TextField resourceDirField;
     private final TextField testDirField;
     private final TextField tempDirField;
+    private final TextField docDirField;
     private final Button createMainScriptButton;
     private final Button createCssButton;
     private final Button createResourceDirButton;
     private final Button createTestDirButton;
     private final Button createTempDirButton;
+    private final Button createDocDirButton;
     private final Path projectDir;
     
     /**
@@ -45,15 +47,17 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         private final String resourceDir;
         private final String testDir;
         private final String tempDir;
+        private final String docDir;
         
         public ProjectProperties(String name, String mainScript, String cssFile, 
-                               String resourceDir, String testDir, String tempDir) {
+                               String resourceDir, String testDir, String tempDir, String docDir) {
             this.name = name;
             this.mainScript = mainScript;
             this.cssFile = cssFile;
             this.resourceDir = resourceDir;
             this.testDir = testDir;
             this.tempDir = tempDir;
+            this.docDir = docDir;
         }
         
         public String getName() {
@@ -78,6 +82,10 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         
         public String getTempDir() {
             return tempDir;
+        }
+        
+        public String getDocDir() {
+            return docDir;
         }
     }
     
@@ -244,6 +252,24 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         // Update create button state when field changes
         tempDirField.textProperty().addListener((obs, old, newVal) -> updateCreateButtonStates());
         
+        // Document Directory field with browse button
+        docDirField = new TextField();
+        docDirField.setPromptText("docs");
+        docDirField.setPrefWidth(250);
+        Object docDirObj = currentProperties.get("docDir");
+        if (docDirObj != null) {
+            docDirField.setText(docDirObj.toString());
+        }
+        
+        Button browseDocDirButton = new Button("...");
+        browseDocDirButton.setOnAction(e -> browseDirectory(docDirField, "Select Document Directory"));
+        
+        createDocDirButton = new Button("Create");
+        createDocDirButton.setOnAction(e -> createDirectory(docDirField));
+        
+        // Update create button state when field changes
+        docDirField.textProperty().addListener((obs, old, newVal) -> updateCreateButtonStates());
+        
         // Add components to grid
         int row = 0;
         grid.add(new Label("Project Name:"), 0, row);
@@ -274,6 +300,11 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         grid.add(browseTempDirButton, 2, row);
         grid.add(createTempDirButton, 3, row++);
         
+        grid.add(new Label("Document Directory:"), 0, row);
+        grid.add(docDirField, 1, row);
+        grid.add(browseDocDirButton, 2, row);
+        grid.add(createDocDirButton, 3, row++);
+        
         getDialogPane().setContent(grid);
         
         // Initialize create button states
@@ -301,7 +332,8 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
                     cssFileField.getText().trim(),
                     resourceDirField.getText().trim(),
                     testDirField.getText().trim(),
-                    tempDirField.getText().trim()
+                    tempDirField.getText().trim(),
+                    docDirField.getText().trim()
                 );
             }
             return null;
@@ -383,6 +415,12 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         boolean tempDirExists = !tempDir.isEmpty() && 
                                Files.exists(projectDir.resolve(tempDir));
         createTempDirButton.setDisable(tempDir.isEmpty() || tempDirExists);
+        
+        // Document directory button - enabled if field not empty and directory doesn't exist
+        String docDir = docDirField.getText().trim();
+        boolean docDirExists = !docDir.isEmpty() && 
+                              Files.exists(projectDir.resolve(docDir));
+        createDocDirButton.setDisable(docDir.isEmpty() || docDirExists);
     }
     
     /**
