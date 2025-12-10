@@ -279,6 +279,9 @@ public class ProjectTreeView extends VBox {
                     MenuItem renameProjectItem = new MenuItem("Rename Project...");
                     renameProjectItem.setOnAction(e -> renameProject(selectedItem, path));
                     
+                    MenuItem propertiesItem = new MenuItem("Properties...");
+                    propertiesItem.setOnAction(e -> showProjectPropertiesDialog(selectedItem, Path.of(path)));
+                    
                     MenuItem removeItem = new MenuItem("Remove from List");
                     removeItem.setOnAction(e -> removeSelectedProject(selectedItem));
                     
@@ -292,6 +295,7 @@ public class ProjectTreeView extends VBox {
                             removeDirItem,
                             new SeparatorMenuItem(),
                             renameProjectItem,
+                            propertiesItem,
                             new SeparatorMenuItem(),
                             removeItem
                         );
@@ -303,6 +307,7 @@ public class ProjectTreeView extends VBox {
                             removeDirItem,
                             new SeparatorMenuItem(),
                             renameProjectItem,
+                            propertiesItem,
                             new SeparatorMenuItem(),
                             removeItem
                         );
