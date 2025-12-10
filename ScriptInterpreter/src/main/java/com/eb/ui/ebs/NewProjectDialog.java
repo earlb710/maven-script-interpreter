@@ -4,6 +4,7 @@ import com.eb.util.Util;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Window;
@@ -64,14 +65,14 @@ public class NewProjectDialog extends Dialog<NewProjectDialog.ProjectInfo> {
         projectNameField = new TextField();
         projectNameField.setPromptText("Enter project name");
         projectNameField.setMaxWidth(Double.MAX_VALUE);
-        javafx.scene.layout.GridPane.setHgrow(projectNameField, javafx.scene.layout.Priority.ALWAYS);
+        GridPane.setHgrow(projectNameField, Priority.ALWAYS);
         
         // Project path field (populated with console path + "/projects")
         projectPathField = new TextField();
         Path defaultProjectsPath = Util.SANDBOX_ROOT.resolve("projects");
         projectPathField.setText(defaultProjectsPath.toString());
         projectPathField.setMaxWidth(Double.MAX_VALUE);
-        javafx.scene.layout.GridPane.setHgrow(projectPathField, javafx.scene.layout.Priority.ALWAYS);
+        GridPane.setHgrow(projectPathField, Priority.ALWAYS);
         
         // Browse button to select directory
         browseButton = new Button("Browse...");
