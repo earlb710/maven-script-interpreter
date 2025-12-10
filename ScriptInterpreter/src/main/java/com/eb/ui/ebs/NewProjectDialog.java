@@ -58,18 +58,18 @@ public class NewProjectDialog extends Dialog<NewProjectDialog.ProjectInfo> {
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
-        grid.setPadding(new Insets(20, 150, 10, 10));
+        grid.setPadding(new Insets(20, 200, 10, 10));
         
         // Project name field (initially blank)
         projectNameField = new TextField();
         projectNameField.setPromptText("Enter project name");
-        projectNameField.setPrefWidth(300);
+        projectNameField.setPrefWidth(450);
         
         // Project path field (populated with console path + "/projects")
         projectPathField = new TextField();
         Path defaultProjectsPath = Util.SANDBOX_ROOT.resolve("projects");
         projectPathField.setText(defaultProjectsPath.toString());
-        projectPathField.setPrefWidth(300);
+        projectPathField.setPrefWidth(450);
         
         // Browse button to select directory
         browseButton = new Button("Browse...");
@@ -110,9 +110,34 @@ public class NewProjectDialog extends Dialog<NewProjectDialog.ProjectInfo> {
         Button okButton = (Button) getDialogPane().lookupButton(okButtonType);
         okButton.setDisable(true);
         
-        // Validation: OK button is enabled only when project name is not empty
+        // Track if user has manually edited the path
+        final boolean[] pathManuallyEdited = {false};
+        
+        // Listen to path field changes to detect manual edits
+        projectPathField.textProperty().addListener((observable, oldValue, newValue) -> {
+            // If the path changed and it's not from our auto-update, mark as manually edited
+            if (newValue != null && oldValue != null && !newValue.equals(oldValue)) {
+                // Check if this change is from our project name listener or user input
+                String projectName = projectNameField.getText();
+                if (projectName != null && !projectName.isEmpty()) {
+                    String expectedPath = defaultProjectsPath.resolve(projectName.trim().replaceAll("\\s+", "-")).toString();
+                    if (!newValue.equals(expectedPath)) {
+                        pathManuallyEdited[0] = true;
+                    }
+                }
+            }
+        });
+        
+        // Validation and auto-update path as project name is typed
         projectNameField.textProperty().addListener((observable, oldValue, newValue) -> {
             okButton.setDisable(newValue == null || newValue.trim().isEmpty());
+            
+            // Auto-update project path with dashes replacing spaces
+            if (!pathManuallyEdited[0] && newValue != null && !newValue.trim().isEmpty()) {
+                String sanitizedName = newValue.trim().replaceAll("\\s+", "-");
+                String newPath = defaultProjectsPath.resolve(sanitizedName).toString();
+                projectPathField.setText(newPath);
+            }
         });
         
         // Convert the result when OK is clicked
