@@ -3283,54 +3283,48 @@ public class ScreenFactory {
             try {
                 double width = parseSize(areaDef.minWidth);
                 container.setMinWidth(width);
-                System.out.println("[LAYOUT] Area '" + areaDef.name + "': setMinWidth(" + width + ")");
             } catch (NumberFormatException e) {
-                System.err.println("[LAYOUT] Area '" + areaDef.name + "': Failed to parse minWidth '" + areaDef.minWidth + "'");
+                // Ignore invalid values
             }
         }
         if (areaDef.prefWidth != null && !areaDef.prefWidth.isEmpty()) {
             try {
                 double width = parseSize(areaDef.prefWidth);
                 container.setPrefWidth(width);
-                System.out.println("[LAYOUT] Area '" + areaDef.name + "': setPrefWidth(" + width + ")");
             } catch (NumberFormatException e) {
-                System.err.println("[LAYOUT] Area '" + areaDef.name + "': Failed to parse prefWidth '" + areaDef.prefWidth + "'");
+                // Ignore invalid values
             }
         }
         if (areaDef.maxWidth != null && !areaDef.maxWidth.isEmpty()) {
             try {
                 double width = parseSize(areaDef.maxWidth);
                 container.setMaxWidth(width);
-                System.out.println("[LAYOUT] Area '" + areaDef.name + "': setMaxWidth(" + width + ")");
             } catch (NumberFormatException e) {
-                System.err.println("[LAYOUT] Area '" + areaDef.name + "': Failed to parse maxWidth '" + areaDef.maxWidth + "'");
+                // Ignore invalid values
             }
         }
         if (areaDef.minHeight != null && !areaDef.minHeight.isEmpty()) {
             try {
                 double height = parseSize(areaDef.minHeight);
                 container.setMinHeight(height);
-                System.out.println("[LAYOUT] Area '" + areaDef.name + "': setMinHeight(" + height + ")");
             } catch (NumberFormatException e) {
-                System.err.println("[LAYOUT] Area '" + areaDef.name + "': Failed to parse minHeight '" + areaDef.minHeight + "'");
+                // Ignore invalid values
             }
         }
         if (areaDef.prefHeight != null && !areaDef.prefHeight.isEmpty()) {
             try {
                 double height = parseSize(areaDef.prefHeight);
                 container.setPrefHeight(height);
-                System.out.println("[LAYOUT] Area '" + areaDef.name + "': setPrefHeight(" + height + ")");
             } catch (NumberFormatException e) {
-                System.err.println("[LAYOUT] Area '" + areaDef.name + "': Failed to parse prefHeight '" + areaDef.prefHeight + "'");
+                // Ignore invalid values
             }
         }
         if (areaDef.maxHeight != null && !areaDef.maxHeight.isEmpty()) {
             try {
                 double height = parseSize(areaDef.maxHeight);
                 container.setMaxHeight(height);
-                System.out.println("[LAYOUT] Area '" + areaDef.name + "': setMaxHeight(" + height + ")");
             } catch (NumberFormatException e) {
-                System.err.println("[LAYOUT] Area '" + areaDef.name + "': Failed to parse maxHeight '" + areaDef.maxHeight + "'");
+                // Ignore invalid values
             }
         }
         
@@ -3550,7 +3544,6 @@ public class ScreenFactory {
                             double width = parseSize(item.minWidth);
                             if (width > 0) {
                                 wrapper.setMinWidth(width);
-                                System.out.println("[LAYOUT] Wrapper for item '" + item.name + "': setMinWidth(" + width + ")");
                             }
                         } catch (NumberFormatException e) {
                             // Ignore
@@ -3561,7 +3554,6 @@ public class ScreenFactory {
                             double width = parseSize(item.prefWidth);
                             if (width > 0) {
                                 wrapper.setPrefWidth(width);
-                                System.out.println("[LAYOUT] Wrapper for item '" + item.name + "': setPrefWidth(" + width + ")");
                             }
                         } catch (NumberFormatException e) {
                             // Ignore
@@ -3572,7 +3564,6 @@ public class ScreenFactory {
                             double width = parseSize(item.maxWidth);
                             if (width > 0) {
                                 wrapper.setMaxWidth(width);
-                                System.out.println("[LAYOUT] Wrapper for item '" + item.name + "': setMaxWidth(" + width + ")");
                             }
                         } catch (NumberFormatException e) {
                             // Ignore
@@ -3670,7 +3661,6 @@ public class ScreenFactory {
             javafx.scene.control.SplitPane splitPane = (javafx.scene.control.SplitPane) container;
             // Set initial divider position to 25% (0.25) for the first pane
             splitPane.setDividerPositions(0.25);
-            System.out.println("[LAYOUT] SplitPane '" + areaDef.name + "': Set divider position to 0.25 (25%)");
         }
 
         return container;
@@ -3773,10 +3763,9 @@ public class ScreenFactory {
                     double width = parseSize(item.prefWidth);
                     if (width > 0) {
                         region.setPrefWidth(width);
-                        System.out.println("[LAYOUT] Item '" + item.name + "': setPrefWidth(" + width + ")");
                     }
                 } catch (NumberFormatException e) {
-                    System.err.println("[LAYOUT] Item '" + item.name + "': Failed to parse prefWidth '" + item.prefWidth + "'");
+                    // Ignore invalid values
                 }
             }
 
@@ -3785,10 +3774,9 @@ public class ScreenFactory {
                     double height = parseSize(item.prefHeight);
                     if (height > 0) {
                         region.setPrefHeight(height);
-                        System.out.println("[LAYOUT] Item '" + item.name + "': setPrefHeight(" + height + ")");
                     }
                 } catch (NumberFormatException e) {
-                    System.err.println("[LAYOUT] Item '" + item.name + "': Failed to parse prefHeight '" + item.prefHeight + "'");
+                    // Ignore invalid values
                 }
             }
 
@@ -3797,10 +3785,9 @@ public class ScreenFactory {
                     double width = parseSize(item.minWidth);
                     if (width > 0) {
                         region.setMinWidth(width);
-                        System.out.println("[LAYOUT] Item '" + item.name + "': setMinWidth(" + width + ")");
                     }
                 } catch (NumberFormatException e) {
-                    System.err.println("[LAYOUT] Item '" + item.name + "': Failed to parse minWidth '" + item.minWidth + "'");
+                    // Ignore invalid values
                 }
             }
 
@@ -3809,10 +3796,9 @@ public class ScreenFactory {
                     double height = parseSize(item.minHeight);
                     if (height > 0) {
                         region.setMinHeight(height);
-                        System.out.println("[LAYOUT] Item '" + item.name + "': setMinHeight(" + height + ")");
                     }
                 } catch (NumberFormatException e) {
-                    System.err.println("[LAYOUT] Item '" + item.name + "': Failed to parse minHeight '" + item.minHeight + "'");
+                    // Ignore invalid values
                 }
             }
 
@@ -3821,10 +3807,9 @@ public class ScreenFactory {
                     double width = parseSize(item.maxWidth);
                     if (width > 0) {
                         region.setMaxWidth(width);
-                        System.out.println("[LAYOUT] Item '" + item.name + "': setMaxWidth(" + width + ")");
                     }
                 } catch (NumberFormatException e) {
-                    System.err.println("[LAYOUT] Item '" + item.name + "': Failed to parse maxWidth '" + item.maxWidth + "'");
+                    // Ignore invalid values
                 }
             }
 
@@ -3833,10 +3818,9 @@ public class ScreenFactory {
                     double height = parseSize(item.maxHeight);
                     if (height > 0) {
                         region.setMaxHeight(height);
-                        System.out.println("[LAYOUT] Item '" + item.name + "': setMaxHeight(" + height + ")");
                     }
                 } catch (NumberFormatException e) {
-                    System.err.println("[LAYOUT] Item '" + item.name + "': Failed to parse maxHeight '" + item.maxHeight + "'");
+                    // Ignore invalid values
                 }
             }
         }
@@ -3868,9 +3852,8 @@ public class ScreenFactory {
                 try {
                     Priority priority = Priority.valueOf(item.vgrow.toUpperCase());
                     VBox.setVgrow(control, priority);
-                    System.out.println("[LAYOUT] Item '" + item.name + "': VBox.setVgrow(" + priority + ")");
                 } catch (IllegalArgumentException e) {
-                    System.err.println("[LAYOUT] Item '" + item.name + "': Invalid vgrow value '" + item.vgrow + "'");
+                    // Ignore invalid values
                 }
             }
 
@@ -3883,9 +3866,8 @@ public class ScreenFactory {
                 try {
                     Priority priority = Priority.valueOf(item.hgrow.toUpperCase());
                     HBox.setHgrow(control, priority);
-                    System.out.println("[LAYOUT] Item '" + item.name + "': HBox.setHgrow(" + priority + ")");
                 } catch (IllegalArgumentException e) {
-                    System.err.println("[LAYOUT] Item '" + item.name + "': Invalid hgrow value '" + item.hgrow + "'");
+                    // Ignore invalid values
                 }
             }
 
@@ -4033,9 +4015,8 @@ public class ScreenFactory {
                 try {
                     Priority priority = Priority.valueOf(childAreaDef.vgrow.toUpperCase());
                     VBox.setVgrow(childArea, priority);
-                    System.out.println("[LAYOUT] ChildArea '" + childAreaDef.name + "': VBox.setVgrow(" + priority + ")");
                 } catch (IllegalArgumentException e) {
-                    System.err.println("[LAYOUT] ChildArea '" + childAreaDef.name + "': Invalid vgrow value '" + childAreaDef.vgrow + "'");
+                    // Ignore invalid values
                 }
             }
         } else if (container instanceof HBox) {
@@ -4046,9 +4027,8 @@ public class ScreenFactory {
                 try {
                     Priority priority = Priority.valueOf(childAreaDef.hgrow.toUpperCase());
                     HBox.setHgrow(childArea, priority);
-                    System.out.println("[LAYOUT] ChildArea '" + childAreaDef.name + "': HBox.setHgrow(" + priority + ")");
                 } catch (IllegalArgumentException e) {
-                    System.err.println("[LAYOUT] ChildArea '" + childAreaDef.name + "': Invalid hgrow value '" + childAreaDef.hgrow + "'");
+                    // Ignore invalid values
                 }
             }
         } else if (container instanceof GridPane) {
@@ -4083,7 +4063,6 @@ public class ScreenFactory {
         } else if (container instanceof javafx.scene.control.SplitPane) {
             javafx.scene.control.SplitPane splitPane = (javafx.scene.control.SplitPane) container;
             splitPane.getItems().add(childArea);
-            System.out.println("[LAYOUT] ChildArea '" + (childAreaDef != null ? childAreaDef.name : "<unnamed>") + "': Added to SplitPane");
             // Note: SplitPane doesn't use hgrow/vgrow properties - divider position controls sizing
         } else if (container instanceof StackPane) {
             ((StackPane) container).getChildren().add(childArea);
