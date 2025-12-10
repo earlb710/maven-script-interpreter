@@ -4022,7 +4022,7 @@
   "topics": {
     "getting_started": {
       "title": "Getting Started with EBS",
-      "content": "Welcome to EBS (Earl Bosch Script)!\n▸ QUICK START\n───────────────────────────────────────────────────────\n1. Write your first script:\n   var message: string = \"Hello, World!\";\n   print message;\n2. Run it in the console or save as .ebs file\n▸ KEY FEATURES\n───────────────────────────────────────────────────────\n• Variables with type annotations or inference\n• Control flow (if/then/else, while, for, foreach)\n• Functions with parameters and return values\n• Arrays (fixed and dynamic) and JSON objects\n• Database operations (connect, cursor, SQL)\n• File I/O and HTTP requests\n• JavaFX screen/UI support\n• Rich set of 200+ built-in functions\n▸ NEXT STEPS\n───────────────────────────────────────────────────────\n• Explore 'Program Structure' for syntax basics\n• Check 'Data Types' for available types\n• Browse 'Built-in Functions' by category\n• View 'Examples' for practical code samples"
+      "content": "Welcome to EBS (Earl Bosch Script)!\n1. Write your first script:\n   var message: string = \"Hello, World!\";\n   print message;\n2. Run it in the console or save as .ebs file\n• Variables with type annotations or inference\n• Control flow (if/then/else, while, for, foreach)\n• Functions with parameters and return values\n• Arrays (fixed and dynamic) and JSON objects\n• Database operations (connect, cursor, SQL)\n• File I/O and HTTP requests\n• JavaFX screen/UI support\n• Rich set of 200+ built-in functions\n• Explore 'Program Structure' for syntax basics\n• Check 'Data Types' for available types\n• Browse 'Built-in Functions' by category\n• View 'Examples' for practical code samples"
     },
     "builtin_cat_overview": {
       "title": "{category_name}",
@@ -4074,31 +4074,31 @@
     ],
     "Syntax": {
       "title": "EBS (Earl Bosch Script) Syntax",
-      "content": "  EBS (Earl Bosch Script) Syntax\n═══════════════════════════════════════════════════════\nEBS is a dynamically-typed scripting language with:\n• Familiar C-like syntax\n• Native JSON support\n• Integrated database capabilities\n• JavaFX-based UI screen support\n• Rich set of built-in functions\n• Interactive REPL environment\nSelect a topic from the tree to view detailed information."
+      "content": "EBS is a dynamically-typed scripting language with:\n• Familiar C-like syntax\n• Native JSON support\n• Integrated database capabilities\n• JavaFX-based UI screen support\n• Rich set of built-in functions\n• Interactive REPL environment\nSelect a topic from the tree to view detailed information."
     },
     "structure": {
       "title": "Program Structure",
-      "content": "  Program Structure\n═══════════════════════════════════════════════════════\nSelect a sub-topic from the tree to view detailed information:\n▸ basic - Statements, comments, blocks, case handling\n▸ variables - Variable declarations, types, constants\n▸ operators - Arithmetic, comparison, logical operators\n▸ functions - Function definitions and calls\n▸ imports - Code organization with imports\n"
+      "content": "Select a sub-topic from the tree to view detailed information:\n▸ basic - Statements, comments, blocks, case handling\n▸ variables - Variable declarations, types, constants\n▸ operators - Arithmetic, comparison, logical operators\n▸ functions - Function definitions and calls\n▸ imports - Code organization with imports\n"
     },
     "structure_basic": {
       "title": "Basic Syntax",
-      "content": "  Basic Syntax\n═══════════════════════════════════════════════════════\n▸ STATEMENTS\n───────────────────────────────────────────────────────\n• Statements end with semicolon (;)\n• Multiple statements per line allowed\n• Blocks use curly braces { }\n▸ COMMENTS\n───────────────────────────────────────────────────────\n  // Single line comment\n  // Comments start with //\n▸ CASE INSENSITIVITY\n───────────────────────────────────────────────────────\n  var userName = \\  print USERNAME;  // Works: prints \\  print UserName;  // Works: prints \\▸ EXAMPLE\n───────────────────────────────────────────────────────\n  // This is a comment\n  var message: string = \\  print message;\n"
+      "content": "• Statements end with semicolon (;)\n• Multiple statements per line allowed\n• Blocks use curly braces { }\n  // Single line comment\n  // Comments start with //\n  // This is a comment\n  var message: string = \\  print message;\n"
     },
     "structure_variables": {
       "title": "Variables",
-      "content": "  Variables\n═══════════════════════════════════════════════════════\n▸ TYPE INFERENCE\n───────────────────────────────────────────────────────\n  var x = 42;        // Inferred as int\n  var y = \\▸ CONSTANTS\n───────────────────────────────────────────────────────\n  const PI: double = 3.14159;\n  const MAX_SIZE: int = 100;\n"
+      "content": "  var x = 42;        // Inferred as int\n  const PI: double = 3.14159;\n  const MAX_SIZE: int = 100;\n"
     },
     "structure_operators": {
       "title": "Operators",
-      "content": "  Operators\n═══════════════════════════════════════════════════════\n▸ ARITHMETIC OPERATORS\n───────────────────────────────────────────────────────\n  +   Addition\n  -   Subtraction\n  *   Multiplication\n  /   Division\n  %   Modulo\n▸ COMPARISON OPERATORS\n───────────────────────────────────────────────────────\n  ==  Equal to\n  !=  Not equal to\n  <   Less than\n  >   Greater than\n  <=  Less than or equal\n  >=  Greater than or equal\n▸ LOGICAL OPERATORS\n───────────────────────────────────────────────────────\n  and   Logical AND\n  or    Logical OR\n  not   Logical NOT\n▸ EXAMPLE\n───────────────────────────────────────────────────────\n  var x = 10;\n  var y = 20;\n  if x < y and x > 0 then {\n      print \\  }\n"
+      "content": "  +   Addition\n  -   Subtraction\n  *   Multiplication\n  /   Division\n  %   Modulo\n  ==  Equal to\n  !=  Not equal to\n  <   Less than\n  >   Greater than\n  <=  Less than or equal\n  >=  Greater than or equal\n  and   Logical AND\n  or    Logical OR\n  not   Logical NOT\n  var x = 10;\n  var y = 20;\n  if x < y and x > 0 then {\n      print \\  }\n"
     },
     "structure_functions": {
       "title": "Functions",
-      "content": "  Functions\n═══════════════════════════════════════════════════════\n▸ FUNCTION DEFINITION\n───────────────────────────────────────────────────────\n  functionName(param1: type, param2: type) return returnType {\n      // function body\n      return value;\n  }\n▸ EXAMPLE\n───────────────────────────────────────────────────────\n  add(a: int, b: int) return int {\n      return a + b;\n  }\n▸ CALLING FUNCTIONS\n───────────────────────────────────────────────────────\n▸ NO RETURN VALUE\n───────────────────────────────────────────────────────\n  greet(name: string) {\n      print \\  }\n"
+      "content": "  functionName(param1: type, param2: type) return returnType {\n      // function body\n      return value;\n  }\n  add(a: int, b: int) return int {\n      return a + b;\n  }\n  greet(name: string) {\n      print \\  }\n"
     },
     "structure_imports": {
       "title": "Imports",
-      "content": "  Imports\n═══════════════════════════════════════════════════════\n▸ IMPORTING MODULES\n───────────────────────────────────────────────────────\n  import \\▸ EXAMPLE\n───────────────────────────────────────────────────────\n  import \\  import \\▸ USAGE\n───────────────────────────────────────────────────────\n• Functions from imported files are available\n• Variables from imported files are accessible\n• Imports are processed at parse time\n▸ NOTE\n───────────────────────────────────────────────────────\n• Import paths are relative to script location\n• Circular imports are not allowed\n"
+      "content": "• Functions from imported files are available\n• Variables from imported files are accessible\n• Imports are processed at parse time\n• Import paths are relative to script location\n• Circular imports are not allowed\n"
     },
     "data": {
       "title": "var count: int = 42;",
@@ -4106,23 +4106,23 @@
     },
     "flow": {
       "title": "Control Flow",
-      "content": "  Control Flow\n═══════════════════════════════════════════════════════\nSelect a sub-topic from the tree to view detailed information:\n▸ conditionals - if-then-else statements\n▸ loops - while, for, foreach, do-while\n▸ break_continue - Loop control\n▸ exceptions - Error handling\n"
+      "content": "Select a sub-topic from the tree to view detailed information:\n▸ conditionals - if-then-else statements\n▸ loops - while, for, foreach, do-while\n▸ break_continue - Loop control\n▸ exceptions - Error handling\n"
     },
     "flow_conditionals": {
       "title": "Conditionals",
-      "content": "  Conditionals\n═══════════════════════════════════════════════════════\n\n▸ ELSE IF\n───────────────────────────────────────────────────────\n▸ CHAINED CONDITIONS\n───────────────────────────────────────────────────────\n  var score: int = 85;\n  if score >= 90 then {\n      print \\  } else if score >= 80 then {\n      print \\  } else {\n      print \\  }\n"
+      "content": "  var score: int = 85;\n  if score >= 90 then {\n      print \\  } else if score >= 80 then {\n      print \\  } else {\n      print \\  }\n"
     },
     "flow_loops": {
       "title": "Loops",
-      "content": "  Loops\n═══════════════════════════════════════════════════════\n\n▸ FOR LOOP\n───────────────────────────────────────────────────────\n  for var i = 0 to 10 {\n      // code\n  }\n\n▸ DO-WHILE LOOP\n───────────────────────────────────────────────────────\n  do {\n      // code\n  } while condition;\n▸ EXAMPLE\n───────────────────────────────────────────────────────\n  var i: int = 0;\n  while i < 5 {\n      print \\      i = i + 1;\n  }\n"
+      "content": "  for var i = 0 to 10 {\n      // code\n  }\n\n  do {\n      // code\n  } while condition;\n  var i: int = 0;\n  while i < 5 {\n      print \\      i = i + 1;\n  }\n"
     },
     "flow_break_continue": {
       "title": "Break and Continue",
-      "content": "  Break and Continue\n═══════════════════════════════════════════════════════\n\n"
+      "content": ""
     },
     "flow_exceptions": {
       "title": "Exception Handling",
-      "content": "  Exception Handling\n═══════════════════════════════════════════════════════\n▸ TRY-EXCEPTIONS-WHEN\n───────────────────────────────────────────────────────\n  try {\n      // code that might throw exception\n  } exceptions when ex {\n      // handle exception\n      print \\  }\n▸ EXAMPLE\n───────────────────────────────────────────────────────\n  try {\n      var result = call file.readTextFile(\\      print result;\n  } exceptions when ex {\n      print \\  }\n▸ NOTES\n───────────────────────────────────────────────────────\n• Exception variable (ex) contains error message\n• Use for file I/O, database operations, etc.\n• Prevents script from crashing on errors\n"
+      "content": "  try {\n      // code that might throw exception\n  } exceptions when ex {\n      // handle exception\n      print \\  }\n  try {\n      var result = call file.readTextFile(\\      print result;\n  } exceptions when ex {\n      print \\  }\n• Exception variable (ex) contains error message\n• Use for file I/O, database operations, etc.\n• Prevents script from crashing on errors\n"
     },
     "keywords": {
       "title": "functionName(param1: type, param2: type) return returnType {",
