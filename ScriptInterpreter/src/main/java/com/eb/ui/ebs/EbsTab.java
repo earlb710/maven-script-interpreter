@@ -54,6 +54,8 @@ import org.fxmisc.richtext.model.StyleSpansBuilder;
 
 import javafx.animation.PauseTransition;
 import javafx.util.Duration;
+import javafx.scene.control.TextInputDialog;
+import java.util.Optional;
 
 public class EbsTab extends Tab {
 
@@ -1711,16 +1713,17 @@ public class EbsTab extends Tab {
             // Remove one tab or up to 4 spaces from the beginning
             if (line.startsWith("\t")) {
                 unindented.append(line.substring(1));
-            } else if (line.startsWith("    ")) {
-                unindented.append(line.substring(4));
-            } else if (line.startsWith("   ")) {
-                unindented.append(line.substring(3));
-            } else if (line.startsWith("  ")) {
-                unindented.append(line.substring(2));
-            } else if (line.startsWith(" ")) {
-                unindented.append(line.substring(1));
             } else {
-                unindented.append(line);
+                // Remove up to 4 leading spaces
+                int spacesToRemove = 0;
+                for (int j = 0; j < Math.min(4, line.length()); j++) {
+                    if (line.charAt(j) == ' ') {
+                        spacesToRemove++;
+                    } else {
+                        break;
+                    }
+                }
+                unindented.append(line.substring(spacesToRemove));
             }
         }
         
@@ -1738,7 +1741,7 @@ public class EbsTab extends Tab {
      * @param area The ScriptArea to operate on
      */
     private void handleGoToLine(ScriptArea area) {
-        javafx.scene.control.TextInputDialog dialog = new javafx.scene.control.TextInputDialog();
+        TextInputDialog dialog = new TextInputDialog();
         dialog.setTitle("Go to Line");
         dialog.setHeaderText("Enter line number:");
         dialog.setContentText("Line:");
@@ -1748,7 +1751,7 @@ public class EbsTab extends Tab {
         dialog.getEditor().setText(String.valueOf(currentLine));
         dialog.getEditor().selectAll();
         
-        java.util.Optional<String> result = dialog.showAndWait();
+        Optional<String> result = dialog.showAndWait();
         result.ifPresent(lineStr -> {
             try {
                 int lineNumber = Integer.parseInt(lineStr.trim());
@@ -1782,21 +1785,16 @@ public class EbsTab extends Tab {
         int selEnd = area.getSelection().getEnd();
         String text = area.getText();
         
-        // If no selection, use current line
-        if (selStart == selEnd) {
-            selEnd = selStart + 1; // Ensure at least current line is processed
-        }
-        
         // Find the start of the line containing selStart
         int lineStart = selStart;
         while (lineStart > 0 && text.charAt(lineStart - 1) != '\n') {
             lineStart--;
         }
         
-        // Find the end of the line containing selEnd
+        // Find the end of the line containing selEnd (or selStart if no selection)
         int lineEnd = selEnd;
         // If selection ends exactly at start of a line (not including that line), adjust back
-        if (selEnd > 0 && selEnd < text.length() && text.charAt(selEnd - 1) == '\n') {
+        if (selStart != selEnd && selEnd > 0 && selEnd < text.length() && text.charAt(selEnd - 1) == '\n') {
             lineEnd = selEnd - 1;
         }
         while (lineEnd < text.length() && text.charAt(lineEnd) != '\n') {
