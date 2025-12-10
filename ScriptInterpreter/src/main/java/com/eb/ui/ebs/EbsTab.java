@@ -1064,19 +1064,26 @@ public class EbsTab extends Tab {
     }
 
     private void hideFind() {
-        clearHighlights();
         findBar.setVisible(false);
         findBar.setManaged(false);
         lastMatches = java.util.Collections.emptyList();
+        stalePendingClear = java.util.Collections.emptyList();
         currentIndex = -1;
         // Stop any pending timer and reset stale flag
         if (editorChangeTimer != null) {
             editorChangeTimer.stop();
         }
         highlightsStale = false;
-        // Reapply syntax highlighting to reset all text styling
-        // This ensures any stale find highlights are cleared and text is properly re-highlighted
+        
+        // Reapply syntax highlighting to remove find highlights
         applyLexerSpans(dispArea.getText());
+        
+        // Clear undo history to prevent undo from bringing back find highlights
+        // This also clears user's text edit history, which is a trade-off to prevent
+        // find highlighting from polluting the undo stack
+        Platform.runLater(() -> {
+            dispArea.getUndoManager().forgetHistory();
+        });
     }
 
     private void runSearch() {
