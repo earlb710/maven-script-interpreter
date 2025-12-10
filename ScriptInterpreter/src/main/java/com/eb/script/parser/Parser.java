@@ -602,8 +602,6 @@ public class Parser {
                         // For now, we'll treat these as STRING type since they hold the component's value
                         // The actual component type information will be stored separately during screen creation
                         elemType = DataType.STRING;
-                        // TODO: Store the component type name for later validation/documentation
-                        String componentType = typeName.substring(7); // Remove "screen." prefix
                     } else {
                         // Check if it's a type alias
                         TypeRegistry.TypeAlias alias = TypeRegistry.getTypeAlias(typeName);

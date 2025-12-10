@@ -20,6 +20,7 @@ import com.eb.script.interpreter.expression.ArrayExpression;
 import com.eb.script.interpreter.expression.ArrayLiteralExpression;
 import com.eb.script.interpreter.expression.ExpressionVisitor;
 import com.eb.script.interpreter.expression.Expression;
+import com.eb.script.interpreter.expression.PropertyExpression;
 import com.eb.script.interpreter.expression.QueueExpression;
 import com.eb.script.interpreter.statement.StatementVisitor;
 import com.eb.script.interpreter.statement.Statement;
@@ -1145,7 +1146,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         // Special handling for typeof operator
         if (expr.operator.type == EbsTokenType.TYPEOF) {
             // Check if this is a screen component property access (e.g., typeof myScreen.clientText)
-            if (expr.right instanceof com.eb.script.interpreter.expression.PropertyExpression propExpr) {
+            if (expr.right instanceof PropertyExpression propExpr) {
                 // Check if the object is a variable expression (screen name)
                 if (propExpr.object instanceof VariableExpression varExpr) {
                     String screenName = varExpr.name.toLowerCase(java.util.Locale.ROOT);

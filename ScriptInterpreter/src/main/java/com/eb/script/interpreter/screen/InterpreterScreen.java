@@ -2725,8 +2725,8 @@ public class InterpreterScreen {
                 // This enables typeof to return "Screen.xxx" for screen component variables
                 DisplayItem displayItem = var.getDisplayItem();
                 if (displayItem != null && displayItem.itemType != null) {
-                    com.eb.script.interpreter.screen.ScreenComponentType componentType = 
-                        new com.eb.script.interpreter.screen.ScreenComponentType(displayItem.itemType.getTypeName());
+                    ScreenComponentType componentType = 
+                        new ScreenComponentType(displayItem.itemType.getTypeName());
                     screenComponentTypeMap.put(varName.toLowerCase(), componentType);
                 }
             }
