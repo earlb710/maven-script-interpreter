@@ -6,6 +6,7 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -14,6 +15,8 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static javafx.application.Platform.runLater;
@@ -331,6 +334,10 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         grid.add(browseCssButton, 2, row);
         grid.add(createCssButton, 3, row++);
         
+        // Add separator before directories
+        Separator separator1 = new Separator();
+        grid.add(separator1, 0, row++, 4, 1);
+        
         grid.add(new Label("Resource Directory:"), 0, row);
         grid.add(resourceDirField, 1, row);
         grid.add(browseResourceDirButton, 2, row);
@@ -351,7 +358,58 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         grid.add(browseDocDirButton, 2, row);
         grid.add(createDocDirButton, 3, row++);
         
-        getDialogPane().setContent(grid);
+        // Extract linked directories from project.json
+        List<String> linkedDirectories = new ArrayList<>();
+        Object dirsObj = currentProperties.get("directories");
+        if (dirsObj instanceof com.eb.script.arrays.ArrayDynamic) {
+            com.eb.script.arrays.ArrayDynamic arrayDynamic = (com.eb.script.arrays.ArrayDynamic) dirsObj;
+            for (int i = 0; i < arrayDynamic.size(); i++) {
+                Object item = arrayDynamic.get(i);
+                if (item instanceof String) {
+                    linkedDirectories.add((String) item);
+                }
+            }
+        } else if (dirsObj instanceof List) {
+            @SuppressWarnings("unchecked")
+            List<Object> list = (List<Object>) dirsObj;
+            for (Object item : list) {
+                if (item instanceof String) {
+                    linkedDirectories.add((String) item);
+                }
+            }
+        }
+        
+        // Create VBox to hold grid and linked directories table
+        VBox mainContainer = new VBox(10);
+        mainContainer.getChildren().add(grid);
+        
+        // Add separator and linked directories section if there are any
+        if (!linkedDirectories.isEmpty()) {
+            Separator separator2 = new Separator();
+            mainContainer.getChildren().add(separator2);
+            
+            // Create TableView for linked directories
+            Label linkedDirLabel = new Label("Linked Directories:");
+            linkedDirLabel.setStyle("-fx-font-weight: bold;");
+            
+            TableView<String> linkedDirTable = new TableView<>();
+            linkedDirTable.setPrefHeight(150);
+            linkedDirTable.setMaxHeight(200);
+            
+            TableColumn<String, String> pathColumn = new TableColumn<>("Directory Path");
+            pathColumn.setCellValueFactory(param -> new javafx.beans.property.SimpleStringProperty(param.getValue()));
+            pathColumn.setPrefWidth(500);
+            
+            linkedDirTable.getColumns().add(pathColumn);
+            linkedDirTable.getItems().addAll(linkedDirectories);
+            linkedDirTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+            
+            VBox linkedDirBox = new VBox(5);
+            linkedDirBox.getChildren().addAll(linkedDirLabel, linkedDirTable);
+            mainContainer.getChildren().add(linkedDirBox);
+        }
+        
+        getDialogPane().setContent(mainContainer);
         
         // Initialize create button states
         updateCreateButtonStates();
