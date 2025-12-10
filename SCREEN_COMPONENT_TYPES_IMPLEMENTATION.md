@@ -1,7 +1,7 @@
 # Screen Component Type System Implementation Summary
 
 ## Overview
-This implementation adds comprehensive type system support for JavaFX screen components in the EBS scripting language. All requirements from the problem statement have been successfully implemented and tested.
+This implementation adds comprehensive type system support for JavaFX screen components in the EBS scripting language. All requirements from the problem statement have been successfully implemented and tested, including JavaFX Node storage and component introspection.
 
 ## Problem Statement Requirements ✓
 
@@ -55,6 +55,33 @@ var buttonText : screen.button = myScreen.saveButton;
 - Progress: progressbar, progressindicator
 - Custom: custom
 
+### 4. JavaFX Node Storage and Introspection ✓
+**Requirement:** Store actual JavaFX component against every screen variable and provide `.javafx` property accessor
+
+**Implementation:**
+- Modified `ScreenComponentType` to store JavaFX Node reference
+- `ScreenFactory` stores Node when binding is set up
+- Added `.javafx` property accessor in `Interpreter.java`
+- Returns detailed component description including type, size, position, style, and state
+
+**Example:**
+```ebs
+print myScreen.clientText.javafx;
+// Output:
+// JavaFX Component Description:
+//   Type: TextArea
+//   Component Type: Screen.Textarea
+//   Width: 400.00
+//   Height: 150.00
+//   X: 0.00
+//   Y: 0.00
+//   Style: -fx-font-size: 12px;
+//   Style Classes: text-area, text-input
+//   Visible: true
+//   Managed: true
+//   Disabled: false
+```
+
 ## Technical Implementation
 
 ### New Components
@@ -63,14 +90,23 @@ var buttonText : screen.button = myScreen.saveButton;
 ```java
 public class ScreenComponentType {
     private final String componentType;
+    private Node javafxNode;  // NEW: Stores actual JavaFX component
     
     public String getFullTypeName() {
         // Returns "Screen.Xxx" format with capitalized component type
     }
+    
+    public Node getJavaFXNode() {
+        // Returns stored JavaFX Node reference
+    }
+    
+    public String getJavaFXDescription() {
+        // Returns detailed component description
+    }
 }
 ```
 
-**Purpose:** Represents screen component types and provides proper formatting
+**Purpose:** Represents screen component types, provides proper formatting, and stores JavaFX Node reference
 
 ### Modified Components
 
@@ -87,22 +123,37 @@ public class ScreenComponentType {
 - Enhanced typeof operator to check for screen component types
 - Added PropertyExpression handling for screen.variable patterns
 - Returns "Screen.Xxx" format when screen component type is found
+- **NEW:** Added `.javafx` property accessor for component introspection
+- Handles `screenName.varName.javafx` pattern to return component details
 
 #### Parser.java
 - Added screen.xxx type parsing in varDeclaration method
 - Treats screen component types as STRING data type
 - Case-insensitive parsing (screen.xxx, Screen.Xxx, SCREEN.XXX)
 
+#### ScreenFactory.java
+- **NEW:** Stores JavaFX Node reference in ScreenComponentType when binding is set up
+- Links actual UI component to screen variable for introspection
+
 ## Testing
 
 ### Test Coverage
-Comprehensive test suite: `ScriptInterpreter/scripts/test/test_screen_component_types.ebs`
+Comprehensive test suite with multiple test scripts:
 
 **Test Cases:**
 1. ✓ typeof returns correct Screen.xxx format for all component types
 2. ✓ Variables can be declared with screen.xxx types
 3. ✓ Value access and modification works correctly
 4. ✓ Case insensitivity works as expected
+5. ✓ .javafx property returns detailed component information (NEW)
+
+### Test Scripts
+
+1. **test_screen_types_basic.ebs** - Quick validation of core functionality
+2. **test_screen_component_types.ebs** - Comprehensive test suite
+3. **test_screen_types_all_components.ebs** - Coverage for all 30+ component types
+4. **test_javafx_property_access.ebs** - Tests .javafx property accessor (NEW)
+5. **screen_component_types_example.ebs** - Practical user registration form example
 
 ### Test Results
 ```
@@ -131,6 +182,17 @@ TEST 4: Case insensitivity ✓
 test1 (SCREEN.TEXTAREA) = Test uppercase
 test2 (Screen.TextField) = Test mixed case
 test3 (screen.Button) = Test lowercase
+
+TEST 5: JavaFX introspection ✓ (NEW)
+------------------------------------
+testScreen.username.javafx:
+JavaFX Component Description:
+  Type: TextField
+  Component Type: Screen.Textfield
+  Width: 200.00
+  Height: 25.00
+  Visible: true
+  Disabled: false
 ```
 
 ## Security
@@ -145,6 +207,7 @@ test3 (screen.Button) = Test lowercase
 - Case-insensitive matching prevents bypass attacks
 - No null pointer exceptions (proper null checks throughout)
 - No buffer overflow risks (proper string bounds checking)
+- JavaFX Node references properly encapsulated
 
 ## Code Quality
 
@@ -160,6 +223,7 @@ test3 (screen.Button) = Test lowercase
 - Clear documentation and comments
 - Consistent naming conventions
 - Case-insensitive comparisons using ROOT locale
+- Encapsulation of JavaFX Node references
 
 ## Usage Examples
 
@@ -205,6 +269,36 @@ myForm.username = "johndoe";
 print myForm.username;  // Prints: johndoe
 ```
 
+### JavaFX Introspection (NEW)
+```ebs
+// Get detailed JavaFX component information
+print myForm.username.javafx;
+// Output:
+// JavaFX Component Description:
+//   Type: TextField
+//   Component Type: Screen.Textfield
+//   Width: 200.00
+//   Height: 25.00
+//   X: 10.00
+//   Y: 20.00
+//   Style: -fx-font-size: 14px;
+//   Style Classes: text-field, text-input
+//   Visible: true
+//   Managed: true
+//   Disabled: false
+//   ID: usernameField
+
+print myForm.bio.javafx;
+// Output:
+// JavaFX Component Description:
+//   Type: TextArea
+//   Component Type: Screen.Textarea
+//   Width: 400.00
+//   Height: 150.00
+//   Visible: true
+//   Disabled: false
+```
+
 ### Advanced Usage
 ```ebs
 // Case-insensitive type declarations
@@ -217,6 +311,12 @@ var btn : screen.button = "Click Me";
 var lbl : screen.label = "Status: Ready";
 var pwd : screen.passwordfield = "secret";
 var list : screen.listview = ["Item 1", "Item 2"];
+
+// Introspect any component
+print myScreen.btn.javafx;      // Button details
+print myScreen.lbl.javafx;      // Label details
+print myScreen.pwd.javafx;      // PasswordField details
+print myScreen.list.javafx;     // ListView details
 ```
 
 ## Migration Guide

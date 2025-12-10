@@ -1,6 +1,6 @@
 # Screen Component Types Test Scripts
 
-This directory contains test scripts for the screen component type system that enables `typeof` introspection and typed variable declarations for JavaFX screen components.
+This directory contains test scripts for the screen component type system that enables `typeof` introspection, typed variable declarations, and JavaFX component introspection for screen components.
 
 ## Test Scripts
 
@@ -129,7 +129,72 @@ choicebox:     Screen.Choicebox
 
 ---
 
-### 4. screen_component_types_example.ebs (in examples/)
+### 4. test_javafx_property_access.ebs (NEW)
+**Purpose:** Test JavaFX component introspection  
+**Description:** Validates the `.javafx` property accessor for detailed component information:
+- Access JavaFX Node properties via `screenName.varName.javafx`
+- Returns detailed description including type, size, position, style, visibility, etc.
+- Works for all screen component types
+
+**Run:**
+```bash
+cd ScriptInterpreter
+mvn exec:java -Dexec.mainClass="com.eb.script.Run" -Dexec.args="scripts/test/test_javafx_property_access.ebs"
+```
+
+**Expected Output:**
+```
+JavaFX Component Access Test
+=============================
+
+Screen created with controls: username (textfield), comments (textarea), submitBtn (button)
+
+TEST 1: typeof operator
+-----------------------
+typeof testScreen.username = Screen.Textfield
+typeof testScreen.comments = Screen.Textarea
+typeof testScreen.submitBtn = Screen.Button
+
+TEST 2: .javafx property access
+--------------------------------
+
+testScreen.username.javafx:
+JavaFX Component Description:
+  Type: TextField
+  Component Type: Screen.Textfield
+  Width: 200.00
+  Height: 25.00
+  X: 0.00
+  Y: 0.00
+  Visible: true
+  Managed: true
+  Disabled: false
+
+testScreen.comments.javafx:
+JavaFX Component Description:
+  Type: TextArea
+  Component Type: Screen.Textarea
+  Width: 400.00
+  Height: 150.00
+  Visible: true
+  Managed: true
+  Disabled: false
+
+testScreen.submitBtn.javafx:
+JavaFX Component Description:
+  Type: Button
+  Component Type: Screen.Button
+  Width: 80.00
+  Height: 30.00
+  Visible: true
+  Disabled: false
+
+✓ JavaFX property access test completed!
+```
+
+---
+
+### 5. screen_component_types_example.ebs (in examples/)
 **Purpose:** Practical real-world example  
 **Description:** Demonstrates a user registration form with:
 - Multiple component types (textfield, passwordfield, textarea, checkbox)
@@ -180,6 +245,19 @@ All tests demonstrate variable declarations with screen component types:
 ```ebs
 var data : screen.textarea = myScreen.clientText;
 var name : screen.textfield = myScreen.nameField;
+```
+
+### JavaFX Component Introspection (NEW)
+New test validates accessing detailed JavaFX component information:
+```ebs
+print myScreen.username.javafx;
+// Returns comprehensive component details:
+//   - JavaFX class type (TextField, Button, etc.)
+//   - Screen component type (Screen.Textfield, etc.)
+//   - Size (width, height)
+//   - Position (x, y)
+//   - Style and CSS classes
+//   - Visibility and state flags
 ```
 
 ### Case Insensitivity
