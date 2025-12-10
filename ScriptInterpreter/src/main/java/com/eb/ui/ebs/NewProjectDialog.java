@@ -3,6 +3,7 @@ package com.eb.ui.ebs;
 import com.eb.util.Util;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.stage.DirectoryChooser;
@@ -59,7 +60,20 @@ public class NewProjectDialog extends Dialog<NewProjectDialog.ProjectInfo> {
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
-        grid.setPadding(new Insets(20, 200, 10, 10));
+        grid.setPadding(new Insets(20, 20, 10, 10));
+        
+        // Configure column constraints to allow growth
+        ColumnConstraints col0 = new ColumnConstraints();
+        col0.setHgrow(Priority.NEVER); // Label column doesn't grow
+        
+        ColumnConstraints col1 = new ColumnConstraints();
+        col1.setHgrow(Priority.ALWAYS); // Text field column grows
+        col1.setMinWidth(400); // Minimum width for text fields
+        
+        ColumnConstraints col2 = new ColumnConstraints();
+        col2.setHgrow(Priority.NEVER); // Button column doesn't grow
+        
+        grid.getColumnConstraints().addAll(col0, col1, col2);
         
         // Project name field (initially blank)
         projectNameField = new TextField();
