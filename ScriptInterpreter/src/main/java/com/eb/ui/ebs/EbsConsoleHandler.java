@@ -1208,9 +1208,11 @@ public class EbsConsoleHandler extends EbsHandler {
         instructions.append("  - Default: `docs`\n");
         instructions.append("  - Place project documentation, markdown files, and guides here\n\n");
         instructions.append("## EBS Script Syntax\n\n");
-        instructions.append("For complete EBS (Earl Bosch Script) language syntax and built-in functions, refer to:\n\n");
-        instructions.append("- **[EBS_LANGUAGE_REFERENCE.md](../EBS_LANGUAGE_REFERENCE.md)** - Quick reference pointer\n");
-        instructions.append("- **[docs/EBS_SCRIPT_SYNTAX.md](../docs/EBS_SCRIPT_SYNTAX.md)** - Comprehensive syntax reference\n\n");
+        instructions.append("For complete EBS (Earl Bosch Script) language syntax and built-in functions, refer to the\n");
+        instructions.append("EBS interpreter documentation:\n\n");
+        instructions.append("- **EBS_LANGUAGE_REFERENCE.md** - Quick reference pointer to syntax documentation\n");
+        instructions.append("- **docs/EBS_SCRIPT_SYNTAX.md** - Comprehensive syntax reference with all language features\n\n");
+        instructions.append("These documentation files are located in the EBS Script Interpreter repository.\n\n");
         instructions.append("The syntax documentation includes:\n");
         instructions.append("- Data types and type casting\n");
         instructions.append("- Variables, operators, and control flow\n");
