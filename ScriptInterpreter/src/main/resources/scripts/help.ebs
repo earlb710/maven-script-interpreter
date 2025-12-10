@@ -311,19 +311,59 @@ if areaArray != null && areaArray.length > 0 then {
 
 // Function to convert plain text to HTML with <pre> tag
 convertToHtml(text: string) return string {
-    // Escape HTML special characters
+    // Escape HTML special characters first
     var html: string = text;
     html = call str.replace(html, "&", "&amp;");
     html = call str.replace(html, "<", "&lt;");
     html = call str.replace(html, ">", "&gt;");
     
-    // Wrap in HTML structure with pre tag for monospace formatting
+    // Split into lines to process line by line
+    var lines: array = call str.split(html, "\n");
+    var processedLines: array = [];
+    
+    var i: int = 0;
+    while i < lines.length {
+        var line: string = lines[i];
+        var trimmedLine: string = call str.trim(line);
+        
+        // Check if line contains only ═, =, or - characters (more than 5)
+        var isHrLine: bool = false;
+        if call str.length(trimmedLine) > 5 {
+            var allSeparators: bool = true;
+            var j: int = 0;
+            while j < call str.length(trimmedLine) {
+                var ch: string = call str.substring(trimmedLine, j, j + 1);
+                if ch != "═" and ch != "=" and ch != "-" {
+                    allSeparators = false;
+                }
+                j = j + 1;
+            }
+            if allSeparators {
+                isHrLine = true;
+            }
+        }
+        
+        if isHrLine {
+            // Replace separator lines with <hr>
+            call array.add(processedLines, "<hr>");
+        } else {
+            // Add the line as-is
+            call array.add(processedLines, line);
+        }
+        
+        i = i + 1;
+    }
+    
+    // Join lines with <br>
+    var bodyContent: string = call str.join(processedLines, "<br>");
+    
+    // Wrap in HTML structure without pre tag
     var result: string = "<!DOCTYPE html><html><head><style>";
     result = result + "body { margin: 10px; font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 12px; }";
-    result = result + "pre { margin: 0; white-space: pre-wrap; word-wrap: break-word; }";
-    result = result + "</style></head><body><pre>";
-    result = result + html;
-    result = result + "</pre></body></html>";
+    result = result + "hr { border: 0; border-top: 1px solid #ccc; margin: 10px 0; }";
+    result = result + "</style></head><body>";
+    result = result + bodyContent;
+    result = result + "</body></html>";
     
     return result;
 }
