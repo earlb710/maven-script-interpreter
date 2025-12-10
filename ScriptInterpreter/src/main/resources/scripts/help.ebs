@@ -172,7 +172,8 @@ if builtinCategoryOrder != null then {
             }
             
             // Use displayName as the tree node value for visibility
-            var categoryNode: json = {};
+            // Use json.jsonFromString to create a fresh JSON object to avoid circular references
+            var categoryNode: json = call json.jsonFromString("{}");
             categoryNode = call json.set(categoryNode, "value", displayName);
             categoryNode = call json.set(categoryNode, "expanded", false);
             categoryNode = call json.set(categoryNode, "children", categoryArray);
@@ -208,7 +209,8 @@ var syntaxChildren: array[*];
 // Add Getting Started as first item
 call array.add(syntaxChildren, call json.set({}, "value", "getting_started"));
 
-var structureNode: json = {};
+// Use json.jsonFromString to create a fresh JSON object to avoid circular references
+var structureNode: json = call json.jsonFromString("{}");
 structureNode = call json.set(structureNode, "value", "structure");
 structureNode = call json.set(structureNode, "expanded", false);
 structureNode = call json.set(structureNode, "children", structureChildren);
@@ -216,7 +218,8 @@ call array.add(syntaxChildren, structureNode);
 
 call array.add(syntaxChildren, call json.set({}, "value", "data"));
 
-var flowNode: json = {};
+// Use json.jsonFromString to create a fresh JSON object to avoid circular references
+var flowNode: json = call json.jsonFromString("{}");
 flowNode = call json.set(flowNode, "value", "flow");
 flowNode = call json.set(flowNode, "expanded", false);
 flowNode = call json.set(flowNode, "children", flowChildren);
@@ -224,7 +227,8 @@ call array.add(syntaxChildren, flowNode);
 
 call array.add(syntaxChildren, call json.set({}, "value", "keywords"));
 
-var builtinsNode: json = {};
+// Use json.jsonFromString to create a fresh JSON object to avoid circular references
+var builtinsNode: json = call json.jsonFromString("{}");
 builtinsNode = call json.set(builtinsNode, "value", "builtins");
 builtinsNode = call json.set(builtinsNode, "expanded", false);
 builtinsNode = call json.set(builtinsNode, "children", builtinChildren);
@@ -240,19 +244,22 @@ call array.add(examplesChildren, call json.set({}, "value", "Screen"));
 
 var rootChildren: array[*];
 
-var syntaxRootNode: json = {};
+// Use json.jsonFromString to create a fresh JSON object to avoid circular references
+var syntaxRootNode: json = call json.jsonFromString("{}");
 syntaxRootNode = call json.set(syntaxRootNode, "value", "Syntax");
 syntaxRootNode = call json.set(syntaxRootNode, "expanded", false);
 syntaxRootNode = call json.set(syntaxRootNode, "children", syntaxChildren);
 call array.add(rootChildren, syntaxRootNode);
 
-var examplesRootNode: json = {};
+// Use json.jsonFromString to create a fresh JSON object to avoid circular references
+var examplesRootNode: json = call json.jsonFromString("{}");
 examplesRootNode = call json.set(examplesRootNode, "value", "Examples");
 examplesRootNode = call json.set(examplesRootNode, "expanded", true);
 examplesRootNode = call json.set(examplesRootNode, "children", examplesChildren);
 call array.add(rootChildren, examplesRootNode);
 
-var treeStructure: json = {};
+// Use json.jsonFromString to create a fresh JSON object to avoid circular references
+var treeStructure: json = call json.jsonFromString("{}");
 treeStructure = call json.set(treeStructure, "value", "Help Topics");
 treeStructure = call json.set(treeStructure, "expanded", true);
 treeStructure = call json.set(treeStructure, "children", rootChildren);
