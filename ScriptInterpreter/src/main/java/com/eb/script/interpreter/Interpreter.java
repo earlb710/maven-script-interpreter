@@ -1144,6 +1144,22 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     public Object visitUnaryExpression(UnaryExpression expr) throws InterpreterError {
         // Special handling for typeof operator
         if (expr.operator.type == EbsTokenType.TYPEOF) {
+            // Check if this is a screen component property access (e.g., typeof myScreen.clientText)
+            if (expr.right instanceof com.eb.script.interpreter.expression.PropertyExpression propExpr) {
+                // Check if the object is a variable expression (screen name)
+                if (propExpr.object instanceof VariableExpression varExpr) {
+                    String screenName = varExpr.name.toLowerCase(java.util.Locale.ROOT);
+                    String varName = propExpr.propertyName.toLowerCase(java.util.Locale.ROOT);
+                    
+                    // Check if this is a screen variable with component type
+                    ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenComponentType> componentTypes = context.getScreenComponentTypes(screenName);
+                    if (componentTypes != null && componentTypes.containsKey(varName)) {
+                        com.eb.script.interpreter.screen.ScreenComponentType componentType = componentTypes.get(varName);
+                        return componentType.getFullTypeName();
+                    }
+                }
+            }
+            
             // If the operand is a variable, we can look up its type metadata
             if (expr.right instanceof VariableExpression) {
                 VariableExpression varExpr = (VariableExpression) expr.right;

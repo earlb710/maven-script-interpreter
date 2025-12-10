@@ -249,6 +249,10 @@ public class InterpreterScreen {
             ConcurrentHashMap<String, DataType> screenVarTypeMap = new java.util.concurrent.ConcurrentHashMap<>();
             context.setScreenVarTypes(stmt.name, screenVarTypeMap);
 
+            // Create thread-safe screen component type storage for this screen
+            ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenComponentType> screenComponentTypeMap = new java.util.concurrent.ConcurrentHashMap<>();
+            context.setScreenComponentTypes(stmt.name, screenComponentTypeMap);
+
             // Initialize new storage structures for this screen
             Map<String, VarSet> varSetsMap = new java.util.HashMap<>();
             Map<String, Var> varItemsMap = new java.util.HashMap<>();
@@ -288,7 +292,7 @@ public class InterpreterScreen {
                                 if (varsObj instanceof ArrayDynamic varsArray) {
                                     @SuppressWarnings("unchecked")
                                     List varsList = varsArray.getAll();
-                                    processVariableList(varsList, setName, stmt.name, stmt.getLine(), varSet, varItemsMap, screenVarMap, screenVarTypeMap);
+                                    processVariableList(varsList, setName, stmt.name, stmt.getLine(), varSet, varItemsMap, screenVarMap, screenVarTypeMap, screenComponentTypeMap);
                                 } else {
                                     throw interpreter.error(stmt.getLine(), "The 'vars' property in set '" + setName + "' must be an array.");
                                 }
@@ -310,7 +314,7 @@ public class InterpreterScreen {
                 if (varsObj instanceof ArrayDynamic varsArray) {
                     @SuppressWarnings("unchecked")
                     List varsList = varsArray.getAll();
-                    processVariableList(varsList, defaultSetName, stmt.name, stmt.getLine(), defaultVarSet, varItemsMap, screenVarMap, screenVarTypeMap);
+                    processVariableList(varsList, defaultSetName, stmt.name, stmt.getLine(), defaultVarSet, varItemsMap, screenVarMap, screenVarTypeMap, screenComponentTypeMap);
                 } else {
                     throw interpreter.error(stmt.getLine(), "The 'vars' property in screen '" + stmt.name + "' must be an array.");
                 }
@@ -2573,7 +2577,8 @@ public class InterpreterScreen {
     private void processVariableList(List varsList, String setName, String screenName, int line,
                                      VarSet varSet, Map<String, Var> varItemsMap,
                                      java.util.concurrent.ConcurrentHashMap<String, Object> screenVarMap,
-                                     java.util.concurrent.ConcurrentHashMap<String, DataType> screenVarTypeMap) throws InterpreterError {
+                                     java.util.concurrent.ConcurrentHashMap<String, DataType> screenVarTypeMap,
+                                     java.util.concurrent.ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenComponentType> screenComponentTypeMap) throws InterpreterError {
         for (Object varObj : varsList) {
             if (varObj instanceof Map) {
                 @SuppressWarnings("unchecked")
@@ -2714,6 +2719,15 @@ public class InterpreterScreen {
                 // Use lowercase key for case-insensitive variable lookup
                 if (varType != null) {
                     screenVarTypeMap.put(varName.toLowerCase(), varType);
+                }
+                
+                // Store the screen component type if display item is specified
+                // This enables typeof to return "Screen.xxx" for screen component variables
+                DisplayItem displayItem = var.getDisplayItem();
+                if (displayItem != null && displayItem.itemType != null) {
+                    com.eb.script.interpreter.screen.ScreenComponentType componentType = 
+                        new com.eb.script.interpreter.screen.ScreenComponentType(displayItem.itemType.getTypeName());
+                    screenComponentTypeMap.put(varName.toLowerCase(), componentType);
                 }
             }
         }
