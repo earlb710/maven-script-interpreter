@@ -1,9 +1,13 @@
 package com.eb.ui.ebs;
 
+import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -12,7 +16,11 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+
+import static javafx.application.Platform.runLater;
 
 /**
  * Dialog for editing project properties.
@@ -22,18 +30,29 @@ import java.util.Map;
  */
 public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.ProjectProperties> {
     
+    private static final double MIN_TEXT_FIELD_WIDTH = 300.0;
+    private static final String READ_ONLY_FIELD_STYLE = "-fx-background-color: #f0f0f0; -fx-opacity: 1.0;";
+    
     private final TextField projectNameField;
+    private final TextField projectDirField;
     private final TextField mainScriptField;
     private final TextField cssFileField;
     private final TextField resourceDirField;
     private final TextField testDirField;
     private final TextField tempDirField;
+    private final TextField docDirField;
     private final Button createMainScriptButton;
     private final Button createCssButton;
     private final Button createResourceDirButton;
     private final Button createTestDirButton;
     private final Button createTempDirButton;
+    private final Button createDocDirButton;
     private final Path projectDir;
+    private final TableView<String> linkedDirTable;
+    private final List<String> linkedDirectories;
+    private final ButtonType okButtonType;
+    
+    private boolean fieldsEdited = false;
     
     /**
      * Result data class containing project properties.
@@ -45,15 +64,20 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         private final String resourceDir;
         private final String testDir;
         private final String tempDir;
+        private final String docDir;
+        private final List<String> linkedDirectories;
         
         public ProjectProperties(String name, String mainScript, String cssFile, 
-                               String resourceDir, String testDir, String tempDir) {
+                               String resourceDir, String testDir, String tempDir, String docDir,
+                               List<String> linkedDirectories) {
             this.name = name;
             this.mainScript = mainScript;
             this.cssFile = cssFile;
             this.resourceDir = resourceDir;
             this.testDir = testDir;
             this.tempDir = tempDir;
+            this.docDir = docDir;
+            this.linkedDirectories = linkedDirectories;
         }
         
         public String getName() {
@@ -79,6 +103,14 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         public String getTempDir() {
             return tempDir;
         }
+        
+        public String getDocDir() {
+            return docDir;
+        }
+        
+        public List<String> getLinkedDirectories() {
+            return linkedDirectories;
+        }
     }
     
     /**
@@ -100,21 +132,51 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
-        grid.setPadding(new Insets(20, 150, 10, 10));
+        grid.setPadding(new Insets(20, 20, 10, 10));
+        
+        // Configure column constraints to allow growth
+        ColumnConstraints col0 = new ColumnConstraints();
+        col0.setHgrow(Priority.NEVER); // Label column doesn't grow
+        
+        ColumnConstraints col1 = new ColumnConstraints();
+        col1.setHgrow(Priority.ALWAYS); // Text field column grows
+        col1.setMinWidth(MIN_TEXT_FIELD_WIDTH); // Minimum width for text fields
+        
+        ColumnConstraints col2 = new ColumnConstraints();
+        col2.setHgrow(Priority.NEVER); // Browse button column doesn't grow
+        
+        ColumnConstraints col3 = new ColumnConstraints();
+        col3.setHgrow(Priority.NEVER); // Create button column doesn't grow
+        
+        grid.getColumnConstraints().addAll(col0, col1, col2, col3);
         
         // Project Name field
         projectNameField = new TextField();
         projectNameField.setPromptText("Project name");
-        projectNameField.setPrefWidth(300);
+        projectNameField.setMaxWidth(Double.MAX_VALUE);
+        GridPane.setHgrow(projectNameField, Priority.ALWAYS);
         Object nameObj = currentProperties.get("name");
         if (nameObj != null) {
             projectNameField.setText(nameObj.toString());
         }
         
+        // Project Directory field (display only)
+        projectDirField = new TextField();
+        projectDirField.setText(projectDir.toString());
+        projectDirField.setEditable(false);
+        projectDirField.setMaxWidth(Double.MAX_VALUE);
+        GridPane.setHgrow(projectDirField, Priority.ALWAYS);
+        // Set light gray background and position cursor at end to show last part of path
+        projectDirField.setStyle(READ_ONLY_FIELD_STYLE);
+        runLater(() -> {
+            projectDirField.positionCaret(projectDirField.getText().length());
+        });
+        
         // Main Script field with browse and create buttons
         mainScriptField = new TextField();
         mainScriptField.setPromptText("main.ebs");
-        mainScriptField.setPrefWidth(200);
+        mainScriptField.setMaxWidth(Double.MAX_VALUE);
+        GridPane.setHgrow(mainScriptField, Priority.ALWAYS);
         Object mainScriptObj = currentProperties.get("mainScript");
         if (mainScriptObj != null) {
             mainScriptField.setText(mainScriptObj.toString());
@@ -154,7 +216,8 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         // CSS File field with browse and create buttons
         cssFileField = new TextField();
         cssFileField.setPromptText("styles.css");
-        cssFileField.setPrefWidth(200);
+        cssFileField.setMaxWidth(Double.MAX_VALUE);
+        GridPane.setHgrow(cssFileField, Priority.ALWAYS);
         Object cssFileObj = currentProperties.get("cssFile");
         if (cssFileObj != null) {
             cssFileField.setText(cssFileObj.toString());
@@ -193,7 +256,8 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         // Resource Directory field with browse button
         resourceDirField = new TextField();
         resourceDirField.setPromptText("resources");
-        resourceDirField.setPrefWidth(250);
+        resourceDirField.setMaxWidth(Double.MAX_VALUE);
+        GridPane.setHgrow(resourceDirField, Priority.ALWAYS);
         Object resourceDirObj = currentProperties.get("resourceDir");
         if (resourceDirObj != null) {
             resourceDirField.setText(resourceDirObj.toString());
@@ -211,7 +275,8 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         // Test Directory field with browse button
         testDirField = new TextField();
         testDirField.setPromptText("tests");
-        testDirField.setPrefWidth(250);
+        testDirField.setMaxWidth(Double.MAX_VALUE);
+        GridPane.setHgrow(testDirField, Priority.ALWAYS);
         Object testDirObj = currentProperties.get("testDir");
         if (testDirObj != null) {
             testDirField.setText(testDirObj.toString());
@@ -229,7 +294,8 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         // Temp Directory field with browse button
         tempDirField = new TextField();
         tempDirField.setPromptText("temp");
-        tempDirField.setPrefWidth(250);
+        tempDirField.setMaxWidth(Double.MAX_VALUE);
+        GridPane.setHgrow(tempDirField, Priority.ALWAYS);
         Object tempDirObj = currentProperties.get("tempDir");
         if (tempDirObj != null) {
             tempDirField.setText(tempDirObj.toString());
@@ -244,10 +310,32 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         // Update create button state when field changes
         tempDirField.textProperty().addListener((obs, old, newVal) -> updateCreateButtonStates());
         
+        // Document Directory field with browse button
+        docDirField = new TextField();
+        docDirField.setPromptText("docs");
+        docDirField.setMaxWidth(Double.MAX_VALUE);
+        GridPane.setHgrow(docDirField, Priority.ALWAYS);
+        Object docDirObj = currentProperties.get("docDir");
+        if (docDirObj != null) {
+            docDirField.setText(docDirObj.toString());
+        }
+        
+        Button browseDocDirButton = new Button("...");
+        browseDocDirButton.setOnAction(e -> browseDirectory(docDirField, "Select Document Directory"));
+        
+        createDocDirButton = new Button("Create");
+        createDocDirButton.setOnAction(e -> createDirectory(docDirField));
+        
+        // Update create button state when field changes
+        docDirField.textProperty().addListener((obs, old, newVal) -> updateCreateButtonStates());
+        
         // Add components to grid
         int row = 0;
         grid.add(new Label("Project Name:"), 0, row);
         grid.add(projectNameField, 1, row++, 3, 1);
+        
+        grid.add(new Label("Project Directory:"), 0, row);
+        grid.add(projectDirField, 1, row++, 3, 1);
         
         grid.add(new Label("Main Script:"), 0, row);
         grid.add(mainScriptField, 1, row);
@@ -258,6 +346,10 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         grid.add(cssFileField, 1, row);
         grid.add(browseCssButton, 2, row);
         grid.add(createCssButton, 3, row++);
+        
+        // Add separator before directories
+        Separator separator1 = new Separator();
+        grid.add(separator1, 0, row++, 4, 1);
         
         grid.add(new Label("Resource Directory:"), 0, row);
         grid.add(resourceDirField, 1, row);
@@ -274,38 +366,181 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         grid.add(browseTempDirButton, 2, row);
         grid.add(createTempDirButton, 3, row++);
         
-        getDialogPane().setContent(grid);
+        grid.add(new Label("Document Directory:"), 0, row);
+        grid.add(docDirField, 1, row);
+        grid.add(browseDocDirButton, 2, row);
+        grid.add(createDocDirButton, 3, row++);
+        
+        // Extract linked directories from project.json
+        linkedDirectories = new ArrayList<>();
+        Object dirsObj = currentProperties.get("directories");
+        if (dirsObj instanceof com.eb.script.arrays.ArrayDynamic) {
+            com.eb.script.arrays.ArrayDynamic arrayDynamic = (com.eb.script.arrays.ArrayDynamic) dirsObj;
+            for (int i = 0; i < arrayDynamic.size(); i++) {
+                Object item = arrayDynamic.get(i);
+                if (item instanceof String) {
+                    linkedDirectories.add((String) item);
+                }
+            }
+        } else if (dirsObj instanceof List) {
+            @SuppressWarnings("unchecked")
+            List<Object> list = (List<Object>) dirsObj;
+            for (Object item : list) {
+                if (item instanceof String) {
+                    linkedDirectories.add((String) item);
+                }
+            }
+        }
+        
+        // Create VBox to hold grid and linked directories table
+        VBox mainContainer = new VBox(10);
+        mainContainer.getChildren().add(grid);
+        
+        // Always add separator and linked directories section
+        Separator separator2 = new Separator();
+        mainContainer.getChildren().add(separator2);
+        
+        // Create TableView for linked directories
+        Label linkedDirLabel = new Label("Linked Directories:");
+        linkedDirLabel.setStyle("-fx-font-weight: bold;");
+        
+        linkedDirTable = new TableView<>();
+        linkedDirTable.setPrefHeight(150);
+        linkedDirTable.setMaxHeight(200);
+        
+        TableColumn<String, String> pathColumn = new TableColumn<>("Directory Path");
+        pathColumn.setCellValueFactory(param -> new SimpleStringProperty(param.getValue()));
+        pathColumn.setPrefWidth(500);
+        
+        linkedDirTable.getColumns().add(pathColumn);
+        linkedDirTable.getItems().addAll(linkedDirectories);
+        linkedDirTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        
+        VBox linkedDirBox = new VBox(5);
+        linkedDirBox.getChildren().addAll(linkedDirLabel, linkedDirTable);
+        mainContainer.getChildren().add(linkedDirBox);
+        
+        // Add "Link Directory" and "Remove Link" buttons directly to the dialog
+        Button linkDirButton = new Button("Link Directory");
+        linkDirButton.setOnAction(e -> linkDirectory());
+        
+        Button removeLinkButton = new Button("Remove Link");
+        removeLinkButton.setOnAction(e -> removeSelectedLink());
+        removeLinkButton.setDisable(true);
+        
+        // Enable/disable Remove Link button based on selection
+        linkedDirTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
+            removeLinkButton.setDisable(newSel == null);
+        });
+        
+        HBox buttonBox = new HBox(10, linkDirButton, removeLinkButton);
+        buttonBox.setPadding(new Insets(10, 0, 0, 0));
+        mainContainer.getChildren().add(buttonBox);
+        
+        getDialogPane().setContent(mainContainer);
         
         // Initialize create button states
         updateCreateButtonStates();
         
         // Add OK and Cancel buttons
-        ButtonType okButton = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        okButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
         ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
-        getDialogPane().getButtonTypes().addAll(okButton, cancelButton);
+        getDialogPane().getButtonTypes().addAll(okButtonType, cancelButton);
         
-        // Enable/Disable OK button based on project name
-        Button okBtn = (Button) getDialogPane().lookupButton(okButton);
+        // Enable/Disable OK button based on field changes and valid project name
+        Button okBtn = (Button) getDialogPane().lookupButton(okButtonType);
         okBtn.setDisable(true);
         
+        // Add listeners to all editable fields to track changes
         projectNameField.textProperty().addListener((observable, oldValue, newValue) -> {
+            fieldsEdited = true;
             okBtn.setDisable(newValue == null || newValue.trim().isEmpty());
         });
         
+        // Add field change listener for all other fields
+        addFieldChangeListener(mainScriptField, okBtn);
+        addFieldChangeListener(cssFileField, okBtn);
+        addFieldChangeListener(resourceDirField, okBtn);
+        addFieldChangeListener(testDirField, okBtn);
+        addFieldChangeListener(tempDirField, okBtn);
+        addFieldChangeListener(docDirField, okBtn);
+        
         // Set result converter
         setResultConverter(dialogButton -> {
-            if (dialogButton == okButton) {
+            if (dialogButton == okButtonType) {
                 return new ProjectProperties(
                     projectNameField.getText().trim(),
                     mainScriptField.getText().trim(),
                     cssFileField.getText().trim(),
                     resourceDirField.getText().trim(),
                     testDirField.getText().trim(),
-                    tempDirField.getText().trim()
+                    tempDirField.getText().trim(),
+                    docDirField.getText().trim(),
+                    new ArrayList<>(linkedDirectories)
                 );
             }
             return null;
         });
+    }
+    
+    /**
+     * Link a new directory to the project.
+     */
+    private void linkDirectory() {
+        DirectoryChooser dirChooser = new DirectoryChooser();
+        dirChooser.setTitle("Select Directory to Link");
+        dirChooser.setInitialDirectory(projectDir.toFile());
+        File selectedDir = dirChooser.showDialog(getOwner());
+        if (selectedDir != null) {
+            String dirPath = selectedDir.getAbsolutePath();
+            if (!linkedDirectories.contains(dirPath)) {
+                linkedDirectories.add(dirPath);
+                linkedDirTable.getItems().add(dirPath);
+                fieldsEdited = true;
+                updateOkButtonState();
+            } else {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION, 
+                    "This directory is already linked to the project.");
+                alert.setHeaderText("Already Linked");
+                alert.showAndWait();
+            }
+        }
+    }
+    
+    /**
+     * Remove the selected linked directory.
+     */
+    private void removeSelectedLink() {
+        String selected = linkedDirTable.getSelectionModel().getSelectedItem();
+        if (selected != null) {
+            linkedDirectories.remove(selected);
+            linkedDirTable.getItems().remove(selected);
+            fieldsEdited = true;
+            updateOkButtonState();
+        }
+    }
+    
+    /**
+     * Add a field change listener that tracks edits and updates OK button.
+     * 
+     * @param field The text field to monitor
+     * @param okBtn The OK button to enable/disable
+     */
+    private void addFieldChangeListener(TextField field, Button okBtn) {
+        field.textProperty().addListener((obs, old, newVal) -> {
+            fieldsEdited = true;
+            okBtn.setDisable(projectNameField.getText().trim().isEmpty());
+        });
+    }
+    
+    /**
+     * Update the OK button state based on project name validity.
+     */
+    private void updateOkButtonState() {
+        Button okBtn = (Button) getDialogPane().lookupButton(okButtonType);
+        if (okBtn != null && !projectNameField.getText().trim().isEmpty()) {
+            okBtn.setDisable(false);
+        }
     }
     
     /**
@@ -383,6 +618,12 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         boolean tempDirExists = !tempDir.isEmpty() && 
                                Files.exists(projectDir.resolve(tempDir));
         createTempDirButton.setDisable(tempDir.isEmpty() || tempDirExists);
+        
+        // Document directory button - enabled if field not empty and directory doesn't exist
+        String docDir = docDirField.getText().trim();
+        boolean docDirExists = !docDir.isEmpty() && 
+                              Files.exists(projectDir.resolve(docDir));
+        createDocDirButton.setDisable(docDir.isEmpty() || docDirExists);
     }
     
     /**

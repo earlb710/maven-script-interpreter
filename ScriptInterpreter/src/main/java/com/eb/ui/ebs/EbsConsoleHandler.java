@@ -1063,6 +1063,13 @@ public class EbsConsoleHandler extends EbsHandler {
             // Write project.json
             Files.writeString(projectJsonPath, projectJson, StandardCharsets.UTF_8);
             
+            // Create AI instruction file
+            Path instructionFilePath = projectDir.resolve(".copilot-instructions.md");
+            if (!Files.exists(instructionFilePath)) {
+                String instructionContent = createAiInstructionFile(projectName, projectDir.toAbsolutePath().toString());
+                Files.writeString(instructionFilePath, instructionContent, StandardCharsets.UTF_8);
+            }
+            
             // Load the project into global environment
             loadProjectJson(projectJsonPath);
             
@@ -1074,6 +1081,9 @@ public class EbsConsoleHandler extends EbsHandler {
             ScriptArea output = env.getOutputArea();
             output.printlnOk("New project created: " + projectJsonPath);
             output.printlnInfo("Project loaded into global variable 'project'");
+            if (Files.exists(instructionFilePath)) {
+                output.printlnInfo("AI instruction file created: " + instructionFilePath);
+            }
             
         } catch (Exception ex) {
             submitErrors("Failed to create new project: " + ex.getMessage());
@@ -1162,6 +1172,93 @@ public class EbsConsoleHandler extends EbsHandler {
         json.append("  }\n");
         json.append("}\n");
         return json.toString();
+    }
+    
+    /**
+     * Create AI instruction file content for a new project.
+     * This file guides AI assistants on the project structure and conventions.
+     */
+    private String createAiInstructionFile(String projectName, String projectDirectory) {
+        StringBuilder instructions = new StringBuilder();
+        instructions.append("# AI Instructions for ").append(projectName).append("\n\n");
+        instructions.append("## Project Overview\n\n");
+        instructions.append("This is an EBS (Earl Bosch Script) project. All project configuration is stored in `project.json`.\n\n");
+        instructions.append("## Project Structure\n\n");
+        instructions.append("The project configuration file `project.json` contains all important project properties and directory locations.\n\n");
+        instructions.append("### Key Properties in project.json\n\n");
+        instructions.append("- **name**: Project name\n");
+        instructions.append("- **directory**: Project root directory path\n");
+        instructions.append("- **description**: Project description\n");
+        instructions.append("- **version**: Project version number\n");
+        instructions.append("- **mainScript**: Main entry point script file (typically `main.ebs`)\n");
+        instructions.append("- **css**: Array of CSS files to load for UI styling\n");
+        instructions.append("- **settings**: Custom project settings\n\n");
+        instructions.append("### Directory Organization\n\n");
+        instructions.append("The following directories can be configured in `project.json`:\n\n");
+        instructions.append("- **resourceDir**: Directory for resource files (images, data files, etc.)\n");
+        instructions.append("  - Default: `resources`\n");
+        instructions.append("  - Use this for static assets and resource files\n\n");
+        instructions.append("- **testDir**: Directory for test scripts\n");
+        instructions.append("  - Default: `tests`\n");
+        instructions.append("  - Place all test EBS scripts here\n\n");
+        instructions.append("- **tempDir**: Directory for temporary files\n");
+        instructions.append("  - Default: `temp`\n");
+        instructions.append("  - Use this for temporary working files\n\n");
+        instructions.append("- **docDir**: Directory for documentation\n");
+        instructions.append("  - Default: `docs`\n");
+        instructions.append("  - Place project documentation, markdown files, and guides here\n\n");
+        instructions.append("## EBS Script Syntax\n\n");
+        instructions.append("For complete EBS (Earl Bosch Script) language syntax and built-in functions, refer to the\n");
+        instructions.append("EBS interpreter documentation:\n\n");
+        instructions.append("- **EBS_LANGUAGE_REFERENCE.md** - Quick reference pointer to syntax documentation\n");
+        instructions.append("- **docs/EBS_SCRIPT_SYNTAX.md** - Comprehensive syntax reference with all language features\n\n");
+        instructions.append("These documentation files are located in the EBS Script Interpreter repository.\n\n");
+        instructions.append("The syntax documentation includes:\n");
+        instructions.append("- Data types and type casting\n");
+        instructions.append("- Variables, operators, and control flow\n");
+        instructions.append("- Functions, arrays, and JSON\n");
+        instructions.append("- Database operations\n");
+        instructions.append("- Screen/UI windows\n");
+        instructions.append("- All built-in functions (string, file, HTTP, mail, CSS, array, system, etc.)\n");
+        instructions.append("- Console commands and best practices\n\n");
+        instructions.append("When writing EBS scripts:\n");
+        instructions.append("- Refer to the syntax documentation for correct language constructs\n");
+        instructions.append("- EBS is case-insensitive for all identifiers\n");
+        instructions.append("- Statements typically end with semicolon `;`\n");
+        instructions.append("- Use `//` for comments\n\n");
+        instructions.append("## File Placement Guidelines\n\n");
+        instructions.append("When working with this project:\n\n");
+        instructions.append("1. **Always read `project.json` first** to understand the project structure and directory layout\n");
+        instructions.append("2. **EBS Scripts**: Place in the project root or organize in subdirectories\n");
+        instructions.append("3. **Resources**: Use the directory specified in `resourceDir` property\n");
+        instructions.append("4. **Tests**: Use the directory specified in `testDir` property\n");
+        instructions.append("5. **Documentation**: Use the directory specified in `docDir` property\n");
+        instructions.append("6. **Temporary Files**: Use the directory specified in `tempDir` property\n");
+        instructions.append("7. **CSS Files**: Reference in the `css` array in project.json\n\n");
+        instructions.append("## Example project.json Structure\n\n");
+        instructions.append("```json\n");
+        instructions.append("{\n");
+        instructions.append("  \"name\": \"").append(escapeJson(projectName)).append("\",\n");
+        instructions.append("  \"directory\": \"").append(escapeJson(projectDirectory)).append("\",\n");
+        instructions.append("  \"description\": \"EBS Script Project\",\n");
+        instructions.append("  \"version\": \"1.0.0\",\n");
+        instructions.append("  \"mainScript\": \"main.ebs\",\n");
+        instructions.append("  \"css\": [\"console.css\"],\n");
+        instructions.append("  \"resourceDir\": \"resources\",\n");
+        instructions.append("  \"testDir\": \"tests\",\n");
+        instructions.append("  \"tempDir\": \"temp\",\n");
+        instructions.append("  \"docDir\": \"docs\",\n");
+        instructions.append("  \"settings\": {\n");
+        instructions.append("    \"autoLoad\": true\n");
+        instructions.append("  }\n");
+        instructions.append("}\n");
+        instructions.append("```\n\n");
+        instructions.append("## Working with AI Assistants\n\n");
+        instructions.append("When asking AI to create or modify files:\n");
+        instructions.append("- Specify which directory the file belongs in based on project.json\n");
+        instructions.append("- AI should check project.json to determine correct file locations\n");
+        instructions.append("- All paths in project.json are relative to the project root directory\n");
+        return instructions.toString();
     }
     
     /**

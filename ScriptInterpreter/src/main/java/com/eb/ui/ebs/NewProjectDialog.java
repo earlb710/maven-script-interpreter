@@ -3,7 +3,9 @@ package com.eb.ui.ebs;
 import com.eb.util.Util;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Window;
@@ -58,18 +60,33 @@ public class NewProjectDialog extends Dialog<NewProjectDialog.ProjectInfo> {
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
-        grid.setPadding(new Insets(20, 150, 10, 10));
+        grid.setPadding(new Insets(20, 20, 10, 10));
+        
+        // Configure column constraints to allow growth
+        ColumnConstraints col0 = new ColumnConstraints();
+        col0.setHgrow(Priority.NEVER); // Label column doesn't grow
+        
+        ColumnConstraints col1 = new ColumnConstraints();
+        col1.setHgrow(Priority.ALWAYS); // Text field column grows
+        col1.setMinWidth(400); // Minimum width for text fields
+        
+        ColumnConstraints col2 = new ColumnConstraints();
+        col2.setHgrow(Priority.NEVER); // Button column doesn't grow
+        
+        grid.getColumnConstraints().addAll(col0, col1, col2);
         
         // Project name field (initially blank)
         projectNameField = new TextField();
         projectNameField.setPromptText("Enter project name");
-        projectNameField.setPrefWidth(300);
+        projectNameField.setMaxWidth(Double.MAX_VALUE);
+        GridPane.setHgrow(projectNameField, Priority.ALWAYS);
         
         // Project path field (populated with console path + "/projects")
         projectPathField = new TextField();
         Path defaultProjectsPath = Util.SANDBOX_ROOT.resolve("projects");
         projectPathField.setText(defaultProjectsPath.toString());
-        projectPathField.setPrefWidth(300);
+        projectPathField.setMaxWidth(Double.MAX_VALUE);
+        GridPane.setHgrow(projectPathField, Priority.ALWAYS);
         
         // Browse button to select directory
         browseButton = new Button("Browse...");
@@ -93,7 +110,7 @@ public class NewProjectDialog extends Dialog<NewProjectDialog.ProjectInfo> {
         
         // Add components to grid
         grid.add(new Label("Project Name:"), 0, 0);
-        grid.add(projectNameField, 1, 0);
+        grid.add(projectNameField, 1, 0, 2, 1); // Span 2 columns for project name
         
         grid.add(new Label("Project Path:"), 0, 1);
         grid.add(projectPathField, 1, 1);
@@ -110,9 +127,38 @@ public class NewProjectDialog extends Dialog<NewProjectDialog.ProjectInfo> {
         Button okButton = (Button) getDialogPane().lookupButton(okButtonType);
         okButton.setDisable(true);
         
-        // Validation: OK button is enabled only when project name is not empty
+        // Track if user has manually edited the path
+        final boolean[] pathManuallyEdited = {false};
+        final boolean[] updatingFromNameField = {false};
+        
+        // Listen to path field changes to detect manual edits
+        projectPathField.textProperty().addListener((observable, oldValue, newValue) -> {
+            // If we're updating from the name field, don't mark as manually edited
+            if (updatingFromNameField[0]) {
+                return;
+            }
+            
+            // If the path changed and it's not empty/null, mark as manually edited
+            if (newValue != null && oldValue != null && !newValue.equals(oldValue)) {
+                pathManuallyEdited[0] = true;
+            }
+        });
+        
+        // Validation and auto-update path as project name is typed
         projectNameField.textProperty().addListener((observable, oldValue, newValue) -> {
             okButton.setDisable(newValue == null || newValue.trim().isEmpty());
+            
+            // Auto-update project path with dashes replacing spaces
+            if (!pathManuallyEdited[0] && newValue != null && !newValue.trim().isEmpty()) {
+                updatingFromNameField[0] = true;
+                try {
+                    String sanitizedName = sanitizeProjectName(newValue);
+                    String newPath = defaultProjectsPath.resolve(sanitizedName).toString();
+                    projectPathField.setText(newPath);
+                } finally {
+                    updatingFromNameField[0] = false;
+                }
+            }
         });
         
         // Convert the result when OK is clicked
@@ -130,5 +176,15 @@ public class NewProjectDialog extends Dialog<NewProjectDialog.ProjectInfo> {
         
         // Focus on project name field
         javafx.application.Platform.runLater(() -> projectNameField.requestFocus());
+    }
+    
+    /**
+     * Sanitize project name by trimming and replacing spaces with dashes.
+     * 
+     * @param name The project name to sanitize
+     * @return Sanitized project name suitable for use as a directory name
+     */
+    private String sanitizeProjectName(String name) {
+        return name.trim().replaceAll("\\s+", "-");
     }
 }
