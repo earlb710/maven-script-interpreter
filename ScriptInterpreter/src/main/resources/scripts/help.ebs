@@ -15,9 +15,10 @@ try {
     var jsonContent: string = call file.readTextResource("help-lookup.json");
     call echo.on();
     helpData = call json.jsonFromString(jsonContent);
-    // Removed debug print: "Help data loaded from JSON"
+    // Help data loaded silently to avoid startup debug output
 } exceptions {
     when ex {
+        call echo.on();  // Ensure echo is re-enabled even if an error occurs
         print "Warning: Could not load help-lookup.json: " + ex;
         print "Help will be displayed without JSON-based keyword descriptions";
     }
@@ -25,9 +26,17 @@ try {
 
 // Get all builtins from system registry
 // Temporarily disable echo to avoid printing the full help output
+var systemHelpText: string = "";
 call echo.off();
-var systemHelpText: string = call system.help();
-call echo.on();
+try {
+    systemHelpText = call system.help();
+    call echo.on();
+} exceptions {
+    when ex {
+        call echo.on();  // Ensure echo is re-enabled even if an error occurs
+        print "Error loading system help: " + ex;
+    }
+}
 
 // Parse the help text to extract builtin information
 // The format is: "builtin.name(param1:type, param2:type?) : returnType"
@@ -238,9 +247,17 @@ treeStructure = call json.set(treeStructure, "children", rootChildren);
 
 
 // Load the screen definition from JSON file
+var screenJsonText: string = "";
 call echo.off();
-var screenJsonText: string = call file.readTextResource("json/help-screen.json");
-call echo.on();
+try {
+    screenJsonText = call file.readTextResource("json/help-screen.json");
+    call echo.on();
+} exceptions {
+    when ex {
+        call echo.on();  // Ensure echo is re-enabled even if an error occurs
+        print "Error loading help screen definition: " + ex;
+    }
+}
 var screenJson: json = call json.jsonFromString(screenJsonText);
 
 // Inject the dynamic tree structure into the screen definition
