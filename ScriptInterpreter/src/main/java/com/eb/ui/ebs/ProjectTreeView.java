@@ -61,7 +61,7 @@ public class ProjectTreeView extends VBox {
         treeView.getStyleClass().add("project-tree");
         VBox.setVgrow(treeView, Priority.ALWAYS);
         
-        // Set custom cell factory to apply error styling
+        // Set custom cell factory to apply error styling and handle double-clicks
         treeView.setCellFactory(tv -> {
             TreeCell<String> cell = new TreeCell<>() {
                 @Override
@@ -90,17 +90,19 @@ public class ProjectTreeView extends VBox {
                     }
                 }
             };
-            return cell;
-        });
-        
-        // Setup double-click to open project or file
-        treeView.setOnMouseClicked(event -> {
-            if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
-                TreeItem<String> selectedItem = treeView.getSelectionModel().getSelectedItem();
-                if (selectedItem != null && selectedItem != rootItem) {
-                    openSelectedItem(selectedItem);
+            
+            // Add mouse click handler to prevent default expand/collapse on double-click
+            cell.setOnMouseClicked(event -> {
+                if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
+                    TreeItem<String> selectedItem = cell.getTreeItem();
+                    if (selectedItem != null && selectedItem != rootItem && !cell.isEmpty()) {
+                        openSelectedItem(selectedItem);
+                        event.consume(); // Consume the event at cell level to prevent default behavior
+                    }
                 }
-            }
+            });
+            
+            return cell;
         });
         
         // Setup selection listener to show directory in status bar message
@@ -139,7 +141,7 @@ public class ProjectTreeView extends VBox {
         searchComboBox.setEditable(true);
         searchComboBox.setPromptText("Search files...");
         HBox.setHgrow(searchComboBox, Priority.ALWAYS);
-        searchComboBox.setPrefWidth(200);
+        searchComboBox.setMaxWidth(Double.MAX_VALUE);
         
         // Add search icon button
         Button searchButton = new Button();
@@ -159,6 +161,14 @@ public class ProjectTreeView extends VBox {
         searchComboBox.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.ENTER) {
                 performSearch();
+            }
+        });
+        
+        // Add Ctrl+F3 keyboard shortcut for "Find Next"
+        setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.F3 && e.isControlDown()) {
+                performSearch();
+                e.consume();
             }
         });
         
@@ -445,10 +455,24 @@ public class ProjectTreeView extends VBox {
         // Check if this is a file (has a parent that's not root) or a project (parent is root)
         TreeItem<String> parent = item.getParent();
         if (parent != null && parent != rootItem) {
+            // This is a child of a project (could be file or folder)
+            // Get the path from user data to check if it's a directory
+            Object userData = item.getGraphic() != null ? item.getGraphic().getUserData() : null;
+            if (userData instanceof String) {
+                String itemPath = (String) userData;
+                Path path = Paths.get(itemPath);
+                
+                // If it's a directory (folder), just toggle expansion instead of opening
+                if (Files.isDirectory(path)) {
+                    item.setExpanded(!item.isExpanded());
+                    return;
+                }
+            }
+            
             // This is a file - open it
             openSelectedFile(item);
         } else {
-            // This is a project - open project
+            // This is a project - open project (don't toggle expand/collapse)
             openSelectedProject(item);
         }
     }
