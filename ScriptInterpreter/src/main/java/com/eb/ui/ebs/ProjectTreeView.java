@@ -585,6 +585,13 @@ public class ProjectTreeView extends VBox {
                     projectData.remove("docDir");
                 }
                 
+                // Update linked directories
+                if (props.getLinkedDirectories() != null && !props.getLinkedDirectories().isEmpty()) {
+                    projectData.put("directories", props.getLinkedDirectories());
+                } else {
+                    projectData.remove("directories");
+                }
+                
                 // Write updated project.json
                 String updatedJson = com.eb.script.json.Json.prettyJson(projectData);
                 Files.writeString(projectJsonPath, updatedJson);

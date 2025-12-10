@@ -48,6 +48,10 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
     private final Button createTempDirButton;
     private final Button createDocDirButton;
     private final Path projectDir;
+    private final TableView<String> linkedDirTable;
+    private final List<String> linkedDirectories;
+    
+    private boolean fieldsEdited = false;
     
     /**
      * Result data class containing project properties.
@@ -60,9 +64,11 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         private final String testDir;
         private final String tempDir;
         private final String docDir;
+        private final List<String> linkedDirectories;
         
         public ProjectProperties(String name, String mainScript, String cssFile, 
-                               String resourceDir, String testDir, String tempDir, String docDir) {
+                               String resourceDir, String testDir, String tempDir, String docDir,
+                               List<String> linkedDirectories) {
             this.name = name;
             this.mainScript = mainScript;
             this.cssFile = cssFile;
@@ -70,6 +76,7 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
             this.testDir = testDir;
             this.tempDir = tempDir;
             this.docDir = docDir;
+            this.linkedDirectories = linkedDirectories;
         }
         
         public String getName() {
@@ -98,6 +105,10 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         
         public String getDocDir() {
             return docDir;
+        }
+        
+        public List<String> getLinkedDirectories() {
+            return linkedDirectories;
         }
     }
     
@@ -360,7 +371,7 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         grid.add(createDocDirButton, 3, row++);
         
         // Extract linked directories from project.json
-        List<String> linkedDirectories = new ArrayList<>();
+        linkedDirectories = new ArrayList<>();
         Object dirsObj = currentProperties.get("directories");
         if (dirsObj instanceof com.eb.script.arrays.ArrayDynamic) {
             com.eb.script.arrays.ArrayDynamic arrayDynamic = (com.eb.script.arrays.ArrayDynamic) dirsObj;
@@ -384,31 +395,29 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         VBox mainContainer = new VBox(10);
         mainContainer.getChildren().add(grid);
         
-        // Add separator and linked directories section if there are any
-        if (!linkedDirectories.isEmpty()) {
-            Separator separator2 = new Separator();
-            mainContainer.getChildren().add(separator2);
-            
-            // Create TableView for linked directories
-            Label linkedDirLabel = new Label("Linked Directories:");
-            linkedDirLabel.setStyle("-fx-font-weight: bold;");
-            
-            TableView<String> linkedDirTable = new TableView<>();
-            linkedDirTable.setPrefHeight(150);
-            linkedDirTable.setMaxHeight(200);
-            
-            TableColumn<String, String> pathColumn = new TableColumn<>("Directory Path");
-            pathColumn.setCellValueFactory(param -> new SimpleStringProperty(param.getValue()));
-            pathColumn.setPrefWidth(500);
-            
-            linkedDirTable.getColumns().add(pathColumn);
-            linkedDirTable.getItems().addAll(linkedDirectories);
-            linkedDirTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-            
-            VBox linkedDirBox = new VBox(5);
-            linkedDirBox.getChildren().addAll(linkedDirLabel, linkedDirTable);
-            mainContainer.getChildren().add(linkedDirBox);
-        }
+        // Always add separator and linked directories section
+        Separator separator2 = new Separator();
+        mainContainer.getChildren().add(separator2);
+        
+        // Create TableView for linked directories
+        Label linkedDirLabel = new Label("Linked Directories:");
+        linkedDirLabel.setStyle("-fx-font-weight: bold;");
+        
+        linkedDirTable = new TableView<>();
+        linkedDirTable.setPrefHeight(150);
+        linkedDirTable.setMaxHeight(200);
+        
+        TableColumn<String, String> pathColumn = new TableColumn<>("Directory Path");
+        pathColumn.setCellValueFactory(param -> new SimpleStringProperty(param.getValue()));
+        pathColumn.setPrefWidth(500);
+        
+        linkedDirTable.getColumns().add(pathColumn);
+        linkedDirTable.getItems().addAll(linkedDirectories);
+        linkedDirTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        
+        VBox linkedDirBox = new VBox(5);
+        linkedDirBox.getChildren().addAll(linkedDirLabel, linkedDirTable);
+        mainContainer.getChildren().add(linkedDirBox);
         
         getDialogPane().setContent(mainContainer);
         
@@ -420,12 +429,62 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
         getDialogPane().getButtonTypes().addAll(okButton, cancelButton);
         
-        // Enable/Disable OK button based on project name
+        // Add "Link Directory" and "Remove Link" buttons at bottom left
+        Button linkDirButton = new Button("Link Directory");
+        linkDirButton.setOnAction(e -> linkDirectory());
+        
+        Button removeLinkButton = new Button("Remove Link");
+        removeLinkButton.setOnAction(e -> removeSelectedLink());
+        removeLinkButton.setDisable(true);
+        
+        // Enable/disable Remove Link button based on selection
+        linkedDirTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
+            removeLinkButton.setDisable(newSel == null);
+        });
+        
+        HBox buttonBox = new HBox(10, linkDirButton, removeLinkButton);
+        buttonBox.setPadding(new Insets(10, 0, 0, 0));
+        getDialogPane().setExpandableContent(buttonBox);
+        getDialogPane().setExpanded(true);
+        
+        // Enable/Disable OK button based on field changes and valid project name
         Button okBtn = (Button) getDialogPane().lookupButton(okButton);
         okBtn.setDisable(true);
         
+        // Add listeners to all editable fields to track changes
         projectNameField.textProperty().addListener((observable, oldValue, newValue) -> {
+            fieldsEdited = true;
             okBtn.setDisable(newValue == null || newValue.trim().isEmpty());
+        });
+        
+        mainScriptField.textProperty().addListener((obs, old, newVal) -> {
+            fieldsEdited = true;
+            okBtn.setDisable(projectNameField.getText().trim().isEmpty());
+        });
+        
+        cssFileField.textProperty().addListener((obs, old, newVal) -> {
+            fieldsEdited = true;
+            okBtn.setDisable(projectNameField.getText().trim().isEmpty());
+        });
+        
+        resourceDirField.textProperty().addListener((obs, old, newVal) -> {
+            fieldsEdited = true;
+            okBtn.setDisable(projectNameField.getText().trim().isEmpty());
+        });
+        
+        testDirField.textProperty().addListener((obs, old, newVal) -> {
+            fieldsEdited = true;
+            okBtn.setDisable(projectNameField.getText().trim().isEmpty());
+        });
+        
+        tempDirField.textProperty().addListener((obs, old, newVal) -> {
+            fieldsEdited = true;
+            okBtn.setDisable(projectNameField.getText().trim().isEmpty());
+        });
+        
+        docDirField.textProperty().addListener((obs, old, newVal) -> {
+            fieldsEdited = true;
+            okBtn.setDisable(projectNameField.getText().trim().isEmpty());
         });
         
         // Set result converter
@@ -438,11 +497,58 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
                     resourceDirField.getText().trim(),
                     testDirField.getText().trim(),
                     tempDirField.getText().trim(),
-                    docDirField.getText().trim()
+                    docDirField.getText().trim(),
+                    new ArrayList<>(linkedDirectories)
                 );
             }
             return null;
         });
+    }
+    
+    /**
+     * Link a new directory to the project.
+     */
+    private void linkDirectory() {
+        DirectoryChooser dirChooser = new DirectoryChooser();
+        dirChooser.setTitle("Select Directory to Link");
+        File selectedDir = dirChooser.showDialog(getOwner());
+        if (selectedDir != null) {
+            String dirPath = selectedDir.getAbsolutePath();
+            if (!linkedDirectories.contains(dirPath)) {
+                linkedDirectories.add(dirPath);
+                linkedDirTable.getItems().add(dirPath);
+                fieldsEdited = true;
+                
+                // Enable OK button
+                Button okBtn = (Button) getDialogPane().lookupButton(ButtonType.OK);
+                if (!projectNameField.getText().trim().isEmpty()) {
+                    okBtn.setDisable(false);
+                }
+            } else {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION, 
+                    "This directory is already linked to the project.");
+                alert.setHeaderText("Already Linked");
+                alert.showAndWait();
+            }
+        }
+    }
+    
+    /**
+     * Remove the selected linked directory.
+     */
+    private void removeSelectedLink() {
+        String selected = linkedDirTable.getSelectionModel().getSelectedItem();
+        if (selected != null) {
+            linkedDirectories.remove(selected);
+            linkedDirTable.getItems().remove(selected);
+            fieldsEdited = true;
+            
+            // Enable OK button
+            Button okBtn = (Button) getDialogPane().lookupButton(ButtonType.OK);
+            if (!projectNameField.getText().trim().isEmpty()) {
+                okBtn.setDisable(false);
+            }
+        }
     }
     
     /**
