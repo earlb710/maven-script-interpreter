@@ -200,7 +200,7 @@ public final class Console {
 //   • Ctrl+Up / Ctrl+Down navigate history (anywhere in buffer)
 //   • Plain Up/Down behave normally (cursor movement)
 //   • Ctrl+Space triggers autocomplete
-//   • Ctrl+F opens find bar
+//   • Ctrl+F toggles find bar
         inputArea.addEventHandler(KeyEvent.KEY_PRESSED, e -> {
             // First check if autocomplete popup wants to handle the event
             if (autocompletePopup.handleKeyEvent(e)) {
@@ -308,7 +308,7 @@ public final class Console {
     
     private void outputEvents() {
         // Key handling for output area:
-        //   • Ctrl+F opens find bar
+        //   • Ctrl+F toggles find bar
         //   • Escape closes find bar
         outputArea.addEventHandler(KeyEvent.KEY_PRESSED, e -> {
             // Find: Ctrl+F
@@ -607,6 +607,10 @@ public final class Console {
                 e.consume();
             } else if (e.getCode() == KeyCode.ENTER) {
                 gotoNext();
+                e.consume();
+            } else if (e.getCode() == KeyCode.F && e.isControlDown()) {
+                // Ctrl+F to close find bar when it's already open
+                hideFind();
                 e.consume();
             }
         });
