@@ -30,6 +30,9 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
     private final TextField tempDirField;
     private final Button createMainScriptButton;
     private final Button createCssButton;
+    private final Button createResourceDirButton;
+    private final Button createTestDirButton;
+    private final Button createTempDirButton;
     private final Path projectDir;
     
     /**
@@ -199,6 +202,12 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         Button browseResourceDirButton = new Button("...");
         browseResourceDirButton.setOnAction(e -> browseDirectory(resourceDirField, "Select Resource Directory"));
         
+        createResourceDirButton = new Button("Create");
+        createResourceDirButton.setOnAction(e -> createDirectory(resourceDirField));
+        
+        // Update create button state when field changes
+        resourceDirField.textProperty().addListener((obs, old, newVal) -> updateCreateButtonStates());
+        
         // Test Directory field with browse button
         testDirField = new TextField();
         testDirField.setPromptText("tests");
@@ -211,6 +220,12 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         Button browseTestDirButton = new Button("...");
         browseTestDirButton.setOnAction(e -> browseDirectory(testDirField, "Select Test Directory"));
         
+        createTestDirButton = new Button("Create");
+        createTestDirButton.setOnAction(e -> createDirectory(testDirField));
+        
+        // Update create button state when field changes
+        testDirField.textProperty().addListener((obs, old, newVal) -> updateCreateButtonStates());
+        
         // Temp Directory field with browse button
         tempDirField = new TextField();
         tempDirField.setPromptText("temp");
@@ -222,6 +237,12 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         
         Button browseTempDirButton = new Button("...");
         browseTempDirButton.setOnAction(e -> browseDirectory(tempDirField, "Select Temp Directory"));
+        
+        createTempDirButton = new Button("Create");
+        createTempDirButton.setOnAction(e -> createDirectory(tempDirField));
+        
+        // Update create button state when field changes
+        tempDirField.textProperty().addListener((obs, old, newVal) -> updateCreateButtonStates());
         
         // Add components to grid
         int row = 0;
@@ -240,15 +261,18 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         
         grid.add(new Label("Resource Directory:"), 0, row);
         grid.add(resourceDirField, 1, row);
-        grid.add(browseResourceDirButton, 2, row++, 2, 1);
+        grid.add(browseResourceDirButton, 2, row);
+        grid.add(createResourceDirButton, 3, row++);
         
         grid.add(new Label("Test Directory:"), 0, row);
         grid.add(testDirField, 1, row);
-        grid.add(browseTestDirButton, 2, row++, 2, 1);
+        grid.add(browseTestDirButton, 2, row);
+        grid.add(createTestDirButton, 3, row++);
         
         grid.add(new Label("Temp Directory:"), 0, row);
         grid.add(tempDirField, 1, row);
-        grid.add(browseTempDirButton, 2, row++, 2, 1);
+        grid.add(browseTempDirButton, 2, row);
+        grid.add(createTempDirButton, 3, row++);
         
         getDialogPane().setContent(grid);
         
@@ -341,6 +365,24 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         boolean cssExists = !cssFile.isEmpty() && 
                            Files.exists(projectDir.resolve(cssFile));
         createCssButton.setDisable(cssFile.isEmpty() || cssExists);
+        
+        // Resource directory button - enabled if field not empty and directory doesn't exist
+        String resourceDir = resourceDirField.getText().trim();
+        boolean resourceDirExists = !resourceDir.isEmpty() && 
+                                   Files.exists(projectDir.resolve(resourceDir));
+        createResourceDirButton.setDisable(resourceDir.isEmpty() || resourceDirExists);
+        
+        // Test directory button - enabled if field not empty and directory doesn't exist
+        String testDir = testDirField.getText().trim();
+        boolean testDirExists = !testDir.isEmpty() && 
+                               Files.exists(projectDir.resolve(testDir));
+        createTestDirButton.setDisable(testDir.isEmpty() || testDirExists);
+        
+        // Temp directory button - enabled if field not empty and directory doesn't exist
+        String tempDir = tempDirField.getText().trim();
+        boolean tempDirExists = !tempDir.isEmpty() && 
+                               Files.exists(projectDir.resolve(tempDir));
+        createTempDirButton.setDisable(tempDir.isEmpty() || tempDirExists);
     }
     
     /**
@@ -399,6 +441,60 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         } catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR, 
                 "Failed to create file: " + e.getMessage());
+            alert.setHeaderText("Error");
+            alert.showAndWait();
+        }
+    }
+    
+    /**
+     * Create a directory with the path from the text field.
+     * 
+     * @param field The text field containing the relative path
+     */
+    private void createDirectory(TextField field) {
+        String relativePath = field.getText().trim();
+        if (relativePath.isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Please enter a directory path.");
+            alert.setHeaderText("Empty Path");
+            alert.showAndWait();
+            return;
+        }
+        
+        try {
+            Path dirPath = projectDir.resolve(relativePath);
+            
+            // Ensure the path is inside project directory
+            if (!isPathInsideProject(dirPath)) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, 
+                    "Directory path must be inside the project directory.");
+                alert.setHeaderText("Invalid Path");
+                alert.showAndWait();
+                return;
+            }
+            
+            // Check if directory already exists
+            if (Files.exists(dirPath)) {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION, "Directory already exists.");
+                alert.setHeaderText("Directory Exists");
+                alert.showAndWait();
+                updateCreateButtonStates();
+                return;
+            }
+            
+            // Create the directory and any parent directories
+            Files.createDirectories(dirPath);
+            
+            // Update button states
+            updateCreateButtonStates();
+            
+            Alert alert = new Alert(Alert.AlertType.INFORMATION, 
+                "Directory created successfully:\n" + dirPath);
+            alert.setHeaderText("Success");
+            alert.showAndWait();
+            
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, 
+                "Failed to create directory: " + e.getMessage());
             alert.setHeaderText("Error");
             alert.showAndWait();
         }
