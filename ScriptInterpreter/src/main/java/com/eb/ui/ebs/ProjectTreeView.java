@@ -2,8 +2,10 @@ package com.eb.ui.ebs;
 
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.KeyCode;
 import javafx.geometry.Insets;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -13,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayDeque;
 
 /**
  * TreeView component for displaying opened projects.
@@ -29,6 +32,12 @@ public class ProjectTreeView extends VBox {
     private final EbsConsoleHandler handler;
     private ContextMenu currentContextMenu;
     private ProjectFileWatcher fileWatcher;
+    private final ComboBox<String> searchComboBox;
+    private final java.util.Deque<String> recentSearches;
+    private static final int MAX_RECENT_SEARCHES = 10;
+    private String lastSearchText;
+    private java.util.List<TreeItem<String>> lastSearchResults;
+    private int currentSearchIndex;
     
     /**
      * Create a new ProjectTreeView.
@@ -38,6 +47,9 @@ public class ProjectTreeView extends VBox {
     public ProjectTreeView(EbsConsoleHandler handler) {
         this.handler = handler;
         this.projectListManager = new ProjectListManager();
+        this.recentSearches = new ArrayDeque<>(MAX_RECENT_SEARCHES);
+        this.lastSearchResults = new java.util.ArrayList<>();
+        this.currentSearchIndex = -1;
         
         // Create root item
         rootItem = new TreeItem<>("Projects");
@@ -48,6 +60,38 @@ public class ProjectTreeView extends VBox {
         treeView.setShowRoot(true);
         treeView.getStyleClass().add("project-tree");
         VBox.setVgrow(treeView, Priority.ALWAYS);
+        
+        // Set custom cell factory to apply error styling
+        treeView.setCellFactory(tv -> {
+            TreeCell<String> cell = new TreeCell<>() {
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    
+                    if (empty || item == null) {
+                        setText(null);
+                        setGraphic(null);
+                        getStyleClass().remove("project-tree-error");
+                    } else {
+                        setText(item);
+                        TreeItem<String> treeItem = getTreeItem();
+                        if (treeItem != null && treeItem.getGraphic() != null) {
+                            setGraphic(treeItem.getGraphic());
+                        }
+                        
+                        // Apply error style if the graphic has error flag
+                        getStyleClass().remove("project-tree-error");
+                        if (treeItem != null && treeItem.getGraphic() instanceof Label) {
+                            Label label = (Label) treeItem.getGraphic();
+                            if (label.getProperties().containsKey("hasError")) {
+                                getStyleClass().add("project-tree-error");
+                            }
+                        }
+                    }
+                }
+            };
+            return cell;
+        });
         
         // Setup double-click to open project or file
         treeView.setOnMouseClicked(event -> {
@@ -90,11 +134,44 @@ public class ProjectTreeView extends VBox {
         // Setup context menu
         setupContextMenu();
         
+        // Create search combo box
+        searchComboBox = new ComboBox<>();
+        searchComboBox.setEditable(true);
+        searchComboBox.setPromptText("Search files...");
+        HBox.setHgrow(searchComboBox, Priority.ALWAYS);
+        searchComboBox.setPrefWidth(200);
+        
+        // Add search icon button
+        Button searchButton = new Button();
+        try {
+            Image searchIcon = new Image(getClass().getResourceAsStream("/icons/search.png"));
+            ImageView searchIconView = new ImageView(searchIcon);
+            searchIconView.setFitWidth(16);
+            searchIconView.setFitHeight(16);
+            searchIconView.setPreserveRatio(true);
+            searchButton.setGraphic(searchIconView);
+        } catch (Exception e) {
+            searchButton.setText("🔍");
+        }
+        searchButton.setOnAction(e -> performSearch());
+        
+        // Handle Enter key in search box
+        searchComboBox.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ENTER) {
+                performSearch();
+            }
+        });
+        
+        // Create search bar container
+        HBox searchBar = new HBox(2);
+        searchBar.getChildren().addAll(searchComboBox, searchButton);
+        searchBar.setPadding(new Insets(0, 0, 2, 0));
+        
         // Add components
         Label titleLabel = new Label("Projects");
         titleLabel.getStyleClass().add("project-tree-title");
         
-        getChildren().addAll(titleLabel, treeView);
+        getChildren().addAll(titleLabel, searchBar, treeView);
         getStyleClass().add("project-tree-panel");
         setPadding(new Insets(5));
         setSpacing(5);
@@ -164,10 +241,20 @@ public class ProjectTreeView extends VBox {
                 boolean isDirectory = path != null && Files.isDirectory(Path.of(path));
                 boolean isFile = path != null && Files.isRegularFile(Path.of(path));
                 
+                // Check if directory is a linked folder
+                boolean isLinkedFolder = false;
+                if (isDirectory && selectedItem.getGraphic() instanceof Label) {
+                    Label label = (Label) selectedItem.getGraphic();
+                    isLinkedFolder = label.getProperties().containsKey("isLinkedFolder");
+                }
+                
                 if (isProject) {
                     // Context menu for project node
                     MenuItem newFileItem = new MenuItem("New File...");
                     newFileItem.setOnAction(e -> handler.createNewFile(path));
+                    
+                    MenuItem newDirItem = new MenuItem("New Directory...");
+                    newDirItem.setOnAction(e -> createNewDirectoryInProject(selectedItem, path));
                     
                     MenuItem addDirItem = new MenuItem("Add Directory...");
                     addDirItem.setOnAction(e -> addDirectoryToProject(selectedItem, path));
@@ -175,21 +262,57 @@ public class ProjectTreeView extends VBox {
                     MenuItem removeDirItem = new MenuItem("Remove Directory...");
                     removeDirItem.setOnAction(e -> removeDirectoryFromProject(selectedItem, path));
                     
+                    // Get main script for run option
+                    String mainScript = getMainScript(path);
+                    MenuItem runProjectItem = null;
+                    if (mainScript != null && !mainScript.isEmpty()) {
+                        runProjectItem = new MenuItem("Run " + mainScript);
+                        runProjectItem.setOnAction(e -> {
+                            Path projectDir = Path.of(path).getParent();
+                            if (projectDir != null) {
+                                Path scriptPath = projectDir.resolve(mainScript);
+                                // Pass project.json path so resourceDir can be loaded
+                                handler.runScriptFile(scriptPath, Path.of(path));
+                            }
+                        });
+                    }
+                    
                     MenuItem renameProjectItem = new MenuItem("Rename Project...");
                     renameProjectItem.setOnAction(e -> renameProject(selectedItem, path));
+                    
+                    MenuItem propertiesItem = new MenuItem("Properties...");
+                    propertiesItem.setOnAction(e -> showProjectPropertiesDialog(selectedItem, Path.of(path)));
                     
                     MenuItem removeItem = new MenuItem("Remove from List");
                     removeItem.setOnAction(e -> removeSelectedProject(selectedItem));
                     
-                    contextMenu.getItems().addAll(
-                        newFileItem, 
-                        addDirItem, 
-                        removeDirItem,
-                        new SeparatorMenuItem(),
-                        renameProjectItem,
-                        new SeparatorMenuItem(),
-                        removeItem
-                    );
+                    if (runProjectItem != null) {
+                        contextMenu.getItems().addAll(
+                            runProjectItem,
+                            new SeparatorMenuItem(),
+                            newFileItem,
+                            newDirItem,
+                            addDirItem, 
+                            removeDirItem,
+                            new SeparatorMenuItem(),
+                            renameProjectItem,
+                            propertiesItem,
+                            new SeparatorMenuItem(),
+                            removeItem
+                        );
+                    } else {
+                        contextMenu.getItems().addAll(
+                            newFileItem,
+                            newDirItem,
+                            addDirItem, 
+                            removeDirItem,
+                            new SeparatorMenuItem(),
+                            renameProjectItem,
+                            propertiesItem,
+                            new SeparatorMenuItem(),
+                            removeItem
+                        );
+                    }
                 } else if (isDirectory) {
                     // Context menu for directory node
                     MenuItem newFileItem = new MenuItem("New File...");
@@ -211,23 +334,54 @@ public class ProjectTreeView extends VBox {
                     MenuItem renameDirItem = new MenuItem("Rename Directory...");
                     renameDirItem.setOnAction(e -> renameDirectory(selectedItem, path));
                     
-                    MenuItem deleteDirItem = new MenuItem("Delete Directory...");
-                    deleteDirItem.setOnAction(e -> deleteDirectory(selectedItem, path));
-                    
                     MenuItem refreshItem = new MenuItem("Refresh");
                     refreshItem.setOnAction(e -> refreshDirectoryNode(selectedItem, path));
                     
-                    contextMenu.getItems().addAll(
-                        newFileItem,
-                        newDirItem,
-                        new SeparatorMenuItem(),
-                        renameDirItem,
-                        deleteDirItem,
-                        new SeparatorMenuItem(),
-                        refreshItem
-                    );
+                    if (isLinkedFolder) {
+                        // For linked folders, show "Remove from Project" instead of "Delete Directory..."
+                        MenuItem removeFromProjectItem = new MenuItem("Remove from Project");
+                        removeFromProjectItem.setOnAction(e -> removeLinkedFolderFromProject(selectedItem, path));
+                        
+                        contextMenu.getItems().addAll(
+                            newFileItem,
+                            newDirItem,
+                            new SeparatorMenuItem(),
+                            renameDirItem,
+                            new SeparatorMenuItem(),
+                            removeFromProjectItem,
+                            new SeparatorMenuItem(),
+                            refreshItem
+                        );
+                    } else {
+                        // For regular directories, show normal menu with delete option
+                        MenuItem deleteDirItem = new MenuItem("Delete Directory...");
+                        deleteDirItem.setOnAction(e -> deleteDirectory(selectedItem, path));
+                        
+                        contextMenu.getItems().addAll(
+                            newFileItem,
+                            newDirItem,
+                            new SeparatorMenuItem(),
+                            renameDirItem,
+                            deleteDirItem,
+                            new SeparatorMenuItem(),
+                            refreshItem
+                        );
+                    }
                 } else if (isFile) {
                     // Context menu for file node
+                    // Check if this is a script file (.ebs)
+                    boolean isScriptFile = path.toLowerCase().endsWith(".ebs");
+                    
+                    MenuItem runScriptItem = null;
+                    if (isScriptFile) {
+                        runScriptItem = new MenuItem("Run Script");
+                        runScriptItem.setOnAction(e -> {
+                            // Try to find parent project.json for resourceDir support
+                            Path projectJsonPath = findProjectJsonForFile(Path.of(path));
+                            handler.runScriptFile(Path.of(path), projectJsonPath);
+                        });
+                    }
+                    
                     MenuItem renameFileItem = new MenuItem("Rename File...");
                     renameFileItem.setOnAction(e -> renameFile(selectedItem, path));
                     
@@ -237,12 +391,23 @@ public class ProjectTreeView extends VBox {
                     MenuItem deleteFileItem = new MenuItem("Delete");
                     deleteFileItem.setOnAction(e -> deleteFile(selectedItem, path));
                     
-                    contextMenu.getItems().addAll(
-                        renameFileItem,
-                        copyFileItem,
-                        new SeparatorMenuItem(),
-                        deleteFileItem
-                    );
+                    if (runScriptItem != null) {
+                        contextMenu.getItems().addAll(
+                            runScriptItem,
+                            new SeparatorMenuItem(),
+                            renameFileItem,
+                            copyFileItem,
+                            new SeparatorMenuItem(),
+                            deleteFileItem
+                        );
+                    } else {
+                        contextMenu.getItems().addAll(
+                            renameFileItem,
+                            copyFileItem,
+                            new SeparatorMenuItem(),
+                            deleteFileItem
+                        );
+                    }
                 }
             }
             
@@ -289,7 +454,7 @@ public class ProjectTreeView extends VBox {
     }
     
     /**
-     * Open the selected project.
+     * Open the selected project (show project properties dialog).
      */
     private void openSelectedProject(TreeItem<String> item) {
         String projectPath = (String) item.getValue();
@@ -303,7 +468,8 @@ public class ProjectTreeView extends VBox {
             try {
                 Path path = Paths.get(projectPath);
                 if (Files.exists(path)) {
-                    handler.openProjectByPath(path);
+                    // Show project properties dialog
+                    showProjectPropertiesDialog(item, path);
                 } else {
                     Alert alert = new Alert(Alert.AlertType.WARNING,
                             "Project file not found:\n" + projectPath + "\n\nRemove it from the list?",
@@ -324,6 +490,96 @@ public class ProjectTreeView extends VBox {
     }
     
     /**
+     * Show project properties dialog and update project.json if changes are made.
+     * 
+     * @param projectItem The project tree item
+     * @param projectJsonPath Path to the project.json file
+     */
+    private void showProjectPropertiesDialog(TreeItem<String> projectItem, Path projectJsonPath) {
+        try {
+            // Read current project.json
+            String jsonContent = Files.readString(projectJsonPath);
+            Object projectObj = com.eb.script.json.Json.parse(jsonContent);
+            
+            if (!(projectObj instanceof Map)) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid project.json format.");
+                alert.showAndWait();
+                return;
+            }
+            
+            @SuppressWarnings("unchecked")
+            Map<String, Object> projectData = (Map<String, Object>) projectObj;
+            
+            // Show dialog
+            ProjectPropertiesDialog dialog = new ProjectPropertiesDialog(
+                getScene().getWindow(), 
+                projectJsonPath, 
+                projectData
+            );
+            
+            var result = dialog.showAndWait();
+            if (result.isPresent()) {
+                ProjectPropertiesDialog.ProjectProperties props = result.get();
+                
+                // Update project.json
+                projectData.put("name", props.getName());
+                
+                // Only set non-empty values
+                if (!props.getMainScript().isEmpty()) {
+                    projectData.put("mainScript", props.getMainScript());
+                } else {
+                    projectData.remove("mainScript");
+                }
+                
+                if (!props.getCssFile().isEmpty()) {
+                    projectData.put("cssFile", props.getCssFile());
+                } else {
+                    projectData.remove("cssFile");
+                }
+                
+                if (!props.getResourceDir().isEmpty()) {
+                    projectData.put("resourceDir", props.getResourceDir());
+                } else {
+                    projectData.remove("resourceDir");
+                }
+                
+                if (!props.getTestDir().isEmpty()) {
+                    projectData.put("testDir", props.getTestDir());
+                } else {
+                    projectData.remove("testDir");
+                }
+                
+                if (!props.getTempDir().isEmpty()) {
+                    projectData.put("tempDir", props.getTempDir());
+                } else {
+                    projectData.remove("tempDir");
+                }
+                
+                // Write updated project.json
+                String updatedJson = com.eb.script.json.Json.prettyJson(projectData);
+                Files.writeString(projectJsonPath, updatedJson);
+                
+                // Refresh the project in the tree
+                projectItem.getChildren().clear();
+                loadProjectFiles(projectItem, projectJsonPath.toString());
+                
+                // Update project display name if version exists
+                String displayName = getProjectDisplayName(projectJsonPath.toString(), props.getName());
+                projectItem.setValue(displayName);
+                
+                System.out.println("Project properties updated: " + projectJsonPath);
+            }
+            
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, 
+                "Failed to update project properties: " + e.getMessage());
+            alert.setHeaderText("Error");
+            alert.showAndWait();
+            e.printStackTrace();
+        }
+    }
+    
+    /**
      * Open the selected file.
      */
     private void openSelectedFile(TreeItem<String> item) {
@@ -336,10 +592,43 @@ public class ProjectTreeView extends VBox {
                 if (Files.exists(path)) {
                     handler.openFileFromTreeView(path);
                 } else {
-                    Alert alert = new Alert(Alert.AlertType.WARNING,
-                            "File not found:\n" + filePath);
+                    // File doesn't exist - offer to create it
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
+                            "File not found:\n" + filePath + "\n\nWould you like to create it?",
+                            ButtonType.YES, ButtonType.NO);
                     alert.setHeaderText("File Not Found");
-                    alert.showAndWait();
+                    var result = alert.showAndWait();
+                    if (result.isPresent() && result.get() == ButtonType.YES) {
+                        // Create the file
+                        try {
+                            // Ensure parent directories exist
+                            Path parentDir = path.getParent();
+                            if (parentDir != null && !Files.exists(parentDir)) {
+                                Files.createDirectories(parentDir);
+                            }
+                            
+                            Files.createFile(path);
+                            
+                            // Refresh the project to update the tree view
+                            TreeItem<String> projectNode = findProjectNode(item);
+                            if (projectNode != null) {
+                                Object projectData = projectNode.getGraphic() != null ? projectNode.getGraphic().getUserData() : null;
+                                String projectJsonPath = projectData instanceof String ? (String) projectData : null;
+                                if (projectJsonPath != null) {
+                                    projectNode.getChildren().clear();
+                                    loadProjectFiles(projectNode, projectJsonPath);
+                                }
+                            }
+                            
+                            // Open the newly created file
+                            handler.openFileFromTreeView(path);
+                        } catch (Exception ex) {
+                            Alert errorAlert = new Alert(Alert.AlertType.ERROR,
+                                    "Failed to create file: " + ex.getMessage());
+                            errorAlert.setHeaderText("Creation Error");
+                            errorAlert.showAndWait();
+                        }
+                    }
                 }
             } catch (Exception ex) {
                 Alert alert = new Alert(Alert.AlertType.ERROR,
@@ -411,10 +700,10 @@ public class ProjectTreeView extends VBox {
             String displayName = getProjectDisplayName(entry.getPath(), entry.getName());
             TreeItem<String> projectItem = new TreeItem<>(displayName);
             
-            // Add project icon from resources (folder-open.png for projects)
+            // Add project icon from resources (project.png for projects)
             Label iconLabel = new Label();
             try {
-                Image projectImage = new Image(getClass().getResourceAsStream("/icons/folder-open.png"));
+                Image projectImage = new Image(getClass().getResourceAsStream("/icons/project.png"));
                 ImageView projectIcon = new ImageView(projectImage);
                 projectIcon.setFitWidth(16);
                 projectIcon.setFitHeight(16);
@@ -497,6 +786,97 @@ public class ProjectTreeView extends VBox {
     }
     
     /**
+     * Get the main script name from project.json.
+     * 
+     * @param projectJsonPath Path to the project.json file
+     * @return The main script name, or null if not found
+     */
+    private String getMainScript(String projectJsonPath) {
+        try {
+            Path jsonPath = Path.of(projectJsonPath);
+            if (!Files.exists(jsonPath)) {
+                return null;
+            }
+            
+            String jsonContent = Files.readString(jsonPath);
+            Object projectObj = com.eb.script.json.Json.parse(jsonContent);
+            
+            if (!(projectObj instanceof Map)) {
+                return null;
+            }
+            
+            @SuppressWarnings("unchecked")
+            Map<String, Object> project = (Map<String, Object>) projectObj;
+            
+            Object mainScriptObj = project.get("mainScript");
+            return mainScriptObj instanceof String ? (String) mainScriptObj : null;
+            
+        } catch (Exception e) {
+            System.err.println("Error reading main script from project.json: " + e.getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Find the project.json file for a given file path by traversing up the tree.
+     * Used to provide project context (like resourceDir) when running scripts.
+     * 
+     * @param filePath Path to the file
+     * @return Path to project.json if found in the project tree, null otherwise
+     */
+    private Path findProjectJsonForFile(Path filePath) {
+        try {
+            // Get the absolute path
+            Path absPath = filePath.toAbsolutePath().normalize();
+            
+            // Search up the tree items to find the project node
+            TreeItem<String> current = findTreeItemForPath(rootItem, absPath.toString());
+            if (current == null) {
+                return null;
+            }
+            
+            // Walk up to find a project node (one that has project.json as its path)
+            while (current != null) {
+                if (current.getGraphic() instanceof Label) {
+                    Label label = (Label) current.getGraphic();
+                    String path = (String) label.getProperties().get("path");
+                    if (path != null && path.endsWith("project.json")) {
+                        return Path.of(path);
+                    }
+                }
+                current = current.getParent();
+            }
+            
+            return null;
+        } catch (Exception e) {
+            System.err.println("Error finding project.json for file: " + e.getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Helper method to find a tree item by its file path.
+     */
+    private TreeItem<String> findTreeItemForPath(TreeItem<String> item, String targetPath) {
+        if (item.getGraphic() instanceof Label) {
+            Label label = (Label) item.getGraphic();
+            String path = (String) label.getProperties().get("path");
+            if (path != null && path.equals(targetPath)) {
+                return item;
+            }
+        }
+        
+        for (TreeItem<String> child : item.getChildren()) {
+            TreeItem<String> result = findTreeItemForPath(child, targetPath);
+            if (result != null) {
+                return result;
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
      * Load files from project directory and add them as children to the project tree item.
      * Scans the entire project directory recursively and also loads directories from project.json.
      * 
@@ -557,12 +937,24 @@ public class ProjectTreeView extends VBox {
             // Load all files and directories from project directory
             java.util.List<Path> paths = new java.util.ArrayList<>();
             java.util.Set<String> addedPaths = new java.util.HashSet<>();
+            java.util.Set<String> linkedFolders = new java.util.HashSet<>();
             
             try (var stream = Files.list(projectDir)) {
                 stream.forEach(p -> {
                     paths.add(p);
                     addedPaths.add(p.toString());
                 });
+            }
+            
+            // Add mainScript even if it doesn't exist
+            if (mainScript != null && !mainScript.isEmpty()) {
+                Path mainScriptPath = projectDir.resolve(mainScript);
+                String normalizedMainScriptPath = mainScriptPath.normalize().toString();
+                
+                if (!addedPaths.contains(normalizedMainScriptPath)) {
+                    paths.add(mainScriptPath);
+                    addedPaths.add(normalizedMainScriptPath);
+                }
             }
             
             // Add directories from project.json that aren't already in the list
@@ -573,6 +965,10 @@ public class ProjectTreeView extends VBox {
                 if (!addedPaths.contains(normalizedPath)) {
                     paths.add(dir);
                     addedPaths.add(normalizedPath);
+                    linkedFolders.add(normalizedPath); // Mark as linked folder
+                } else {
+                    // Even if the directory exists in project dir, mark it as linked if it's in extraDirectories
+                    linkedFolders.add(normalizedPath);
                 }
             }
             
@@ -610,13 +1006,21 @@ public class ProjectTreeView extends VBox {
                 
                 boolean isDirectory = Files.isDirectory(path);
                 boolean fileExists = Files.exists(path);
+                boolean isLinkedFolder = isDirectory && linkedFolders.contains(path.normalize().toString());
+                boolean isMainScript = mainScript != null && fileName.equals(mainScript);
                 
-                // Add "!" prefix if doesn't exist
-                String displayName = fileExists ? fileName : "! " + fileName;
+                // Don't add "!" prefix for missing files anymore
+                String displayName = fileName;
                 TreeItem<String> item = new TreeItem<>(displayName);
                 
                 // Create label with icon
-                Label label = createFileOrDirLabel(fileName, path.toString(), fileExists, isDirectory);
+                Label label = createFileOrDirLabel(fileName, path.toString(), fileExists, isDirectory, isLinkedFolder, isMainScript);
+                
+                // Store error flag in the label's properties for non-existent files
+                if (!fileExists && !isDirectory) {
+                    label.getProperties().put("hasError", true);
+                }
+                
                 item.setGraphic(label);
                 
                 // Set tooltip
@@ -647,15 +1051,18 @@ public class ProjectTreeView extends VBox {
      * @param path The full path
      * @param exists Whether the file/directory exists
      * @param isDirectory Whether this is a directory
+     * @param isLinkedFolder Whether this is a linked folder from project.json directories array
+     * @param isMainScript Whether this is the main script file from project.json
      * @return Label with icon and appropriate styling
      */
-    private Label createFileOrDirLabel(String fileName, String path, boolean exists, boolean isDirectory) {
+    private Label createFileOrDirLabel(String fileName, String path, boolean exists, boolean isDirectory, boolean isLinkedFolder, boolean isMainScript) {
         Label label = new Label();
         
         if (isDirectory) {
-            // Directory icon
+            // Directory icon - use folder_ref.png for linked folders, folder.png for regular folders
             try {
-                Image folderImage = new Image(getClass().getResourceAsStream("/icons/folder.png"));
+                String iconPath = isLinkedFolder ? "/icons/folder_ref.png" : "/icons/folder.png";
+                Image folderImage = new Image(getClass().getResourceAsStream(iconPath));
                 ImageView folderIcon = new ImageView(folderImage);
                 folderIcon.setFitWidth(16);
                 folderIcon.setFitHeight(16);
@@ -666,7 +1073,7 @@ public class ProjectTreeView extends VBox {
             }
         } else {
             // File icon
-            ImageView icon = getIconForFileType(fileName);
+            ImageView icon = getIconForFileType(fileName, exists, isMainScript);
             if (icon != null) {
                 label.setGraphic(icon);
             }
@@ -674,6 +1081,11 @@ public class ProjectTreeView extends VBox {
         
         // Store path in user data
         label.setUserData(path);
+        
+        // Store linked folder flag in properties
+        if (isLinkedFolder) {
+            label.getProperties().put("isLinkedFolder", true);
+        }
         
         // Set red text if doesn't exist - use CSS class
         if (!exists) {
@@ -687,14 +1099,23 @@ public class ProjectTreeView extends VBox {
      * Get the appropriate icon for a file based on its extension.
      * 
      * @param fileName The name of the file
+     * @param exists Whether the file exists
+     * @param isMainScript Whether this is the main script file
      * @return ImageView with the appropriate icon, or null if icon not found
      */
-    private ImageView getIconForFileType(String fileName) {
+    private ImageView getIconForFileType(String fileName, boolean exists, boolean isMainScript) {
         String iconPath = null;
         String lowerName = fileName.toLowerCase();
         
         if (lowerName.endsWith(".ebs")) {
-            iconPath = "/icons/text-file.png"; // EBS script file
+            // EBS script file - use special icons
+            if (isMainScript) {
+                iconPath = "/icons/script-file-run.png"; // Main script file
+            } else if (!exists) {
+                iconPath = "/icons/script-file-missing.png"; // Missing script file
+            } else {
+                iconPath = "/icons/script-file.png"; // Normal script file
+            }
         } else if (lowerName.endsWith(".json")) {
             iconPath = "/icons/config-file.png"; // JSON config file
         } else if (lowerName.endsWith(".css")) {
@@ -800,6 +1221,64 @@ public class ProjectTreeView extends VBox {
                 refreshDirectoryNode(dirItem, dirPath);
                 
                 System.out.println("Directory created: " + newDirPath);
+                
+            } catch (Exception e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, 
+                    "Failed to create directory: " + e.getMessage());
+                alert.setHeaderText("Creation Error");
+                alert.showAndWait();
+            }
+        });
+    }
+    
+    /**
+     * Create a new directory in a project.
+     * 
+     * @param projectItem The project tree item
+     * @param projectJsonPath Path to the project.json file
+     */
+    private void createNewDirectoryInProject(TreeItem<String> projectItem, String projectJsonPath) {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("New Directory");
+        dialog.setHeaderText("Create new directory in project");
+        dialog.setContentText("Directory name:");
+        
+        dialog.showAndWait().ifPresent(newName -> {
+            if (newName == null || newName.trim().isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Directory name cannot be empty.");
+                alert.setHeaderText("Invalid Name");
+                alert.showAndWait();
+                return;
+            }
+            
+            try {
+                Path jsonPath = Path.of(projectJsonPath);
+                Path projectDir = jsonPath.getParent();
+                
+                if (projectDir == null) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "Could not determine project directory.");
+                    alert.showAndWait();
+                    return;
+                }
+                
+                Path newDirPath = projectDir.resolve(newName.trim());
+                
+                if (Files.exists(newDirPath)) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, 
+                        "A directory with that name already exists.");
+                    alert.setHeaderText("Directory Exists");
+                    alert.showAndWait();
+                    return;
+                }
+                
+                // Create the directory
+                Files.createDirectory(newDirPath);
+                
+                // Refresh the project to show the new directory
+                projectItem.getChildren().clear();
+                loadProjectFiles(projectItem, projectJsonPath);
+                
+                System.out.println("Directory created in project: " + newDirPath);
                 
             } catch (Exception e) {
                 Alert alert = new Alert(Alert.AlertType.ERROR, 
@@ -1004,7 +1483,7 @@ public class ProjectTreeView extends VBox {
                 Label label = (Label) fileItem.getGraphic();
                 if (label != null) {
                     label.setUserData(newPath.toString());
-                    ImageView icon = getIconForFileType(newName);
+                    ImageView icon = getIconForFileType(newName, true, false);
                     if (icon != null) {
                         label.setGraphic(icon);
                     }
@@ -1277,6 +1756,137 @@ public class ProjectTreeView extends VBox {
     }
     
     /**
+     * Remove a linked folder from the project.
+     * Removes the directory from the project.json directories array.
+     * 
+     * @param dirItem The directory tree item
+     * @param dirPath The directory path
+     */
+    private void removeLinkedFolderFromProject(TreeItem<String> dirItem, String dirPath) {
+        // Find the project node
+        TreeItem<String> projectNode = findProjectNode(dirItem);
+        if (projectNode == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Could not find project for this directory.");
+            alert.showAndWait();
+            return;
+        }
+        
+        Object projectData = projectNode.getGraphic() != null ? projectNode.getGraphic().getUserData() : null;
+        String projectJsonPath = projectData instanceof String ? (String) projectData : null;
+        
+        if (projectJsonPath == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Could not find project.json path.");
+            alert.showAndWait();
+            return;
+        }
+        
+        try {
+            // Read project.json
+            Path jsonPath = Path.of(projectJsonPath);
+            String jsonContent = Files.readString(jsonPath);
+            Object projectObj = com.eb.script.json.Json.parse(jsonContent);
+            
+            if (projectObj instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> project = (Map<String, Object>) projectObj;
+                
+                // Get directories array
+                Object dirsObj = project.get("directories");
+                java.util.List<String> dirsList = null;
+                
+                // Handle ArrayDynamic or standard List
+                if (dirsObj instanceof com.eb.script.arrays.ArrayDynamic) {
+                    com.eb.script.arrays.ArrayDynamic arrayDynamic = (com.eb.script.arrays.ArrayDynamic) dirsObj;
+                    dirsList = new java.util.ArrayList<>();
+                    for (int i = 0; i < arrayDynamic.size(); i++) {
+                        Object item = arrayDynamic.get(i);
+                        if (item instanceof String) {
+                            dirsList.add((String) item);
+                        }
+                    }
+                } else if (dirsObj instanceof java.util.List) {
+                    @SuppressWarnings("unchecked")
+                    java.util.List<String> list = (java.util.List<String>) dirsObj;
+                    dirsList = new java.util.ArrayList<>(list);
+                }
+                
+                if (dirsList != null && !dirsList.isEmpty()) {
+                    // Convert the directory path to relative path to match what's in project.json
+                    Path projectDir = jsonPath.getParent();
+                    Path linkedDirPath = Path.of(dirPath);
+                    String pathToRemove = null;
+                    
+                    // Try to find the matching entry in the directories list
+                    for (String dir : dirsList) {
+                        Path resolvedPath = projectDir.resolve(dir).normalize();
+                        if (resolvedPath.equals(linkedDirPath.normalize())) {
+                            pathToRemove = dir;
+                            break;
+                        }
+                    }
+                    
+                    if (pathToRemove != null) {
+                        // Make variables effectively final for lambda
+                        final String finalPathToRemove = pathToRemove;
+                        final java.util.List<String> finalDirsList = dirsList;
+                        final Map<String, Object> finalProject = project;
+                        final Path finalJsonPath = jsonPath;
+                        final TreeItem<String> finalProjectNode = projectNode;
+                        final String finalProjectJsonPath = projectJsonPath;
+                        
+                        // Confirm removal
+                        Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION);
+                        confirmDialog.setTitle("Remove Linked Folder");
+                        confirmDialog.setHeaderText("Remove folder from project?");
+                        confirmDialog.setContentText("This will remove the directory reference from project.json.\nThe actual directory will not be deleted.");
+                        
+                        confirmDialog.showAndWait().ifPresent(response -> {
+                            if (response == ButtonType.OK) {
+                                try {
+                                    finalDirsList.remove(finalPathToRemove);
+                                    
+                                    // Update the project map
+                                    finalProject.put("directories", finalDirsList);
+                                    
+                                    // Write updated project.json
+                                    String updatedJson = com.eb.script.json.Json.prettyJson(finalProject);
+                                    Files.writeString(finalJsonPath, updatedJson);
+                                    
+                                    System.out.println("Removed directory from project.json: " + finalPathToRemove);
+                                    
+                                    // Refresh the project view
+                                    finalProjectNode.getChildren().clear();
+                                    loadProjectFiles(finalProjectNode, finalProjectJsonPath);
+                                    
+                                } catch (Exception e) {
+                                    Alert alert = new Alert(Alert.AlertType.ERROR, 
+                                        "Failed to remove directory: " + e.getMessage());
+                                    alert.setHeaderText("Error");
+                                    alert.showAndWait();
+                                }
+                            }
+                        });
+                    } else {
+                        Alert alert = new Alert(Alert.AlertType.WARNING, 
+                            "Could not find this directory in project.json directories list.");
+                        alert.setHeaderText("Not Found");
+                        alert.showAndWait();
+                    }
+                } else {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION, 
+                        "No directories found in project.json.");
+                    alert.showAndWait();
+                }
+            }
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, 
+                "Failed to remove directory from project: " + e.getMessage());
+            alert.setHeaderText("Error");
+            alert.showAndWait();
+        }
+    }
+    
+    /**
      * Refresh a directory node.
      * 
      * @param dirItem The directory tree item
@@ -1325,27 +1935,8 @@ public class ProjectTreeView extends VBox {
                 boolean isDirectory = Files.isDirectory(path);
                 TreeItem<String> item = new TreeItem<>(fileName);
                 
-                // Create label with icon
-                Label label = new Label();
-                if (isDirectory) {
-                    try {
-                        Image folderImage = new Image(getClass().getResourceAsStream("/icons/folder.png"));
-                        ImageView folderIcon = new ImageView(folderImage);
-                        folderIcon.setFitWidth(16);
-                        folderIcon.setFitHeight(16);
-                        folderIcon.setPreserveRatio(true);
-                        label.setGraphic(folderIcon);
-                    } catch (Exception e) {
-                        // Fallback to emoji
-                    }
-                } else {
-                    ImageView icon = getIconForFileType(fileName);
-                    if (icon != null) {
-                        label.setGraphic(icon);
-                    }
-                }
-                
-                label.setUserData(path.toString());
+                // Create label with icon - subdirectories are not linked folders and not main script
+                Label label = createFileOrDirLabel(fileName, path.toString(), true, isDirectory, false, false);
                 item.setGraphic(label);
                 
                 // Set tooltip
@@ -1389,6 +1980,98 @@ public class ProjectTreeView extends VBox {
      */
     public ProjectFileWatcher getFileWatcher() {
         return fileWatcher;
+    }
+    
+    /**
+     * Perform search in the project tree.
+     */
+    private void performSearch() {
+        String searchText = searchComboBox.getEditor().getText();
+        if (searchText == null || searchText.trim().isEmpty()) {
+            return;
+        }
+        
+        searchText = searchText.trim();
+        
+        // Check if this is the same search (find next) or a new search
+        boolean isNewSearch = lastSearchText == null || !lastSearchText.equals(searchText);
+        
+        if (isNewSearch) {
+            // New search - reset and find all matches
+            lastSearchText = searchText;
+            lastSearchResults.clear();
+            currentSearchIndex = -1;
+            
+            // Add to recent searches
+            addToRecentSearches(searchText);
+            
+            // Find all matches
+            findAllMatches(rootItem, searchText.toLowerCase(), lastSearchResults);
+        }
+        
+        // Move to next match (if any matches found)
+        if (!lastSearchResults.isEmpty()) {
+            currentSearchIndex = (currentSearchIndex + 1) % lastSearchResults.size();
+            TreeItem<String> match = lastSearchResults.get(currentSearchIndex);
+            
+            // Expand parents
+            TreeItem<String> parent = match.getParent();
+            while (parent != null) {
+                parent.setExpanded(true);
+                parent = parent.getParent();
+            }
+            
+            // Select and scroll to match
+            treeView.getSelectionModel().select(match);
+            treeView.scrollTo(treeView.getRow(match));
+        }
+    }
+    
+    /**
+     * Find all matching items in the tree.
+     * 
+     * @param item The tree item to search from
+     * @param searchText The search text (lowercase)
+     * @param results List to collect matching items
+     */
+    private void findAllMatches(TreeItem<String> item, String searchText, java.util.List<TreeItem<String>> results) {
+        if (item == null) {
+            return;
+        }
+        
+        // Check if current item matches (exclude root)
+        if (item != rootItem) {
+            String itemText = item.getValue();
+            if (itemText != null && itemText.toLowerCase().contains(searchText)) {
+                results.add(item);
+            }
+        }
+        
+        // Search in children
+        for (TreeItem<String> child : item.getChildren()) {
+            findAllMatches(child, searchText, results);
+        }
+    }
+    
+    /**
+     * Add a search term to recent searches.
+     * 
+     * @param searchText The search text to add
+     */
+    private void addToRecentSearches(String searchText) {
+        // Remove if already exists
+        recentSearches.remove(searchText);
+        
+        // Add to front
+        recentSearches.addFirst(searchText);
+        
+        // Keep only last 10
+        while (recentSearches.size() > MAX_RECENT_SEARCHES) {
+            recentSearches.removeLast();
+        }
+        
+        // Update combo box items
+        searchComboBox.getItems().setAll(recentSearches);
     }
     
     /**

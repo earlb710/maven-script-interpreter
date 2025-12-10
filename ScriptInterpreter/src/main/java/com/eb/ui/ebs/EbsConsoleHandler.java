@@ -890,6 +890,133 @@ public class EbsConsoleHandler extends EbsHandler {
     }
     
     /**
+     * Run a script file from a file path.
+     * 
+     * @param filePath The path to the script file
+     */
+    public void runScriptFile(Path filePath) {
+        runScriptFile(filePath, null);
+    }
+    
+    /**
+     * Run a script file with optional project context.
+     * @param filePath Path to the script file to run
+     * @param projectJsonPath Optional path to project.json for loading project settings like resourceDir
+     */
+    public void runScriptFile(Path filePath, Path projectJsonPath) {
+        try {
+            if (!Files.exists(filePath)) {
+                ScriptArea output = env.getOutputArea();
+                javafx.application.Platform.runLater(() -> {
+                    output.printlnError("ERROR: File not found: " + filePath);
+                });
+                return;
+            }
+            
+            String script = Files.readString(filePath, StandardCharsets.UTF_8);
+            String scriptName = filePath.getFileName().toString();
+            
+            // Update status bar
+            if (statusBar != null) {
+                javafx.application.Platform.runLater(() -> {
+                    statusBar.setStatus("Running " + scriptName);
+                    statusBar.clearMessage();
+                });
+            }
+            
+            // Get the directory containing the script
+            Path scriptDir = filePath.getParent();
+            
+            // Read project settings if project.json provided
+            String resourceDirPath = null;
+            if (projectJsonPath != null && Files.exists(projectJsonPath)) {
+                try {
+                    String jsonContent = Files.readString(projectJsonPath, StandardCharsets.UTF_8);
+                    Map<String, Object> projectData = (Map<String, Object>) Json.parse(jsonContent);
+                    String resourceDir = (String) projectData.get("resourceDir");
+                    
+                    if (resourceDir != null && !resourceDir.isEmpty()) {
+                        Path projectDir = projectJsonPath.getParent();
+                        if (projectDir != null) {
+                            Path fullResourcePath = projectDir.resolve(resourceDir).toAbsolutePath().normalize();
+                            if (Files.exists(fullResourcePath) && Files.isDirectory(fullResourcePath)) {
+                                resourceDirPath = fullResourcePath.toString();
+                            }
+                        }
+                    }
+                } catch (Exception ex) {
+                    // Log but don't fail - resourceDir is optional
+                    System.err.println("Warning: Could not read resourceDir from project.json: " + ex.getMessage());
+                }
+            }
+            
+            final String finalResourceDirPath = resourceDirPath;
+            
+            // Execute script in background thread
+            Thread t = new Thread(() -> {
+                // Set the script's directory as the context source directory
+                if (scriptDir != null) {
+                    Util.setCurrentContextSourceDir(scriptDir);
+                }
+                
+                // Set resource directory if available
+                if (finalResourceDirPath != null) {
+                    Util.setResourceDir(Path.of(finalResourceDirPath));
+                    // Also set as global variable in environment
+                    env.getBaseEnvironmentValues().define("resourceDir", finalResourceDirPath);
+                } else {
+                    // Set empty string if no resource directory
+                    env.getBaseEnvironmentValues().define("resourceDir", "");
+                }
+                
+                try {
+                    // Submit script for execution
+                    submit(script);
+                    
+                    // Update status bar on completion
+                    javafx.application.Platform.runLater(() -> {
+                        if (statusBar != null) {
+                            statusBar.clearStatus();
+                            statusBar.setMessage(scriptName + " completed");
+                        }
+                    });
+                } catch (Exception ex) {
+                    // Error message
+                    ScriptArea output = env.getOutputArea();
+                    javafx.application.Platform.runLater(() -> {
+                        output.printlnError("✗ Error running " + scriptName + ": " + Util.formatExceptionWith2Origin(ex));
+                        if (statusBar != null) {
+                            statusBar.clearStatus();
+                            String errorMsg = ex.getMessage() != null ? ex.getMessage() : ex.getClass().getSimpleName();
+                            String displayMsg = errorMsg.length() > MAX_ERROR_MESSAGE_LENGTH 
+                                ? errorMsg.substring(0, TRUNCATED_MESSAGE_LENGTH) + "..." 
+                                : errorMsg;
+                            statusBar.setMessage(displayMsg, errorMsg);
+                        }
+                    });
+                } finally {
+                    // Clear the context source directory after execution
+                    if (scriptDir != null) {
+                        Util.clearCurrentContextSourceDir();
+                    }
+                    // Clear the resource directory after execution
+                    if (finalResourceDirPath != null) {
+                        Util.clearResourceDir();
+                    }
+                }
+            }, "script-runner");
+            t.setDaemon(true);
+            t.start();
+            
+        } catch (Exception ex) {
+            ScriptArea output = env.getOutputArea();
+            javafx.application.Platform.runLater(() -> {
+                output.printlnError("ERROR loading script: " + ex.getMessage());
+            });
+        }
+    }
+    
+    /**
      * Create a new project with a project.json file.
      * Shows a dialog asking for project name and path.
      */
