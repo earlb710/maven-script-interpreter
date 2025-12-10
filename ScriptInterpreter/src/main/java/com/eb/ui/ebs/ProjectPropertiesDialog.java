@@ -50,6 +50,7 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
     private final Path projectDir;
     private final TableView<String> linkedDirTable;
     private final List<String> linkedDirectories;
+    private final ButtonType okButtonType;
     
     private boolean fieldsEdited = false;
     
@@ -442,12 +443,12 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         updateCreateButtonStates();
         
         // Add OK and Cancel buttons
-        ButtonType okButton = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        okButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
         ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
-        getDialogPane().getButtonTypes().addAll(okButton, cancelButton);
+        getDialogPane().getButtonTypes().addAll(okButtonType, cancelButton);
         
         // Enable/Disable OK button based on field changes and valid project name
-        Button okBtn = (Button) getDialogPane().lookupButton(okButton);
+        Button okBtn = (Button) getDialogPane().lookupButton(okButtonType);
         okBtn.setDisable(true);
         
         // Add listeners to all editable fields to track changes
@@ -466,7 +467,7 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         
         // Set result converter
         setResultConverter(dialogButton -> {
-            if (dialogButton == okButton) {
+            if (dialogButton == okButtonType) {
                 return new ProjectProperties(
                     projectNameField.getText().trim(),
                     mainScriptField.getText().trim(),
@@ -488,6 +489,7 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
     private void linkDirectory() {
         DirectoryChooser dirChooser = new DirectoryChooser();
         dirChooser.setTitle("Select Directory to Link");
+        dirChooser.setInitialDirectory(projectDir.toFile());
         File selectedDir = dirChooser.showDialog(getOwner());
         if (selectedDir != null) {
             String dirPath = selectedDir.getAbsolutePath();
@@ -535,8 +537,8 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
      * Update the OK button state based on project name validity.
      */
     private void updateOkButtonState() {
-        Button okBtn = (Button) getDialogPane().lookupButton(ButtonType.OK);
-        if (!projectNameField.getText().trim().isEmpty()) {
+        Button okBtn = (Button) getDialogPane().lookupButton(okButtonType);
+        if (okBtn != null && !projectNameField.getText().trim().isEmpty()) {
             okBtn.setDisable(false);
         }
     }
