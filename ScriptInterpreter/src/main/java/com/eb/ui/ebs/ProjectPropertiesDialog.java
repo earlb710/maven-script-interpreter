@@ -147,7 +147,11 @@ public class ProjectPropertiesDialog extends Dialog<ProjectPropertiesDialog.Proj
         projectDirField.setEditable(false);
         projectDirField.setMaxWidth(Double.MAX_VALUE);
         GridPane.setHgrow(projectDirField, Priority.ALWAYS);
-        // Remove the opacity override to let it use default grayed-out style
+        // Set light gray background and position cursor at end to show last part of path
+        projectDirField.setStyle("-fx-background-color: #f0f0f0; -fx-opacity: 1.0;");
+        javafx.application.Platform.runLater(() -> {
+            projectDirField.positionCaret(projectDirField.getText().length());
+        });
         
         // Main Script field with browse and create buttons
         mainScriptField = new TextField();
