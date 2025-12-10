@@ -237,6 +237,21 @@ public final class Console {
                 e.consume();
                 return;
             }
+            
+            // Ctrl+Delete: delete spaces onward if on space, delete word if on text
+            if (e.isControlDown() && e.getCode() == KeyCode.DELETE) {
+                handleCtrlDelete(inputArea);
+                e.consume();
+                return;
+            }
+            
+            // Tab: indent multiple lines if selected, normal behavior for single line
+            if (e.getCode() == KeyCode.TAB && !e.isControlDown() && !e.isShiftDown()) {
+                if (handleTabIndent(inputArea)) {
+                    e.consume();
+                    return;
+                }
+            }
 
             // History: Ctrl+Up / Ctrl+Down
             if (e.isControlDown() && e.getCode() == KeyCode.UP) {
@@ -753,5 +768,113 @@ public final class Console {
         } else {
             showFind();
         }
+    }
+    
+    /**
+     * Handle Ctrl+Delete key press.
+     * When cursor is on a space, delete all spaces onward.
+     * When cursor is on text, delete the current word.
+     * @param area The ScriptArea to operate on
+     */
+    private void handleCtrlDelete(ScriptArea area) {
+        int caretPos = area.getCaretPosition();
+        String text = area.getText();
+        
+        if (caretPos >= text.length()) {
+            return; // At end of text, nothing to delete
+        }
+        
+        char currentChar = text.charAt(caretPos);
+        int deleteEnd = caretPos;
+        
+        if (Character.isWhitespace(currentChar)) {
+            // Delete all spaces onward
+            while (deleteEnd < text.length() && Character.isWhitespace(text.charAt(deleteEnd))) {
+                deleteEnd++;
+            }
+        } else {
+            // Delete the word (letters, digits, underscores)
+            while (deleteEnd < text.length()) {
+                char c = text.charAt(deleteEnd);
+                if (Character.isLetterOrDigit(c) || c == '_') {
+                    deleteEnd++;
+                } else {
+                    break;
+                }
+            }
+        }
+        
+        if (deleteEnd > caretPos) {
+            area.replaceText(caretPos, deleteEnd, "");
+        }
+    }
+    
+    /**
+     * Handle Tab key press for indentation.
+     * When multiple lines are selected, indent all of them.
+     * When single line or no selection, return false to allow default behavior.
+     * @param area The ScriptArea to operate on
+     * @return true if event was handled (multiple lines indented), false for default behavior
+     */
+    private boolean handleTabIndent(ScriptArea area) {
+        int selStart = area.getSelection().getStart();
+        int selEnd = area.getSelection().getEnd();
+        
+        if (selStart == selEnd) {
+            return false; // No selection, use default tab behavior
+        }
+        
+        String text = area.getText();
+        
+        // Find the start of the line containing selStart
+        int lineStart = selStart;
+        while (lineStart > 0 && text.charAt(lineStart - 1) != '\n') {
+            lineStart--;
+        }
+        
+        // Find the end of the line containing selEnd
+        int lineEnd = selEnd;
+        // If selection ends exactly at start of a line (not including that line), adjust back
+        if (selEnd > 0 && text.charAt(selEnd - 1) == '\n') {
+            lineEnd = selEnd - 1;
+        }
+        while (lineEnd < text.length() && text.charAt(lineEnd) != '\n') {
+            lineEnd++;
+        }
+        
+        // Check if this spans multiple lines
+        boolean multipleLines = false;
+        for (int i = lineStart; i < lineEnd; i++) {
+            if (text.charAt(i) == '\n') {
+                multipleLines = true;
+                break;
+            }
+        }
+        
+        if (!multipleLines) {
+            return false; // Single line, use default tab behavior
+        }
+        
+        // Indent all lines in the selection
+        String selectedText = text.substring(lineStart, lineEnd);
+        String[] lines = selectedText.split("\n", -1);
+        StringBuilder indented = new StringBuilder();
+        
+        for (int i = 0; i < lines.length; i++) {
+            if (i > 0) {
+                indented.append('\n');
+            }
+            // Add tab at the beginning of each line (even empty lines)
+            indented.append('\t').append(lines[i]);
+        }
+        
+        // Replace the text
+        area.replaceText(lineStart, lineEnd, indented.toString());
+        
+        // Restore selection to cover the indented text
+        int newEnd = lineStart + indented.length();
+        area.selectRange(lineStart, newEnd);
+        
+        return true; // Event handled
     }
 }
