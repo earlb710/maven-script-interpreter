@@ -112,6 +112,12 @@ public class EbsTab extends Tab {
         loadFile(tabContext);
         tabUI();
         
+        // Clear undo history after file load and initial syntax highlighting
+        // Use Platform.runLater to ensure this runs after any pending style updates
+        Platform.runLater(() -> {
+            dispArea.getUndoManager().forgetHistory();
+        });
+        
         // Make outputArea not editable
         outputArea.setEditable(false);
 
@@ -234,8 +240,7 @@ public class EbsTab extends Tab {
                 dispArea.replaceText("");
                 outputArea.printlnInfo("New file: " + tabContext.path.getFileName());
                 suppressDirty = false;
-                // Clear undo history for new files
-                dispArea.getUndoManager().forgetHistory();
+                // Note: Don't clear undo history yet - will be done after syntax highlighting is applied
                 return;
             }
             
@@ -245,8 +250,7 @@ public class EbsTab extends Tab {
             dispArea.replaceText(ret.stringData);
             outputArea.printlnOk(ret.fileContext.path.toString() + " : " + ret.fileContext.size);
             suppressDirty = false;
-            // Clear undo history after loading file so undo doesn't go past the loaded state
-            dispArea.getUndoManager().forgetHistory();
+            // Note: Don't clear undo history yet - will be done after syntax highlighting is applied
         } catch (Exception ex) {
             outputArea.printlnError("load error:" + ex.getMessage());
         }
@@ -867,8 +871,13 @@ public class EbsTab extends Tab {
         suppressDirty = true;
         dispArea.replaceText(content);
         suppressDirty = false;
-        // Clear undo history so undo doesn't remove the initial content
-        dispArea.getUndoManager().forgetHistory();
+        // Clear undo history after a delay to ensure syntax highlighting is applied first
+        // The multiPlainChanges listener triggers highlighting after 100ms
+        PauseTransition clearUndoDelay = new PauseTransition(Duration.millis(200));
+        clearUndoDelay.setOnFinished(e -> {
+            dispArea.getUndoManager().forgetHistory();
+        });
+        clearUndoDelay.play();
         markDirty();  // Mark as dirty since it's a new unsaved file
     }
 
