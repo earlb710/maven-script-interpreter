@@ -63,13 +63,15 @@ public class NewProjectDialog extends Dialog<NewProjectDialog.ProjectInfo> {
         // Project name field (initially blank)
         projectNameField = new TextField();
         projectNameField.setPromptText("Enter project name");
-        projectNameField.setPrefWidth(450);
+        projectNameField.setMaxWidth(Double.MAX_VALUE);
+        javafx.scene.layout.GridPane.setHgrow(projectNameField, javafx.scene.layout.Priority.ALWAYS);
         
         // Project path field (populated with console path + "/projects")
         projectPathField = new TextField();
         Path defaultProjectsPath = Util.SANDBOX_ROOT.resolve("projects");
         projectPathField.setText(defaultProjectsPath.toString());
-        projectPathField.setPrefWidth(450);
+        projectPathField.setMaxWidth(Double.MAX_VALUE);
+        javafx.scene.layout.GridPane.setHgrow(projectPathField, javafx.scene.layout.Priority.ALWAYS);
         
         // Browse button to select directory
         browseButton = new Button("Browse...");
@@ -93,7 +95,7 @@ public class NewProjectDialog extends Dialog<NewProjectDialog.ProjectInfo> {
         
         // Add components to grid
         grid.add(new Label("Project Name:"), 0, 0);
-        grid.add(projectNameField, 1, 0);
+        grid.add(projectNameField, 1, 0, 2, 1); // Span 2 columns for project name
         
         grid.add(new Label("Project Path:"), 0, 1);
         grid.add(projectPathField, 1, 1);
