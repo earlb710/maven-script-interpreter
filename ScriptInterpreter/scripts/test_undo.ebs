@@ -1,19 +1,37 @@
 // Test script for custom undo functionality
 // 
 // How to test the custom undo manager:
-// 1. Open this file in the script editor
-// 2. Type some text in the editor (syntax highlighting will be applied)
-// 3. Press Ctrl+Z to undo - it should undo only the text you typed, not the highlighting
-// 4. Press Ctrl+Y to redo - it should redo the text change
-// 5. Use Ctrl+F to search for text - highlighting will be applied to matches
-// 6. Type more text - the search highlights should not interfere with undo
-// 7. Press Ctrl+Z - it should undo the text you just typed, not the search highlighting
+// 
+// 1. BASIC UNDO/REDO TEST:
+//    - Open this file in the script editor
+//    - Type some text in the editor (syntax highlighting will be applied)
+//    - Press Ctrl+Z to undo - it should undo only the text you typed, not the highlighting
+//    - Press Ctrl+Y to redo - it should redo the text change
+//
+// 2. WORD-LEVEL UNDO TEST:
+//    - Type the word "print" (5 characters)
+//    - Press Ctrl+Z once - it should undo the entire word "print", not just the last character
+//    - Type "hello world" (two words with a space)
+//    - Press Ctrl+Z once - should undo "world"
+//    - Press Ctrl+Z again - should undo "hello "
+//
+// 3. FIND BAR TEST (Ctrl+F should NOT clear undo history):
+//    - Type some text in the editor
+//    - Press Ctrl+F to open find bar - highlighting will be applied to matches
+//    - Close the find bar (press Esc or click Close button)
+//    - Press Ctrl+Z - it should undo the text you typed, NOT be cleared
+//
+// 4. SEARCH HIGHLIGHTING TEST:
+//    - Type more text - the search highlights should not interfere with undo
+//    - Press Ctrl+Z - it should undo the text you just typed, not the search highlighting
 //
 // Expected behavior:
 // - Undo/redo should only affect text changes, not style/highlighting changes
+// - Undo should work at word-level (undo entire words, not individual characters)
 // - Cursor should stay at the correct position after undo/redo
 // - No cursor jumping to top of document
 // - Search highlighting should not pollute the undo stack
+// - Opening/closing find bar (Ctrl+F) should NOT clear undo history
 
 var string message = "Hello, World!"
 print(message)

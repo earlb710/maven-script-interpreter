@@ -1104,12 +1104,8 @@ public class EbsTab extends Tab {
         // Reapply syntax highlighting to remove find highlights
         applyLexerSpans(dispArea.getText());
         
-        // Clear undo history to prevent undo from bringing back find highlights
-        // This also clears user's text edit history, which is a trade-off to prevent
-        // find highlighting from polluting the undo stack
-        Platform.runLater(() -> {
-            dispArea.getUndoManager().forgetHistory();
-        });
+        // Note: With custom undo manager, we no longer need to clear undo history
+        // The custom undo manager only tracks text changes, not style changes (highlighting)
     }
 
     private void runSearch() {

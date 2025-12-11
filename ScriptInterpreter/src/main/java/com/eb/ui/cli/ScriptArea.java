@@ -28,6 +28,11 @@ public class ScriptArea extends StyleClassedTextArea {
     private final BooleanProperty undoAvailable = new SimpleBooleanProperty(false);
     private final BooleanProperty redoAvailable = new SimpleBooleanProperty(false);
     private final BooleanProperty performingAction = new SimpleBooleanProperty(false);
+    
+    // Change merging state for word-level undo
+    private TextChange pendingChange = null;
+    private long lastChangeTime = 0;
+    private static final long MERGE_TIMEOUT_MS = 500; // Merge changes within 500ms
 
     public ScriptArea() {
         setParagraphGraphicFactory(LineNumberFactory.get(this)); // initial state ON
@@ -42,20 +47,151 @@ public class ScriptArea extends StyleClassedTextArea {
     /**
      * Record a text change for undo/redo functionality.
      * Only plain text changes are recorded, style changes are ignored.
+     * Changes are merged together if they happen in quick succession at the same position.
      */
     private void recordTextChange(PlainTextChange change) {
+        long currentTime = System.currentTimeMillis();
+        
         // Clear redo stack when a new change is made
         redoStack.clear();
         redoAvailable.set(false);
         
-        // Create a record of this change
-        TextChange textChange = new TextChange(
-            change.getPosition(),
-            change.getRemoved(),
-            change.getInserted()
-        );
+        // Try to merge with pending change if possible
+        if (pendingChange != null && canMerge(pendingChange, change, currentTime)) {
+            // Merge the changes
+            pendingChange = mergeChanges(pendingChange, change);
+            lastChangeTime = currentTime;
+        } else {
+            // Commit any pending change before starting a new one
+            if (pendingChange != null) {
+                commitChange(pendingChange);
+            }
+            
+            // Start a new pending change
+            pendingChange = new TextChange(
+                change.getPosition(),
+                change.getRemoved(),
+                change.getInserted()
+            );
+            lastChangeTime = currentTime;
+        }
+    }
+    
+    /**
+     * Check if a new change can be merged with the pending change.
+     * Changes can be merged if they happen within the timeout period and
+     * represent continuous typing (insertions at adjacent positions) or
+     * continuous deletion (backspace/delete at same position).
+     */
+    private boolean canMerge(TextChange pending, PlainTextChange newChange, long currentTime) {
+        // Check timeout
+        if (currentTime - lastChangeTime > MERGE_TIMEOUT_MS) {
+            return false;
+        }
         
-        undoStack.add(textChange);
+        String newRemoved = newChange.getRemoved();
+        String newInserted = newChange.getInserted();
+        int newPos = newChange.getPosition();
+        
+        // Case 1: Continuous insertion (typing forward)
+        // New text is inserted right after the pending text
+        if (pending.removed.isEmpty() && newRemoved.isEmpty()) {
+            // Check if inserting at the end of previous insertion
+            if (newPos == pending.position + pending.inserted.length()) {
+                // Don't merge if inserting a space or newline after non-whitespace
+                // This creates word boundaries for better undo granularity
+                if (!pending.inserted.isEmpty() && !newInserted.isEmpty()) {
+                    char lastChar = pending.inserted.charAt(pending.inserted.length() - 1);
+                    char newChar = newInserted.charAt(0);
+                    // Break on word boundaries (space, newline, punctuation)
+                    if (isWordBoundary(lastChar, newChar)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+        
+        // Case 2: Continuous forward deletion (delete key)
+        // Deleting at the same position repeatedly
+        if (pending.inserted.isEmpty() && newInserted.isEmpty() && newPos == pending.position) {
+            return true;
+        }
+        
+        // Case 3: Continuous backward deletion (backspace)
+        // Deleting before the previous deletion position
+        if (pending.inserted.isEmpty() && newInserted.isEmpty()) {
+            if (newPos + newRemoved.length() == pending.position) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Check if transition from one character to another represents a word boundary.
+     */
+    private boolean isWordBoundary(char lastChar, char newChar) {
+        // Space or newline always creates a boundary
+        if (Character.isWhitespace(newChar) || Character.isWhitespace(lastChar)) {
+            return true;
+        }
+        // Transition between alphanumeric and punctuation
+        boolean lastAlphaNum = Character.isLetterOrDigit(lastChar) || lastChar == '_';
+        boolean newAlphaNum = Character.isLetterOrDigit(newChar) || newChar == '_';
+        if (lastAlphaNum != newAlphaNum) {
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * Merge a new change with the pending change.
+     */
+    private TextChange mergeChanges(TextChange pending, PlainTextChange newChange) {
+        String newRemoved = newChange.getRemoved();
+        String newInserted = newChange.getInserted();
+        int newPos = newChange.getPosition();
+        
+        // Continuous insertion
+        if (pending.removed.isEmpty() && newRemoved.isEmpty() && 
+            newPos == pending.position + pending.inserted.length()) {
+            return new TextChange(
+                pending.position,
+                pending.removed,
+                pending.inserted + newInserted
+            );
+        }
+        
+        // Forward deletion (delete key)
+        if (pending.inserted.isEmpty() && newInserted.isEmpty() && newPos == pending.position) {
+            return new TextChange(
+                pending.position,
+                pending.removed + newRemoved,
+                pending.inserted
+            );
+        }
+        
+        // Backward deletion (backspace)
+        if (pending.inserted.isEmpty() && newInserted.isEmpty() && 
+            newPos + newRemoved.length() == pending.position) {
+            return new TextChange(
+                newPos,
+                newRemoved + pending.removed,
+                pending.inserted
+            );
+        }
+        
+        // Shouldn't reach here if canMerge returned true
+        return pending;
+    }
+    
+    /**
+     * Commit a change to the undo stack.
+     */
+    private void commitChange(TextChange change) {
+        undoStack.add(change);
         undoAvailable.set(true);
         
         // Limit undo history size to prevent memory issues
@@ -70,6 +206,12 @@ public class ScriptArea extends StyleClassedTextArea {
      */
     @Override
     public void undo() {
+        // Commit any pending change before undoing
+        if (pendingChange != null) {
+            commitChange(pendingChange);
+            pendingChange = null;
+        }
+        
         if (undoStack.isEmpty()) {
             return;
         }
@@ -103,6 +245,12 @@ public class ScriptArea extends StyleClassedTextArea {
      */
     @Override
     public void redo() {
+        // Commit any pending change before redoing
+        if (pendingChange != null) {
+            commitChange(pendingChange);
+            pendingChange = null;
+        }
+        
         if (redoStack.isEmpty()) {
             return;
         }
@@ -237,6 +385,7 @@ public class ScriptArea extends StyleClassedTextArea {
         
         @Override
         public void forgetHistory() {
+            pendingChange = null;  // Clear any pending change
             undoStack.clear();
             redoStack.clear();
             undoAvailable.set(false);
