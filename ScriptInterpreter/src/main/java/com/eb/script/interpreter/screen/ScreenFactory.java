@@ -948,27 +948,52 @@ public class ScreenFactory {
             VBox.setVgrow(itemsTable, Priority.ALWAYS);
             
             // Add row click handler to copy item to clipboard
-            // Capture screenName in final variable for lambda
+            // Capture screenName and context in final variables for lambda
             final String finalScreenName = screenName;
+            final InterpreterContext finalContext = context;
             itemsTable.setRowFactory(tv -> {
                 javafx.scene.control.TableRow<String[]> row = new javafx.scene.control.TableRow<>();
                 row.setOnMouseClicked(event -> {
                     if (!row.isEmpty()) {
                         String[] rowData = row.getItem();
-                        // Array format: [displayTextWithIcon, value, varRef, itemType, rawName]
+                        // Array format: [displayTextWithIcon, value, varRef, itemType, rawName, parentArea, displayInfo]
                         String displayText = rowData[0];
                         String value = rowData[1];
                         String varRef = rowData.length > 2 ? rowData[2] : "";
                         String itemType = rowData.length > 3 ? rowData[3] : "unknown";
                         String rawName = rowData.length > 4 ? rowData[4] : displayText;
+                        String parentArea = rowData.length > 5 ? rowData[5] : "";
+                        String displayInfo = rowData.length > 6 ? rowData[6] : "";
                         
+                        // Determine state (same logic as tooltip)
+                        String state = "CLEAN";
+                        boolean isChanged = displayText.contains(CHANGE_INDICATOR_EMOJI);
+                        if (isChanged) {
+                            state = "CHANGED";
+                        }
+                        ScreenStatus screenStatus = finalContext.getScreenStatus(finalScreenName);
+                        if (screenStatus == ScreenStatus.ERROR) {
+                            state = "ERROR";
+                        }
+                        
+                        // Build clipboard content matching the tooltip format exactly
                         StringBuilder clipboardBuilder = new StringBuilder();
                         clipboardBuilder.append("Item: ").append(rawName);
                         clipboardBuilder.append("\nType: ").append(itemType);
                         if (varRef != null && !varRef.isEmpty()) {
                             clipboardBuilder.append("\nVar: ").append(varRef);
                         }
+                        if (parentArea != null && !parentArea.isEmpty()) {
+                            // Limit to last two direct parents only (same as tooltip)
+                            String limitedAreaPath = limitAreaPathToTwoLevels(parentArea);
+                            clipboardBuilder.append("\nArea: ").append(limitedAreaPath);
+                        }
+                        clipboardBuilder.append("\nState: ").append(state);
                         clipboardBuilder.append("\nValue: ").append(value);
+                        // Add display info if present (includes JavaFX info)
+                        if (displayInfo != null && !displayInfo.isEmpty()) {
+                            clipboardBuilder.append("\n---\n").append(displayInfo);
+                        }
                         
                         javafx.scene.input.Clipboard clipboard = javafx.scene.input.Clipboard.getSystemClipboard();
                         javafx.scene.input.ClipboardContent content = new javafx.scene.input.ClipboardContent();
@@ -986,7 +1011,7 @@ public class ScreenFactory {
                             }
                         }).start();
                         // Also show feedback via status bar if available
-                        com.eb.ui.ebs.StatusBar statusBar = context.getScreenStatusBars().get(finalScreenName);
+                        com.eb.ui.ebs.StatusBar statusBar = finalContext.getScreenStatusBars().get(finalScreenName);
                         if (statusBar != null) {
                             statusBar.setMessage("Copied to clipboard: " + rawName);
                         }
