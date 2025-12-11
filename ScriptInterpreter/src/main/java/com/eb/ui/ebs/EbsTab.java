@@ -92,7 +92,7 @@ public class EbsTab extends Tab {
     // Minimum character count for find highlighting (more than 2 means at least 3)
     private static final int MIN_FIND_CHARS = 3;
     
-    // Timer for debounced editor change re-highlighting (2 seconds)
+    // Timer for debounced editor change re-highlighting (1 second)
     private PauseTransition editorChangeTimer;
     // Flag to indicate if highlights are stale due to editor changes
     private boolean highlightsStale = false;
@@ -909,8 +909,8 @@ public class EbsTab extends Tab {
 
     // Setup find bar listeners once during initialization
     private void setupFindListeners() {
-        // Initialize the editor change timer (2 second delay)
-        editorChangeTimer = new PauseTransition(Duration.seconds(2));
+        // Initialize the editor change timer (1 second delay)
+        editorChangeTimer = new PauseTransition(Duration.seconds(1));
         editorChangeTimer.setOnFinished(e -> {
             if (findBar.isVisible() && highlightsStale) {
                 // Reset stale flag FIRST so applyLexerSpans won't skip
