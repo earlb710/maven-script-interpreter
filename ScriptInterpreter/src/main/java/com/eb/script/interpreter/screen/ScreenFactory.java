@@ -1831,6 +1831,7 @@ public class ScreenFactory {
         }
         
         // Check if item is backed by a JavaFX component
+        // Null checks are needed as this is called from multiple contexts where parameters may be null
         if (context != null && screenName != null && varRef != null && !varRef.isEmpty()) {
             java.util.concurrent.ConcurrentHashMap<String, ScreenComponentType> componentTypes = context.getScreenComponentTypes(screenName);
             if (componentTypes != null) {
@@ -1842,7 +1843,7 @@ public class ScreenFactory {
                     }
                     info.append("JavaFX:\n");
                     String javafxDesc = componentType.getJavaFXDescription();
-                    // Indent each line for better readability
+                    // Append the JavaFX description (already formatted by getJavaFXDescription)
                     String[] lines = javafxDesc.split("\n");
                     for (String line : lines) {
                         info.append(line).append("\n");
