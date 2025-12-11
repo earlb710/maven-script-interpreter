@@ -913,9 +913,22 @@ public class ScreenFactory {
             java.util.List<String> sortedItemKeys = new java.util.ArrayList<>(screenAreaItems.keySet());
             java.util.Collections.sort(sortedItemKeys, String.CASE_INSENSITIVE_ORDER);
             
+            // Deduplicate items - items may be stored multiple times with different keys
+            // (e.g., "helpTree" and "default.helpTree" for the same item)
+            // Track seen item names to avoid showing duplicates
+            java.util.Set<String> seenItemNames = new java.util.HashSet<>();
+            
             for (String key : sortedItemKeys) {
                 AreaItem item = screenAreaItems.get(key);
                 String displayName = item.name != null ? item.name : key;
+                String displayNameLower = displayName.toLowerCase();
+                
+                // Skip if we've already shown this item by name
+                if (seenItemNames.contains(displayNameLower)) {
+                    continue;
+                }
+                seenItemNames.add(displayNameLower);
+                
                 String valueStr = getScreenItemValue(key, item, context, screenName);
                 String varRef = item.varRef != null ? item.varRef : "";
                 // Get the item type from displayItem or fall back to displayMetadata lookup
