@@ -1,7 +1,7 @@
 // Simple test for imagedata type keyword
 // Verifies that imagedata is recognized as a valid datatype
 
-print "ImageData Type Keyword Test";
+print "imagedata Type Keyword Test";
 print "============================";
 print "";
 
