@@ -46,6 +46,7 @@ public class InterpreterContext {
     private final ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> screenVars = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, ConcurrentHashMap<String, DataType>> screenVarTypes = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenComponentType>> screenComponentTypes = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenContainerType>> screenContainerTypes = new ConcurrentHashMap<>();
     private final Map<String, DisplayItem> displayMetadata = new java.util.HashMap<>();
     private final Map<String, List<AreaDefinition>> screenAreas = new java.util.HashMap<>();
     private final Deque<String> connectionStack = new java.util.ArrayDeque<>();
@@ -217,6 +218,14 @@ public class InterpreterContext {
 
     public void setScreenComponentTypes(String screen, ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenComponentType> val) {
         screenComponentTypes.put(screen.toLowerCase(), val);
+    }
+
+    public ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenContainerType> getScreenContainerTypes(String screen) {
+        return screenContainerTypes.get(screen != null ? screen.toLowerCase() : null);
+    }
+
+    public void setScreenContainerTypes(String screen, ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenContainerType> val) {
+        screenContainerTypes.put(screen != null ? screen.toLowerCase() : null, val);
     }
 
     public Set<String> getScreensBeingCreated() {

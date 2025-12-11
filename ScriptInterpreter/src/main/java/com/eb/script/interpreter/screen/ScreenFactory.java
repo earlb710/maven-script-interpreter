@@ -3334,6 +3334,17 @@ public class ScreenFactory {
             container.setUserData("area:" + screenName + "." + areaDef.name);
             // Register the container in context for later lookup by scr.setAreaProperty
             context.registerAreaContainer(screenName, areaDef.name, container);
+            
+            // Register the container in screenContainerTypes as Screen.container
+            java.util.concurrent.ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenContainerType> containerTypes = 
+                context.getScreenContainerTypes(screenName);
+            if (containerTypes != null && areaDef.areaType != null) {
+                String areaNameLower = areaDef.name.toLowerCase(java.util.Locale.ROOT);
+                String containerTypeName = areaDef.areaType.toString().toLowerCase();
+                com.eb.script.interpreter.screen.ScreenContainerType containerType = 
+                    new com.eb.script.interpreter.screen.ScreenContainerType(containerTypeName, container);
+                containerTypes.put(areaNameLower, containerType);
+            }
         }
         
         // Log debug information for this container if debug mode is enabled

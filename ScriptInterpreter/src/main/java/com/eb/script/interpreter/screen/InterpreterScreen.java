@@ -253,6 +253,10 @@ public class InterpreterScreen {
             ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenComponentType> screenComponentTypeMap = new java.util.concurrent.ConcurrentHashMap<>();
             context.setScreenComponentTypes(stmt.name, screenComponentTypeMap);
 
+            // Create thread-safe screen container type storage for this screen
+            ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenContainerType> screenContainerTypeMap = new java.util.concurrent.ConcurrentHashMap<>();
+            context.setScreenContainerTypes(stmt.name, screenContainerTypeMap);
+
             // Initialize new storage structures for this screen
             Map<String, VarSet> varSetsMap = new java.util.HashMap<>();
             Map<String, Var> varItemsMap = new java.util.HashMap<>();
