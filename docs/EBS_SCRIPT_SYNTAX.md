@@ -1202,14 +1202,42 @@ import 'lib/database.ebs';
 - Circular import protection (files imported only once)
 - Import paths are resolved relative to the importing script's directory
 
+**Best Practices:**
+- **Place imports at the top of your script file** whenever possible for better code organization and readability
+- Import statements should appear before type definitions, constants, and other code
+- Exception: If your imported code depends on type definitions or constants from the main file, place the import after those definitions
+
 **Example:**
 ```javascript
 // main.ebs
+// Imports at the top (recommended)
 import "util/math.ebs";
 import "util/string.ebs";
 
 var result: int = call add(5, 3);
 var text: string = call toUpper("hello");
+```
+
+**Example with dependencies:**
+```javascript
+// chess.ebs
+// Type definitions first
+ChessCell typeof bitmap { cellColor: 0, pieceType: 1-6, pieceColor: 7 };
+posType typeof record { x: int, y: int };
+
+// Constants
+var WHITE: int = 0;
+var BLACK: int = 1;
+
+// Helper functions that imported code depends on
+isValidPosition(x: int, y: int) return bool {
+    return x >= 0 && x < 8 && y >= 0 && y < 8;
+}
+
+// Import after dependencies are defined
+import "chess-moves.ebs";
+
+// Rest of the code...
 ```
 
 ### Type Aliases (typeof)
