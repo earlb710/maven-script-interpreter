@@ -4550,6 +4550,154 @@ public class ScreenFactory {
     }
 
     /**
+     * Validates that only valid properties are present in a display definition.
+     * Throws RuntimeException if invalid properties (like hgrow, vgrow) are found.
+     */
+    private static void validateDisplayProperties(Map<String, Object> displayDef, String screenName) {
+        // Define valid display properties (including snake_case variants)
+        java.util.Set<String> validProps = new java.util.HashSet<>(java.util.Arrays.asList(
+            // Core display properties
+            "type", "mandatory", "case", "caseformat", "alignment", "pattern",
+            "min", "max", "style", "screenname",
+            // Text and label properties
+            "prompthelp", "prompt_help", "labeltext", "label_text",
+            "labeltextalignment", "label_text_alignment", "labelposition", "label_position",
+            // Event handlers
+            "onclick", "on_click", "onvalidate", "on_validate", "onchange", "on_change",
+            // Options and data
+            "options", "columns", "displayrecords", "display_records",
+            // Tree properties
+            "treeitems", "tree_items", "expandall", "expand_all", "showroot", "show_root",
+            // Styling properties
+            "labelcolor", "label_color", "labelbold", "label_bold", 
+            "labelitalic", "label_italic", "labelfontsize", "label_font_size",
+            "itemfontsize", "item_font_size", "itemcolor", "item_color",
+            "itembold", "item_bold", "itemitalic", "item_italic",
+            "maxlength", "max_length", "height",
+            // Image properties
+            "fitwidth", "fit_width", "fitheight", "fit_height",
+            "preserveratio", "preserve_ratio", "smooth", "scalemode", "scale_mode",
+            // Slider properties
+            "showslidervalue", "show_slider_value",
+            // Sequence
+            "seq", "sequence",
+            // Data source
+            "source", "status"
+        ));
+        
+        // Properties that should NOT be in display (they belong to AreaItem)
+        java.util.Set<String> itemOnlyProps = new java.util.HashSet<>(java.util.Arrays.asList(
+            "hgrow", "vgrow", "margin", "padding",
+            "prefwidth", "pref_width", "prefheight", "pref_height",
+            "minwidth", "min_width", "minheight", "min_height",
+            "maxwidth", "max_width", "maxheight", "max_height",
+            "colspan", "col_span", "rowspan", "row_span",
+            "layoutpos", "layout_pos", "relativepos", "relative_pos",
+            "varref", "var_ref", "name", "editable", "disabled", "visible", "tooltip",
+            "textcolor", "text_color", "backgroundcolor", "background_color"
+        ));
+        
+        // Check for invalid properties
+        for (String key : displayDef.keySet()) {
+            String lowerKey = key.toLowerCase();
+            if (itemOnlyProps.contains(lowerKey)) {
+                throw new RuntimeException(
+                    String.format("Invalid property '%s' in display definition for screen '%s'. " +
+                                "This property belongs at the item level, not in the display object. " +
+                                "Move '%s' outside of the 'display' object to the item level.",
+                                key, screenName, key)
+                );
+            }
+            if (!validProps.contains(lowerKey)) {
+                // Give a warning for unknown properties (might be custom or future properties)
+                System.err.println(
+                    String.format("Warning: Unknown property '%s' in display definition for screen '%s'. " +
+                                "This property may be ignored.",
+                                key, screenName)
+                );
+            }
+        }
+    }
+
+    /**
+     * Validates that only valid properties are present in an area item definition.
+     * Throws RuntimeException if invalid properties are found.
+     */
+    private static void validateAreaItemProperties(Map<String, Object> itemDef, String screenName) {
+        // Define valid item properties (including snake_case variants)
+        java.util.Set<String> validProps = new java.util.HashSet<>(java.util.Arrays.asList(
+            // Core item properties
+            "name", "sequence", "seq", "layoutpos", "layout_pos", "relativepos", "relative_pos",
+            "varref", "var_ref", "display", "type",
+            // UI behavior properties
+            "editable", "disabled", "visible", "tooltip",
+            "textcolor", "text_color", "backgroundcolor", "background_color",
+            // Layout properties
+            "colspan", "col_span", "rowspan", "row_span",
+            "hgrow", "vgrow", "margin", "padding",
+            "prefwidth", "pref_width", "prefheight", "pref_height",
+            "minwidth", "min_width", "minheight", "min_height",
+            "maxwidth", "max_width", "maxheight", "max_height",
+            "alignment",
+            // Event handlers (can be at item or display level)
+            "onvalidate", "on_validate", "onchange", "on_change",
+            // Data source
+            "source",
+            // promptHelp can be at item level (gets moved to displayItem)
+            "prompthelp", "prompt_help",
+            // Label properties (can be at item level for override/merge behavior)
+            "labeltext", "label_text", "labeltextalignment", "label_text_alignment",
+            "labelposition", "label_position",
+            // Styling properties (can be at item level for override/merge behavior)
+            "labelcolor", "label_color", "labelbold", "label_bold",
+            "labelitalic", "label_italic", "labelfontsize", "label_font_size",
+            "itemfontsize", "item_font_size", "itemcolor", "item_color",
+            "itembold", "item_bold", "itemitalic", "item_italic"
+        ));
+        
+        // Properties that should NOT be at item level (they belong in display object)
+        java.util.Set<String> displayOnlyProps = new java.util.HashSet<>(java.util.Arrays.asList(
+            "mandatory", "case", "caseformat", "pattern", "min", "max",
+            "onclick", "on_click",
+            "options", "columns", "displayrecords", "display_records",
+            "treeitems", "tree_items", "expandall", "expand_all", "showroot", "show_root",
+            "maxlength", "max_length", "height",
+            "fitwidth", "fit_width", "fitheight", "fit_height",
+            "preserveratio", "preserve_ratio", "smooth", "scalemode", "scale_mode",
+            "showslidervalue", "show_slider_value"
+        ));
+        
+        // Check for invalid properties
+        for (String key : itemDef.keySet()) {
+            String lowerKey = key.toLowerCase();
+            // Skip the 'display' object itself
+            if (lowerKey.equals("display")) {
+                continue;
+            }
+            // Skip 'type' as it can be at item level for convenience
+            if (lowerKey.equals("type")) {
+                continue;
+            }
+            if (displayOnlyProps.contains(lowerKey)) {
+                throw new RuntimeException(
+                    String.format("Invalid property '%s' at item level for screen '%s'. " +
+                                "This property belongs in the 'display' object, not at the item level. " +
+                                "Move '%s' inside the 'display' object.",
+                                key, screenName, key)
+                );
+            }
+            if (!validProps.contains(lowerKey)) {
+                // Give a warning for unknown properties (might be custom or future properties)
+                System.err.println(
+                    String.format("Warning: Unknown property '%s' at item level for screen '%s'. " +
+                                "This property may be ignored.",
+                                key, screenName)
+                );
+            }
+        }
+    }
+
+    /**
      * Parses an AreaItem from a Map.
      */
     private static AreaItem parseAreaItem(Map<String, Object> itemDef, String screenName) {
@@ -4617,6 +4765,9 @@ public class ScreenFactory {
         // Event handlers
         item.onValidate = getStringValue(itemDef, "onValidate", getStringValue(itemDef, "on_validate", null));
         item.onChange = getStringValue(itemDef, "onChange", getStringValue(itemDef, "on_change", null));
+
+        // Validate that no invalid properties are present in item definition
+        validateAreaItemProperties(itemDef, screenName);
 
         return item;
     }
@@ -4700,6 +4851,9 @@ public class ScreenFactory {
         metadata.itemItalic = getBooleanValue(displayDef, "itemItalic", getBooleanValue(displayDef, "item_italic", null));
         metadata.maxLength = getIntValue(displayDef, "maxLength", getIntValue(displayDef, "max_length", null));
         metadata.height = getIntValue(displayDef, "height", null);
+
+        // Validate that no invalid properties are present in display definition
+        validateDisplayProperties(displayDef, screenName);
 
         return metadata;
     }

@@ -37,6 +37,8 @@
               "name": "helpTree",
               "varRef": "selectedTopic",
               "seq": 1,
+              "hgrow": "NEVER",
+              "vgrow": "ALWAYS",
               "display": {
                 "type": "treeview",
                 "labelText": "Help Topic",
@@ -46,8 +48,6 @@
                 "minHeight": "200",
                 "prefHeight": "200",
                 "maxHeight": "MAX",
-                "hgrow": "NEVER",
-                "vgrow": "ALWAYS",
                 "expandAll": true,
                 "showRoot": false,
                 "onChange": "helpScreen.helpContent = call convertToHtml(call getHelpContent(helpScreen.selectedTopic));",
@@ -68,6 +68,8 @@
               "name": "helpContentView",
               "varRef": "helpContent",
               "seq": 1,
+              "hgrow": "ALWAYS",
+              "vgrow": "ALWAYS",
               "display": {
                 "type": "webview",
                 "labelText": "Help Content",
@@ -77,9 +79,7 @@
                 "maxWidth": "MAX",
                 "minHeight": "200",
                 "prefHeight": "100",
-                "maxHeight": "MAX",
-                "hgrow": "ALWAYS",
-                "vgrow": "ALWAYS"
+                "maxHeight": "MAX"
               }
             }
           ]
