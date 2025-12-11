@@ -4026,7 +4026,7 @@
     },
     "builtin_cat_overview": {
       "title": "{category_name}",
-      "template": "This category contains {count} functions.\nSelect a function from the tree to view its documentation.\n▸ FUNCTIONS IN THIS CATEGORY\n───────────────────────────────────────────────────────\n{function_list}"
+      "template": "This category contains {count} functions.\nSelect a function from the tree to view its documentation.\n\n{function_list}"
     },
     "builtin_categories": {
       "str": "String Functions",

@@ -7,13 +7,13 @@
 
 
 // Load help data from JSON file
+// Note: Echo is disabled by default in Environment, so resource loading happens silently
 var helpData: json = null;
 try {
     // Read from classpath resources using the new resource loader
     // This loads from the application resources, not the file system
     var jsonContent: string = call file.readTextResource("help-lookup.json");
     helpData = call json.jsonFromString(jsonContent);
-    print "Help data loaded from JSON";
 } exceptions {
     when ex {
         print "Warning: Could not load help-lookup.json: " + ex;

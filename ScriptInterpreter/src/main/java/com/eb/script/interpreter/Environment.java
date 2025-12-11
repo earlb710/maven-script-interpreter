@@ -34,7 +34,7 @@ public class Environment {
     // Thread-safe call stack using ConcurrentLinkedDeque
     private final Deque<StackInfo> callStack = new ConcurrentLinkedDeque<>();
     private Debugger debug = new Debugger(null);
-    private volatile boolean echo = true;
+    private volatile boolean echo = false; // Default to off to suppress debug output during script initialization and resource loading
     private volatile ScriptArea outputArea;
     private volatile Interpreter currentInterpreter; // Reference to current Interpreter for cleanup
 
