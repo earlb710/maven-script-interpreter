@@ -1,7 +1,7 @@
 # Custom Undo Manager Implementation
 
 ## Overview
-This document describes the custom undo manager implementation for the EBS script editor that solves the issue where undo operations were trying to undo syntax highlighting instead of actual text changes.
+This document describes the custom undo manager implementation for the EBS script editor that solves the issue where undo operations were trying to undo syntax highlighting instead of actual text changes, and implements word-level undo for better user experience.
 
 ## Problem Statement
 The original undo functionality in the script editor was unusable because:
@@ -10,6 +10,8 @@ The original undo functionality in the script editor was unusable because:
 3. Pressing Ctrl+Z would try to undo the last change, which was often the highlighting
 4. This caused the cursor to jump to the top of the document
 5. Same issue occurred with search/find highlighting
+6. Character-by-character undo was tedious (typing "print" required 5 undos)
+7. Opening find bar (Ctrl+F) cleared undo history
 
 ## Solution
 Implemented a custom undo manager in `ScriptArea.java` that:
@@ -17,6 +19,8 @@ Implemented a custom undo manager in `ScriptArea.java` that:
 - Completely ignores style changes (syntax highlighting, search highlighting)
 - Maintains proper cursor position after undo/redo operations
 - Uses observable properties for UI integration
+- **Merges consecutive character changes into word-level undo operations**
+- **Preserves undo history when opening/closing find bar**
 
 ## Technical Implementation
 
@@ -25,20 +29,68 @@ Implemented a custom undo manager in `ScriptArea.java` that:
 ScriptArea extends StyleClassedTextArea
   ├─ Custom undo/redo stacks (LinkedList<TextChange>)
   ├─ Observable properties (undoAvailable, redoAvailable, performingAction)
+  ├─ Change merging state (pendingChange, lastChangeTime)
   └─ CustomUndoManagerWrapper (compatibility wrapper)
 ```
 
 ### Key Components
 
-#### 1. Text Change Recording
+#### 1. Text Change Recording with Merging
 ```java
 // Subscribe only to plain text changes, ignore style changes
 plainTextChanges()
     .filter(change -> !performingAction.get() && change.getNetLength() != 0)
     .subscribe(this::recordTextChange);
+
+// Changes are merged if they occur within 500ms and represent continuous typing
+private void recordTextChange(PlainTextChange change) {
+    if (pendingChange != null && canMerge(pendingChange, change, currentTime)) {
+        pendingChange = mergeChanges(pendingChange, change);
+    } else {
+        if (pendingChange != null) commitChange(pendingChange);
+        pendingChange = new TextChange(...);
+    }
+}
 ```
 
-#### 2. TextChange Record
+#### 2. Change Merging Logic
+The undo manager merges changes based on:
+- **Time proximity**: Changes within 500ms (MERGE_TIMEOUT_MS) are candidates for merging
+- **Position continuity**: Changes must occur at adjacent positions
+- **Word boundaries**: Merging stops at spaces, newlines, and punctuation transitions
+
+Three merge patterns are supported:
+1. **Continuous insertion** (typing forward): Characters inserted at end of previous insertion
+2. **Forward deletion** (Delete key): Characters deleted at same position repeatedly
+3. **Backward deletion** (Backspace): Characters deleted moving backward
+
+```java
+private boolean canMerge(TextChange pending, PlainTextChange newChange, long currentTime) {
+    // Check timeout
+    if (currentTime - lastChangeTime > MERGE_TIMEOUT_MS) return false;
+    
+    // Check for continuous insertion at word boundaries
+    if (pending.removed.isEmpty() && newRemoved.isEmpty()) {
+        if (newPos == pending.position + pending.inserted.length()) {
+            // Break on word boundaries
+            if (isWordBoundary(lastChar, newChar)) return false;
+            return true;
+        }
+    }
+    // ... forward/backward deletion checks
+}
+
+private boolean isWordBoundary(char lastChar, char newChar) {
+    // Space or newline always creates boundary
+    if (Character.isWhitespace(newChar) || Character.isWhitespace(lastChar)) return true;
+    // Transition between alphanumeric and punctuation
+    boolean lastAlphaNum = Character.isLetterOrDigit(lastChar) || lastChar == '_';
+    boolean newAlphaNum = Character.isLetterOrDigit(newChar) || newChar == '_';
+    return lastAlphaNum != newAlphaNum;
+}
+```
+
+#### 3. TextChange Record
 ```java
 private static record TextChange(int position, String removed, String inserted) {
 }
@@ -46,9 +98,15 @@ private static record TextChange(int position, String removed, String inserted) 
 - Stores the position, removed text, and inserted text
 - Uses Java record for automatic equals(), hashCode(), and toString()
 
-#### 3. Undo Operation
+#### 4. Undo Operation
 ```java
 public void undo() {
+    // Commit any pending change before undoing
+    if (pendingChange != null) {
+        commitChange(pendingChange);
+        pendingChange = null;
+    }
+    
     TextChange change = undoStack.removeLast();
     performingAction.set(true);
     try {
@@ -66,7 +124,7 @@ public void undo() {
 }
 ```
 
-#### 4. Redo Operation
+#### 5. Redo Operation
 ```java
 public void redo() {
     TextChange change = redoStack.removeLast();
@@ -87,6 +145,15 @@ public void redo() {
 ```
 
 ### Design Decisions
+
+#### Change Merging Strategy
+- **Decision**: Merge consecutive character changes within 500ms timeout
+- **Reason**: Provides word-level undo like standard text editors
+- **Word Boundaries**: Space, newline, transition between alphanumeric and punctuation
+- **Benefits**: 
+  - Typing "print" creates one undo operation, not five
+  - Typing "hello world" creates two operations (one per word)
+  - More intuitive user experience
 
 #### LinkedList vs Stack
 - **Decision**: Use `LinkedList<TextChange>` instead of `Stack<TextChange>`
@@ -111,6 +178,12 @@ public void redo() {
 - **Reason**: `plainTextChanges()` only fires for text modifications, not style changes
 - **Additional Filter**: Skip changes when `performingAction` is true to avoid recording undo/redo operations themselves
 
+#### Find Bar Integration
+- **Decision**: Remove `forgetHistory()` call when closing find bar
+- **Reason**: Custom undo manager only tracks text changes, so find highlighting doesn't pollute undo stack
+- **Previous Issue**: Old code cleared entire undo history when Ctrl+F was pressed
+- **Fix**: Changed `EbsTab.hideFind()` to remove the `forgetHistory()` call
+
 ### Compatibility Layer
 The `CustomUndoManagerWrapper` class implements `org.fxmisc.undo.UndoManager<Object>` to maintain compatibility with existing code that calls `getUndoManager()` or `forgetHistory()`.
 
@@ -130,18 +203,31 @@ See `ScriptInterpreter/scripts/test_undo.ebs` for detailed test procedures:
    - Press Ctrl+Z → text should be removed, highlighting updates automatically
    - Press Ctrl+Y → text should be restored
 
-2. **Search Highlighting**:
+2. **Word-Level Undo**:
+   - Type the word "print" (5 characters)
+   - Press Ctrl+Z once → entire word "print" should be undone
+   - Type "hello world" (two words)
+   - Press Ctrl+Z once → "world" should be undone
+   - Press Ctrl+Z again → "hello " should be undone
+
+3. **Find Bar Undo History Preservation**:
+   - Type some text in editor
+   - Press Ctrl+F to open find bar
+   - Close find bar (Esc or Close button)
+   - Press Ctrl+Z → should undo text typed earlier, history preserved
+
+4. **Search Highlighting**:
    - Type text in editor
    - Press Ctrl+F and search for text → matches highlighted
    - Type more text
    - Press Ctrl+Z → should undo text, not search highlights
 
-3. **Cursor Position**:
+5. **Cursor Position**:
    - Type text at various positions
    - Press Ctrl+Z multiple times
    - Cursor should remain at the correct position (not jump to top)
 
-4. **Multiple Operations**:
+6. **Multiple Operations**:
    - Type, delete, type more text
    - Press Ctrl+Z multiple times
    - Each undo should revert one logical text change
@@ -154,23 +240,26 @@ See `ScriptInterpreter/scripts/test_undo.ebs` for detailed test procedures:
 - ✅ Redo works correctly
 - ✅ History limit prevents memory issues
 - ✅ Observable properties update correctly
+- ✅ **Word-level undo** (entire words, not individual characters)
+- ✅ **Find bar preserves undo history** (Ctrl+F doesn't clear history)
 
 ## Security Review
 - **CodeQL Scan**: No security issues found
 - **Code Review**: All identified issues addressed
 
 ## Performance Considerations
-- **Memory**: Limited to ~1000 changes × average change size
+- **Memory**: Limited to ~1000 changes × average change size (word-level merging reduces memory usage)
 - **CPU**: O(1) for undo/redo operations
 - **CPU**: O(1) for adding new changes (including history limit enforcement)
+- **CPU**: O(1) for change merging (constant time checks)
 - **Subscription**: Event stream filtering is efficient (built into ReactFX)
 
 ## Future Enhancements
 Possible improvements (not currently needed):
-1. Smart change merging (merge consecutive single-character insertions)
+1. ~~Smart change merging (merge consecutive single-character insertions)~~ ✅ Implemented
 2. Configurable history limit
 3. Persistent undo history across sessions
-4. Change grouping by time intervals
+4. Configurable merge timeout (currently 500ms)
 
 ## References
 - RichTextFX Documentation: https://github.com/FXMisc/RichTextFX
