@@ -145,6 +145,8 @@ See `ScriptInterpreter/src/main/java/com/eb/script/syntax_ebnf.txt` for the comp
 
 ### When Adding New Features
 
+**IMPORTANT**: If solving a problem requires creating a new keyword, data type, event, or builtin that was not explicitly asked for, first get feedback on how to proceed before implementing.
+
 1. **Built-in Functions**: Add to `Builtins.java` and register in the interpreter's environment
 2. **Language Constructs**: Update lexer tokens, parser rules, and interpreter execution logic
 3. **Database Adapters**: Implement the `DbAdapter` interface

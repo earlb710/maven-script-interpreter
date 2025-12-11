@@ -100,6 +100,7 @@ Testing and Scripts
   - Test scripts with parser validation before committing
 
 Documentation and Maintenance
+- **IMPORTANT**: If solving a problem requires creating a new keyword, data type, event, or builtin that was not explicitly asked for, first get feedback on how to proceed before implementing.
 - When changes affect architecture, screen parsing, built-ins, or keywords:
   - Update `ARCHITECTURE.md`.
   - Update any keyword/builtin lookup resources referenced there.
