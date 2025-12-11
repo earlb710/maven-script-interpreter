@@ -3,8 +3,10 @@ package com.eb.ui.cli;
 import com.eb.util.MarkupTokenizer;
 import com.eb.util.Util;
 import java.util.List;
+import java.util.Stack;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.StyleClassedTextArea;
+import org.fxmisc.richtext.model.PlainTextChange;
 
 /**
  *
@@ -13,9 +15,237 @@ import org.fxmisc.richtext.StyleClassedTextArea;
 public class ScriptArea extends StyleClassedTextArea {
 
     private boolean showLineNumbers = true; // default: on
+    
+    // Custom undo/redo stacks that only track text changes
+    private final Stack<TextChange> undoStack = new Stack<>();
+    private final Stack<TextChange> redoStack = new Stack<>();
+    private boolean isUndoingOrRedoing = false;
+    private static final int MAX_UNDO_HISTORY = 1000;
 
     public ScriptArea() {
         setParagraphGraphicFactory(LineNumberFactory.get(this)); // initial state ON
+        
+        // Set up custom undo tracking that only monitors plain text changes
+        // This ignores style changes (syntax highlighting, search highlighting, etc.)
+        plainTextChanges()
+            .filter(change -> !isUndoingOrRedoing && change.getNetLength() != 0)
+            .subscribe(this::recordTextChange);
+    }
+    
+    /**
+     * Record a text change for undo/redo functionality.
+     * Only plain text changes are recorded, style changes are ignored.
+     */
+    private void recordTextChange(PlainTextChange change) {
+        // Clear redo stack when a new change is made
+        redoStack.clear();
+        
+        // Create a record of this change
+        TextChange textChange = new TextChange(
+            change.getPosition(),
+            change.getRemoved(),
+            change.getInserted()
+        );
+        
+        undoStack.push(textChange);
+        
+        // Limit undo history size to prevent memory issues
+        if (undoStack.size() > MAX_UNDO_HISTORY) {
+            undoStack.remove(0);
+        }
+    }
+    
+    /**
+     * Undo the last text change.
+     */
+    @Override
+    public void undo() {
+        if (undoStack.isEmpty()) {
+            return;
+        }
+        
+        TextChange change = undoStack.pop();
+        isUndoingOrRedoing = true;
+        
+        try {
+            // Undo: remove inserted text and restore removed text
+            int start = change.position;
+            int end = start + change.inserted.length();
+            
+            replaceText(start, end, change.removed);
+            
+            // Position cursor at the start of the undone change
+            selectRange(start, start);
+            
+            // Push to redo stack
+            redoStack.push(change);
+        } finally {
+            isUndoingOrRedoing = false;
+        }
+    }
+    
+    /**
+     * Redo the last undone text change.
+     */
+    @Override
+    public void redo() {
+        if (redoStack.isEmpty()) {
+            return;
+        }
+        
+        TextChange change = redoStack.pop();
+        isUndoingOrRedoing = true;
+        
+        try {
+            // Redo: remove the text that was restored and insert the original text
+            int start = change.position;
+            int end = start + change.removed.length();
+            
+            replaceText(start, end, change.inserted);
+            
+            // Position cursor at the end of the redone change
+            int newPos = start + change.inserted.length();
+            selectRange(newPos, newPos);
+            
+            // Push back to undo stack
+            undoStack.push(change);
+        } finally {
+            isUndoingOrRedoing = false;
+        }
+    }
+    
+    /**
+     * Get the custom undo manager (for compatibility with existing code that calls forgetHistory()).
+     * Returns a wrapper that implements the UndoManager interface.
+     */
+    @Override
+    public org.fxmisc.undo.UndoManager<?> getUndoManager() {
+        return new CustomUndoManagerWrapper();
+    }
+    
+    /**
+     * Wrapper class to provide UndoManager interface compatibility.
+     */
+    private class CustomUndoManagerWrapper implements org.fxmisc.undo.UndoManager<Object> {
+        @Override
+        public boolean undo() {
+            if (!undoStack.isEmpty()) {
+                ScriptArea.this.undo();
+                return true;
+            }
+            return false;
+        }
+        
+        @Override
+        public boolean redo() {
+            if (!redoStack.isEmpty()) {
+                ScriptArea.this.redo();
+                return true;
+            }
+            return false;
+        }
+        
+        @Override
+        public boolean isUndoAvailable() {
+            return !undoStack.isEmpty();
+        }
+        
+        @Override
+        public org.reactfx.value.Val<Boolean> undoAvailableProperty() {
+            return org.reactfx.value.Val.constant(!undoStack.isEmpty());
+        }
+        
+        @Override
+        public boolean isRedoAvailable() {
+            return !redoStack.isEmpty();
+        }
+        
+        @Override
+        public org.reactfx.value.Val<Boolean> redoAvailableProperty() {
+            return org.reactfx.value.Val.constant(!redoStack.isEmpty());
+        }
+        
+        @Override
+        public boolean isPerformingAction() {
+            return isUndoingOrRedoing;
+        }
+        
+        @Override
+        public javafx.beans.value.ObservableBooleanValue performingActionProperty() {
+            return new javafx.beans.property.SimpleBooleanProperty(isUndoingOrRedoing);
+        }
+        
+        @Override
+        public boolean isAtMarkedPosition() {
+            return false;
+        }
+        
+        @Override
+        public javafx.beans.value.ObservableBooleanValue atMarkedPositionProperty() {
+            return new javafx.beans.property.SimpleBooleanProperty(false);
+        }
+        
+        @Override
+        public org.fxmisc.undo.UndoManager.UndoPosition getCurrentPosition() {
+            // Return a dummy position as we don't track positions in our simple implementation
+            return new org.fxmisc.undo.UndoManager.UndoPosition() {
+                @Override
+                public void mark() {
+                    // No-op
+                }
+                
+                @Override
+                public boolean isValid() {
+                    return false;
+                }
+            };
+        }
+        
+        @Override
+        public org.reactfx.value.Val<Object> nextUndoProperty() {
+            return org.reactfx.value.Val.constant(null);
+        }
+        
+        @Override
+        public org.reactfx.value.Val<Object> nextRedoProperty() {
+            return org.reactfx.value.Val.constant(null);
+        }
+        
+        @Override
+        public void preventMerge() {
+            // Not needed for our simple implementation
+        }
+        
+        @Override
+        public void forgetHistory() {
+            undoStack.clear();
+            redoStack.clear();
+        }
+        
+        @Override
+        public void mark() {
+            // Not needed for our simple implementation
+        }
+        
+        @Override
+        public void close() {
+            forgetHistory();
+        }
+    }
+    
+    /**
+     * Simple record of a text change for undo/redo.
+     */
+    private static class TextChange {
+        final int position;
+        final String removed;
+        final String inserted;
+        
+        TextChange(int position, String removed, String inserted) {
+            this.position = position;
+            this.removed = removed;
+            this.inserted = inserted;
+        }
     }
 
     /**
