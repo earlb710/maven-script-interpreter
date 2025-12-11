@@ -1,0 +1,432 @@
+// EBS Language Reference v1.0.2.1 - Test script for hgrow/vgrow and Screen.container features
+// This script demonstrates:
+// 1. Items with hgrow property expanding horizontally in HBox containers
+// 2. Items with vgrow property expanding vertically in VBox containers
+// 3. Items with both properties expanding in GridPane containers
+// 4. Screen.container type registration for named areas
+// 5. Accessing container type and .javafx properties
+
+// Test 1: HBox with hgrow - horizontal expansion
+screen testHgrow = {
+    "title": "Test 1: HGrow - Horizontal Expansion",
+    "width": 700,
+    "height": 250,
+    "area": [
+        {
+            "name": "mainContainer",
+            "type": "vbox",
+            "spacing": "10",
+            "padding": "15",
+            "areas": [
+                {
+                    "name": "titleArea",
+                    "type": "hbox",
+                    "spacing": "5",
+                    "items": [
+                        {
+                            "name": "titleLabel",
+                            "display": {
+                                "type": "label",
+                                "labelText": "Instructions: Resize window to see middle field expand horizontally →"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "testHbox",
+                    "type": "hbox",
+                    "spacing": "5",
+                    "items": [
+                        {
+                            "name": "fixedField1",
+                            "varRef": "field1",
+                            "display": {
+                                "type": "textfield",
+                                "labelText": "Fixed:"
+                            }
+                        },
+                        {
+                            "name": "growField",
+                            "varRef": "field2",
+                            "hgrow": "ALWAYS",
+                            "display": {
+                                "type": "textfield",
+                                "labelText": "Grows Horizontally:"
+                            }
+                        },
+                        {
+                            "name": "fixedField2",
+                            "varRef": "field3",
+                            "display": {
+                                "type": "textfield",
+                                "labelText": "Fixed:"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "vars": [
+        {"name": "field1", "type": "string", "default": "Fixed width"},
+        {"name": "field2", "type": "string", "default": "This field should expand horizontally when window is resized"},
+        {"name": "field3", "type": "string", "default": "Also fixed"}
+    ]
+};
+
+// Test 2: VBox with vgrow - vertical expansion
+screen testVgrow = {
+    "title": "Test 2: VGrow - Vertical Expansion",
+    "width": 500,
+    "height": 600,
+    "area": [
+        {
+            "name": "mainContainer",
+            "type": "vbox",
+            "spacing": "10",
+            "padding": "15",
+            "items": [
+                {
+                    "name": "infoLabel",
+                    "display": {
+                        "type": "label",
+                        "labelText": "Instructions: Resize window to see middle textarea expand vertically ↓"
+                    }
+                },
+                {
+                    "name": "fixedArea1",
+                    "varRef": "area1",
+                    "display": {
+                        "type": "textarea",
+                        "labelText": "Fixed Height:",
+                        "height": 3
+                    }
+                },
+                {
+                    "name": "growArea",
+                    "varRef": "area2",
+                    "vgrow": "ALWAYS",
+                    "display": {
+                        "type": "textarea",
+                        "labelText": "Grows Vertically:"
+                    }
+                },
+                {
+                    "name": "fixedField",
+                    "varRef": "area3",
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Fixed:"
+                    }
+                }
+            ]
+        }
+    ],
+    "vars": [
+        {"name": "area1", "type": "string", "default": "Fixed height textarea (3 lines)"},
+        {"name": "area2", "type": "string", "default": "This textarea should expand vertically to fill available space when window is resized"},
+        {"name": "area3", "type": "string", "default": "Fixed single-line field"}
+    ]
+};
+
+// Test 3: GridPane with both hgrow and vgrow
+screen testBothGrow = {
+    "title": "Test 3: Both HGrow and VGrow",
+    "width": 700,
+    "height": 600,
+    "area": [
+        {
+            "name": "mainContainer",
+            "type": "vbox",
+            "spacing": "10",
+            "padding": "15",
+            "areas": [
+                {
+                    "name": "infoArea",
+                    "type": "hbox",
+                    "items": [
+                        {
+                            "name": "infoLabel",
+                            "display": {
+                                "type": "label",
+                                "labelText": "Instructions: Resize window to see bottom-right textarea expand in both directions"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "gridContainer",
+                    "type": "gridpane",
+                    "spacing": "10",
+                    "items": [
+                        {
+                            "name": "topLeft",
+                            "varRef": "tl",
+                            "layoutPos": "0,0",
+                            "display": {
+                                "type": "textfield",
+                                "labelText": "Top Left:"
+                            }
+                        },
+                        {
+                            "name": "topRight",
+                            "varRef": "tr",
+                            "layoutPos": "0,1",
+                            "hgrow": "ALWAYS",
+                            "display": {
+                                "type": "textfield",
+                                "labelText": "Grows Horizontally:"
+                            }
+                        },
+                        {
+                            "name": "middleLeft",
+                            "varRef": "ml",
+                            "layoutPos": "1,0",
+                            "vgrow": "ALWAYS",
+                            "display": {
+                                "type": "textarea",
+                                "labelText": "Grows Vertically:"
+                            }
+                        },
+                        {
+                            "name": "middleRight",
+                            "varRef": "mr",
+                            "layoutPos": "1,1",
+                            "hgrow": "ALWAYS",
+                            "vgrow": "ALWAYS",
+                            "display": {
+                                "type": "textarea",
+                                "labelText": "Grows Both:"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "vars": [
+        {"name": "tl", "type": "string", "default": "Fixed"},
+        {"name": "tr", "type": "string", "default": "Expands horizontally"},
+        {"name": "ml", "type": "string", "default": "Expands vertically"},
+        {"name": "mr", "type": "string", "default": "Expands both horizontally and vertically - resize window to see effect"}
+    ]
+};
+
+// Test 4: Item without label but with hgrow
+screen testNoLabelHgrow = {
+    "title": "Test 4: HGrow Without Label",
+    "width": 600,
+    "height": 200,
+    "area": [
+        {
+            "name": "mainContainer",
+            "type": "vbox",
+            "spacing": "10",
+            "padding": "15",
+            "areas": [
+                {
+                    "name": "infoArea",
+                    "type": "hbox",
+                    "items": [
+                        {
+                            "name": "infoLabel",
+                            "display": {
+                                "type": "label",
+                                "labelText": "Instructions: Resize window to see middle field (no label) expand horizontally"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "buttonBox",
+                    "type": "hbox",
+                    "spacing": "5",
+                    "disableLabelAlignment": true,
+                    "items": [
+                        {
+                            "name": "btn1",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Fixed Button"
+                            }
+                        },
+                        {
+                            "name": "growFieldNoLabel",
+                            "varRef": "growField",
+                            "hgrow": "ALWAYS",
+                            "display": {
+                                "type": "textfield"
+                            }
+                        },
+                        {
+                            "name": "btn2",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Another Fixed"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "vars": [
+        {"name": "growField", "type": "string", "default": "This field should expand horizontally"}
+    ]
+};
+
+// Test 5: Screen.container type demonstration
+screen testContainerTypes = {
+    "title": "Test 5: Screen.container Types",
+    "width": 700,
+    "height": 500,
+    "area": [
+        {
+            "name": "outerContainer",
+            "type": "vbox",
+            "spacing": "15",
+            "padding": "20",
+            "areas": [
+                {
+                    "name": "infoBox",
+                    "type": "hbox",
+                    "spacing": "5",
+                    "items": [
+                        {
+                            "name": "info",
+                            "display": {
+                                "type": "label",
+                                "labelText": "This screen demonstrates Screen.container types for named areas"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "horizontalBox",
+                    "type": "hbox",
+                    "spacing": "10",
+                    "items": [
+                        {
+                            "name": "hbox1",
+                            "varRef": "field1",
+                            "display": {
+                                "type": "textfield",
+                                "labelText": "Field 1:"
+                            }
+                        },
+                        {
+                            "name": "hbox2",
+                            "varRef": "field2",
+                            "display": {
+                                "type": "textfield",
+                                "labelText": "Field 2:"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "verticalBox",
+                    "type": "vbox",
+                    "spacing": "8",
+                    "items": [
+                        {
+                            "name": "vbox1",
+                            "varRef": "text1",
+                            "display": {
+                                "type": "textarea",
+                                "labelText": "Text Area:",
+                                "height": 3
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "gridLayout",
+                    "type": "gridpane",
+                    "spacing": "10",
+                    "items": [
+                        {
+                            "name": "grid1",
+                            "varRef": "g1",
+                            "layoutPos": "0,0",
+                            "display": {
+                                "type": "textfield",
+                                "labelText": "A:"
+                            }
+                        },
+                        {
+                            "name": "grid2",
+                            "varRef": "g2",
+                            "layoutPos": "0,1",
+                            "display": {
+                                "type": "textfield",
+                                "labelText": "B:"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "vars": [
+        {"name": "field1", "type": "string", "default": "HBox field 1"},
+        {"name": "field2", "type": "string", "default": "HBox field 2"},
+        {"name": "text1", "type": "string", "default": "VBox text area"},
+        {"name": "g1", "type": "string", "default": "Grid A"},
+        {"name": "g2", "type": "string", "default": "Grid B"}
+    ]
+};
+
+// Show all test screens
+show screen testHgrow;
+show screen testVgrow;
+show screen testBothGrow;
+show screen testNoLabelHgrow;
+show screen testContainerTypes;
+
+print("=== Test Script Execution Summary ===");
+print("");
+print("Opened 5 test screens demonstrating:");
+print("");
+print("1. testHgrow: Field with hgrow=ALWAYS in HBox");
+print("   - Middle field expands horizontally when window is resized");
+print("   - Named area 'testHbox' registered as Screen.container (type: hbox)");
+print("");
+print("2. testVgrow: TextArea with vgrow=ALWAYS in VBox");
+print("   - Middle textarea expands vertically when window is resized");
+print("   - Named area 'mainContainer' registered as Screen.container (type: vbox)");
+print("");
+print("3. testBothGrow: TextArea with both hgrow and vgrow in GridPane");
+print("   - Bottom-right textarea expands in both directions");
+print("   - Named area 'gridContainer' registered as Screen.container (type: gridpane)");
+print("");
+print("4. testNoLabelHgrow: Field without label with hgrow in HBox");
+print("   - Field without label expands horizontally");
+print("   - Named area 'buttonBox' registered as Screen.container (type: hbox)");
+print("");
+print("5. testContainerTypes: Multiple named containers");
+print("   - Each named area (outerContainer, infoBox, horizontalBox, verticalBox, gridLayout)");
+print("     is registered as Screen.container with its specific type");
+print("");
+print("=== Screen.container Type Information ===");
+print("");
+print("Named areas are registered as Screen.container with:");
+print("  - Container type property (hbox, vbox, gridpane, etc.)");
+print("  - .javafx property showing all major attributes:");
+print("    * Size properties (width, height, min/max/pref)");
+print("    * Position and padding");
+print("    * Container-specific properties (spacing, alignment, gaps)");
+print("    * Style, visibility, and child count");
+print("");
+print("Note: Auto-generated wrappers (for label alignment) are NOT registered");
+print("      Only explicitly named areas in the screen JSON are registered");
+print("");
+print("=== How to Test ===");
+print("");
+print("1. Resize each window to see the growth behavior");
+print("2. Fields/areas with hgrow expand horizontally");
+print("3. Fields/areas with vgrow expand vertically");
+print("4. Fields/areas with both expand in both directions");
+print("5. Label wrappers properly propagate growth properties to parent containers");
+print("");
+print("Test completed successfully!");
