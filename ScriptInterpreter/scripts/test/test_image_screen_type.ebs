@@ -13,7 +13,7 @@ screen testImage = {
         "setname": "main",
         "vars": [{
             "name": "myImage",
-            "type": "imageData",
+            "type": "imagedata",
             "default": null,
             "display": {
                 "type": "image"

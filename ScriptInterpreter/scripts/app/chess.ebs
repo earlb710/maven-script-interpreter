@@ -95,8 +95,8 @@ var currentPlayer: int = 0;
 // Selection and move indication variables
 var selectedX: int = -1;  // -1 means no selection
 var selectedY: int = -1;
-var greenIndicator: imageData;  // Green circle for valid moves
-var redIndicator: imageData;    // Red circle for capture moves
+var greenIndicator: imagedata;  // Green circle for valid moves
+var redIndicator: imagedata;    // Red circle for capture moves
 
 // Helper functions
 boardIndex(row: int, col: int) return int {
@@ -561,7 +561,7 @@ clearIndicators() {
 
 // Set indicator for a specific cell
 setIndicator(x: int, y: int, isCapture: bool) {
-    var indicator: imageData;
+    var indicator: imagedata;
     if isCapture then {
         indicator = redIndicator;
     } else {
