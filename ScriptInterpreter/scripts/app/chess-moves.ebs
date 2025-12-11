@@ -9,7 +9,7 @@
 //   - Main validMoves() function that determines legal moves for any piece
 
 // Helper function to create a posType record from x, y coordinates
-createPos(x: int, y: int) {
+createPos(x: int, y: int) return posType {
     var jsonStr: string = '{"x": ' + x + ', "y": ' + y + '}';
     var jsonData: json = call json.jsonfromstring(jsonStr);
     var pos: posType = record(jsonData);
@@ -17,7 +17,7 @@ createPos(x: int, y: int) {
 }
 
 // Get all possible moves for a pawn at given position
-getPawnMoves(x: int, y: int, color: int) {
+getPawnMoves(x: int, y: int, color: int) return posType[] {
     var moves: posType[];
     var direction: int;
     var startRow: int;
@@ -86,7 +86,7 @@ getPawnMoves(x: int, y: int, color: int) {
 }
 
 // Get all possible moves for a knight at given position
-getKnightMoves(x: int, y: int) {
+getKnightMoves(x: int, y: int) return posType[] {
     var moves: posType[];
     var offsets: int[16];
     
@@ -114,7 +114,7 @@ getKnightMoves(x: int, y: int) {
 }
 
 // Get all possible moves for a king at given position
-getKingMoves(x: int, y: int) {
+getKingMoves(x: int, y: int) return posType[] {
     var moves: posType[];
     var offsets: int[16];
     
@@ -142,7 +142,7 @@ getKingMoves(x: int, y: int) {
 }
 
 // Get all possible moves for a rook at given position
-getRookMoves(x: int, y: int) {
+getRookMoves(x: int, y: int) return posType[] {
     var moves: posType[];
     var directions: int[8];
     
@@ -185,7 +185,7 @@ getRookMoves(x: int, y: int) {
 }
 
 // Get all possible moves for a bishop at given position
-getBishopMoves(x: int, y: int) {
+getBishopMoves(x: int, y: int) return posType[] {
     var moves: posType[];
     var directions: int[8];
     
@@ -228,7 +228,7 @@ getBishopMoves(x: int, y: int) {
 }
 
 // Get all possible moves for a queen at given position
-getQueenMoves(x: int, y: int) {
+getQueenMoves(x: int, y: int) return posType[] {
     var moves: posType[];
     
     // Queen moves = Rook moves + Bishop moves
@@ -251,7 +251,7 @@ getQueenMoves(x: int, y: int) {
 
 // Main function: Get all valid moves for a piece at the given position
 // Returns a posType array of valid moves on the board
-validMoves(x: int, y: int) {
+validMoves(x: int, y: int) return posType[] {
     var validMovesList: posType[];
     var allMoves: posType[];
     
