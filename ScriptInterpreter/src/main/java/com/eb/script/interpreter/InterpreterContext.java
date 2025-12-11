@@ -221,11 +221,17 @@ public class InterpreterContext {
     }
 
     public ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenContainerType> getScreenContainerTypes(String screen) {
-        return screenContainerTypes.get(screen != null ? screen.toLowerCase() : null);
+        if (screen == null) {
+            return null;
+        }
+        return screenContainerTypes.get(screen.toLowerCase());
     }
 
     public void setScreenContainerTypes(String screen, ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenContainerType> val) {
-        screenContainerTypes.put(screen != null ? screen.toLowerCase() : null, val);
+        if (screen == null) {
+            return;
+        }
+        screenContainerTypes.put(screen.toLowerCase(), val);
     }
 
     public Set<String> getScreensBeingCreated() {
