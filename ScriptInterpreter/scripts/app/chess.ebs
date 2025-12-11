@@ -19,9 +19,6 @@
 // Usage:
 //   Run in EBS Console: /open scripts/app/chess.ebs then Ctrl+Enter
 
-// Import chess move calculation functions
-import "chess-moves.ebs";
-
 // Define the chess cell bitmap type for bit-level field access
 ChessCell typeof bitmap { cellColor: 0, pieceType: 1-6, pieceColor: 7 };
 
@@ -135,6 +132,10 @@ isOccupiedByColor(x: int, y: int, color: int) {
     var cell = ChessCell(cellValue);
     return cell.pieceType != EMPTY && cell.pieceColor == color;
 }
+
+// Import chess move calculation functions
+// Import happens here after types and helper functions are defined
+import "chess-moves.ebs";
 
 // Create indicator images using canvas
 createIndicators() {
