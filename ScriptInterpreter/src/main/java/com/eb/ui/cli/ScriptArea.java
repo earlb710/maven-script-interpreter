@@ -4,6 +4,8 @@ import com.eb.util.MarkupTokenizer;
 import com.eb.util.Util;
 import java.util.List;
 import java.util.Stack;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.BooleanProperty;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.StyleClassedTextArea;
 import org.fxmisc.richtext.model.PlainTextChange;
@@ -21,6 +23,11 @@ public class ScriptArea extends StyleClassedTextArea {
     private final Stack<TextChange> redoStack = new Stack<>();
     private boolean isUndoingOrRedoing = false;
     private static final int MAX_UNDO_HISTORY = 1000;
+    
+    // Observable properties for undo/redo state
+    private final BooleanProperty undoAvailable = new SimpleBooleanProperty(false);
+    private final BooleanProperty redoAvailable = new SimpleBooleanProperty(false);
+    private final BooleanProperty performingAction = new SimpleBooleanProperty(false);
 
     public ScriptArea() {
         setParagraphGraphicFactory(LineNumberFactory.get(this)); // initial state ON
@@ -39,6 +46,7 @@ public class ScriptArea extends StyleClassedTextArea {
     private void recordTextChange(PlainTextChange change) {
         // Clear redo stack when a new change is made
         redoStack.clear();
+        redoAvailable.set(false);
         
         // Create a record of this change
         TextChange textChange = new TextChange(
@@ -48,6 +56,7 @@ public class ScriptArea extends StyleClassedTextArea {
         );
         
         undoStack.push(textChange);
+        undoAvailable.set(true);
         
         // Limit undo history size to prevent memory issues
         if (undoStack.size() > MAX_UNDO_HISTORY) {
@@ -66,6 +75,7 @@ public class ScriptArea extends StyleClassedTextArea {
         
         TextChange change = undoStack.pop();
         isUndoingOrRedoing = true;
+        performingAction.set(true);
         
         try {
             // Undo: remove inserted text and restore removed text
@@ -79,8 +89,13 @@ public class ScriptArea extends StyleClassedTextArea {
             
             // Push to redo stack
             redoStack.push(change);
+            
+            // Update observable properties
+            undoAvailable.set(!undoStack.isEmpty());
+            redoAvailable.set(true);
         } finally {
             isUndoingOrRedoing = false;
+            performingAction.set(false);
         }
     }
     
@@ -95,6 +110,7 @@ public class ScriptArea extends StyleClassedTextArea {
         
         TextChange change = redoStack.pop();
         isUndoingOrRedoing = true;
+        performingAction.set(true);
         
         try {
             // Redo: remove the text that was restored and insert the original text
@@ -109,8 +125,13 @@ public class ScriptArea extends StyleClassedTextArea {
             
             // Push back to undo stack
             undoStack.push(change);
+            
+            // Update observable properties
+            undoAvailable.set(true);
+            redoAvailable.set(!redoStack.isEmpty());
         } finally {
             isUndoingOrRedoing = false;
+            performingAction.set(false);
         }
     }
     
@@ -152,7 +173,7 @@ public class ScriptArea extends StyleClassedTextArea {
         
         @Override
         public org.reactfx.value.Val<Boolean> undoAvailableProperty() {
-            return org.reactfx.value.Val.constant(!undoStack.isEmpty());
+            return org.reactfx.value.Val.wrap(undoAvailable);
         }
         
         @Override
@@ -162,7 +183,7 @@ public class ScriptArea extends StyleClassedTextArea {
         
         @Override
         public org.reactfx.value.Val<Boolean> redoAvailableProperty() {
-            return org.reactfx.value.Val.constant(!redoStack.isEmpty());
+            return org.reactfx.value.Val.wrap(redoAvailable);
         }
         
         @Override
@@ -172,7 +193,7 @@ public class ScriptArea extends StyleClassedTextArea {
         
         @Override
         public javafx.beans.value.ObservableBooleanValue performingActionProperty() {
-            return new javafx.beans.property.SimpleBooleanProperty(isUndoingOrRedoing);
+            return performingAction;
         }
         
         @Override
@@ -182,7 +203,8 @@ public class ScriptArea extends StyleClassedTextArea {
         
         @Override
         public javafx.beans.value.ObservableBooleanValue atMarkedPositionProperty() {
-            return new javafx.beans.property.SimpleBooleanProperty(false);
+            // Create a constant property that never changes
+            return new SimpleBooleanProperty(false);
         }
         
         @Override
@@ -220,6 +242,8 @@ public class ScriptArea extends StyleClassedTextArea {
         public void forgetHistory() {
             undoStack.clear();
             redoStack.clear();
+            undoAvailable.set(false);
+            redoAvailable.set(false);
         }
         
         @Override
@@ -235,17 +259,9 @@ public class ScriptArea extends StyleClassedTextArea {
     
     /**
      * Simple record of a text change for undo/redo.
+     * Using a record provides automatic equals(), hashCode(), and toString() implementations.
      */
-    private static class TextChange {
-        final int position;
-        final String removed;
-        final String inserted;
-        
-        TextChange(int position, String removed, String inserted) {
-            this.position = position;
-            this.removed = removed;
-            this.inserted = inserted;
-        }
+    private static record TextChange(int position, String removed, String inserted) {
     }
 
     /**

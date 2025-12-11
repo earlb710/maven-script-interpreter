@@ -1,0 +1,21 @@
+// Test script for custom undo functionality
+// 
+// How to test the custom undo manager:
+// 1. Open this file in the script editor
+// 2. Type some text in the editor (syntax highlighting will be applied)
+// 3. Press Ctrl+Z to undo - it should undo only the text you typed, not the highlighting
+// 4. Press Ctrl+Y to redo - it should redo the text change
+// 5. Use Ctrl+F to search for text - highlighting will be applied to matches
+// 6. Type more text - the search highlights should not interfere with undo
+// 7. Press Ctrl+Z - it should undo the text you just typed, not the search highlighting
+//
+// Expected behavior:
+// - Undo/redo should only affect text changes, not style/highlighting changes
+// - Cursor should stay at the correct position after undo/redo
+// - No cursor jumping to top of document
+// - Search highlighting should not pollute the undo stack
+
+var string message = "Hello, World!"
+print(message)
+
+// Type more text below this line and test undo...
