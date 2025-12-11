@@ -1,0 +1,307 @@
+// Chess Move Calculation Functions
+// ==================================
+// This file contains all the move calculation logic for chess pieces.
+// It is imported by chess.ebs.
+//
+// Functions:
+//   - Helper functions for board access and position validation
+//   - Move calculation for each piece type (pawn, knight, bishop, rook, queen, king)
+//   - Main validMoves() function that determines legal moves for any piece
+
+// Helper function to create a posType record from x, y coordinates
+createPos(x: int, y: int) {
+    var jsonStr: string = '{"x": ' + x + ', "y": ' + y + '}';
+    var jsonData: json = call json.jsonfromstring(jsonStr);
+    var pos: posType = record(jsonData);
+    return pos;
+}
+
+// Get all possible moves for a pawn at given position
+getPawnMoves(x: int, y: int, color: int) {
+    var moves: posType[];
+    var direction: int;
+    var startRow: int;
+    
+    if color == WHITE then {
+        direction = -1;
+        startRow = 6;
+    } else {
+        direction = 1;
+        startRow = 1;
+    }
+    
+    // Move forward one square
+    var forwardX: int = x;
+    var forwardY: int = y + direction;
+    if call isValidPosition(forwardX, forwardY) then {
+        var cellValue: int = call getPieceAt(forwardX, forwardY);
+        var cell = ChessCell(cellValue);
+        if cell.pieceType == EMPTY then {
+            var forward: posType = call createPos(forwardX, forwardY);
+            call array.add(moves, forward);
+            
+            // Move forward two squares from starting position
+            if y == startRow then {
+                var forward2X: int = x;
+                var forward2Y: int = y + (direction * 2);
+                var cellValue2: int = call getPieceAt(forward2X, forward2Y);
+                var cell2 = ChessCell(cellValue2);
+                if cell2.pieceType == EMPTY then {
+                    var forward2: posType = call createPos(forward2X, forward2Y);
+                    call array.add(moves, forward2);
+                }
+            }
+        }
+    }
+    
+    // Calculate enemy color once
+    var enemyColor: int;
+    if color == WHITE then {
+        enemyColor = BLACK;
+    } else {
+        enemyColor = WHITE;
+    }
+    
+    // Capture left diagonal
+    var captureLeftX: int = x - 1;
+    var captureLeftY: int = y + direction;
+    if call isValidPosition(captureLeftX, captureLeftY) then {
+        if call isOccupiedByColor(captureLeftX, captureLeftY, enemyColor) then {
+            var captureLeft: posType = call createPos(captureLeftX, captureLeftY);
+            call array.add(moves, captureLeft);
+        }
+    }
+    
+    // Capture right diagonal
+    var captureRightX: int = x + 1;
+    var captureRightY: int = y + direction;
+    if call isValidPosition(captureRightX, captureRightY) then {
+        if call isOccupiedByColor(captureRightX, captureRightY, enemyColor) then {
+            var captureRight: posType = call createPos(captureRightX, captureRightY);
+            call array.add(moves, captureRight);
+        }
+    }
+    
+    return moves;
+}
+
+// Get all possible moves for a knight at given position
+getKnightMoves(x: int, y: int) {
+    var moves: posType[];
+    var offsets: int[16];
+    
+    // Knight move offsets: 8 possible L-shaped moves
+    offsets[0] = -2; offsets[1] = -1;  // up 2, left 1
+    offsets[2] = -2; offsets[3] = 1;   // up 2, right 1
+    offsets[4] = 2; offsets[5] = -1;   // down 2, left 1
+    offsets[6] = 2; offsets[7] = 1;    // down 2, right 1
+    offsets[8] = -1; offsets[9] = -2;  // up 1, left 2
+    offsets[10] = -1; offsets[11] = 2; // up 1, right 2
+    offsets[12] = 1; offsets[13] = -2; // down 1, left 2
+    offsets[14] = 1; offsets[15] = 2;  // down 1, right 2
+    
+    var i: int = 0;
+    for (i = 0; i < 16; i = i + 2) {
+        var newY: int = y + offsets[i];
+        var newX: int = x + offsets[i + 1];
+        if call isValidPosition(newX, newY) then {
+            var newPos: posType = call createPos(newX, newY);
+            call array.add(moves, newPos);
+        }
+    }
+    
+    return moves;
+}
+
+// Get all possible moves for a king at given position
+getKingMoves(x: int, y: int) {
+    var moves: posType[];
+    var offsets: int[16];
+    
+    // King move offsets: 8 directions (one square each)
+    offsets[0] = -1; offsets[1] = -1;  // up-left
+    offsets[2] = -1; offsets[3] = 0;   // up
+    offsets[4] = -1; offsets[5] = 1;   // up-right
+    offsets[6] = 0; offsets[7] = -1;   // left
+    offsets[8] = 0; offsets[9] = 1;    // right
+    offsets[10] = 1; offsets[11] = -1; // down-left
+    offsets[12] = 1; offsets[13] = 0;  // down
+    offsets[14] = 1; offsets[15] = 1;  // down-right
+    
+    var i: int = 0;
+    for (i = 0; i < 16; i = i + 2) {
+        var newY: int = y + offsets[i];
+        var newX: int = x + offsets[i + 1];
+        if call isValidPosition(newX, newY) then {
+            var newPos: posType = call createPos(newX, newY);
+            call array.add(moves, newPos);
+        }
+    }
+    
+    return moves;
+}
+
+// Get all possible moves for a rook at given position
+getRookMoves(x: int, y: int) {
+    var moves: posType[];
+    var directions: int[8];
+    
+    // Rook move directions: up, down, left, right
+    directions[0] = -1; directions[1] = 0;  // up
+    directions[2] = 1; directions[3] = 0;   // down
+    directions[4] = 0; directions[5] = -1;  // left
+    directions[6] = 0; directions[7] = 1;   // right
+    
+    var d: int = 0;
+    for (d = 0; d < 8; d = d + 2) {
+        var dy: int = directions[d];
+        var dx: int = directions[d + 1];
+        var step: int = 1;
+        var blocked: bool = false;
+        
+        while !blocked {
+            var newY: int = y + (dy * step);
+            var newX: int = x + (dx * step);
+            
+            if call isValidPosition(newX, newY) then {
+                var newPos: posType = call createPos(newX, newY);
+                call array.add(moves, newPos);
+                
+                // Check if blocked by any piece
+                var cellValue: int = call getPieceAt(newX, newY);
+                var cell = ChessCell(cellValue);
+                if cell.pieceType != EMPTY then {
+                    blocked = true;
+                }
+                
+                step = step + 1;
+            } else {
+                blocked = true;
+            }
+        }
+    }
+    
+    return moves;
+}
+
+// Get all possible moves for a bishop at given position
+getBishopMoves(x: int, y: int) {
+    var moves: posType[];
+    var directions: int[8];
+    
+    // Bishop move directions: diagonals
+    directions[0] = -1; directions[1] = -1;  // up-left
+    directions[2] = -1; directions[3] = 1;   // up-right
+    directions[4] = 1; directions[5] = -1;   // down-left
+    directions[6] = 1; directions[7] = 1;    // down-right
+    
+    var d: int = 0;
+    for (d = 0; d < 8; d = d + 2) {
+        var dy: int = directions[d];
+        var dx: int = directions[d + 1];
+        var step: int = 1;
+        var blocked: bool = false;
+        
+        while !blocked {
+            var newY: int = y + (dy * step);
+            var newX: int = x + (dx * step);
+            
+            if call isValidPosition(newX, newY) then {
+                var newPos: posType = call createPos(newX, newY);
+                call array.add(moves, newPos);
+                
+                // Check if blocked by any piece
+                var cellValue: int = call getPieceAt(newX, newY);
+                var cell = ChessCell(cellValue);
+                if cell.pieceType != EMPTY then {
+                    blocked = true;
+                }
+                
+                step = step + 1;
+            } else {
+                blocked = true;
+            }
+        }
+    }
+    
+    return moves;
+}
+
+// Get all possible moves for a queen at given position
+getQueenMoves(x: int, y: int) {
+    var moves: posType[];
+    
+    // Queen moves = Rook moves + Bishop moves
+    var rookMoves: posType[] = call getRookMoves(x, y);
+    var bishopMoves: posType[] = call getBishopMoves(x, y);
+    
+    var i: int = 0;
+    var len: int = rookMoves.length;
+    for (i = 0; i < len; i = i + 1) {
+        call array.add(moves, rookMoves[i]);
+    }
+    
+    len = bishopMoves.length;
+    for (i = 0; i < len; i = i + 1) {
+        call array.add(moves, bishopMoves[i]);
+    }
+    
+    return moves;
+}
+
+// Main function: Get all valid moves for a piece at the given position
+// Returns a posType array of valid moves on the board
+validMoves(x: int, y: int) {
+    var validMovesList: posType[];
+    var allMoves: posType[];
+    
+    // Get the piece at the current position
+    var cellValue: int = call getPieceAt(x, y);
+    if cellValue == -1 then {
+        return validMovesList;  // Empty array for invalid position
+    }
+    
+    var cell = ChessCell(cellValue);
+    var pieceType: int = cell.pieceType;
+    var pieceColor: int = cell.pieceColor;
+    
+    // Get all possible moves based on piece type
+    if pieceType == PAWN then {
+        allMoves = call getPawnMoves(x, y, pieceColor);
+    } else if pieceType == ROOK then {
+        allMoves = call getRookMoves(x, y);
+    } else if pieceType == KNIGHT then {
+        allMoves = call getKnightMoves(x, y);
+    } else if pieceType == BISHOP then {
+        allMoves = call getBishopMoves(x, y);
+    } else if pieceType == QUEEN then {
+        allMoves = call getQueenMoves(x, y);
+    } else if pieceType == KING then {
+        allMoves = call getKingMoves(x, y);
+    } else {
+        return validMovesList;  // Empty piece
+    }
+    
+    // Filter moves to only include valid ones
+    // (don't capture own pieces, stay on board, etc.)
+    var i: int = 0;
+    var len: int = allMoves.length;
+    for (i = 0; i < len; i = i + 1) {
+        var move: posType = allMoves[i];
+        var targetX: int = move.x;
+        var targetY: int = move.y;
+        
+        // Check if target position is valid
+        if call isValidPosition(targetX, targetY) then {
+            var targetCellValue: int = call getPieceAt(targetX, targetY);
+            var targetCell = ChessCell(targetCellValue);
+            
+            // Can move to empty square or capture opponent's piece
+            if targetCell.pieceType == EMPTY || targetCell.pieceColor != pieceColor then {
+                call array.add(validMovesList, move);
+            }
+        }
+    }
+    
+    return validMovesList;
+}
