@@ -17,7 +17,7 @@ createPos(x: int, y: int) return posType {
 }
 
 // Get all possible moves for a pawn at given position
-getPawnMoves(x: int, y: int, color: int) return posType[] {
+getPawnMoves(x: int, y: int, color: int) {
     var moves: posType[];
     var direction: int;
     var startRow: int;
@@ -86,7 +86,7 @@ getPawnMoves(x: int, y: int, color: int) return posType[] {
 }
 
 // Get all possible moves for a knight at given position
-getKnightMoves(x: int, y: int) return posType[] {
+getKnightMoves(x: int, y: int) {
     var moves: posType[];
     var offsets: int[16];
     
@@ -114,7 +114,7 @@ getKnightMoves(x: int, y: int) return posType[] {
 }
 
 // Get all possible moves for a king at given position
-getKingMoves(x: int, y: int) return posType[] {
+getKingMoves(x: int, y: int) {
     var moves: posType[];
     var offsets: int[16];
     
@@ -142,7 +142,7 @@ getKingMoves(x: int, y: int) return posType[] {
 }
 
 // Get all possible moves for a rook at given position
-getRookMoves(x: int, y: int) return posType[] {
+getRookMoves(x: int, y: int) {
     var moves: posType[];
     var directions: int[8];
     
@@ -185,7 +185,7 @@ getRookMoves(x: int, y: int) return posType[] {
 }
 
 // Get all possible moves for a bishop at given position
-getBishopMoves(x: int, y: int) return posType[] {
+getBishopMoves(x: int, y: int) {
     var moves: posType[];
     var directions: int[8];
     
@@ -228,7 +228,7 @@ getBishopMoves(x: int, y: int) return posType[] {
 }
 
 // Get all possible moves for a queen at given position
-getQueenMoves(x: int, y: int) return posType[] {
+getQueenMoves(x: int, y: int) {
     var moves: posType[];
     
     // Queen moves = Rook moves + Bishop moves
@@ -251,7 +251,7 @@ getQueenMoves(x: int, y: int) return posType[] {
 
 // Main function: Get all valid moves for a piece at the given position
 // Returns a posType array of valid moves on the board
-validMoves(x: int, y: int) return posType[] {
+validMoves(x: int, y: int) {
     var validMovesList: posType[];
     var allMoves: posType[];
     
