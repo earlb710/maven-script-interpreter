@@ -2,6 +2,14 @@
 
 This directory contains test scripts for the screen component type system that enables `typeof` introspection, typed variable declarations, and JavaFX component introspection for screen components.
 
+## Overview
+
+The screen component type system provides:
+- **typeof operator**: Returns "Screen.Xxx" format for screen component variables
+- **Type declarations**: Variables can be declared with `screen.xxx` types (e.g., `var x : screen.textfield`)
+- **JavaFX introspection**: Access detailed component information via `.javafx` property
+- **Canvas type**: Uses `screen.canvas` (not `screen.canvasview`) for consistency with canvas datatype
+
 ## Test Scripts
 
 ### 1. test_screen_types_basic.ebs
@@ -194,7 +202,44 @@ JavaFX Component Description:
 
 ---
 
-### 5. screen_component_types_example.ebs (in examples/)
+### 5. test_canvas_screen_type.ebs (NEW)
+**Purpose:** Test canvas type as Screen.Canvas  
+**Description:** Validates the canvas component type simplification:
+- typeof returns "Screen.Canvas" (not "Screen.Canvasview")
+- Type declarations with `screen.canvas` work
+- Case-insensitive support
+
+**Run:**
+```bash
+cd ScriptInterpreter
+mvn exec:java -Dexec.mainClass="com.eb.script.Run" -Dexec.args="scripts/test/test_canvas_screen_type.ebs"
+```
+
+**Expected Output:**
+```
+Canvas Component Type Test
+==========================
+
+TEST 1: typeof returns Screen.Canvas
+-------------------------------------
+typeof testCanvas.myCanvas = Screen.Canvas
+
+TEST 2: Variable declaration with screen.canvas type
+-----------------------------------------------------
+canvasVar declared with type screen.canvas: test value
+
+TEST 3: Case insensitivity
+---------------------------
+canvas1 (screen.canvas) = value1
+canvas2 (Screen.Canvas) = value2
+canvas3 (SCREEN.CANVAS) = value3
+
+✓ All canvas type tests passed!
+```
+
+---
+
+### 6. screen_component_types_example.ebs (in examples/)
 **Purpose:** Practical real-world example  
 **Description:** Demonstrates a user registration form with:
 - Multiple component types (textfield, passwordfield, textarea, checkbox)
@@ -238,6 +283,7 @@ Component Type Inspection:
 All tests validate that `typeof` returns the correct "Screen.Xxx" format:
 ```ebs
 print typeof myScreen.clientText;  // "Screen.Textarea"
+print typeof myCanvas.drawing;     // "Screen.Canvas"
 ```
 
 ### Type Declarations
@@ -245,6 +291,25 @@ All tests demonstrate variable declarations with screen component types:
 ```ebs
 var data : screen.textarea = myScreen.clientText;
 var name : screen.textfield = myScreen.nameField;
+var canvas : screen.canvas = myCanvas.drawing;  // Canvas uses screen.canvas
+```
+
+### Canvas Type Simplification
+Canvas component type uses `screen.canvas` (not `screen.canvasview`):
+```ebs
+screen myCanvas = {
+    "sets": [{
+        "setname": "main",
+        "vars": [{
+            "name": "drawing",
+            "type": "canvas",
+            "display": {"type": "canvasview"}  // Display type in JSON
+        }]
+    }]
+};
+
+print typeof myCanvas.drawing;  // Returns "Screen.Canvas"
+var c : screen.canvas = myCanvas.drawing;  // Type declaration
 ```
 
 ### JavaFX Component Introspection (NEW)
