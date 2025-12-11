@@ -1658,20 +1658,23 @@ public class InterpreterScreen {
             // Data source
             "source",
             // promptHelp can be at item level (gets moved to displayItem)
-            "prompthelp", "prompt_help"
+            "prompthelp", "prompt_help",
+            // Label properties (can be at item level for override/merge behavior)
+            "labeltext", "label_text", "labeltextalignment", "label_text_alignment",
+            "labelposition", "label_position",
+            // Styling properties (can be at item level for override/merge behavior)
+            "labelcolor", "label_color", "labelbold", "label_bold",
+            "labelitalic", "label_italic", "labelfontsize", "label_font_size",
+            "itemfontsize", "item_font_size", "itemcolor", "item_color",
+            "itembold", "item_bold", "itemitalic", "item_italic"
         ));
         
         // Properties that should NOT be at item level (they belong in display object)
         java.util.Set<String> displayOnlyProps = new java.util.HashSet<>(java.util.Arrays.asList(
             "mandatory", "case", "caseformat", "pattern", "min", "max",
-            "labeltext", "label_text", "labeltextalignment", "label_text_alignment",
-            "labelposition", "label_position", "onclick", "on_click",
+            "onclick", "on_click",
             "options", "columns", "displayrecords", "display_records",
             "treeitems", "tree_items", "expandall", "expand_all", "showroot", "show_root",
-            "labelcolor", "label_color", "labelbold", "label_bold",
-            "labelitalic", "label_italic", "labelfontsize", "label_font_size",
-            "itemfontsize", "item_font_size", "itemcolor", "item_color",
-            "itembold", "item_bold", "itemitalic", "item_italic",
             "maxlength", "max_length", "height",
             "fitwidth", "fit_width", "fitheight", "fit_height",
             "preserveratio", "preserve_ratio", "smooth", "scalemode", "scale_mode",
