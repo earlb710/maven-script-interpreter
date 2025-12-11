@@ -7,6 +7,7 @@
 
 
 // Load help data from JSON file
+// Note: Echo is disabled by default in Environment, so resource loading happens silently
 var helpData: json = null;
 try {
     // Read from classpath resources using the new resource loader
