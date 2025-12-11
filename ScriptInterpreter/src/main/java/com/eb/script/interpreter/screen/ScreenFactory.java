@@ -827,7 +827,7 @@ public class ScreenFactory {
                             setStyle(DEBUG_ITEM_NAME_BASE_STYLE);
                         }
                         // Add tooltip with item details from row data
-                        // Array format: [displayTextWithIcon, value, varRef, itemType, rawName, parentArea, displayInfo]
+                        // Array format: [displayTextWithIcon, value, varRef, itemType, rawName, parentArea, displayInfo, allKeys]
                         int rowIndex = getIndex();
                         if (rowIndex >= 0 && rowIndex < getTableView().getItems().size()) {
                             String[] rowData = getTableView().getItems().get(rowIndex);
@@ -836,6 +836,7 @@ public class ScreenFactory {
                             String varRef = rowData.length >= 3 ? rowData[2] : "";
                             String parentArea = rowData.length >= 6 ? rowData[5] : "";
                             String displayInfo = rowData.length >= 7 ? rowData[6] : "";
+                            String allKeys = rowData.length >= 8 ? rowData[7] : "";
                             
                             // Determine state
                             String state = "CLEAN";
@@ -860,6 +861,10 @@ public class ScreenFactory {
                                 tooltipText.append("\nArea: ").append(limitedAreaPath);
                             }
                             tooltipText.append("\nState: ").append(state);
+                            // Add all lookup keys if present
+                            if (allKeys != null && !allKeys.isEmpty()) {
+                                tooltipText.append("\nKeys: ").append(allKeys);
+                            }
                             // Add display info if present
                             if (displayInfo != null && !displayInfo.isEmpty()) {
                                 tooltipText.append("\n---\n").append(displayInfo);
@@ -909,14 +914,29 @@ public class ScreenFactory {
             }
             
             // Populate data - pre-compute display text with icon
-            // Array format: [displayTextWithIcon, value, varRef, itemType, rawName, parentArea, displayInfo]
+            // Array format: [displayTextWithIcon, value, varRef, itemType, rawName, parentArea, displayInfo, allKeys]
+            
+            // Build a map of unique items to all their associated keys
+            // Items can be stored with multiple keys (by name, by varRef, etc.)
+            java.util.Map<AreaItem, java.util.List<String>> itemToKeysMap = new java.util.LinkedHashMap<>();
             java.util.List<String> sortedItemKeys = new java.util.ArrayList<>(screenAreaItems.keySet());
             java.util.Collections.sort(sortedItemKeys, String.CASE_INSENSITIVE_ORDER);
             
             for (String key : sortedItemKeys) {
                 AreaItem item = screenAreaItems.get(key);
-                String displayName = item.name != null ? item.name : key;
-                String valueStr = getScreenItemValue(key, item, context, screenName);
+                itemToKeysMap.computeIfAbsent(item, k -> new java.util.ArrayList<>()).add(key);
+            }
+            
+            // Now display each unique item once with all its associated keys
+            for (java.util.Map.Entry<AreaItem, java.util.List<String>> entry : itemToKeysMap.entrySet()) {
+                AreaItem item = entry.getKey();
+                java.util.List<String> allKeys = entry.getValue();
+                
+                // Use the first key for lookups
+                String primaryKey = allKeys.get(0);
+                
+                String displayName = item.name != null ? item.name : primaryKey;
+                String valueStr = getScreenItemValue(primaryKey, item, context, screenName);
                 String varRef = item.varRef != null ? item.varRef : "";
                 // Get the item type from displayItem or fall back to displayMetadata lookup
                 String itemType = getItemType(item, context, screenName);
@@ -928,19 +948,22 @@ public class ScreenFactory {
                     parentArea = itemToAreaMap.get(itemNameLower);
                 } else {
                     // Try extracting from key format (setName.itemName)
-                    int dotIndex = key.indexOf('.');
+                    int dotIndex = primaryKey.indexOf('.');
                     if (dotIndex > 0) {
-                        parentArea = key.substring(0, dotIndex);
+                        parentArea = primaryKey.substring(0, dotIndex);
                     }
                 }
                 
                 // Build display info string with additional displayItem properties
                 String displayInfo = buildDisplayItemInfo(item, context, screenName, varRef);
                 
+                // Format all keys for tooltip display
+                String allKeysStr = String.join(", ", allKeys);
+                
                 // Pre-compute the display text with icon (no ⚠️ since not changed on initial display)
                 String typeIcon = getItemTypeIcon(itemType);
                 String displayText = typeIcon + " " + displayName;
-                itemsTable.getItems().add(new String[]{displayText, valueStr, varRef, itemType, displayName, parentArea, displayInfo});
+                itemsTable.getItems().add(new String[]{displayText, valueStr, varRef, itemType, displayName, parentArea, displayInfo, allKeysStr});
             }
             
             // Allow table to expand to fill available space
@@ -956,7 +979,7 @@ public class ScreenFactory {
                 row.setOnMouseClicked(event -> {
                     if (!row.isEmpty()) {
                         String[] rowData = row.getItem();
-                        // Array format: [displayTextWithIcon, value, varRef, itemType, rawName, parentArea, displayInfo]
+                        // Array format: [displayTextWithIcon, value, varRef, itemType, rawName, parentArea, displayInfo, allKeys]
                         String displayText = rowData[0];
                         String value = rowData[1];
                         String varRef = rowData.length > 2 ? rowData[2] : "";
@@ -964,6 +987,7 @@ public class ScreenFactory {
                         String rawName = rowData.length > 4 ? rowData[4] : displayText;
                         String parentArea = rowData.length > 5 ? rowData[5] : "";
                         String displayInfo = rowData.length > 6 ? rowData[6] : "";
+                        String allKeys = rowData.length > 7 ? rowData[7] : "";
                         
                         // Determine state (same logic as tooltip)
                         String state = "CLEAN";
@@ -989,6 +1013,10 @@ public class ScreenFactory {
                             clipboardBuilder.append("\nArea: ").append(limitedAreaPath);
                         }
                         clipboardBuilder.append("\nState: ").append(state);
+                        // Add all lookup keys if present
+                        if (allKeys != null && !allKeys.isEmpty()) {
+                            clipboardBuilder.append("\nKeys: ").append(allKeys);
+                        }
                         clipboardBuilder.append("\nValue: ").append(value);
                         // Add display info if present (includes JavaFX info)
                         if (displayInfo != null && !displayInfo.isEmpty()) {
