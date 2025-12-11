@@ -15,7 +15,7 @@ print "";
 
 // Load the test image from resources
 print "Loading test image...";
-var testImage: image = call image.load("src/main/resources/images/test_image.png");
+var testImage: imageData = call image.load("src/main/resources/images/test_image.png");
 print "Image loaded successfully";
 
 // Get image info
@@ -58,9 +58,9 @@ screen imageTestScreen = {
         },
         {
             "name": "testImageVar",
-            "type": "image",
+            "type": "imageData",
             "display": {
-                "type": "imageview",
+                "type": "image",
                 "labelText": "Test Image (Click to convert to B&W):",
                 "fitWidth": 200,
                 "fitHeight": 200,
@@ -177,7 +177,7 @@ print "====================================================================";
 // Function to convert image to black and white when clicked
 convertToBlackAndWhite() return void {
     print "Converting image to black and white...";
-    var grayImage: image = call image.toGrayscale(imageTestScreen.testImageVar);
+    var grayImage: imageData = call image.toGrayscale(imageTestScreen.testImageVar);
     imageTestScreen.testImageVar = grayImage;
     print "Image converted to black and white!";
 }

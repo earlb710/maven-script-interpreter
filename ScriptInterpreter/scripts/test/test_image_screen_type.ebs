@@ -1,0 +1,49 @@
+// Test for image screen component type change
+// Verifies that typeof returns "Screen.Image" and display type is "image"
+
+print "Image Component Type Test";
+print "==========================";
+print "";
+
+screen testImage = {
+    "title": "Image Type Test",
+    "width": 500,
+    "height": 400,
+    "sets": [{
+        "setname": "main",
+        "vars": [{
+            "name": "myImage",
+            "type": "imageData",
+            "default": null,
+            "display": {
+                "type": "image"
+            }
+        }]
+    }]
+};
+
+// Test 1: typeof returns "Screen.Image"
+print "TEST 1: typeof returns Screen.Image";
+print "-------------------------------------";
+print "typeof testImage.myImage = " + typeof testImage.myImage;
+print "";
+
+// Test 2: Variable declaration with screen.image type
+print "TEST 2: Variable declaration with screen.image type";
+print "-----------------------------------------------------";
+var imageVar : screen.image = "test value";
+print "imageVar declared with type screen.image: " + imageVar;
+print "";
+
+// Test 3: Case insensitivity
+print "TEST 3: Case insensitivity";
+print "---------------------------";
+var img1 : screen.image = "value1";
+var img2 : Screen.Image = "value2";
+var img3 : SCREEN.IMAGE = "value3";
+print "img1 (screen.image) = " + img1;
+print "img2 (Screen.Image) = " + img2;
+print "img3 (SCREEN.IMAGE) = " + img3;
+print "";
+
+print "✓ All image type tests passed!";

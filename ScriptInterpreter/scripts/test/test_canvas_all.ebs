@@ -480,7 +480,7 @@ screen canvasDisplayScreen = {
             "name": "canvasDisplay",
             "type": "canvas",
             "display": {
-                "type": "canvasview",
+                "type": "canvas",
                 "labelText": "Complex Scene (House with Sun and Ground):",
                 "fitWidth": 400,
                 "fitHeight": 300,

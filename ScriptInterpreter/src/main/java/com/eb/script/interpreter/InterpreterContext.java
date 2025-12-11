@@ -45,6 +45,7 @@ public class InterpreterContext {
     private final Map<String, Interpreter.CursorSpec> cursorSpecs = new java.util.HashMap<>();
     private final ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> screenVars = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, ConcurrentHashMap<String, DataType>> screenVarTypes = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenComponentType>> screenComponentTypes = new ConcurrentHashMap<>();
     private final Map<String, DisplayItem> displayMetadata = new java.util.HashMap<>();
     private final Map<String, List<AreaDefinition>> screenAreas = new java.util.HashMap<>();
     private final Deque<String> connectionStack = new java.util.ArrayDeque<>();
@@ -208,6 +209,14 @@ public class InterpreterContext {
 
     public void setScreenVarTypes(String screen, ConcurrentHashMap<String, DataType> val) {
         screenVarTypes.put(screen.toLowerCase(), val);
+    }
+
+    public ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenComponentType> getScreenComponentTypes(String screen) {
+        return screenComponentTypes.get(screen.toLowerCase());
+    }
+
+    public void setScreenComponentTypes(String screen, ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenComponentType> val) {
+        screenComponentTypes.put(screen.toLowerCase(), val);
     }
 
     public Set<String> getScreensBeingCreated() {

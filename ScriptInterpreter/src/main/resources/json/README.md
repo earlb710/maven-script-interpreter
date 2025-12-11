@@ -55,7 +55,7 @@ Schema for display metadata (UI control types and validation).
 - Color: colorpicker
 - Button: button
 - Display: label, labeltext, text, hyperlink, separator
-- Media: imageview, mediaview, webview, chart
+- Media: image, mediaview, webview, chart
 - Progress: progressbar, progressindicator
 - Custom: custom
 

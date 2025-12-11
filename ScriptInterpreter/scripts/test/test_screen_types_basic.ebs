@@ -1,0 +1,52 @@
+// Basic test for screen component type system
+// Quick validation of typeof and type declarations
+
+print "Basic Screen Component Type Test";
+print "=================================";
+
+// Create a simple screen
+screen testForm = {
+    "title": "Basic Test",
+    "width": 300,
+    "height": 200,
+    "sets": [{
+        "setname": "inputs",
+        "vars": [
+            {
+                "name": "username",
+                "type": "string",
+                "default": "admin",
+                "display": {"type": "textfield"}
+            },
+            {
+                "name": "notes",
+                "type": "string",
+                "default": "Enter notes here",
+                "display": {"type": "textarea"}
+            }
+        ]
+    }]
+};
+
+// Test 1: typeof operator
+print "";
+print "1. Testing typeof operator:";
+print "   typeof testForm.username = " + typeof testForm.username;
+print "   typeof testForm.notes = " + typeof testForm.notes;
+
+// Test 2: Variable declarations
+print "";
+print "2. Testing variable declarations:";
+var user : screen.textfield = testForm.username;
+var comments : screen.textarea = testForm.notes;
+print "   user = " + user;
+print "   comments = " + comments;
+
+// Test 3: Value assignment
+print "";
+print "3. Testing value assignment:";
+testForm.username = "newuser";
+print "   testForm.username = " + testForm.username;
+
+print "";
+print "✓ Basic test passed!";

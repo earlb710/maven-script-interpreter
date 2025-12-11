@@ -82,6 +82,8 @@ All identifiers are normalized to lowercase internally, so `myVariable`, `MyVari
 | `record` | Structured type with named fields | `record {name: string, age: int}` |
 | `bitmap` | Byte with named bit fields (8-bit, 0-7) | `bitmap { flag: 0, status: 1-3 }` |
 | `intmap` | Integer with named bit fields (32-bit, 0-31) | `intmap { enabled: 0, mode: 1-7, id: 8-31 }` |
+| `imageData` | Image data type | Image data |
+| `canvas` | Canvas graphics type | Canvas drawing surface |
 | `array` | Generic array | `array[10]`, `array[*]` |
 | `queue` | FIFO queue (use `queue.type`) | `queue.string`, `queue.int` |
 

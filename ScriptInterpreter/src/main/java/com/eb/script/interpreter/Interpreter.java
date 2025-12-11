@@ -20,6 +20,7 @@ import com.eb.script.interpreter.expression.ArrayExpression;
 import com.eb.script.interpreter.expression.ArrayLiteralExpression;
 import com.eb.script.interpreter.expression.ExpressionVisitor;
 import com.eb.script.interpreter.expression.Expression;
+import com.eb.script.interpreter.expression.PropertyExpression;
 import com.eb.script.interpreter.expression.QueueExpression;
 import com.eb.script.interpreter.statement.StatementVisitor;
 import com.eb.script.interpreter.statement.Statement;
@@ -1144,6 +1145,22 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     public Object visitUnaryExpression(UnaryExpression expr) throws InterpreterError {
         // Special handling for typeof operator
         if (expr.operator.type == EbsTokenType.TYPEOF) {
+            // Check if this is a screen component property access (e.g., typeof myScreen.clientText)
+            if (expr.right instanceof PropertyExpression propExpr) {
+                // Check if the object is a variable expression (screen name)
+                if (propExpr.object instanceof VariableExpression varExpr) {
+                    String screenName = varExpr.name.toLowerCase(java.util.Locale.ROOT);
+                    String varName = propExpr.propertyName.toLowerCase(java.util.Locale.ROOT);
+                    
+                    // Check if this is a screen variable with component type
+                    ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenComponentType> componentTypes = context.getScreenComponentTypes(screenName);
+                    if (componentTypes != null && componentTypes.containsKey(varName)) {
+                        com.eb.script.interpreter.screen.ScreenComponentType componentType = componentTypes.get(varName);
+                        return componentType.getFullTypeName();
+                    }
+                }
+            }
+            
             // If the operand is a variable, we can look up its type metadata
             if (expr.right instanceof VariableExpression) {
                 VariableExpression varExpr = (VariableExpression) expr.right;
@@ -1935,7 +1952,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
 
     @Override
     public Object visitPropertyExpression(com.eb.script.interpreter.expression.PropertyExpression expr) throws InterpreterError {
-        // Check if this is a screen variable access pattern (screenName.varName)
+        // Check if this is a screen variable access pattern (screenName.varName or screenName.varName.javafx)
         if (expr.object instanceof com.eb.script.interpreter.expression.VariableExpression varExpr) {
             String screenName = varExpr.name.toLowerCase(java.util.Locale.ROOT);
             ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars(screenName);
@@ -1981,6 +1998,28 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 
                 // Extract and return the field value
                 return field.getValue(byteValue);
+            }
+        }
+        
+        // Check if this is a screen variable's .javafx property access (screenName.varName.javafx)
+        if (expr.object instanceof PropertyExpression propExpr) {
+            if (propExpr.object instanceof com.eb.script.interpreter.expression.VariableExpression varExpr) {
+                String screenName = varExpr.name.toLowerCase(java.util.Locale.ROOT);
+                String varName = propExpr.propertyName.toLowerCase(java.util.Locale.ROOT);
+                String property = expr.propertyName.toLowerCase(java.util.Locale.ROOT);
+                
+                // Check if this is .javafx property access
+                if ("javafx".equals(property)) {
+                    ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenComponentType> componentTypes = 
+                        context.getScreenComponentTypes(screenName);
+                    
+                    if (componentTypes != null && componentTypes.containsKey(varName)) {
+                        com.eb.script.interpreter.screen.ScreenComponentType componentType = componentTypes.get(varName);
+                        return componentType.getJavaFXDescription();
+                    }
+                    
+                    throw error(expr.getLine(), "No JavaFX component found for " + screenName + "." + varName);
+                }
             }
         }
         

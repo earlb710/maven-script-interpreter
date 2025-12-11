@@ -269,9 +269,9 @@ public class DisplayItem {
                   "-fx-padding: 5 0 5 0;"),
         
         // Media/Display Controls
-        IMAGEVIEW("imageview", "screen-item-imageview",
+        IMAGEVIEW("image", "screen-item-image",
                   "-fx-fit-width: 100; -fx-fit-height: 100; -fx-preserve-ratio: true;"),
-        CANVASVIEW("canvasview", "screen-item-canvasview",
+        CANVASVIEW("canvas", "screen-item-canvas",
                    "-fx-pref-width: 400; -fx-pref-height: 400;"),
         MEDIAVIEW("mediaview", "screen-item-mediaview",
                   ""),

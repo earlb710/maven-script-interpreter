@@ -1,0 +1,128 @@
+// Example: Practical usage of screen component types
+// Demonstrates real-world scenario with form validation
+
+print "Screen Component Types - Practical Example";
+print "==========================================";
+print "";
+
+// Define a user registration form
+screen registrationForm = {
+    "title": "User Registration",
+    "width": 500,
+    "height": 400,
+    "sets": [
+        {
+            "setname": "userInfo",
+            "scope": "visible",
+            "vars": [
+                {
+                    "name": "firstName",
+                    "type": "string",
+                    "default": "",
+                    "display": {"type": "textfield"}
+                },
+                {
+                    "name": "lastName",
+                    "type": "string",
+                    "default": "",
+                    "display": {"type": "textfield"}
+                },
+                {
+                    "name": "email",
+                    "type": "string",
+                    "default": "",
+                    "display": {"type": "textfield"}
+                },
+                {
+                    "name": "password",
+                    "type": "string",
+                    "default": "",
+                    "display": {"type": "passwordfield"}
+                },
+                {
+                    "name": "bio",
+                    "type": "string",
+                    "default": "",
+                    "display": {"type": "textarea"}
+                },
+                {
+                    "name": "agreeTerms",
+                    "type": "bool",
+                    "default": false,
+                    "display": {"type": "checkbox"}
+                }
+            ]
+        }
+    ]
+};
+
+print "Form Definition Created";
+print "-----------------------";
+print "";
+
+// Inspect component types
+print "Component Type Inspection:";
+print "  firstName: " + typeof registrationForm.firstName;
+print "  lastName: " + typeof registrationForm.lastName;
+print "  email: " + typeof registrationForm.email;
+print "  password: " + typeof registrationForm.password;
+print "  bio: " + typeof registrationForm.bio;
+print "  agreeTerms: " + typeof registrationForm.agreeTerms;
+print "";
+
+// Use typed variables for form processing
+print "Processing Form Data:";
+print "--------------------";
+
+// Extract form data with explicit types
+var userFirstName : screen.textfield = registrationForm.firstName;
+var userLastName : screen.textfield = registrationForm.lastName;
+var userEmail : screen.textfield = registrationForm.email;
+var userPassword : screen.passwordfield = registrationForm.password;
+var userBio : screen.textarea = registrationForm.bio;
+var termsAccepted : screen.checkbox = registrationForm.agreeTerms;
+
+// Simulate user input
+registrationForm.firstName = "John";
+registrationForm.lastName = "Doe";
+registrationForm.email = "john.doe@example.com";
+registrationForm.password = "secret123";
+registrationForm.bio = "Software developer with 5 years of experience";
+registrationForm.agreeTerms = true;
+
+print "User Registration Data:";
+print "  Name: " + registrationForm.firstName + " " + registrationForm.lastName;
+print "  Email: " + registrationForm.email;
+print "  Password: " + registrationForm.password;
+print "  Bio: " + registrationForm.bio;
+print "  Terms Accepted: " + registrationForm.agreeTerms;
+print "";
+
+// Validate form (simple validation)
+print "Form Validation:";
+if registrationForm.firstName == "" then
+    print "  ✗ First name is required";
+else
+    print "  ✓ First name provided";
+end if;
+
+if registrationForm.email == "" then
+    print "  ✗ Email is required";
+else
+    print "  ✓ Email provided";
+end if;
+
+if registrationForm.password == "" then
+    print "  ✗ Password is required";
+else
+    print "  ✓ Password provided";
+end if;
+
+if registrationForm.agreeTerms == false then
+    print "  ✗ Must agree to terms";
+else
+    print "  ✓ Terms accepted";
+end if;
+
+print "";
+print "✓ Example completed successfully!";

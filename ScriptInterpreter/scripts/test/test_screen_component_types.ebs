@@ -1,0 +1,102 @@
+// Comprehensive test for screen component type system
+// Tests both typeof and variable declarations with screen.xxx types
+
+print "=== Screen Component Type System Tests ===";
+print "";
+
+// Define a screen with various component types
+screen myScreen = {
+    "title": "Test Screen",
+    "width": 400,
+    "height": 300,
+    "sets": [
+        {
+            "setname": "main",
+            "scope": "visible",
+            "vars": [
+                {
+                    "name": "clientText",
+                    "type": "string",
+                    "default": "Sample text content",
+                    "display": {
+                        "type": "textarea"
+                    }
+                },
+                {
+                    "name": "nameField",
+                    "type": "string",
+                    "default": "John Doe",
+                    "display": {
+                        "type": "textfield"
+                    }
+                },
+                {
+                    "name": "saveButton",
+                    "type": "string",
+                    "default": "Save",
+                    "display": {
+                        "type": "button"
+                    }
+                },
+                {
+                    "name": "statusLabel",
+                    "type": "string",
+                    "default": "Ready",
+                    "display": {
+                        "type": "label"
+                    }
+                },
+                {
+                    "name": "passwordInput",
+                    "type": "string",
+                    "default": "",
+                    "display": {
+                        "type": "passwordfield"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+print "TEST 1: typeof returns Screen.xxx format";
+print "----------------------------------------";
+print "typeof myScreen.clientText = " + typeof myScreen.clientText;
+print "typeof myScreen.nameField = " + typeof myScreen.nameField;
+print "typeof myScreen.saveButton = " + typeof myScreen.saveButton;
+print "typeof myScreen.statusLabel = " + typeof myScreen.statusLabel;
+print "typeof myScreen.passwordInput = " + typeof myScreen.passwordInput;
+print "";
+
+print "TEST 2: Variable declarations with screen.xxx types";
+print "---------------------------------------------------";
+// Test declaring variables with screen component types
+var clientData : screen.textarea = myScreen.clientText;
+var userName : screen.textfield = myScreen.nameField;
+var buttonText : screen.button = myScreen.saveButton;
+var status : screen.label = myScreen.statusLabel;
+
+print "clientData (screen.textarea) = " + clientData;
+print "userName (screen.textfield) = " + userName;
+print "buttonText (screen.button) = " + buttonText;
+print "status (screen.label) = " + status;
+print "";
+
+print "TEST 3: Variable value access and modification";
+print "----------------------------------------------";
+print "Original value: myScreen.nameField = " + myScreen.nameField;
+myScreen.nameField = "Jane Smith";
+print "Modified value: myScreen.nameField = " + myScreen.nameField;
+print "";
+
+print "TEST 4: Case insensitivity";
+print "---------------------------";
+var test1 : SCREEN.TEXTAREA = "Test uppercase";
+var test2 : Screen.TextField = "Test mixed case";
+var test3 : screen.Button = "Test lowercase";
+print "test1 (SCREEN.TEXTAREA) = " + test1;
+print "test2 (Screen.TextField) = " + test2;
+print "test3 (screen.Button) = " + test3;
+print "";
+
+print "=== All tests completed successfully! ===";

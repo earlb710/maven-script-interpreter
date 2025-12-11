@@ -9,6 +9,7 @@ A powerful script interpreter for the EBS (Earl Bosch Script) language, featurin
 - **Bitmap Type**: Define named bit fields within a byte (8-bit) for compact storage of flags and small values
 - **Intmap Type**: Define named bit fields within an integer (32-bit) for storing larger bit-packed data structures
 - **typeof Operator**: Get the type of any variable or expression at runtime (e.g., `typeof a` returns `"string"`)
+- **Screen Component Types**: Type tracking for JavaFX screen components with `typeof` returning "Screen.Xxx" format and `.javafx` property for component introspection
 - **Exception Handling**: Robust error handling with `try-exceptions-when` syntax to catch specific or any errors
 - **Interactive Console**: JavaFX-based IDE with rich text editing
 - **Syntax Highlighting**: Color-coded syntax for better readability
