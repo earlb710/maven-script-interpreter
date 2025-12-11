@@ -344,7 +344,7 @@ All JavaFX components are supported:
 **Color:** colorpicker  
 **Buttons:** button  
 **Display:** label, labeltext, text, hyperlink, separator  
-**Media:** imageview, canvas, mediaview, webview, chart  
+**Media:** image, canvas, mediaview, webview, chart  
 **Progress:** progressbar, progressindicator  
 
 ## Running All Tests

@@ -1504,7 +1504,7 @@ public class InterpreterScreen {
                 return DataType.JSON;
             case "record":
                 return DataType.RECORD;
-            case "image":
+            case "imagedata":
                 return DataType.IMAGE;
             case "canvas":
                 return DataType.CANVAS;

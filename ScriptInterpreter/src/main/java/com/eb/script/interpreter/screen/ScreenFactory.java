@@ -1678,7 +1678,7 @@ public class ScreenFactory {
                 return "━";
             
             // Media controls
-            case "imageview":
+            case "image":
                 return "🖼";
             case "canvas":
                 return "🎨";
@@ -3474,7 +3474,7 @@ public class ScreenFactory {
                                 // After executing the onClick code, refresh all bound controls
                                 refreshBoundControls(boundControls, screenVars);
                             } catch (InterpreterError e) {
-                                System.err.println("Error executing imageview onClick: " + e.getMessage());
+                                System.err.println("Error executing image onClick: " + e.getMessage());
                                 e.printStackTrace();
                             }
                         });

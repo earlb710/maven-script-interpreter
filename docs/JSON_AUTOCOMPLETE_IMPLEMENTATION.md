@@ -182,7 +182,7 @@ Console.showAutocomplete()
 **Properties**: type, mandatory, case, min, max, style, cssClass, screenName, alignment, pattern, promptHelp, labelText, labelTextAlignment, options, labelColor, labelBold, labelItalic, labelFontSize, itemFontSize, maxLength, itemColor, itemBold, itemItalic, onClick
 
 **Enum Properties**:
-- `type`: textfield, textarea, passwordfield, checkbox, radiobutton, togglebutton, combobox, choicebox, listview, spinner, slider, datepicker, colorpicker, button, label, labeltext, text, hyperlink, separator, imageview, mediaview, webview, chart, progressbar, progressindicator, custom
+- `type`: textfield, textarea, passwordfield, checkbox, radiobutton, togglebutton, combobox, choicebox, listview, spinner, slider, datepicker, colorpicker, button, label, labeltext, text, hyperlink, separator, image, mediaview, webview, chart, progressbar, progressindicator, custom
 - `case`: upper, lower, title
 - `alignment`: left, center, right, justify
 - `labelTextAlignment`: left, center, right, l, c, r
