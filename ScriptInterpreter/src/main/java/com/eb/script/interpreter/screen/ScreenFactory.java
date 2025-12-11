@@ -3425,7 +3425,7 @@ public class ScreenFactory {
                         if (labelPos == null || labelPos.isEmpty()) {
                             labelPos = (control instanceof javafx.scene.control.TableView) ? "top" : "left";
                         }
-                        nodeToAdd = createLabeledControl(metadata.labelText, metadata.labelTextAlignment, control, maxLabelWidth, metadata, labelPos);
+                        nodeToAdd = createLabeledControl(metadata.labelText, metadata.labelTextAlignment, control, maxLabelWidth, metadata, labelPos, item);
                     }
                 } else {
                     // No label specified - wrap control in HBox with left padding to align with labeled controls
@@ -3435,14 +3435,66 @@ public class ScreenFactory {
                             && !(control instanceof javafx.scene.control.Label)
                             && !(control instanceof javafx.scene.control.Button)
                             && !(control instanceof javafx.scene.control.TableView)) {
-                        javafx.scene.layout.HBox alignmentBox = new javafx.scene.layout.HBox();
-                        alignmentBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-                        // Add left padding equal to label width plus spacing to align with labeled controls
-                        alignmentBox.setPadding(new javafx.geometry.Insets(0, 0, 0, maxLabelWidth + 5));
-                        // Make container pick on bounds so tooltips on child controls work properly
-                        alignmentBox.setPickOnBounds(false);
-                        alignmentBox.getChildren().add(control);
-                        nodeToAdd = alignmentBox;
+                        
+                        // Check if item has hgrow or vgrow properties
+                        boolean hasHgrow = item.hgrow != null && !item.hgrow.isEmpty();
+                        boolean hasVgrow = item.vgrow != null && !item.vgrow.isEmpty();
+                        
+                        // Choose appropriate wrapper container type based on growth properties
+                        // If vgrow is set, use VBox; otherwise use HBox (default for alignment)
+                        if (hasVgrow && !hasHgrow) {
+                            // Use VBox for vertical growth
+                            javafx.scene.layout.VBox alignmentBox = new javafx.scene.layout.VBox();
+                            alignmentBox.setAlignment(javafx.geometry.Pos.TOP_LEFT);
+                            // Add top padding equal to label height for alignment
+                            alignmentBox.setPadding(new javafx.geometry.Insets(5, 0, 0, 0));
+                            alignmentBox.setPickOnBounds(false);
+                            alignmentBox.getChildren().add(control);
+                            // Allow control to grow within the VBox
+                            javafx.scene.layout.VBox.setVgrow(control, javafx.scene.layout.Priority.ALWAYS);
+                            // Store vgrow priority on wrapper
+                            try {
+                                Priority priority = Priority.valueOf(item.vgrow.toUpperCase());
+                                alignmentBox.getProperties().put("vgrowPriority", priority);
+                            } catch (IllegalArgumentException e) {
+                                // Ignore invalid values
+                            }
+                            nodeToAdd = alignmentBox;
+                        } else {
+                            // Use HBox for horizontal growth or default alignment
+                            javafx.scene.layout.HBox alignmentBox = new javafx.scene.layout.HBox();
+                            alignmentBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+                            // Add left padding equal to label width plus spacing to align with labeled controls
+                            alignmentBox.setPadding(new javafx.geometry.Insets(0, 0, 0, maxLabelWidth + 5));
+                            alignmentBox.setPickOnBounds(false);
+                            alignmentBox.getChildren().add(control);
+                            
+                            // If item has hgrow, configure the wrapper accordingly
+                            if (hasHgrow) {
+                                // Allow control to grow within the HBox
+                                javafx.scene.layout.HBox.setHgrow(control, javafx.scene.layout.Priority.ALWAYS);
+                                alignmentBox.setMaxWidth(Double.MAX_VALUE);
+                                // Store hgrow priority on wrapper
+                                try {
+                                    Priority priority = Priority.valueOf(item.hgrow.toUpperCase());
+                                    alignmentBox.getProperties().put("hgrowPriority", priority);
+                                } catch (IllegalArgumentException e) {
+                                    // Ignore invalid values
+                                }
+                            }
+                            
+                            // If item has vgrow as well, store it on the wrapper
+                            if (hasVgrow) {
+                                try {
+                                    Priority priority = Priority.valueOf(item.vgrow.toUpperCase());
+                                    alignmentBox.getProperties().put("vgrowPriority", priority);
+                                } catch (IllegalArgumentException e) {
+                                    // Ignore invalid values
+                                }
+                            }
+                            
+                            nodeToAdd = alignmentBox;
+                        }
                     }
                 }
 
@@ -3854,34 +3906,52 @@ public class ScreenFactory {
 
     /**
      * Adds an item to a container based on the container type.
+     * If the control is a wrapper container (created by createLabeledControl) with growth
+     * properties stored, those properties are applied to the parent container.
      */
     private static void addItemToContainer(Region container, Node control, AreaItem item, AreaType areaType) {
         if (container instanceof VBox) {
             VBox vbox = (VBox) container;
             vbox.getChildren().add(control);
 
-            // Apply VBox-specific properties
-            if (item.vgrow != null && !item.vgrow.isEmpty()) {
+            // Check if the control (wrapper) has a stored vgrowPriority
+            Priority vgrowPriority = null;
+            if (control.getProperties().containsKey("vgrowPriority")) {
+                vgrowPriority = (Priority) control.getProperties().get("vgrowPriority");
+            } else if (item.vgrow != null && !item.vgrow.isEmpty()) {
+                // Fall back to item's vgrow property if no wrapper priority is set
                 try {
-                    Priority priority = Priority.valueOf(item.vgrow.toUpperCase());
-                    VBox.setVgrow(control, priority);
+                    vgrowPriority = Priority.valueOf(item.vgrow.toUpperCase());
                 } catch (IllegalArgumentException e) {
                     // Ignore invalid values
                 }
+            }
+            
+            // Apply vgrow priority to the control in the VBox
+            if (vgrowPriority != null) {
+                VBox.setVgrow(control, vgrowPriority);
             }
 
         } else if (container instanceof HBox) {
             HBox hbox = (HBox) container;
             hbox.getChildren().add(control);
 
-            // Apply HBox-specific properties
-            if (item.hgrow != null && !item.hgrow.isEmpty()) {
+            // Check if the control (wrapper) has a stored hgrowPriority
+            Priority hgrowPriority = null;
+            if (control.getProperties().containsKey("hgrowPriority")) {
+                hgrowPriority = (Priority) control.getProperties().get("hgrowPriority");
+            } else if (item.hgrow != null && !item.hgrow.isEmpty()) {
+                // Fall back to item's hgrow property if no wrapper priority is set
                 try {
-                    Priority priority = Priority.valueOf(item.hgrow.toUpperCase());
-                    HBox.setHgrow(control, priority);
+                    hgrowPriority = Priority.valueOf(item.hgrow.toUpperCase());
                 } catch (IllegalArgumentException e) {
                     // Ignore invalid values
                 }
+            }
+            
+            // Apply hgrow priority to the control in the HBox
+            if (hgrowPriority != null) {
+                HBox.setHgrow(control, hgrowPriority);
             }
 
         } else if (container instanceof GridPane) {
@@ -3913,21 +3983,36 @@ public class ScreenFactory {
             }
 
             // Apply grid grow priorities
-            if (item.hgrow != null && !item.hgrow.isEmpty()) {
+            // Check if the control (wrapper) has stored priorities first
+            Priority hgrowPriority = null;
+            Priority vgrowPriority = null;
+            
+            if (control.getProperties().containsKey("hgrowPriority")) {
+                hgrowPriority = (Priority) control.getProperties().get("hgrowPriority");
+            } else if (item.hgrow != null && !item.hgrow.isEmpty()) {
                 try {
-                    Priority priority = Priority.valueOf(item.hgrow.toUpperCase());
-                    GridPane.setHgrow(control, priority);
+                    hgrowPriority = Priority.valueOf(item.hgrow.toUpperCase());
                 } catch (IllegalArgumentException e) {
                     // Ignore invalid values
                 }
             }
-            if (item.vgrow != null && !item.vgrow.isEmpty()) {
+            
+            if (control.getProperties().containsKey("vgrowPriority")) {
+                vgrowPriority = (Priority) control.getProperties().get("vgrowPriority");
+            } else if (item.vgrow != null && !item.vgrow.isEmpty()) {
                 try {
-                    Priority priority = Priority.valueOf(item.vgrow.toUpperCase());
-                    GridPane.setVgrow(control, priority);
+                    vgrowPriority = Priority.valueOf(item.vgrow.toUpperCase());
                 } catch (IllegalArgumentException e) {
                     // Ignore invalid values
                 }
+            }
+            
+            // Apply the priorities to the control in the GridPane
+            if (hgrowPriority != null) {
+                GridPane.setHgrow(control, hgrowPriority);
+            }
+            if (vgrowPriority != null) {
+                GridPane.setVgrow(control, vgrowPriority);
             }
 
         } else if (container instanceof BorderPane) {
@@ -4850,6 +4935,10 @@ public class ScreenFactory {
      * Creates a labeled control by wrapping a control with its label.
      * For most controls, the label is placed horizontally (on the left).
      * For TableView and similar large controls, the label is placed vertically (on top).
+     * 
+     * If the item has hgrow or vgrow properties set, the container type will be chosen
+     * to support those properties (HBox for hgrow, VBox for vgrow), and the properties
+     * will be applied to the container so it can participate in parent layout growth.
      *
      * @param labelText The text for the label
      * @param alignment The alignment of the label ("left", "center", "right")
@@ -4857,13 +4946,33 @@ public class ScreenFactory {
      * @param minWidth The minimum width for the label
      * @param metadata DisplayItem metadata containing styling information
      * @param labelPosition Label position: "left", "right", "top", or "bottom"
+     * @param item The AreaItem containing layout properties like hgrow and vgrow
      * @return The wrapped control with label
      */
-    private static Node createLabeledControl(String labelText, String alignment, Node control, double minWidth, DisplayItem metadata, String labelPosition) {
+    private static Node createLabeledControl(String labelText, String alignment, Node control, double minWidth, DisplayItem metadata, String labelPosition, AreaItem item) {
         javafx.scene.control.Label label = new javafx.scene.control.Label(labelText);
 
+        // Check if item has hgrow or vgrow properties that require special container handling
+        boolean hasHgrow = item != null && item.hgrow != null && !item.hgrow.isEmpty();
+        boolean hasVgrow = item != null && item.vgrow != null && !item.vgrow.isEmpty();
+        
         // Determine if vertical or horizontal layout based on position
+        // If hgrow is set, prefer horizontal layout (HBox) unless explicitly set to vertical position
+        // If vgrow is set, prefer vertical layout (VBox) unless explicitly set to horizontal position
         boolean isVertical = "top".equals(labelPosition) || "bottom".equals(labelPosition);
+        
+        // Override layout direction if growth properties require it
+        if (hasHgrow && !hasVgrow && ("top".equals(labelPosition) || "bottom".equals(labelPosition))) {
+            // Item has hgrow but position is top/bottom - we need HBox for hgrow to work
+            // Change to horizontal layout and adjust label position
+            isVertical = false;
+            labelPosition = "left"; // Default to left for horizontal layout
+        } else if (hasVgrow && !hasHgrow && ("left".equals(labelPosition) || "right".equals(labelPosition) || labelPosition == null || labelPosition.isEmpty())) {
+            // Item has vgrow but position is left/right - we need VBox for vgrow to work
+            // Change to vertical layout and adjust label position
+            isVertical = true;
+            labelPosition = "top"; // Default to top for vertical layout
+        }
         
         // Build label style with default styling
         String defaultAlignment = isVertical ? "center-left" : "center-right";
@@ -4932,6 +5041,30 @@ public class ScreenFactory {
             javafx.scene.layout.VBox.setVgrow(control, javafx.scene.layout.Priority.ALWAYS);
             javafx.scene.layout.HBox.setHgrow(control, javafx.scene.layout.Priority.ALWAYS);
             
+            // Apply vgrow to the container itself if the item has vgrow property
+            // This allows the wrapper to participate in parent layout growth
+            if (hasVgrow) {
+                try {
+                    Priority priority = Priority.valueOf(item.vgrow.toUpperCase());
+                    // Store the priority on the container so it can be applied by the parent
+                    container.getProperties().put("vgrowPriority", priority);
+                } catch (IllegalArgumentException e) {
+                    // Ignore invalid values
+                }
+            }
+            
+            // If item has hgrow, allow the container to grow horizontally as well
+            if (hasHgrow) {
+                container.setMaxWidth(Double.MAX_VALUE);
+                try {
+                    Priority priority = Priority.valueOf(item.hgrow.toUpperCase());
+                    // Store the priority on the container so it can be applied by the parent
+                    container.getProperties().put("hgrowPriority", priority);
+                } catch (IllegalArgumentException e) {
+                    // Ignore invalid values
+                }
+            }
+            
             return container;
         } else {
             // Horizontal layout: label on left or right
@@ -4952,6 +5085,34 @@ public class ScreenFactory {
                 // "left" is default - Label first (on the left), then control
                 container.getChildren().addAll(label, control);
                 container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+            }
+
+            // Apply hgrow to the container itself if the item has hgrow property
+            // This allows the wrapper to participate in parent layout growth
+            if (hasHgrow) {
+                // Allow the control to grow within the HBox
+                javafx.scene.layout.HBox.setHgrow(control, javafx.scene.layout.Priority.ALWAYS);
+                // Set max width so container can expand
+                container.setMaxWidth(Double.MAX_VALUE);
+                try {
+                    Priority priority = Priority.valueOf(item.hgrow.toUpperCase());
+                    // Store the priority on the container so it can be applied by the parent
+                    container.getProperties().put("hgrowPriority", priority);
+                } catch (IllegalArgumentException e) {
+                    // Ignore invalid values
+                }
+            }
+            
+            // If item has vgrow, allow the container to grow vertically as well
+            if (hasVgrow) {
+                container.setMaxHeight(Double.MAX_VALUE);
+                try {
+                    Priority priority = Priority.valueOf(item.vgrow.toUpperCase());
+                    // Store the priority on the container so it can be applied by the parent
+                    container.getProperties().put("vgrowPriority", priority);
+                } catch (IllegalArgumentException e) {
+                    // Ignore invalid values
+                }
             }
 
             return container;
