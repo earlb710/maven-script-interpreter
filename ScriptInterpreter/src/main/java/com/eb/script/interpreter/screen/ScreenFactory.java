@@ -935,7 +935,7 @@ public class ScreenFactory {
                 }
                 
                 // Build display info string with additional displayItem properties
-                String displayInfo = buildDisplayItemInfo(item);
+                String displayInfo = buildDisplayItemInfo(item, context, screenName, varRef);
                 
                 // Pre-compute the display text with icon (no ⚠️ since not changed on initial display)
                 String typeIcon = getItemTypeIcon(itemType);
@@ -1770,7 +1770,7 @@ public class ScreenFactory {
      * @param item The AreaItem to get display info from
      * @return A formatted string with display properties, or empty string if none
      */
-    private static String buildDisplayItemInfo(AreaItem item) {
+    private static String buildDisplayItemInfo(AreaItem item, InterpreterContext context, String screenName, String varRef) {
         if (item == null) return "";
         
         StringBuilder info = new StringBuilder();
@@ -1827,6 +1827,27 @@ public class ScreenFactory {
             }
             if (displayItem.optionsMap != null && !displayItem.optionsMap.isEmpty()) {
                 info.append("OptionsMap: ").append(displayItem.optionsMap.size()).append(" items\n");
+            }
+        }
+        
+        // Check if item is backed by a JavaFX component
+        if (context != null && screenName != null && varRef != null && !varRef.isEmpty()) {
+            java.util.concurrent.ConcurrentHashMap<String, ScreenComponentType> componentTypes = context.getScreenComponentTypes(screenName);
+            if (componentTypes != null) {
+                ScreenComponentType componentType = componentTypes.get(varRef);
+                if (componentType != null && componentType.getJavaFXNode() != null) {
+                    // Add JavaFX component description
+                    if (info.length() > 0) {
+                        info.append("\n");
+                    }
+                    info.append("JavaFX:\n");
+                    String javafxDesc = componentType.getJavaFXDescription();
+                    // Indent each line for better readability
+                    String[] lines = javafxDesc.split("\n");
+                    for (String line : lines) {
+                        info.append(line).append("\n");
+                    }
+                }
             }
         }
         
