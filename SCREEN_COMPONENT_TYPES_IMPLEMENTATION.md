@@ -51,11 +51,9 @@ var buttonText : screen.button = myScreen.saveButton;
 - Color: colorpicker
 - Buttons: button
 - Display: label, labeltext, text, hyperlink, separator
-- Media: imageview, canvas (canvasview), mediaview, webview, chart
+- Media: imageview, canvas, mediaview, webview, chart
 - Progress: progressbar, progressindicator
 - Custom: custom
-
-**Note:** The canvas component type uses `screen.canvas` for consistency with the canvas datatype, even though the display type in JSON is "canvasview".
 
 ### 4. JavaFX Node Storage and Introspection ✓
 **Requirement:** Store actual JavaFX component against every screen variable and provide `.javafx` property accessor
@@ -84,14 +82,14 @@ print myScreen.clientText.javafx;
 //   Disabled: false
 ```
 
-### 5. Canvas Type Simplified to Screen.Canvas ✓
-**Requirement:** Change canvas datatype to use `screen.canvas` for better consistency
+### 5. Canvas Display Type Unified to "canvas" ✓
+**Requirement:** Unify canvas display type to use "canvas" for consistency with canvas datatype
 
 **Implementation:**
-- Modified `ScreenComponentType.getFullTypeName()` to map "canvasview" → "canvas"
-- Updated `Parser.java` to handle `screen.canvas` type annotations (special SCREEN keyword handling)
-- Added `peekNext()` helper method for parser lookahead
-- Canvas components now return "Screen.Canvas" instead of "Screen.Canvasview"
+- Changed `DisplayItem.CANVASVIEW` enum to use "canvas" as the type name
+- Updated `ScreenFactory` to recognize "canvas" as display type
+- Removed special mapping in `ScreenComponentType.getFullTypeName()`
+- Display type in JSON now uses "canvas" directly
 
 **Example:**
 ```ebs
@@ -101,7 +99,7 @@ screen myCanvas = {
         "vars": [{
             "name": "drawing",
             "type": "canvas",
-            "display": {"type": "canvasview"}
+            "display": {"type": "canvas"}  // Now uses "canvas" directly
         }]
     }]
 };
@@ -126,7 +124,6 @@ public class ScreenComponentType {
     
     public String getFullTypeName() {
         // Returns "Screen.Xxx" format with capitalized component type
-        // Special case: "canvasview" → "canvas" for consistency with datatype
     }
     
     public Node getJavaFXNode() {
@@ -139,7 +136,7 @@ public class ScreenComponentType {
 }
 ```
 
-**Purpose:** Represents screen component types, provides proper formatting, and stores JavaFX Node reference. Includes special handling for canvas type mapping.
+**Purpose:** Represents screen component types, provides proper formatting, and stores JavaFX Node reference.
 
 ### Modified Components
 

@@ -8,7 +8,7 @@ The screen component type system provides:
 - **typeof operator**: Returns "Screen.Xxx" format for screen component variables
 - **Type declarations**: Variables can be declared with `screen.xxx` types (e.g., `var x : screen.textfield`)
 - **JavaFX introspection**: Access detailed component information via `.javafx` property
-- **Canvas type**: Uses `screen.canvas` (not `screen.canvasview`) for consistency with canvas datatype
+- **Canvas type**: Uses `screen.canvas` with display type `"type": "canvas"` for consistency
 
 ## Test Scripts
 
@@ -295,7 +295,7 @@ var canvas : screen.canvas = myCanvas.drawing;  // Canvas uses screen.canvas
 ```
 
 ### Canvas Type Simplification
-Canvas component type uses `screen.canvas` (not `screen.canvasview`):
+Canvas component type uses `screen.canvas` with display type `"canvas"`:
 ```ebs
 screen myCanvas = {
     "sets": [{
@@ -303,7 +303,7 @@ screen myCanvas = {
         "vars": [{
             "name": "drawing",
             "type": "canvas",
-            "display": {"type": "canvasview"}  // Display type in JSON
+            "display": {"type": "canvas"}  // Display type uses "canvas"
         }]
     }]
 };
@@ -344,7 +344,7 @@ All JavaFX components are supported:
 **Color:** colorpicker  
 **Buttons:** button  
 **Display:** label, labeltext, text, hyperlink, separator  
-**Media:** imageview, canvasview, mediaview, webview, chart  
+**Media:** imageview, canvas, mediaview, webview, chart  
 **Progress:** progressbar, progressindicator  
 
 ## Running All Tests

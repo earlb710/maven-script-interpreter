@@ -1,5 +1,5 @@
 // Test for canvas screen component type change
-// Verifies that typeof returns "Screen.Canvas" instead of "Screen.Canvasview"
+// Verifies that typeof returns "Screen.Canvas" and display type is "canvas"
 
 print "Canvas Component Type Test";
 print "==========================";
@@ -16,7 +16,7 @@ screen testCanvas = {
             "type": "canvas",
             "default": null,
             "display": {
-                "type": "canvasview"
+                "type": "canvas"
             }
         }]
     }]

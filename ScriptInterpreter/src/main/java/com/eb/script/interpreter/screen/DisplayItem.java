@@ -271,7 +271,7 @@ public class DisplayItem {
         // Media/Display Controls
         IMAGEVIEW("imageview", "screen-item-imageview",
                   "-fx-fit-width: 100; -fx-fit-height: 100; -fx-preserve-ratio: true;"),
-        CANVASVIEW("canvasview", "screen-item-canvasview",
+        CANVASVIEW("canvas", "screen-item-canvas",
                    "-fx-pref-width: 400; -fx-pref-height: 400;"),
         MEDIAVIEW("mediaview", "screen-item-mediaview",
                   ""),

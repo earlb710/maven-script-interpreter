@@ -1680,7 +1680,7 @@ public class ScreenFactory {
             // Media controls
             case "imageview":
                 return "🖼";
-            case "canvasview":
+            case "canvas":
                 return "🎨";
             case "webview":
                 return "🌐";
