@@ -2,8 +2,8 @@ package com.eb.ui.cli;
 
 import com.eb.util.MarkupTokenizer;
 import com.eb.util.Util;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Stack;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.BooleanProperty;
 import org.fxmisc.richtext.LineNumberFactory;
@@ -19,9 +19,9 @@ public class ScriptArea extends StyleClassedTextArea {
     private boolean showLineNumbers = true; // default: on
     
     // Custom undo/redo stacks that only track text changes
-    private final Stack<TextChange> undoStack = new Stack<>();
-    private final Stack<TextChange> redoStack = new Stack<>();
-    private boolean isUndoingOrRedoing = false;
+    // Using LinkedList for efficient removal of oldest entries
+    private final LinkedList<TextChange> undoStack = new LinkedList<>();
+    private final LinkedList<TextChange> redoStack = new LinkedList<>();
     private static final int MAX_UNDO_HISTORY = 1000;
     
     // Observable properties for undo/redo state
@@ -35,7 +35,7 @@ public class ScriptArea extends StyleClassedTextArea {
         // Set up custom undo tracking that only monitors plain text changes
         // This ignores style changes (syntax highlighting, search highlighting, etc.)
         plainTextChanges()
-            .filter(change -> !isUndoingOrRedoing && change.getNetLength() != 0)
+            .filter(change -> !performingAction.get() && change.getNetLength() != 0)
             .subscribe(this::recordTextChange);
     }
     
@@ -55,12 +55,13 @@ public class ScriptArea extends StyleClassedTextArea {
             change.getInserted()
         );
         
-        undoStack.push(textChange);
+        undoStack.add(textChange);
         undoAvailable.set(true);
         
         // Limit undo history size to prevent memory issues
+        // Remove from the front (oldest) when limit is exceeded
         if (undoStack.size() > MAX_UNDO_HISTORY) {
-            undoStack.remove(0);
+            undoStack.removeFirst();
         }
     }
     
@@ -73,8 +74,7 @@ public class ScriptArea extends StyleClassedTextArea {
             return;
         }
         
-        TextChange change = undoStack.pop();
-        isUndoingOrRedoing = true;
+        TextChange change = undoStack.removeLast();
         performingAction.set(true);
         
         try {
@@ -88,13 +88,12 @@ public class ScriptArea extends StyleClassedTextArea {
             selectRange(start, start);
             
             // Push to redo stack
-            redoStack.push(change);
+            redoStack.add(change);
             
             // Update observable properties
             undoAvailable.set(!undoStack.isEmpty());
             redoAvailable.set(true);
         } finally {
-            isUndoingOrRedoing = false;
             performingAction.set(false);
         }
     }
@@ -108,8 +107,7 @@ public class ScriptArea extends StyleClassedTextArea {
             return;
         }
         
-        TextChange change = redoStack.pop();
-        isUndoingOrRedoing = true;
+        TextChange change = redoStack.removeLast();
         performingAction.set(true);
         
         try {
@@ -124,13 +122,12 @@ public class ScriptArea extends StyleClassedTextArea {
             selectRange(newPos, newPos);
             
             // Push back to undo stack
-            undoStack.push(change);
+            undoStack.add(change);
             
             // Update observable properties
             undoAvailable.set(true);
             redoAvailable.set(!redoStack.isEmpty());
         } finally {
-            isUndoingOrRedoing = false;
             performingAction.set(false);
         }
     }
@@ -188,7 +185,7 @@ public class ScriptArea extends StyleClassedTextArea {
         
         @Override
         public boolean isPerformingAction() {
-            return isUndoingOrRedoing;
+            return performingAction.get();
         }
         
         @Override
