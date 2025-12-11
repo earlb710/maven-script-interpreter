@@ -504,10 +504,31 @@ public class Parser {
 
         if (match(EbsTokenType.COLON)) {
             EbsToken t = peek();
+            boolean handledScreenType = false; // Track if we handled screen.xxx syntax
             
+            // Special handling for "screen.xxx" type annotations
+            // Since "screen" is a keyword, we need to check for SCREEN token followed by DOT
+            if (t.type == EbsTokenType.SCREEN && peekNext() != null && peekNext().type == EbsTokenType.DOT) {
+                // Consume SCREEN token
+                advance();
+                // Consume DOT token
+                consume(EbsTokenType.DOT, "Expected '.' after 'screen' in type annotation.");
+                // Get the component type name (can be IDENTIFIER or DATATYPE like "canvas")
+                EbsToken componentTypeToken = peek();
+                if (componentTypeToken.type == EbsTokenType.IDENTIFIER || componentTypeToken.type == EbsTokenType.DATATYPE) {
+                    advance(); // consume the component type token
+                    String componentTypeName = (String) componentTypeToken.literal;
+                    
+                    // Treat screen component types as STRING since they hold the component's value
+                    elemType = DataType.STRING;
+                    handledScreenType = true; // Mark that we've handled all tokens
+                } else {
+                    throw error(componentTypeToken, "Expected component type name after 'screen.'.");
+                }
+            }
             // Check if this is a bitmap type definition
             // Check both token type and literal value since lexer might categorize it differently
-            if (t.type == EbsTokenType.BITMAP || 
+            else if (t.type == EbsTokenType.BITMAP || 
                 (t.literal instanceof String && "bitmap".equals(((String)t.literal).toLowerCase()))) {
                 elemType = DataType.BITMAP;
                 advance(); // consume 'bitmap'
@@ -695,6 +716,7 @@ public class Parser {
                 !(t.literal instanceof String && "intmap".equals(((String)t.literal).toLowerCase())) &&
                 !(t.literal instanceof String && ((String)t.literal).toLowerCase().startsWith("array.record")) &&
                 !(t.literal instanceof String && ((String)t.literal).toLowerCase().startsWith("queue.")) &&
+                !handledScreenType && // Don't advance if we already handled screen.xxx
                 !isAlias) {
                 advance();
             }
@@ -3178,6 +3200,16 @@ public class Parser {
     private EbsToken peek() {
         return currToken;
         //return tokens.get(current );
+    }
+    
+    /**
+     * Peek at the next token without consuming it
+     */
+    private EbsToken peekNext() {
+        if (current + 1 < tokens.size()) {
+            return tokens.get(current + 1);
+        }
+        return null;
     }
 
     private EbsToken previous() {

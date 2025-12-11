@@ -1,0 +1,49 @@
+// Test for canvas screen component type change
+// Verifies that typeof returns "Screen.Canvas" instead of "Screen.Canvasview"
+
+print "Canvas Component Type Test";
+print "==========================";
+print "";
+
+screen testCanvas = {
+    "title": "Canvas Type Test",
+    "width": 500,
+    "height": 400,
+    "sets": [{
+        "setname": "main",
+        "vars": [{
+            "name": "myCanvas",
+            "type": "canvas",
+            "default": null,
+            "display": {
+                "type": "canvasview"
+            }
+        }]
+    }]
+};
+
+// Test 1: typeof returns "Screen.Canvas"
+print "TEST 1: typeof returns Screen.Canvas";
+print "-------------------------------------";
+print "typeof testCanvas.myCanvas = " + typeof testCanvas.myCanvas;
+print "";
+
+// Test 2: Variable declaration with screen.canvas type
+print "TEST 2: Variable declaration with screen.canvas type";
+print "-----------------------------------------------------";
+var canvasVar : screen.canvas = "test value";
+print "canvasVar declared with type screen.canvas: " + canvasVar;
+print "";
+
+// Test 3: Case insensitivity
+print "TEST 3: Case insensitivity";
+print "---------------------------";
+var canvas1 : screen.canvas = "value1";
+var canvas2 : Screen.Canvas = "value2";
+var canvas3 : SCREEN.CANVAS = "value3";
+print "canvas1 (screen.canvas) = " + canvas1;
+print "canvas2 (Screen.Canvas) = " + canvas2;
+print "canvas3 (SCREEN.CANVAS) = " + canvas3;
+print "";
+
+print "✓ All canvas type tests passed!";

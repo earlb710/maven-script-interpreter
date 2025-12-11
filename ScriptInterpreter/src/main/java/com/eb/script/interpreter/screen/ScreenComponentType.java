@@ -65,8 +65,15 @@ public class ScreenComponentType {
         if (componentType == null || componentType.isEmpty()) {
             return "Screen";
         }
+        
+        // Special case: "canvasview" should be displayed as "Canvas" for consistency with datatype
+        String displayType = componentType;
+        if ("canvasview".equals(componentType)) {
+            displayType = "canvas";
+        }
+        
         // Capitalize first letter of component type for display
-        String capitalized = componentType.substring(0, 1).toUpperCase() + componentType.substring(1);
+        String capitalized = displayType.substring(0, 1).toUpperCase() + displayType.substring(1);
         return "Screen." + capitalized;
     }
     
