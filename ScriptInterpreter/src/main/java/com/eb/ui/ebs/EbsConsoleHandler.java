@@ -3,6 +3,7 @@ package com.eb.ui.ebs;
 import com.eb.script.RuntimeContext;
 import com.eb.script.arrays.ArrayDynamic;
 import com.eb.script.file.FileContext;
+import com.eb.script.interpreter.Environment;
 import com.eb.script.interpreter.builtins.Builtins;
 import com.eb.script.interpreter.InterpreterError;
 import com.eb.script.json.Json;
@@ -976,6 +977,9 @@ public class EbsConsoleHandler extends EbsHandler {
                     // Copy debug mode state from current thread to this thread
                     boolean debugModeEnabled = com.eb.script.interpreter.screen.ScreenFactory.getDebugModeForInheritance();
                     com.eb.script.interpreter.screen.ScreenFactory.setDebugModeForThread(debugModeEnabled);
+                    
+                    // Register the output area in the script context's environment
+                    scriptContext.environment.registerOutputArea(env.getOutputArea());
                     
                     // Execute the parsed script using the persistent interpreter
                     interpreter.interpret(scriptContext);
