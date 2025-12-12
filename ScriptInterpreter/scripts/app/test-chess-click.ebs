@@ -1,0 +1,80 @@
+// Quick test to verify chess move functionality
+print "Testing chess move indicator functionality...";
+print "";
+
+// Define the types needed
+ChessCell typeof bitmap { cellColor: 0, pieceType: 1-6, pieceColor: 7 };
+posType typeof record { x: int, y: int };
+
+// Constants
+var EMPTY: int = 0;
+var PAWN: int = 1;
+var ROOK: int = 2;
+var KNIGHT: int = 3;
+var BISHOP: int = 4;
+var QUEEN: int = 5;
+var KING: int = 6;
+var WHITE: int = 0;
+var BLACK: int = 1;
+
+// Create test board
+var board: array.bitmap[64];
+
+// Helper functions
+boardIndex(row: int, col: int) return int {
+    return row * 8 + col;
+}
+
+isValidPosition(x: int, y: int) return bool {
+    return x >= 0 && x < 8 && y >= 0 && y < 8;
+}
+
+getPieceAt(x: int, y: int) {
+    if call isValidPosition(x, y) then {
+        var idx: int = call boardIndex(y, x);
+        return board[idx];
+    } else {
+        return -1;
+    }
+}
+
+isOccupiedByColor(x: int, y: int, color: int) {
+    var cellValue: int = call getPieceAt(x, y);
+    if cellValue == -1 then {
+        return false;
+    }
+    var cell = ChessCell(cellValue);
+    return cell.pieceType != EMPTY && cell.pieceColor == color;
+}
+
+// Import move functions
+import "chess-moves.ebs";
+
+// Initialize a simple board position
+encodeCellValue(cellColor: int, pieceType: int, pieceColor: int) return int {
+    return cellColor + (pieceType * 2) + (pieceColor * 128);
+}
+
+// Set up a white pawn at (0, 6)
+var idx: int = call boardIndex(6, 0);
+board[idx] = call encodeCellValue(0, PAWN, WHITE);
+print "Placed white pawn at (0, 6)";
+
+// Try to get valid moves
+print "Calling validMoves(0, 6)...";
+var moves: posType[] = call validMoves(0, 6);
+print "validMoves returned array with length: " + moves.length;
+
+if moves.length > 0 then {
+    print "Valid moves found:";
+    var i: int = 0;
+    for (i = 0; i < moves.length; i = i + 1) {
+        var move: posType = moves[i];
+        print "  Move " + i + ": (" + move.x + ", " + move.y + ")";
+    }
+} else {
+    print "No valid moves returned!";
+}
+
+print "";
+print "Test complete!";

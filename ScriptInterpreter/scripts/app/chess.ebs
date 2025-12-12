@@ -312,21 +312,28 @@ setIndicator(x: int, y: int, isCapture: bool) {
 
 // Handle cell click - select piece and show valid moves
 handleCellClick(x: int, y: int) {
+    print "Cell clicked: (" + x + ", " + y + ")";
+    
     // Clear previous indicators
     call clearIndicators();
     
     // Get piece at clicked position
     var cellValue: int = call getPieceAt(x, y);
+    print "Cell value: " + cellValue;
+    
     if cellValue == -1 then {
+        print "Invalid position, deselecting";
         selectedX = -1;
         selectedY = -1;
         return;
     }
     
     var cell = ChessCell(cellValue);
+    print "Piece type: " + cell.pieceType + ", color: " + cell.pieceColor;
     
     // If empty cell or clicking same piece, deselect
     if cell.pieceType == EMPTY || (selectedX == x && selectedY == y) then {
+        print "Empty cell or same piece clicked, deselecting";
         selectedX = -1;
         selectedY = -1;
         return;
@@ -335,15 +342,19 @@ handleCellClick(x: int, y: int) {
     // Select the piece
     selectedX = x;
     selectedY = y;
+    print "Piece selected at (" + x + ", " + y + ")";
     
     // Get valid moves for this piece
+    print "Getting valid moves...";
     var moves: posType[] = call validMoves(x, y);
     var len: int = moves.length;
+    print "Found " + len + " valid moves";
     
     // Show indicators for each valid move
     var i: int = 0;
     for (i = 0; i < len; i = i + 1) {
         var move: posType = moves[i];
+        print "  Move to: (" + move.x + ", " + move.y + ")";
         
         // Check if this move captures an enemy piece
         var targetCellValue: int = call getPieceAt(move.x, move.y);
@@ -353,12 +364,16 @@ handleCellClick(x: int, y: int) {
             var targetCell = ChessCell(targetCellValue);
             if targetCell.pieceType != EMPTY then {
                 isCapture = true;
+                print "    (capture move)";
             }
         }
         
         // Set the indicator
+        print "  Setting indicator at (" + move.x + ", " + move.y + ")";
         call setIndicator(move.x, move.y, isCapture);
     }
+    
+    print "handleCellClick complete";
 }
 
 encodeCellValue(cellColor: int, pieceType: int, pieceColor: int) return int {
