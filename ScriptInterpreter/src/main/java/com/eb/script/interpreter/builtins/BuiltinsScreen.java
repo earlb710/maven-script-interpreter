@@ -2483,33 +2483,33 @@ public class BuiltinsScreen {
         // Start from root
         javafx.scene.control.TreeItem<String> current = root;
         
-        // For each part of the path, find the matching child
-        for (String part : pathParts) {
+        // Traverse the path step by step
+        int partIndex = 0;
+        
+        // Check if root matches the first part of the path
+        if (current.getValue() != null && current.getValue().equals(pathParts[0])) {
+            partIndex = 1; // Start searching from the next part
+        }
+        
+        // For each remaining part of the path, find the matching child
+        while (partIndex < pathParts.length) {
+            String part = pathParts[partIndex];
             boolean found = false;
             
-            // Check if current item matches
-            if (current.getValue() != null && current.getValue().equals(part)) {
-                // If this is the last part, we found it
-                if (pathParts.length == 1 || pathParts[pathParts.length - 1].equals(part)) {
-                    return current;
-                }
-                found = true;
-            }
-            
-            if (!found) {
-                // Search children for matching value
-                for (javafx.scene.control.TreeItem<String> child : current.getChildren()) {
-                    if (child.getValue() != null && child.getValue().equals(part)) {
-                        current = child;
-                        found = true;
-                        break;
-                    }
+            // Search children for matching value
+            for (javafx.scene.control.TreeItem<String> child : current.getChildren()) {
+                if (child.getValue() != null && child.getValue().equals(part)) {
+                    current = child;
+                    found = true;
+                    break;
                 }
             }
             
             if (!found) {
-                return null; // Path not found
+                return null; // Path component not found
             }
+            
+            partIndex++;
         }
         
         return current;
@@ -2533,21 +2533,25 @@ public class BuiltinsScreen {
             
             // Try loading from classpath using ClassLoader
             String resourcePath = iconPath.startsWith("/") ? iconPath.substring(1) : iconPath;
-            java.io.InputStream is = BuiltinsScreen.class.getClassLoader().getResourceAsStream(resourcePath);
             
-            // Also try with leading slash
-            if (is == null) {
-                is = BuiltinsScreen.class.getResourceAsStream("/" + resourcePath);
+            // Try first method
+            try (java.io.InputStream is = BuiltinsScreen.class.getClassLoader().getResourceAsStream(resourcePath)) {
+                if (is != null) {
+                    image = new javafx.scene.image.Image(is);
+                }
             }
             
-            if (is != null) {
-                try {
-                    image = new javafx.scene.image.Image(is);
-                } finally {
-                    is.close();
+            // If not found, try with leading slash
+            if (image == null) {
+                try (java.io.InputStream is = BuiltinsScreen.class.getResourceAsStream("/" + resourcePath)) {
+                    if (is != null) {
+                        image = new javafx.scene.image.Image(is);
+                    }
                 }
-            } else {
-                // Try as file path
+            }
+            
+            // If still not found, try as file path
+            if (image == null) {
                 java.io.File file = new java.io.File(iconPath);
                 if (file.exists() && file.isFile()) {
                     image = new javafx.scene.image.Image(file.toURI().toString());
