@@ -504,3 +504,26 @@
     -rtfx-background-color: #dc143c; /* crimson red for unmatched brackets - better accessibility than pure red */
 }
 
+/* ===== Quote matching highlighting ===== */
+/* Matched quote highlight - subtle blue background for accessibility */
+.quote-match,
+.text.quote-match,
+.styled-text-area .text.quote-match,
+.editor-ebs .text.quote-match,
+.editor-text .text.quote-match {
+    -fx-fill: #000000;
+    -fx-font-weight: bold;
+    -rtfx-background-color: #87ceeb; /* sky blue for matched quotes - distinct from brackets */
+}
+
+/* Unmatched quote highlight - subtle orange background with better contrast */
+.quote-error,
+.text.quote-error,
+.styled-text-area .text.quote-error,
+.editor-ebs .text.quote-error,
+.editor-text .text.quote-error {
+    -fx-fill: #000000;
+    -fx-font-weight: bold;
+    -rtfx-background-color: #ffa500; /* orange for unmatched quotes - distinct from bracket errors */
+}
+

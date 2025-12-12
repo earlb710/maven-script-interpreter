@@ -36,6 +36,9 @@ public class ScriptArea extends StyleClassedTextArea {
     
     // Bracket matching state
     private int[] lastHighlightedBrackets = null; // [openPos, closePos] or null if no brackets highlighted
+    
+    // Quote matching state
+    private int[] lastHighlightedQuotes = null; // [openPos, closePos] or null if no quotes highlighted
 
     public ScriptArea() {
         setParagraphGraphicFactory(LineNumberFactory.get(this)); // initial state ON
@@ -581,13 +584,14 @@ public class ScriptArea extends StyleClassedTextArea {
     }
     
     /**
-     * Highlight matching brackets when the caret is on or inside a bracket pair.
-     * Supports {}, (), and [] brackets.
+     * Highlight matching brackets and quotes when the caret is on or inside a pair.
+     * Supports {}, (), [] brackets and single/double quotes.
      * This method is public to allow external triggering after syntax highlighting updates.
      */
     public void highlightMatchingBrackets() {
         // Clear previous highlights
         clearBracketHighlights();
+        clearQuoteHighlights();
         
         String text = getText();
         int caretPos = getCaretPosition();
@@ -596,12 +600,18 @@ public class ScriptArea extends StyleClassedTextArea {
             return;
         }
         
-        // Check if caret is on a bracket
+        // Check if caret is on a bracket or quote
         char charAtCaret = (caretPos < text.length()) ? text.charAt(caretPos) : '\0';
         char charBeforeCaret = (caretPos > 0) ? text.charAt(caretPos - 1) : '\0';
         
-        // Try matching bracket at caret position first
-        if (isOpenBracket(charAtCaret)) {
+        // Check for quotes first (they take precedence when on the character)
+        if (isQuote(charAtCaret)) {
+            highlightQuotePair(text, caretPos, charAtCaret);
+        } else if (isQuote(charBeforeCaret)) {
+            // Also check the character before the caret (when cursor is after a quote)
+            highlightQuotePair(text, caretPos - 1, charBeforeCaret);
+        } else if (isOpenBracket(charAtCaret)) {
+            // Try matching bracket at caret position
             highlightBracketPair(text, caretPos, charAtCaret, true);
         } else if (isCloseBracket(charAtCaret)) {
             highlightBracketPair(text, caretPos, charAtCaret, false);
@@ -611,7 +621,7 @@ public class ScriptArea extends StyleClassedTextArea {
         } else if (isCloseBracket(charBeforeCaret)) {
             highlightBracketPair(text, caretPos - 1, charBeforeCaret, false);
         } else {
-            // Caret is not on a bracket - check if it's inside a bracket pair
+            // Caret is not on a bracket or quote - check if it's inside a bracket pair
             highlightEnclosingBrackets(text, caretPos);
         }
     }
@@ -811,6 +821,145 @@ public class ScriptArea extends StyleClassedTextArea {
             }
             
             lastHighlightedBrackets = null;
+        }
+    }
+    
+    // ========== Quote Matching Methods ==========
+    
+    /**
+     * Check if character is a quote.
+     */
+    private boolean isQuote(char c) {
+        return c == '"' || c == '\'';
+    }
+    
+    /**
+     * Highlight a quote pair starting from a specific position.
+     * Handles escaped quotes by skipping them.
+     * @param text The text to search in
+     * @param quotePos The position of the quote
+     * @param quote The quote character (single or double)
+     */
+    private void highlightQuotePair(String text, int quotePos, char quote) {
+        int matchPos = findMatchingQuote(text, quotePos, quote);
+        
+        if (matchPos != -1) {
+            // Found matching quote - highlight both with success color
+            addStyleToRange(quotePos, quotePos + 1, "quote-match");
+            addStyleToRange(matchPos, matchPos + 1, "quote-match");
+            lastHighlightedQuotes = new int[]{quotePos, matchPos};
+        } else {
+            // No matching quote - highlight with error color
+            addStyleToRange(quotePos, quotePos + 1, "quote-error");
+            lastHighlightedQuotes = new int[]{quotePos, quotePos};
+        }
+    }
+    
+    /**
+     * Find the matching quote for a quote at a given position.
+     * Skips escaped quotes (\' or \").
+     * @param text The text to search in
+     * @param startPos The position of the opening quote
+     * @param quote The quote character to match
+     * @return The position of the matching quote, or -1 if not found
+     */
+    private int findMatchingQuote(String text, int startPos, char quote) {
+        // Determine if we're looking for the opening or closing quote
+        // by checking if there's a quote before us that's not escaped
+        boolean lookingForClose = isOpeningQuote(text, startPos, quote);
+        
+        if (lookingForClose) {
+            // Search forward for closing quote
+            for (int i = startPos + 1; i < text.length(); i++) {
+                char c = text.charAt(i);
+                if (c == quote) {
+                    // Check if this quote is escaped
+                    if (!isEscaped(text, i)) {
+                        return i;
+                    }
+                }
+            }
+        } else {
+            // Search backward for opening quote
+            for (int i = startPos - 1; i >= 0; i--) {
+                char c = text.charAt(i);
+                if (c == quote) {
+                    // Check if this quote is escaped
+                    if (!isEscaped(text, i)) {
+                        return i;
+                    }
+                }
+            }
+        }
+        
+        return -1; // No matching quote found
+    }
+    
+    /**
+     * Check if a quote at a given position is escaped.
+     * A quote is escaped if it's preceded by an odd number of backslashes.
+     * @param text The text to check in
+     * @param pos The position of the quote
+     * @return true if the quote is escaped, false otherwise
+     */
+    private boolean isEscaped(String text, int pos) {
+        if (pos == 0) {
+            return false;
+        }
+        
+        // Count consecutive backslashes before the quote
+        int backslashCount = 0;
+        int i = pos - 1;
+        while (i >= 0 && text.charAt(i) == '\\') {
+            backslashCount++;
+            i--;
+        }
+        
+        // If there's an odd number of backslashes, the quote is escaped
+        return backslashCount % 2 == 1;
+    }
+    
+    /**
+     * Determine if a quote at a given position is an opening quote.
+     * This is done by counting unescaped quotes of the same type before it.
+     * If the count is even, this is an opening quote.
+     * @param text The text to check in
+     * @param pos The position of the quote
+     * @param quote The quote character
+     * @return true if this is an opening quote, false if closing
+     */
+    private boolean isOpeningQuote(String text, int pos, char quote) {
+        int count = 0;
+        
+        // Count unescaped quotes before this position
+        for (int i = 0; i < pos; i++) {
+            if (text.charAt(i) == quote && !isEscaped(text, i)) {
+                count++;
+            }
+        }
+        
+        // If even number of quotes before, this is opening; if odd, this is closing
+        return count % 2 == 0;
+    }
+    
+    /**
+     * Clear any previously highlighted quotes.
+     */
+    private void clearQuoteHighlights() {
+        if (lastHighlightedQuotes != null) {
+            int openPos = lastHighlightedQuotes[0];
+            int closePos = lastHighlightedQuotes[1];
+            
+            // Remove both match and error styles
+            removeStyleFromRange(openPos, openPos + 1, "quote-match");
+            removeStyleFromRange(openPos, openPos + 1, "quote-error");
+            
+            if (closePos != openPos) {
+                removeStyleFromRange(closePos, closePos + 1, "quote-match");
+                removeStyleFromRange(closePos, closePos + 1, "quote-error");
+            }
+            
+            lastHighlightedQuotes = null;
         }
     }
 }
