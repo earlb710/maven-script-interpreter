@@ -971,25 +971,29 @@ public class EbsConsoleHandler extends EbsHandler {
                 }
                 
                 try {
-                    // Use the existing context (which has screen state) and just update the script
-                    // Parse the file to get imports resolved correctly
+                    // Parse the file to get the blocks and statements with correct source path
                     RuntimeContext scriptContext = com.eb.script.parser.Parser.parse(filePath);
                     
                     // Copy debug mode state from current thread to this thread
                     boolean debugModeEnabled = com.eb.script.interpreter.screen.ScreenFactory.getDebugModeForInheritance();
                     com.eb.script.interpreter.screen.ScreenFactory.setDebugModeForThread(debugModeEnabled);
                     
-                    // Merge the parsed script into the existing handler context
-                    // This preserves screen state while allowing imports to be resolved
+                    // Create a new RuntimeContext that combines:
+                    // - The correct sourcePath from scriptContext (for import resolution)
+                    // - The handler's environment (to preserve screen state and runtime state)
+                    // - The blocks and statements from scriptContext (the parsed script)
                     if (ctx != null) {
-                        // Copy functions from script context to handler context
-                        ctx.blocks.putAll(scriptContext.blocks);
-                        // Update statements if any
-                        if (scriptContext.statements != null && scriptContext.statements.length > 0) {
-                            ctx.statements = scriptContext.statements;
-                        }
-                        // Execute using handler's context (which has screen state)
-                        interpreter.interpret(ctx);
+                        // Create a new context with sourcePath from file and environment from handler
+                        RuntimeContext execContext = new RuntimeContext(
+                            scriptContext.name,
+                            scriptContext.sourcePath,  // Has the file path for import resolution
+                            ctx.environment,            // Reuses handler's environment with screen state
+                            scriptContext.blocks,       // Functions from the parsed script
+                            scriptContext.statements    // Statements from the parsed script
+                        );
+                        
+                        // Execute using the combined context
+                        interpreter.interpret(execContext);
                     } else {
                         // Fallback: register output area and execute with script context
                         scriptContext.environment.registerOutputArea(env.getOutputArea());
