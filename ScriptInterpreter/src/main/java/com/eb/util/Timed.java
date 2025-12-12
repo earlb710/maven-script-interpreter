@@ -188,40 +188,45 @@ public final class Timed {
      * Gets the total elapsed time as a string in seconds with specified decimal precision.
      * Format: "seconds.xxx" where xxx has pDecimals digits
      *
-     * @param pDecimals number of decimal places (0-3)
+     * @param pDecimals number of decimal places (0-3). Limited to 3 since milliseconds
+     *                  have only 3 digits of precision.
      * @return the elapsed time in seconds as a string with specified precision
      * @throws IllegalArgumentException if pDecimals is negative or greater than 3
      */
     public String getTimerString_Seconds(int pDecimals) {
-        if (pDecimals < 0 || pDecimals > 3) {
-            throw new IllegalArgumentException("pDecimals must be between 0 and 3, got: " + pDecimals);
-        }
-        long period = getTimerPeriod();
-        if (pDecimals == 0) {
-            return String.valueOf(period / 1000);
-        }
-        String millisPart = UtilString.lpad(String.valueOf(period % 1000), 3, '0');
-        return String.format("%d.%s", period / 1000, millisPart.substring(0, pDecimals));
+        return formatPeriodAsSeconds(getTimerPeriod(), pDecimals);
     }
 
     /**
      * Gets the time since last continuation as a string in seconds with specified decimal precision.
      * Format: "seconds.xxx" where xxx has pDecimals digits
      *
-     * @param pDecimals number of decimal places (0-3)
+     * @param pDecimals number of decimal places (0-3). Limited to 3 since milliseconds
+     *                  have only 3 digits of precision.
      * @return the elapsed time since continuation in seconds as a string with specified precision
      * @throws IllegalArgumentException if pDecimals is negative or greater than 3
      */
     public String getContinueString_Seconds(int pDecimals) {
+        return formatPeriodAsSeconds(getContinuePeriod(), pDecimals);
+    }
+
+    /**
+     * Helper method to format a period in milliseconds as seconds with specified decimal precision.
+     *
+     * @param periodMillis the period in milliseconds
+     * @param pDecimals number of decimal places (0-3)
+     * @return the formatted string
+     * @throws IllegalArgumentException if pDecimals is invalid
+     */
+    private String formatPeriodAsSeconds(long periodMillis, int pDecimals) {
         if (pDecimals < 0 || pDecimals > 3) {
             throw new IllegalArgumentException("pDecimals must be between 0 and 3, got: " + pDecimals);
         }
-        long period = getContinuePeriod();
         if (pDecimals == 0) {
-            return String.valueOf(period / 1000);
+            return String.valueOf(periodMillis / 1000);
         }
-        String millisPart = UtilString.lpad(String.valueOf(period % 1000), 3, '0');
-        return String.format("%d.%s", period / 1000, millisPart.substring(0, pDecimals));
+        String millisPart = UtilString.lpad(String.valueOf(periodMillis % 1000), 3, '0');
+        return String.format("%d.%s", periodMillis / 1000, millisPart.substring(0, pDecimals));
     }
 
 }
