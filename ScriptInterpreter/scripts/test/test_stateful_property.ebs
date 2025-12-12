@@ -1,0 +1,103 @@
+// EBS Script: Test stateful property on area items
+// This demonstrates the stateful property which controls whether changes
+// to an item mark the screen as changed
+//
+// Testing:
+// 1. Changes to items with stateful=true (default) will mark screen as CHANGED
+// 2. Changes to items with stateful=false will NOT mark screen as CHANGED
+
+// Create a screen with both stateful and non-stateful items
+screen testStateful = {
+    "title": "Stateful Property Test",
+    "width": 500,
+    "height": 400,
+    "vars": [
+        {
+            "name": "username",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Username (stateful):"
+            }
+        },
+        {
+            "name": "searchFilter",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Search Filter (non-stateful):"
+            }
+        },
+        {
+            "name": "notes",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textarea",
+                "labelText": "Notes (stateful):"
+            }
+        },
+        {
+            "name": "tempValue",
+            "type": "int",
+            "default": 0,
+            "display": {
+                "type": "slider",
+                "min": 0,
+                "max": 100,
+                "labelText": "Temp Value (non-stateful):"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "items": [
+                {
+                    "name": "usernameItem",
+                    "varref": "username",
+                    "sequence": 1
+                    // stateful defaults to true, so changes will mark screen as changed
+                },
+                {
+                    "name": "searchFilterItem",
+                    "varref": "searchFilter",
+                    "sequence": 2,
+                    "stateful": false
+                    // stateful=false means changes won't mark screen as changed
+                },
+                {
+                    "name": "notesItem",
+                    "varref": "notes",
+                    "sequence": 3
+                    // stateful defaults to true
+                },
+                {
+                    "name": "tempValueItem",
+                    "varref": "tempValue",
+                    "sequence": 4,
+                    "stateful": false
+                    // stateful=false for temporary/filter values
+                }
+            ]
+        }
+    ]
+};
+
+// Show the screen
+show screen testStateful;
+
+println("Screen 'testStateful' is now showing.");
+println("Initial status: " + scr.getStatus("testStateful"));
+println("");
+println("Instructions for testing:");
+println("1. Type something in 'Username' - screen should become CHANGED");
+println("2. Type in 'Search Filter' - screen should stay CLEAN (stateful=false)");
+println("3. Type in 'Notes' - screen should become CHANGED");
+println("4. Move 'Temp Value' slider - screen should stay CLEAN (stateful=false)");
+println("");
+println("You can check status with: scr.getStatus(\"testStateful\")");
+println("Press Ctrl+D to toggle debug panel and see changed items");
