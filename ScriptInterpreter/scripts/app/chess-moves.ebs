@@ -253,7 +253,7 @@ getQueenMoves(x: int, y: int) {
 // Returns a posType array of valid moves on the board
 validMoves(x: int, y: int) {
     var validMovesList: posType[] = [];
-    var allMoves: posType[];
+    var allMoves: posType[] = [];
     
     // Get the piece at the current position
     var cellValue: int = call getPieceAt(x, y);
