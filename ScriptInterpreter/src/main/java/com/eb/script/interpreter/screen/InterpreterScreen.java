@@ -1653,8 +1653,10 @@ public class InterpreterScreen {
             "minwidth", "min_width", "minheight", "min_height",
             "maxwidth", "max_width", "maxheight", "max_height",
             "alignment",
-            // Event handlers (can be at item or display level)
-            "onvalidate", "on_validate", "onchange", "on_change",
+            // Event handlers (should be at item level, not in display object)
+            // Note: Event handlers belong at the item level to bind to the specific item instance.
+            // The display object is only for shared display/rendering properties.
+            "onclick", "on_click", "onvalidate", "on_validate", "onchange", "on_change",
             // Data source
             "source",
             // promptHelp can be at item level (gets moved to displayItem)
@@ -1670,9 +1672,10 @@ public class InterpreterScreen {
         ));
         
         // Properties that should NOT be at item level (they belong in display object)
+        // Note: Display object properties are for shared rendering/presentation configuration.
+        // Item-specific properties (like event handlers) should be at item level.
         java.util.Set<String> displayOnlyProps = new java.util.HashSet<>(java.util.Arrays.asList(
             "mandatory", "case", "caseformat", "pattern", "min", "max",
-            "onclick", "on_click",
             "options", "columns", "displayrecords", "display_records",
             "treeitems", "tree_items", "expandall", "expand_all", "showroot", "show_root",
             "maxlength", "max_length", "height",
