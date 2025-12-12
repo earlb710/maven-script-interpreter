@@ -201,7 +201,7 @@ public final class Timed {
             return String.valueOf(period / 1000);
         }
         String millisPart = UtilString.lpad(String.valueOf(period % 1000), 3, '0');
-        return period / 1000 + "." + millisPart.substring(0, pDecimals);
+        return String.format("%d.%s", period / 1000, millisPart.substring(0, pDecimals));
     }
 
     /**
@@ -221,7 +221,7 @@ public final class Timed {
             return String.valueOf(period / 1000);
         }
         String millisPart = UtilString.lpad(String.valueOf(period % 1000), 3, '0');
-        return period / 1000 + "." + millisPart.substring(0, pDecimals);
+        return String.format("%d.%s", period / 1000, millisPart.substring(0, pDecimals));
     }
 
 }
