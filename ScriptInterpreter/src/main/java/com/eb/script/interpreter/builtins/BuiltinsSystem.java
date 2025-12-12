@@ -327,6 +327,10 @@ public class BuiltinsSystem {
         return removedValue;
     }
 
+    /**
+     * Encodes byte array to base64 string.
+     * Uses BuiltinsCrypto.encodeBase64() for base64 encoding.
+     */
     private static Object base64Encode(Object[] args) throws InterpreterError {
         Object a0 = args[0];
         if (a0 == null) {
@@ -359,16 +363,20 @@ public class BuiltinsSystem {
             throw new InterpreterError("array.base64encode: expected byte array");
         }
 
-        return java.util.Base64.getEncoder().encodeToString(content);
+        return BuiltinsCrypto.encodeBase64(content);
     }
 
+    /**
+     * Decodes base64 string to byte array.
+     * Uses BuiltinsCrypto.decodeBase64() for base64 decoding.
+     */
     private static Object base64Decode(Object[] args) throws InterpreterError {
         String b64 = (String) args[0];
         if (b64 == null) {
             return null;
         }
         try {
-            byte[] bytes = java.util.Base64.getDecoder().decode(b64);
+            byte[] bytes = BuiltinsCrypto.decodeBase64(b64);
             return new ArrayFixedByte(bytes);
         } catch (IllegalArgumentException ex) {
             throw new InterpreterError("array.base64decode: invalid base64: " + ex.getMessage());

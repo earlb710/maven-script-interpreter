@@ -334,6 +334,31 @@ public class BuiltinsCrypto {
         }
     }
 
+    // --- Public utility methods for use by other builtin classes ---
+
+    /**
+     * Encodes byte array to Base64 string.
+     * Public utility for use by image and array builtins.
+     * 
+     * @param bytes Byte array to encode
+     * @return Base64-encoded string
+     */
+    public static String encodeBase64(byte[] bytes) {
+        return Base64.getEncoder().encodeToString(bytes);
+    }
+
+    /**
+     * Decodes Base64 string to byte array.
+     * Public utility for use by image and array builtins.
+     * 
+     * @param base64String Base64-encoded string
+     * @return Decoded byte array
+     * @throws IllegalArgumentException if the input is not valid Base64
+     */
+    public static byte[] decodeBase64(String base64String) {
+        return Base64.getDecoder().decode(base64String);
+    }
+
     // --- Helper methods ---
 
     /**
