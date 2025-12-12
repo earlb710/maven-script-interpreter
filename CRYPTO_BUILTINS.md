@@ -165,6 +165,75 @@ var decoded: string = call crypto.base64decode(invalid);
 
 ---
 
+## Obfuscation Functions
+
+### crypto.obfuscate(text) ✨ NEW
+
+Simple character substitution obfuscation for making text harder to read at a glance.
+
+**Parameters:**
+- `text` (string): Text to obfuscate
+
+**Returns:** Obfuscated string
+
+**Example:**
+```ebs
+var secret: string = "Password123";
+var obfuscated: string = call crypto.obfuscate(secret);
+print obfuscated;
+// Output: Pqllvgkr829 (readable but different)
+```
+
+**How It Works:**
+- Space characters map to `~`
+- Uppercase letters (A-Z) map to different uppercase letters
+- Lowercase letters (a-z) map to different lowercase letters
+- Digits (0-9) map to different digits
+- Special characters pass through unchanged
+- Uses fixed character mappings (no key required)
+
+**Use Cases:**
+- Making text less obvious in logs or displays
+- Simple obfuscation for casual privacy (not security)
+- Hiding sensitive data from shoulder surfing
+- Making text unreadable to automated scrapers
+
+**⚠️ Important Notes:**
+- This is NOT cryptographically secure encryption
+- Does not provide security against determined attackers
+- For true security, use `crypto.encrypt()` instead
+- The mapping is fixed and reversible with `crypto.deobfuscate()`
+
+---
+
+### crypto.deobfuscate(text) ✨ NEW
+
+Reverses obfuscation performed by `crypto.obfuscate()`.
+
+**Parameters:**
+- `text` (string): Obfuscated string to restore
+
+**Returns:** Original string
+
+**Example:**
+```ebs
+var obfuscated: string = "Pqllvgkr829";
+var original: string = call crypto.deobfuscate(obfuscated);
+print original;
+// Output: Password123
+```
+
+**Round-trip Example:**
+```ebs
+var original: string = "Sensitive Data 2024";
+var obfuscated: string = call crypto.obfuscate(original);
+var restored: string = call crypto.deobfuscate(obfuscated);
+print "Match: " + (original == restored);
+// Output: Match: true
+```
+
+---
+
 ## Encryption Functions
 
 ### crypto.encrypt(plaintext, key)

@@ -45,6 +45,8 @@ public class BuiltinsCrypto {
             case "crypto.md5" -> md5(args);
             case "crypto.base64encode" -> base64Encode(args);
             case "crypto.base64decode" -> base64Decode(args);
+            case "crypto.obfuscate" -> obfuscate(args);
+            case "crypto.deobfuscate" -> deobfuscate(args);
             default -> throw new InterpreterError("Unknown Crypto builtin: " + name);
         };
     }
@@ -357,6 +359,156 @@ public class BuiltinsCrypto {
      */
     public static byte[] decodeBase64(String base64String) {
         return Base64.getDecoder().decode(base64String);
+    }
+
+    /**
+     * crypto.obfuscate(text) - Simple character substitution obfuscation
+     * 
+     * Uses fixed character mapping for space, alphabetic (A-Z, a-z), and numeric (0-9) characters.
+     * Other characters pass through unchanged. This is NOT cryptographically secure - it's a simple
+     * obfuscation for making text harder to read at a glance.
+     * 
+     * Character mappings:
+     * - Space maps to a random printable character
+     * - A-Z map to different random uppercase letters
+     * - a-z map to different random lowercase letters  
+     * - 0-9 map to different random digits
+     * - All other characters remain unchanged
+     * 
+     * @param args [0] text: String to obfuscate
+     * @return Obfuscated string
+     */
+    private static Object obfuscate(Object[] args) throws InterpreterError {
+        if (args.length < 1) {
+            throw new InterpreterError("crypto.obfuscate requires 1 argument: text");
+        }
+
+        String text = (String) args[0];
+        if (text == null) {
+            throw new InterpreterError("crypto.obfuscate: text cannot be null");
+        }
+
+        return obfuscateString(text);
+    }
+
+    /**
+     * crypto.deobfuscate(text) - Reverses the obfuscation
+     * 
+     * @param args [0] text: Obfuscated string to restore
+     * @return Original string
+     */
+    private static Object deobfuscate(Object[] args) throws InterpreterError {
+        if (args.length < 1) {
+            throw new InterpreterError("crypto.deobfuscate requires 1 argument: text");
+        }
+
+        String text = (String) args[0];
+        if (text == null) {
+            throw new InterpreterError("crypto.deobfuscate: text cannot be null");
+        }
+
+        return deobfuscateString(text);
+    }
+
+    // Fixed character substitution maps for obfuscation
+    // These provide a reversible character-to-character mapping
+    
+    // Space mapping
+    private static final char SPACE_OBFUSCATED = '~';
+    
+    // Uppercase letters (A-Z) mapping - each letter maps to a different letter
+    private static final char[] UPPER_MAP = {
+        'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P',  // A-J
+        'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Z',  // K-T
+        'X', 'C', 'V', 'B', 'N', 'M'                        // U-Z
+    };
+    
+    // Lowercase letters (a-z) mapping - each letter maps to a different letter
+    private static final char[] LOWER_MAP = {
+        'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p',  // a-j
+        'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'z',  // k-t
+        'x', 'c', 'v', 'b', 'n', 'm'                        // u-z
+    };
+    
+    // Digits (0-9) mapping - each digit maps to a different digit
+    private static final char[] DIGIT_MAP = {
+        '5', '8', '2', '9', '1', '7', '3', '0', '6', '4'   // 0-9
+    };
+    
+    // Reverse maps for deobfuscation (built once for efficiency)
+    private static final char[] UPPER_REVERSE_MAP = new char[26];
+    private static final char[] LOWER_REVERSE_MAP = new char[26];
+    private static final char[] DIGIT_REVERSE_MAP = new char[10];
+    
+    static {
+        // Build reverse mapping tables for efficient deobfuscation
+        for (int i = 0; i < 26; i++) {
+            UPPER_REVERSE_MAP[UPPER_MAP[i] - 'A'] = (char) ('A' + i);
+            LOWER_REVERSE_MAP[LOWER_MAP[i] - 'a'] = (char) ('a' + i);
+        }
+        for (int i = 0; i < 10; i++) {
+            DIGIT_REVERSE_MAP[DIGIT_MAP[i] - '0'] = (char) ('0' + i);
+        }
+    }
+
+    /**
+     * Obfuscates a string using fixed character substitution.
+     * Uses char arrays for maximum efficiency.
+     * 
+     * @param input String to obfuscate
+     * @return Obfuscated string
+     */
+    private static String obfuscateString(String input) {
+        char[] chars = input.toCharArray();
+        int len = chars.length;
+        
+        // Process in-place for efficiency
+        for (int i = 0; i < len; i++) {
+            char c = chars[i];
+            
+            if (c == ' ') {
+                chars[i] = SPACE_OBFUSCATED;
+            } else if (c >= 'A' && c <= 'Z') {
+                chars[i] = UPPER_MAP[c - 'A'];
+            } else if (c >= 'a' && c <= 'z') {
+                chars[i] = LOWER_MAP[c - 'a'];
+            } else if (c >= '0' && c <= '9') {
+                chars[i] = DIGIT_MAP[c - '0'];
+            }
+            // Other characters remain unchanged
+        }
+        
+        return new String(chars);
+    }
+
+    /**
+     * Deobfuscates a string that was obfuscated with obfuscateString.
+     * Uses char arrays and reverse lookup tables for maximum efficiency.
+     * 
+     * @param input Obfuscated string
+     * @return Original string
+     */
+    private static String deobfuscateString(String input) {
+        char[] chars = input.toCharArray();
+        int len = chars.length;
+        
+        // Process in-place for efficiency
+        for (int i = 0; i < len; i++) {
+            char c = chars[i];
+            
+            if (c == SPACE_OBFUSCATED) {
+                chars[i] = ' ';
+            } else if (c >= 'A' && c <= 'Z') {
+                chars[i] = UPPER_REVERSE_MAP[c - 'A'];
+            } else if (c >= 'a' && c <= 'z') {
+                chars[i] = LOWER_REVERSE_MAP[c - 'a'];
+            } else if (c >= '0' && c <= '9') {
+                chars[i] = DIGIT_REVERSE_MAP[c - '0'];
+            }
+            // Other characters remain unchanged
+        }
+        
+        return new String(chars);
     }
 
     // --- Helper methods ---
