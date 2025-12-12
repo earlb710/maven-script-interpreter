@@ -1591,6 +1591,9 @@ public class InterpreterScreen {
             // Image properties
             "fitwidth", "fit_width", "fitheight", "fit_height",
             "preserveratio", "preserve_ratio", "smooth", "scalemode", "scale_mode",
+            "pickonbounds", "pick_on_bounds",
+            // Text area properties
+            "wraptext", "wrap_text",
             // Slider properties
             "showslidervalue", "show_slider_value",
             // Sequence
@@ -1663,7 +1666,7 @@ public class InterpreterScreen {
             "prompthelp", "prompt_help",
             // Label properties (can be at item level for override/merge behavior)
             "labeltext", "label_text", "labeltextalignment", "label_text_alignment",
-            "labelposition", "label_position",
+            "labelposition", "label_position", "labelpos", "label_pos",
             // Styling properties (can be at item level for override/merge behavior)
             "labelcolor", "label_color", "labelbold", "label_bold",
             "labelitalic", "label_italic", "labelfontsize", "label_font_size",
