@@ -3925,11 +3925,30 @@ call scr.setAreaProperty("screenName.areaName", "propertyName", value);
 var options = call scr.getItemChoiceOptions("screenName", "itemName");
 call scr.setItemChoiceOptions("screenName", "itemName", optionsMap);
 
+// TreeView icon management (dynamically change icons at runtime)
+// Set a static icon for a tree item
+call scr.setTreeItemIcon("screenName", "itemPath", "icons/file.png");
+
+// Set state-based icons (open/closed) for a tree item
+call scr.setTreeItemIcons("screenName", "itemPath", "icons/folder.png", 
+                          "icons/folder-open.png", "icons/folder.png");
+
+// Get the current icon path for a tree item
+var iconPath = call scr.getTreeItemIcon("screenName", "itemPath");
+
+// itemPath uses dot notation to navigate tree hierarchy
+// Examples: "Root", "Root.src", "Root.src.main.java"
+
 // Examples:
 var editable = call scr.getProperty("propTest.usernamefield", "editable");
 call scr.setProperty("propTest.usernamefield", "visible", false);
 var items = call scr.getItemList("propTest");
 // items[0], items[1], ... contain item names like "usernamefield", "agefield", etc.
+
+// TreeView icon example:
+call scr.setTreeItemIcon("fileExplorer", "main.ebs", "icons/script-file-run.png");
+call scr.setTreeItemIcons("fileExplorer", "src", "icons/folder.png",
+                          "icons/folder-open.png", "icons/folder.png");
 ```
 
 **Note:** The canonical prefix for screen functions is `scr.` (e.g., `scr.getProperty`, `scr.setStatus`). This is the recommended prefix for all new code.
