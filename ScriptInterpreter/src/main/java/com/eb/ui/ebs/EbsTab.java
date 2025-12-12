@@ -853,6 +853,8 @@ public class EbsTab extends Tab {
         // Restore scroll position after style update
         Platform.runLater(() -> {
             dispArea.scrollYToPixel(scrollY);
+            // Reapply bracket highlighting after syntax highlighting to ensure it's visible
+            dispArea.highlightMatchingBrackets();
         });
     }
 

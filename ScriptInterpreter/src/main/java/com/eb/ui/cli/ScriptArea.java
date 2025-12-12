@@ -583,8 +583,9 @@ public class ScriptArea extends StyleClassedTextArea {
     /**
      * Highlight matching brackets when the caret is on or inside a bracket pair.
      * Supports {}, (), and [] brackets.
+     * This method is public to allow external triggering after syntax highlighting updates.
      */
-    private void highlightMatchingBrackets() {
+    public void highlightMatchingBrackets() {
         // Clear previous highlights
         clearBracketHighlights();
         
