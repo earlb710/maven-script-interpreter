@@ -39,15 +39,15 @@
               "seq": 1,
               "hgrow": "NEVER",
               "vgrow": "ALWAYS",
+              "minWidth": "200",
+              "prefWidth": "250",
+              "minHeight": "200",
+              "prefHeight": "200",
+              "maxHeight": "MAX",
               "display": {
                 "type": "treeview",
                 "labelText": "Help Topic",
                 "labelPosition": "TOP",
-                "minWidth": "200",
-                "prefWidth": "250",
-                "minHeight": "200",
-                "prefHeight": "200",
-                "maxHeight": "MAX",
                 "expandAll": true,
                 "showRoot": false,
                 "onChange": "helpScreen.helpContent = call convertToHtml(call getHelpContent(helpScreen.selectedTopic));",
@@ -70,16 +70,16 @@
               "seq": 1,
               "hgrow": "ALWAYS",
               "vgrow": "ALWAYS",
+              "minWidth": "200",
+              "prefWidth": "400",
+              "maxWidth": "MAX",
+              "minHeight": "200",
+              "prefHeight": "100",
+              "maxHeight": "MAX",
               "display": {
                 "type": "webview",
                 "labelText": "Help Content",
-                "labelPosition": "TOP",
-                "minWidth": "200",
-                "prefWidth": "400",
-                "maxWidth": "MAX",
-                "minHeight": "200",
-                "prefHeight": "100",
-                "maxHeight": "MAX"
+                "labelPosition": "TOP"
               }
             }
           ]
