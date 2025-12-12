@@ -687,6 +687,7 @@ Press `Ctrl+D` again to hide the debug panel.
 - **[Array Syntax Guide](docs/ARRAY_SYNTAX_GUIDE.md)** - Comprehensive guide explaining differences between `int[n]` and `array.int[n]` syntax, including performance and memory usage comparisons
 - **[Python vs EBS String Functions](docs/PYTHON_VS_EBS_STRING_FUNCTIONS.md)** - Comparison guide for Python developers learning EBS Script
 - **[EBS Script vs Oracle PL/SQL](docs/EBS_VS_ORACLE_PLSQL.md)** - Comprehensive comparison guide for PL/SQL developers learning EBS Script
+- **[Base64 and Encryption Functions](BASE64_AND_ENCRYPTION_FUNCTIONS.md)** - Complete guide to Base64 encoding/decoding and encryption functions locations and usage
 - **[Architecture & Flow Documentation](ARCHITECTURE.md)** - Comprehensive documentation of the system architecture, data flow, and internal workings
 - **[Class Tree Lister](CLASS_TREE_LISTER.md)** - Utility for analyzing the project's class hierarchy
 - **[Syntax Reference](ScriptInterpreter/src/main/java/com/eb/script/syntax_ebnf.txt)** - EBNF grammar specification
