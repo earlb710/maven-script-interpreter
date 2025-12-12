@@ -514,7 +514,7 @@ public class UtilString extends UtilUnicode {
 
     public static String getFirstTokenString(int pStartToken, String pString, String pDiv) {
         int idx = pString.indexOf(pDiv, pStartToken);
-        if (idx > 1) {
+        if (idx >= 0) {
             String lastStr = pString.substring(pStartToken, idx);
             return lastStr;
         } else {
@@ -524,7 +524,7 @@ public class UtilString extends UtilUnicode {
 
     public static String getFirstTokenString(int pStartToken, String pString) {
         int idx = pString.indexOf(div, pStartToken);
-        if (idx > 1) {
+        if (idx >= 0) {
             String lastStr = pString.substring(pStartToken, idx);
             return lastStr;
         } else {
@@ -534,7 +534,7 @@ public class UtilString extends UtilUnicode {
 
     public static String getFirstTokenString(String pString, String pDiv) {
         int idx = pString.indexOf(pDiv);
-        if (idx > 1) {
+        if (idx >= 0) {
             String lastStr = pString.substring(0, idx);
             return lastStr;
         } else {
@@ -544,7 +544,7 @@ public class UtilString extends UtilUnicode {
 
     public static String getFirstTokenString(String pString) {
         int idx = pString.indexOf(div);
-        if (idx > 1) {
+        if (idx >= 0) {
             String lastStr = pString.substring(0, idx);
             return lastStr;
         } else {
