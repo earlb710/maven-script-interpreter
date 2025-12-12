@@ -10,6 +10,12 @@ import java.util.concurrent.ConcurrentHashMap;
  * Built-in functions for timing operations.
  * Provides stopwatch-like functionality for measuring execution time.
  * Handles all timer.* builtins.
+ * <p>
+ * <b>Auto-initialization Behavior:</b> All timer operations automatically initialize
+ * timers if they don't exist, preventing null pointer errors. This design choice
+ * prioritizes ease of use - operations return sensible defaults (0ms, false, "0.000")
+ * rather than throwing exceptions for non-existent timers.
+ * </p>
  *
  * @author Earl Bosch
  */
@@ -217,11 +223,15 @@ public class BuiltinsTimer {
     /**
      * timer.clear() - Remove all timers from the registry
      * Returns the number of timers that were removed
+     * Thread-safe: Uses atomic operation to ensure accurate count
      */
     private static Object clear(Object[] args) throws InterpreterError {
-        int count = TIMERS.size();
-        TIMERS.clear();
-        return count;
+        // Use synchronized block to ensure atomicity of size check and clear
+        synchronized (TIMERS) {
+            int count = TIMERS.size();
+            TIMERS.clear();
+            return count;
+        }
     }
 
     /**
