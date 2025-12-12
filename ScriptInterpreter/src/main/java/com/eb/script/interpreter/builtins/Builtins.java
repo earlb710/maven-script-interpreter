@@ -1744,6 +1744,37 @@ public final class Builtins {
                 newParam("dateValue", DataType.DATE, true)
         ));
 
+        // ==========================
+        // CRYPTO builtins
+        // ==========================
+        addBuiltin(info(
+                "crypto.encrypt", DataType.STRING,
+                newParam("plaintext", DataType.STRING, true),
+                newParam("key", DataType.STRING, true)
+        ));
+        addBuiltin(info(
+                "crypto.decrypt", DataType.STRING,
+                newParam("ciphertext", DataType.STRING, true),
+                newParam("key", DataType.STRING, true)
+        ));
+        addBuiltin(info(
+                "crypto.generateKey", DataType.STRING,
+                newParam("bits", DataType.INTEGER, false)  // optional; defaults to 256
+        ));
+        addBuiltin(info(
+                "crypto.hash", DataType.STRING,
+                newParam("text", DataType.STRING, true),
+                newParam("algorithm", DataType.STRING, true)
+        ));
+        addBuiltin(info(
+                "crypto.sha256", DataType.STRING,
+                newParam("text", DataType.STRING, true)
+        ));
+        addBuiltin(info(
+                "crypto.md5", DataType.STRING,
+                newParam("text", DataType.STRING, true)
+        ));
+
         NAMES = Collections.unmodifiableSet(BUILTINS.keySet());
     }
 
@@ -1840,6 +1871,11 @@ public final class Builtins {
         // Date builtins
         if (BuiltinsDate.handles(name)) {
             return BuiltinsDate.dispatch(name, args);
+        }
+        
+        // Crypto builtins
+        if (BuiltinsCrypto.handles(name)) {
+            return BuiltinsCrypto.dispatch(name, args);
         }
         
         // File builtins (already in BuiltinsFile)

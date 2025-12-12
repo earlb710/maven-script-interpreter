@@ -4017,6 +4017,112 @@
       ],
       "return_type": "bool",
       "example": "<b>call</b> css.unloadCss(screenName=\"myscreen\", cssPath=\"dark-theme.css\");<br><b>call</b> css.loadCss(screenName=\"myscreen\", cssPath=\"light-theme.css\");"
+    },
+    {
+      "function": "crypto.encrypt",
+      "format": "html",
+      "short_description": "Encrypts text using AES-256-GCM",
+      "long_help": "Encrypts plaintext using AES-256-GCM (Advanced Encryption Standard with Galois/Counter Mode). The key parameter can be either a Base64-encoded AES key (from crypto.generateKey) or a simple password string that will be hashed to derive a key. Returns Base64-encoded encrypted data.",
+      "parameters": [
+        {
+          "name": "plaintext",
+          "type": "string",
+          "description": "Text to encrypt"
+        },
+        {
+          "name": "key",
+          "type": "string",
+          "description": "Base64 encryption key or password"
+        }
+      ],
+      "return_type": "string",
+      "example": "<b>var</b> key = <b>call</b> crypto.generateKey();<br><b>var</b> encrypted = <b>call</b> crypto.encrypt(plaintext=\"Secret message\", key=key);<br><b>print</b> encrypted;"
+    },
+    {
+      "function": "crypto.decrypt",
+      "format": "html",
+      "short_description": "Decrypts AES-256-GCM encrypted text",
+      "long_help": "Decrypts ciphertext that was encrypted using crypto.encrypt. The key must be the same key (or password) used for encryption. Returns the original plaintext string.",
+      "parameters": [
+        {
+          "name": "ciphertext",
+          "type": "string",
+          "description": "Base64-encoded encrypted data"
+        },
+        {
+          "name": "key",
+          "type": "string",
+          "description": "Base64 encryption key or password"
+        }
+      ],
+      "return_type": "string",
+      "example": "<b>var</b> decrypted = <b>call</b> crypto.decrypt(ciphertext=encrypted, key=key);<br><b>print</b> decrypted;"
+    },
+    {
+      "function": "crypto.generateKey",
+      "format": "html",
+      "short_description": "Generates a random AES encryption key",
+      "long_help": "Generates a cryptographically secure random AES key. The optional bits parameter specifies key size (128, 192, or 256 bits). Default is 256 bits for maximum security. Returns the key as a Base64-encoded string that can be used with crypto.encrypt and crypto.decrypt.",
+      "parameters": [
+        {
+          "name": "bits",
+          "type": "int",
+          "optional": true,
+          "description": "Key size in bits (128, 192, or 256; default 256)"
+        }
+      ],
+      "return_type": "string",
+      "example": "<b>var</b> key256 = <b>call</b> crypto.generateKey();<br><b>var</b> key128 = <b>call</b> crypto.generateKey(bits=128);<br><b>print</b> key256;"
+    },
+    {
+      "function": "crypto.hash",
+      "format": "html",
+      "short_description": "Computes hash using specified algorithm",
+      "long_help": "Computes a cryptographic hash of the input text using the specified algorithm. Supported algorithms include SHA-256, SHA-512, SHA-1, and MD5. Returns the hash as a hexadecimal string. Use for data integrity verification, password storage (with salt), and checksums.",
+      "parameters": [
+        {
+          "name": "text",
+          "type": "string",
+          "description": "Text to hash"
+        },
+        {
+          "name": "algorithm",
+          "type": "string",
+          "description": "Hash algorithm (SHA-256, SHA-512, SHA-1, MD5)"
+        }
+      ],
+      "return_type": "string",
+      "example": "<b>var</b> hash = <b>call</b> crypto.hash(text=\"Hello, World!\", algorithm=\"SHA-256\");<br><b>print</b> hash;"
+    },
+    {
+      "function": "crypto.sha256",
+      "format": "html",
+      "short_description": "Computes SHA-256 hash",
+      "long_help": "Computes a SHA-256 (256-bit Secure Hash Algorithm) hash of the input text. SHA-256 is widely used for data integrity verification and is considered cryptographically secure. Returns the hash as a 64-character hexadecimal string.",
+      "parameters": [
+        {
+          "name": "text",
+          "type": "string",
+          "description": "Text to hash"
+        }
+      ],
+      "return_type": "string",
+      "example": "<b>var</b> hash = <b>call</b> crypto.sha256(text=\"Hello, World!\");<br><b>print</b> hash;<br>// Output: dffd6021bb2bd5b0af676290809ec3a53191dd81c7f70a4b28688a362182986f"
+    },
+    {
+      "function": "crypto.md5",
+      "format": "html",
+      "short_description": "Computes MD5 hash",
+      "long_help": "Computes an MD5 (Message Digest 5) hash of the input text. MD5 is fast and commonly used for checksums and non-cryptographic purposes. Note: MD5 is not recommended for cryptographic security; use SHA-256 or SHA-512 instead. Returns the hash as a 32-character hexadecimal string.",
+      "parameters": [
+        {
+          "name": "text",
+          "type": "string",
+          "description": "Text to hash"
+        }
+      ],
+      "return_type": "string",
+      "example": "<b>var</b> hash = <b>call</b> crypto.md5(text=\"Hello, World!\");<br><b>print</b> hash;<br>// Output: 65a8e27d8879283831b664bd8b7f0ad4"
     }
   ],
   "topics": {
