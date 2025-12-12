@@ -933,7 +933,7 @@ screen chessScreen = {
                             "padding": "0",
                             "disableLabelAlignment": true,
                             "items": [
-                                {"name": "moveHistoryText", "varRef": "moveHistory", "display": {"type": "textarea", "editable": false, "wrapText": true, "height": 30, "style": "-fx-control-inner-background: $COLOR_MOVE_HISTORY_BG; -fx-text-fill: $COLOR_MOVE_HISTORY_TEXT; -fx-font-family: 'Courier New'; -fx-font-size: 12px; -fx-border-color: #555555; -fx-border-width: 1;"}, "labelPos": "top"}
+                                {"name": "moveHistoryText", "varRef": "moveHistory", "editable": false, "display": {"type": "textarea", "wrapText": true, "height": 30, "style": "-fx-control-inner-background: $COLOR_MOVE_HISTORY_BG; -fx-text-fill: $COLOR_MOVE_HISTORY_TEXT; -fx-font-family: 'Courier New'; -fx-font-size: 12px; -fx-border-color: #555555; -fx-border-width: 1;"}, "labelPos": "top"}
                             ]
                         }
                     ]
