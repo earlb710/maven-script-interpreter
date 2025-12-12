@@ -22,34 +22,34 @@ public final class SHA2 {
     }
 
     public static String getSHA2String(String pMessage) {
-        byte[] d = null;
         try {
-            d = digest512(pMessage.getBytes("UTF-16"));
+            byte[] d = digest512(pMessage.getBytes("UTF-16"));
+            return getHexString(d);
         } catch (UnsupportedEncodingException ex) {
             Logger.getLogger(SHA2.class.getName()).log(Level.SEVERE, null, ex);
+            return "";
         }
-        return getHexString(d);
     }
 
     public static String getSHA2String(char[] pMessage) {
-        byte[] ret = null;
         try {
             byte[] msg = new String(pMessage).getBytes("UTF-16");
-            ret = digest512(msg);
+            byte[] ret = digest512(msg);
+            return getHexString(ret);
         } catch (UnsupportedEncodingException ex) {
             Logger.getLogger(SHA2.class.getName()).log(Level.SEVERE, null, ex);
+            return "";
         }
-        return getHexString(ret);
     }
 
     public static String getSHA2String_javaMessageDigest(String pMessage) throws NoSuchAlgorithmException {
-        byte[] d = null;
         try {
-            d = javaMessageDigest_SHA_512(pMessage.getBytes("UTF-16"));
+            byte[] d = javaMessageDigest_SHA_512(pMessage.getBytes("UTF-16"));
+            return getHexString(d);
         } catch (UnsupportedEncodingException ex) {
             Logger.getLogger(SHA2.class.getName()).log(Level.SEVERE, null, ex);
+            return "";
         }
-        return getHexString(d);
     }
 
     public static String getSHA2String(byte[] pMessage) {
@@ -59,18 +59,13 @@ public final class SHA2 {
     }
 
     public static String getSHA2ShortString(String pMessage) {
-        byte[] d = null;
         try {
-            d = digest224(pMessage.getBytes("UTF-16"));
+            byte[] d = digest224(pMessage.getBytes("UTF-16"));
+            return UtilConvert.bytesToHex(d);
         } catch (UnsupportedEncodingException ex) {
             Logger.getLogger(SHA2.class.getName()).log(Level.SEVERE, null, ex);
+            return "";
         }
-        /*char[] c = new char[d.length];
-        for (int idx = 0; idx < d.length; idx++) {
-            //c[idx] = (char)d[idx];
-            c[idx] = Character.forDigit(d[idx], 256);
-        }*/
-        return UtilConvert.bytesToHex(d);
     }
 
     /**
@@ -302,7 +297,6 @@ public final class SHA2 {
     }
 
     public static byte[] digest512(final byte[] pMessage) {
-        byte[] message = pMessage;
         final byte[] retHashed = new byte[64];
         final long[] words = new long[80];
         final long[] K512 = {
@@ -345,13 +339,13 @@ public final class SHA2 {
         final long[] v = {
             0, 0
         };
-        final byte[] padMessage = paddedPart(message);
-        //final int blockCount = pmessage.length >> 7;
+        final byte[] thePad = paddedPart(pMessage);
 
-        int blockCount = ((message.length + padMessage.length) >> 7) - 1;
+        byte[] message = pMessage;
+        int blockCount = ((pMessage.length + thePad.length) >> 7) - 1;
         for (int i = 0; i <= blockCount; i++) {
-            if (i == blockCount && padMessage.length > 0) {
-                message = padMessage;
+            if (i == blockCount && thePad.length > 0) {
+                message = thePad;
                 i = 0;
                 blockCount = 0;
             }
@@ -432,21 +426,7 @@ public final class SHA2 {
         return (i >>> distance) | (i << -distance);
     }
 
-    /*private static long sum0(long a) {
-        return Long.rotateRight(a, 28) ^ Long.rotateRight(a, 34) ^ Long.rotateRight(a, 39);
-    }
 
-    private static long sum1(long e) {
-        return Long.rotateRight(e, 14) ^ Long.rotateRight(e, 18) ^ Long.rotateRight(e, 41);
-    }
-
-    private static long ch(long e, long f, long g) {
-        return (e & f) ^ ((~e) & g);
-    }
-
-    private static long maj(long a, long b, long c) {
-        return (a & b) ^ (a & c) ^ (b & c);
-    }*/
     private static byte[] padMessage(final byte[] data) {
         int origLength = data.length;
         int tailLength = origLength & 63;
