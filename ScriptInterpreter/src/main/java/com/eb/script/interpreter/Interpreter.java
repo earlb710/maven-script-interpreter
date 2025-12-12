@@ -1795,7 +1795,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     public void visitImportStatement(ImportStatement stmt) throws InterpreterError {
         environment().pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Import %1", stmt.filename);
         try {
-            // Resolve the file path relative to the current script's directory
+            // Resolve file path relative to the current script's directory
             Path importPath = resolveImportPath(stmt.filename);
             
             if (!Files.exists(importPath)) {
@@ -1861,7 +1861,8 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                     // Register this function as declared from the imported file
                     context.getDeclaredFunctions().put(functionName, stmt.filename);
                     
-                    // Store blocks so they can be called later (always in the root runtime)
+                    // Store blocks in the root runtime (not currentRuntime) to ensure all imported
+                    // functions are accessible from the main script context, regardless of import nesting level
                     rootRuntime.blocks.put(functionName, entry.getValue());
                 }
             }
