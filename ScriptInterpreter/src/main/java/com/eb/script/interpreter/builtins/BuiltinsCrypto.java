@@ -362,25 +362,26 @@ public class BuiltinsCrypto {
     }
 
     /**
-     * crypto.obfuscate(text) - Simple character substitution obfuscation
+     * crypto.obfuscate(text, shift?) - Simple character substitution obfuscation
      * 
-     * Uses fixed character mapping for space, alphabetic (A-Z, a-z), and numeric (0-9) characters.
-     * Other characters pass through unchanged. This is NOT cryptographically secure - it's a simple
-     * obfuscation for making text harder to read at a glance.
+     * Uses fixed character mapping for space, alphabetic (A-Z, a-z), numeric (0-9) and special characters.
+     * This is NOT cryptographically secure - it's a simple obfuscation for making text harder to read at a glance.
      * 
      * Character mappings:
      * - Space maps to a random printable character
-     * - A-Z map to different random uppercase letters
-     * - a-z map to different random lowercase letters  
-     * - 0-9 map to different random digits
-     * - All other characters remain unchanged
+     * - A-Z map to different letters/numbers/special chars
+     * - a-z map to different letters/numbers/special chars
+     * - 0-9 map to different letters/numbers/special chars
+     * - Special chars (.*+@#&=(%"-_) map to different chars
+     * - Other characters remain unchanged
      * 
      * @param args [0] text: String to obfuscate
+     *             [1] shift (optional): Integer offset added to mapping index for variation
      * @return Obfuscated string
      */
     private static Object obfuscate(Object[] args) throws InterpreterError {
         if (args.length < 1) {
-            throw new InterpreterError("crypto.obfuscate requires 1 argument: text");
+            throw new InterpreterError("crypto.obfuscate requires at least 1 argument: text");
         }
 
         String text = (String) args[0];
@@ -388,18 +389,28 @@ public class BuiltinsCrypto {
             throw new InterpreterError("crypto.obfuscate: text cannot be null");
         }
 
-        return obfuscateString(text);
+        int shift = 0;
+        if (args.length >= 2 && args[1] != null) {
+            if (args[1] instanceof Number) {
+                shift = ((Number) args[1]).intValue();
+            } else {
+                throw new InterpreterError("crypto.obfuscate: shift parameter must be an integer");
+            }
+        }
+
+        return obfuscateString(text, shift);
     }
 
     /**
-     * crypto.deobfuscate(text) - Reverses the obfuscation
+     * crypto.deobfuscate(text, shift?) - Reverses the obfuscation
      * 
      * @param args [0] text: Obfuscated string to restore
+     *             [1] shift (optional): Same integer offset used during obfuscation
      * @return Original string
      */
     private static Object deobfuscate(Object[] args) throws InterpreterError {
         if (args.length < 1) {
-            throw new InterpreterError("crypto.deobfuscate requires 1 argument: text");
+            throw new InterpreterError("crypto.deobfuscate requires at least 1 argument: text");
         }
 
         String text = (String) args[0];
@@ -407,21 +418,41 @@ public class BuiltinsCrypto {
             throw new InterpreterError("crypto.deobfuscate: text cannot be null");
         }
 
-        return deobfuscateString(text);
+        int shift = 0;
+        if (args.length >= 2 && args[1] != null) {
+            if (args[1] instanceof Number) {
+                shift = ((Number) args[1]).intValue();
+            } else {
+                throw new InterpreterError("crypto.deobfuscate: shift parameter must be an integer");
+            }
+        }
+
+        return deobfuscateString(text, shift);
     }
 
     // Fixed character substitution maps for obfuscation
     // These provide a reversible character-to-character mapping
-    // Characters can map to numbers, letters, or spaces randomly for better obfuscation
+    // Characters can map to numbers, letters, spaces, or special chars randomly for better obfuscation
     
-    // Combined character set for obfuscation (62 chars + 1 space marker)
-    // Each alphanumeric char (A-Z, a-z, 0-9) and space maps to a unique char from this set
-    // This allows letters to map to numbers, numbers to letters, etc.
+    // Special characters to include in obfuscation: .*+@#&=(%"-_
+    private static final String SPECIAL_CHARS = ".*+@#&=(%\"-_";
+    private static final int SPECIAL_CHARS_COUNT = SPECIAL_CHARS.length(); // 13 chars
     
-    private static final char[] OBFUSCATION_MAP = new char[63]; // 26 upper + 26 lower + 10 digits + 1 space
+    // Combined character set for obfuscation
+    // 1 space + 26 upper + 26 lower + 10 digits + 13 special = 76 total
+    private static final char[] OBFUSCATION_MAP = new char[76];
+    
+    // Mapping indices:
+    // 0: space
+    // 1-26: A-Z
+    // 27-52: a-z
+    // 53-62: 0-9
+    // 63-75: special chars (.*+@#&=(%"-_)
     
     static {
         // Create a shuffled mapping where any char can map to any other char type
+        // IMPORTANT: All characters in the map must be unique for deobfuscation to work
+        
         // Space (index 0)
         OBFUSCATION_MAP[0] = '~';
         
@@ -446,6 +477,13 @@ public class BuiltinsCrypto {
             'W', 'R', 'I', 'D', 'K', 'V', 'r', 'y', 'f', 'b'   // 0-9
         };
         System.arraycopy(digitTargets, 0, OBFUSCATION_MAP, 53, 10);
+        
+        // Special chars .*+@#&=(%"-_ (indices 63-75) - map to unique chars not used above
+        // Use less common characters to avoid collisions with pass-through chars
+        char[] specialTargets = {
+            '!', '$', '/', '?', '<', '>', '[', ']', '{', '}', '|', '^', '`'  // .*+@#&=(%"-_
+        };
+        System.arraycopy(specialTargets, 0, OBFUSCATION_MAP, 63, 13);
     }
     
     // Reverse map for deobfuscation - maps obfuscated char back to original
@@ -476,32 +514,56 @@ public class BuiltinsCrypto {
         for (int i = 0; i < 10; i++) {
             REVERSE_MAP[OBFUSCATION_MAP[53 + i]] = (char) ('0' + i);
         }
+        
+        // Special chars
+        for (int i = 0; i < SPECIAL_CHARS_COUNT; i++) {
+            REVERSE_MAP[OBFUSCATION_MAP[63 + i]] = SPECIAL_CHARS.charAt(i);
+        }
     }
 
     /**
-     * Obfuscates a string using fixed character substitution.
+     * Obfuscates a string using fixed character substitution with optional shift.
      * Uses char arrays for maximum efficiency.
-     * Characters can map to numbers, letters, or spaces randomly.
+     * Characters can map to numbers, letters, spaces, or special chars randomly.
      * 
      * @param input String to obfuscate
+     * @param shift Integer offset added to mapping index for variation
      * @return Obfuscated string
      */
-    private static String obfuscateString(String input) {
+    private static String obfuscateString(String input, int shift) {
         char[] chars = input.toCharArray();
         int len = chars.length;
+        int mapSize = OBFUSCATION_MAP.length;
         
         // Process in-place for efficiency
         for (int i = 0; i < len; i++) {
             char c = chars[i];
+            int baseIndex = -1;
             
             if (c == ' ') {
-                chars[i] = OBFUSCATION_MAP[0];
+                baseIndex = 0;
             } else if (c >= 'A' && c <= 'Z') {
-                chars[i] = OBFUSCATION_MAP[1 + (c - 'A')];
+                baseIndex = 1 + (c - 'A');
             } else if (c >= 'a' && c <= 'z') {
-                chars[i] = OBFUSCATION_MAP[27 + (c - 'a')];
+                baseIndex = 27 + (c - 'a');
             } else if (c >= '0' && c <= '9') {
-                chars[i] = OBFUSCATION_MAP[53 + (c - '0')];
+                baseIndex = 53 + (c - '0');
+            } else {
+                // Check if it's a special character
+                int specialIdx = SPECIAL_CHARS.indexOf(c);
+                if (specialIdx >= 0) {
+                    baseIndex = 63 + specialIdx;
+                }
+            }
+            
+            // Apply shift if character is in obfuscation set
+            if (baseIndex >= 0) {
+                // Apply shift with wrapping (modulo map size)
+                int shiftedIndex = (baseIndex + shift) % mapSize;
+                if (shiftedIndex < 0) {
+                    shiftedIndex += mapSize; // Handle negative shifts
+                }
+                chars[i] = OBFUSCATION_MAP[shiftedIndex];
             }
             // Other characters remain unchanged
         }
@@ -511,24 +573,51 @@ public class BuiltinsCrypto {
 
     /**
      * Deobfuscates a string that was obfuscated with obfuscateString.
-     * Uses char arrays and reverse lookup table for maximum efficiency.
+     * Uses char arrays for maximum efficiency.
      * 
      * @param input Obfuscated string
+     * @param shift Same integer offset used during obfuscation
      * @return Original string
      */
-    private static String deobfuscateString(String input) {
+    private static String deobfuscateString(String input, int shift) {
         char[] chars = input.toCharArray();
         int len = chars.length;
+        int mapSize = OBFUSCATION_MAP.length;
         
         // Process in-place for efficiency
         for (int i = 0; i < len; i++) {
             char c = chars[i];
             
-            // Use reverse map for O(1) lookup
-            if (c < 256 && REVERSE_MAP[c] != 0) {
-                chars[i] = REVERSE_MAP[c];
+            // Find this character in the obfuscation map
+            int obfIndex = -1;
+            for (int j = 0; j < mapSize; j++) {
+                if (OBFUSCATION_MAP[j] == c) {
+                    obfIndex = j;
+                    break;
+                }
             }
-            // Characters not in the obfuscation set remain unchanged
+            
+            if (obfIndex >= 0) {
+                // Reverse the shift to get original index
+                int originalIndex = (obfIndex - shift) % mapSize;
+                if (originalIndex < 0) {
+                    originalIndex += mapSize;
+                }
+                
+                // Map back to original character based on index
+                if (originalIndex == 0) {
+                    chars[i] = ' ';
+                } else if (originalIndex >= 1 && originalIndex <= 26) {
+                    chars[i] = (char) ('A' + (originalIndex - 1));
+                } else if (originalIndex >= 27 && originalIndex <= 52) {
+                    chars[i] = (char) ('a' + (originalIndex - 27));
+                } else if (originalIndex >= 53 && originalIndex <= 62) {
+                    chars[i] = (char) ('0' + (originalIndex - 53));
+                } else if (originalIndex >= 63 && originalIndex < 63 + SPECIAL_CHARS_COUNT) {
+                    chars[i] = SPECIAL_CHARS.charAt(originalIndex - 63);
+                }
+            }
+            // Characters not in the obfuscation map remain unchanged
         }
         
         return new String(chars);

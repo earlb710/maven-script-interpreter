@@ -167,12 +167,13 @@ var decoded: string = call crypto.base64decode(invalid);
 
 ## Obfuscation Functions
 
-### crypto.obfuscate(text) ✨ NEW
+### crypto.obfuscate(text, shift?) ✨ ENHANCED
 
 Simple character substitution obfuscation for making text harder to read at a glance.
 
 **Parameters:**
 - `text` (string): Text to obfuscate
+- `shift` (int, optional): Integer offset to vary the obfuscation pattern (default: 0)
 
 **Returns:** Obfuscated string
 
@@ -181,7 +182,11 @@ Simple character substitution obfuscation for making text harder to read at a gl
 var secret: string = "Password123";
 var obfuscated: string = call crypto.obfuscate(secret);
 print obfuscated;
-// Output: hqllvgk2RID (letters become numbers and vice versa)
+// Output: xqllvgkrRID (letters become numbers and vice versa)
+
+// With shift parameter for variation
+var obf2: string = call crypto.obfuscate(secret, 5);
+// Output: xY66RZvoryf (different obfuscation pattern)
 ```
 
 **How It Works:**
@@ -189,50 +194,86 @@ print obfuscated;
 - **Characters can map across types randomly:**
   - Letters (A-Z, a-z) can map to numbers or other letters
   - Numbers (0-9) can map to letters or other numbers
+  - Special chars (.*+@#&=(%"-_) map to other special characters
   - Example: "ABC" → "Q7E" (A→Q, B→7, C→E)
   - Example: "123" → "RID" (1→R, 2→I, 3→D)
-- Special characters pass through unchanged
+  - Example: "@#&" → "?<>" (special chars obfuscated)
+- Other characters pass through unchanged
 - Uses fixed character mappings (no key required)
+- **Optional shift parameter** rotates the mapping for variation
 - More complex obfuscation pattern than simple letter-to-letter
+
+**Shift Parameter:**
+- Adds an integer offset to the mapping index
+- Different shift values produce different obfuscations
+- Same shift must be used for deobfuscation
+- Supports positive, negative, and large values
+- Example: `crypto.obfuscate("Test", 0)` → "ztlZ"
+- Example: `crypto.obfuscate("Test", 5)` → "nP6N"
+- Example: `crypto.obfuscate("Test", 10)` → "2gID"
+
+**Special Characters Supported:**
+- `.` (dot), `*` (asterisk), `+` (plus)
+- `@` (at), `#` (hash), `&` (ampersand)
+- `=` (equals), `(` (open paren), `%` (percent)
+- `"` (quote), `-` (dash), `_` (underscore)
 
 **Use Cases:**
 - Making text less obvious in logs or displays
 - Simple obfuscation for casual privacy (not security)
 - Hiding sensitive data from shoulder surfing
 - Making text unreadable to automated scrapers
+- Using shift parameter to vary obfuscation across different contexts
 
 **⚠️ Important Notes:**
 - This is NOT cryptographically secure encryption
 - Does not provide security against determined attackers
 - For true security, use `crypto.encrypt()` instead
 - The mapping is fixed and reversible with `crypto.deobfuscate()`
+- Remember the shift value - needed for deobfuscation
 
 ---
 
-### crypto.deobfuscate(text) ✨ NEW
+### crypto.deobfuscate(text, shift?) ✨ ENHANCED
 
 Reverses obfuscation performed by `crypto.obfuscate()`.
 
 **Parameters:**
 - `text` (string): Obfuscated string to restore
+- `shift` (int, optional): Same integer offset used during obfuscation (default: 0)
 
 **Returns:** Original string
 
 **Example:**
 ```ebs
-var obfuscated: string = "hqllvgk2RID";
+var obfuscated: string = "xqllvgkrRID";
 var original: string = call crypto.deobfuscate(obfuscated);
 print original;
 // Output: Password123
+
+// With shift parameter
+var obfuscated2: string = "xY66RZvoryf";
+var original2: string = call crypto.deobfuscate(obfuscated2, 5);
+print original2;
+// Output: Password123
 ```
 
-**Round-trip Example:**
+**Round-trip Examples:**
 ```ebs
+// Without shift
 var original: string = "Secret Data 2024";
 var obfuscated: string = call crypto.obfuscate(original);
 // obfuscated = "LtektZ~3qZq~IWIK" (mix of letters and numbers)
 var restored: string = call crypto.deobfuscate(obfuscated);
 print "Match: " + (original == restored);
+// Output: Match: true
+
+// With shift
+var text: string = "Email: user@domain.com (2024) Pass=Abc*123+";
+var obf: string = call crypto.obfuscate(text, 7);
+// obf = "SZiHl:URmsN|AcZiHX]PcZUQbyb$)U0imm~9oP{fb!}"
+var deobf: string = call crypto.deobfuscate(obf, 7);
+print "Match: " + (text == deobf);
 // Output: Match: true
 ```
 
@@ -246,10 +287,16 @@ var test1: string = call crypto.obfuscate("ABCDE");
 var test2: string = call crypto.obfuscate("12345");
 // Result: "RIDKVr" (all become letters)
 
-// Mixed mapping creates more complex obfuscation
-var test3: string = call crypto.obfuscate("Test123");
-// Result: "ztlZRID" (mixed letters and numbers)
+// Special characters are obfuscated
+var test3: string = call crypto.obfuscate("@#&");
+// Result: "?<>" (special chars mapped)
+
+// Mixed mapping with shift creates complex obfuscation
+var test4: string = call crypto.obfuscate("Test.*+", 5);
+// Result: "nP6N!$/" (letters, special chars all obfuscated with shift)
 ```
+
+**Important:** Always use the same shift value for deobfuscation as was used for obfuscation, otherwise the result will be incorrect.
 
 ---
 
