@@ -298,5 +298,3 @@ try {
 - **SHA-256 and SHA-512**: Use hardware acceleration (SHA-NI) when available
 - **Base64**: Fast encoding/decoding with Java's built-in `Base64` class
 - **AES encryption**: Uses AES-GCM for authenticated encryption with hardware acceleration
-
-For performance comparison between SHA-256 and custom implementations, see `SHA256_PERFORMANCE_ANALYSIS.md`.
