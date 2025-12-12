@@ -51,11 +51,19 @@ public final class Timed {
 
     /**
      * Continues the timer after a stop, marking a new continuation point.
-     * This updates the previous stop marker and sets the timer to running.
-     * The total elapsed time from the original start is preserved.
+     * <p>
+     * This method is used to track intervals or segments while maintaining the overall
+     * timer state. It updates the previous stop marker and sets a new continuation marker.
+     * The total timer period continues to measure wall-clock time from the original start.
+     * </p>
+     * <p>
+     * Note: This does NOT reset or adjust for pause time. If you need to exclude pause
+     * time, use {@link #timerStart()} to restart the timer instead.
+     * </p>
      */
     public void timerContinue() {
         timerPrevStop = timerStop;
+        timerStop = System.currentTimeMillis();
         running = true;
     }
 
@@ -223,7 +231,7 @@ public final class Timed {
             throw new IllegalArgumentException("pDecimals must be between 0 and 3, got: " + pDecimals);
         }
         if (pDecimals == 0) {
-            return String.valueOf(periodMillis / 1000);
+            return String.format("%d", periodMillis / 1000);
         }
         String millisPart = UtilString.lpad(String.valueOf(periodMillis % 1000), 3, '0');
         return String.format("%d.%s", periodMillis / 1000, millisPart.substring(0, pDecimals));
