@@ -1,0 +1,13 @@
+{
+  "name": "Chess",
+  "directory": "C:\\Earl\\Java\\ScriptInterpreter-GitHub-V5\\maven-script-interpreter\\ScriptInterpreter\\projects\\Chess",
+  "description": "EBS Script Project",
+  "version": "1.0.0",
+  "css": [
+    "console.css"
+  ],
+  "mainScript": "chess.ebs",
+  "settings": {
+    "autoLoad": true
+  }
+}
