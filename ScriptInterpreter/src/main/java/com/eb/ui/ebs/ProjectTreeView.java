@@ -290,11 +290,11 @@ public class ProjectTreeView extends VBox {
                     MenuItem renameProjectItem = new MenuItem("Rename Project...");
                     renameProjectItem.setOnAction(e -> renameProject(selectedItem, path));
                     
-                    MenuItem propertiesItem = new MenuItem("Properties...");
-                    propertiesItem.setOnAction(e -> showProjectPropertiesDialog(selectedItem, Path.of(path)));
-                    
                     MenuItem removeItem = new MenuItem("Remove from List");
                     removeItem.setOnAction(e -> removeSelectedProject(selectedItem));
+                    
+                    MenuItem propertiesItem = new MenuItem("Properties...");
+                    propertiesItem.setOnAction(e -> showProjectPropertiesDialog(selectedItem, Path.of(path)));
                     
                     if (runProjectItem != null) {
                         contextMenu.getItems().addAll(
@@ -306,9 +306,9 @@ public class ProjectTreeView extends VBox {
                             removeDirItem,
                             new SeparatorMenuItem(),
                             renameProjectItem,
-                            propertiesItem,
+                            removeItem,
                             new SeparatorMenuItem(),
-                            removeItem
+                            propertiesItem
                         );
                     } else {
                         contextMenu.getItems().addAll(
@@ -318,9 +318,9 @@ public class ProjectTreeView extends VBox {
                             removeDirItem,
                             new SeparatorMenuItem(),
                             renameProjectItem,
-                            propertiesItem,
+                            removeItem,
                             new SeparatorMenuItem(),
-                            removeItem
+                            propertiesItem
                         );
                     }
                 } else if (isDirectory) {
