@@ -181,16 +181,19 @@ Simple character substitution obfuscation for making text harder to read at a gl
 var secret: string = "Password123";
 var obfuscated: string = call crypto.obfuscate(secret);
 print obfuscated;
-// Output: Pqllvgkr829 (readable but different)
+// Output: hqllvgk2RID (letters become numbers and vice versa)
 ```
 
 **How It Works:**
 - Space characters map to `~`
-- Uppercase letters (A-Z) map to different uppercase letters
-- Lowercase letters (a-z) map to different lowercase letters
-- Digits (0-9) map to different digits
+- **Characters can map across types randomly:**
+  - Letters (A-Z, a-z) can map to numbers or other letters
+  - Numbers (0-9) can map to letters or other numbers
+  - Example: "ABC" → "Q7E" (A→Q, B→7, C→E)
+  - Example: "123" → "RID" (1→R, 2→I, 3→D)
 - Special characters pass through unchanged
 - Uses fixed character mappings (no key required)
+- More complex obfuscation pattern than simple letter-to-letter
 
 **Use Cases:**
 - Making text less obvious in logs or displays
@@ -217,7 +220,7 @@ Reverses obfuscation performed by `crypto.obfuscate()`.
 
 **Example:**
 ```ebs
-var obfuscated: string = "Pqllvgkr829";
+var obfuscated: string = "hqllvgk2RID";
 var original: string = call crypto.deobfuscate(obfuscated);
 print original;
 // Output: Password123
@@ -225,11 +228,27 @@ print original;
 
 **Round-trip Example:**
 ```ebs
-var original: string = "Sensitive Data 2024";
+var original: string = "Secret Data 2024";
 var obfuscated: string = call crypto.obfuscate(original);
+// obfuscated = "LtektZ~3qZq~IWIK" (mix of letters and numbers)
 var restored: string = call crypto.deobfuscate(obfuscated);
 print "Match: " + (original == restored);
 // Output: Match: true
+```
+
+**Character Mapping Examples:**
+```ebs
+// Letters can map to numbers
+var test1: string = call crypto.obfuscate("ABCDE");
+// Result: "Q7E3T" (B→7, D→3)
+
+// Numbers can map to letters  
+var test2: string = call crypto.obfuscate("12345");
+// Result: "RIDKVr" (all become letters)
+
+// Mixed mapping creates more complex obfuscation
+var test3: string = call crypto.obfuscate("Test123");
+// Result: "ztlZRID" (mixed letters and numbers)
 ```
 
 ---

@@ -412,48 +412,76 @@ public class BuiltinsCrypto {
 
     // Fixed character substitution maps for obfuscation
     // These provide a reversible character-to-character mapping
+    // Characters can map to numbers, letters, or spaces randomly for better obfuscation
     
-    // Space mapping
-    private static final char SPACE_OBFUSCATED = '~';
+    // Combined character set for obfuscation (62 chars + 1 space marker)
+    // Each alphanumeric char (A-Z, a-z, 0-9) and space maps to a unique char from this set
+    // This allows letters to map to numbers, numbers to letters, etc.
     
-    // Uppercase letters (A-Z) mapping - each letter maps to a different letter
-    private static final char[] UPPER_MAP = {
-        'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P',  // A-J
-        'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Z',  // K-T
-        'X', 'C', 'V', 'B', 'N', 'M'                        // U-Z
-    };
-    
-    // Lowercase letters (a-z) mapping - each letter maps to a different letter
-    private static final char[] LOWER_MAP = {
-        'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p',  // a-j
-        'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'z',  // k-t
-        'x', 'c', 'v', 'b', 'n', 'm'                        // u-z
-    };
-    
-    // Digits (0-9) mapping - each digit maps to a different digit
-    private static final char[] DIGIT_MAP = {
-        '5', '8', '2', '9', '1', '7', '3', '0', '6', '4'   // 0-9
-    };
-    
-    // Reverse maps for deobfuscation (built once for efficiency)
-    private static final char[] UPPER_REVERSE_MAP = new char[26];
-    private static final char[] LOWER_REVERSE_MAP = new char[26];
-    private static final char[] DIGIT_REVERSE_MAP = new char[10];
+    private static final char[] OBFUSCATION_MAP = new char[63]; // 26 upper + 26 lower + 10 digits + 1 space
     
     static {
-        // Build reverse mapping tables for efficient deobfuscation
-        for (int i = 0; i < 26; i++) {
-            UPPER_REVERSE_MAP[UPPER_MAP[i] - 'A'] = (char) ('A' + i);
-            LOWER_REVERSE_MAP[LOWER_MAP[i] - 'a'] = (char) ('a' + i);
+        // Create a shuffled mapping where any char can map to any other char type
+        // Space (index 0)
+        OBFUSCATION_MAP[0] = '~';
+        
+        // Uppercase A-Z (indices 1-26) - map to mix of letters, numbers, and special chars
+        char[] upperTargets = {
+            'Q', '7', 'E', '3', 'T', 'w', 'U', '9', 'O', 'p',  // A-J
+            'a', 'S', '1', 'F', 'G', 'h', 'J', '5', 'L', 'z',  // K-T
+            'x', 'C', '0', 'B', 'n', 'M'                        // U-Z
+        };
+        System.arraycopy(upperTargets, 0, OBFUSCATION_MAP, 1, 26);
+        
+        // Lowercase a-z (indices 27-52) - map to mix of letters, numbers, and special chars
+        char[] lowerTargets = {
+            'q', '8', 'e', '2', 't', 'Y', 'u', 'i', 'o', 'P',  // a-j
+            'A', 's', 'd', '4', 'g', 'H', 'j', 'k', 'l', 'Z',  // k-t
+            'X', 'c', 'v', '6', 'N', 'm'                        // u-z
+        };
+        System.arraycopy(lowerTargets, 0, OBFUSCATION_MAP, 27, 26);
+        
+        // Digits 0-9 (indices 53-62) - map to mix of letters and other numbers
+        char[] digitTargets = {
+            'W', 'R', 'I', 'D', 'K', 'V', 'r', 'y', 'f', 'b'   // 0-9
+        };
+        System.arraycopy(digitTargets, 0, OBFUSCATION_MAP, 53, 10);
+    }
+    
+    // Reverse map for deobfuscation - maps obfuscated char back to original
+    // Uses a HashMap-like approach with char arrays for O(1) lookup
+    private static final char[] REVERSE_MAP = new char[256];
+    
+    static {
+        // Initialize reverse map (default value 0 means no mapping)
+        for (int i = 0; i < 256; i++) {
+            REVERSE_MAP[i] = 0;
         }
+        
+        // Build reverse mapping
+        // Space
+        REVERSE_MAP[OBFUSCATION_MAP[0]] = ' ';
+        
+        // Uppercase A-Z
+        for (int i = 0; i < 26; i++) {
+            REVERSE_MAP[OBFUSCATION_MAP[1 + i]] = (char) ('A' + i);
+        }
+        
+        // Lowercase a-z
+        for (int i = 0; i < 26; i++) {
+            REVERSE_MAP[OBFUSCATION_MAP[27 + i]] = (char) ('a' + i);
+        }
+        
+        // Digits 0-9
         for (int i = 0; i < 10; i++) {
-            DIGIT_REVERSE_MAP[DIGIT_MAP[i] - '0'] = (char) ('0' + i);
+            REVERSE_MAP[OBFUSCATION_MAP[53 + i]] = (char) ('0' + i);
         }
     }
 
     /**
      * Obfuscates a string using fixed character substitution.
      * Uses char arrays for maximum efficiency.
+     * Characters can map to numbers, letters, or spaces randomly.
      * 
      * @param input String to obfuscate
      * @return Obfuscated string
@@ -467,13 +495,13 @@ public class BuiltinsCrypto {
             char c = chars[i];
             
             if (c == ' ') {
-                chars[i] = SPACE_OBFUSCATED;
+                chars[i] = OBFUSCATION_MAP[0];
             } else if (c >= 'A' && c <= 'Z') {
-                chars[i] = UPPER_MAP[c - 'A'];
+                chars[i] = OBFUSCATION_MAP[1 + (c - 'A')];
             } else if (c >= 'a' && c <= 'z') {
-                chars[i] = LOWER_MAP[c - 'a'];
+                chars[i] = OBFUSCATION_MAP[27 + (c - 'a')];
             } else if (c >= '0' && c <= '9') {
-                chars[i] = DIGIT_MAP[c - '0'];
+                chars[i] = OBFUSCATION_MAP[53 + (c - '0')];
             }
             // Other characters remain unchanged
         }
@@ -483,7 +511,7 @@ public class BuiltinsCrypto {
 
     /**
      * Deobfuscates a string that was obfuscated with obfuscateString.
-     * Uses char arrays and reverse lookup tables for maximum efficiency.
+     * Uses char arrays and reverse lookup table for maximum efficiency.
      * 
      * @param input Obfuscated string
      * @return Original string
@@ -496,16 +524,11 @@ public class BuiltinsCrypto {
         for (int i = 0; i < len; i++) {
             char c = chars[i];
             
-            if (c == SPACE_OBFUSCATED) {
-                chars[i] = ' ';
-            } else if (c >= 'A' && c <= 'Z') {
-                chars[i] = UPPER_REVERSE_MAP[c - 'A'];
-            } else if (c >= 'a' && c <= 'z') {
-                chars[i] = LOWER_REVERSE_MAP[c - 'a'];
-            } else if (c >= '0' && c <= '9') {
-                chars[i] = DIGIT_REVERSE_MAP[c - '0'];
+            // Use reverse map for O(1) lookup
+            if (c < 256 && REVERSE_MAP[c] != 0) {
+                chars[i] = REVERSE_MAP[c];
             }
-            // Other characters remain unchanged
+            // Characters not in the obfuscation set remain unchanged
         }
         
         return new String(chars);
