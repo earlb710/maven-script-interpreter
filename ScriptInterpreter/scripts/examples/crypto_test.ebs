@@ -1,0 +1,83 @@
+// Test script for crypto builtins
+// Demonstrates encryption, decryption, and hashing functions
+
+print "=== Crypto Builtins Test ===";
+print "";
+
+// Test 1: Generate a secure encryption key
+print "Test 1: Generate encryption key";
+var key = call crypto.generateKey();
+print "Generated key: " + key;
+print "";
+
+// Test 2: Encrypt and decrypt a message
+print "Test 2: Encrypt and decrypt";
+var plaintext = "Hello, World! This is a secret message.";
+print "Original message: " + plaintext;
+
+var encrypted = call crypto.encrypt(plaintext, key);
+print "Encrypted: " + encrypted;
+
+var decrypted = call crypto.decrypt(encrypted, key);
+print "Decrypted: " + decrypted;
+
+if decrypted == plaintext then {
+    print "✓ Encryption/Decryption successful!";
+} else {
+    print "✗ Encryption/Decryption failed!";
+}
+print "";
+
+// Test 3: Password-based encryption (using a simple password)
+print "Test 3: Password-based encryption";
+var password = "MySecurePassword123";
+var message = "Secret data protected by password";
+print "Message: " + message;
+print "Password: " + password;
+
+var encryptedMsg = call crypto.encrypt(message, password);
+print "Encrypted: " + encryptedMsg;
+
+var decryptedMsg = call crypto.decrypt(encryptedMsg, password);
+print "Decrypted: " + decryptedMsg;
+
+if decryptedMsg == message then {
+    print "✓ Password-based encryption successful!";
+} else {
+    print "✗ Password-based encryption failed!";
+}
+print "";
+
+// Test 4: SHA-256 hashing
+print "Test 4: SHA-256 hashing";
+var text = "Hello, World!";
+var hash = call crypto.sha256(text);
+print "Text: " + text;
+print "SHA-256 hash: " + hash;
+print "";
+
+// Test 5: MD5 hashing
+print "Test 5: MD5 hashing";
+var md5hash = call crypto.md5(text);
+print "Text: " + text;
+print "MD5 hash: " + md5hash;
+print "";
+
+// Test 6: Generic hash function
+print "Test 6: Generic hash with SHA-512";
+var sha512hash = call crypto.hash(text, "SHA-512");
+print "Text: " + text;
+print "SHA-512 hash: " + sha512hash;
+print "";
+
+// Test 7: Generate keys of different sizes
+print "Test 7: Generate keys of different sizes";
+var key128 = call crypto.generateKey(128);
+var key192 = call crypto.generateKey(192);
+var key256 = call crypto.generateKey(256);
+print "128-bit key: " + key128;
+print "192-bit key: " + key192;
+print "256-bit key: " + key256;
+print "";
+
+print "=== All tests completed ===";
