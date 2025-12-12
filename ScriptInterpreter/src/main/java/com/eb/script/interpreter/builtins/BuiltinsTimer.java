@@ -89,6 +89,7 @@ public class BuiltinsTimer {
 
     /**
      * timer.reset(timerId) - Reset the timer to current time without starting it
+     * Returns true on success
      */
     private static Object reset(Object[] args) throws InterpreterError {
         if (args.length < 1) {
@@ -102,11 +103,12 @@ public class BuiltinsTimer {
         }
         
         timer.timerReset();
-        return null;
+        return true;
     }
 
     /**
      * timer.continue(timerId) - Continue a stopped timer, marking a continuation point
+     * Returns true on success
      */
     private static Object continueTimer(Object[] args) throws InterpreterError {
         if (args.length < 1) {
@@ -120,7 +122,7 @@ public class BuiltinsTimer {
         }
         
         timer.timerContinue();
-        return null;
+        return true;
     }
 
     /**
@@ -234,15 +236,23 @@ public class BuiltinsTimer {
     }
 
     /**
-     * Helper to convert an argument to int
+     * Helper to convert an argument to int with bounds checking
      */
     private static int convertToInt(Object value, String paramName) throws InterpreterError {
         if (value instanceof Integer) {
             return (Integer) value;
         } else if (value instanceof Long) {
-            return ((Long) value).intValue();
+            long longValue = (Long) value;
+            if (longValue < Integer.MIN_VALUE || longValue > Integer.MAX_VALUE) {
+                throw new InterpreterError(paramName + " value out of integer range: " + longValue);
+            }
+            return (int) longValue;
         } else if (value instanceof Double) {
-            return ((Double) value).intValue();
+            double doubleValue = (Double) value;
+            if (doubleValue < Integer.MIN_VALUE || doubleValue > Integer.MAX_VALUE) {
+                throw new InterpreterError(paramName + " value out of integer range: " + doubleValue);
+            }
+            return (int) doubleValue;
         } else if (value instanceof String) {
             try {
                 return Integer.parseInt((String) value);

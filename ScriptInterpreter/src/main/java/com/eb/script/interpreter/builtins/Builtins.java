@@ -1756,11 +1756,11 @@ public final class Builtins {
                 newParam("timerId", DataType.STRING, true)
         ));
         addBuiltin(info(
-                "timer.reset", DataType.STRING,
+                "timer.reset", DataType.BOOL,
                 newParam("timerId", DataType.STRING, true)
         ));
         addBuiltin(info(
-                "timer.continue", DataType.STRING,
+                "timer.continue", DataType.BOOL,
                 newParam("timerId", DataType.STRING, true)
         ));
         addBuiltin(info(
