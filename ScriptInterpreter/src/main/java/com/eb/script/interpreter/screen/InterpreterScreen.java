@@ -1657,6 +1657,8 @@ public class InterpreterScreen {
             "onvalidate", "on_validate", "onchange", "on_change",
             // Data source
             "source",
+            // Change tracking
+            "stateful",
             // promptHelp can be at item level (gets moved to displayItem)
             "prompthelp", "prompt_help",
             // Label properties (can be at item level for override/merge behavior)
@@ -2623,6 +2625,14 @@ public class InterpreterScreen {
                         } else if (itemDef.containsKey("onchange")) {
                             Object val = itemDef.get("onchange");
                             if (val != null) item.onChange = String.valueOf(val);
+                        }
+                        
+                        // stateful property (default: true)
+                        if (itemDef.containsKey("stateful")) {
+                            Object statefulObj = itemDef.get("stateful");
+                            if (statefulObj instanceof Boolean) {
+                                item.stateful = (Boolean) statefulObj;
+                            }
                         }
 
                         // Store in screenAreaItems map by item name (for screen.getProperty/setProperty)

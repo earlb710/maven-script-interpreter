@@ -49,6 +49,14 @@ public class ControlListenerFactory {
         Object contextObj = control.getProperties().get(PROP_INTERPRETER_CONTEXT);
         Object screenNameObj = control.getProperties().get(PROP_SCREEN_NAME);
         Object varNameObj = control.getProperties().get("varName");
+        Object statefulObj = control.getProperties().get("stateful");
+        
+        // Check if this control is stateful (default: true)
+        // If stateful is false, changes to this item should not mark the screen as changed
+        boolean stateful = statefulObj instanceof Boolean ? (Boolean) statefulObj : true;
+        if (!stateful) {
+            return; // Skip marking as changed for non-stateful items
+        }
         
         if (contextObj instanceof InterpreterContext && screenNameObj instanceof String) {
             InterpreterContext context = (InterpreterContext) contextObj;

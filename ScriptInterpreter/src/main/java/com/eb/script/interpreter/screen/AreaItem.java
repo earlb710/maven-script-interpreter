@@ -68,6 +68,8 @@ public class AreaItem {
     public String onChange;
     // Source of the value: "data" (original data value) or "display" (formatted display value)
     public String source = "data";
+    // Whether changes to this item should mark the screen/item as changed (default: true)
+    public Boolean stateful = true;
 
     @Override
     public String toString() {

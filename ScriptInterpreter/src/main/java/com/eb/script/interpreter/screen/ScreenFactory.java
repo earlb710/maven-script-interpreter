@@ -3636,6 +3636,8 @@ public class ScreenFactory {
                     // Store context and screenName for screen status updates when control values change
                     control.getProperties().put(ControlListenerFactory.PROP_INTERPRETER_CONTEXT, context);
                     control.getProperties().put(ControlListenerFactory.PROP_SCREEN_NAME, screenName);
+                    // Store stateful property for change tracking control
+                    control.getProperties().put("stateful", item.stateful != null ? item.stateful : true);
                     // Track this control so we can refresh it when variables change
                     boundControls.add(control);
                     
