@@ -25,6 +25,20 @@ public class BuiltinsScreen {
     private static final String DEFAULT_SNAPSHOT_FORMAT = "png";
     private static final String SNAPSHOT_NAME_SUFFIX = "_screenshot";
     private static final int SNAPSHOT_TIMEOUT_SECONDS = 10;
+    
+    // Storage for tree item icon paths (weak references to avoid memory leaks)
+    private static final java.util.WeakHashMap<javafx.scene.control.TreeItem<String>, TreeItemIconData> treeItemIcons 
+        = new java.util.WeakHashMap<>();
+    
+    /**
+     * Helper class to store icon path data for tree items
+     */
+    private static class TreeItemIconData {
+        String iconPath;
+        String iconOpenPath;
+        String iconClosedPath;
+        javafx.beans.value.ChangeListener<Boolean> expansionListener;
+    }
 
     /**
      * scr.showScreen(screenName?) -> BOOL Shows a screen. If screenName is null
@@ -2093,5 +2107,465 @@ public class BuiltinsScreen {
         
         // Return simple lowercase name - areas are stored under simple names
         return screenNameLower;
+    }
+    
+    /**
+     * scr.setTreeItemIcon(screenName, itemPath, iconPath) -> Boolean
+     * Sets a static icon for a tree item at the specified path.
+     * The itemPath uses dot notation to specify the path through the tree (e.g., "Root.src.main").
+     * 
+     * @param context The interpreter context
+     * @param args [screenName, itemPath, iconPath]
+     * @return Boolean true on success
+     * @throws InterpreterError if parameters are invalid or tree item not found
+     */
+    public static Object screenSetTreeItemIcon(InterpreterContext context, Object[] args) throws InterpreterError {
+        if (args.length < 3) {
+            throw new InterpreterError("scr.setTreeItemIcon: requires 3 parameters: screenName, itemPath, iconPath");
+        }
+        
+        String screenName = (String) args[0];
+        String itemPath = (String) args[1];
+        String iconPath = (String) args[2];
+        
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("scr.setTreeItemIcon: screenName parameter cannot be null or empty");
+        }
+        if (itemPath == null || itemPath.isEmpty()) {
+            throw new InterpreterError("scr.setTreeItemIcon: itemPath parameter cannot be null or empty");
+        }
+        
+        // Normalize screen name
+        screenName = screenName.toLowerCase();
+        
+        // Verify screen exists
+        if (!context.getScreens().containsKey(screenName)) {
+            throw new InterpreterError("scr.setTreeItemIcon: screen '" + screenName + "' not found");
+        }
+        
+        final String finalScreenName = screenName;
+        final String finalItemPath = itemPath;
+        final String finalIconPath = iconPath;
+        
+        final java.util.concurrent.atomic.AtomicReference<InterpreterError> errorRef 
+            = new java.util.concurrent.atomic.AtomicReference<>();
+        final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
+        
+        // Update on JavaFX thread
+        javafx.application.Platform.runLater(() -> {
+            try {
+                // Find the TreeView control for this screen
+                java.util.List<javafx.scene.Node> controls = context.getScreenBoundControls().get(finalScreenName);
+                if (controls == null) {
+                    errorRef.set(new InterpreterError("scr.setTreeItemIcon: no controls found for screen '" + finalScreenName + "'"));
+                    latch.countDown();
+                    return;
+                }
+                
+                javafx.scene.control.TreeView<String> treeView = null;
+                for (javafx.scene.Node control : controls) {
+                    if (control instanceof javafx.scene.control.TreeView) {
+                        @SuppressWarnings("unchecked")
+                        javafx.scene.control.TreeView<String> tv = (javafx.scene.control.TreeView<String>) control;
+                        treeView = tv;
+                        break;
+                    }
+                }
+                
+                if (treeView == null) {
+                    errorRef.set(new InterpreterError("scr.setTreeItemIcon: no TreeView found in screen '" + finalScreenName + "'"));
+                    latch.countDown();
+                    return;
+                }
+                
+                // Find the tree item using the path
+                javafx.scene.control.TreeItem<String> item = findTreeItemByPath(treeView.getRoot(), finalItemPath);
+                if (item == null) {
+                    errorRef.set(new InterpreterError("scr.setTreeItemIcon: tree item '" + finalItemPath + "' not found"));
+                    latch.countDown();
+                    return;
+                }
+                
+                // Set the icon
+                setTreeItemIconGraphic(item, finalIconPath);
+                
+            } catch (Exception e) {
+                errorRef.set(new InterpreterError("scr.setTreeItemIcon: error setting icon: " + e.getMessage()));
+            } finally {
+                latch.countDown();
+            }
+        });
+        
+        // Wait for completion
+        try {
+            latch.await(5, java.util.concurrent.TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new InterpreterError("scr.setTreeItemIcon: interrupted while setting icon");
+        }
+        
+        if (errorRef.get() != null) {
+            throw errorRef.get();
+        }
+        
+        return Boolean.TRUE;
+    }
+    
+    /**
+     * scr.setTreeItemIcons(screenName, itemPath, iconPath, iconOpenPath, iconClosedPath) -> Boolean
+     * Sets state-based icons for a tree item (open/closed states for branches).
+     * The itemPath uses dot notation to specify the path through the tree (e.g., "Root.src.main").
+     * 
+     * @param context The interpreter context
+     * @param args [screenName, itemPath, iconPath, iconOpenPath, iconClosedPath]
+     * @return Boolean true on success
+     * @throws InterpreterError if parameters are invalid or tree item not found
+     */
+    public static Object screenSetTreeItemIcons(InterpreterContext context, Object[] args) throws InterpreterError {
+        if (args.length < 5) {
+            throw new InterpreterError("scr.setTreeItemIcons: requires 5 parameters: screenName, itemPath, iconPath, iconOpenPath, iconClosedPath");
+        }
+        
+        String screenName = (String) args[0];
+        String itemPath = (String) args[1];
+        String iconPath = (String) args[2];
+        String iconOpenPath = (String) args[3];
+        String iconClosedPath = (String) args[4];
+        
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("scr.setTreeItemIcons: screenName parameter cannot be null or empty");
+        }
+        if (itemPath == null || itemPath.isEmpty()) {
+            throw new InterpreterError("scr.setTreeItemIcons: itemPath parameter cannot be null or empty");
+        }
+        
+        // Normalize screen name
+        screenName = screenName.toLowerCase();
+        
+        // Verify screen exists
+        if (!context.getScreens().containsKey(screenName)) {
+            throw new InterpreterError("scr.setTreeItemIcons: screen '" + screenName + "' not found");
+        }
+        
+        final String finalScreenName = screenName;
+        final String finalItemPath = itemPath;
+        final String finalIconPath = iconPath;
+        final String finalIconOpenPath = iconOpenPath;
+        final String finalIconClosedPath = iconClosedPath;
+        
+        final java.util.concurrent.atomic.AtomicReference<InterpreterError> errorRef 
+            = new java.util.concurrent.atomic.AtomicReference<>();
+        final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
+        
+        // Update on JavaFX thread
+        javafx.application.Platform.runLater(() -> {
+            try {
+                // Find the TreeView control for this screen
+                java.util.List<javafx.scene.Node> controls = context.getScreenBoundControls().get(finalScreenName);
+                if (controls == null) {
+                    errorRef.set(new InterpreterError("scr.setTreeItemIcons: no controls found for screen '" + finalScreenName + "'"));
+                    latch.countDown();
+                    return;
+                }
+                
+                javafx.scene.control.TreeView<String> treeView = null;
+                for (javafx.scene.Node control : controls) {
+                    if (control instanceof javafx.scene.control.TreeView) {
+                        @SuppressWarnings("unchecked")
+                        javafx.scene.control.TreeView<String> tv = (javafx.scene.control.TreeView<String>) control;
+                        treeView = tv;
+                        break;
+                    }
+                }
+                
+                if (treeView == null) {
+                    errorRef.set(new InterpreterError("scr.setTreeItemIcons: no TreeView found in screen '" + finalScreenName + "'"));
+                    latch.countDown();
+                    return;
+                }
+                
+                // Find the tree item using the path
+                javafx.scene.control.TreeItem<String> item = findTreeItemByPath(treeView.getRoot(), finalItemPath);
+                if (item == null) {
+                    errorRef.set(new InterpreterError("scr.setTreeItemIcons: tree item '" + finalItemPath + "' not found"));
+                    latch.countDown();
+                    return;
+                }
+                
+                // Get or create icon data for this item
+                TreeItemIconData iconData = treeItemIcons.get(item);
+                if (iconData == null) {
+                    iconData = new TreeItemIconData();
+                    treeItemIcons.put(item, iconData);
+                }
+                
+                // Store the icon paths
+                iconData.iconPath = finalIconPath;
+                iconData.iconOpenPath = finalIconOpenPath;
+                iconData.iconClosedPath = finalIconClosedPath;
+                
+                // Remove any existing expansion listener
+                if (iconData.expansionListener != null) {
+                    item.expandedProperty().removeListener(iconData.expansionListener);
+                    iconData.expansionListener = null;
+                }
+                
+                // Set initial icon based on current state
+                boolean isExpanded = item.isExpanded();
+                boolean hasChildren = !item.getChildren().isEmpty();
+                
+                if (hasChildren && (finalIconOpenPath != null || finalIconClosedPath != null)) {
+                    // Use state-based icons for branches
+                    String currentIconPath = isExpanded ? 
+                        (finalIconOpenPath != null ? finalIconOpenPath : finalIconPath) : 
+                        (finalIconClosedPath != null ? finalIconClosedPath : finalIconPath);
+                    setTreeItemIconGraphic(item, currentIconPath);
+                    
+                    // Add listener for state changes
+                    javafx.beans.value.ChangeListener<Boolean> listener = (obs, wasExpanded, nowExpanded) -> {
+                        String newIconPath = nowExpanded ? 
+                            (finalIconOpenPath != null ? finalIconOpenPath : finalIconPath) : 
+                            (finalIconClosedPath != null ? finalIconClosedPath : finalIconPath);
+                        setTreeItemIconGraphic(item, newIconPath);
+                    };
+                    item.expandedProperty().addListener(listener);
+                    iconData.expansionListener = listener;
+                } else {
+                    // Use static icon for leaves
+                    setTreeItemIconGraphic(item, finalIconPath);
+                }
+                
+            } catch (Exception e) {
+                errorRef.set(new InterpreterError("scr.setTreeItemIcons: error setting icons: " + e.getMessage()));
+            } finally {
+                latch.countDown();
+            }
+        });
+        
+        // Wait for completion
+        try {
+            latch.await(5, java.util.concurrent.TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new InterpreterError("scr.setTreeItemIcons: interrupted while setting icons");
+        }
+        
+        if (errorRef.get() != null) {
+            throw errorRef.get();
+        }
+        
+        return Boolean.TRUE;
+    }
+    
+    /**
+     * scr.getTreeItemIcon(screenName, itemPath) -> String
+     * Gets the current icon path for a tree item.
+     * 
+     * @param context The interpreter context
+     * @param args [screenName, itemPath]
+     * @return String icon path or null if no icon set
+     * @throws InterpreterError if parameters are invalid or tree item not found
+     */
+    public static Object screenGetTreeItemIcon(InterpreterContext context, Object[] args) throws InterpreterError {
+        if (args.length < 2) {
+            throw new InterpreterError("scr.getTreeItemIcon: requires 2 parameters: screenName, itemPath");
+        }
+        
+        String screenName = (String) args[0];
+        String itemPath = (String) args[1];
+        
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("scr.getTreeItemIcon: screenName parameter cannot be null or empty");
+        }
+        if (itemPath == null || itemPath.isEmpty()) {
+            throw new InterpreterError("scr.getTreeItemIcon: itemPath parameter cannot be null or empty");
+        }
+        
+        // Normalize screen name
+        screenName = screenName.toLowerCase();
+        
+        // Verify screen exists
+        if (!context.getScreens().containsKey(screenName)) {
+            throw new InterpreterError("scr.getTreeItemIcon: screen '" + screenName + "' not found");
+        }
+        
+        final String finalScreenName = screenName;
+        final String finalItemPath = itemPath;
+        
+        final java.util.concurrent.atomic.AtomicReference<String> iconPathRef 
+            = new java.util.concurrent.atomic.AtomicReference<>();
+        final java.util.concurrent.atomic.AtomicReference<InterpreterError> errorRef 
+            = new java.util.concurrent.atomic.AtomicReference<>();
+        final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
+        
+        // Query on JavaFX thread
+        javafx.application.Platform.runLater(() -> {
+            try {
+                // Find the TreeView control for this screen
+                java.util.List<javafx.scene.Node> controls = context.getScreenBoundControls().get(finalScreenName);
+                if (controls == null) {
+                    errorRef.set(new InterpreterError("scr.getTreeItemIcon: no controls found for screen '" + finalScreenName + "'"));
+                    latch.countDown();
+                    return;
+                }
+                
+                javafx.scene.control.TreeView<String> treeView = null;
+                for (javafx.scene.Node control : controls) {
+                    if (control instanceof javafx.scene.control.TreeView) {
+                        @SuppressWarnings("unchecked")
+                        javafx.scene.control.TreeView<String> tv = (javafx.scene.control.TreeView<String>) control;
+                        treeView = tv;
+                        break;
+                    }
+                }
+                
+                if (treeView == null) {
+                    errorRef.set(new InterpreterError("scr.getTreeItemIcon: no TreeView found in screen '" + finalScreenName + "'"));
+                    latch.countDown();
+                    return;
+                }
+                
+                // Find the tree item using the path
+                javafx.scene.control.TreeItem<String> item = findTreeItemByPath(treeView.getRoot(), finalItemPath);
+                if (item == null) {
+                    errorRef.set(new InterpreterError("scr.getTreeItemIcon: tree item '" + finalItemPath + "' not found"));
+                    latch.countDown();
+                    return;
+                }
+                
+                // Try to get icon path from storage
+                TreeItemIconData iconData = treeItemIcons.get(item);
+                if (iconData != null && iconData.iconPath != null) {
+                    iconPathRef.set(iconData.iconPath);
+                } else {
+                    iconPathRef.set(null);
+                }
+                
+            } catch (Exception e) {
+                errorRef.set(new InterpreterError("scr.getTreeItemIcon: error getting icon: " + e.getMessage()));
+            } finally {
+                latch.countDown();
+            }
+        });
+        
+        // Wait for completion
+        try {
+            latch.await(5, java.util.concurrent.TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new InterpreterError("scr.getTreeItemIcon: interrupted while getting icon");
+        }
+        
+        if (errorRef.get() != null) {
+            throw errorRef.get();
+        }
+        
+        return iconPathRef.get();
+    }
+    
+    /**
+     * Helper method to find a tree item by its path (dot-separated).
+     * Supports both simple paths (matching value) and hierarchical paths.
+     * 
+     * @param root The root tree item to search from
+     * @param path The path to the item (e.g., "Root.src.main.java")
+     * @return The found TreeItem or null if not found
+     */
+    private static javafx.scene.control.TreeItem<String> findTreeItemByPath(
+            javafx.scene.control.TreeItem<String> root, String path) {
+        if (root == null || path == null || path.isEmpty()) {
+            return null;
+        }
+        
+        // Split path into components
+        String[] pathParts = path.split("\\.");
+        
+        // Start from root
+        javafx.scene.control.TreeItem<String> current = root;
+        
+        // For each part of the path, find the matching child
+        for (String part : pathParts) {
+            boolean found = false;
+            
+            // Check if current item matches
+            if (current.getValue() != null && current.getValue().equals(part)) {
+                // If this is the last part, we found it
+                if (pathParts.length == 1 || pathParts[pathParts.length - 1].equals(part)) {
+                    return current;
+                }
+                found = true;
+            }
+            
+            if (!found) {
+                // Search children for matching value
+                for (javafx.scene.control.TreeItem<String> child : current.getChildren()) {
+                    if (child.getValue() != null && child.getValue().equals(part)) {
+                        current = child;
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            
+            if (!found) {
+                return null; // Path not found
+            }
+        }
+        
+        return current;
+    }
+    
+    /**
+     * Helper method to set an icon on a tree item.
+     * Loads the icon from resources and sets it as the graphic.
+     * 
+     * @param item The tree item to set the icon on
+     * @param iconPath The path to the icon image (can be null)
+     */
+    private static void setTreeItemIconGraphic(javafx.scene.control.TreeItem<String> item, String iconPath) {
+        if (iconPath == null || iconPath.isEmpty()) {
+            item.setGraphic(null);
+            return;
+        }
+        
+        try {
+            javafx.scene.image.Image image = null;
+            
+            // Try loading from classpath using ClassLoader
+            String resourcePath = iconPath.startsWith("/") ? iconPath.substring(1) : iconPath;
+            java.io.InputStream is = BuiltinsScreen.class.getClassLoader().getResourceAsStream(resourcePath);
+            
+            // Also try with leading slash
+            if (is == null) {
+                is = BuiltinsScreen.class.getResourceAsStream("/" + resourcePath);
+            }
+            
+            if (is != null) {
+                try {
+                    image = new javafx.scene.image.Image(is);
+                } finally {
+                    is.close();
+                }
+            } else {
+                // Try as file path
+                java.io.File file = new java.io.File(iconPath);
+                if (file.exists() && file.isFile()) {
+                    image = new javafx.scene.image.Image(file.toURI().toString());
+                }
+            }
+            
+            if (image != null) {
+                javafx.scene.image.ImageView imageView = new javafx.scene.image.ImageView(image);
+                imageView.setFitWidth(16);
+                imageView.setFitHeight(16);
+                imageView.setPreserveRatio(true);
+                item.setGraphic(imageView);
+            } else {
+                item.setGraphic(null);
+            }
+        } catch (Exception e) {
+            System.err.println("Error loading tree icon '" + iconPath + "': " + e.getMessage());
+            item.setGraphic(null);
+        }
     }
 }
