@@ -1,3 +1,7 @@
+// Import chess move calculation functions
+// Import happens here after types and helper functions are defined
+import "chess-moves.ebs";
+
 // EBS Chess Game Application
 // ===========================
 // This script demonstrates using the array.bitmap type for efficient chess board encoding.
@@ -132,10 +136,6 @@ isOccupiedByColor(x: int, y: int, color: int) {
     var cell = ChessCell(cellValue);
     return cell.pieceType != EMPTY && cell.pieceColor == color;
 }
-
-// Import chess move calculation functions
-// Import happens here after types and helper functions are defined
-import "chess-moves.ebs";
 
 // Create indicator images using canvas
 createIndicators() {
