@@ -1,3 +1,7 @@
+// Import chess move calculation functions
+// Import happens here after types and helper functions are defined
+import "chess-moves.ebs";
+
 // EBS Chess Game Application
 // ===========================
 // This script demonstrates using the array.bitmap type for efficient chess board encoding.
@@ -95,8 +99,8 @@ var currentPlayer: int = 0;
 // Selection and move indication variables
 var selectedX: int = -1;  // -1 means no selection
 var selectedY: int = -1;
-var greenIndicator: imageData;  // Green circle for valid moves
-var redIndicator: imageData;    // Red circle for capture moves
+var greenIndicator: imagedata;  // Green circle for valid moves
+var redIndicator: imagedata;    // Red circle for capture moves
 
 // Helper functions
 boardIndex(row: int, col: int) return int {
@@ -131,344 +135,6 @@ isOccupiedByColor(x: int, y: int, color: int) {
     }
     var cell = ChessCell(cellValue);
     return cell.pieceType != EMPTY && cell.pieceColor == color;
-}
-
-// Helper function to create a posType record from x, y coordinates
-createPos(x: int, y: int) {
-    var jsonStr: string = '{"x": ' + x + ', "y": ' + y + '}';
-    var jsonData: json = call json.jsonfromstring(jsonStr);
-    var pos: posType = record(jsonData);
-    return pos;
-}
-
-// Get all possible moves for a pawn at given position
-getPawnMoves(x: int, y: int, color: int) {
-    var moves: posType[];
-    var direction: int;
-    var startRow: int;
-    
-    if color == WHITE then {
-        direction = -1;
-        startRow = 6;
-    } else {
-        direction = 1;
-        startRow = 1;
-    }
-    
-    // Move forward one square
-    var forwardX: int = x;
-    var forwardY: int = y + direction;
-    if call isValidPosition(forwardX, forwardY) then {
-        var cellValue: int = call getPieceAt(forwardX, forwardY);
-        var cell = ChessCell(cellValue);
-        if cell.pieceType == EMPTY then {
-            var forward: posType = call createPos(forwardX, forwardY);
-            call array.add(moves, forward);
-            
-            // Move forward two squares from starting position
-            if y == startRow then {
-                var forward2X: int = x;
-                var forward2Y: int = y + (direction * 2);
-                var cellValue2: int = call getPieceAt(forward2X, forward2Y);
-                var cell2 = ChessCell(cellValue2);
-                if cell2.pieceType == EMPTY then {
-                    var forward2: posType = call createPos(forward2X, forward2Y);
-                    call array.add(moves, forward2);
-                }
-            }
-        }
-    }
-    
-    // Calculate enemy color once
-    var enemyColor: int;
-    if color == WHITE then {
-        enemyColor = BLACK;
-    } else {
-        enemyColor = WHITE;
-    }
-    
-    // Capture left diagonal
-    var captureLeftX: int = x - 1;
-    var captureLeftY: int = y + direction;
-    if call isValidPosition(captureLeftX, captureLeftY) then {
-        if call isOccupiedByColor(captureLeftX, captureLeftY, enemyColor) then {
-            var captureLeft: posType = call createPos(captureLeftX, captureLeftY);
-            call array.add(moves, captureLeft);
-        }
-    }
-    
-    // Capture right diagonal
-    var captureRightX: int = x + 1;
-    var captureRightY: int = y + direction;
-    if call isValidPosition(captureRightX, captureRightY) then {
-        if call isOccupiedByColor(captureRightX, captureRightY, enemyColor) then {
-            var captureRight: posType = call createPos(captureRightX, captureRightY);
-            call array.add(moves, captureRight);
-        }
-    }
-    
-    return moves;
-}
-
-// Get all possible moves for a knight at given position
-getKnightMoves(x: int, y: int) {
-    var moves: posType[];
-    var offsets: int[16];
-    
-    // Knight move offsets: 8 possible L-shaped moves
-    offsets[0] = -2; offsets[1] = -1;  // up 2, left 1
-    offsets[2] = -2; offsets[3] = 1;   // up 2, right 1
-    offsets[4] = 2; offsets[5] = -1;   // down 2, left 1
-    offsets[6] = 2; offsets[7] = 1;    // down 2, right 1
-    offsets[8] = -1; offsets[9] = -2;  // up 1, left 2
-    offsets[10] = -1; offsets[11] = 2; // up 1, right 2
-    offsets[12] = 1; offsets[13] = -2; // down 1, left 2
-    offsets[14] = 1; offsets[15] = 2;  // down 1, right 2
-    
-    var i: int = 0;
-    for (i = 0; i < 16; i = i + 2) {
-        var newY: int = y + offsets[i];
-        var newX: int = x + offsets[i + 1];
-        if call isValidPosition(newX, newY) then {
-            var newPos: posType = call createPos(newX, newY);
-            call array.add(moves, newPos);
-        }
-    }
-    
-    return moves;
-}
-
-// Get all possible moves for a king at given position
-getKingMoves(x: int, y: int) {
-    var moves: posType[];
-    var offsets: int[16];
-    
-    // King move offsets: 8 directions (one square each)
-    offsets[0] = -1; offsets[1] = -1;  // up-left
-    offsets[2] = -1; offsets[3] = 0;   // up
-    offsets[4] = -1; offsets[5] = 1;   // up-right
-    offsets[6] = 0; offsets[7] = -1;   // left
-    offsets[8] = 0; offsets[9] = 1;    // right
-    offsets[10] = 1; offsets[11] = -1; // down-left
-    offsets[12] = 1; offsets[13] = 0;  // down
-    offsets[14] = 1; offsets[15] = 1;  // down-right
-    
-    var i: int = 0;
-    for (i = 0; i < 16; i = i + 2) {
-        var newY: int = y + offsets[i];
-        var newX: int = x + offsets[i + 1];
-        if call isValidPosition(newX, newY) then {
-            var newPos: posType = call createPos(newX, newY);
-            call array.add(moves, newPos);
-        }
-    }
-    
-    return moves;
-}
-
-// Get all possible moves for a rook at given position
-getRookMoves(x: int, y: int) {
-    var moves: posType[];
-    var directions: int[8];
-    
-    // Rook move directions: up, down, left, right
-    directions[0] = -1; directions[1] = 0;  // up
-    directions[2] = 1; directions[3] = 0;   // down
-    directions[4] = 0; directions[5] = -1;  // left
-    directions[6] = 0; directions[7] = 1;   // right
-    
-    var d: int = 0;
-    for (d = 0; d < 8; d = d + 2) {
-        var dy: int = directions[d];
-        var dx: int = directions[d + 1];
-        var step: int = 1;
-        var blocked: bool = false;
-        
-        while !blocked {
-            var newY: int = y + (dy * step);
-            var newX: int = x + (dx * step);
-            
-            if call isValidPosition(newX, newY) then {
-                var newPos: posType = call createPos(newX, newY);
-                call array.add(moves, newPos);
-                
-                // Check if blocked by any piece
-                var cellValue: int = call getPieceAt(newX, newY);
-                var cell = ChessCell(cellValue);
-                if cell.pieceType != EMPTY then {
-                    blocked = true;
-                }
-                
-                step = step + 1;
-            } else {
-                blocked = true;
-            }
-        }
-    }
-    
-    return moves;
-}
-
-// Get all possible moves for a bishop at given position
-getBishopMoves(x: int, y: int) {
-    var moves: posType[];
-    var directions: int[8];
-    
-    // Bishop move directions: diagonals
-    directions[0] = -1; directions[1] = -1;  // up-left
-    directions[2] = -1; directions[3] = 1;   // up-right
-    directions[4] = 1; directions[5] = -1;   // down-left
-    directions[6] = 1; directions[7] = 1;    // down-right
-    
-    var d: int = 0;
-    for (d = 0; d < 8; d = d + 2) {
-        var dy: int = directions[d];
-        var dx: int = directions[d + 1];
-        var step: int = 1;
-        var blocked: bool = false;
-        
-        while !blocked {
-            var newY: int = y + (dy * step);
-            var newX: int = x + (dx * step);
-            
-            if call isValidPosition(newX, newY) then {
-                var newPos: posType = call createPos(newX, newY);
-                call array.add(moves, newPos);
-                
-                // Check if blocked by any piece
-                var cellValue: int = call getPieceAt(newX, newY);
-                var cell = ChessCell(cellValue);
-                if cell.pieceType != EMPTY then {
-                    blocked = true;
-                }
-                
-                step = step + 1;
-            } else {
-                blocked = true;
-            }
-        }
-    }
-    
-    return moves;
-}
-
-// Get all possible moves for a queen at given position
-getQueenMoves(x: int, y: int) {
-    var moves: posType[];
-    
-    // Queen moves = Rook moves + Bishop moves
-    var rookMoves: posType[] = call getRookMoves(x, y);
-    var bishopMoves: posType[] = call getBishopMoves(x, y);
-    
-    var i: int = 0;
-    var len: int = rookMoves.length;
-    for (i = 0; i < len; i = i + 1) {
-        call array.add(moves, rookMoves[i]);
-    }
-    
-    len = bishopMoves.length;
-    for (i = 0; i < len; i = i + 1) {
-        call array.add(moves, bishopMoves[i]);
-    }
-    
-    return moves;
-}
-
-// Main function: Get all valid moves for a piece at the given position
-// Returns a posType array of valid moves on the board
-validMoves(x: int, y: int) {
-    var validMovesList: posType[];
-    
-    // Get the piece at the position
-    var cellValue: int = call getPieceAt(x, y);
-    if cellValue == -1 then {
-        return validMovesList;  // Empty array if position invalid
-    }
-    
-    var cell = ChessCell(cellValue);
-    if cell.pieceType == EMPTY then {
-        return validMovesList;  // Empty array if no piece at position
-    }
-    
-    var pieceType: int = cell.pieceType;
-    var pieceColor: int = cell.pieceColor;
-    
-    // Get all possible moves for this piece type
-    var allMoves: posType[];
-    
-    if pieceType == PAWN then {
-        allMoves = call getPawnMoves(x, y, pieceColor);
-    } else if pieceType == ROOK then {
-        allMoves = call getRookMoves(x, y);
-    } else if pieceType == KNIGHT then {
-        allMoves = call getKnightMoves(x, y);
-    } else if pieceType == BISHOP then {
-        allMoves = call getBishopMoves(x, y);
-    } else if pieceType == QUEEN then {
-        allMoves = call getQueenMoves(x, y);
-    } else if pieceType == KING then {
-        allMoves = call getKingMoves(x, y);
-    }
-    
-    // Filter moves to ensure they don't capture own pieces
-    var i: int = 0;
-    var len: int = allMoves.length;
-    for (i = 0; i < len; i = i + 1) {
-        var move: posType = allMoves[i];
-        
-        // Check if move doesn't capture own piece
-        if !call isOccupiedByColor(move.x, move.y, pieceColor) then {
-            call array.add(validMovesList, move);
-        }
-    }
-    
-    return validMovesList;
-}
-
-// Test function for validMoves
-testValidMovesFunction {
-    print "";
-    print "Testing validMoves function:";
-    print "=============================";
-
-    // First test a simple getPieceAt call
-    print "Testing getPieceAt...";
-    var test: int = call getPieceAt(0, 6);
-    print "getPieceAt returned: " + test;
-
-    // Test validMoves for white pawn at (0, 6) - should be able to move 1 or 2 squares forward
-    print "Testing white pawn at (0, 6)...";
-    var pawnMoves: posType[] = call validMoves(0, 6);
-    print "White Pawn at (0,6) has " + pawnMoves.length + " valid moves:";
-    var i: int = 0;
-    var len: int = pawnMoves.length;
-    for (i = 0; i < len; i = i + 1) {
-        var move: posType = pawnMoves[i];
-        print "  - Move to (" + move.x + ", " + move.y + ")";
-    }
-
-    // Test validMoves for white knight at (1, 7)
-    print "Testing white knight at (1, 7)...";
-    var knightMoves: posType[] = call validMoves(1, 7);
-    print "White Knight at (1,7) has " + knightMoves.length + " valid moves:";
-    len = knightMoves.length;
-    for (i = 0; i < len; i = i + 1) {
-        var move: posType = knightMoves[i];
-        print "  - Move to (" + move.x + ", " + move.y + ")";
-    }
-
-    // Test validMoves for black queen at (3, 0)
-    print "Testing black queen at (3, 0)...";
-    var queenMoves: posType[] = call validMoves(3, 0);
-    print "Black Queen at (3,0) has " + queenMoves.length + " valid moves:";
-    len = queenMoves.length;
-    for (i = 0; i < len; i = i + 1) {
-        var move: posType = queenMoves[i];
-        print "  - Move to (" + move.x + ", " + move.y + ")";
-    }
-
-    print "";
-    print "validMoves testing complete!";
 }
 
 // Create indicator images using canvas
@@ -561,7 +227,7 @@ clearIndicators() {
 
 // Set indicator for a specific cell
 setIndicator(x: int, y: int, isCapture: bool) {
-    var indicator: imageData;
+    var indicator: imagedata;
     if isCapture then {
         indicator = redIndicator;
     } else {
@@ -646,21 +312,28 @@ setIndicator(x: int, y: int, isCapture: bool) {
 
 // Handle cell click - select piece and show valid moves
 handleCellClick(x: int, y: int) {
+    print "Cell clicked: (" + x + ", " + y + ")";
+    
     // Clear previous indicators
     call clearIndicators();
     
     // Get piece at clicked position
     var cellValue: int = call getPieceAt(x, y);
+    print "Cell value: " + cellValue;
+    
     if cellValue == -1 then {
+        print "Invalid position, deselecting";
         selectedX = -1;
         selectedY = -1;
         return;
     }
     
     var cell = ChessCell(cellValue);
+    print "Piece type: " + cell.pieceType + ", color: " + cell.pieceColor;
     
     // If empty cell or clicking same piece, deselect
     if cell.pieceType == EMPTY || (selectedX == x && selectedY == y) then {
+        print "Empty cell or same piece clicked, deselecting";
         selectedX = -1;
         selectedY = -1;
         return;
@@ -669,15 +342,19 @@ handleCellClick(x: int, y: int) {
     // Select the piece
     selectedX = x;
     selectedY = y;
+    print "Piece selected at (" + x + ", " + y + ")";
     
     // Get valid moves for this piece
+    print "Getting valid moves...";
     var moves: posType[] = call validMoves(x, y);
     var len: int = moves.length;
+    print "Found " + len + " valid moves";
     
     // Show indicators for each valid move
     var i: int = 0;
     for (i = 0; i < len; i = i + 1) {
         var move: posType = moves[i];
+        print "  Move to: (" + move.x + ", " + move.y + ")";
         
         // Check if this move captures an enemy piece
         var targetCellValue: int = call getPieceAt(move.x, move.y);
@@ -687,12 +364,16 @@ handleCellClick(x: int, y: int) {
             var targetCell = ChessCell(targetCellValue);
             if targetCell.pieceType != EMPTY then {
                 isCapture = true;
+                print "    (capture move)";
             }
         }
         
         // Set the indicator
+        print "  Setting indicator at (" + move.x + ", " + move.y + ")";
         call setIndicator(move.x, move.y, isCapture);
     }
+    
+    print "handleCellClick complete";
 }
 
 encodeCellValue(cellColor: int, pieceType: int, pieceColor: int) return int {
@@ -721,339 +402,6 @@ formatTimer(seconds: int) return string {
     var minsStr: string = call str.lpad(string(mins), 2, "0");
     var secsStr: string = call str.lpad(string(secs), 2, "0");
     return minsStr + ":" + secsStr;
-}
-
-// Chess piece move calculation functions
-// These functions return all possible theoretical moves for each piece type
-// Parameters:
-//   x, y: Current position (0-7)
-//   direction: "up" or "down" (board direction, used for pawns)
-// Returns: dynamic array of posType records with possible moves
-
-getPawnMoves(x: int, y: int, direction: string) {
-    var moves: json = [];
-    var move: json;
-    
-    if direction == "up" then {
-        // Moving up the board (decreasing y)
-        // Forward move
-        if y > 0 then {
-            move = {"x": 0, "y": 0};
-            call json.set(move, "x", x);
-            call json.set(move, "y", y - 1);
-            call json.add(moves, move);
-        }
-        // Initial double move (from row 6 for white)
-        if y == 6 then {
-            move = {"x": 0, "y": 0};
-            call json.set(move, "x", x);
-            call json.set(move, "y", y - 2);
-            call json.add(moves, move);
-        }
-        // Diagonal captures
-        if y > 0 and x > 0 then {
-            move = {"x": 0, "y": 0};
-            call json.set(move, "x", x - 1);
-            call json.set(move, "y", y - 1);
-            call json.add(moves, move);
-        }
-        if y > 0 and x < 7 then {
-            move = {"x": 0, "y": 0};
-            call json.set(move, "x", x + 1);
-            call json.set(move, "y", y - 1);
-            call json.add(moves, move);
-        }
-    } else {
-        // Moving down the board (increasing y)
-        // Forward move
-        if y < 7 then {
-            move = {"x": 0, "y": 0};
-            call json.set(move, "x", x);
-            call json.set(move, "y", y + 1);
-            call json.add(moves, move);
-        }
-        // Initial double move (from row 1 for black)
-        if y == 1 then {
-            move = {"x": 0, "y": 0};
-            call json.set(move, "x", x);
-            call json.set(move, "y", y + 2);
-            call json.add(moves, move);
-        }
-        // Diagonal captures
-        if y < 7 and x > 0 then {
-            move = {"x": 0, "y": 0};
-            call json.set(move, "x", x - 1);
-            call json.set(move, "y", y + 1);
-            call json.add(moves, move);
-        }
-        if y < 7 and x < 7 then {
-            move = {"x": 0, "y": 0};
-            call json.set(move, "x", x + 1);
-            call json.set(move, "y", y + 1);
-            call json.add(moves, move);
-        }
-    }
-    
-    return moves;
-}
-
-getRookMoves(x: int, y: int, direction: string) {
-    // Note: direction parameter is not used for rook moves but kept for API consistency
-    var moves: json = [];
-    var move: json;
-    var i: int;
-    
-    // Horizontal moves (right)
-    for (i = x + 1; i < 8; i++) {
-        move = {"x": 0, "y": 0};
-        call json.set(move, "x", i);
-        call json.set(move, "y", y);
-        call json.add(moves, move);
-    }
-    
-    // Horizontal moves (left)
-    for (i = x - 1; i >= 0; i--) {
-        move = {"x": 0, "y": 0};
-        call json.set(move, "x", i);
-        call json.set(move, "y", y);
-        call json.add(moves, move);
-    }
-    
-    // Vertical moves (down)
-    for (i = y + 1; i < 8; i++) {
-        move = {"x": 0, "y": 0};
-        call json.set(move, "x", x);
-        call json.set(move, "y", i);
-        call json.add(moves, move);
-    }
-    
-    // Vertical moves (up)
-    for (i = y - 1; i >= 0; i--) {
-        move = {"x": 0, "y": 0};
-        call json.set(move, "x", x);
-        call json.set(move, "y", i);
-        call json.add(moves, move);
-    }
-    
-    return moves;
-}
-
-getKnightMoves(x: int, y: int, direction: string) {
-    // Note: direction parameter is not used for knight moves but kept for API consistency
-    var moves: json = [];
-    var move: json;
-    
-    // Knight moves in L-shape: 2 squares in one direction, 1 in perpendicular
-    // Up 2, right 1
-    if y >= 2 and x < 7 then {
-        move = {"x": 0, "y": 0};
-        call json.set(move, "x", x + 1);
-        call json.set(move, "y", y - 2);
-        call json.add(moves, move);
-    }
-    // Up 2, left 1
-    if y >= 2 and x > 0 then {
-        move = {"x": 0, "y": 0};
-        call json.set(move, "x", x - 1);
-        call json.set(move, "y", y - 2);
-        call json.add(moves, move);
-    }
-    // Right 2, up 1
-    if x <= 5 and y > 0 then {
-        move = {"x": 0, "y": 0};
-        call json.set(move, "x", x + 2);
-        call json.set(move, "y", y - 1);
-        call json.add(moves, move);
-    }
-    // Right 2, down 1
-    if x <= 5 and y < 7 then {
-        move = {"x": 0, "y": 0};
-        call json.set(move, "x", x + 2);
-        call json.set(move, "y", y + 1);
-        call json.add(moves, move);
-    }
-    // Down 2, right 1
-    if y <= 5 and x < 7 then {
-        move = {"x": 0, "y": 0};
-        call json.set(move, "x", x + 1);
-        call json.set(move, "y", y + 2);
-        call json.add(moves, move);
-    }
-    // Down 2, left 1
-    if y <= 5 and x > 0 then {
-        move = {"x": 0, "y": 0};
-        call json.set(move, "x", x - 1);
-        call json.set(move, "y", y + 2);
-        call json.add(moves, move);
-    }
-    // Left 2, up 1
-    if x >= 2 and y > 0 then {
-        move = {"x": 0, "y": 0};
-        call json.set(move, "x", x - 2);
-        call json.set(move, "y", y - 1);
-        call json.add(moves, move);
-    }
-    // Left 2, down 1
-    if x >= 2 and y < 7 then {
-        move = {"x": 0, "y": 0};
-        call json.set(move, "x", x - 2);
-        call json.set(move, "y", y + 1);
-        call json.add(moves, move);
-    }
-    
-    return moves;
-}
-
-getBishopMoves(x: int, y: int, direction: string) {
-    // Note: direction parameter is not used for bishop moves but kept for API consistency
-    var moves: json = [];
-    var move: json;
-    var i: int;
-    var newX: int;
-    var newY: int;
-    
-    // Diagonal up-right
-    newX = x + 1;
-    newY = y - 1;
-    while newX < 8 and newY >= 0 {
-        move = {"x": 0, "y": 0};
-        call json.set(move, "x", newX);
-        call json.set(move, "y", newY);
-        call json.add(moves, move);
-        newX = newX + 1;
-        newY = newY - 1;
-    }
-    
-    // Diagonal up-left
-    newX = x - 1;
-    newY = y - 1;
-    while newX >= 0 and newY >= 0 {
-        move = {"x": 0, "y": 0};
-        call json.set(move, "x", newX);
-        call json.set(move, "y", newY);
-        call json.add(moves, move);
-        newX = newX - 1;
-        newY = newY - 1;
-    }
-    
-    // Diagonal down-right
-    newX = x + 1;
-    newY = y + 1;
-    while newX < 8 and newY < 8 {
-        move = {"x": 0, "y": 0};
-        call json.set(move, "x", newX);
-        call json.set(move, "y", newY);
-        call json.add(moves, move);
-        newX = newX + 1;
-        newY = newY + 1;
-    }
-    
-    // Diagonal down-left
-    newX = x - 1;
-    newY = y + 1;
-    while newX >= 0 and newY < 8 {
-        move = {"x": 0, "y": 0};
-        call json.set(move, "x", newX);
-        call json.set(move, "y", newY);
-        call json.add(moves, move);
-        newX = newX - 1;
-        newY = newY + 1;
-    }
-    
-    return moves;
-}
-
-getQueenMoves(x: int, y: int, direction: string) {
-    // Note: direction parameter is not used for queen moves but kept for API consistency
-    var moves: json = [];
-    var rookMoves: json;
-    var bishopMoves: json;
-    var i: int;
-    var len: int;
-    
-    // Queen combines rook and bishop moves
-    rookMoves = call getRookMoves(x, y, direction);
-    bishopMoves = call getBishopMoves(x, y, direction);
-    
-    // Add all rook moves
-    len = call json.length(rookMoves);
-    for (i = 0; i < len; i++) {
-        call json.add(moves, call json.get(rookMoves, i));
-    }
-    
-    // Add all bishop moves
-    len = call json.length(bishopMoves);
-    for (i = 0; i < len; i++) {
-        call json.add(moves, call json.get(bishopMoves, i));
-    }
-    
-    return moves;
-}
-
-getKingMoves(x: int, y: int, direction: string) {
-    // Note: direction parameter is not used for king moves but kept for API consistency
-    var moves: json = [];
-    var move: json;
-    
-    // King can move one square in any direction
-    // Up
-    if y > 0 then {
-        move = {"x": 0, "y": 0};
-        call json.set(move, "x", x);
-        call json.set(move, "y", y - 1);
-        call json.add(moves, move);
-    }
-    // Down
-    if y < 7 then {
-        move = {"x": 0, "y": 0};
-        call json.set(move, "x", x);
-        call json.set(move, "y", y + 1);
-        call json.add(moves, move);
-    }
-    // Left
-    if x > 0 then {
-        move = {"x": 0, "y": 0};
-        call json.set(move, "x", x - 1);
-        call json.set(move, "y", y);
-        call json.add(moves, move);
-    }
-    // Right
-    if x < 7 then {
-        move = {"x": 0, "y": 0};
-        call json.set(move, "x", x + 1);
-        call json.set(move, "y", y);
-        call json.add(moves, move);
-    }
-    // Up-left
-    if y > 0 and x > 0 then {
-        move = {"x": 0, "y": 0};
-        call json.set(move, "x", x - 1);
-        call json.set(move, "y", y - 1);
-        call json.add(moves, move);
-    }
-    // Up-right
-    if y > 0 and x < 7 then {
-        move = {"x": 0, "y": 0};
-        call json.set(move, "x", x + 1);
-        call json.set(move, "y", y - 1);
-        call json.add(moves, move);
-    }
-    // Down-left
-    if y < 7 and x > 0 then {
-        move = {"x": 0, "y": 0};
-        call json.set(move, "x", x - 1);
-        call json.set(move, "y", y + 1);
-        call json.add(moves, move);
-    }
-    // Down-right
-    if y < 7 and x < 7 then {
-        move = {"x": 0, "y": 0};
-        call json.set(move, "x", x + 1);
-        call json.set(move, "y", y + 1);
-        call json.add(moves, move);
-    }
-    
-    return moves;
 }
 
 initializeBoard() {
@@ -1235,102 +583,102 @@ screen chessScreen = {
         {"name": "blackTimer", "type": "string", "default": "10:00"},
         {"name": "statusMessage", "type": "string", "default": "White to move"},
         {"name": "moveHistory", "type": "string", "default": "Game started...\n"},
-        {"name": "c00", "type": "image"},
-        {"name": "c01", "type": "image"},
-        {"name": "c02", "type": "image"},
-        {"name": "c03", "type": "image"},
-        {"name": "c04", "type": "image"},
-        {"name": "c05", "type": "image"},
-        {"name": "c06", "type": "image"},
-        {"name": "c07", "type": "image"},
-        {"name": "c10", "type": "image"},
-        {"name": "c11", "type": "image"},
-        {"name": "c12", "type": "image"},
-        {"name": "c13", "type": "image"},
-        {"name": "c14", "type": "image"},
-        {"name": "c15", "type": "image"},
-        {"name": "c16", "type": "image"},
-        {"name": "c17", "type": "image"},
-        {"name": "c60", "type": "image"},
-        {"name": "c61", "type": "image"},
-        {"name": "c62", "type": "image"},
-        {"name": "c63", "type": "image"},
-        {"name": "c64", "type": "image"},
-        {"name": "c65", "type": "image"},
-        {"name": "c66", "type": "image"},
-        {"name": "c67", "type": "image"},
-        {"name": "c70", "type": "image"},
-        {"name": "c71", "type": "image"},
-        {"name": "c72", "type": "image"},
-        {"name": "c73", "type": "image"},
-        {"name": "c74", "type": "image"},
-        {"name": "c75", "type": "image"},
-        {"name": "c76", "type": "image"},
-        {"name": "c77", "type": "image"},
-        {"name": "i00", "type": "image"},
-        {"name": "i01", "type": "image"},
-        {"name": "i02", "type": "image"},
-        {"name": "i03", "type": "image"},
-        {"name": "i04", "type": "image"},
-        {"name": "i05", "type": "image"},
-        {"name": "i06", "type": "image"},
-        {"name": "i07", "type": "image"},
-        {"name": "i10", "type": "image"},
-        {"name": "i11", "type": "image"},
-        {"name": "i12", "type": "image"},
-        {"name": "i13", "type": "image"},
-        {"name": "i14", "type": "image"},
-        {"name": "i15", "type": "image"},
-        {"name": "i16", "type": "image"},
-        {"name": "i17", "type": "image"},
-        {"name": "i20", "type": "image"},
-        {"name": "i21", "type": "image"},
-        {"name": "i22", "type": "image"},
-        {"name": "i23", "type": "image"},
-        {"name": "i24", "type": "image"},
-        {"name": "i25", "type": "image"},
-        {"name": "i26", "type": "image"},
-        {"name": "i27", "type": "image"},
-        {"name": "i30", "type": "image"},
-        {"name": "i31", "type": "image"},
-        {"name": "i32", "type": "image"},
-        {"name": "i33", "type": "image"},
-        {"name": "i34", "type": "image"},
-        {"name": "i35", "type": "image"},
-        {"name": "i36", "type": "image"},
-        {"name": "i37", "type": "image"},
-        {"name": "i40", "type": "image"},
-        {"name": "i41", "type": "image"},
-        {"name": "i42", "type": "image"},
-        {"name": "i43", "type": "image"},
-        {"name": "i44", "type": "image"},
-        {"name": "i45", "type": "image"},
-        {"name": "i46", "type": "image"},
-        {"name": "i47", "type": "image"},
-        {"name": "i50", "type": "image"},
-        {"name": "i51", "type": "image"},
-        {"name": "i52", "type": "image"},
-        {"name": "i53", "type": "image"},
-        {"name": "i54", "type": "image"},
-        {"name": "i55", "type": "image"},
-        {"name": "i56", "type": "image"},
-        {"name": "i57", "type": "image"},
-        {"name": "i60", "type": "image"},
-        {"name": "i61", "type": "image"},
-        {"name": "i62", "type": "image"},
-        {"name": "i63", "type": "image"},
-        {"name": "i64", "type": "image"},
-        {"name": "i65", "type": "image"},
-        {"name": "i66", "type": "image"},
-        {"name": "i67", "type": "image"},
-        {"name": "i70", "type": "image"},
-        {"name": "i71", "type": "image"},
-        {"name": "i72", "type": "image"},
-        {"name": "i73", "type": "image"},
-        {"name": "i74", "type": "image"},
-        {"name": "i75", "type": "image"},
-        {"name": "i76", "type": "image"},
-        {"name": "i77", "type": "image"}
+        {"name": "c00", "type": "imagedata"},
+        {"name": "c01", "type": "imagedata"},
+        {"name": "c02", "type": "imagedata"},
+        {"name": "c03", "type": "imagedata"},
+        {"name": "c04", "type": "imagedata"},
+        {"name": "c05", "type": "imagedata"},
+        {"name": "c06", "type": "imagedata"},
+        {"name": "c07", "type": "imagedata"},
+        {"name": "c10", "type": "imagedata"},
+        {"name": "c11", "type": "imagedata"},
+        {"name": "c12", "type": "imagedata"},
+        {"name": "c13", "type": "imagedata"},
+        {"name": "c14", "type": "imagedata"},
+        {"name": "c15", "type": "imagedata"},
+        {"name": "c16", "type": "imagedata"},
+        {"name": "c17", "type": "imagedata"},
+        {"name": "c60", "type": "imagedata"},
+        {"name": "c61", "type": "imagedata"},
+        {"name": "c62", "type": "imagedata"},
+        {"name": "c63", "type": "imagedata"},
+        {"name": "c64", "type": "imagedata"},
+        {"name": "c65", "type": "imagedata"},
+        {"name": "c66", "type": "imagedata"},
+        {"name": "c67", "type": "imagedata"},
+        {"name": "c70", "type": "imagedata"},
+        {"name": "c71", "type": "imagedata"},
+        {"name": "c72", "type": "imagedata"},
+        {"name": "c73", "type": "imagedata"},
+        {"name": "c74", "type": "imagedata"},
+        {"name": "c75", "type": "imagedata"},
+        {"name": "c76", "type": "imagedata"},
+        {"name": "c77", "type": "imagedata"},
+        {"name": "i00", "type": "imagedata"},
+        {"name": "i01", "type": "imagedata"},
+        {"name": "i02", "type": "imagedata"},
+        {"name": "i03", "type": "imagedata"},
+        {"name": "i04", "type": "imagedata"},
+        {"name": "i05", "type": "imagedata"},
+        {"name": "i06", "type": "imagedata"},
+        {"name": "i07", "type": "imagedata"},
+        {"name": "i10", "type": "imagedata"},
+        {"name": "i11", "type": "imagedata"},
+        {"name": "i12", "type": "imagedata"},
+        {"name": "i13", "type": "imagedata"},
+        {"name": "i14", "type": "imagedata"},
+        {"name": "i15", "type": "imagedata"},
+        {"name": "i16", "type": "imagedata"},
+        {"name": "i17", "type": "imagedata"},
+        {"name": "i20", "type": "imagedata"},
+        {"name": "i21", "type": "imagedata"},
+        {"name": "i22", "type": "imagedata"},
+        {"name": "i23", "type": "imagedata"},
+        {"name": "i24", "type": "imagedata"},
+        {"name": "i25", "type": "imagedata"},
+        {"name": "i26", "type": "imagedata"},
+        {"name": "i27", "type": "imagedata"},
+        {"name": "i30", "type": "imagedata"},
+        {"name": "i31", "type": "imagedata"},
+        {"name": "i32", "type": "imagedata"},
+        {"name": "i33", "type": "imagedata"},
+        {"name": "i34", "type": "imagedata"},
+        {"name": "i35", "type": "imagedata"},
+        {"name": "i36", "type": "imagedata"},
+        {"name": "i37", "type": "imagedata"},
+        {"name": "i40", "type": "imagedata"},
+        {"name": "i41", "type": "imagedata"},
+        {"name": "i42", "type": "imagedata"},
+        {"name": "i43", "type": "imagedata"},
+        {"name": "i44", "type": "imagedata"},
+        {"name": "i45", "type": "imagedata"},
+        {"name": "i46", "type": "imagedata"},
+        {"name": "i47", "type": "imagedata"},
+        {"name": "i50", "type": "imagedata"},
+        {"name": "i51", "type": "imagedata"},
+        {"name": "i52", "type": "imagedata"},
+        {"name": "i53", "type": "imagedata"},
+        {"name": "i54", "type": "imagedata"},
+        {"name": "i55", "type": "imagedata"},
+        {"name": "i56", "type": "imagedata"},
+        {"name": "i57", "type": "imagedata"},
+        {"name": "i60", "type": "imagedata"},
+        {"name": "i61", "type": "imagedata"},
+        {"name": "i62", "type": "imagedata"},
+        {"name": "i63", "type": "imagedata"},
+        {"name": "i64", "type": "imagedata"},
+        {"name": "i65", "type": "imagedata"},
+        {"name": "i66", "type": "imagedata"},
+        {"name": "i67", "type": "imagedata"},
+        {"name": "i70", "type": "imagedata"},
+        {"name": "i71", "type": "imagedata"},
+        {"name": "i72", "type": "imagedata"},
+        {"name": "i73", "type": "imagedata"},
+        {"name": "i74", "type": "imagedata"},
+        {"name": "i75", "type": "imagedata"},
+        {"name": "i76", "type": "imagedata"},
+        {"name": "i77", "type": "imagedata"}
     ],
     "area": [
         {

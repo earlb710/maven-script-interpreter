@@ -126,6 +126,59 @@ print "All imports successful!";
 5. **Platform Independent**: Works on all operating systems
 6. **Backward Compatible**: Existing imports still work
 
+## Best Practices
+
+### Import Placement
+**Place import statements at the top of your script file** for better code organization:
+
+```javascript
+// ✓ RECOMMENDED: Imports at the top
+import "util/stringUtil.ebs";
+import "util/mathUtil.ebs";
+
+var result: int = call add(5, 3);
+// ... rest of code
+```
+
+### Exception: Dependencies
+If imported code depends on types or functions from your main file, place imports after those definitions:
+
+```javascript
+// Type definitions and constants first
+MyType typeof record { name: string, value: int };
+var CONSTANT: int = 42;
+
+// Helper functions that imported code needs
+helperFunction() {
+    // ...
+}
+
+// Import after dependencies
+import "module-using-mytype.ebs";
+
+// Rest of code...
+```
+
+### Real-World Example
+From chess.ebs:
+```javascript
+// Type definitions
+ChessCell typeof bitmap { cellColor: 0, pieceType: 1-6, pieceColor: 7 };
+posType typeof record { x: int, y: int };
+
+// Constants
+var WHITE: int = 0;
+var BLACK: int = 1;
+
+// Helper functions
+isValidPosition(x: int, y: int) return bool {
+    return x >= 0 && x < 8 && y >= 0 && y < 8;
+}
+
+// Import after dependencies are defined
+import "chess-moves.ebs";
+```
+
 ## Migration Guide
 
 ### No Changes Required

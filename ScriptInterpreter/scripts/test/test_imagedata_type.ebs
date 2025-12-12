@@ -1,21 +1,21 @@
-// Simple test for imageData type keyword
-// Verifies that imageData is recognized as a valid datatype
+// Simple test for imagedata type keyword
+// Verifies that imagedata is recognized as a valid datatype
 
-print "ImageData Type Keyword Test";
+print "imagedata Type Keyword Test";
 print "============================";
 print "";
 
-// Test 1: Variable declaration with imageData type
-print "TEST 1: Variable declaration with imageData type";
+// Test 1: Variable declaration with imagedata type
+print "TEST 1: Variable declaration with imagedata type";
 print "---------------------------------------";
-var testImg : imageData = null;
-print "testImg declared with type imageData: " + testImg;
+var testImg : imagedata = null;
+print "testImg declared with type imagedata: " + testImg;
 print "";
 
 // Test 2: typeof returns correct type  
-print "TEST 2: typeof imageData variable";
+print "TEST 2: typeof imagedata variable";
 print "------------------------------------";
 print "typeof testImg = " + typeof testImg;
 print "";
 
-print "✓ All imageData type tests passed!";
+print "✓ All imagedata type tests passed!";

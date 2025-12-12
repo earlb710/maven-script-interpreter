@@ -3,6 +3,7 @@ package com.eb.ui.ebs;
 import com.eb.script.RuntimeContext;
 import com.eb.script.arrays.ArrayDynamic;
 import com.eb.script.file.FileContext;
+import com.eb.script.interpreter.Environment;
 import com.eb.script.interpreter.builtins.Builtins;
 import com.eb.script.interpreter.InterpreterError;
 import com.eb.script.json.Json;
@@ -970,8 +971,30 @@ public class EbsConsoleHandler extends EbsHandler {
                 }
                 
                 try {
-                    // Submit script for execution
-                    submit(script);
+                    // Use the existing context (which has screen state) and just update the script
+                    // Parse the file to get imports resolved correctly
+                    RuntimeContext scriptContext = com.eb.script.parser.Parser.parse(filePath);
+                    
+                    // Copy debug mode state from current thread to this thread
+                    boolean debugModeEnabled = com.eb.script.interpreter.screen.ScreenFactory.getDebugModeForInheritance();
+                    com.eb.script.interpreter.screen.ScreenFactory.setDebugModeForThread(debugModeEnabled);
+                    
+                    // Merge the parsed script into the existing handler context
+                    // This preserves screen state while allowing imports to be resolved
+                    if (ctx != null) {
+                        // Copy functions from script context to handler context
+                        ctx.blocks.putAll(scriptContext.blocks);
+                        // Update statements if any
+                        if (scriptContext.statements != null && scriptContext.statements.length > 0) {
+                            ctx.statements = scriptContext.statements;
+                        }
+                        // Execute using handler's context (which has screen state)
+                        interpreter.interpret(ctx);
+                    } else {
+                        // Fallback: register output area and execute with script context
+                        scriptContext.environment.registerOutputArea(env.getOutputArea());
+                        interpreter.interpret(scriptContext);
+                    }
                     
                     // Update status bar on completion
                     javafx.application.Platform.runLater(() -> {

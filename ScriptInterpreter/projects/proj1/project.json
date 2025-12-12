@@ -1,0 +1,17 @@
+{
+  "name": "Small Projects",
+  "directory": "C:\\Earl\\Java\\ScriptInterpreter-GitHub-V5\\maven-script-interpreter\\ScriptInterpreter\\projects\\proj1",
+  "description": "EBS Script Project",
+  "version": "1.0.0",
+  "css": [
+    "console.css"
+  ],
+  "mainScript": "main.ebs",
+  "settings": {
+    "autoLoad": true
+  },
+  "directories": [
+    "..\\..\\scripts\\examples",
+    "..\\..\\scripts\\test"
+  ]
+}
