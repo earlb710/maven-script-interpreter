@@ -240,7 +240,15 @@ public class InterpreterArray {
                             Object value = interpreter.evaluate(stmt.value);
                             
                             // Assign the value to the screen variable
-                            screenVarMap.put(varName, value);
+                            // Note: ConcurrentHashMap doesn't allow null values, but screen variables can be null
+                            // If value is null, we still need to store it (use a sentinel or remove it)
+                            if (value == null) {
+                                // For null values, we can either remove the key or keep it with a sentinel
+                                // Keeping the key allows us to know the variable exists but has no value
+                                screenVarMap.remove(varName);
+                            } else {
+                                screenVarMap.put(varName, value);
+                            }
                             
                             // Trigger screen refresh to update UI controls
                             context.triggerScreenRefresh(screenName);
