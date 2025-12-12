@@ -28,6 +28,9 @@ public class ControlListenerFactory {
     
     /** Property key for storing screen name on controls */
     public static final String PROP_SCREEN_NAME = "screenName";
+    
+    /** Property key for storing stateful flag on controls */
+    public static final String PROP_STATEFUL = "stateful";
 
     /**
      * Marks the screen as changed when a control's value is modified.
@@ -49,7 +52,7 @@ public class ControlListenerFactory {
         Object contextObj = control.getProperties().get(PROP_INTERPRETER_CONTEXT);
         Object screenNameObj = control.getProperties().get(PROP_SCREEN_NAME);
         Object varNameObj = control.getProperties().get("varName");
-        Object statefulObj = control.getProperties().get("stateful");
+        Object statefulObj = control.getProperties().get(PROP_STATEFUL);
         
         // Check if this control is stateful (default: true)
         // If stateful is false, changes to this item should not mark the screen as changed
