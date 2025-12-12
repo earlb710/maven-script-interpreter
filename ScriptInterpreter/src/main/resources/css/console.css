@@ -481,3 +481,26 @@
     -fx-border-color: #0078d7;
 }
 
+/* ===== Bracket matching highlighting ===== */
+/* Matched bracket highlight - green background */
+.bracket-match,
+.text.bracket-match,
+.styled-text-area .text.bracket-match,
+.editor-ebs .text.bracket-match,
+.editor-text .text.bracket-match {
+    -fx-fill: #000000;
+    -fx-font-weight: bold;
+    -rtfx-background-color: #00ff00; /* bright green for matched brackets */
+}
+
+/* Unmatched bracket highlight - red background */
+.bracket-error,
+.text.bracket-error,
+.styled-text-area .text.bracket-error,
+.editor-ebs .text.bracket-error,
+.editor-text .text.bracket-error {
+    -fx-fill: #000000;
+    -fx-font-weight: bold;
+    -rtfx-background-color: #ff0000; /* bright red for unmatched brackets */
+}
+
