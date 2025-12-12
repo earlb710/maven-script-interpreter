@@ -970,8 +970,15 @@ public class EbsConsoleHandler extends EbsHandler {
                 }
                 
                 try {
-                    // Submit script for execution
-                    submit(script);
+                    // Parse script using file path so imports can be resolved relative to script location
+                    RuntimeContext scriptContext = com.eb.script.parser.Parser.parse(filePath);
+                    
+                    // Copy debug mode state from current thread to this thread
+                    boolean debugModeEnabled = com.eb.script.interpreter.screen.ScreenFactory.getDebugModeForInheritance();
+                    com.eb.script.interpreter.screen.ScreenFactory.setDebugModeForThread(debugModeEnabled);
+                    
+                    // Execute the parsed script using the persistent interpreter
+                    interpreter.interpret(scriptContext);
                     
                     // Update status bar on completion
                     javafx.application.Platform.runLater(() -> {
