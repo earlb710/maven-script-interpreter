@@ -2304,9 +2304,13 @@ public class BuiltinsScreen {
                 iconData.iconOpenPath = finalIconOpenPath;
                 iconData.iconClosedPath = finalIconClosedPath;
                 
-                // Remove any existing expansion listener
+                // Remove any existing expansion listener (with error handling)
                 if (iconData.expansionListener != null) {
-                    item.expandedProperty().removeListener(iconData.expansionListener);
+                    try {
+                        item.expandedProperty().removeListener(iconData.expansionListener);
+                    } catch (Exception e) {
+                        // Ignore errors if listener is already removed or item is invalid
+                    }
                     iconData.expansionListener = null;
                 }
                 
@@ -2486,9 +2490,13 @@ public class BuiltinsScreen {
         // Traverse the path step by step
         int partIndex = 0;
         
-        // Check if root matches the first part of the path
-        if (current.getValue() != null && current.getValue().equals(pathParts[0])) {
+        // Check if root matches the first part of the path (handle null root value)
+        String rootValue = current.getValue();
+        if (rootValue != null && rootValue.equals(pathParts[0])) {
             partIndex = 1; // Start searching from the next part
+        } else if (rootValue == null && pathParts.length == 1) {
+            // If root value is null and we're looking for a single-part path, it can't match
+            return null;
         }
         
         // For each remaining part of the path, find the matching child
