@@ -88,6 +88,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     private InterpreterDatabase databaseInterpreter;
     private InterpreterArray arrayInterpreter;
     private RuntimeContext currentRuntime;  // Store current runtime context for import resolution
+    private RuntimeContext rootRuntime;  // Store root runtime context (main script) for function registration
     private String currentImportFile;  // Track which import file is currently being processed
 
     public Interpreter() {
@@ -210,6 +211,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     // We use fully-qualified types to avoid changing imports.
     public void interpret(RuntimeContext runtime) throws InterpreterError {
         this.currentRuntime = runtime;  // Store for import resolution
+        this.rootRuntime = runtime;  // Store root runtime for function registration
         context.setEnvironment(runtime.environment);
         context.setOutput(runtime.environment.getOutputArea());
         
@@ -1793,20 +1795,20 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     public void visitImportStatement(ImportStatement stmt) throws InterpreterError {
         environment().pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Import %1", stmt.filename);
         try {
-            // Resolve the file path
+            // Resolve the file path relative to the current script's directory
             Path importPath = resolveImportPath(stmt.filename);
             
             if (!Files.exists(importPath)) {
                 throw error(stmt.getLine(), "Import file not found: " + stmt.filename);
             }
             
-            // Normalize the import path as written by the user, maintaining the relative structure
-            // This provides a consistent representation while preserving the user's intent
-            Path normalizedImportPath = Path.of(stmt.filename).normalize();
-            String importKey = normalizedImportPath.toString();
+            // Normalize the absolute resolved path for deduplication
+            // This ensures that the same file imported via different relative paths is only loaded once
+            Path normalizedAbsolutePath = importPath.toAbsolutePath().normalize();
+            String importKey = normalizedAbsolutePath.toString();
             
             // Check if file has already been imported (prevents circular imports and duplicate imports)
-            // We use the normalized form of the import path as written by the user
+            // We use the absolute normalized path to ensure the same file isn't imported twice
             if (context.getImportedFiles().contains(importKey)) {
                 if (context.getOutput() != null) {
                     context.getOutput().printlnOk("Skipped (already imported): " + stmt.filename);
@@ -1815,16 +1817,19 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             }
             
             // Add to imported files set before processing to prevent circular imports
-            // Store the import path as normalized from what the user wrote
             context.getImportedFiles().add(importKey);
             
-            // Read and parse the imported file
-            String importedScript = Files.readString(importPath, StandardCharsets.UTF_8);
-            RuntimeContext importContext = Parser.parse(importPath.getFileName().toString(), importedScript);
+            // Parse the imported file with its full path so nested imports can resolve correctly
+            RuntimeContext importContext = Parser.parse(importPath);
             
             // Set the current import file so that screen/function declarations know their source
             String previousImportFile = currentImportFile;
             currentImportFile = stmt.filename;
+            
+            // Save the current runtime and temporarily set it to the imported file's runtime
+            // This allows nested imports in the imported file to resolve relative to its location
+            RuntimeContext previousRuntime = currentRuntime;
+            currentRuntime = importContext;
             
             try {
                 // Execute the imported script in the current environment
@@ -1832,13 +1837,14 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                     s.accept(this);
                 }
             } finally {
-                // Restore previous import file context
+                // Restore previous import file context and runtime
                 currentImportFile = previousImportFile;
+                currentRuntime = previousRuntime;
             }
             
-            // Register imported blocks/functions in the current runtime context
+            // Register imported blocks/functions in the root runtime context
             // Check for conflicts to enforce strict no-overwrite semantics
-            if (importContext.blocks != null && currentRuntime != null) {
+            if (importContext.blocks != null && rootRuntime != null) {
                 for (Map.Entry<String, BlockStatement> entry : importContext.blocks.entrySet()) {
                     String functionName = entry.getKey();
                     
@@ -1855,8 +1861,8 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                     // Register this function as declared from the imported file
                     context.getDeclaredFunctions().put(functionName, stmt.filename);
                     
-                    // Store blocks so they can be called later
-                    currentRuntime.blocks.put(functionName, entry.getValue());
+                    // Store blocks so they can be called later (always in the root runtime)
+                    rootRuntime.blocks.put(functionName, entry.getValue());
                 }
             }
             
