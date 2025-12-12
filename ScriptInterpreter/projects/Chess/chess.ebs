@@ -18,6 +18,12 @@ import "chess-moves.ebs";
 //   - Graphical JavaFX GridPane chess board with SVG piece images
 //   - Row labels (1-8) and column labels (a-h)
 //   - Timer display for both players
+//
+// Best Practices:
+//   - Event handlers (onClick, onChange, etc.) should call functions rather than
+//     contain inline code. This keeps the JSON screen definition clean and makes
+//     the code more maintainable and testable.
+//   - Example: "onClick": "call handleClick();" NOT "onClick": "var x = 1; print x;"
 //   - New Game button to reset the board
 //
 // Usage:
@@ -573,6 +579,11 @@ resetGame() {
     chessScreen.statusMessage = "White to move - Game Reset!";
 }
 
+// Close the chess screen
+closeChessScreen() {
+    hide screen chessScreen;
+}
+
 // Define the chess screen with timer and 10x10 grid board (8x8 + labels)
 screen chessScreen = {
     "title": "Chess Game",
@@ -952,7 +963,7 @@ screen chessScreen = {
                     "padding": "10",
                     "items": [
                         {"name": "newGameBtn", "display": {"type": "button", "labelText": "New Game", "onClick": "call resetGame();"}},
-                        {"name": "closeBtn", "display": {"type": "button", "labelText": "Close", "onClick": "hide screen chessScreen;"}}
+                        {"name": "closeBtn", "display": {"type": "button", "labelText": "Close", "onClick": "call closeChessScreen();"}}
                     ]
                 }
             ]
