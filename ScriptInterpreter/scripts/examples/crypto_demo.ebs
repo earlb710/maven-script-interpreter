@@ -1,0 +1,34 @@
+// Simplified crypto demo for screenshot
+print "=== EBS Crypto Functions Demo ===";
+print "";
+
+// 1. Generate a secure key
+var key = call crypto.generateKey();
+print "1. Generated encryption key:";
+print "   " + key;
+print "";
+
+// 2. Encrypt a message
+var message = "Secret message: The treasure is buried at 45.5231, -122.6765";
+var encrypted = call crypto.encrypt(message, key);
+print "2. Encrypted message:";
+print "   Original: " + message;
+print "   Encrypted: " + encrypted;
+print "";
+
+// 3. Decrypt the message
+var decrypted = call crypto.decrypt(encrypted, key);
+print "3. Decrypted message:";
+print "   " + decrypted;
+print "   Match: " + (decrypted == message);
+print "";
+
+// 4. Hash examples
+print "4. Hashing examples:";
+var text = "password123";
+print "   Text: " + text;
+print "   SHA-256: " + call crypto.sha256(text);
+print "   MD5: " + call crypto.md5(text);
+print "";
+
+print "=== Demo Complete ===";

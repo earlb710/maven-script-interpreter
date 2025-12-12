@@ -4022,7 +4022,7 @@
       "function": "crypto.encrypt",
       "format": "html",
       "short_description": "Encrypts text using AES-256-GCM",
-      "long_help": "Encrypts plaintext using AES-256-GCM (Advanced Encryption Standard with Galois/Counter Mode). The key parameter can be either a Base64-encoded AES key (from crypto.generateKey) or a simple password string that will be hashed to derive a key. Returns Base64-encoded encrypted data.",
+      "long_help": "Encrypts plaintext using AES-256-GCM (Advanced Encryption Standard with Galois/Counter Mode). The key parameter can be either a Base64-encoded AES key (from crypto.generateKey, recommended) or a simple password string that will be hashed to derive a key. For best security, use crypto.generateKey() to create proper random keys. Password-based encryption uses simple hashing and is suitable for casual use but not high-security scenarios. Returns Base64-encoded encrypted data.",
       "parameters": [
         {
           "name": "plaintext",
@@ -4113,7 +4113,7 @@
       "function": "crypto.md5",
       "format": "html",
       "short_description": "Computes MD5 hash",
-      "long_help": "Computes an MD5 (Message Digest 5) hash of the input text. MD5 is fast and commonly used for checksums and non-cryptographic purposes. Note: MD5 is not recommended for cryptographic security; use SHA-256 or SHA-512 instead. Returns the hash as a 32-character hexadecimal string.",
+      "long_help": "Computes an MD5 (Message Digest 5) hash of the input text. MD5 is fast and commonly used for checksums and non-cryptographic purposes. <b>Warning:</b> MD5 is cryptographically broken and susceptible to collision attacks. Use only for legacy compatibility or non-security purposes (like checksums). For any security-related hashing, use SHA-256 or SHA-512 instead. Returns the hash as a 32-character hexadecimal string.",
       "parameters": [
         {
           "name": "text",

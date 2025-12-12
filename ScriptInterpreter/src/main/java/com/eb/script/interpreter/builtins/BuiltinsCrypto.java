@@ -265,6 +265,11 @@ public class BuiltinsCrypto {
      * Derives an AES key from a string input.
      * If the input is a valid Base64-encoded key of the right size, it's used directly.
      * Otherwise, it's hashed using SHA-256 to produce a 256-bit key.
+     * 
+     * Note: Password-based key derivation uses simple SHA-256 hashing without salt for simplicity.
+     * This is suitable for casual encryption but not for high-security scenarios.
+     * For production use with passwords, consider using PBKDF2 with random salt and iterations.
+     * For best security, use crypto.generateKey() to create proper random keys.
      */
     private static SecretKey deriveKey(String keyInput) throws Exception {
         try {
