@@ -41,7 +41,10 @@ public class BuiltinsCrypto {
             case "crypto.generatekey" -> generateKey(args);
             case "crypto.hash" -> hash(args);
             case "crypto.sha256" -> sha256(args);
+            case "crypto.sha512" -> sha512(args);
             case "crypto.md5" -> md5(args);
+            case "crypto.base64encode" -> base64Encode(args);
+            case "crypto.base64decode" -> base64Decode(args);
             default -> throw new InterpreterError("Unknown Crypto builtin: " + name);
         };
     }
@@ -235,6 +238,31 @@ public class BuiltinsCrypto {
     }
 
     /**
+     * crypto.sha512(text) - Computes SHA-512 hash
+     * 
+     * @param args [0] text: String to hash
+     * @return Hex-encoded SHA-512 hash
+     */
+    private static Object sha512(Object[] args) throws InterpreterError {
+        if (args.length < 1) {
+            throw new InterpreterError("crypto.sha512 requires 1 argument: text");
+        }
+
+        String text = (String) args[0];
+        if (text == null) {
+            throw new InterpreterError("crypto.sha512: text cannot be null");
+        }
+
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-512");
+            byte[] hash = digest.digest(text.getBytes(StandardCharsets.UTF_8));
+            return bytesToHex(hash);
+        } catch (Exception e) {
+            throw new InterpreterError("crypto.sha512 failed: " + e.getMessage());
+        }
+    }
+
+    /**
      * crypto.md5(text) - Computes MD5 hash
      * 
      * @param args [0] text: String to hash
@@ -256,6 +284,53 @@ public class BuiltinsCrypto {
             return bytesToHex(hash);
         } catch (Exception e) {
             throw new InterpreterError("crypto.md5 failed: " + e.getMessage());
+        }
+    }
+
+    /**
+     * crypto.base64encode(text) - Encodes text to Base64
+     * 
+     * @param args [0] text: String to encode
+     * @return Base64-encoded string
+     */
+    private static Object base64Encode(Object[] args) throws InterpreterError {
+        if (args.length < 1) {
+            throw new InterpreterError("crypto.base64encode requires 1 argument: text");
+        }
+
+        String text = (String) args[0];
+        if (text == null) {
+            throw new InterpreterError("crypto.base64encode: text cannot be null");
+        }
+
+        try {
+            return Base64.getEncoder().encodeToString(text.getBytes(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            throw new InterpreterError("crypto.base64encode failed: " + e.getMessage());
+        }
+    }
+
+    /**
+     * crypto.base64decode(text) - Decodes Base64 text
+     * 
+     * @param args [0] text: Base64-encoded string to decode
+     * @return Decoded string
+     */
+    private static Object base64Decode(Object[] args) throws InterpreterError {
+        if (args.length < 1) {
+            throw new InterpreterError("crypto.base64decode requires 1 argument: text");
+        }
+
+        String text = (String) args[0];
+        if (text == null) {
+            throw new InterpreterError("crypto.base64decode: text cannot be null");
+        }
+
+        try {
+            byte[] decoded = Base64.getDecoder().decode(text);
+            return new String(decoded, StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            throw new InterpreterError("crypto.base64decode failed: " + e.getMessage());
         }
     }
 
