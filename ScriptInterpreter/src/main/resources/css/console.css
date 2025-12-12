@@ -482,7 +482,7 @@
 }
 
 /* ===== Bracket matching highlighting ===== */
-/* Matched bracket highlight - green background */
+/* Matched bracket highlight - subtle green background for accessibility */
 .bracket-match,
 .text.bracket-match,
 .styled-text-area .text.bracket-match,
@@ -490,17 +490,17 @@
 .editor-text .text.bracket-match {
     -fx-fill: #000000;
     -fx-font-weight: bold;
-    -rtfx-background-color: #00ff00; /* bright green for matched brackets */
+    -rtfx-background-color: #90ee90; /* light green for matched brackets - better contrast and accessibility */
 }
 
-/* Unmatched bracket highlight - red background */
+/* Unmatched bracket highlight - subtle red background with better contrast */
 .bracket-error,
 .text.bracket-error,
 .styled-text-area .text.bracket-error,
 .editor-ebs .text.bracket-error,
 .editor-text .text.bracket-error {
-    -fx-fill: #000000;
+    -fx-fill: #ffffff;
     -fx-font-weight: bold;
-    -rtfx-background-color: #ff0000; /* bright red for unmatched brackets */
+    -rtfx-background-color: #dc143c; /* crimson red for unmatched brackets - better accessibility than pure red */
 }
 
