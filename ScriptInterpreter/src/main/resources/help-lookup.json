@@ -4173,7 +4173,7 @@
       "function": "timer.getPeriodString",
       "format": "html",
       "short_description": "Get formatted elapsed time string",
-      "long_help": "Returns the elapsed time as a formatted string in seconds with milliseconds. Format is \"seconds.milliseconds\" (e.g., \"5.123\"). Optional decimals parameter controls precision (0-3 decimal places). Without the decimals parameter, displays all 3 decimal places.",
+      "long_help": "Returns the elapsed time as a formatted string in seconds with milliseconds. Format is \"seconds.milliseconds\" (e.g., \"5.123\"). Optional decimals parameter controls precision (0-3 decimal places). Without the decimals parameter, displays exactly 3 decimal places with zero-padding (e.g., \"1.050\" for 1050ms).",
       "parameters": [
         {
           "name": "timerId",
@@ -4224,7 +4224,7 @@
       "function": "timer.continue",
       "format": "html",
       "short_description": "Continue timer after stopping",
-      "long_help": "Continues a stopped timer and marks a new continuation point. The total elapsed time continues to measure wall-clock time from the original start. Use timer.getContinuePeriod() to measure time since the last continuation. Note: This does NOT exclude pause time from the total - for that, use timer.start() to restart.",
+      "long_help": "Continues a stopped timer and marks a new continuation point. The total elapsed time includes any pause periods between stop and continue calls. Use timer.getContinuePeriod() to measure time since the last continuation. Note: If you want to exclude pause time from measurements, use timer.start() to restart the timer instead.",
       "parameters": [
         {
           "name": "timerId",

@@ -94,12 +94,13 @@ print "";
 print "=== Continue and Lap Timing ===";
 
 // Time multiple segments/laps
+// Note: Before first continue, lap total and segment are the same
 call timer.start("laps");
 call sleep(100);
 call timer.stop("laps");
 var lap1Total : long = call timer.getPeriod("laps");
 var lap1Segment : long = call timer.getContinuePeriod("laps");
-print "Lap 1 - Total: " + lap1Total + "ms, Segment: " + lap1Segment + "ms";
+print "Lap 1 - Total: " + lap1Total + "ms, Segment: " + lap1Segment + "ms (same until continue)";
 
 call timer.continue("laps");
 call sleep(150);
