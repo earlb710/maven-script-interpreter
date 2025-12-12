@@ -60,7 +60,7 @@ public final class UtilConvert {
         val = val & range;
         String ret = Integer.toString(val, pRadix).toUpperCase();
         if (ret.length() < pDigits) {
-            lpad(ret, pDigits, '0');
+            ret = lpad(ret, pDigits, '0');
         }
         return ret;
     }
@@ -259,8 +259,6 @@ public final class UtilConvert {
         }
         pValue = (char) (pValue & -33);
         if (pValue >= 'A' && pValue <= 'F') {
-            return (byte) (pValue - 55);
-        } else if (pValue >= 'a' && pValue <= 'f') {
             return (byte) (pValue - 55);
         }
         return 0;

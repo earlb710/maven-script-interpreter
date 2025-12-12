@@ -60,7 +60,7 @@ public class UtilString extends UtilUnicode {
         0x9, 0xA, 0xB, 0xC, 0xD, 0x1C, 0x1D, 0x1E, 0x1F, 0x20
     };
     public static final String WHITESPACES_CHAR = new String(_WHITESPACES_CHAR);
-    public static final String[] WHITESPACES_STRING_ARRAY = WHITESPACES_CHAR.split("|");
+    public static final String[] WHITESPACES_STRING_ARRAY = new String[_WHITESPACES_CHAR.length];
 
     private static final char[] _SPECIAL_CHAR = new char[]{
         '(', ')', '[', ']', '{', '}', '*', '+', '-', '/', '\\', '=', '<', '>', ',', '@', '#', '$', '%', '&', '|', ':', ';', '?', '!', '`', '~', '\'', '"'
@@ -105,8 +105,10 @@ public class UtilString extends UtilUnicode {
     public static final String NUMERIC_COMMA_CHAR;
 
     static {
-        for (int c : _WHITESPACES_CHAR) {
+        for (int i = 0; i < _WHITESPACES_CHAR.length; i++) {
+            int c = _WHITESPACES_CHAR[i];
             CHAR_mapping[c] = (short) (CHAR_mapping[c] | MASK_WHITESPACES_CHAR);
+            WHITESPACES_STRING_ARRAY[i] = String.valueOf((char) c);
         }
         for (int c : _SPECIAL_CHAR) {
             CHAR_mapping[c] = (short) (CHAR_mapping[c] | MASK_SPECIAL_CHAR);
@@ -512,8 +514,8 @@ public class UtilString extends UtilUnicode {
 
     public static String getFirstTokenString(int pStartToken, String pString, String pDiv) {
         int idx = pString.indexOf(pDiv, pStartToken);
-        if (idx > 1) {
-            String lastStr = pString.substring(0, - 1);
+        if (idx >= 0) {
+            String lastStr = pString.substring(pStartToken, idx);
             return lastStr;
         } else {
             return null;
@@ -522,8 +524,8 @@ public class UtilString extends UtilUnicode {
 
     public static String getFirstTokenString(int pStartToken, String pString) {
         int idx = pString.indexOf(div, pStartToken);
-        if (idx > 1) {
-            String lastStr = pString.substring(0, - 1);
+        if (idx >= 0) {
+            String lastStr = pString.substring(pStartToken, idx);
             return lastStr;
         } else {
             return null;
@@ -532,8 +534,8 @@ public class UtilString extends UtilUnicode {
 
     public static String getFirstTokenString(String pString, String pDiv) {
         int idx = pString.indexOf(pDiv);
-        if (idx > 1) {
-            String lastStr = pString.substring(0, - 1);
+        if (idx >= 0) {
+            String lastStr = pString.substring(0, idx);
             return lastStr;
         } else {
             return null;
@@ -542,8 +544,8 @@ public class UtilString extends UtilUnicode {
 
     public static String getFirstTokenString(String pString) {
         int idx = pString.indexOf(div);
-        if (idx > 1) {
-            String lastStr = pString.substring(0, - 1);
+        if (idx >= 0) {
+            String lastStr = pString.substring(0, idx);
             return lastStr;
         } else {
             return null;
@@ -1050,7 +1052,7 @@ public class UtilString extends UtilUnicode {
     public static int firstIndexAlphaNumeric(char[] pCharString, int pIdx) {
         int findIdx = pIdx;
         do {
-            if (!(UtilString.isAlphaChar(pCharString[findIdx]) || UtilString.isAlphaChar(pCharString[findIdx]))) {
+            if (!(UtilString.isAlphaChar(pCharString[findIdx]) || UtilString.isNumericChar(pCharString[findIdx]))) {
                 findIdx++;
             } else {
                 break;
@@ -1062,7 +1064,7 @@ public class UtilString extends UtilUnicode {
     public static int lastIndexAlphaNumeric(char[] pCharString, int pIdx) {
         int findIdx = pIdx;
         do {
-            if (!(UtilString.isAlphaChar(pCharString[findIdx]) || UtilString.isAlphaChar(pCharString[findIdx]))) {
+            if (!(UtilString.isAlphaChar(pCharString[findIdx]) || UtilString.isNumericChar(pCharString[findIdx]))) {
                 findIdx--;
             } else {
                 break;

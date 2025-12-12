@@ -9,7 +9,6 @@ import com.eb.util.Util;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -312,6 +311,7 @@ public class BuiltinsImage {
     /**
      * Load image from base64 encoded string.
      * image.fromBase64(b64String) -> IMAGE
+     * Uses BuiltinsCrypto.decodeBase64() for base64 decoding.
      */
     private static Object fromBase64(Object[] args) throws InterpreterError {
         String b64 = (String) args[0];
@@ -325,7 +325,7 @@ public class BuiltinsImage {
                 b64 = b64.substring(b64.indexOf(",") + 1);
             }
             
-            byte[] bytes = Base64.getDecoder().decode(b64);
+            byte[] bytes = BuiltinsCrypto.decodeBase64(b64);
             return new EbsImage(bytes);
         } catch (InterpreterError ie) {
             throw ie;
@@ -339,6 +339,7 @@ public class BuiltinsImage {
     /**
      * Convert image to base64 encoded string.
      * image.toBase64(image, format?) -> STRING
+     * Uses BuiltinsCrypto.encodeBase64() for base64 encoding.
      */
     private static Object toBase64(Object[] args) throws InterpreterError {
         EbsImage image = getImage(args[0], "image.toBase64");
@@ -346,7 +347,7 @@ public class BuiltinsImage {
         
         try {
             ArrayFixedByte bytes = image.getBytes(format);
-            return Base64.getEncoder().encodeToString(bytes.elements);
+            return BuiltinsCrypto.encodeBase64(bytes.elements);
         } catch (InterpreterError ie) {
             throw ie;
         } catch (Exception ex) {
