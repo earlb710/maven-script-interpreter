@@ -236,7 +236,7 @@ public class BuiltinsTimer {
     }
 
     /**
-     * Helper to convert an argument to int with bounds checking
+     * Helper to convert an argument to int with bounds checking and special value handling
      */
     private static int convertToInt(Object value, String paramName) throws InterpreterError {
         if (value instanceof Integer) {
@@ -249,10 +249,34 @@ public class BuiltinsTimer {
             return (int) longValue;
         } else if (value instanceof Double) {
             double doubleValue = (Double) value;
+            // Check for special floating-point values
+            if (Double.isNaN(doubleValue)) {
+                throw new InterpreterError(paramName + " cannot be NaN");
+            }
+            if (Double.isInfinite(doubleValue)) {
+                throw new InterpreterError(paramName + " cannot be infinite");
+            }
+            // Check bounds before truncation
             if (doubleValue < Integer.MIN_VALUE || doubleValue > Integer.MAX_VALUE) {
                 throw new InterpreterError(paramName + " value out of integer range: " + doubleValue);
             }
-            return (int) doubleValue;
+            // Round to nearest integer instead of truncating
+            return (int) Math.round(doubleValue);
+        } else if (value instanceof Float) {
+            float floatValue = (Float) value;
+            // Check for special floating-point values
+            if (Float.isNaN(floatValue)) {
+                throw new InterpreterError(paramName + " cannot be NaN");
+            }
+            if (Float.isInfinite(floatValue)) {
+                throw new InterpreterError(paramName + " cannot be infinite");
+            }
+            // Check bounds before rounding
+            if (floatValue < Integer.MIN_VALUE || floatValue > Integer.MAX_VALUE) {
+                throw new InterpreterError(paramName + " value out of integer range: " + floatValue);
+            }
+            // Round to nearest integer
+            return Math.round(floatValue);
         } else if (value instanceof String) {
             try {
                 return Integer.parseInt((String) value);
