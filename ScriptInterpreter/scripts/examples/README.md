@@ -201,6 +201,7 @@ This directory contains short, precise example scripts for each EBS language key
 | [timer.ebs](timer.ebs) | `timer.getContinuePeriod` | Get time since last continuation |
 | [timer.ebs](timer.ebs) | `timer.getContinuePeriodString` | Get formatted continue period |
 | [timer.ebs](timer.ebs) | `timer.remove` | Remove timer from registry |
+| [timer.ebs](timer.ebs) | `timer.clear` | Remove all timers from registry |
 
 ## Screen Builtins (scr.*)
 | File | Builtin | Description |

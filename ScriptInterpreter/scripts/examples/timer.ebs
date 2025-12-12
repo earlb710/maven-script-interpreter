@@ -208,23 +208,43 @@ if approach1Time < approach2Time then {
 }
 
 // =====================================================
-// SECTION 8: Timer Cleanup
+// SECTION 8: Auto-initialization and Error Handling
+// =====================================================
+print "";
+print "=== Auto-initialization (No Null Pointer Errors) ===";
+
+// Timer operations auto-initialize if timer doesn't exist
+var period : long = call timer.getPeriod("never_started");
+print "Period of never-started timer: " + period + "ms (auto-initialized to 0)";
+
+var isRunning : bool = call timer.isRunning("never_started");
+print "Is never-started timer running: " + isRunning + " (auto-initialized to false)";
+
+// Operations work even on non-existent timers
+call timer.stop("another_new_timer");
+print "Stopped a timer that never existed (auto-initialized)";
+
+print "";
+print "Note: All timer operations auto-initialize timers if they don't exist,";
+print "preventing null pointer errors and making timers more user-friendly.";
+
+// =====================================================
+// SECTION 9: Timer Cleanup
 // =====================================================
 print "";
 print "=== Timer Cleanup ===";
 
-// Remove timers when done
+// Individual removal
 var removed1 : bool = call timer.remove("basic");
-var removed2 : bool = call timer.remove("progress");
-var removed3 : bool = call timer.remove("format");
-var removed4 : bool = call timer.remove("laps");
-var removed5 : bool = call timer.remove("nonexistent");
-
 print "Removed 'basic': " + removed1;
-print "Removed 'progress': " + removed2;
-print "Removed 'format': " + removed3;
-print "Removed 'laps': " + removed4;
-print "Removed 'nonexistent': " + removed5 + " (expected false)";
+
+// Bulk clear - removes all timers at once
+var clearedCount : int = call timer.clear();
+print "Bulk clear removed " + clearedCount + " timers";
+
+// Try removing after clear
+var removed2 : bool = call timer.remove("progress");
+print "Removed 'progress' after clear: " + removed2 + " (expected false)";
 
 print "";
 print "=== All timer function tests completed ===";

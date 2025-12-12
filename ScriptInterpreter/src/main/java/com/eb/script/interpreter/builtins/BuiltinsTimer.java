@@ -41,6 +41,7 @@ public class BuiltinsTimer {
             case "timer.getcontinueperiodstring" -> getContinuePeriodString(args);
             case "timer.isrunning" -> isRunning(args);
             case "timer.remove" -> remove(args);
+            case "timer.clear" -> clear(args);
             default -> throw new InterpreterError("Unknown Timer builtin: " + name);
         };
     }
@@ -72,6 +73,7 @@ public class BuiltinsTimer {
 
     /**
      * timer.stop(timerId) - Stop the timer and return elapsed time in milliseconds
+     * Auto-initializes timer if it doesn't exist
      */
     private static Object stop(Object[] args) throws InterpreterError {
         if (args.length < 1) {
@@ -79,16 +81,13 @@ public class BuiltinsTimer {
         }
         String timerId = String.valueOf(args[0]);
         
-        Timed timer = TIMERS.get(timerId);
-        if (timer == null) {
-            throw new InterpreterError("Timer not found: " + timerId);
-        }
-        
+        Timed timer = TIMERS.computeIfAbsent(timerId, k -> new Timed());
         return timer.timerStop();
     }
 
     /**
      * timer.reset(timerId) - Reset the timer to current time without starting it
+     * Auto-initializes timer if it doesn't exist
      * Returns true on success
      */
     private static Object reset(Object[] args) throws InterpreterError {
@@ -97,17 +96,14 @@ public class BuiltinsTimer {
         }
         String timerId = String.valueOf(args[0]);
         
-        Timed timer = TIMERS.get(timerId);
-        if (timer == null) {
-            throw new InterpreterError("Timer not found: " + timerId);
-        }
-        
+        Timed timer = TIMERS.computeIfAbsent(timerId, k -> new Timed());
         timer.timerReset();
         return true;
     }
 
     /**
      * timer.continue(timerId) - Continue a stopped timer, marking a continuation point
+     * Auto-initializes timer if it doesn't exist
      * Returns true on success
      */
     private static Object continueTimer(Object[] args) throws InterpreterError {
@@ -116,17 +112,14 @@ public class BuiltinsTimer {
         }
         String timerId = String.valueOf(args[0]);
         
-        Timed timer = TIMERS.get(timerId);
-        if (timer == null) {
-            throw new InterpreterError("Timer not found: " + timerId);
-        }
-        
+        Timed timer = TIMERS.computeIfAbsent(timerId, k -> new Timed());
         timer.timerContinue();
         return true;
     }
 
     /**
      * timer.getPeriod(timerId) - Get elapsed time in milliseconds since timer start
+     * Auto-initializes timer if it doesn't exist (returns 0)
      */
     private static Object getPeriod(Object[] args) throws InterpreterError {
         if (args.length < 1) {
@@ -134,11 +127,7 @@ public class BuiltinsTimer {
         }
         String timerId = String.valueOf(args[0]);
         
-        Timed timer = TIMERS.get(timerId);
-        if (timer == null) {
-            throw new InterpreterError("Timer not found: " + timerId);
-        }
-        
+        Timed timer = TIMERS.computeIfAbsent(timerId, k -> new Timed());
         return timer.getTimerPeriod();
     }
 
@@ -146,6 +135,7 @@ public class BuiltinsTimer {
      * timer.getPeriodString(timerId [, decimals]) - Get elapsed time as formatted string
      * Format: "seconds.milliseconds" (e.g., "5.123")
      * Optional decimals parameter (0-3) controls decimal precision
+     * Auto-initializes timer if it doesn't exist (returns "0.000")
      */
     private static Object getPeriodString(Object[] args) throws InterpreterError {
         if (args.length < 1) {
@@ -153,10 +143,7 @@ public class BuiltinsTimer {
         }
         String timerId = String.valueOf(args[0]);
         
-        Timed timer = TIMERS.get(timerId);
-        if (timer == null) {
-            throw new InterpreterError("Timer not found: " + timerId);
-        }
+        Timed timer = TIMERS.computeIfAbsent(timerId, k -> new Timed());
         
         if (args.length >= 2) {
             int decimals = convertToInt(args[1], "decimals");
@@ -168,6 +155,7 @@ public class BuiltinsTimer {
 
     /**
      * timer.getContinuePeriod(timerId) - Get elapsed time since last continuation point
+     * Auto-initializes timer if it doesn't exist (returns 0)
      */
     private static Object getContinuePeriod(Object[] args) throws InterpreterError {
         if (args.length < 1) {
@@ -175,16 +163,13 @@ public class BuiltinsTimer {
         }
         String timerId = String.valueOf(args[0]);
         
-        Timed timer = TIMERS.get(timerId);
-        if (timer == null) {
-            throw new InterpreterError("Timer not found: " + timerId);
-        }
-        
+        Timed timer = TIMERS.computeIfAbsent(timerId, k -> new Timed());
         return timer.getContinuePeriod();
     }
 
     /**
      * timer.getContinuePeriodString(timerId [, decimals]) - Get continue period as formatted string
+     * Auto-initializes timer if it doesn't exist (returns "0.000")
      */
     private static Object getContinuePeriodString(Object[] args) throws InterpreterError {
         if (args.length < 1) {
@@ -192,10 +177,7 @@ public class BuiltinsTimer {
         }
         String timerId = String.valueOf(args[0]);
         
-        Timed timer = TIMERS.get(timerId);
-        if (timer == null) {
-            throw new InterpreterError("Timer not found: " + timerId);
-        }
+        Timed timer = TIMERS.computeIfAbsent(timerId, k -> new Timed());
         
         if (args.length >= 2) {
             int decimals = convertToInt(args[1], "decimals");
@@ -207,6 +189,7 @@ public class BuiltinsTimer {
 
     /**
      * timer.isRunning(timerId) - Check if the timer is currently running
+     * Auto-initializes timer if it doesn't exist (returns false)
      */
     private static Object isRunning(Object[] args) throws InterpreterError {
         if (args.length < 1) {
@@ -214,11 +197,7 @@ public class BuiltinsTimer {
         }
         String timerId = String.valueOf(args[0]);
         
-        Timed timer = TIMERS.get(timerId);
-        if (timer == null) {
-            throw new InterpreterError("Timer not found: " + timerId);
-        }
-        
+        Timed timer = TIMERS.computeIfAbsent(timerId, k -> new Timed());
         return timer.isRunning();
     }
 
@@ -233,6 +212,16 @@ public class BuiltinsTimer {
         String timerId = String.valueOf(args[0]);
         
         return TIMERS.remove(timerId) != null;
+    }
+
+    /**
+     * timer.clear() - Remove all timers from the registry
+     * Returns the number of timers that were removed
+     */
+    private static Object clear(Object[] args) throws InterpreterError {
+        int count = TIMERS.size();
+        TIMERS.clear();
+        return count;
     }
 
     /**

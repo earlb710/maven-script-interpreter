@@ -1789,6 +1789,9 @@ public final class Builtins {
                 "timer.remove", DataType.BOOL,
                 newParam("timerId", DataType.STRING, true)
         ));
+        addBuiltin(info(
+                "timer.clear", DataType.INTEGER
+        ));
 
         // ==========================
         // CRYPTO builtins
