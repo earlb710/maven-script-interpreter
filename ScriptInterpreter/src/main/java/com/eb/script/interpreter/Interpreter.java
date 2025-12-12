@@ -766,13 +766,12 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                                    (screenVarTypes != null && screenVarTypes.containsKey(varName));
                 if (varExists) {
                     // Variable exists with simple name (legacy format)
-                    // ConcurrentHashMap doesn't allow null values, so handle null appropriately
+                    // ConcurrentHashMap doesn't allow null values, so use NULL_SENTINEL for nulls
                     if (value != null) {
                         screenVarMap.put(varName, value);
                     } else {
-                        // For null values, we need to keep track of the variable but can't store null
-                        // Remove any existing value - the variable exists but has no value
-                        screenVarMap.remove(varName);
+                        // Use NULL_SENTINEL to represent null so UI refresh can detect the change
+                        screenVarMap.put(varName, InterpreterArray.NULL_SENTINEL);
                     }
                     // Trigger screen refresh to update UI controls
                     context.triggerScreenRefresh(screenName);
@@ -1118,7 +1117,9 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             if (screenVarMap != null) {
                 if (screenVarMap.containsKey(varName)) {
                     // Variable exists with simple name (legacy format)
-                    return screenVarMap.get(varName);
+                    Object value = screenVarMap.get(varName);
+                    // Convert NULL_SENTINEL back to null
+                    return (value == InterpreterArray.NULL_SENTINEL) ? null : value;
                 } else {
                     throw error(expr.line, "Screen '" + screenName + "' does not have a variable '" + setName + "." + varName + "'.");
                 }
@@ -1132,7 +1133,9 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars(screenName);
             if (screenVarMap != null && screenVarMap.containsKey(varName)) {
                 // Found screen variable, return it
-                return screenVarMap.get(varName);
+                Object value = screenVarMap.get(varName);
+                // Convert NULL_SENTINEL back to null
+                return (value == InterpreterArray.NULL_SENTINEL) ? null : value;
             }
             // If not a screen variable, fall through to check regular environment variables
         }
@@ -1962,7 +1965,9 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 String varName = expr.propertyName.toLowerCase(java.util.Locale.ROOT);
                 if (screenVarMap.containsKey(varName)) {
                     // This is a screen variable - return it
-                    return screenVarMap.get(varName);
+                    Object value = screenVarMap.get(varName);
+                    // Convert NULL_SENTINEL back to null
+                    return (value == InterpreterArray.NULL_SENTINEL) ? null : value;
                 }
                 // If the variable doesn't exist in the screen, fall through to normal property access
                 // This allows accessing properties of the screen config JSON if needed

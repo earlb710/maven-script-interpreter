@@ -26,6 +26,18 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class InterpreterArray {
     
+    /**
+     * Sentinel value to represent null in ConcurrentHashMap (which doesn't allow null values).
+     * This allows screen variables to be explicitly set to null while still being tracked in the map.
+     * Public so that ControlUpdater can check for it when updating UI controls.
+     */
+    public static final Object NULL_SENTINEL = new Object() {
+        @Override
+        public String toString() {
+            return "NULL_SENTINEL";
+        }
+    };
+    
     private final InterpreterContext context;
     private final Interpreter interpreter;
     
@@ -241,11 +253,9 @@ public class InterpreterArray {
                             
                             // Assign the value to the screen variable
                             // Note: ConcurrentHashMap doesn't allow null values, but screen variables can be null
-                            // If value is null, we still need to store it (use a sentinel or remove it)
+                            // Use NULL_SENTINEL to represent null values so the UI refresh system can detect the change
                             if (value == null) {
-                                // For null values, we can either remove the key or keep it with a sentinel
-                                // Keeping the key allows us to know the variable exists but has no value
-                                screenVarMap.remove(varName);
+                                screenVarMap.put(varName, NULL_SENTINEL);
                             } else {
                                 screenVarMap.put(varName, value);
                             }

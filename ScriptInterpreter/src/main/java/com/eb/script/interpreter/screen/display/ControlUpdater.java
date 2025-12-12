@@ -40,6 +40,12 @@ public class ControlUpdater {
      * @param metadata Display metadata for the control
      */
     public static void updateControlFromValue(Node control, Object value, DisplayItem metadata) {
+        // Check for NULL_SENTINEL and treat it as null
+        // NULL_SENTINEL is used in ConcurrentHashMap to represent null values (which HashMap doesn't allow)
+        if (value == com.eb.script.interpreter.InterpreterArray.NULL_SENTINEL) {
+            value = null;
+        }
+        
         // Handle HBox containing slider (when showSliderValue is true)
         if (control instanceof HBox) {
             HBox hbox = (HBox) control;
