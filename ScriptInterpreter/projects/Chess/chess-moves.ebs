@@ -18,7 +18,7 @@ createPos(x: int, y: int) return posType {
 
 // Get all possible moves for a pawn at given position
 getPawnMoves(x: int, y: int, color: int) {
-    var moves: posType[];
+    var moves: posType[] = [];
     var direction: int;
     var startRow: int;
     
@@ -87,7 +87,7 @@ getPawnMoves(x: int, y: int, color: int) {
 
 // Get all possible moves for a knight at given position
 getKnightMoves(x: int, y: int) {
-    var moves: posType[];
+    var moves: posType[] = [];
     var offsets: int[16];
     
     // Knight move offsets: 8 possible L-shaped moves
@@ -115,7 +115,7 @@ getKnightMoves(x: int, y: int) {
 
 // Get all possible moves for a king at given position
 getKingMoves(x: int, y: int) {
-    var moves: posType[];
+    var moves: posType[] = [];
     var offsets: int[16];
     
     // King move offsets: 8 directions (one square each)
@@ -143,7 +143,7 @@ getKingMoves(x: int, y: int) {
 
 // Get all possible moves for a rook at given position
 getRookMoves(x: int, y: int) {
-    var moves: posType[];
+    var moves: posType[] = [];
     var directions: int[8];
     
     // Rook move directions: up, down, left, right
@@ -186,7 +186,7 @@ getRookMoves(x: int, y: int) {
 
 // Get all possible moves for a bishop at given position
 getBishopMoves(x: int, y: int) {
-    var moves: posType[];
+    var moves: posType[] = [];
     var directions: int[8];
     
     // Bishop move directions: diagonals
@@ -229,7 +229,7 @@ getBishopMoves(x: int, y: int) {
 
 // Get all possible moves for a queen at given position
 getQueenMoves(x: int, y: int) {
-    var moves: posType[];
+    var moves: posType[] = [];
     
     // Queen moves = Rook moves + Bishop moves
     var rookMoves: posType[] = call getRookMoves(x, y);
@@ -252,8 +252,8 @@ getQueenMoves(x: int, y: int) {
 // Main function: Get all valid moves for a piece at the given position
 // Returns a posType array of valid moves on the board
 validMoves(x: int, y: int) {
-    var validMovesList: posType[];
-    var allMoves: posType[];
+    var validMovesList: posType[] = [];
+    var allMoves: posType[] = [];
     
     // Get the piece at the current position
     var cellValue: int = call getPieceAt(x, y);
