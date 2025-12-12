@@ -1156,7 +1156,7 @@ public class ProjectTreeView extends VBox {
         } else if (lowerName.endsWith(".json")) {
             iconPath = "/icons/config-file.png"; // JSON config file
         } else if (lowerName.endsWith(".css")) {
-            iconPath = "/icons/text-file.png"; // CSS file
+            iconPath = "/icons/css-file.png"; // CSS file
         } else if (lowerName.endsWith(".md")) {
             iconPath = "/icons/markdown-file.png"; // Markdown file
         } else if (lowerName.endsWith(".xml")) {
