@@ -53,8 +53,7 @@ public final class SHA2 {
     }
 
     public static String getSHA2String(byte[] pMessage) {
-        byte[] d = null;
-        d = digest512(pMessage);
+        byte[] d = digest512(pMessage);
         return UtilConvert.bytesToHex(d);
     }
 
