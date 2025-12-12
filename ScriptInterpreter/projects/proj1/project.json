@@ -9,5 +9,9 @@
   "mainScript": "main.ebs",
   "settings": {
     "autoLoad": true
-  }
+  },
+  "directories": [
+    "..\\..\\scripts\\examples",
+    "..\\..\\scripts\\test"
+  ]
 }
