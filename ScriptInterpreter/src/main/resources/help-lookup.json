@@ -4125,6 +4125,65 @@
       "example": "<b>var</b> hash = <b>call</b> crypto.md5(text=\"Hello, World!\");<br><b>print</b> hash;<br>// Output: 65a8e27d8879283831b664bd8b7f0ad4"
     },
     {
+      "function": "random.nextLong",
+      "format": "html",
+      "short_description": "Generates a random long integer",
+      "long_help": "Generates a random long (64-bit integer) value. Can be called with no arguments for any long value, one argument for a range [0, max), or two arguments for a range [min, max). Uses a shared Random instance that can be seeded with random.setSeed() for reproducible sequences.",
+      "parameters": [
+        {
+          "name": "min",
+          "type": "long",
+          "optional": true,
+          "description": "Minimum value (inclusive). If only one arg provided, it's treated as max"
+        },
+        {
+          "name": "max",
+          "type": "long",
+          "optional": true,
+          "description": "Maximum value (exclusive)"
+        }
+      ],
+      "return_type": "long",
+      "example": "<b>// Unbounded random long</b><br><b>var</b> anyLong = <b>call</b> random.nextLong();<br><br><b>// Range [0, 100)</b><br><b>var</b> percentage = <b>call</b> random.nextLong(100);<br><br><b>// Range [1, 7) for dice roll (1-6)</b><br><b>var</b> diceRoll = <b>call</b> random.nextLong(1, 7);<br><br><b>// Range [50, 100)</b><br><b>var</b> score = <b>call</b> random.nextLong(50, 100);"
+    },
+    {
+      "function": "random.nextDouble",
+      "format": "html",
+      "short_description": "Generates a random double-precision floating-point number",
+      "long_help": "Generates a random double value. Can be called with no arguments for a value in [0.0, 1.0), one argument for a range [0.0, max), or two arguments for a range [min, max). Uses a shared Random instance that can be seeded with random.setSeed() for reproducible sequences.",
+      "parameters": [
+        {
+          "name": "min",
+          "type": "double",
+          "optional": true,
+          "description": "Minimum value (inclusive). If only one arg provided, it's treated as max"
+        },
+        {
+          "name": "max",
+          "type": "double",
+          "optional": true,
+          "description": "Maximum value (exclusive)"
+        }
+      ],
+      "return_type": "double",
+      "example": "<b>// Random probability [0.0, 1.0)</b><br><b>var</b> probability = <b>call</b> random.nextDouble();<br><br><b>// Random percentage [0.0, 100.0)</b><br><b>var</b> percentage = <b>call</b> random.nextDouble(100.0);<br><br><b>// Random temperature [20.0, 30.0)</b><br><b>var</b> temp = <b>call</b> random.nextDouble(20.0, 30.0);<br><br><b>// Random weight [50.0, 100.0)</b><br><b>var</b> weight = <b>call</b> random.nextDouble(50.0, 100.0);"
+    },
+    {
+      "function": "random.setSeed",
+      "format": "html",
+      "short_description": "Sets the seed for reproducible random number generation",
+      "long_help": "Sets the seed for the random number generator, allowing for reproducible sequences. When the same seed is used, the sequence of random numbers will be identical. This is useful for testing, debugging, or procedural generation that needs to be repeatable. The seed affects all subsequent random.nextLong() and random.nextDouble() calls until a new seed is set.",
+      "parameters": [
+        {
+          "name": "seed",
+          "type": "long",
+          "description": "Seed value for the random number generator"
+        }
+      ],
+      "return_type": "null",
+      "example": "<b>// Set seed for reproducible results</b><br><b>call</b> random.setSeed(12345);<br><b>var</b> val1 = <b>call</b> random.nextLong(100);  <b>// Always 51 with seed 12345</b><br><b>var</b> val2 = <b>call</b> random.nextDouble();<br><br><b>// Reset to same seed</b><br><b>call</b> random.setSeed(12345);<br><b>var</b> val3 = <b>call</b> random.nextLong(100);  <b>// Also 51</b><br><b>var</b> val4 = <b>call</b> random.nextDouble();     <b>// Same as val2</b>"
+    },
+    {
       "function": "timer.start",
       "format": "html",
       "short_description": "Start or restart a timer",

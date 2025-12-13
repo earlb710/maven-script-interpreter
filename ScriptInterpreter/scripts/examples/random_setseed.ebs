@@ -1,0 +1,46 @@
+// EBS Language Reference v1.0.7.11 - See EBS_LANGUAGE_REFERENCE.md
+// Example: random.setSeed - Set seed for reproducible random sequences
+// Syntax: call random.setSeed(seed);
+
+print "Demonstrating reproducible random sequences";
+print "";
+
+// Set seed and generate sequence
+print "First sequence (seed=12345):";
+call random.setSeed(12345);
+var val1: long = call random.nextLong(100);
+var val2: double = call random.nextDouble();
+var val3: long = call random.nextLong(1, 11);
+print "  Long [0, 100): " + val1;
+print "  Double [0.0, 1.0): " + val2;
+print "  Long [1, 11): " + val3;
+print "";
+
+// Reset to same seed - should get same sequence
+print "Second sequence (seed=12345 again):";
+call random.setSeed(12345);
+var val4: long = call random.nextLong(100);
+var val5: double = call random.nextDouble();
+var val6: long = call random.nextLong(1, 11);
+print "  Long [0, 100): " + val4;
+print "  Double [0.0, 1.0): " + val5;
+print "  Long [1, 11): " + val6;
+print "";
+
+// Verify sequences match
+if val1 == val4 and val2 == val5 and val3 == val6 then {
+    print "SUCCESS: Sequences match! Seed works correctly.";
+} else {
+    print "ERROR: Sequences don't match!";
+}
+print "";
+
+// Different seed produces different sequence
+print "Third sequence (seed=54321):";
+call random.setSeed(54321);
+var val7: long = call random.nextLong(100);
+var val8: double = call random.nextDouble();
+var val9: long = call random.nextLong(1, 11);
+print "  Long [0, 100): " + val7;
+print "  Double [0.0, 1.0): " + val8;
+print "  Long [1, 11): " + val9;
