@@ -548,17 +548,6 @@ public class EbsTab extends Tab {
         clearBtn.setPadding(new Insets(5, 10, 5, 10));
         clearBtn.setOnAction(e -> outputArea.clear());
 
-        // Add View button for HTML files
-        Button viewBtn = new Button("View");
-        viewBtn.setPadding(new Insets(5, 10, 5, 10));
-        viewBtn.setTooltip(new Tooltip("Open HTML in WebView"));
-        viewBtn.setOnAction(e -> openHtmlInWebView());
-        // Only show View button for HTML files
-        if (!isHtml) {
-            viewBtn.setVisible(false);
-            viewBtn.setManaged(false);
-        }
-
         // Show the "start in" directory (script's parent directory)
         Path startInDir = tabContext.path != null ? tabContext.path.getParent() : null;
         String startInText = startInDir != null ? startInDir.toString() : System.getProperty("user.dir");
@@ -567,7 +556,17 @@ public class EbsTab extends Tab {
         startInLabel.setMaxWidth(400); // Limit width to prevent layout issues with long paths
         startInLabel.setTooltip(new Tooltip("File operations use relative paths from this directory\n" + startInText));
 
-        HBox buttons = new HBox(8, runBtn, clearBtn, viewBtn, startInLabel);
+        // Create button row - add View button only for HTML files
+        HBox buttons;
+        if (isHtml) {
+            Button viewBtn = new Button("View");
+            viewBtn.setPadding(new Insets(5, 10, 5, 10));
+            viewBtn.setTooltip(new Tooltip("Open HTML in WebView"));
+            viewBtn.setOnAction(e -> openHtmlInWebView());
+            buttons = new HBox(8, runBtn, clearBtn, viewBtn, startInLabel);
+        } else {
+            buttons = new HBox(8, runBtn, clearBtn, startInLabel);
+        }
         buttons.setStyle("-fx-padding: 6 4 0 0;");
 
         VBox bottom = new VBox(2, new Label("Output:"), outputAreaFrame, buttons);
