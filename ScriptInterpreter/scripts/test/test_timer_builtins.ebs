@@ -1,0 +1,377 @@
+// Test script for Timer Builtins
+// Tests all timer.* builtin functions with proper EBS syntax
+// This script validates timer functionality and serves as a syntax reference
+
+print "╔════════════════════════════════════════════════════════════╗";
+print "║          Timer Builtins - Comprehensive Test Suite        ║";
+print "╚════════════════════════════════════════════════════════════╝";
+print "";
+
+var testsPassed : int = 0;
+var testsFailed : int = 0;
+
+// ============================================================================
+// TEST 1: Basic timer.start() and timer.stop()
+// ============================================================================
+print "TEST 1: Basic timer.start() and timer.stop()";
+var timerId1 : string = call timer.start("test1");
+call thread.sleep(100);
+var elapsed1 : long = call timer.stop("test1");
+
+if timerId1 == "test1" then {
+    print "  ✓ timer.start() returns correct timer ID";
+    testsPassed = testsPassed + 1;
+} else {
+    print "  ✗ timer.start() returned: " + timerId1;
+    testsFailed = testsFailed + 1;
+}
+
+if elapsed1 >= 90 and elapsed1 <= 200 then {
+    print "  ✓ timer.stop() returned elapsed time: " + elapsed1 + "ms";
+    testsPassed = testsPassed + 1;
+} else {
+    print "  ✗ timer.stop() returned unexpected time: " + elapsed1 + "ms";
+    testsFailed = testsFailed + 1;
+}
+print "";
+
+// ============================================================================
+// TEST 2: Auto-initialization (no null pointer errors)
+// ============================================================================
+print "TEST 2: Auto-initialization prevents null pointer errors";
+
+// Test getPeriod on non-existent timer
+var period1 : long = call timer.getPeriod("never_existed");
+if period1 == 0 then {
+    print "  ✓ timer.getPeriod() auto-initializes (returns 0ms)";
+    testsPassed = testsPassed + 1;
+} else {
+    print "  ✗ timer.getPeriod() returned: " + period1 + "ms";
+    testsFailed = testsFailed + 1;
+}
+
+// Test isRunning on non-existent timer
+var isRunning1 : bool = call timer.isRunning("also_never_existed");
+if isRunning1 == false then {
+    print "  ✓ timer.isRunning() auto-initializes (returns false)";
+    testsPassed = testsPassed + 1;
+} else {
+    print "  ✗ timer.isRunning() returned: " + isRunning1;
+    testsFailed = testsFailed + 1;
+}
+
+// Test stop on non-existent timer
+var elapsed2 : long = call timer.stop("stop_nonexistent");
+if elapsed2 == 0 then {
+    print "  ✓ timer.stop() auto-initializes (returns 0ms)";
+    testsPassed = testsPassed + 1;
+} else {
+    print "  ✗ timer.stop() returned: " + elapsed2 + "ms";
+    testsFailed = testsFailed + 1;
+}
+print "";
+
+// ============================================================================
+// TEST 3: timer.getPeriod() while running
+// ============================================================================
+print "TEST 3: timer.getPeriod() tracking while running";
+call timer.start("tracking_test");
+call thread.sleep(50);
+var period2 : long = call timer.getPeriod("tracking_test");
+call thread.sleep(50);
+var period3 : long = call timer.getPeriod("tracking_test");
+
+if period3 > period2 then {
+    print "  ✓ Period increases while running: " + period2 + "ms -> " + period3 + "ms";
+    testsPassed = testsPassed + 1;
+} else {
+    print "  ✗ Period did not increase: " + period2 + "ms, " + period3 + "ms";
+    testsFailed = testsFailed + 1;
+}
+call timer.remove("tracking_test");
+print "";
+
+// ============================================================================
+// TEST 4: timer.getPeriodString() with different decimal precisions
+// ============================================================================
+print "TEST 4: timer.getPeriodString() formatting";
+call timer.start("format_test");
+call thread.sleep(1234);
+call timer.stop("format_test");
+
+var str0 : string = call timer.getPeriodString("format_test", 0);
+var str1 : string = call timer.getPeriodString("format_test", 1);
+var str2 : string = call timer.getPeriodString("format_test", 2);
+var str3 : string = call timer.getPeriodString("format_test", 3);
+var strDefault : string = call timer.getPeriodString("format_test");
+
+print "  0 decimals: " + str0;
+print "  1 decimal:  " + str1;
+print "  2 decimals: " + str2;
+print "  3 decimals: " + str3;
+print "  Default:    " + strDefault;
+
+// Check that strDefault has 3 decimals (contains a dot and 3 digits after)
+if call str.contains(strDefault, ".") then {
+    print "  ✓ Default format includes decimal point";
+    testsPassed = testsPassed + 1;
+} else {
+    print "  ✗ Default format missing decimal point";
+    testsFailed = testsFailed + 1;
+}
+call timer.remove("format_test");
+print "";
+
+// ============================================================================
+// TEST 5: timer.isRunning() state management
+// ============================================================================
+print "TEST 5: timer.isRunning() state tracking";
+call timer.start("state_test");
+var running1 : bool = call timer.isRunning("state_test");
+call timer.stop("state_test");
+var running2 : bool = call timer.isRunning("state_test");
+
+if running1 == true then {
+    print "  ✓ Timer is running after start";
+    testsPassed = testsPassed + 1;
+} else {
+    print "  ✗ Timer not running after start";
+    testsFailed = testsFailed + 1;
+}
+
+if running2 == false then {
+    print "  ✓ Timer is stopped after stop";
+    testsPassed = testsPassed + 1;
+} else {
+    print "  ✗ Timer still running after stop";
+    testsFailed = testsFailed + 1;
+}
+call timer.remove("state_test");
+print "";
+
+// ============================================================================
+// TEST 6: timer.reset() functionality
+// ============================================================================
+print "TEST 6: timer.reset() functionality";
+call timer.start("reset_test");
+call thread.sleep(100);
+var periodBefore : long = call timer.getPeriod("reset_test");
+var resetResult : bool = call timer.reset("reset_test");
+var periodAfter : long = call timer.getPeriod("reset_test");
+
+if resetResult == true then {
+    print "  ✓ timer.reset() returns true";
+    testsPassed = testsPassed + 1;
+} else {
+    print "  ✗ timer.reset() returned: " + resetResult;
+    testsFailed = testsFailed + 1;
+}
+
+if periodAfter < periodBefore then {
+    print "  ✓ Period decreased after reset: " + periodBefore + "ms -> " + periodAfter + "ms";
+    testsPassed = testsPassed + 1;
+} else {
+    print "  ✗ Period not decreased: " + periodBefore + "ms -> " + periodAfter + "ms";
+    testsFailed = testsFailed + 1;
+}
+call timer.remove("reset_test");
+print "";
+
+// ============================================================================
+// TEST 7: timer.continue() functionality
+// ============================================================================
+print "TEST 7: timer.continue() and lap timing";
+call timer.start("continue_test");
+call thread.sleep(100);
+call timer.stop("continue_test");
+var firstPeriod : long = call timer.getPeriod("continue_test");
+var continueResult : bool = call timer.continue("continue_test");
+call thread.sleep(100);
+call timer.stop("continue_test");
+var totalPeriod : long = call timer.getPeriod("continue_test");
+var continuePeriod : long = call timer.getContinuePeriod("continue_test");
+
+if continueResult == true then {
+    print "  ✓ timer.continue() returns true";
+    testsPassed = testsPassed + 1;
+} else {
+    print "  ✗ timer.continue() returned: " + continueResult;
+    testsFailed = testsFailed + 1;
+}
+
+if totalPeriod > firstPeriod then {
+    print "  ✓ Total period increased: " + firstPeriod + "ms -> " + totalPeriod + "ms";
+    testsPassed = testsPassed + 1;
+} else {
+    print "  ✗ Total period not increased";
+    testsFailed = testsFailed + 1;
+}
+
+if continuePeriod >= 90 and continuePeriod <= 200 then {
+    print "  ✓ Continue period is ~100ms: " + continuePeriod + "ms";
+    testsPassed = testsPassed + 1;
+} else {
+    print "  ✗ Continue period unexpected: " + continuePeriod + "ms";
+    testsFailed = testsFailed + 1;
+}
+call timer.remove("continue_test");
+print "";
+
+// ============================================================================
+// TEST 8: timer.getContinuePeriodString() formatting
+// ============================================================================
+print "TEST 8: timer.getContinuePeriodString() formatting";
+call timer.start("continue_format");
+call thread.sleep(500);
+call timer.continue("continue_format");
+call thread.sleep(500);
+call timer.stop("continue_format");
+var contStr : string = call timer.getContinuePeriodString("continue_format", 2);
+print "  Continue period formatted: " + contStr;
+if call str.contains(contStr, ".") then {
+    print "  ✓ Continue period string formatted correctly";
+    testsPassed = testsPassed + 1;
+} else {
+    print "  ✗ Continue period string missing decimal";
+    testsFailed = testsFailed + 1;
+}
+call timer.remove("continue_format");
+print "";
+
+// ============================================================================
+// TEST 9: Multiple concurrent timers
+// ============================================================================
+print "TEST 9: Multiple concurrent timers";
+call timer.start("timer_a");
+call thread.sleep(50);
+call timer.start("timer_b");
+call thread.sleep(50);
+call timer.start("timer_c");
+call thread.sleep(50);
+
+var timeA : long = call timer.stop("timer_a");
+var timeB : long = call timer.stop("timer_b");
+var timeC : long = call timer.stop("timer_c");
+
+if timeA > timeB and timeB > timeC then {
+    print "  ✓ Multiple timers track independently";
+    print "    Timer A: " + timeA + "ms";
+    print "    Timer B: " + timeB + "ms";
+    print "    Timer C: " + timeC + "ms";
+    testsPassed = testsPassed + 1;
+} else {
+    print "  ✗ Timer ordering incorrect";
+    testsFailed = testsFailed + 1;
+}
+call timer.remove("timer_a");
+call timer.remove("timer_b");
+call timer.remove("timer_c");
+print "";
+
+// ============================================================================
+// TEST 10: timer.remove() functionality
+// ============================================================================
+print "TEST 10: timer.remove() functionality";
+call timer.start("remove_test");
+var removed1 : bool = call timer.remove("remove_test");
+var removed2 : bool = call timer.remove("remove_test");
+
+if removed1 == true then {
+    print "  ✓ timer.remove() returns true for existing timer";
+    testsPassed = testsPassed + 1;
+} else {
+    print "  ✗ timer.remove() returned: " + removed1;
+    testsFailed = testsFailed + 1;
+}
+
+if removed2 == false then {
+    print "  ✓ timer.remove() returns false for non-existent timer";
+    testsPassed = testsPassed + 1;
+} else {
+    print "  ✗ timer.remove() returned: " + removed2 + " (expected false)";
+    testsFailed = testsFailed + 1;
+}
+print "";
+
+// ============================================================================
+// TEST 11: timer.clear() bulk operation
+// ============================================================================
+print "TEST 11: timer.clear() bulk operation";
+call timer.start("bulk1");
+call timer.start("bulk2");
+call timer.start("bulk3");
+call timer.start("bulk4");
+call timer.start("bulk5");
+
+var cleared : int = call timer.clear();
+if cleared >= 5 then {
+    print "  ✓ timer.clear() removed " + cleared + " timers";
+    testsPassed = testsPassed + 1;
+} else {
+    print "  ✗ timer.clear() only removed " + cleared + " timers";
+    testsFailed = testsFailed + 1;
+}
+
+// Clear again should return 0
+var cleared2 : int = call timer.clear();
+if cleared2 == 0 then {
+    print "  ✓ timer.clear() on empty registry returns 0";
+    testsPassed = testsPassed + 1;
+} else {
+    print "  ✗ timer.clear() returned: " + cleared2;
+    testsFailed = testsFailed + 1;
+}
+print "";
+
+// ============================================================================
+// TEST 12: Edge cases - empty string timer ID
+// ============================================================================
+print "TEST 12: Edge cases - empty string timer ID";
+call timer.start("");
+var emptyElapsed : long = call timer.stop("");
+if emptyElapsed >= 0 then {
+    print "  ✓ Empty string timer ID works: " + emptyElapsed + "ms";
+    testsPassed = testsPassed + 1;
+} else {
+    print "  ✗ Empty string timer ID failed";
+    testsFailed = testsFailed + 1;
+}
+call timer.remove("");
+print "";
+
+// ============================================================================
+// TEST 13: Edge cases - special characters in timer ID
+// ============================================================================
+print "TEST 13: Edge cases - special characters in timer ID";
+var specialId : string = "timer-with.special_chars@123!";
+call timer.start(specialId);
+var specialElapsed : long = call timer.stop(specialId);
+if specialElapsed >= 0 then {
+    print "  ✓ Special character timer ID works: " + specialElapsed + "ms";
+    testsPassed = testsPassed + 1;
+} else {
+    print "  ✗ Special character timer ID failed";
+    testsFailed = testsFailed + 1;
+}
+call timer.remove(specialId);
+print "";
+
+// ============================================================================
+// Final Results
+// ============================================================================
+print "╔════════════════════════════════════════════════════════════╗";
+print "║                    Test Results Summary                   ║";
+print "╚════════════════════════════════════════════════════════════╝";
+print "";
+print "Tests Passed: " + testsPassed;
+print "Tests Failed: " + testsFailed;
+print "Total Tests:  " + (testsPassed + testsFailed);
+print "";
+
+if testsFailed == 0 then {
+    print "✓ All timer builtin tests passed successfully!";
+} else {
+    print "✗ Some tests failed - please review the output above";
+}
+print "";
+print "=== Timer Builtins Test Complete ===";

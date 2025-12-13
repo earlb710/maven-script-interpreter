@@ -4,12 +4,15 @@ package com.eb.util;
 import com.eb.util.string.UtilString;
 
 /**
- * Generic utility timer methods. Note : methods to time execution speeds.
+ * Utility class for timing execution speeds and measuring elapsed time.
+ * <p>
+ * This class provides a simple stopwatch-like timer that can be started, stopped,
+ * and continued. It tracks both the total elapsed time and the time since the last
+ * continuation point.
+ * </p>
  *
  * @author Earl
- *
  */
-
 public final class Timed {
 
     private boolean running;
@@ -18,7 +21,8 @@ public final class Timed {
     private long timerPrevStop;
 
     /**
-     * UtilTimer Constructor Starts a new timer
+     * Constructs a new timer instance in a stopped state.
+     * The timer is initialized to the current time but not started.
      */
     public Timed() {
         timerReset();
@@ -26,24 +30,37 @@ public final class Timed {
     }
 
     /**
-     * Reset timer period to 0 and starts timer from current time
-     *
+     * Resets the timer to the current time without starting it.
+     * All time markers (start, stop, and previous stop) are set to the current time.
      */
     public void timerReset() {
-        timerStart = System.currentTimeMillis();
-        timerStop = timerStart;
-        timerPrevStop = timerStop;
+        long currentTime = System.currentTimeMillis();
+        timerStart = currentTime;
+        timerStop = currentTime;
+        timerPrevStop = currentTime;
     }
 
     /**
-     * Start timer from current time
-     *
+     * Starts (or restarts) the timer from the current time.
+     * This resets all time markers to the current time and sets the timer to running.
      */
     public void timerStart() {
         running = true;
         timerReset();
     }
 
+    /**
+     * Continues the timer after a stop, marking a new continuation point.
+     * <p>
+     * This method is used to track intervals or segments while maintaining the overall
+     * timer state. It updates the previous stop marker and sets a new continuation marker.
+     * The total timer period continues to measure wall-clock time from the original start.
+     * </p>
+     * <p>
+     * Note: This does NOT reset or adjust for pause time. If you need to exclude pause
+     * time, use {@link #timerStart()} to restart the timer instead.
+     * </p>
+     */
     public void timerContinue() {
         timerPrevStop = timerStop;
         timerStop = System.currentTimeMillis();
@@ -51,104 +68,173 @@ public final class Timed {
     }
 
     /**
-     * Stop timer and return total period so far
+     * Stops the timer and returns the total elapsed time in milliseconds.
      *
-     * @return period
+     * @return the total time elapsed since the timer was started, in milliseconds
      */
-    public long timerStop() {
+    public long timerStop() {  
         running = false;
-        long newTimer = System.currentTimeMillis();
+        long currentTime = System.currentTimeMillis();
         timerPrevStop = timerStop;
-        timerStop = newTimer;
-        if (timerStart != 0) {
-            return (timerStop - timerStart);
-        } else {
-            timerStop = 0L;
-            return 0L;
-        }
+        timerStop = currentTime;
+        return timerStop - timerStart;
     }
 
     /**
-     * Set timer start position
+     * Sets the timer start position manually.
+     * <p>
+     * <strong>Warning:</strong> This method should be used with caution as it can
+     * break the internal consistency of the timer.
+     * </p>
      *
+     * @param pTimer the new start time in milliseconds since epoch
      */
     public void setTimerStart(long pTimer) {
         timerStart = pTimer;
     }
 
     /**
-     * Returns current timer start position
+     * Gets the timer start position.
      *
+     * @return the start time in milliseconds since epoch
      */
     public long getTimerStart() {
         return timerStart;
     }
 
+    /**
+     * Gets the timer stop position.
+     *
+     * @return the stop time in milliseconds since epoch
+     */
     public long getTimerStop() {
         return timerStop;
     }
 
+    /**
+     * Checks if the timer is currently running.
+     *
+     * @return true if the timer is running, false otherwise
+     */
     public boolean isRunning() {
         return running;
     }
 
+    /**
+     * Gets the total elapsed time from the timer start.
+     * If the timer is running, returns the time elapsed up to now.
+     * If stopped, returns the time elapsed when it was stopped.
+     *
+     * @return the elapsed time in milliseconds
+     */
     public long getTimerPeriod() {
         if (running) {
-            long newTimer = System.currentTimeMillis();
-            return (newTimer - timerStart);
+            long currentTime = System.currentTimeMillis();
+            return currentTime - timerStart;
         } else {
-            return (timerStop - timerStart);
+            return timerStop - timerStart;
         }
     }
 
     /**
-     * Returns current timer period in milliseconds
+     * Gets the elapsed time since the last continuation point.
+     * If the timer is running, returns the time elapsed since the last continue call.
+     * If stopped, returns the time between the last continue and stop.
      *
+     * @return the elapsed time since last continuation, in milliseconds
      */
     public long getContinuePeriod() {
         if (running) {
-            long newTimer = System.currentTimeMillis();
-            return (newTimer - timerPrevStop);
+            long currentTime = System.currentTimeMillis();
+            return currentTime - timerPrevStop;
         } else {
-            return (timerStop - timerPrevStop);
+            return timerStop - timerPrevStop;
         }
     }
 
     /**
-     * Returns current timer period in milliseconds as a String
+     * Gets the total elapsed time as a string in milliseconds.
      *
+     * @return the elapsed time in milliseconds as a string
      */
     public String getTimerString_milliseconds() {
         return String.valueOf(getTimerPeriod());
     }
 
+    /**
+     * Gets the time since last continuation as a string in milliseconds.
+     *
+     * @return the elapsed time since continuation in milliseconds as a string
+     */
     public String getContinueString_milliseconds() {
         return String.valueOf(getContinuePeriod());
     }
 
     /**
-     * Returns current timer period in seconds as a String
+     * Gets the total elapsed time as a string in seconds with milliseconds.
+     * Format: "seconds.milliseconds" (e.g., "5.123")
      *
+     * @return the elapsed time in seconds as a string
      */
     public String getTimerString_Seconds() {
-        return String.valueOf(getTimerPeriod() / 1000) + "." + String.valueOf(getTimerPeriod() % 1000);
-    }
-
-    public String getContinueString_Seconds() {
-        return String.valueOf(getContinuePeriod() / 1000) + "." + String.valueOf(getContinuePeriod() % 1000);
+        long period = getTimerPeriod();
+        return String.format("%d.%03d", period / 1000, period % 1000);
     }
 
     /**
-     * Returns current timer period in seconds as a String
+     * Gets the time since last continuation as a string in seconds with milliseconds.
+     * Format: "seconds.milliseconds" (e.g., "5.123")
      *
-     * @param pDecimals Number of decimal spaces - max 6.
+     * @return the elapsed time since continuation in seconds as a string
      */
-    public String getTimerString_Seconds(int pDecimals) {
-        return String.valueOf(getTimerPeriod() / 1000) + "." + UtilString.lpad(String.valueOf(getTimerPeriod() % 1000), 3, '0').substring(0, pDecimals);
+    public String getContinueString_Seconds() {
+        long period = getContinuePeriod();
+        return String.format("%d.%03d", period / 1000, period % 1000);
     }
 
+    /**
+     * Gets the total elapsed time as a string in seconds with specified decimal precision.
+     * Format: "seconds.xxx" where xxx has pDecimals digits
+     *
+     * @param pDecimals number of decimal places (0-3). Limited to 3 since milliseconds
+     *                  have only 3 digits of precision.
+     * @return the elapsed time in seconds as a string with specified precision
+     * @throws IllegalArgumentException if pDecimals is negative or greater than 3
+     */
+    public String getTimerString_Seconds(int pDecimals) {
+        return formatPeriodAsSeconds(getTimerPeriod(), pDecimals);
+    }
+
+    /**
+     * Gets the time since last continuation as a string in seconds with specified decimal precision.
+     * Format: "seconds.xxx" where xxx has pDecimals digits
+     *
+     * @param pDecimals number of decimal places (0-3). Limited to 3 since milliseconds
+     *                  have only 3 digits of precision.
+     * @return the elapsed time since continuation in seconds as a string with specified precision
+     * @throws IllegalArgumentException if pDecimals is negative or greater than 3
+     */
     public String getContinueString_Seconds(int pDecimals) {
-        return String.valueOf(getContinuePeriod() / 1000) + "." + UtilString.lpad(String.valueOf(getContinuePeriod() % 1000), 3, '0').substring(0, pDecimals);
+        return formatPeriodAsSeconds(getContinuePeriod(), pDecimals);
+    }
+
+    /**
+     * Helper method to format a period in milliseconds as seconds with specified decimal precision.
+     *
+     * @param periodMillis the period in milliseconds
+     * @param pDecimals number of decimal places (0-3)
+     * @return the formatted string
+     * @throws IllegalArgumentException if pDecimals is invalid
+     */
+    private String formatPeriodAsSeconds(long periodMillis, int pDecimals) {
+        if (pDecimals < 0 || pDecimals > 3) {
+            throw new IllegalArgumentException("pDecimals must be between 0 and 3, got: " + pDecimals);
+        }
+        if (pDecimals == 0) {
+            return String.format("%d", periodMillis / 1000);
+        }
+        String millisPart = UtilString.lpad(String.valueOf(periodMillis % 1000), 3, '0');
+        return String.format("%d.%s", periodMillis / 1000, millisPart.substring(0, pDecimals));
     }
 
 }

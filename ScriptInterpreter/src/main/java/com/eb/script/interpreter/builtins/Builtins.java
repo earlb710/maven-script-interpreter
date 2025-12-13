@@ -1745,6 +1745,55 @@ public final class Builtins {
         ));
 
         // ==========================
+        // TIMER builtins
+        // ==========================
+        addBuiltin(info(
+                "timer.start", DataType.STRING,
+                newParam("timerId", DataType.STRING, true)
+        ));
+        addBuiltin(info(
+                "timer.stop", DataType.LONG,
+                newParam("timerId", DataType.STRING, true)
+        ));
+        addBuiltin(info(
+                "timer.reset", DataType.BOOL,
+                newParam("timerId", DataType.STRING, true)
+        ));
+        addBuiltin(info(
+                "timer.continue", DataType.BOOL,
+                newParam("timerId", DataType.STRING, true)
+        ));
+        addBuiltin(info(
+                "timer.getPeriod", DataType.LONG,
+                newParam("timerId", DataType.STRING, true)
+        ));
+        addBuiltin(info(
+                "timer.getPeriodString", DataType.STRING,
+                newParam("timerId", DataType.STRING, true),
+                newParam("decimals", DataType.INTEGER, false)
+        ));
+        addBuiltin(info(
+                "timer.getContinuePeriod", DataType.LONG,
+                newParam("timerId", DataType.STRING, true)
+        ));
+        addBuiltin(info(
+                "timer.getContinuePeriodString", DataType.STRING,
+                newParam("timerId", DataType.STRING, true),
+                newParam("decimals", DataType.INTEGER, false)
+        ));
+        addBuiltin(info(
+                "timer.isRunning", DataType.BOOL,
+                newParam("timerId", DataType.STRING, true)
+        ));
+        addBuiltin(info(
+                "timer.remove", DataType.BOOL,
+                newParam("timerId", DataType.STRING, true)
+        ));
+        addBuiltin(info(
+                "timer.clear", DataType.INTEGER
+        ));
+
+        // ==========================
         // CRYPTO builtins
         // ==========================
         addBuiltin(info(
@@ -1871,6 +1920,11 @@ public final class Builtins {
         // Date builtins
         if (BuiltinsDate.handles(name)) {
             return BuiltinsDate.dispatch(name, args);
+        }
+        
+        // Timer builtins
+        if (BuiltinsTimer.handles(name)) {
+            return BuiltinsTimer.dispatch(name, args);
         }
         
         // Crypto builtins

@@ -1,0 +1,250 @@
+// EBS Language Reference v1.0.5.8 - See EBS_LANGUAGE_REFERENCE.md
+// Example: timer functions - Timing execution and measuring elapsed time
+// Demonstrates all timer.* builtin functions for performance measurement and benchmarking
+
+// =====================================================
+// SECTION 1: Basic Timer Operations
+// =====================================================
+print "=== Basic Timer Operations ===";
+
+// Start a timer
+call timer.start("basic");
+print "Timer started...";
+
+// Do some work
+call thread.sleep(500);
+
+// Stop the timer and get elapsed time
+var elapsed : long = call timer.stop("basic");
+print "Elapsed time: " + elapsed + "ms";
+print "Expected: ~500ms";
+print "";
+
+// =====================================================
+// SECTION 2: Checking Timer While Running
+// =====================================================
+print "=== Checking Timer While Running ===";
+
+// Start a timer for a longer operation
+call timer.start("progress");
+
+// Check progress at intervals
+call thread.sleep(200);
+var checkpoint1 : long = call timer.getPeriod("progress");
+print "Checkpoint 1: " + checkpoint1 + "ms";
+
+call thread.sleep(200);
+var checkpoint2 : long = call timer.getPeriod("progress");
+print "Checkpoint 2: " + checkpoint2 + "ms";
+
+call thread.sleep(200);
+var checkpoint3 : long = call timer.getPeriod("progress");
+print "Checkpoint 3: " + checkpoint3 + "ms";
+
+// Stop and get final time
+var finalTime : long = call timer.stop("progress");
+print "Final time: " + finalTime + "ms";
+print "";
+
+// =====================================================
+// SECTION 3: Formatted Time Strings
+// =====================================================
+print "=== Formatted Time Strings ===";
+
+call timer.start("format");
+call thread.sleep(1234);
+call timer.stop("format");
+
+// Display with different decimal precision
+var str0 : string = call timer.getPeriodString("format", 0);
+var str1 : string = call timer.getPeriodString("format", 1);
+var str2 : string = call timer.getPeriodString("format", 2);
+var str3 : string = call timer.getPeriodString("format", 3);
+var strDefault : string = call timer.getPeriodString("format");
+
+print "0 decimals: " + str0 + " seconds";
+print "1 decimal:  " + str1 + " seconds";
+print "2 decimals: " + str2 + " seconds";
+print "3 decimals: " + str3 + " seconds";
+print "Default:    " + strDefault + " seconds";
+print "";
+
+// =====================================================
+// SECTION 4: Timer State Management
+// =====================================================
+print "=== Timer State Management ===";
+
+call timer.start("state");
+var isRunning1 : bool = call timer.isRunning("state");
+print "After start - Running: " + isRunning1;
+
+call timer.stop("state");
+var isRunning2 : bool = call timer.isRunning("state");
+print "After stop - Running: " + isRunning2;
+
+call timer.reset("state");
+print "Timer reset (not running)";
+var isRunning3 : bool = call timer.isRunning("state");
+print "After reset - Running: " + isRunning3;
+print "";
+
+// =====================================================
+// SECTION 5: Continue and Lap Timing
+// =====================================================
+print "=== Continue and Lap Timing ===";
+
+// Time multiple segments/laps
+// Note: Before first continue, lap total and segment are the same
+call timer.start("laps");
+call thread.sleep(100);
+call timer.stop("laps");
+var lap1Total : long = call timer.getPeriod("laps");
+var lap1Segment : long = call timer.getContinuePeriod("laps");
+print "Lap 1 - Total: " + lap1Total + "ms, Segment: " + lap1Segment + "ms (same until continue)";
+
+call timer.continue("laps");
+call thread.sleep(150);
+call timer.stop("laps");
+var lap2Total : long = call timer.getPeriod("laps");
+var lap2Segment : long = call timer.getContinuePeriod("laps");
+print "Lap 2 - Total: " + lap2Total + "ms, Segment: " + lap2Segment + "ms";
+
+call timer.continue("laps");
+call thread.sleep(200);
+call timer.stop("laps");
+var lap3Total : long = call timer.getPeriod("laps");
+var lap3Segment : long = call timer.getContinuePeriod("laps");
+print "Lap 3 - Total: " + lap3Total + "ms, Segment: " + lap3Segment + "ms";
+
+print "Note: Total time includes all laps";
+print "";
+
+// =====================================================
+// SECTION 6: Multiple Concurrent Timers
+// =====================================================
+print "=== Multiple Concurrent Timers ===";
+
+// Start multiple timers for different operations
+call timer.start("task1");
+call thread.sleep(100);
+call timer.start("task2");
+call thread.sleep(100);
+call timer.start("task3");
+call thread.sleep(100);
+
+// Stop them and report
+var time1 : long = call timer.stop("task1");
+var time2 : long = call timer.stop("task2");
+var time3 : long = call timer.stop("task3");
+
+print "Task 1 duration: " + time1 + "ms (~300ms expected)";
+print "Task 2 duration: " + time2 + "ms (~200ms expected)";
+print "Task 3 duration: " + time3 + "ms (~100ms expected)";
+print "";
+
+// =====================================================
+// SECTION 7: Practical Examples
+// =====================================================
+print "=== Practical Examples ===";
+
+// Example 1: Benchmark a simple loop
+print "";
+print "Example 1: Benchmarking a loop";
+call timer.start("loop_benchmark");
+var sum : long = 0;
+var i : int = 0;
+while i < 100000 {
+    sum = sum + i;
+    i = i + 1;
+}
+var loopTime : long = call timer.stop("loop_benchmark");
+print "Loop processed 100,000 iterations in " + loopTime + "ms";
+print "Sum: " + sum;
+
+// Example 2: Measure function call overhead
+print "";
+print "Example 2: Measuring operation times";
+call timer.start("string_ops");
+
+var text : string = "Hello, World!";
+var i2 : int = 0;
+while i2 < 1000 {
+    var upper = call str.toUpper(text);
+    var lower = call str.toLower(text);
+    i2 = i2 + 1;
+}
+
+var strOpsTime : long = call timer.stop("string_ops");
+print "1000 string operations took " + strOpsTime + "ms";
+
+// Example 3: Performance comparison
+print "";
+print "Example 3: Comparing different approaches";
+call timer.start("approach1");
+var j : int = 0;
+while j < 10000 {
+    var temp : int = j * 2;
+    j = j + 1;
+}
+var approach1Time : long = call timer.stop("approach1");
+
+call timer.start("approach2");
+var k : int = 0;
+while k < 10000 {
+    var temp : int = k + k;
+    k = k + 1;
+}
+var approach2Time : long = call timer.stop("approach2");
+
+print "Approach 1 (multiplication): " + approach1Time + "ms";
+print "Approach 2 (addition): " + approach2Time + "ms";
+
+if approach1Time < approach2Time then {
+    print "Multiplication was faster";
+} else if approach2Time < approach1Time then {
+    print "Addition was faster";
+} else {
+    print "Both approaches took the same time";
+}
+
+// =====================================================
+// SECTION 8: Auto-initialization and Error Handling
+// =====================================================
+print "";
+print "=== Auto-initialization (No Null Pointer Errors) ===";
+
+// Timer operations auto-initialize if timer doesn't exist
+var period : long = call timer.getPeriod("never_started");
+print "Period of never-started timer: " + period + "ms (auto-initialized to 0)";
+
+var isRunning : bool = call timer.isRunning("never_started");
+print "Is never-started timer running: " + isRunning + " (auto-initialized to false)";
+
+// Operations work even on non-existent timers
+call timer.stop("another_new_timer");
+print "Stopped a timer that never existed (auto-initialized)";
+
+print "";
+print "Note: All timer operations auto-initialize timers if they don't exist,";
+print "preventing null pointer errors and making timers more user-friendly.";
+
+// =====================================================
+// SECTION 9: Timer Cleanup
+// =====================================================
+print "";
+print "=== Timer Cleanup ===";
+
+// Individual removal
+var removed1 : bool = call timer.remove("basic");
+print "Removed 'basic': " + removed1;
+
+// Bulk clear - removes all timers at once
+var clearedCount : int = call timer.clear();
+print "Bulk clear removed " + clearedCount + " timers";
+
+// Try removing after clear
+var removed2 : bool = call timer.remove("progress");
+print "Removed 'progress' after clear: " + removed2 + " (expected false)";
+
+print "";
+print "=== All timer function tests completed ===";

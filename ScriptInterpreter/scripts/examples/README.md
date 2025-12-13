@@ -188,6 +188,21 @@ This directory contains short, precise example scripts for each EBS language key
 | [date.ebs](date.ebs) | `date.fromEpochMs` | Create date from epoch milliseconds |
 | [date.ebs](date.ebs) | `date.toSqlTimestamp` | Convert to SQL Timestamp |
 
+## Timer Builtins (timer.*)
+| File | Builtin | Description |
+|------|---------|-------------|
+| [timer.ebs](timer.ebs) | `timer.start` | Start or restart a timer |
+| [timer.ebs](timer.ebs) | `timer.stop` | Stop timer and get elapsed time |
+| [timer.ebs](timer.ebs) | `timer.getPeriod` | Get elapsed time without stopping |
+| [timer.ebs](timer.ebs) | `timer.getPeriodString` | Get formatted elapsed time string |
+| [timer.ebs](timer.ebs) | `timer.isRunning` | Check if timer is running |
+| [timer.ebs](timer.ebs) | `timer.reset` | Reset timer to current time |
+| [timer.ebs](timer.ebs) | `timer.continue` | Continue timer after stopping |
+| [timer.ebs](timer.ebs) | `timer.getContinuePeriod` | Get time since last continuation |
+| [timer.ebs](timer.ebs) | `timer.getContinuePeriodString` | Get formatted continue period |
+| [timer.ebs](timer.ebs) | `timer.remove` | Remove timer from registry |
+| [timer.ebs](timer.ebs) | `timer.clear` | Remove all timers from registry |
+
 ## Screen Builtins (scr.*)
 | File | Builtin | Description |
 |------|---------|-------------|
