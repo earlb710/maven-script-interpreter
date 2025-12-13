@@ -19,31 +19,31 @@ var cell3: canvas = canvas.create(200, 200, "cell3");
 var cell4: canvas = canvas.create(200, 200, "cell4");
 
 // Initialize all cells with a light gray background
-style.setFill(cell1, "#f0f0f0");
-draw.rect(cell1, 0, 0, 200, 200, true);
+call style.setFill(cell1, "#f0f0f0");
+call draw.rect(cell1, 0, 0, 200, 200, true);
 
-style.setFill(cell2, "#f0f0f0");
-draw.rect(cell2, 0, 0, 200, 200, true);
+call style.setFill(cell2, "#f0f0f0");
+call draw.rect(cell2, 0, 0, 200, 200, true);
 
-style.setFill(cell3, "#f0f0f0");
-draw.rect(cell3, 0, 0, 200, 200, true);
+call style.setFill(cell3, "#f0f0f0");
+call draw.rect(cell3, 0, 0, 200, 200, true);
 
-style.setFill(cell4, "#f0f0f0");
-draw.rect(cell4, 0, 0, 200, 200, true);
+call style.setFill(cell4, "#f0f0f0");
+call draw.rect(cell4, 0, 0, 200, 200, true);
 
 // Function to draw a circle in a specific cell
 drawCircleInCell(cellCanvas: canvas) {
     // Clear the cell with light gray background
-    style.setFill(cellCanvas, "#f0f0f0");
-    draw.rect(cellCanvas, 0, 0, 200, 200, true);
+    call style.setFill(cellCanvas, "#f0f0f0");
+    call draw.rect(cellCanvas, 0, 0, 200, 200, true);
     
     // Draw a filled blue circle in the center of the cell
-    style.setFill(cellCanvas, "#3366ff");
-    draw.circle(cellCanvas, 100, 100, 60, true);
+    call style.setFill(cellCanvas, "#3366ff");
+    call draw.circle(cellCanvas, 100, 100, 60, true);
     
     // Draw a stroke around the circle
-    style.setStroke(cellCanvas, "#0033cc", 3);
-    draw.circle(cellCanvas, 100, 100, 60, false);
+    call style.setStroke(cellCanvas, "#0033cc", 3);
+    call draw.circle(cellCanvas, 100, 100, 60, false);
 }
 
 // Define the screen
