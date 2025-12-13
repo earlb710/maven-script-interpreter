@@ -72,7 +72,7 @@ public final class Timed {
      *
      * @return the total time elapsed since the timer was started, in milliseconds
      */
-    public long timerStop() { 
+    public long timerStop() {  
         running = false;
         long currentTime = System.currentTimeMillis();
         timerPrevStop = timerStop;
