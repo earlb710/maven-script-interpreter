@@ -50,17 +50,27 @@ public class BuiltinsRandom {
      * random.nextLong(min, max) - Returns a random long between min (inclusive) and max (exclusive)
      */
     private static Object nextLong(Object[] args) throws InterpreterError {
-        if (args.length == 0) {
+        // Count non-null arguments
+        int nonNullCount = 0;
+        for (Object arg : args) {
+            if (arg != null) {
+                nonNullCount++;
+            }
+        }
+        
+        if (nonNullCount == 0) {
             // No arguments: return any long value
             return random.nextLong();
-        } else if (args.length == 1) {
+        } else if (nonNullCount == 1) {
             // One argument: range from 0 to max (exclusive)
-            long max = requireLong(args[0], "random.nextLong", "max");
+            // The argument could be in args[0] or args[1] depending on how it's called
+            long max = args[0] != null ? requireLong(args[0], "random.nextLong", "max") 
+                                       : requireLong(args[1], "random.nextLong", "max");
             if (max <= 0) {
                 throw new InterpreterError("random.nextLong: max must be positive, got: " + max);
             }
-            return random.nextLong(max);
-        } else if (args.length >= 2) {
+            return nextLongBounded(max);
+        } else if (nonNullCount >= 2) {
             // Two arguments: range from min (inclusive) to max (exclusive)
             long min = requireLong(args[0], "random.nextLong", "min");
             long max = requireLong(args[1], "random.nextLong", "max");
@@ -69,9 +79,40 @@ public class BuiltinsRandom {
             }
             // Generate random long in range [min, max)
             long range = max - min;
-            return min + random.nextLong(range);
+            return min + nextLongBounded(range);
         }
         throw new InterpreterError("random.nextLong: unexpected number of arguments");
+    }
+
+    /**
+     * Generate a random long in the range [0, bound).
+     * This implementation works correctly across all Java versions.
+     */
+    private static long nextLongBounded(long bound) {
+        if (bound <= 0) {
+            throw new IllegalArgumentException("bound must be positive");
+        }
+        
+        // For small bounds, we can use nextInt
+        if (bound <= Integer.MAX_VALUE) {
+            return random.nextInt((int) bound);
+        }
+        
+        // For larger bounds, use the rejection method to avoid modulo bias
+        long value;
+        long mask = bound - 1;
+        
+        // If bound is a power of 2, we can use a simple mask
+        if ((bound & mask) == 0) {
+            return random.nextLong() & mask;
+        }
+        
+        // Otherwise, use rejection method
+        do {
+            value = random.nextLong() >>> 1; // Use only positive longs
+        } while (value + mask - (value % bound) < 0);
+        
+        return value % bound;
     }
 
     /**
@@ -80,17 +121,27 @@ public class BuiltinsRandom {
      * random.nextDouble(min, max) - Returns a random double between min (inclusive) and max (exclusive)
      */
     private static Object nextDouble(Object[] args) throws InterpreterError {
-        if (args.length == 0) {
+        // Count non-null arguments
+        int nonNullCount = 0;
+        for (Object arg : args) {
+            if (arg != null) {
+                nonNullCount++;
+            }
+        }
+        
+        if (nonNullCount == 0) {
             // No arguments: return [0.0, 1.0)
             return random.nextDouble();
-        } else if (args.length == 1) {
+        } else if (nonNullCount == 1) {
             // One argument: range from 0.0 to max (exclusive)
-            double max = requireDouble(args[0], "random.nextDouble", "max");
+            // The argument could be in args[0] or args[1] depending on how it's called
+            double max = args[0] != null ? requireDouble(args[0], "random.nextDouble", "max") 
+                                         : requireDouble(args[1], "random.nextDouble", "max");
             if (max <= 0.0) {
                 throw new InterpreterError("random.nextDouble: max must be positive, got: " + max);
             }
             return random.nextDouble() * max;
-        } else if (args.length >= 2) {
+        } else if (nonNullCount >= 2) {
             // Two arguments: range from min (inclusive) to max (exclusive)
             double min = requireDouble(args[0], "random.nextDouble", "min");
             double max = requireDouble(args[1], "random.nextDouble", "max");

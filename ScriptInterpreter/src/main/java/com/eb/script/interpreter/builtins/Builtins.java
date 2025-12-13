@@ -1839,17 +1839,21 @@ public final class Builtins {
         // ==========================
         // RANDOM builtins
         // ==========================
+        // random.nextLong() - returns any long
+        // random.nextLong(max) - returns [0, max)
+        // random.nextLong(min, max) - returns [min, max)
         addBuiltin(info(
-                "random.nextLong", DataType.LONG
-                // 0 params: returns any long
-                // 1 param (max): returns [0, max)
-                // 2 params (min, max): returns [min, max)
+                "random.nextLong", DataType.LONG,
+                newParam("min", DataType.LONG, false),  // optional: if only one param, it's max; if two params, first is min
+                newParam("max", DataType.LONG, false)   // optional: second param is max
         ));
+        // random.nextDouble() - returns [0.0, 1.0)
+        // random.nextDouble(max) - returns [0.0, max)
+        // random.nextDouble(min, max) - returns [min, max)
         addBuiltin(info(
-                "random.nextDouble", DataType.DOUBLE
-                // 0 params: returns [0.0, 1.0)
-                // 1 param (max): returns [0.0, max)
-                // 2 params (min, max): returns [min, max)
+                "random.nextDouble", DataType.DOUBLE,
+                newParam("min", DataType.DOUBLE, false),  // optional: if only one param, it's max; if two params, first is min
+                newParam("max", DataType.DOUBLE, false)   // optional: second param is max
         ));
         addBuiltin(info(
                 "random.setSeed", DataType.STRING,
