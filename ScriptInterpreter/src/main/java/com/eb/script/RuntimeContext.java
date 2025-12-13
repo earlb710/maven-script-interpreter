@@ -3,6 +3,7 @@ package com.eb.script;
 import com.eb.script.interpreter.Environment;
 import com.eb.script.interpreter.statement.BlockStatement;
 import com.eb.script.interpreter.statement.Statement;
+import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,11 +15,11 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Earl Bosch
  */
-public class RuntimeContext {
+public class RuntimeContext implements Serializable {
 
     public final String name;
-    public final Path sourcePath;  // Path to the source file, if loaded from a file
-    public final Environment environment;
+    public final transient Path sourcePath;  // Path to the source file, if loaded from a file (not serialized)
+    public final transient Environment environment;  // Environment is not serialized (recreated on load)
     public Map<String, BlockStatement> blocks;
     public Statement[] statements;
 

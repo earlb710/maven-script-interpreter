@@ -1,0 +1,14 @@
+// Main script that imports and uses library functions
+import "test-import-lib.ebs";
+
+// Test the imported functions
+var text: string = call upperCase("hello world");
+print "Uppercase: " + text;
+
+var squared: int = call square(7);
+print "7 squared: " + squared;
+
+var sum: int = call addThree(10, 20, 30);
+print "Sum of 10, 20, 30: " + sum;
+
+print "Import test completed!";

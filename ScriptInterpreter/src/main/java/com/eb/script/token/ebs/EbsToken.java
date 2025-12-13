@@ -2,9 +2,10 @@ package com.eb.script.token.ebs;
 
 import com.eb.script.token.LexerType;
 import com.eb.script.token.LexerToken;
+import java.io.Serializable;
 import java.util.List;
 
-public class EbsToken implements LexerToken {
+public class EbsToken implements LexerToken, Serializable {
 
     private static final List defaultStyle=List.of("info");
     private static final EbsToken emptyToken = new EbsToken(EbsTokenType.NULL, "", 0);

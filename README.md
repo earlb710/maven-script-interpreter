@@ -20,6 +20,7 @@ A powerful script interpreter for the EBS (Earl Bosch Script) language, featurin
 - **Array Support**: Multi-dimensional arrays with type safety
 - **JSON Support**: Native JSON parsing with support for both standard quoted keys and JavaScript-style unquoted keys, validation, and schema support
 - **File I/O**: Built-in file operations
+- **Script Packaging**: Package EBS applications into binary `.ebsp` files to protect source code from viewing
 - **Extensible**: Easy to add custom built-in functions
 
 ## Quick Start
@@ -968,6 +969,47 @@ colorsItem.setOnAction(e -> {
     handler.runScriptFromResource("/scripts/color_editor.ebs", "Color Editor");
 });
 ```
+
+## Script Packaging
+
+EBS scripts can be packaged into binary `.ebsp` files to protect your source code when distributing applications.
+
+### Quick Start
+
+**Package a script:**
+```bash
+# From command line
+cd ScriptInterpreter
+java -cp target/classes com.eb.script.package_tool.EbsPackager myapp.ebs
+
+# From console
+/package myapp.ebs
+```
+
+**Run a packaged script:**
+```bash
+mvn exec:java -Dexec.mainClass="com.eb.script.Run" -Dexec.args="myapp.ebsp"
+```
+
+### Benefits
+
+- **Source Code Protection**: Original source code is not stored in the package
+- **Obfuscation**: Binary serialization and GZIP compression obscure the content
+- **Fast Loading**: Pre-parsed AST loads faster than parsing source code
+- **Seamless Execution**: `.ebsp` files run exactly like `.ebs` files
+
+### Example
+
+```bash
+# Create and package a script
+echo 'print "Hello from packaged script!";' > hello.ebs
+java -cp target/classes com.eb.script.package_tool.EbsPackager hello.ebs
+
+# Run the package
+mvn exec:java -Dexec.mainClass="com.eb.script.Run" -Dexec.args="hello.ebsp"
+```
+
+For complete documentation, see **[docs/PACKAGING_GUIDE.md](docs/PACKAGING_GUIDE.md)**.
 
 ## Contributing
 

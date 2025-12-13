@@ -2,12 +2,13 @@ package com.eb.script.interpreter.statement;
 
 import com.eb.script.token.DataType;
 import com.eb.script.interpreter.expression.Expression;
+import java.io.Serializable;
 
 /**
  *
  * @author Earl Bosch
  */
-public class Parameter {
+public class Parameter implements Serializable {
 
     public final String name;
     public final DataType paramType;

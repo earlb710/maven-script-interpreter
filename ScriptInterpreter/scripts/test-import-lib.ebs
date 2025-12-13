@@ -1,0 +1,16 @@
+// Library with utility functions for testing imports with packaged scripts
+
+// String utility function
+upperCase(text: string) return string {
+    return call str.toupper(text);
+}
+
+// Math utility function
+square(n: int) return int {
+    return n * n;
+}
+
+// Simple addition
+addThree(a: int, b: int, c: int) return int {
+    return a + b + c;
+}

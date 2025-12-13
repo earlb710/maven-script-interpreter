@@ -2,6 +2,7 @@ package com.eb.script.interpreter.statement;
 
 import com.eb.script.interpreter.ErrorType;
 import com.eb.script.interpreter.EbsScriptException;
+import java.io.Serializable;
 
 /**
  * Represents a single exception handler clause in a try-exceptions block.
@@ -13,7 +14,7 @@ import com.eb.script.interpreter.EbsScriptException;
  * 
  * @author Earl Bosch
  */
-public class ExceptionHandler {
+public class ExceptionHandler implements Serializable {
     
     /** The type of error this handler catches (for standard exceptions) */
     public final ErrorType errorType;
