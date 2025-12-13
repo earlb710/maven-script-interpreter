@@ -684,6 +684,7 @@ Press `Ctrl+D` again to hide the debug panel.
 ## Documentation
 
 - **[EBS Script Syntax Reference](docs/EBS_SCRIPT_SYNTAX.md)** - Complete language syntax guide including type aliases (typeof)
+- **[EBS Collections Reference](docs/EBS_COLLECTIONS_REFERENCE.md)** - Comprehensive guide to all collection types (arrays, queues, maps, JSON) with comparison tables and examples
 - **[Array Syntax Guide](docs/ARRAY_SYNTAX_GUIDE.md)** - Comprehensive guide explaining differences between `int[n]` and `array.int[n]` syntax, including performance and memory usage comparisons
 - **[Python vs EBS String Functions](docs/PYTHON_VS_EBS_STRING_FUNCTIONS.md)** - Comparison guide for Python developers learning EBS Script
 - **[EBS Script vs Oracle PL/SQL](docs/EBS_VS_ORACLE_PLSQL.md)** - Comprehensive comparison guide for PL/SQL developers learning EBS Script

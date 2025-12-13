@@ -1,10 +1,35 @@
 # Documentation Directory
 
-This directory contains detailed documentation for the Screen Variable Sets refactoring and related features.
+This directory contains detailed documentation for the EBS (Earl Bosch Script) language, including language references, guides, and feature documentation.
 
-## Documents
+## Core Language Documentation
 
-### [SCOPE_REFACTORING.md](SCOPE_REFACTORING.md)
+### [EBS_SCRIPT_SYNTAX.md](EBS_SCRIPT_SYNTAX.md)
+Complete EBS language syntax reference with all keywords, data types, control flow, and built-in functions.
+
+### [EBS_COLLECTIONS_REFERENCE.md](EBS_COLLECTIONS_REFERENCE.md)
+Comprehensive guide to all collection types in EBS:
+- **Arrays**: Fixed-size and dynamic arrays with multiple syntax variants
+- **Queues**: FIFO data structures for task processing
+- **Maps**: Key-value stores for configuration and lookups
+- **JSON**: Flexible structures for data interchange
+
+Includes comparison tables, performance considerations, and detailed examples for choosing the right collection type.
+
+### [ARRAY_SYNTAX_GUIDE.md](ARRAY_SYNTAX_GUIDE.md)
+Detailed comparison of array syntax variants (`int[n]` vs `array.int[n]`) with performance benchmarks and memory usage analysis.
+
+### [PYTHON_VS_EBS_STRING_FUNCTIONS.md](PYTHON_VS_EBS_STRING_FUNCTIONS.md)
+Comparison guide for Python developers learning EBS Script.
+
+### [EBS_VS_ORACLE_PLSQL.md](EBS_VS_ORACLE_PLSQL.md)
+Comprehensive comparison guide for PL/SQL developers learning EBS Script.
+
+## Feature-Specific Documentation
+
+### Screen Variable Sets
+
+#### [SCOPE_REFACTORING.md](SCOPE_REFACTORING.md)
 Comprehensive guide to the scope refactoring that consolidated parameter direction into the VarSet scope field.
 
 **Topics covered:**
@@ -15,7 +40,7 @@ Comprehensive guide to the scope refactoring that consolidated parameter directi
 - Migration guide
 - Benefits of the new approach
 
-### [VARSET_API.md](VARSET_API.md)
+#### [VARSET_API.md](VARSET_API.md)
 Complete API reference for the VarSet class.
 
 **Topics covered:**
@@ -26,7 +51,7 @@ Complete API reference for the VarSet class.
 - Usage examples
 - Code snippets for common operations
 
-### [BUGFIX_GETITEMLIST.md](BUGFIX_GETITEMLIST.md)
+#### [BUGFIX_GETITEMLIST.md](BUGFIX_GETITEMLIST.md)
 Documentation of the screen.getItemList bug fix.
 
 **Topics covered:**

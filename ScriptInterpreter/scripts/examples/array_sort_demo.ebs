@@ -1,0 +1,57 @@
+// Array sorting demonstration
+// See docs/EBS_COLLECTIONS_REFERENCE.md for complete documentation
+
+print "=== Array Sorting Demo ===";
+print "";
+
+// Example 1: Sort numbers in ascending order
+print "1. Sort numbers - Ascending";
+var numbers = [5, 2, 8, 1, 9, 3];
+print "Before: " + numbers;
+call array.sort(numbers, true);
+print "After:  " + numbers;
+print "";
+
+// Example 2: Sort numbers in descending order
+print "2. Sort numbers - Descending";
+var scores = [95, 87, 92, 78, 88];
+print "Before: " + scores;
+call array.sort(scores, false);
+print "After:  " + scores;
+print "";
+
+// Example 3: Sort strings alphabetically
+print "3. Sort strings - Alphabetical";
+var names = ["Charlie", "Alice", "Bob", "David"];
+print "Before: " + names;
+call array.sort(names, true);
+print "After:  " + names;
+print "";
+
+// Example 4: Sort with enhanced array syntax
+print "4. Sort with array.int syntax";
+var temperatures: array.int[7];
+temperatures[0] = 72;
+temperatures[1] = 68;
+temperatures[2] = 75;
+temperatures[3] = 70;
+temperatures[4] = 73;
+temperatures[5] = 69;
+temperatures[6] = 74;
+print "Before: " + temperatures;
+call array.sort(temperatures, true);
+print "After:  " + temperatures;
+print "";
+
+// Example 5: Sort dynamic array
+print "5. Sort dynamic array";
+var items: string[*] = ["Zebra", "Apple", "Mango", "Banana"];
+print "Before: " + items;
+call array.sort(items, true);
+print "After:  " + items;
+print "";
+
+print "=== Demo Complete ===";
+print "";
+print "Note: Sorting only works with Arrays.";
+print "      Queues, Maps, and JSON objects do not support sorting.";

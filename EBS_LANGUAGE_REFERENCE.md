@@ -55,6 +55,8 @@ For the formal EBNF grammar, see:
 
 ### Related Documentation
 - [README.md](README.md) - Project overview and quick start
+- [docs/EBS_COLLECTIONS_REFERENCE.md](docs/EBS_COLLECTIONS_REFERENCE.md) - Comprehensive collections guide (arrays, queues, maps, JSON)
+- [docs/ARRAY_SYNTAX_GUIDE.md](docs/ARRAY_SYNTAX_GUIDE.md) - Detailed array syntax comparison and performance guide
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - System architecture and internals
 - [docs/PYTHON_VS_EBS_STRING_FUNCTIONS.md](docs/PYTHON_VS_EBS_STRING_FUNCTIONS.md) - Comparison for Python developers
 - [docs/EBS_VS_ORACLE_PLSQL.md](docs/EBS_VS_ORACLE_PLSQL.md) - Comparison for PL/SQL developers
