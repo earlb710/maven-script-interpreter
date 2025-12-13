@@ -2404,7 +2404,7 @@
       "example": "<b>call</b> <b>echo.on</b>();<br>// Statements will now be echoed to console"
     },
     {
-      "function": "sleep",
+      "function": "thread.sleep",
       "short_description": "Pauses execution for specified milliseconds",
       "long_help": "Pauses the current script execution for the specified number of milliseconds. This is useful for adding delays between<br>operations or waiting for external processes. Returns a status string.",
       "parameters": [
@@ -2414,7 +2414,7 @@
         }
       ],
       "return_type": "string",
-      "example": "<b>call</b> <b>sleep</b>(millis=1000);<br>// Pauses for 1 second<br><b>print</b> \"Resumed after 1 second delay\";"
+      "example": "<b>call</b> <b>thread.sleep</b>(millis=1000);<br>// Pauses for 1 second<br><b>print</b> \"Resumed after 1 second delay\";"
     },
     {
       "function": "plugin.load",
@@ -4137,7 +4137,7 @@
         }
       ],
       "return_type": "string",
-      "example": "<b>call</b> timer.start(\"myTimer\");<br><b>call</b> sleep(1000);<br><b>var</b> elapsed = <b>call</b> timer.stop(\"myTimer\");<br><b>print</b> \"Elapsed: \" + elapsed + \"ms\";"
+      "example": "<b>call</b> timer.start(\"myTimer\");<br><b>call</b> thread.sleep(1000);<br><b>var</b> elapsed = <b>call</b> timer.stop(\"myTimer\");<br><b>print</b> \"Elapsed: \" + elapsed + \"ms\";"
     },
     {
       "function": "timer.stop",
@@ -4167,7 +4167,7 @@
         }
       ],
       "return_type": "long",
-      "example": "<b>call</b> timer.start(\"benchmark\");<br><b>call</b> sleep(500);<br><b>var</b> elapsed1 = <b>call</b> timer.getPeriod(\"benchmark\");<br><b>call</b> sleep(500);<br><b>var</b> elapsed2 = <b>call</b> timer.getPeriod(\"benchmark\");<br><b>print</b> \"First check: \" + elapsed1 + \"ms\";<br><b>print</b> \"Second check: \" + elapsed2 + \"ms\";"
+      "example": "<b>call</b> timer.start(\"benchmark\");<br><b>call</b> thread.sleep(500);<br><b>var</b> elapsed1 = <b>call</b> timer.getPeriod(\"benchmark\");<br><b>call</b> thread.sleep(500);<br><b>var</b> elapsed2 = <b>call</b> timer.getPeriod(\"benchmark\");<br><b>print</b> \"First check: \" + elapsed1 + \"ms\";<br><b>print</b> \"Second check: \" + elapsed2 + \"ms\";"
     },
     {
       "function": "timer.getPeriodString",
@@ -4188,7 +4188,7 @@
         }
       ],
       "return_type": "string",
-      "example": "<b>call</b> timer.start(\"format_test\");<br><b>call</b> sleep(1234);<br><b>call</b> timer.stop(\"format_test\");<br><b>print</b> <b>call</b> timer.getPeriodString(\"format_test\");     // \"1.234\"<br><b>print</b> <b>call</b> timer.getPeriodString(\"format_test\", 2);  // \"1.23\""
+      "example": "<b>call</b> timer.start(\"format_test\");<br><b>call</b> thread.sleep(1234);<br><b>call</b> timer.stop(\"format_test\");<br><b>print</b> <b>call</b> timer.getPeriodString(\"format_test\");     // \"1.234\"<br><b>print</b> <b>call</b> timer.getPeriodString(\"format_test\", 2);  // \"1.23\""
     },
     {
       "function": "timer.isRunning",
@@ -4218,7 +4218,7 @@
         }
       ],
       "return_type": "bool",
-      "example": "<b>call</b> timer.start(\"reset_demo\");<br><b>call</b> sleep(500);<br><b>call</b> timer.reset(\"reset_demo\");<br>// Timer is reset but not running"
+      "example": "<b>call</b> timer.start(\"reset_demo\");<br><b>call</b> thread.sleep(500);<br><b>call</b> timer.reset(\"reset_demo\");<br>// Timer is reset but not running"
     },
     {
       "function": "timer.continue",
@@ -4233,7 +4233,7 @@
         }
       ],
       "return_type": "bool",
-      "example": "<b>call</b> timer.start(\"segments\");<br><b>call</b> sleep(100);<br><b>call</b> timer.stop(\"segments\");<br><b>call</b> sleep(50);  // Pause (included in total)<br><b>call</b> timer.continue(\"segments\");<br><b>call</b> sleep(100);<br><b>var</b> total = <b>call</b> timer.stop(\"segments\");<br><b>print</b> \"Total: \" + total + \"ms\";  // ~250ms"
+      "example": "<b>call</b> timer.start(\"segments\");<br><b>call</b> thread.sleep(100);<br><b>call</b> timer.stop(\"segments\");<br><b>call</b> thread.sleep(50);  // Pause (included in total)<br><b>call</b> timer.continue(\"segments\");<br><b>call</b> thread.sleep(100);<br><b>var</b> total = <b>call</b> timer.stop(\"segments\");<br><b>print</b> \"Total: \" + total + \"ms\";  // ~250ms"
     },
     {
       "function": "timer.getContinuePeriod",
@@ -4248,7 +4248,7 @@
         }
       ],
       "return_type": "long",
-      "example": "<b>call</b> timer.start(\"laps\");<br><b>call</b> sleep(100);<br><b>call</b> timer.stop(\"laps\");<br><b>var</b> lap1 = <b>call</b> timer.getContinuePeriod(\"laps\");<br><b>call</b> timer.continue(\"laps\");<br><b>call</b> sleep(150);<br><b>call</b> timer.stop(\"laps\");<br><b>var</b> lap2 = <b>call</b> timer.getContinuePeriod(\"laps\");<br><b>print</b> \"Lap 1: \" + lap1 + \"ms\";<br><b>print</b> \"Lap 2: \" + lap2 + \"ms\";"
+      "example": "<b>call</b> timer.start(\"laps\");<br><b>call</b> thread.sleep(100);<br><b>call</b> timer.stop(\"laps\");<br><b>var</b> lap1 = <b>call</b> timer.getContinuePeriod(\"laps\");<br><b>call</b> timer.continue(\"laps\");<br><b>call</b> thread.sleep(150);<br><b>call</b> timer.stop(\"laps\");<br><b>var</b> lap2 = <b>call</b> timer.getContinuePeriod(\"laps\");<br><b>print</b> \"Lap 1: \" + lap1 + \"ms\";<br><b>print</b> \"Lap 2: \" + lap2 + \"ms\";"
     },
     {
       "function": "timer.getContinuePeriodString",
@@ -4269,7 +4269,7 @@
         }
       ],
       "return_type": "string",
-      "example": "<b>call</b> timer.start(\"segment\");<br><b>call</b> sleep(100);<br><b>call</b> timer.stop(\"segment\");<br><b>call</b> timer.continue(\"segment\");<br><b>call</b> sleep(250);<br><b>call</b> timer.stop(\"segment\");<br><b>var</b> segTime = <b>call</b> timer.getContinuePeriodString(\"segment\", 2);<br><b>print</b> \"Segment: \" + segTime + \" seconds\";"
+      "example": "<b>call</b> timer.start(\"segment\");<br><b>call</b> thread.sleep(100);<br><b>call</b> timer.stop(\"segment\");<br><b>call</b> timer.continue(\"segment\");<br><b>call</b> thread.sleep(250);<br><b>call</b> timer.stop(\"segment\");<br><b>var</b> segTime = <b>call</b> timer.getContinuePeriodString(\"segment\", 2);<br><b>print</b> \"Segment: \" + segTime + \" seconds\";"
     },
     {
       "function": "timer.remove",
@@ -4284,7 +4284,7 @@
         }
       ],
       "return_type": "bool",
-      "example": "<b>call</b> timer.start(\"temp_timer\");<br><b>call</b> sleep(100);<br><b>call</b> timer.stop(\"temp_timer\");<br><b>var</b> removed = <b>call</b> timer.remove(\"temp_timer\");<br><b>print</b> \"Timer removed: \" + removed;"
+      "example": "<b>call</b> timer.start(\"temp_timer\");<br><b>call</b> thread.sleep(100);<br><b>call</b> timer.stop(\"temp_timer\");<br><b>var</b> removed = <b>call</b> timer.remove(\"temp_timer\");<br><b>print</b> \"Timer removed: \" + removed;"
     },
     {
       "function": "timer.clear",
@@ -4293,7 +4293,7 @@
       "long_help": "Removes all timers from the registry at once, freeing their resources. Returns the number of timers that were removed. Useful for bulk cleanup after completing a set of timing operations.",
       "parameters": [],
       "return_type": "integer",
-      "example": "<b>call</b> timer.start(\"timer1\");<br><b>call</b> timer.start(\"timer2\");<br><b>call</b> timer.start(\"timer3\");<br><b>call</b> sleep(100);<br><b>var</b> count = <b>call</b> timer.clear();<br><b>print</b> \"Cleared \" + count + \" timers\";"
+      "example": "<b>call</b> timer.start(\"timer1\");<br><b>call</b> timer.start(\"timer2\");<br><b>call</b> timer.start(\"timer3\");<br><b>call</b> thread.sleep(100);<br><b>var</b> count = <b>call</b> timer.clear();<br><b>print</b> \"Cleared \" + count + \" timers\";"
     }
   ],
   "topics": {
@@ -4322,7 +4322,8 @@
       "classTree": "Code Analysis",
       "plugin": "Plugin System",
       "echo": "Echo Functions",
-      "sleep": "Timing Functions",
+      "thread": "Thread Functions",
+      "timer": "Timer Functions",
       "custom": "Custom Functions",
       "EbsFunction": "EBS Functions",
       "other": "Other Functions"
@@ -4344,7 +4345,8 @@
       "classTree",
       "plugin",
       "echo",
-      "sleep",
+      "thread",
+      "timer",
       "custom",
       "EbsFunction",
       "other"
