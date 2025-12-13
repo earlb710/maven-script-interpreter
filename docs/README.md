@@ -63,42 +63,6 @@ Documentation of the screen.getItemList bug fix.
 - Impact assessment
 - Backward compatibility
 
-## Additional Documents
-
-### [SCOPE_REFACTORING.md](SCOPE_REFACTORING.md)
-Comprehensive guide to the scope refactoring that consolidated parameter direction into the VarSet scope field.
-
-**Topics covered:**
-- What changed (before/after comparison)
-- Scope values and their meanings
-- JSON format examples
-- API changes
-- Migration guide
-- Benefits of the new approach
-
-### [VARSET_API.md](VARSET_API.md)
-Complete API reference for the VarSet class.
-
-**Topics covered:**
-- Class overview and package
-- Fields and their purposes
-- All constructors
-- All public methods with parameters and return values
-- Usage examples
-- Code snippets for common operations
-
-### [BUGFIX_GETITEMLIST.md](BUGFIX_GETITEMLIST.md)
-Documentation of the screen.getItemList bug fix.
-
-**Topics covered:**
-- Issue description
-- Root cause analysis
-- Code comparison (before/after)
-- Affected functions
-- Testing approach
-- Impact assessment
-- Backward compatibility
-
 ## Quick Reference
 
 ### Scope Values

@@ -1,5 +1,5 @@
-// EBS Language Reference v1.0.7.11 - See EBS_LANGUAGE_REFERENCE.md
 // Comprehensive demonstration of all collection types in EBS
+// See docs/EBS_COLLECTIONS_REFERENCE.md for complete documentation
 
 print "=== EBS Collections Demo ===";
 print "";
