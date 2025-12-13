@@ -1,6 +1,6 @@
 # EBS Language Reference
 
-**Documentation Version: 1.0.7.10**
+**Documentation Version: 1.0.7.11**
 
 This document serves as a pointer to the comprehensive EBS (Earl Bosch Script) language documentation.
 
@@ -83,7 +83,7 @@ EBS uses a four-part versioning system: **`language.keyword.builtin.build`**
 
 Each version component is incremented independently based on the type of change made.
 
-**Current Version: 1.0.7.10** (Language v1, Keyword v0, Builtin v7, Build 10)
+**Current Version: 1.0.7.11** (Language v1, Keyword v0, Builtin v7, Build 11)
 
 ### Getting the Language Version Programmatically
 
@@ -118,6 +118,7 @@ For the latest updates and comprehensive language reference, always refer to [do
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.0.7.11 | 2025-12-12 | Added TreeView icon management functions: `scr.setTreeItemIcon`, `scr.setTreeItemIcons`, `scr.getTreeItemIcon` for dynamically setting icons on tree view items at runtime |
 | 1.0.7.10 | 2025-12-12 | Added cryptographic functions: `crypto.encrypt`, `crypto.decrypt`, `crypto.generateKey`, `crypto.hash`, `crypto.sha256`, `crypto.md5`; AES-256-GCM encryption support; Password-based encryption with key derivation |
 | 1.0.6.11 | 2025-12-06 | Added `intmap` type for 32-bit field mapping (0-31 bits) using integer storage; Added `array.intmap` backed by ArrayFixedInt; Added `array.asIntmap()` and `array.asInt()` for casting; Intmap type aliases with `typeof` keyword; Int to intmap casting |
 | 1.0.6.10 | 2025-12-05 | Added `array.bitmap` type backed by ArrayFixedByte; Added `array.asBitmap()` and `array.asByte()` for casting between byte and bitmap arrays |

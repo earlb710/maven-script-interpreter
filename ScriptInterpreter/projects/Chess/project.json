@@ -9,5 +9,6 @@
   "mainScript": "chess.ebs",
   "settings": {
     "autoLoad": true
-  }
+  },
+  "cssFile": "chess.css"
 }

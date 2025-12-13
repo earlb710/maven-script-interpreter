@@ -1,0 +1,242 @@
+// Test Script: Dynamic Tree Icon Setting
+// Description: Demonstrates dynamically changing tree item icons at runtime
+// Author: EBS Test Suite
+// Date: 2025-12-12
+
+print "=== Dynamic Tree Icons Test ===";
+print "";
+print "This test demonstrates dynamically changing tree item icons at runtime";
+print "using the new scr.setTreeItemIcon and scr.setTreeItemIcons builtins.";
+print "";
+
+// Create a screen with a TreeView and buttons to change icons
+screen iconDemo = {
+    "title": "Dynamic Tree Icon Demo",
+    "width": 700,
+    "height": 500,
+    "maximize": false,
+    "vars": [
+        {
+            "name": "selectedItem",
+            "type": "string",
+            "default": ""
+        },
+        {
+            "name": "status",
+            "type": "string",
+            "default": "Ready"
+        }
+    ],
+    "area": [
+        {
+            "name": "mainLayout",
+            "type": "vbox",
+            "spacing": "10",
+            "padding": "10",
+            "areas": [
+                {
+                    "name": "controlsArea",
+                    "type": "hbox",
+                    "spacing": "5",
+                    "padding": "5",
+                    "items": [
+                        {
+                            "name": "changeRootBtn",
+                            "seq": 1,
+                            "display": {
+                                "type": "button",
+                                "labelText": "Change Root Icon",
+                                "onClick": "call scr.setTreeItemIcon('iconDemo', 'Project', 'icons/project.png'); set iconDemo.status = 'Changed root icon to project.png';"
+                            }
+                        },
+                        {
+                            "name": "changeSrcBtn",
+                            "seq": 2,
+                            "display": {
+                                "type": "button",
+                                "labelText": "Change Src Icons",
+                                "onClick": "call scr.setTreeItemIcons('iconDemo', 'src', 'icons/folder.png', 'icons/folder-open.png', 'icons/folder.png'); set iconDemo.status = 'Changed src folder icons (open/closed)';"
+                            }
+                        },
+                        {
+                            "name": "changeFileBtn",
+                            "seq": 3,
+                            "display": {
+                                "type": "button",
+                                "labelText": "Change File Icon",
+                                "onClick": "call scr.setTreeItemIcon('iconDemo', 'main.ebs', 'icons/script-file-run.png'); set iconDemo.status = 'Changed main.ebs icon to script-file-run.png';"
+                            }
+                        },
+                        {
+                            "name": "resetBtn",
+                            "seq": 4,
+                            "display": {
+                                "type": "button",
+                                "labelText": "Reset Icons",
+                                "onClick": "call scr.setTreeItemIcons('iconDemo', 'Project', 'icons/folder.png', 'icons/folder-open.png', 'icons/folder.png'); call scr.setTreeItemIcons('iconDemo', 'src', 'icons/folder.png', 'icons/folder-open.png', 'icons/folder.png'); call scr.setTreeItemIcon('iconDemo', 'main.ebs', 'icons/script-file.png'); set iconDemo.status = 'Reset all icons to defaults';"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "contentArea",
+                    "type": "hbox",
+                    "spacing": "10",
+                    "areas": [
+                        {
+                            "name": "treeArea",
+                            "type": "vbox",
+                            "spacing": "5",
+                            "width": "300",
+                            "items": [
+                                {
+                                    "name": "projectTree",
+                                    "varRef": "selectedItem",
+                                    "seq": 1,
+                                    "display": {
+                                        "type": "treeview",
+                                        "labelText": "Project Files:",
+                                        "labelPosition": "top",
+                                        "displayRecords": 15,
+                                        "expandAll": true,
+                                        "showRoot": true,
+                                        "treeItems": [
+                                            {
+                                                "value": "Project",
+                                                "iconOpen": "icons/folder-open.png",
+                                                "iconClosed": "icons/folder.png",
+                                                "expanded": true,
+                                                "children": [
+                                                    {
+                                                        "value": "src",
+                                                        "iconOpen": "icons/folder-open.png",
+                                                        "iconClosed": "icons/folder.png",
+                                                        "expanded": true,
+                                                        "children": [
+                                                            {"value": "main.ebs", "icon": "icons/script-file.png"},
+                                                            {"value": "utils.ebs", "icon": "icons/script-file.png"},
+                                                            {"value": "config.json", "icon": "icons/config-file.png"}
+                                                        ]
+                                                    },
+                                                    {
+                                                        "value": "docs",
+                                                        "iconOpen": "icons/folder-open.png",
+                                                        "iconClosed": "icons/folder.png",
+                                                        "children": [
+                                                            {"value": "README.md", "icon": "icons/markdown-file.png"},
+                                                            {"value": "GUIDE.md", "icon": "icons/markdown-file.png"}
+                                                        ]
+                                                    },
+                                                    {"value": "project.json", "icon": "icons/config-file.png"}
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "infoArea",
+                            "type": "vbox",
+                            "spacing": "8",
+                            "padding": "10",
+                            "style": "-fx-border-color: #cccccc; -fx-border-width: 1; -fx-border-radius: 5; -fx-background-color: #f9f9f9; -fx-background-radius: 5;",
+                            "items": [
+                                {
+                                    "name": "infoHeader",
+                                    "seq": 1,
+                                    "display": {
+                                        "type": "label",
+                                        "labelText": "Instructions",
+                                        "labelBold": true,
+                                        "labelFontSize": "14px"
+                                    }
+                                },
+                                {
+                                    "name": "info1",
+                                    "seq": 2,
+                                    "display": {
+                                        "type": "label",
+                                        "labelText": "1. Click buttons to change icons"
+                                    }
+                                },
+                                {
+                                    "name": "info2",
+                                    "seq": 3,
+                                    "display": {
+                                        "type": "label",
+                                        "labelText": "2. Expand/collapse folders to see"
+                                    }
+                                },
+                                {
+                                    "name": "info3",
+                                    "seq": 4,
+                                    "display": {
+                                        "type": "label",
+                                        "labelText": "   state-based icons change"
+                                    }
+                                },
+                                {
+                                    "name": "info4",
+                                    "seq": 5,
+                                    "display": {
+                                        "type": "label",
+                                        "labelText": "3. Use Reset to restore defaults"
+                                    }
+                                },
+                                {
+                                    "name": "statusHeader",
+                                    "seq": 6,
+                                    "display": {
+                                        "type": "label",
+                                        "labelText": "Status:",
+                                        "labelBold": true,
+                                        "labelFontSize": "12px"
+                                    }
+                                },
+                                {
+                                    "name": "statusField",
+                                    "varRef": "status",
+                                    "seq": 7,
+                                    "display": {
+                                        "type": "textarea",
+                                        "height": 5,
+                                        "editable": false
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+};
+
+print "Created icon demo screen with TreeView and control buttons.";
+print "";
+print "Available builtins for tree icons:";
+print "- scr.setTreeItemIcon(screenName, itemPath, iconPath)";
+print "  Sets a static icon for a tree item";
+print "";
+print "- scr.setTreeItemIcons(screenName, itemPath, icon, iconOpen, iconClosed)";
+print "  Sets state-based icons (changes on expand/collapse)";
+print "";
+print "- scr.getTreeItemIcon(screenName, itemPath)";
+print "  Gets the current icon path for a tree item";
+print "";
+
+// Show the screen
+print "Displaying dynamic tree icon demo...";
+show screen iconDemo;
+
+// Test getting icon path
+var rootIcon: string = call scr.getTreeItemIcon("iconDemo", "Project");
+print "Root icon path: " + rootIcon;
+
+print "";
+print "Test completed!";
+print "The screen displays a tree with buttons to dynamically change icons.";
+print "- Click buttons to see icons change in real-time";
+print "- Expand/collapse folders to see state-based icon changes";
+print "- itemPath uses dot notation to navigate the tree hierarchy";
