@@ -151,7 +151,7 @@ public class BuiltinsTimer {
         
         Timed timer = TIMERS.computeIfAbsent(timerId, k -> new Timed());
         
-        if (args.length >= 2) {
+        if (args.length >= 2 && args[1] != null) {
             int decimals = convertToInt(args[1], "decimals");
             return timer.getTimerString_Seconds(decimals);
         } else {
@@ -185,7 +185,7 @@ public class BuiltinsTimer {
         
         Timed timer = TIMERS.computeIfAbsent(timerId, k -> new Timed());
         
-        if (args.length >= 2) {
+        if (args.length >= 2 && args[1] != null) {
             int decimals = convertToInt(args[1], "decimals");
             return timer.getContinueString_Seconds(decimals);
         } else {
