@@ -123,7 +123,35 @@ call array.unshift(arr, value);  // Add to start
 // Slicing and joining
 var subset = call array.slice(arr, start, end);
 var text = call array.join(arr, separator);
+
+// Sorting
+call array.sort(arr, true);   // Sort ascending
+call array.sort(arr, false);  // Sort descending
 ```
+
+#### Sorting Arrays
+```javascript
+// Sort in ascending order (default)
+var numbers = [5, 2, 8, 1, 9];
+call array.sort(numbers, true);
+print numbers;  // Output: [1, 2, 5, 8, 9]
+
+// Sort in descending order
+var scores = [95, 87, 92, 78];
+call array.sort(scores, false);
+print scores;  // Output: [95, 92, 87, 78]
+
+// Works with all array types
+var names: string[*] = ["Charlie", "Alice", "Bob"];
+call array.sort(names, true);
+print names;  // Output: ["Alice", "Bob", "Charlie"]
+```
+
+**Sorting Notes:**
+- Works with all array types (fixed and dynamic)
+- Sorts in-place (modifies the original array)
+- Second parameter is boolean: `true` for ascending, `false` for descending
+- Uses natural ordering for the element type (numeric, alphabetic, etc.)
 
 #### Type Casting Between Array Variants
 ```javascript
@@ -432,7 +460,10 @@ var person: json = {
 | **Dynamic Size** | Optional (`[*]`) | Yes | Yes | Yes |
 | **Nesting** | Yes | No | Yes | Yes |
 | **Duplicate Values** | Yes | Yes | Yes | Yes |
+| **Sorting** | ✅ Yes (`array.sort`) | ❌ No | ❌ No | ⚠️ Arrays only* |
 | **Primary Operation** | Index-based | Enqueue/Dequeue | Key-value lookup | Flexible access |
+
+**Note:** *JSON arrays must be extracted and manipulated as arrays to use sorting.
 
 ---
 
@@ -444,8 +475,9 @@ var person: json = {
 - You want type safety for elements
 - You're working with fixed-size or predictable data
 - Performance is critical (use `array.int[n]` for large numeric arrays)
+- **You need to sort data** (only collection type with native sorting)
 
-**Examples**: List of items, coordinates, matrix operations, buffer storage
+**Examples**: List of items, coordinates, matrix operations, buffer storage, sorted lists
 
 ### Use **Queue** when:
 - You need FIFO (First-In-First-Out) processing
@@ -507,9 +539,38 @@ foreach value in data {
         filtered[filtered.length - 1] = value;
     }
 }
+
+// Sort the filtered results in descending order
+call array.sort(filtered, false);
+print "Top values: " + filtered;
 ```
 
-### Example 2: Queue-Based Task Processor
+### Example 2: Sorting Different Data Types
+```javascript
+// Sort numeric scores
+var scores = [87, 95, 78, 92, 88];
+call array.sort(scores, false);  // Descending
+print "Rankings: " + scores;  // [95, 92, 88, 87, 78]
+
+// Sort names alphabetically
+var names = ["Charlie", "Alice", "Bob", "David"];
+call array.sort(names, true);  // Ascending
+print "Alphabetical: " + names;  // ["Alice", "Bob", "Charlie", "David"]
+
+// Sort with enhanced array syntax
+var temperatures: array.int[7];
+temperatures[0] = 72;
+temperatures[1] = 68;
+temperatures[2] = 75;
+temperatures[3] = 70;
+temperatures[4] = 73;
+temperatures[5] = 69;
+temperatures[6] = 74;
+call array.sort(temperatures, true);
+print "Sorted temps: " + temperatures;
+```
+
+### Example 3: Queue-Based Task Processor
 ```javascript
 // Multi-stage task processing
 var pendingTasks: queue.string;
@@ -535,7 +596,7 @@ while !call queue.isEmpty(pendingTasks) {
 print "Completed " + call queue.size(completedTasks) + " tasks";
 ```
 
-### Example 3: Configuration Management with Maps
+### Example 4: Configuration Management with Maps
 ```javascript
 // Application configuration
 var appConfig: map = {
@@ -566,7 +627,7 @@ call json.set(appConfig, "features",
     {"enableCache": false, "maxConnections": 200});
 ```
 
-### Example 4: JSON Data Processing
+### Example 5: JSON Data Processing
 ```javascript
 // Parse JSON from API
 var jsonResponse = '{
