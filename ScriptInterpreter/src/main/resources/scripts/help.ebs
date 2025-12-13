@@ -227,10 +227,41 @@ structureNode = call json.set(structureNode, "expanded", false);
 structureNode = call json.set(structureNode, "children", structureChildren);
 call array.add(syntaxChildren, structureNode);
 
+// Data Types section
+var dataChildren: array[*];
+
 tempNode = call json.jsonFromString("{}");
-tempNode = call json.set(tempNode, "value", "data");
+tempNode = call json.set(tempNode, "value", "Integer Types");
 tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
-call array.add(syntaxChildren, tempNode);
+call array.add(dataChildren, tempNode);
+
+tempNode = call json.jsonFromString("{}");
+tempNode = call json.set(tempNode, "value", "Floating Point");
+tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
+call array.add(dataChildren, tempNode);
+
+tempNode = call json.jsonFromString("{}");
+tempNode = call json.set(tempNode, "value", "String");
+tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
+call array.add(dataChildren, tempNode);
+
+tempNode = call json.jsonFromString("{}");
+tempNode = call json.set(tempNode, "value", "Boolean");
+tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
+call array.add(dataChildren, tempNode);
+
+tempNode = call json.jsonFromString("{}");
+tempNode = call json.set(tempNode, "value", "Date");
+tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
+call array.add(dataChildren, tempNode);
+
+// Use json.jsonFromString to create a fresh JSON object to avoid circular references
+var dataNode: json = call json.jsonFromString("{}");
+dataNode = call json.set(dataNode, "value", "data");
+dataNode = call json.set(dataNode, "icon", "icons/tree-node.png");
+dataNode = call json.set(dataNode, "expanded", false);
+dataNode = call json.set(dataNode, "children", dataChildren);
+call array.add(syntaxChildren, dataNode);
 
 // Collections section
 var collectionsChildren: array[*];
@@ -742,6 +773,23 @@ getHelpContent(topic: string) return string {
     }
     if topic == "Bitmap and Intmap" then {
         topic = "collections_bitmap";
+    }
+    
+    // Map data type display names to topic keys
+    if topic == "Integer Types" then {
+        topic = "data_integer";
+    }
+    if topic == "Floating Point" then {
+        topic = "data_float";
+    }
+    if topic == "String" then {
+        topic = "data_string";
+    }
+    if topic == "Boolean" then {
+        topic = "data_boolean";
+    }
+    if topic == "Date" then {
+        topic = "data_date";
     }
     
     // Handle example topic aliases (Keywords/examples_keywords, etc.)
