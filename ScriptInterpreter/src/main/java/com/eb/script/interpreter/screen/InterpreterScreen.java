@@ -31,6 +31,24 @@ public class InterpreterScreen {
 
     private final InterpreterContext context;
     private final Interpreter interpreter;
+    
+    /**
+     * Set of properties that belong at the item level, not in display definitions.
+     * These properties are specific to AreaItem and should be filtered out when
+     * an item definition is used as a display definition.
+     */
+    private static final java.util.Set<String> ITEM_ONLY_PROPERTIES = java.util.Collections.unmodifiableSet(
+        new java.util.HashSet<>(java.util.Arrays.asList(
+            "hgrow", "vgrow", "margin", "padding",
+            "prefwidth", "pref_width", "prefheight", "pref_height",
+            "minwidth", "min_width", "minheight", "min_height",
+            "maxwidth", "max_width", "maxheight", "max_height",
+            "colspan", "col_span", "rowspan", "row_span",
+            "layoutpos", "layout_pos", "relativepos", "relative_pos",
+            "varref", "var_ref", "name", "editable", "disabled", "visible", "tooltip",
+            "textcolor", "text_color", "backgroundcolor", "background_color"
+        ))
+    );
 
     public InterpreterScreen(InterpreterContext context, Interpreter interpreter) {
         this.context = context;
@@ -1572,23 +1590,11 @@ public class InterpreterScreen {
      * @return A new map with only display-level properties
      */
     private Map<String, Object> filterItemLevelProperties(Map<String, Object> itemDef) {
-        // Define item-level properties that should NOT be in display definitions
-        java.util.Set<String> itemOnlyProps = new java.util.HashSet<>(java.util.Arrays.asList(
-            "hgrow", "vgrow", "margin", "padding",
-            "prefwidth", "pref_width", "prefheight", "pref_height",
-            "minwidth", "min_width", "minheight", "min_height",
-            "maxwidth", "max_width", "maxheight", "max_height",
-            "colspan", "col_span", "rowspan", "row_span",
-            "layoutpos", "layout_pos", "relativepos", "relative_pos",
-            "varref", "var_ref", "name", "editable", "disabled", "visible", "tooltip",
-            "textcolor", "text_color", "backgroundcolor", "background_color"
-        ));
-        
         // Create a new map with only display-level properties
         Map<String, Object> displayDef = new java.util.HashMap<>();
         for (Map.Entry<String, Object> entry : itemDef.entrySet()) {
             String lowerKey = entry.getKey().toLowerCase();
-            if (!itemOnlyProps.contains(lowerKey)) {
+            if (!ITEM_ONLY_PROPERTIES.contains(lowerKey)) {
                 displayDef.put(entry.getKey(), entry.getValue());
             }
         }
@@ -1635,22 +1641,10 @@ public class InterpreterScreen {
             "source", "status"
         ));
         
-        // Properties that should NOT be in display (they belong to AreaItem)
-        java.util.Set<String> itemOnlyProps = new java.util.HashSet<>(java.util.Arrays.asList(
-            "hgrow", "vgrow", "margin", "padding",
-            "prefwidth", "pref_width", "prefheight", "pref_height",
-            "minwidth", "min_width", "minheight", "min_height",
-            "maxwidth", "max_width", "maxheight", "max_height",
-            "colspan", "col_span", "rowspan", "row_span",
-            "layoutpos", "layout_pos", "relativepos", "relative_pos",
-            "varref", "var_ref", "name", "editable", "disabled", "visible", "tooltip",
-            "textcolor", "text_color", "backgroundcolor", "background_color"
-        ));
-        
         // Check for invalid properties
         for (String key : displayDef.keySet()) {
             String lowerKey = key.toLowerCase();
-            if (itemOnlyProps.contains(lowerKey)) {
+            if (ITEM_ONLY_PROPERTIES.contains(lowerKey)) {
                 throw new RuntimeException(
                     String.format("Invalid property '%s' in display definition for screen '%s'. " +
                                 "This property belongs at the item level, not in the display object. " +
