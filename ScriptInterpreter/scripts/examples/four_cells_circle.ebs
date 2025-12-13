@@ -6,8 +6,6 @@
 //
 // Features:
 //   - 4 canvas cells arranged in a 2x2 GridPane
-//   - Left cells (1 & 2): Draw via image creation (canvas.toImage + draw.image)
-//   - Right cells (3 & 4): Draw directly on canvas (draw.circle)
 //   - Click on any cell to draw a circle with random color and size
 //   - Each cell is 200x200 pixels
 //
@@ -19,10 +17,6 @@ var cell1: canvas = call canvas.create(200, 200, "cell1");
 var cell2: canvas = call canvas.create(200, 200, "cell2");
 var cell3: canvas = call canvas.create(200, 200, "cell3");
 var cell4: canvas = call canvas.create(200, 200, "cell4");
-
-// Create temporary canvases for image-based drawing (left cells)
-var tempCanvas1: canvas = call canvas.create(200, 200, "temp1");
-var tempCanvas2: canvas = call canvas.create(200, 200, "temp2");
 
 // Initialize all cells with a light gray background
 call style.setFill(cell1, "#f0f0f0");
@@ -47,7 +41,7 @@ toHex(num: int) return string {
     return result;
 }
 
-// Function to draw a circle in a specific cell with random color and size (direct drawing)
+// Function to draw a circle in a specific cell with random color and size
 drawCircleInCell(cellCanvas: canvas) {
     // Clear the cell with light gray background
     call style.setFill(cellCanvas, "#f0f0f0");
@@ -78,49 +72,6 @@ drawCircleInCell(cellCanvas: canvas) {
     // Draw a stroke around the circle
     call style.setStroke(cellCanvas, strokeHex, 3);
     call draw.circle(cellCanvas, 100, 100, radius, false);
-}
-
-// Function to draw a circle via image (create image first, then display)
-drawCircleInCellViaImage(cellCanvas: canvas, tempCanvas: canvas) {
-    // Clear the cell with light gray background
-    call style.setFill(cellCanvas, "#f0f0f0");
-    call draw.rect(cellCanvas, 0, 0, 200, 200, true);
-    
-    // Generate random RGB color (each component 0-255)
-    var r: int = call random.nextLong(256);
-    var g: int = call random.nextLong(256);
-    var b: int = call random.nextLong(256);
-    
-    // Convert RGB to hex color string
-    var colorHex: string = "#" + call toHex(r) + call toHex(g) + call toHex(b);
-    
-    // Generate random circle size (radius between 20 and 80, inclusive)
-    var radius: int = call random.nextLong(20, 81);
-    
-    // Clear and draw on the temporary canvas
-    call style.setFill(tempCanvas, "#f0f0f0");
-    call draw.rect(tempCanvas, 0, 0, 200, 200, true);
-    
-    // Draw a filled circle with random color in the center
-    call style.setFill(tempCanvas, colorHex);
-    call draw.circle(tempCanvas, 100, 100, radius, true);
-    
-    // Create a darker stroke color by reducing RGB values by 30% (minimum 0)
-    var strokeR: int = r * 7 / 10;
-    var strokeG: int = g * 7 / 10;
-    var strokeB: int = b * 7 / 10;
-    
-    var strokeHex: string = "#" + call toHex(strokeR) + call toHex(strokeG) + call toHex(strokeB);
-    
-    // Draw a stroke around the circle
-    call style.setStroke(tempCanvas, strokeHex, 3);
-    call draw.circle(tempCanvas, 100, 100, radius, false);
-    
-    // Convert the temporary canvas to an image
-    var circleImage: imagedata = call canvas.toImage(tempCanvas);
-    
-    // Draw the image on the target canvas
-    call draw.image(cellCanvas, circleImage, 0, 0);
 }
 
 // Define the screen
@@ -172,7 +123,7 @@ screen fourCellsScreen = {
                             "varRef": "canvas1",
                             "display": {
                                 "type": "canvas",
-                                "onClick": "call drawCircleInCellViaImage(cell1, tempCanvas1);",
+                                "onClick": "call drawCircleInCell(cell1);",
                                 "style": "-fx-cursor: hand; -fx-border-color: #666666; -fx-border-width: 2;"
                             }
                         },
@@ -182,7 +133,7 @@ screen fourCellsScreen = {
                             "varRef": "canvas2",
                             "display": {
                                 "type": "canvas",
-                                "onClick": "call drawCircleInCellViaImage(cell2, tempCanvas2);",
+                                "onClick": "call drawCircleInCell(cell2);",
                                 "style": "-fx-cursor: hand; -fx-border-color: #666666; -fx-border-width: 2;"
                             }
                         },
