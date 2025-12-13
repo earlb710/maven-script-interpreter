@@ -7,6 +7,7 @@
 // Features:
 //   - 4 canvas cells arranged in a 2x2 GridPane
 //   - Click on any cell to draw a circle with random color and size
+//   - Circles are drawn directly on canvas using draw.circle()
 //   - Each cell is 200x200 pixels
 //
 // Usage:
@@ -41,7 +42,7 @@ toHex(num: int) return string {
     return result;
 }
 
-// Function to draw a circle in a specific cell with random color and size
+// Function to draw a circle with random color and size directly on a canvas
 drawCircleInCell(cellCanvas: canvas) {
     // Clear the cell with light gray background
     call style.setFill(cellCanvas, "#f0f0f0");
