@@ -19,6 +19,7 @@ import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,6 +32,22 @@ public class InterpreterScreen {
 
     private final InterpreterContext context;
     private final Interpreter interpreter;
+    
+    /**
+     * Set of properties that belong at the item level, not in display definitions.
+     * These properties are specific to AreaItem and should be filtered out when
+     * an item definition is used as a display definition.
+     */
+    private static final java.util.Set<String> ITEM_ONLY_PROPERTIES = java.util.Set.of(
+        "hgrow", "vgrow", "margin", "padding",
+        "prefwidth", "pref_width", "prefheight", "pref_height",
+        "minwidth", "min_width", "minheight", "min_height",
+        "maxwidth", "max_width", "maxheight", "max_height",
+        "colspan", "col_span", "rowspan", "row_span",
+        "layoutpos", "layout_pos", "relativepos", "relative_pos",
+        "varref", "var_ref", "name", "editable", "disabled", "visible", "tooltip",
+        "textcolor", "text_color", "backgroundcolor", "background_color"
+    );
 
     public InterpreterScreen(InterpreterContext context, Interpreter interpreter) {
         this.context = context;
@@ -1564,6 +1581,28 @@ public class InterpreterScreen {
     }
 
     /**
+     * Filters out item-level properties from an item definition, leaving only
+     * display-level properties. This is used when an item definition is used
+     * as a display definition (e.g., for button items without varRef).
+     * 
+     * @param itemDef The item definition map
+     * @return A new map with only display-level properties
+     */
+    private Map<String, Object> filterItemLevelProperties(Map<String, Object> itemDef) {
+        // Create a new map with only display-level properties
+        // Initialize with itemDef size as upper bound for better performance
+        Map<String, Object> displayDef = new HashMap<>(itemDef.size());
+        for (Map.Entry<String, Object> entry : itemDef.entrySet()) {
+            String lowerKey = entry.getKey().toLowerCase();
+            if (!ITEM_ONLY_PROPERTIES.contains(lowerKey)) {
+                displayDef.put(entry.getKey(), entry.getValue());
+            }
+        }
+        
+        return displayDef;
+    }
+
+    /**
      * Validates that only valid properties are present in a display definition.
      * Throws RuntimeException if invalid properties (like hgrow, vgrow) are found.
      */
@@ -1602,22 +1641,10 @@ public class InterpreterScreen {
             "source", "status"
         ));
         
-        // Properties that should NOT be in display (they belong to AreaItem)
-        java.util.Set<String> itemOnlyProps = new java.util.HashSet<>(java.util.Arrays.asList(
-            "hgrow", "vgrow", "margin", "padding",
-            "prefwidth", "pref_width", "prefheight", "pref_height",
-            "minwidth", "min_width", "minheight", "min_height",
-            "maxwidth", "max_width", "maxheight", "max_height",
-            "colspan", "col_span", "rowspan", "row_span",
-            "layoutpos", "layout_pos", "relativepos", "relative_pos",
-            "varref", "var_ref", "name", "editable", "disabled", "visible", "tooltip",
-            "textcolor", "text_color", "backgroundcolor", "background_color"
-        ));
-        
         // Check for invalid properties
         for (String key : displayDef.keySet()) {
             String lowerKey = key.toLowerCase();
-            if (itemOnlyProps.contains(lowerKey)) {
+            if (ITEM_ONLY_PROPERTIES.contains(lowerKey)) {
                 throw new RuntimeException(
                     String.format("Invalid property '%s' in display definition for screen '%s'. " +
                                 "This property belongs at the item level, not in the display object. " +
@@ -1656,6 +1683,8 @@ public class InterpreterScreen {
             "minwidth", "min_width", "minheight", "min_height",
             "maxwidth", "max_width", "maxheight", "max_height",
             "alignment",
+            // Styling
+            "style",
             // Event handlers (should be at item level, not in display object)
             // Note: Event handlers belong at the item level to bind to the specific item instance.
             // The display object is only for shared display/rendering properties.
@@ -2471,7 +2500,9 @@ public class InterpreterScreen {
                                    getCaseInsensitive(itemDef, "varref") == null) {
                             // If item has a direct "type" property (e.g., button, label) without a varRef,
                             // treat the item definition itself as the display definition
-                            item.displayItem = parseDisplayItem(itemDef, screenName);
+                            // Filter out item-level properties before passing to parseDisplayItem
+                            Map<String, Object> displayDef = filterItemLevelProperties(itemDef);
+                            item.displayItem = parseDisplayItem(displayDef, screenName);
                         }
                         // If displayItem is not set here, it will remain null
                         // and the consuming code should fall back to using varRef's DisplayItem
