@@ -165,27 +165,27 @@ var structureChildren: array[*];
 var tempNode: json;
 
 tempNode = call json.jsonFromString("{}");
-tempNode = call json.set(tempNode, "value", "structure_basic");
+tempNode = call json.set(tempNode, "value", "Basic");
 tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
 call array.add(structureChildren, tempNode);
 
 tempNode = call json.jsonFromString("{}");
-tempNode = call json.set(tempNode, "value", "structure_variables");
+tempNode = call json.set(tempNode, "value", "Variables");
 tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
 call array.add(structureChildren, tempNode);
 
 tempNode = call json.jsonFromString("{}");
-tempNode = call json.set(tempNode, "value", "structure_operators");
+tempNode = call json.set(tempNode, "value", "Operators");
 tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
 call array.add(structureChildren, tempNode);
 
 tempNode = call json.jsonFromString("{}");
-tempNode = call json.set(tempNode, "value", "structure_functions");
+tempNode = call json.set(tempNode, "value", "Functions");
 tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
 call array.add(structureChildren, tempNode);
 
 tempNode = call json.jsonFromString("{}");
-tempNode = call json.set(tempNode, "value", "structure_imports");
+tempNode = call json.set(tempNode, "value", "Imports");
 tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
 call array.add(structureChildren, tempNode);
 
@@ -215,13 +215,13 @@ var syntaxChildren: array[*];
 
 // Add Getting Started as first item
 tempNode = call json.jsonFromString("{}");
-tempNode = call json.set(tempNode, "value", "getting_started");
+tempNode = call json.set(tempNode, "value", "Getting started");
 tempNode = call json.set(tempNode, "icon", "icons/help-page.png");
 call array.add(syntaxChildren, tempNode);
 
 // Use json.jsonFromString to create a fresh JSON object to avoid circular references
 var structureNode: json = call json.jsonFromString("{}");
-structureNode = call json.set(structureNode, "value", "structure");
+structureNode = call json.set(structureNode, "value", "Structure");
 structureNode = call json.set(structureNode, "icon", "icons/tree-node.png");
 structureNode = call json.set(structureNode, "expanded", false);
 structureNode = call json.set(structureNode, "children", structureChildren);
@@ -272,7 +272,7 @@ call array.add(dataChildren, tempNode);
 
 // Use json.jsonFromString to create a fresh JSON object to avoid circular references
 var dataNode: json = call json.jsonFromString("{}");
-dataNode = call json.set(dataNode, "value", "data");
+dataNode = call json.set(dataNode, "value", "Data");
 dataNode = call json.set(dataNode, "icon", "icons/tree-node.png");
 dataNode = call json.set(dataNode, "expanded", false);
 dataNode = call json.set(dataNode, "children", dataChildren);
@@ -303,7 +303,7 @@ call array.add(collectionsChildren, tempNode);
 
 // Use json.jsonFromString to create a fresh JSON object to avoid circular references
 var collectionsNode: json = call json.jsonFromString("{}");
-collectionsNode = call json.set(collectionsNode, "value", "collections");
+collectionsNode = call json.set(collectionsNode, "value", "Collections");
 collectionsNode = call json.set(collectionsNode, "icon", "icons/tree-node.png");
 collectionsNode = call json.set(collectionsNode, "expanded", false);
 collectionsNode = call json.set(collectionsNode, "children", collectionsChildren);
@@ -311,20 +311,20 @@ call array.add(syntaxChildren, collectionsNode);
 
 // Use json.jsonFromString to create a fresh JSON object to avoid circular references
 var flowNode: json = call json.jsonFromString("{}");
-flowNode = call json.set(flowNode, "value", "flow");
+flowNode = call json.set(flowNode, "value", "Flow");
 flowNode = call json.set(flowNode, "icon", "icons/tree-node.png");
 flowNode = call json.set(flowNode, "expanded", false);
 flowNode = call json.set(flowNode, "children", flowChildren);
 call array.add(syntaxChildren, flowNode);
 
 tempNode = call json.jsonFromString("{}");
-tempNode = call json.set(tempNode, "value", "keywords");
+tempNode = call json.set(tempNode, "value", "Keywords");
 tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
 call array.add(syntaxChildren, tempNode);
 
 // Use json.jsonFromString to create a fresh JSON object to avoid circular references
 var builtinsNode: json = call json.jsonFromString("{}");
-builtinsNode = call json.set(builtinsNode, "value", "builtins");
+builtinsNode = call json.set(builtinsNode, "value", "Builtins");
 builtinsNode = call json.set(builtinsNode, "icon", "icons/tree-node.png");
 builtinsNode = call json.set(builtinsNode, "expanded", false);
 builtinsNode = call json.set(builtinsNode, "children", builtinChildren);
@@ -334,28 +334,28 @@ call array.add(syntaxChildren, builtinsNode);
 var screenChildren: array[*];
 
 tempNode = call json.jsonFromString("{}");
-tempNode = call json.set(tempNode, "value", "screen_data");
+tempNode = call json.set(tempNode, "value", "Screen data");
 tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
 call array.add(screenChildren, tempNode);
 
 tempNode = call json.jsonFromString("{}");
-tempNode = call json.set(tempNode, "value", "screen_display");
+tempNode = call json.set(tempNode, "value", "Screen display");
 tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
 call array.add(screenChildren, tempNode);
 
 tempNode = call json.jsonFromString("{}");
-tempNode = call json.set(tempNode, "value", "screen_areas");
+tempNode = call json.set(tempNode, "value", "Screen areas");
 tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
 call array.add(screenChildren, tempNode);
 
 tempNode = call json.jsonFromString("{}");
-tempNode = call json.set(tempNode, "value", "screen_items");
+tempNode = call json.set(tempNode, "value", "Screen items");
 tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
 call array.add(screenChildren, tempNode);
 
 // Create screen node with children
 var screenNode: json = call json.jsonFromString("{}");
-screenNode = call json.set(screenNode, "value", "screen");
+screenNode = call json.set(screenNode, "value", "Screen");
 screenNode = call json.set(screenNode, "icon", "icons/tree-node.png");
 screenNode = call json.set(screenNode, "expanded", false);
 screenNode = call json.set(screenNode, "children", screenChildren);
@@ -805,6 +805,48 @@ getHelpContent(topic: string) return string {
         }
     }
     
+    // Map renamed tree node display names to topic keys
+    // These mappings ensure the new display names (without underscores) map to the correct topic keys
+    if topic == "Getting started" then {
+        topic = "getting_started";
+    }
+    if topic == "Structure" then {
+        topic = "structure";
+    }
+    if topic == "Basic" then {
+        topic = "structure_basic";
+    }
+    if topic == "Variables" then {
+        topic = "structure_variables";
+    }
+    if topic == "Operators" then {
+        topic = "structure_operators";
+    }
+    if topic == "Functions" then {
+        topic = "structure_functions";
+    }
+    if topic == "Imports" then {
+        topic = "structure_imports";
+    }
+    if topic == "Data" then {
+        topic = "data";
+    }
+    if topic == "Collections" then {
+        topic = "collections";
+    }
+    if topic == "Flow" then {
+        topic = "flow";
+    }
+    if topic == "Keywords" then {
+        topic = "keywords";
+    }
+    if topic == "Builtins" then {
+        topic = "builtins";
+    }
+    if topic == "Screen" then {
+        topic = "screen";
+    }
+    
     // Map flow display names to topic keys
     if topic == "Conditionals" then {
         topic = "flow_conditionals";
@@ -817,6 +859,20 @@ getHelpContent(topic: string) return string {
     }
     if topic == "Exception Handling" then {
         topic = "flow_exceptions";
+    }
+    
+    // Map screen sub-topic display names to topic keys
+    if topic == "Screen data" then {
+        topic = "screen_data";
+    }
+    if topic == "Screen display" then {
+        topic = "screen_display";
+    }
+    if topic == "Screen areas" then {
+        topic = "screen_areas";
+    }
+    if topic == "Screen items" then {
+        topic = "screen_items";
     }
     
     // Map collections display names to topic keys
