@@ -87,6 +87,15 @@ public class Parser {
     private final String source;
 
     public static RuntimeContext parse(Path file) throws IOException, ParseError {
+        // Check if this is a packaged .ebsp file
+        if (file.toString().toLowerCase().endsWith(".ebsp")) {
+            try {
+                return com.eb.script.package_tool.RuntimeContextSerializer.deserialize(file);
+            } catch (ClassNotFoundException e) {
+                throw new ParseError("Error loading packaged script: " + e.getMessage());
+            }
+        }
+        
         String script = Files.readString(file, StandardCharsets.UTF_8);
 
         List<EbsToken> tokens = lexer.tokenize(script);

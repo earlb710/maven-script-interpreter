@@ -164,6 +164,9 @@ public class EbsConsoleHandler extends EbsHandler {
                     } else if (cmd.startsWith("/debug")) {
                         handleDebug(output, cmd);
                         continue;
+                    } else if (cmd.startsWith("/package")) {
+                        handlePackage(output, line);
+                        continue;
                     } else {
                         // Check if /help has a parameter
                         if (cmd.startsWith("/help ") || cmd.startsWith("/?")) {
@@ -204,6 +207,7 @@ public class EbsConsoleHandler extends EbsHandler {
                                 output.println("  <b>/list open files</b> <i>- list open filenames</i>");
                                 output.println("  <b>/echo  [on|off]</b>  <i>- toggle interpreter echo flag (current: " + (env.isEchoOn() ? "on" : "off") + ")");
                                 output.println("  <b>/debug [on|off|trace on|trace off]</b> <i>- toggle interpreter debug/trace flags");
+                                output.println("  <b>/package &lt;input.ebs&gt; [output.ebsp]</b> <i>- package script to binary .ebsp file");
                                 output.println("  <b>/exit</b>            <i>- close console</i>");
                                 continue;
 
@@ -287,6 +291,46 @@ public class EbsConsoleHandler extends EbsHandler {
             return;
         }
         output.printlnWarn("usage: /debug on|off | /debug trace on|off");
+    }
+
+    private void handlePackage(ScriptArea output, String line) {
+        try {
+            String[] parts = Util.splitArgsAllowingQuotes(line.substring(line.indexOf(' ')).trim());
+            
+            if (parts.length == 0) {
+                output.printlnWarn("usage: /package <input.ebs> [output.ebsp]");
+                return;
+            }
+            
+            String inputFile = parts[0];
+            String outputFile = parts.length > 1 ? parts[1] : inputFile.replaceAll("\\.ebs$", "") + ".ebsp";
+            
+            Path inputPath = Util.resolveSandboxedPath(inputFile);
+            Path outputPath = Util.resolveSandboxedPath(outputFile);
+            
+            if (!Files.exists(inputPath)) {
+                output.printlnError("Input file not found: " + inputFile);
+                return;
+            }
+            
+            output.printlnInfo("Parsing: " + inputFile);
+            RuntimeContext context = com.eb.script.parser.Parser.parse(inputPath);
+            
+            output.printlnInfo("Packaging to: " + outputFile);
+            com.eb.script.package_tool.RuntimeContextSerializer.serialize(context, outputPath);
+            
+            long originalSize = Files.size(inputPath);
+            long packagedSize = Files.size(outputPath);
+            output.printlnOk("Package created successfully!");
+            output.println("  Original size: " + originalSize + " bytes");
+            output.println("  Packaged size: " + packagedSize + " bytes");
+            output.println("  Compression: " + String.format("%.1f%%", 
+                (1.0 - (double)packagedSize / originalSize) * 100));
+            
+        } catch (Exception e) {
+            output.printlnError("Error packaging script: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private void displayDetailedHelp(ScriptArea output, String itemName) {
