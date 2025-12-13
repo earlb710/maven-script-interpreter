@@ -454,8 +454,12 @@ public class EbsTab extends Tab {
         // Decide if we treat as text or binary:
 
         boolean isEbs = ext.equalsIgnoreCase(".ebs");
+        boolean isJson = ext.equalsIgnoreCase(".json");
+        boolean isCss = ext.equalsIgnoreCase(".css");
+        boolean isHtml = ext.equalsIgnoreCase(".html");
+        boolean isEditable = isEbs || isJson || isCss || isHtml;
 
-        if (isEbs) {
+        if (isEditable) {
             dispArea.setEditable(true);               // enable edits for textual content
             dispArea.getStyleClass().add("editor-ebs");
             setupLexerHighlighting();             // <— hook the EbsLexer here
