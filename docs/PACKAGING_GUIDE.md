@@ -156,11 +156,11 @@ Parsing: calculator.ebs
 Packaging to: calculator.ebsp
 Original size: 312 bytes
 Packaged size: 1847 bytes
-Compression: -492.6%
+Size increase: 492.6%
 Successfully packaged to: calculator.ebsp
 ```
 
-**Note**: The packaged size may be larger than the original source because it includes the full serialized AST. This is a trade-off for source code protection and faster loading.
+**Note**: The packaged size is typically larger than the original source because it includes the full serialized AST structure with type information, line numbers, and parsed expressions. This is a trade-off for source code protection and faster loading (no parsing required).
 
 ### 3. Distribute the Package
 

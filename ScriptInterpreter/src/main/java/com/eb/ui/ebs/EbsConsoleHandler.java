@@ -303,7 +303,7 @@ public class EbsConsoleHandler extends EbsHandler {
             }
             
             String inputFile = parts[0];
-            String outputFile = parts.length > 1 ? parts[1] : inputFile.replaceAll("\\.ebs$", "") + ".ebsp";
+            String outputFile = parts.length > 1 ? parts[1] : inputFile.replaceAll("(?i)\\.ebs$", "") + ".ebsp";
             
             Path inputPath = Util.resolveSandboxedPath(inputFile);
             Path outputPath = Util.resolveSandboxedPath(outputFile);
@@ -324,8 +324,14 @@ public class EbsConsoleHandler extends EbsHandler {
             output.printlnOk("Package created successfully!");
             output.println("  Original size: " + originalSize + " bytes");
             output.println("  Packaged size: " + packagedSize + " bytes");
-            output.println("  Compression: " + String.format("%.1f%%", 
-                (1.0 - (double)packagedSize / originalSize) * 100));
+            
+            if (packagedSize < originalSize) {
+                output.println("  Size reduction: " + String.format("%.1f%%", 
+                    (1.0 - (double)packagedSize / originalSize) * 100));
+            } else {
+                output.println("  Size increase: " + String.format("%.1f%%", 
+                    ((double)packagedSize / originalSize - 1.0) * 100));
+            }
             
         } catch (Exception e) {
             output.printlnError("Error packaging script: " + e.getMessage());

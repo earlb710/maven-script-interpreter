@@ -1947,7 +1947,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 }
                 // If not found and filename ends with .ebs, try .ebsp
                 if (filename.toLowerCase().endsWith(".ebs")) {
-                    Path packagedPath = scriptDir.resolve(filename.replaceAll("\\.ebs$", ".ebsp"));
+                    Path packagedPath = scriptDir.resolve(filename.replaceAll("(?i)\\.ebs$", ".ebsp"));
                     if (Files.exists(packagedPath)) {
                         return packagedPath;
                     }
@@ -1963,7 +1963,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         
         // Try .ebsp in current working directory if .ebs not found
         if (filename.toLowerCase().endsWith(".ebs")) {
-            Path packagedPath = Path.of(filename.replaceAll("\\.ebs$", ".ebsp"));
+            Path packagedPath = Path.of(filename.replaceAll("(?i)\\.ebs$", ".ebsp"));
             if (Files.exists(packagedPath)) {
                 return packagedPath;
             }

@@ -57,7 +57,7 @@ public class EbsPackager {
             // If no output file specified, use first input file with .ebsp extension
             if (outputFile == null) {
                 String firstInput = inputFiles.get(0);
-                outputFile = firstInput.replaceAll("\\.ebs$", "") + ".ebsp";
+                outputFile = firstInput.replaceAll("(?i)\\.ebs$", "") + ".ebsp";
             }
             
             // Package the script(s)
@@ -98,8 +98,14 @@ public class EbsPackager {
         long packagedSize = Files.size(outputPath);
         System.out.println("Original size: " + originalSize + " bytes");
         System.out.println("Packaged size: " + packagedSize + " bytes");
-        System.out.println("Compression: " + String.format("%.1f%%", 
-            (1.0 - (double)packagedSize / originalSize) * 100));
+        
+        if (packagedSize < originalSize) {
+            System.out.println("Size reduction: " + String.format("%.1f%%", 
+                (1.0 - (double)packagedSize / originalSize) * 100));
+        } else {
+            System.out.println("Size increase: " + String.format("%.1f%%", 
+                ((double)packagedSize / originalSize - 1.0) * 100));
+        }
     }
     
     /**
