@@ -21,27 +21,27 @@ var iconPath = call scr.getTreeItemIcon(screenName, itemPath);
 
 | Type | Icon Path | Usage |
 |------|-----------|-------|
-| **Folders** |
+| **Folders** | | |
 | Regular folder | `icons/folder.png` | Closed folder |
 | Open folder | `icons/folder-open.png` | Expanded folder |
 | Favorite folder | `icons/folder_fav.png` | Bookmarked/starred folder |
 | Linked folder | `icons/folder_ref.png` | External/linked folder |
-| **Script Files** |
+| **Script Files** | | |
 | Regular script | `icons/script-file.png` | Normal .ebs file |
 | Main script | `icons/script-file-run.png` | Executable/main .ebs file |
 | Missing script | `icons/script-file-missing.png` | File not found (red) |
-| **Configuration Files** |
+| **Configuration Files** | | |
 | JSON | `icons/config-file.png` | .json files |
 | CSS | `icons/css-file.png` | .css files |
 | XML | `icons/xml-file.png` | .xml files |
-| **Documentation** |
+| **Documentation** | | |
 | Markdown | `icons/markdown-file.png` | .md files |
 | Text | `icons/text-file.png` | .txt files |
-| **Code Files** |
+| **Code Files** | | |
 | Java | `icons/java-file.png` | .java files |
-| **Media** |
+| **Media** | | |
 | Image | `icons/image-file.png` | .png, .jpg, .gif files |
-| **Other** |
+| **Other** | | |
 | Generic file | `icons/file.png` | Any other file type |
 | Git file | `icons/git-file.png` | .gitignore, etc. |
 | Project | `icons/project.png` | Project root |

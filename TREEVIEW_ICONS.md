@@ -103,7 +103,7 @@ Root
 
 ## Available Icons
 
-The EBS runtime includes the following built-in icons in the `/icons/` directory:
+The EBS runtime includes the following built-in icons in the `icons/` directory:
 
 ### File Icons
 - `icons/file.png` - Generic file
