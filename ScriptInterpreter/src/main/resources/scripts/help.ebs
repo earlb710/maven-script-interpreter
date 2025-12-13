@@ -521,6 +521,9 @@ convertToHtml(text: string) return string {
     // Remove extra <br> after <hr> tags
     bodyContent = call str.replace(bodyContent, "<hr><br>", "<hr>");
     
+    // Remove extra <br> between heading and <hr>
+    bodyContent = call str.replace(bodyContent, "</h2><br><hr>", "</h2><hr>");
+    
     // Wrap in HTML structure without pre tag
     var result: string = "<!DOCTYPE html><html><head><style>";
     result = result + "body { margin: 10px; font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 12px; }";
