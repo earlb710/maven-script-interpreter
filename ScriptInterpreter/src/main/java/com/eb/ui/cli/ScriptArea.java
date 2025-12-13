@@ -605,9 +605,10 @@ public class ScriptArea extends StyleClassedTextArea {
         char charBeforeCaret = (caretPos > 0) ? text.charAt(caretPos - 1) : '\0';
         
         // Check for quotes first (they take precedence when on the character)
-        if (isQuote(charAtCaret)) {
+        // But skip escaped quotes
+        if (isQuote(charAtCaret) && !isEscaped(text, caretPos)) {
             highlightQuotePair(text, caretPos, charAtCaret);
-        } else if (isQuote(charBeforeCaret)) {
+        } else if (isQuote(charBeforeCaret) && !isEscaped(text, caretPos - 1)) {
             // Also check the character before the caret (when cursor is after a quote)
             highlightQuotePair(text, caretPos - 1, charBeforeCaret);
         } else if (isOpenBracket(charAtCaret)) {
