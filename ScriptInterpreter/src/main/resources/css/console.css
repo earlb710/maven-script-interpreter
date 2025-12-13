@@ -217,6 +217,11 @@
     -fx-stroke: white;
 }
 
+/* Default text styling for unstyled/normal text in editors */
+.editor-ebs .text,
+.editor-text .text {
+    -fx-fill: #ffffff; /* white for normal/unstyled text */
+}
 
 /* Console input field */
 .console-in .text-area,
