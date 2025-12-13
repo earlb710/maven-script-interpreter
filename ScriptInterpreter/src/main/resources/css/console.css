@@ -196,8 +196,8 @@
     -fx-font-family: "Consolas", "Menlo", "JetBrains Mono", monospace;
     -fx-font-size: 12px;
     -fx-control-inner-background: #0f1116;
-    -fx-text-fill: #e6e6e6;
-    -fx-fill: #e6e6e6;
+    -fx-text-fill: #ffffff;
+    -fx-fill: #ffffff;
     -fx-padding: 8;
 }
 .editor-ebs .caret {
@@ -209,8 +209,8 @@
     -fx-font-family: "Consolas", "Menlo", "JetBrains Mono", monospace;
     -fx-font-size: 12px;
     -fx-control-inner-background: #0f1116;
-    -fx-text-fill: #e6e6e6;
-    -fx-fill: #e6e6e6;
+    -fx-text-fill: #ffffff;
+    -fx-fill: #ffffff;
     -fx-padding: 8;
 }
 .editor-text .caret {
