@@ -112,7 +112,7 @@ print "  3 decimals: " + str3;
 print "  Default:    " + strDefault;
 
 // Check that strDefault has 3 decimals (contains a dot and 3 digits after)
-if call string.contains(strDefault, ".") then {
+if call str.contains(strDefault, ".") then {
     print "  ✓ Default format includes decimal point";
     testsPassed = testsPassed + 1;
 } else {
@@ -228,7 +228,7 @@ call thread.sleep(500);
 call timer.stop("continue_format");
 var contStr : string = call timer.getContinuePeriodString("continue_format", 2);
 print "  Continue period formatted: " + contStr;
-if call string.contains(contStr, ".") then {
+if call str.contains(contStr, ".") then {
     print "  ✓ Continue period string formatted correctly";
     testsPassed = testsPassed + 1;
 } else {

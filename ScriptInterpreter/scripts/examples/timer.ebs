@@ -169,8 +169,8 @@ call timer.start("string_ops");
 var text : string = "Hello, World!";
 var i2 : int = 0;
 while i2 < 1000 {
-    var upper = call string.toUpper(text);
-    var lower = call string.toLower(text);
+    var upper = call str.toUpper(text);
+    var lower = call str.toLower(text);
     i2 = i2 + 1;
 }
 
