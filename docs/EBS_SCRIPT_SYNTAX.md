@@ -30,6 +30,9 @@ EBS (Earl Bosch Script) is a dynamically-typed scripting language with:
 - Rich set of built-in functions
 - Interactive REPL environment
 
+### Quick References
+For a comprehensive overview of collection types (arrays, queues, maps, JSON), see **[EBS Collections Reference](EBS_COLLECTIONS_REFERENCE.md)**.
+
 ## Basic Syntax
 
 ### Program Structure
@@ -1646,6 +1649,8 @@ findMax(a: int, b: int) return int {
 ---
 
 ## Arrays
+
+> **See Also**: For a comprehensive overview of all collection types including arrays, queues, maps, and JSON with comparison tables and usage guidance, see **[EBS Collections Reference](EBS_COLLECTIONS_REFERENCE.md)**.
 
 ### Array Declaration
 
