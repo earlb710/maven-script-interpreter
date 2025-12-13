@@ -463,7 +463,13 @@ public class EbsTab extends Tab {
         if (isEditable) {
             dispArea.setEditable(true);               // enable edits for textual content
             dispArea.getStyleClass().add("editor-ebs");
-            setupLexerHighlighting();             // <— hook the EbsLexer here
+            
+            // Choose appropriate highlighting based on file type
+            if (isCss) {
+                setupCssHighlighting();
+            } else {
+                setupLexerHighlighting();             // <— hook the EbsLexer here
+            }
         } else {
             dispArea.getStyleClass().add("editor-text");
             setupLexerHighlighting();             // optional: you can highlight non-.ebs tokens too
@@ -795,6 +801,132 @@ public class EbsTab extends Tab {
         return builder.create();
     }
 
+// ---------- CSS syntax highlighting ----------
+    private static final String[] CSS_PROPERTIES = new String[]{
+        "align-content", "align-items", "align-self", "animation", "animation-delay",
+        "animation-direction", "animation-duration", "animation-fill-mode", "animation-iteration-count",
+        "animation-name", "animation-play-state", "animation-timing-function", "backface-visibility",
+        "background", "background-attachment", "background-clip", "background-color", "background-image",
+        "background-origin", "background-position", "background-repeat", "background-size", "border",
+        "border-bottom", "border-bottom-color", "border-bottom-left-radius", "border-bottom-right-radius",
+        "border-bottom-style", "border-bottom-width", "border-collapse", "border-color", "border-image",
+        "border-left", "border-left-color", "border-left-style", "border-left-width", "border-radius",
+        "border-right", "border-right-color", "border-right-style", "border-right-width", "border-spacing",
+        "border-style", "border-top", "border-top-color", "border-top-left-radius", "border-top-right-radius",
+        "border-top-style", "border-top-width", "border-width", "bottom", "box-shadow", "box-sizing",
+        "caption-side", "clear", "clip", "color", "column-count", "column-gap", "column-rule",
+        "column-rule-color", "column-rule-style", "column-rule-width", "column-width", "columns",
+        "content", "counter-increment", "counter-reset", "cursor", "direction", "display",
+        "empty-cells", "filter", "flex", "flex-basis", "flex-direction", "flex-flow", "flex-grow",
+        "flex-shrink", "flex-wrap", "float", "font", "font-family", "font-size", "font-size-adjust",
+        "font-stretch", "font-style", "font-variant", "font-weight", "grid", "grid-area", "grid-auto-columns",
+        "grid-auto-flow", "grid-auto-rows", "grid-column", "grid-column-end", "grid-column-gap",
+        "grid-column-start", "grid-gap", "grid-row", "grid-row-end", "grid-row-gap", "grid-row-start",
+        "grid-template", "grid-template-areas", "grid-template-columns", "grid-template-rows",
+        "height", "justify-content", "left", "letter-spacing", "line-height", "list-style",
+        "list-style-image", "list-style-position", "list-style-type", "margin", "margin-bottom",
+        "margin-left", "margin-right", "margin-top", "max-height", "max-width", "min-height",
+        "min-width", "opacity", "order", "outline", "outline-color", "outline-offset", "outline-style",
+        "outline-width", "overflow", "overflow-x", "overflow-y", "padding", "padding-bottom",
+        "padding-left", "padding-right", "padding-top", "page-break-after", "page-break-before",
+        "page-break-inside", "perspective", "perspective-origin", "position", "quotes", "resize",
+        "right", "tab-size", "table-layout", "text-align", "text-align-last", "text-decoration",
+        "text-decoration-color", "text-decoration-line", "text-decoration-style", "text-indent",
+        "text-justify", "text-overflow", "text-shadow", "text-transform", "top", "transform",
+        "transform-origin", "transform-style", "transition", "transition-delay", "transition-duration",
+        "transition-property", "transition-timing-function", "vertical-align", "visibility",
+        "white-space", "width", "word-break", "word-spacing", "word-wrap", "z-index"
+    };
+    
+    private static final Pattern CSS_PATTERN = buildCssPattern();
+    
+    private static Pattern buildCssPattern() {
+        // Build property alternations
+        String props = "\\b(?:" + String.join("|", CSS_PROPERTIES) + ")\\b";
+        
+        // CSS Tokens
+        String COMMENT = "/\\*[^*]*\\*+(?:[^/*][^*]*\\*+)*/";  // /* ... */
+        String SELECTOR = "(?:[.#]?[a-zA-Z_][a-zA-Z0-9_-]*|\\*|\\[[^\\]]+\\]|:[a-zA-Z_-]+(?:\\([^)]*\\))?)";  // .class, #id, tag, *, [attr], :pseudo
+        String PROPERTY = props;
+        String COLOR = "#[0-9a-fA-F]{3,8}\\b";  // #rgb, #rrggbb, #rrggbbaa
+        String UNIT = "\\b\\d+(?:\\.\\d+)?(?:px|em|rem|%|vh|vw|vmin|vmax|cm|mm|in|pt|pc|ex|ch|deg|rad|turn|s|ms)\\b";
+        String NUMBER = "\\b\\d+(?:\\.\\d+)?\\b";
+        String STRING_DQ = "\"([^\"\\\\]|\\\\.)*\"";
+        String STRING_SQ = "'([^'\\\\]|\\\\.)*'";
+        String IMPORTANT = "!important\\b";
+        String AT_RULE = "@[a-zA-Z_-]+";  // @media, @import, @keyframes, etc.
+        
+        // Use named groups
+        String master =
+                "(?<COMMENT>" + COMMENT + ")"
+                + "|(?<ATRULE>" + AT_RULE + ")"
+                + "|(?<IMPORTANT>" + IMPORTANT + ")"
+                + "|(?<PROPERTY>" + PROPERTY + ")"
+                + "|(?<COLOR>" + COLOR + ")"
+                + "|(?<STRING>" + STRING_DQ + "|" + STRING_SQ + ")"
+                + "|(?<UNIT>" + UNIT + ")"
+                + "|(?<NUMBER>" + NUMBER + ")"
+                + "|(?<SELECTOR>" + SELECTOR + ")";
+        
+        return Pattern.compile(master, Pattern.MULTILINE);
+    }
+    
+    private void setupCssHighlighting() {
+        // Initial highlight
+        applyCssHighlighting(dispArea.getText());
+        
+        // Re-highlight after pauses in typing using ReactFX's debouncing
+        dispArea.multiPlainChanges()
+                .successionEnds(java.time.Duration.ofMillis(100))
+                .subscribe(ignore -> applyCssHighlighting(dispArea.getText()));
+    }
+    
+    private void applyCssHighlighting(String text) {
+        StyleSpans<Collection<String>> spans = computeCssHighlighting(text);
+        
+        // Preserve scroll position when applying style spans
+        double scrollY = dispArea.getEstimatedScrollY();
+        
+        dispArea.setStyleSpans(0, spans);
+        
+        // Restore scroll position after style update
+        Platform.runLater(() -> {
+            dispArea.scrollYToPixel(scrollY);
+            dispArea.highlightMatchingBrackets();
+        });
+    }
+    
+    private StyleSpans<Collection<String>> computeCssHighlighting(String text) {
+        Matcher m = CSS_PATTERN.matcher(text);
+        int last = 0;
+        StyleSpansBuilder<Collection<String>> builder = new StyleSpansBuilder<>();
+        
+        while (m.find()) {
+            // gap (unstyled)
+            builder.add(Collections.emptyList(), m.start() - last);
+            
+            String styleClass =
+                    m.group("COMMENT") != null ? "tok-comment"
+                    : m.group("ATRULE") != null ? "tok-keyword"
+                    : m.group("IMPORTANT") != null ? "tok-keyword"
+                    : m.group("PROPERTY") != null ? "tok-builtin"
+                    : m.group("COLOR") != null ? "tok-string"
+                    : m.group("STRING") != null ? "tok-string"
+                    : m.group("UNIT") != null ? "tok-number"
+                    : m.group("NUMBER") != null ? "tok-number"
+                    : m.group("SELECTOR") != null ? "tok-type" : null;
+            
+            builder.add(styleClass == null ? Collections.emptyList()
+                    : Collections.singleton(styleClass),
+                    m.end() - m.start());
+            
+            last = m.end();
+        }
+        // tail
+        builder.add(Collections.emptyList(), text.length() - last);
+        return builder.create();
+    }
+
 // ---------- Lexer-based highlighter ----------
     private final EbsLexer ebsLexer = new EbsLexer();
 
@@ -819,6 +951,14 @@ public class EbsTab extends Tab {
             return;
         }
         
+        // Dispatch to appropriate highlighter based on file extension
+        boolean isCss = ext.equalsIgnoreCase(".css");
+        if (isCss) {
+            applyCssHighlighting(src);
+            return;
+        }
+        
+        // Default: use EBS lexer for all other files
         List<EbsToken> tokens = ebsLexer.tokenize(src); // returns List<EbsToken> with start/end/style
         // Build spans from token positions
         StyleSpansBuilder<Collection<String>> builder = new StyleSpansBuilder<>();
