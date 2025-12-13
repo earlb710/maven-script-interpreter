@@ -16,7 +16,7 @@ call style.setFill(testCanvas, "#FF6347");
 call draw.circle(testCanvas, 50, 50, 40, true);
 call style.setFill(testCanvas, "#FFFFFF");
 call draw.circle(testCanvas, 50, 50, 20, true);
-var testImage: image = call canvas.toImage(testCanvas);
+var testImage: imagedata = call canvas.toImage(testCanvas);
 
 // Draw the test image at different positions and sizes
 print "Drawing image at various positions...";

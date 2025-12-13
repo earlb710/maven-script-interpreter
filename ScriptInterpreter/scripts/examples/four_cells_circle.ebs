@@ -2,11 +2,13 @@
 // ================================
 // This script demonstrates a simple interactive screen with 4 cells
 // arranged in a 2x2 grid. When you click on any cell, a circle is
-// drawn in that cell.
+// drawn in that cell with random color and size.
 //
 // Features:
 //   - 4 canvas cells arranged in a 2x2 GridPane
-//   - Click on any cell to draw a circle
+//   - Left cells (1 & 2): Draw via image creation (canvas.toImage + draw.image)
+//   - Right cells (3 & 4): Draw directly on canvas (draw.circle)
+//   - Click on any cell to draw a circle with random color and size
 //   - Each cell is 200x200 pixels
 //
 // Usage:
@@ -17,6 +19,10 @@ var cell1: canvas = call canvas.create(200, 200, "cell1");
 var cell2: canvas = call canvas.create(200, 200, "cell2");
 var cell3: canvas = call canvas.create(200, 200, "cell3");
 var cell4: canvas = call canvas.create(200, 200, "cell4");
+
+// Create temporary canvases for image-based drawing (left cells)
+var tempCanvas1: canvas = call canvas.create(200, 200, "temp1");
+var tempCanvas2: canvas = call canvas.create(200, 200, "temp2");
 
 // Initialize all cells with a light gray background
 call style.setFill(cell1, "#f0f0f0");
@@ -31,26 +37,97 @@ call draw.rect(cell3, 0, 0, 200, 200, true);
 call style.setFill(cell4, "#f0f0f0");
 call draw.rect(cell4, 0, 0, 200, 200, true);
 
-// Function to draw a circle in a specific cell
+// Helper function to convert a number (0-255) to a 2-digit hex string
+toHex(num: int) return string {
+    var hexChars: string = "0123456789ABCDEF";
+    var high: int = num / 16;
+    var low: int = num - (high * 16);  // Calculate remainder without modulo operator
+    var result: string = call str.substring(hexChars, high, high + 1);
+    result = result + call str.substring(hexChars, low, low + 1);
+    return result;
+}
+
+// Function to draw a circle in a specific cell with random color and size (direct drawing)
 drawCircleInCell(cellCanvas: canvas) {
     // Clear the cell with light gray background
     call style.setFill(cellCanvas, "#f0f0f0");
     call draw.rect(cellCanvas, 0, 0, 200, 200, true);
     
-    // Draw a filled blue circle in the center of the cell
-    call style.setFill(cellCanvas, "#3366ff");
-    call draw.circle(cellCanvas, 100, 100, 60, true);
+    // Generate random RGB color (each component 0-255)
+    var r: int = call random.nextLong(256);
+    var g: int = call random.nextLong(256);
+    var b: int = call random.nextLong(256);
+    
+    // Convert RGB to hex color string
+    var colorHex: string = "#" + call toHex(r) + call toHex(g) + call toHex(b);
+    
+    // Generate random circle size (radius between 20 and 80, inclusive)
+    var radius: int = call random.nextLong(20, 81);
+    
+    // Draw a filled circle with random color in the center of the cell
+    call style.setFill(cellCanvas, colorHex);
+    call draw.circle(cellCanvas, 100, 100, radius, true);
+    
+    // Create a darker stroke color by reducing RGB values by 30% (minimum 0)
+    var strokeR: int = r * 7 / 10;
+    var strokeG: int = g * 7 / 10;
+    var strokeB: int = b * 7 / 10;
+    
+    var strokeHex: string = "#" + call toHex(strokeR) + call toHex(strokeG) + call toHex(strokeB);
     
     // Draw a stroke around the circle
-    call style.setStroke(cellCanvas, "#0033cc", 3);
-    call draw.circle(cellCanvas, 100, 100, 60, false);
+    call style.setStroke(cellCanvas, strokeHex, 3);
+    call draw.circle(cellCanvas, 100, 100, radius, false);
+}
+
+// Function to draw a circle via image (create image first, then display)
+drawCircleInCellViaImage(cellCanvas: canvas, tempCanvas: canvas) {
+    // Clear the cell with light gray background
+    call style.setFill(cellCanvas, "#f0f0f0");
+    call draw.rect(cellCanvas, 0, 0, 200, 200, true);
+    
+    // Generate random RGB color (each component 0-255)
+    var r: int = call random.nextLong(256);
+    var g: int = call random.nextLong(256);
+    var b: int = call random.nextLong(256);
+    
+    // Convert RGB to hex color string
+    var colorHex: string = "#" + call toHex(r) + call toHex(g) + call toHex(b);
+    
+    // Generate random circle size (radius between 20 and 80, inclusive)
+    var radius: int = call random.nextLong(20, 81);
+    
+    // Clear and draw on the temporary canvas
+    call style.setFill(tempCanvas, "#f0f0f0");
+    call draw.rect(tempCanvas, 0, 0, 200, 200, true);
+    
+    // Draw a filled circle with random color in the center
+    call style.setFill(tempCanvas, colorHex);
+    call draw.circle(tempCanvas, 100, 100, radius, true);
+    
+    // Create a darker stroke color by reducing RGB values by 30% (minimum 0)
+    var strokeR: int = r * 7 / 10;
+    var strokeG: int = g * 7 / 10;
+    var strokeB: int = b * 7 / 10;
+    
+    var strokeHex: string = "#" + call toHex(strokeR) + call toHex(strokeG) + call toHex(strokeB);
+    
+    // Draw a stroke around the circle
+    call style.setStroke(tempCanvas, strokeHex, 3);
+    call draw.circle(tempCanvas, 100, 100, radius, false);
+    
+    // Convert the temporary canvas to an image
+    var circleImage: imagedata = call canvas.toImage(tempCanvas);
+    
+    // Draw the image on the target canvas
+    call draw.image(cellCanvas, circleImage, 0, 0);
 }
 
 // Define the screen
 screen fourCellsScreen = {
     "title": "Four Cells - Click to Draw Circle",
-    "width": 440,
-    "height": 480,
+    "width": 500,
+    "height": 540,
     "sets": [
         {
             "setname": "main",
@@ -74,7 +151,7 @@ screen fourCellsScreen = {
                     "name": "titleLabel",
                     "display": {
                         "type": "label",
-                        "labelText": "Click on any cell to draw a circle",
+                        "labelText": "Click on any cell to draw a random circle",
                         "labelColor": "#ffffff",
                         "labelFontSize": "16px",
                         "labelBold": true
@@ -95,7 +172,7 @@ screen fourCellsScreen = {
                             "varRef": "canvas1",
                             "display": {
                                 "type": "canvas",
-                                "onClick": "call drawCircleInCell(cell1);",
+                                "onClick": "call drawCircleInCellViaImage(cell1, tempCanvas1);",
                                 "style": "-fx-cursor: hand; -fx-border-color: #666666; -fx-border-width: 2;"
                             }
                         },
@@ -105,7 +182,7 @@ screen fourCellsScreen = {
                             "varRef": "canvas2",
                             "display": {
                                 "type": "canvas",
-                                "onClick": "call drawCircleInCell(cell2);",
+                                "onClick": "call drawCircleInCellViaImage(cell2, tempCanvas2);",
                                 "style": "-fx-cursor: hand; -fx-border-color: #666666; -fx-border-width: 2;"
                             }
                         },
@@ -145,4 +222,4 @@ fourCellsScreen.canvas4 = cell4;
 // Show the screen
 show screen fourCellsScreen;
 
-print "Four cells screen shown. Click on any cell to draw a circle.";
+print "Four cells screen shown. Click on any cell to draw a random circle.";
