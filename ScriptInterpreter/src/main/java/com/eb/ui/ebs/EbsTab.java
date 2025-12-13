@@ -848,7 +848,7 @@ public class EbsTab extends Tab {
         String COMMENT = "/\\*[^*]*\\*+(?:[^/*][^*]*\\*+)*/";  // /* ... */
         String SELECTOR = "(?:[.#]?[a-zA-Z_][a-zA-Z0-9_-]*|\\*|\\[[^\\]]+\\]|:[a-zA-Z_-]+(?:\\([^)]*\\))?)";  // .class, #id, tag, *, [attr], :pseudo
         String PROPERTY = props;
-        String COLOR = "#[0-9a-fA-F]{3,8}\\b";  // #rgb, #rrggbb, #rrggbbaa
+        String COLOR = "(?:#[0-9a-fA-F]{3}\\b|#[0-9a-fA-F]{4}\\b|#[0-9a-fA-F]{6}\\b|#[0-9a-fA-F]{8}\\b)";  // #rgb, #rgba, #rrggbb, #rrggbbaa
         String UNIT = "\\b\\d+(?:\\.\\d+)?(?:px|em|rem|%|vh|vw|vmin|vmax|cm|mm|in|pt|pc|ex|ch|deg|rad|turn|s|ms)\\b";
         String NUMBER = "\\b\\d+(?:\\.\\d+)?\\b";
         String STRING_DQ = "\"([^\"\\\\]|\\\\.)*\"";
