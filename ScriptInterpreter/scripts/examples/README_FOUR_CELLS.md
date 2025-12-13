@@ -111,25 +111,25 @@ java -cp target/classes com.eb.script.Run scripts/examples/four_cells_circle.ebs
 
 ```ebs
 // 1. Create canvas objects
-var cell1: canvas = canvas.create(200, 200, "cell1");
+var cell1: canvas = call canvas.create(200, 200, "cell1");
 
 // 2. Initialize with background
-style.setFill(cell1, "#f0f0f0");
-draw.rect(cell1, 0, 0, 200, 200, true);
+call style.setFill(cell1, "#f0f0f0");
+call draw.rect(cell1, 0, 0, 200, 200, true);
 
 // 3. Define draw function
 drawCircleInCell(cellCanvas: canvas) {
     // Clear background
-    style.setFill(cellCanvas, "#f0f0f0");
-    draw.rect(cellCanvas, 0, 0, 200, 200, true);
+    call style.setFill(cellCanvas, "#f0f0f0");
+    call draw.rect(cellCanvas, 0, 0, 200, 200, true);
     
     // Draw circle
-    style.setFill(cellCanvas, "#3366ff");
-    draw.circle(cellCanvas, 100, 100, 60, true);
+    call style.setFill(cellCanvas, "#3366ff");
+    call draw.circle(cellCanvas, 100, 100, 60, true);
     
     // Draw stroke
-    style.setStroke(cellCanvas, "#0033cc", 3);
-    draw.circle(cellCanvas, 100, 100, 60, false);
+    call style.setStroke(cellCanvas, "#0033cc", 3);
+    call draw.circle(cellCanvas, 100, 100, 60, false);
 }
 
 // 4. Define screen with GridPane layout
