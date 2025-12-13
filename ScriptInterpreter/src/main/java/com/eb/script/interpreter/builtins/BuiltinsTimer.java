@@ -140,7 +140,7 @@ public class BuiltinsTimer {
     /**
      * timer.getPeriodString(timerId [, decimals]) - Get elapsed time as formatted string
      * Format: "seconds.milliseconds" (e.g., "5.123")
-     * Optional decimals parameter (0-3) controls decimal precision
+     * Optional decimals parameter (0-3) controls decimal precision. If omitted or null, uses default formatting.
      * Auto-initializes timer if it doesn't exist (returns "0.000")
      */
     private static Object getPeriodString(Object[] args) throws InterpreterError {
@@ -175,6 +175,7 @@ public class BuiltinsTimer {
 
     /**
      * timer.getContinuePeriodString(timerId [, decimals]) - Get continue period as formatted string
+     * Optional decimals parameter (0-3) controls decimal precision. If omitted or null, uses default formatting.
      * Auto-initializes timer if it doesn't exist (returns "0.000")
      */
     private static Object getContinuePeriodString(Object[] args) throws InterpreterError {
