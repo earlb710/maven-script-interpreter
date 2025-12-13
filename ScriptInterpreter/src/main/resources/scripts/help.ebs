@@ -192,22 +192,22 @@ call array.add(structureChildren, tempNode);
 var flowChildren: array[*];
 
 tempNode = call json.jsonFromString("{}");
-tempNode = call json.set(tempNode, "value", "flow_conditionals");
+tempNode = call json.set(tempNode, "value", "Conditionals");
 tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
 call array.add(flowChildren, tempNode);
 
 tempNode = call json.jsonFromString("{}");
-tempNode = call json.set(tempNode, "value", "flow_loops");
+tempNode = call json.set(tempNode, "value", "Loops");
 tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
 call array.add(flowChildren, tempNode);
 
 tempNode = call json.jsonFromString("{}");
-tempNode = call json.set(tempNode, "value", "flow_break_continue");
+tempNode = call json.set(tempNode, "value", "Break and Continue");
 tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
 call array.add(flowChildren, tempNode);
 
 tempNode = call json.jsonFromString("{}");
-tempNode = call json.set(tempNode, "value", "flow_exceptions");
+tempNode = call json.set(tempNode, "value", "Exception Handling");
 tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
 call array.add(flowChildren, tempNode);
 
@@ -227,10 +227,87 @@ structureNode = call json.set(structureNode, "expanded", false);
 structureNode = call json.set(structureNode, "children", structureChildren);
 call array.add(syntaxChildren, structureNode);
 
+// Data Types section
+var dataChildren: array[*];
+
+// Integer Types with sub-nodes
+var integerChildren: array[*];
+
 tempNode = call json.jsonFromString("{}");
-tempNode = call json.set(tempNode, "value", "data");
+tempNode = call json.set(tempNode, "value", "Bitmap");
 tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
-call array.add(syntaxChildren, tempNode);
+call array.add(integerChildren, tempNode);
+
+tempNode = call json.jsonFromString("{}");
+tempNode = call json.set(tempNode, "value", "Intmap");
+tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
+call array.add(integerChildren, tempNode);
+
+var integerNode: json = call json.jsonFromString("{}");
+integerNode = call json.set(integerNode, "value", "Integer Types");
+integerNode = call json.set(integerNode, "icon", "icons/tree-node.png");
+integerNode = call json.set(integerNode, "expanded", false);
+integerNode = call json.set(integerNode, "children", integerChildren);
+call array.add(dataChildren, integerNode);
+
+tempNode = call json.jsonFromString("{}");
+tempNode = call json.set(tempNode, "value", "Floating Point");
+tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
+call array.add(dataChildren, tempNode);
+
+tempNode = call json.jsonFromString("{}");
+tempNode = call json.set(tempNode, "value", "String");
+tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
+call array.add(dataChildren, tempNode);
+
+tempNode = call json.jsonFromString("{}");
+tempNode = call json.set(tempNode, "value", "Boolean");
+tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
+call array.add(dataChildren, tempNode);
+
+tempNode = call json.jsonFromString("{}");
+tempNode = call json.set(tempNode, "value", "Date");
+tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
+call array.add(dataChildren, tempNode);
+
+// Use json.jsonFromString to create a fresh JSON object to avoid circular references
+var dataNode: json = call json.jsonFromString("{}");
+dataNode = call json.set(dataNode, "value", "data");
+dataNode = call json.set(dataNode, "icon", "icons/tree-node.png");
+dataNode = call json.set(dataNode, "expanded", false);
+dataNode = call json.set(dataNode, "children", dataChildren);
+call array.add(syntaxChildren, dataNode);
+
+// Collections section
+var collectionsChildren: array[*];
+
+tempNode = call json.jsonFromString("{}");
+tempNode = call json.set(tempNode, "value", "Arrays");
+tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
+call array.add(collectionsChildren, tempNode);
+
+tempNode = call json.jsonFromString("{}");
+tempNode = call json.set(tempNode, "value", "JSON");
+tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
+call array.add(collectionsChildren, tempNode);
+
+tempNode = call json.jsonFromString("{}");
+tempNode = call json.set(tempNode, "value", "Records");
+tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
+call array.add(collectionsChildren, tempNode);
+
+tempNode = call json.jsonFromString("{}");
+tempNode = call json.set(tempNode, "value", "Bitmap and Intmap");
+tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
+call array.add(collectionsChildren, tempNode);
+
+// Use json.jsonFromString to create a fresh JSON object to avoid circular references
+var collectionsNode: json = call json.jsonFromString("{}");
+collectionsNode = call json.set(collectionsNode, "value", "collections");
+collectionsNode = call json.set(collectionsNode, "icon", "icons/tree-node.png");
+collectionsNode = call json.set(collectionsNode, "expanded", false);
+collectionsNode = call json.set(collectionsNode, "children", collectionsChildren);
+call array.add(syntaxChildren, collectionsNode);
 
 // Use json.jsonFromString to create a fresh JSON object to avoid circular references
 var flowNode: json = call json.jsonFromString("{}");
@@ -369,6 +446,7 @@ convertToHtml(text: string) return string {
     var processedLines: array = [];
     
     var i: int = 0;
+    var lastWasHr: bool = false;
     while i < lines.length {
         var line: string = lines[i];
         var trimmedLine: string = call str.trim(line);
@@ -395,9 +473,43 @@ convertToHtml(text: string) return string {
         if isHrLine then {
             // Replace separator lines with <hr>
             call array.add(processedLines, "<hr>");
+            lastWasHr = true;
         } else {
-            // Add the line as-is
-            call array.add(processedLines, line);
+            // Check if this is a title line (comes after <hr> and before another <hr>)
+            var isTitle: bool = false;
+            if lastWasHr and trimmedLine != "" then {
+                // Look ahead to see if next non-empty line is also <hr>
+                var nextIdx: int = i + 1;
+                if nextIdx < lines.length then {
+                    var nextLine: string = lines[nextIdx];
+                    var nextTrimmed: string = call str.trim(nextLine);
+                    var nextLineLen: int = nextTrimmed.length;
+                    if nextLineLen > 5 then {
+                        var nextAllSep: bool = true;
+                        var k: int = 0;
+                        while k < nextLineLen {
+                            var nextCh: string = call str.substring(nextTrimmed, k, k + 1);
+                            if nextCh != "═" and nextCh != "=" and nextCh != "-" then {
+                                nextAllSep = false;
+                                break;
+                            }
+                            k = k + 1;
+                        }
+                        if nextAllSep then {
+                            isTitle = true;
+                        }
+                    }
+                }
+            }
+            
+            if isTitle then {
+                // Wrap title in heading tags
+                call array.add(processedLines, "<h2>" + line + "</h2>");
+            } else {
+                // Add the line as-is
+                call array.add(processedLines, line);
+            }
+            lastWasHr = false;
         }
         
         i = i + 1;
@@ -406,10 +518,14 @@ convertToHtml(text: string) return string {
     // Join lines with <br>
     var bodyContent: string = call str.join(processedLines, "<br>");
     
+    // Remove extra <br> after <hr> tags
+    bodyContent = call str.replace(bodyContent, "<hr><br>", "<hr>");
+    
     // Wrap in HTML structure without pre tag
     var result: string = "<!DOCTYPE html><html><head><style>";
     result = result + "body { margin: 10px; font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 12px; }";
     result = result + "hr { border: 0; border-top: 1px solid #ccc; margin: 10px 0; }";
+    result = result + "h2 { font-size: 18px; font-weight: bold; margin: 10px 0; color: #333; }";
     result = result + "</style></head><body>";
     result = result + bodyContent;
     result = result + "</body></html>";
@@ -647,6 +763,57 @@ getHelpContent(topic: string) return string {
                 return content;
             }
         }
+    }
+    
+    // Map flow display names to topic keys
+    if topic == "Conditionals" then {
+        topic = "flow_conditionals";
+    }
+    if topic == "Loops" then {
+        topic = "flow_loops";
+    }
+    if topic == "Break and Continue" then {
+        topic = "flow_break_continue";
+    }
+    if topic == "Exception Handling" then {
+        topic = "flow_exceptions";
+    }
+    
+    // Map collections display names to topic keys
+    if topic == "Arrays" then {
+        topic = "collections_arrays";
+    }
+    if topic == "JSON" then {
+        topic = "collections_json";
+    }
+    if topic == "Records" then {
+        topic = "collections_records";
+    }
+    if topic == "Bitmap and Intmap" then {
+        topic = "collections_bitmap";
+    }
+    
+    // Map data type display names to topic keys
+    if topic == "Integer Types" then {
+        topic = "data_integer";
+    }
+    if topic == "Floating Point" then {
+        topic = "data_float";
+    }
+    if topic == "String" then {
+        topic = "data_string";
+    }
+    if topic == "Boolean" then {
+        topic = "data_boolean";
+    }
+    if topic == "Date" then {
+        topic = "data_date";
+    }
+    if topic == "Bitmap" then {
+        topic = "data_bitmap";
+    }
+    if topic == "Intmap" then {
+        topic = "data_intmap";
     }
     
     // Handle example topic aliases (Keywords/examples_keywords, etc.)
