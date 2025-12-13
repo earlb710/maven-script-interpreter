@@ -35,7 +35,7 @@ call draw.rect(cell4, 0, 0, 200, 200, true);
 toHex(num: int) return string {
     var hexChars: string = "0123456789ABCDEF";
     var high: int = num / 16;
-    var low: int = num % 16;
+    var low: int = num - (high * 16);  // Calculate remainder without modulo operator
     var result: string = call str.substring(hexChars, high, high + 1);
     result = result + call str.substring(hexChars, low, low + 1);
     return result;
