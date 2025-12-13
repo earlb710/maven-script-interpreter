@@ -1591,6 +1591,9 @@ public class InterpreterScreen {
             // Image properties
             "fitwidth", "fit_width", "fitheight", "fit_height",
             "preserveratio", "preserve_ratio", "smooth", "scalemode", "scale_mode",
+            "pickonbounds", "pick_on_bounds",
+            // Text area properties
+            "wraptext", "wrap_text",
             // Slider properties
             "showslidervalue", "show_slider_value",
             // Sequence
@@ -1653,8 +1656,10 @@ public class InterpreterScreen {
             "minwidth", "min_width", "minheight", "min_height",
             "maxwidth", "max_width", "maxheight", "max_height",
             "alignment",
-            // Event handlers (can be at item or display level)
-            "onvalidate", "on_validate", "onchange", "on_change",
+            // Event handlers (should be at item level, not in display object)
+            // Note: Event handlers belong at the item level to bind to the specific item instance.
+            // The display object is only for shared display/rendering properties.
+            "onclick", "on_click", "onvalidate", "on_validate", "onchange", "on_change",
             // Data source
             "source",
             // Change tracking
@@ -1663,7 +1668,7 @@ public class InterpreterScreen {
             "prompthelp", "prompt_help",
             // Label properties (can be at item level for override/merge behavior)
             "labeltext", "label_text", "labeltextalignment", "label_text_alignment",
-            "labelposition", "label_position",
+            "labelposition", "label_position", "labelpos", "label_pos",
             // Styling properties (can be at item level for override/merge behavior)
             "labelcolor", "label_color", "labelbold", "label_bold",
             "labelitalic", "label_italic", "labelfontsize", "label_font_size",
@@ -1672,9 +1677,10 @@ public class InterpreterScreen {
         ));
         
         // Properties that should NOT be at item level (they belong in display object)
+        // Note: Display object properties are for shared rendering/presentation configuration.
+        // Item-specific properties (like event handlers) should be at item level.
         java.util.Set<String> displayOnlyProps = new java.util.HashSet<>(java.util.Arrays.asList(
             "mandatory", "case", "caseformat", "pattern", "min", "max",
-            "onclick", "on_click",
             "options", "columns", "displayrecords", "display_records",
             "treeitems", "tree_items", "expandall", "expand_all", "showroot", "show_root",
             "maxlength", "max_length", "height",
@@ -2878,9 +2884,12 @@ public class InterpreterScreen {
 
                 // Store in screen's thread-safe variable map (legacy support)
                 // Use lowercase key for case-insensitive variable lookup
-                // ConcurrentHashMap doesn't allow null values, so only store if value is not null
+                // ConcurrentHashMap doesn't allow null values, so use NULL_SENTINEL for nulls
                 if (value != null) {
                     screenVarMap.put(varName.toLowerCase(), value);
+                } else {
+                    // Use NULL_SENTINEL for null initial values so bound controls can detect them
+                    screenVarMap.put(varName.toLowerCase(), com.eb.script.interpreter.InterpreterArray.NULL_SENTINEL);
                 }
 
                 // Store the variable type if specified (legacy support)

@@ -18,7 +18,7 @@ public class RuntimeContext {
 
     public final String name;
     public final Path sourcePath;  // Path to the source file, if loaded from a file
-    public final Environment environment = new Environment();
+    public final Environment environment;
     public Map<String, BlockStatement> blocks;
     public Statement[] statements;
 
@@ -29,6 +29,7 @@ public class RuntimeContext {
     public RuntimeContext(String name, Path sourcePath) {
         this.name = name;
         this.sourcePath = sourcePath;
+        this.environment = new Environment();
         this.blocks = new ConcurrentHashMap<>();
         this.statements = null;
     }
@@ -40,6 +41,28 @@ public class RuntimeContext {
     public RuntimeContext(String name, Path sourcePath, Map<String, BlockStatement> blocks, Statement[] statements) {
         this.name = name;
         this.sourcePath = sourcePath;
+        this.environment = new Environment();
+        // Use ConcurrentHashMap for thread-safe access from screen threads
+        this.blocks = blocks != null ? new ConcurrentHashMap<>(blocks) : new ConcurrentHashMap<>();
+        this.statements = statements;
+    }
+    
+    /**
+     * Constructor that allows reusing an existing environment.
+     * This is useful when running scripts from the tree view where we want to
+     * preserve screen state from the handler's context while having the correct
+     * source path for import resolution.
+     * 
+     * @param name The name of the context
+     * @param sourcePath The path to the source file
+     * @param environment The environment to reuse
+     * @param blocks The function blocks
+     * @param statements The statements to execute
+     */
+    public RuntimeContext(String name, Path sourcePath, Environment environment, Map<String, BlockStatement> blocks, Statement[] statements) {
+        this.name = name;
+        this.sourcePath = sourcePath;
+        this.environment = environment;
         // Use ConcurrentHashMap for thread-safe access from screen threads
         this.blocks = blocks != null ? new ConcurrentHashMap<>(blocks) : new ConcurrentHashMap<>();
         this.statements = statements;
