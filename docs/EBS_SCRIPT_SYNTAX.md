@@ -4156,6 +4156,115 @@ var sqlTimestamp = call date.toSqlTimestamp(now);
 
 For implementation details and Java type recommendations, see [JAVA_DATE_TYPE_RECOMMENDATION.md](JAVA_DATE_TYPE_RECOMMENDATION.md).
 
+### Random Number Generation Functions
+
+EBS provides built-in random number generation with support for seeding (for reproducible sequences) and bounded ranges. All random functions use a shared `java.util.Random` instance.
+
+**Generating Random Long Integers:**
+```javascript
+// Unbounded random long (any 64-bit integer value)
+var anyLong = call random.nextLong();
+
+// Random long in range [0, max) - exclusive upper bound
+var percentage = call random.nextLong(100);        // 0 to 99
+
+// Random long in range [min, max) - inclusive min, exclusive max
+var diceRoll = call random.nextLong(1, 7);         // 1 to 6
+var score = call random.nextLong(50, 100);         // 50 to 99
+```
+
+**Generating Random Double Values:**
+```javascript
+// Random double in range [0.0, 1.0) - standard probability
+var probability = call random.nextDouble();
+
+// Random double in range [0.0, max)
+var percentage = call random.nextDouble(100.0);    // 0.0 to 99.999...
+
+// Random double in range [min, max)
+var temperature = call random.nextDouble(20.0, 30.0);  // 20.0 to 29.999...
+var weight = call random.nextDouble(50.0, 100.0);      // 50.0 to 99.999...
+```
+
+**Reproducible Random Sequences (Seeding):**
+```javascript
+// Set seed for reproducible results
+call random.setSeed(12345);
+var val1 = call random.nextLong(100);      // Always produces 51 with seed 12345
+var val2 = call random.nextDouble();
+
+// Reset to same seed to repeat sequence
+call random.setSeed(12345);
+var val3 = call random.nextLong(100);      // Also produces 51
+var val4 = call random.nextDouble();       // Same as val2
+
+// Different seed produces different sequence
+call random.setSeed(54321);
+var val5 = call random.nextLong(100);      // Different value
+```
+
+**Practical Examples:**
+
+*Dice Rolling:*
+```javascript
+// Roll a 6-sided die (1-6)
+var roll = call random.nextLong(1, 7);
+
+// Roll two dice
+var die1 = call random.nextLong(1, 7);
+var die2 = call random.nextLong(1, 7);
+var total = die1 + die2;
+```
+
+*Random Selection from Array:*
+```javascript
+var items = ["apple", "banana", "cherry", "date"];
+var randomIndex = call random.nextLong(items.length);
+var randomItem = items[randomIndex];
+print "Selected: " + randomItem;
+```
+
+*Monte Carlo Simulation:*
+```javascript
+// Estimate PI using random points
+var inside = 0;
+var total = 10000;
+var i = 0;
+
+while i < total {
+    var x = call random.nextDouble(-1.0, 1.0);
+    var y = call random.nextDouble(-1.0, 1.0);
+    if (x * x + y * y) <= 1.0 then {
+        inside = inside + 1;
+    }
+    i = i + 1;
+}
+
+var piEstimate = 4.0 * inside / total;
+print "PI estimate: " + piEstimate;
+```
+
+*Shuffling (Fisher-Yates):*
+```javascript
+var deck = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+var i = deck.length - 1;
+
+while i > 0 {
+    var j = call random.nextLong(i + 1);
+    var temp = deck[i];
+    deck[i] = deck[j];
+    deck[j] = temp;
+    i = i - 1;
+}
+print "Shuffled deck: " + deck;
+```
+
+**Notes:**
+- All random functions use a shared `Random` instance, so setting a seed affects all subsequent calls
+- Upper bounds are exclusive: `random.nextLong(10)` returns 0-9, not 0-10
+- For long ranges, uses rejection sampling to avoid modulo bias
+- Seeds are useful for testing, debugging, and procedural generation
+
 ### Class Tree Functions
 ```javascript
 // Generate class hierarchy

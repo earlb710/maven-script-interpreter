@@ -1836,6 +1836,30 @@ public final class Builtins {
                 newParam("text", DataType.STRING, true)
         ));
 
+        // ==========================
+        // RANDOM builtins
+        // ==========================
+        // random.nextLong() - returns any long
+        // random.nextLong(max) - returns [0, max)
+        // random.nextLong(min, max) - returns [min, max)
+        addBuiltin(info(
+                "random.nextLong", DataType.LONG,
+                newParam("min", DataType.LONG, false),  // optional: if only one param, it's max; if two params, first is min
+                newParam("max", DataType.LONG, false)   // optional: second param is max
+        ));
+        // random.nextDouble() - returns [0.0, 1.0)
+        // random.nextDouble(max) - returns [0.0, max)
+        // random.nextDouble(min, max) - returns [min, max)
+        addBuiltin(info(
+                "random.nextDouble", DataType.DOUBLE,
+                newParam("min", DataType.DOUBLE, false),  // optional: if only one param, it's max; if two params, first is min
+                newParam("max", DataType.DOUBLE, false)   // optional: second param is max
+        ));
+        addBuiltin(info(
+                "random.setSeed", null,
+                newParam("seed", DataType.LONG, true)
+        ));
+
         NAMES = Collections.unmodifiableSet(BUILTINS.keySet());
     }
 
@@ -1947,6 +1971,11 @@ public final class Builtins {
         // Crypto builtins
         if (BuiltinsCrypto.handles(name)) {
             return BuiltinsCrypto.dispatch(name, args);
+        }
+        
+        // Random builtins
+        if (BuiltinsRandom.handles(name)) {
+            return BuiltinsRandom.dispatch(name, args);
         }
         
         // File builtins (already in BuiltinsFile)

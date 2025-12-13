@@ -1,0 +1,28 @@
+// EBS Language Reference v1.0.7.11 - See EBS_LANGUAGE_REFERENCE.md
+// Example: random.nextDouble - Generate random double-precision numbers
+// Syntax: call random.nextDouble(); call random.nextDouble(max); call random.nextDouble(min, max);
+
+// Random probability [0.0, 1.0)
+var probability: double = call random.nextDouble();
+print "Random probability [0.0, 1.0): " + probability;
+
+// Random percentage [0.0, 100.0)
+var percentage: double = call random.nextDouble(100.0);
+print "Random percentage [0.0, 100.0): " + percentage;
+
+// Random temperature [20.0, 30.0)
+var temp: double = call random.nextDouble(20.0, 30.0);
+print "Temperature [20.0, 30.0): " + temp;
+
+// Random weight [50.0, 100.0)
+var weight: double = call random.nextDouble(50.0, 100.0);
+print "Weight [50.0, 100.0): " + weight;
+
+// Generate 5 random probabilities
+print "Five random probabilities:";
+var i: int = 0;
+while i < 5 {
+    var prob: double = call random.nextDouble();
+    print "  " + prob;
+    i = i + 1;
+}

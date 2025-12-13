@@ -1,0 +1,28 @@
+// EBS Language Reference v1.0.7.11 - See EBS_LANGUAGE_REFERENCE.md
+// Example: random.nextLong - Generate random long integers
+// Syntax: call random.nextLong(); call random.nextLong(max); call random.nextLong(min, max);
+
+// Unbounded random long (any value)
+var anyLong: long = call random.nextLong();
+print "Random long (unbounded): " + anyLong;
+
+// Random long in range [0, 100)
+var percentage: long = call random.nextLong(100);
+print "Random [0, 100): " + percentage;
+
+// Random long in range [1, 7) - dice roll (1-6)
+var diceRoll: long = call random.nextLong(1, 7);
+print "Dice roll [1-6]: " + diceRoll;
+
+// Random long in range [50, 100)
+var score: long = call random.nextLong(50, 100);
+print "Score [50, 100): " + score;
+
+// Generate 5 random numbers in range [1, 10]
+print "Five random numbers [1-10]:";
+var i: int = 0;
+while i < 5 {
+    var num: long = call random.nextLong(1, 11);
+    print "  " + num;
+    i = i + 1;
+}
