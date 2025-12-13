@@ -13,10 +13,10 @@
 //   Run in EBS Console: /open scripts/examples/four_cells_circle.ebs then Ctrl+Enter
 
 // Create 4 canvas objects for the cells
-var cell1: canvas = canvas.create(200, 200, "cell1");
-var cell2: canvas = canvas.create(200, 200, "cell2");
-var cell3: canvas = canvas.create(200, 200, "cell3");
-var cell4: canvas = canvas.create(200, 200, "cell4");
+var cell1: canvas = call canvas.create(200, 200, "cell1");
+var cell2: canvas = call canvas.create(200, 200, "cell2");
+var cell3: canvas = call canvas.create(200, 200, "cell3");
+var cell4: canvas = call canvas.create(200, 200, "cell4");
 
 // Initialize all cells with a light gray background
 call style.setFill(cell1, "#f0f0f0");
