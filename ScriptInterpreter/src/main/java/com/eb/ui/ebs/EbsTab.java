@@ -2448,6 +2448,10 @@ public class EbsTab extends Tab {
     /**
      * Open the HTML content in a new WebView window.
      * Creates a new stage with a WebView that displays the current HTML content from the editor.
+     * 
+     * Note: This method loads the HTML content without sanitization since it's a developer tool
+     * for previewing HTML that the user is actively editing. The user is intentionally viewing
+     * their own content including any scripts, similar to how other HTML editors work.
      */
     private void openHtmlInWebView() {
         // Get the current HTML content from the editor
@@ -2460,10 +2464,10 @@ public class EbsTab extends Tab {
         // Create a WebView
         WebView webView = new WebView();
         
-        // Load the HTML content
+        // Load the HTML content (including any scripts - this is intentional for preview)
         webView.getEngine().loadContent(htmlContent);
         
-        // Create a scene with the WebView
+        // Create a scene with the WebView (800x600 is a reasonable default, window is resizable)
         Scene scene = new Scene(webView, 800, 600);
         webViewStage.setScene(scene);
         
