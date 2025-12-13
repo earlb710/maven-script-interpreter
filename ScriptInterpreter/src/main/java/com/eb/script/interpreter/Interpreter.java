@@ -1933,7 +1933,8 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     }
     
     /**
-     * Resolve import file path relative to current script location or working directory
+     * Resolve import file path relative to current script location or working directory.
+     * Also attempts to find .ebsp packaged version if .ebs is not found.
      */
     private Path resolveImportPath(String filename) {
         // First try relative to current script directory
@@ -1944,10 +1945,30 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 if (Files.exists(resolvedPath)) {
                     return resolvedPath;
                 }
+                // If not found and filename ends with .ebs, try .ebsp
+                if (filename.toLowerCase().endsWith(".ebs")) {
+                    Path packagedPath = scriptDir.resolve(filename.replaceAll("\\.ebs$", ".ebsp"));
+                    if (Files.exists(packagedPath)) {
+                        return packagedPath;
+                    }
+                }
             }
         }
         
         // Fall back to current working directory
+        Path cwdPath = Path.of(filename);
+        if (Files.exists(cwdPath)) {
+            return cwdPath;
+        }
+        
+        // Try .ebsp in current working directory if .ebs not found
+        if (filename.toLowerCase().endsWith(".ebs")) {
+            Path packagedPath = Path.of(filename.replaceAll("\\.ebs$", ".ebsp"));
+            if (Files.exists(packagedPath)) {
+                return packagedPath;
+            }
+        }
+        
         return Path.of(filename);
     }
 
