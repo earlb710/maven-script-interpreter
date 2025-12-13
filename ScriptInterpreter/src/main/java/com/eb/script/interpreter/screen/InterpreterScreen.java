@@ -19,6 +19,7 @@ import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,17 +38,15 @@ public class InterpreterScreen {
      * These properties are specific to AreaItem and should be filtered out when
      * an item definition is used as a display definition.
      */
-    private static final java.util.Set<String> ITEM_ONLY_PROPERTIES = java.util.Collections.unmodifiableSet(
-        new java.util.HashSet<>(java.util.Arrays.asList(
-            "hgrow", "vgrow", "margin", "padding",
-            "prefwidth", "pref_width", "prefheight", "pref_height",
-            "minwidth", "min_width", "minheight", "min_height",
-            "maxwidth", "max_width", "maxheight", "max_height",
-            "colspan", "col_span", "rowspan", "row_span",
-            "layoutpos", "layout_pos", "relativepos", "relative_pos",
-            "varref", "var_ref", "name", "editable", "disabled", "visible", "tooltip",
-            "textcolor", "text_color", "backgroundcolor", "background_color"
-        ))
+    private static final java.util.Set<String> ITEM_ONLY_PROPERTIES = java.util.Set.of(
+        "hgrow", "vgrow", "margin", "padding",
+        "prefwidth", "pref_width", "prefheight", "pref_height",
+        "minwidth", "min_width", "minheight", "min_height",
+        "maxwidth", "max_width", "maxheight", "max_height",
+        "colspan", "col_span", "rowspan", "row_span",
+        "layoutpos", "layout_pos", "relativepos", "relative_pos",
+        "varref", "var_ref", "name", "editable", "disabled", "visible", "tooltip",
+        "textcolor", "text_color", "backgroundcolor", "background_color"
     );
 
     public InterpreterScreen(InterpreterContext context, Interpreter interpreter) {
@@ -1591,7 +1590,7 @@ public class InterpreterScreen {
      */
     private Map<String, Object> filterItemLevelProperties(Map<String, Object> itemDef) {
         // Create a new map with only display-level properties
-        Map<String, Object> displayDef = new java.util.HashMap<>();
+        Map<String, Object> displayDef = new HashMap<>();
         for (Map.Entry<String, Object> entry : itemDef.entrySet()) {
             String lowerKey = entry.getKey().toLowerCase();
             if (!ITEM_ONLY_PROPERTIES.contains(lowerKey)) {
