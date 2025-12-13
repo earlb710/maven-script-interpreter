@@ -196,8 +196,8 @@
     -fx-font-family: "Consolas", "Menlo", "JetBrains Mono", monospace;
     -fx-font-size: 12px;
     -fx-control-inner-background: #0f1116;
-    -fx-text-fill: #e6e6e6;
-    -fx-fill: #e6e6e6;
+    -fx-text-fill: #ffffff;
+    -fx-fill: #ffffff;
     -fx-padding: 8;
 }
 .editor-ebs .caret {
@@ -209,14 +209,19 @@
     -fx-font-family: "Consolas", "Menlo", "JetBrains Mono", monospace;
     -fx-font-size: 12px;
     -fx-control-inner-background: #0f1116;
-    -fx-text-fill: #e6e6e6;
-    -fx-fill: #e6e6e6;
+    -fx-text-fill: #ffffff;
+    -fx-fill: #ffffff;
     -fx-padding: 8;
 }
 .editor-text .caret {
     -fx-stroke: white;
 }
 
+/* Default text styling for unstyled/normal text in editors */
+.editor-ebs .text,
+.editor-text .text {
+    -fx-fill: #ffffff; /* white for normal/unstyled text */
+}
 
 /* Console input field */
 .console-in .text-area,
@@ -525,5 +530,89 @@
     -fx-fill: #000000;
     -fx-font-weight: bold;
     -rtfx-background-color: #dd8800; /* darker orange for unmatched quotes - improved contrast */
+}
+
+/* ===== Syntax highlighting token styles ===== */
+/* Comments */
+.tok-comment,
+.text.tok-comment,
+.styled-text-area .text.tok-comment,
+.editor-ebs .text.tok-comment,
+.editor-text .text.tok-comment {
+    -fx-fill: #6A9955; /* green for comments */
+    -fx-font-style: italic;
+}
+
+/* Keywords (if, else, while, @media, etc.) */
+.tok-keyword,
+.text.tok-keyword,
+.styled-text-area .text.tok-keyword,
+.editor-ebs .text.tok-keyword,
+.editor-text .text.tok-keyword {
+    -fx-fill: #569CD6; /* blue for keywords */
+    -fx-font-weight: bold;
+}
+
+/* Types (class names, type annotations) */
+.tok-type,
+.text.tok-type,
+.styled-text-area .text.tok-type,
+.editor-ebs .text.tok-type,
+.editor-text .text.tok-type {
+    -fx-fill: #4EC9B0; /* teal for types */
+}
+
+/* Built-in functions and properties */
+.tok-builtin,
+.text.tok-builtin,
+.styled-text-area .text.tok-builtin,
+.editor-ebs .text.tok-builtin,
+.editor-text .text.tok-builtin {
+    -fx-fill: #DCDCAA; /* yellow for builtins */
+}
+
+/* Strings */
+.tok-string,
+.text.tok-string,
+.styled-text-area .text.tok-string,
+.editor-ebs .text.tok-string,
+.editor-text .text.tok-string {
+    -fx-fill: #CE9178; /* orange for strings */
+}
+
+/* Numbers */
+.tok-number,
+.text.tok-number,
+.styled-text-area .text.tok-number,
+.editor-ebs .text.tok-number,
+.editor-text .text.tok-number {
+    -fx-fill: #B5CEA8; /* light green for numbers */
+}
+
+/* Booleans (true, false) */
+.tok-bool,
+.text.tok-bool,
+.styled-text-area .text.tok-bool,
+.editor-ebs .text.tok-bool,
+.editor-text .text.tok-bool {
+    -fx-fill: #569CD6; /* blue for booleans */
+}
+
+/* Null */
+.tok-null,
+.text.tok-null,
+.styled-text-area .text.tok-null,
+.editor-ebs .text.tok-null,
+.editor-text .text.tok-null {
+    -fx-fill: #569CD6; /* blue for null */
+}
+
+/* Functions */
+.tok-function,
+.text.tok-function,
+.styled-text-area .text.tok-function,
+.editor-ebs .text.tok-function,
+.editor-text .text.tok-function {
+    -fx-fill: #DCDCAA; /* yellow for functions */
 }
 

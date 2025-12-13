@@ -548,6 +548,9 @@ public class EbsConsoleHandler extends EbsHandler {
         //  filter
         fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("EBS Scripts", "*.ebs"));
         fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("JSON files", "*.json"));
+        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSS files", "*.css"));
+        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("HTML files", "*.html"));
+        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Markdown files", "*.md"));
         fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Log files", "*.log"));
         var f = fc.showOpenDialog(stage);
         if (f != null) {

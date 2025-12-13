@@ -454,11 +454,28 @@ public class EbsTab extends Tab {
         // Decide if we treat as text or binary:
 
         boolean isEbs = ext.equalsIgnoreCase(".ebs");
+        boolean isJson = ext.equalsIgnoreCase(".json");
+        boolean isCss = ext.equalsIgnoreCase(".css");
+        boolean isHtml = ext.equalsIgnoreCase(".html");
+        boolean isMd = ext.equalsIgnoreCase(".md");
+        boolean isEditable = isEbs || isJson || isCss || isHtml || isMd;
 
-        if (isEbs) {
+        if (isEditable) {
             dispArea.setEditable(true);               // enable edits for textual content
             dispArea.getStyleClass().add("editor-ebs");
-            setupLexerHighlighting();             // <— hook the EbsLexer here
+            
+            // Choose appropriate highlighting based on file type
+            if (isCss) {
+                setupCssHighlighting();
+            } else if (isHtml) {
+                setupHtmlHighlighting();
+            } else if (isJson) {
+                setupJsonHighlighting();
+            } else if (isMd) {
+                setupMdHighlighting();
+            } else {
+                setupLexerHighlighting();             // <— hook the EbsLexer here
+            }
         } else {
             dispArea.getStyleClass().add("editor-text");
             setupLexerHighlighting();             // optional: you can highlight non-.ebs tokens too
@@ -790,6 +807,420 @@ public class EbsTab extends Tab {
         return builder.create();
     }
 
+// ---------- CSS syntax highlighting ----------
+    private static Pattern CSS_PATTERN = null;
+    
+    private static Pattern getCssPattern() {
+        if (CSS_PATTERN == null) {
+            CSS_PATTERN = buildCssPattern();
+        }
+        return CSS_PATTERN;
+    }
+    
+    private static Pattern buildCssPattern() {
+        String[] CSS_PROPERTIES = new String[]{
+            "align-content", "align-items", "align-self", "animation", "animation-delay",
+            "animation-direction", "animation-duration", "animation-fill-mode", "animation-iteration-count",
+            "animation-name", "animation-play-state", "animation-timing-function", "backface-visibility",
+            "background", "background-attachment", "background-clip", "background-color", "background-image",
+            "background-origin", "background-position", "background-repeat", "background-size", "border",
+            "border-bottom", "border-bottom-color", "border-bottom-left-radius", "border-bottom-right-radius",
+            "border-bottom-style", "border-bottom-width", "border-collapse", "border-color", "border-image",
+            "border-left", "border-left-color", "border-left-style", "border-left-width", "border-radius",
+            "border-right", "border-right-color", "border-right-style", "border-right-width", "border-spacing",
+            "border-style", "border-top", "border-top-color", "border-top-left-radius", "border-top-right-radius",
+            "border-top-style", "border-top-width", "border-width", "bottom", "box-shadow", "box-sizing",
+            "caption-side", "clear", "clip", "color", "column-count", "column-gap", "column-rule",
+            "column-rule-color", "column-rule-style", "column-rule-width", "column-width", "columns",
+            "content", "counter-increment", "counter-reset", "cursor", "direction", "display",
+            "empty-cells", "filter", "flex", "flex-basis", "flex-direction", "flex-flow", "flex-grow",
+            "flex-shrink", "flex-wrap", "float", "font", "font-family", "font-size", "font-size-adjust",
+            "font-stretch", "font-style", "font-variant", "font-weight", "grid", "grid-area", "grid-auto-columns",
+            "grid-auto-flow", "grid-auto-rows", "grid-column", "grid-column-end", "grid-column-gap",
+            "grid-column-start", "grid-gap", "grid-row", "grid-row-end", "grid-row-gap", "grid-row-start",
+            "grid-template", "grid-template-areas", "grid-template-columns", "grid-template-rows",
+            "height", "justify-content", "left", "letter-spacing", "line-height", "list-style",
+            "list-style-image", "list-style-position", "list-style-type", "margin", "margin-bottom",
+            "margin-left", "margin-right", "margin-top", "max-height", "max-width", "min-height",
+            "min-width", "opacity", "order", "outline", "outline-color", "outline-offset", "outline-style",
+            "outline-width", "overflow", "overflow-x", "overflow-y", "padding", "padding-bottom",
+            "padding-left", "padding-right", "padding-top", "page-break-after", "page-break-before",
+            "page-break-inside", "perspective", "perspective-origin", "position", "quotes", "resize",
+            "right", "tab-size", "table-layout", "text-align", "text-align-last", "text-decoration",
+            "text-decoration-color", "text-decoration-line", "text-decoration-style", "text-indent",
+            "text-justify", "text-overflow", "text-shadow", "text-transform", "top", "transform",
+            "transform-origin", "transform-style", "transition", "transition-delay", "transition-duration",
+            "transition-property", "transition-timing-function", "vertical-align", "visibility",
+            "white-space", "width", "word-break", "word-spacing", "word-wrap", "z-index"
+        };
+        
+        // Build property alternations
+        String props = "\\b(?:" + String.join("|", CSS_PROPERTIES) + ")\\b";
+        
+        // CSS Tokens
+        String COMMENT = "/\\*[^*]*\\*+(?:[^/*][^*]*\\*+)*/";  // /* ... */
+        String SELECTOR = "(?:[.#]?[a-zA-Z_][a-zA-Z0-9_-]*|\\*|\\[[^\\]]+\\]|:[a-zA-Z_-]+(?:\\([^)]*\\))?)";  // .class, #id, tag, *, [attr], :pseudo
+        String PROPERTY = props;
+        String COLOR = "(?:#[0-9a-fA-F]{3}\\b|#[0-9a-fA-F]{4}\\b|#[0-9a-fA-F]{6}\\b|#[0-9a-fA-F]{8}\\b)";  // #rgb, #rgba, #rrggbb, #rrggbbaa
+        String UNIT = "\\b\\d+(?:\\.\\d+)?(?:px|em|rem|%|vh|vw|vmin|vmax|cm|mm|in|pt|pc|ex|ch|deg|rad|turn|s|ms)\\b";
+        String NUMBER = "\\b\\d+(?:\\.\\d+)?\\b";
+        String STRING_DQ = "\"([^\"\\\\]|\\\\.)*\"";
+        String STRING_SQ = "'([^'\\\\]|\\\\.)*'";
+        String IMPORTANT = "!important\\b";
+        String AT_RULE = "@[a-zA-Z_-]+";  // @media, @import, @keyframes, etc.
+        
+        // Use named groups
+        String master =
+                "(?<COMMENT>" + COMMENT + ")"
+                + "|(?<ATRULE>" + AT_RULE + ")"
+                + "|(?<IMPORTANT>" + IMPORTANT + ")"
+                + "|(?<PROPERTY>" + PROPERTY + ")"
+                + "|(?<COLOR>" + COLOR + ")"
+                + "|(?<STRING>" + STRING_DQ + "|" + STRING_SQ + ")"
+                + "|(?<UNIT>" + UNIT + ")"
+                + "|(?<NUMBER>" + NUMBER + ")"
+                + "|(?<SELECTOR>" + SELECTOR + ")";
+        
+        return Pattern.compile(master, Pattern.MULTILINE);
+    }
+    
+    private void setupCssHighlighting() {
+        // Initial highlight
+        applyCssHighlighting(dispArea.getText());
+        
+        // Re-highlight after pauses in typing using ReactFX's debouncing
+        dispArea.multiPlainChanges()
+                .successionEnds(java.time.Duration.ofMillis(100))
+                .subscribe(ignore -> applyCssHighlighting(dispArea.getText()));
+    }
+    
+    private void applyCssHighlighting(String text) {
+        StyleSpans<Collection<String>> spans = computeCssHighlighting(text);
+        
+        // Preserve scroll position when applying style spans
+        double scrollY = dispArea.getEstimatedScrollY();
+        
+        dispArea.setStyleSpans(0, spans);
+        
+        // Restore scroll position after style update
+        Platform.runLater(() -> {
+            dispArea.scrollYToPixel(scrollY);
+            dispArea.highlightMatchingBrackets();
+        });
+    }
+    
+    private StyleSpans<Collection<String>> computeCssHighlighting(String text) {
+        Matcher m = getCssPattern().matcher(text);
+        int last = 0;
+        StyleSpansBuilder<Collection<String>> builder = new StyleSpansBuilder<>();
+        
+        while (m.find()) {
+            // gap (unstyled)
+            builder.add(Collections.emptyList(), m.start() - last);
+            
+            String styleClass =
+                    m.group("COMMENT") != null ? "tok-comment"
+                    : m.group("ATRULE") != null ? "tok-keyword"
+                    : m.group("IMPORTANT") != null ? "tok-keyword"
+                    : m.group("PROPERTY") != null ? "tok-builtin"
+                    : m.group("COLOR") != null ? "tok-string"
+                    : m.group("STRING") != null ? "tok-string"
+                    : m.group("UNIT") != null ? "tok-number"
+                    : m.group("NUMBER") != null ? "tok-number"
+                    : m.group("SELECTOR") != null ? "tok-type" : null;
+            
+            builder.add(styleClass == null ? Collections.emptyList()
+                    : Collections.singleton(styleClass),
+                    m.end() - m.start());
+            
+            last = m.end();
+        }
+        // tail
+        builder.add(Collections.emptyList(), text.length() - last);
+        return builder.create();
+    }
+
+// ---------- HTML syntax highlighting ----------
+    private static Pattern HTML_PATTERN = null;
+    
+    private static Pattern getHtmlPattern() {
+        if (HTML_PATTERN == null) {
+            HTML_PATTERN = buildHtmlPattern();
+        }
+        return HTML_PATTERN;
+    }
+    
+    private static Pattern buildHtmlPattern() {
+        String[] HTML_TAGS = new String[]{
+            "a", "abbr", "address", "area", "article", "aside", "audio", "b", "base", "bdi", "bdo",
+            "blockquote", "body", "br", "button", "canvas", "caption", "cite", "code", "col", "colgroup",
+            "data", "datalist", "dd", "del", "details", "dfn", "dialog", "div", "dl", "dt", "em", "embed",
+            "fieldset", "figcaption", "figure", "footer", "form", "h1", "h2", "h3", "h4", "h5", "h6",
+            "head", "header", "hr", "html", "i", "iframe", "img", "input", "ins", "kbd", "label", "legend",
+            "li", "link", "main", "map", "mark", "meta", "meter", "nav", "noscript", "object", "ol",
+            "optgroup", "option", "output", "p", "param", "picture", "pre", "progress", "q", "rp", "rt",
+            "ruby", "s", "samp", "script", "section", "select", "small", "source", "span", "strong",
+            "style", "sub", "summary", "sup", "svg", "table", "tbody", "td", "template", "textarea",
+            "tfoot", "th", "thead", "time", "title", "tr", "track", "u", "ul", "var", "video", "wbr"
+        };
+        
+        // Build tag alternations
+        String tags = "\\b(?:" + String.join("|", HTML_TAGS) + ")\\b";
+        
+        // HTML Tokens
+        String COMMENT = "<!--[^-]*(?:-(?!->)[^-]*)*-->";  // <!-- ... -->
+        String DOCTYPE = "<!DOCTYPE[^>]*>";
+        String TAG_OPEN = "</?(" + tags + ")";  // <tag or </tag
+        String TAG_CLOSE = "/?>";  // > or />
+        String ATTRIBUTE = "\\b[a-zA-Z_:][-a-zA-Z0-9_:.]*(?=\\s*=)";  // attribute names
+        String STRING_DQ = "\"([^\"\\\\]|\\\\.)*\"";
+        String STRING_SQ = "'([^'\\\\]|\\\\.)*'";
+        String ENTITY = "&(?:[a-zA-Z][a-zA-Z0-9]*|#[0-9]+|#x[0-9a-fA-F]+);";  // &nbsp; &#123; &#xAB;
+        
+        // Use named groups
+        String master =
+                "(?<COMMENT>" + COMMENT + ")"
+                + "|(?<DOCTYPE>" + DOCTYPE + ")"
+                + "|(?<TAGOPEN>" + TAG_OPEN + ")"
+                + "|(?<TAGCLOSE>" + TAG_CLOSE + ")"
+                + "|(?<ATTRIBUTE>" + ATTRIBUTE + ")"
+                + "|(?<STRING>" + STRING_DQ + "|" + STRING_SQ + ")"
+                + "|(?<ENTITY>" + ENTITY + ")";
+        
+        return Pattern.compile(master, Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
+    }
+    
+    private void setupHtmlHighlighting() {
+        // Initial highlight
+        applyHtmlHighlighting(dispArea.getText());
+        
+        // Re-highlight after pauses in typing using ReactFX's debouncing
+        dispArea.multiPlainChanges()
+                .successionEnds(java.time.Duration.ofMillis(100))
+                .subscribe(ignore -> applyHtmlHighlighting(dispArea.getText()));
+    }
+    
+    private void applyHtmlHighlighting(String text) {
+        StyleSpans<Collection<String>> spans = computeHtmlHighlighting(text);
+        
+        // Preserve scroll position when applying style spans
+        double scrollY = dispArea.getEstimatedScrollY();
+        
+        dispArea.setStyleSpans(0, spans);
+        
+        // Restore scroll position after style update
+        Platform.runLater(() -> {
+            dispArea.scrollYToPixel(scrollY);
+            dispArea.highlightMatchingBrackets();
+        });
+    }
+    
+    private StyleSpans<Collection<String>> computeHtmlHighlighting(String text) {
+        Matcher m = getHtmlPattern().matcher(text);
+        int last = 0;
+        StyleSpansBuilder<Collection<String>> builder = new StyleSpansBuilder<>();
+        
+        while (m.find()) {
+            // gap (unstyled)
+            builder.add(Collections.emptyList(), m.start() - last);
+            
+            String styleClass =
+                    m.group("COMMENT") != null ? "tok-comment"
+                    : m.group("DOCTYPE") != null ? "tok-keyword"
+                    : m.group("TAGOPEN") != null ? "tok-keyword"
+                    : m.group("TAGCLOSE") != null ? "tok-keyword"
+                    : m.group("ATTRIBUTE") != null ? "tok-builtin"
+                    : m.group("STRING") != null ? "tok-string"
+                    : m.group("ENTITY") != null ? "tok-type" : null;
+            
+            builder.add(styleClass == null ? Collections.emptyList()
+                    : Collections.singleton(styleClass),
+                    m.end() - m.start());
+            
+            last = m.end();
+        }
+        // tail
+        builder.add(Collections.emptyList(), text.length() - last);
+        return builder.create();
+    }
+
+// ---------- JSON syntax highlighting ----------
+    private static Pattern JSON_PATTERN = null;
+    
+    private static Pattern getJsonPattern() {
+        if (JSON_PATTERN == null) {
+            JSON_PATTERN = buildJsonPattern();
+        }
+        return JSON_PATTERN;
+    }
+    
+    private static Pattern buildJsonPattern() {
+        // JSON Tokens
+        String COMMENT_SINGLE = "//[^\\n]*";  // Single-line comment (non-standard but common)
+        String COMMENT_MULTI = "/\\*[^*]*\\*+(?:[^/*][^*]*\\*+)*/";  // /* ... */
+        String KEY = "\"([^\"\\\\]|\\\\.)*\"\\s*(?=:)";  // "key": (string followed by colon)
+        String STRING = "\"([^\"\\\\]|\\\\.)*\"";  // "string"
+        String NUMBER = "-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?\\b";  // JSON numbers
+        String BOOLEAN = "\\b(?:true|false)\\b";
+        String NULL = "\\bnull\\b";
+        
+        // Use named groups (NOTE: Java regex group names cannot contain underscores)
+        String master =
+                "(?<COMMENTSINGLE>" + COMMENT_SINGLE + ")"
+                + "|(?<COMMENTMULTI>" + COMMENT_MULTI + ")"
+                + "|(?<KEY>" + KEY + ")"
+                + "|(?<STRING>" + STRING + ")"
+                + "|(?<NUMBER>" + NUMBER + ")"
+                + "|(?<BOOLEAN>" + BOOLEAN + ")"
+                + "|(?<NULL>" + NULL + ")";
+        
+        return Pattern.compile(master, Pattern.MULTILINE);
+    }
+    
+    private void setupJsonHighlighting() {
+        // Initial highlight
+        applyJsonHighlighting(dispArea.getText());
+        
+        // Re-highlight after pauses in typing using ReactFX's debouncing
+        dispArea.multiPlainChanges()
+                .successionEnds(java.time.Duration.ofMillis(100))
+                .subscribe(ignore -> applyJsonHighlighting(dispArea.getText()));
+    }
+    
+    private void applyJsonHighlighting(String text) {
+        StyleSpans<Collection<String>> spans = computeJsonHighlighting(text);
+        
+        // Preserve scroll position when applying style spans
+        double scrollY = dispArea.getEstimatedScrollY();
+        
+        dispArea.setStyleSpans(0, spans);
+        
+        // Restore scroll position after style update
+        Platform.runLater(() -> {
+            dispArea.scrollYToPixel(scrollY);
+            dispArea.highlightMatchingBrackets();
+        });
+    }
+    
+    private StyleSpans<Collection<String>> computeJsonHighlighting(String text) {
+        Matcher m = getJsonPattern().matcher(text);
+        int last = 0;
+        StyleSpansBuilder<Collection<String>> builder = new StyleSpansBuilder<>();
+        
+        while (m.find()) {
+            // gap (unstyled)
+            builder.add(Collections.emptyList(), m.start() - last);
+            
+            String styleClass =
+                    m.group("COMMENTSINGLE") != null ? "tok-comment"
+                    : m.group("COMMENTMULTI") != null ? "tok-comment"
+                    : m.group("KEY") != null ? "tok-builtin"
+                    : m.group("STRING") != null ? "tok-string"
+                    : m.group("NUMBER") != null ? "tok-number"
+                    : m.group("BOOLEAN") != null ? "tok-bool"
+                    : m.group("NULL") != null ? "tok-null" : null;
+            
+            builder.add(styleClass == null ? Collections.emptyList()
+                    : Collections.singleton(styleClass),
+                    m.end() - m.start());
+            
+            last = m.end();
+        }
+        // tail
+        builder.add(Collections.emptyList(), text.length() - last);
+        return builder.create();
+    }
+
+// ---------- Markdown syntax highlighting ----------
+    private static Pattern MD_PATTERN = null;
+    
+    private static Pattern getMdPattern() {
+        if (MD_PATTERN == null) {
+            MD_PATTERN = buildMdPattern();
+        }
+        return MD_PATTERN;
+    }
+    
+    private static Pattern buildMdPattern() {
+        // Markdown Tokens (basic highlighting)
+        String HEADING = "^#{1,6}\\s+.*$";  // # Heading
+        String BOLD = "\\*\\*[^*]+\\*\\*|__[^_]+__";  // **bold** or __bold__
+        String ITALIC = "\\*[^*]+\\*|_[^_]+_";  // *italic* or _italic_
+        String CODE_BLOCK = "```[\\s\\S]*?```|~~~[\\s\\S]*?~~~";  // ```code```
+        String INLINE_CODE = "`[^`]+`";  // `code`
+        String LINK = "\\[[^\\]]+\\]\\([^)]+\\)";  // [text](url)
+        String LIST = "^\\s*[-*+]\\s+.*$|^\\s*\\d+\\.\\s+.*$";  // - item or 1. item
+        String BLOCKQUOTE = "^>\\s+.*$";  // > quote
+        
+        // Use named groups (order matters - more specific patterns first)
+        String master =
+                "(?<CODEBLOCK>" + CODE_BLOCK + ")"
+                + "|(?<INLINECODE>" + INLINE_CODE + ")"
+                + "|(?<BOLD>" + BOLD + ")"
+                + "|(?<ITALIC>" + ITALIC + ")"
+                + "|(?<LINK>" + LINK + ")"
+                + "|(?<HEADING>" + HEADING + ")"
+                + "|(?<LIST>" + LIST + ")"
+                + "|(?<BLOCKQUOTE>" + BLOCKQUOTE + ")";
+        
+        return Pattern.compile(master, Pattern.MULTILINE);
+    }
+    
+    private void setupMdHighlighting() {
+        // Initial highlight
+        applyMdHighlighting(dispArea.getText());
+        
+        // Re-highlight after pauses in typing using ReactFX's debouncing
+        dispArea.multiPlainChanges()
+                .successionEnds(java.time.Duration.ofMillis(100))
+                .subscribe(ignore -> applyMdHighlighting(dispArea.getText()));
+    }
+    
+    private void applyMdHighlighting(String text) {
+        StyleSpans<Collection<String>> spans = computeMdHighlighting(text);
+        
+        // Preserve scroll position when applying style spans
+        double scrollY = dispArea.getEstimatedScrollY();
+        
+        dispArea.setStyleSpans(0, spans);
+        
+        // Restore scroll position after style update
+        Platform.runLater(() -> {
+            dispArea.scrollYToPixel(scrollY);
+            dispArea.highlightMatchingBrackets();
+        });
+    }
+    
+    private StyleSpans<Collection<String>> computeMdHighlighting(String text) {
+        Matcher m = getMdPattern().matcher(text);
+        int last = 0;
+        StyleSpansBuilder<Collection<String>> builder = new StyleSpansBuilder<>();
+        
+        while (m.find()) {
+            // gap (unstyled)
+            builder.add(Collections.emptyList(), m.start() - last);
+            
+            String styleClass =
+                    m.group("CODEBLOCK") != null ? "tok-string"
+                    : m.group("HEADING") != null ? "tok-keyword"
+                    : m.group("BOLD") != null ? "tok-keyword"
+                    : m.group("ITALIC") != null ? "tok-type"
+                    : m.group("INLINECODE") != null ? "tok-string"
+                    : m.group("LINK") != null ? "tok-builtin"
+                    : m.group("LIST") != null ? "tok-keyword"
+                    : m.group("BLOCKQUOTE") != null ? "tok-comment" : null;
+            
+            builder.add(styleClass == null ? Collections.emptyList()
+                    : Collections.singleton(styleClass),
+                    m.end() - m.start());
+            
+            last = m.end();
+        }
+        // tail
+        builder.add(Collections.emptyList(), text.length() - last);
+        return builder.create();
+    }
+
 // ---------- Lexer-based highlighter ----------
     private final EbsLexer ebsLexer = new EbsLexer();
 
@@ -814,6 +1245,27 @@ public class EbsTab extends Tab {
             return;
         }
         
+        // Dispatch to appropriate highlighter based on file extension
+        boolean isCss = ext.equalsIgnoreCase(".css");
+        boolean isHtml = ext.equalsIgnoreCase(".html");
+        boolean isJson = ext.equalsIgnoreCase(".json");
+        boolean isMd = ext.equalsIgnoreCase(".md");
+        
+        if (isCss) {
+            applyCssHighlighting(src);
+            return;
+        } else if (isHtml) {
+            applyHtmlHighlighting(src);
+            return;
+        } else if (isJson) {
+            applyJsonHighlighting(src);
+            return;
+        } else if (isMd) {
+            applyMdHighlighting(src);
+            return;
+        }
+        
+        // Default: use EBS lexer for all other files
         List<EbsToken> tokens = ebsLexer.tokenize(src); // returns List<EbsToken> with start/end/style
         // Build spans from token positions
         StyleSpansBuilder<Collection<String>> builder = new StyleSpansBuilder<>();
