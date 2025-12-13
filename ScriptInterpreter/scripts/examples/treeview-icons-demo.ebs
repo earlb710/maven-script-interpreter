@@ -1,0 +1,177 @@
+// TreeView Icons Demo
+// Demonstrates how to set icons on TreeView items dynamically
+
+// Create a file explorer screen with TreeView
+call scr.create("fileExplorer", "File Explorer - Icon Demo", 600, 500);
+
+// Add TreeView control
+var treeData = call map.new();
+call map.put(treeData, "type", "treeview");
+call map.put(treeData, "name", "fileTree");
+call map.put(treeData, "x", 10);
+call map.put(treeData, "y", 10);
+call map.put(treeData, "width", 580);
+call map.put(treeData, "height", 450);
+call map.put(treeData, "showRoot", true);
+
+// Create tree structure
+var rootItem = call map.new();
+call map.put(rootItem, "text", "Root");
+call map.put(rootItem, "children", []);
+
+// Add src folder with files
+var srcFolder = call map.new();
+call map.put(srcFolder, "text", "src");
+call map.put(srcFolder, "children", []);
+
+var mainScript = call map.new();
+call map.put(mainScript, "text", "main.ebs");
+call map.put(mainScript, "children", []);
+
+var utilScript = call map.new();
+call map.put(utilScript, "text", "util.ebs");
+call map.put(utilScript, "children", []);
+
+var testScript = call map.new();
+call map.put(testScript, "text", "test.ebs");
+call map.put(testScript, "children", []);
+
+call array.push(call map.get(srcFolder, "children"), mainScript);
+call array.push(call map.get(srcFolder, "children"), utilScript);
+call array.push(call map.get(srcFolder, "children"), testScript);
+
+// Add resources folder with files
+var resourcesFolder = call map.new();
+call map.put(resourcesFolder, "text", "resources");
+call map.put(resourcesFolder, "children", []);
+
+var configFile = call map.new();
+call map.put(configFile, "text", "config.json");
+call map.put(configFile, "children", []);
+
+var styleFile = call map.new();
+call map.put(styleFile, "text", "styles.css");
+call map.put(styleFile, "children", []);
+
+var readmeFile = call map.new();
+call map.put(readmeFile, "text", "README.md");
+call map.put(readmeFile, "children", []);
+
+call array.push(call map.get(resourcesFolder, "children"), configFile);
+call array.push(call map.get(resourcesFolder, "children"), styleFile);
+call array.push(call map.get(resourcesFolder, "children"), readmeFile);
+
+// Add favorites folder (special folder)
+var favFolder = call map.new();
+call map.put(favFolder, "text", "favorites");
+call map.put(favFolder, "children", []);
+
+var favFile1 = call map.new();
+call map.put(favFile1, "text", "important.ebs");
+call map.put(favFile1, "children", []);
+
+call array.push(call map.get(favFolder, "children"), favFile1);
+
+// Add docs folder
+var docsFolder = call map.new();
+call map.put(docsFolder, "text", "docs");
+call map.put(docsFolder, "children", []);
+
+var docFile = call map.new();
+call map.put(docFile, "text", "guide.md");
+call map.put(docFile, "children", []);
+
+call array.push(call map.get(docsFolder, "children"), docFile);
+
+// Add all folders to root
+call array.push(call map.get(rootItem, "children"), srcFolder);
+call array.push(call map.get(rootItem, "children"), resourcesFolder);
+call array.push(call map.get(rootItem, "children"), favFolder);
+call array.push(call map.get(rootItem, "children"), docsFolder);
+
+// Set the tree data
+call map.put(treeData, "root", rootItem);
+
+// Add the TreeView to the screen
+call scr.addControl("fileExplorer", treeData);
+
+// Now set icons for the tree items
+
+// 1. Set folder icons with open/closed states
+call println("Setting folder icons...");
+
+// Regular folders
+call scr.setTreeItemIcons("fileExplorer", "Root.src", 
+    "icons/folder.png", 
+    "icons/folder-open.png", 
+    "icons/folder.png"
+);
+
+call scr.setTreeItemIcons("fileExplorer", "Root.resources", 
+    "icons/folder.png", 
+    "icons/folder-open.png", 
+    "icons/folder.png"
+);
+
+call scr.setTreeItemIcons("fileExplorer", "Root.docs", 
+    "icons/folder.png", 
+    "icons/folder-open.png", 
+    "icons/folder.png"
+);
+
+// Special folder (favorites) - uses different icon
+call scr.setTreeItemIcons("fileExplorer", "Root.favorites", 
+    "icons/folder_fav.png", 
+    "icons/folder_fav.png", 
+    "icons/folder_fav.png"
+);
+
+// 2. Set file icons based on file type
+call println("Setting file icons...");
+
+// EBS script files
+call scr.setTreeItemIcon("fileExplorer", "Root.src.main.ebs", "icons/script-file-run.png");  // Main script (special)
+call scr.setTreeItemIcon("fileExplorer", "Root.src.util.ebs", "icons/script-file.png");     // Regular script
+call scr.setTreeItemIcon("fileExplorer", "Root.src.test.ebs", "icons/script-file.png");     // Regular script
+call scr.setTreeItemIcon("fileExplorer", "Root.favorites.important.ebs", "icons/script-file-run.png");  // Important script
+
+// Configuration and style files
+call scr.setTreeItemIcon("fileExplorer", "Root.resources.config.json", "icons/config-file.png");
+call scr.setTreeItemIcon("fileExplorer", "Root.resources.styles.css", "icons/css-file.png");
+
+// Documentation files
+call scr.setTreeItemIcon("fileExplorer", "Root.resources.README.md", "icons/markdown-file.png");
+call scr.setTreeItemIcon("fileExplorer", "Root.docs.guide.md", "icons/markdown-file.png");
+
+call println("Icons set successfully!");
+
+// Add instruction label
+var instructionData = call map.new();
+call map.put(instructionData, "type", "label");
+call map.put(instructionData, "name", "instructions");
+call map.put(instructionData, "text", "Tree icons set! Expand folders to see open/closed icon changes.");
+call map.put(instructionData, "x", 10);
+call map.put(instructionData, "y", 470);
+call scr.addControl("fileExplorer", instructionData);
+
+// Show the screen
+call scr.showScreen("fileExplorer");
+
+call println("");
+call println("=== TreeView Icons Demo ===");
+call println("The tree shows different icons for:");
+call println("  - Folders (with open/closed states)");
+call println("  - Special folder (favorites)");
+call println("  - EBS script files");
+call println("  - Main script (main.ebs - with run icon)");
+call println("  - Configuration files (JSON)");
+call println("  - Style files (CSS)");
+call println("  - Documentation files (Markdown)");
+call println("");
+call println("Try expanding and collapsing folders to see icon state changes!");
+call println("");
+
+// Wait for user to close screen
+call scr.waitForClose("fileExplorer");
+
+call println("Demo completed.");
