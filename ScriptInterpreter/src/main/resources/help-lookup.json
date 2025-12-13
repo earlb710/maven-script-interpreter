@@ -5813,6 +5813,7 @@
       "echo": "Echo Functions",
       "thread": "Thread Functions",
       "timer": "Timer Functions",
+      "random": "Random Number Generation",
       "custom": "Custom Functions",
       "EbsFunction": "EBS Functions",
       "other": "Other Functions"
@@ -5836,6 +5837,7 @@
       "echo",
       "thread",
       "timer",
+      "random",
       "custom",
       "EbsFunction",
       "other"
@@ -5874,7 +5876,7 @@
     },
     "flow": {
       "title": "Control Flow",
-      "content": "Select a sub-topic from the tree to view detailed information:\n▸ conditionals - if-then-else statements\n▸ loops - while, for, foreach, do-while\n▸ break_continue - Loop control\n▸ exceptions - Error handling\n"
+      "content": "Select a sub-topic from the tree to view detailed information:\n▸ Conditionals - if-then-else statements\n▸ Loops - while, for, foreach, do-while\n▸ Break and Continue - Loop control\n▸ Exceptions - Error handling\n"
     },
     "flow_conditionals": {
       "title": "Conditionals",
