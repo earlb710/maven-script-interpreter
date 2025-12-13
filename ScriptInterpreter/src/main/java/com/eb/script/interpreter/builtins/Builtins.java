@@ -1856,7 +1856,7 @@ public final class Builtins {
                 newParam("max", DataType.DOUBLE, false)   // optional: second param is max
         ));
         addBuiltin(info(
-                "random.setSeed", DataType.STRING,
+                "random.setSeed", null,
                 newParam("seed", DataType.LONG, true)
         ));
 

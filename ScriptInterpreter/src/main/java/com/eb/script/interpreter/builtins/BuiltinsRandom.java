@@ -63,9 +63,8 @@ public class BuiltinsRandom {
             return random.nextLong();
         } else if (nonNullCount == 1) {
             // One argument: range from 0 to max (exclusive)
-            // The argument could be in args[0] or args[1] depending on how it's called
-            long max = args[0] != null ? requireLong(args[0], "random.nextLong", "max") 
-                                       : requireLong(args[1], "random.nextLong", "max");
+            // When only one parameter is provided, it's always in args[0]
+            long max = requireLong(args[0], "random.nextLong", "max");
             if (max <= 0) {
                 throw new InterpreterError("random.nextLong: max must be positive, got: " + max);
             }
@@ -134,9 +133,8 @@ public class BuiltinsRandom {
             return random.nextDouble();
         } else if (nonNullCount == 1) {
             // One argument: range from 0.0 to max (exclusive)
-            // The argument could be in args[0] or args[1] depending on how it's called
-            double max = args[0] != null ? requireDouble(args[0], "random.nextDouble", "max") 
-                                         : requireDouble(args[1], "random.nextDouble", "max");
+            // When only one parameter is provided, it's always in args[0]
+            double max = requireDouble(args[0], "random.nextDouble", "max");
             if (max <= 0.0) {
                 throw new InterpreterError("random.nextDouble: max must be positive, got: " + max);
             }
