@@ -471,6 +471,8 @@ public class EbsTab extends Tab {
                 setupHtmlHighlighting();
             } else if (isJson) {
                 setupJsonHighlighting();
+            } else if (isMd) {
+                setupMdHighlighting();
             } else {
                 setupLexerHighlighting();             // <— hook the EbsLexer here
             }
@@ -1062,10 +1064,10 @@ public class EbsTab extends Tab {
         String BOOLEAN = "\\b(?:true|false)\\b";
         String NULL = "\\bnull\\b";
         
-        // Use named groups
+        // Use named groups (NOTE: Java regex group names cannot contain underscores)
         String master =
-                "(?<COMMENT_SINGLE>" + COMMENT_SINGLE + ")"
-                + "|(?<COMMENT_MULTI>" + COMMENT_MULTI + ")"
+                "(?<COMMENTSINGLE>" + COMMENT_SINGLE + ")"
+                + "|(?<COMMENTMULTI>" + COMMENT_MULTI + ")"
                 + "|(?<KEY>" + KEY + ")"
                 + "|(?<STRING>" + STRING + ")"
                 + "|(?<NUMBER>" + NUMBER + ")"
@@ -1110,13 +1112,103 @@ public class EbsTab extends Tab {
             builder.add(Collections.emptyList(), m.start() - last);
             
             String styleClass =
-                    m.group("COMMENT_SINGLE") != null ? "tok-comment"
-                    : m.group("COMMENT_MULTI") != null ? "tok-comment"
+                    m.group("COMMENTSINGLE") != null ? "tok-comment"
+                    : m.group("COMMENTMULTI") != null ? "tok-comment"
                     : m.group("KEY") != null ? "tok-builtin"
                     : m.group("STRING") != null ? "tok-string"
                     : m.group("NUMBER") != null ? "tok-number"
                     : m.group("BOOLEAN") != null ? "tok-bool"
                     : m.group("NULL") != null ? "tok-null" : null;
+            
+            builder.add(styleClass == null ? Collections.emptyList()
+                    : Collections.singleton(styleClass),
+                    m.end() - m.start());
+            
+            last = m.end();
+        }
+        // tail
+        builder.add(Collections.emptyList(), text.length() - last);
+        return builder.create();
+    }
+
+// ---------- Markdown syntax highlighting ----------
+    private static Pattern MD_PATTERN = null;
+    
+    private static Pattern getMdPattern() {
+        if (MD_PATTERN == null) {
+            MD_PATTERN = buildMdPattern();
+        }
+        return MD_PATTERN;
+    }
+    
+    private static Pattern buildMdPattern() {
+        // Markdown Tokens (basic highlighting)
+        String HEADING = "^#{1,6}\\s+.*$";  // # Heading
+        String BOLD = "\\*\\*[^*]+\\*\\*|__[^_]+__";  // **bold** or __bold__
+        String ITALIC = "\\*[^*]+\\*|_[^_]+_";  // *italic* or _italic_
+        String CODE_BLOCK = "```[\\s\\S]*?```|~~~[\\s\\S]*?~~~";  // ```code```
+        String INLINE_CODE = "`[^`]+`";  // `code`
+        String LINK = "\\[[^\\]]+\\]\\([^)]+\\)";  // [text](url)
+        String LIST = "^\\s*[-*+]\\s+.*$|^\\s*\\d+\\.\\s+.*$";  // - item or 1. item
+        String BLOCKQUOTE = "^>\\s+.*$";  // > quote
+        
+        // Use named groups
+        String master =
+                "(?<CODEBLOCK>" + CODE_BLOCK + ")"
+                + "|(?<HEADING>" + HEADING + ")"
+                + "|(?<BOLD>" + BOLD + ")"
+                + "|(?<ITALIC>" + ITALIC + ")"
+                + "|(?<INLINECODE>" + INLINE_CODE + ")"
+                + "|(?<LINK>" + LINK + ")"
+                + "|(?<LIST>" + LIST + ")"
+                + "|(?<BLOCKQUOTE>" + BLOCKQUOTE + ")";
+        
+        return Pattern.compile(master, Pattern.MULTILINE);
+    }
+    
+    private void setupMdHighlighting() {
+        // Initial highlight
+        applyMdHighlighting(dispArea.getText());
+        
+        // Re-highlight after pauses in typing using ReactFX's debouncing
+        dispArea.multiPlainChanges()
+                .successionEnds(java.time.Duration.ofMillis(100))
+                .subscribe(ignore -> applyMdHighlighting(dispArea.getText()));
+    }
+    
+    private void applyMdHighlighting(String text) {
+        StyleSpans<Collection<String>> spans = computeMdHighlighting(text);
+        
+        // Preserve scroll position when applying style spans
+        double scrollY = dispArea.getEstimatedScrollY();
+        
+        dispArea.setStyleSpans(0, spans);
+        
+        // Restore scroll position after style update
+        Platform.runLater(() -> {
+            dispArea.scrollYToPixel(scrollY);
+            dispArea.highlightMatchingBrackets();
+        });
+    }
+    
+    private StyleSpans<Collection<String>> computeMdHighlighting(String text) {
+        Matcher m = getMdPattern().matcher(text);
+        int last = 0;
+        StyleSpansBuilder<Collection<String>> builder = new StyleSpansBuilder<>();
+        
+        while (m.find()) {
+            // gap (unstyled)
+            builder.add(Collections.emptyList(), m.start() - last);
+            
+            String styleClass =
+                    m.group("CODEBLOCK") != null ? "tok-string"
+                    : m.group("HEADING") != null ? "tok-keyword"
+                    : m.group("BOLD") != null ? "tok-keyword"
+                    : m.group("ITALIC") != null ? "tok-type"
+                    : m.group("INLINECODE") != null ? "tok-string"
+                    : m.group("LINK") != null ? "tok-builtin"
+                    : m.group("LIST") != null ? "tok-keyword"
+                    : m.group("BLOCKQUOTE") != null ? "tok-comment" : null;
             
             builder.add(styleClass == null ? Collections.emptyList()
                     : Collections.singleton(styleClass),
@@ -1157,6 +1249,7 @@ public class EbsTab extends Tab {
         boolean isCss = ext.equalsIgnoreCase(".css");
         boolean isHtml = ext.equalsIgnoreCase(".html");
         boolean isJson = ext.equalsIgnoreCase(".json");
+        boolean isMd = ext.equalsIgnoreCase(".md");
         
         if (isCss) {
             applyCssHighlighting(src);
@@ -1166,6 +1259,9 @@ public class EbsTab extends Tab {
             return;
         } else if (isJson) {
             applyJsonHighlighting(src);
+            return;
+        } else if (isMd) {
+            applyMdHighlighting(src);
             return;
         }
         
