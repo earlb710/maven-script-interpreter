@@ -361,7 +361,7 @@
         }
       ],
       "return_type": "void",
-      "example": "<b>var</b> arr = [1, 2, 3];<br><b>call</b> <b>array.add</b>(arr, 4);<br><b>call</b> <b>array.add</b>(arr, 0, 0); // insert at beginning"
+      "example": "<b>var</b> arr = [1, 2, 3];<br><b>call</b> <b>array.add</b>(array=arr, value=4);<br><b>call</b> <b>array.add</b>(array=arr, value=0, index=0); // insert at beginning"
     },
     {
       "function": "array.asBitmap",
@@ -515,7 +515,7 @@
         }
       ],
       "return_type": "void",
-      "example": "<b>call</b> <b>array.sort</b>(array=numbers, ascending=true);"
+      "example": "<b>var</b> numbers = [3, 1, 2];<br><b>call</b> <b>array.sort</b>(array=numbers, ascending=true);"
     },
     {
       "function": "canvas.clear",
@@ -917,7 +917,7 @@
         }
       ],
       "return_type": "date",
-      "example": "<b>var</b> future = <b>call</b> <b>date.addDays</b>(dateValue=date.today(), days=7);"
+      "example": "<b>var</b> today = <b>call</b> <b>date.today</b>();<br><b>var</b> future = <b>call</b> <b>date.addDays</b>(dateValue=today, days=7);"
     },
     {
       "function": "date.addHours",
@@ -934,7 +934,7 @@
         }
       ],
       "return_type": "date",
-      "example": "<b>var</b> later = <b>call</b> <b>date.addHours</b>(dateValue=date.now(), hours=2);"
+      "example": "<b>var</b> now = <b>call</b> <b>date.now</b>();<br><b>var</b> later = <b>call</b> <b>date.addHours</b>(dateValue=now, hours=2);"
     },
     {
       "function": "date.addMinutes",
@@ -951,7 +951,7 @@
         }
       ],
       "return_type": "date",
-      "example": "<b>var</b> later = <b>call</b> <b>date.addMinutes</b>(dateValue=date.now(), minutes=30);"
+      "example": "<b>var</b> now = <b>call</b> <b>date.now</b>();<br><b>var</b> later = <b>call</b> <b>date.addMinutes</b>(dateValue=now, minutes=30);"
     },
     {
       "function": "date.addSeconds",
@@ -968,7 +968,7 @@
         }
       ],
       "return_type": "date",
-      "example": "<b>var</b> later = <b>call</b> <b>date.addSeconds</b>(dateValue=date.now(), seconds=45);"
+      "example": "<b>var</b> now = <b>call</b> <b>date.now</b>();<br><b>var</b> later = <b>call</b> <b>date.addSeconds</b>(dateValue=now, seconds=45);"
     },
     {
       "function": "date.daysBetween",
@@ -985,7 +985,7 @@
         }
       ],
       "return_type": "long",
-      "example": "<b>var</b> days = <b>call</b> <b>date.daysBetween</b>(date1=date.today(), date2=date.addDays(date.today(), 10));<br><b>print</b> \"Days: \" + days;"
+      "example": "<b>var</b> today = <b>call</b> <b>date.today</b>();<br><b>var</b> future = <b>call</b> <b>date.addDays</b>(dateValue=today, days=10);<br><b>var</b> days = <b>call</b> <b>date.daysBetween</b>(date1=today, date2=future);<br><b>print</b> \"Days: \" + days;"
     },
     {
       "function": "date.format",
@@ -1002,7 +1002,7 @@
         }
       ],
       "return_type": "string",
-      "example": "<b>var</b> formatted = <b>call</b> <b>date.format</b>(dateValue=date.now(), pattern=\"yyyy-MM-dd\");<br><b>print</b> formatted;"
+      "example": "<b>var</b> now = <b>call</b> <b>date.now</b>();<br><b>var</b> formatted = <b>call</b> <b>date.format</b>(dateValue=now, pattern=\"yyyy-MM-dd\");<br><b>print</b> formatted;"
     },
     {
       "function": "date.fromEpochMs",
@@ -1028,7 +1028,7 @@
         }
       ],
       "return_type": "integer",
-      "example": "<b>var</b> day = <b>call</b> <b>date.getDay</b>(dateValue=date.now());<br><b>print</b> day;"
+      "example": "<b>var</b> now = <b>call</b> <b>date.now</b>();<br><b>var</b> day = <b>call</b> <b>date.getDay</b>(dateValue=now);<br><b>print</b> day;"
     },
     {
       "function": "date.getHour",
@@ -1041,7 +1041,7 @@
         }
       ],
       "return_type": "integer",
-      "example": "<b>var</b> hour = <b>call</b> <b>date.getHour</b>(dateValue=date.now());<br><b>print</b> hour;"
+      "example": "<b>var</b> now = <b>call</b> <b>date.now</b>();<br><b>var</b> hour = <b>call</b> <b>date.getHour</b>(dateValue=now);<br><b>print</b> hour;"
     },
     {
       "function": "date.getMinute",
@@ -1054,7 +1054,7 @@
         }
       ],
       "return_type": "integer",
-      "example": "<b>var</b> minute = <b>call</b> <b>date.getMinute</b>(dateValue=date.now());<br><b>print</b> minute;"
+      "example": "<b>var</b> now = <b>call</b> <b>date.now</b>();<br><b>var</b> minute = <b>call</b> <b>date.getMinute</b>(dateValue=now);<br><b>print</b> minute;"
     },
     {
       "function": "date.getMonth",
@@ -1067,7 +1067,7 @@
         }
       ],
       "return_type": "integer",
-      "example": "<b>var</b> month = <b>call</b> <b>date.getMonth</b>(dateValue=date.now());<br><b>print</b> month;"
+      "example": "<b>var</b> now = <b>call</b> <b>date.now</b>();<br><b>var</b> month = <b>call</b> <b>date.getMonth</b>(dateValue=now);<br><b>print</b> month;"
     },
     {
       "function": "date.getSecond",
@@ -1080,7 +1080,7 @@
         }
       ],
       "return_type": "integer",
-      "example": "<b>var</b> second = <b>call</b> <b>date.getSecond</b>(dateValue=date.now());<br><b>print</b> second;"
+      "example": "<b>var</b> now = <b>call</b> <b>date.now</b>();<br><b>var</b> second = <b>call</b> <b>date.getSecond</b>(dateValue=now);<br><b>print</b> second;"
     },
     {
       "function": "date.getYear",
@@ -1093,7 +1093,7 @@
         }
       ],
       "return_type": "integer",
-      "example": "<b>var</b> year = <b>call</b> <b>date.getYear</b>(dateValue=date.now());<br><b>print</b> year;"
+      "example": "<b>var</b> now = <b>call</b> <b>date.now</b>();<br><b>var</b> year = <b>call</b> <b>date.getYear</b>(dateValue=now);<br><b>print</b> year;"
     },
     {
       "function": "date.now",
@@ -1148,7 +1148,7 @@
         }
       ],
       "return_type": "long",
-      "example": "<b>var</b> millis = <b>call</b> <b>date.toEpochMs</b>(dateValue=date.now());<br><b>print</b> millis;"
+      "example": "<b>var</b> now = <b>call</b> <b>date.now</b>();<br><b>var</b> millis = <b>call</b> <b>date.toEpochMs</b>(dateValue=now);<br><b>print</b> millis;"
     },
     {
       "function": "date.toSqlTimestamp",
@@ -1161,7 +1161,7 @@
         }
       ],
       "return_type": "date",
-      "example": "<b>var</b> ts = <b>call</b> <b>date.toSqlTimestamp</b>(dateValue=date.now());"
+      "example": "<b>var</b> now = <b>call</b> <b>date.now</b>();<br><b>var</b> ts = <b>call</b> <b>date.toSqlTimestamp</b>(dateValue=now);"
     },
     {
       "function": "date.today",
