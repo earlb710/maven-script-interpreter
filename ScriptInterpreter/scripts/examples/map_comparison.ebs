@@ -13,7 +13,8 @@ var config: map = {
 };
 
 print "=== Normal Map (Insertion Order) ===";
-call json.toString(config);
+var configStr = call json.toString(config);
+print configStr;
 
 // Create a sorted map with the same keys
 var sortedConfig: sorted map = {
@@ -28,18 +29,21 @@ var sortedConfig: sorted map = {
 
 print "";
 print "=== Sorted Map (Alphabetical Order) ===";
-call json.toString(sortedConfig);
+var sortedConfigStr = call json.toString(sortedConfig);
+print sortedConfigStr;
 
 // Demonstrate dynamic conversion
 print "";
 print "=== Converting Normal to Sorted ===";
 var tempSorted = call map.toSorted(config);
-call json.toString(tempSorted);
+var tempSortedStr = call json.toString(tempSorted);
+print tempSortedStr;
 
 print "";
 print "=== Converting Sorted to Normal ===";
 var tempNormal = call map.toUnsorted(sortedConfig);
-call json.toString(tempNormal);
+var tempNormalStr = call json.toString(tempNormal);
+print tempNormalStr;
 
 // Use case: Configuration management
 // Sorted maps are ideal when you want consistent ordering for:
