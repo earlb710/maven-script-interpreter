@@ -230,10 +230,25 @@ call array.add(syntaxChildren, structureNode);
 // Data Types section
 var dataChildren: array[*];
 
+// Integer Types with sub-nodes
+var integerChildren: array[*];
+
 tempNode = call json.jsonFromString("{}");
-tempNode = call json.set(tempNode, "value", "Integer Types");
+tempNode = call json.set(tempNode, "value", "Bitmap");
 tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
-call array.add(dataChildren, tempNode);
+call array.add(integerChildren, tempNode);
+
+tempNode = call json.jsonFromString("{}");
+tempNode = call json.set(tempNode, "value", "Intmap");
+tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
+call array.add(integerChildren, tempNode);
+
+var integerNode: json = call json.jsonFromString("{}");
+integerNode = call json.set(integerNode, "value", "Integer Types");
+integerNode = call json.set(integerNode, "icon", "icons/tree-node.png");
+integerNode = call json.set(integerNode, "expanded", false);
+integerNode = call json.set(integerNode, "children", integerChildren);
+call array.add(dataChildren, integerNode);
 
 tempNode = call json.jsonFromString("{}");
 tempNode = call json.set(tempNode, "value", "Floating Point");
@@ -502,6 +517,9 @@ convertToHtml(text: string) return string {
     
     // Join lines with <br>
     var bodyContent: string = call str.join(processedLines, "<br>");
+    
+    // Remove extra <br> after <hr> tags
+    bodyContent = call str.replace(bodyContent, "<hr><br>", "<hr>");
     
     // Wrap in HTML structure without pre tag
     var result: string = "<!DOCTYPE html><html><head><style>";
@@ -790,6 +808,12 @@ getHelpContent(topic: string) return string {
     }
     if topic == "Date" then {
         topic = "data_date";
+    }
+    if topic == "Bitmap" then {
+        topic = "data_bitmap";
+    }
+    if topic == "Intmap" then {
+        topic = "data_intmap";
     }
     
     // Handle example topic aliases (Keywords/examples_keywords, etc.)
