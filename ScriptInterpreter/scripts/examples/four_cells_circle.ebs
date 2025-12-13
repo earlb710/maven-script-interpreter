@@ -126,8 +126,8 @@ drawCircleInCellViaImage(cellCanvas: canvas, tempCanvas: canvas) {
 // Define the screen
 screen fourCellsScreen = {
     "title": "Four Cells - Click to Draw Circle",
-    "width": 440,
-    "height": 480,
+    "width": 500,
+    "height": 540,
     "sets": [
         {
             "setname": "main",
