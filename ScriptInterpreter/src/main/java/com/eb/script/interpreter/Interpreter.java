@@ -793,13 +793,12 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 boolean varExists = screenVarMap.containsKey(secondPart) || 
                                    (screenVarTypes != null && screenVarTypes.containsKey(secondPart));
                 if (varExists) {
-                    // ConcurrentHashMap doesn't allow null values, so handle null appropriately
+                    // ConcurrentHashMap doesn't allow null values, so use NULL_SENTINEL for nulls
                     if (value != null) {
                         screenVarMap.put(secondPart, value);
                     } else {
-                        // For null values, we need to keep track of the variable but can't store null
-                        // Remove any existing value - the variable exists but has no value
-                        screenVarMap.remove(secondPart);
+                        // Use NULL_SENTINEL to represent null so UI refresh can detect the change
+                        screenVarMap.put(secondPart, InterpreterArray.NULL_SENTINEL);
                     }
                     // Trigger screen refresh to update UI controls
                     context.triggerScreenRefresh(firstPart);
