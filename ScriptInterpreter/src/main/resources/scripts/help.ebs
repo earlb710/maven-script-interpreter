@@ -369,6 +369,7 @@ convertToHtml(text: string) return string {
     var processedLines: array = [];
     
     var i: int = 0;
+    var lastWasHr: bool = false;
     while i < lines.length {
         var line: string = lines[i];
         var trimmedLine: string = call str.trim(line);
@@ -395,9 +396,43 @@ convertToHtml(text: string) return string {
         if isHrLine then {
             // Replace separator lines with <hr>
             call array.add(processedLines, "<hr>");
+            lastWasHr = true;
         } else {
-            // Add the line as-is
-            call array.add(processedLines, line);
+            // Check if this is a title line (comes after <hr> and before another <hr>)
+            var isTitle: bool = false;
+            if lastWasHr and trimmedLine != "" then {
+                // Look ahead to see if next non-empty line is also <hr>
+                var nextIdx: int = i + 1;
+                if nextIdx < lines.length then {
+                    var nextLine: string = lines[nextIdx];
+                    var nextTrimmed: string = call str.trim(nextLine);
+                    var nextLineLen: int = nextTrimmed.length;
+                    if nextLineLen > 5 then {
+                        var nextAllSep: bool = true;
+                        var k: int = 0;
+                        while k < nextLineLen {
+                            var nextCh: string = call str.substring(nextTrimmed, k, k + 1);
+                            if nextCh != "═" and nextCh != "=" and nextCh != "-" then {
+                                nextAllSep = false;
+                                break;
+                            }
+                            k = k + 1;
+                        }
+                        if nextAllSep then {
+                            isTitle = true;
+                        }
+                    }
+                }
+            }
+            
+            if isTitle then {
+                // Wrap title in heading tags
+                call array.add(processedLines, "<h2>" + line + "</h2>");
+            } else {
+                // Add the line as-is
+                call array.add(processedLines, line);
+            }
+            lastWasHr = false;
         }
         
         i = i + 1;
@@ -410,6 +445,7 @@ convertToHtml(text: string) return string {
     var result: string = "<!DOCTYPE html><html><head><style>";
     result = result + "body { margin: 10px; font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 12px; }";
     result = result + "hr { border: 0; border-top: 1px solid #ccc; margin: 10px 0; }";
+    result = result + "h2 { font-size: 18px; font-weight: bold; margin: 10px 0; color: #333; }";
     result = result + "</style></head><body>";
     result = result + bodyContent;
     result = result + "</body></html>";
