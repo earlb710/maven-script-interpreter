@@ -467,6 +467,10 @@ public class EbsTab extends Tab {
             // Choose appropriate highlighting based on file type
             if (isCss) {
                 setupCssHighlighting();
+            } else if (isHtml) {
+                setupHtmlHighlighting();
+            } else if (isJson) {
+                setupJsonHighlighting();
             } else {
                 setupLexerHighlighting();             // <— hook the EbsLexer here
             }
@@ -927,6 +931,183 @@ public class EbsTab extends Tab {
         return builder.create();
     }
 
+// ---------- HTML syntax highlighting ----------
+    private static final String[] HTML_TAGS = new String[]{
+        "a", "abbr", "address", "area", "article", "aside", "audio", "b", "base", "bdi", "bdo",
+        "blockquote", "body", "br", "button", "canvas", "caption", "cite", "code", "col", "colgroup",
+        "data", "datalist", "dd", "del", "details", "dfn", "dialog", "div", "dl", "dt", "em", "embed",
+        "fieldset", "figcaption", "figure", "footer", "form", "h1", "h2", "h3", "h4", "h5", "h6",
+        "head", "header", "hr", "html", "i", "iframe", "img", "input", "ins", "kbd", "label", "legend",
+        "li", "link", "main", "map", "mark", "meta", "meter", "nav", "noscript", "object", "ol",
+        "optgroup", "option", "output", "p", "param", "picture", "pre", "progress", "q", "rp", "rt",
+        "ruby", "s", "samp", "script", "section", "select", "small", "source", "span", "strong",
+        "style", "sub", "summary", "sup", "svg", "table", "tbody", "td", "template", "textarea",
+        "tfoot", "th", "thead", "time", "title", "tr", "track", "u", "ul", "var", "video", "wbr"
+    };
+    
+    private static final Pattern HTML_PATTERN = buildHtmlPattern();
+    
+    private static Pattern buildHtmlPattern() {
+        // Build tag alternations
+        String tags = "\\b(?:" + String.join("|", HTML_TAGS) + ")\\b";
+        
+        // HTML Tokens
+        String COMMENT = "<!--[^-]*(?:-(?!->)[^-]*)*-->";  // <!-- ... -->
+        String DOCTYPE = "<!DOCTYPE[^>]*>";
+        String TAG_OPEN = "</?(" + tags + ")";  // <tag or </tag
+        String TAG_CLOSE = "/?>";  // > or />
+        String ATTRIBUTE = "\\b[a-zA-Z_:][-a-zA-Z0-9_:.]*(?=\\s*=)";  // attribute names
+        String STRING_DQ = "\"([^\"\\\\]|\\\\.)*\"";
+        String STRING_SQ = "'([^'\\\\]|\\\\.)*'";
+        String ENTITY = "&(?:[a-zA-Z][a-zA-Z0-9]*|#[0-9]+|#x[0-9a-fA-F]+);";  // &nbsp; &#123; &#xAB;
+        
+        // Use named groups
+        String master =
+                "(?<COMMENT>" + COMMENT + ")"
+                + "|(?<DOCTYPE>" + DOCTYPE + ")"
+                + "|(?<TAGOPEN>" + TAG_OPEN + ")"
+                + "|(?<TAGCLOSE>" + TAG_CLOSE + ")"
+                + "|(?<ATTRIBUTE>" + ATTRIBUTE + ")"
+                + "|(?<STRING>" + STRING_DQ + "|" + STRING_SQ + ")"
+                + "|(?<ENTITY>" + ENTITY + ")";
+        
+        return Pattern.compile(master, Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
+    }
+    
+    private void setupHtmlHighlighting() {
+        // Initial highlight
+        applyHtmlHighlighting(dispArea.getText());
+        
+        // Re-highlight after pauses in typing using ReactFX's debouncing
+        dispArea.multiPlainChanges()
+                .successionEnds(java.time.Duration.ofMillis(100))
+                .subscribe(ignore -> applyHtmlHighlighting(dispArea.getText()));
+    }
+    
+    private void applyHtmlHighlighting(String text) {
+        StyleSpans<Collection<String>> spans = computeHtmlHighlighting(text);
+        
+        // Preserve scroll position when applying style spans
+        double scrollY = dispArea.getEstimatedScrollY();
+        
+        dispArea.setStyleSpans(0, spans);
+        
+        // Restore scroll position after style update
+        Platform.runLater(() -> {
+            dispArea.scrollYToPixel(scrollY);
+            dispArea.highlightMatchingBrackets();
+        });
+    }
+    
+    private StyleSpans<Collection<String>> computeHtmlHighlighting(String text) {
+        Matcher m = HTML_PATTERN.matcher(text);
+        int last = 0;
+        StyleSpansBuilder<Collection<String>> builder = new StyleSpansBuilder<>();
+        
+        while (m.find()) {
+            // gap (unstyled)
+            builder.add(Collections.emptyList(), m.start() - last);
+            
+            String styleClass =
+                    m.group("COMMENT") != null ? "tok-comment"
+                    : m.group("DOCTYPE") != null ? "tok-keyword"
+                    : m.group("TAGOPEN") != null ? "tok-keyword"
+                    : m.group("TAGCLOSE") != null ? "tok-keyword"
+                    : m.group("ATTRIBUTE") != null ? "tok-builtin"
+                    : m.group("STRING") != null ? "tok-string"
+                    : m.group("ENTITY") != null ? "tok-type" : null;
+            
+            builder.add(styleClass == null ? Collections.emptyList()
+                    : Collections.singleton(styleClass),
+                    m.end() - m.start());
+            
+            last = m.end();
+        }
+        // tail
+        builder.add(Collections.emptyList(), text.length() - last);
+        return builder.create();
+    }
+
+// ---------- JSON syntax highlighting ----------
+    private static final Pattern JSON_PATTERN = buildJsonPattern();
+    
+    private static Pattern buildJsonPattern() {
+        // JSON Tokens
+        String COMMENT_SINGLE = "//[^\\n]*";  // Single-line comment (non-standard but common)
+        String COMMENT_MULTI = "/\\*[^*]*\\*+(?:[^/*][^*]*\\*+)*/";  // /* ... */
+        String KEY = "\"([^\"\\\\]|\\\\.)*\"\\s*(?=:)";  // "key": (string followed by colon)
+        String STRING = "\"([^\"\\\\]|\\\\.)*\"";  // "string"
+        String NUMBER = "-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?\\b";  // JSON numbers
+        String BOOLEAN = "\\b(?:true|false)\\b";
+        String NULL = "\\bnull\\b";
+        
+        // Use named groups
+        String master =
+                "(?<COMMENT_SINGLE>" + COMMENT_SINGLE + ")"
+                + "|(?<COMMENT_MULTI>" + COMMENT_MULTI + ")"
+                + "|(?<KEY>" + KEY + ")"
+                + "|(?<STRING>" + STRING + ")"
+                + "|(?<NUMBER>" + NUMBER + ")"
+                + "|(?<BOOLEAN>" + BOOLEAN + ")"
+                + "|(?<NULL>" + NULL + ")";
+        
+        return Pattern.compile(master, Pattern.MULTILINE);
+    }
+    
+    private void setupJsonHighlighting() {
+        // Initial highlight
+        applyJsonHighlighting(dispArea.getText());
+        
+        // Re-highlight after pauses in typing using ReactFX's debouncing
+        dispArea.multiPlainChanges()
+                .successionEnds(java.time.Duration.ofMillis(100))
+                .subscribe(ignore -> applyJsonHighlighting(dispArea.getText()));
+    }
+    
+    private void applyJsonHighlighting(String text) {
+        StyleSpans<Collection<String>> spans = computeJsonHighlighting(text);
+        
+        // Preserve scroll position when applying style spans
+        double scrollY = dispArea.getEstimatedScrollY();
+        
+        dispArea.setStyleSpans(0, spans);
+        
+        // Restore scroll position after style update
+        Platform.runLater(() -> {
+            dispArea.scrollYToPixel(scrollY);
+            dispArea.highlightMatchingBrackets();
+        });
+    }
+    
+    private StyleSpans<Collection<String>> computeJsonHighlighting(String text) {
+        Matcher m = JSON_PATTERN.matcher(text);
+        int last = 0;
+        StyleSpansBuilder<Collection<String>> builder = new StyleSpansBuilder<>();
+        
+        while (m.find()) {
+            // gap (unstyled)
+            builder.add(Collections.emptyList(), m.start() - last);
+            
+            String styleClass =
+                    m.group("COMMENT_SINGLE") != null ? "tok-comment"
+                    : m.group("COMMENT_MULTI") != null ? "tok-comment"
+                    : m.group("KEY") != null ? "tok-builtin"
+                    : m.group("STRING") != null ? "tok-string"
+                    : m.group("NUMBER") != null ? "tok-number"
+                    : m.group("BOOLEAN") != null ? "tok-bool"
+                    : m.group("NULL") != null ? "tok-null" : null;
+            
+            builder.add(styleClass == null ? Collections.emptyList()
+                    : Collections.singleton(styleClass),
+                    m.end() - m.start());
+            
+            last = m.end();
+        }
+        // tail
+        builder.add(Collections.emptyList(), text.length() - last);
+        return builder.create();
+    }
+
 // ---------- Lexer-based highlighter ----------
     private final EbsLexer ebsLexer = new EbsLexer();
 
@@ -953,8 +1134,17 @@ public class EbsTab extends Tab {
         
         // Dispatch to appropriate highlighter based on file extension
         boolean isCss = ext.equalsIgnoreCase(".css");
+        boolean isHtml = ext.equalsIgnoreCase(".html");
+        boolean isJson = ext.equalsIgnoreCase(".json");
+        
         if (isCss) {
             applyCssHighlighting(src);
+            return;
+        } else if (isHtml) {
+            applyHtmlHighlighting(src);
+            return;
+        } else if (isJson) {
+            applyJsonHighlighting(src);
             return;
         }
         
