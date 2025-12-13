@@ -18,32 +18,37 @@ public class VarStatement extends Statement {
     public final IntmapType intmapType; // Intmap type definition (if varType is INTMAP)
     public final Expression initializer;
     public final boolean isConst; // Whether this is a const declaration (cannot be reassigned)
+    public final boolean isSortedMap; // Whether this is a sorted map (uses TreeMap instead of LinkedHashMap)
 
     public VarStatement(int line, String name, DataType type, Expression initializer) {
-        this(line, name, type, null, null, null, initializer, false);
+        this(line, name, type, null, null, null, initializer, false, false);
     }
     
     public VarStatement(int line, String name, DataType type, Expression initializer, boolean isConst) {
-        this(line, name, type, null, null, null, initializer, isConst);
+        this(line, name, type, null, null, null, initializer, isConst, false);
     }
     
     public VarStatement(int line, String name, DataType type, RecordType recordType, Expression initializer) {
-        this(line, name, type, recordType, null, null, initializer, false);
+        this(line, name, type, recordType, null, null, initializer, false, false);
     }
     
     public VarStatement(int line, String name, DataType type, RecordType recordType, Expression initializer, boolean isConst) {
-        this(line, name, type, recordType, null, null, initializer, isConst);
+        this(line, name, type, recordType, null, null, initializer, isConst, false);
     }
     
     public VarStatement(int line, String name, DataType type, BitmapType bitmapType, Expression initializer, boolean isConst) {
-        this(line, name, type, null, bitmapType, null, initializer, isConst);
+        this(line, name, type, null, bitmapType, null, initializer, isConst, false);
     }
     
     public VarStatement(int line, String name, DataType type, IntmapType intmapType, Expression initializer, boolean isConst) {
-        this(line, name, type, null, null, intmapType, initializer, isConst);
+        this(line, name, type, null, null, intmapType, initializer, isConst, false);
     }
     
-    public VarStatement(int line, String name, DataType type, RecordType recordType, BitmapType bitmapType, IntmapType intmapType, Expression initializer, boolean isConst) {
+    public VarStatement(int line, String name, DataType type, Expression initializer, boolean isConst, boolean isSortedMap) {
+        this(line, name, type, null, null, null, initializer, isConst, isSortedMap);
+    }
+    
+    public VarStatement(int line, String name, DataType type, RecordType recordType, BitmapType bitmapType, IntmapType intmapType, Expression initializer, boolean isConst, boolean isSortedMap) {
         super(line);
         this.name = name;
         this.varType = type;
@@ -52,6 +57,7 @@ public class VarStatement extends Statement {
         this.intmapType = intmapType;
         this.initializer = initializer;
         this.isConst = isConst;
+        this.isSortedMap = isSortedMap;
     }
 
     public VarStatement(int line, String name, EbsToken tokenType, Expression initializer) {
@@ -81,6 +87,7 @@ public class VarStatement extends Statement {
         this.intmapType = null;
         this.initializer = initializer;
         this.isConst = false;
+        this.isSortedMap = false;
     }
 
     @Override

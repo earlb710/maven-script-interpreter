@@ -501,14 +501,28 @@ public class Parser {
         Expression[] arrayDims = null;
         boolean consumedBraces = false; // Track if we consumed braces for record/bitmap/intmap fields
         boolean isQueueType = false; // Track if this is a queue type declaration
+        boolean isSortedMap = false; // Track if this is a sorted map
 
         if (match(EbsTokenType.COLON)) {
             EbsToken t = peek();
             boolean handledScreenType = false; // Track if we handled screen.xxx syntax
             
+            // Check for "sorted map" type modifier
+            if (t.type == EbsTokenType.SORTED) {
+                advance(); // consume 'sorted'
+                EbsToken mapToken = peek();
+                if (mapToken.type == EbsTokenType.MAP || 
+                    (mapToken.literal instanceof String && "map".equals(((String)mapToken.literal).toLowerCase()))) {
+                    isSortedMap = true;
+                    elemType = DataType.MAP;
+                    advance(); // consume 'map'
+                } else {
+                    throw error(mapToken, "Expected 'map' after 'sorted' type modifier.");
+                }
+            }
             // Special handling for "screen.xxx" type annotations
             // Since "screen" is a keyword, we need to check for SCREEN token followed by DOT
-            if (t.type == EbsTokenType.SCREEN && peekNext() != null && peekNext().type == EbsTokenType.DOT) {
+            else if (t.type == EbsTokenType.SCREEN && peekNext() != null && peekNext().type == EbsTokenType.DOT) {
                 // Consume SCREEN token
                 advance();
                 // Consume DOT token
@@ -711,6 +725,7 @@ public class Parser {
             if (t.type != EbsTokenType.RECORD && 
                 t.type != EbsTokenType.BITMAP &&
                 t.type != EbsTokenType.INTMAP &&
+                t.type != EbsTokenType.SORTED && // Don't advance if we handled sorted map
                 !(t.literal instanceof String && "record".equals(((String)t.literal).toLowerCase())) &&
                 !(t.literal instanceof String && "bitmap".equals(((String)t.literal).toLowerCase())) &&
                 !(t.literal instanceof String && "intmap".equals(((String)t.literal).toLowerCase())) &&
@@ -864,7 +879,7 @@ public class Parser {
         } else if (recordType != null) {
             return new VarStatement(name.line, (String) name.literal, elemType, recordType, varInit, isConst);
         } else {
-            return new VarStatement(name.line, (String) name.literal, elemType, varInit, isConst);
+            return new VarStatement(name.line, (String) name.literal, elemType, varInit, isConst, isSortedMap);
         }
 
     }

@@ -438,6 +438,33 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                         // Convert to int
                         value = DataType.INTMAP.convertValue(value);
                     }
+                } else if (expectedType == DataType.MAP && stmt.isSortedMap) {
+                    // Special handling for sorted map types
+                    // Convert LinkedHashMap to TreeMap to maintain sorted order by keys
+                    if (value == null) {
+                        value = new java.util.TreeMap<String, Object>();
+                    } else if (value instanceof java.util.Map) {
+                        // Create a new TreeMap and copy all entries from the existing map
+                        java.util.Map<String, Object> treeMap = new java.util.TreeMap<>();
+                        treeMap.putAll((java.util.Map<String, Object>) value);
+                        value = treeMap;
+                    } else {
+                        // Convert to map type first, then to TreeMap
+                        value = stmt.varType.convertValue(value);
+                        if (value instanceof java.util.Map) {
+                            java.util.Map<String, Object> treeMap = new java.util.TreeMap<>();
+                            treeMap.putAll((java.util.Map<String, Object>) value);
+                            value = treeMap;
+                        }
+                    }
+                } else if (expectedType == DataType.MAP && !stmt.isSortedMap) {
+                    // Special handling for normal (unsorted) map types
+                    // Ensure we use LinkedHashMap to maintain insertion order
+                    if (value == null) {
+                        value = new java.util.LinkedHashMap<String, Object>();
+                    } else {
+                        value = stmt.varType.convertValue(value);
+                    }
                 } else {
                     // For non-array values, convert to the expected type
                     value = stmt.varType.convertValue(value);

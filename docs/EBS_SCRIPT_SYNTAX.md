@@ -179,9 +179,18 @@ var rec = record(arrayData);
 #### Map Type and JSON to Map Casting
 The `map` type represents a key-value store where keys are strings and values can be any type. Maps are backed by JSON objects and can only be created from JSON objects (not arrays).
 
+EBS supports two types of maps:
+- **Normal maps** (`map`): Maintain insertion order (LinkedHashMap)
+- **Sorted maps** (`sorted map`): Automatically sort keys alphabetically (TreeMap)
+
 ```javascript
-// Declare a map variable
-var myMap: map = {"key1": "value1", "key2": 123, "key3": true};
+// Normal map (maintains insertion order)
+var myMap: map = {"z": 3, "a": 1, "m": 2};
+// When iterating: z=3, a=1, m=2 (insertion order)
+
+// Sorted map (maintains alphabetical order)
+var sortedMap: sorted map = {"z": 3, "a": 1, "m": 2};
+// When iterating: a=1, m=2, z=3 (alphabetical order)
 
 // Cast JSON object to map
 var jsonData: json = {"name": "Alice", "age": 30, "city": "New York"};
@@ -192,6 +201,10 @@ var name = call json.get(personMap, "name");          // "Alice"
 var age = call json.getint(personMap, "age");         // 30
 call json.set(personMap, "city", "Los Angeles");      // Modify value
 call json.set(personMap, "country", "USA");           // Add new key
+
+// Convert between normal and sorted maps
+var toSorted = call map.toSorted(myMap);              // Convert to sorted map
+var toNormal = call map.toUnsorted(sortedMap);        // Convert to normal map
 
 // Nested maps
 var nestedJson: json = {

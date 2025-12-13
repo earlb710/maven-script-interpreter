@@ -1,0 +1,66 @@
+// map_comparison.ebs - Comparing normal and sorted maps
+// Demonstrates the differences between LinkedHashMap (normal) and TreeMap (sorted)
+
+// Create a normal map with keys in random order
+var config: map = {
+    "database": "mysql",
+    "host": "localhost",
+    "port": 3306,
+    "username": "admin",
+    "password": "secret",
+    "timeout": 30,
+    "retries": 3
+};
+
+print "=== Normal Map (Insertion Order) ===";
+var configStr = call json.toString(config);
+print configStr;
+
+// Create a sorted map with the same keys
+var sortedConfig: sorted map = {
+    "database": "mysql",
+    "host": "localhost",
+    "port": 3306,
+    "username": "admin",
+    "password": "secret",
+    "timeout": 30,
+    "retries": 3
+};
+
+print "";
+print "=== Sorted Map (Alphabetical Order) ===";
+var sortedConfigStr = call json.toString(sortedConfig);
+print sortedConfigStr;
+
+// Demonstrate dynamic conversion
+print "";
+print "=== Converting Normal to Sorted ===";
+var tempSorted = call map.toSorted(config);
+var tempSortedStr = call json.toString(tempSorted);
+print tempSortedStr;
+
+print "";
+print "=== Converting Sorted to Normal ===";
+var tempNormal = call map.toUnsorted(sortedConfig);
+var tempNormalStr = call json.toString(tempNormal);
+print tempNormalStr;
+
+// Use case: Configuration management
+// Sorted maps are ideal when you want consistent ordering for:
+// - Configuration files (easier to compare and diff)
+// - API responses (predictable JSON structure)
+// - Logging and debugging (consistent output)
+// - UI display (alphabetically sorted dropdown lists)
+
+print "";
+print "Normal maps preserve insertion order - good for:";
+print "  - Sequential processing";
+print "  - Maintaining user-defined order";
+print "  - FIFO-style access patterns";
+
+print "";
+print "Sorted maps maintain alphabetical order - good for:";
+print "  - Configuration files";
+print "  - Consistent API responses";
+print "  - Alphabetically sorted displays";
+print "  - Deterministic iteration";
