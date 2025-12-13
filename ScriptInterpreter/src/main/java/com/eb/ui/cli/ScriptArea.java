@@ -33,6 +33,12 @@ public class ScriptArea extends StyleClassedTextArea {
     private TextChange pendingChange = null;
     private long lastChangeTime = 0;
     private static final long MERGE_TIMEOUT_MS = 500; // Merge changes within 500ms
+    
+    // Bracket matching state
+    private int[] lastHighlightedBrackets = null; // [openPos, closePos] or null if no brackets highlighted
+    
+    // Quote matching state
+    private int[] lastHighlightedQuotes = null; // [openPos, closePos] or null if no quotes highlighted
 
     public ScriptArea() {
         setParagraphGraphicFactory(LineNumberFactory.get(this)); // initial state ON
@@ -42,6 +48,11 @@ public class ScriptArea extends StyleClassedTextArea {
         plainTextChanges()
             .filter(change -> !performingAction.get() && change.getNetLength() != 0)
             .subscribe(this::recordTextChange);
+        
+        // Set up bracket matching on caret position changes
+        caretPositionProperty().addListener((obs, oldPos, newPos) -> {
+            highlightMatchingBrackets();
+        });
     }
     
     /**
@@ -570,5 +581,386 @@ public class ScriptArea extends StyleClassedTextArea {
         }
         
         setStyleSpans(actualStart, builder.create());
+    }
+    
+    /**
+     * Highlight matching brackets and quotes when the caret is on or inside a pair.
+     * Supports {}, (), [] brackets and single/double quotes.
+     * This method is public to allow external triggering after syntax highlighting updates.
+     */
+    public void highlightMatchingBrackets() {
+        // Clear previous highlights
+        clearBracketHighlights();
+        clearQuoteHighlights();
+        
+        String text = getText();
+        int caretPos = getCaretPosition();
+        
+        if (text.isEmpty() || caretPos < 0) {
+            return;
+        }
+        
+        // Check if caret is on a bracket or quote
+        char charAtCaret = (caretPos < text.length()) ? text.charAt(caretPos) : '\0';
+        char charBeforeCaret = (caretPos > 0) ? text.charAt(caretPos - 1) : '\0';
+        
+        // Check for quotes first (they take precedence when on the character)
+        // But skip escaped quotes
+        if (isQuote(charAtCaret) && !isEscaped(text, caretPos)) {
+            highlightQuotePair(text, caretPos, charAtCaret);
+        } else if (isQuote(charBeforeCaret) && !isEscaped(text, caretPos - 1)) {
+            // Also check the character before the caret (when cursor is after a quote)
+            highlightQuotePair(text, caretPos - 1, charBeforeCaret);
+        } else if (isOpenBracket(charAtCaret)) {
+            // Try matching bracket at caret position
+            highlightBracketPair(text, caretPos, charAtCaret, true);
+        } else if (isCloseBracket(charAtCaret)) {
+            highlightBracketPair(text, caretPos, charAtCaret, false);
+        } else if (isOpenBracket(charBeforeCaret)) {
+            // Also check the character before the caret (when cursor is after a bracket)
+            highlightBracketPair(text, caretPos - 1, charBeforeCaret, true);
+        } else if (isCloseBracket(charBeforeCaret)) {
+            highlightBracketPair(text, caretPos - 1, charBeforeCaret, false);
+        } else {
+            // Caret is not on a bracket or quote - check if it's inside a bracket pair
+            highlightEnclosingBrackets(text, caretPos);
+        }
+    }
+    
+    /**
+     * Check if character is an opening bracket.
+     */
+    private boolean isOpenBracket(char c) {
+        return c == '{' || c == '(' || c == '[';
+    }
+    
+    /**
+     * Check if character is a closing bracket.
+     */
+    private boolean isCloseBracket(char c) {
+        return c == '}' || c == ')' || c == ']';
+    }
+    
+    /**
+     * Get the matching bracket for a given bracket.
+     */
+    private char getMatchingBracket(char bracket) {
+        return switch (bracket) {
+            case '{' -> '}';
+            case '}' -> '{';
+            case '(' -> ')';
+            case ')' -> '(';
+            case '[' -> ']';
+            case ']' -> '[';
+            default -> '\0';
+        };
+    }
+    
+    /**
+     * Check if two brackets are a matching pair.
+     */
+    private boolean isMatchingPair(char open, char close) {
+        return (open == '{' && close == '}') ||
+               (open == '(' && close == ')') ||
+               (open == '[' && close == ']');
+    }
+    
+    /**
+     * Highlight a bracket pair starting from a specific position.
+     * @param text The text to search in
+     * @param bracketPos The position of the bracket
+     * @param bracket The bracket character
+     * @param searchForward True if searching for closing bracket, false for opening
+     */
+    private void highlightBracketPair(String text, int bracketPos, char bracket, boolean searchForward) {
+        int matchPos = searchForward 
+            ? findMatchingCloseBracket(text, bracketPos, bracket)
+            : findMatchingOpenBracket(text, bracketPos, bracket);
+        
+        if (matchPos != -1) {
+            // Found matching bracket - highlight both with success color
+            addStyleToRange(bracketPos, bracketPos + 1, "bracket-match");
+            addStyleToRange(matchPos, matchPos + 1, "bracket-match");
+            lastHighlightedBrackets = new int[]{
+                Math.min(bracketPos, matchPos), 
+                Math.max(bracketPos, matchPos)
+            };
+        } else {
+            // No matching bracket - highlight with error color
+            addStyleToRange(bracketPos, bracketPos + 1, "bracket-error");
+            lastHighlightedBrackets = new int[]{bracketPos, bracketPos};
+        }
+    }
+    
+    /**
+     * Find the matching closing bracket for an opening bracket.
+     * @param text The text to search in
+     * @param startPos The position of the opening bracket
+     * @param openBracket The opening bracket character
+     * @return The position of the matching closing bracket, or -1 if not found
+     */
+    private int findMatchingCloseBracket(String text, int startPos, char openBracket) {
+        char closeBracket = getMatchingBracket(openBracket);
+        int depth = 1;
+        
+        for (int i = startPos + 1; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (c == openBracket) {
+                depth++;
+            } else if (c == closeBracket) {
+                depth--;
+                if (depth == 0) {
+                    return i;
+                }
+            }
+        }
+        
+        return -1; // No matching bracket found
+    }
+    
+    /**
+     * Find the matching opening bracket for a closing bracket.
+     * @param text The text to search in
+     * @param startPos The position of the closing bracket
+     * @param closeBracket The closing bracket character
+     * @return The position of the matching opening bracket, or -1 if not found
+     */
+    private int findMatchingOpenBracket(String text, int startPos, char closeBracket) {
+        char openBracket = getMatchingBracket(closeBracket);
+        int depth = 1;
+        
+        for (int i = startPos - 1; i >= 0; i--) {
+            char c = text.charAt(i);
+            if (c == closeBracket) {
+                depth++;
+            } else if (c == openBracket) {
+                depth--;
+                if (depth == 0) {
+                    return i;
+                }
+            }
+        }
+        
+        return -1; // No matching bracket found
+    }
+    
+    /**
+     * Highlight the enclosing bracket pair when caret is inside brackets.
+     * @param text The text to search in
+     * @param caretPos The caret position
+     */
+    private void highlightEnclosingBrackets(String text, int caretPos) {
+        // Find the nearest enclosing bracket pair
+        int bestOpenPos = -1;
+        int bestClosePos = -1;
+        int bestDepth = Integer.MAX_VALUE;
+        
+        // Try each bracket type
+        for (char openBracket : new char[]{'{', '(', '['}) {
+            char closeBracket = getMatchingBracket(openBracket);
+            
+            // Find the closest opening bracket before caret
+            for (int i = caretPos - 1; i >= 0; i--) {
+                if (text.charAt(i) == openBracket) {
+                    // Found an opening bracket, now find its matching close
+                    int closePos = findMatchingCloseBracket(text, i, openBracket);
+                    if (closePos != -1 && closePos >= caretPos) {
+                        // This bracket pair encloses the caret
+                        int depth = countNestedBrackets(text, i, closePos);
+                        if (depth < bestDepth) {
+                            bestDepth = depth;
+                            bestOpenPos = i;
+                            bestClosePos = closePos;
+                        }
+                        break; // Found the closest opening bracket of this type
+                    }
+                }
+            }
+        }
+        
+        if (bestOpenPos != -1 && bestClosePos != -1) {
+            // Highlight the enclosing bracket pair
+            addStyleToRange(bestOpenPos, bestOpenPos + 1, "bracket-match");
+            addStyleToRange(bestClosePos, bestClosePos + 1, "bracket-match");
+            lastHighlightedBrackets = new int[]{bestOpenPos, bestClosePos};
+        }
+    }
+    
+    /**
+     * Count the nesting depth of brackets between two positions.
+     * @param text The text to search in
+     * @param startPos The start position
+     * @param endPos The end position
+     * @return The nesting depth
+     */
+    private int countNestedBrackets(String text, int startPos, int endPos) {
+        int depth = 0;
+        for (int i = startPos + 1; i < endPos; i++) {
+            char c = text.charAt(i);
+            if (isOpenBracket(c)) {
+                depth++;
+            }
+        }
+        return depth;
+    }
+    
+    /**
+     * Clear any previously highlighted brackets.
+     */
+    private void clearBracketHighlights() {
+        if (lastHighlightedBrackets != null) {
+            int openPos = lastHighlightedBrackets[0];
+            int closePos = lastHighlightedBrackets[1];
+            
+            // Remove both match and error styles
+            removeStyleFromRange(openPos, openPos + 1, "bracket-match");
+            removeStyleFromRange(openPos, openPos + 1, "bracket-error");
+            
+            if (closePos != openPos) {
+                removeStyleFromRange(closePos, closePos + 1, "bracket-match");
+                removeStyleFromRange(closePos, closePos + 1, "bracket-error");
+            }
+            
+            lastHighlightedBrackets = null;
+        }
+    }
+    
+    // ========== Quote Matching Methods ==========
+    
+    /**
+     * Check if character is a quote.
+     */
+    private boolean isQuote(char c) {
+        return c == '"' || c == '\'';
+    }
+    
+    /**
+     * Highlight a quote pair starting from a specific position.
+     * Handles escaped quotes by skipping them.
+     * @param text The text to search in
+     * @param quotePos The position of the quote
+     * @param quote The quote character (single or double)
+     */
+    private void highlightQuotePair(String text, int quotePos, char quote) {
+        int matchPos = findMatchingQuote(text, quotePos, quote);
+        
+        if (matchPos != -1) {
+            // Found matching quote - highlight both with success color
+            addStyleToRange(quotePos, quotePos + 1, "quote-match");
+            addStyleToRange(matchPos, matchPos + 1, "quote-match");
+            lastHighlightedQuotes = new int[]{quotePos, matchPos};
+        } else {
+            // No matching quote - highlight with error color
+            addStyleToRange(quotePos, quotePos + 1, "quote-error");
+            lastHighlightedQuotes = new int[]{quotePos, quotePos};
+        }
+    }
+    
+    /**
+     * Find the matching quote for a quote at a given position.
+     * Skips escaped quotes (\' or \").
+     * @param text The text to search in
+     * @param startPos The position of the opening quote
+     * @param quote The quote character to match
+     * @return The position of the matching quote, or -1 if not found
+     */
+    private int findMatchingQuote(String text, int startPos, char quote) {
+        // Determine if we're looking for the opening or closing quote
+        // by checking if there's a quote before us that's not escaped
+        boolean lookingForClose = isOpeningQuote(text, startPos, quote);
+        
+        if (lookingForClose) {
+            // Search forward for closing quote
+            for (int i = startPos + 1; i < text.length(); i++) {
+                char c = text.charAt(i);
+                if (c == quote) {
+                    // Check if this quote is escaped
+                    if (!isEscaped(text, i)) {
+                        return i;
+                    }
+                }
+            }
+        } else {
+            // Search backward for opening quote
+            for (int i = startPos - 1; i >= 0; i--) {
+                char c = text.charAt(i);
+                if (c == quote) {
+                    // Check if this quote is escaped
+                    if (!isEscaped(text, i)) {
+                        return i;
+                    }
+                }
+            }
+        }
+        
+        return -1; // No matching quote found
+    }
+    
+    /**
+     * Check if a quote at a given position is escaped.
+     * A quote is escaped if it's preceded by an odd number of backslashes.
+     * @param text The text to check in
+     * @param pos The position of the quote
+     * @return true if the quote is escaped, false otherwise
+     */
+    private boolean isEscaped(String text, int pos) {
+        if (pos == 0) {
+            return false;
+        }
+        
+        // Count consecutive backslashes before the quote
+        int backslashCount = 0;
+        int i = pos - 1;
+        while (i >= 0 && text.charAt(i) == '\\') {
+            backslashCount++;
+            i--;
+        }
+        
+        // If there's an odd number of backslashes, the quote is escaped
+        return backslashCount % 2 == 1;
+    }
+    
+    /**
+     * Determine if a quote at a given position is an opening quote.
+     * This is done by counting unescaped quotes of the same type before it.
+     * If the count is even, this is an opening quote.
+     * @param text The text to check in
+     * @param pos The position of the quote
+     * @param quote The quote character
+     * @return true if this is an opening quote, false if closing
+     */
+    private boolean isOpeningQuote(String text, int pos, char quote) {
+        int count = 0;
+        
+        // Count unescaped quotes before this position
+        for (int i = 0; i < pos; i++) {
+            if (text.charAt(i) == quote && !isEscaped(text, i)) {
+                count++;
+            }
+        }
+        
+        // If even number of quotes before, this is opening; if odd, this is closing
+        return count % 2 == 0;
+    }
+    
+    /**
+     * Clear any previously highlighted quotes.
+     */
+    private void clearQuoteHighlights() {
+        if (lastHighlightedQuotes != null) {
+            int openPos = lastHighlightedQuotes[0];
+            int closePos = lastHighlightedQuotes[1];
+            
+            // Remove both match and error styles
+            removeStyleFromRange(openPos, openPos + 1, "quote-match");
+            removeStyleFromRange(openPos, openPos + 1, "quote-error");
+            
+            if (closePos != openPos) {
+                removeStyleFromRange(closePos, closePos + 1, "quote-match");
+                removeStyleFromRange(closePos, closePos + 1, "quote-error");
+            }
+            
+            lastHighlightedQuotes = null;
+        }
     }
 }
