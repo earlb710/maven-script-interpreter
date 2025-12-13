@@ -192,22 +192,22 @@ call array.add(structureChildren, tempNode);
 var flowChildren: array[*];
 
 tempNode = call json.jsonFromString("{}");
-tempNode = call json.set(tempNode, "value", "flow_conditionals");
+tempNode = call json.set(tempNode, "value", "Conditionals");
 tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
 call array.add(flowChildren, tempNode);
 
 tempNode = call json.jsonFromString("{}");
-tempNode = call json.set(tempNode, "value", "flow_loops");
+tempNode = call json.set(tempNode, "value", "Loops");
 tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
 call array.add(flowChildren, tempNode);
 
 tempNode = call json.jsonFromString("{}");
-tempNode = call json.set(tempNode, "value", "flow_break_continue");
+tempNode = call json.set(tempNode, "value", "Break and Continue");
 tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
 call array.add(flowChildren, tempNode);
 
 tempNode = call json.jsonFromString("{}");
-tempNode = call json.set(tempNode, "value", "flow_exceptions");
+tempNode = call json.set(tempNode, "value", "Exception Handling");
 tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
 call array.add(flowChildren, tempNode);
 
@@ -647,6 +647,20 @@ getHelpContent(topic: string) return string {
                 return content;
             }
         }
+    }
+    
+    // Map flow display names to topic keys
+    if topic == "Conditionals" then {
+        topic = "flow_conditionals";
+    }
+    if topic == "Loops" then {
+        topic = "flow_loops";
+    }
+    if topic == "Break and Continue" then {
+        topic = "flow_break_continue";
+    }
+    if topic == "Exception Handling" then {
+        topic = "flow_exceptions";
     }
     
     // Handle example topic aliases (Keywords/examples_keywords, etc.)
