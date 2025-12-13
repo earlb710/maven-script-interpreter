@@ -1,0 +1,148 @@
+// Four Cells with Circle Drawing
+// ================================
+// This script demonstrates a simple interactive screen with 4 cells
+// arranged in a 2x2 grid. When you click on any cell, a circle is
+// drawn in that cell.
+//
+// Features:
+//   - 4 canvas cells arranged in a 2x2 GridPane
+//   - Click on any cell to draw a circle
+//   - Each cell is 200x200 pixels
+//
+// Usage:
+//   Run in EBS Console: /open scripts/examples/four_cells_circle.ebs then Ctrl+Enter
+
+// Create 4 canvas objects for the cells
+var cell1: canvas = canvas.create(200, 200, "cell1");
+var cell2: canvas = canvas.create(200, 200, "cell2");
+var cell3: canvas = canvas.create(200, 200, "cell3");
+var cell4: canvas = canvas.create(200, 200, "cell4");
+
+// Initialize all cells with a light gray background
+style.setFill(cell1, "#f0f0f0");
+draw.rect(cell1, 0, 0, 200, 200, true);
+
+style.setFill(cell2, "#f0f0f0");
+draw.rect(cell2, 0, 0, 200, 200, true);
+
+style.setFill(cell3, "#f0f0f0");
+draw.rect(cell3, 0, 0, 200, 200, true);
+
+style.setFill(cell4, "#f0f0f0");
+draw.rect(cell4, 0, 0, 200, 200, true);
+
+// Function to draw a circle in a specific cell
+drawCircleInCell(cellCanvas: canvas) {
+    // Clear the cell with light gray background
+    style.setFill(cellCanvas, "#f0f0f0");
+    draw.rect(cellCanvas, 0, 0, 200, 200, true);
+    
+    // Draw a filled blue circle in the center of the cell
+    style.setFill(cellCanvas, "#3366ff");
+    draw.circle(cellCanvas, 100, 100, 60, true);
+    
+    // Draw a stroke around the circle
+    style.setStroke(cellCanvas, "#0033cc", 3);
+    draw.circle(cellCanvas, 100, 100, 60, false);
+}
+
+// Define the screen
+screen fourCellsScreen = {
+    "title": "Four Cells - Click to Draw Circle",
+    "width": 440,
+    "height": 480,
+    "sets": [
+        {
+            "setname": "main",
+            "vars": [
+                {"name": "canvas1", "type": "canvas"},
+                {"name": "canvas2", "type": "canvas"},
+                {"name": "canvas3", "type": "canvas"},
+                {"name": "canvas4", "type": "canvas"}
+            ]
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "10",
+            "padding": "20",
+            "style": "-fx-background-color: #2c2c2c; -fx-alignment: center;",
+            "items": [
+                {
+                    "name": "titleLabel",
+                    "display": {
+                        "type": "label",
+                        "labelText": "Click on any cell to draw a circle",
+                        "labelColor": "#ffffff",
+                        "labelFontSize": "16px",
+                        "labelBold": true
+                    }
+                }
+            ],
+            "areas": [
+                {
+                    "name": "gridArea",
+                    "type": "gridpane",
+                    "spacing": "10",
+                    "disableLabelAlignment": true,
+                    "style": "-fx-padding: 10; -fx-alignment: center;",
+                    "items": [
+                        {
+                            "name": "cell1Canvas",
+                            "layoutPos": "0,0",
+                            "varRef": "canvas1",
+                            "display": {
+                                "type": "canvas",
+                                "onClick": "call drawCircleInCell(cell1);",
+                                "style": "-fx-cursor: hand; -fx-border-color: #666666; -fx-border-width: 2;"
+                            }
+                        },
+                        {
+                            "name": "cell2Canvas",
+                            "layoutPos": "0,1",
+                            "varRef": "canvas2",
+                            "display": {
+                                "type": "canvas",
+                                "onClick": "call drawCircleInCell(cell2);",
+                                "style": "-fx-cursor: hand; -fx-border-color: #666666; -fx-border-width: 2;"
+                            }
+                        },
+                        {
+                            "name": "cell3Canvas",
+                            "layoutPos": "1,0",
+                            "varRef": "canvas3",
+                            "display": {
+                                "type": "canvas",
+                                "onClick": "call drawCircleInCell(cell3);",
+                                "style": "-fx-cursor: hand; -fx-border-color: #666666; -fx-border-width: 2;"
+                            }
+                        },
+                        {
+                            "name": "cell4Canvas",
+                            "layoutPos": "1,1",
+                            "varRef": "canvas4",
+                            "display": {
+                                "type": "canvas",
+                                "onClick": "call drawCircleInCell(cell4);",
+                                "style": "-fx-cursor: hand; -fx-border-color: #666666; -fx-border-width: 2;"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+};
+
+// Set the canvas variables in the screen
+fourCellsScreen.canvas1 = cell1;
+fourCellsScreen.canvas2 = cell2;
+fourCellsScreen.canvas3 = cell3;
+fourCellsScreen.canvas4 = cell4;
+
+// Show the screen
+show screen fourCellsScreen;
+
+print "Four cells screen shown. Click on any cell to draw a circle.";
