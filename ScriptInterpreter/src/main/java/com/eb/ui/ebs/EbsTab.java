@@ -16,6 +16,8 @@ import com.eb.util.Debugger;
 import com.eb.util.Util;
 import javafx.application.Platform;
 import javafx.scene.control.Tab;
+import javafx.scene.Scene;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -545,6 +547,17 @@ public class EbsTab extends Tab {
         Button clearBtn = new Button("Clear");
         clearBtn.setOnAction(e -> outputArea.clear());
 
+        // Add View button for HTML files
+        Button viewBtn = new Button("View");
+        viewBtn.setPadding(new Insets(5, 10, 5, 10));
+        viewBtn.setTooltip(new Tooltip("Open HTML in WebView"));
+        viewBtn.setOnAction(e -> openHtmlInWebView());
+        // Only show View button for HTML files
+        if (!isHtml) {
+            viewBtn.setVisible(false);
+            viewBtn.setManaged(false);
+        }
+
         // Show the "start in" directory (script's parent directory)
         Path startInDir = tabContext.path != null ? tabContext.path.getParent() : null;
         String startInText = startInDir != null ? startInDir.toString() : System.getProperty("user.dir");
@@ -553,7 +566,7 @@ public class EbsTab extends Tab {
         startInLabel.setMaxWidth(400); // Limit width to prevent layout issues with long paths
         startInLabel.setTooltip(new Tooltip("File operations use relative paths from this directory\n" + startInText));
 
-        HBox buttons = new HBox(8, runBtn, clearBtn, startInLabel);
+        HBox buttons = new HBox(8, runBtn, clearBtn, viewBtn, startInLabel);
         buttons.setStyle("-fx-padding: 6 4 0 0;");
 
         VBox bottom = new VBox(2, new Label("Output:"), outputAreaFrame, buttons);
@@ -2430,6 +2443,32 @@ public class EbsTab extends Tab {
         int newSelStart = offset + (selStart - lineStart);
         int newSelEnd = offset + (selEnd - lineStart);
         area.selectRange(newSelStart, newSelEnd);
+    }
+    
+    /**
+     * Open the HTML content in a new WebView window.
+     * Creates a new stage with a WebView that displays the current HTML content from the editor.
+     */
+    private void openHtmlInWebView() {
+        // Get the current HTML content from the editor
+        String htmlContent = dispArea.getText();
+        
+        // Create a new Stage (window) for the WebView
+        Stage webViewStage = new Stage();
+        webViewStage.setTitle("HTML Preview - " + filename);
+        
+        // Create a WebView
+        WebView webView = new WebView();
+        
+        // Load the HTML content
+        webView.getEngine().loadContent(htmlContent);
+        
+        // Create a scene with the WebView
+        Scene scene = new Scene(webView, 800, 600);
+        webViewStage.setScene(scene);
+        
+        // Show the stage
+        webViewStage.show();
     }
 
 }
