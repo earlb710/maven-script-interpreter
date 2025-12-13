@@ -116,7 +116,7 @@ drawCircleInCellViaImage(cellCanvas: canvas) {
     call draw.circle(tempCanvas, 100, 100, radius, false);
     
     // Convert the temporary canvas to an image
-    var circleImage: image = call canvas.toImage(tempCanvas);
+    var circleImage: imagedata = call canvas.toImage(tempCanvas);
     
     // Draw the image on the target canvas
     call draw.image(cellCanvas, circleImage, 0, 0);

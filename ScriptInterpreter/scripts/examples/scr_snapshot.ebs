@@ -69,7 +69,7 @@ fullCapture() return void {
     print "Full capture (with screen name) - returns EbsImage...";
     
     // Capture the screenshot and get EbsImage object
-    var ebsImage: image = call scr.snapshot("testScreen");
+    var ebsImage: imagedata = call scr.snapshot("testScreen");
     
     // Get image information
     var width: int = call image.getWidth(ebsImage);
