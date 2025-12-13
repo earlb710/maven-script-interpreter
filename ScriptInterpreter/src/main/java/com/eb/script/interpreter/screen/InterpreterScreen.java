@@ -1590,7 +1590,8 @@ public class InterpreterScreen {
      */
     private Map<String, Object> filterItemLevelProperties(Map<String, Object> itemDef) {
         // Create a new map with only display-level properties
-        Map<String, Object> displayDef = new HashMap<>();
+        // Initialize with itemDef size as upper bound for better performance
+        Map<String, Object> displayDef = new HashMap<>(itemDef.size());
         for (Map.Entry<String, Object> entry : itemDef.entrySet()) {
             String lowerKey = entry.getKey().toLowerCase();
             if (!ITEM_ONLY_PROPERTIES.contains(lowerKey)) {
