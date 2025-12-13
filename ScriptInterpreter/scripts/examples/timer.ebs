@@ -153,7 +153,7 @@ print "Example 1: Benchmarking a loop";
 call timer.start("loop_benchmark");
 var sum : long = 0;
 var i : int = 0;
-while i < 100000 do {
+while i < 100000 {
     sum = sum + i;
     i = i + 1;
 }
@@ -168,7 +168,7 @@ call timer.start("string_ops");
 
 var text : string = "Hello, World!";
 var i2 : int = 0;
-while i2 < 1000 do {
+while i2 < 1000 {
     var upper = call string.toUpper(text);
     var lower = call string.toLower(text);
     i2 = i2 + 1;
@@ -182,7 +182,7 @@ print "";
 print "Example 3: Comparing different approaches";
 call timer.start("approach1");
 var j : int = 0;
-while j < 10000 do {
+while j < 10000 {
     var temp : int = j * 2;
     j = j + 1;
 }
@@ -190,7 +190,7 @@ var approach1Time : long = call timer.stop("approach1");
 
 call timer.start("approach2");
 var k : int = 0;
-while k < 10000 do {
+while k < 10000 {
     var temp : int = k + k;
     k = k + 1;
 }
