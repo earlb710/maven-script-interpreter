@@ -253,10 +253,36 @@ builtinsNode = call json.set(builtinsNode, "expanded", false);
 builtinsNode = call json.set(builtinsNode, "children", builtinChildren);
 call array.add(syntaxChildren, builtinsNode);
 
+// Build screen children with sub-topics
+var screenChildren: array[*];
+
 tempNode = call json.jsonFromString("{}");
-tempNode = call json.set(tempNode, "value", "screen");
+tempNode = call json.set(tempNode, "value", "screen_data");
 tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
-call array.add(syntaxChildren, tempNode);
+call array.add(screenChildren, tempNode);
+
+tempNode = call json.jsonFromString("{}");
+tempNode = call json.set(tempNode, "value", "screen_display");
+tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
+call array.add(screenChildren, tempNode);
+
+tempNode = call json.jsonFromString("{}");
+tempNode = call json.set(tempNode, "value", "screen_areas");
+tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
+call array.add(screenChildren, tempNode);
+
+tempNode = call json.jsonFromString("{}");
+tempNode = call json.set(tempNode, "value", "screen_items");
+tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
+call array.add(screenChildren, tempNode);
+
+// Create screen node with children
+var screenNode: json = call json.jsonFromString("{}");
+screenNode = call json.set(screenNode, "value", "screen");
+screenNode = call json.set(screenNode, "icon", "icons/tree-node.png");
+screenNode = call json.set(screenNode, "expanded", false);
+screenNode = call json.set(screenNode, "children", screenChildren);
+call array.add(syntaxChildren, screenNode);
 
 var examplesChildren: array[*];
 
