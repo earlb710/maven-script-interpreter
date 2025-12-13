@@ -482,7 +482,7 @@
 }
 
 /* ===== Bracket matching highlighting ===== */
-/* Matched bracket highlight - subtle green background for accessibility */
+/* Matched bracket highlight - darker green background for better contrast */
 .bracket-match,
 .text.bracket-match,
 .styled-text-area .text.bracket-match,
@@ -490,10 +490,10 @@
 .editor-text .text.bracket-match {
     -fx-fill: #000000;
     -fx-font-weight: bold;
-    -rtfx-background-color: #90ee90; /* light green for matched brackets - better contrast and accessibility */
+    -rtfx-background-color: #66cc66; /* darker green for matched brackets - improved contrast */
 }
 
-/* Unmatched bracket highlight - subtle red background with better contrast */
+/* Unmatched bracket highlight - darker red background for better contrast */
 .bracket-error,
 .text.bracket-error,
 .styled-text-area .text.bracket-error,
@@ -501,11 +501,11 @@
 .editor-text .text.bracket-error {
     -fx-fill: #ffffff;
     -fx-font-weight: bold;
-    -rtfx-background-color: #dc143c; /* crimson red for unmatched brackets - better accessibility than pure red */
+    -rtfx-background-color: #cc0000; /* darker red for unmatched brackets - improved contrast */
 }
 
 /* ===== Quote matching highlighting ===== */
-/* Matched quote highlight - subtle blue background for accessibility */
+/* Matched quote highlight - darker blue background for better contrast */
 .quote-match,
 .text.quote-match,
 .styled-text-area .text.quote-match,
@@ -513,10 +513,10 @@
 .editor-text .text.quote-match {
     -fx-fill: #000000;
     -fx-font-weight: bold;
-    -rtfx-background-color: #87ceeb; /* sky blue for matched quotes - distinct from brackets */
+    -rtfx-background-color: #5599dd; /* darker blue for matched quotes - improved contrast */
 }
 
-/* Unmatched quote highlight - subtle orange background with better contrast */
+/* Unmatched quote highlight - darker orange background for better contrast */
 .quote-error,
 .text.quote-error,
 .styled-text-area .text.quote-error,
@@ -524,6 +524,6 @@
 .editor-text .text.quote-error {
     -fx-fill: #000000;
     -fx-font-weight: bold;
-    -rtfx-background-color: #ffa500; /* orange for unmatched quotes - distinct from bracket errors */
+    -rtfx-background-color: #dd8800; /* darker orange for unmatched quotes - improved contrast */
 }
 
