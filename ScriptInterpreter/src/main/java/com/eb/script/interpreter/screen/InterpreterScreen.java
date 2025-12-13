@@ -1683,6 +1683,8 @@ public class InterpreterScreen {
             "minwidth", "min_width", "minheight", "min_height",
             "maxwidth", "max_width", "maxheight", "max_height",
             "alignment",
+            // Styling
+            "style",
             // Event handlers (should be at item level, not in display object)
             // Note: Event handlers belong at the item level to bind to the specific item instance.
             // The display object is only for shared display/rendering properties.
