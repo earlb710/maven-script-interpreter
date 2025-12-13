@@ -2874,9 +2874,12 @@ public class InterpreterScreen {
 
                 // Store in screen's thread-safe variable map (legacy support)
                 // Use lowercase key for case-insensitive variable lookup
-                // ConcurrentHashMap doesn't allow null values, so only store if value is not null
+                // ConcurrentHashMap doesn't allow null values, so use NULL_SENTINEL for nulls
                 if (value != null) {
                     screenVarMap.put(varName.toLowerCase(), value);
+                } else {
+                    // Use NULL_SENTINEL for null initial values so bound controls can detect them
+                    screenVarMap.put(varName.toLowerCase(), com.eb.script.interpreter.InterpreterArray.NULL_SENTINEL);
                 }
 
                 // Store the variable type if specified (legacy support)
