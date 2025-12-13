@@ -232,6 +232,37 @@ tempNode = call json.set(tempNode, "value", "data");
 tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
 call array.add(syntaxChildren, tempNode);
 
+// Collections section
+var collectionsChildren: array[*];
+
+tempNode = call json.jsonFromString("{}");
+tempNode = call json.set(tempNode, "value", "Arrays");
+tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
+call array.add(collectionsChildren, tempNode);
+
+tempNode = call json.jsonFromString("{}");
+tempNode = call json.set(tempNode, "value", "JSON");
+tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
+call array.add(collectionsChildren, tempNode);
+
+tempNode = call json.jsonFromString("{}");
+tempNode = call json.set(tempNode, "value", "Records");
+tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
+call array.add(collectionsChildren, tempNode);
+
+tempNode = call json.jsonFromString("{}");
+tempNode = call json.set(tempNode, "value", "Bitmap and Intmap");
+tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
+call array.add(collectionsChildren, tempNode);
+
+// Use json.jsonFromString to create a fresh JSON object to avoid circular references
+var collectionsNode: json = call json.jsonFromString("{}");
+collectionsNode = call json.set(collectionsNode, "value", "collections");
+collectionsNode = call json.set(collectionsNode, "icon", "icons/tree-node.png");
+collectionsNode = call json.set(collectionsNode, "expanded", false);
+collectionsNode = call json.set(collectionsNode, "children", collectionsChildren);
+call array.add(syntaxChildren, collectionsNode);
+
 // Use json.jsonFromString to create a fresh JSON object to avoid circular references
 var flowNode: json = call json.jsonFromString("{}");
 flowNode = call json.set(flowNode, "value", "flow");
@@ -697,6 +728,20 @@ getHelpContent(topic: string) return string {
     }
     if topic == "Exception Handling" then {
         topic = "flow_exceptions";
+    }
+    
+    // Map collections display names to topic keys
+    if topic == "Arrays" then {
+        topic = "collections_arrays";
+    }
+    if topic == "JSON" then {
+        topic = "collections_json";
+    }
+    if topic == "Records" then {
+        topic = "collections_records";
+    }
+    if topic == "Bitmap and Intmap" then {
+        topic = "collections_bitmap";
     }
     
     // Handle example topic aliases (Keywords/examples_keywords, etc.)
