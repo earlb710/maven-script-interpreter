@@ -148,7 +148,7 @@ if builtinCategoryOrder != null then {
             // Use json.jsonFromString to create a fresh JSON object to avoid circular references
             var categoryNode: json = call json.jsonFromString("{}");
             categoryNode = call json.set(categoryNode, "value", displayName);
-            categoryNode = call json.set(categoryNode, "icon", "icons/expand-arrow.png");
+            categoryNode = call json.set(categoryNode, "icon", "icons/tree-node.png");
             categoryNode = call json.set(categoryNode, "expanded", false);
             categoryNode = call json.set(categoryNode, "children", categoryArray);
             call array.add(builtinChildren, categoryNode);
@@ -222,7 +222,7 @@ call array.add(syntaxChildren, tempNode);
 // Use json.jsonFromString to create a fresh JSON object to avoid circular references
 var structureNode: json = call json.jsonFromString("{}");
 structureNode = call json.set(structureNode, "value", "structure");
-structureNode = call json.set(structureNode, "icon", "icons/expand-arrow.png");
+structureNode = call json.set(structureNode, "icon", "icons/tree-node.png");
 structureNode = call json.set(structureNode, "expanded", false);
 structureNode = call json.set(structureNode, "children", structureChildren);
 call array.add(syntaxChildren, structureNode);
@@ -235,7 +235,7 @@ call array.add(syntaxChildren, tempNode);
 // Use json.jsonFromString to create a fresh JSON object to avoid circular references
 var flowNode: json = call json.jsonFromString("{}");
 flowNode = call json.set(flowNode, "value", "flow");
-flowNode = call json.set(flowNode, "icon", "icons/expand-arrow.png");
+flowNode = call json.set(flowNode, "icon", "icons/tree-node.png");
 flowNode = call json.set(flowNode, "expanded", false);
 flowNode = call json.set(flowNode, "children", flowChildren);
 call array.add(syntaxChildren, flowNode);
@@ -248,7 +248,7 @@ call array.add(syntaxChildren, tempNode);
 // Use json.jsonFromString to create a fresh JSON object to avoid circular references
 var builtinsNode: json = call json.jsonFromString("{}");
 builtinsNode = call json.set(builtinsNode, "value", "builtins");
-builtinsNode = call json.set(builtinsNode, "icon", "icons/expand-arrow.png");
+builtinsNode = call json.set(builtinsNode, "icon", "icons/tree-node.png");
 builtinsNode = call json.set(builtinsNode, "expanded", false);
 builtinsNode = call json.set(builtinsNode, "children", builtinChildren);
 call array.add(syntaxChildren, builtinsNode);
@@ -280,7 +280,7 @@ var rootChildren: array[*];
 // Use json.jsonFromString to create a fresh JSON object to avoid circular references
 var syntaxRootNode: json = call json.jsonFromString("{}");
 syntaxRootNode = call json.set(syntaxRootNode, "value", "Syntax");
-syntaxRootNode = call json.set(syntaxRootNode, "icon", "icons/expand-arrow.png");
+syntaxRootNode = call json.set(syntaxRootNode, "icon", "icons/tree-node.png");
 syntaxRootNode = call json.set(syntaxRootNode, "expanded", false);
 syntaxRootNode = call json.set(syntaxRootNode, "children", syntaxChildren);
 call array.add(rootChildren, syntaxRootNode);
@@ -288,7 +288,7 @@ call array.add(rootChildren, syntaxRootNode);
 // Use json.jsonFromString to create a fresh JSON object to avoid circular references
 var examplesRootNode: json = call json.jsonFromString("{}");
 examplesRootNode = call json.set(examplesRootNode, "value", "Examples");
-examplesRootNode = call json.set(examplesRootNode, "icon", "icons/expand-arrow.png");
+examplesRootNode = call json.set(examplesRootNode, "icon", "icons/tree-node.png");
 examplesRootNode = call json.set(examplesRootNode, "expanded", true);
 examplesRootNode = call json.set(examplesRootNode, "children", examplesChildren);
 call array.add(rootChildren, examplesRootNode);
@@ -296,7 +296,7 @@ call array.add(rootChildren, examplesRootNode);
 // Use json.jsonFromString to create a fresh JSON object to avoid circular references
 var treeStructure: json = call json.jsonFromString("{}");
 treeStructure = call json.set(treeStructure, "value", "Help Topics");
-treeStructure = call json.set(treeStructure, "icon", "icons/expand-arrow.png");
+treeStructure = call json.set(treeStructure, "icon", "icons/tree-node.png");
 treeStructure = call json.set(treeStructure, "expanded", true);
 treeStructure = call json.set(treeStructure, "children", rootChildren);
 
