@@ -55,14 +55,14 @@ drawCircleInCell(cellCanvas: canvas) {
     // Convert RGB to hex color string
     var colorHex: string = "#" + call toHex(r) + call toHex(g) + call toHex(b);
     
-    // Generate random circle size (radius between 20 and 80)
+    // Generate random circle size (radius between 20 and 80, inclusive)
     var radius: int = call random.nextLong(20, 81);
     
     // Draw a filled circle with random color in the center of the cell
     call style.setFill(cellCanvas, colorHex);
     call draw.circle(cellCanvas, 100, 100, radius, true);
     
-    // Create a darker stroke color by reducing RGB values by 30%
+    // Create a darker stroke color by reducing RGB values by 30% (minimum 0)
     var strokeR: int = r * 7 / 10;
     var strokeG: int = g * 7 / 10;
     var strokeB: int = b * 7 / 10;
