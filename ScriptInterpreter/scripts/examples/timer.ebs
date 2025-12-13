@@ -12,7 +12,7 @@ call timer.start("basic");
 print "Timer started...";
 
 // Do some work
-call sleep(500);
+call thread.sleep(500);
 
 // Stop the timer and get elapsed time
 var elapsed : long = call timer.stop("basic");
@@ -29,15 +29,15 @@ print "=== Checking Timer While Running ===";
 call timer.start("progress");
 
 // Check progress at intervals
-call sleep(200);
+call thread.sleep(200);
 var checkpoint1 : long = call timer.getPeriod("progress");
 print "Checkpoint 1: " + checkpoint1 + "ms";
 
-call sleep(200);
+call thread.sleep(200);
 var checkpoint2 : long = call timer.getPeriod("progress");
 print "Checkpoint 2: " + checkpoint2 + "ms";
 
-call sleep(200);
+call thread.sleep(200);
 var checkpoint3 : long = call timer.getPeriod("progress");
 print "Checkpoint 3: " + checkpoint3 + "ms";
 
@@ -52,7 +52,7 @@ print "";
 print "=== Formatted Time Strings ===";
 
 call timer.start("format");
-call sleep(1234);
+call thread.sleep(1234);
 call timer.stop("format");
 
 // Display with different decimal precision
@@ -96,21 +96,21 @@ print "=== Continue and Lap Timing ===";
 // Time multiple segments/laps
 // Note: Before first continue, lap total and segment are the same
 call timer.start("laps");
-call sleep(100);
+call thread.sleep(100);
 call timer.stop("laps");
 var lap1Total : long = call timer.getPeriod("laps");
 var lap1Segment : long = call timer.getContinuePeriod("laps");
 print "Lap 1 - Total: " + lap1Total + "ms, Segment: " + lap1Segment + "ms (same until continue)";
 
 call timer.continue("laps");
-call sleep(150);
+call thread.sleep(150);
 call timer.stop("laps");
 var lap2Total : long = call timer.getPeriod("laps");
 var lap2Segment : long = call timer.getContinuePeriod("laps");
 print "Lap 2 - Total: " + lap2Total + "ms, Segment: " + lap2Segment + "ms";
 
 call timer.continue("laps");
-call sleep(200);
+call thread.sleep(200);
 call timer.stop("laps");
 var lap3Total : long = call timer.getPeriod("laps");
 var lap3Segment : long = call timer.getContinuePeriod("laps");
@@ -126,11 +126,11 @@ print "=== Multiple Concurrent Timers ===";
 
 // Start multiple timers for different operations
 call timer.start("task1");
-call sleep(100);
+call thread.sleep(100);
 call timer.start("task2");
-call sleep(100);
+call thread.sleep(100);
 call timer.start("task3");
-call sleep(100);
+call thread.sleep(100);
 
 // Stop them and report
 var time1 : long = call timer.stop("task1");

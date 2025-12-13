@@ -15,7 +15,7 @@ var testsFailed : int = 0;
 // ============================================================================
 print "TEST 1: Basic timer.start() and timer.stop()";
 var timerId1 : string = call timer.start("test1");
-call sleep(100);
+call thread.sleep(100);
 var elapsed1 : long = call timer.stop("test1");
 
 if timerId1 == "test1" then {
@@ -76,9 +76,9 @@ print "";
 // ============================================================================
 print "TEST 3: timer.getPeriod() tracking while running";
 call timer.start("tracking_test");
-call sleep(50);
+call thread.sleep(50);
 var period2 : long = call timer.getPeriod("tracking_test");
-call sleep(50);
+call thread.sleep(50);
 var period3 : long = call timer.getPeriod("tracking_test");
 
 if period3 > period2 then {
@@ -96,7 +96,7 @@ print "";
 // ============================================================================
 print "TEST 4: timer.getPeriodString() formatting";
 call timer.start("format_test");
-call sleep(1234);
+call thread.sleep(1234);
 call timer.stop("format_test");
 
 var str0 : string = call timer.getPeriodString("format_test", 0);
@@ -154,7 +154,7 @@ print "";
 // ============================================================================
 print "TEST 6: timer.reset() functionality";
 call timer.start("reset_test");
-call sleep(100);
+call thread.sleep(100);
 var periodBefore : long = call timer.getPeriod("reset_test");
 var resetResult : bool = call timer.reset("reset_test");
 var periodAfter : long = call timer.getPeriod("reset_test");
@@ -182,11 +182,11 @@ print "";
 // ============================================================================
 print "TEST 7: timer.continue() and lap timing";
 call timer.start("continue_test");
-call sleep(100);
+call thread.sleep(100);
 call timer.stop("continue_test");
 var firstPeriod : long = call timer.getPeriod("continue_test");
 var continueResult : bool = call timer.continue("continue_test");
-call sleep(100);
+call thread.sleep(100);
 call timer.stop("continue_test");
 var totalPeriod : long = call timer.getPeriod("continue_test");
 var continuePeriod : long = call timer.getContinuePeriod("continue_test");
@@ -222,9 +222,9 @@ print "";
 // ============================================================================
 print "TEST 8: timer.getContinuePeriodString() formatting";
 call timer.start("continue_format");
-call sleep(500);
+call thread.sleep(500);
 call timer.continue("continue_format");
-call sleep(500);
+call thread.sleep(500);
 call timer.stop("continue_format");
 var contStr : string = call timer.getContinuePeriodString("continue_format", 2);
 print "  Continue period formatted: " + contStr;
@@ -243,11 +243,11 @@ print "";
 // ============================================================================
 print "TEST 9: Multiple concurrent timers";
 call timer.start("timer_a");
-call sleep(50);
+call thread.sleep(50);
 call timer.start("timer_b");
-call sleep(50);
+call thread.sleep(50);
 call timer.start("timer_c");
-call sleep(50);
+call thread.sleep(50);
 
 var timeA : long = call timer.stop("timer_a");
 var timeB : long = call timer.stop("timer_b");
