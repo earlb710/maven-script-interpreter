@@ -249,6 +249,18 @@ public final class Builtins {
         ));
 
         // ==========================
+        // MAP builtins
+        // ==========================
+        addBuiltin(info(
+                "map.toSorted", DataType.MAP, // converts a map to sorted map (TreeMap)
+                newParam("map", DataType.MAP)
+        ));
+        addBuiltin(info(
+                "map.toUnsorted", DataType.MAP, // converts a sorted map to normal map (LinkedHashMap)
+                newParam("map", DataType.MAP)
+        ));
+
+        // ==========================
         // STRING builtins
         // ==========================
         addBuiltin(info(
@@ -1833,6 +1845,11 @@ public final class Builtins {
             return BuiltinsQueue.dispatch(name, args);
         }
         
+        // Map builtins
+        if (name.startsWith("map.")) {
+            return dispatchMapBuiltin(name, args);
+        }
+        
         // CSS builtins
         if (BuiltinsCss.handles(name)) {
             return BuiltinsCss.dispatch(context, name, args);
@@ -1924,6 +1941,41 @@ public final class Builtins {
             case "classtree.generate" -> BuiltinsFile.generateClassTree(env, args);
             case "classtree.scan" -> BuiltinsFile.scanClassTree(env, args);
             default -> throw new InterpreterError("Unknown file builtin: " + name);
+        };
+    }
+    
+    /**
+     * Dispatch map-related builtins.
+     */
+    private static Object dispatchMapBuiltin(String name, Object[] args) throws InterpreterError {
+        return switch (name) {
+            case "map.tosorted" -> {
+                if (args.length < 1) {
+                    throw new InterpreterError("map.toSorted requires 1 argument: map");
+                }
+                Object mapArg = args[0];
+                if (!(mapArg instanceof java.util.Map)) {
+                    throw new InterpreterError("map.toSorted requires a map argument");
+                }
+                // Convert to TreeMap (sorted by keys)
+                java.util.Map<String, Object> sortedMap = new java.util.TreeMap<>();
+                sortedMap.putAll((java.util.Map<String, Object>) mapArg);
+                yield sortedMap;
+            }
+            case "map.tounsorted" -> {
+                if (args.length < 1) {
+                    throw new InterpreterError("map.toUnsorted requires 1 argument: map");
+                }
+                Object mapArg = args[0];
+                if (!(mapArg instanceof java.util.Map)) {
+                    throw new InterpreterError("map.toUnsorted requires a map argument");
+                }
+                // Convert to LinkedHashMap (maintains insertion order)
+                java.util.Map<String, Object> unsortedMap = new java.util.LinkedHashMap<>();
+                unsortedMap.putAll((java.util.Map<String, Object>) mapArg);
+                yield unsortedMap;
+            }
+            default -> throw new InterpreterError("Unknown map builtin: " + name);
         };
     }
     
