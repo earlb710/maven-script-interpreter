@@ -281,12 +281,6 @@ call json.set(myMap, "key3", "newKey");       // Add new key
 // Remove keys
 call json.remove(myMap, "key2");
 
-// Check existence
-var hasKey = call json.has(myMap, "key1");
-
-// Get all keys
-var keys = call json.keys(myMap);  // Returns array of keys
-
 // Nested maps
 var nested: json = {"user": {"name": "Bob", "settings": {"theme": "dark"}}};
 var nestedMap = map(nested);
@@ -363,27 +357,23 @@ call json.set(person, "phone", "555-1234");  // Add new field
 
 // Remove fields
 call json.remove(person, "email");
-
-// Check existence
-var hasEmail = call json.has(person, "email");
-
-// Get keys
-var keys = call json.keys(person);
 ```
 
 #### Array Operations
 ```javascript
-var list: json = [1, 2, 3];
+// JSON arrays can be accessed like regular arrays
+var listData: json = {"items": [1, 2, 3]};
+var list = call json.get(listData, "items");
 
-// Add elements
-call json.add(list, 4);              // Append: [1, 2, 3, 4]
-call json.insert(list, 0, 0);        // Insert at index: [0, 1, 2, 3, 4]
+// Access by index (direct array access)
+var first = list[0];
 
-// Access by index
-var first = call json.getindex(list, 0);
+// Get length
+var size = list.length;
 
-// Get size
-var size = call json.size(list);
+// Add elements (using path notation)
+call json.add(listData, "items", 4);         // Append to items array
+call json.insert(listData, "items", 0, 0);   // Insert at index 0
 ```
 
 #### Parse and Stringify
@@ -592,9 +582,9 @@ var data = call json.jsonfromstring(jsonResponse);
 var users = call json.get(data, "users");
 var total = call json.getint(data, "total");
 
-// Process users
-for (var i: int = 0; i < total; i++) {
-    var user = call json.getindex(users, i);
+// Process users (arrays can be accessed directly)
+for (var i: int = 0; i < users.length; i++) {
+    var user = users[i];
     var name = call json.getstring(user, "name");
     var active = call json.getbool(user, "active");
     

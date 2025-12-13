@@ -1,0 +1,178 @@
+// EBS Language Reference v1.0.7.11 - See EBS_LANGUAGE_REFERENCE.md
+// Comprehensive demonstration of all collection types in EBS
+
+print "=== EBS Collections Demo ===";
+print "";
+
+// ==========================================
+// 1. ARRAYS
+// ==========================================
+print "1. ARRAYS";
+print "----------";
+
+// Fixed-size array
+var numbers: int[5];
+numbers[0] = 10;
+numbers[1] = 20;
+numbers[2] = 30;
+numbers[3] = 40;
+numbers[4] = 50;
+print "Fixed-size array: " + numbers;
+
+// Dynamic array with literals
+var fruits = ["apple", "banana", "cherry"];
+print "Array literal: " + fruits;
+print "First fruit: " + fruits[0];
+print "Array length: " + fruits.length;
+
+// Enhanced array syntax
+var scores: array.int[3];
+scores[0] = 95;
+scores[1] = 87;
+scores[2] = 92;
+print "Enhanced array (array.int): " + scores;
+
+// 2D array
+var matrix: int[2, 3];
+matrix[0, 0] = 1;
+matrix[0, 1] = 2;
+matrix[0, 2] = 3;
+matrix[1, 0] = 4;
+matrix[1, 1] = 5;
+matrix[1, 2] = 6;
+print "2D array [1,1]: " + matrix[1, 1];
+
+print "";
+
+// ==========================================
+// 2. QUEUES
+// ==========================================
+print "2. QUEUES (FIFO)";
+print "----------------";
+
+var taskQueue: queue.string;
+
+// Enqueue tasks
+call queue.enqueue(taskQueue, "Task 1: Initialize");
+call queue.enqueue(taskQueue, "Task 2: Process");
+call queue.enqueue(taskQueue, "Task 3: Finalize");
+
+print "Queue size: " + call queue.size(taskQueue);
+
+// Peek at front
+print "Next task (peek): " + call queue.peek(taskQueue);
+
+// Dequeue and process
+while !call queue.isEmpty(taskQueue) {
+    var task = call queue.dequeue(taskQueue);
+    print "Processing: " + task;
+}
+
+print "Queue empty: " + call queue.isEmpty(taskQueue);
+
+print "";
+
+// ==========================================
+// 3. MAPS
+// ==========================================
+print "3. MAPS (Key-Value)";
+print "-------------------";
+
+// Create a map for configuration
+var config: map = {
+    "appName": "MyApp",
+    "version": "1.0.0",
+    "port": 8080,
+    "debug": true
+};
+
+print "App Name: " + call json.getstring(config, "appName");
+print "Port: " + call json.getint(config, "port");
+print "Debug mode: " + call json.getbool(config, "debug");
+
+// Add new configuration
+call json.set(config, "timeout", 30);
+print "Added timeout: " + call json.getint(config, "timeout");
+
+// Config is working - keys can be accessed individually
+print "Config has appName, version, port, debug, and timeout";
+
+// Cast JSON to map
+var settings: json = {"theme": "dark", "fontSize": 14};
+var settingsMap = map(settings);
+print "Settings map theme: " + call json.getstring(settingsMap, "theme");
+
+print "";
+
+// ==========================================
+// 4. JSON COLLECTIONS
+// ==========================================
+print "4. JSON COLLECTIONS";
+print "-------------------";
+
+// JSON Object
+var person: json = {
+    "name": "Alice",
+    "age": 30,
+    "email": "alice@example.com",
+    "address": {
+        "city": "New York",
+        "zip": "10001"
+    }
+};
+
+print "Person name: " + call json.getstring(person, "name");
+print "Person age: " + call json.getint(person, "age");
+
+// Access nested object
+var address = call json.get(person, "address");
+print "City: " + call json.getstring(address, "city");
+
+// JSON Array  
+var colorData: json = {"colors": ["red", "green", "blue"]};
+var colors = call json.get(colorData, "colors");
+print "Colors array: " + colors;
+print "First color: " + colors[0];
+print "Array length: " + colors.length;
+
+// Add to JSON array (using path notation)
+call json.add(colorData, "colors", "yellow");
+var updatedColors = call json.get(colorData, "colors");
+print "After adding yellow: " + updatedColors;
+
+// Complex nested structure
+var data: json = {
+    "users": [
+        {"name": "Bob", "score": 95},
+        {"name": "Carol", "score": 87},
+        {"name": "Dave", "score": 92}
+    ],
+    "totalUsers": 3
+};
+
+var users = call json.get(data, "users");
+print "Total users: " + call json.getint(data, "totalUsers");
+
+// Iterate through users
+for (var i: int = 0; i < users.length; i++) {
+    var user = users[i];
+    var userName = call json.getstring(user, "name");
+    var userScore = call json.getint(user, "score");
+    print "User " + (i + 1) + ": " + userName + " - Score: " + userScore;
+}
+
+print "";
+
+// ==========================================
+// 5. COLLECTION COMPARISON
+// ==========================================
+print "5. COLLECTION TYPE COMPARISON";
+print "------------------------------";
+
+print "Array:  Ordered, indexed access, fixed/dynamic size";
+print "Queue:  FIFO, enqueue/dequeue operations";
+print "Map:    Key-value, string keys, flexible values";
+print "JSON:   Universal, supports objects and arrays";
+
+print "";
+print "=== Demo Complete ===";
