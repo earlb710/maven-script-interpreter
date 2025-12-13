@@ -545,6 +545,7 @@ public class EbsTab extends Tab {
         runBtn.setPadding(new Insets(5, 10, 5, 10));
 
         Button clearBtn = new Button("Clear");
+        clearBtn.setPadding(new Insets(5, 10, 5, 10));
         clearBtn.setOnAction(e -> outputArea.clear());
 
         // Add View button for HTML files
@@ -2455,7 +2456,7 @@ public class EbsTab extends Tab {
         
         // Create a new Stage (window) for the WebView
         Stage webViewStage = new Stage();
-        webViewStage.setTitle("HTML Preview - " + filename);
+        webViewStage.setTitle("HTML Preview - " + (filename != null ? filename : "untitled"));
         
         // Create a WebView
         WebView webView = new WebView();
