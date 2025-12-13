@@ -1,0 +1,58 @@
+// test_sorted_map.ebs - Test script for sorted map functionality
+
+print "Testing sorted map functionality...";
+print "";
+
+// Test 1: Basic sorted map declaration
+print "Test 1: Sorted map declaration";
+var sm1: sorted map = {"c": 3, "a": 1, "b": 2};
+var result1 = call json.toString(sm1);
+print "Sorted map: " + result1;
+print "";
+
+// Test 2: Normal map declaration
+print "Test 2: Normal map declaration";
+var nm1: map = {"c": 3, "a": 1, "b": 2};
+var result2 = call json.toString(nm1);
+print "Normal map: " + result2;
+print "";
+
+// Test 3: Convert normal to sorted
+print "Test 3: Convert normal to sorted";
+var nm2: map = {"z": 26, "m": 13, "a": 1};
+var sm2 = call map.toSorted(nm2);
+var result3 = call json.toString(sm2);
+print "Converted to sorted: " + result3;
+print "";
+
+// Test 4: Convert sorted to normal
+print "Test 4: Convert sorted to normal";
+var sm3: sorted map = {"z": 26, "m": 13, "a": 1};
+var nm3 = call map.toUnsorted(sm3);
+var result4 = call json.toString(nm3);
+print "Converted to normal: " + result4;
+print "";
+
+// Test 5: Empty sorted map
+print "Test 5: Empty sorted map";
+var sm4: sorted map = {};
+print "Empty sorted map created successfully";
+call json.set(sm4, "first", 1);
+call json.set(sm4, "third", 3);
+call json.set(sm4, "second", 2);
+var result5 = call json.toString(sm4);
+print "After adding elements: " + result5;
+print "";
+
+// Test 6: Empty normal map
+print "Test 6: Empty normal map";
+var nm4: map = {};
+print "Empty normal map created successfully";
+call json.set(nm4, "first", 1);
+call json.set(nm4, "third", 3);
+call json.set(nm4, "second", 2);
+var result6 = call json.toString(nm4);
+print "After adding elements: " + result6;
+print "";
+
+print "All tests completed!";

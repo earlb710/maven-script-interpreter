@@ -1,0 +1,33 @@
+// sorted_map.ebs - Example demonstrating sorted map functionality
+// Sorted maps use TreeMap and maintain keys in alphabetical order
+
+// Declare a normal map (uses LinkedHashMap - maintains insertion order)
+var normalMap: map = {"zebra": 1, "apple": 2, "mango": 3, "banana": 4};
+
+print "Normal map (insertion order):";
+call json.toString(normalMap);
+
+// Declare a sorted map (uses TreeMap - maintains alphabetical order by keys)
+var sortedMap: sorted map = {"zebra": 1, "apple": 2, "mango": 3, "banana": 4};
+
+print "Sorted map (alphabetical order by keys):";
+call json.toString(sortedMap);
+
+// You can also convert between normal and sorted maps
+var convertedToSorted = call map.toSorted(normalMap);
+print "Normal map converted to sorted:";
+call json.toString(convertedToSorted);
+
+var convertedToNormal = call map.toUnsorted(sortedMap);
+print "Sorted map converted to normal (preserves current order):";
+call json.toString(convertedToNormal);
+
+// Adding elements to sorted map - they will be automatically sorted
+call json.set(sortedMap, "cherry", 5);
+call json.set(sortedMap, "date", 6);
+
+print "Sorted map after adding more elements:";
+call json.toString(sortedMap);
+
+// Sorted maps are useful when you need predictable key ordering
+// For example, when iterating over configuration settings or displaying sorted lists

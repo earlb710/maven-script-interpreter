@@ -268,14 +268,22 @@ while !call queue.isEmpty(tasks) {
 
 Maps provide key-value storage where keys are strings and values can be any type. Maps are backed by JSON objects.
 
+EBS supports two types of maps:
+- **Normal maps** (default): Maintain insertion order using LinkedHashMap
+- **Sorted maps**: Automatically sort keys alphabetically using TreeMap
+
 ### Map Declaration
 
 ```javascript
-// Declare a map variable
+// Normal map (maintains insertion order)
 var config: map = {"host": "localhost", "port": 8080, "debug": true};
 
-// Empty map
+// Sorted map (maintains alphabetical order by keys)
+var sortedConfig: sorted map = {"host": "localhost", "port": 8080, "debug": true};
+
+// Empty maps
 var settings: map = {};
+var sortedSettings: sorted map = {};
 ```
 
 ### Casting JSON to Map
@@ -315,17 +323,50 @@ var nestedMap = map(nested);
 var userName = call json.get(call json.get(nestedMap, "user"), "name");
 ```
 
+### Map Conversion
+
+Convert between normal and sorted maps using builtin functions:
+
+```javascript
+var normalMap: map = {"z": 26, "a": 1, "m": 13};
+var sortedMap: sorted map = {"z": 26, "a": 1, "m": 13};
+
+// Convert normal map to sorted (alphabetically ordered)
+var toSorted = call map.toSorted(normalMap);
+
+// Convert sorted map to normal (preserves current order)
+var toNormal = call map.toUnsorted(sortedMap);
+```
+
 ### Map Characteristics
 
+#### Normal Maps (`map`)
 - **Keys**: Always strings
 - **Values**: Any type (string, int, bool, arrays, nested maps/JSON)
-- **Flexible**: No predefined schema required
-- **Implementation**: Backed by JSON objects (Java's LinkedHashMap)
+- **Ordering**: Maintains insertion order (LinkedHashMap)
 - **Use Cases**:
-  - Configuration storage
-  - Dictionary/lookup tables
-  - Dynamic key-value stores
-  - API response handling
+  - Sequential processing
+  - User-defined ordering
+  - FIFO-style access patterns
+  - Maintaining insertion history
+
+#### Sorted Maps (`sorted map`)
+- **Keys**: Always strings (sorted alphabetically)
+- **Values**: Any type (string, int, bool, arrays, nested maps/JSON)
+- **Ordering**: Automatically sorted by keys (TreeMap)
+- **Use Cases**:
+  - Configuration files (easier to compare and diff)
+  - Consistent API responses
+  - Alphabetically sorted displays
+  - Deterministic iteration
+  - Logging and debugging (consistent output)
+
+### Map Builtins
+
+| Function | Description | Example |
+|----------|-------------|---------|
+| `map.toSorted(map)` | Converts a normal map to a sorted map | `call map.toSorted(myMap)` |
+| `map.toUnsorted(map)` | Converts a sorted map to a normal map | `call map.toUnsorted(sortedMap)` |
 
 ---
 

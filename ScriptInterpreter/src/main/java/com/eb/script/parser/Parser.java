@@ -520,10 +520,9 @@ public class Parser {
                     throw error(mapToken, "Expected 'map' after 'sorted' type modifier.");
                 }
             }
-            
             // Special handling for "screen.xxx" type annotations
             // Since "screen" is a keyword, we need to check for SCREEN token followed by DOT
-            if (t.type == EbsTokenType.SCREEN && peekNext() != null && peekNext().type == EbsTokenType.DOT) {
+            else if (t.type == EbsTokenType.SCREEN && peekNext() != null && peekNext().type == EbsTokenType.DOT) {
                 // Consume SCREEN token
                 advance();
                 // Consume DOT token
@@ -726,6 +725,7 @@ public class Parser {
             if (t.type != EbsTokenType.RECORD && 
                 t.type != EbsTokenType.BITMAP &&
                 t.type != EbsTokenType.INTMAP &&
+                t.type != EbsTokenType.SORTED && // Don't advance if we handled sorted map
                 !(t.literal instanceof String && "record".equals(((String)t.literal).toLowerCase())) &&
                 !(t.literal instanceof String && "bitmap".equals(((String)t.literal).toLowerCase())) &&
                 !(t.literal instanceof String && "intmap".equals(((String)t.literal).toLowerCase())) &&
