@@ -1152,14 +1152,14 @@ public class EbsTab extends Tab {
         String LIST = "^\\s*[-*+]\\s+.*$|^\\s*\\d+\\.\\s+.*$";  // - item or 1. item
         String BLOCKQUOTE = "^>\\s+.*$";  // > quote
         
-        // Use named groups
+        // Use named groups (order matters - more specific patterns first)
         String master =
                 "(?<CODEBLOCK>" + CODE_BLOCK + ")"
-                + "|(?<HEADING>" + HEADING + ")"
+                + "|(?<INLINECODE>" + INLINE_CODE + ")"
                 + "|(?<BOLD>" + BOLD + ")"
                 + "|(?<ITALIC>" + ITALIC + ")"
-                + "|(?<INLINECODE>" + INLINE_CODE + ")"
                 + "|(?<LINK>" + LINK + ")"
+                + "|(?<HEADING>" + HEADING + ")"
                 + "|(?<LIST>" + LIST + ")"
                 + "|(?<BLOCKQUOTE>" + BLOCKQUOTE + ")";
         
