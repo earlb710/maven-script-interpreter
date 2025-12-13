@@ -457,7 +457,8 @@ public class EbsTab extends Tab {
         boolean isJson = ext.equalsIgnoreCase(".json");
         boolean isCss = ext.equalsIgnoreCase(".css");
         boolean isHtml = ext.equalsIgnoreCase(".html");
-        boolean isEditable = isEbs || isJson || isCss || isHtml;
+        boolean isMd = ext.equalsIgnoreCase(".md");
+        boolean isEditable = isEbs || isJson || isCss || isHtml || isMd;
 
         if (isEditable) {
             dispArea.setEditable(true);               // enable edits for textual content
