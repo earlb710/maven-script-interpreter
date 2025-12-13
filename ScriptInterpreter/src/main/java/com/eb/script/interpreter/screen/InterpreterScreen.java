@@ -1564,6 +1564,39 @@ public class InterpreterScreen {
     }
 
     /**
+     * Filters out item-level properties from an item definition, leaving only
+     * display-level properties. This is used when an item definition is used
+     * as a display definition (e.g., for button items without varRef).
+     * 
+     * @param itemDef The item definition map
+     * @return A new map with only display-level properties
+     */
+    private Map<String, Object> filterItemLevelProperties(Map<String, Object> itemDef) {
+        // Define item-level properties that should NOT be in display definitions
+        java.util.Set<String> itemOnlyProps = new java.util.HashSet<>(java.util.Arrays.asList(
+            "hgrow", "vgrow", "margin", "padding",
+            "prefwidth", "pref_width", "prefheight", "pref_height",
+            "minwidth", "min_width", "minheight", "min_height",
+            "maxwidth", "max_width", "maxheight", "max_height",
+            "colspan", "col_span", "rowspan", "row_span",
+            "layoutpos", "layout_pos", "relativepos", "relative_pos",
+            "varref", "var_ref", "name", "editable", "disabled", "visible", "tooltip",
+            "textcolor", "text_color", "backgroundcolor", "background_color"
+        ));
+        
+        // Create a new map with only display-level properties
+        Map<String, Object> displayDef = new java.util.HashMap<>();
+        for (Map.Entry<String, Object> entry : itemDef.entrySet()) {
+            String lowerKey = entry.getKey().toLowerCase();
+            if (!itemOnlyProps.contains(lowerKey)) {
+                displayDef.put(entry.getKey(), entry.getValue());
+            }
+        }
+        
+        return displayDef;
+    }
+
+    /**
      * Validates that only valid properties are present in a display definition.
      * Throws RuntimeException if invalid properties (like hgrow, vgrow) are found.
      */
@@ -2471,7 +2504,9 @@ public class InterpreterScreen {
                                    getCaseInsensitive(itemDef, "varref") == null) {
                             // If item has a direct "type" property (e.g., button, label) without a varRef,
                             // treat the item definition itself as the display definition
-                            item.displayItem = parseDisplayItem(itemDef, screenName);
+                            // Filter out item-level properties before passing to parseDisplayItem
+                            Map<String, Object> displayDef = filterItemLevelProperties(itemDef);
+                            item.displayItem = parseDisplayItem(displayDef, screenName);
                         }
                         // If displayItem is not set here, it will remain null
                         // and the consuming code should fall back to using varRef's DisplayItem
