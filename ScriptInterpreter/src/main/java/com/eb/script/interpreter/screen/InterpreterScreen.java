@@ -2001,6 +2001,13 @@ public class InterpreterScreen {
         } else if (displayDef.containsKey("itemcolor")) {
             metadata.itemColor = String.valueOf(displayDef.get("itemcolor"));
         }
+        
+        // Extract textColor (alternative to itemColor for consistency with labelColor)
+        if (displayDef.containsKey("textColor")) {
+            metadata.textColor = String.valueOf(displayDef.get("textColor"));
+        } else if (displayDef.containsKey("text_color")) {
+            metadata.textColor = String.valueOf(displayDef.get("text_color"));
+        }
 
         if (displayDef.containsKey("itemBold")) {
             Object boldObj = displayDef.get("itemBold");

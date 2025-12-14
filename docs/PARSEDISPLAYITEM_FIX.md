@@ -160,6 +160,7 @@ The test script correctly uses `labelText` for all buttons. The issue was that `
 | `labelFontSize` | String | Label font size | "14px", "1.2em" |
 | `itemFontSize` | String | Control font size | "12px", "1em" |
 | `itemColor` | String | Control text color | "#333333", "blue" |
+| `textColor` | String | Control text color (alternative to itemColor) | "#FF0000", "blue" |
 | `itemBold` | Boolean | Bold control text | true, false |
 | `itemItalic` | Boolean | Italic control text | true, false |
 | `maxLength` | Integer | Max text length | 100, 255 |

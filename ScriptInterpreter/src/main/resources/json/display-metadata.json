@@ -117,6 +117,10 @@
       "type": "string",
       "description": "Control/item text color (e.g., '#000000', 'red', '#0000FF')"
     },
+    "textColor": {
+      "type": "string",
+      "description": "Text color for the actual item (alternative to itemColor, for consistency with labelColor). Takes precedence over itemColor if both are specified."
+    },
     "itemBold": {
       "type": "boolean",
       "description": "Whether the control/item text should be bold",

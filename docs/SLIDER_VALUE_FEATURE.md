@@ -172,7 +172,7 @@ The HBox:
 ## Styling Support
 The value label inherits styling from the slider's display metadata:
 - `itemFontSize` - Controls font size of the value
-- `itemColor` - Controls text color of the value
+- `itemColor` or `textColor` - Controls text color of the value (textColor takes precedence when both are specified)
 - `itemBold` - Makes the value bold
 - `itemItalic` - Makes the value italic
 

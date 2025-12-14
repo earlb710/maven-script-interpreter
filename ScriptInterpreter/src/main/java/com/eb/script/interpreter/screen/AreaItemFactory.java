@@ -561,10 +561,13 @@ public class AreaItemFactory {
             //System.out.println("[DEBUG]   Adding font-size: " + metadata.itemFontSize);
         }
         
-        // Apply item text color
-        if (metadata.itemColor != null && !metadata.itemColor.isEmpty()) {
-            itemStyle.append("-fx-text-fill: ").append(metadata.itemColor).append("; ");
-            //System.out.println("[DEBUG]   Adding text-fill: " + metadata.itemColor);
+        // Apply item text color (textColor takes precedence over itemColor)
+        String colorToApply = (metadata.textColor != null && !metadata.textColor.isEmpty()) 
+                            ? metadata.textColor 
+                            : metadata.itemColor;
+        if (colorToApply != null && !colorToApply.isEmpty()) {
+            itemStyle.append("-fx-text-fill: ").append(colorToApply).append("; ");
+            //System.out.println("[DEBUG]   Adding text-fill: " + colorToApply);
         }
         
         // Apply item bold
@@ -898,9 +901,14 @@ public class AreaItemFactory {
             valueLabelStyle.append("-fx-font-size: ").append(metadata.itemFontSize).append("; ");
         }
         
-        // Apply text color from metadata
-        if (metadata != null && metadata.itemColor != null && !metadata.itemColor.isEmpty()) {
-            valueLabelStyle.append("-fx-text-fill: ").append(metadata.itemColor).append("; ");
+        // Apply text color from metadata (textColor takes precedence over itemColor)
+        if (metadata != null) {
+            String colorToApply = (metadata.textColor != null && !metadata.textColor.isEmpty()) 
+                                ? metadata.textColor 
+                                : metadata.itemColor;
+            if (colorToApply != null && !colorToApply.isEmpty()) {
+                valueLabelStyle.append("-fx-text-fill: ").append(colorToApply).append("; ");
+            }
         }
         
         // Apply bold from metadata

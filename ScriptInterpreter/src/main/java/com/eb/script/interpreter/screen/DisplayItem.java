@@ -61,6 +61,8 @@ public class DisplayItem {
     public Integer height;
     // Item/control text color
     String itemColor;
+    // Text color for the actual item (alternative to itemColor for consistency with labelColor)
+    String textColor;
     // Item/control text bold flag
     Boolean itemBold;
     // Item/control text italic flag
@@ -172,6 +174,8 @@ public class DisplayItem {
                ", labelColor='" + labelColor + '\'' +
                ", labelBold=" + labelBold +
                ", labelItalic=" + labelItalic +
+               ", itemColor='" + itemColor + '\'' +
+               ", textColor='" + textColor + '\'' +
                '}';
     }
     
