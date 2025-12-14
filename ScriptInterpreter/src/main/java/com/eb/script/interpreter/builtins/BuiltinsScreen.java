@@ -1592,12 +1592,12 @@ public class BuiltinsScreen {
         switch (propLower) {
             case "value", "text" -> {
                 // Check if the item is stateful (affects dirty tracking)
-                // If stateful is false or null defaults to true, only stateful items are protected
+                // The stateful property defaults to true when null
                 boolean isStateful = (item.stateful == null) ? true : item.stateful;
                 
                 if (isStateful) {
-                    // For stateful items, value/text changes must go through screen variables
-                    // to ensure proper dirty tracking and data binding
+                    // Stateful items (default) require screen variable access for value changes
+                    // This ensures proper dirty tracking and data binding with the underlying Var
                     throw new InterpreterError("scr.setProperty: cannot change 'value' or 'text' property on stateful items. "
                             + "Use screen variable access instead (e.g., screenName.varName = value). "
                             + "For display-only updates, set stateful=false on the item.");
@@ -1738,8 +1738,8 @@ public class BuiltinsScreen {
         switch (propLower) {
             case "value", "text" -> {
                 // Set the text/value of the control
-                // This is only reached for non-stateful items (stateful=false)
-                // where display-only updates are allowed
+                // This code path is only reached after the stateful check in setAreaItemProperty()
+                // has confirmed the item has stateful=false, making it safe to update the display
                 String textValue = value != null ? String.valueOf(value) : "";
                 if (control instanceof javafx.scene.control.TextField) {
                     ((javafx.scene.control.TextField) control).setText(textValue);

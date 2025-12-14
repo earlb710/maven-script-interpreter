@@ -40,7 +40,7 @@ screen propSetScreen = {
                 {
                     "name": "emailField",
                     "varRef": "email"
-                    // stateful defaults to true - changes affect dirty tracking
+                    // stateful defaults to true - changes mark screen as "changed" for save prompts
                 },
                 {
                     "name": "statusDisplay",
