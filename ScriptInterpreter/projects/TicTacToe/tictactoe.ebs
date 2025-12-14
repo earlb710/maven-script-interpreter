@@ -159,14 +159,14 @@ updateDisplay {
     for (var i: int = 0; i < 9; i++) {
         var cellName: string = "cell" + string(i);
         var disabled: bool = gameOver or board[i] != "";
-        call screen.setProperty("tictactoeScreen." + cellName, "disabled", disabled);
+        call scr.setProperty("tictactoeScreen." + cellName, "disabled", disabled);
     }
 }
 
 // Handle player move
 playerMove(pos: int) {
     var empty: bool = call isEmpty(pos);
-    if (gameOver or not empty) {
+    if (gameOver or !empty) {
         return;
     }
     
