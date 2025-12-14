@@ -986,15 +986,10 @@ public final class Builtins {
                 newParam("screenName", DataType.STRING, true) // required; screen name to check if defined
         ));
         addBuiltin(info(
-                "scr.getItemSource", DataType.STRING,
+                "scr.setVarStateful", DataType.BOOL,
                 newParam("screenName", DataType.STRING, true), // required; screen name
-                newParam("itemName", DataType.STRING, true) // required; item name (varRef)
-        ));
-        addBuiltin(info(
-                "scr.setItemSource", DataType.BOOL,
-                newParam("screenName", DataType.STRING, true), // required; screen name
-                newParam("itemName", DataType.STRING, true), // required; item name (varRef)
-                newParam("source", DataType.STRING, true) // required; source: "data" or "display"
+                newParam("varName", DataType.STRING, true), // required; variable name
+                newParam("stateful", DataType.BOOL, true) // required; stateful: true or false
         ));
         addBuiltin(info(
                 "scr.getItemStatus", DataType.STRING,
@@ -2143,8 +2138,7 @@ public final class Builtins {
             case "scr.geterror" -> BuiltinsScreen.screenGetError(context, args);
             case "scr.setstatusbarmessage" -> BuiltinsScreen.screenSetStatusBarMessage(context, args);
             case "scr.findscreen" -> BuiltinsScreen.screenFindScreen(context, args);
-            case "scr.getitemsource" -> BuiltinsScreen.screenGetItemSource(context, args);
-            case "scr.setitemsource" -> BuiltinsScreen.screenSetItemSource(context, args);
+            case "scr.setvarstateful" -> BuiltinsScreen.screenSetVarStateful(context, args);
             case "scr.getitemstatus" -> BuiltinsScreen.screenGetItemStatus(context, args);
             case "scr.resetitemoriginalvalue" -> BuiltinsScreen.screenResetItemOriginalValue(context, args);
             case "scr.checkchanged" -> BuiltinsScreen.screenCheckChanged(context, args);

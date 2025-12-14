@@ -5864,7 +5864,6 @@ public class ScreenFactory {
         item.alignment = template.alignment;
         item.onValidate = template.onValidate;
         item.onChange = template.onChange;
-        item.source = template.source;
         
         // Expand the name to be unique for each record
         if (template.name != null) {
@@ -5993,7 +5992,6 @@ public class ScreenFactory {
         clone.onValidate = source.onValidate;
         clone.onChange = source.onChange;
         clone.showSliderValue = source.showSliderValue;
-        clone.source = source.source;
         clone.status = source.status;
         clone.displayRecords = source.displayRecords;
         clone.seq = source.seq;

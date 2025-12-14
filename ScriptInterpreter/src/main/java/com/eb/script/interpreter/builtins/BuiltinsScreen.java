@@ -567,124 +567,61 @@ public class BuiltinsScreen {
     }
 
     /**
-     * scr.getItemSource(screenName, itemName) -> String Gets the source
-     * property of a screen item: "data" or "display"
+     * scr.setVarStateful(screenName, varName, stateful) -> Boolean Sets the
+     * stateful property of a screen variable. If true, changes to this variable
+     * will mark the screen as dirty. If false, changes do not affect dirty tracking.
      */
-    public static Object screenGetItemSource(InterpreterContext context, Object[] args) throws InterpreterError {
+    public static Object screenSetVarStateful(InterpreterContext context, Object[] args) throws InterpreterError {
         String screenName = (String) args[0];
-        String itemName = (String) args[1];
+        String varName = (String) args[1];
+        Boolean stateful = (Boolean) args[2];
 
         if (screenName == null || screenName.isEmpty()) {
-            throw new InterpreterError("scr.getItemSource: screenName parameter cannot be null or empty");
+            throw new InterpreterError("scr.setVarStateful: screenName parameter cannot be null or empty");
         }
-        if (itemName == null || itemName.isEmpty()) {
-            throw new InterpreterError("scr.getItemSource: itemName parameter cannot be null or empty");
+        if (varName == null || varName.isEmpty()) {
+            throw new InterpreterError("scr.setVarStateful: varName parameter cannot be null or empty");
+        }
+        if (stateful == null) {
+            throw new InterpreterError("scr.setVarStateful: stateful parameter cannot be null");
         }
 
         // Verify screen exists
         if (!context.getScreens().containsKey(screenName.toLowerCase())) {
-            throw new InterpreterError("scr.getItemSource: screen '" + screenName + "' not found");
+            throw new InterpreterError("scr.setVarStateful: screen '" + screenName + "' not found");
         }
 
         // Get the var item
         Map<String, Var> varItems = context.getScreenVarItems(screenName);
         if (varItems == null) {
-            throw new InterpreterError("scr.getItemSource: no variables defined for screen '" + screenName + "'");
+            throw new InterpreterError("scr.setVarStateful: no variables defined for screen '" + screenName + "'");
         }
 
         // Find the variable - try with various key formats
         Var var = null;
-        String lowerItemName = itemName.toLowerCase();
+        String lowerVarName = varName.toLowerCase();
 
-        // Try direct lookup
         for (Map.Entry<String, Var> entry : varItems.entrySet()) {
             String key = entry.getKey();
             Var v = entry.getValue();
-            // Match by key or by variable name
-            if (key.equals(lowerItemName) || key.endsWith("." + lowerItemName)
-                    || (v.getName() != null && v.getName().equalsIgnoreCase(itemName))) {
+            if (key.equals(lowerVarName) || key.endsWith("." + lowerVarName)
+                    || (v.getName() != null && v.getName().equalsIgnoreCase(varName))) {
                 var = v;
                 break;
             }
         }
 
         if (var == null) {
-            throw new InterpreterError("scr.getItemSource: item '" + itemName + "' not found in screen '" + screenName + "'");
+            throw new InterpreterError("scr.setVarStateful: variable '" + varName + "' not found in screen '" + screenName + "'");
         }
 
-        // Get the display item
-        DisplayItem displayItem = var.getDisplayItem();
-        if (displayItem == null) {
-            return "data"; // Default if no display item
+        // Set the stateful property
+        var.setStateful(stateful);
+        
+        // If setting to stateful=true and no original value is set, capture current value as original
+        if (stateful && var.getOriginalValue() == null) {
+            var.resetOriginalValue();
         }
-
-        return displayItem.source != null ? displayItem.source : "data";
-    }
-
-    /**
-     * scr.setItemSource(screenName, itemName, source) -> Boolean Sets the
-     * source property of a screen item: "data" or "display"
-     */
-    public static Object screenSetItemSource(InterpreterContext context, Object[] args) throws InterpreterError {
-        String screenName = (String) args[0];
-        String itemName = (String) args[1];
-        String source = (String) args[2];
-
-        if (screenName == null || screenName.isEmpty()) {
-            throw new InterpreterError("scr.setItemSource: screenName parameter cannot be null or empty");
-        }
-        if (itemName == null || itemName.isEmpty()) {
-            throw new InterpreterError("scr.setItemSource: itemName parameter cannot be null or empty");
-        }
-        if (source == null || source.isEmpty()) {
-            throw new InterpreterError("scr.setItemSource: source parameter cannot be null or empty");
-        }
-
-        // Validate source value
-        String lowerSource = source.toLowerCase();
-        if (!lowerSource.equals("data") && !lowerSource.equals("display")) {
-            throw new InterpreterError("scr.setItemSource: source must be 'data' or 'display', got: " + source);
-        }
-
-        // Verify screen exists
-        if (!context.getScreens().containsKey(screenName.toLowerCase())) {
-            throw new InterpreterError("scr.setItemSource: screen '" + screenName + "' not found");
-        }
-
-        // Get the var item
-        Map<String, Var> varItems = context.getScreenVarItems(screenName);
-        if (varItems == null) {
-            throw new InterpreterError("scr.setItemSource: no variables defined for screen '" + screenName + "'");
-        }
-
-        // Find the variable - try with various key formats
-        Var var = null;
-        String lowerItemName = itemName.toLowerCase();
-
-        for (Map.Entry<String, Var> entry : varItems.entrySet()) {
-            String key = entry.getKey();
-            Var v = entry.getValue();
-            if (key.equals(lowerItemName) || key.endsWith("." + lowerItemName)
-                    || (v.getName() != null && v.getName().equalsIgnoreCase(itemName))) {
-                var = v;
-                break;
-            }
-        }
-
-        if (var == null) {
-            throw new InterpreterError("scr.setItemSource: item '" + itemName + "' not found in screen '" + screenName + "'");
-        }
-
-        // Get or create the display item
-        DisplayItem displayItem = var.getDisplayItem();
-        if (displayItem == null) {
-            // Create a basic display item if it doesn't exist
-            displayItem = new DisplayItem();
-            var.setDisplayItem(displayItem);
-        }
-
-        // Set the source
-        displayItem.source = lowerSource;
 
         return true;
     }

@@ -48,6 +48,10 @@ public class Var {
     // For array.record, this holds the template record used to initialize new elements
     private Object recordTemplate;
     
+    // Whether changes to this var should mark the screen/item as changed (default: true)
+    // If false, changes don't affect dirty tracking
+    private Boolean stateful = true;
+    
     /**
      * Default constructor
      */
@@ -241,6 +245,22 @@ public class Var {
      */
     public void setElementType(DataType elementType) {
         this.elementType = elementType;
+    }
+    
+    /**
+     * Get whether this variable is stateful (affects dirty tracking)
+     * @return true if stateful (default), false if not
+     */
+    public Boolean getStateful() {
+        return stateful;
+    }
+    
+    /**
+     * Set whether this variable is stateful (affects dirty tracking)
+     * @param stateful true to enable dirty tracking, false to disable
+     */
+    public void setStateful(Boolean stateful) {
+        this.stateful = stateful;
     }
     
     /**

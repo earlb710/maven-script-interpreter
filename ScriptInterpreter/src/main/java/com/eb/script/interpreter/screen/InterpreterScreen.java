@@ -1638,8 +1638,8 @@ public class InterpreterScreen {
             "showslidervalue", "show_slider_value",
             // Sequence
             "seq", "sequence",
-            // Data source
-            "source", "status"
+            // Status tracking
+            "status"
         ));
         
         // Check for invalid properties
@@ -1690,8 +1690,6 @@ public class InterpreterScreen {
             // Note: Event handlers belong at the item level to bind to the specific item instance.
             // The display object is only for shared display/rendering properties.
             "onclick", "on_click", "onvalidate", "on_validate", "onchange", "on_change",
-            // Data source
-            "source",
             // Change tracking
             "stateful",
             // promptHelp can be at item level (gets moved to displayItem)
