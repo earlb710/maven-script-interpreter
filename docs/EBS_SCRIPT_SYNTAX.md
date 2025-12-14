@@ -3947,9 +3947,13 @@ var error = call scr.getError("screenName");
 var hasChanges = call scr.checkChanged("screenName");
 var hasErrors = call scr.checkError("screenName");
 
-// Item source and status
-var source = call scr.getItemSource("screenName", "itemName");  // "data" or "display"
-call scr.setItemSource("screenName", "itemName", "data");
+// Variable stateful property (controls dirty tracking)
+call scr.setVarStateful("screenName", "varName", true);  // Enable dirty tracking
+call scr.setVarStateful("screenName", "varName", false); // Disable dirty tracking
+// When stateful=true, changes to the variable mark screen as dirty
+// When stateful=false, changes don't affect dirty tracking (for display-only fields)
+
+// Item status
 var itemStatus = call scr.getItemStatus("screenName", "itemName");
 call scr.resetItemOriginalValue("screenName", "itemName");
 

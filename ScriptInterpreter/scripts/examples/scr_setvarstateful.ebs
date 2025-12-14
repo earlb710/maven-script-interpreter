@@ -1,0 +1,103 @@
+// EBS Language Reference - See EBS_SCRIPT_SYNTAX.md
+// Example: scr.setVarStateful builtin - Control dirty tracking for screen variables
+// Syntax: call scr.setVarStateful("screenName", "varName", statefulFlag)
+// Returns: true on success
+//
+// Purpose: Set whether changes to a variable should mark the screen as "dirty" (changed)
+// - stateful=true (default): changes affect dirty tracking
+// - stateful=false: changes don't affect dirty tracking (for display-only fields)
+
+// Define a test screen with multiple variables
+screen statefulTestScreen = {
+    "title": "Stateful Property Test",
+    "width": 500,
+    "height": 400,
+    "vars": [
+        {
+            "name": "dataField",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Data Field (stateful):"
+            }
+        },
+        {
+            "name": "statusMessage",
+            "type": "string",
+            "default": "Ready",
+            "display": {
+                "type": "label",
+                "labelText": "Status:"
+            }
+        },
+        {
+            "name": "processCount",
+            "type": "int",
+            "default": 0,
+            "display": {
+                "type": "label",
+                "labelText": "Process Count:"
+            }
+        }
+    ]
+};
+
+show screen statefulTestScreen;
+
+// By default, all variables are stateful (changes mark screen as dirty)
+print "=== Test 1: Default stateful behavior ===";
+print "Initial screen status: " + call scr.getStatus("statefulTestScreen");
+
+// Change a stateful field - this marks the screen as dirty
+statefulTestScreen.dataField = "Some data";
+print "After changing dataField: " + call scr.getStatus("statefulTestScreen");
+print "Screen has changes: " + call scr.checkChanged("statefulTestScreen");
+
+// Reset for next test
+call scr.revert("statefulTestScreen");
+print "";
+
+// Test 2: Set a variable to non-stateful (display-only)
+print "=== Test 2: Non-stateful (display-only) variables ===";
+call scr.setVarStateful("statefulTestScreen", "statusMessage", false);
+call scr.setVarStateful("statefulTestScreen", "processCount", false);
+print "Set statusMessage and processCount to non-stateful";
+
+// Change non-stateful fields - these don't mark screen as dirty
+statefulTestScreen.statusMessage = "Processing...";
+statefulTestScreen.processCount = 10;
+print "After changing display fields: " + call scr.getStatus("statefulTestScreen");
+print "Screen has changes: " + call scr.checkChanged("statefulTestScreen");
+print "Status and count were updated but screen is still clean!";
+print "";
+
+// Test 3: Mix of stateful and non-stateful changes
+print "=== Test 3: Mixed changes ===";
+statefulTestScreen.dataField = "New data";  // Stateful - marks as dirty
+statefulTestScreen.statusMessage = "Done";  // Non-stateful - doesn't mark dirty
+print "Changed dataField (stateful) and statusMessage (non-stateful)";
+print "Screen status: " + call scr.getStatus("statefulTestScreen");
+print "Screen has changes: " + call scr.checkChanged("statefulTestScreen");
+print "Only the stateful field change triggered dirty tracking";
+print "";
+
+// Test 4: Re-enable stateful tracking
+print "=== Test 4: Re-enable stateful tracking ===";
+call scr.setVarStateful("statefulTestScreen", "statusMessage", true);
+print "Set statusMessage back to stateful=true";
+statefulTestScreen.statusMessage = "Final status";
+print "After changing statusMessage (now stateful): " + call scr.getStatus("statefulTestScreen");
+print "";
+
+print "=== Summary ===";
+print "Use stateful=false for display-only fields that don't represent user data:";
+print "  - Status messages";
+print "  - Progress indicators";
+print "  - Temporary feedback text";
+print "  - Counters and calculations";
+print "";
+print "Keep stateful=true (default) for fields that represent user data:";
+print "  - Form input fields";
+print "  - Data entry fields";
+print "  - Any field that should trigger save prompts";
