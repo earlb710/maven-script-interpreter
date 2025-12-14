@@ -1593,7 +1593,7 @@ public class BuiltinsScreen {
             case "value", "text" -> {
                 // Check if the item is stateful (affects dirty tracking)
                 // The stateful property defaults to true when null
-                boolean isStateful = (item.stateful == null) ? true : item.stateful;
+                boolean isStateful = !Boolean.FALSE.equals(item.stateful);
                 
                 if (isStateful) {
                     // Stateful items (default) require screen variable access for value changes

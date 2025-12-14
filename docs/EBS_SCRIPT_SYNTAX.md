@@ -3903,7 +3903,7 @@ var exists = call scr.findScreen("screenName");
 var value = call scr.getProperty("screenName.itemName", "propertyName");
 call scr.setProperty("screenName.itemName", "propertyName", value);
 
-// IMPORTANT: By default, scr.setProperty cannot change "value" or "text" on stateful items
+// IMPORTANT: For stateful items (the default behavior), scr.setProperty cannot change "value" or "text"
 // All communication with screen data values MUST be done through screen variables:
 //   Correct:   screenName.varName = value
 //   Incorrect: call scr.setProperty("screenName.itemName", "value", value)  // ERROR
