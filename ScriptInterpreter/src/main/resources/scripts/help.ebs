@@ -929,9 +929,9 @@ getHelpContent(topic: string) return string {
     }
     
     // Check if this topic matches a category display name
-    if builtinCategoryNames != null && builtinCategoryOrder != null then {
+    if builtinCategoryNames != null && categoryOrderArray.length > 0 then {
         // Iterate through category names to find a match
-        foreach categoryKey in builtinCategoryOrder {
+        foreach categoryKey in categoryOrderArray {
             var displayName: string = call json.getString(builtinCategoryNames, categoryKey, "");
             if displayName == topic then {
                 // Found matching category - show overview
@@ -1127,8 +1127,8 @@ call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.Screen", true);
 call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.Data.Integer Types", true);
 
 // Builtins section - all category nodes have children
-if builtinCategoryOrder != null then {
-    foreach categoryKey in builtinCategoryOrder {
+if categoryOrderArray.length > 0 then {
+    foreach categoryKey in categoryOrderArray {
         var displayName: string = categoryKey;
         if builtinCategoryNames != null then {
             var jsonDisplayName: string = call json.getString(builtinCategoryNames, categoryKey, "");
