@@ -868,6 +868,13 @@ public final class Builtins {
         ));
 
         addBuiltin(info(
+                "sys.getEventCount", DataType.INTEGER, // returns the event count for a specific screen item event
+                newParam("screenName", DataType.STRING, true),  // required: screen name
+                newParam("itemName", DataType.STRING, true),    // required: item name
+                newParam("eventType", DataType.STRING, true)    // required: event type (e.g., "onExpand", "onCollapse")
+        ));
+
+        addBuiltin(info(
                 "thread.sleep", DataType.STRING,
                 newParam("millis", DataType.LONG) // required: milliseconds to sleep
         ));

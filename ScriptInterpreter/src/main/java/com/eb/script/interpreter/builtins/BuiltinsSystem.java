@@ -49,6 +49,7 @@ public class BuiltinsSystem {
             case "system.getebsver" -> getEBSver();
             case "system.testebsver" -> testEBSver(args);
             case "system.reloadconfig" -> reloadConfig();
+            case "sys.geteventcount" -> getEventCount(args);
             case "thread.sleep" -> sleep(args);
             case "array.expand" -> arrayExpand(args);
             case "array.sort" -> arraySort(args);
@@ -69,7 +70,7 @@ public class BuiltinsSystem {
      * Checks if the given builtin name is a System/Array/Sleep builtin.
      */
     public static boolean handles(String name) {
-        return name.startsWith("system.") || name.startsWith("array.") || name.equals("thread.sleep");
+        return name.startsWith("system.") || name.startsWith("sys.") || name.startsWith("array.") || name.equals("thread.sleep");
     }
 
     // --- Individual builtin implementations ---
@@ -512,5 +513,20 @@ public class BuiltinsSystem {
         } catch (Exception ex) {
             throw new RuntimeException("system.command failed: " + ex.getMessage(), ex);
         }
+    }
+
+    /**
+     * Get the event count for a specific screen item event.
+     * sys.getEventCount(screenName, itemName, eventType) -> int
+     * 
+     * @param args [screenName, itemName, eventType]
+     * @return The event count (0 if never fired)
+     */
+    private static Object getEventCount(Object[] args) {
+        final String screenName = (String) args[0];
+        final String itemName = (String) args[1];
+        final String eventType = (String) args[2];
+        
+        return com.eb.script.interpreter.screen.ScreenFactory.getEventCount(screenName, itemName, eventType);
     }
 }

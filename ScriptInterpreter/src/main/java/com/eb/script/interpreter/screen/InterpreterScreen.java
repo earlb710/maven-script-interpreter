@@ -2107,6 +2107,24 @@ public class InterpreterScreen {
             metadata.onValidate = String.valueOf(displayDef.get("onvalidate"));
         }
 
+        // Extract onExpand event handler - fires when a tree node is expanded
+        if (displayDef.containsKey("onExpand")) {
+            metadata.onExpand = String.valueOf(displayDef.get("onExpand"));
+        } else if (displayDef.containsKey("on_expand")) {
+            metadata.onExpand = String.valueOf(displayDef.get("on_expand"));
+        } else if (displayDef.containsKey("onexpand")) {
+            metadata.onExpand = String.valueOf(displayDef.get("onexpand"));
+        }
+
+        // Extract onCollapse event handler - fires when a tree node is collapsed
+        if (displayDef.containsKey("onCollapse")) {
+            metadata.onCollapse = String.valueOf(displayDef.get("onCollapse"));
+        } else if (displayDef.containsKey("on_collapse")) {
+            metadata.onCollapse = String.valueOf(displayDef.get("on_collapse"));
+        } else if (displayDef.containsKey("oncollapse")) {
+            metadata.onCollapse = String.valueOf(displayDef.get("oncollapse"));
+        }
+
         metadata.screenName = screenName;
 
         // Validate that no invalid properties are present in display definition
