@@ -174,6 +174,8 @@ public class DisplayItem {
                ", labelColor='" + labelColor + '\'' +
                ", labelBold=" + labelBold +
                ", labelItalic=" + labelItalic +
+               ", itemColor='" + itemColor + '\'' +
+               ", textColor='" + textColor + '\'' +
                '}';
     }
     
