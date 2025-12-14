@@ -118,13 +118,21 @@ if builtinsArray != null then {
 var builtinChildren: array[*];
 var totalBuiltins: int = 0;
 
-// Sort category order alphabetically
+// Convert JSON array to regular array for sorting
+var categoryOrderArray: array[*];
 if builtinCategoryOrder != null then {
-    call array.sort(array=builtinCategoryOrder, ascending=true);
+    var idx: int = 0;
+    while idx < builtinCategoryOrder.length {
+        var categoryKey: string = builtinCategoryOrder[idx];
+        call array.add(categoryOrderArray, categoryKey);
+        idx = idx + 1;
+    }
+    // Sort category order alphabetically
+    call array.sort(categoryOrderArray, true);
 }
 
 if builtinCategoryOrder != null then {
-    foreach categoryKey in builtinCategoryOrder {
+    foreach categoryKey in categoryOrderArray {
         // Get category array from json using json.getArray to properly handle JSON arrays
         var categoryArray: json = call json.getArray(builtinsByCategory, categoryKey);
         if categoryArray != null then {
