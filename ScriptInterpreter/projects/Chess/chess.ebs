@@ -160,6 +160,7 @@ createBoardLayer() {
 createIndicators() {
     // Create green circle indicator for valid moves
     var greenCanvas: canvas = call canvas.create(50, 50, "green_indicator");
+    call canvas.clear(greenCanvas);  // Make canvas transparent
     call style.setFill(greenCanvas, "#00FF0080");  // Semi-transparent green
     call draw.circle(greenCanvas, 25, 25, 20, true);
     call style.setStroke(greenCanvas, "#00AA00", 2.0);
@@ -168,6 +169,7 @@ createIndicators() {
     
     // Create red circle indicator for capture moves
     var redCanvas: canvas = call canvas.create(50, 50, "red_indicator");
+    call canvas.clear(redCanvas);  // Make canvas transparent
     call style.setFill(redCanvas, "#FF000080");  // Semi-transparent red
     call draw.circle(redCanvas, 25, 25, 20, true);
     call style.setStroke(redCanvas, "#AA0000", 2.0);
