@@ -4377,6 +4377,57 @@
       "example": "<b>// Red for error files (hex format)</b><br><b>call</b> <b>scr.setTreeItemColor</b>(screenName=\"fileExplorer\", itemPath=\"Root.error.log\", color=\"#ff0000\");<br><br><b>// Blue for main file (RGB format)</b><br><b>call</b> <b>scr.setTreeItemColor</b>(screenName=\"fileExplorer\", itemPath=\"Root.main.ebs\", color=\"rgb(0,102,204)\");<br><br><b>// Green for documentation (color name)</b><br><b>call</b> <b>scr.setTreeItemColor</b>(screenName=\"fileExplorer\", itemPath=\"Root.README.md\", color=\"green\");<br><br><b>// Combine with bold and italic</b><br><b>call</b> <b>scr.setTreeItemBold</b>(screenName=\"fileExplorer\", itemPath=\"Root.important.ebs\", bold=<b>true</b>);<br><b>call</b> <b>scr.setTreeItemItalic</b>(screenName=\"fileExplorer\", itemPath=\"Root.important.ebs\", italic=<b>true</b>);<br><b>call</b> <b>scr.setTreeItemColor</b>(screenName=\"fileExplorer\", itemPath=\"Root.important.ebs\", color=\"#9900cc\");"
     },
     {
+      "function": "scr.getTreeItemBold",
+      "short_description": "Gets the bold styling state for a TreeView item",
+      "long_help": "Retrieves the current bold styling state for a specific tree item. Returns true if bold is enabled, false if not set or disabled.<br>The itemPath uses dot notation to navigate the tree (e.g., \"Root.src.main\").",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        },
+        {
+          "name": "itemPath",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>// Get bold state</b><br><b>var</b> isBold = <b>call</b> <b>scr.getTreeItemBold</b>(screenName=\"fileExplorer\", itemPath=\"Root.src\");<br><b>if</b> isBold <b>then</b> {<br>    <b>print</b> \"Item is bold\";<br>} <b>else</b> {<br>    <b>print</b> \"Item is not bold\";<br>}<br><br><b>// Check and toggle</b><br><b>var</b> currentBold = <b>call</b> <b>scr.getTreeItemBold</b>(screenName=\"fileExplorer\", itemPath=\"Root.main.ebs\");<br><b>call</b> <b>scr.setTreeItemBold</b>(screenName=\"fileExplorer\", itemPath=\"Root.main.ebs\", bold=<b>not</b> currentBold);"
+    },
+    {
+      "function": "scr.getTreeItemItalic",
+      "short_description": "Gets the italic styling state for a TreeView item",
+      "long_help": "Retrieves the current italic styling state for a specific tree item. Returns true if italic is enabled, false if not set or disabled.<br>The itemPath uses dot notation to navigate the tree (e.g., \"Root.docs.README.md\").",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        },
+        {
+          "name": "itemPath",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>// Get italic state</b><br><b>var</b> isItalic = <b>call</b> <b>scr.getTreeItemItalic</b>(screenName=\"fileExplorer\", itemPath=\"Root.docs.README.md\");<br><b>if</b> isItalic <b>then</b> {<br>    <b>print</b> \"Item is italic\";<br>} <b>else</b> {<br>    <b>print</b> \"Item is not italic\";<br>}<br><br><b>// Check and toggle</b><br><b>var</b> currentItalic = <b>call</b> <b>scr.getTreeItemItalic</b>(screenName=\"fileExplorer\", itemPath=\"Root.config.json\");<br><b>call</b> <b>scr.setTreeItemItalic</b>(screenName=\"fileExplorer\", itemPath=\"Root.config.json\", italic=<b>not</b> currentItalic);"
+    },
+    {
+      "function": "scr.getTreeItemColor",
+      "short_description": "Gets the text color for a TreeView item",
+      "long_help": "Retrieves the current text color for a specific tree item. Returns the color string (hex, rgb, or color name) if set, or null if no color is set.<br>The itemPath uses dot notation to navigate the tree (e.g., \"Root.error.log\").",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        },
+        {
+          "name": "itemPath",
+          "type": "string"
+        }
+      ],
+      "return_type": "string",
+      "example": "<b>// Get color</b><br><b>var</b> color = <b>call</b> <b>scr.getTreeItemColor</b>(screenName=\"fileExplorer\", itemPath=\"Root.error.log\");<br><b>if</b> color != <b>null</b> <b>then</b> {<br>    <b>print</b> \"Color: \" + color;<br>} <b>else</b> {<br>    <b>print</b> \"No color set\";<br>}<br><br><b>// Check color and change if needed</b><br><b>var</b> currentColor = <b>call</b> <b>scr.getTreeItemColor</b>(screenName=\"fileExplorer\", itemPath=\"Root.status.txt\");<br><b>if</b> currentColor == \"#ff0000\" <b>then</b> {<br>    <b>call</b> <b>scr.setTreeItemColor</b>(screenName=\"fileExplorer\", itemPath=\"Root.status.txt\", color=\"#00ff00\");<br>}"
+    },
+    {
       "function": "str.charArray",
       "short_description": "Converts string to character array",
       "long_help": "Returns an array of integer character codes (Unicode code points) for each character in the string.",

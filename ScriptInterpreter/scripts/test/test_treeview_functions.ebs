@@ -240,6 +240,47 @@ call println("   - Remove color from config.json: " + remove3);
 call println("   ✓ Style removal tested successfully");
 call println("");
 
+// Test 7: Getter Functions
+call println("8. Testing Getter Functions...");
+
+call println("   Testing scr.getTreeItemBold:");
+var getBold1 = call scr.getTreeItemBold("treeTest", "Root.src");
+call println("   - Get bold for src folder: " + getBold1);
+
+var getBold2 = call scr.getTreeItemBold("treeTest", "Root.src.main.ebs");
+call println("   - Get bold for main.ebs: " + getBold2);
+
+var getBold3 = call scr.getTreeItemBold("treeTest", "Root.tests");
+call println("   - Get bold for tests folder (removed): " + getBold3);
+
+call println("");
+call println("   Testing scr.getTreeItemItalic:");
+var getItalic1 = call scr.getTreeItemItalic("treeTest", "Root.docs.README.md");
+call println("   - Get italic for README.md: " + getItalic1);
+
+var getItalic2 = call scr.getTreeItemItalic("treeTest", "Root.src.util.ebs");
+call println("   - Get italic for util.ebs: " + getItalic2);
+
+var getItalic3 = call scr.getTreeItemItalic("treeTest", "Root.src.config.json");
+call println("   - Get italic for config.json (removed): " + getItalic3);
+
+call println("");
+call println("   Testing scr.getTreeItemColor:");
+var getColor1 = call scr.getTreeItemColor("treeTest", "Root.src.main.ebs");
+call println("   - Get color for main.ebs: " + getColor1);
+
+var getColor2 = call scr.getTreeItemColor("treeTest", "Root.docs.README.md");
+call println("   - Get color for README.md: " + getColor2);
+
+var getColor3 = call scr.getTreeItemColor("treeTest", "Root.src.util.ebs");
+call println("   - Get color for util.ebs: " + getColor3);
+
+var getColor4 = call scr.getTreeItemColor("treeTest", "Root.src.config.json");
+call println("   - Get color for config.json (removed): " + getColor4);
+
+call println("   ✓ All getter functions tested successfully");
+call println("");
+
 // Add instruction label
 var instrData = call map.new();
 call map.put(instrData, "type", "label");
@@ -261,15 +302,21 @@ call println("  - scr.setTreeItemIcon (static icons for files)");
 call println("  - scr.setTreeItemIcons (state-based icons for folders)");
 call println("  - scr.getTreeItemIcon (retrieve icon paths)");
 call println("");
-call println("✓ Styling Functions:");
+call println("✓ Styling Functions (Setters):");
 call println("  - scr.setTreeItemBold (bold text)");
 call println("  - scr.setTreeItemItalic (italic text)");
 call println("  - scr.setTreeItemColor (hex, rgb, color names)");
+call println("");
+call println("✓ Styling Functions (Getters):");
+call println("  - scr.getTreeItemBold (retrieve bold state)");
+call println("  - scr.getTreeItemItalic (retrieve italic state)");
+call println("  - scr.getTreeItemColor (retrieve color value)");
 call println("");
 call println("✓ Advanced Features:");
 call println("  - Combined styles (bold + italic + color)");
 call println("  - Style removal (setting to false/null)");
 call println("  - State-based icons (expand/collapse folders)");
+call println("  - Style retrieval and validation");
 call println("");
 call println("Visual Results in TreeView:");
 call println("  • Folders (src, docs) - Bold with state-based icons");
@@ -287,4 +334,4 @@ call scr.waitForClose("treeTest");
 
 call println("");
 call println("Test completed successfully!");
-call println("All TreeView icon and styling functions are working correctly.");
+call println("All TreeView icon and styling functions (9 total) are working correctly.");

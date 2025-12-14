@@ -2100,6 +2100,9 @@ public final class Builtins {
             case "scr.settreeitembold" -> BuiltinsScreen.screenSetTreeItemBold(context, args);
             case "scr.settreeitemitalic" -> BuiltinsScreen.screenSetTreeItemItalic(context, args);
             case "scr.settreeitemcolor" -> BuiltinsScreen.screenSetTreeItemColor(context, args);
+            case "scr.gettreeitembold" -> BuiltinsScreen.screenGetTreeItemBold(context, args);
+            case "scr.gettreeitemitalic" -> BuiltinsScreen.screenGetTreeItemItalic(context, args);
+            case "scr.gettreeitemcolor" -> BuiltinsScreen.screenGetTreeItemColor(context, args);
             default -> throw new InterpreterError("Unknown screen builtin: " + name);
         };
     }
