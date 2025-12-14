@@ -441,10 +441,12 @@ public class Parser {
         } else if (matchAll(EbsTokenType.IDENTIFIER, EbsTokenType.RETURN)) {
             EbsToken n = peek();
             advance();
-            DataType type = blockParameterReturn();
+            ReturnTypeInfo typeInfo = blockParameterReturn();
             consume(EbsTokenType.LBRACE, "Expected { after return type.");
             BlockStatement bs = block((String) n.literal);
-            bs.returnType = type;
+            if (typeInfo != null) {
+                bs.setReturnType(typeInfo.dataType, typeInfo.recordType, typeInfo.bitmapType, typeInfo.intmapType);
+            }
             return bs;
         } else if (matchAll(EbsTokenType.IDENTIFIER, EbsTokenType.LPAREN)) {
             EbsToken n = peek();
@@ -1894,33 +1896,211 @@ public class Parser {
         return parameters;
     }
 
-    private DataType blockParameterReturn() throws ParseError {
+    private ReturnTypeInfo blockParameterReturn() throws ParseError {
         EbsToken ret = consumeOptional(EbsTokenType.RETURN);
         if (ret != null) {
-            // Check if current token is a datatype keyword or identifier
-            EbsToken ttype = currToken;
-            EbsTokenType tokenType = ttype.type;
+            // Parse return type similar to how varDeclaration parses types
+            DataType elemType = null;
+            RecordType recordType = null;
+            BitmapType bitmapType = null;
+            IntmapType intmapType = null;
+            boolean consumedBraces = false;
             
-            // If it's a datatype keyword token, use it directly
-            if (tokenType.getDataType() != null) {
-                advance();
-                return tokenType.getDataType();
+            EbsToken t = peek();
+            EbsTokenType tokenType = t.type;
+            
+            // Check for bitmap type
+            if (tokenType == EbsTokenType.BITMAP || 
+                (t.literal instanceof String && "bitmap".equals(((String)t.literal).toLowerCase()))) {
+                elemType = DataType.BITMAP;
+                advance(); // consume 'bitmap'
+                
+                // Expect opening brace for field definitions
+                consume(EbsTokenType.LBRACE, "Expected '{' after 'bitmap' keyword.");
+                bitmapType = parseBitmapFields();
+                consume(EbsTokenType.RBRACE, "Expected '}' after bitmap field definitions.");
+                consumedBraces = true;
+                
+                return new ReturnTypeInfo(elemType, null, bitmapType, null);
             }
             
+            // Check for intmap type
+            if (tokenType == EbsTokenType.INTMAP || 
+                (t.literal instanceof String && "intmap".equals(((String)t.literal).toLowerCase()))) {
+                elemType = DataType.INTMAP;
+                advance(); // consume 'intmap'
+                
+                // Expect opening brace for field definitions
+                consume(EbsTokenType.LBRACE, "Expected '{' after 'intmap' keyword.");
+                intmapType = parseIntmapFields();
+                consume(EbsTokenType.RBRACE, "Expected '}' after intmap field definitions.");
+                consumedBraces = true;
+                
+                return new ReturnTypeInfo(elemType, null, null, intmapType);
+            }
+            
+            // Check for record type
+            if (tokenType == EbsTokenType.RECORD || 
+                (t.literal instanceof String && "record".equals(((String)t.literal).toLowerCase()))) {
+                elemType = DataType.RECORD;
+                advance(); // consume 'record'
+                
+                // Expect opening brace for field definitions
+                consume(EbsTokenType.LBRACE, "Expected '{' after 'record' keyword.");
+                recordType = parseRecordFields();
+                consume(EbsTokenType.RBRACE, "Expected '}' after record field definitions.");
+                consumedBraces = true;
+                
+                return new ReturnTypeInfo(elemType, recordType, null, null);
+            }
+            
+            // Check if it's a datatype keyword token
+            if (tokenType.getDataType() != null) {
+                elemType = tokenType.getDataType();
+                advance();
+            }
             // Handle DATATYPE token (datatype keywords like "string", "int", etc.)
-            if (tokenType == EbsTokenType.DATATYPE) {
-                ttype = advance();
-                EbsTokenType type = getTokenType((String) ttype.literal);
+            else if (tokenType == EbsTokenType.DATATYPE) {
+                advance();
+                EbsTokenType type = getTokenType((String) t.literal);
                 if (type != null) {
-                    return type.getDataType();
+                    elemType = type.getDataType();
+                }
+            }
+            // Handle IDENTIFIER token (might be type name or qualified type)
+            else if (tokenType == EbsTokenType.IDENTIFIER) {
+                String typeName = (String) t.literal;
+                
+                // Check for qualified type names like "array.int", "array.record", "queue.string"
+                if (typeName.startsWith("array.")) {
+                    String subType = typeName.substring(6); // Remove "array." prefix
+                    switch (subType.toLowerCase()) {
+                        case "any" -> elemType = DataType.ARRAY;
+                        case "string" -> elemType = DataType.STRING;
+                        case "byte" -> elemType = DataType.BYTE;
+                        case "bitmap" -> elemType = DataType.BITMAP;
+                        case "intmap" -> elemType = DataType.INTMAP;
+                        case "int", "integer" -> elemType = DataType.INTEGER;
+                        case "long" -> elemType = DataType.LONG;
+                        case "float" -> elemType = DataType.FLOAT;
+                        case "double", "number" -> elemType = DataType.DOUBLE;
+                        case "bool", "boolean" -> elemType = DataType.BOOL;
+                        case "date" -> elemType = DataType.DATE;
+                        case "image" -> elemType = DataType.IMAGE;
+                        case "record" -> {
+                            elemType = DataType.RECORD;
+                            // For array.record, field definitions come after
+                        }
+                        default -> throw error(t, "Unknown array element type: " + subType);
+                    }
+                    advance();
+                } else if (typeName.startsWith("queue.")) {
+                    String subType = typeName.substring(6); // Remove "queue." prefix
+                    switch (subType.toLowerCase()) {
+                        case "any" -> elemType = DataType.QUEUE;
+                        case "string" -> elemType = DataType.STRING;
+                        case "byte" -> elemType = DataType.BYTE;
+                        case "int", "integer" -> elemType = DataType.INTEGER;
+                        case "long" -> elemType = DataType.LONG;
+                        case "float" -> elemType = DataType.FLOAT;
+                        case "double", "number" -> elemType = DataType.DOUBLE;
+                        case "bool", "boolean" -> elemType = DataType.BOOL;
+                        case "date" -> elemType = DataType.DATE;
+                        case "image" -> elemType = DataType.IMAGE;
+                        default -> throw error(t, "Unknown queue element type: " + subType);
+                    }
+                    advance();
+                } else {
+                    // Check if it's a type alias
+                    TypeRegistry.TypeAlias alias = TypeRegistry.getTypeAlias(typeName);
+                    if (alias != null) {
+                        elemType = alias.dataType;
+                        recordType = alias.recordType;
+                        advance();
+                        return new ReturnTypeInfo(elemType, recordType, null, null);
+                    }
+                    
+                    // Look up as a regular type name
+                    EbsTokenType type = getTokenType(typeName);
+                    if (type != null) {
+                        elemType = type.getDataType();
+                        advance();
+                    } else {
+                        throw error(t, "Unknown type name: " + typeName);
+                    }
                 }
             }
             
-            // Otherwise, expect an identifier and look it up as a type name
-            ttype = consume(EbsTokenType.IDENTIFIER, "Expected type after return.");
-            EbsTokenType type = getTokenType((String) ttype.literal);
-            if (type != null) {
-                return type.getDataType();
+            // Check for array.type or queue.type syntax when type is not already qualified
+            if (elemType == DataType.ARRAY && match(EbsTokenType.DOT)) {
+                EbsToken subType = peek();
+                
+                if (subType.type.getDataType() != null) {
+                    elemType = subType.type.getDataType();
+                    advance();
+                } else if (subType.type == EbsTokenType.IDENTIFIER || subType.type == EbsTokenType.DATATYPE) {
+                    String subTypeName = (String) subType.literal;
+                    advance();
+                    
+                    switch (subTypeName.toLowerCase()) {
+                        case "any" -> elemType = DataType.ARRAY;
+                        case "string" -> elemType = DataType.STRING;
+                        case "byte" -> elemType = DataType.BYTE;
+                        case "bitmap" -> elemType = DataType.BITMAP;
+                        case "intmap" -> elemType = DataType.INTMAP;
+                        case "int", "integer" -> elemType = DataType.INTEGER;
+                        case "long" -> elemType = DataType.LONG;
+                        case "float" -> elemType = DataType.FLOAT;
+                        case "double", "number" -> elemType = DataType.DOUBLE;
+                        case "bool", "boolean" -> elemType = DataType.BOOL;
+                        case "date" -> elemType = DataType.DATE;
+                        case "image" -> elemType = DataType.IMAGE;
+                        case "record" -> elemType = DataType.RECORD;
+                        default -> throw error(subType, "Unknown array element type: " + subTypeName);
+                    }
+                } else {
+                    throw error(subType, "Expected type name after 'array.'");
+                }
+            }
+            
+            // Check for queue.type syntax when type is not already qualified
+            if (elemType == DataType.QUEUE && match(EbsTokenType.DOT)) {
+                EbsToken subType = peek();
+                
+                if (subType.type.getDataType() != null) {
+                    elemType = subType.type.getDataType();
+                    advance();
+                } else if (subType.type == EbsTokenType.IDENTIFIER || subType.type == EbsTokenType.DATATYPE) {
+                    String subTypeName = (String) subType.literal;
+                    advance();
+                    
+                    switch (subTypeName.toLowerCase()) {
+                        case "any" -> elemType = DataType.QUEUE;
+                        case "string" -> elemType = DataType.STRING;
+                        case "byte" -> elemType = DataType.BYTE;
+                        case "int", "integer" -> elemType = DataType.INTEGER;
+                        case "long" -> elemType = DataType.LONG;
+                        case "float" -> elemType = DataType.FLOAT;
+                        case "double", "number" -> elemType = DataType.DOUBLE;
+                        case "bool", "boolean" -> elemType = DataType.BOOL;
+                        case "date" -> elemType = DataType.DATE;
+                        case "image" -> elemType = DataType.IMAGE;
+                        default -> throw error(subType, "Unknown queue element type: " + subTypeName);
+                    }
+                } else {
+                    throw error(subType, "Expected type name after 'queue.'");
+                }
+            }
+            
+            // For array.record or record, parse field definitions if braces follow
+            if (elemType == DataType.RECORD && !consumedBraces && check(EbsTokenType.LBRACE)) {
+                consume(EbsTokenType.LBRACE, "Expected '{' for record field definitions.");
+                recordType = parseRecordFields();
+                consume(EbsTokenType.RBRACE, "Expected '}' after record field definitions.");
+            }
+            
+            if (elemType != null) {
+                return new ReturnTypeInfo(elemType, recordType, bitmapType, intmapType);
             }
         }
         return null;
@@ -1937,10 +2117,12 @@ public class Parser {
             return block(name);
         } else if (match(EbsTokenType.RETURN)) {
             // function name return type { ... }
-            DataType type = blockParameterReturn();
+            ReturnTypeInfo typeInfo = blockParameterReturn();
             consume(EbsTokenType.LBRACE, "Expected { after return type.");
             BlockStatement bs = block(name);
-            bs.returnType = type;
+            if (typeInfo != null) {
+                bs.setReturnType(typeInfo.dataType, typeInfo.recordType, typeInfo.bitmapType, typeInfo.intmapType);
+            }
             return bs;
         } else if (match(EbsTokenType.LPAREN)) {
             // function name(...) [return type] { ... }
@@ -1953,12 +2135,14 @@ public class Parser {
     private Statement blockParameters(String name) throws ParseError {
         int line = currToken.line;
         List<Parameter> parameters = getBlockParameters();
-        DataType type = blockParameterReturn();
+        ReturnTypeInfo typeInfo = blockParameterReturn();
         BlockStatement bs;
-        if (type != null) {
+        if (typeInfo != null) {
             consume(EbsTokenType.LBRACE, "Expected '{' after return.");
             List<Statement> s = getBlockStatements();
-            bs = new BlockStatement(line, name, parameters, s, type);
+            bs = new BlockStatement(line, name, parameters, s, typeInfo.dataType);
+            // Set additional type information for complex return types
+            bs.setReturnType(typeInfo.dataType, typeInfo.recordType, typeInfo.bitmapType, typeInfo.intmapType);
         } else {
             consume(EbsTokenType.LBRACE, "Expected '{' after parameters.");
             List<Statement> s = getBlockStatements();
@@ -3312,6 +3496,30 @@ public class Parser {
             case "image" -> DataType.IMAGE;
             default -> null;
         };
+    }
+    
+    /**
+     * Helper class to hold parsed return type information including complex types.
+     */
+    private static class ReturnTypeInfo {
+        DataType dataType;
+        RecordType recordType;
+        BitmapType bitmapType;
+        IntmapType intmapType;
+        
+        ReturnTypeInfo(DataType dataType) {
+            this.dataType = dataType;
+            this.recordType = null;
+            this.bitmapType = null;
+            this.intmapType = null;
+        }
+        
+        ReturnTypeInfo(DataType dataType, RecordType recordType, BitmapType bitmapType, IntmapType intmapType) {
+            this.dataType = dataType;
+            this.recordType = recordType;
+            this.bitmapType = bitmapType;
+            this.intmapType = intmapType;
+        }
     }
 
 }
