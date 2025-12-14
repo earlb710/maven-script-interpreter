@@ -747,8 +747,32 @@ public class EbsConsoleHandler extends EbsHandler {
      */
     public void createNewScriptFile() {
         try {
-            // Show new file dialog with SANDBOX_ROOT as default path
-            NewFileDialog dialog = new NewFileDialog(stage, Util.SANDBOX_ROOT.toString());
+            // Determine the default path based on the currently selected tab
+            String defaultPath = Util.SANDBOX_ROOT.toString();
+            
+            TabContext selectedTabContext = getSelectedTabContext();
+            if (selectedTabContext != null && selectedTabContext.path != null) {
+                Path selectedPath = selectedTabContext.path;
+                // If the selected path is a file, use its parent directory
+                // Otherwise, use the path itself (assuming it's a directory)
+                if (Files.exists(selectedPath) && Files.isRegularFile(selectedPath)) {
+                    Path parentDir = selectedPath.getParent();
+                    if (parentDir != null) {
+                        defaultPath = parentDir.toString();
+                    }
+                } else if (Files.exists(selectedPath) && Files.isDirectory(selectedPath)) {
+                    defaultPath = selectedPath.toString();
+                } else {
+                    // If the file doesn't exist yet, use its parent directory
+                    Path parentDir = selectedPath.getParent();
+                    if (parentDir != null) {
+                        defaultPath = parentDir.toString();
+                    }
+                }
+            }
+            
+            // Show new file dialog with the determined default path
+            NewFileDialog dialog = new NewFileDialog(stage, defaultPath);
             var result = dialog.showAndWait();
             
             if (result.isEmpty()) {
