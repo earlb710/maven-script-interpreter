@@ -114,6 +114,86 @@ if builtinsArray != null then {
 } else {
 }
 
+// Add sub-nodes for scr.setProperty
+// Check if "scr" category exists and find scr.setProperty in it
+var scrCategory: json = call json.getArray(builtinsByCategory, "scr");
+if scrCategory != null then {
+    var scrSetPropertyIndex: int = -1;
+    var i: int = 0;
+    while i < scrCategory.length {
+        var item: json = scrCategory[i];
+        var itemValue: string = call json.getString(item, "value", "");
+        if itemValue == "scr.setProperty" then {
+            scrSetPropertyIndex = i;
+            break;
+        }
+        i = i + 1;
+    }
+    
+    // If scr.setProperty was found, add sub-nodes for each property
+    if scrSetPropertyIndex >= 0 then {
+        var scrSetPropertyNode: json = scrCategory[scrSetPropertyIndex];
+        
+        // Create array of property sub-nodes
+        var propertyNodes: array[*];
+        
+        // Add overview node first
+        var overviewNode: json = call json.jsonFromString("{}");
+        overviewNode = call json.set(overviewNode, "value", "Overview");
+        overviewNode = call json.set(overviewNode, "icon", "icons/info-page.png");
+        overviewNode = call json.set(overviewNode, "expanded", false);
+        call array.add(propertyNodes, overviewNode);
+        
+        // Define property nodes in order
+        var propertyNames: array[*];
+        call array.add(propertyNames, "value");
+        call array.add(propertyNames, "editable");
+        call array.add(propertyNames, "disabled");
+        call array.add(propertyNames, "visible");
+        call array.add(propertyNames, "tooltip");
+        call array.add(propertyNames, "textColor");
+        call array.add(propertyNames, "backgroundColor");
+        call array.add(propertyNames, "colSpan");
+        call array.add(propertyNames, "rowSpan");
+        call array.add(propertyNames, "hgrow");
+        call array.add(propertyNames, "vgrow");
+        call array.add(propertyNames, "margin");
+        call array.add(propertyNames, "padding");
+        call array.add(propertyNames, "prefWidth");
+        call array.add(propertyNames, "prefHeight");
+        call array.add(propertyNames, "minWidth");
+        call array.add(propertyNames, "minHeight");
+        call array.add(propertyNames, "maxWidth");
+        call array.add(propertyNames, "maxHeight");
+        call array.add(propertyNames, "alignment");
+        
+        // Create nodes for each property
+        foreach propName in propertyNames do {
+            var propNode: json = call json.jsonFromString("{}");
+            propNode = call json.set(propNode, "value", propName);
+            propNode = call json.set(propNode, "icon", "icons/info-page.png");
+            propNode = call json.set(propNode, "expanded", false);
+            call array.add(propertyNodes, propNode);
+        }
+        
+        // Convert array to JSON array
+        var propNodesJson: json = call json.jsonFromString("[]");
+        var j: int = 0;
+        while j < propertyNodes.length {
+            propNodesJson = call json.add(propNodesJson, "", propertyNodes[j]);
+            j = j + 1;
+        }
+        
+        // Add children to scr.setProperty node
+        scrSetPropertyNode = call json.set(scrSetPropertyNode, "children", propNodesJson);
+        scrSetPropertyNode = call json.set(scrSetPropertyNode, "expanded", false);
+        
+        // Update the node in the category array
+        scrCategory = call json.set(scrCategory, scrSetPropertyIndex, scrSetPropertyNode);
+        builtinsByCategory = call json.set(builtinsByCategory, "scr", scrCategory);
+    }
+}
+
 // Build categorized builtin tree using category order from JSON
 var builtinChildren: array[*];
 var totalBuiltins: int = 0;
@@ -918,6 +998,53 @@ getBuiltinHelp(builtinName: string) return string {
 // Function to get help content based on selected topic
 getHelpContent(topic: string) return string {
     var content: string = "";
+    
+    // Check for scr.setProperty sub-topics first (special case)
+    // Map property names to their topic keys
+    if topic == "Overview" then {
+        // Check if parent is scr.setProperty - for now just map to overview topic
+        topic = "scr_setproperty_overview";
+    } else if topic == "value" || topic == "text" then {
+        topic = "scr_setproperty_value";
+    } else if topic == "editable" then {
+        topic = "scr_setproperty_editable";
+    } else if topic == "disabled" then {
+        topic = "scr_setproperty_disabled";
+    } else if topic == "visible" then {
+        topic = "scr_setproperty_visible";
+    } else if topic == "tooltip" then {
+        topic = "scr_setproperty_tooltip";
+    } else if topic == "textColor" then {
+        topic = "scr_setproperty_textcolor";
+    } else if topic == "backgroundColor" then {
+        topic = "scr_setproperty_backgroundcolor";
+    } else if topic == "colSpan" then {
+        topic = "scr_setproperty_colspan";
+    } else if topic == "rowSpan" then {
+        topic = "scr_setproperty_rowspan";
+    } else if topic == "hgrow" then {
+        topic = "scr_setproperty_hgrow";
+    } else if topic == "vgrow" then {
+        topic = "scr_setproperty_vgrow";
+    } else if topic == "margin" then {
+        topic = "scr_setproperty_margin";
+    } else if topic == "padding" then {
+        topic = "scr_setproperty_padding";
+    } else if topic == "prefWidth" then {
+        topic = "scr_setproperty_prefwidth";
+    } else if topic == "prefHeight" then {
+        topic = "scr_setproperty_prefheight";
+    } else if topic == "minWidth" then {
+        topic = "scr_setproperty_minwidth";
+    } else if topic == "minHeight" then {
+        topic = "scr_setproperty_minheight";
+    } else if topic == "maxWidth" then {
+        topic = "scr_setproperty_maxwidth";
+    } else if topic == "maxHeight" then {
+        topic = "scr_setproperty_maxheight";
+    } else if topic == "alignment" then {
+        topic = "scr_setproperty_alignment";
+    }
     
     // Check if this is a builtin function name (contains a dot like "str.trim")
     // Valid builtin names have at least one char before the dot (e.g., "str.trim", "array.add")
