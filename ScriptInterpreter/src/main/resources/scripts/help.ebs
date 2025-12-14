@@ -131,7 +131,7 @@ if builtinCategoryOrder != null then {
     call array.sort(categoryOrderArray, true);
 }
 
-if builtinCategoryOrder != null then {
+if categoryOrderArray.length > 0 then {
     foreach categoryKey in categoryOrderArray {
         // Get category array from json using json.getArray to properly handle JSON arrays
         var categoryArray: json = call json.getArray(builtinsByCategory, categoryKey);
