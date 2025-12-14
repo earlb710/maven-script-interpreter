@@ -1,6 +1,6 @@
 {
   "name": "board game",
-  "directory": "/home/runner/work/maven-script-interpreter/maven-script-interpreter/projects/board-game",
+  "directory": "/home/runner/work/maven-script-interpreter/maven-script-interpreter/ScriptInterpreter/projects/board-game",
   "description": "EBS Script Project",
   "version": "1.0.0",
   "css": [
