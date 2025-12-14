@@ -65,7 +65,7 @@ fileTree {
     displayItem {
         type = treeview
         onExpand = "
-            call print('Expanded: ' + fileTree.expandedItem);
+            print 'Expanded: ' + fileTree.expandedItem;
             call updateStatus(fileTree.expandedItem);
         "
     }
@@ -81,7 +81,7 @@ fileTree {
 5. **Event Counter**: Increments expand counter for fileTree
 6. **Code Execution**: Runs the onExpand EBS code:
    ```
-   call print('Expanded: ' + fileTree.expandedItem);  // fileTree.expandedItem = "Root.src"
+   print 'Expanded: ' + fileTree.expandedItem;  // fileTree.expandedItem = "Root.src"
    call updateStatus(fileTree.expandedItem);
    ```
 

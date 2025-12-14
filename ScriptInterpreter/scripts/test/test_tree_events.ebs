@@ -65,8 +65,8 @@ screen testTreeEvents = {
                                 ]
                             }
                         ],
-                        "onExpand": "call print('Node EXPANDED: ' + fileTree.expandedItem); call scr.setProperty('testTreeEvents', 'eventInfo', 'labelText', 'EXPANDED: ' + fileTree.expandedItem);",
-                        "onCollapse": "call print('Node COLLAPSED: ' + fileTree.collapsedItem); call scr.setProperty('testTreeEvents', 'eventInfo', 'labelText', 'COLLAPSED: ' + fileTree.collapsedItem);"
+                        "onExpand": "print 'Node EXPANDED: ' + fileTree.expandedItem; call scr.setProperty('testTreeEvents', 'eventInfo', 'labelText', 'EXPANDED: ' + fileTree.expandedItem);",
+                        "onCollapse": "print 'Node COLLAPSED: ' + fileTree.collapsedItem; call scr.setProperty('testTreeEvents', 'eventInfo', 'labelText', 'COLLAPSED: ' + fileTree.collapsedItem);"
                     }
                 },
                 {
