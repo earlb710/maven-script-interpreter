@@ -550,6 +550,8 @@ public class EbsTab extends Tab {
         if (!isEbs) {
             runBtn.setDisable(true);
             runBtn.setTooltip(new Tooltip("Run button is only available for .ebs files"));
+        } else {
+            runBtn.setTooltip(new Tooltip("Run the EBS script"));
         }
 
         Button clearBtn = new Button("Clear");
