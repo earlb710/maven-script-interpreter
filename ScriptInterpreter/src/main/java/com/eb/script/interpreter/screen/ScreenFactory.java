@@ -208,12 +208,19 @@ public class ScreenFactory {
         System.out.println("[DEBUG] getEventCount - key: '" + key + "' (screenName='" + screenName + "', itemName='" + itemName + "', eventType='" + eventType + "')");
         java.util.concurrent.atomic.AtomicInteger count = eventCounts.get(key);
         
-        // If exact key not found, try finding a matching key with any prefix
+        // If exact key not found, try finding a matching key that contains the screen name
+        // This handles cases where the screen name might have a parent prefix (e.g., "parent.screenname" vs "screenname")
         if (count == null) {
             System.out.println("[DEBUG] getEventCount - exact key not found, trying partial match");
-            String suffix = "." + itemName.toLowerCase() + "." + eventType.toLowerCase();
+            String screenNameLower = screenName.toLowerCase();
+            String itemNameLower = itemName.toLowerCase();
+            String eventTypeLower = eventType.toLowerCase();
+            
+            // Try to find a key that contains the screen name and ends with the item and event type
             for (String storedKey : eventCounts.keySet()) {
-                if (storedKey.endsWith(suffix)) {
+                // Check if the stored key contains the screen name and ends with the expected suffix
+                if (storedKey.contains(screenNameLower) && 
+                    storedKey.endsWith(itemNameLower + "." + eventTypeLower)) {
                     System.out.println("[DEBUG] getEventCount - found matching key: '" + storedKey + "' (expected: '" + key + "')");
                     count = eventCounts.get(storedKey);
                     break;
