@@ -344,6 +344,9 @@ public class ProjectTreeView extends VBox {
                     MenuItem renameDirItem = new MenuItem("Rename Directory...");
                     renameDirItem.setOnAction(e -> renameDirectory(selectedItem, path));
                     
+                    MenuItem moveDirItem = new MenuItem("Move...");
+                    moveDirItem.setOnAction(e -> moveDirectory(selectedItem, path));
+                    
                     MenuItem refreshItem = new MenuItem("Refresh");
                     refreshItem.setOnAction(e -> refreshDirectoryNode(selectedItem, path));
                     
@@ -357,6 +360,7 @@ public class ProjectTreeView extends VBox {
                             newDirItem,
                             new SeparatorMenuItem(),
                             renameDirItem,
+                            moveDirItem,
                             new SeparatorMenuItem(),
                             removeFromProjectItem,
                             new SeparatorMenuItem(),
@@ -372,6 +376,7 @@ public class ProjectTreeView extends VBox {
                             newDirItem,
                             new SeparatorMenuItem(),
                             renameDirItem,
+                            moveDirItem,
                             deleteDirItem,
                             new SeparatorMenuItem(),
                             refreshItem
@@ -398,6 +403,9 @@ public class ProjectTreeView extends VBox {
                     MenuItem copyFileItem = new MenuItem("Copy...");
                     copyFileItem.setOnAction(e -> copyFile(selectedItem, path));
                     
+                    MenuItem moveFileItem = new MenuItem("Move...");
+                    moveFileItem.setOnAction(e -> moveFile(selectedItem, path));
+                    
                     MenuItem deleteFileItem = new MenuItem("Delete");
                     deleteFileItem.setOnAction(e -> deleteFile(selectedItem, path));
                     
@@ -407,6 +415,7 @@ public class ProjectTreeView extends VBox {
                             new SeparatorMenuItem(),
                             renameFileItem,
                             copyFileItem,
+                            moveFileItem,
                             new SeparatorMenuItem(),
                             deleteFileItem
                         );
@@ -414,6 +423,7 @@ public class ProjectTreeView extends VBox {
                         contextMenu.getItems().addAll(
                             renameFileItem,
                             copyFileItem,
+                            moveFileItem,
                             new SeparatorMenuItem(),
                             deleteFileItem
                         );
@@ -1628,6 +1638,137 @@ public class ProjectTreeView extends VBox {
                 alert.showAndWait();
             }
         });
+    }
+    
+    /**
+     * Move a file to a different directory.
+     * 
+     * @param fileItem The file tree item
+     * @param filePath The source file path
+     */
+    private void moveFile(TreeItem<String> fileItem, String filePath) {
+        Path sourcePath = Path.of(filePath);
+        String originalFileName = sourcePath.getFileName().toString();
+        
+        // Show directory chooser to select destination
+        javafx.stage.DirectoryChooser chooser = new javafx.stage.DirectoryChooser();
+        chooser.setTitle("Move File To...");
+        
+        // Set initial directory to parent of source file
+        Path parentPath = sourcePath.getParent();
+        if (parentPath != null && Files.exists(parentPath)) {
+            chooser.setInitialDirectory(parentPath.toFile());
+        }
+        
+        java.io.File selectedDir = chooser.showDialog(treeView.getScene().getWindow());
+        if (selectedDir != null) {
+            try {
+                Path targetDir = selectedDir.toPath();
+                Path targetPath = targetDir.resolve(originalFileName);
+                
+                // Check if target already exists
+                if (Files.exists(targetPath)) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, 
+                        "A file with that name already exists in the destination directory.");
+                    alert.setHeaderText("File Exists");
+                    alert.showAndWait();
+                    return;
+                }
+                
+                // Move the file
+                Files.move(sourcePath, targetPath);
+                
+                // Remove from current parent in tree
+                TreeItem<String> parent = fileItem.getParent();
+                if (parent != null) {
+                    parent.getChildren().remove(fileItem);
+                    
+                    // If the target directory is in the same project, refresh it
+                    TreeItem<String> targetItem = findTreeItemForPath(rootItem, targetDir.toString());
+                    if (targetItem != null) {
+                        refreshDirectoryNode(targetItem, targetDir.toString());
+                    }
+                }
+                
+                System.out.println("File moved from " + sourcePath + " to " + targetPath);
+                
+            } catch (Exception e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, 
+                    "Failed to move file: " + e.getMessage());
+                alert.setHeaderText("Move Error");
+                alert.showAndWait();
+            }
+        }
+    }
+    
+    /**
+     * Move a directory to a different location.
+     * 
+     * @param dirItem The directory tree item
+     * @param dirPath The source directory path
+     */
+    private void moveDirectory(TreeItem<String> dirItem, String dirPath) {
+        Path sourcePath = Path.of(dirPath);
+        String originalDirName = sourcePath.getFileName().toString();
+        
+        // Show directory chooser to select destination
+        javafx.stage.DirectoryChooser chooser = new javafx.stage.DirectoryChooser();
+        chooser.setTitle("Move Directory To...");
+        
+        // Set initial directory to parent of source
+        Path parentPath = sourcePath.getParent();
+        if (parentPath != null && Files.exists(parentPath)) {
+            chooser.setInitialDirectory(parentPath.toFile());
+        }
+        
+        java.io.File selectedDir = chooser.showDialog(treeView.getScene().getWindow());
+        if (selectedDir != null) {
+            try {
+                Path targetDir = selectedDir.toPath();
+                Path targetPath = targetDir.resolve(originalDirName);
+                
+                // Prevent moving directory into itself or its subdirectories
+                if (targetPath.startsWith(sourcePath)) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, 
+                        "Cannot move directory into itself or its subdirectories.");
+                    alert.setHeaderText("Invalid Move");
+                    alert.showAndWait();
+                    return;
+                }
+                
+                // Check if target already exists
+                if (Files.exists(targetPath)) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, 
+                        "A directory with that name already exists in the destination.");
+                    alert.setHeaderText("Directory Exists");
+                    alert.showAndWait();
+                    return;
+                }
+                
+                // Move the directory
+                Files.move(sourcePath, targetPath);
+                
+                // Remove from current parent in tree
+                TreeItem<String> parent = dirItem.getParent();
+                if (parent != null) {
+                    parent.getChildren().remove(dirItem);
+                    
+                    // If the target directory is in the same project, refresh it
+                    TreeItem<String> targetItem = findTreeItemForPath(rootItem, targetDir.toString());
+                    if (targetItem != null) {
+                        refreshDirectoryNode(targetItem, targetDir.toString());
+                    }
+                }
+                
+                System.out.println("Directory moved from " + sourcePath + " to " + targetPath);
+                
+            } catch (Exception e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, 
+                    "Failed to move directory: " + e.getMessage());
+                alert.setHeaderText("Move Error");
+                alert.showAndWait();
+            }
+        }
     }
     
     /**
