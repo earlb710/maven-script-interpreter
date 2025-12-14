@@ -1,5 +1,6 @@
 package com.eb.script.token;
 
+import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -16,12 +17,12 @@ import java.util.Map;
  * 
  * @author Earl Bosch
  */
-public class BitmapType {
+public class BitmapType implements Serializable {
     
     /**
      * Represents a field within a bitmap, defined by its bit range.
      */
-    public static class BitField {
+    public static class BitField implements Serializable {
         private final String name;
         private final int startBit;  // Inclusive, 0-7
         private final int endBit;    // Inclusive, 0-7
