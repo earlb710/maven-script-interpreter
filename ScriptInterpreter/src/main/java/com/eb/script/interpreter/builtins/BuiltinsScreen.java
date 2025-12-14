@@ -627,6 +627,103 @@ public class BuiltinsScreen {
     }
 
     /**
+     * scr.getVarStateful(screenName, varName) -> Boolean Gets the
+     * stateful property of a screen variable.
+     */
+    public static Object screenGetVarStateful(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (String) args[0];
+        String varName = (String) args[1];
+
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("scr.getVarStateful: screenName parameter cannot be null or empty");
+        }
+        if (varName == null || varName.isEmpty()) {
+            throw new InterpreterError("scr.getVarStateful: varName parameter cannot be null or empty");
+        }
+
+        // Verify screen exists
+        if (!context.getScreens().containsKey(screenName.toLowerCase())) {
+            throw new InterpreterError("scr.getVarStateful: screen '" + screenName + "' not found");
+        }
+
+        // Get the var item
+        Map<String, Var> varItems = context.getScreenVarItems(screenName);
+        if (varItems == null) {
+            throw new InterpreterError("scr.getVarStateful: no variables defined for screen '" + screenName + "'");
+        }
+
+        // Find the variable - try with various key formats
+        Var var = null;
+        String lowerVarName = varName.toLowerCase();
+
+        for (Map.Entry<String, Var> entry : varItems.entrySet()) {
+            String key = entry.getKey();
+            Var v = entry.getValue();
+            if (key.equals(lowerVarName) || key.endsWith("." + lowerVarName)
+                    || (v.getName() != null && v.getName().equalsIgnoreCase(varName))) {
+                var = v;
+                break;
+            }
+        }
+
+        if (var == null) {
+            throw new InterpreterError("scr.getVarStateful: variable '" + varName + "' not found in screen '" + screenName + "'");
+        }
+
+        // Get the stateful property
+        Boolean stateful = var.getStateful();
+        return stateful != null ? stateful : true; // Default to true if null
+    }
+
+    /**
+     * scr.getVarOriginalValue(screenName, varName) -> ANY Gets the
+     * original value of a screen variable (before any changes were made).
+     */
+    public static Object screenGetVarOriginalValue(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (String) args[0];
+        String varName = (String) args[1];
+
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("scr.getVarOriginalValue: screenName parameter cannot be null or empty");
+        }
+        if (varName == null || varName.isEmpty()) {
+            throw new InterpreterError("scr.getVarOriginalValue: varName parameter cannot be null or empty");
+        }
+
+        // Verify screen exists
+        if (!context.getScreens().containsKey(screenName.toLowerCase())) {
+            throw new InterpreterError("scr.getVarOriginalValue: screen '" + screenName + "' not found");
+        }
+
+        // Get the var item
+        Map<String, Var> varItems = context.getScreenVarItems(screenName);
+        if (varItems == null) {
+            throw new InterpreterError("scr.getVarOriginalValue: no variables defined for screen '" + screenName + "'");
+        }
+
+        // Find the variable - try with various key formats
+        Var var = null;
+        String lowerVarName = varName.toLowerCase();
+
+        for (Map.Entry<String, Var> entry : varItems.entrySet()) {
+            String key = entry.getKey();
+            Var v = entry.getValue();
+            if (key.equals(lowerVarName) || key.endsWith("." + lowerVarName)
+                    || (v.getName() != null && v.getName().equalsIgnoreCase(varName))) {
+                var = v;
+                break;
+            }
+        }
+
+        if (var == null) {
+            throw new InterpreterError("scr.getVarOriginalValue: variable '" + varName + "' not found in screen '" + screenName + "'");
+        }
+
+        // Get the original value
+        return var.getOriginalValue();
+    }
+
+    /**
      * scr.getItemStatus(screenName, itemName) -> String Gets the status of a
      * screen item: "clean" or "changed" Status is determined by comparing
      * current value to original value

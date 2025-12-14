@@ -1,9 +1,13 @@
 // EBS Language Reference - See EBS_SCRIPT_SYNTAX.md
-// Example: scr.setVarStateful builtin - Control dirty tracking for screen variables
-// Syntax: call scr.setVarStateful("screenName", "varName", statefulFlag)
-// Returns: true on success
+// Example: scr.setVarStateful, scr.getVarStateful, scr.getVarOriginalValue
+// Control dirty tracking for screen variables and retrieve their state
 //
-// Purpose: Set whether changes to a variable should mark the screen as "dirty" (changed)
+// Syntax: 
+//   call scr.setVarStateful("screenName", "varName", statefulFlag) -> Boolean
+//   call scr.getVarStateful("screenName", "varName") -> Boolean
+//   call scr.getVarOriginalValue("screenName", "varName") -> ANY
+//
+// Purpose: Control and query whether changes to a variable should mark the screen as "dirty"
 // - stateful=true (default): changes affect dirty tracking
 // - stateful=false: changes don't affect dirty tracking (for display-only fields)
 
@@ -49,10 +53,17 @@ show screen statefulTestScreen;
 print "=== Test 1: Default stateful behavior ===";
 print "Initial screen status: " + call scr.getStatus("statefulTestScreen");
 
+// Check stateful property and original value
+var isStateful = call scr.getVarStateful("statefulTestScreen", "dataField");
+print "dataField is stateful: " + isStateful;
+var originalVal = call scr.getVarOriginalValue("statefulTestScreen", "dataField");
+print "dataField original value: '" + originalVal + "'";
+
 // Change a stateful field - this marks the screen as dirty
 statefulTestScreen.dataField = "Some data";
 print "After changing dataField: " + call scr.getStatus("statefulTestScreen");
 print "Screen has changes: " + call scr.checkChanged("statefulTestScreen");
+print "Current value: '" + statefulTestScreen.dataField + "', Original: '" + call scr.getVarOriginalValue("statefulTestScreen", "dataField") + "'";
 
 // Reset for next test
 call scr.revert("statefulTestScreen");
@@ -63,6 +74,10 @@ print "=== Test 2: Non-stateful (display-only) variables ===";
 call scr.setVarStateful("statefulTestScreen", "statusMessage", false);
 call scr.setVarStateful("statefulTestScreen", "processCount", false);
 print "Set statusMessage and processCount to non-stateful";
+
+// Verify the stateful property was changed
+print "statusMessage is stateful: " + call scr.getVarStateful("statefulTestScreen", "statusMessage");
+print "processCount is stateful: " + call scr.getVarStateful("statefulTestScreen", "processCount");
 
 // Change non-stateful fields - these don't mark screen as dirty
 statefulTestScreen.statusMessage = "Processing...";
@@ -88,6 +103,16 @@ call scr.setVarStateful("statefulTestScreen", "statusMessage", true);
 print "Set statusMessage back to stateful=true";
 statefulTestScreen.statusMessage = "Final status";
 print "After changing statusMessage (now stateful): " + call scr.getStatus("statefulTestScreen");
+print "";
+
+// Test 5: Check original values
+print "=== Test 5: Tracking original values ===";
+print "dataField current value: '" + statefulTestScreen.dataField + "'";
+print "dataField original value: '" + call scr.getVarOriginalValue("statefulTestScreen", "dataField") + "'";
+print "statusMessage current value: '" + statefulTestScreen.statusMessage + "'";
+print "statusMessage original value: '" + call scr.getVarOriginalValue("statefulTestScreen", "statusMessage") + "'";
+print "";
+print "Note: Original values are tracked for stateful variables to detect changes";
 print "";
 
 print "=== Summary ===";

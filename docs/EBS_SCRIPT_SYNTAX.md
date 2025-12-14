@@ -3950,6 +3950,8 @@ var hasErrors = call scr.checkError("screenName");
 // Variable stateful property (controls dirty tracking)
 call scr.setVarStateful("screenName", "varName", true);  // Enable dirty tracking
 call scr.setVarStateful("screenName", "varName", false); // Disable dirty tracking
+var isStateful = call scr.getVarStateful("screenName", "varName");  // Get stateful setting
+var originalValue = call scr.getVarOriginalValue("screenName", "varName");  // Get original value
 // When stateful=true, changes to the variable mark screen as dirty
 // When stateful=false, changes don't affect dirty tracking (for display-only fields)
 
