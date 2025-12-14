@@ -15,6 +15,7 @@ import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.shape.StrokeLineJoin;
 import javafx.scene.text.Font;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.SnapshotParameters;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -452,12 +453,16 @@ public class EbsCanvas {
     public EbsImage toImage() throws InterpreterError {
         WritableImage snapshot;
         
+        // Create SnapshotParameters with transparent fill to preserve canvas transparency
+        SnapshotParameters params = new SnapshotParameters();
+        params.setFill(Color.TRANSPARENT);
+        
         // Check if we're already on the JavaFX Application Thread
         if (Platform.isFxApplicationThread()) {
             // We're on FX thread - run snapshot directly to avoid deadlock
             try {
                 snapshot = new WritableImage((int) canvas.getWidth(), (int) canvas.getHeight());
-                canvas.snapshot(null, snapshot);
+                canvas.snapshot(params, snapshot);
             } catch (Exception e) {
                 throw new InterpreterError("Failed to take canvas snapshot: " + e.getMessage());
             }
@@ -471,7 +476,7 @@ public class EbsCanvas {
             Platform.runLater(() -> {
                 try {
                     WritableImage snap = new WritableImage((int) canvas.getWidth(), (int) canvas.getHeight());
-                    canvas.snapshot(null, snap);
+                    canvas.snapshot(params, snap);
                     snapshotRef.set(snap);
                 } catch (Exception e) {
                     errorRef.set(e);
