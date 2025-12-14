@@ -373,7 +373,7 @@ handleCellClick(x: int, y: int) {
     // Show indicators for each valid move
     var i: int = 0;
     for (i = 0; i < len; i = i + 1) {
-        var move: posType = moves[i];
+        var move = moves[i];
         print "  Move to: (" + move.x + ", " + move.y + ")";
         
         // Check if this move captures an enemy piece
