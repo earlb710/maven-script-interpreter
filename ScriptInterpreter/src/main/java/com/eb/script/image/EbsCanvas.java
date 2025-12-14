@@ -495,7 +495,13 @@ public class EbsCanvas {
             snapshot = snapshotRef.get();
         }
         try {
-            BufferedImage buffered = SwingFXUtils.fromFXImage(snapshot, null);
+            // Create BufferedImage with alpha channel for transparency support
+            BufferedImage buffered = new BufferedImage(
+                (int) snapshot.getWidth(), 
+                (int) snapshot.getHeight(), 
+                BufferedImage.TYPE_INT_ARGB
+            );
+            SwingFXUtils.fromFXImage(snapshot, buffered);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ImageIO.write(buffered, "png", baos);
             byte[] bytes = baos.toByteArray();
@@ -560,7 +566,13 @@ public class EbsCanvas {
             snapshot = snapshotRef.get();
         }
         try {
-            BufferedImage buffered = SwingFXUtils.fromFXImage(snapshot, null);
+            // Create BufferedImage with alpha channel for transparency support
+            BufferedImage buffered = new BufferedImage(
+                (int) snapshot.getWidth(), 
+                (int) snapshot.getHeight(), 
+                BufferedImage.TYPE_INT_ARGB
+            );
+            SwingFXUtils.fromFXImage(snapshot, buffered);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ImageIO.write(buffered, "png", baos);
             byte[] bytes = baos.toByteArray();
@@ -626,7 +638,13 @@ public class EbsCanvas {
             snapshot = snapshotRef.get();
         }
         try {
-            BufferedImage buffered = SwingFXUtils.fromFXImage(snapshot, null);
+            // Create BufferedImage with alpha channel for transparency support
+            BufferedImage buffered = new BufferedImage(
+                (int) snapshot.getWidth(), 
+                (int) snapshot.getHeight(), 
+                BufferedImage.TYPE_INT_ARGB
+            );
+            SwingFXUtils.fromFXImage(snapshot, buffered);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ImageIO.write(buffered, finalFormat.toLowerCase(), baos);
             return new ArrayFixedByte(baos.toByteArray());
