@@ -331,7 +331,7 @@ screen tictactoeScreen = {
                         "labelColor": "#ffff00",
                         "labelFontSize": "18px",
                         "labelBold": true,
-                        "style": "-fx-alignment: center; -fx-min-height: 50px; -fx-max-height: 50px;"
+                        "style": "-fx-alignment: center; -fx-min-height: 50px; -fx-max-height: 50px; -fx-text-fill: #ffff00;"
                     }
                 }
             ],
