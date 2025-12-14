@@ -1,6 +1,9 @@
 package com.eb.script.interpreter.statement;
 
 import com.eb.script.token.DataType;
+import com.eb.script.token.RecordType;
+import com.eb.script.token.BitmapType;
+import com.eb.script.token.IntmapType;
 import com.eb.script.interpreter.InterpreterError;
 import java.util.List;
 
@@ -10,6 +13,9 @@ public class BlockStatement extends Statement {
     public final Statement[] statements;
     public final Parameter[] parameters;
     public DataType returnType;
+    public RecordType returnRecordType; // Record type definition for return type (if returnType is RECORD)
+    public BitmapType returnBitmapType; // Bitmap type definition for return type (if returnType is BITMAP)
+    public IntmapType returnIntmapType; // Intmap type definition for return type (if returnType is INTMAP)
     
     /** Optional exception handlers for this block (functions can have exceptions without try) */
     public ExceptionHandler[] exceptionHandlers;
@@ -20,6 +26,9 @@ public class BlockStatement extends Statement {
         this.statements = statementsToArray(statements);
         this.parameters = null;
         this.returnType = null;
+        this.returnRecordType = null;
+        this.returnBitmapType = null;
+        this.returnIntmapType = null;
         this.exceptionHandlers = null;
     }
 
@@ -29,6 +38,9 @@ public class BlockStatement extends Statement {
         this.statements = statementsToArray(statements);
         this.parameters = null;
         this.returnType = null;
+        this.returnRecordType = null;
+        this.returnBitmapType = null;
+        this.returnIntmapType = null;
         this.exceptionHandlers = null;
     }
 
@@ -38,6 +50,9 @@ public class BlockStatement extends Statement {
         this.statements = statementsToArray(statements);
         this.parameters = parametersToArray(parameters);
         this.returnType = null;
+        this.returnRecordType = null;
+        this.returnBitmapType = null;
+        this.returnIntmapType = null;
         this.exceptionHandlers = null;
     }
 
@@ -47,6 +62,9 @@ public class BlockStatement extends Statement {
         this.statements = statementsToArray(statements);
         this.parameters = parametersToArray(parameters);
         this.returnType = returnType;
+        this.returnRecordType = null;
+        this.returnBitmapType = null;
+        this.returnIntmapType = null;
         this.exceptionHandlers = null;
     }
     
@@ -65,6 +83,16 @@ public class BlockStatement extends Statement {
      */
     public boolean hasExceptionHandlers() {
         return exceptionHandlers != null && exceptionHandlers.length > 0;
+    }
+    
+    /**
+     * Set the return type with additional type information for complex types.
+     */
+    public void setReturnType(DataType returnType, RecordType recordType, BitmapType bitmapType, IntmapType intmapType) {
+        this.returnType = returnType;
+        this.returnRecordType = recordType;
+        this.returnBitmapType = bitmapType;
+        this.returnIntmapType = intmapType;
     }
 
     private Statement[] statementsToArray(List<Statement> list) {

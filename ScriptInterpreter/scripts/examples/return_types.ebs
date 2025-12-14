@@ -1,0 +1,106 @@
+// EBS Language Reference v1.0.7.11 - See EBS_LANGUAGE_REFERENCE.md
+// Example: return types - Functions with complex return types
+// Demonstrates all supported return type variations
+
+// ============================================
+// Simple Return Types
+// ============================================
+
+getInt() return int {
+    return 42;
+}
+
+getString() return string {
+    return "Hello, World!";
+}
+
+getDouble() return double {
+    return 3.14159;
+}
+
+getBool() return bool {
+    return true;
+}
+
+// ============================================
+// Array Return Types
+// ============================================
+
+getArray() return array {
+    return null;  // Return type is array
+}
+
+getArrayInt() return array.int {
+    return null;  // Return type is array.int
+}
+
+getArrayString() return array.string {
+    return null;  // Return type is array.string
+}
+
+// ============================================
+// Record Return Types
+// ============================================
+
+getPerson() return record {name: string, age: int, city: string} {
+    return null;  // Return type is record with specified fields
+}
+
+getEmployee() return record {id: int, name: string, salary: double} {
+    return null;  // Return type is record with specified fields
+}
+
+// ============================================
+// Array of Records Return Types
+// ============================================
+
+getPeople() return array.record {name: string, age: int} {
+    return null;  // Return type is array.record with specified fields
+}
+
+getEmployees() return array.record {id: int, name: string, department: string} {
+    return null;  // Return type is array.record with specified fields
+}
+
+// ============================================
+// Bitmap Return Types
+// ============================================
+
+getFlags() return bitmap {enabled: 0, status: 1-2, mode: 3-5} {
+    return null;  // Return type is bitmap with bit field definitions
+}
+
+// ============================================
+// Intmap Return Types
+// ============================================
+
+getConfig() return intmap {enabled: 0, mode: 1-7, id: 8-15, flags: 16-31} {
+    return null;  // Return type is intmap with bit field definitions
+}
+
+// ============================================
+// Queue Return Types
+// ============================================
+
+getQueue() return queue.string {
+    return null;  // Return type is queue.string
+}
+
+getQueueInt() return queue.int {
+    return null;  // Return type is queue.int
+}
+
+// ============================================
+// Test - verify all return types parse correctly
+// ============================================
+
+print "All complex return types parsed successfully!";
+print "";
+print "Supported return type variations:";
+print "- Simple types: int, string, double, bool, etc.";
+print "- Array types: array, array.int, array.string, etc.";
+print "- Record types: record {field: type, ...}";
+print "- Array.record types: array.record {field: type, ...}";
+print "- Bitmap types: bitmap {field: bit-range, ...}";
+print "- Intmap types: intmap {field: bit-range, ...}";
+print "- Queue types: queue.string, queue.int, etc.";
