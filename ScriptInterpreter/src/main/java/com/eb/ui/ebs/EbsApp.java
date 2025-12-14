@@ -140,8 +140,8 @@ public class EbsApp {
      * Setup global keyboard shortcuts for menu access.
      * Alt+F = File menu, Alt+E = Edit menu, Alt+C = Config menu, etc.
      * 
-     * NOTE: Menu order in EbsMenu.java is: File, Edit, Config, Tools, Screens, Help
-     * This mapping must be kept in sync if menu order changes.
+     * NOTE: This method uses menu text names (not variable names) to be more maintainable.
+     * Actual menu names in EbsMenu.java are: "File", "Edit", "Config", "Tools", "Screens", "Help"
      */
     private void setupGlobalKeyboardShortcuts(Scene scene) {
         scene.addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, event -> {

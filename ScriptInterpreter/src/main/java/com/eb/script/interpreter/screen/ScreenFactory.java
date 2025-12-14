@@ -5932,6 +5932,6 @@ public class ScreenFactory {
             || control instanceof javafx.scene.control.DatePicker
             || control instanceof javafx.scene.control.ColorPicker
             || control instanceof javafx.scene.control.Spinner
-            || control instanceof com.eb.ui.cli.ScriptArea;
+            || control instanceof ScriptArea;
     }
 }
