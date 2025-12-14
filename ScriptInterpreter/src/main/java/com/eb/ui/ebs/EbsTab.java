@@ -32,6 +32,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -2465,6 +2466,20 @@ public class EbsTab extends Tab {
         // Create a WebView
         WebView webView = new WebView();
         
+        // Create a pin button to keep window always on top
+        ToggleButton pinBtn = new ToggleButton("📌 Pin");
+        pinBtn.setTooltip(new Tooltip("Keep window always on top"));
+        pinBtn.setOnAction(e -> {
+            webViewStage.setAlwaysOnTop(pinBtn.isSelected());
+        });
+        
+        // Create a toolbar with the pin button
+        HBox toolbar = new HBox(5);
+        toolbar.setPadding(new Insets(5));
+        toolbar.setAlignment(Pos.CENTER_LEFT);
+        toolbar.getChildren().add(pinBtn);
+        toolbar.getStyleClass().add("toolbar");
+        
         // Create a StatusBar to show URLs when hovering over links
         StatusBar statusBar = new StatusBar();
         
@@ -2483,8 +2498,9 @@ public class EbsTab extends Tab {
         // Load the HTML content (including any scripts - this is intentional for preview)
         webView.getEngine().loadContent(htmlContent);
         
-        // Create a BorderPane layout with WebView in center and StatusBar at bottom
+        // Create a BorderPane layout with toolbar at top, WebView in center, and StatusBar at bottom
         BorderPane root = new BorderPane();
+        root.setTop(toolbar);
         root.setCenter(webView);
         root.setBottom(statusBar);
         
