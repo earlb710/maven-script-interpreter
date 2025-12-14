@@ -104,14 +104,14 @@ screen fileExplorer {
                         // Event handler for node expansion
                         onExpand = "
                             print 'Expanded: ' + fileTree.expandedItem;
-                            call scr.setProperty('fileExplorer', 'statusLabel', 'labelText', 
+                            call scr.setProperty('fileExplorer.statusLabel', 'labelText', 
                                 'EXPANDED: ' + fileTree.expandedItem);
                         "
                         
                         // Event handler for node collapse
                         onCollapse = "
                             print 'Collapsed: ' + fileTree.collapsedItem;
-                            call scr.setProperty('fileExplorer', 'statusLabel', 'labelText', 
+                            call scr.setProperty('fileExplorer.statusLabel', 'labelText', 
                                 'COLLAPSED: ' + fileTree.collapsedItem);
                         "
                     }

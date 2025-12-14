@@ -65,8 +65,8 @@ screen testTreeEvents = {
                                 ]
                             }
                         ],
-                        "onExpand": "print 'Node EXPANDED: ' + fileTree.expandedItem; call scr.setProperty('testTreeEvents', 'eventInfo', 'labelText', 'EXPANDED: ' + fileTree.expandedItem);",
-                        "onCollapse": "print 'Node COLLAPSED: ' + fileTree.collapsedItem; call scr.setProperty('testTreeEvents', 'eventInfo', 'labelText', 'COLLAPSED: ' + fileTree.collapsedItem);"
+                        "onExpand": "print 'Node EXPANDED: ' + fileTree.expandedItem; call scr.setProperty('testTreeEvents.eventInfo', 'labelText', 'EXPANDED: ' + fileTree.expandedItem);",
+                        "onCollapse": "print 'Node COLLAPSED: ' + fileTree.collapsedItem; call scr.setProperty('testTreeEvents.eventInfo', 'labelText', 'COLLAPSED: ' + fileTree.collapsedItem);"
                     }
                 },
                 {
@@ -84,7 +84,7 @@ screen testTreeEvents = {
                     "display": {
                         "type": "button",
                         "labelText": "Refresh Event Count",
-                        "onClick": "int expandCount = call sys.getEventCount('testTreeEvents', 'fileTree', 'onExpand'); int collapseCount = call sys.getEventCount('testTreeEvents', 'fileTree', 'onCollapse'); int total = expandCount + collapseCount; string msg = 'Events: ' + total + ' (Expand: ' + expandCount + ', Collapse: ' + collapseCount + ')'; call scr.setProperty('testTreeEvents', 'eventCount', 'labelText', msg);"
+                        "onClick": "int expandCount = call sys.getEventCount('testTreeEvents', 'fileTree', 'onExpand'); int collapseCount = call sys.getEventCount('testTreeEvents', 'fileTree', 'onCollapse'); int total = expandCount + collapseCount; string msg = 'Events: ' + total + ' (Expand: ' + expandCount + ', Collapse: ' + collapseCount + ')'; call scr.setProperty('testTreeEvents.eventCount', 'labelText', msg);"
                     }
                 }
             ]
