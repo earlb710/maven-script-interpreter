@@ -2485,12 +2485,17 @@ public class EbsTab extends Tab {
         ToggleButton autoRefreshBtn = new ToggleButton("🔄 Auto Refresh");
         autoRefreshBtn.setTooltip(new Tooltip("Automatically refresh preview when editor changes"));
         
+        // Get base URL for resolving relative paths (images, CSS, JS, etc.)
+        String baseUrl = tabContext.path.getParent() != null 
+            ? tabContext.path.getParent().toUri().toString() 
+            : tabContext.path.toUri().toString();
+        
         // Timer for debouncing editor changes
         PauseTransition refreshTimer = new PauseTransition(Duration.millis(500));
         refreshTimer.setOnFinished(e -> {
-            // Refresh the WebView with current editor content
+            // Refresh the WebView with current editor content and base URL
             String updatedContent = dispArea.getText();
-            webView.getEngine().loadContent(updatedContent);
+            webView.getEngine().loadContent(updatedContent, baseUrl);
         });
         
         // Listener for editor text changes
@@ -2546,8 +2551,8 @@ public class EbsTab extends Tab {
             }
         });
         
-        // Load the HTML content (including any scripts - this is intentional for preview)
-        webView.getEngine().loadContent(htmlContent);
+        // Load the HTML content with base URL for resolving relative paths (images, CSS, JS, etc.)
+        webView.getEngine().loadContent(htmlContent, baseUrl);
         
         // Create a BorderPane layout with toolbar at top, WebView in center, and StatusBar at bottom
         BorderPane root = new BorderPane();
