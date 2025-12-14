@@ -1,0 +1,40 @@
+// Test script for demonstrating EBS script packaging
+// This script can be packaged to hide the source code
+
+// Simple greeting function
+greet(name: string) return string {
+    return "Hello, " + name + "!";
+}
+
+// Calculate factorial
+factorial(n: int) return int {
+    if (n <= 1) {
+        return 1;
+    }
+    return n * call factorial(n - 1);
+}
+
+// Main execution
+var message: string = call greet("World");
+print message;
+
+var fact5: int = call factorial(5);
+print "Factorial of 5 is: " + fact5;
+
+// Some data processing
+var numbers: int[5];
+numbers[0] = 10;
+numbers[1] = 20;
+numbers[2] = 30;
+numbers[3] = 40;
+numbers[4] = 50;
+
+var sum: int = 0;
+var i: int = 0;
+while (i < 5) {
+    sum = sum + numbers[i];
+    i = i + 1;
+}
+
+print "Sum of numbers: " + sum;
+print "Packaging test completed successfully!";

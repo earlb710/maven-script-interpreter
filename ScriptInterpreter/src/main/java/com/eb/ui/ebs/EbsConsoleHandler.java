@@ -164,6 +164,9 @@ public class EbsConsoleHandler extends EbsHandler {
                     } else if (cmd.startsWith("/debug")) {
                         handleDebug(output, cmd);
                         continue;
+                    } else if (cmd.startsWith("/package")) {
+                        handlePackage(output, line);
+                        continue;
                     } else {
                         // Check if /help has a parameter
                         if (cmd.startsWith("/help ") || cmd.startsWith("/?")) {
@@ -204,6 +207,7 @@ public class EbsConsoleHandler extends EbsHandler {
                                 output.println("  <b>/list open files</b> <i>- list open filenames</i>");
                                 output.println("  <b>/echo  [on|off]</b>  <i>- toggle interpreter echo flag (current: " + (env.isEchoOn() ? "on" : "off") + ")");
                                 output.println("  <b>/debug [on|off|trace on|trace off]</b> <i>- toggle interpreter debug/trace flags");
+                                output.println("  <b>/package &lt;input.ebs&gt; [output.ebsp]</b> <i>- package script to binary .ebsp file");
                                 output.println("  <b>/exit</b>            <i>- close console</i>");
                                 continue;
 
@@ -289,6 +293,52 @@ public class EbsConsoleHandler extends EbsHandler {
         output.printlnWarn("usage: /debug on|off | /debug trace on|off");
     }
 
+    private void handlePackage(ScriptArea output, String line) {
+        try {
+            String[] parts = Util.splitArgsAllowingQuotes(line.substring(line.indexOf(' ')).trim());
+            
+            if (parts.length == 0) {
+                output.printlnWarn("usage: /package <input.ebs> [output.ebsp]");
+                return;
+            }
+            
+            String inputFile = parts[0];
+            String outputFile = parts.length > 1 ? parts[1] : inputFile.replaceAll("(?i)\\.ebs$", "") + ".ebsp";
+            
+            Path inputPath = Util.resolveSandboxedPath(inputFile);
+            Path outputPath = Util.resolveSandboxedPath(outputFile);
+            
+            if (!Files.exists(inputPath)) {
+                output.printlnError("Input file not found: " + inputFile);
+                return;
+            }
+            
+            output.printlnInfo("Parsing: " + inputFile);
+            RuntimeContext context = com.eb.script.parser.Parser.parse(inputPath);
+            
+            output.printlnInfo("Packaging to: " + outputFile);
+            com.eb.script.package_tool.RuntimeContextSerializer.serialize(context, outputPath);
+            
+            long originalSize = Files.size(inputPath);
+            long packagedSize = Files.size(outputPath);
+            output.printlnOk("Package created successfully!");
+            output.println("  Original size: " + originalSize + " bytes");
+            output.println("  Packaged size: " + packagedSize + " bytes");
+            
+            if (packagedSize < originalSize) {
+                output.println("  Size reduction: " + String.format("%.1f%%", 
+                    (1.0 - (double)packagedSize / originalSize) * 100));
+            } else {
+                output.println("  Size increase: " + String.format("%.1f%%", 
+                    ((double)packagedSize / originalSize - 1.0) * 100));
+            }
+            
+        } catch (Exception e) {
+            output.printlnError("Error packaging script: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     private void displayDetailedHelp(ScriptArea output, String itemName) {
         try {
             // Load help-lookup.json from resources
@@ -325,6 +375,19 @@ public class EbsConsoleHandler extends EbsHandler {
                     String funcName = (String) builtin.get("function");
                     if (funcName != null && funcName.equalsIgnoreCase(itemName)) {
                         displayHelpEntry(output, funcName, builtin, "Builtin Function");
+                        return;
+                    }
+                }
+            }
+            
+            // Search in console commands
+            ArrayDynamic consoleCommands = (ArrayDynamic) lookup.get("console_commands");
+            if (consoleCommands != null) {
+                for (Object cmdObj : consoleCommands) {
+                    Map<String, Object> command = (Map<String, Object>) cmdObj;
+                    String cmdName = (String) command.get("command");
+                    if (cmdName != null && cmdName.equalsIgnoreCase(itemName)) {
+                        displayHelpEntry(output, cmdName, command, "Console Command");
                         return;
                     }
                 }
@@ -408,6 +471,13 @@ public class EbsConsoleHandler extends EbsHandler {
         if (example != null && !example.isEmpty()) {
             output.println("<b>Example:</b>");
             output.println("<i>" + example + "</i>");
+            output.println("");
+        }
+        
+        String documentation = (String) entry.get("documentation");
+        if (documentation != null && !documentation.isEmpty()) {
+            output.println("<b>Additional Documentation:</b>");
+            output.println(documentation);
         }
         
         output.println("<b>═══════════════════════════════════════════════════════════</b>");
