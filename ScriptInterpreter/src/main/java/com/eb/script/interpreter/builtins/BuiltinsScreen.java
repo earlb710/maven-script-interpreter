@@ -2955,14 +2955,8 @@ public class BuiltinsScreen {
         }
         
         if (styleData.color != null && !styleData.color.isEmpty()) {
-            // Handle different color formats
-            String colorValue = styleData.color;
-            if (!colorValue.startsWith("#") && !colorValue.startsWith("rgb") && !colorValue.startsWith("rgba")) {
-                // Assume it's a color name, use as-is
-                style.append("-fx-text-fill: ").append(colorValue).append("; ");
-            } else {
-                style.append("-fx-text-fill: ").append(colorValue).append("; ");
-            }
+            // Accept any color format: hex (#RRGGBB), rgb/rgba, or color names
+            style.append("-fx-text-fill: ").append(styleData.color).append("; ");
         }
         
         return style.length() > 0 ? style.toString() : null;
