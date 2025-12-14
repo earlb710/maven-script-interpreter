@@ -3903,10 +3903,14 @@ var exists = call scr.findScreen("screenName");
 var value = call scr.getProperty("screenName.itemName", "propertyName");
 call scr.setProperty("screenName.itemName", "propertyName", value);
 
-// IMPORTANT: scr.setProperty cannot be used to change "value" or "text" properties
-// All communication with screen values MUST be done through screen variables:
+// IMPORTANT: By default, scr.setProperty cannot change "value" or "text" on stateful items
+// All communication with screen data values MUST be done through screen variables:
 //   Correct:   screenName.varName = value
 //   Incorrect: call scr.setProperty("screenName.itemName", "value", value)  // ERROR
+//
+// EXCEPTION: For display-only items with stateful=false, value/text can be set:
+//   Items defined with "stateful": false allow value updates without dirty tracking
+//   Example: status displays, progress messages, etc.
 //
 // Properties you CAN set with scr.setProperty:
 //   - editable (bool): whether field can be edited
@@ -3915,6 +3919,7 @@ call scr.setProperty("screenName.itemName", "propertyName", value);
 //   - tooltip (string): tooltip text
 //   - textColor (string): text color
 //   - backgroundColor (string): background color
+//   - value, text (string): display value (only for stateful=false items)
 //   - colSpan, rowSpan (int): grid layout span
 //   - hgrow, vgrow (string): growth priority
 //   - margin, padding (string): spacing

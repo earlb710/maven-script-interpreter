@@ -3,10 +3,11 @@
 // Syntax: call scr.setProperty("screenName.itemName", "propertyName", value)
 // Returns: true on success
 //
-// IMPORTANT: scr.setProperty cannot be used to change "value" or "text" properties
-// Use screen variable access instead: screenName.varName = value
+// IMPORTANT: scr.setProperty cannot be used to change "value" or "text" on stateful items
+// Use screen variable access for data values: screenName.varName = value
+// Exception: Items with stateful=false allow value updates for display-only purposes
 
-// Define a test screen with an item
+// Define a test screen with different types of items
 screen propSetScreen = {
     "title": "Set Property Test",
     "width": 400,
@@ -20,6 +21,15 @@ screen propSetScreen = {
                 "type": "textfield",
                 "labelText": "Email:"
             }
+        },
+        {
+            "name": "status",
+            "type": "string",
+            "default": "Ready",
+            "display": {
+                "type": "label",
+                "labelText": "Status:"
+            }
         }
     ],
     "area": [
@@ -30,6 +40,12 @@ screen propSetScreen = {
                 {
                     "name": "emailField",
                     "varRef": "email"
+                    // stateful defaults to true - changes affect dirty tracking
+                },
+                {
+                    "name": "statusDisplay",
+                    "varRef": "status",
+                    "stateful": false  // Display-only, doesn't mark screen dirty
                 }
             ]
         }
@@ -38,12 +54,19 @@ screen propSetScreen = {
 
 show screen propSetScreen;
 
-// Set UI properties on the item (NOT value/text)
+// Set UI properties on items (these always work)
 call scr.setProperty("propSetScreen.emailField", "editable", false);
 call scr.setProperty("propSetScreen.emailField", "tooltip", "Enter email address");
 call scr.setProperty("propSetScreen.emailField", "visible", true);
-print "Properties updated successfully";
+print "UI properties updated successfully";
 
-// To change the value, use screen variable access:
+// Change data value using screen variable (correct way for stateful items):
 propSetScreen.email = "example@email.com";
 print "Email value set to: " + propSetScreen.email;
+
+// For non-stateful items (stateful=false), can update value via scr.setProperty:
+call scr.setProperty("propSetScreen.statusDisplay", "value", "Processing...");
+print "Status display updated (doesn't mark screen as dirty)";
+
+// Try to set value on stateful item - this will fail:
+// call scr.setProperty("propSetScreen.emailField", "value", "test");  // ERROR!

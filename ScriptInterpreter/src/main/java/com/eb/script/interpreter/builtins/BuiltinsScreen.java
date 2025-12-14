@@ -1591,10 +1591,19 @@ public class BuiltinsScreen {
 
         switch (propLower) {
             case "value", "text" -> {
-                // Setting value/text through scr.setProperty is NOT allowed
-                // All communication with screen values must be done through screen variables
-                throw new InterpreterError("scr.setProperty: cannot change 'value' or 'text' property. "
-                        + "Use screen variable access instead (e.g., screenName.varName = value)");
+                // Check if the item is stateful (affects dirty tracking)
+                // If stateful is false or null defaults to true, only stateful items are protected
+                boolean isStateful = (item.stateful == null) ? true : item.stateful;
+                
+                if (isStateful) {
+                    // For stateful items, value/text changes must go through screen variables
+                    // to ensure proper dirty tracking and data binding
+                    throw new InterpreterError("scr.setProperty: cannot change 'value' or 'text' property on stateful items. "
+                            + "Use screen variable access instead (e.g., screenName.varName = value). "
+                            + "For display-only updates, set stateful=false on the item.");
+                }
+                // For non-stateful items (stateful=false), allow value/text changes
+                // These are display-only changes that don't affect the underlying data or dirty tracking
             }
             case "editable" -> {
                 if (value instanceof Boolean) {
@@ -1728,10 +1737,22 @@ public class BuiltinsScreen {
 
         switch (propLower) {
             case "value", "text" -> {
-                // This case should never be reached since setAreaItemProperty now rejects value/text
-                // Kept for defensive programming, but will not be called
-                throw new IllegalArgumentException("scr.setProperty: cannot change 'value' or 'text' property. "
-                        + "Use screen variable access instead (e.g., screenName.varName = value)");
+                // Set the text/value of the control
+                // This is only reached for non-stateful items (stateful=false)
+                // where display-only updates are allowed
+                String textValue = value != null ? String.valueOf(value) : "";
+                if (control instanceof javafx.scene.control.TextField) {
+                    ((javafx.scene.control.TextField) control).setText(textValue);
+                } else if (control instanceof javafx.scene.control.TextArea) {
+                    ((javafx.scene.control.TextArea) control).setText(textValue);
+                } else if (control instanceof javafx.scene.web.WebView) {
+                    // For WebView, load the content as HTML
+                    ((javafx.scene.web.WebView) control).getEngine().loadContent(textValue);
+                } else if (control instanceof javafx.scene.control.Label) {
+                    ((javafx.scene.control.Label) control).setText(textValue);
+                } else if (control instanceof javafx.scene.control.Button) {
+                    ((javafx.scene.control.Button) control).setText(textValue);
+                }
             }
             case "editable" -> {
                 if (value instanceof Boolean) {

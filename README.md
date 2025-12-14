@@ -893,14 +893,33 @@ call scr.setProperty("screenName.labelName", "visible", false);
 call scr.setProperty("screenName.buttonName", "disabled", false);
 ```
 
-**IMPORTANT:** `scr.setProperty` cannot be used to change `value` or `text` properties. All communication with screen values MUST be done through screen variables:
+**IMPORTANT:** By default, `scr.setProperty` cannot be used to change `value` or `text` properties on stateful items (items where changes affect dirty tracking). All communication with screen data values MUST be done through screen variables:
 
 ```javascript
-// Correct way to update screen values:
+// Correct way to update screen data values:
 screenName.varName = "New value";
 
-// Incorrect (will throw an error):
+// This will throw an error for stateful items (default):
 call scr.setProperty("screenName.itemName", "value", "New value");  // ERROR
+```
+
+**Exception for Display-Only Updates:**
+For items with `stateful: false`, you can update `value`/`text` via `scr.setProperty` for display-only purposes without affecting dirty tracking:
+
+```javascript
+screen myScreen = {
+    "vars": [...],
+    "area": [{
+        "items": [{
+            "name": "statusLabel",
+            "varRef": "status",
+            "stateful": false  // Display-only, doesn't mark screen as dirty
+        }]
+    }]
+};
+
+// This is allowed because stateful=false:
+call scr.setProperty("myScreen.statusLabel", "value", "Processing...");
 ```
 
 **Supported Properties:**
@@ -910,6 +929,7 @@ call scr.setProperty("screenName.itemName", "value", "New value");  // ERROR
 - `tooltip` - Tooltip text (string)
 - `textColor` - Text color (string)
 - `backgroundColor` - Background color (string)
+- `value` / `text` - Update display value (only for items with `stateful: false`)
 - Layout properties: `colSpan`, `rowSpan`, `hgrow`, `vgrow`, `margin`, `padding`, `alignment`
 - Sizing properties: `prefWidth`, `prefHeight`, `minWidth`, `minHeight`, `maxWidth`, `maxHeight`
 
