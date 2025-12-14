@@ -31,6 +31,7 @@ public class NewFileDialog extends Dialog<NewFileDialog.FileInfo> {
         EBS_SCRIPT("EBS Script", ".ebs"),
         JSON("JSON", ".json"),
         CSS("CSS", ".css"),
+        HTML("HTML", ".html"),
         MARKDOWN("Markdown", ".md");
         
         private final String displayName;
@@ -155,23 +156,38 @@ public class NewFileDialog extends Dialog<NewFileDialog.FileInfo> {
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
-        grid.setPadding(new Insets(20, 150, 10, 10));
+        grid.setPadding(new Insets(20, 20, 10, 10));
+        
+        // Set column constraints to make items use full width
+        javafx.scene.layout.ColumnConstraints col1 = new javafx.scene.layout.ColumnConstraints();
+        col1.setMinWidth(80);
+        col1.setPrefWidth(80);
+        
+        javafx.scene.layout.ColumnConstraints col2 = new javafx.scene.layout.ColumnConstraints();
+        col2.setHgrow(javafx.scene.layout.Priority.ALWAYS);
+        col2.setFillWidth(true);
+        
+        javafx.scene.layout.ColumnConstraints col3 = new javafx.scene.layout.ColumnConstraints();
+        col3.setMinWidth(100);
+        col3.setPrefWidth(100);
+        
+        grid.getColumnConstraints().addAll(col1, col2, col3);
         
         // File type combo box
         fileTypeCombo = new ComboBox<>();
         fileTypeCombo.getItems().addAll(FileType.values());
         fileTypeCombo.setValue(FileType.EBS_SCRIPT); // Default to EBS script
-        fileTypeCombo.setPrefWidth(300);
+        fileTypeCombo.setMaxWidth(Double.MAX_VALUE);
         
         // File name field
         fileNameField = new TextField();
         fileNameField.setPromptText("Enter file name");
-        fileNameField.setPrefWidth(300);
+        fileNameField.setMaxWidth(Double.MAX_VALUE);
         
         // File path field (populated with project path)
         filePathField = new TextField();
         filePathField.setText(defaultPath != null ? defaultPath : System.getProperty("user.dir"));
-        filePathField.setPrefWidth(300);
+        filePathField.setMaxWidth(Double.MAX_VALUE);
         
         // Set initial default filename based on the default file type
         fileNameField.setText(generateDefaultFilename(FileType.EBS_SCRIPT, filePathField.getText()));

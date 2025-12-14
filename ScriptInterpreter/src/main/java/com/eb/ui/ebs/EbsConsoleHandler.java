@@ -1716,6 +1716,7 @@ public class EbsConsoleHandler extends EbsHandler {
             case EBS_SCRIPT -> "// EBS Script\n// Type your code here\n\n";
             case JSON -> "{\n  \n}\n";
             case CSS -> "/* CSS Styles */\n\n";
+            case HTML -> "<!DOCTYPE html>\n<html>\n<head>\n    <title>Document</title>\n</head>\n<body>\n    \n</body>\n</html>\n";
             case MARKDOWN -> "# Markdown Document\n\n";
         };
     }
