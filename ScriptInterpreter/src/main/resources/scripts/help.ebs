@@ -135,7 +135,7 @@ if scrCategory != null then {
         var scrSetPropertyNode: json = scrCategory[scrSetPropertyIndex];
         
         // Create array of property sub-nodes
-        var propertyNodes: array[*];
+        var propertyNodes: array[*] = [];
         
         // Add overview node first
         var overviewNode: json = call json.jsonFromString("{}");
@@ -145,7 +145,7 @@ if scrCategory != null then {
         call array.add(propertyNodes, overviewNode);
         
         // Define property nodes in order
-        var propertyNames: array[*];
+        var propertyNames: array[*] = [];
         call array.add(propertyNames, "value");
         call array.add(propertyNames, "editable");
         call array.add(propertyNames, "disabled");
@@ -168,7 +168,7 @@ if scrCategory != null then {
         call array.add(propertyNames, "alignment");
         
         // Create nodes for each property
-        foreach propName in propertyNames do {
+        foreach propName in propertyNames {
             var propNode: json = call json.jsonFromString("{}");
             propNode = call json.set(propNode, "value", propName);
             propNode = call json.set(propNode, "icon", "icons/info-page.png");
