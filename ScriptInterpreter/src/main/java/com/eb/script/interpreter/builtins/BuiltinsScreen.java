@@ -1730,7 +1730,8 @@ public class BuiltinsScreen {
             case "value", "text" -> {
                 // This case should never be reached since setAreaItemProperty now rejects value/text
                 // Kept for defensive programming, but will not be called
-                throw new IllegalArgumentException("Cannot set value/text property through scr.setProperty");
+                throw new IllegalArgumentException("scr.setProperty: cannot change 'value' or 'text' property. "
+                        + "Use screen variable access instead (e.g., screenName.varName = value)");
             }
             case "editable" -> {
                 if (value instanceof Boolean) {
