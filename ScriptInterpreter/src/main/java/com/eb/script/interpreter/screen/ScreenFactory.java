@@ -3134,6 +3134,13 @@ public class ScreenFactory {
                 captureScreenshotToFile(screenName, stage, context);
                 event.consume(); // Prevent the event from propagating further
             }
+            // Add Alt+E key handler to focus first editable field
+            // Note: Alt+E is also used in the main console to open Edit menu,
+            // but in screen context it focuses the editor for quick editing access
+            else if (event.getCode() == KeyCode.E && event.isAltDown() && !event.isControlDown() && !event.isShiftDown()) {
+                focusFirstEditableField(allBoundControls);
+                event.consume(); // Prevent the event from propagating further
+            }
         });
         
         // Load CSS stylesheets for screen areas and input controls
@@ -5893,5 +5900,38 @@ public class ScreenFactory {
      */
     public static boolean isValidationAvailable() {
         return screenSchema != null && areaSchema != null && displayMetadataSchema != null;
+    }
+
+    /**
+     * Focus the first editable field (TextField, TextArea, etc.) in a list of controls.
+     * This is used for the Alt+E keyboard shortcut to quickly jump to the editor.
+     * 
+     * @param controls The list of controls to search for editable fields
+     */
+    private static void focusFirstEditableField(List<Node> controls) {
+        for (Node control : controls) {
+            // Check if the control is focusable and editable
+            if (control.isFocusTraversable() && isEditableControl(control)) {
+                Platform.runLater(() -> control.requestFocus());
+                return;
+            }
+        }
+    }
+
+    /**
+     * Check if a control is an editable control (TextField, TextArea, etc.)
+     * 
+     * @param control The control to check
+     * @return true if the control is editable
+     */
+    private static boolean isEditableControl(Node control) {
+        return control instanceof javafx.scene.control.TextField
+            || control instanceof javafx.scene.control.TextArea
+            || control instanceof javafx.scene.control.ComboBox
+            || control instanceof javafx.scene.control.ChoiceBox
+            || control instanceof javafx.scene.control.DatePicker
+            || control instanceof javafx.scene.control.ColorPicker
+            || control instanceof javafx.scene.control.Spinner
+            || control instanceof ScriptArea;
     }
 }

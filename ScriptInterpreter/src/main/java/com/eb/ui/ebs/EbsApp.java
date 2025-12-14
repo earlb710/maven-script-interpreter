@@ -29,6 +29,7 @@ public class EbsApp {
     private Console console;
     private EbsConsoleHandler handler;
     private StatusBar statusBar; // Main window status bar
+    private EbsMenu menuBar; // Menu bar for keyboard shortcuts
     
     // Static reference to root for config reloading
     private static BorderPane rootPane;
@@ -77,6 +78,9 @@ public class EbsApp {
         
         Scene scene = new Scene(root, 1400, 900);
         scene.getStylesheets().add(getClass().getResource("/css/console.css").toExternalForm());
+        
+        // Add global keyboard shortcuts for menu access
+        setupGlobalKeyboardShortcuts(scene);
         
         primaryStage.setScene(scene);
         primaryStage.setTitle("EBS Console");
@@ -132,6 +136,72 @@ public class EbsApp {
         console.submit(lines);
     }
 
+    /**
+     * Setup global keyboard shortcuts for menu access.
+     * Alt+F = File menu, Alt+E = Edit menu, Alt+C = Config menu, etc.
+     * 
+     * NOTE: This method uses menu text names (not variable names) to be more maintainable.
+     * Actual menu names in EbsMenu.java are: "File", "Edit", "Config", "Tools", "Screens", "Help"
+     */
+    private void setupGlobalKeyboardShortcuts(Scene scene) {
+        scene.addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, event -> {
+            // Only handle Alt+ key combinations (Alt without Control or Shift)
+            if (!event.isAltDown() || event.isControlDown() || event.isShiftDown()) {
+                return;
+            }
+            
+            javafx.scene.input.KeyCode code = event.getCode();
+            
+            // Map Alt+key to menu by name for more maintainable code
+            // Alt+F = File menu
+            if (code == javafx.scene.input.KeyCode.F) {
+                showMenuByName("File");
+                event.consume();
+            }
+            // Alt+E = Edit menu
+            else if (code == javafx.scene.input.KeyCode.E) {
+                showMenuByName("Edit");
+                event.consume();
+            }
+            // Alt+C = Config menu
+            else if (code == javafx.scene.input.KeyCode.C) {
+                showMenuByName("Config");
+                event.consume();
+            }
+            // Alt+T = Tools menu
+            else if (code == javafx.scene.input.KeyCode.T) {
+                showMenuByName("Tools");
+                event.consume();
+            }
+            // Alt+S = Screens menu
+            else if (code == javafx.scene.input.KeyCode.S) {
+                showMenuByName("Screens");
+                event.consume();
+            }
+            // Alt+H = Help menu
+            else if (code == javafx.scene.input.KeyCode.H) {
+                showMenuByName("Help");
+                event.consume();
+            }
+        });
+    }
+
+    /**
+     * Show a menu by its text name.
+     * This is more maintainable than using indices as it doesn't depend on menu order.
+     * @param menuName The text name of the menu (e.g., "File", "Edit", "Config")
+     */
+    private void showMenuByName(String menuName) {
+        if (menuBar != null) {
+            for (javafx.scene.control.Menu menu : menuBar.getMenus()) {
+                if (menu.getText().equals(menuName)) {
+                    menu.show();
+                    return;
+                }
+            }
+        }
+    }
+
     private void initUI(BorderPane root) {
         // Tabs & console (existing code)
         mainTabs = new TabPane();
@@ -163,7 +233,7 @@ public class EbsApp {
         projectTreeView.minWidthProperty().bind(splitPane.widthProperty().multiply(0.12));
 
         // --- Menu bar ---
-        MenuBar menuBar = new EbsMenu(handler);
+        menuBar = new EbsMenu(handler);
         root.setTop(menuBar);
         root.setCenter(splitPane); // Changed from mainTabs to splitPane
         
