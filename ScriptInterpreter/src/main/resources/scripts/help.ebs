@@ -776,7 +776,17 @@ getTopicFromJson(topicKey: string) return string {
     }
     
     var result: string = "";
-    if title != "" then {
+    
+    // Check if content already starts with a title section (═══ separator)
+    var contentHasTitle: bool = false;
+    if content != "" then {
+        if call str.startsWith(content, "═══") then {
+            contentHasTitle = true;
+        }
+    }
+    
+    // Only add title if content doesn't already have one
+    if title != "" && !contentHasTitle then {
         result = "═══════════════════════════════════════════════════════\n";
         result = result + "  " + title + "\n";
         result = result + "═══════════════════════════════════════════════════════\n\n";
@@ -1069,12 +1079,12 @@ call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax", true);
 call scr.setTreeItemBold("helpScreen", "Help Topics.Examples", true);
 
 // Syntax section nodes with children
-call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.structure", true);
-call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.data", true);
-call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.collections", true);
-call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.flow", true);
-call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.builtins", true);
-call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.screen", true);
+call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.Structure", true);
+call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.Data", true);
+call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.Collections", true);
+call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.Flow", true);
+call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.Builtins", true);
+call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.Screen", true);
 
 // Data section - Integer Types has children
 call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.data.Integer Types", true);
