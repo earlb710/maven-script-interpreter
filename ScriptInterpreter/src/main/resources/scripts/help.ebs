@@ -442,7 +442,6 @@ if areaArray != null && areaArray.length > 0 then {
 // Function to convert plain text to HTML with <pre> tag
 convertToHtml(text: string) return string {
     // Check if the content already contains HTML table tags
-    // If so, preserve it as-is without line-by-line processing
     var hasHtmlTable: bool = false;
     if call str.contains(text, "<table") then {
         hasHtmlTable = true;
@@ -451,8 +450,97 @@ convertToHtml(text: string) return string {
     var bodyContent: string = "";
     
     if hasHtmlTable then {
-        // Content already has HTML table, preserve it as-is
-        bodyContent = text;
+        // Content has HTML table - need to process heading but preserve table
+        // Split to find the heading section and table section
+        var tableStartIdx: int = call str.indexOf(text, "<table", 0);
+        var beforeTable: string = "";
+        var tableContent: string = "";
+        
+        if tableStartIdx > 0 then {
+            beforeTable = call str.substring(text, 0, tableStartIdx);
+            tableContent = call str.substring(text, tableStartIdx, text.length);
+        } else {
+            tableContent = text;
+        }
+        
+        // Process the part before the table (headings, etc.)
+        if beforeTable != "" then {
+            var lines: array = call str.split(beforeTable, "\n");
+            var processedLines: array = [];
+            
+            var i: int = 0;
+            var lastWasHr: bool = false;
+            while i < lines.length {
+                var line: string = lines[i];
+                var trimmedLine: string = call str.trim(line);
+                
+                // Check if line contains only ═, =, or - characters (more than 5)
+                var isHrLine: bool = false;
+                var lineLen: int = trimmedLine.length;
+                if lineLen > 5 then {
+                    var allSeparators: bool = true;
+                    var j: int = 0;
+                    while j < lineLen {
+                        var ch: string = call str.substring(trimmedLine, j, j + 1);
+                        if ch != "═" and ch != "=" and ch != "-" then {
+                            allSeparators = false;
+                            break;
+                        }
+                        j = j + 1;
+                    }
+                    if allSeparators then {
+                        isHrLine = true;
+                    }
+                }
+                
+                if isHrLine then {
+                    call array.add(processedLines, "<hr>");
+                    lastWasHr = true;
+                } else {
+                    // Check if this is a title line
+                    var isTitle: bool = false;
+                    if lastWasHr and trimmedLine != "" then {
+                        var nextIdx: int = i + 1;
+                        if nextIdx < lines.length then {
+                            var nextLine: string = lines[nextIdx];
+                            var nextTrimmed: string = call str.trim(nextLine);
+                            var nextLineLen: int = nextTrimmed.length;
+                            if nextLineLen > 5 then {
+                                var nextAllSep: bool = true;
+                                var k: int = 0;
+                                while k < nextLineLen {
+                                    var nextCh: string = call str.substring(nextTrimmed, k, k + 1);
+                                    if nextCh != "═" and nextCh != "=" and nextCh != "-" then {
+                                        nextAllSep = false;
+                                        break;
+                                    }
+                                    k = k + 1;
+                                }
+                                if nextAllSep then {
+                                    isTitle = true;
+                                }
+                            }
+                        }
+                    }
+                    
+                    if isTitle then {
+                        call array.add(processedLines, "<h2>" + line + "</h2>");
+                    } else if trimmedLine != "" then {
+                        call array.add(processedLines, line);
+                    }
+                    lastWasHr = false;
+                }
+                
+                i = i + 1;
+            }
+            
+            var beforeTableHtml: string = call str.join(processedLines, "<br>");
+            beforeTableHtml = call str.replace(beforeTableHtml, "<hr><br>", "<hr>");
+            beforeTableHtml = call str.replace(beforeTableHtml, "</h2><br><hr>", "</h2><hr>");
+            bodyContent = beforeTableHtml + tableContent;
+        } else {
+            bodyContent = tableContent;
+        }
     } else {
         // Split into lines to process line by line
         var lines: array = call str.split(text, "\n");
