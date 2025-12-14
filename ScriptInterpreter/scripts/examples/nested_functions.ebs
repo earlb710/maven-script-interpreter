@@ -1,0 +1,150 @@
+// EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
+// Example: Nested Function Calls - Test ReturnSignal propagation fix
+// Tests that inner function returns don't get caught by outer function handlers
+
+// Test 1: Simple nested function calls
+print "=== Test 1: Simple Nested Functions ===";
+
+innerFunc(dummy: int) return string {
+    print "  Inside innerFunc";
+    return "INNER_RESULT";
+}
+
+outerFunc(x: int) return string {
+    print "Entering outerFunc";
+    var result: string = call innerFunc(1);
+    print "After innerFunc call, got: " + result;
+    print "Exiting outerFunc";
+    return "OUTER_RESULT";
+}
+
+var test1: string = call outerFunc(0);
+print "Final result from outerFunc: " + test1;
+print "";
+
+// Test 2: Three-level nested function calls
+print "=== Test 2: Three-Level Nesting ===";
+
+level3(n: int) return int {
+    print "    Level 3: returning 3";
+    return 3;
+}
+
+level2(n: int) return int {
+    print "  Level 2 start";
+    var x: int = call level3(n);
+    print "  Level 2 got: " + x;
+    print "  Level 2: returning 2";
+    return 2;
+}
+
+level1(n: int) return int {
+    print "Level 1 start";
+    var y: int = call level2(n);
+    print "Level 1 got: " + y;
+    print "Level 1: returning 1";
+    return 1;
+}
+
+var test2: int = call level1(0);
+print "Top level got: " + test2;
+print "";
+
+// Test 3: Nested functions with different return types
+print "=== Test 3: Mixed Return Types ===";
+
+getNumber(base: int) return int {
+    print "  getNumber returning 42";
+    return 42;
+}
+
+formatNumber(num: int) return string {
+    print " formatNumber processing: " + num;
+    return "Number: " + num;
+}
+
+processAndFormat(x: int) return string {
+    print "processAndFormat start";
+    var n: int = call getNumber(x);
+    var formatted: string = call formatNumber(n);
+    print "processAndFormat got: " + formatted;
+    return formatted;
+}
+
+var test3: string = call processAndFormat(0);
+print "Final formatted result: " + test3;
+print "";
+
+// Test 4: Functions with conditional returns
+print "=== Test 4: Conditional Returns ===";
+
+checkPositive(val: int) return string {
+    if val > 0 then {
+        return "positive";
+    } else {
+        return "non-positive";
+    }
+}
+
+processValue(val: int) return string {
+    print " Processing value: " + val;
+    var check: string = call checkPositive(val);
+    print " Value is: " + check;
+    return "Processed: " + check;
+}
+
+var test4a: string = call processValue(5);
+print "Result for 5: " + test4a;
+
+var test4b: string = call processValue(-3);
+print "Result for -3: " + test4b;
+print "";
+
+// Test 5: Recursive-like pattern (not true recursion but nested calls)
+print "=== Test 5: Multiple Nested Calls in Sequence ===";
+
+helper1(n: int) return string {
+    return "H1";
+}
+
+helper2(n: int) return string {
+    return "H2";
+}
+
+helper3(n: int) return string {
+    return "H3";
+}
+
+combineHelpers(n: int) return string {
+    var r1: string = call helper1(n);
+    var r2: string = call helper2(n);
+    var r3: string = call helper3(n);
+    return r1 + "-" + r2 + "-" + r3;
+}
+
+var test5: string = call combineHelpers(0);
+print "Combined result: " + test5;
+print "";
+
+// Test 6: Nested calls with string concatenation
+print "=== Test 6: String Operations ===";
+
+getPrefix(x: int) return string {
+    return "Hello";
+}
+
+getSuffix(x: int) return string {
+    return "World";
+}
+
+buildGreeting(x: int) return string {
+    var prefix: string = call getPrefix(x);
+    var suffix: string = call getSuffix(x);
+    return prefix + ", " + suffix + "!";
+}
+
+var test6: string = call buildGreeting(0);
+print "Greeting: " + test6;
+print "";
+
+print "=== All Nested Function Tests Completed Successfully ===";
