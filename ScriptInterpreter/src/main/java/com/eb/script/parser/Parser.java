@@ -238,16 +238,18 @@ public class Parser {
 //                    }
                 }
                 try {
-                    if (b != null && b.parameters != null) {
+                    if (b != null && b.parameters != null && b.parameters.length > 0) {
                         Parameter[] parameters = matchParameters(b.parameters, call.parameters);
-                        call.parameters = parameters;
-                        Statement[] paramInit = new Statement[parameters.length];
-                        int pidx = 0;
-                        for (Parameter p : parameters) {
-                            paramInit[pidx] = new VarStatement(call.getLine(), p.name, p.paramType, p.value);
-                            pidx++;
+                        if (parameters != null) {
+                            call.parameters = parameters;
+                            Statement[] paramInit = new Statement[parameters.length];
+                            int pidx = 0;
+                            for (Parameter p : parameters) {
+                                paramInit[pidx] = new VarStatement(call.getLine(), p.name, p.paramType, p.value);
+                                pidx++;
+                            }
+                            call.paramInit = paramInit;
                         }
-                        call.paramInit = paramInit;
                     }
                 } catch (ParseError ex) {
                     throw new ParseError(ex.getMessage() + " in call to " + call.name + " on line " + call.getLine());
