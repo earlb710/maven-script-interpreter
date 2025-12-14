@@ -4673,6 +4673,7 @@ public class ScreenFactory {
             "labeltextalignment", "label_text_alignment", "labelposition", "label_position",
             // Event handlers
             "onclick", "on_click", "onvalidate", "on_validate", "onchange", "on_change",
+            "onexpand", "on_expand", "oncollapse", "on_collapse",
             // Options and data
             "options", "columns", "displayrecords", "display_records",
             // Tree properties
