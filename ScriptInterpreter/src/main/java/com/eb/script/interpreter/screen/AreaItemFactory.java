@@ -982,31 +982,46 @@ public class AreaItemFactory {
             }
         }
         
-        // Handle expandable property - prevent expansion if expandable is explicitly false
-        if (def.expandable != null && !def.expandable && hasChildren) {
-            // Add listener to prevent expansion when user tries to expand
-            item.expandedProperty().addListener((obs, wasExpanded, isExpanded) -> {
-                if (isExpanded && !wasExpanded) {
-                    // User is trying to expand - prevent it
-                    item.setExpanded(false);
-                }
-            });
-        }
-        
-        // Set up icons
+        // Set up icons and expansion control
         boolean hasOpenClosedIcons = def.iconOpen != null || def.iconClosed != null;
+        boolean isExpandable = def.expandable == null || def.expandable;  // Default to true if not specified
         
         if (hasOpenClosedIcons && hasChildren) {
             // Dynamic icons that change based on expanded/collapsed state
             updateTreeItemIcon(item, def, item.isExpanded());
             
-            // Add listener for expansion state changes
+            // Add combined listener for expansion state changes (handles both icon updates and expandable control)
             item.expandedProperty().addListener((obs, wasExpanded, isExpanded) -> {
+                // Handle expandable control first - prevent expansion if not expandable
+                if (!isExpandable && isExpanded && !wasExpanded) {
+                    // User is trying to expand a non-expandable node - prevent it
+                    item.setExpanded(false);
+                    return;  // Don't update icon since we're reverting the state
+                }
+                // Update icon based on actual expanded state
                 updateTreeItemIcon(item, def, isExpanded);
             });
         } else if (def.icon != null && !def.icon.isEmpty()) {
             // Static icon (same for all states)
             setTreeItemIcon(item, def.icon);
+            
+            // Still need to handle expandable control even without dynamic icons
+            if (!isExpandable && hasChildren) {
+                item.expandedProperty().addListener((obs, wasExpanded, isExpanded) -> {
+                    if (isExpanded && !wasExpanded) {
+                        // User is trying to expand a non-expandable node - prevent it
+                        item.setExpanded(false);
+                    }
+                });
+            }
+        } else if (!isExpandable && hasChildren) {
+            // No icons at all, but still need expandable control
+            item.expandedProperty().addListener((obs, wasExpanded, isExpanded) -> {
+                if (isExpanded && !wasExpanded) {
+                    // User is trying to expand a non-expandable node - prevent it
+                    item.setExpanded(false);
+                }
+            });
         }
         
         return item;
