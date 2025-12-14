@@ -103,18 +103,16 @@ screen fileExplorer {
                         
                         // Event handler for node expansion
                         onExpand = "
-                            string expandedPath = fileTree.expandedItem;
-                            call print('Expanded: ' + expandedPath);
+                            call print('Expanded: ' + fileTree.expandedItem);
                             call scr.setProperty('fileExplorer', 'statusLabel', 'labelText', 
-                                'EXPANDED: ' + expandedPath);
+                                'EXPANDED: ' + fileTree.expandedItem);
                         "
                         
                         // Event handler for node collapse
                         onCollapse = "
-                            string collapsedPath = fileTree.collapsedItem;
-                            call print('Collapsed: ' + collapsedPath);
+                            call print('Collapsed: ' + fileTree.collapsedItem);
                             call scr.setProperty('fileExplorer', 'statusLabel', 'labelText', 
-                                'COLLAPSED: ' + collapsedPath);
+                                'COLLAPSED: ' + fileTree.collapsedItem);
                         "
                     }
                 }
