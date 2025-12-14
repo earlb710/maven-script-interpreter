@@ -1,0 +1,217 @@
+// Test script for Variable Stateful Management API
+// Tests scr.setVarStateful, scr.getVarStateful, and scr.getVarOriginalValue
+// Also tests scr.setProperty restrictions for stateful items
+
+print "=== Variable Stateful Management API Test Suite ===";
+print "";
+
+// Define test screen
+screen testVarStatefulScreen = {
+    "title": "Variable Stateful Test",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "field1",
+            "type": "string",
+            "default": "initial1",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 1:"
+            }
+        },
+        {
+            "name": "field2",
+            "type": "string",
+            "default": "initial2",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 2:"
+            }
+        },
+        {
+            "name": "counter",
+            "type": "int",
+            "default": 0,
+            "display": {
+                "type": "label",
+                "labelText": "Counter:"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "items": [
+                {
+                    "name": "field1Item",
+                    "varRef": "field1"
+                },
+                {
+                    "name": "field2Item",
+                    "varRef": "field2"
+                },
+                {
+                    "name": "counterItem",
+                    "varRef": "counter"
+                }
+            ]
+        }
+    ]
+};
+
+show screen testVarStatefulScreen;
+
+var testsPassed: int = 0;
+var testsFailed: int = 0;
+
+// Helper function to check test results
+assertTest(testName, condition, errorMsg) {
+    if condition then {
+        print "✓ PASS: " + testName;
+        testsPassed = testsPassed + 1;
+    } else {
+        print "✗ FAIL: " + testName + " - " + errorMsg;
+        testsFailed = testsFailed + 1;
+    }
+}
+
+print "--- Test 1: Default stateful behavior ---";
+// All variables should be stateful by default
+var stateful1 = call scr.getVarStateful("testVarStatefulScreen", "field1");
+call assertTest("field1 is stateful by default", stateful1 = true, "Expected true, got " + stateful1);
+
+var stateful2 = call scr.getVarStateful("testVarStatefulScreen", "field2");
+call assertTest("field2 is stateful by default", stateful2 = true, "Expected true, got " + stateful2);
+print "";
+
+print "--- Test 2: Original values are captured ---";
+var orig1 = call scr.getVarOriginalValue("testVarStatefulScreen", "field1");
+call assertTest("field1 original value", orig1 = "initial1", "Expected 'initial1', got '" + orig1 + "'");
+
+var orig2 = call scr.getVarOriginalValue("testVarStatefulScreen", "field2");
+call assertTest("field2 original value", orig2 = "initial2", "Expected 'initial2', got '" + orig2 + "'");
+
+var origCounter = call scr.getVarOriginalValue("testVarStatefulScreen", "counter");
+call assertTest("counter original value", origCounter = 0, "Expected 0, got " + origCounter);
+print "";
+
+print "--- Test 3: Changes to stateful variables mark screen dirty ---";
+testVarStatefulScreen.field1 = "changed1";
+var status = call scr.getStatus("testVarStatefulScreen");
+call assertTest("Screen marked changed after stateful var change", status = "changed", "Expected 'changed', got '" + status + "'");
+
+var hasChanges = call scr.checkChanged("testVarStatefulScreen");
+call assertTest("checkChanged returns true", hasChanges = true, "Expected true, got " + hasChanges);
+print "";
+
+print "--- Test 4: Original value remains after change ---";
+var origAfterChange = call scr.getVarOriginalValue("testVarStatefulScreen", "field1");
+call assertTest("Original value unchanged", origAfterChange = "initial1", "Expected 'initial1', got '" + origAfterChange + "'");
+print "";
+
+print "--- Test 5: Set variable to non-stateful ---";
+call scr.setVarStateful("testVarStatefulScreen", "counter", false);
+var counterStateful = call scr.getVarStateful("testVarStatefulScreen", "counter");
+call assertTest("counter is now non-stateful", counterStateful = false, "Expected false, got " + counterStateful);
+
+// Revert to clean state for next test
+call scr.revert("testVarStatefulScreen");
+var statusAfterRevert = call scr.getStatus("testVarStatefulScreen");
+call assertTest("Screen clean after revert", statusAfterRevert = "clean", "Expected 'clean', got '" + statusAfterRevert + "'");
+print "";
+
+print "--- Test 6: Non-stateful variable changes don't mark dirty ---";
+testVarStatefulScreen.counter = 5;
+var statusAfterCounter = call scr.getStatus("testVarStatefulScreen");
+call assertTest("Screen still clean after non-stateful change", statusAfterCounter = "clean", "Expected 'clean', got '" + statusAfterCounter + "'");
+
+var hasChanges2 = call scr.checkChanged("testVarStatefulScreen");
+call assertTest("checkChanged still false", hasChanges2 = false, "Expected false, got " + hasChanges2);
+print "";
+
+print "--- Test 7: Mix stateful and non-stateful changes ---";
+testVarStatefulScreen.field2 = "changed2";  // stateful
+testVarStatefulScreen.counter = 10;  // non-stateful
+var statusMixed = call scr.getStatus("testVarStatefulScreen");
+call assertTest("Screen marked changed (stateful change)", statusMixed = "changed", "Expected 'changed', got '" + statusMixed + "'");
+print "";
+
+print "--- Test 8: Re-enable stateful tracking ---";
+call scr.setVarStateful("testVarStatefulScreen", "counter", true);
+var counterStateful2 = call scr.getVarStateful("testVarStatefulScreen", "counter");
+call assertTest("counter is stateful again", counterStateful2 = true, "Expected true, got " + counterStateful2);
+
+// Clean screen for next test
+call scr.revert("testVarStatefulScreen");
+print "";
+
+print "--- Test 9: scr.setProperty restrictions for stateful items ---";
+// Set field2Item to non-stateful at area item level
+screen testVarStatefulScreen.area[0].items[1].stateful = false;
+
+// Should fail for stateful item
+var errorCaught: bool = false;
+try {
+    call scr.setProperty("testVarStatefulScreen.field1Item", "value", "test");
+} exceptions {
+    when ANY_ERROR(msg) {
+        errorCaught = true;
+        call assertTest("scr.setProperty blocked for stateful item", true, "");
+    }
+}
+if not errorCaught then {
+    call assertTest("scr.setProperty blocked for stateful item", false, "No error thrown");
+}
+
+// Should succeed for non-stateful item
+var successNonStateful: bool = false;
+try {
+    call scr.setProperty("testVarStatefulScreen.field2Item", "value", "allowed");
+    successNonStateful = true;
+} exceptions {
+    when ANY_ERROR(msg) {
+        print "Unexpected error: " + msg;
+    }
+}
+call assertTest("scr.setProperty allowed for non-stateful item", successNonStateful, "Error thrown unexpectedly");
+print "";
+
+print "--- Test 10: Error handling ---";
+// Test with non-existent screen
+var errorScreen: bool = false;
+try {
+    call scr.getVarStateful("nonExistentScreen", "field1");
+} exceptions {
+    when ANY_ERROR(msg) {
+        errorScreen = true;
+    }
+}
+call assertTest("Error on non-existent screen", errorScreen, "No error thrown");
+
+// Test with non-existent variable
+var errorVar: bool = false;
+try {
+    call scr.getVarStateful("testVarStatefulScreen", "nonExistentVar");
+} exceptions {
+    when ANY_ERROR(msg) {
+        errorVar = true;
+    }
+}
+call assertTest("Error on non-existent variable", errorVar, "No error thrown");
+print "";
+
+print "=== Test Summary ===";
+print "Tests Passed: " + testsPassed;
+print "Tests Failed: " + testsFailed;
+print "";
+
+if testsFailed = 0 then {
+    print "✓ All tests PASSED!";
+} else {
+    print "✗ Some tests FAILED!";
+}
+
+// Clean up
+call scr.closeScreen("testVarStatefulScreen");
