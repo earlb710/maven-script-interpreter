@@ -76,9 +76,12 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayDeque;
 import java.util.Date;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Interpreter implements StatementVisitor, ExpressionVisitor {
@@ -90,6 +93,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     private RuntimeContext currentRuntime;  // Store current runtime context for import resolution
     private RuntimeContext rootRuntime;  // Store root runtime context (main script) for function registration
     private String currentImportFile;  // Track which import file is currently being processed
+    private final Deque<String> functionStack = new ArrayDeque<>();  // Track current function context for return signals
 
     public Interpreter() {
         this.context = new InterpreterContext();
@@ -961,6 +965,12 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     public Object visitBlockStatement(BlockStatement stmt, Statement[] parameters) throws InterpreterError {
         environment().pushEnvironmentValues();
         environment().pushCallStack(stmt.getLine(), StatementKind.BLOCK, "Block %1", stmt.name);  // name may be null
+        
+        // Track function context for return signals - only for named blocks with return types (functions)
+        boolean isFunction = stmt.name != null && stmt.returnType != null;
+        if (isFunction) {
+            functionStack.push(stmt.name);
+        }
 
         try {
             if (parameters != null) {
@@ -976,13 +986,20 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
 
         } catch (ReturnSignal r) {
             // Only handle return for named blocks (functions) with a declared return type
-            // For anonymous blocks (e.g., if/then blocks), re-throw the signal to propagate it up
+            // AND only if the return signal matches this function's name
             if (stmt.returnType != null) {
-                // This is a function block with a return type - validate and return the value
-                if (!Util.checkDataType(stmt.returnType, r.value)) {
-                    throw error(stmt.getLine(), "Return value '" + r.value + "' not correct type : " + stmt.returnType + " in " + stmt.name);
+                // Check if this return signal is meant for this function
+                // Use Objects.equals for null-safe comparison
+                if (Objects.equals(stmt.name, r.functionName)) {
+                    // This is the target function - validate and return the value
+                    if (!Util.checkDataType(stmt.returnType, r.value)) {
+                        throw error(stmt.getLine(), "Return value '" + r.value + "' not correct type : " + stmt.returnType + " in " + stmt.name);
+                    }
+                    return r.value;
+                } else {
+                    // This return signal is meant for a different function - propagate it up
+                    throw r;
                 }
-                return r.value;
             } else {
                 // This is an anonymous block - propagate the return signal up
                 throw r;
@@ -1028,6 +1045,11 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             // POP the frame even on errors/returns
             environment().popCallStack();
             environment().popEnvironmentValues();
+            
+            // Pop function context if we pushed it
+            if (isFunction) {
+                functionStack.pop();
+            }
         }
         return null;
     }
@@ -1105,7 +1127,10 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     public Object visitReturnStatement(ReturnStatement stmt) throws InterpreterError {
         // If value is null (return;), return null
         Object returnValue = (stmt.value != null) ? evaluate(stmt.value) : null;
-        throw new ReturnSignal(returnValue);
+        // Get the current function name from the function stack (top of stack)
+        // Will be null if return is at top level (not inside a function), which is valid
+        String currentFunction = functionStack.peek();
+        throw new ReturnSignal(returnValue, currentFunction);
     }
 
     // --- Expression Visitors ---
@@ -2493,10 +2518,12 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     public static final class ReturnSignal extends RuntimeException {
 
         public final Object value;
+        public final String functionName;
 
-        public ReturnSignal(Object v) {
+        public ReturnSignal(Object v, String functionName) {
             super(null, null, false, false);
             this.value = v;
+            this.functionName = functionName;
         }
     }
 
