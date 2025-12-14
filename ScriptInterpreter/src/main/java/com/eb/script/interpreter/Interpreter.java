@@ -402,6 +402,15 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 // Clear it immediately to prevent leaking to other variables
                 context.clearLastInferredIntmapType();
             }
+            
+            // Check if we just performed a record cast and clear it to prevent leaking to other variables
+            // Note: For explicit record type declarations (var x: posType = ...), the record type is stored
+            // via stmt.recordType (handled below), not via lastInferredRecordType
+            RecordType inferredRecordType = context.getLastInferredRecordType();
+            if (inferredRecordType != null) {
+                // Clear it immediately to prevent leaking to subsequent assignments
+                context.clearLastInferredRecordType();
+            }
 
             if (stmt.varType != null) {
                 DataType expectedType = stmt.varType;
