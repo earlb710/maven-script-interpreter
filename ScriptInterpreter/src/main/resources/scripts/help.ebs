@@ -1087,7 +1087,7 @@ call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.Builtins", true);
 call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.Screen", true);
 
 // Data section - Integer Types has children
-call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.data.Integer Types", true);
+call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.Data.Integer Types", true);
 
 // Builtins section - all category nodes have children
 if builtinCategoryOrder != null then {
