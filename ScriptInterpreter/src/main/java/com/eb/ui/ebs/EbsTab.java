@@ -2473,11 +2473,52 @@ public class EbsTab extends Tab {
             webViewStage.setAlwaysOnTop(pinBtn.isSelected());
         });
         
-        // Create a toolbar with the pin button
+        // Create auto-refresh toggle button with debounced updates (0.5 second delay)
+        ToggleButton autoRefreshBtn = new ToggleButton("🔄 Auto Refresh");
+        autoRefreshBtn.setTooltip(new Tooltip("Automatically refresh preview when editor changes"));
+        
+        // Timer for debouncing editor changes
+        PauseTransition refreshTimer = new PauseTransition(Duration.millis(500));
+        refreshTimer.setOnFinished(e -> {
+            // Refresh the WebView with current editor content
+            String updatedContent = dispArea.getText();
+            webView.getEngine().loadContent(updatedContent);
+        });
+        
+        // Listener for editor text changes
+        javafx.beans.value.ChangeListener<String> textChangeListener = (obs, oldText, newText) -> {
+            if (autoRefreshBtn.isSelected()) {
+                // Restart the timer on each change (debouncing)
+                refreshTimer.playFromStart();
+            }
+        };
+        
+        // Apply custom styling when auto-refresh is toggled
+        autoRefreshBtn.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
+            if (isSelected) {
+                // Blue background with white text when on
+                autoRefreshBtn.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white;");
+                // Add the listener when enabled
+                dispArea.textProperty().addListener(textChangeListener);
+            } else {
+                // Reset to default style when off
+                autoRefreshBtn.setStyle("");
+                // Stop any pending refresh
+                refreshTimer.stop();
+            }
+        });
+        
+        // Clean up when window closes
+        webViewStage.setOnCloseRequest(e -> {
+            refreshTimer.stop();
+            dispArea.textProperty().removeListener(textChangeListener);
+        });
+        
+        // Create a toolbar with the pin and auto-refresh buttons
         HBox toolbar = new HBox(5);
         toolbar.setPadding(new Insets(5));
         toolbar.setAlignment(Pos.CENTER_LEFT);
-        toolbar.getChildren().add(pinBtn);
+        toolbar.getChildren().addAll(pinBtn, autoRefreshBtn);
         toolbar.getStyleClass().add("toolbar");
         
         // Create a StatusBar to show URLs when hovering over links
