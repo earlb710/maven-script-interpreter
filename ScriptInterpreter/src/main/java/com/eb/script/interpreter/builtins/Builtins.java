@@ -1046,6 +1046,58 @@ public final class Builtins {
                 "scr.snapshot", DataType.IMAGE,
                 newParam("screenName", DataType.STRING, false) // optional; screen name (if null, uses current screen)
         ));
+        addBuiltin(info(
+                "scr.setTreeItemIcon", DataType.BOOL,
+                newParam("screenName", DataType.STRING, true), // required; screen name
+                newParam("itemPath", DataType.STRING, true),   // required; tree item path (e.g., "Root.folder.item")
+                newParam("iconPath", DataType.STRING, false)   // optional; icon path (null to remove icon)
+        ));
+        addBuiltin(info(
+                "scr.setTreeItemIcons", DataType.BOOL,
+                newParam("screenName", DataType.STRING, true),   // required; screen name
+                newParam("itemPath", DataType.STRING, true),     // required; tree item path
+                newParam("iconPath", DataType.STRING, false),    // optional; default icon
+                newParam("iconOpenPath", DataType.STRING, false),   // optional; icon when expanded
+                newParam("iconClosedPath", DataType.STRING, false) // optional; icon when collapsed
+        ));
+        addBuiltin(info(
+                "scr.getTreeItemIcon", DataType.STRING,
+                newParam("screenName", DataType.STRING, true), // required; screen name
+                newParam("itemPath", DataType.STRING, true)    // required; tree item path
+        ));
+        addBuiltin(info(
+                "scr.setTreeItemBold", DataType.BOOL,
+                newParam("screenName", DataType.STRING, true), // required; screen name
+                newParam("itemPath", DataType.STRING, true),   // required; tree item path
+                newParam("bold", DataType.BOOL, true)          // required; bold flag
+        ));
+        addBuiltin(info(
+                "scr.setTreeItemItalic", DataType.BOOL,
+                newParam("screenName", DataType.STRING, true), // required; screen name
+                newParam("itemPath", DataType.STRING, true),   // required; tree item path
+                newParam("italic", DataType.BOOL, true)        // required; italic flag
+        ));
+        addBuiltin(info(
+                "scr.setTreeItemColor", DataType.BOOL,
+                newParam("screenName", DataType.STRING, true), // required; screen name
+                newParam("itemPath", DataType.STRING, true),   // required; tree item path
+                newParam("color", DataType.STRING, true)       // required; color (hex, rgb, or name)
+        ));
+        addBuiltin(info(
+                "scr.getTreeItemBold", DataType.BOOL,
+                newParam("screenName", DataType.STRING, true), // required; screen name
+                newParam("itemPath", DataType.STRING, true)    // required; tree item path
+        ));
+        addBuiltin(info(
+                "scr.getTreeItemItalic", DataType.BOOL,
+                newParam("screenName", DataType.STRING, true), // required; screen name
+                newParam("itemPath", DataType.STRING, true)    // required; tree item path
+        ));
+        addBuiltin(info(
+                "scr.getTreeItemColor", DataType.STRING,
+                newParam("screenName", DataType.STRING, true), // required; screen name
+                newParam("itemPath", DataType.STRING, true)    // required; tree item path
+        ));
 
         // ==========================
         // CSS builtins
