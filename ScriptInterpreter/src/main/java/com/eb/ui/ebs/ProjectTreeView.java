@@ -6,6 +6,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.geometry.Insets;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -102,6 +106,9 @@ public class ProjectTreeView extends VBox {
                 }
             });
             
+            // Setup drag-and-drop handlers
+            setupDragAndDrop(cell);
+            
             return cell;
         });
         
@@ -197,6 +204,180 @@ public class ProjectTreeView extends VBox {
         
         // Load projects from file after UI is initialized
         javafx.application.Platform.runLater(() -> loadProjects());
+    }
+    
+    /**
+     * Setup drag-and-drop handlers for a tree cell.
+     * 
+     * @param cell The tree cell to configure
+     */
+    private void setupDragAndDrop(TreeCell<String> cell) {
+        // Detect drag start
+        cell.setOnDragDetected(event -> {
+            TreeItem<String> draggedItem = cell.getTreeItem();
+            
+            // Don't allow dragging the root item or empty cells
+            if (draggedItem == null || draggedItem == rootItem || cell.isEmpty()) {
+                return;
+            }
+            
+            // Don't allow dragging project nodes (only files and directories within projects)
+            if (draggedItem.getParent() == rootItem) {
+                return;
+            }
+            
+            // Get the path of the dragged item
+            Object userData = draggedItem.getGraphic() != null ? draggedItem.getGraphic().getUserData() : null;
+            if (!(userData instanceof String)) {
+                return;
+            }
+            
+            String itemPath = (String) userData;
+            Path path = Paths.get(itemPath);
+            
+            // Verify the item exists
+            if (!Files.exists(path)) {
+                return;
+            }
+            
+            // Start drag-and-drop
+            Dragboard dragboard = cell.startDragAndDrop(TransferMode.MOVE);
+            ClipboardContent content = new ClipboardContent();
+            content.putString(itemPath);
+            dragboard.setContent(content);
+            
+            event.consume();
+        });
+        
+        // Handle drag over - validate if drop is allowed
+        cell.setOnDragOver(event -> {
+            if (event.getGestureSource() != cell && event.getDragboard().hasString()) {
+                TreeItem<String> targetItem = cell.getTreeItem();
+                
+                // Allow drop only on directories (not files, not root, not empty cells)
+                if (targetItem != null && targetItem != rootItem && !cell.isEmpty()) {
+                    Object userData = targetItem.getGraphic() != null ? targetItem.getGraphic().getUserData() : null;
+                    if (userData instanceof String) {
+                        String targetPath = (String) userData;
+                        Path target = Paths.get(targetPath);
+                        
+                        // Only allow drop on directories
+                        if (Files.isDirectory(target)) {
+                            String sourcePath = event.getDragboard().getString();
+                            Path source = Paths.get(sourcePath);
+                            
+                            // Prevent dropping a directory into itself or its subdirectories
+                            if (Files.isDirectory(source)) {
+                                try {
+                                    if (target.startsWith(source) || target.equals(source)) {
+                                        return; // Don't accept
+                                    }
+                                } catch (Exception e) {
+                                    return; // Don't accept on error
+                                }
+                            }
+                            
+                            // Prevent dropping into the same parent directory
+                            if (source.getParent() != null && source.getParent().equals(target)) {
+                                return; // Don't accept
+                            }
+                            
+                            // Accept the drag
+                            event.acceptTransferModes(TransferMode.MOVE);
+                        }
+                    }
+                }
+            }
+            event.consume();
+        });
+        
+        // Handle drag dropped - perform the move
+        cell.setOnDragDropped(event -> {
+            Dragboard dragboard = event.getDragboard();
+            boolean success = false;
+            
+            if (dragboard.hasString()) {
+                String sourcePath = dragboard.getString();
+                TreeItem<String> targetItem = cell.getTreeItem();
+                
+                if (targetItem != null) {
+                    Object userData = targetItem.getGraphic() != null ? targetItem.getGraphic().getUserData() : null;
+                    if (userData instanceof String) {
+                        String targetDirPath = (String) userData;
+                        
+                        try {
+                            Path source = Paths.get(sourcePath);
+                            Path targetDir = Paths.get(targetDirPath);
+                            
+                            // Verify target is a directory
+                            if (!Files.isDirectory(targetDir)) {
+                                throw new IllegalArgumentException("Target must be a directory");
+                            }
+                            
+                            // Get the file/directory name
+                            String fileName = source.getFileName().toString();
+                            Path destination = targetDir.resolve(fileName);
+                            
+                            // Check if destination already exists
+                            if (Files.exists(destination)) {
+                                Alert alert = new Alert(Alert.AlertType.ERROR,
+                                    "A file or directory with that name already exists in the destination.");
+                                alert.setHeaderText("Cannot Move");
+                                alert.showAndWait();
+                                return;
+                            }
+                            
+                            // Perform the move
+                            Files.move(source, destination);
+                            success = true;
+                            
+                            // Update the tree view
+                            // Find and remove the source item from tree
+                            TreeItem<String> sourceItem = findTreeItemForPath(rootItem, sourcePath);
+                            if (sourceItem != null && sourceItem.getParent() != null) {
+                                sourceItem.getParent().getChildren().remove(sourceItem);
+                            }
+                            
+                            // Refresh the target directory in the tree
+                            refreshDirectoryNode(targetItem, targetDirPath);
+                            
+                            System.out.println("Moved " + source + " to " + destination);
+                            
+                        } catch (Exception e) {
+                            Alert alert = new Alert(Alert.AlertType.ERROR,
+                                "Failed to move: " + e.getMessage());
+                            alert.setHeaderText("Move Error");
+                            alert.showAndWait();
+                        }
+                    }
+                }
+            }
+            
+            event.setDropCompleted(success);
+            event.consume();
+        });
+        
+        // Visual feedback when drag enters/exits the cell
+        cell.setOnDragEntered(event -> {
+            if (event.getGestureSource() != cell && event.getDragboard().hasString()) {
+                TreeItem<String> targetItem = cell.getTreeItem();
+                if (targetItem != null && targetItem != rootItem && !cell.isEmpty()) {
+                    Object userData = targetItem.getGraphic() != null ? targetItem.getGraphic().getUserData() : null;
+                    if (userData instanceof String) {
+                        String targetPath = (String) userData;
+                        if (Files.isDirectory(Paths.get(targetPath))) {
+                            cell.setStyle("-fx-background-color: #e0e0ff;");
+                        }
+                    }
+                }
+            }
+            event.consume();
+        });
+        
+        cell.setOnDragExited(event -> {
+            cell.setStyle("");
+            event.consume();
+        });
     }
     
     /**
