@@ -3,6 +3,10 @@
     {
       "name": "TestProject",
       "path": "/tmp/test-project/project.json"
+    },
+    {
+      "name": "board game",
+      "path": "/home/runner/work/maven-script-interpreter/maven-script-interpreter/projects/board-game/project.json"
     }
   ]
 }
