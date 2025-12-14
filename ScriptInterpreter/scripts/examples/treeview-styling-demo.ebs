@@ -1,0 +1,156 @@
+// TreeView Styling Demo
+// Demonstrates how to set bold, italic, and color styling on TreeView items
+
+// Create a file explorer screen with TreeView
+call scr.create("styledTree", "TreeView Styling Demo", 600, 500);
+
+// Add TreeView control
+var treeData = call map.new();
+call map.put(treeData, "type", "treeview");
+call map.put(treeData, "name", "fileTree");
+call map.put(treeData, "x", 10);
+call map.put(treeData, "y", 10);
+call map.put(treeData, "width", 580);
+call map.put(treeData, "height", 450);
+call map.put(treeData, "showRoot", true);
+
+// Create tree structure
+var rootItem = call map.new();
+call map.put(rootItem, "text", "Root");
+call map.put(rootItem, "children", []);
+
+// Add src folder with files
+var srcFolder = call map.new();
+call map.put(srcFolder, "text", "src");
+call map.put(srcFolder, "children", []);
+
+var mainScript = call map.new();
+call map.put(mainScript, "text", "main.ebs");
+call map.put(mainScript, "children", []);
+
+var utilScript = call map.new();
+call map.put(utilScript, "text", "util.ebs");
+call map.put(utilScript, "children", []);
+
+var configFile = call map.new();
+call map.put(configFile, "text", "config.json");
+call map.put(configFile, "children", []);
+
+call array.push(call map.get(srcFolder, "children"), mainScript);
+call array.push(call map.get(srcFolder, "children"), utilScript);
+call array.push(call map.get(srcFolder, "children"), configFile);
+
+// Add docs folder with files
+var docsFolder = call map.new();
+call map.put(docsFolder, "text", "docs");
+call map.put(docsFolder, "children", []);
+
+var readmeFile = call map.new();
+call map.put(readmeFile, "text", "README.md");
+call map.put(readmeFile, "children", []);
+
+var guideFile = call map.new();
+call map.put(guideFile, "text", "guide.md");
+call map.put(guideFile, "children", []);
+
+call array.push(call map.get(docsFolder, "children"), readmeFile);
+call array.push(call map.get(docsFolder, "children"), guideFile);
+
+// Add tests folder with files
+var testsFolder = call map.new();
+call map.put(testsFolder, "text", "tests");
+call map.put(testsFolder, "children", []);
+
+var testMain = call map.new();
+call map.put(testMain, "text", "test_main.ebs");
+call map.put(testMain, "children", []);
+
+var testUtil = call map.new();
+call map.put(testUtil, "text", "test_util.ebs");
+call map.put(testUtil, "children", []);
+
+call array.push(call map.get(testsFolder, "children"), testMain);
+call array.push(call map.get(testsFolder, "children"), testUtil);
+
+// Add all folders to root
+call array.push(call map.get(rootItem, "children"), srcFolder);
+call array.push(call map.get(rootItem, "children"), docsFolder);
+call array.push(call map.get(rootItem, "children"), testsFolder);
+
+// Set the tree data
+call map.put(treeData, "root", rootItem);
+
+// Add the TreeView to the screen
+call scr.addControl("styledTree", treeData);
+
+// Now apply styling to tree items
+call println("Applying styles to tree items...");
+
+// 1. Set folder names to bold
+call scr.setTreeItemBold("styledTree", "Root.src", true);
+call scr.setTreeItemBold("styledTree", "Root.docs", true);
+call scr.setTreeItemBold("styledTree", "Root.tests", true);
+
+// 2. Set main files to bold and colored
+call scr.setTreeItemBold("styledTree", "Root.src.main.ebs", true);
+call scr.setTreeItemColor("styledTree", "Root.src.main.ebs", "#0066cc");  // Blue
+
+// 3. Set documentation files to italic and green
+call scr.setTreeItemItalic("styledTree", "Root.docs.README.md", true);
+call scr.setTreeItemColor("styledTree", "Root.docs.README.md", "#008800");  // Green
+
+call scr.setTreeItemItalic("styledTree", "Root.docs.guide.md", true);
+call scr.setTreeItemColor("styledTree", "Root.docs.guide.md", "#008800");  // Green
+
+// 4. Set test files to red
+call scr.setTreeItemColor("styledTree", "Root.tests.test_main.ebs", "#cc0000");  // Red
+call scr.setTreeItemColor("styledTree", "Root.tests.test_util.ebs", "#cc0000");  // Red
+
+// 5. Set config file to orange and italic
+call scr.setTreeItemItalic("styledTree", "Root.src.config.json", true);
+call scr.setTreeItemColor("styledTree", "Root.src.config.json", "#ff8800");  // Orange
+
+// 6. Combine multiple styles - bold, italic, and purple
+call scr.setTreeItemBold("styledTree", "Root.src.util.ebs", true);
+call scr.setTreeItemItalic("styledTree", "Root.src.util.ebs", true);
+call scr.setTreeItemColor("styledTree", "Root.src.util.ebs", "#9900cc");  // Purple
+
+call println("Styles applied successfully!");
+
+// Add instruction label
+var instructionData = call map.new();
+call map.put(instructionData, "type", "label");
+call map.put(instructionData, "name", "instructions");
+call map.put(instructionData, "text", "Tree items styled! Notice bold folders, colored files, and italic text.");
+call map.put(instructionData, "x", 10);
+call map.put(instructionData, "y", 470);
+call scr.addControl("styledTree", instructionData);
+
+// Show the screen
+call scr.showScreen("styledTree");
+
+call println("");
+call println("=== TreeView Styling Demo ===");
+call println("The tree shows different text styles:");
+call println("  - Folders: Bold");
+call println("  - Main script (main.ebs): Bold + Blue");
+call println("  - Documentation files: Italic + Green");
+call println("  - Test files: Red");
+call println("  - Config file (config.json): Italic + Orange");
+call println("  - Utility script (util.ebs): Bold + Italic + Purple");
+call println("");
+call println("Available styling functions:");
+call println("  • scr.setTreeItemBold(screenName, itemPath, true/false)");
+call println("  • scr.setTreeItemItalic(screenName, itemPath, true/false)");
+call println("  • scr.setTreeItemColor(screenName, itemPath, colorString)");
+call println("");
+call println("Color formats supported:");
+call println("  • Hex: #RRGGBB (e.g., '#ff0000' for red)");
+call println("  • RGB: rgb(r,g,b) (e.g., 'rgb(255,0,0)' for red)");
+call println("  • Names: 'red', 'blue', 'green', etc.");
+call println("");
+
+// Wait for user to close screen
+call scr.waitForClose("styledTree");
+
+call println("Demo completed.");
