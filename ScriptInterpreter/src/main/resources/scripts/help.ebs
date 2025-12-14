@@ -855,3 +855,39 @@ helpScreen.helpContent = call convertToHtml(call getHelpContent(""));
 // Show the screen
 show screen helpScreen;
 
+// Apply bold styling to all non-leaf nodes (nodes with children) in the tree
+// Wait a moment for the screen to be fully initialized
+call thread.sleep(100);
+
+// Root node
+call scr.setTreeItemBold("helpScreen", "Help Topics", true);
+
+// Top-level nodes with children
+call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax", true);
+call scr.setTreeItemBold("helpScreen", "Help Topics.Examples", true);
+
+// Syntax section nodes with children
+call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.structure", true);
+call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.data", true);
+call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.collections", true);
+call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.flow", true);
+call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.builtins", true);
+call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.screen", true);
+
+// Data section - Integer Types has children
+call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.data.Integer Types", true);
+
+// Builtins section - all category nodes have children
+if builtinCategoryOrder != null then {
+    foreach categoryKey in builtinCategoryOrder {
+        var displayName: string = categoryKey;
+        if builtinCategoryNames != null then {
+            var jsonDisplayName: string = call json.getString(builtinCategoryNames, categoryKey, "");
+            if jsonDisplayName != "" then {
+                displayName = jsonDisplayName;
+            }
+        }
+        call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.builtins." + displayName, true);
+    }
+}
+
