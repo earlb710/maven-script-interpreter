@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4-Quadrant Monopoly-Style Board Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .description {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        svg {
+            display: block;
+            margin: 0 auto;
+            border: 1px solid #ddd;
+            background-color: #fafafa;
+        }
+        .legend {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        .legend h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .legend ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .legend li {
+            margin: 8px 0;
+            padding: 5px;
+        }
+        .legend .color-box {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            vertical-align: middle;
+            border: 1px solid #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>4-Quadrant Monopoly-Style Board Game</h1>
+        <p class="description">
+            A large-scale board game with 4 quadrants sharing borders at the center.<br>
+            Each quadrant contains 40 spaces (like a standard Monopoly board).
+        </p>
+        
+        <svg width="1000" height="1000" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
+            <!-- Define patterns and gradients -->
+            <defs>
+                <linearGradient id="q1Gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#e3f2fd;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#90caf9;stop-opacity:1" />
+                </linearGradient>
+                <linearGradient id="q2Gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#f3e5f5;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#ce93d8;stop-opacity:1" />
+                </linearGradient>
+                <linearGradient id="q3Gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#e8f5e9;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#81c784;stop-opacity:1" />
+                </linearGradient>
+                <linearGradient id="q4Gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#fff3e0;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#ffb74d;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            
+            <!-- Board outline -->
+            <rect x="50" y="50" width="900" height="900" fill="none" stroke="#333" stroke-width="4"/>
+            
+            <!-- Quadrant 1 (NW - Top Left) - Luxury District -->
+            <rect x="50" y="50" width="450" height="450" fill="url(#q1Gradient)" stroke="#333" stroke-width="2"/>
+            <text x="275" y="30" text-anchor="middle" font-size="24" font-weight="bold" fill="#1565c0">Quadrant 1 (NW)</text>
+            <text x="275" y="60" text-anchor="middle" font-size="16" fill="#1565c0">Luxury District</text>
+            
+            <!-- Q1 Spaces (10 per side) -->
+            <!-- Top side -->
+            <rect x="50" y="50" width="45" height="45" fill="#bbdefb" stroke="#333" stroke-width="1"/>
+            <text x="72.5" y="77" text-anchor="middle" font-size="10">1</text>
+            <rect x="95" y="50" width="45" height="45" fill="#e3f2fd" stroke="#333" stroke-width="1"/>
+            <text x="117.5" y="77" text-anchor="middle" font-size="10">2</text>
+            <rect x="140" y="50" width="45" height="45" fill="#bbdefb" stroke="#333" stroke-width="1"/>
+            <text x="162.5" y="77" text-anchor="middle" font-size="10">3</text>
+            <rect x="185" y="50" width="45" height="45" fill="#e3f2fd" stroke="#333" stroke-width="1"/>
+            <text x="207.5" y="77" text-anchor="middle" font-size="10">4</text>
+            <rect x="230" y="50" width="45" height="45" fill="#bbdefb" stroke="#333" stroke-width="1"/>
+            <text x="252.5" y="77" text-anchor="middle" font-size="10">5</text>
+            <rect x="275" y="50" width="45" height="45" fill="#e3f2fd" stroke="#333" stroke-width="1"/>
+            <text x="297.5" y="77" text-anchor="middle" font-size="10">6</text>
+            <rect x="320" y="50" width="45" height="45" fill="#bbdefb" stroke="#333" stroke-width="1"/>
+            <text x="342.5" y="77" text-anchor="middle" font-size="10">7</text>
+            <rect x="365" y="50" width="45" height="45" fill="#e3f2fd" stroke="#333" stroke-width="1"/>
+            <text x="387.5" y="77" text-anchor="middle" font-size="10">8</text>
+            <rect x="410" y="50" width="45" height="45" fill="#bbdefb" stroke="#333" stroke-width="1"/>
+            <text x="432.5" y="77" text-anchor="middle" font-size="10">9</text>
+            <rect x="455" y="50" width="45" height="45" fill="#e3f2fd" stroke="#333" stroke-width="1"/>
+            <text x="477.5" y="77" text-anchor="middle" font-size="10">10</text>
+            
+            <!-- Right side (shared with Q2) -->
+            <rect x="455" y="95" width="45" height="45" fill="#e1bee7" stroke="#333" stroke-width="2" stroke-dasharray="5,5"/>
+            <text x="477.5" y="122" text-anchor="middle" font-size="10">11</text>
+            
+            <!-- Bottom side (shared with Q3) -->
+            <rect x="50" y="455" width="45" height="45" fill="#c8e6c9" stroke="#333" stroke-width="2" stroke-dasharray="5,5"/>
+            <text x="72.5" y="482" text-anchor="middle" font-size="10">31</text>
+            
+            <!-- Q1 Label -->
+            <text x="275" y="275" text-anchor="middle" font-size="48" font-weight="bold" fill="#1565c0" opacity="0.3">Q1</text>
+            
+            <!-- Quadrant 2 (NE - Top Right) - Commercial District -->
+            <rect x="500" y="50" width="450" height="450" fill="url(#q2Gradient)" stroke="#333" stroke-width="2"/>
+            <text x="725" y="30" text-anchor="middle" font-size="24" font-weight="bold" fill="#7b1fa2">Quadrant 2 (NE)</text>
+            <text x="725" y="60" text-anchor="middle" font-size="16" fill="#7b1fa2">Commercial District</text>
+            
+            <!-- Q2 Spaces (10 per side) -->
+            <!-- Top side -->
+            <rect x="500" y="50" width="45" height="45" fill="#e1bee7" stroke="#333" stroke-width="1"/>
+            <text x="522.5" y="77" text-anchor="middle" font-size="10">1</text>
+            <rect x="545" y="50" width="45" height="45" fill="#f3e5f5" stroke="#333" stroke-width="1"/>
+            <text x="567.5" y="77" text-anchor="middle" font-size="10">2</text>
+            <rect x="590" y="50" width="45" height="45" fill="#e1bee7" stroke="#333" stroke-width="1"/>
+            <text x="612.5" y="77" text-anchor="middle" font-size="10">3</text>
+            <rect x="635" y="50" width="45" height="45" fill="#f3e5f5" stroke="#333" stroke-width="1"/>
+            <text x="657.5" y="77" text-anchor="middle" font-size="10">4</text>
+            <rect x="680" y="50" width="45" height="45" fill="#e1bee7" stroke="#333" stroke-width="1"/>
+            <text x="702.5" y="77" text-anchor="middle" font-size="10">5</text>
+            <rect x="725" y="50" width="45" height="45" fill="#f3e5f5" stroke="#333" stroke-width="1"/>
+            <text x="747.5" y="77" text-anchor="middle" font-size="10">6</text>
+            <rect x="770" y="50" width="45" height="45" fill="#e1bee7" stroke="#333" stroke-width="1"/>
+            <text x="792.5" y="77" text-anchor="middle" font-size="10">7</text>
+            <rect x="815" y="50" width="45" height="45" fill="#f3e5f5" stroke="#333" stroke-width="1"/>
+            <text x="837.5" y="77" text-anchor="middle" font-size="10">8</text>
+            <rect x="860" y="50" width="45" height="45" fill="#e1bee7" stroke="#333" stroke-width="1"/>
+            <text x="882.5" y="77" text-anchor="middle" font-size="10">9</text>
+            <rect x="905" y="50" width="45" height="45" fill="#f3e5f5" stroke="#333" stroke-width="1"/>
+            <text x="927.5" y="77" text-anchor="middle" font-size="10">10</text>
+            
+            <!-- Bottom side (shared with Q4) -->
+            <rect x="905" y="455" width="45" height="45" fill="#ffcc80" stroke="#333" stroke-width="2" stroke-dasharray="5,5"/>
+            <text x="927.5" y="482" text-anchor="middle" font-size="10">31</text>
+            
+            <!-- Q2 Label -->
+            <text x="725" y="275" text-anchor="middle" font-size="48" font-weight="bold" fill="#7b1fa2" opacity="0.3">Q2</text>
+            
+            <!-- Quadrant 3 (SW - Bottom Left) - Residential District -->
+            <rect x="50" y="500" width="450" height="450" fill="url(#q3Gradient)" stroke="#333" stroke-width="2"/>
+            <text x="275" y="970" text-anchor="middle" font-size="24" font-weight="bold" fill="#2e7d32">Quadrant 3 (SW)</text>
+            <text x="275" y="990" text-anchor="middle" font-size="16" fill="#2e7d32">Residential District</text>
+            
+            <!-- Q3 Spaces (10 per side) -->
+            <!-- Bottom side -->
+            <rect x="50" y="905" width="45" height="45" fill="#a5d6a7" stroke="#333" stroke-width="1"/>
+            <text x="72.5" y="932" text-anchor="middle" font-size="10">31</text>
+            <rect x="95" y="905" width="45" height="45" fill="#c8e6c9" stroke="#333" stroke-width="1"/>
+            <text x="117.5" y="932" text-anchor="middle" font-size="10">32</text>
+            <rect x="140" y="905" width="45" height="45" fill="#a5d6a7" stroke="#333" stroke-width="1"/>
+            <text x="162.5" y="932" text-anchor="middle" font-size="10">33</text>
+            <rect x="185" y="905" width="45" height="45" fill="#c8e6c9" stroke="#333" stroke-width="1"/>
+            <text x="207.5" y="932" text-anchor="middle" font-size="10">34</text>
+            <rect x="230" y="905" width="45" height="45" fill="#a5d6a7" stroke="#333" stroke-width="1"/>
+            <text x="252.5" y="932" text-anchor="middle" font-size="10">35</text>
+            <rect x="275" y="905" width="45" height="45" fill="#c8e6c9" stroke="#333" stroke-width="1"/>
+            <text x="297.5" y="932" text-anchor="middle" font-size="10">36</text>
+            <rect x="320" y="905" width="45" height="45" fill="#a5d6a7" stroke="#333" stroke-width="1"/>
+            <text x="342.5" y="932" text-anchor="middle" font-size="10">37</text>
+            <rect x="365" y="905" width="45" height="45" fill="#c8e6c9" stroke="#333" stroke-width="1"/>
+            <text x="387.5" y="932" text-anchor="middle" font-size="10">38</text>
+            <rect x="410" y="905" width="45" height="45" fill="#a5d6a7" stroke="#333" stroke-width="1"/>
+            <text x="432.5" y="932" text-anchor="middle" font-size="10">39</text>
+            <rect x="455" y="905" width="45" height="45" fill="#c8e6c9" stroke="#333" stroke-width="1"/>
+            <text x="477.5" y="932" text-anchor="middle" font-size="10">40</text>
+            
+            <!-- Right side (shared with Q4) -->
+            <rect x="455" y="905" width="45" height="45" fill="#ffcc80" stroke="#333" stroke-width="2" stroke-dasharray="5,5"/>
+            <text x="477.5" y="932" text-anchor="middle" font-size="10">11</text>
+            
+            <!-- Q3 Label -->
+            <text x="275" y="725" text-anchor="middle" font-size="48" font-weight="bold" fill="#2e7d32" opacity="0.3">Q3</text>
+            
+            <!-- Quadrant 4 (SE - Bottom Right) - Industrial District -->
+            <rect x="500" y="500" width="450" height="450" fill="url(#q4Gradient)" stroke="#333" stroke-width="2"/>
+            <text x="725" y="970" text-anchor="middle" font-size="24" font-weight="bold" fill="#e65100">Quadrant 4 (SE)</text>
+            <text x="725" y="990" text-anchor="middle" font-size="16" fill="#e65100">Industrial District</text>
+            
+            <!-- Q4 Spaces (10 per side) -->
+            <!-- Bottom side -->
+            <rect x="500" y="905" width="45" height="45" fill="#ffcc80" stroke="#333" stroke-width="1"/>
+            <text x="522.5" y="932" text-anchor="middle" font-size="10">31</text>
+            <rect x="545" y="905" width="45" height="45" fill="#ffe0b2" stroke="#333" stroke-width="1"/>
+            <text x="567.5" y="932" text-anchor="middle" font-size="10">32</text>
+            <rect x="590" y="905" width="45" height="45" fill="#ffcc80" stroke="#333" stroke-width="1"/>
+            <text x="612.5" y="932" text-anchor="middle" font-size="10">33</text>
+            <rect x="635" y="905" width="45" height="45" fill="#ffe0b2" stroke="#333" stroke-width="1"/>
+            <text x="657.5" y="932" text-anchor="middle" font-size="10">34</text>
+            <rect x="680" y="905" width="45" height="45" fill="#ffcc80" stroke="#333" stroke-width="1"/>
+            <text x="702.5" y="932" text-anchor="middle" font-size="10">35</text>
+            <rect x="725" y="905" width="45" height="45" fill="#ffe0b2" stroke="#333" stroke-width="1"/>
+            <text x="747.5" y="932" text-anchor="middle" font-size="10">36</text>
+            <rect x="770" y="905" width="45" height="45" fill="#ffcc80" stroke="#333" stroke-width="1"/>
+            <text x="792.5" y="932" text-anchor="middle" font-size="10">37</text>
+            <rect x="815" y="905" width="45" height="45" fill="#ffe0b2" stroke="#333" stroke-width="1"/>
+            <text x="837.5" y="932" text-anchor="middle" font-size="10">38</text>
+            <rect x="860" y="905" width="45" height="45" fill="#ffcc80" stroke="#333" stroke-width="1"/>
+            <text x="882.5" y="932" text-anchor="middle" font-size="10">39</text>
+            <rect x="905" y="905" width="45" height="45" fill="#ffe0b2" stroke="#333" stroke-width="1"/>
+            <text x="927.5" y="932" text-anchor="middle" font-size="10">40</text>
+            
+            <!-- Q4 Label -->
+            <text x="725" y="725" text-anchor="middle" font-size="48" font-weight="bold" fill="#e65100" opacity="0.3">Q4</text>
+            
+            <!-- Center START -->
+            <circle cx="500" cy="500" r="80" fill="#ffd700" stroke="#333" stroke-width="4"/>
+            <circle cx="500" cy="500" r="70" fill="none" stroke="#333" stroke-width="2"/>
+            <text x="500" y="490" text-anchor="middle" font-size="28" font-weight="bold" fill="#333">START</text>
+            <text x="500" y="520" text-anchor="middle" font-size="14" fill="#333">Choose</text>
+            <text x="500" y="537" text-anchor="middle" font-size="14" fill="#333">Direction</text>
+            
+            <!-- Arrows pointing to quadrants from center -->
+            <!-- Arrow to Q1 (NW) -->
+            <line x1="480" y1="480" x2="450" y2="450" stroke="#333" stroke-width="3" marker-end="url(#arrowhead)"/>
+            <!-- Arrow to Q2 (NE) -->
+            <line x1="520" y1="480" x2="550" y2="450" stroke="#333" stroke-width="3" marker-end="url(#arrowhead)"/>
+            <!-- Arrow to Q3 (SW) -->
+            <line x1="480" y1="520" x2="450" y2="550" stroke="#333" stroke-width="3" marker-end="url(#arrowhead)"/>
+            <!-- Arrow to Q4 (SE) -->
+            <line x1="520" y1="520" x2="550" y2="550" stroke="#333" stroke-width="3" marker-end="url(#arrowhead)"/>
+            
+            <defs>
+                <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                    <polygon points="0 0, 10 3, 0 6" fill="#333" />
+                </marker>
+            </defs>
+            
+            <!-- Shared border indicators -->
+            <!-- Q1-Q2 border -->
+            <line x1="500" y1="50" x2="500" y2="500" stroke="#ff0000" stroke-width="4" opacity="0.5"/>
+            <text x="505" y="275" font-size="14" fill="#ff0000" font-weight="bold">Shared Border</text>
+            
+            <!-- Q1-Q3 border -->
+            <line x1="50" y1="500" x2="500" y2="500" stroke="#ff0000" stroke-width="4" opacity="0.5"/>
+            <text x="275" y="495" text-anchor="middle" font-size="14" fill="#ff0000" font-weight="bold">Shared Border</text>
+            
+            <!-- Q2-Q4 border -->
+            <line x1="950" y1="500" x2="500" y2="500" stroke="#ff0000" stroke-width="4" opacity="0.5"/>
+            <text x="725" y="495" text-anchor="middle" font-size="14" fill="#ff0000" font-weight="bold">Shared Border</text>
+            
+            <!-- Q3-Q4 border -->
+            <line x1="500" y1="950" x2="500" y2="500" stroke="#ff0000" stroke-width="4" opacity="0.5"/>
+            <text x="505" y="725" font-size="14" fill="#ff0000" font-weight="bold">Shared Border</text>
+        </svg>
+        
+        <div class="legend">
+            <h3>Legend</h3>
+            <ul>
+                <li>
+                    <span class="color-box" style="background: linear-gradient(135deg, #e3f2fd 0%, #90caf9 100%);"></span>
+                    <strong>Quadrant 1 (NW) - Luxury District:</strong> High-value properties ($200-$400)
+                </li>
+                <li>
+                    <span class="color-box" style="background: linear-gradient(135deg, #f3e5f5 0%, #ce93d8 100%);"></span>
+                    <strong>Quadrant 2 (NE) - Commercial District:</strong> Business properties ($150-$300)
+                </li>
+                <li>
+                    <span class="color-box" style="background: linear-gradient(135deg, #e8f5e9 0%, #81c784 100%);"></span>
+                    <strong>Quadrant 3 (SW) - Residential District:</strong> Medium properties ($100-$200)
+                </li>
+                <li>
+                    <span class="color-box" style="background: linear-gradient(135deg, #fff3e0 0%, #ffb74d 100%);"></span>
+                    <strong>Quadrant 4 (SE) - Industrial District:</strong> Starter properties ($60-$150)
+                </li>
+                <li>
+                    <span class="color-box" style="background: #ffd700;"></span>
+                    <strong>CENTER START:</strong> All players begin here and choose a direction
+                </li>
+                <li>
+                    <strong style="color: #ff0000;">Red Lines:</strong> Shared borders between adjacent quadrants
+                </li>
+                <li>
+                    <strong>Dashed Borders:</strong> Spaces on shared borders (counted once)
+                </li>
+            </ul>
+            
+            <h3>Board Statistics</h3>
+            <ul>
+                <li><strong>Total Quadrants:</strong> 4 (Q1-NW, Q2-NE, Q3-SW, Q4-SE)</li>
+                <li><strong>Spaces per Quadrant:</strong> 40 (10 per side)</li>
+                <li><strong>Total Unique Spaces:</strong> 161 (160 board spaces + 1 center START)</li>
+                <li><strong>Shared Borders:</strong> Q1↔Q2, Q1↔Q3, Q2↔Q4, Q3↔Q4</li>
+            </ul>
+            
+            <h3>Gameplay Notes</h3>
+            <ul>
+                <li>Players start at the <strong>CENTER START</strong> and choose one of 4 directions</li>
+                <li>Move clockwise within your current quadrant (like standard Monopoly)</li>
+                <li>When landing on a <strong>shared border space</strong>, you can cross into the adjacent quadrant</li>
+                <li>Collect $200 when passing through CENTER START</li>
+                <li>Strategic gameplay: Choose quadrants based on property availability and opponents' positions</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
