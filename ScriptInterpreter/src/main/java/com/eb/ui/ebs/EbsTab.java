@@ -33,6 +33,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tooltip;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
@@ -2464,11 +2465,31 @@ public class EbsTab extends Tab {
         // Create a WebView
         WebView webView = new WebView();
         
+        // Create a StatusBar to show URLs when hovering over links
+        StatusBar statusBar = new StatusBar();
+        
+        // Listen to WebEngine's status changed event to display hover URLs
+        webView.getEngine().setOnStatusChanged(event -> {
+            String status = event.getData();
+            if (status != null && !status.isEmpty()) {
+                // Show the URL in the status bar message section
+                statusBar.setMessage(status);
+            } else {
+                // Clear the status bar when not hovering over a link
+                statusBar.clearMessage();
+            }
+        });
+        
         // Load the HTML content (including any scripts - this is intentional for preview)
         webView.getEngine().loadContent(htmlContent);
         
-        // Create a scene with the WebView (800x600 is a reasonable default, window is resizable)
-        Scene scene = new Scene(webView, 800, 600);
+        // Create a BorderPane layout with WebView in center and StatusBar at bottom
+        BorderPane root = new BorderPane();
+        root.setCenter(webView);
+        root.setBottom(statusBar);
+        
+        // Create a scene with the layout (800x600 is a reasonable default, window is resizable)
+        Scene scene = new Scene(root, 800, 600);
         webViewStage.setScene(scene);
         
         // Show the stage
