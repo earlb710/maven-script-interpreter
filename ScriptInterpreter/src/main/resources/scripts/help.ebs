@@ -104,6 +104,7 @@ if builtinsArray != null then {
             var childNode: json = call json.jsonFromString("{}");
             childNode = call json.set(childNode, "value", builtinName);
             childNode = call json.set(childNode, "icon", "icons/help-page.png");
+            childNode = call json.set(childNode, "expanded", false);
             
             // Use json.add to append to the array at the category path
             // json.add automatically creates the array if it doesn't exist and appends the item
@@ -117,24 +118,60 @@ if builtinsArray != null then {
 var builtinChildren: array[*];
 var totalBuiltins: int = 0;
 
+// Convert JSON array to regular array for sorting
+var categoryOrderArray: array[*];
 if builtinCategoryOrder != null then {
-    foreach categoryKey in builtinCategoryOrder {
+    var idx: int = 0;
+    while idx < builtinCategoryOrder.length {
+        var categoryKey: string = builtinCategoryOrder[idx];
+        call array.add(categoryOrderArray, categoryKey);
+        idx = idx + 1;
+    }
+    // Sort category order alphabetically
+    call array.sort(categoryOrderArray, true);
+}
+
+if categoryOrderArray.length > 0 then {
+    foreach categoryKey in categoryOrderArray {
         // Get category array from json using json.getArray to properly handle JSON arrays
         var categoryArray: json = call json.getArray(builtinsByCategory, categoryKey);
         if categoryArray != null then {
-            // Debug: print first 3 function names if they exist
-            var firstFunc: json = call json.get(categoryArray, "0");
-            if firstFunc != null then {
-                var firstName: string = call json.getString(firstFunc, "value", "");
+            // Sort builtin functions alphabetically within this category
+            // Create a regular array to sort, then convert back
+            var sortableArray: array[*];
+            var i: int = 0;
+            while i < categoryArray.length {
+                var item: json = categoryArray[i];
+                call array.add(sortableArray, item);
+                i = i + 1;
             }
-            var secondFunc: json = call json.get(categoryArray, "1");
-            if secondFunc != null then {
-                var secondName: string = call json.getString(secondFunc, "value", "");
+            
+            // Sort by the "value" property (function name)
+            var j: int = 0;
+            while j < sortableArray.length - 1 {
+                var k: int = j + 1;
+                while k < sortableArray.length {
+                    var item1: json = sortableArray[j];
+                    var item2: json = sortableArray[k];
+                    var name1: string = call json.getString(item1, "value", "");
+                    var name2: string = call json.getString(item2, "value", "");
+                    if name1 > name2 then {
+                        sortableArray[j] = item2;
+                        sortableArray[k] = item1;
+                    }
+                    k = k + 1;
+                }
+                j = j + 1;
             }
-            var thirdFunc: json = call json.get(categoryArray, "2");
-            if thirdFunc != null then {
-                var thirdName: string = call json.getString(thirdFunc, "value", "");
+            
+            // Convert sorted array back to JSON array
+            var sortedCategoryArray: json = call json.jsonFromString("[]");
+            var m: int = 0;
+            while m < sortableArray.length {
+                sortedCategoryArray = call json.add(sortedCategoryArray, "", sortableArray[m]);
+                m = m + 1;
             }
+            
             // Get display name from JSON, fallback to key
             var displayName: string = categoryKey;
             if builtinCategoryNames != null then {
@@ -150,7 +187,7 @@ if builtinCategoryOrder != null then {
             categoryNode = call json.set(categoryNode, "value", displayName);
             categoryNode = call json.set(categoryNode, "icon", "icons/tree-node.png");
             categoryNode = call json.set(categoryNode, "expanded", false);
-            categoryNode = call json.set(categoryNode, "children", categoryArray);
+            categoryNode = call json.set(categoryNode, "children", sortedCategoryArray);
             call array.add(builtinChildren, categoryNode);
             totalBuiltins = totalBuiltins + 1; // Count categories, not individual functions
         } else {
@@ -223,7 +260,7 @@ call array.add(syntaxChildren, tempNode);
 var structureNode: json = call json.jsonFromString("{}");
 structureNode = call json.set(structureNode, "value", "Structure");
 structureNode = call json.set(structureNode, "icon", "icons/tree-node.png");
-structureNode = call json.set(structureNode, "expanded", false);
+structureNode = call json.set(structureNode, "expanded", true);
 structureNode = call json.set(structureNode, "children", structureChildren);
 call array.add(syntaxChildren, structureNode);
 
@@ -246,7 +283,7 @@ call array.add(integerChildren, tempNode);
 var integerNode: json = call json.jsonFromString("{}");
 integerNode = call json.set(integerNode, "value", "Integer Types");
 integerNode = call json.set(integerNode, "icon", "icons/tree-node.png");
-integerNode = call json.set(integerNode, "expanded", false);
+integerNode = call json.set(integerNode, "expanded", true);
 integerNode = call json.set(integerNode, "children", integerChildren);
 call array.add(dataChildren, integerNode);
 
@@ -274,7 +311,7 @@ call array.add(dataChildren, tempNode);
 var dataNode: json = call json.jsonFromString("{}");
 dataNode = call json.set(dataNode, "value", "Data");
 dataNode = call json.set(dataNode, "icon", "icons/tree-node.png");
-dataNode = call json.set(dataNode, "expanded", false);
+dataNode = call json.set(dataNode, "expanded", true);
 dataNode = call json.set(dataNode, "children", dataChildren);
 call array.add(syntaxChildren, dataNode);
 
@@ -305,7 +342,7 @@ call array.add(collectionsChildren, tempNode);
 var collectionsNode: json = call json.jsonFromString("{}");
 collectionsNode = call json.set(collectionsNode, "value", "Collections");
 collectionsNode = call json.set(collectionsNode, "icon", "icons/tree-node.png");
-collectionsNode = call json.set(collectionsNode, "expanded", false);
+collectionsNode = call json.set(collectionsNode, "expanded", true);
 collectionsNode = call json.set(collectionsNode, "children", collectionsChildren);
 call array.add(syntaxChildren, collectionsNode);
 
@@ -313,7 +350,7 @@ call array.add(syntaxChildren, collectionsNode);
 var flowNode: json = call json.jsonFromString("{}");
 flowNode = call json.set(flowNode, "value", "Flow");
 flowNode = call json.set(flowNode, "icon", "icons/tree-node.png");
-flowNode = call json.set(flowNode, "expanded", false);
+flowNode = call json.set(flowNode, "expanded", true);
 flowNode = call json.set(flowNode, "children", flowChildren);
 call array.add(syntaxChildren, flowNode);
 
@@ -357,7 +394,7 @@ call array.add(screenChildren, tempNode);
 var screenNode: json = call json.jsonFromString("{}");
 screenNode = call json.set(screenNode, "value", "Screen");
 screenNode = call json.set(screenNode, "icon", "icons/tree-node.png");
-screenNode = call json.set(screenNode, "expanded", false);
+screenNode = call json.set(screenNode, "expanded", true);
 screenNode = call json.set(screenNode, "children", screenChildren);
 call array.add(syntaxChildren, screenNode);
 
@@ -384,7 +421,7 @@ var rootChildren: array[*];
 var syntaxRootNode: json = call json.jsonFromString("{}");
 syntaxRootNode = call json.set(syntaxRootNode, "value", "Syntax");
 syntaxRootNode = call json.set(syntaxRootNode, "icon", "icons/tree-node.png");
-syntaxRootNode = call json.set(syntaxRootNode, "expanded", false);
+syntaxRootNode = call json.set(syntaxRootNode, "expanded", true);
 syntaxRootNode = call json.set(syntaxRootNode, "children", syntaxChildren);
 call array.add(rootChildren, syntaxRootNode);
 
@@ -892,9 +929,9 @@ getHelpContent(topic: string) return string {
     }
     
     // Check if this topic matches a category display name
-    if builtinCategoryNames != null && builtinCategoryOrder != null then {
+    if builtinCategoryNames != null && categoryOrderArray.length > 0 then {
         // Iterate through category names to find a match
-        foreach categoryKey in builtinCategoryOrder {
+        foreach categoryKey in categoryOrderArray {
             var displayName: string = call json.getString(builtinCategoryNames, categoryKey, "");
             if displayName == topic then {
                 // Found matching category - show overview
@@ -1090,8 +1127,8 @@ call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.Screen", true);
 call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.Data.Integer Types", true);
 
 // Builtins section - all category nodes have children
-if builtinCategoryOrder != null then {
-    foreach categoryKey in builtinCategoryOrder {
+if categoryOrderArray.length > 0 then {
+    foreach categoryKey in categoryOrderArray {
         var displayName: string = categoryKey;
         if builtinCategoryNames != null then {
             var jsonDisplayName: string = call json.getString(builtinCategoryNames, categoryKey, "");
