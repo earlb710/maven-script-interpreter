@@ -1228,6 +1228,9 @@ print "";
 print "Initializing board layer (checkerboard pattern)...";
 
 // Initialize all 64 board squares with the correct checkerboard pattern
+// Note: Manual assignment is used because EBS screen variables (chessScreen.b##)
+// cannot be accessed dynamically via computed names. While verbose, this approach
+// ensures correct checkerboard pattern: light on (row+col)%2==0, dark on (row+col)%2==1
 // Row 0 (board row 8)
 chessScreen.b00 = lightSquare; chessScreen.b01 = darkSquare; chessScreen.b02 = lightSquare; chessScreen.b03 = darkSquare;
 chessScreen.b04 = lightSquare; chessScreen.b05 = darkSquare; chessScreen.b06 = lightSquare; chessScreen.b07 = darkSquare;
