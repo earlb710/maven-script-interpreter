@@ -993,6 +993,8 @@ public class AreaItemFactory {
             // Add combined listener for expansion state changes (handles both icon updates and expandable control)
             item.expandedProperty().addListener((obs, wasExpanded, isExpanded) -> {
                 // Handle expandable control first - prevent expansion if not expandable
+                // Note: This is safe from recursion because the condition checks for transition from
+                // collapsed->expanded. When we set to false, next trigger will have isExpanded=false.
                 if (!isExpandable && isExpanded && !wasExpanded) {
                     // User is trying to expand a non-expandable node - prevent it
                     item.setExpanded(false);
@@ -1009,6 +1011,7 @@ public class AreaItemFactory {
         // Add expansion prevention listener for non-expandable nodes (if not already added above)
         if (!isExpandable && hasChildren && !hasOpenClosedIcons) {
             item.expandedProperty().addListener((obs, wasExpanded, isExpanded) -> {
+                // Safe from recursion: checks for collapsed->expanded transition only
                 if (isExpanded && !wasExpanded) {
                     // User is trying to expand a non-expandable node - prevent it
                     item.setExpanded(false);
