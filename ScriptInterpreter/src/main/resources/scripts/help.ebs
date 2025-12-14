@@ -260,7 +260,7 @@ call array.add(syntaxChildren, tempNode);
 var structureNode: json = call json.jsonFromString("{}");
 structureNode = call json.set(structureNode, "value", "Structure");
 structureNode = call json.set(structureNode, "icon", "icons/tree-node.png");
-structureNode = call json.set(structureNode, "expanded", false);
+structureNode = call json.set(structureNode, "expanded", true);
 structureNode = call json.set(structureNode, "children", structureChildren);
 call array.add(syntaxChildren, structureNode);
 
@@ -283,7 +283,7 @@ call array.add(integerChildren, tempNode);
 var integerNode: json = call json.jsonFromString("{}");
 integerNode = call json.set(integerNode, "value", "Integer Types");
 integerNode = call json.set(integerNode, "icon", "icons/tree-node.png");
-integerNode = call json.set(integerNode, "expanded", false);
+integerNode = call json.set(integerNode, "expanded", true);
 integerNode = call json.set(integerNode, "children", integerChildren);
 call array.add(dataChildren, integerNode);
 
@@ -311,7 +311,7 @@ call array.add(dataChildren, tempNode);
 var dataNode: json = call json.jsonFromString("{}");
 dataNode = call json.set(dataNode, "value", "Data");
 dataNode = call json.set(dataNode, "icon", "icons/tree-node.png");
-dataNode = call json.set(dataNode, "expanded", false);
+dataNode = call json.set(dataNode, "expanded", true);
 dataNode = call json.set(dataNode, "children", dataChildren);
 call array.add(syntaxChildren, dataNode);
 
@@ -342,7 +342,7 @@ call array.add(collectionsChildren, tempNode);
 var collectionsNode: json = call json.jsonFromString("{}");
 collectionsNode = call json.set(collectionsNode, "value", "Collections");
 collectionsNode = call json.set(collectionsNode, "icon", "icons/tree-node.png");
-collectionsNode = call json.set(collectionsNode, "expanded", false);
+collectionsNode = call json.set(collectionsNode, "expanded", true);
 collectionsNode = call json.set(collectionsNode, "children", collectionsChildren);
 call array.add(syntaxChildren, collectionsNode);
 
@@ -350,7 +350,7 @@ call array.add(syntaxChildren, collectionsNode);
 var flowNode: json = call json.jsonFromString("{}");
 flowNode = call json.set(flowNode, "value", "Flow");
 flowNode = call json.set(flowNode, "icon", "icons/tree-node.png");
-flowNode = call json.set(flowNode, "expanded", false);
+flowNode = call json.set(flowNode, "expanded", true);
 flowNode = call json.set(flowNode, "children", flowChildren);
 call array.add(syntaxChildren, flowNode);
 
@@ -394,7 +394,7 @@ call array.add(screenChildren, tempNode);
 var screenNode: json = call json.jsonFromString("{}");
 screenNode = call json.set(screenNode, "value", "Screen");
 screenNode = call json.set(screenNode, "icon", "icons/tree-node.png");
-screenNode = call json.set(screenNode, "expanded", false);
+screenNode = call json.set(screenNode, "expanded", true);
 screenNode = call json.set(screenNode, "children", screenChildren);
 call array.add(syntaxChildren, screenNode);
 
@@ -421,7 +421,7 @@ var rootChildren: array[*];
 var syntaxRootNode: json = call json.jsonFromString("{}");
 syntaxRootNode = call json.set(syntaxRootNode, "value", "Syntax");
 syntaxRootNode = call json.set(syntaxRootNode, "icon", "icons/tree-node.png");
-syntaxRootNode = call json.set(syntaxRootNode, "expanded", false);
+syntaxRootNode = call json.set(syntaxRootNode, "expanded", true);
 syntaxRootNode = call json.set(syntaxRootNode, "children", syntaxChildren);
 call array.add(rootChildren, syntaxRootNode);
 
