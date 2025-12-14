@@ -1872,6 +1872,10 @@ public final class Builtins {
         if (name.startsWith("custom.")) {
             return true;
         }
+        // Check for screen builtins (scr.*)
+        if (name.startsWith("scr.")) {
+            return true;
+        }
         return false;
     }
 
