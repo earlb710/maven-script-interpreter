@@ -1,0 +1,45 @@
+// Test Script: textColor Property Parsing Test (No GUI)
+// Description: Tests the new textColor property parsing without showing the screen
+
+screen textColorParseTest = {
+    "title": "textColor Property Parse Test",
+    "width": 600,
+    "height": 400,
+    "vars": [
+        {
+            "name": "field1",
+            "type": "string",
+            "default": "Red text using textColor",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field with textColor:",
+                "labelColor": "#000000",
+                "textColor": "#FF0000"
+            }
+        },
+        {
+            "name": "field2",
+            "type": "string",
+            "default": "Blue text",
+            "display": {
+                "type": "textfield",
+                "labelText": "Another field:",
+                "textColor": "#0000FF"
+            }
+        }
+    ]
+};
+
+print "textColor Property Parsing Test";
+print "==============================";
+print "";
+print "Testing that textColor property is properly parsed...";
+print "";
+
+// Access screen variables to ensure parsing succeeded
+print "field1 value: " + textColorParseTest.field1;
+print "field2 value: " + textColorParseTest.field2;
+
+print "";
+print "If you see this message, the textColor property was successfully parsed!";
+print "The screen definition was created without errors.";

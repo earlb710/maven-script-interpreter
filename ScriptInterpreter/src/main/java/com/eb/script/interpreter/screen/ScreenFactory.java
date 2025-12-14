@@ -4856,6 +4856,7 @@ public class ScreenFactory {
         metadata.labelFontSize = getStringValue(displayDef, "labelFontSize", getStringValue(displayDef, "label_font_size", null));
         metadata.itemFontSize = getStringValue(displayDef, "itemFontSize", getStringValue(displayDef, "item_font_size", null));
         metadata.itemColor = getStringValue(displayDef, "itemColor", getStringValue(displayDef, "item_color", null));
+        metadata.textColor = getStringValue(displayDef, "textColor", getStringValue(displayDef, "text_color", null));
         metadata.itemBold = getBooleanValue(displayDef, "itemBold", getBooleanValue(displayDef, "item_bold", null));
         metadata.itemItalic = getBooleanValue(displayDef, "itemItalic", getBooleanValue(displayDef, "item_italic", null));
         metadata.maxLength = getIntValue(displayDef, "maxLength", getIntValue(displayDef, "max_length", null));
@@ -4919,6 +4920,7 @@ public class ScreenFactory {
         merged.maxLength = base.maxLength;
         merged.height = base.height;
         merged.itemColor = base.itemColor;
+        merged.textColor = base.textColor;
         merged.itemBold = base.itemBold;
         merged.itemItalic = base.itemItalic;
         merged.onClick = base.onClick;
@@ -4957,6 +4959,7 @@ public class ScreenFactory {
         if (overlay.maxLength != null) merged.maxLength = overlay.maxLength;
         if (overlay.height != null) merged.height = overlay.height;
         if (overlay.itemColor != null) merged.itemColor = overlay.itemColor;
+        if (overlay.textColor != null) merged.textColor = overlay.textColor;
         if (overlay.itemBold != null) merged.itemBold = overlay.itemBold;
         if (overlay.itemItalic != null) merged.itemItalic = overlay.itemItalic;
         if (overlay.onClick != null) merged.onClick = overlay.onClick;
@@ -5740,6 +5743,7 @@ public class ScreenFactory {
         clone.maxLength = source.maxLength;
         clone.height = source.height;
         clone.itemColor = source.itemColor;
+        clone.textColor = source.textColor;
         clone.itemBold = source.itemBold;
         clone.itemItalic = source.itemItalic;
         clone.onClick = source.onClick;

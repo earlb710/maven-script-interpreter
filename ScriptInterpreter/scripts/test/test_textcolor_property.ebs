@@ -1,0 +1,110 @@
+// Test Script: textColor Property Test
+// Description: Tests the new textColor property for screen items
+// This property should work as an alternative to itemColor for consistency with labelColor
+
+screen textColorTest = {
+    "title": "textColor Property Test",
+    "width": 600,
+    "height": 500,
+    "vars": [
+        {
+            "name": "field1",
+            "type": "string",
+            "default": "Red text using textColor",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field with textColor (red):",
+                "labelColor": "#000000",
+                "textColor": "#FF0000"
+            }
+        },
+        {
+            "name": "field2",
+            "type": "string",
+            "default": "Blue text using textColor",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field with textColor (blue):",
+                "labelColor": "#000000",
+                "textColor": "#0000FF"
+            }
+        },
+        {
+            "name": "field3",
+            "type": "string",
+            "default": "Green text using itemColor",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field with itemColor (green):",
+                "labelColor": "#000000",
+                "itemColor": "#00AA00"
+            }
+        },
+        {
+            "name": "field4",
+            "type": "string",
+            "default": "Purple text - textColor precedence",
+            "display": {
+                "type": "textfield",
+                "labelText": "Both textColor and itemColor:",
+                "labelColor": "#000000",
+                "textColor": "#AA00AA",
+                "itemColor": "#00AAAA"
+            }
+        },
+        {
+            "name": "field5",
+            "type": "string",
+            "default": "Styled text with textColor",
+            "display": {
+                "type": "textfield",
+                "labelText": "Styled Field:",
+                "labelColor": "#0000AA",
+                "labelBold": true,
+                "textColor": "#CC6600",
+                "itemBold": true,
+                "itemFontSize": "16px"
+            }
+        },
+        {
+            "name": "message",
+            "type": "string",
+            "default": "This is a textarea with textColor",
+            "display": {
+                "type": "textarea",
+                "labelText": "Textarea with textColor:",
+                "labelColor": "#666666",
+                "textColor": "#006600",
+                "height": 3
+            }
+        }
+    ]
+};
+
+print "textColor Property Test";
+print "=====================";
+print "";
+print "This screen demonstrates the new textColor property:";
+print "";
+print "1. Field 1: Uses textColor for red text";
+print "2. Field 2: Uses textColor for blue text";
+print "3. Field 3: Uses itemColor for green text (old style)";
+print "4. Field 4: Both textColor and itemColor set - textColor should win (purple)";
+print "5. Field 5: Styled field with bold text and larger font";
+print "6. Message: Textarea with green textColor";
+print "";
+print "Expected Results:";
+print "- Field 1 should have red text";
+print "- Field 2 should have blue text";
+print "- Field 3 should have green text";
+print "- Field 4 should have purple text (not cyan) - textColor takes precedence";
+print "- Field 5 should have orange text, bold, and larger font";
+print "- Textarea should have green text";
+print "";
+
+screen textColorTest show;
+
+print "";
+print "textColor property test completed!";
+print "The textColor property provides a consistent naming convention";
+print "alongside labelColor for better code readability.";
