@@ -1,0 +1,564 @@
+// Tic Tac Toe Game - Human vs Computer
+// ======================================
+// A simple implementation of Tic Tac Toe where you play against the computer.
+// The computer makes basic strategic moves (blocking wins, taking center, etc.)
+//
+// Features:
+//   - 3x3 grid of clickable canvas cells
+//   - Human plays as 'X' (white), Computer plays as 'O' (black)
+//   - Computer AI with strategic decision making
+//   - Win/Draw detection
+//   - New Game button to reset
+//   - Status display showing current game state
+//
+// Usage:
+//   Run in EBS Console: /open projects/TicTacToe/tictactoe.ebs then Ctrl+Enter
+
+// Canvas constants
+var CELL_SIZE: int = 100;
+var DRAW_SIZE: int = 90;  // 90% of cell size
+var DRAW_OFFSET: int = 5;  // (100 - 90) / 2
+
+// Game state variables
+var board: string[9];  // Board positions 0-8 (top-left to bottom-right, row by row)
+var gameOver: bool = false;
+var statusMessage: string = "Your turn! Click a cell to play.";
+
+// Canvas cells for the 3x3 grid
+var canvas0: canvas = call canvas.create(CELL_SIZE, CELL_SIZE, "canvas0");
+var canvas1: canvas = call canvas.create(CELL_SIZE, CELL_SIZE, "canvas1");
+var canvas2: canvas = call canvas.create(CELL_SIZE, CELL_SIZE, "canvas2");
+var canvas3: canvas = call canvas.create(CELL_SIZE, CELL_SIZE, "canvas3");
+var canvas4: canvas = call canvas.create(CELL_SIZE, CELL_SIZE, "canvas4");
+var canvas5: canvas = call canvas.create(CELL_SIZE, CELL_SIZE, "canvas5");
+var canvas6: canvas = call canvas.create(CELL_SIZE, CELL_SIZE, "canvas6");
+var canvas7: canvas = call canvas.create(CELL_SIZE, CELL_SIZE, "canvas7");
+var canvas8: canvas = call canvas.create(CELL_SIZE, CELL_SIZE, "canvas8");
+
+// Initialize the board with empty cells
+initBoard {
+    for (var i: int = 0; i < 9; i++) {
+        board[i] = "";
+    }
+    gameOver = false;
+    statusMessage = "Your turn! Click a cell to play.";
+}
+
+// Check if a position is empty
+isEmpty(pos: int) return bool {
+    return board[pos] == "";
+}
+
+// Check for a win condition
+checkWin(player: string) return bool {
+    // Check rows
+    if (board[0] == player and board[1] == player and board[2] == player) {
+        return true;
+    }
+    if (board[3] == player and board[4] == player and board[5] == player) {
+        return true;
+    }
+    if (board[6] == player and board[7] == player and board[8] == player) {
+        return true;
+    }
+    
+    // Check columns
+    if (board[0] == player and board[3] == player and board[6] == player) {
+        return true;
+    }
+    if (board[1] == player and board[4] == player and board[7] == player) {
+        return true;
+    }
+    if (board[2] == player and board[5] == player and board[8] == player) {
+        return true;
+    }
+    
+    // Check diagonals
+    if (board[0] == player and board[4] == player and board[8] == player) {
+        return true;
+    }
+    if (board[2] == player and board[4] == player and board[6] == player) {
+        return true;
+    }
+    
+    return false;
+}
+
+// Draw winning line through the three winning cells
+drawWinLine(player: string) {
+    // Check rows
+    if (board[0] == player and board[1] == player and board[2] == player) {
+        call drawLineOnCells(0, 1, 2, "horizontal");
+    }
+    if (board[3] == player and board[4] == player and board[5] == player) {
+        call drawLineOnCells(3, 4, 5, "horizontal");
+    }
+    if (board[6] == player and board[7] == player and board[8] == player) {
+        call drawLineOnCells(6, 7, 8, "horizontal");
+    }
+    
+    // Check columns
+    if (board[0] == player and board[3] == player and board[6] == player) {
+        call drawLineOnCells(0, 3, 6, "vertical");
+    }
+    if (board[1] == player and board[4] == player and board[7] == player) {
+        call drawLineOnCells(1, 4, 7, "vertical");
+    }
+    if (board[2] == player and board[5] == player and board[8] == player) {
+        call drawLineOnCells(2, 5, 8, "vertical");
+    }
+    
+    // Check diagonals
+    if (board[0] == player and board[4] == player and board[8] == player) {
+        call drawLineOnCells(0, 4, 8, "diagonal-down");
+    }
+    if (board[2] == player and board[4] == player and board[6] == player) {
+        call drawLineOnCells(2, 4, 6, "diagonal-up");
+    }
+}
+
+// Draw a red line on the specified cells
+drawLineOnCells(cell1: int, cell2: int, cell3: int, direction: string) {
+    var canvas1: canvas = call getCanvas(cell1);
+    var canvas2: canvas = call getCanvas(cell2);
+    var canvas3: canvas = call getCanvas(cell3);
+    
+    call style.setStroke(canvas1, "#ff0000", 8);
+    call style.setStroke(canvas2, "#ff0000", 8);
+    call style.setStroke(canvas3, "#ff0000", 8);
+    
+    if (direction == "horizontal") {
+        // Draw horizontal line through center of each cell
+        call draw.line(canvas1, 0, 50, 100, 50);
+        call draw.line(canvas2, 0, 50, 100, 50);
+        call draw.line(canvas3, 0, 50, 100, 50);
+    }
+    if (direction == "vertical") {
+        // Draw vertical line through center of each cell
+        call draw.line(canvas1, 50, 0, 50, 100);
+        call draw.line(canvas2, 50, 0, 50, 100);
+        call draw.line(canvas3, 50, 0, 50, 100);
+    }
+    if (direction == "diagonal-down") {
+        // Draw diagonal from top-left to bottom-right
+        call draw.line(canvas1, 0, 0, 100, 100);
+        call draw.line(canvas2, 0, 0, 100, 100);
+        call draw.line(canvas3, 0, 0, 100, 100);
+    }
+    if (direction == "diagonal-up") {
+        // Draw diagonal from bottom-left to top-right
+        call draw.line(canvas1, 0, 100, 100, 0);
+        call draw.line(canvas2, 0, 100, 100, 0);
+        call draw.line(canvas3, 0, 100, 100, 0);
+    }
+}
+
+// Check if the board is full (draw)
+checkDraw return bool {
+    for (var i: int = 0; i < 9; i++) {
+        if (board[i] == "") {
+            return false;
+        }
+    }
+    return true;
+}
+
+// Computer AI - Find best move
+computerMove return int {
+    // Strategy priority:
+    // 1. Win if possible
+    // 2. Block player from winning
+    // 3. Take center if available
+    // 4. Take corner
+    // 5. Take any available spot
+    
+    // Check if computer can win
+    for (var i: int = 0; i < 9; i++) {
+        if (call isEmpty(i)) {
+            board[i] = "O";
+            if (call checkWin("O")) {
+                board[i] = "";  // Reset for actual move
+                return i;
+            }
+            board[i] = "";
+        }
+    }
+    
+    // Check if need to block player
+    for (var i: int = 0; i < 9; i++) {
+        if (call isEmpty(i)) {
+            board[i] = "X";
+            if (call checkWin("X")) {
+                board[i] = "";  // Reset for actual move
+                return i;
+            }
+            board[i] = "";
+        }
+    }
+    
+    // Take center if available
+    if (call isEmpty(4)) {
+        return 4;
+    }
+    
+    // Take a corner
+    var corners: int[4];
+    corners[0] = 0;
+    corners[1] = 2;
+    corners[2] = 6;
+    corners[3] = 8;
+    
+    for (var i: int = 0; i < 4; i++) {
+        if (call isEmpty(corners[i])) {
+            return corners[i];
+        }
+    }
+    
+    // Take any available spot
+    for (var i: int = 0; i < 9; i++) {
+        if (call isEmpty(i)) {
+            return i;
+        }
+    }
+    
+    return -1;  // Should never happen
+}
+
+// Draw X on a canvas cell (white, two diagonal lines)
+drawX(cellCanvas: canvas) {
+    // Clear the cell with background color
+    call style.setFill(cellCanvas, "#34495e");
+    call draw.rect(cellCanvas, 0, 0, CELL_SIZE, CELL_SIZE, true);
+    
+    // Draw white X (two diagonal lines)
+    call style.setStroke(cellCanvas, "#ffffff", 4);
+    call draw.line(cellCanvas, DRAW_OFFSET, DRAW_OFFSET, DRAW_OFFSET + DRAW_SIZE, DRAW_OFFSET + DRAW_SIZE);
+    call draw.line(cellCanvas, DRAW_OFFSET + DRAW_SIZE, DRAW_OFFSET, DRAW_OFFSET, DRAW_OFFSET + DRAW_SIZE);
+}
+
+// Draw O on a canvas cell (black circle)
+drawO(cellCanvas: canvas) {
+    // Clear the cell with background color
+    call style.setFill(cellCanvas, "#34495e");
+    call draw.rect(cellCanvas, 0, 0, CELL_SIZE, CELL_SIZE, true);
+    
+    // Draw black O (circle outline)
+    var radius: int = DRAW_SIZE / 2;
+    var centerX: int = CELL_SIZE / 2;
+    var centerY: int = CELL_SIZE / 2;
+    call style.setStroke(cellCanvas, "#000000", 4);
+    call draw.circle(cellCanvas, centerX, centerY, radius, false);
+}
+
+// Clear a canvas cell
+clearCell(cellCanvas: canvas) {
+    call style.setFill(cellCanvas, "#34495e");
+    call draw.rect(cellCanvas, 0, 0, CELL_SIZE, CELL_SIZE, true);
+}
+
+// Get canvas by position
+getCanvas(pos: int) return canvas {
+    if (pos == 0) { return canvas0; }
+    if (pos == 1) { return canvas1; }
+    if (pos == 2) { return canvas2; }
+    if (pos == 3) { return canvas3; }
+    if (pos == 4) { return canvas4; }
+    if (pos == 5) { return canvas5; }
+    if (pos == 6) { return canvas6; }
+    if (pos == 7) { return canvas7; }
+    if (pos == 8) { return canvas8; }
+    return canvas0;  // Should never happen
+}
+
+// Update the screen display
+updateDisplay {
+    // Draw X or O on each cell based on board state
+    for (var i: int = 0; i < 9; i++) {
+        var cellCanvas: canvas = call getCanvas(i);
+        if (board[i] == "X") {
+            call drawX(cellCanvas);
+        } else if (board[i] == "O") {
+            call drawO(cellCanvas);
+        } else {
+            call clearCell(cellCanvas);
+        }
+    }
+    
+    // Update status message
+    tictactoeScreen.status = statusMessage;
+}
+
+// Handle player move
+playerMove(pos: int) {
+    var empty: bool = call isEmpty(pos);
+    if (gameOver or !empty) {
+        return;
+    }
+    
+    // Player makes move
+    board[pos] = "X";
+    call updateDisplay;
+    
+    // Check if player won
+    if (call checkWin("X")) {
+        gameOver = true;
+        statusMessage = "You win! Congratulations!";
+        call updateDisplay;
+        call drawWinLine("X");
+        return;
+    }
+    
+    // Check for draw
+    if (call checkDraw) {
+        gameOver = true;
+        statusMessage = "It's a draw!";
+        call updateDisplay;
+        return;
+    }
+    
+    // Computer's turn
+    statusMessage = "Computer's turn...";
+    call updateDisplay;
+    
+    var compPos: int = call computerMove();
+    if (compPos >= 0) {
+        board[compPos] = "O";
+        
+        // Check if computer won
+        if (call checkWin("O")) {
+            gameOver = true;
+            statusMessage = "Computer wins! Try again.";
+            call updateDisplay;
+            call drawWinLine("O");
+            return;
+        }
+        
+        // Check for draw after computer move
+        if (call checkDraw) {
+            gameOver = true;
+            statusMessage = "It's a draw!";
+            call updateDisplay;
+            return;
+        }
+        
+        statusMessage = "Your turn! Click a cell to play.";
+        call updateDisplay;
+    }
+}
+
+// Reset the game
+newGame {
+    call initBoard;
+    call updateDisplay;
+}
+
+// Define the Tic Tac Toe screen
+screen tictactoeScreen = {
+    "title": "Tic Tac Toe - You (X) vs Computer (O)",
+    "width": 450,
+    "height": 650,
+    "sets": [
+        {
+            "setname": "main",
+            "vars": [
+                {"name": "status", "type": "string"},
+                {"name": "canvas0", "type": "canvas"},
+                {"name": "canvas1", "type": "canvas"},
+                {"name": "canvas2", "type": "canvas"},
+                {"name": "canvas3", "type": "canvas"},
+                {"name": "canvas4", "type": "canvas"},
+                {"name": "canvas5", "type": "canvas"},
+                {"name": "canvas6", "type": "canvas"},
+                {"name": "canvas7", "type": "canvas"},
+                {"name": "canvas8", "type": "canvas"}
+            ]
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "15",
+            "padding": "20",
+            "style": "-fx-background-color: #2c3e50; -fx-alignment: center;",
+            "items": [
+                {
+                    "name": "titleLabel",
+                    "display": {
+                        "type": "label",
+                        "labelText": "TIC TAC TOE",
+                        "labelColor": "#ffffff",
+                        "labelFontSize": "28px",
+                        "labelBold": true,
+                        "style": "-fx-alignment: center;"
+                    }
+                },
+                {
+                    "name": "statusLabel",
+                    "varRef": "status",
+                    "display": {
+                        "type": "label",
+                        "labelText": "",
+                        "labelColor": "#ffff00",
+                        "labelFontSize": "18px",
+                        "labelBold": true,
+                        "style": "-fx-alignment: center; -fx-min-height: 50px; -fx-max-height: 50px; -fx-text-fill: #ffff00;"
+                    }
+                }
+            ],
+            "areas": [
+                {
+                    "name": "gridArea",
+                    "type": "gridpane",
+                    "spacing": "10",
+                    "disableLabelAlignment": true,
+                    "style": "-fx-padding: 10; -fx-alignment: center;",
+                    "items": [
+                        {
+                            "name": "cell0Canvas",
+                            "layoutPos": "0,0",
+                            "varRef": "canvas0",
+                            "display": {
+                                "type": "canvas",
+                                "onClick": "call playerMove(0);",
+                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-effect: innershadow(gaussian, rgba(0,0,0,0.7), 10, 0, 0, 2);"
+                            }
+                        },
+                        {
+                            "name": "cell1Canvas",
+                            "layoutPos": "0,1",
+                            "varRef": "canvas1",
+                            "display": {
+                                "type": "canvas",
+                                "onClick": "call playerMove(1);",
+                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-effect: innershadow(gaussian, rgba(0,0,0,0.7), 10, 0, 0, 2);"
+                            }
+                        },
+                        {
+                            "name": "cell2Canvas",
+                            "layoutPos": "0,2",
+                            "varRef": "canvas2",
+                            "display": {
+                                "type": "canvas",
+                                "onClick": "call playerMove(2);",
+                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-effect: innershadow(gaussian, rgba(0,0,0,0.7), 10, 0, 0, 2);"
+                            }
+                        },
+                        {
+                            "name": "cell3Canvas",
+                            "layoutPos": "1,0",
+                            "varRef": "canvas3",
+                            "display": {
+                                "type": "canvas",
+                                "onClick": "call playerMove(3);",
+                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-effect: innershadow(gaussian, rgba(0,0,0,0.7), 10, 0, 0, 2);"
+                            }
+                        },
+                        {
+                            "name": "cell4Canvas",
+                            "layoutPos": "1,1",
+                            "varRef": "canvas4",
+                            "display": {
+                                "type": "canvas",
+                                "onClick": "call playerMove(4);",
+                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-effect: innershadow(gaussian, rgba(0,0,0,0.7), 10, 0, 0, 2);"
+                            }
+                        },
+                        {
+                            "name": "cell5Canvas",
+                            "layoutPos": "1,2",
+                            "varRef": "canvas5",
+                            "display": {
+                                "type": "canvas",
+                                "onClick": "call playerMove(5);",
+                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-effect: innershadow(gaussian, rgba(0,0,0,0.7), 10, 0, 0, 2);"
+                            }
+                        },
+                        {
+                            "name": "cell6Canvas",
+                            "layoutPos": "2,0",
+                            "varRef": "canvas6",
+                            "display": {
+                                "type": "canvas",
+                                "onClick": "call playerMove(6);",
+                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-effect: innershadow(gaussian, rgba(0,0,0,0.7), 10, 0, 0, 2);"
+                            }
+                        },
+                        {
+                            "name": "cell7Canvas",
+                            "layoutPos": "2,1",
+                            "varRef": "canvas7",
+                            "display": {
+                                "type": "canvas",
+                                "onClick": "call playerMove(7);",
+                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-effect: innershadow(gaussian, rgba(0,0,0,0.7), 10, 0, 0, 2);"
+                            }
+                        },
+                        {
+                            "name": "cell8Canvas",
+                            "layoutPos": "2,2",
+                            "varRef": "canvas8",
+                            "display": {
+                                "type": "canvas",
+                                "onClick": "call playerMove(8);",
+                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-effect: innershadow(gaussian, rgba(0,0,0,0.7), 10, 0, 0, 2);"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "buttonArea",
+                    "type": "hbox",
+                    "spacing": "10",
+                    "style": "-fx-padding: 10; -fx-alignment: center;",
+                    "items": [
+                        {
+                            "name": "newGameButton",
+                            "display": {
+                                "type": "button",
+                                "labelText": "New Game",
+                                "onClick": "call newGame();",
+                                "style": "-fx-min-width: 120px; -fx-min-height: 40px; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #27ae60; -fx-text-fill: #ffff00; -fx-cursor: hand;"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+};
+
+// Initialize all canvas cells with empty background
+call clearCell(canvas0);
+call clearCell(canvas1);
+call clearCell(canvas2);
+call clearCell(canvas3);
+call clearCell(canvas4);
+call clearCell(canvas5);
+call clearCell(canvas6);
+call clearCell(canvas7);
+call clearCell(canvas8);
+
+// Set canvas variables in the screen
+tictactoeScreen.canvas0 = canvas0;
+tictactoeScreen.canvas1 = canvas1;
+tictactoeScreen.canvas2 = canvas2;
+tictactoeScreen.canvas3 = canvas3;
+tictactoeScreen.canvas4 = canvas4;
+tictactoeScreen.canvas5 = canvas5;
+tictactoeScreen.canvas6 = canvas6;
+tictactoeScreen.canvas7 = canvas7;
+tictactoeScreen.canvas8 = canvas8;
+
+// Initialize the game
+call initBoard;
+
+// Update the display to show initial state
+call updateDisplay;
+
+// Show the screen
+show screen tictactoeScreen;
+
+print "Tic Tac Toe game started!";
+print "You are X (white), Computer is O (black)";
+print "Click on any empty cell to make your move.";
