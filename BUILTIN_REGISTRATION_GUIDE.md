@@ -57,7 +57,7 @@ addBuiltin(info(
 ### Common Return Types
 - `DataType.BOOL` - Boolean return
 - `DataType.STRING` - String return
-- `DataType.INTEGER` or `DataType.INT` - Integer return
+- `DataType.INTEGER` (or `DataType.INT` - both are equivalent) - Integer return
 - `DataType.ANY` - Any type return
 - `DataType.JSON` - JSON object return
 - `DataType.ARRAY` - Array return
@@ -124,8 +124,9 @@ To verify a function is properly registered:
 4. Verify the function appears in the alphabetically sorted list
 5. Click the function to view its signature and documentation
 
-Or programmatically:
+Or programmatically in EBS:
 ```ebs
+// This is valid EBS script syntax
 var helpText: string = call system.help();
 print helpText;  // Should include your function
 ```
@@ -139,7 +140,7 @@ print helpText;  // Should include your function
 
 ## Related Issues
 
-- Issue: TreeItem functions not appearing in help (PR #xxx)
+- TreeItem functions not appearing in help (this PR)
   - Cause: Functions implemented but not registered
   - Solution: Added all 9 TreeItem function registrations
   - Lesson: Always register with addBuiltin() for visibility in help system
