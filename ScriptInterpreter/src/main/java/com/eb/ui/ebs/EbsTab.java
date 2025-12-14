@@ -16,6 +16,8 @@ import com.eb.util.Debugger;
 import com.eb.util.Util;
 import javafx.application.Platform;
 import javafx.scene.control.Tab;
+import javafx.scene.Scene;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -30,7 +32,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
@@ -541,8 +545,17 @@ public class EbsTab extends Tab {
         Button runBtn = new Button("Run");
         runBtn.setDefaultButton(true);
         runBtn.setPadding(new Insets(5, 10, 5, 10));
+        
+        // Only enable Run button for .ebs files
+        if (!isEbs) {
+            runBtn.setDisable(true);
+            runBtn.setTooltip(new Tooltip("Run button is only available for .ebs files"));
+        } else {
+            runBtn.setTooltip(new Tooltip("Run the EBS script"));
+        }
 
         Button clearBtn = new Button("Clear");
+        clearBtn.setPadding(new Insets(5, 10, 5, 10));
         clearBtn.setOnAction(e -> outputArea.clear());
 
         // Show the "start in" directory (script's parent directory)
@@ -553,7 +566,17 @@ public class EbsTab extends Tab {
         startInLabel.setMaxWidth(400); // Limit width to prevent layout issues with long paths
         startInLabel.setTooltip(new Tooltip("File operations use relative paths from this directory\n" + startInText));
 
-        HBox buttons = new HBox(8, runBtn, clearBtn, startInLabel);
+        // Create button row - add View button only for HTML files
+        HBox buttons;
+        if (isHtml) {
+            Button viewBtn = new Button("View");
+            viewBtn.setPadding(new Insets(5, 10, 5, 10));
+            viewBtn.setTooltip(new Tooltip("Open HTML in WebView"));
+            viewBtn.setOnAction(e -> openHtmlInWebView());
+            buttons = new HBox(8, runBtn, clearBtn, viewBtn, startInLabel);
+        } else {
+            buttons = new HBox(8, runBtn, clearBtn, startInLabel);
+        }
         buttons.setStyle("-fx-padding: 6 4 0 0;");
 
         VBox bottom = new VBox(2, new Label("Output:"), outputAreaFrame, buttons);
@@ -2430,6 +2453,174 @@ public class EbsTab extends Tab {
         int newSelStart = offset + (selStart - lineStart);
         int newSelEnd = offset + (selEnd - lineStart);
         area.selectRange(newSelStart, newSelEnd);
+    }
+    
+    /**
+     * Open the HTML content in a new WebView window.
+     * Creates a new stage with a WebView that displays the current HTML content from the editor.
+     * 
+     * Note: This method loads the HTML content without sanitization since it's a developer tool
+     * for previewing HTML that the user is actively editing. The user is intentionally viewing
+     * their own content including any scripts, similar to how other HTML editors work.
+     */
+    private void openHtmlInWebView() {
+        // Get the current HTML content from the editor
+        String htmlContent = dispArea.getText();
+        
+        // Create a new Stage (window) for the WebView
+        Stage webViewStage = new Stage();
+        webViewStage.setTitle("HTML Preview - " + (filename != null ? filename : "untitled"));
+        
+        // Create a WebView
+        WebView webView = new WebView();
+        
+        // Create a pin button to keep window always on top
+        ToggleButton pinBtn = new ToggleButton("📌 Pin");
+        pinBtn.setTooltip(new Tooltip("Keep window always on top"));
+        pinBtn.setOnAction(e -> {
+            webViewStage.setAlwaysOnTop(pinBtn.isSelected());
+        });
+        
+        // Create auto-refresh toggle button with debounced updates (0.5 second delay)
+        ToggleButton autoRefreshBtn = new ToggleButton("🔄 Auto Refresh");
+        autoRefreshBtn.setTooltip(new Tooltip("Automatically refresh preview when editor changes"));
+        
+        // Get base URL for resolving relative paths (images, CSS, JS, etc.)
+        // We need to inject a <base> tag into the HTML to set the base URL for relative paths
+        String baseUrl = tabContext.path.getParent() != null 
+            ? tabContext.path.getParent().toUri().toString() 
+            : tabContext.path.toUri().toString();
+        
+        // Timer for debouncing editor changes
+        PauseTransition refreshTimer = new PauseTransition(Duration.millis(500));
+        refreshTimer.setOnFinished(e -> {
+            // Refresh the WebView with current editor content
+            String updatedContent = dispArea.getText();
+            // Inject base tag if not present to resolve relative paths
+            String contentWithBase = injectBaseTag(updatedContent, baseUrl);
+            webView.getEngine().loadContent(contentWithBase, "text/html");
+        });
+        
+        // Listener for editor text changes
+        javafx.beans.value.ChangeListener<String> textChangeListener = (obs, oldText, newText) -> {
+            if (autoRefreshBtn.isSelected()) {
+                // Restart the timer on each change (debouncing)
+                refreshTimer.playFromStart();
+            }
+        };
+        
+        // Apply custom styling when auto-refresh is toggled
+        autoRefreshBtn.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
+            if (isSelected) {
+                // Blue background with white text when on
+                autoRefreshBtn.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white;");
+                // Add the listener when enabled
+                dispArea.textProperty().addListener(textChangeListener);
+            } else {
+                // Reset to default style when off
+                autoRefreshBtn.setStyle("");
+                // Stop any pending refresh
+                refreshTimer.stop();
+                // Remove the listener when disabled
+                dispArea.textProperty().removeListener(textChangeListener);
+            }
+        });
+        
+        // Clean up when window closes
+        webViewStage.setOnCloseRequest(e -> {
+            refreshTimer.stop();
+            dispArea.textProperty().removeListener(textChangeListener);
+        });
+        
+        // Create a toolbar with the pin and auto-refresh buttons
+        HBox toolbar = new HBox(5);
+        toolbar.setPadding(new Insets(5));
+        toolbar.setAlignment(Pos.CENTER_LEFT);
+        toolbar.getChildren().addAll(pinBtn, autoRefreshBtn);
+        toolbar.getStyleClass().add("toolbar");
+        
+        // Create a StatusBar to show URLs when hovering over links
+        StatusBar statusBar = new StatusBar();
+        
+        // Listen to WebEngine's status changed event to display hover URLs
+        webView.getEngine().setOnStatusChanged(event -> {
+            String status = event.getData();
+            if (status != null && !status.isEmpty()) {
+                // Show the URL in the status bar message section
+                statusBar.setMessage(status);
+            } else {
+                // Clear the status bar when not hovering over a link
+                statusBar.clearMessage();
+            }
+        });
+        
+        // Add load state listener for error detection
+        webView.getEngine().getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
+            if (newState == javafx.concurrent.Worker.State.FAILED) {
+                statusBar.setMessage("Failed to load HTML content");
+            }
+        });
+        
+        // Enable JavaScript console error logging
+        webView.getEngine().setOnError(event -> {
+            statusBar.setMessage("Error: " + event.getMessage());
+        });
+        
+        // Load the HTML content with injected base tag for resolving relative paths (images, CSS, JS, etc.)
+        String contentWithBase = injectBaseTag(htmlContent, baseUrl);
+        webView.getEngine().loadContent(contentWithBase, "text/html");
+        
+        // Create a BorderPane layout with toolbar at top, WebView in center, and StatusBar at bottom
+        BorderPane root = new BorderPane();
+        root.setTop(toolbar);
+        root.setCenter(webView);
+        root.setBottom(statusBar);
+        
+        // Create a scene with the layout (800x600 is a reasonable default, window is resizable)
+        Scene scene = new Scene(root, 800, 600);
+        webViewStage.setScene(scene);
+        
+        // Show the stage
+        webViewStage.show();
+    }
+    
+    /**
+     * Injects a <base> tag into HTML content to set the base URL for resolving relative paths.
+     * If the HTML already has a <head> tag, the base tag is inserted at the beginning.
+     * If there's no <head>, one is created with the base tag.
+     * 
+     * @param htmlContent The original HTML content
+     * @param baseUrl The base URL to use for relative path resolution
+     * @return HTML content with base tag injected
+     */
+    private String injectBaseTag(String htmlContent, String baseUrl) {
+        String baseTag = "<base href=\"" + baseUrl + "\">";
+        
+        // Check if there's already a base tag
+        if (htmlContent.toLowerCase().contains("<base")) {
+            return htmlContent; // Already has a base tag
+        }
+        
+        // Try to insert into existing <head> tag
+        String lowerContent = htmlContent.toLowerCase();
+        int headIndex = lowerContent.indexOf("<head");
+        if (headIndex >= 0) {
+            int headCloseIndex = htmlContent.indexOf(">", headIndex);
+            if (headCloseIndex >= 0) {
+                // Insert base tag right after <head>
+                return htmlContent.substring(0, headCloseIndex + 1) + baseTag + htmlContent.substring(headCloseIndex + 1);
+            }
+        }
+        
+        // No <head> tag found, try to insert before <body> or at start
+        int bodyIndex = lowerContent.indexOf("<body");
+        if (bodyIndex >= 0) {
+            // Insert <head> with base tag before <body>
+            return htmlContent.substring(0, bodyIndex) + "<head>" + baseTag + "</head>" + htmlContent.substring(bodyIndex);
+        }
+        
+        // No structure found, prepend base tag at the beginning
+        return baseTag + htmlContent;
     }
 
 }
