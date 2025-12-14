@@ -1,0 +1,16 @@
+// Board Game Project - Main Script
+// This is the main entry point for the board game project
+
+// Display project information
+println("===========================================");
+println("   Board Game Project");
+println("===========================================");
+println("");
+println("Project: " + project.name);
+println("Version: " + project.version);
+println("Description: " + project.description);
+println("");
+println("This is a starter template for your board game project.");
+println("You can begin implementing your game logic here.");
+println("");
+println("===========================================");
