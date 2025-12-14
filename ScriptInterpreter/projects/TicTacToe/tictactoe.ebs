@@ -4,8 +4,8 @@
 // The computer makes basic strategic moves (blocking wins, taking center, etc.)
 //
 // Features:
-//   - 3x3 grid of clickable buttons
-//   - Human plays as 'X', Computer plays as 'O'
+//   - 3x3 grid of clickable canvas cells
+//   - Human plays as 'X' (white), Computer plays as 'O' (black)
 //   - Computer AI with strategic decision making
 //   - Win/Draw detection
 //   - New Game button to reset
@@ -14,10 +14,26 @@
 // Usage:
 //   Run in EBS Console: /open projects/TicTacToe/tictactoe.ebs then Ctrl+Enter
 
+// Canvas constants
+var CELL_SIZE: int = 100;
+var DRAW_SIZE: int = 90;  // 90% of cell size
+var DRAW_OFFSET: int = 5;  // (100 - 90) / 2
+
 // Game state variables
 var board: string[9];  // Board positions 0-8 (top-left to bottom-right, row by row)
 var gameOver: bool = false;
 var statusMessage: string = "Your turn! Click a cell to play.";
+
+// Canvas cells for the 3x3 grid
+var canvas0: canvas = call canvas.create(CELL_SIZE, CELL_SIZE, "canvas0");
+var canvas1: canvas = call canvas.create(CELL_SIZE, CELL_SIZE, "canvas1");
+var canvas2: canvas = call canvas.create(CELL_SIZE, CELL_SIZE, "canvas2");
+var canvas3: canvas = call canvas.create(CELL_SIZE, CELL_SIZE, "canvas3");
+var canvas4: canvas = call canvas.create(CELL_SIZE, CELL_SIZE, "canvas4");
+var canvas5: canvas = call canvas.create(CELL_SIZE, CELL_SIZE, "canvas5");
+var canvas6: canvas = call canvas.create(CELL_SIZE, CELL_SIZE, "canvas6");
+var canvas7: canvas = call canvas.create(CELL_SIZE, CELL_SIZE, "canvas7");
+var canvas8: canvas = call canvas.create(CELL_SIZE, CELL_SIZE, "canvas8");
 
 // Initialize the board with empty cells
 initBoard {
@@ -139,28 +155,68 @@ computerMove return int {
     return -1;  // Should never happen
 }
 
+// Draw X on a canvas cell (white, two diagonal lines)
+drawX(cellCanvas: canvas) {
+    // Clear the cell with background color
+    call style.setFill(cellCanvas, "#34495e");
+    call draw.rect(cellCanvas, 0, 0, CELL_SIZE, CELL_SIZE, true);
+    
+    // Draw white X (two diagonal lines)
+    call style.setStroke(cellCanvas, "#ffffff", 4);
+    call draw.line(cellCanvas, DRAW_OFFSET, DRAW_OFFSET, DRAW_OFFSET + DRAW_SIZE, DRAW_OFFSET + DRAW_SIZE);
+    call draw.line(cellCanvas, DRAW_OFFSET + DRAW_SIZE, DRAW_OFFSET, DRAW_OFFSET, DRAW_OFFSET + DRAW_SIZE);
+}
+
+// Draw O on a canvas cell (black circle)
+drawO(cellCanvas: canvas) {
+    // Clear the cell with background color
+    call style.setFill(cellCanvas, "#34495e");
+    call draw.rect(cellCanvas, 0, 0, CELL_SIZE, CELL_SIZE, true);
+    
+    // Draw black O (circle outline)
+    var radius: int = DRAW_SIZE / 2;
+    var centerX: int = CELL_SIZE / 2;
+    var centerY: int = CELL_SIZE / 2;
+    call style.setStroke(cellCanvas, "#000000", 4);
+    call draw.circle(cellCanvas, centerX, centerY, radius, false);
+}
+
+// Clear a canvas cell
+clearCell(cellCanvas: canvas) {
+    call style.setFill(cellCanvas, "#34495e");
+    call draw.rect(cellCanvas, 0, 0, CELL_SIZE, CELL_SIZE, true);
+}
+
+// Get canvas by position
+getCanvas(pos: int) return canvas {
+    if (pos == 0) { return canvas0; }
+    if (pos == 1) { return canvas1; }
+    if (pos == 2) { return canvas2; }
+    if (pos == 3) { return canvas3; }
+    if (pos == 4) { return canvas4; }
+    if (pos == 5) { return canvas5; }
+    if (pos == 6) { return canvas6; }
+    if (pos == 7) { return canvas7; }
+    if (pos == 8) { return canvas8; }
+    return canvas0;  // Should never happen
+}
+
 // Update the screen display
 updateDisplay {
-    // Update all button labels
-    tictactoeScreen.cell0 = board[0];
-    tictactoeScreen.cell1 = board[1];
-    tictactoeScreen.cell2 = board[2];
-    tictactoeScreen.cell3 = board[3];
-    tictactoeScreen.cell4 = board[4];
-    tictactoeScreen.cell5 = board[5];
-    tictactoeScreen.cell6 = board[6];
-    tictactoeScreen.cell7 = board[7];
-    tictactoeScreen.cell8 = board[8];
+    // Draw X or O on each cell based on board state
+    for (var i: int = 0; i < 9; i++) {
+        var cellCanvas: canvas = call getCanvas(i);
+        if (board[i] == "X") {
+            call drawX(cellCanvas);
+        } else if (board[i] == "O") {
+            call drawO(cellCanvas);
+        } else {
+            call clearCell(cellCanvas);
+        }
+    }
     
     // Update status message
     tictactoeScreen.status = statusMessage;
-    
-    // Disable buttons if game is over or cell is occupied
-    for (var i: int = 0; i < 9; i++) {
-        var cellName: string = "cell" + string(i);
-        var disabled: bool = gameOver or board[i] != "";
-        call scr.setProperty("tictactoeScreen." + cellName, "disabled", disabled);
-    }
 }
 
 // Handle player move
@@ -229,21 +285,21 @@ newGame {
 screen tictactoeScreen = {
     "title": "Tic Tac Toe - You (X) vs Computer (O)",
     "width": 450,
-    "height": 550,
+    "height": 600,
     "sets": [
         {
             "setname": "main",
             "vars": [
                 {"name": "status", "type": "string"},
-                {"name": "cell0", "type": "string"},
-                {"name": "cell1", "type": "string"},
-                {"name": "cell2", "type": "string"},
-                {"name": "cell3", "type": "string"},
-                {"name": "cell4", "type": "string"},
-                {"name": "cell5", "type": "string"},
-                {"name": "cell6", "type": "string"},
-                {"name": "cell7", "type": "string"},
-                {"name": "cell8", "type": "string"}
+                {"name": "canvas0", "type": "canvas"},
+                {"name": "canvas1", "type": "canvas"},
+                {"name": "canvas2", "type": "canvas"},
+                {"name": "canvas3", "type": "canvas"},
+                {"name": "canvas4", "type": "canvas"},
+                {"name": "canvas5", "type": "canvas"},
+                {"name": "canvas6", "type": "canvas"},
+                {"name": "canvas7", "type": "canvas"},
+                {"name": "canvas8", "type": "canvas"}
             ]
         }
     ],
@@ -288,102 +344,93 @@ screen tictactoeScreen = {
                     "style": "-fx-padding: 10; -fx-alignment: center;",
                     "items": [
                         {
-                            "name": "cell0",
+                            "name": "cell0Canvas",
                             "layoutPos": "0,0",
-                            "varRef": "cell0",
+                            "varRef": "canvas0",
                             "display": {
-                                "type": "button",
-                                "labelText": "",
+                                "type": "canvas",
                                 "onClick": "call playerMove(0);",
-                                "style": "-fx-min-width: 100px; -fx-min-height: 100px; -fx-font-size: 36px; -fx-font-weight: bold; -fx-background-color: #34495e; -fx-text-fill: #ecf0f1; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-cursor: hand;"
+                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2;"
                             }
                         },
                         {
-                            "name": "cell1",
+                            "name": "cell1Canvas",
                             "layoutPos": "0,1",
-                            "varRef": "cell1",
+                            "varRef": "canvas1",
                             "display": {
-                                "type": "button",
-                                "labelText": "",
+                                "type": "canvas",
                                 "onClick": "call playerMove(1);",
-                                "style": "-fx-min-width: 100px; -fx-min-height: 100px; -fx-font-size: 36px; -fx-font-weight: bold; -fx-background-color: #34495e; -fx-text-fill: #ecf0f1; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-cursor: hand;"
+                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2;"
                             }
                         },
                         {
-                            "name": "cell2",
+                            "name": "cell2Canvas",
                             "layoutPos": "0,2",
-                            "varRef": "cell2",
+                            "varRef": "canvas2",
                             "display": {
-                                "type": "button",
-                                "labelText": "",
+                                "type": "canvas",
                                 "onClick": "call playerMove(2);",
-                                "style": "-fx-min-width: 100px; -fx-min-height: 100px; -fx-font-size: 36px; -fx-font-weight: bold; -fx-background-color: #34495e; -fx-text-fill: #ecf0f1; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-cursor: hand;"
+                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2;"
                             }
                         },
                         {
-                            "name": "cell3",
+                            "name": "cell3Canvas",
                             "layoutPos": "1,0",
-                            "varRef": "cell3",
+                            "varRef": "canvas3",
                             "display": {
-                                "type": "button",
-                                "labelText": "",
+                                "type": "canvas",
                                 "onClick": "call playerMove(3);",
-                                "style": "-fx-min-width: 100px; -fx-min-height: 100px; -fx-font-size: 36px; -fx-font-weight: bold; -fx-background-color: #34495e; -fx-text-fill: #ecf0f1; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-cursor: hand;"
+                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2;"
                             }
                         },
                         {
-                            "name": "cell4",
+                            "name": "cell4Canvas",
                             "layoutPos": "1,1",
-                            "varRef": "cell4",
+                            "varRef": "canvas4",
                             "display": {
-                                "type": "button",
-                                "labelText": "",
+                                "type": "canvas",
                                 "onClick": "call playerMove(4);",
-                                "style": "-fx-min-width: 100px; -fx-min-height: 100px; -fx-font-size: 36px; -fx-font-weight: bold; -fx-background-color: #34495e; -fx-text-fill: #ecf0f1; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-cursor: hand;"
+                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2;"
                             }
                         },
                         {
-                            "name": "cell5",
+                            "name": "cell5Canvas",
                             "layoutPos": "1,2",
-                            "varRef": "cell5",
+                            "varRef": "canvas5",
                             "display": {
-                                "type": "button",
-                                "labelText": "",
+                                "type": "canvas",
                                 "onClick": "call playerMove(5);",
-                                "style": "-fx-min-width: 100px; -fx-min-height: 100px; -fx-font-size: 36px; -fx-font-weight: bold; -fx-background-color: #34495e; -fx-text-fill: #ecf0f1; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-cursor: hand;"
+                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2;"
                             }
                         },
                         {
-                            "name": "cell6",
+                            "name": "cell6Canvas",
                             "layoutPos": "2,0",
-                            "varRef": "cell6",
+                            "varRef": "canvas6",
                             "display": {
-                                "type": "button",
-                                "labelText": "",
+                                "type": "canvas",
                                 "onClick": "call playerMove(6);",
-                                "style": "-fx-min-width: 100px; -fx-min-height: 100px; -fx-font-size: 36px; -fx-font-weight: bold; -fx-background-color: #34495e; -fx-text-fill: #ecf0f1; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-cursor: hand;"
+                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2;"
                             }
                         },
                         {
-                            "name": "cell7",
+                            "name": "cell7Canvas",
                             "layoutPos": "2,1",
-                            "varRef": "cell7",
+                            "varRef": "canvas7",
                             "display": {
-                                "type": "button",
-                                "labelText": "",
+                                "type": "canvas",
                                 "onClick": "call playerMove(7);",
-                                "style": "-fx-min-width: 100px; -fx-min-height: 100px; -fx-font-size: 36px; -fx-font-weight: bold; -fx-background-color: #34495e; -fx-text-fill: #ecf0f1; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-cursor: hand;"
+                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2;"
                             }
                         },
                         {
-                            "name": "cell8",
+                            "name": "cell8Canvas",
                             "layoutPos": "2,2",
-                            "varRef": "cell8",
+                            "varRef": "canvas8",
                             "display": {
-                                "type": "button",
-                                "labelText": "",
+                                "type": "canvas",
                                 "onClick": "call playerMove(8);",
-                                "style": "-fx-min-width: 100px; -fx-min-height: 100px; -fx-font-size: 36px; -fx-font-weight: bold; -fx-background-color: #34495e; -fx-text-fill: #ecf0f1; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-cursor: hand;"
+                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2;"
                             }
                         }
                     ]
@@ -410,6 +457,28 @@ screen tictactoeScreen = {
     ]
 };
 
+// Initialize all canvas cells with empty background
+call clearCell(canvas0);
+call clearCell(canvas1);
+call clearCell(canvas2);
+call clearCell(canvas3);
+call clearCell(canvas4);
+call clearCell(canvas5);
+call clearCell(canvas6);
+call clearCell(canvas7);
+call clearCell(canvas8);
+
+// Set canvas variables in the screen
+tictactoeScreen.canvas0 = canvas0;
+tictactoeScreen.canvas1 = canvas1;
+tictactoeScreen.canvas2 = canvas2;
+tictactoeScreen.canvas3 = canvas3;
+tictactoeScreen.canvas4 = canvas4;
+tictactoeScreen.canvas5 = canvas5;
+tictactoeScreen.canvas6 = canvas6;
+tictactoeScreen.canvas7 = canvas7;
+tictactoeScreen.canvas8 = canvas8;
+
 // Initialize the game
 call initBoard;
 
@@ -420,5 +489,5 @@ call updateDisplay;
 show screen tictactoeScreen;
 
 print "Tic Tac Toe game started!";
-print "You are X, Computer is O";
+print "You are X (white), Computer is O (black)";
 print "Click on any empty cell to make your move.";

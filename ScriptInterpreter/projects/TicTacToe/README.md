@@ -11,7 +11,8 @@ A simple implementation of the classic Tic Tac Toe game where you play against a
   3. Takes the center square when available
   4. Prefers corner squares
   5. Takes any available square as a fallback
-- **Interactive UI**: 3x3 grid of clickable buttons in a JavaFX window
+- **Interactive UI**: 3x3 grid of clickable canvas cells in a JavaFX window
+- **Visual Marks**: X is drawn in white, O is drawn in black using canvas drawing
 - **Game Status**: Clear visual feedback showing whose turn it is and game results
 - **New Game Button**: Easily restart the game at any time
 
@@ -24,9 +25,9 @@ A simple implementation of the classic Tic Tac Toe game where you play against a
    - Press Ctrl+Enter to run the script
 
 2. **Make Your Move**: 
-   - You play as 'X' and go first
+   - You play as 'X' (white) and go first
    - Click any empty cell to place your mark
-   - The computer will automatically make its move as 'O'
+   - The computer will automatically make its move as 'O' (black)
 
 3. **Win Conditions**:
    - Get three marks in a row (horizontal, vertical, or diagonal) to win
@@ -44,8 +45,10 @@ A simple implementation of the classic Tic Tac Toe game where you play against a
 ## Technical Details
 
 - **Language**: EBS (Earl Bosch Script)
-- **UI Framework**: JavaFX screens with GridPane layout
+- **UI Framework**: JavaFX screens with GridPane layout and Canvas drawing
 - **Board Representation**: 9-element string array (positions 0-8)
+- **Visual Rendering**: Canvas-based drawing with X (white lines) and O (black circle)
+- **Cell Size**: 100x100 pixels with 90% drawing area
 - **AI Logic**: Multi-level strategic decision making with win/block detection
 
 ## Files
