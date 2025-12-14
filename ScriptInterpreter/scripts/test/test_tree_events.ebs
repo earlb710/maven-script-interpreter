@@ -84,7 +84,7 @@ screen testTreeEvents = {
                     "display": {
                         "type": "button",
                         "labelText": "Refresh Event Count",
-                        "onClick": "int expandCount = sys.getEventCount('testTreeEvents', 'fileTree', 'onExpand'); int collapseCount = sys.getEventCount('testTreeEvents', 'fileTree', 'onCollapse'); int total = expandCount + collapseCount; call scr.setProperty('testTreeEvents', 'eventCount', 'labelText', 'Events: ' + total + ' (Expand: ' + expandCount + ', Collapse: ' + collapseCount + ')');"
+                        "onClick": "int expandCount = call sys.getEventCount('testTreeEvents', 'fileTree', 'onExpand'); int collapseCount = call sys.getEventCount('testTreeEvents', 'fileTree', 'onCollapse'); int total = expandCount + collapseCount; string msg = 'Events: ' + total + ' (Expand: ' + expandCount + ', Collapse: ' + collapseCount + ')'; call scr.setProperty('testTreeEvents', 'eventCount', 'labelText', msg);"
                     }
                 }
             ]
