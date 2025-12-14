@@ -2486,6 +2486,7 @@ public class EbsTab extends Tab {
         autoRefreshBtn.setTooltip(new Tooltip("Automatically refresh preview when editor changes"));
         
         // Get base URL for resolving relative paths (images, CSS, JS, etc.)
+        // We need to inject a <base> tag into the HTML to set the base URL for relative paths
         String baseUrl = tabContext.path.getParent() != null 
             ? tabContext.path.getParent().toUri().toString() 
             : tabContext.path.toUri().toString();
@@ -2493,9 +2494,11 @@ public class EbsTab extends Tab {
         // Timer for debouncing editor changes
         PauseTransition refreshTimer = new PauseTransition(Duration.millis(500));
         refreshTimer.setOnFinished(e -> {
-            // Refresh the WebView with current editor content and base URL
+            // Refresh the WebView with current editor content
             String updatedContent = dispArea.getText();
-            webView.getEngine().loadContent(updatedContent, baseUrl);
+            // Inject base tag if not present to resolve relative paths
+            String contentWithBase = injectBaseTag(updatedContent, baseUrl);
+            webView.getEngine().loadContent(contentWithBase, "text/html");
         });
         
         // Listener for editor text changes
@@ -2563,8 +2566,9 @@ public class EbsTab extends Tab {
             statusBar.setMessage("Error: " + event.getMessage());
         });
         
-        // Load the HTML content with base URL for resolving relative paths (images, CSS, JS, etc.)
-        webView.getEngine().loadContent(htmlContent, baseUrl);
+        // Load the HTML content with injected base tag for resolving relative paths (images, CSS, JS, etc.)
+        String contentWithBase = injectBaseTag(htmlContent, baseUrl);
+        webView.getEngine().loadContent(contentWithBase, "text/html");
         
         // Create a BorderPane layout with toolbar at top, WebView in center, and StatusBar at bottom
         BorderPane root = new BorderPane();
@@ -2578,6 +2582,45 @@ public class EbsTab extends Tab {
         
         // Show the stage
         webViewStage.show();
+    }
+    
+    /**
+     * Injects a <base> tag into HTML content to set the base URL for resolving relative paths.
+     * If the HTML already has a <head> tag, the base tag is inserted at the beginning.
+     * If there's no <head>, one is created with the base tag.
+     * 
+     * @param htmlContent The original HTML content
+     * @param baseUrl The base URL to use for relative path resolution
+     * @return HTML content with base tag injected
+     */
+    private String injectBaseTag(String htmlContent, String baseUrl) {
+        String baseTag = "<base href=\"" + baseUrl + "\">";
+        
+        // Check if there's already a base tag
+        if (htmlContent.toLowerCase().contains("<base")) {
+            return htmlContent; // Already has a base tag
+        }
+        
+        // Try to insert into existing <head> tag
+        String lowerContent = htmlContent.toLowerCase();
+        int headIndex = lowerContent.indexOf("<head");
+        if (headIndex >= 0) {
+            int headCloseIndex = htmlContent.indexOf(">", headIndex);
+            if (headCloseIndex >= 0) {
+                // Insert base tag right after <head>
+                return htmlContent.substring(0, headCloseIndex + 1) + baseTag + htmlContent.substring(headCloseIndex + 1);
+            }
+        }
+        
+        // No <head> tag found, try to insert before <body> or at start
+        int bodyIndex = lowerContent.indexOf("<body");
+        if (bodyIndex >= 0) {
+            // Insert <head> with base tag before <body>
+            return htmlContent.substring(0, bodyIndex) + "<head>" + baseTag + "</head>" + htmlContent.substring(bodyIndex);
+        }
+        
+        // No structure found, prepend base tag at the beginning
+        return baseTag + htmlContent;
     }
 
 }
