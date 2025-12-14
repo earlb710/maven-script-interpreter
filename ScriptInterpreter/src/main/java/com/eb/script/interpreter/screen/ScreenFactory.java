@@ -208,20 +208,23 @@ public class ScreenFactory {
         System.out.println("[DEBUG] getEventCount - key: '" + key + "' (screenName='" + screenName + "', itemName='" + itemName + "', eventType='" + eventType + "')");
         java.util.concurrent.atomic.AtomicInteger count = eventCounts.get(key);
         
-        // If exact key not found, try finding a matching key that contains the screen name
+        // If exact key not found, try finding a matching key that contains the screen name as a complete segment
         // This handles cases where the screen name might have a parent prefix (e.g., "parent.screenname" vs "screenname")
         if (count == null) {
             System.out.println("[DEBUG] getEventCount - exact key not found, trying partial match");
             String screenNameLower = screenName.toLowerCase();
             String itemNameLower = itemName.toLowerCase();
             String eventTypeLower = eventType.toLowerCase();
+            String suffix = "." + itemNameLower + "." + eventTypeLower;
             
-            // Try to find a key that contains the screen name and ends with the item and event type
+            // Try to find a key that ends with screenName.itemName.eventType or contains .screenName.itemName.eventType
             for (String storedKey : eventCounts.keySet()) {
-                // Check if the stored key contains the screen name and ends with the expected suffix
-                if (storedKey.contains(screenNameLower) && 
-                    storedKey.endsWith(itemNameLower + "." + eventTypeLower)) {
+                // Check if the stored key ends with the full expected suffix (screenName.itemName.eventType)
+                // OR if it contains the screen name as a complete segment followed by the expected suffix
+                if (storedKey.endsWith(screenNameLower + suffix) || 
+                    storedKey.contains("." + screenNameLower + suffix)) {
                     System.out.println("[DEBUG] getEventCount - found matching key: '" + storedKey + "' (expected: '" + key + "')");
+                    System.out.println("[DEBUG] getEventCount - KEY MISMATCH DETECTED! This indicates the screen name used during event increment differs from the one used during retrieval.");
                     count = eventCounts.get(storedKey);
                     break;
                 }
