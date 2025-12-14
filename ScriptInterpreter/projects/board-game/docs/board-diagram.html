@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>4-Quadrant Board Game - Complete Cell Layout (Corrected)</title>
+    <title>4-Quadrant Board Game - Corrected Layout</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -65,8 +65,9 @@
     <div class="container">
         <h1>4-Quadrant Monopoly-Style Board Game</h1>
         <p class="description">
-            Complete board layout showing all 109 unique cells (CORRECTED)<br>
-            <strong>76 unique quadrant cells (green)</strong> + <strong>32 shared cross cells (orange)</strong> + <strong>1 center START (gold)</strong> = 109 total
+            Complete board layout with 109 unique cells<br>
+            <strong>Outer perimeter:</strong> Q1→Q2: 19 cells, Q2→Q4: 19 cells, Q4→Q3: 19 cells, Q3→Q1: 18 cells (75 total)<br>
+            <strong>Center START:</strong> Single cell (1×1)
         </p>
         
         <svg width="1200" height="1200" viewBox="0 0 1200 1200" xmlns="http://www.w3.org/2000/svg">
@@ -85,7 +86,7 @@
             <rect x="50" y="50" width="1100" height="1100" fill="none" stroke="#000" stroke-width="4"/>
             
             <!-- QUADRANT 1 (NW) - Top Left -->
-            <!-- Top row (10 unique cells: Q1-1 through Q1-10) -->
+            <!-- Top row (10 unique cells: Q1-1 through Q1-10) - OUTER PERIMETER -->
             <rect x="50" y="50" width="55" height="55" class="cell-unique"/><text x="77.5" y="82" class="cell-text">Q1-1</text>
             <rect x="105" y="50" width="55" height="55" class="cell-unique"/><text x="132.5" y="82" class="cell-text">Q1-2</text>
             <rect x="160" y="50" width="55" height="55" class="cell-unique"/><text x="187.5" y="82" class="cell-text">Q1-3</text>
@@ -97,7 +98,7 @@
             <rect x="490" y="50" width="55" height="55" class="cell-unique"/><text x="517.5" y="82" class="cell-text">Q1-9</text>
             <rect x="545" y="50" width="55" height="55" class="cell-unique"/><text x="572.5" y="82" class="cell-text">Q1-10</text>
             
-            <!-- Left column (9 unique cells: Q1-11 through Q1-19) -->
+            <!-- Left column (9 unique cells: Q1-11 through Q1-19) - OUTER PERIMETER -->
             <rect x="50" y="105" width="55" height="55" class="cell-unique"/><text x="77.5" y="137" class="cell-text">Q1-11</text>
             <rect x="50" y="160" width="55" height="55" class="cell-unique"/><text x="77.5" y="192" class="cell-text">Q1-12</text>
             <rect x="50" y="215" width="55" height="55" class="cell-unique"/><text x="77.5" y="247" class="cell-text">Q1-13</text>
@@ -108,11 +109,10 @@
             <rect x="50" y="490" width="55" height="55" class="cell-unique"/><text x="77.5" y="522" class="cell-text">Q1-18</text>
             <rect x="50" y="545" width="55" height="55" class="cell-unique"/><text x="77.5" y="577" class="cell-text">Q1-19</text>
             
-            <!-- Q1 Label -->
             <text x="325" y="330" class="quadrant-label" opacity="0.3">Q1 (NW)</text>
             
             <!-- QUADRANT 2 (NE) - Top Right -->
-            <!-- Top row (10 unique cells: Q2-1 through Q2-10) -->
+            <!-- Top row (9 unique cells: Q2-1 through Q2-9) - OUTER PERIMETER continues -->
             <rect x="600" y="50" width="55" height="55" class="cell-unique"/><text x="627.5" y="82" class="cell-text">Q2-1</text>
             <rect x="655" y="50" width="55" height="55" class="cell-unique"/><text x="682.5" y="82" class="cell-text">Q2-2</text>
             <rect x="710" y="50" width="55" height="55" class="cell-unique"/><text x="737.5" y="82" class="cell-text">Q2-3</text>
@@ -122,9 +122,11 @@
             <rect x="930" y="50" width="55" height="55" class="cell-unique"/><text x="957.5" y="82" class="cell-text">Q2-7</text>
             <rect x="985" y="50" width="55" height="55" class="cell-unique"/><text x="1012.5" y="82" class="cell-text">Q2-8</text>
             <rect x="1040" y="50" width="55" height="55" class="cell-unique"/><text x="1067.5" y="82" class="cell-text">Q2-9</text>
+            
+            <!-- Top-right corner -->
             <rect x="1095" y="50" width="55" height="55" class="cell-unique"/><text x="1122.5" y="82" class="cell-text">Q2-10</text>
             
-            <!-- Right column (9 unique cells: Q2-11 through Q2-19) -->
+            <!-- Right column (9 unique cells: Q2-11 through Q2-19) - OUTER PERIMETER -->
             <rect x="1095" y="105" width="55" height="55" class="cell-unique"/><text x="1122.5" y="137" class="cell-text">Q2-11</text>
             <rect x="1095" y="160" width="55" height="55" class="cell-unique"/><text x="1122.5" y="192" class="cell-text">Q2-12</text>
             <rect x="1095" y="215" width="55" height="55" class="cell-unique"/><text x="1122.5" y="247" class="cell-text">Q2-13</text>
@@ -135,11 +137,10 @@
             <rect x="1095" y="490" width="55" height="55" class="cell-unique"/><text x="1122.5" y="522" class="cell-text">Q2-18</text>
             <rect x="1095" y="545" width="55" height="55" class="cell-unique"/><text x="1122.5" y="577" class="cell-text">Q2-19</text>
             
-            <!-- Q2 Label -->
             <text x="875" y="330" class="quadrant-label" opacity="0.3">Q2 (NE)</text>
             
             <!-- QUADRANT 3 (SW) - Bottom Left -->
-            <!-- Left column (9 unique cells: Q3-1 through Q3-9) -->
+            <!-- Left column (9 unique cells: Q3-1 through Q3-9) - OUTER PERIMETER continues -->
             <rect x="50" y="600" width="55" height="55" class="cell-unique"/><text x="77.5" y="632" class="cell-text">Q3-1</text>
             <rect x="50" y="655" width="55" height="55" class="cell-unique"/><text x="77.5" y="687" class="cell-text">Q3-11</text>
             <rect x="50" y="710" width="55" height="55" class="cell-unique"/><text x="77.5" y="742" class="cell-text">Q3-12</text>
@@ -149,9 +150,11 @@
             <rect x="50" y="930" width="55" height="55" class="cell-unique"/><text x="77.5" y="962" class="cell-text">Q3-16</text>
             <rect x="50" y="985" width="55" height="55" class="cell-unique"/><text x="77.5" y="1017" class="cell-text">Q3-17</text>
             <rect x="50" y="1040" width="55" height="55" class="cell-unique"/><text x="77.5" y="1072" class="cell-text">Q3-18</text>
+            
+            <!-- Bottom-left corner -->
             <rect x="50" y="1095" width="55" height="55" class="cell-unique"/><text x="77.5" y="1127" class="cell-text">Q3-19</text>
             
-            <!-- Bottom row shared cells (Q3-2 through Q3-9 are S17-S24) - these are SHARED -->
+            <!-- Bottom row shared cells (Q3-2 to Q3-9 are S17-S24) - OUTER PERIMETER -->
             <rect x="105" y="1095" width="55" height="55" class="cell-shared"/><text x="132.5" y="1127" class="cell-text">S17</text><text x="132.5" y="1140" class="cell-label">(Q3-2)</text>
             <rect x="160" y="1095" width="55" height="55" class="cell-shared"/><text x="187.5" y="1127" class="cell-text">S18</text><text x="187.5" y="1140" class="cell-label">(Q3-3)</text>
             <rect x="215" y="1095" width="55" height="55" class="cell-shared"/><text x="242.5" y="1127" class="cell-text">S19</text><text x="242.5" y="1140" class="cell-label">(Q3-4)</text>
@@ -164,11 +167,10 @@
             <!-- Q3-10 unique corner -->
             <rect x="545" y="1095" width="55" height="55" class="cell-unique"/><text x="572.5" y="1127" class="cell-text">Q3-10</text>
             
-            <!-- Q3 Label -->
             <text x="325" y="880" class="quadrant-label" opacity="0.3">Q3 (SW)</text>
             
             <!-- QUADRANT 4 (SE) - Bottom Right -->
-            <!-- Right column (9 unique cells: Q4-1 through Q4-9, Q4-19) -->
+            <!-- Right column (9 unique cells) - OUTER PERIMETER continues -->
             <rect x="1095" y="600" width="55" height="55" class="cell-unique"/><text x="1122.5" y="632" class="cell-text">Q4-1</text>
             <rect x="1095" y="655" width="55" height="55" class="cell-unique"/><text x="1122.5" y="687" class="cell-text">Q4-11</text>
             <rect x="1095" y="710" width="55" height="55" class="cell-unique"/><text x="1122.5" y="742" class="cell-text">Q4-12</text>
@@ -178,12 +180,14 @@
             <rect x="1095" y="930" width="55" height="55" class="cell-unique"/><text x="1122.5" y="962" class="cell-text">Q4-16</text>
             <rect x="1095" y="985" width="55" height="55" class="cell-unique"/><text x="1122.5" y="1017" class="cell-text">Q4-17</text>
             <rect x="1095" y="1040" width="55" height="55" class="cell-unique"/><text x="1122.5" y="1072" class="cell-text">Q4-18</text>
+            
+            <!-- Bottom-right corner -->
             <rect x="1095" y="1095" width="55" height="55" class="cell-unique"/><text x="1122.5" y="1127" class="cell-text">Q4-19</text>
             
             <!-- Q4-10 unique corner -->
             <rect x="600" y="1095" width="55" height="55" class="cell-unique"/><text x="627.5" y="1127" class="cell-text">Q4-10</text>
             
-            <!-- Bottom row shared cells (Q4-2 through Q4-9 are S25-S32) - these are SHARED -->
+            <!-- Bottom row shared cells (Q4-2 to Q4-9 are S25-S32) - OUTER PERIMETER -->
             <rect x="655" y="1095" width="55" height="55" class="cell-shared"/><text x="682.5" y="1127" class="cell-text">S25</text><text x="682.5" y="1140" class="cell-label">(Q4-2)</text>
             <rect x="710" y="1095" width="55" height="55" class="cell-shared"/><text x="737.5" y="1127" class="cell-text">S26</text><text x="737.5" y="1140" class="cell-label">(Q4-3)</text>
             <rect x="765" y="1095" width="55" height="55" class="cell-shared"/><text x="792.5" y="1127" class="cell-text">S27</text><text x="792.5" y="1140" class="cell-label">(Q4-4)</text>
@@ -193,10 +197,9 @@
             <rect x="985" y="1095" width="55" height="55" class="cell-shared"/><text x="1012.5" y="1127" class="cell-text">S31</text><text x="1012.5" y="1140" class="cell-label">(Q4-8)</text>
             <rect x="1040" y="1095" width="55" height="55" class="cell-shared"/><text x="1067.5" y="1127" class="cell-text">S32</text><text x="1067.5" y="1140" class="cell-label">(Q4-9)</text>
             
-            <!-- Q4 Label -->
             <text x="875" y="880" class="quadrant-label" opacity="0.3">Q4 (SE)</text>
             
-            <!-- SHARED CROSS - 33 cells total -->
+            <!-- SHARED CROSS - Interior borders -->
             <!-- Vertical shared border Q1-Q2 (8 cells: S1-S8) -->
             <rect x="600" y="105" width="55" height="55" class="cell-shared"/><text x="627.5" y="137" class="cell-text">S1</text>
             <rect x="600" y="160" width="55" height="55" class="cell-shared"/><text x="627.5" y="192" class="cell-text">S2</text>
@@ -217,7 +220,7 @@
             <rect x="600" y="930" width="55" height="55" class="cell-shared"/><text x="627.5" y="962" class="cell-text">S15</text>
             <rect x="600" y="985" width="55" height="55" class="cell-shared"/><text x="627.5" y="1017" class="cell-text">S16</text>
             
-            <!-- Horizontal shared border Q1-Q3 (8 cells already defined as part of Q1 row: note these overlap with center column) -->
+            <!-- Horizontal shared border Q1-Q3 (8 cells) -->
             <rect x="105" y="545" width="55" height="55" class="cell-shared"/><text x="132.5" y="577" class="cell-text">S33</text>
             <rect x="160" y="545" width="55" height="55" class="cell-shared"/><text x="187.5" y="577" class="cell-text">S34</text>
             <rect x="215" y="545" width="55" height="55" class="cell-shared"/><text x="242.5" y="577" class="cell-text">S35</text>
@@ -227,7 +230,7 @@
             <rect x="435" y="545" width="55" height="55" class="cell-shared"/><text x="462.5" y="577" class="cell-text">S39</text>
             <rect x="490" y="545" width="55" height="55" class="cell-shared"/><text x="517.5" y="577" class="cell-text">S40</text>
             
-            <!-- Horizontal shared border Q2-Q4 (8 cells: similar pattern on right side) -->
+            <!-- Horizontal shared border Q2-Q4 (8 cells) -->
             <rect x="655" y="545" width="55" height="55" class="cell-shared"/><text x="682.5" y="577" class="cell-text">S41</text>
             <rect x="710" y="545" width="55" height="55" class="cell-shared"/><text x="737.5" y="577" class="cell-text">S42</text>
             <rect x="765" y="545" width="55" height="55" class="cell-shared"/><text x="792.5" y="577" class="cell-text">S43</text>
@@ -237,16 +240,15 @@
             <rect x="985" y="545" width="55" height="55" class="cell-shared"/><text x="1012.5" y="577" class="cell-text">S47</text>
             <rect x="1040" y="545" width="55" height="55" class="cell-shared"/><text x="1067.5" y="577" class="cell-text">S48</text>
             
-            <!-- Center START (1 cell) -->
-            <rect x="545" y="545" width="110" height="110" class="cell-center"/>
-            <text x="600" y="590" class="cell-text" font-size="16">START</text>
-            <text x="600" y="610" class="cell-label">Choose Direction</text>
+            <!-- Center START (SINGLE CELL - 1x1) -->
+            <rect x="545" y="545" width="55" height="55" class="cell-center"/>
+            <text x="572.5" y="577" class="cell-text" font-size="12">START</text>
             
-            <!-- Arrows from center -->
-            <line x1="580" y1="580" x2="540" y2="540" stroke="#333" stroke-width="3" marker-end="url(#arrowhead)"/>
-            <line x1="620" y1="580" x2="660" y2="540" stroke="#333" stroke-width="3" marker-end="url(#arrowhead)"/>
-            <line x1="580" y1="620" x2="540" y2="660" stroke="#333" stroke-width="3" marker-end="url(#arrowhead)"/>
-            <line x1="620" y1="620" x2="660" y2="660" stroke="#333" stroke-width="3" marker-end="url(#arrowhead)"/>
+            <!-- Arrows from center pointing to each quadrant -->
+            <line x1="560" y1="560" x2="540" y2="540" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+            <line x1="585" y1="560" x2="605" y2="540" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+            <line x1="560" y1="585" x2="540" y2="605" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+            <line x1="585" y1="585" x2="605" y2="605" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
             
             <defs>
                 <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
@@ -264,37 +266,38 @@
                 </li>
                 <li>
                     <span class="color-box" style="background: #ffcc80; border-color: #e65100;"></span>
-                    <strong>Shared Cross Cells (Orange):</strong> 32 cells in the cross structure + bottom/top borders
+                    <strong>Shared Cross Cells (Orange):</strong> 32 shared interior cells
                 </li>
                 <li>
                     <span class="color-box" style="background: #ffd700; border-color: #ff6f00;"></span>
-                    <strong>Center START (Gold):</strong> 1 cell at the central intersection
+                    <strong>Center START (Gold):</strong> Single 1×1 cell at center
                 </li>
             </ul>
             
-            <h3>Corrected Cell Positions</h3>
+            <h3>Outer Perimeter Cell Counts</h3>
             <ul>
-                <li><strong>S9-S16:</strong> Vertical border between Q3 and Q4 (bottom half of board)</li>
-                <li><strong>Q3-2 to Q3-9:</strong> Now correctly shown as S17-S24 (shared bottom border of Q3)</li>
-                <li><strong>Q4-2 to Q4-9:</strong> Now correctly shown as S25-S32 (shared bottom border of Q4)</li>
+                <li><strong>Q1 to Q2 (Top edge):</strong> 19 cells (Q1-1 through Q1-10, Q2-1 through Q2-9)</li>
+                <li><strong>Q2 to Q4 (Right edge):</strong> 19 cells (Q2-10 through Q2-19, Q4-1 through Q4-10)</li>
+                <li><strong>Q4 to Q3 (Bottom edge):</strong> 19 cells (Q4-19, S32 through S25, Q3-10)</li>
+                <li><strong>Q3 to Q1 (Left edge):</strong> 18 cells (Q3-19 through Q3-1, Q1-11 through Q1-19, doesn't recount Q1-1)</li>
+                <li><strong>Total perimeter:</strong> 75 cells</li>
             </ul>
             
             <h3>Board Statistics</h3>
             <ul>
                 <li><strong>Total Quadrants:</strong> 4 (Q1-NW, Q2-NE, Q3-SW, Q4-SE)</li>
-                <li><strong>Unique Cells per Quadrant:</strong> 19 cells each</li>
-                <li><strong>Shared Cross Cells:</strong> 48 total shared cells (includes all borders)</li>
-                <li><strong>Center START:</strong> 1 cell</li>
+                <li><strong>Unique Cells per Quadrant:</strong> 19 cells each (76 total)</li>
+                <li><strong>Shared Cross Cells:</strong> 32 interior shared cells + 1 center = 33 total</li>
+                <li><strong>Center START:</strong> Single 1×1 cell</li>
                 <li><strong>Total Unique Spaces:</strong> 109 cells (76 + 32 + 1)</li>
             </ul>
             
             <h3>Gameplay Notes</h3>
             <ul>
-                <li>Each quadrant has <strong>10 cells per side</strong>, but adjacent sides are shared with neighboring quadrants</li>
-                <li>Players start at the <strong>CENTER START</strong> and choose one of 4 directions (arrows point to each quadrant)</li>
+                <li>Players start at the <strong>single-cell CENTER START</strong> and choose one of 4 directions</li>
+                <li><strong>Outer perimeter:</strong> 75 cells forming the board's outer edge</li>
                 <li><strong>Shared cells (orange)</strong> allow movement between adjacent quadrants</li>
-                <li>The cross-shaped shared area creates strategic gameplay opportunities</li>
-                <li>All 109 unique cells are shown with clear labels</li>
+                <li>All 109 unique cells are labeled clearly</li>
             </ul>
         </div>
     </div>
