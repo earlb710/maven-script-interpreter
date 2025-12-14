@@ -7,6 +7,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Window;
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -107,6 +108,33 @@ public class NewFileDialog extends Dialog<NewFileDialog.FileInfo> {
     }
     
     /**
+     * Generate a unique default filename based on the file type.
+     * Format: newXXX (or newXXX_count if file exists) where XXX is based on the extension
+     * 
+     * @param type The file type
+     * @param path The directory path where the file will be created
+     * @return A unique filename without extension
+     */
+    private String generateDefaultFilename(FileType type, String path) {
+        // Base name without extension (e.g., "newebs", "newjson")
+        String baseName = "new" + type.getExtension().substring(1); // Remove the dot from extension
+        String filename = baseName;
+        int count = 1;
+        
+        // Check if file exists and increment count if needed
+        Path dirPath = Paths.get(path);
+        Path filePath = dirPath.resolve(filename + type.getExtension());
+        
+        while (Files.exists(filePath)) {
+            filename = baseName + "_" + count;
+            filePath = dirPath.resolve(filename + type.getExtension());
+            count++;
+        }
+        
+        return filename;
+    }
+    
+    /**
      * Create a new file dialog.
      * 
      * @param owner The owner window
@@ -135,17 +163,22 @@ public class NewFileDialog extends Dialog<NewFileDialog.FileInfo> {
         fileNameField.setPromptText("Enter file name");
         fileNameField.setPrefWidth(300);
         
-        // Update extension hint when file type changes
-        fileTypeCombo.valueProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                fileNameField.setPromptText("Enter file name (extension " + newValue.getExtension() + " will be added)");
-            }
-        });
-        
         // File path field (populated with project path)
         filePathField = new TextField();
         filePathField.setText(defaultPath != null ? defaultPath : System.getProperty("user.dir"));
         filePathField.setPrefWidth(300);
+        
+        // Set initial default filename based on the default file type
+        fileNameField.setText(generateDefaultFilename(FileType.EBS_SCRIPT, filePathField.getText()));
+        
+        // Update extension hint and default filename when file type changes
+        fileTypeCombo.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                fileNameField.setPromptText("Enter file name (extension " + newValue.getExtension() + " will be added)");
+                // Update default filename based on new type
+                fileNameField.setText(generateDefaultFilename(newValue, filePathField.getText()));
+            }
+        });
         
         // Browse button to select directory
         browseButton = new Button("Browse...");

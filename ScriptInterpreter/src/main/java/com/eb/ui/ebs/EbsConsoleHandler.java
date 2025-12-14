@@ -741,29 +741,38 @@ public class EbsConsoleHandler extends EbsHandler {
     }
 
     /**
-     * Create a new empty script file with a default name "newScript_x.ebs"
-     * where x is an incrementing sequence number.
+     * Create a new file using the NewFileDialog.
+     * Shows a dialog to select file type and name, with smart defaults.
      * The file is NOT created on disk - it exists only in the tab until saved.
      */
     public void createNewScriptFile() {
         try {
-            String filename = getNextNewScriptFilename();
-            Path path = Util.SANDBOX_ROOT.resolve(filename);
+            // Show new file dialog with SANDBOX_ROOT as default path
+            NewFileDialog dialog = new NewFileDialog(stage, Util.SANDBOX_ROOT.toString());
+            var result = dialog.showAndWait();
+            
+            if (result.isEmpty()) {
+                return; // User cancelled
+            }
+            
+            NewFileDialog.FileInfo fileInfo = result.get();
+            String fullPath = fileInfo.getFullPath();
+            Path path = Path.of(fullPath);
             
             // DO NOT create the physical file - just create the tab
             // Create a TabContext with a null fileContext since the file doesn't exist yet
-            TabContext tabContext = new TabContext(filename, path, null);
+            TabContext tabContext = new TabContext(path.getFileName().toString(), path, null);
             
             // Create the tab using the tab handler
             EbsTab newTab = tabHandler.createNewTab(tabContext, true);
             
             if (newTab != null) {
-                // Initialize with default content and mark as dirty (unsaved)
-                String defaultContent = "// New EBS Script\n\n";
+                // Initialize with default content based on file type
+                String defaultContent = getDefaultContentForFileType(fileInfo.getType());
                 newTab.initializeAsNewFile(defaultContent);
             }
         } catch (Exception ex) {
-            submitErrors("Failed to create new script file: " + ex.getMessage());
+            submitErrors("Failed to create new file: " + ex.getMessage());
         }
     }
 
