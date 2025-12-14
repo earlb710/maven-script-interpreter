@@ -272,8 +272,9 @@ public class ProjectTreeView extends VBox {
                                     if (target.startsWith(source) || target.equals(source)) {
                                         return; // Don't accept
                                     }
-                                } catch (Exception e) {
-                                    return; // Don't accept on error
+                                } catch (java.nio.file.InvalidPathException e) {
+                                    // Invalid path, don't accept
+                                    return;
                                 }
                             }
                             
