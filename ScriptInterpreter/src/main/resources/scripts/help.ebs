@@ -1099,7 +1099,7 @@ if builtinCategoryOrder != null then {
                 displayName = jsonDisplayName;
             }
         }
-        call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.builtins." + displayName, true);
+        call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.Builtins." + displayName, true);
     }
 }
 
