@@ -126,11 +126,11 @@ treeView.setCellFactory(tv -> {
 ### What Can Be Drop Targets
 - Directories ✓
 - Directories within projects ✓
+- Project nodes (moves to project root directory) ✓
 
 ### What Cannot Be Drop Targets
 - Files ✗
 - Root node ✗
-- Project nodes ✗
 - Same parent directory (no-op) ✗
 - Directory cannot be dropped into itself ✗
 - Directory cannot be dropped into its subdirectories ✗

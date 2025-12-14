@@ -92,6 +92,7 @@ When dragging over a file (invalid target):
 
 ✓ **Directories** - Any folder within a project  
 ✓ **Nested Directories** - Folders inside other folders  
+✓ **Project Nodes** - Drop on project to move to project root directory  
 
 ✗ **Files** - Cannot drop onto files  
 ✗ **Same Parent** - Cannot drop into current parent (no change)  
@@ -222,14 +223,8 @@ Projects
 Drag important.ebs to MyProject:
 1. Expand temp/ folder
 2. Click important.ebs
-3. Drag to MyProject node (root of project)
-   ⚠️ Cannot drop on project node!
-
-Instead, use context menu:
-1. Right-click important.ebs
-2. Select "Move..."
-3. Choose MyProject directory
-4. Click "Select"
+3. Drag to MyProject node (highlights blue)
+4. Drop
 
 Final Structure:
 Projects
@@ -239,7 +234,7 @@ Projects
     └── main.ebs
 ```
 
-**Note**: To move to project root, use context menu "Move..." since project nodes themselves cannot be drop targets.
+**Note**: You can now drop directly on project nodes to move items to the project root directory!
 
 ## Tips and Tricks
 

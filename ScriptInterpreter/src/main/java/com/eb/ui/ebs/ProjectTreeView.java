@@ -254,14 +254,20 @@ public class ProjectTreeView extends VBox {
             if (event.getGestureSource() != cell && event.getDragboard().hasString()) {
                 TreeItem<String> targetItem = cell.getTreeItem();
                 
-                // Allow drop only on directories (not files, not root, not empty cells)
+                // Allow drop on directories and project nodes (not files, not root, not empty cells)
                 if (targetItem != null && targetItem != rootItem && !cell.isEmpty()) {
                     Object userData = targetItem.getGraphic() != null ? targetItem.getGraphic().getUserData() : null;
                     if (userData instanceof String) {
                         String targetPath = (String) userData;
-                        Path target = Paths.get(targetPath);
                         
-                        // Only allow drop on directories
+                        // Check if this is a project node (parent is root)
+                        boolean isProjectNode = targetItem.getParent() == rootItem;
+                        
+                        // For project nodes, get the project directory from project.json path
+                        String targetDirPath = isProjectNode ? getProjectDirectory(targetPath) : targetPath;
+                        Path target = Paths.get(targetDirPath);
+                        
+                        // Only allow drop on directories (or project nodes which represent directories)
                         if (Files.isDirectory(target)) {
                             String sourcePath = event.getDragboard().getString();
                             Path source = Paths.get(sourcePath);
@@ -304,7 +310,13 @@ public class ProjectTreeView extends VBox {
                 if (targetItem != null) {
                     Object userData = targetItem.getGraphic() != null ? targetItem.getGraphic().getUserData() : null;
                     if (userData instanceof String) {
-                        String targetDirPath = (String) userData;
+                        String targetPath = (String) userData;
+                        
+                        // Check if this is a project node (parent is root)
+                        boolean isProjectNode = targetItem.getParent() == rootItem;
+                        
+                        // For project nodes, get the project directory from project.json path
+                        String targetDirPath = isProjectNode ? getProjectDirectory(targetPath) : targetPath;
                         
                         try {
                             Path source = Paths.get(sourcePath);
@@ -339,8 +351,14 @@ public class ProjectTreeView extends VBox {
                                 sourceItem.getParent().getChildren().remove(sourceItem);
                             }
                             
-                            // Refresh the target directory in the tree
-                            refreshDirectoryNode(targetItem, targetDirPath);
+                            // Refresh the target in the tree
+                            // For project nodes, refresh the entire project; for directories, refresh just that directory
+                            if (isProjectNode) {
+                                targetItem.getChildren().clear();
+                                loadProjectFiles(targetItem, targetPath);
+                            } else {
+                                refreshDirectoryNode(targetItem, targetDirPath);
+                            }
                             
                             System.out.println("Moved " + source + " to " + destination);
                             
@@ -367,7 +385,13 @@ public class ProjectTreeView extends VBox {
                     if (userData instanceof String) {
                         String targetPath = (String) userData;
                         try {
-                            if (Files.isDirectory(Paths.get(targetPath))) {
+                            // Check if this is a project node (parent is root)
+                            boolean isProjectNode = targetItem.getParent() == rootItem;
+                            
+                            // For project nodes, get the project directory from project.json path
+                            String targetDirPath = isProjectNode ? getProjectDirectory(targetPath) : targetPath;
+                            
+                            if (Files.isDirectory(Paths.get(targetDirPath))) {
                                 cell.setStyle("-fx-background-color: #e0e0ff;");
                             }
                         } catch (Exception e) {

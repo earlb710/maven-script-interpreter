@@ -16,6 +16,7 @@ The project tree now supports drag-and-drop operations for files and directories
 
 ### Drop Validation
 - Files and directories can only be dropped onto directory items (not files)
+- Files and directories can be dropped onto project nodes to move to the project root directory
 - Directories cannot be dropped into themselves or their subdirectories
 - Items cannot be dropped into their current parent directory (no-op move)
 - Invalid drop targets are automatically rejected
@@ -101,10 +102,11 @@ treeView.setCellFactory(tv -> {
 
 1. **Cannot drag project nodes**: Only files and directories within projects can be dragged
 2. **Cannot drag root**: The "Projects" root node cannot be dragged
-3. **Cannot drop on files**: Drop targets must be directories
-4. **Cannot drop directory into itself**: Prevents infinite loops and invalid operations
-5. **Cannot drop into same parent**: Prevents no-op moves
-6. **Must not overwrite**: Duplicate names in destination are rejected with an error message
+3. **Cannot drop on files**: Drop targets must be directories or project nodes
+4. **Can drop on project nodes**: Dropping on a project node moves the item to the project root directory
+5. **Cannot drop directory into itself**: Prevents infinite loops and invalid operations
+6. **Cannot drop into same parent**: Prevents no-op moves
+7. **Must not overwrite**: Duplicate names in destination are rejected with an error message
 
 ## Error Handling
 
