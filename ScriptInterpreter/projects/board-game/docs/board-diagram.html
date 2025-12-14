@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>4-Quadrant Board Game - Cross + Border Structure</title>
+    <title>4-Quadrant Board Game - Complete Board with Corners</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -63,10 +63,10 @@
 </head>
 <body>
     <div class="container">
-        <h1>4-Quadrant Board Game - New Structure</h1>
+        <h1>4-Quadrant Board Game - Complete Board with Corners</h1>
         <p class="description">
-            <strong>Center cell (C0,0)</strong> + <strong>4 arms (8 cells each)</strong> + <strong>4 shared corner cells (S)</strong> + <strong>4 borders (17 cells each)</strong><br>
-            Total: 1 center + 32 arm cells + 4 shared corners + 68 border cells = 105 unique cells
+            <strong>Center cell (C0,0)</strong> + <strong>4 arms (8 cells each)</strong> + <strong>4 shared corner cells (S)</strong> + <strong>4 borders (16 cells each)</strong> + <strong>4 corner cells (C)</strong><br>
+            Total: 1 center + 32 arm cells + 4 shared corners + 64 border cells + 4 corner cells = 105 unique cells
         </p>
         
         <svg width="1100" height="1100" viewBox="0 0 1100 1100" xmlns="http://www.w3.org/2000/svg">
@@ -76,6 +76,7 @@
                     .cell-arm { fill: #90caf9; stroke: #1976d2; stroke-width: 2; }
                     .cell-shared { fill: #ff6f00; stroke: #e65100; stroke-width: 3; }
                     .cell-border { fill: #c8e6c9; stroke: #2e7d32; stroke-width: 2; }
+                    .cell-corner { fill: #ba68c8; stroke: #7b1fa2; stroke-width: 3; }
                     .cell-text { font-size: 10px; text-anchor: middle; fill: #000; font-weight: bold; }
                     .label { font-size: 14px; text-anchor: middle; fill: #333; font-weight: bold; }
                 </style>
@@ -141,8 +142,24 @@
             <rect x="50" y="500" width="50" height="50" class="cell-shared"/>
             <text x="75" y="530" class="cell-text">S-W</text>
             
-            <!-- TOP BORDER (S-W corner to S-N: 8 cells, then S-N shared, then 8 cells to S-E) -->
-            <!-- Left section: S-W to S-N -->
+            <!-- 4 CORNER CELLS (NEW) -->
+            <!-- NW Corner -->
+            <rect x="50" y="50" width="50" height="50" class="cell-corner"/>
+            <text x="75" y="80" class="cell-text">C-NW</text>
+            
+            <!-- NE Corner -->
+            <rect x="950" y="50" width="50" height="50" class="cell-corner"/>
+            <text x="975" y="80" class="cell-text">C-NE</text>
+            
+            <!-- SE Corner -->
+            <rect x="950" y="950" width="50" height="50" class="cell-corner"/>
+            <text x="975" y="980" class="cell-text">C-SE</text>
+            
+            <!-- SW Corner -->
+            <rect x="50" y="950" width="50" height="50" class="cell-corner"/>
+            <text x="75" y="980" class="cell-text">C-SW</text>
+            
+            <!-- TOP BORDER (C-NW to S-N: 8 cells, then S-N shared, then 8 cells to C-NE) -->
             <rect x="100" y="50" width="50" height="50" class="cell-border"/><text x="125" y="80" class="cell-text">B1</text>
             <rect x="150" y="50" width="50" height="50" class="cell-border"/><text x="175" y="80" class="cell-text">B2</text>
             <rect x="200" y="50" width="50" height="50" class="cell-border"/><text x="225" y="80" class="cell-text">B3</text>
@@ -151,8 +168,7 @@
             <rect x="350" y="50" width="50" height="50" class="cell-border"/><text x="375" y="80" class="cell-text">B6</text>
             <rect x="400" y="50" width="50" height="50" class="cell-border"/><text x="425" y="80" class="cell-text">B7</text>
             <rect x="450" y="50" width="50" height="50" class="cell-border"/><text x="475" y="80" class="cell-text">B8</text>
-            <!-- S-N shared corner is already drawn -->
-            <!-- Right section: S-N to S-E -->
+            <!-- S-N shared corner already drawn -->
             <rect x="550" y="50" width="50" height="50" class="cell-border"/><text x="575" y="80" class="cell-text">B9</text>
             <rect x="600" y="50" width="50" height="50" class="cell-border"/><text x="625" y="80" class="cell-text">B10</text>
             <rect x="650" y="50" width="50" height="50" class="cell-border"/><text x="675" y="80" class="cell-text">B11</text>
@@ -162,8 +178,7 @@
             <rect x="850" y="50" width="50" height="50" class="cell-border"/><text x="875" y="80" class="cell-text">B15</text>
             <rect x="900" y="50" width="50" height="50" class="cell-border"/><text x="925" y="80" class="cell-text">B16</text>
             
-            <!-- RIGHT BORDER (S-N to S-E: 8 cells vertical, then S-E shared, then 8 cells to S-S) -->
-            <!-- Top section: down from S-N area -->
+            <!-- RIGHT BORDER (C-NE to S-E: 8 cells, then S-E shared, then 8 cells to C-SE) -->
             <rect x="950" y="100" width="50" height="50" class="cell-border"/><text x="975" y="130" class="cell-text">B17</text>
             <rect x="950" y="150" width="50" height="50" class="cell-border"/><text x="975" y="180" class="cell-text">B18</text>
             <rect x="950" y="200" width="50" height="50" class="cell-border"/><text x="975" y="230" class="cell-text">B19</text>
@@ -172,8 +187,7 @@
             <rect x="950" y="350" width="50" height="50" class="cell-border"/><text x="975" y="380" class="cell-text">B22</text>
             <rect x="950" y="400" width="50" height="50" class="cell-border"/><text x="975" y="430" class="cell-text">B23</text>
             <rect x="950" y="450" width="50" height="50" class="cell-border"/><text x="975" y="480" class="cell-text">B24</text>
-            <!-- S-E shared corner is already drawn -->
-            <!-- Bottom section: down from S-E -->
+            <!-- S-E shared corner already drawn -->
             <rect x="950" y="550" width="50" height="50" class="cell-border"/><text x="975" y="580" class="cell-text">B25</text>
             <rect x="950" y="600" width="50" height="50" class="cell-border"/><text x="975" y="630" class="cell-text">B26</text>
             <rect x="950" y="650" width="50" height="50" class="cell-border"/><text x="975" y="680" class="cell-text">B27</text>
@@ -183,8 +197,7 @@
             <rect x="950" y="850" width="50" height="50" class="cell-border"/><text x="975" y="880" class="cell-text">B31</text>
             <rect x="950" y="900" width="50" height="50" class="cell-border"/><text x="975" y="930" class="cell-text">B32</text>
             
-            <!-- BOTTOM BORDER (S-E to S-S: 8 cells, then S-S shared, then 8 cells to S-W) -->
-            <!-- Right section: S-E to S-S -->
+            <!-- BOTTOM BORDER (C-SE to S-S: 8 cells, then S-S shared, then 8 cells to C-SW) -->
             <rect x="900" y="950" width="50" height="50" class="cell-border"/><text x="925" y="980" class="cell-text">B33</text>
             <rect x="850" y="950" width="50" height="50" class="cell-border"/><text x="875" y="980" class="cell-text">B34</text>
             <rect x="800" y="950" width="50" height="50" class="cell-border"/><text x="825" y="980" class="cell-text">B35</text>
@@ -193,8 +206,7 @@
             <rect x="650" y="950" width="50" height="50" class="cell-border"/><text x="675" y="980" class="cell-text">B38</text>
             <rect x="600" y="950" width="50" height="50" class="cell-border"/><text x="625" y="980" class="cell-text">B39</text>
             <rect x="550" y="950" width="50" height="50" class="cell-border"/><text x="575" y="980" class="cell-text">B40</text>
-            <!-- S-S shared corner is already drawn -->
-            <!-- Left section: S-S to S-W -->
+            <!-- S-S shared corner already drawn -->
             <rect x="450" y="950" width="50" height="50" class="cell-border"/><text x="475" y="980" class="cell-text">B41</text>
             <rect x="400" y="950" width="50" height="50" class="cell-border"/><text x="425" y="980" class="cell-text">B42</text>
             <rect x="350" y="950" width="50" height="50" class="cell-border"/><text x="375" y="980" class="cell-text">B43</text>
@@ -204,8 +216,7 @@
             <rect x="150" y="950" width="50" height="50" class="cell-border"/><text x="175" y="980" class="cell-text">B47</text>
             <rect x="100" y="950" width="50" height="50" class="cell-border"/><text x="125" y="980" class="cell-text">B48</text>
             
-            <!-- LEFT BORDER (S-S to S-W: 8 cells vertical, then S-W shared, then 8 cells to S-N) -->
-            <!-- Bottom section: up from S-S area -->
+            <!-- LEFT BORDER (C-SW to S-W: 8 cells, then S-W shared, then 8 cells to C-NW) -->
             <rect x="50" y="900" width="50" height="50" class="cell-border"/><text x="75" y="930" class="cell-text">B49</text>
             <rect x="50" y="850" width="50" height="50" class="cell-border"/><text x="75" y="880" class="cell-text">B50</text>
             <rect x="50" y="800" width="50" height="50" class="cell-border"/><text x="75" y="830" class="cell-text">B51</text>
@@ -214,8 +225,7 @@
             <rect x="50" y="650" width="50" height="50" class="cell-border"/><text x="75" y="680" class="cell-text">B54</text>
             <rect x="50" y="600" width="50" height="50" class="cell-border"/><text x="75" y="630" class="cell-text">B55</text>
             <rect x="50" y="550" width="50" height="50" class="cell-border"/><text x="75" y="580" class="cell-text">B56</text>
-            <!-- S-W shared corner is already drawn -->
-            <!-- Top section: up from S-W -->
+            <!-- S-W shared corner already drawn -->
             <rect x="50" y="450" width="50" height="50" class="cell-border"/><text x="75" y="480" class="cell-text">B57</text>
             <rect x="50" y="400" width="50" height="50" class="cell-border"/><text x="75" y="430" class="cell-text">B58</text>
             <rect x="50" y="350" width="50" height="50" class="cell-border"/><text x="75" y="380" class="cell-text">B59</text>
@@ -257,6 +267,10 @@
                     <span class="color-box" style="background: #c8e6c9; border-color: #2e7d32;"></span>
                     <strong>Border Cells (Green):</strong> 64 cells (16 per side: B1-B64)
                 </li>
+                <li>
+                    <span class="color-box" style="background: #ba68c8; border-color: #7b1fa2;"></span>
+                    <strong>Board Corner Cells (Purple):</strong> 4 cells (C-NW, C-NE, C-SE, C-SW)
+                </li>
             </ul>
             
             <h3>Board Statistics</h3>
@@ -265,16 +279,17 @@
                 <li><strong>Arms:</strong> 32 cells (4 directions × 8 cells each)</li>
                 <li><strong>Shared Corners:</strong> 4 cells (at the end of each arm)</li>
                 <li><strong>Borders:</strong> 64 cells (4 borders × 16 cells each)</li>
-                <li><strong>Total:</strong> 1 + 32 + 4 + 64 = <strong>101 unique cells</strong></li>
+                <li><strong>Board Corners:</strong> 4 cells (at the 4 corners of the square board)</li>
+                <li><strong>Total:</strong> 1 + 32 + 4 + 64 + 4 = <strong>105 unique cells</strong></li>
             </ul>
             
             <h3>Border Structure (per side)</h3>
             <ul>
-                <li><strong>Each border:</strong> 8 cells + 1 shared corner + 8 cells = 17 positions</li>
-                <li><strong>Top border:</strong> B1-B8 (8) + S-N (shared) + B9-B16 (8)</li>
-                <li><strong>Right border:</strong> B17-B24 (8) + S-E (shared) + B25-B32 (8)</li>
-                <li><strong>Bottom border:</strong> B33-B40 (8) + S-S (shared) + B41-B48 (8)</li>
-                <li><strong>Left border:</strong> B49-B56 (8) + S-W (shared) + B57-B64 (8)</li>
+                <li><strong>Each border:</strong> 1 corner + 8 cells + 1 shared corner + 8 cells + 1 corner = 19 positions</li>
+                <li><strong>Top border:</strong> C-NW + B1-B8 (8) + S-N (shared) + B9-B16 (8) + C-NE</li>
+                <li><strong>Right border:</strong> C-NE + B17-B24 (8) + S-E (shared) + B25-B32 (8) + C-SE</li>
+                <li><strong>Bottom border:</strong> C-SE + B33-B40 (8) + S-S (shared) + B41-B48 (8) + C-SW</li>
+                <li><strong>Left border:</strong> C-SW + B49-B56 (8) + S-W (shared) + B57-B64 (8) + C-NW</li>
             </ul>
             
             <h3>Gameplay Notes</h3>
@@ -283,6 +298,7 @@
                 <li>Move along one of the 4 arms (North, East, South, or West)</li>
                 <li>Reach shared corners (S-N, S-E, S-S, S-W) to access the border paths</li>
                 <li>Border paths form the outer perimeter of the game board</li>
+                <li>Board corners (C-NW, C-NE, C-SE, C-SW) mark the 4 corners of the square board</li>
             </ul>
         </div>
     </div>
