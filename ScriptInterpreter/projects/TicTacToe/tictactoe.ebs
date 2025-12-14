@@ -285,7 +285,7 @@ newGame {
 screen tictactoeScreen = {
     "title": "Tic Tac Toe - You (X) vs Computer (O)",
     "width": 450,
-    "height": 600,
+    "height": 650,
     "sets": [
         {
             "setname": "main",
@@ -316,7 +316,7 @@ screen tictactoeScreen = {
                     "display": {
                         "type": "label",
                         "labelText": "TIC TAC TOE",
-                        "labelColor": "#ecf0f1",
+                        "labelColor": "#ffffff",
                         "labelFontSize": "28px",
                         "labelBold": true,
                         "style": "-fx-alignment: center;"
@@ -328,7 +328,7 @@ screen tictactoeScreen = {
                     "display": {
                         "type": "label",
                         "labelText": "",
-                        "labelColor": "#f39c12",
+                        "labelColor": "#ffff00",
                         "labelFontSize": "18px",
                         "labelBold": true,
                         "style": "-fx-alignment: center; -fx-min-height: 50px; -fx-max-height: 50px;"
@@ -350,7 +350,7 @@ screen tictactoeScreen = {
                             "display": {
                                 "type": "canvas",
                                 "onClick": "call playerMove(0);",
-                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2;"
+                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-effect: innershadow(gaussian, rgba(0,0,0,0.7), 10, 0, 0, 2);"
                             }
                         },
                         {
@@ -360,7 +360,7 @@ screen tictactoeScreen = {
                             "display": {
                                 "type": "canvas",
                                 "onClick": "call playerMove(1);",
-                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2;"
+                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-effect: innershadow(gaussian, rgba(0,0,0,0.7), 10, 0, 0, 2);"
                             }
                         },
                         {
@@ -370,7 +370,7 @@ screen tictactoeScreen = {
                             "display": {
                                 "type": "canvas",
                                 "onClick": "call playerMove(2);",
-                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2;"
+                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-effect: innershadow(gaussian, rgba(0,0,0,0.7), 10, 0, 0, 2);"
                             }
                         },
                         {
@@ -380,7 +380,7 @@ screen tictactoeScreen = {
                             "display": {
                                 "type": "canvas",
                                 "onClick": "call playerMove(3);",
-                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2;"
+                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-effect: innershadow(gaussian, rgba(0,0,0,0.7), 10, 0, 0, 2);"
                             }
                         },
                         {
@@ -390,7 +390,7 @@ screen tictactoeScreen = {
                             "display": {
                                 "type": "canvas",
                                 "onClick": "call playerMove(4);",
-                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2;"
+                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-effect: innershadow(gaussian, rgba(0,0,0,0.7), 10, 0, 0, 2);"
                             }
                         },
                         {
@@ -400,7 +400,7 @@ screen tictactoeScreen = {
                             "display": {
                                 "type": "canvas",
                                 "onClick": "call playerMove(5);",
-                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2;"
+                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-effect: innershadow(gaussian, rgba(0,0,0,0.7), 10, 0, 0, 2);"
                             }
                         },
                         {
@@ -410,7 +410,7 @@ screen tictactoeScreen = {
                             "display": {
                                 "type": "canvas",
                                 "onClick": "call playerMove(6);",
-                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2;"
+                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-effect: innershadow(gaussian, rgba(0,0,0,0.7), 10, 0, 0, 2);"
                             }
                         },
                         {
@@ -420,7 +420,7 @@ screen tictactoeScreen = {
                             "display": {
                                 "type": "canvas",
                                 "onClick": "call playerMove(7);",
-                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2;"
+                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-effect: innershadow(gaussian, rgba(0,0,0,0.7), 10, 0, 0, 2);"
                             }
                         },
                         {
@@ -430,7 +430,7 @@ screen tictactoeScreen = {
                             "display": {
                                 "type": "canvas",
                                 "onClick": "call playerMove(8);",
-                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2;"
+                                "style": "-fx-cursor: hand; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-effect: innershadow(gaussian, rgba(0,0,0,0.7), 10, 0, 0, 2);"
                             }
                         }
                     ]
