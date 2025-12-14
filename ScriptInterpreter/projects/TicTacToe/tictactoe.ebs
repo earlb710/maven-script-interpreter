@@ -84,6 +84,75 @@ checkWin(player: string) return bool {
     return false;
 }
 
+// Draw winning line through the three winning cells
+drawWinLine(player: string) {
+    // Check rows
+    if (board[0] == player and board[1] == player and board[2] == player) {
+        call drawLineOnCells(0, 1, 2, "horizontal");
+    }
+    if (board[3] == player and board[4] == player and board[5] == player) {
+        call drawLineOnCells(3, 4, 5, "horizontal");
+    }
+    if (board[6] == player and board[7] == player and board[8] == player) {
+        call drawLineOnCells(6, 7, 8, "horizontal");
+    }
+    
+    // Check columns
+    if (board[0] == player and board[3] == player and board[6] == player) {
+        call drawLineOnCells(0, 3, 6, "vertical");
+    }
+    if (board[1] == player and board[4] == player and board[7] == player) {
+        call drawLineOnCells(1, 4, 7, "vertical");
+    }
+    if (board[2] == player and board[5] == player and board[8] == player) {
+        call drawLineOnCells(2, 5, 8, "vertical");
+    }
+    
+    // Check diagonals
+    if (board[0] == player and board[4] == player and board[8] == player) {
+        call drawLineOnCells(0, 4, 8, "diagonal-down");
+    }
+    if (board[2] == player and board[4] == player and board[6] == player) {
+        call drawLineOnCells(2, 4, 6, "diagonal-up");
+    }
+}
+
+// Draw a red line on the specified cells
+drawLineOnCells(cell1: int, cell2: int, cell3: int, direction: string) {
+    var canvas1: canvas = call getCanvas(cell1);
+    var canvas2: canvas = call getCanvas(cell2);
+    var canvas3: canvas = call getCanvas(cell3);
+    
+    call style.setStroke(canvas1, "#ff0000", 8);
+    call style.setStroke(canvas2, "#ff0000", 8);
+    call style.setStroke(canvas3, "#ff0000", 8);
+    
+    if (direction == "horizontal") {
+        // Draw horizontal line through center of each cell
+        call draw.line(canvas1, 0, 50, 100, 50);
+        call draw.line(canvas2, 0, 50, 100, 50);
+        call draw.line(canvas3, 0, 50, 100, 50);
+    }
+    if (direction == "vertical") {
+        // Draw vertical line through center of each cell
+        call draw.line(canvas1, 50, 0, 50, 100);
+        call draw.line(canvas2, 50, 0, 50, 100);
+        call draw.line(canvas3, 50, 0, 50, 100);
+    }
+    if (direction == "diagonal-down") {
+        // Draw diagonal from top-left to bottom-right
+        call draw.line(canvas1, 0, 0, 100, 100);
+        call draw.line(canvas2, 0, 0, 100, 100);
+        call draw.line(canvas3, 0, 0, 100, 100);
+    }
+    if (direction == "diagonal-up") {
+        // Draw diagonal from bottom-left to top-right
+        call draw.line(canvas1, 0, 100, 100, 0);
+        call draw.line(canvas2, 0, 100, 100, 0);
+        call draw.line(canvas3, 0, 100, 100, 0);
+    }
+}
+
 // Check if the board is full (draw)
 checkDraw return bool {
     for (var i: int = 0; i < 9; i++) {
@@ -235,6 +304,7 @@ playerMove(pos: int) {
         gameOver = true;
         statusMessage = "You win! Congratulations!";
         call updateDisplay;
+        call drawWinLine("X");
         return;
     }
     
@@ -259,6 +329,7 @@ playerMove(pos: int) {
             gameOver = true;
             statusMessage = "Computer wins! Try again.";
             call updateDisplay;
+            call drawWinLine("O");
             return;
         }
         
