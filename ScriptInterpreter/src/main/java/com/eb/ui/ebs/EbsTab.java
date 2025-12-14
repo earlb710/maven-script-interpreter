@@ -2505,6 +2505,8 @@ public class EbsTab extends Tab {
                 autoRefreshBtn.setStyle("");
                 // Stop any pending refresh
                 refreshTimer.stop();
+                // Remove the listener when disabled
+                dispArea.textProperty().removeListener(textChangeListener);
             }
         });
         
