@@ -5629,7 +5629,7 @@ public class ScreenFactory {
             if (newValue && expandCode != null && !expandCode.isEmpty()) {
                 // Node was expanded - execute onExpand code
                 try {
-                    // Set the selected item path in a temporary variable for the event handler
+                    // Set the expanded item path in a temporary variable for the event handler
                     if (varRef != null && screenVars != null) {
                         screenVars.put(varRef + ".expandedItem", itemPath);
                     }
@@ -5646,7 +5646,7 @@ public class ScreenFactory {
             } else if (!newValue && collapseCode != null && !collapseCode.isEmpty()) {
                 // Node was collapsed - execute onCollapse code
                 try {
-                    // Set the selected item path in a temporary variable for the event handler
+                    // Set the collapsed item path in a temporary variable for the event handler
                     if (varRef != null && screenVars != null) {
                         screenVars.put(varRef + ".collapsedItem", itemPath);
                     }
