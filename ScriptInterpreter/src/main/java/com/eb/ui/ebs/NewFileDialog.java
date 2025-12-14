@@ -116,22 +116,27 @@ public class NewFileDialog extends Dialog<NewFileDialog.FileInfo> {
      * @return A unique filename without extension
      */
     private String generateDefaultFilename(FileType type, String path) {
-        // Base name without extension (e.g., "newebs", "newjson")
-        String baseName = "new" + type.getExtension().substring(1); // Remove the dot from extension
-        String filename = baseName;
-        int count = 1;
-        
-        // Check if file exists and increment count if needed
-        Path dirPath = Paths.get(path);
-        Path filePath = dirPath.resolve(filename + type.getExtension());
-        
-        while (Files.exists(filePath)) {
-            filename = baseName + "_" + count;
-            filePath = dirPath.resolve(filename + type.getExtension());
-            count++;
+        try {
+            // Base name without extension (e.g., "newebs", "newjson")
+            String baseName = "new" + type.getExtension().substring(1); // Remove the dot from extension
+            String filename = baseName;
+            int count = 1;
+            
+            // Check if file exists and increment count if needed
+            Path dirPath = Paths.get(path);
+            Path filePath = dirPath.resolve(filename + type.getExtension());
+            
+            while (Files.exists(filePath)) {
+                filename = baseName + "_" + count;
+                filePath = dirPath.resolve(filename + type.getExtension());
+                count++;
+            }
+            
+            return filename;
+        } catch (Exception e) {
+            // If any error occurs (invalid path, I/O error, etc.), return a simple default
+            return "new" + type.getExtension().substring(1);
         }
-        
-        return filename;
     }
     
     /**
@@ -177,6 +182,14 @@ public class NewFileDialog extends Dialog<NewFileDialog.FileInfo> {
                 fileNameField.setPromptText("Enter file name (extension " + newValue.getExtension() + " will be added)");
                 // Update default filename based on new type
                 fileNameField.setText(generateDefaultFilename(newValue, filePathField.getText()));
+            }
+        });
+        
+        // Update default filename when path changes
+        filePathField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null && fileTypeCombo.getValue() != null) {
+                // Update default filename based on new path
+                fileNameField.setText(generateDefaultFilename(fileTypeCombo.getValue(), newValue));
             }
         });
         
