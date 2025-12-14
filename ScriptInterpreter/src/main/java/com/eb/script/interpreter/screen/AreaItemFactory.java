@@ -982,6 +982,17 @@ public class AreaItemFactory {
             }
         }
         
+        // Handle expandable property - prevent expansion if expandable is explicitly false
+        if (def.expandable != null && !def.expandable && hasChildren) {
+            // Add listener to prevent expansion when user tries to expand
+            item.expandedProperty().addListener((obs, wasExpanded, isExpanded) -> {
+                if (isExpanded && !wasExpanded) {
+                    // User is trying to expand - prevent it
+                    item.setExpanded(false);
+                }
+            });
+        }
+        
         // Set up icons
         boolean hasOpenClosedIcons = def.iconOpen != null || def.iconClosed != null;
         

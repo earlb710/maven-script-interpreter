@@ -150,6 +150,7 @@ if builtinCategoryOrder != null then {
             categoryNode = call json.set(categoryNode, "value", displayName);
             categoryNode = call json.set(categoryNode, "icon", "icons/tree-node.png");
             categoryNode = call json.set(categoryNode, "expanded", false);
+            categoryNode = call json.set(categoryNode, "expandable", false);
             categoryNode = call json.set(categoryNode, "children", categoryArray);
             call array.add(builtinChildren, categoryNode);
             totalBuiltins = totalBuiltins + 1; // Count categories, not individual functions

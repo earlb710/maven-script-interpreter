@@ -5804,6 +5804,7 @@ public class ScreenFactory {
             itemClone.iconOpen = item.iconOpen;
             itemClone.iconClosed = item.iconClosed;
             itemClone.expanded = item.expanded;
+            itemClone.expandable = item.expandable;
             if (item.children != null) {
                 itemClone.children = cloneTreeItems(item.children);
             }
