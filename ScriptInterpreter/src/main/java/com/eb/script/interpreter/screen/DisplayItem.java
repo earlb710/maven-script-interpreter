@@ -73,6 +73,10 @@ public class DisplayItem {
     String onValidate;
     // onChange event handler - EBS code to execute whenever the item value changes
     String onChange;
+    // onExpand event handler - EBS code to execute when a tree node is expanded
+    String onExpand;
+    // onCollapse event handler - EBS code to execute when a tree node is collapsed
+    String onCollapse;
     // Whether to show the current value label for sliders
     Boolean showSliderValue;
     // Source of the value: "data" (original data value) or "display" (formatted display value)

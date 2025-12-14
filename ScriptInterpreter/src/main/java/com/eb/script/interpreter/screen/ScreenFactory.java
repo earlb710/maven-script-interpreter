@@ -1370,6 +1370,14 @@ public class ScreenFactory {
                     addEventHandlerRow(handlersSection, screenName, itemName, "onChange", item.onChange);
                     hasHandlers = true;
                 }
+                if (item.onExpand != null) {
+                    addEventHandlerRow(handlersSection, screenName, itemName, "onExpand", item.onExpand);
+                    hasHandlers = true;
+                }
+                if (item.onCollapse != null) {
+                    addEventHandlerRow(handlersSection, screenName, itemName, "onCollapse", item.onCollapse);
+                    hasHandlers = true;
+                }
                 
                 // Check displayItem handlers
                 if (item.displayItem != null) {
@@ -1383,6 +1391,14 @@ public class ScreenFactory {
                     }
                     if (item.displayItem.onChange != null && item.onChange == null) {
                         addEventHandlerRow(handlersSection, screenName, itemName, "onChange", item.displayItem.onChange);
+                        hasHandlers = true;
+                    }
+                    if (item.displayItem.onExpand != null && item.onExpand == null) {
+                        addEventHandlerRow(handlersSection, screenName, itemName, "onExpand", item.displayItem.onExpand);
+                        hasHandlers = true;
+                    }
+                    if (item.displayItem.onCollapse != null && item.onCollapse == null) {
+                        addEventHandlerRow(handlersSection, screenName, itemName, "onCollapse", item.displayItem.onCollapse);
                         hasHandlers = true;
                     }
                 }
@@ -2239,6 +2255,14 @@ public class ScreenFactory {
                     sb.append(itemName).append(".onChange: ").append(truncateCode(item.onChange)).append("\n");
                     hasHandlers = true;
                 }
+                if (item.onExpand != null) {
+                    sb.append(itemName).append(".onExpand: ").append(truncateCode(item.onExpand)).append("\n");
+                    hasHandlers = true;
+                }
+                if (item.onCollapse != null) {
+                    sb.append(itemName).append(".onCollapse: ").append(truncateCode(item.onCollapse)).append("\n");
+                    hasHandlers = true;
+                }
                 if (item.displayItem != null) {
                     if (item.displayItem.onClick != null) {
                         sb.append(itemName).append(".onClick: ").append(truncateCode(item.displayItem.onClick)).append("\n");
@@ -2250,6 +2274,14 @@ public class ScreenFactory {
                     }
                     if (item.displayItem.onChange != null && item.onChange == null) {
                         sb.append(itemName).append(".onChange: ").append(truncateCode(item.displayItem.onChange)).append("\n");
+                        hasHandlers = true;
+                    }
+                    if (item.displayItem.onExpand != null && item.onExpand == null) {
+                        sb.append(itemName).append(".onExpand: ").append(truncateCode(item.displayItem.onExpand)).append("\n");
+                        hasHandlers = true;
+                    }
+                    if (item.displayItem.onCollapse != null && item.onCollapse == null) {
+                        sb.append(itemName).append(".onCollapse: ").append(truncateCode(item.displayItem.onCollapse)).append("\n");
                         hasHandlers = true;
                     }
                 }
@@ -3689,6 +3721,29 @@ public class ScreenFactory {
                 }
                 if (onClickHandler != null && changeCode != null && !changeCode.isEmpty()) {
                     setupChangeHandler(control, changeCode, onClickHandler, screenName, context, boundControls, screenVars);
+                }
+                
+                // Set up onExpand and onCollapse handlers for TreeView
+                if (control instanceof javafx.scene.control.TreeView) {
+                    javafx.scene.control.TreeView<?> treeView = (javafx.scene.control.TreeView<?>) control;
+                    
+                    // Get onExpand code from item or metadata
+                    String expandCode = item.onExpand;
+                    if (expandCode == null && metadata != null) {
+                        expandCode = metadata.onExpand;
+                    }
+                    
+                    // Get onCollapse code from item or metadata
+                    String collapseCode = item.onCollapse;
+                    if (collapseCode == null && metadata != null) {
+                        collapseCode = metadata.onCollapse;
+                    }
+                    
+                    // Set up the expand/collapse handlers if event handlers are provided
+                    if (onClickHandler != null && (expandCode != null || collapseCode != null)) {
+                        setupTreeExpandCollapseHandlers(treeView, expandCode, collapseCode, onClickHandler, 
+                            screenName, context, item.varRef, screenVars);
+                    }
                 }
 
                 // Apply item layout properties
@@ -5514,6 +5569,144 @@ public class ScreenFactory {
             List<Node> boundControls, java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
         // Delegate to DisplayChangeHandler in the display layer
         DisplayChangeHandler.setupChangeHandler(control, changeCode, onClickHandler, screenName, context, boundControls, screenVars);
+    }
+
+    /**
+     * Sets up onExpand and onCollapse event handlers for a TreeView control.
+     * The expand code is executed when a tree node is expanded.
+     * The collapse code is executed when a tree node is collapsed.
+     * 
+     * @param treeView The TreeView control to monitor
+     * @param expandCode The EBS code to execute on expand (can be null)
+     * @param collapseCode The EBS code to execute on collapse (can be null)
+     * @param onClickHandler Handler to execute the EBS code
+     * @param screenName The screen name for context
+     * @param context The interpreter context
+     * @param varRef The variable reference for the tree control
+     * @param screenVars The screen variables map
+     */
+    private static void setupTreeExpandCollapseHandlers(javafx.scene.control.TreeView<?> treeView,
+            String expandCode, String collapseCode,
+            OnClickHandler onClickHandler, String screenName, InterpreterContext context,
+            String varRef, java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
+        
+        if (treeView.getRoot() == null) {
+            return; // No root, nothing to listen to
+        }
+        
+        // Recursively attach listeners to all tree items
+        attachExpandCollapseListenersToTreeItem(treeView.getRoot(), expandCode, collapseCode, 
+            onClickHandler, screenName, context, varRef, screenVars);
+    }
+    
+    /**
+     * Recursively attaches expand/collapse listeners to a tree item and all its children.
+     * 
+     * @param treeItem The tree item to attach listeners to
+     * @param expandCode The EBS code to execute on expand
+     * @param collapseCode The EBS code to execute on collapse
+     * @param onClickHandler Handler to execute the EBS code
+     * @param screenName The screen name for context
+     * @param context The interpreter context
+     * @param varRef The variable reference for the tree control
+     * @param screenVars The screen variables map
+     */
+    private static void attachExpandCollapseListenersToTreeItem(
+            javafx.scene.control.TreeItem<?> treeItem,
+            String expandCode, String collapseCode,
+            OnClickHandler onClickHandler, String screenName, InterpreterContext context,
+            String varRef, java.util.concurrent.ConcurrentHashMap<String, Object> screenVars) {
+        
+        if (treeItem == null) {
+            return;
+        }
+        
+        // Add listener to this tree item's expanded property
+        treeItem.expandedProperty().addListener((observable, oldValue, newValue) -> {
+            String itemPath = buildTreeItemPath(treeItem);
+            
+            // Execute the appropriate handler based on expand/collapse state
+            if (newValue && expandCode != null && !expandCode.isEmpty()) {
+                // Node was expanded - execute onExpand code
+                try {
+                    // Set the selected item path in a temporary variable for the event handler
+                    if (varRef != null && screenVars != null) {
+                        screenVars.put(varRef + ".expandedItem", itemPath);
+                    }
+                    
+                    // Increment event counter
+                    incrementEventCount(screenName, varRef != null ? varRef : "tree", "onExpand");
+                    
+                    // Execute the expand code on the JavaFX thread
+                    onClickHandler.executeDirect(expandCode);
+                } catch (InterpreterError e) {
+                    System.err.println("Error executing onExpand handler: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            } else if (!newValue && collapseCode != null && !collapseCode.isEmpty()) {
+                // Node was collapsed - execute onCollapse code
+                try {
+                    // Set the selected item path in a temporary variable for the event handler
+                    if (varRef != null && screenVars != null) {
+                        screenVars.put(varRef + ".collapsedItem", itemPath);
+                    }
+                    
+                    // Increment event counter
+                    incrementEventCount(screenName, varRef != null ? varRef : "tree", "onCollapse");
+                    
+                    // Execute the collapse code on the JavaFX thread
+                    onClickHandler.executeDirect(collapseCode);
+                } catch (InterpreterError e) {
+                    System.err.println("Error executing onCollapse handler: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+        });
+        
+        // Recursively attach listeners to children
+        for (javafx.scene.control.TreeItem<?> child : treeItem.getChildren()) {
+            attachExpandCollapseListenersToTreeItem(child, expandCode, collapseCode, 
+                onClickHandler, screenName, context, varRef, screenVars);
+        }
+        
+        // Also listen for children being added in the future (dynamic trees)
+        treeItem.getChildren().addListener((javafx.collections.ListChangeListener<javafx.scene.control.TreeItem<?>>) change -> {
+            while (change.next()) {
+                if (change.wasAdded()) {
+                    for (javafx.scene.control.TreeItem<?> newItem : change.getAddedSubList()) {
+                        attachExpandCollapseListenersToTreeItem(newItem, expandCode, collapseCode,
+                            onClickHandler, screenName, context, varRef, screenVars);
+                    }
+                }
+            }
+        });
+    }
+    
+    /**
+     * Builds a dot-notation path for a tree item by walking up the tree hierarchy.
+     * 
+     * @param treeItem The tree item to build a path for
+     * @return The dot-notation path (e.g., "Root.src.main")
+     */
+    private static String buildTreeItemPath(javafx.scene.control.TreeItem<?> treeItem) {
+        if (treeItem == null) {
+            return "";
+        }
+        
+        // Build path by walking up the tree
+        java.util.List<String> pathParts = new java.util.ArrayList<>();
+        javafx.scene.control.TreeItem<?> current = treeItem;
+        
+        while (current != null) {
+            Object value = current.getValue();
+            if (value != null) {
+                pathParts.add(0, value.toString());
+            }
+            current = current.getParent();
+        }
+        
+        // Join parts with dots
+        return String.join(".", pathParts);
     }
 
     /**

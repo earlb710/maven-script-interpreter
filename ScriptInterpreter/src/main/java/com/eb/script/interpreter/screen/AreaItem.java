@@ -66,6 +66,10 @@ public class AreaItem {
     public String onValidate;
     // onChange event handler - EBS code to execute whenever the item value changes
     public String onChange;
+    // onExpand event handler - EBS code to execute when a tree node is expanded
+    public String onExpand;
+    // onCollapse event handler - EBS code to execute when a tree node is collapsed
+    public String onCollapse;
     // Source of the value: "data" (original data value) or "display" (formatted display value)
     public String source = "data";
     // Whether changes to this item should mark the screen/item as changed (default: true)
