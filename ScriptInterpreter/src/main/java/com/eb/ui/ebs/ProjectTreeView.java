@@ -366,8 +366,12 @@ public class ProjectTreeView extends VBox {
                     Object userData = targetItem.getGraphic() != null ? targetItem.getGraphic().getUserData() : null;
                     if (userData instanceof String) {
                         String targetPath = (String) userData;
-                        if (Files.isDirectory(Paths.get(targetPath))) {
-                            cell.setStyle("-fx-background-color: #e0e0ff;");
+                        try {
+                            if (Files.isDirectory(Paths.get(targetPath))) {
+                                cell.setStyle("-fx-background-color: #e0e0ff;");
+                            }
+                        } catch (Exception e) {
+                            // Ignore invalid paths or filesystem errors
                         }
                     }
                 }
