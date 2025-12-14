@@ -8,7 +8,9 @@ The chess.ebs application had two visual issues with move indicator circles:
 ## Root Causes Identified
 
 ### Issue 1: Circle Background Not Transparent
-**Root Cause**: When converting JavaFX Canvas to PNG image, the `SwingFXUtils.fromFXImage(snapshot, null)` method was creating a `BufferedImage` with type `TYPE_INT_RGB` (when null is passed as the second parameter), which does NOT support transparency/alpha channel.
+**Root Cause 1**: When converting JavaFX Canvas to PNG image, the `SwingFXUtils.fromFXImage(snapshot, null)` method was creating a `BufferedImage` with type `TYPE_INT_RGB` (when null is passed as the second parameter), which does NOT support transparency/alpha channel.
+
+**Root Cause 2 (ACTUAL ISSUE)**: JavaFX `WritableImage` constructor `new WritableImage(width, height)` initializes all pixels to **opaque white** by default, not transparent! When taking a canvas snapshot into a pre-allocated WritableImage, the white background overwrites the transparent canvas pixels.
 
 **Location**: `EbsCanvas.java` - `toImage()`, `snapshot()`, and `getBytes()` methods
 
@@ -21,6 +23,7 @@ The chess.ebs application had two visual issues with move indicator circles:
 
 ### Solution 1: Enable PNG Transparency (EbsCanvas.java)
 
+**Part 1 - BufferedImage with alpha channel:**
 Changed from:
 ```java
 BufferedImage buffered = SwingFXUtils.fromFXImage(snapshot, null);
@@ -37,9 +40,26 @@ BufferedImage buffered = new BufferedImage(
 SwingFXUtils.fromFXImage(snapshot, buffered);
 ```
 
+**Part 2 - SnapshotParameters with transparent fill (THE KEY FIX):**
+Changed from:
+```java
+WritableImage snapshot = new WritableImage((int) canvas.getWidth(), (int) canvas.getHeight());
+canvas.snapshot(null, snapshot);
+```
+
+Changed to:
+```java
+// Use SnapshotParameters with transparent fill to preserve alpha channel
+javafx.scene.SnapshotParameters params = new javafx.scene.SnapshotParameters();
+params.setFill(Color.TRANSPARENT);
+WritableImage snapshot = canvas.snapshot(params, null);
+```
+
 **Why this works**: 
 - `BufferedImage.TYPE_INT_ARGB` explicitly includes an alpha channel (A=Alpha)
-- This ensures transparency is preserved when the canvas is converted to PNG
+- `SnapshotParameters.setFill(Color.TRANSPARENT)` tells JavaFX to fill the snapshot background with transparent pixels instead of opaque white
+- Passing `null` as the second argument to `canvas.snapshot()` lets JavaFX create the WritableImage with correct transparent pixels
+- This ensures transparency is preserved through the entire pipeline: Canvas → WritableImage → BufferedImage → PNG
 - Applied to all three methods: `toImage()`, `snapshot()`, and `getBytes()`
 
 ### Solution 2: Perfect Circle Centering (chess.ebs)
