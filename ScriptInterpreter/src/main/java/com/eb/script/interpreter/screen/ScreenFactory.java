@@ -3135,6 +3135,8 @@ public class ScreenFactory {
                 event.consume(); // Prevent the event from propagating further
             }
             // Add Alt+E key handler to focus first editable field
+            // Note: Alt+E is also used in the main console to open Edit menu,
+            // but in screen context it focuses the editor for quick editing access
             else if (event.getCode() == KeyCode.E && event.isAltDown() && !event.isControlDown() && !event.isShiftDown()) {
                 focusFirstEditableField(allBoundControls);
                 event.consume(); // Prevent the event from propagating further

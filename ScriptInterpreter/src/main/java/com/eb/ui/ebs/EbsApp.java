@@ -139,57 +139,66 @@ public class EbsApp {
     /**
      * Setup global keyboard shortcuts for menu access.
      * Alt+F = File menu, Alt+E = Edit menu, Alt+C = Config menu, etc.
+     * 
+     * NOTE: Menu order in EbsMenu.java is: File, Edit, Config, Tools, Screens, Help
+     * This mapping must be kept in sync if menu order changes.
      */
     private void setupGlobalKeyboardShortcuts(Scene scene) {
         scene.addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, event -> {
-            // Only handle Alt+ combinations
+            // Only handle Alt+ key combinations (Alt without Control or Shift)
             if (!event.isAltDown() || event.isControlDown() || event.isShiftDown()) {
                 return;
             }
             
             javafx.scene.input.KeyCode code = event.getCode();
             
-            // Alt+F = File menu (index 0)
+            // Map Alt+key to menu by name for more maintainable code
+            // Alt+F = File menu
             if (code == javafx.scene.input.KeyCode.F) {
-                showMenu(0);
+                showMenuByName("File");
                 event.consume();
             }
-            // Alt+E = Edit menu (index 1)
+            // Alt+E = Edit menu
             else if (code == javafx.scene.input.KeyCode.E) {
-                showMenu(1);
+                showMenuByName("Edit");
                 event.consume();
             }
-            // Alt+C = Config menu (index 2)
+            // Alt+C = Config menu
             else if (code == javafx.scene.input.KeyCode.C) {
-                showMenu(2);
+                showMenuByName("Config");
                 event.consume();
             }
-            // Alt+T = Tools menu (index 3)
+            // Alt+T = Tools menu
             else if (code == javafx.scene.input.KeyCode.T) {
-                showMenu(3);
+                showMenuByName("Tools");
                 event.consume();
             }
-            // Alt+S = Screens menu (index 4)
+            // Alt+S = Screens menu
             else if (code == javafx.scene.input.KeyCode.S) {
-                showMenu(4);
+                showMenuByName("Screens");
                 event.consume();
             }
-            // Alt+H = Help menu (index 5)
+            // Alt+H = Help menu
             else if (code == javafx.scene.input.KeyCode.H) {
-                showMenu(5);
+                showMenuByName("Help");
                 event.consume();
             }
         });
     }
 
     /**
-     * Show the menu at the specified index.
-     * @param index The menu index (0=File, 1=Edit, 2=Config, 3=Tools, 4=Screens, 5=Help)
+     * Show a menu by its text name.
+     * This is more maintainable than using indices as it doesn't depend on menu order.
+     * @param menuName The text name of the menu (e.g., "File", "Edit", "Config")
      */
-    private void showMenu(int index) {
-        if (menuBar != null && index >= 0 && index < menuBar.getMenus().size()) {
-            javafx.scene.control.Menu menu = menuBar.getMenus().get(index);
-            menu.show();
+    private void showMenuByName(String menuName) {
+        if (menuBar != null) {
+            for (javafx.scene.control.Menu menu : menuBar.getMenus()) {
+                if (menu.getText().equals(menuName)) {
+                    menu.show();
+                    return;
+                }
+            }
         }
     }
 
