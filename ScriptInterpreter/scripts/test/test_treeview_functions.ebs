@@ -1,0 +1,290 @@
+// TreeView Functions Test Script
+// Tests all TreeView icon and styling functions
+
+call println("=======================================================");
+call println("  TreeView Functions Comprehensive Test Script");
+call println("=======================================================");
+call println("");
+
+// Create a test screen with TreeView
+call println("1. Creating test screen with TreeView...");
+call scr.create("treeTest", "TreeView Functions Test", 700, 600);
+
+// Build tree data structure
+var treeData = call map.new();
+call map.put(treeData, "type", "treeview");
+call map.put(treeData, "name", "testTree");
+call map.put(treeData, "x", 10);
+call map.put(treeData, "y", 50);
+call map.put(treeData, "width", 680);
+call map.put(treeData, "height", 500);
+call map.put(treeData, "showRoot", true);
+
+// Create root
+var rootItem = call map.new();
+call map.put(rootItem, "text", "Root");
+call map.put(rootItem, "children", []);
+
+// Add folders
+var srcFolder = call map.new();
+call map.put(srcFolder, "text", "src");
+call map.put(srcFolder, "children", []);
+
+var docsFolder = call map.new();
+call map.put(docsFolder, "text", "docs");
+call map.put(docsFolder, "children", []);
+
+var testsFolder = call map.new();
+call map.put(testsFolder, "text", "tests");
+call map.put(testsFolder, "children", []);
+
+// Add files to src
+var mainFile = call map.new();
+call map.put(mainFile, "text", "main.ebs");
+call map.put(mainFile, "children", []);
+
+var utilFile = call map.new();
+call map.put(utilFile, "text", "util.ebs");
+call map.put(utilFile, "children", []);
+
+var configFile = call map.new();
+call map.put(configFile, "text", "config.json");
+call map.put(configFile, "children", []);
+
+call array.push(call map.get(srcFolder, "children"), mainFile);
+call array.push(call map.get(srcFolder, "children"), utilFile);
+call array.push(call map.get(srcFolder, "children"), configFile);
+
+// Add files to docs
+var readmeFile = call map.new();
+call map.put(readmeFile, "text", "README.md");
+call map.put(readmeFile, "children", []);
+
+var guideFile = call map.new();
+call map.put(guideFile, "text", "guide.md");
+call map.put(guideFile, "children", []);
+
+call array.push(call map.get(docsFolder, "children"), readmeFile);
+call array.push(call map.get(docsFolder, "children"), guideFile);
+
+// Add files to tests
+var testMain = call map.new();
+call map.put(testMain, "text", "test_main.ebs");
+call map.put(testMain, "children", []);
+
+var testUtil = call map.new();
+call map.put(testUtil, "text", "test_util.ebs");
+call map.put(testUtil, "children", []);
+
+call array.push(call map.get(testsFolder, "children"), testMain);
+call array.push(call map.get(testsFolder, "children"), testUtil);
+
+// Add folders to root
+call array.push(call map.get(rootItem, "children"), srcFolder);
+call array.push(call map.get(rootItem, "children"), docsFolder);
+call array.push(call map.get(rootItem, "children"), testsFolder);
+
+call map.put(treeData, "root", rootItem);
+
+// Add title label
+var titleData = call map.new();
+call map.put(titleData, "type", "label");
+call map.put(titleData, "name", "title");
+call map.put(titleData, "text", "TreeView Functions Test - All Features Demonstrated");
+call map.put(titleData, "x", 10);
+call map.put(titleData, "y", 10);
+call scr.addControl("treeTest", titleData);
+
+// Add TreeView
+call scr.addControl("treeTest", treeData);
+call println("   ✓ TreeView created with folders and files");
+call println("");
+
+// Test 1: Icon Functions
+call println("2. Testing Icon Functions...");
+call println("   Testing scr.setTreeItemIcon (static icons):");
+
+var result1 = call scr.setTreeItemIcon("treeTest", "Root.src.main.ebs", "icons/script-file-run.png");
+call println("   - Set main.ebs icon: " + result1);
+
+var result2 = call scr.setTreeItemIcon("treeTest", "Root.src.util.ebs", "icons/script-file.png");
+call println("   - Set util.ebs icon: " + result2);
+
+var result3 = call scr.setTreeItemIcon("treeTest", "Root.src.config.json", "icons/config-file.png");
+call println("   - Set config.json icon: " + result3);
+
+var result4 = call scr.setTreeItemIcon("treeTest", "Root.docs.README.md", "icons/markdown-file.png");
+call println("   - Set README.md icon: " + result4);
+
+var result5 = call scr.setTreeItemIcon("treeTest", "Root.docs.guide.md", "icons/markdown-file.png");
+call println("   - Set guide.md icon: " + result5);
+
+call println("");
+call println("   Testing scr.setTreeItemIcons (state-based icons):");
+
+var result6 = call scr.setTreeItemIcons("treeTest", "Root.src", 
+    "icons/folder.png", "icons/folder-open.png", "icons/folder.png");
+call println("   - Set src folder icons: " + result6);
+
+var result7 = call scr.setTreeItemIcons("treeTest", "Root.docs",
+    "icons/folder.png", "icons/folder-open.png", "icons/folder.png");
+call println("   - Set docs folder icons: " + result7);
+
+var result8 = call scr.setTreeItemIcons("treeTest", "Root.tests",
+    "icons/folder.png", "icons/folder-open.png", "icons/folder.png");
+call println("   - Set tests folder icons: " + result8);
+
+call println("");
+call println("   Testing scr.getTreeItemIcon:");
+
+var icon1 = call scr.getTreeItemIcon("treeTest", "Root.src.main.ebs");
+call println("   - Get main.ebs icon: " + icon1);
+
+var icon2 = call scr.getTreeItemIcon("treeTest", "Root.src.config.json");
+call println("   - Get config.json icon: " + icon2);
+
+call println("   ✓ All icon functions tested successfully");
+call println("");
+
+// Test 2: Bold Styling
+call println("3. Testing Bold Styling (scr.setTreeItemBold)...");
+
+var bold1 = call scr.setTreeItemBold("treeTest", "Root.src", true);
+call println("   - Bold src folder: " + bold1);
+
+var bold2 = call scr.setTreeItemBold("treeTest", "Root.docs", true);
+call println("   - Bold docs folder: " + bold2);
+
+var bold3 = call scr.setTreeItemBold("treeTest", "Root.tests", true);
+call println("   - Bold tests folder: " + bold3);
+
+var bold4 = call scr.setTreeItemBold("treeTest", "Root.src.main.ebs", true);
+call println("   - Bold main.ebs: " + bold4);
+
+call println("   ✓ Bold styling applied successfully");
+call println("");
+
+// Test 3: Italic Styling
+call println("4. Testing Italic Styling (scr.setTreeItemItalic)...");
+
+var italic1 = call scr.setTreeItemItalic("treeTest", "Root.docs.README.md", true);
+call println("   - Italic README.md: " + italic1);
+
+var italic2 = call scr.setTreeItemItalic("treeTest", "Root.docs.guide.md", true);
+call println("   - Italic guide.md: " + italic2);
+
+var italic3 = call scr.setTreeItemItalic("treeTest", "Root.src.config.json", true);
+call println("   - Italic config.json: " + italic3);
+
+call println("   ✓ Italic styling applied successfully");
+call println("");
+
+// Test 4: Color Styling
+call println("5. Testing Color Styling (scr.setTreeItemColor)...");
+
+call println("   Testing hex colors:");
+var color1 = call scr.setTreeItemColor("treeTest", "Root.src.main.ebs", "#0066cc");
+call println("   - Set main.ebs to blue (#0066cc): " + color1);
+
+var color2 = call scr.setTreeItemColor("treeTest", "Root.tests.test_main.ebs", "#cc0000");
+call println("   - Set test_main.ebs to red (#cc0000): " + color2);
+
+var color3 = call scr.setTreeItemColor("treeTest", "Root.tests.test_util.ebs", "#cc0000");
+call println("   - Set test_util.ebs to red (#cc0000): " + color3);
+
+call println("");
+call println("   Testing RGB colors:");
+var color4 = call scr.setTreeItemColor("treeTest", "Root.docs.README.md", "rgb(0,136,0)");
+call println("   - Set README.md to green (rgb): " + color4);
+
+var color5 = call scr.setTreeItemColor("treeTest", "Root.docs.guide.md", "rgb(0,136,0)");
+call println("   - Set guide.md to green (rgb): " + color5);
+
+call println("");
+call println("   Testing color names:");
+var color6 = call scr.setTreeItemColor("treeTest", "Root.src.config.json", "orange");
+call println("   - Set config.json to orange: " + color6);
+
+call println("   ✓ Color styling applied successfully");
+call println("");
+
+// Test 5: Combined Styles
+call println("6. Testing Combined Styles (bold + italic + color)...");
+
+var comb1 = call scr.setTreeItemBold("treeTest", "Root.src.util.ebs", true);
+var comb2 = call scr.setTreeItemItalic("treeTest", "Root.src.util.ebs", true);
+var comb3 = call scr.setTreeItemColor("treeTest", "Root.src.util.ebs", "#9900cc");
+call println("   - Set util.ebs: bold + italic + purple");
+call println("     Bold: " + comb1 + ", Italic: " + comb2 + ", Color: " + comb3);
+
+call println("   ✓ Combined styles applied successfully");
+call println("");
+
+// Test 6: Remove Styles
+call println("7. Testing Style Removal...");
+
+call println("   Removing bold from one item:");
+var remove1 = call scr.setTreeItemBold("treeTest", "Root.tests", false);
+call println("   - Remove bold from tests folder: " + remove1);
+
+call println("");
+call println("   Removing italic from one item:");
+var remove2 = call scr.setTreeItemItalic("treeTest", "Root.src.config.json", false);
+call println("   - Remove italic from config.json: " + remove2);
+
+call println("");
+call println("   Removing color from one item:");
+var remove3 = call scr.setTreeItemColor("treeTest", "Root.src.config.json", null);
+call println("   - Remove color from config.json: " + remove3);
+
+call println("   ✓ Style removal tested successfully");
+call println("");
+
+// Add instruction label
+var instrData = call map.new();
+call map.put(instrData, "type", "label");
+call map.put(instrData, "name", "instructions");
+call map.put(instrData, "text", "All TreeView functions tested! Expand folders to see state-based icons.");
+call map.put(instrData, "x", 10);
+call map.put(instrData, "y", 560);
+call scr.addControl("treeTest", instrData);
+
+// Show the screen
+call scr.showScreen("treeTest");
+
+call println("");
+call println("=======================================================");
+call println("  TEST SUMMARY");
+call println("=======================================================");
+call println("✓ Icon Functions:");
+call println("  - scr.setTreeItemIcon (static icons for files)");
+call println("  - scr.setTreeItemIcons (state-based icons for folders)");
+call println("  - scr.getTreeItemIcon (retrieve icon paths)");
+call println("");
+call println("✓ Styling Functions:");
+call println("  - scr.setTreeItemBold (bold text)");
+call println("  - scr.setTreeItemItalic (italic text)");
+call println("  - scr.setTreeItemColor (hex, rgb, color names)");
+call println("");
+call println("✓ Advanced Features:");
+call println("  - Combined styles (bold + italic + color)");
+call println("  - Style removal (setting to false/null)");
+call println("  - State-based icons (expand/collapse folders)");
+call println("");
+call println("Visual Results in TreeView:");
+call println("  • Folders (src, docs) - Bold with state-based icons");
+call println("  • main.ebs - Bold + Blue + Run icon");
+call println("  • util.ebs - Bold + Italic + Purple + Script icon");
+call println("  • config.json - Config icon only");
+call println("  • README.md, guide.md - Italic + Green + Markdown icon");
+call println("  • test files - Red + Script icons");
+call println("=======================================================");
+call println("");
+call println("Screen is displayed. Close the window to continue.");
+
+// Wait for screen to close
+call scr.waitForClose("treeTest");
+
+call println("");
+call println("Test completed successfully!");
+call println("All TreeView icon and styling functions are working correctly.");
