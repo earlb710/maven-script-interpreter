@@ -545,6 +545,12 @@ public class EbsTab extends Tab {
         Button runBtn = new Button("Run");
         runBtn.setDefaultButton(true);
         runBtn.setPadding(new Insets(5, 10, 5, 10));
+        
+        // Only enable Run button for .ebs files
+        if (!isEbs) {
+            runBtn.setDisable(true);
+            runBtn.setTooltip(new Tooltip("Run button is only available for .ebs files"));
+        }
 
         Button clearBtn = new Button("Clear");
         clearBtn.setPadding(new Insets(5, 10, 5, 10));
