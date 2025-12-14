@@ -16,7 +16,7 @@ keywords   = "var" | "const" | "print" | "call" | "return" | "if" | "then" | "el
            | "typeof" ;                  (* typeof operator for runtime type inspection *)
 datatypes  = "byte" | "int" | "integer" | "long" | "float" | "double" | "string" | "date" | "bool" | "boolean" | "json" | "record" | "bitmap" | "intmap" | "imageData" | "canvas" ;
 operators  = "+" | "-" | "*" | "/" | "^" | "=" | "!" | ">" | "<" | ">=" | "<=" | "==" | "!=" 
-           | "and" | "or" | "&&" | "||" 
+           | "and" | "or" | "not" | "&&" | "||" 
            | "=>" | "=<" ;
 separators = ":" | "," | "." | ";" | "(" | ")" | "[" | "]" | "{" | "}" ;
 identifier = letter ( letter | digit | "_" )* ;

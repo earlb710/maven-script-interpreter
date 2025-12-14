@@ -186,6 +186,24 @@
       "example": "var isComplete = false;\nwhile isComplete == false do {\n  // process\n}"
     },
     {
+      "keyword": "and",
+      "short_description": "Logical AND operator",
+      "long_help": "The 'and' keyword (or &&) is a logical operator that returns true only if both operands are true. Use it to combine multiple conditions.",
+      "example": "var age = 25;\nvar hasLicense = true;\nif age >= 18 and hasLicense then {\n  print \"Can drive\";\n}"
+    },
+    {
+      "keyword": "or",
+      "short_description": "Logical OR operator",
+      "long_help": "The 'or' keyword (or ||) is a logical operator that returns true if at least one operand is true. Use it to check multiple alternative conditions.",
+      "example": "var isWeekend = false;\nvar isHoliday = true;\nif isWeekend or isHoliday then {\n  print \"Day off!\";\n}"
+    },
+    {
+      "keyword": "not",
+      "short_description": "Logical NOT operator",
+      "long_help": "The 'not' keyword (or !) is a logical operator that inverts a boolean value. It returns true if the operand is false, and false if the operand is true.",
+      "example": "var isLoggedIn = false;\nif not isLoggedIn then {\n  print \"Please log in\";\n}\n\nvar age = 25;\nif not (age < 18) then {\n  print \"Adult\";\n}"
+    },
+    {
       "keyword": "bitmap",
       "short_description": "Defines named bit fields within a byte",
       "long_help": "The 'bitmap' type defines named fields that map to bit ranges within a byte (0-7). This allows compact storage of multiple small values in a single byte, useful for flags, status bits, or packing multiple small integers. Fields are accessed using dot notation, with automatic bit shifting on read/write. Use 'typeof' to define reusable bitmap type aliases.",
