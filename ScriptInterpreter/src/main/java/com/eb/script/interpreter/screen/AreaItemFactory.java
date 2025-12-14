@@ -1004,18 +1004,10 @@ public class AreaItemFactory {
         } else if (def.icon != null && !def.icon.isEmpty()) {
             // Static icon (same for all states)
             setTreeItemIcon(item, def.icon);
-            
-            // Still need to handle expandable control even without dynamic icons
-            if (!isExpandable && hasChildren) {
-                item.expandedProperty().addListener((obs, wasExpanded, isExpanded) -> {
-                    if (isExpanded && !wasExpanded) {
-                        // User is trying to expand a non-expandable node - prevent it
-                        item.setExpanded(false);
-                    }
-                });
-            }
-        } else if (!isExpandable && hasChildren) {
-            // No icons at all, but still need expandable control
+        }
+        
+        // Add expansion prevention listener for non-expandable nodes (if not already added above)
+        if (!isExpandable && hasChildren && !hasOpenClosedIcons) {
             item.expandedProperty().addListener((obs, wasExpanded, isExpanded) -> {
                 if (isExpanded && !wasExpanded) {
                     // User is trying to expand a non-expandable node - prevent it
