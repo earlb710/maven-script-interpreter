@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.BooleanProperty;
+import javafx.scene.input.MouseEvent;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.StyleClassedTextArea;
 import org.fxmisc.richtext.model.PlainTextChange;
@@ -39,6 +40,10 @@ public class ScriptArea extends StyleClassedTextArea {
     
     // Quote matching state
     private int[] lastHighlightedQuotes = null; // [openPos, closePos] or null if no quotes highlighted
+    
+    // Selection drag state - used to suppress bracket highlighting during selection
+    // Volatile ensures visibility across potential concurrent access from different event handlers
+    private volatile boolean isSelectionDragInProgress = false;
 
     public ScriptArea() {
         setParagraphGraphicFactory(LineNumberFactory.get(this)); // initial state ON
@@ -50,7 +55,24 @@ public class ScriptArea extends StyleClassedTextArea {
             .subscribe(this::recordTextChange);
         
         // Set up bracket matching on caret position changes
+        // Skip highlighting if user is dragging to select text
         caretPositionProperty().addListener((obs, oldPos, newPos) -> {
+            if (!isSelectionDragInProgress) {
+                highlightMatchingBrackets();
+            }
+        });
+        
+        // Track mouse press to detect start of selection drag
+        addEventFilter(MouseEvent.MOUSE_PRESSED, e -> {
+            // Mouse press indicates potential selection start - suppress bracket highlighting
+            isSelectionDragInProgress = true;
+        });
+        
+        // Track mouse release to detect end of selection drag
+        addEventFilter(MouseEvent.MOUSE_RELEASED, e -> {
+            // Mouse release ends selection drag - re-enable bracket highlighting
+            isSelectionDragInProgress = false;
+            // Now apply bracket highlighting at the final caret position
             highlightMatchingBrackets();
         });
     }
