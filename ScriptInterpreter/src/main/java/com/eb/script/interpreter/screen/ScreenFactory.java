@@ -163,7 +163,9 @@ public class ScreenFactory {
      */
     public static int incrementEventCount(String screenName, String itemName, String eventType) {
         String key = (screenName + "." + itemName + "." + eventType).toLowerCase();
+        System.out.println("[DEBUG] incrementEventCount - key: '" + key + "' (screenName='" + screenName + "', itemName='" + itemName + "', eventType='" + eventType + "')");
         int newCount = eventCounts.computeIfAbsent(key, k -> new java.util.concurrent.atomic.AtomicInteger(0)).incrementAndGet();
+        System.out.println("[DEBUG] incrementEventCount - new count: " + newCount);
         
         // Update the debug panel label if it exists
         javafx.scene.control.Label countLabel = eventCountLabels.get(key);
@@ -203,8 +205,26 @@ public class ScreenFactory {
      */
     public static int getEventCount(String screenName, String itemName, String eventType) {
         String key = (screenName + "." + itemName + "." + eventType).toLowerCase();
+        System.out.println("[DEBUG] getEventCount - key: '" + key + "' (screenName='" + screenName + "', itemName='" + itemName + "', eventType='" + eventType + "')");
         java.util.concurrent.atomic.AtomicInteger count = eventCounts.get(key);
-        return count != null ? count.get() : 0;
+        
+        // If exact key not found, try finding a matching key with any prefix
+        if (count == null) {
+            System.out.println("[DEBUG] getEventCount - exact key not found, trying partial match");
+            String suffix = "." + itemName.toLowerCase() + "." + eventType.toLowerCase();
+            for (String storedKey : eventCounts.keySet()) {
+                if (storedKey.endsWith(suffix)) {
+                    System.out.println("[DEBUG] getEventCount - found matching key: '" + storedKey + "' (expected: '" + key + "')");
+                    count = eventCounts.get(storedKey);
+                    break;
+                }
+            }
+        }
+        
+        int result = count != null ? count.get() : 0;
+        System.out.println("[DEBUG] getEventCount - result: " + result);
+        System.out.println("[DEBUG] getEventCount - all keys in eventCounts: " + eventCounts.keySet());
+        return result;
     }
     
     /**
