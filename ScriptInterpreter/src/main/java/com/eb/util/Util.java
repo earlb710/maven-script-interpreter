@@ -147,6 +147,8 @@ public class Util {
                     value instanceof Map || value instanceof List || value instanceof ArrayDef;
                 case MAP ->
                     value instanceof Map;
+                case RECORD ->
+                    value instanceof Map;
                 case QUEUE ->
                     value instanceof com.eb.script.arrays.QueueDef;
                 case IMAGE ->
