@@ -1591,8 +1591,10 @@ public class BuiltinsScreen {
 
         switch (propLower) {
             case "value", "text" -> {
-                // The "value" and "text" properties are handled by applyPropertyToControl
-                // but we accept them here without error to allow the JavaFX control update
+                // Setting value/text through scr.setProperty is NOT allowed
+                // All communication with screen values must be done through screen variables
+                throw new InterpreterError("scr.setProperty: cannot change 'value' or 'text' property. "
+                        + "Use screen variable access instead (e.g., screenName.varName = value)");
             }
             case "editable" -> {
                 if (value instanceof Boolean) {
@@ -1726,20 +1728,9 @@ public class BuiltinsScreen {
 
         switch (propLower) {
             case "value", "text" -> {
-                // Set the text/value of the control
-                String textValue = value != null ? String.valueOf(value) : "";
-                if (control instanceof javafx.scene.control.TextField) {
-                    ((javafx.scene.control.TextField) control).setText(textValue);
-                } else if (control instanceof javafx.scene.control.TextArea) {
-                    ((javafx.scene.control.TextArea) control).setText(textValue);
-                } else if (control instanceof javafx.scene.web.WebView) {
-                    // For WebView, load the content as HTML
-                    ((javafx.scene.web.WebView) control).getEngine().loadContent(textValue);
-                } else if (control instanceof javafx.scene.control.Label) {
-                    ((javafx.scene.control.Label) control).setText(textValue);
-                } else if (control instanceof javafx.scene.control.Button) {
-                    ((javafx.scene.control.Button) control).setText(textValue);
-                }
+                // This case should never be reached since setAreaItemProperty now rejects value/text
+                // Kept for defensive programming, but will not be called
+                throw new IllegalArgumentException("Cannot set value/text property through scr.setProperty");
             }
             case "editable" -> {
                 if (value instanceof Boolean) {

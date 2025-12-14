@@ -2,6 +2,9 @@
 // Example: scr.setProperty builtin - Set property value on a screen item
 // Syntax: call scr.setProperty("screenName.itemName", "propertyName", value)
 // Returns: true on success
+//
+// IMPORTANT: scr.setProperty cannot be used to change "value" or "text" properties
+// Use screen variable access instead: screenName.varName = value
 
 // Define a test screen with an item
 screen propSetScreen = {
@@ -35,8 +38,12 @@ screen propSetScreen = {
 
 show screen propSetScreen;
 
-// Set properties on the item
+// Set UI properties on the item (NOT value/text)
 call scr.setProperty("propSetScreen.emailField", "editable", false);
 call scr.setProperty("propSetScreen.emailField", "tooltip", "Enter email address");
 call scr.setProperty("propSetScreen.emailField", "visible", true);
 print "Properties updated successfully";
+
+// To change the value, use screen variable access:
+propSetScreen.email = "example@email.com";
+print "Email value set to: " + propSetScreen.email;

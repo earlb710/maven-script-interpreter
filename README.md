@@ -877,22 +877,41 @@ call ai.cancel(requestId);
 
 ### Screen Property Updates with `scr.setProperty`
 
-Update UI controls programmatically (useful in AI callbacks):
+Update UI control properties programmatically (useful in AI callbacks):
 
 ```javascript
 // Disable a button
 call scr.setProperty("screenName.buttonName", "disabled", true);
 
-// Update text content
-call scr.setProperty("screenName.textAreaName", "value", "New text content");
+// Make a field read-only
+call scr.setProperty("screenName.textFieldName", "editable", false);
+
+// Hide a control
+call scr.setProperty("screenName.labelName", "visible", false);
 
 // Enable button after operation
 call scr.setProperty("screenName.buttonName", "disabled", false);
 ```
 
+**IMPORTANT:** `scr.setProperty` cannot be used to change `value` or `text` properties. All communication with screen values MUST be done through screen variables:
+
+```javascript
+// Correct way to update screen values:
+screenName.varName = "New value";
+
+// Incorrect (will throw an error):
+call scr.setProperty("screenName.itemName", "value", "New value");  // ERROR
+```
+
 **Supported Properties:**
 - `disabled` - Enable/disable controls (boolean)
-- `value` / `text` - Update text content of TextField, TextArea, Label, or Button
+- `editable` - Make fields editable or read-only (boolean)
+- `visible` - Show/hide controls (boolean)
+- `tooltip` - Tooltip text (string)
+- `textColor` - Text color (string)
+- `backgroundColor` - Background color (string)
+- Layout properties: `colSpan`, `rowSpan`, `hgrow`, `vgrow`, `margin`, `padding`, `alignment`
+- Sizing properties: `prefWidth`, `prefHeight`, `minWidth`, `minHeight`, `maxWidth`, `maxHeight`
 
 ## Extension & Customization
 

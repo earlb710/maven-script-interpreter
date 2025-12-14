@@ -3903,6 +3903,24 @@ var exists = call scr.findScreen("screenName");
 var value = call scr.getProperty("screenName.itemName", "propertyName");
 call scr.setProperty("screenName.itemName", "propertyName", value);
 
+// IMPORTANT: scr.setProperty cannot be used to change "value" or "text" properties
+// All communication with screen values MUST be done through screen variables:
+//   Correct:   screenName.varName = value
+//   Incorrect: call scr.setProperty("screenName.itemName", "value", value)  // ERROR
+//
+// Properties you CAN set with scr.setProperty:
+//   - editable (bool): whether field can be edited
+//   - disabled (bool): whether control is disabled
+//   - visible (bool): whether control is visible
+//   - tooltip (string): tooltip text
+//   - textColor (string): text color
+//   - backgroundColor (string): background color
+//   - colSpan, rowSpan (int): grid layout span
+//   - hgrow, vgrow (string): growth priority
+//   - margin, padding (string): spacing
+//   - prefWidth, prefHeight, minWidth, minHeight, maxWidth, maxHeight (string): sizing
+//   - alignment (string): content alignment
+
 // Get list of all item names in a screen
 var itemList = call scr.getItemList("screenName");
 // Alias: scr.getScreenItemList also available
