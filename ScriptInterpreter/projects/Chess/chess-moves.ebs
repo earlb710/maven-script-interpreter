@@ -38,9 +38,7 @@ function getPawnMoves(x: int, y: int, color: int) return array {
         var cell = ChessCell(cellValue);
         var pt1: int = cell.pieceType;
         if pt1 == EMPTY then {
-            var jsonStr: string = '{"x": ' + forwardX + ', "y": ' + forwardY + '}';
-            var jsonData: json = call json.jsonfromstring(jsonStr);
-            var forward: posType = record(jsonData);
+            var forward: posType = call createPos(forwardX, forwardY);
             call array.add(moves, forward);
             
             // Move forward two squares from starting position
@@ -51,9 +49,7 @@ function getPawnMoves(x: int, y: int, color: int) return array {
                 var cell2 = ChessCell(cellValue2);
                 var pt2: int = cell2.pieceType;
                 if pt2 == EMPTY then {
-                    var jsonStr2: string = '{"x": ' + forward2X + ', "y": ' + forward2Y + '}';
-                    var jsonData2: json = call json.jsonfromstring(jsonStr2);
-                    var forward2: posType = record(jsonData2);
+                    var forward2: posType = call createPos(forward2X, forward2Y);
                     call array.add(moves, forward2);
                 }
             }
@@ -73,9 +69,7 @@ function getPawnMoves(x: int, y: int, color: int) return array {
     var captureLeftY: int = y + direction;
     if call isValidPosition(captureLeftX, captureLeftY) then {
         if call isOccupiedByColor(captureLeftX, captureLeftY, enemyColor) then {
-            var jsonStrL: string = '{"x": ' + captureLeftX + ', "y": ' + captureLeftY + '}';
-            var jsonDataL: json = call json.jsonfromstring(jsonStrL);
-            var captureLeft: posType = record(jsonDataL);
+            var captureLeft: posType = call createPos(captureLeftX, captureLeftY);
             call array.add(moves, captureLeft);
         }
     }
@@ -85,9 +79,7 @@ function getPawnMoves(x: int, y: int, color: int) return array {
     var captureRightY: int = y + direction;
     if call isValidPosition(captureRightX, captureRightY) then {
         if call isOccupiedByColor(captureRightX, captureRightY, enemyColor) then {
-            var jsonStrR: string = '{"x": ' + captureRightX + ', "y": ' + captureRightY + '}';
-            var jsonDataR: json = call json.jsonfromstring(jsonStrR);
-            var captureRight: posType = record(jsonDataR);
+            var captureRight: posType = call createPos(captureRightX, captureRightY);
             call array.add(moves, captureRight);
         }
     }
@@ -115,9 +107,7 @@ function getKnightMoves(x: int, y: int) return array {
         var newY: int = y + offsets[i];
         var newX: int = x + offsets[i + 1];
         if call isValidPosition(newX, newY) then {
-            var jsonStr: string = '{"x": ' + newX + ', "y": ' + newY + '}';
-            var jsonData: json = call json.jsonfromstring(jsonStr);
-            var newPos: posType = record(jsonData);
+            var newPos: posType = call createPos(newX, newY);
             call array.add(moves, newPos);
         }
     }
@@ -145,9 +135,7 @@ function getKingMoves(x: int, y: int) return array {
         var newY: int = y + offsets[i];
         var newX: int = x + offsets[i + 1];
         if call isValidPosition(newX, newY) then {
-            var jsonStr: string = '{"x": ' + newX + ', "y": ' + newY + '}';
-            var jsonData: json = call json.jsonfromstring(jsonStr);
-            var newPos: posType = record(jsonData);
+            var newPos: posType = call createPos(newX, newY);
             call array.add(moves, newPos);
         }
     }
@@ -178,9 +166,7 @@ function getRookMoves(x: int, y: int) return array {
             var newX: int = x + (dx * step);
             
             if call isValidPosition(newX, newY) then {
-                var jsonStr: string = '{"x": ' + newX + ', "y": ' + newY + '}';
-                var jsonData: json = call json.jsonfromstring(jsonStr);
-                var newPos: posType = record(jsonData);
+                var newPos: posType = call createPos(newX, newY);
                 call array.add(moves, newPos);
                 
                 // Check if blocked by any piece
@@ -223,9 +209,7 @@ function getBishopMoves(x: int, y: int) return array {
             var newX: int = x + (dx * step);
             
             if call isValidPosition(newX, newY) then {
-                var jsonStr: string = '{"x": ' + newX + ', "y": ' + newY + '}';
-                var jsonData: json = call json.jsonfromstring(jsonStr);
-                var newPos: posType = record(jsonData);
+                var newPos: posType = call createPos(newX, newY);
                 call array.add(moves, newPos);
                 
                 // Check if blocked by any piece
