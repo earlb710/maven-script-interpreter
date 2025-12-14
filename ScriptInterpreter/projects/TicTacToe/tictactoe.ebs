@@ -447,7 +447,7 @@ screen tictactoeScreen = {
                                 "type": "button",
                                 "labelText": "New Game",
                                 "onClick": "call newGame();",
-                                "style": "-fx-min-width: 120px; -fx-min-height: 40px; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #27ae60; -fx-text-fill: white; -fx-cursor: hand;"
+                                "style": "-fx-min-width: 120px; -fx-min-height: 40px; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #27ae60; -fx-text-fill: #ffff00; -fx-cursor: hand;"
                             }
                         }
                     ]
