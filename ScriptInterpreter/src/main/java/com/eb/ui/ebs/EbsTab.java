@@ -2551,6 +2551,18 @@ public class EbsTab extends Tab {
             }
         });
         
+        // Add load state listener for error detection
+        webView.getEngine().getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
+            if (newState == javafx.concurrent.Worker.State.FAILED) {
+                statusBar.setMessage("Failed to load HTML content");
+            }
+        });
+        
+        // Enable JavaScript console error logging
+        webView.getEngine().setOnError(event -> {
+            statusBar.setMessage("Error: " + event.getMessage());
+        });
+        
         // Load the HTML content with base URL for resolving relative paths (images, CSS, JS, etc.)
         webView.getEngine().loadContent(htmlContent, baseUrl);
         
