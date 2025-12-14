@@ -3741,8 +3741,10 @@ public class ScreenFactory {
                     
                     // Set up the expand/collapse handlers if event handlers are provided
                     if (onClickHandler != null && (expandCode != null || collapseCode != null)) {
+                        // Use varRef if available, otherwise use item name for event tracking
+                        String itemIdentifier = item.varRef != null ? item.varRef : item.name;
                         setupTreeExpandCollapseHandlers(treeView, expandCode, collapseCode, onClickHandler, 
-                            screenName, context, item.varRef, screenVars);
+                            screenName, context, itemIdentifier, screenVars);
                     }
                 }
 
@@ -5634,8 +5636,10 @@ public class ScreenFactory {
                         screenVars.put(varRef + ".expandedItem", itemPath);
                     }
                     
-                    // Increment event counter
-                    incrementEventCount(screenName, varRef != null ? varRef : "tree", "onExpand");
+                    // Increment event counter (varRef contains itemIdentifier - either actual varRef or item name)
+                    if (varRef != null) {
+                        incrementEventCount(screenName, varRef, "onExpand");
+                    }
                     
                     // Execute the expand code on the JavaFX thread
                     onClickHandler.executeDirect(expandCode);
@@ -5651,8 +5655,10 @@ public class ScreenFactory {
                         screenVars.put(varRef + ".collapsedItem", itemPath);
                     }
                     
-                    // Increment event counter
-                    incrementEventCount(screenName, varRef != null ? varRef : "tree", "onCollapse");
+                    // Increment event counter (varRef contains itemIdentifier - either actual varRef or item name)
+                    if (varRef != null) {
+                        incrementEventCount(screenName, varRef, "onCollapse");
+                    }
                     
                     // Execute the collapse code on the JavaFX thread
                     onClickHandler.executeDirect(collapseCode);
