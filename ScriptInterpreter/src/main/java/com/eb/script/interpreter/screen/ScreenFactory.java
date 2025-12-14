@@ -163,9 +163,13 @@ public class ScreenFactory {
      */
     public static int incrementEventCount(String screenName, String itemName, String eventType) {
         String key = (screenName + "." + itemName + "." + eventType).toLowerCase();
-        System.out.println("[DEBUG] incrementEventCount - key: '" + key + "' (screenName='" + screenName + "', itemName='" + itemName + "', eventType='" + eventType + "')");
+        if (isDebugMode()) {
+            System.out.println("[DEBUG] incrementEventCount - key: '" + key + "' (screenName='" + screenName + "', itemName='" + itemName + "', eventType='" + eventType + "')");
+        }
         int newCount = eventCounts.computeIfAbsent(key, k -> new java.util.concurrent.atomic.AtomicInteger(0)).incrementAndGet();
-        System.out.println("[DEBUG] incrementEventCount - new count: " + newCount);
+        if (isDebugMode()) {
+            System.out.println("[DEBUG] incrementEventCount - new count: " + newCount);
+        }
         
         // Update the debug panel label if it exists
         javafx.scene.control.Label countLabel = eventCountLabels.get(key);
@@ -205,26 +209,33 @@ public class ScreenFactory {
      */
     public static int getEventCount(String screenName, String itemName, String eventType) {
         String key = (screenName + "." + itemName + "." + eventType).toLowerCase();
-        System.out.println("[DEBUG] getEventCount - key: '" + key + "' (screenName='" + screenName + "', itemName='" + itemName + "', eventType='" + eventType + "')");
+        if (isDebugMode()) {
+            System.out.println("[DEBUG] getEventCount - key: '" + key + "' (screenName='" + screenName + "', itemName='" + itemName + "', eventType='" + eventType + "')");
+        }
         java.util.concurrent.atomic.AtomicInteger count = eventCounts.get(key);
         
         // If exact key not found, try finding a matching key that contains the screen name as a complete segment
         // This handles cases where the screen name might have a parent prefix (e.g., "parent.screenname" vs "screenname")
         if (count == null) {
-            System.out.println("[DEBUG] getEventCount - exact key not found, trying partial match");
+            if (isDebugMode()) {
+                System.out.println("[DEBUG] getEventCount - exact key not found, trying partial match");
+            }
             String screenNameLower = screenName.toLowerCase();
             String itemNameLower = itemName.toLowerCase();
             String eventTypeLower = eventType.toLowerCase();
             String suffix = "." + itemNameLower + "." + eventTypeLower;
             
             // Try to find a key that ends with screenName.itemName.eventType or contains .screenName.itemName.eventType
+            // The second check ensures screenName is a complete segment by looking for ".<screenName>.<item>.<event>"
             for (String storedKey : eventCounts.keySet()) {
                 // Check if the stored key ends with the full expected suffix (screenName.itemName.eventType)
-                // OR if it contains the screen name as a complete segment followed by the expected suffix
+                // OR if it ends with a dotted version (.screenName.itemName.eventType), ensuring complete segment match
                 if (storedKey.endsWith(screenNameLower + suffix) || 
-                    storedKey.contains("." + screenNameLower + suffix)) {
-                    System.out.println("[DEBUG] getEventCount - found matching key: '" + storedKey + "' (expected: '" + key + "')");
-                    System.out.println("[DEBUG] getEventCount - KEY MISMATCH DETECTED! This indicates the screen name used during event increment differs from the one used during retrieval.");
+                    storedKey.endsWith("." + screenNameLower + suffix)) {
+                    if (isDebugMode()) {
+                        System.out.println("[DEBUG] getEventCount - found matching key: '" + storedKey + "' (expected: '" + key + "')");
+                        System.out.println("[DEBUG] getEventCount - KEY MISMATCH DETECTED! This indicates the screen name used during event increment differs from the one used during retrieval.");
+                    }
                     count = eventCounts.get(storedKey);
                     break;
                 }
@@ -232,8 +243,10 @@ public class ScreenFactory {
         }
         
         int result = count != null ? count.get() : 0;
-        System.out.println("[DEBUG] getEventCount - result: " + result);
-        System.out.println("[DEBUG] getEventCount - all keys in eventCounts: " + eventCounts.keySet());
+        if (isDebugMode()) {
+            System.out.println("[DEBUG] getEventCount - result: " + result);
+            System.out.println("[DEBUG] getEventCount - all keys in eventCounts: " + eventCounts.keySet());
+        }
         return result;
     }
     

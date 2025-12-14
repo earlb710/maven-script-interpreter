@@ -33,12 +33,16 @@ This causes the lookup to fail and return 0.
 ## Implemented Solution
 
 ### 1. Debug Logging
-Added comprehensive logging to both `incrementEventCount` and `getEventCount`:
+Added comprehensive logging to both `incrementEventCount` and `getEventCount` (conditional on debug mode):
 ```java
-System.out.println("[DEBUG] incrementEventCount - key: '" + key + "' ...");
-System.out.println("[DEBUG] getEventCount - key: '" + key + "' ...");
-System.out.println("[DEBUG] getEventCount - all keys in eventCounts: " + eventCounts.keySet());
+if (isDebugMode()) {
+    System.out.println("[DEBUG] incrementEventCount - key: '" + key + "' ...");
+    System.out.println("[DEBUG] getEventCount - key: '" + key + "' ...");
+    System.out.println("[DEBUG] getEventCount - all keys in eventCounts: " + eventCounts.keySet());
+}
 ```
+
+**Note**: Debug logging only appears when debug mode is enabled (use `/debug` command in console).
 
 ### 2. Fallback Mechanism
 If the exact key is not found, `getEventCount` now tries to find a matching key:
@@ -65,10 +69,13 @@ cd ScriptInterpreter
 mvn javafx:run
 ```
 
-Then in the console, run:
+Then in the console, **enable debug mode** and run the test script:
 ```
+/debug
 /run scripts/test/test_tree_events.ebs
 ```
+
+**Note**: The `/debug` command toggles debug mode, which enables the debug logging needed to diagnose the issue.
 
 ### 2. Interact with the Tree
 1. Expand some tree nodes (Root > src, Root > docs, etc.)
@@ -102,7 +109,7 @@ This confirms the root cause was a key mismatch, and the fallback mechanism is w
 ## Next Steps
 
 ### Option 1: Keep the Fallback (Recommended for now)
-- Remove the debug logging (or make it conditional on debug mode)
+- Debug logging is already conditional on debug mode ✅
 - Keep the fallback mechanism as it provides robustness
 - Document that `sys.getEventCount` can handle qualified screen names
 
