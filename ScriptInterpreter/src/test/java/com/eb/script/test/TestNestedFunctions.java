@@ -1,11 +1,8 @@
 package com.eb.script.test;
 
 import com.eb.script.parser.Parser;
-import com.eb.script.parser.ParseError;
 import com.eb.script.RuntimeContext;
 import com.eb.script.interpreter.Interpreter;
-import com.eb.script.interpreter.InterpreterError;
-import java.io.IOException;
 
 public class TestNestedFunctions {
     

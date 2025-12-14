@@ -76,7 +76,9 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayDeque;
 import java.util.Date;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -90,7 +92,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
     private RuntimeContext currentRuntime;  // Store current runtime context for import resolution
     private RuntimeContext rootRuntime;  // Store root runtime context (main script) for function registration
     private String currentImportFile;  // Track which import file is currently being processed
-    private final java.util.Deque<String> functionStack = new java.util.ArrayDeque<>();  // Track current function context for return signals
+    private final Deque<String> functionStack = new ArrayDeque<>();  // Track current function context for return signals
 
     public Interpreter() {
         this.context = new InterpreterContext();
@@ -1043,9 +1045,8 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             environment().popEnvironmentValues();
             
             // Pop function context if we pushed it
-            // Using poll() instead of pop() to safely handle empty stack without exception
             if (isFunction) {
-                functionStack.poll();
+                functionStack.pop();
             }
         }
         return null;
