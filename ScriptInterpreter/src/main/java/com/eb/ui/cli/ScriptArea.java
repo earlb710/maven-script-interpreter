@@ -42,7 +42,8 @@ public class ScriptArea extends StyleClassedTextArea {
     private int[] lastHighlightedQuotes = null; // [openPos, closePos] or null if no quotes highlighted
     
     // Selection drag state - used to suppress bracket highlighting during selection
-    private boolean isSelectionDragInProgress = false;
+    // Volatile ensures visibility across potential concurrent access from different event handlers
+    private volatile boolean isSelectionDragInProgress = false;
 
     public ScriptArea() {
         setParagraphGraphicFactory(LineNumberFactory.get(this)); // initial state ON
