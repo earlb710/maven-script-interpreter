@@ -2,105 +2,116 @@
 
 ## Overview
 
-This board game features a 4-quadrant design, where each quadrant is the size of a standard Monopoly board. The START position is located in the center, and players can choose one of 4 directions when they land on or pass through START.
+This board game features a 4-quadrant design where each quadrant is the size of a standard Monopoly board (40 spaces). **The quadrants share borders at the center** where they overlap, creating a unified game board. The START position is at the center intersection where all four quadrants meet, and players can choose one of 4 directions when they land on START.
+
+## Quadrant Layout
+
+```
+   Q1    |    Q2
+(NW)     |    (NE)
+---------+--------
+   Q3    |    Q4
+(SW)     |    (SE)
+```
+
+**Shared Borders:**
+- **Q1 shares border with Q2** (East side of Q1 = West side of Q2)
+- **Q1 shares border with Q3** (South side of Q1 = North side of Q3)
+- **Q2 shares border with Q4** (South side of Q2 = North side of Q4)
+- **Q3 shares border with Q4** (East side of Q3 = West side of Q4)
+- **All four quadrants meet at the CENTER START**
 
 ## Board Layout Diagram
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│ NORTH QUADRANT (40 spaces)                                               │
-│                                                                           │
-│  [40][39][38][37][36][35][34][33][32][31][30][29][28][27][26][25][24]  │
-│   │                                                                  │    │
-│  [41]                                                              [23]  │
-│   │                                                                  │    │
-│  [42]                                                              [22]  │
-│   │                                                                  │    │
-│  [43]                                                              [21]  │
-│   │                  NORTH QUADRANT PROPERTIES                      │    │
-│  [44]                  (Like Full Monopoly Board)                  [20]  │
-│   │                                                                  │    │
-│  [45]                                                              [19]  │
-│   │                                                                  │    │
-│  [46]                                                              [18]  │
-│   │                                                                  │    │
-│  [47]                                                              [17]  │
-│   │                                                                  │    │
-│  [48][49][50][51][52][53][54][55][56][57][58][59][60][61][62][63][64]  │
-│                                                                           │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                           │
-│ WEST [80]                                    [N1]                 [16] E │
-│      [79]                                    [N2]                 [15] A │
-│      [78]                                    [N3]                 [14] S │
-│      [77]                                    [N4]                 [13] T │
-│      [76]                                    [N5]                 [12]   │
-│      [75]              ╔═══════════════╗     [N6]                 [11] Q │
-│      [74]              ║               ║     [N7]                 [10] U │
-│      [73]              ║    CENTER     ║     [N8]                 [9]  A │
-│      [72]              ║               ║     [N9]                 [8]  D │
-│ Q    [71]              ║  ** START **  ║    [N10]                 [7]  R │
-│ U    [70]              ║               ║    [N11]                 [6]  A │
-│ A    [69]              ║  Choose one   ║    [N12]                 [5]  N │
-│ D    [68]              ║  of 4 dirs:   ║    [N13]                 [4]  T │
-│ R    [67]              ║  N, E, S, W   ║    [N14]                 [3]     │
-│ A    [66]              ║               ║    [N15]                 [2]     │
-│ N    [65]              ╚═══════════════╝    [N16]                 [1]     │
-│ T                                            [S1]                         │
-│                                              [S2]                         │
-│      [96]                                    [S3]                 [32]    │
-│      [97]                                    [S4]                 [33]    │
-│      [98]                                    [S5]                 [34]    │
-│      [99]                                    [S6]                 [35] S  │
-│     [100]                                    [S7]                 [36] O  │
-│     [101]              ╔═══════════════╗     [S8]                 [37] U  │
-│     [102]              ║               ║     [S9]                 [38] T  │
-│     [103]              ║  Connectors   ║    [S10]                 [39] H  │
-│     [104]              ║  to Center    ║    [S11]                 [40]    │
-│ W    [105]              ║               ║    [S12]                [120] Q  │
-│ E    [106]              ║  North: N1-16 ║    [S13]                [119] U  │
-│ S    [107]              ║  East:  E1-16 ║    [S14]                [118] A  │
-│ T    [108]              ║  South: S1-16 ║    [S15]                [117] D  │
-│      [109]              ║  West:  W1-16 ║    [S16]                [116] R  │
-│ Q    [110]              ║               ║                         [115] A  │
-│ U    [111]              ╚═══════════════╝                         [114] N  │
-│ A   [112][113][114][115][116][117][118][119][120][121]...[136][137][138] T  │
-│ D                                                                         │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                           │
-│ SOUTH QUADRANT (40 spaces)                                               │
-│                                                                           │
-│ [112][113][114][115][116][117][118][119][120][121][122][123][124][125]  │
-│   │                                                                  │    │
-│ [111]                                                              [126]  │
-│   │                                                                  │    │
-│ [110]                                                              [127]  │
-│   │                                                                  │    │
-│ [109]                                                              [128]  │
-│   │                  SOUTH QUADRANT PROPERTIES                      │    │
-│ [108]                  (Like Full Monopoly Board)                  [129]  │
-│   │                                                                  │    │
-│ [107]                                                              [130]  │
-│   │                                                                  │    │
-│ [106]                                                              [131]  │
-│   │                                                                  │    │
-│ [105]                                                              [132]  │
-│   │                                                                  │    │
-│ [104][103][102][101][100][99][98][97][96][95][94][93][92][91][90][89]  │
-│                                                                           │
-└─────────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────┬──────────────────────────────────────────┐
+│         QUADRANT 1 (NW)                  │         QUADRANT 2 (NE)                  │
+│         40 spaces                        │         40 spaces                        │
+│                                          │                                          │
+│  [11][12][13][14][15][16][17][18][19]   │   [21][22][23][24][25][26][27][28][29]  │
+│   │                                 │    │    │                                 │   │
+│  [10]       Q1 Properties          [20]  │  [20]       Q2 Properties          [30]  │
+│   │         (10 per side)           │    │    │         (10 per side)           │   │
+│  [09]                              [21]  │  [19]                              [31]  │
+│   │                                 │    │    │                                 │   │
+│  [08]                              [22]  │  [18]                              [32]  │
+│   │                                 │    │    │                                 │   │
+│  [07]                              [23]  │  [17]                              [33]  │
+│   │                                 │    │    │                                 │   │
+│  [06]                              [24]  │  [16]                              [34]  │
+│   │                                 │    │    │                                 │   │
+│  [05]                              [25]  │  [15]                              [35]  │
+│   │                                 │    │    │                                 │   │
+│  [04]                              [26]  │  [14]                              [36]  │
+│   │                                 │    │    │                                 │   │
+│  [03]                              [27]  │  [13]                              [37]  │
+│   │                                 │    │    │                                 │   │
+│  [02]                              [28]  │  [12]                              [38]  │
+│   │                                 │    │    │                                 │   │
+│  [01][40][39][38][37][36][35][34][33][32]══[11][10][09][08][07][06][05][04][03][02][01][40]
+│                                     ▲    │    ▲                                     │
+│                                     │    │    │                                     │
+│                              Shared Border (Q1-Q2)                                  │
+├──────────────────────────────────────────┼──────────────────────────────────────────┤
+│                              Shared │    │    │ Shared                              │
+│                              Border │    │    │ Border                              │
+│                              (Q1-Q3)│    │    │ (Q2-Q4)                             │
+│                                     ▼    │    ▼                                     │
+│  [01][02][03][04][05][06][07][08][09][10]══[39][38][37][36][35][34][33][32][31][30]
+│   │                                 │    │    │                                 │   │
+│  [40]                              [11]  │  [40]                              [29]  │
+│   │                                 │    │    │                                 │   │
+│  [39]                              [12]  │  [39]                              [28]  │
+│   │                                 │    │    │                                 │   │
+│  [38]                              [13]  │  [38]                              [27]  │
+│   │                                 │    │    │                                 │   │
+│  [37]                              [14]  │  [37]                              [26]  │
+│   │                                 │    │    │                                 │   │
+│  [36]       Q3 Properties          [15]  │  [36]       Q4 Properties          [25]  │
+│   │         (10 per side)           │    │    │         (10 per side)           │   │
+│  [35]                              [16]  │  [35]                              [24]  │
+│   │                                 │    │    │                                 │   │
+│  [34]                              [17]  │  [34]                              [23]  │
+│   │                                 │    │    │                                 │   │
+│  [33]                              [18]  │  [33]                              [22]  │
+│   │                                 │    │    │                                 │   │
+│  [32]                              [19]  │  [32]                              [21]  │
+│   │                                 │    │    │                                 │   │
+│  [31][30][29][28][27][26][25][24][23][22]  [21][20][19][18][17][16][15][14][13][12][11]
+│                                          │                                          │
+│         QUADRANT 3 (SW)                  │         QUADRANT 4 (SE)                  │
+│         40 spaces                        │         40 spaces                        │
+└──────────────────────────────────────────┴──────────────────────────────────────────┘
+
+                           ═══════════════════
+                           ║  CENTER START   ║
+                           ║                 ║
+                           ║  Choose one of  ║
+                           ║  4 directions:  ║
+                           ║  → Q1 (NW)      ║
+                           ║  → Q2 (NE)      ║
+                           ║  → Q3 (SW)      ║
+                           ║  → Q4 (SE)      ║
+                           ═══════════════════
 ```
+
+**Key Features:**
+- Each quadrant has exactly 40 spaces arranged in a square (like standard Monopoly)
+- Quadrants share borders where they touch (marked with ══)
+- The CENTER START is at the intersection where all 4 quadrants meet
+- Players at CENTER can choose to enter any of the 4 quadrants
 
 ## Board Specifications
 
 ### Total Spaces
-- **North Quadrant**: 40 spaces (numbered 1-40 or equivalent)
-- **East Quadrant**: 40 spaces (numbered 1-40 or equivalent)  
-- **South Quadrant**: 40 spaces (numbered 1-40 or equivalent)
-- **West Quadrant**: 40 spaces (numbered 1-40 or equivalent)
-- **Connector Spaces**: 16 spaces per direction (N1-N16, E1-E16, S1-S16, W1-W16)
-- **Center START**: 1 central space
-- **Total**: 160 board spaces + 64 connector spaces + 1 center = 225 spaces
+- **Quadrant 1 (NW)**: 40 spaces arranged in a square
+- **Quadrant 2 (NE)**: 40 spaces arranged in a square
+- **Quadrant 3 (SW)**: 40 spaces arranged in a square
+- **Quadrant 4 (SE)**: 40 spaces arranged in a square
+- **Center START**: 1 central intersection space where all quadrants meet
+- **Total**: 160 unique board spaces + 1 center = 161 spaces total
+
+**Note:** Spaces on shared borders are counted only once. For example, where Q1 and Q2 meet, those border spaces are shared between both quadrants.
 
 ### Quadrant Details
 
@@ -109,60 +120,64 @@ Each quadrant contains the equivalent of a full Monopoly board (40 spaces) with:
 - **Railroads**: 4 per quadrant
 - **Utilities**: 2 per quadrant  
 - **Special Spaces**: Go to Jail, Free Parking, Chance, Community Chest, Tax spaces
+- **10 spaces per side** (standard Monopoly layout)
+
+### Shared Borders
+
+The quadrants physically connect and share borders:
+
+- **Q1 ↔ Q2 Border**: East side of Q1 connects to West side of Q2
+- **Q1 ↔ Q3 Border**: South side of Q1 connects to North side of Q3
+- **Q2 ↔ Q4 Border**: South side of Q2 connects to North side of Q4
+- **Q3 ↔ Q4 Border**: East side of Q3 connects to West side of Q4
+
+Players can move between quadrants by crossing these shared borders during normal gameplay.
 
 ### Center START Mechanics
 
-When a player lands on or passes through the CENTER START:
-1. Player collects $200 (or game equivalent)
-2. Player must choose one of 4 directions:
-   - **North (N)**: Enter North Quadrant via connector N1-N16
-   - **East (E)**: Enter East Quadrant via connector E1-E16
-   - **South (S)**: Enter South Quadrant via connector S1-S16
-   - **West (W)**: Enter West Quadrant via connector W1-W16
-3. Player moves along the chosen direction's connector spaces
-4. Player continues into the selected quadrant
+The CENTER START is at the central intersection where all four quadrants meet:
 
-### Connector Pathways
-
-Each direction has a 16-space connector path from CENTER to the quadrant:
-- **North Connectors (N1-N16)**: Lead from center to North Quadrant entry
-- **East Connectors (E1-E16)**: Lead from center to East Quadrant entry
-- **South Connectors (S1-S16)**: Lead from center to South Quadrant entry
-- **West Connectors (W1-W16)**: Lead from center to West Quadrant entry
-
-These connectors can have their own properties, special spaces, or events.
+1. **Starting Position**: All players begin at the CENTER START
+2. **Direction Choice**: When at START, players choose one of 4 directions:
+   - **Q1 (Northwest)**: Enter the top-left quadrant
+   - **Q2 (Northeast)**: Enter the top-right quadrant
+   - **Q3 (Southwest)**: Enter the bottom-left quadrant
+   - **Q4 (Southeast)**: Enter the bottom-right quadrant
+3. **Passing START**: Players collect $200 (or game equivalent) when passing through START
+4. **Changing Quadrants**: Players can switch quadrants by returning to START or crossing shared borders
 
 ### Navigation Rules
 
-1. **First Turn**: All players start at CENTER START and choose a direction
-2. **Completing a Quadrant**: When a player completes a full circuit of their quadrant (40 spaces), they return to their connector path
-3. **Returning to Center**: Players walk back through the connector spaces (16 spaces) to reach CENTER START again
-4. **Direction Choice**: Each time a player reaches CENTER, they may choose a different direction or continue in the same one
-5. **Strategic Gameplay**: Players can choose directions based on:
+1. **First Turn**: All players start at CENTER START and roll dice to choose initial direction
+2. **Movement**: Players move clockwise within their current quadrant following standard Monopoly rules
+3. **Quadrant Completion**: When completing a circuit (40 spaces) within a quadrant, players can:
+   - Continue in the same quadrant
+   - Return to CENTER to choose a new direction
+   - Cross a shared border to an adjacent quadrant
+4. **Border Crossing**: Players landing on a shared border space can choose to:
+   - Stay in their current quadrant
+   - Cross into the adjacent quadrant on their next turn
+5. **Strategic Gameplay**: Players can choose routes based on:
    - Available properties to purchase
-   - Avoiding opponents' properties
-   - Seeking specific property groups
-   - Strategic positioning
+   - Avoiding opponents' properties with high rent
+   - Seeking specific property groups to complete sets
+   - Strategic positioning for maximum income
 
 ### Visual Scale
 
 ```
-Standard Monopoly Board: 40 spaces arranged in a square
+Standard Monopoly Board: 40 spaces arranged in a square (10 per side)
 
-This Extended Board: 
-┌─────────────┐
-│   NORTH     │  40 spaces
-│   QUADRANT  │
-├─────┬───────┤
-│WEST │CENTER │EAST
-│  Q  │START  │ Q     Each quadrant = 40 spaces
-│  U  │(+ 16) │ U     Center connectors = 16 each
-│  A  │       │ A     Total = 225 spaces
-│  D  │       │ D
-├─────┴───────┤
-│   SOUTH     │  40 spaces
-│   QUADRANT  │
-└─────────────┘
+This Extended Board (Shared Borders):
+┌──────────┬──────────┐
+│    Q1    │    Q2    │  Each quadrant = 40 spaces
+│   (NW)   │   (NE)   │  10 spaces per side
+│          │          │
+├─── CENTER START ────┤  Quadrants share borders
+│          │          │  Total unique spaces = 161
+│    Q3    │    Q4    │
+│   (SW)   │   (SE)   │
+└──────────┴──────────┘
 ```
 
 ## Implementation Notes
@@ -172,34 +187,48 @@ This Extended Board:
 When implementing this board in EBS scripts:
 
 1. **Board Representation**: Use a 2D array or map structure to represent spaces
-2. **Player Position**: Track current quadrant + space number + connector position
-3. **Direction State**: Store player's current direction choice
+2. **Player Position**: Track current quadrant (Q1-Q4) + space number (1-40) within that quadrant
+3. **Quadrant State**: Store player's current quadrant location
 4. **Space Properties**: JSON objects for each space with type, name, cost, rent, etc.
-5. **Movement Logic**: Handle transitions between quadrants and connectors
-6. **UI Rendering**: Consider using JavaFX screens to visualize the board
+5. **Movement Logic**: Handle transitions between quadrants via shared borders
+6. **Border Detection**: Identify when a player lands on a shared border space
+7. **UI Rendering**: Consider using JavaFX screens to visualize the board
 
 ### Data Structures
 
 ```javascript
-// Example space definition
+// Example space definition with shared borders
 var boardSpaces: json = {
   "center": {
-    "id": 0,
+    "id": "START",
     "name": "CENTER START",
     "type": "start",
-    "bonus": 200
+    "bonus": 200,
+    "adjacentQuadrants": ["Q1", "Q2", "Q3", "Q4"]
   },
-  "north_connector": [
-    {"id": "N1", "name": "North Path 1", "type": "connector"},
-    {"id": "N2", "name": "North Path 2", "type": "connector"},
-    // ... N3-N16
-  ],
-  "north_quadrant": [
-    {"id": 1, "name": "Mediterranean Avenue", "type": "property", "color": "brown", "cost": 60},
-    {"id": 2, "name": "Community Chest", "type": "community_chest"},
+  "quadrant1": [
+    {"id": "Q1-01", "name": "Mediterranean Avenue", "type": "property", "color": "brown", "cost": 60},
+    {"id": "Q1-02", "name": "Community Chest", "type": "community_chest"},
     // ... spaces 3-40
+    {"id": "Q1-10", "name": "Border Space", "type": "property", "sharedWith": "Q2", "border": "Q1-Q2"},
+    {"id": "Q1-30", "name": "Border Space", "type": "property", "sharedWith": "Q3", "border": "Q1-Q3"}
   ],
-  // Similar structures for East, South, West
+  "quadrant2": [
+    {"id": "Q2-01", "name": "Baltic Avenue", "type": "property", "color": "brown", "cost": 60},
+    // ... spaces 2-40
+    {"id": "Q2-01", "name": "Border Space", "type": "property", "sharedWith": "Q1", "border": "Q1-Q2"},
+    {"id": "Q2-20", "name": "Border Space", "type": "property", "sharedWith": "Q4", "border": "Q2-Q4"}
+  ],
+  // Similar structures for Q3 and Q4
+};
+
+// Player position tracking
+var player1Position: json = {
+  "quadrant": "Q1",
+  "space": 5,
+  "atCenter": false,
+  "onBorder": false,
+  "adjacentQuadrant": null
 };
 ```
 
@@ -207,28 +236,60 @@ var boardSpaces: json = {
 
 For the JavaFX UI implementation:
 - Use a GridPane or Canvas for board visualization
-- Center area: 300x300 pixels
-- Each quadrant: 600x600 pixels
-- Total board: Approximately 1500x1500 pixels
-- Connector paths: 150-200 pixels each
-- Scale down for display and allow zooming/panning
+- Each quadrant: 500x500 pixels
+- Total board: 1000x1000 pixels (2x2 quadrant grid)
+- Center intersection: Visually marked at the meeting point
+- Shared borders: Highlighted or marked to show connectivity
+- Scale for display and allow zooming/panning for detail
+
+### Border Crossing Logic
+
+When a player lands on a shared border space:
+
+```javascript
+// Pseudocode for border crossing
+if call space.isOnBorder() then {
+    var adjacentQ = call space.getAdjacentQuadrant();
+    
+    // Prompt player: "Cross into [quadrant name]? (Y/N)"
+    var choice = call system.confirmDialog("Cross into " + adjacentQ + "?");
+    
+    if choice then {
+        player.quadrant = adjacentQ;
+        player.space = call getEquivalentSpaceInQuadrant(adjacentQ);
+    }
+}
+```
 
 ## Property Distribution Suggestion
 
 Each quadrant could have themed properties:
 
-- **North Quadrant**: Luxury/High-value properties (Park Place equivalent)
-- **East Quadrant**: Commercial/Business properties (Boardwalk equivalent)
-- **South Quadrant**: Residential/Medium properties (Atlantic Avenue equivalent)
-- **West Quadrant**: Industrial/Low-value properties (Baltic Avenue equivalent)
+- **Q1 (NW) - Luxury District**: High-value properties (Park Place, Boardwalk equivalents)
+  - Property values: $200-$400
+  - Rent: High
+  
+- **Q2 (NE) - Commercial District**: Business/Office properties
+  - Property values: $150-$300
+  - Rent: Medium-High
+  
+- **Q3 (SW) - Residential District**: Medium-value properties (Atlantic Ave equivalents)
+  - Property values: $100-$200
+  - Rent: Medium
+  
+- **Q4 (SE) - Industrial District**: Low-value starter properties (Baltic, Mediterranean equivalents)
+  - Property values: $60-$150
+  - Rent: Low-Medium
 
-This creates strategic value in choosing different directions!
+This creates strategic value in choosing different quadrants! Players might start in cheaper Q4, build wealth, then move to more expensive quadrants.
 
 ## Next Steps
 
-1. Define all 225 spaces with names, types, and properties
-2. Create board visualization using EBS screens and JavaFX
-3. Implement movement and direction-choice mechanics
-4. Design player tokens and tracking system
-5. Create property cards and game rules
-6. Test gameplay balance across all four quadrants
+1. Define all 161 unique spaces with names, types, and properties
+2. Map shared border spaces between adjacent quadrants
+3. Create board visualization using EBS screens and JavaFX
+4. Implement movement and quadrant-transition mechanics
+5. Design player tokens and tracking system
+6. Create property cards and game rules
+7. Test gameplay balance across all four quadrants
+8. Implement border-crossing decision logic
