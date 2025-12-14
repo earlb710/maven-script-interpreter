@@ -1,0 +1,11 @@
+{
+  "name": "TicTacToe",
+  "directory": "/home/runner/work/maven-script-interpreter/maven-script-interpreter/ScriptInterpreter/projects/TicTacToe",
+  "description": "A simple Tic Tac Toe game against a computer player",
+  "version": "1.0.0",
+  "css": [],
+  "mainScript": "tictactoe.ebs",
+  "settings": {
+    "autoLoad": false
+  }
+}

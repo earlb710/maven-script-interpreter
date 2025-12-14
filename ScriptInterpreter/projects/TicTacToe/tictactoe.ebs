@@ -1,0 +1,429 @@
+// Tic Tac Toe Game - Human vs Computer
+// ======================================
+// A simple implementation of Tic Tac Toe where you play against the computer.
+// The computer makes basic strategic moves (blocking wins, taking center, etc.)
+//
+// Features:
+//   - 3x3 grid of clickable buttons
+//   - Human plays as 'X', Computer plays as 'O'
+//   - Computer AI with strategic decision making
+//   - Win/Draw detection
+//   - New Game button to reset
+//   - Status display showing current game state
+//
+// Usage:
+//   Run in EBS Console: /open projects/TicTacToe/tictactoe.ebs then Ctrl+Enter
+
+// Game state variables
+var board: string[9];  // Board positions 0-8 (top-left to bottom-right, row by row)
+var gameOver: bool = false;
+var statusMessage: string = "Your turn! Click a cell to play.";
+
+// Initialize the board with empty cells
+initBoard {
+    for (var i: int = 0; i < 9; i++) {
+        board[i] = "";
+    }
+    gameOver = false;
+    statusMessage = "Your turn! Click a cell to play.";
+}
+
+// Check if a position is empty
+isEmpty(pos: int) return bool {
+    return board[pos] == "";
+}
+
+// Check for a win condition
+checkWin(player: string) return bool {
+    // Check rows
+    if (board[0] == player and board[1] == player and board[2] == player) {
+        return true;
+    }
+    if (board[3] == player and board[4] == player and board[5] == player) {
+        return true;
+    }
+    if (board[6] == player and board[7] == player and board[8] == player) {
+        return true;
+    }
+    
+    // Check columns
+    if (board[0] == player and board[3] == player and board[6] == player) {
+        return true;
+    }
+    if (board[1] == player and board[4] == player and board[7] == player) {
+        return true;
+    }
+    if (board[2] == player and board[5] == player and board[8] == player) {
+        return true;
+    }
+    
+    // Check diagonals
+    if (board[0] == player and board[4] == player and board[8] == player) {
+        return true;
+    }
+    if (board[2] == player and board[4] == player and board[6] == player) {
+        return true;
+    }
+    
+    return false;
+}
+
+// Check if the board is full (draw)
+checkDraw return bool {
+    for (var i: int = 0; i < 9; i++) {
+        if (board[i] == "") {
+            return false;
+        }
+    }
+    return true;
+}
+
+// Computer AI - Find best move
+computerMove return int {
+    // Strategy priority:
+    // 1. Win if possible
+    // 2. Block player from winning
+    // 3. Take center if available
+    // 4. Take corner
+    // 5. Take any available spot
+    
+    // Check if computer can win
+    for (var i: int = 0; i < 9; i++) {
+        if (call isEmpty(i)) {
+            board[i] = "O";
+            if (call checkWin("O")) {
+                board[i] = "";  // Reset for actual move
+                return i;
+            }
+            board[i] = "";
+        }
+    }
+    
+    // Check if need to block player
+    for (var i: int = 0; i < 9; i++) {
+        if (call isEmpty(i)) {
+            board[i] = "X";
+            if (call checkWin("X")) {
+                board[i] = "";  // Reset for actual move
+                return i;
+            }
+            board[i] = "";
+        }
+    }
+    
+    // Take center if available
+    if (call isEmpty(4)) {
+        return 4;
+    }
+    
+    // Take a corner
+    var corners: int[4];
+    corners[0] = 0;
+    corners[1] = 2;
+    corners[2] = 6;
+    corners[3] = 8;
+    
+    for (var i: int = 0; i < 4; i++) {
+        if (call isEmpty(corners[i])) {
+            return corners[i];
+        }
+    }
+    
+    // Take any available spot
+    for (var i: int = 0; i < 9; i++) {
+        if (call isEmpty(i)) {
+            return i;
+        }
+    }
+    
+    return -1;  // Should never happen
+}
+
+// Update the screen display
+updateDisplay {
+    // Update all button labels
+    tictactoeScreen.cell0 = board[0];
+    tictactoeScreen.cell1 = board[1];
+    tictactoeScreen.cell2 = board[2];
+    tictactoeScreen.cell3 = board[3];
+    tictactoeScreen.cell4 = board[4];
+    tictactoeScreen.cell5 = board[5];
+    tictactoeScreen.cell6 = board[6];
+    tictactoeScreen.cell7 = board[7];
+    tictactoeScreen.cell8 = board[8];
+    
+    // Update status message
+    tictactoeScreen.status = statusMessage;
+    
+    // Disable buttons if game is over or cell is occupied
+    for (var i: int = 0; i < 9; i++) {
+        var cellName: string = "cell" + string(i);
+        var disabled: bool = gameOver or board[i] != "";
+        call screen.setProperty("tictactoeScreen." + cellName, "disabled", disabled);
+    }
+}
+
+// Handle player move
+playerMove(pos: int) {
+    if (gameOver or not call isEmpty(pos)) {
+        return;
+    }
+    
+    // Player makes move
+    board[pos] = "X";
+    call updateDisplay;
+    
+    // Check if player won
+    if (call checkWin("X")) {
+        gameOver = true;
+        statusMessage = "You win! Congratulations!";
+        call updateDisplay;
+        return;
+    }
+    
+    // Check for draw
+    if (call checkDraw) {
+        gameOver = true;
+        statusMessage = "It's a draw!";
+        call updateDisplay;
+        return;
+    }
+    
+    // Computer's turn
+    statusMessage = "Computer's turn...";
+    call updateDisplay;
+    
+    var compPos: int = call computerMove();
+    if (compPos >= 0) {
+        board[compPos] = "O";
+        
+        // Check if computer won
+        if (call checkWin("O")) {
+            gameOver = true;
+            statusMessage = "Computer wins! Try again.";
+            call updateDisplay;
+            return;
+        }
+        
+        // Check for draw after computer move
+        if (call checkDraw) {
+            gameOver = true;
+            statusMessage = "It's a draw!";
+            call updateDisplay;
+            return;
+        }
+        
+        statusMessage = "Your turn! Click a cell to play.";
+        call updateDisplay;
+    }
+}
+
+// Reset the game
+newGame {
+    call initBoard;
+    call updateDisplay;
+}
+
+// Define the Tic Tac Toe screen
+screen tictactoeScreen = {
+    "title": "Tic Tac Toe - You (X) vs Computer (O)",
+    "width": 450,
+    "height": 550,
+    "sets": [
+        {
+            "setname": "main",
+            "vars": [
+                {"name": "status", "type": "string"},
+                {"name": "cell0", "type": "string"},
+                {"name": "cell1", "type": "string"},
+                {"name": "cell2", "type": "string"},
+                {"name": "cell3", "type": "string"},
+                {"name": "cell4", "type": "string"},
+                {"name": "cell5", "type": "string"},
+                {"name": "cell6", "type": "string"},
+                {"name": "cell7", "type": "string"},
+                {"name": "cell8", "type": "string"}
+            ]
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "15",
+            "padding": "20",
+            "style": "-fx-background-color: #2c3e50; -fx-alignment: center;",
+            "items": [
+                {
+                    "name": "titleLabel",
+                    "display": {
+                        "type": "label",
+                        "labelText": "TIC TAC TOE",
+                        "labelColor": "#ecf0f1",
+                        "labelFontSize": "28px",
+                        "labelBold": true,
+                        "style": "-fx-alignment: center;"
+                    }
+                },
+                {
+                    "name": "statusLabel",
+                    "varRef": "status",
+                    "display": {
+                        "type": "label",
+                        "labelText": "",
+                        "labelColor": "#f39c12",
+                        "labelFontSize": "18px",
+                        "labelBold": true,
+                        "style": "-fx-alignment: center; -fx-min-height: 50px; -fx-max-height: 50px;"
+                    }
+                }
+            ],
+            "areas": [
+                {
+                    "name": "gridArea",
+                    "type": "gridpane",
+                    "spacing": "10",
+                    "disableLabelAlignment": true,
+                    "style": "-fx-padding: 10; -fx-alignment: center;",
+                    "items": [
+                        {
+                            "name": "cell0",
+                            "layoutPos": "0,0",
+                            "varRef": "cell0",
+                            "display": {
+                                "type": "button",
+                                "labelText": "",
+                                "onClick": "call playerMove(0);",
+                                "style": "-fx-min-width: 100px; -fx-min-height: 100px; -fx-font-size: 36px; -fx-font-weight: bold; -fx-background-color: #34495e; -fx-text-fill: #ecf0f1; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-cursor: hand;"
+                            }
+                        },
+                        {
+                            "name": "cell1",
+                            "layoutPos": "0,1",
+                            "varRef": "cell1",
+                            "display": {
+                                "type": "button",
+                                "labelText": "",
+                                "onClick": "call playerMove(1);",
+                                "style": "-fx-min-width: 100px; -fx-min-height: 100px; -fx-font-size: 36px; -fx-font-weight: bold; -fx-background-color: #34495e; -fx-text-fill: #ecf0f1; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-cursor: hand;"
+                            }
+                        },
+                        {
+                            "name": "cell2",
+                            "layoutPos": "0,2",
+                            "varRef": "cell2",
+                            "display": {
+                                "type": "button",
+                                "labelText": "",
+                                "onClick": "call playerMove(2);",
+                                "style": "-fx-min-width: 100px; -fx-min-height: 100px; -fx-font-size: 36px; -fx-font-weight: bold; -fx-background-color: #34495e; -fx-text-fill: #ecf0f1; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-cursor: hand;"
+                            }
+                        },
+                        {
+                            "name": "cell3",
+                            "layoutPos": "1,0",
+                            "varRef": "cell3",
+                            "display": {
+                                "type": "button",
+                                "labelText": "",
+                                "onClick": "call playerMove(3);",
+                                "style": "-fx-min-width: 100px; -fx-min-height: 100px; -fx-font-size: 36px; -fx-font-weight: bold; -fx-background-color: #34495e; -fx-text-fill: #ecf0f1; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-cursor: hand;"
+                            }
+                        },
+                        {
+                            "name": "cell4",
+                            "layoutPos": "1,1",
+                            "varRef": "cell4",
+                            "display": {
+                                "type": "button",
+                                "labelText": "",
+                                "onClick": "call playerMove(4);",
+                                "style": "-fx-min-width: 100px; -fx-min-height: 100px; -fx-font-size: 36px; -fx-font-weight: bold; -fx-background-color: #34495e; -fx-text-fill: #ecf0f1; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-cursor: hand;"
+                            }
+                        },
+                        {
+                            "name": "cell5",
+                            "layoutPos": "1,2",
+                            "varRef": "cell5",
+                            "display": {
+                                "type": "button",
+                                "labelText": "",
+                                "onClick": "call playerMove(5);",
+                                "style": "-fx-min-width: 100px; -fx-min-height: 100px; -fx-font-size: 36px; -fx-font-weight: bold; -fx-background-color: #34495e; -fx-text-fill: #ecf0f1; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-cursor: hand;"
+                            }
+                        },
+                        {
+                            "name": "cell6",
+                            "layoutPos": "2,0",
+                            "varRef": "cell6",
+                            "display": {
+                                "type": "button",
+                                "labelText": "",
+                                "onClick": "call playerMove(6);",
+                                "style": "-fx-min-width: 100px; -fx-min-height: 100px; -fx-font-size: 36px; -fx-font-weight: bold; -fx-background-color: #34495e; -fx-text-fill: #ecf0f1; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-cursor: hand;"
+                            }
+                        },
+                        {
+                            "name": "cell7",
+                            "layoutPos": "2,1",
+                            "varRef": "cell7",
+                            "display": {
+                                "type": "button",
+                                "labelText": "",
+                                "onClick": "call playerMove(7);",
+                                "style": "-fx-min-width: 100px; -fx-min-height: 100px; -fx-font-size: 36px; -fx-font-weight: bold; -fx-background-color: #34495e; -fx-text-fill: #ecf0f1; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-cursor: hand;"
+                            }
+                        },
+                        {
+                            "name": "cell8",
+                            "layoutPos": "2,2",
+                            "varRef": "cell8",
+                            "display": {
+                                "type": "button",
+                                "labelText": "",
+                                "onClick": "call playerMove(8);",
+                                "style": "-fx-min-width: 100px; -fx-min-height: 100px; -fx-font-size: 36px; -fx-font-weight: bold; -fx-background-color: #34495e; -fx-text-fill: #ecf0f1; -fx-border-color: #7f8c8d; -fx-border-width: 2; -fx-cursor: hand;"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "buttonArea",
+                    "type": "hbox",
+                    "spacing": "10",
+                    "style": "-fx-padding: 10; -fx-alignment: center;",
+                    "items": [
+                        {
+                            "name": "newGameButton",
+                            "display": {
+                                "type": "button",
+                                "labelText": "New Game",
+                                "onClick": "call newGame();",
+                                "style": "-fx-min-width: 120px; -fx-min-height: 40px; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #27ae60; -fx-text-fill: white; -fx-cursor: hand;"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+};
+
+// Initialize the game
+call initBoard;
+
+// Set initial values
+tictactoeScreen.status = statusMessage;
+
+// Initialize all cell buttons to empty
+for (var i: int = 0; i < 9; i++) {
+    var cellName: string = "cell" + string(i);
+    tictactoeScreen[cellName] = "";
+}
+
+// Show the screen
+show screen tictactoeScreen;
+
+print "Tic Tac Toe game started!";
+print "You are X, Computer is O";
+print "Click on any empty cell to make your move.";
