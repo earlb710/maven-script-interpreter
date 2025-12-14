@@ -165,7 +165,8 @@ updateDisplay {
 
 // Handle player move
 playerMove(pos: int) {
-    if (gameOver or not call isEmpty(pos)) {
+    var empty: bool = call isEmpty(pos);
+    if (gameOver or empty == false) {
         return;
     }
     
@@ -416,10 +417,15 @@ call initBoard;
 tictactoeScreen.status = statusMessage;
 
 // Initialize all cell buttons to empty
-for (var i: int = 0; i < 9; i++) {
-    var cellName: string = "cell" + string(i);
-    tictactoeScreen[cellName] = "";
-}
+tictactoeScreen.cell0 = "";
+tictactoeScreen.cell1 = "";
+tictactoeScreen.cell2 = "";
+tictactoeScreen.cell3 = "";
+tictactoeScreen.cell4 = "";
+tictactoeScreen.cell5 = "";
+tictactoeScreen.cell6 = "";
+tictactoeScreen.cell7 = "";
+tictactoeScreen.cell8 = "";
 
 // Show the screen
 show screen tictactoeScreen;
