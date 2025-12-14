@@ -2266,7 +2266,7 @@ screen formScreen = {
     "alignment": "left",                    // Content alignment
     "itemFontSize": "14px",                // Control font size
     "itemColor": "#000000",                // Control text color
-    "textColor": "#000000",                // Control text color (alternative to itemColor; takes precedence if both specified)
+    "textColor": "#000000",                // Control text color (alternative to itemColor for consistency with labelColor; takes precedence when both are specified)
     "itemBold": true,                      // Bold text
     "itemItalic": false,                   // Italic text
     "labelColor": "#0000ff",               // Label text color
