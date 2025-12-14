@@ -688,6 +688,8 @@ Press `Ctrl+D` again to hide the debug panel.
 - **[Array Syntax Guide](docs/ARRAY_SYNTAX_GUIDE.md)** - Comprehensive guide explaining differences between `int[n]` and `array.int[n]` syntax, including performance and memory usage comparisons
 - **[TreeView Icons Guide](TREEVIEW_ICONS.md)** - Complete guide to setting icons on TreeView items with examples
 - **[TreeView Icons Quick Reference](TREEVIEW_ICONS_QUICKREF.md)** - Quick reference for TreeView icon functions and common patterns
+- **[TreeView Styling Guide](TREEVIEW_STYLING.md)** - Complete guide to styling TreeView items (bold, italic, color) with examples
+- **[TreeView Styling Quick Reference](TREEVIEW_STYLING_QUICKREF.md)** - Quick reference for TreeView styling functions and common patterns
 - **[Python vs EBS String Functions](docs/PYTHON_VS_EBS_STRING_FUNCTIONS.md)** - Comparison guide for Python developers learning EBS Script
 - **[EBS Script vs Oracle PL/SQL](docs/EBS_VS_ORACLE_PLSQL.md)** - Comprehensive comparison guide for PL/SQL developers learning EBS Script
 - **[Architecture & Flow Documentation](ARCHITECTURE.md)** - Comprehensive documentation of the system architecture, data flow, and internal workings
