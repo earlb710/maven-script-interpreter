@@ -185,6 +185,37 @@ public class AreaItemFactory {
             case TREEVIEW:
                 TreeView<String> treeView = new TreeView<>();
                 
+                // Set custom cell factory to apply styling from BuiltinsScreen
+                treeView.setCellFactory(tv -> new TreeCell<String>() {
+                    @Override
+                    protected void updateItem(String item, boolean empty) {
+                        super.updateItem(item, empty);
+                        
+                        if (empty || item == null) {
+                            setText(null);
+                            setGraphic(null);
+                            setStyle(null);
+                        } else {
+                            setText(item);
+                            TreeItem<String> treeItem = getTreeItem();
+                            if (treeItem != null) {
+                                // Set graphic if present
+                                if (treeItem.getGraphic() != null) {
+                                    setGraphic(treeItem.getGraphic());
+                                }
+                                
+                                // Apply styles from BuiltinsScreen
+                                String styleString = com.eb.script.interpreter.builtins.BuiltinsScreen.getTreeItemStyle(treeItem);
+                                if (styleString != null) {
+                                    setStyle(styleString);
+                                } else {
+                                    setStyle(null);
+                                }
+                            }
+                        }
+                    }
+                });
+                
                 // Set the root node if treeItems are specified
                 if (metadata != null && metadata.treeItems != null && !metadata.treeItems.isEmpty()) {
                     // Determine if we should show the root node

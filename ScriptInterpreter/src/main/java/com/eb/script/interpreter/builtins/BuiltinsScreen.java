@@ -30,6 +30,10 @@ public class BuiltinsScreen {
     private static final java.util.WeakHashMap<javafx.scene.control.TreeItem<String>, TreeItemIconData> treeItemIcons 
         = new java.util.WeakHashMap<>();
     
+    // Storage for tree item style data (weak references to avoid memory leaks)
+    private static final java.util.WeakHashMap<javafx.scene.control.TreeItem<String>, TreeItemStyleData> treeItemStyles 
+        = new java.util.WeakHashMap<>();
+    
     /**
      * Helper class to store icon path data for tree items
      */
@@ -38,6 +42,15 @@ public class BuiltinsScreen {
         String iconOpenPath;
         String iconClosedPath;
         javafx.beans.value.ChangeListener<Boolean> expansionListener;
+    }
+    
+    /**
+     * Helper class to store style data for tree items
+     */
+    private static class TreeItemStyleData {
+        Boolean bold;
+        Boolean italic;
+        String color;
     }
 
     /**
@@ -2468,6 +2481,664 @@ public class BuiltinsScreen {
     }
     
     /**
+     * scr.setTreeItemBold(screenName, itemPath, bold) -> Boolean
+     * Sets bold styling for a tree item at the specified path.
+     * The itemPath uses dot notation to specify the path through the tree (e.g., "Root.src.main").
+     * 
+     * @param context The interpreter context
+     * @param args [screenName, itemPath, bold]
+     * @return Boolean true on success
+     * @throws InterpreterError if parameters are invalid or tree item not found
+     */
+    public static Object screenSetTreeItemBold(InterpreterContext context, Object[] args) throws InterpreterError {
+        if (args.length < 3) {
+            throw new InterpreterError("scr.setTreeItemBold: requires 3 parameters: screenName, itemPath, bold");
+        }
+        
+        String screenName = (String) args[0];
+        String itemPath = (String) args[1];
+        Boolean bold = (Boolean) args[2];
+        
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("scr.setTreeItemBold: screenName parameter cannot be null or empty");
+        }
+        if (itemPath == null || itemPath.isEmpty()) {
+            throw new InterpreterError("scr.setTreeItemBold: itemPath parameter cannot be null or empty");
+        }
+        
+        // Normalize screen name
+        screenName = screenName.toLowerCase();
+        
+        // Verify screen exists
+        if (!context.getScreens().containsKey(screenName)) {
+            throw new InterpreterError("scr.setTreeItemBold: screen '" + screenName + "' not found");
+        }
+        
+        final String finalScreenName = screenName;
+        final String finalItemPath = itemPath;
+        final Boolean finalBold = bold;
+        
+        final java.util.concurrent.atomic.AtomicReference<InterpreterError> errorRef 
+            = new java.util.concurrent.atomic.AtomicReference<>();
+        final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
+        
+        // Update on JavaFX thread
+        javafx.application.Platform.runLater(() -> {
+            try {
+                // Find the TreeView control for this screen
+                java.util.List<javafx.scene.Node> controls = context.getScreenBoundControls().get(finalScreenName);
+                if (controls == null) {
+                    errorRef.set(new InterpreterError("scr.setTreeItemBold: no controls found for screen '" + finalScreenName + "'"));
+                    latch.countDown();
+                    return;
+                }
+                
+                javafx.scene.control.TreeView<String> treeView = null;
+                for (javafx.scene.Node control : controls) {
+                    if (control instanceof javafx.scene.control.TreeView) {
+                        @SuppressWarnings("unchecked")
+                        javafx.scene.control.TreeView<String> tv = (javafx.scene.control.TreeView<String>) control;
+                        treeView = tv;
+                        break;
+                    }
+                }
+                
+                if (treeView == null) {
+                    errorRef.set(new InterpreterError("scr.setTreeItemBold: no TreeView found in screen '" + finalScreenName + "'"));
+                    latch.countDown();
+                    return;
+                }
+                
+                // Find the tree item using the path
+                javafx.scene.control.TreeItem<String> item = findTreeItemByPath(treeView.getRoot(), finalItemPath);
+                if (item == null) {
+                    errorRef.set(new InterpreterError("scr.setTreeItemBold: tree item '" + finalItemPath + "' not found"));
+                    latch.countDown();
+                    return;
+                }
+                
+                // Get or create style data for this item
+                TreeItemStyleData styleData = treeItemStyles.get(item);
+                if (styleData == null) {
+                    styleData = new TreeItemStyleData();
+                    treeItemStyles.put(item, styleData);
+                }
+                
+                // Set bold property
+                styleData.bold = finalBold;
+                
+                // Force refresh of the tree view to apply styles
+                treeView.refresh();
+                
+            } catch (Exception e) {
+                errorRef.set(new InterpreterError("scr.setTreeItemBold: error setting bold: " + e.getMessage()));
+            } finally {
+                latch.countDown();
+            }
+        });
+        
+        // Wait for completion
+        try {
+            latch.await(5, java.util.concurrent.TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new InterpreterError("scr.setTreeItemBold: interrupted while setting bold");
+        }
+        
+        if (errorRef.get() != null) {
+            throw errorRef.get();
+        }
+        
+        return Boolean.TRUE;
+    }
+    
+    /**
+     * scr.setTreeItemItalic(screenName, itemPath, italic) -> Boolean
+     * Sets italic styling for a tree item at the specified path.
+     * The itemPath uses dot notation to specify the path through the tree (e.g., "Root.src.main").
+     * 
+     * @param context The interpreter context
+     * @param args [screenName, itemPath, italic]
+     * @return Boolean true on success
+     * @throws InterpreterError if parameters are invalid or tree item not found
+     */
+    public static Object screenSetTreeItemItalic(InterpreterContext context, Object[] args) throws InterpreterError {
+        if (args.length < 3) {
+            throw new InterpreterError("scr.setTreeItemItalic: requires 3 parameters: screenName, itemPath, italic");
+        }
+        
+        String screenName = (String) args[0];
+        String itemPath = (String) args[1];
+        Boolean italic = (Boolean) args[2];
+        
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("scr.setTreeItemItalic: screenName parameter cannot be null or empty");
+        }
+        if (itemPath == null || itemPath.isEmpty()) {
+            throw new InterpreterError("scr.setTreeItemItalic: itemPath parameter cannot be null or empty");
+        }
+        
+        // Normalize screen name
+        screenName = screenName.toLowerCase();
+        
+        // Verify screen exists
+        if (!context.getScreens().containsKey(screenName)) {
+            throw new InterpreterError("scr.setTreeItemItalic: screen '" + screenName + "' not found");
+        }
+        
+        final String finalScreenName = screenName;
+        final String finalItemPath = itemPath;
+        final Boolean finalItalic = italic;
+        
+        final java.util.concurrent.atomic.AtomicReference<InterpreterError> errorRef 
+            = new java.util.concurrent.atomic.AtomicReference<>();
+        final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
+        
+        // Update on JavaFX thread
+        javafx.application.Platform.runLater(() -> {
+            try {
+                // Find the TreeView control for this screen
+                java.util.List<javafx.scene.Node> controls = context.getScreenBoundControls().get(finalScreenName);
+                if (controls == null) {
+                    errorRef.set(new InterpreterError("scr.setTreeItemItalic: no controls found for screen '" + finalScreenName + "'"));
+                    latch.countDown();
+                    return;
+                }
+                
+                javafx.scene.control.TreeView<String> treeView = null;
+                for (javafx.scene.Node control : controls) {
+                    if (control instanceof javafx.scene.control.TreeView) {
+                        @SuppressWarnings("unchecked")
+                        javafx.scene.control.TreeView<String> tv = (javafx.scene.control.TreeView<String>) control;
+                        treeView = tv;
+                        break;
+                    }
+                }
+                
+                if (treeView == null) {
+                    errorRef.set(new InterpreterError("scr.setTreeItemItalic: no TreeView found in screen '" + finalScreenName + "'"));
+                    latch.countDown();
+                    return;
+                }
+                
+                // Find the tree item using the path
+                javafx.scene.control.TreeItem<String> item = findTreeItemByPath(treeView.getRoot(), finalItemPath);
+                if (item == null) {
+                    errorRef.set(new InterpreterError("scr.setTreeItemItalic: tree item '" + finalItemPath + "' not found"));
+                    latch.countDown();
+                    return;
+                }
+                
+                // Get or create style data for this item
+                TreeItemStyleData styleData = treeItemStyles.get(item);
+                if (styleData == null) {
+                    styleData = new TreeItemStyleData();
+                    treeItemStyles.put(item, styleData);
+                }
+                
+                // Set italic property
+                styleData.italic = finalItalic;
+                
+                // Force refresh of the tree view to apply styles
+                treeView.refresh();
+                
+            } catch (Exception e) {
+                errorRef.set(new InterpreterError("scr.setTreeItemItalic: error setting italic: " + e.getMessage()));
+            } finally {
+                latch.countDown();
+            }
+        });
+        
+        // Wait for completion
+        try {
+            latch.await(5, java.util.concurrent.TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new InterpreterError("scr.setTreeItemItalic: interrupted while setting italic");
+        }
+        
+        if (errorRef.get() != null) {
+            throw errorRef.get();
+        }
+        
+        return Boolean.TRUE;
+    }
+    
+    /**
+     * scr.setTreeItemColor(screenName, itemPath, color) -> Boolean
+     * Sets text color for a tree item at the specified path.
+     * The itemPath uses dot notation to specify the path through the tree (e.g., "Root.src.main").
+     * Color can be specified as: hex string (#RRGGBB), rgb string (rgb(r,g,b)), or color name (red, blue, etc.)
+     * 
+     * @param context The interpreter context
+     * @param args [screenName, itemPath, color]
+     * @return Boolean true on success
+     * @throws InterpreterError if parameters are invalid or tree item not found
+     */
+    public static Object screenSetTreeItemColor(InterpreterContext context, Object[] args) throws InterpreterError {
+        if (args.length < 3) {
+            throw new InterpreterError("scr.setTreeItemColor: requires 3 parameters: screenName, itemPath, color");
+        }
+        
+        String screenName = (String) args[0];
+        String itemPath = (String) args[1];
+        String color = (String) args[2];
+        
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("scr.setTreeItemColor: screenName parameter cannot be null or empty");
+        }
+        if (itemPath == null || itemPath.isEmpty()) {
+            throw new InterpreterError("scr.setTreeItemColor: itemPath parameter cannot be null or empty");
+        }
+        
+        // Normalize screen name
+        screenName = screenName.toLowerCase();
+        
+        // Verify screen exists
+        if (!context.getScreens().containsKey(screenName)) {
+            throw new InterpreterError("scr.setTreeItemColor: screen '" + screenName + "' not found");
+        }
+        
+        final String finalScreenName = screenName;
+        final String finalItemPath = itemPath;
+        final String finalColor = color;
+        
+        final java.util.concurrent.atomic.AtomicReference<InterpreterError> errorRef 
+            = new java.util.concurrent.atomic.AtomicReference<>();
+        final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
+        
+        // Update on JavaFX thread
+        javafx.application.Platform.runLater(() -> {
+            try {
+                // Find the TreeView control for this screen
+                java.util.List<javafx.scene.Node> controls = context.getScreenBoundControls().get(finalScreenName);
+                if (controls == null) {
+                    errorRef.set(new InterpreterError("scr.setTreeItemColor: no controls found for screen '" + finalScreenName + "'"));
+                    latch.countDown();
+                    return;
+                }
+                
+                javafx.scene.control.TreeView<String> treeView = null;
+                for (javafx.scene.Node control : controls) {
+                    if (control instanceof javafx.scene.control.TreeView) {
+                        @SuppressWarnings("unchecked")
+                        javafx.scene.control.TreeView<String> tv = (javafx.scene.control.TreeView<String>) control;
+                        treeView = tv;
+                        break;
+                    }
+                }
+                
+                if (treeView == null) {
+                    errorRef.set(new InterpreterError("scr.setTreeItemColor: no TreeView found in screen '" + finalScreenName + "'"));
+                    latch.countDown();
+                    return;
+                }
+                
+                // Find the tree item using the path
+                javafx.scene.control.TreeItem<String> item = findTreeItemByPath(treeView.getRoot(), finalItemPath);
+                if (item == null) {
+                    errorRef.set(new InterpreterError("scr.setTreeItemColor: tree item '" + finalItemPath + "' not found"));
+                    latch.countDown();
+                    return;
+                }
+                
+                // Get or create style data for this item
+                TreeItemStyleData styleData = treeItemStyles.get(item);
+                if (styleData == null) {
+                    styleData = new TreeItemStyleData();
+                    treeItemStyles.put(item, styleData);
+                }
+                
+                // Set color property
+                styleData.color = finalColor;
+                
+                // Force refresh of the tree view to apply styles
+                treeView.refresh();
+                
+            } catch (Exception e) {
+                errorRef.set(new InterpreterError("scr.setTreeItemColor: error setting color: " + e.getMessage()));
+            } finally {
+                latch.countDown();
+            }
+        });
+        
+        // Wait for completion
+        try {
+            latch.await(5, java.util.concurrent.TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new InterpreterError("scr.setTreeItemColor: interrupted while setting color");
+        }
+        
+        if (errorRef.get() != null) {
+            throw errorRef.get();
+        }
+        
+        return Boolean.TRUE;
+    }
+    
+    /**
+     * scr.getTreeItemBold(screenName, itemPath) -> Boolean
+     * Gets the bold styling state for a tree item at the specified path.
+     * The itemPath uses dot notation to specify the path through the tree (e.g., "Root.src.main").
+     * 
+     * @param context The interpreter context
+     * @param args [screenName, itemPath]
+     * @return Boolean true if bold is set, false if not set or null
+     * @throws InterpreterError if parameters are invalid or tree item not found
+     */
+    public static Object screenGetTreeItemBold(InterpreterContext context, Object[] args) throws InterpreterError {
+        if (args.length < 2) {
+            throw new InterpreterError("scr.getTreeItemBold: requires 2 parameters: screenName, itemPath");
+        }
+        
+        String screenName = (String) args[0];
+        String itemPath = (String) args[1];
+        
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("scr.getTreeItemBold: screenName parameter cannot be null or empty");
+        }
+        if (itemPath == null || itemPath.isEmpty()) {
+            throw new InterpreterError("scr.getTreeItemBold: itemPath parameter cannot be null or empty");
+        }
+        
+        // Normalize screen name
+        screenName = screenName.toLowerCase();
+        
+        // Verify screen exists
+        if (!context.getScreens().containsKey(screenName)) {
+            throw new InterpreterError("scr.getTreeItemBold: screen '" + screenName + "' not found");
+        }
+        
+        final String finalScreenName = screenName;
+        final String finalItemPath = itemPath;
+        
+        final java.util.concurrent.atomic.AtomicReference<Boolean> boldRef 
+            = new java.util.concurrent.atomic.AtomicReference<>();
+        final java.util.concurrent.atomic.AtomicReference<InterpreterError> errorRef 
+            = new java.util.concurrent.atomic.AtomicReference<>();
+        final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
+        
+        // Query on JavaFX thread
+        javafx.application.Platform.runLater(() -> {
+            try {
+                // Find the TreeView control for this screen
+                java.util.List<javafx.scene.Node> controls = context.getScreenBoundControls().get(finalScreenName);
+                if (controls == null) {
+                    errorRef.set(new InterpreterError("scr.getTreeItemBold: no controls found for screen '" + finalScreenName + "'"));
+                    latch.countDown();
+                    return;
+                }
+                
+                javafx.scene.control.TreeView<String> treeView = null;
+                for (javafx.scene.Node control : controls) {
+                    if (control instanceof javafx.scene.control.TreeView) {
+                        @SuppressWarnings("unchecked")
+                        javafx.scene.control.TreeView<String> tv = (javafx.scene.control.TreeView<String>) control;
+                        treeView = tv;
+                        break;
+                    }
+                }
+                
+                if (treeView == null) {
+                    errorRef.set(new InterpreterError("scr.getTreeItemBold: no TreeView found in screen '" + finalScreenName + "'"));
+                    latch.countDown();
+                    return;
+                }
+                
+                // Find the tree item using the path
+                javafx.scene.control.TreeItem<String> item = findTreeItemByPath(treeView.getRoot(), finalItemPath);
+                if (item == null) {
+                    errorRef.set(new InterpreterError("scr.getTreeItemBold: tree item '" + finalItemPath + "' not found"));
+                    latch.countDown();
+                    return;
+                }
+                
+                // Get style data for this item
+                TreeItemStyleData styleData = treeItemStyles.get(item);
+                if (styleData != null && styleData.bold != null) {
+                    boldRef.set(styleData.bold);
+                } else {
+                    boldRef.set(false);
+                }
+                
+            } catch (Exception e) {
+                errorRef.set(new InterpreterError("scr.getTreeItemBold: error getting bold: " + e.getMessage()));
+            } finally {
+                latch.countDown();
+            }
+        });
+        
+        // Wait for completion
+        try {
+            latch.await(5, java.util.concurrent.TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new InterpreterError("scr.getTreeItemBold: interrupted while getting bold");
+        }
+        
+        if (errorRef.get() != null) {
+            throw errorRef.get();
+        }
+        
+        return boldRef.get();
+    }
+    
+    /**
+     * scr.getTreeItemItalic(screenName, itemPath) -> Boolean
+     * Gets the italic styling state for a tree item at the specified path.
+     * The itemPath uses dot notation to specify the path through the tree (e.g., "Root.src.main").
+     * 
+     * @param context The interpreter context
+     * @param args [screenName, itemPath]
+     * @return Boolean true if italic is set, false if not set or null
+     * @throws InterpreterError if parameters are invalid or tree item not found
+     */
+    public static Object screenGetTreeItemItalic(InterpreterContext context, Object[] args) throws InterpreterError {
+        if (args.length < 2) {
+            throw new InterpreterError("scr.getTreeItemItalic: requires 2 parameters: screenName, itemPath");
+        }
+        
+        String screenName = (String) args[0];
+        String itemPath = (String) args[1];
+        
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("scr.getTreeItemItalic: screenName parameter cannot be null or empty");
+        }
+        if (itemPath == null || itemPath.isEmpty()) {
+            throw new InterpreterError("scr.getTreeItemItalic: itemPath parameter cannot be null or empty");
+        }
+        
+        // Normalize screen name
+        screenName = screenName.toLowerCase();
+        
+        // Verify screen exists
+        if (!context.getScreens().containsKey(screenName)) {
+            throw new InterpreterError("scr.getTreeItemItalic: screen '" + screenName + "' not found");
+        }
+        
+        final String finalScreenName = screenName;
+        final String finalItemPath = itemPath;
+        
+        final java.util.concurrent.atomic.AtomicReference<Boolean> italicRef 
+            = new java.util.concurrent.atomic.AtomicReference<>();
+        final java.util.concurrent.atomic.AtomicReference<InterpreterError> errorRef 
+            = new java.util.concurrent.atomic.AtomicReference<>();
+        final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
+        
+        // Query on JavaFX thread
+        javafx.application.Platform.runLater(() -> {
+            try {
+                // Find the TreeView control for this screen
+                java.util.List<javafx.scene.Node> controls = context.getScreenBoundControls().get(finalScreenName);
+                if (controls == null) {
+                    errorRef.set(new InterpreterError("scr.getTreeItemItalic: no controls found for screen '" + finalScreenName + "'"));
+                    latch.countDown();
+                    return;
+                }
+                
+                javafx.scene.control.TreeView<String> treeView = null;
+                for (javafx.scene.Node control : controls) {
+                    if (control instanceof javafx.scene.control.TreeView) {
+                        @SuppressWarnings("unchecked")
+                        javafx.scene.control.TreeView<String> tv = (javafx.scene.control.TreeView<String>) control;
+                        treeView = tv;
+                        break;
+                    }
+                }
+                
+                if (treeView == null) {
+                    errorRef.set(new InterpreterError("scr.getTreeItemItalic: no TreeView found in screen '" + finalScreenName + "'"));
+                    latch.countDown();
+                    return;
+                }
+                
+                // Find the tree item using the path
+                javafx.scene.control.TreeItem<String> item = findTreeItemByPath(treeView.getRoot(), finalItemPath);
+                if (item == null) {
+                    errorRef.set(new InterpreterError("scr.getTreeItemItalic: tree item '" + finalItemPath + "' not found"));
+                    latch.countDown();
+                    return;
+                }
+                
+                // Get style data for this item
+                TreeItemStyleData styleData = treeItemStyles.get(item);
+                if (styleData != null && styleData.italic != null) {
+                    italicRef.set(styleData.italic);
+                } else {
+                    italicRef.set(false);
+                }
+                
+            } catch (Exception e) {
+                errorRef.set(new InterpreterError("scr.getTreeItemItalic: error getting italic: " + e.getMessage()));
+            } finally {
+                latch.countDown();
+            }
+        });
+        
+        // Wait for completion
+        try {
+            latch.await(5, java.util.concurrent.TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new InterpreterError("scr.getTreeItemItalic: interrupted while getting italic");
+        }
+        
+        if (errorRef.get() != null) {
+            throw errorRef.get();
+        }
+        
+        return italicRef.get();
+    }
+    
+    /**
+     * scr.getTreeItemColor(screenName, itemPath) -> String
+     * Gets the text color for a tree item at the specified path.
+     * The itemPath uses dot notation to specify the path through the tree (e.g., "Root.src.main").
+     * 
+     * @param context The interpreter context
+     * @param args [screenName, itemPath]
+     * @return String color value or null if no color set
+     * @throws InterpreterError if parameters are invalid or tree item not found
+     */
+    public static Object screenGetTreeItemColor(InterpreterContext context, Object[] args) throws InterpreterError {
+        if (args.length < 2) {
+            throw new InterpreterError("scr.getTreeItemColor: requires 2 parameters: screenName, itemPath");
+        }
+        
+        String screenName = (String) args[0];
+        String itemPath = (String) args[1];
+        
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("scr.getTreeItemColor: screenName parameter cannot be null or empty");
+        }
+        if (itemPath == null || itemPath.isEmpty()) {
+            throw new InterpreterError("scr.getTreeItemColor: itemPath parameter cannot be null or empty");
+        }
+        
+        // Normalize screen name
+        screenName = screenName.toLowerCase();
+        
+        // Verify screen exists
+        if (!context.getScreens().containsKey(screenName)) {
+            throw new InterpreterError("scr.getTreeItemColor: screen '" + screenName + "' not found");
+        }
+        
+        final String finalScreenName = screenName;
+        final String finalItemPath = itemPath;
+        
+        final java.util.concurrent.atomic.AtomicReference<String> colorRef 
+            = new java.util.concurrent.atomic.AtomicReference<>();
+        final java.util.concurrent.atomic.AtomicReference<InterpreterError> errorRef 
+            = new java.util.concurrent.atomic.AtomicReference<>();
+        final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
+        
+        // Query on JavaFX thread
+        javafx.application.Platform.runLater(() -> {
+            try {
+                // Find the TreeView control for this screen
+                java.util.List<javafx.scene.Node> controls = context.getScreenBoundControls().get(finalScreenName);
+                if (controls == null) {
+                    errorRef.set(new InterpreterError("scr.getTreeItemColor: no controls found for screen '" + finalScreenName + "'"));
+                    latch.countDown();
+                    return;
+                }
+                
+                javafx.scene.control.TreeView<String> treeView = null;
+                for (javafx.scene.Node control : controls) {
+                    if (control instanceof javafx.scene.control.TreeView) {
+                        @SuppressWarnings("unchecked")
+                        javafx.scene.control.TreeView<String> tv = (javafx.scene.control.TreeView<String>) control;
+                        treeView = tv;
+                        break;
+                    }
+                }
+                
+                if (treeView == null) {
+                    errorRef.set(new InterpreterError("scr.getTreeItemColor: no TreeView found in screen '" + finalScreenName + "'"));
+                    latch.countDown();
+                    return;
+                }
+                
+                // Find the tree item using the path
+                javafx.scene.control.TreeItem<String> item = findTreeItemByPath(treeView.getRoot(), finalItemPath);
+                if (item == null) {
+                    errorRef.set(new InterpreterError("scr.getTreeItemColor: tree item '" + finalItemPath + "' not found"));
+                    latch.countDown();
+                    return;
+                }
+                
+                // Get style data for this item
+                TreeItemStyleData styleData = treeItemStyles.get(item);
+                if (styleData != null && styleData.color != null) {
+                    colorRef.set(styleData.color);
+                } else {
+                    colorRef.set(null);
+                }
+                
+            } catch (Exception e) {
+                errorRef.set(new InterpreterError("scr.getTreeItemColor: error getting color: " + e.getMessage()));
+            } finally {
+                latch.countDown();
+            }
+        });
+        
+        // Wait for completion
+        try {
+            latch.await(5, java.util.concurrent.TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new InterpreterError("scr.getTreeItemColor: interrupted while getting color");
+        }
+        
+        if (errorRef.get() != null) {
+            throw errorRef.get();
+        }
+        
+        return colorRef.get();
+    }
+    
+    /**
      * Helper method to find a tree item by its path (dot-separated).
      * Supports both simple paths (matching value) and hierarchical paths.
      * 
@@ -2579,5 +3250,36 @@ public class BuiltinsScreen {
             System.err.println("Error loading tree icon '" + iconPath + "': " + e.getMessage());
             item.setGraphic(null);
         }
+    }
+    
+    /**
+     * Helper method to get the style CSS string for a tree item.
+     * This is used by the TreeView cell factory to apply styles.
+     * 
+     * @param item The tree item to get style for
+     * @return CSS style string or null if no style set
+     */
+    public static String getTreeItemStyle(javafx.scene.control.TreeItem<String> item) {
+        TreeItemStyleData styleData = treeItemStyles.get(item);
+        if (styleData == null) {
+            return null;
+        }
+        
+        StringBuilder style = new StringBuilder();
+        
+        if (styleData.bold != null && styleData.bold) {
+            style.append("-fx-font-weight: bold; ");
+        }
+        
+        if (styleData.italic != null && styleData.italic) {
+            style.append("-fx-font-style: italic; ");
+        }
+        
+        if (styleData.color != null && !styleData.color.isEmpty()) {
+            // Accept any color format: hex (#RRGGBB), rgb/rgba, or color names
+            style.append("-fx-text-fill: ").append(styleData.color).append("; ");
+        }
+        
+        return style.length() > 0 ? style.toString() : null;
     }
 }

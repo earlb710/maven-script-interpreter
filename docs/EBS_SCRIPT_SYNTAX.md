@@ -3954,6 +3954,23 @@ call scr.setTreeItemIcons("screenName", "itemPath", "icons/folder.png",
 // Get the current icon path for a tree item
 var iconPath = call scr.getTreeItemIcon("screenName", "itemPath");
 
+// TreeView styling (bold, italic, color per tree node)
+// Set bold text
+call scr.setTreeItemBold("screenName", "itemPath", true);
+
+// Set italic text
+call scr.setTreeItemItalic("screenName", "itemPath", true);
+
+// Set text color (hex, rgb, or color name)
+call scr.setTreeItemColor("screenName", "itemPath", "#ff0000");  // Red
+call scr.setTreeItemColor("screenName", "itemPath", "rgb(255,0,0)");  // Red
+call scr.setTreeItemColor("screenName", "itemPath", "red");  // Red
+
+// Combine multiple styles on the same item
+call scr.setTreeItemBold("screenName", "itemPath", true);
+call scr.setTreeItemItalic("screenName", "itemPath", true);
+call scr.setTreeItemColor("screenName", "itemPath", "#0066cc");
+
 // itemPath uses dot notation to navigate tree hierarchy
 // Examples: "Root", "Root.src", "Root.src.main.java"
 
@@ -3967,6 +3984,10 @@ var items = call scr.getItemList("propTest");
 call scr.setTreeItemIcon("fileExplorer", "main.ebs", "icons/script-file-run.png");
 call scr.setTreeItemIcons("fileExplorer", "src", "icons/folder.png",
                           "icons/folder-open.png", "icons/folder.png");
+
+// TreeView styling example:
+call scr.setTreeItemBold("fileExplorer", "src", true);
+call scr.setTreeItemColor("fileExplorer", "main.ebs", "#0066cc");
 ```
 
 **Note:** The canonical prefix for screen functions is `scr.` (e.g., `scr.getProperty`, `scr.setStatus`). This is the recommended prefix for all new code.

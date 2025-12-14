@@ -4243,6 +4243,191 @@
       "example": "<b>var</b> img = <b>call</b> <b>scr.snapshot</b>(screenName=\"myScreen\");<br><b>call</b> <b>image.save</b>(img, \"screenshot.png\");"
     },
     {
+      "function": "scr.setTreeItemIcon",
+      "short_description": "Sets a static icon for a TreeView item",
+      "long_help": "Sets an icon for a specific tree item in a TreeView. Use this for leaf nodes (files) that don't expand.<br>The itemPath uses dot notation to navigate the tree hierarchy (e.g., \"Root.src.main.java\").<br>Icon path can be a classpath resource (e.g., \"icons/file.png\") or a file system path.<br>Pass null to remove the icon. Returns true on success.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        },
+        {
+          "name": "itemPath",
+          "type": "string"
+        },
+        {
+          "name": "iconPath",
+          "type": "string",
+          "optional": true
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>// Set icon for a file</b><br><b>call</b> <b>scr.setTreeItemIcon</b>(screenName=\"fileExplorer\", itemPath=\"Root.main.ebs\", iconPath=\"icons/script-file-run.png\");<br><br><b>// Set icon for a config file</b><br><b>call</b> <b>scr.setTreeItemIcon</b>(screenName=\"fileExplorer\", itemPath=\"Root.config.json\", iconPath=\"icons/config-file.png\");<br><br><b>// Remove icon</b><br><b>call</b> <b>scr.setTreeItemIcon</b>(screenName=\"fileExplorer\", itemPath=\"Root.file.txt\", iconPath=<b>null</b>);"
+    },
+    {
+      "function": "scr.setTreeItemIcons",
+      "short_description": "Sets state-based icons for a TreeView item",
+      "long_help": "Sets multiple icons for a tree item that change based on expansion state. Use this for branch nodes (folders) that can expand/collapse.<br>The itemPath uses dot notation (e.g., \"Root.src\"). Provides three icon paths:<br>• iconPath - Default/fallback icon<br>• iconOpenPath - Icon when expanded (or null to use iconPath)<br>• iconClosedPath - Icon when collapsed (or null to use iconPath)<br>Returns true on success.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        },
+        {
+          "name": "itemPath",
+          "type": "string"
+        },
+        {
+          "name": "iconPath",
+          "type": "string"
+        },
+        {
+          "name": "iconOpenPath",
+          "type": "string",
+          "optional": true
+        },
+        {
+          "name": "iconClosedPath",
+          "type": "string",
+          "optional": true
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>// Folder with open/closed states</b><br><b>call</b> <b>scr.setTreeItemIcons</b>(screenName=\"fileExplorer\", itemPath=\"Root.src\",<br>    iconPath=\"icons/folder.png\",<br>    iconOpenPath=\"icons/folder-open.png\",<br>    iconClosedPath=\"icons/folder.png\");<br><br><b>// Special folder (same icon always)</b><br><b>call</b> <b>scr.setTreeItemIcons</b>(screenName=\"fileExplorer\", itemPath=\"Root.favorites\",<br>    iconPath=\"icons/folder_fav.png\",<br>    iconOpenPath=\"icons/folder_fav.png\",<br>    iconClosedPath=\"icons/folder_fav.png\");"
+    },
+    {
+      "function": "scr.getTreeItemIcon",
+      "short_description": "Gets the current icon path for a TreeView item",
+      "long_help": "Retrieves the icon path currently set for a tree item. Returns the icon path as a string, or null if no icon is set.<br>The itemPath uses dot notation to navigate the tree (e.g., \"Root.src.main.java\").",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        },
+        {
+          "name": "itemPath",
+          "type": "string"
+        }
+      ],
+      "return_type": "string",
+      "example": "<b>// Get current icon</b><br><b>var</b> iconPath = <b>call</b> <b>scr.getTreeItemIcon</b>(screenName=\"fileExplorer\", itemPath=\"Root.main.ebs\");<br><b>if</b> iconPath != <b>null</b> <b>then</b> {<br>    <b>print</b> \"Icon: \" + iconPath;<br>} <b>else</b> {<br>    <b>print</b> \"No icon set\";<br>}"
+    },
+    {
+      "function": "scr.setTreeItemBold",
+      "short_description": "Sets bold text styling for a TreeView item",
+      "long_help": "Applies or removes bold text styling on a specific tree item. Use this to emphasize important items like folders or main files.<br>The itemPath uses dot notation (e.g., \"Root.src\"). Pass true to enable bold, false to disable.<br>Can be combined with italic and color styling on the same item. Returns true on success.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        },
+        {
+          "name": "itemPath",
+          "type": "string"
+        },
+        {
+          "name": "bold",
+          "type": "bool"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>// Make folder bold</b><br><b>call</b> <b>scr.setTreeItemBold</b>(screenName=\"fileExplorer\", itemPath=\"Root.src\", bold=<b>true</b>);<br><br><b>// Make main file bold</b><br><b>call</b> <b>scr.setTreeItemBold</b>(screenName=\"fileExplorer\", itemPath=\"Root.main.ebs\", bold=<b>true</b>);<br><br><b>// Remove bold</b><br><b>call</b> <b>scr.setTreeItemBold</b>(screenName=\"fileExplorer\", itemPath=\"Root.test.ebs\", bold=<b>false</b>);"
+    },
+    {
+      "function": "scr.setTreeItemItalic",
+      "short_description": "Sets italic text styling for a TreeView item",
+      "long_help": "Applies or removes italic text styling on a specific tree item. Use this for special files like documentation or configuration.<br>The itemPath uses dot notation (e.g., \"Root.docs.README.md\"). Pass true to enable italic, false to disable.<br>Can be combined with bold and color styling on the same item. Returns true on success.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        },
+        {
+          "name": "itemPath",
+          "type": "string"
+        },
+        {
+          "name": "italic",
+          "type": "bool"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>// Make documentation file italic</b><br><b>call</b> <b>scr.setTreeItemItalic</b>(screenName=\"fileExplorer\", itemPath=\"Root.docs.README.md\", italic=<b>true</b>);<br><br><b>// Make config file italic</b><br><b>call</b> <b>scr.setTreeItemItalic</b>(screenName=\"fileExplorer\", itemPath=\"Root.config.json\", italic=<b>true</b>);<br><br><b>// Remove italic</b><br><b>call</b> <b>scr.setTreeItemItalic</b>(screenName=\"fileExplorer\", itemPath=\"Root.data.txt\", italic=<b>false</b>);"
+    },
+    {
+      "function": "scr.setTreeItemColor",
+      "short_description": "Sets text color for a TreeView item",
+      "long_help": "Sets the text color for a specific tree item. Use this to indicate file status, type, or importance.<br>The itemPath uses dot notation (e.g., \"Root.error.log\").<br>Color formats supported:<br>• Hex: #RRGGBB (e.g., \"#ff0000\" for red)<br>• RGB: rgb(r,g,b) (e.g., \"rgb(255,0,0)\" for red)<br>• Color names: \"red\", \"blue\", \"green\", etc.<br>Pass null or empty string to remove color. Can be combined with bold and italic. Returns true on success.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        },
+        {
+          "name": "itemPath",
+          "type": "string"
+        },
+        {
+          "name": "color",
+          "type": "string",
+          "optional": true
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>// Red for error files (hex format)</b><br><b>call</b> <b>scr.setTreeItemColor</b>(screenName=\"fileExplorer\", itemPath=\"Root.error.log\", color=\"#ff0000\");<br><br><b>// Blue for main file (RGB format)</b><br><b>call</b> <b>scr.setTreeItemColor</b>(screenName=\"fileExplorer\", itemPath=\"Root.main.ebs\", color=\"rgb(0,102,204)\");<br><br><b>// Green for documentation (color name)</b><br><b>call</b> <b>scr.setTreeItemColor</b>(screenName=\"fileExplorer\", itemPath=\"Root.README.md\", color=\"green\");<br><br><b>// Combine with bold and italic</b><br><b>call</b> <b>scr.setTreeItemBold</b>(screenName=\"fileExplorer\", itemPath=\"Root.important.ebs\", bold=<b>true</b>);<br><b>call</b> <b>scr.setTreeItemItalic</b>(screenName=\"fileExplorer\", itemPath=\"Root.important.ebs\", italic=<b>true</b>);<br><b>call</b> <b>scr.setTreeItemColor</b>(screenName=\"fileExplorer\", itemPath=\"Root.important.ebs\", color=\"#9900cc\");"
+    },
+    {
+      "function": "scr.getTreeItemBold",
+      "short_description": "Gets the bold styling state for a TreeView item",
+      "long_help": "Retrieves the current bold styling state for a specific tree item. Returns true if bold is enabled, false if not set or disabled.<br>The itemPath uses dot notation to navigate the tree (e.g., \"Root.src.main\").",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        },
+        {
+          "name": "itemPath",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>// Get bold state</b><br><b>var</b> isBold = <b>call</b> <b>scr.getTreeItemBold</b>(screenName=\"fileExplorer\", itemPath=\"Root.src\");<br><b>if</b> isBold <b>then</b> {<br>    <b>print</b> \"Item is bold\";<br>} <b>else</b> {<br>    <b>print</b> \"Item is not bold\";<br>}<br><br><b>// Check and toggle</b><br><b>var</b> currentBold = <b>call</b> <b>scr.getTreeItemBold</b>(screenName=\"fileExplorer\", itemPath=\"Root.main.ebs\");<br><b>call</b> <b>scr.setTreeItemBold</b>(screenName=\"fileExplorer\", itemPath=\"Root.main.ebs\", bold=<b>not</b> currentBold);"
+    },
+    {
+      "function": "scr.getTreeItemItalic",
+      "short_description": "Gets the italic styling state for a TreeView item",
+      "long_help": "Retrieves the current italic styling state for a specific tree item. Returns true if italic is enabled, false if not set or disabled.<br>The itemPath uses dot notation to navigate the tree (e.g., \"Root.docs.README.md\").",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        },
+        {
+          "name": "itemPath",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>// Get italic state</b><br><b>var</b> isItalic = <b>call</b> <b>scr.getTreeItemItalic</b>(screenName=\"fileExplorer\", itemPath=\"Root.docs.README.md\");<br><b>if</b> isItalic <b>then</b> {<br>    <b>print</b> \"Item is italic\";<br>} <b>else</b> {<br>    <b>print</b> \"Item is not italic\";<br>}<br><br><b>// Check and toggle</b><br><b>var</b> currentItalic = <b>call</b> <b>scr.getTreeItemItalic</b>(screenName=\"fileExplorer\", itemPath=\"Root.config.json\");<br><b>call</b> <b>scr.setTreeItemItalic</b>(screenName=\"fileExplorer\", itemPath=\"Root.config.json\", italic=<b>not</b> currentItalic);"
+    },
+    {
+      "function": "scr.getTreeItemColor",
+      "short_description": "Gets the text color for a TreeView item",
+      "long_help": "Retrieves the current text color for a specific tree item. Returns the color string (hex, rgb, or color name) if set, or null if no color is set.<br>The itemPath uses dot notation to navigate the tree (e.g., \"Root.error.log\").",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        },
+        {
+          "name": "itemPath",
+          "type": "string"
+        }
+      ],
+      "return_type": "string",
+      "example": "<b>// Get color</b><br><b>var</b> color = <b>call</b> <b>scr.getTreeItemColor</b>(screenName=\"fileExplorer\", itemPath=\"Root.error.log\");<br><b>if</b> color != <b>null</b> <b>then</b> {<br>    <b>print</b> \"Color: \" + color;<br>} <b>else</b> {<br>    <b>print</b> \"No color set\";<br>}<br><br><b>// Check color and change if needed</b><br><b>var</b> currentColor = <b>call</b> <b>scr.getTreeItemColor</b>(screenName=\"fileExplorer\", itemPath=\"Root.status.txt\");<br><b>if</b> currentColor == \"#ff0000\" <b>then</b> {<br>    <b>call</b> <b>scr.setTreeItemColor</b>(screenName=\"fileExplorer\", itemPath=\"Root.status.txt\", color=\"#00ff00\");<br>}"
+    },
+    {
       "function": "str.charArray",
       "short_description": "Converts string to character array",
       "long_help": "Returns an array of integer character codes (Unicode code points) for each character in the string.",
