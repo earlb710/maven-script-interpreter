@@ -1,0 +1,67 @@
+// Test script demonstrating all logical operator aliases
+// Tests that and/&&, or/||, and !/not work correctly
+
+var a: bool = true;
+var b: bool = false;
+
+print "Testing AND operator aliases:";
+if a and b then {
+    print "  a and b = true (FAIL)";
+} else {
+    print "  a and b = false (PASS)";
+}
+
+if a && b then {
+    print "  a && b = true (FAIL)";
+} else {
+    print "  a && b = false (PASS)";
+}
+
+print "";
+print "Testing OR operator aliases:";
+if a or b then {
+    print "  a or b = true (PASS)";
+} else {
+    print "  a or b = false (FAIL)";
+}
+
+if a || b then {
+    print "  a || b = true (PASS)";
+} else {
+    print "  a || b = false (FAIL)";
+}
+
+print "";
+print "Testing NOT operator aliases:";
+if !b then {
+    print "  !b = true (PASS)";
+} else {
+    print "  !b = false (FAIL)";
+}
+
+if not b then {
+    print "  not b = true (PASS)";
+} else {
+    print "  not b = false (FAIL)";
+}
+
+print "";
+print "Testing combined operators:";
+var combined1: bool = a and b;
+var combined2: bool = not b;
+if combined1 or combined2 then {
+    print "  (a and b) or (not b) = true (PASS)";
+} else {
+    print "  (a and b) or (not b) = false (FAIL)";
+}
+
+var combined3: bool = a && b;
+var combined4: bool = !b;
+if combined3 || combined4 then {
+    print "  (a && b) || (!b) = true (PASS)";
+} else {
+    print "  (a && b) || (!b) = false (FAIL)";
+}
+
+print "";
+print "All operator alias tests completed successfully!";

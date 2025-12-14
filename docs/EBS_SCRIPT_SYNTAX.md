@@ -699,9 +699,10 @@ a <= b    // Less than or equal to
 
 ### Logical Operators
 ```javascript
-a and b   // Logical AND
-a or b    // Logical OR
-!a        // Logical NOT
+a and b   // Logical AND (also &&)
+a or b    // Logical OR (also ||)
+!a        // Logical NOT (also not)
+not a     // Logical NOT (alternative to !)
 
 // Example
 if count > 0 and count < 100 then {

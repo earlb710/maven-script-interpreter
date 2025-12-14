@@ -60,7 +60,7 @@ public enum EbsTokenType implements LexerToken {
     // Boolean Operators
     BOOL_TRUE(PrintStyle.DATA, Category.KEYWORD, "true"), //true
     BOOL_FALSE(PrintStyle.DATA, Category.KEYWORD, "false"), //false
-    BOOL_BANG(Category.OPERATOR, "!"), //!
+    BOOL_BANG(Category.OPERATOR, "!", "not"), //! not
     BOOL_GT(Category.OPERATOR, ">"), BOOL_LT(Category.OPERATOR, "<"), // > <
     BOOL_GT_EQ(Category.OPERATOR, ">=", "=>"), BOOL_LT_EQ(Category.OPERATOR, "<=", "=<"), // >= <=
     BOOL_EQ(Category.OPERATOR, "=="), //==

@@ -1,0 +1,114 @@
+// Test script for NOT operator (! and not)
+// Verifies that both ! and not work as logical negation operators
+
+var a: bool = true;
+var b: bool = false;
+
+// Test 1: Basic ! operator
+print "Test 1: Basic ! operator";
+if !b then {
+    print "  !false = true (PASS)";
+} else {
+    print "  !false = false (FAIL)";
+}
+
+// Test 2: Basic not operator
+print "Test 2: Basic not operator";
+if not b then {
+    print "  not false = true (PASS)";
+} else {
+    print "  not false = false (FAIL)";
+}
+
+// Test 3: Negating true with !
+print "Test 3: Negating true with !";
+if !a then {
+    print "  !true = true (FAIL)";
+} else {
+    print "  !true = false (PASS)";
+}
+
+// Test 4: Negating true with not
+print "Test 4: Negating true with not";
+if not a then {
+    print "  not true = true (FAIL)";
+} else {
+    print "  not true = false (PASS)";
+}
+
+// Test 5: Combined with and operator (!)
+print "Test 5: Combined with and operator (!)";
+if !b and a then {
+    print "  !false and true = true (PASS)";
+} else {
+    print "  !false and true = false (FAIL)";
+}
+
+// Test 6: Combined with and operator (not)
+print "Test 6: Combined with and operator (not)";
+if not b and a then {
+    print "  not false and true = true (PASS)";
+} else {
+    print "  not false and true = false (FAIL)";
+}
+
+// Test 7: Combined with or operator (!)
+print "Test 7: Combined with or operator (!)";
+if !a or b then {
+    print "  !true or false = false (FAIL)";
+} else {
+    print "  !true or false = false (PASS)";
+}
+
+// Test 8: Combined with or operator (not)
+print "Test 8: Combined with or operator (not)";
+if not a or b then {
+    print "  not true or false = false (FAIL)";
+} else {
+    print "  not true or false = false (PASS)";
+}
+
+// Test 9: Double negation with ! 
+print "Test 9: Double negation with !";
+if !!a then {
+    print "  !!true = true (PASS)";
+} else {
+    print "  !!true = false (FAIL)";
+}
+
+// Test 10: Double negation with not
+print "Test 10: Double negation with not";
+if not not a then {
+    print "  not not true = true (PASS)";
+} else {
+    print "  not not true = false (FAIL)";
+}
+
+// Test 11: Complex expression with !
+print "Test 11: Complex expression with !";
+var x: int = 5;
+var y: int = 10;
+if !(x > y) then {
+    print "  !(5 > 10) = true (PASS)";
+} else {
+    print "  !(5 > 10) = false (FAIL)";
+}
+
+// Test 12: Complex expression with not
+print "Test 12: Complex expression with not";
+if not (x > y) then {
+    print "  not (5 > 10) = true (PASS)";
+} else {
+    print "  not (5 > 10) = false (FAIL)";
+}
+
+// Test 13: Mixed ! and not
+print "Test 13: Mixed ! and not";
+if !b and not b then {
+    print "  !false and not false = true (PASS)";
+} else {
+    print "  !false and not false = false (FAIL)";
+}
+
+print "";
+print "All NOT operator tests completed!";

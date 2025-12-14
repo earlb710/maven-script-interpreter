@@ -1,6 +1,6 @@
 // EBS Language Reference v1.0.2.1 - See EBS_LANGUAGE_REFERENCE.md
-// Example: and, or operators - Logical operations
-// Syntax: expr1 and expr2, expr1 or expr2
+// Example: and, or, not operators - Logical operations
+// Syntax: expr1 and expr2, expr1 or expr2, !expr, not expr
 
 var a: bool = true;
 var b: bool = false;
@@ -17,10 +17,31 @@ if a or b then {
     print "At least one is true";
 }
 
+// NOT - logical negation (! or not)
+if !b then {
+    print "b is false (using !)";
+}
+
+if not b then {
+    print "b is false (using not)";
+}
+
+// Combined conditions with NOT
+if not a or b then {
+    print "Either a is false or b is true";
+} else {
+    print "a is true and b is false";
+}
+
 // Combined conditions
 var age: int = 25;
 var hasLicense: bool = true;
 
 if age >= 18 and hasLicense then {
     print "Can drive";
+}
+
+// Using NOT with complex conditions
+if not (age < 18) and hasLicense then {
+    print "Age is at least 18 and has license";
 }
