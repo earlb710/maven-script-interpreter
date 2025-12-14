@@ -103,24 +103,40 @@ This board game features a 4-quadrant design where each quadrant is the size of 
 
 ## Board Specifications
 
-### Total Spaces
-- **Quadrant 1 (NW)**: 40 spaces arranged in a square
-- **Quadrant 2 (NE)**: 40 spaces arranged in a square
-- **Quadrant 3 (SW)**: 40 spaces arranged in a square
-- **Quadrant 4 (SE)**: 40 spaces arranged in a square
-- **Center START**: 1 central intersection space where all quadrants meet
-- **Total**: 160 unique board spaces + 1 center = 161 spaces total
+### Space Calculation
 
-**Note:** Spaces on shared borders are counted only once. For example, where Q1 and Q2 meet, those border spaces are shared between both quadrants.
+With shared borders, the space count works as follows:
+
+**Per Quadrant:**
+- Each side has 10 cells
+- Shared sides overlap, so each quadrant has:
+  - **19 unique cells**: 10 on one side + 9 on the adjacent side (1 cell overlaps at corner)
+  - **17 shared cells**: 9 + 8 (accounting for corner overlaps)
+
+**Total Board:**
+- **Shared cross**: 8 + 8 + 8 + 8 + 1 (center) = **33 cells** (the cross-shaped shared area)
+- **Unique quadrant cells**: 19 × 4 = **76 cells** (non-shared cells in all quadrants)
+- **Total unique spaces**: 33 + 76 = **109 spaces**
+
+### Total Spaces Breakdown
+- **Quadrant 1 (NW)**: 19 unique cells + 17 shared cells = 36 cells total in quadrant view
+- **Quadrant 2 (NE)**: 19 unique cells + 17 shared cells = 36 cells total in quadrant view
+- **Quadrant 3 (SW)**: 19 unique cells + 17 shared cells = 36 cells total in quadrant view
+- **Quadrant 4 (SE)**: 19 unique cells + 17 shared cells = 36 cells total in quadrant view
+- **Shared cross structure**: 33 cells (counted once across all quadrants)
+- **Center START**: Included in the shared cross count
+- **Total unique board spaces**: 109 spaces
+
+**Note:** Each quadrant appears to have 40 spaces when viewed individually (10 per side), but because adjacent sides are shared, the actual unique space count is calculated as shown above.
 
 ### Quadrant Details
 
-Each quadrant contains the equivalent of a full Monopoly board (40 spaces) with:
+Each quadrant operates like a Monopoly board section with:
 - **Properties**: Various property groups with different colors
-- **Railroads**: 4 per quadrant
-- **Utilities**: 2 per quadrant  
+- **Railroads**: Distributed across quadrants
+- **Utilities**: Distributed across quadrants
 - **Special Spaces**: Go to Jail, Free Parking, Chance, Community Chest, Tax spaces
-- **10 spaces per side** (standard Monopoly layout)
+- **10 spaces per side** (some sides shared with adjacent quadrants)
 
 ### Shared Borders
 
@@ -170,12 +186,12 @@ Standard Monopoly Board: 40 spaces arranged in a square (10 per side)
 
 This Extended Board (Shared Borders):
 ┌──────────┬──────────┐
-│    Q1    │    Q2    │  Each quadrant = 40 spaces
-│   (NW)   │   (NE)   │  10 spaces per side
+│    Q1    │    Q2    │  Each quadrant: 19 unique + 17 shared cells
+│   (NW)   │   (NE)   │  10 spaces per side (some shared)
 │          │          │
-├─── CENTER START ────┤  Quadrants share borders
-│          │          │  Total unique spaces = 161
-│    Q3    │    Q4    │
+├─── CENTER START ────┤  Shared cross: 33 cells
+│          │          │  Unique quadrant cells: 76 (19×4)
+│    Q3    │    Q4    │  Total unique spaces: 109
 │   (SW)   │   (SE)   │
 └──────────┴──────────┘
 ```
@@ -285,7 +301,9 @@ This creates strategic value in choosing different quadrants! Players might star
 
 ## Next Steps
 
-1. Define all 161 unique spaces with names, types, and properties
+1. Define all 109 unique spaces with names, types, and properties:
+   - 33 spaces in the shared cross (including center START)
+   - 76 spaces unique to individual quadrants (19 per quadrant)
 2. Map shared border spaces between adjacent quadrants
 3. Create board visualization using EBS screens and JavaFX
 4. Implement movement and quadrant-transition mechanics
