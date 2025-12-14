@@ -66,7 +66,7 @@
         <h1>4-Quadrant Board Game - Complete Board with Corners</h1>
         <p class="description">
             <strong>Center cell (C0,0)</strong> + <strong>4 arms (8 cells each)</strong> + <strong>4 shared corner cells (S)</strong> + <strong>4 borders (16 cells each)</strong> + <strong>4 corner cells (C)</strong><br>
-            Total: 1 center + 32 arm cells + 4 shared corners + 64 border cells + 4 corner cells = 105 unique cells
+            Total: 1 center + 32 arm cells + 4 shared corners + 48 regular borders + 8 Opportunity + 8 Incident + 4 corner cells = 105 unique cells
         </p>
         
         <svg width="1100" height="1100" viewBox="0 0 1100 1100" xmlns="http://www.w3.org/2000/svg">
@@ -77,6 +77,9 @@
                     .cell-shared { fill: #ff6f00; stroke: #e65100; stroke-width: 3; }
                     .cell-border { fill: #c8e6c9; stroke: #2e7d32; stroke-width: 2; }
                     .cell-corner { fill: #ba68c8; stroke: #7b1fa2; stroke-width: 3; }
+                    .cell-opportunity { fill: #ffeb3b; stroke: #f57c00; stroke-width: 3; }
+                    .cell-incident { fill: #ff5252; stroke: #b71c1c; stroke-width: 3; }
+
                     .cell-text { font-size: 10px; text-anchor: middle; fill: #000; font-weight: bold; }
                     .label { font-size: 14px; text-anchor: middle; fill: #333; font-weight: bold; }
                 </style>
@@ -170,77 +173,77 @@
             
             <!-- TOP BORDER (C-NW to S-N: 8 cells, then S-N shared, then 8 cells to C-NE) -->
             <rect x="100" y="50" width="50" height="50" class="cell-border"/><text x="125" y="72" class="cell-text">B1</text><text x="125" y="85" class="cell-text" style="font-size: 8px;">(-8,9)</text>
-            <rect x="150" y="50" width="50" height="50" class="cell-border"/><text x="175" y="72" class="cell-text">B2</text><text x="175" y="85" class="cell-text" style="font-size: 8px;">(-7,9)</text>
+            <rect x="150" y="50" width="50" height="50" class="cell-opportunity"/><text x="175" y="72" class="cell-text">O-1</text><text x="175" y="85" class="cell-text" style="font-size: 8px;">(-7,9)</text>
             <rect x="200" y="50" width="50" height="50" class="cell-border"/><text x="225" y="72" class="cell-text">B3</text><text x="225" y="85" class="cell-text" style="font-size: 8px;">(-6,9)</text>
             <rect x="250" y="50" width="50" height="50" class="cell-border"/><text x="275" y="72" class="cell-text">B4</text><text x="275" y="85" class="cell-text" style="font-size: 8px;">(-5,9)</text>
             <rect x="300" y="50" width="50" height="50" class="cell-border"/><text x="325" y="72" class="cell-text">B5</text><text x="325" y="85" class="cell-text" style="font-size: 8px;">(-4,9)</text>
-            <rect x="350" y="50" width="50" height="50" class="cell-border"/><text x="375" y="72" class="cell-text">B6</text><text x="375" y="85" class="cell-text" style="font-size: 8px;">(-3,9)</text>
+            <rect x="350" y="50" width="50" height="50" class="cell-incident"/><text x="375" y="72" class="cell-text">I-1</text><text x="375" y="85" class="cell-text" style="font-size: 8px;">(-3,9)</text>
             <rect x="400" y="50" width="50" height="50" class="cell-border"/><text x="425" y="72" class="cell-text">B7</text><text x="425" y="85" class="cell-text" style="font-size: 8px;">(-2,9)</text>
             <rect x="450" y="50" width="50" height="50" class="cell-border"/><text x="475" y="72" class="cell-text">B8</text><text x="475" y="85" class="cell-text" style="font-size: 8px;">(-1,9)</text>
             <!-- S-N shared corner already drawn -->
             <rect x="550" y="50" width="50" height="50" class="cell-border"/><text x="575" y="72" class="cell-text">B9</text><text x="575" y="85" class="cell-text" style="font-size: 8px;">(1,9)</text>
             <rect x="600" y="50" width="50" height="50" class="cell-border"/><text x="625" y="72" class="cell-text">B10</text><text x="625" y="85" class="cell-text" style="font-size: 8px;">(2,9)</text>
-            <rect x="650" y="50" width="50" height="50" class="cell-border"/><text x="675" y="72" class="cell-text">B11</text><text x="675" y="85" class="cell-text" style="font-size: 8px;">(3,9)</text>
+            <rect x="650" y="50" width="50" height="50" class="cell-incident"/><text x="675" y="72" class="cell-text">I-2</text><text x="675" y="85" class="cell-text" style="font-size: 8px;">(3,9)</text>
             <rect x="700" y="50" width="50" height="50" class="cell-border"/><text x="725" y="72" class="cell-text">B12</text><text x="725" y="85" class="cell-text" style="font-size: 8px;">(4,9)</text>
             <rect x="750" y="50" width="50" height="50" class="cell-border"/><text x="775" y="72" class="cell-text">B13</text><text x="775" y="85" class="cell-text" style="font-size: 8px;">(5,9)</text>
             <rect x="800" y="50" width="50" height="50" class="cell-border"/><text x="825" y="72" class="cell-text">B14</text><text x="825" y="85" class="cell-text" style="font-size: 8px;">(6,9)</text>
-            <rect x="850" y="50" width="50" height="50" class="cell-border"/><text x="875" y="72" class="cell-text">B15</text><text x="875" y="85" class="cell-text" style="font-size: 8px;">(7,9)</text>
+            <rect x="850" y="50" width="50" height="50" class="cell-opportunity"/><text x="875" y="72" class="cell-text">O-2</text><text x="875" y="85" class="cell-text" style="font-size: 8px;">(7,9)</text>
             <rect x="900" y="50" width="50" height="50" class="cell-border"/><text x="925" y="72" class="cell-text">B16</text><text x="925" y="85" class="cell-text" style="font-size: 8px;">(8,9)</text>
             
             <!-- RIGHT BORDER (C-NE to S-E: 8 cells, then S-E shared, then 8 cells to C-SE) -->
             <rect x="950" y="100" width="50" height="50" class="cell-border"/><text x="975" y="122" class="cell-text">B17</text><text x="975" y="135" class="cell-text" style="font-size: 8px;">(9,8)</text>
             <rect x="950" y="150" width="50" height="50" class="cell-border"/><text x="975" y="172" class="cell-text">B18</text><text x="975" y="185" class="cell-text" style="font-size: 8px;">(9,7)</text>
-            <rect x="950" y="200" width="50" height="50" class="cell-border"/><text x="975" y="222" class="cell-text">B19</text><text x="975" y="235" class="cell-text" style="font-size: 8px;">(9,6)</text>
+            <rect x="950" y="200" width="50" height="50" class="cell-opportunity"/><text x="975" y="222" class="cell-text">O-3</text><text x="975" y="235" class="cell-text" style="font-size: 8px;">(9,6)</text>
             <rect x="950" y="250" width="50" height="50" class="cell-border"/><text x="975" y="272" class="cell-text">B20</text><text x="975" y="285" class="cell-text" style="font-size: 8px;">(9,5)</text>
             <rect x="950" y="300" width="50" height="50" class="cell-border"/><text x="975" y="322" class="cell-text">B21</text><text x="975" y="335" class="cell-text" style="font-size: 8px;">(9,4)</text>
-            <rect x="950" y="350" width="50" height="50" class="cell-border"/><text x="975" y="372" class="cell-text">B22</text><text x="975" y="385" class="cell-text" style="font-size: 8px;">(9,3)</text>
+            <rect x="950" y="350" width="50" height="50" class="cell-incident"/><text x="975" y="372" class="cell-text">I-3</text><text x="975" y="385" class="cell-text" style="font-size: 8px;">(9,3)</text>
             <rect x="950" y="400" width="50" height="50" class="cell-border"/><text x="975" y="422" class="cell-text">B23</text><text x="975" y="435" class="cell-text" style="font-size: 8px;">(9,2)</text>
             <rect x="950" y="450" width="50" height="50" class="cell-border"/><text x="975" y="472" class="cell-text">B24</text><text x="975" y="485" class="cell-text" style="font-size: 8px;">(9,1)</text>
             <!-- S-E shared corner already drawn -->
             <rect x="950" y="550" width="50" height="50" class="cell-border"/><text x="975" y="572" class="cell-text">B25</text><text x="975" y="585" class="cell-text" style="font-size: 8px;">(9,-1)</text>
             <rect x="950" y="600" width="50" height="50" class="cell-border"/><text x="975" y="622" class="cell-text">B26</text><text x="975" y="635" class="cell-text" style="font-size: 8px;">(9,-2)</text>
-            <rect x="950" y="650" width="50" height="50" class="cell-border"/><text x="975" y="672" class="cell-text">B27</text><text x="975" y="685" class="cell-text" style="font-size: 8px;">(9,-3)</text>
+            <rect x="950" y="650" width="50" height="50" class="cell-incident"/><text x="975" y="672" class="cell-text">I-4</text><text x="975" y="685" class="cell-text" style="font-size: 8px;">(9,-3)</text>
             <rect x="950" y="700" width="50" height="50" class="cell-border"/><text x="975" y="722" class="cell-text">B28</text><text x="975" y="735" class="cell-text" style="font-size: 8px;">(9,-4)</text>
             <rect x="950" y="750" width="50" height="50" class="cell-border"/><text x="975" y="772" class="cell-text">B29</text><text x="975" y="785" class="cell-text" style="font-size: 8px;">(9,-5)</text>
-            <rect x="950" y="800" width="50" height="50" class="cell-border"/><text x="975" y="822" class="cell-text">B30</text><text x="975" y="835" class="cell-text" style="font-size: 8px;">(9,-6)</text>
+            <rect x="950" y="800" width="50" height="50" class="cell-opportunity"/><text x="975" y="822" class="cell-text">O-4</text><text x="975" y="835" class="cell-text" style="font-size: 8px;">(9,-6)</text>
             <rect x="950" y="850" width="50" height="50" class="cell-border"/><text x="975" y="872" class="cell-text">B31</text><text x="975" y="885" class="cell-text" style="font-size: 8px;">(9,-7)</text>
             <rect x="950" y="900" width="50" height="50" class="cell-border"/><text x="975" y="922" class="cell-text">B32</text><text x="975" y="935" class="cell-text" style="font-size: 8px;">(9,-8)</text>
             
             <!-- BOTTOM BORDER (C-SE to S-S: 8 cells, then S-S shared, then 8 cells to C-SW) -->
             <rect x="900" y="950" width="50" height="50" class="cell-border"/><text x="925" y="972" class="cell-text">B33</text><text x="925" y="985" class="cell-text" style="font-size: 8px;">(8,-9)</text>
             <rect x="850" y="950" width="50" height="50" class="cell-border"/><text x="875" y="972" class="cell-text">B34</text><text x="875" y="985" class="cell-text" style="font-size: 8px;">(7,-9)</text>
-            <rect x="800" y="950" width="50" height="50" class="cell-border"/><text x="825" y="972" class="cell-text">B35</text><text x="825" y="985" class="cell-text" style="font-size: 8px;">(6,-9)</text>
+            <rect x="800" y="950" width="50" height="50" class="cell-opportunity"/><text x="825" y="972" class="cell-text">O-5</text><text x="825" y="985" class="cell-text" style="font-size: 8px;">(6,-9)</text>
             <rect x="750" y="950" width="50" height="50" class="cell-border"/><text x="775" y="972" class="cell-text">B36</text><text x="775" y="985" class="cell-text" style="font-size: 8px;">(5,-9)</text>
             <rect x="700" y="950" width="50" height="50" class="cell-border"/><text x="725" y="972" class="cell-text">B37</text><text x="725" y="985" class="cell-text" style="font-size: 8px;">(4,-9)</text>
-            <rect x="650" y="950" width="50" height="50" class="cell-border"/><text x="675" y="972" class="cell-text">B38</text><text x="675" y="985" class="cell-text" style="font-size: 8px;">(3,-9)</text>
+            <rect x="650" y="950" width="50" height="50" class="cell-incident"/><text x="675" y="972" class="cell-text">I-5</text><text x="675" y="985" class="cell-text" style="font-size: 8px;">(3,-9)</text>
             <rect x="600" y="950" width="50" height="50" class="cell-border"/><text x="625" y="972" class="cell-text">B39</text><text x="625" y="985" class="cell-text" style="font-size: 8px;">(2,-9)</text>
             <rect x="550" y="950" width="50" height="50" class="cell-border"/><text x="575" y="972" class="cell-text">B40</text><text x="575" y="985" class="cell-text" style="font-size: 8px;">(1,-9)</text>
             <!-- S-S shared corner already drawn -->
             <rect x="450" y="950" width="50" height="50" class="cell-border"/><text x="475" y="972" class="cell-text">B41</text><text x="475" y="985" class="cell-text" style="font-size: 8px;">(-1,-9)</text>
             <rect x="400" y="950" width="50" height="50" class="cell-border"/><text x="425" y="972" class="cell-text">B42</text><text x="425" y="985" class="cell-text" style="font-size: 8px;">(-2,-9)</text>
-            <rect x="350" y="950" width="50" height="50" class="cell-border"/><text x="375" y="972" class="cell-text">B43</text><text x="375" y="985" class="cell-text" style="font-size: 8px;">(-3,-9)</text>
+            <rect x="350" y="950" width="50" height="50" class="cell-incident"/><text x="375" y="972" class="cell-text">I-6</text><text x="375" y="985" class="cell-text" style="font-size: 8px;">(-3,-9)</text>
             <rect x="300" y="950" width="50" height="50" class="cell-border"/><text x="325" y="972" class="cell-text">B44</text><text x="325" y="985" class="cell-text" style="font-size: 8px;">(-4,-9)</text>
             <rect x="250" y="950" width="50" height="50" class="cell-border"/><text x="275" y="972" class="cell-text">B45</text><text x="275" y="985" class="cell-text" style="font-size: 8px;">(-5,-9)</text>
-            <rect x="200" y="950" width="50" height="50" class="cell-border"/><text x="225" y="972" class="cell-text">B46</text><text x="225" y="985" class="cell-text" style="font-size: 8px;">(-6,-9)</text>
+            <rect x="200" y="950" width="50" height="50" class="cell-opportunity"/><text x="225" y="972" class="cell-text">O-6</text><text x="225" y="985" class="cell-text" style="font-size: 8px;">(-6,-9)</text>
             <rect x="150" y="950" width="50" height="50" class="cell-border"/><text x="175" y="972" class="cell-text">B47</text><text x="175" y="985" class="cell-text" style="font-size: 8px;">(-7,-9)</text>
             <rect x="100" y="950" width="50" height="50" class="cell-border"/><text x="125" y="972" class="cell-text">B48</text><text x="125" y="985" class="cell-text" style="font-size: 8px;">(-8,-9)</text>
             
             <!-- LEFT BORDER (C-SW to S-W: 8 cells, then S-W shared, then 8 cells to C-NW) -->
             <rect x="50" y="900" width="50" height="50" class="cell-border"/><text x="75" y="922" class="cell-text">B49</text><text x="75" y="935" class="cell-text" style="font-size: 8px;">(-9,-8)</text>
             <rect x="50" y="850" width="50" height="50" class="cell-border"/><text x="75" y="872" class="cell-text">B50</text><text x="75" y="885" class="cell-text" style="font-size: 8px;">(-9,-7)</text>
-            <rect x="50" y="800" width="50" height="50" class="cell-border"/><text x="75" y="822" class="cell-text">B51</text><text x="75" y="835" class="cell-text" style="font-size: 8px;">(-9,-6)</text>
+            <rect x="50" y="800" width="50" height="50" class="cell-opportunity"/><text x="75" y="822" class="cell-text">O-7</text><text x="75" y="835" class="cell-text" style="font-size: 8px;">(-9,-6)</text>
             <rect x="50" y="750" width="50" height="50" class="cell-border"/><text x="75" y="772" class="cell-text">B52</text><text x="75" y="785" class="cell-text" style="font-size: 8px;">(-9,-5)</text>
             <rect x="50" y="700" width="50" height="50" class="cell-border"/><text x="75" y="722" class="cell-text">B53</text><text x="75" y="735" class="cell-text" style="font-size: 8px;">(-9,-4)</text>
-            <rect x="50" y="650" width="50" height="50" class="cell-border"/><text x="75" y="672" class="cell-text">B54</text><text x="75" y="685" class="cell-text" style="font-size: 8px;">(-9,-3)</text>
+            <rect x="50" y="650" width="50" height="50" class="cell-incident"/><text x="75" y="672" class="cell-text">I-7</text><text x="75" y="685" class="cell-text" style="font-size: 8px;">(-9,-3)</text>
             <rect x="50" y="600" width="50" height="50" class="cell-border"/><text x="75" y="622" class="cell-text">B55</text><text x="75" y="635" class="cell-text" style="font-size: 8px;">(-9,-2)</text>
             <rect x="50" y="550" width="50" height="50" class="cell-border"/><text x="75" y="572" class="cell-text">B56</text><text x="75" y="585" class="cell-text" style="font-size: 8px;">(-9,-1)</text>
             <!-- S-W shared corner already drawn -->
             <rect x="50" y="450" width="50" height="50" class="cell-border"/><text x="75" y="472" class="cell-text">B57</text><text x="75" y="485" class="cell-text" style="font-size: 8px;">(-9,1)</text>
             <rect x="50" y="400" width="50" height="50" class="cell-border"/><text x="75" y="422" class="cell-text">B58</text><text x="75" y="435" class="cell-text" style="font-size: 8px;">(-9,2)</text>
-            <rect x="50" y="350" width="50" height="50" class="cell-border"/><text x="75" y="372" class="cell-text">B59</text><text x="75" y="385" class="cell-text" style="font-size: 8px;">(-9,3)</text>
+            <rect x="50" y="350" width="50" height="50" class="cell-incident"/><text x="75" y="372" class="cell-text">I-8</text><text x="75" y="385" class="cell-text" style="font-size: 8px;">(-9,3)</text>
             <rect x="50" y="300" width="50" height="50" class="cell-border"/><text x="75" y="322" class="cell-text">B60</text><text x="75" y="335" class="cell-text" style="font-size: 8px;">(-9,4)</text>
             <rect x="50" y="250" width="50" height="50" class="cell-border"/><text x="75" y="272" class="cell-text">B61</text><text x="75" y="285" class="cell-text" style="font-size: 8px;">(-9,5)</text>
-            <rect x="50" y="200" width="50" height="50" class="cell-border"/><text x="75" y="222" class="cell-text">B62</text><text x="75" y="235" class="cell-text" style="font-size: 8px;">(-9,6)</text>
+            <rect x="50" y="200" width="50" height="50" class="cell-opportunity"/><text x="75" y="222" class="cell-text">O-8</text><text x="75" y="235" class="cell-text" style="font-size: 8px;">(-9,6)</text>
             <rect x="50" y="150" width="50" height="50" class="cell-border"/><text x="75" y="172" class="cell-text">B63</text><text x="75" y="185" class="cell-text" style="font-size: 8px;">(-9,7)</text>
             <rect x="50" y="100" width="50" height="50" class="cell-border"/><text x="75" y="122" class="cell-text">B64</text><text x="75" y="135" class="cell-text" style="font-size: 8px;">(-9,8)</text>
             
