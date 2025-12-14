@@ -1,5 +1,5 @@
-// Quick test to verify chess move functionality
-print "Testing chess move indicator functionality...";
+// Test knight move functionality
+print "Testing knight move functionality...";
 print "";
 
 // Define the types needed
@@ -56,14 +56,14 @@ encodeCellValue(cellColor: int, pieceType: int, pieceColor: int) return int {
     return cellColor + (pieceType * 2) + (pieceColor * 128);
 }
 
-// Set up a white pawn at (0, 6)
-var idx: int = call boardIndex(6, 0);
-board[idx] = call encodeCellValue(0, PAWN, WHITE);
-print "Placed white pawn at (0, 6)";
+// Set up a black knight at (1, 0)
+var idx: int = call boardIndex(0, 1);
+board[idx] = call encodeCellValue(1, KNIGHT, BLACK);
+print "Placed black knight at (1, 0)";
 
 // Try to get valid moves
-print "Calling validMoves(0, 6)...";
-var moves = call validMoves(0, 6);
+print "Calling validMoves(1, 0)...";
+var moves = call validMoves(1, 0);
 print "validMoves returned array with length: " + moves.length;
 
 if moves.length > 0 then {

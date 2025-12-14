@@ -136,7 +136,7 @@ public class Util {
                 case BYTE ->
                     value instanceof Byte;
                 case INTEGER, LONG ->
-                    value instanceof Integer || value instanceof Long;
+                    value instanceof Integer || value instanceof Long || value instanceof Byte;
                 case FLOAT, DOUBLE ->
                     value instanceof Float || value instanceof Double;
                 case STRING ->

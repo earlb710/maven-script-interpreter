@@ -164,7 +164,17 @@ public enum DataType {
 
     public final Object convertValue(Object value) {
         if (value == null) {
-            return null;
+            // Return default values for primitive types when null
+            switch (type) {
+                case BYTE -> { return (byte) 0; }
+                case INTEGER -> { return 0; }
+                case LONG -> { return 0L; }
+                case FLOAT -> { return 0.0f; }
+                case DOUBLE -> { return 0.0; }
+                case BOOL -> { return false; }
+                case STRING -> { return ""; }
+                default -> { return null; }
+            }
         }
         switch (type) {
             case STRING -> {

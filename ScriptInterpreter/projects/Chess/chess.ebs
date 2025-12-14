@@ -118,17 +118,18 @@ isValidPosition(x: int, y: int) return bool {
 }
 
 // Get piece information at a given position (x, y coordinates)
-getPieceAt(x: int, y: int) {
+function getPieceAt(x: int, y: int) return int {
     if call isValidPosition(x, y) then {
         var idx: int = call boardIndex(y, x);
-        return board[idx];
+        var cellValue: int = board[idx];
+        return cellValue;
     } else {
         return -1;
     }
 }
 
 // Check if position is occupied by a piece of the given color
-isOccupiedByColor(x: int, y: int, color: int) {
+function isOccupiedByColor(x: int, y: int, color: int) return bool {
     var cellValue: int = call getPieceAt(x, y);
     if cellValue == -1 then {
         return false;
@@ -346,7 +347,7 @@ handleCellClick(x: int, y: int) {
     
     // Get valid moves for this piece
     print "Getting valid moves...";
-    var moves: posType[] = call validMoves(x, y);
+    var moves = call validMoves(x, y);
     var len: int = moves.length;
     print "Found " + len + " valid moves";
     

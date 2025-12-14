@@ -9,7 +9,7 @@
 //   - Main validMoves() function that determines legal moves for any piece
 
 // Helper function to create a posType record from x, y coordinates
-createPos(x: int, y: int) return posType {
+function createPos(x: int, y: int) return posType {
     var jsonStr: string = '{"x": ' + x + ', "y": ' + y + '}';
     var jsonData: json = call json.jsonfromstring(jsonStr);
     var pos: posType = record(jsonData);
@@ -17,7 +17,7 @@ createPos(x: int, y: int) return posType {
 }
 
 // Get all possible moves for a pawn at given position
-getPawnMoves(x: int, y: int, color: int) {
+function getPawnMoves(x: int, y: int, color: int) return array {
     var moves: posType[] = [];
     var direction: int;
     var startRow: int;
@@ -36,8 +36,11 @@ getPawnMoves(x: int, y: int, color: int) {
     if call isValidPosition(forwardX, forwardY) then {
         var cellValue: int = call getPieceAt(forwardX, forwardY);
         var cell = ChessCell(cellValue);
-        if cell.pieceType == EMPTY then {
-            var forward: posType = call createPos(forwardX, forwardY);
+        var pt1: int = cell.pieceType;
+        if pt1 == EMPTY then {
+            var jsonStr: string = '{"x": ' + forwardX + ', "y": ' + forwardY + '}';
+            var jsonData: json = call json.jsonfromstring(jsonStr);
+            var forward: posType = record(jsonData);
             call array.add(moves, forward);
             
             // Move forward two squares from starting position
@@ -46,8 +49,11 @@ getPawnMoves(x: int, y: int, color: int) {
                 var forward2Y: int = y + (direction * 2);
                 var cellValue2: int = call getPieceAt(forward2X, forward2Y);
                 var cell2 = ChessCell(cellValue2);
-                if cell2.pieceType == EMPTY then {
-                    var forward2: posType = call createPos(forward2X, forward2Y);
+                var pt2: int = cell2.pieceType;
+                if pt2 == EMPTY then {
+                    var jsonStr2: string = '{"x": ' + forward2X + ', "y": ' + forward2Y + '}';
+                    var jsonData2: json = call json.jsonfromstring(jsonStr2);
+                    var forward2: posType = record(jsonData2);
                     call array.add(moves, forward2);
                 }
             }
@@ -67,7 +73,9 @@ getPawnMoves(x: int, y: int, color: int) {
     var captureLeftY: int = y + direction;
     if call isValidPosition(captureLeftX, captureLeftY) then {
         if call isOccupiedByColor(captureLeftX, captureLeftY, enemyColor) then {
-            var captureLeft: posType = call createPos(captureLeftX, captureLeftY);
+            var jsonStrL: string = '{"x": ' + captureLeftX + ', "y": ' + captureLeftY + '}';
+            var jsonDataL: json = call json.jsonfromstring(jsonStrL);
+            var captureLeft: posType = record(jsonDataL);
             call array.add(moves, captureLeft);
         }
     }
@@ -77,7 +85,9 @@ getPawnMoves(x: int, y: int, color: int) {
     var captureRightY: int = y + direction;
     if call isValidPosition(captureRightX, captureRightY) then {
         if call isOccupiedByColor(captureRightX, captureRightY, enemyColor) then {
-            var captureRight: posType = call createPos(captureRightX, captureRightY);
+            var jsonStrR: string = '{"x": ' + captureRightX + ', "y": ' + captureRightY + '}';
+            var jsonDataR: json = call json.jsonfromstring(jsonStrR);
+            var captureRight: posType = record(jsonDataR);
             call array.add(moves, captureRight);
         }
     }
@@ -86,7 +96,7 @@ getPawnMoves(x: int, y: int, color: int) {
 }
 
 // Get all possible moves for a knight at given position
-getKnightMoves(x: int, y: int) {
+function getKnightMoves(x: int, y: int) return array {
     var moves: posType[] = [];
     var offsets: int[16];
     
@@ -105,7 +115,9 @@ getKnightMoves(x: int, y: int) {
         var newY: int = y + offsets[i];
         var newX: int = x + offsets[i + 1];
         if call isValidPosition(newX, newY) then {
-            var newPos: posType = call createPos(newX, newY);
+            var jsonStr: string = '{"x": ' + newX + ', "y": ' + newY + '}';
+            var jsonData: json = call json.jsonfromstring(jsonStr);
+            var newPos: posType = record(jsonData);
             call array.add(moves, newPos);
         }
     }
@@ -114,7 +126,7 @@ getKnightMoves(x: int, y: int) {
 }
 
 // Get all possible moves for a king at given position
-getKingMoves(x: int, y: int) {
+function getKingMoves(x: int, y: int) return array {
     var moves: posType[] = [];
     var offsets: int[16];
     
@@ -133,7 +145,9 @@ getKingMoves(x: int, y: int) {
         var newY: int = y + offsets[i];
         var newX: int = x + offsets[i + 1];
         if call isValidPosition(newX, newY) then {
-            var newPos: posType = call createPos(newX, newY);
+            var jsonStr: string = '{"x": ' + newX + ', "y": ' + newY + '}';
+            var jsonData: json = call json.jsonfromstring(jsonStr);
+            var newPos: posType = record(jsonData);
             call array.add(moves, newPos);
         }
     }
@@ -142,7 +156,7 @@ getKingMoves(x: int, y: int) {
 }
 
 // Get all possible moves for a rook at given position
-getRookMoves(x: int, y: int) {
+function getRookMoves(x: int, y: int) return array {
     var moves: posType[] = [];
     var directions: int[8];
     
@@ -164,7 +178,9 @@ getRookMoves(x: int, y: int) {
             var newX: int = x + (dx * step);
             
             if call isValidPosition(newX, newY) then {
-                var newPos: posType = call createPos(newX, newY);
+                var jsonStr: string = '{"x": ' + newX + ', "y": ' + newY + '}';
+                var jsonData: json = call json.jsonfromstring(jsonStr);
+                var newPos: posType = record(jsonData);
                 call array.add(moves, newPos);
                 
                 // Check if blocked by any piece
@@ -185,7 +201,7 @@ getRookMoves(x: int, y: int) {
 }
 
 // Get all possible moves for a bishop at given position
-getBishopMoves(x: int, y: int) {
+function getBishopMoves(x: int, y: int) return array {
     var moves: posType[] = [];
     var directions: int[8];
     
@@ -207,7 +223,9 @@ getBishopMoves(x: int, y: int) {
             var newX: int = x + (dx * step);
             
             if call isValidPosition(newX, newY) then {
-                var newPos: posType = call createPos(newX, newY);
+                var jsonStr: string = '{"x": ' + newX + ', "y": ' + newY + '}';
+                var jsonData: json = call json.jsonfromstring(jsonStr);
+                var newPos: posType = record(jsonData);
                 call array.add(moves, newPos);
                 
                 // Check if blocked by any piece
@@ -228,12 +246,12 @@ getBishopMoves(x: int, y: int) {
 }
 
 // Get all possible moves for a queen at given position
-getQueenMoves(x: int, y: int) {
+function getQueenMoves(x: int, y: int) return array {
     var moves: posType[] = [];
     
     // Queen moves = Rook moves + Bishop moves
-    var rookMoves: posType[] = call getRookMoves(x, y);
-    var bishopMoves: posType[] = call getBishopMoves(x, y);
+    var rookMoves = call getRookMoves(x, y);
+    var bishopMoves = call getBishopMoves(x, y);
     
     var i: int = 0;
     var len: int = rookMoves.length;
@@ -251,9 +269,9 @@ getQueenMoves(x: int, y: int) {
 
 // Main function: Get all valid moves for a piece at the given position
 // Returns a posType array of valid moves on the board
-validMoves(x: int, y: int) {
+function validMoves(x: int, y: int) return array {
     var validMovesList: posType[] = [];
-    var allMoves: posType[] = [];
+    var allMoves = [];
     
     // Get the piece at the current position
     var cellValue: int = call getPieceAt(x, y);
@@ -262,8 +280,10 @@ validMoves(x: int, y: int) {
     }
     
     var cell = ChessCell(cellValue);
-    var pieceType: int = cell.pieceType;
-    var pieceColor: int = cell.pieceColor;
+    var pt: int = cell.pieceType;
+    var pc: int = cell.pieceColor;
+    var pieceType: int = pt;
+    var pieceColor: int = pc;
     
     // Get all possible moves based on piece type
     if pieceType == PAWN then {
