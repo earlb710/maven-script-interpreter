@@ -81,6 +81,7 @@ import java.util.Date;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Interpreter implements StatementVisitor, ExpressionVisitor {
@@ -988,7 +989,8 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             // AND only if the return signal matches this function's name
             if (stmt.returnType != null) {
                 // Check if this return signal is meant for this function
-                if (stmt.name != null && stmt.name.equals(r.functionName)) {
+                // Use Objects.equals for null-safe comparison
+                if (Objects.equals(stmt.name, r.functionName)) {
                     // This is the target function - validate and return the value
                     if (!Util.checkDataType(stmt.returnType, r.value)) {
                         throw error(stmt.getLine(), "Return value '" + r.value + "' not correct type : " + stmt.returnType + " in " + stmt.name);
