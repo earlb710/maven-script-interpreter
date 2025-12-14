@@ -1,4 +1,4 @@
-// Test script for NOT operator (!  and not)
+// Test script for NOT operator (! and not)
 // Verifies that both ! and not work as logical negation operators
 
 var a: bool = true;
