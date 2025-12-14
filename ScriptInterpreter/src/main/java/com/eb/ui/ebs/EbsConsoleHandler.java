@@ -748,28 +748,7 @@ public class EbsConsoleHandler extends EbsHandler {
     public void createNewScriptFile() {
         try {
             // Determine the default path based on the currently selected tab
-            String defaultPath = Util.SANDBOX_ROOT.toString();
-            
-            TabContext selectedTabContext = getSelectedTabContext();
-            if (selectedTabContext != null && selectedTabContext.path != null) {
-                Path selectedPath = selectedTabContext.path;
-                // If the selected path is a file, use its parent directory
-                // Otherwise, use the path itself (assuming it's a directory)
-                if (Files.exists(selectedPath) && Files.isRegularFile(selectedPath)) {
-                    Path parentDir = selectedPath.getParent();
-                    if (parentDir != null) {
-                        defaultPath = parentDir.toString();
-                    }
-                } else if (Files.exists(selectedPath) && Files.isDirectory(selectedPath)) {
-                    defaultPath = selectedPath.toString();
-                } else {
-                    // If the file doesn't exist yet, use its parent directory
-                    Path parentDir = selectedPath.getParent();
-                    if (parentDir != null) {
-                        defaultPath = parentDir.toString();
-                    }
-                }
-            }
+            String defaultPath = getDefaultPathForNewFile();
             
             // Show new file dialog with the determined default path
             NewFileDialog dialog = new NewFileDialog(stage, defaultPath);
@@ -798,6 +777,37 @@ public class EbsConsoleHandler extends EbsHandler {
         } catch (Exception ex) {
             submitErrors("Failed to create new file: " + ex.getMessage());
         }
+    }
+    
+    /**
+     * Determine the default path for creating a new file based on the currently selected tab.
+     * If a file is selected, returns its parent directory.
+     * If a directory is selected, returns that directory.
+     * Otherwise, returns SANDBOX_ROOT.
+     * 
+     * @return The default path as a string
+     */
+    private String getDefaultPathForNewFile() {
+        String defaultPath = Util.SANDBOX_ROOT.toString();
+        
+        TabContext selectedTabContext = getSelectedTabContext();
+        if (selectedTabContext != null && selectedTabContext.path != null) {
+            Path selectedPath = selectedTabContext.path;
+            boolean pathExists = Files.exists(selectedPath);
+            
+            // If the path exists and is a directory, use it directly
+            if (pathExists && Files.isDirectory(selectedPath)) {
+                defaultPath = selectedPath.toString();
+            } else {
+                // If the path is a file (existing or not), use its parent directory
+                Path parentDir = selectedPath.getParent();
+                if (parentDir != null) {
+                    defaultPath = parentDir.toString();
+                }
+            }
+        }
+        
+        return defaultPath;
     }
 
     /**
