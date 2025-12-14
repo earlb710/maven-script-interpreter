@@ -1653,7 +1653,12 @@ public class ProjectTreeView extends VBox {
         // Show directory chooser to select destination
         javafx.stage.DirectoryChooser chooser = new javafx.stage.DirectoryChooser();
         chooser.setTitle("Move File To...");
-        chooser.setInitialDirectory(sourcePath.getParent().toFile());
+        
+        // Set initial directory to parent of source file
+        Path parentPath = sourcePath.getParent();
+        if (parentPath != null && Files.exists(parentPath)) {
+            chooser.setInitialDirectory(parentPath.toFile());
+        }
         
         java.io.File selectedDir = chooser.showDialog(treeView.getScene().getWindow());
         if (selectedDir != null) {
@@ -1679,14 +1684,9 @@ public class ProjectTreeView extends VBox {
                     parent.getChildren().remove(fileItem);
                     
                     // If the target directory is in the same project, refresh it
-                    Object parentData = parent.getGraphic() != null ? parent.getGraphic().getUserData() : null;
-                    if (parentData instanceof String) {
-                        String parentPath = (String) parentData;
-                        // Check if target is a subdirectory of current project
-                        TreeItem<String> targetItem = findTreeItemForPath(rootItem, targetDir.toString());
-                        if (targetItem != null) {
-                            refreshDirectoryNode(targetItem, targetDir.toString());
-                        }
+                    TreeItem<String> targetItem = findTreeItemForPath(rootItem, targetDir.toString());
+                    if (targetItem != null) {
+                        refreshDirectoryNode(targetItem, targetDir.toString());
                     }
                 }
                 
