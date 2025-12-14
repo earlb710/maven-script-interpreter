@@ -2265,7 +2265,8 @@ screen formScreen = {
     "mandatory": true,                      // Field is required
     "alignment": "left",                    // Content alignment
     "itemFontSize": "14px",                // Control font size
-    "itemColor": "#000000",                // Control text color
+    "itemColor": "#000000",                // Control text color (legacy)
+    "textColor": "#000000",                // Control text color (takes precedence over itemColor)
     "itemBold": true,                      // Bold text
     "itemItalic": false,                   // Italic text
     "labelColor": "#0000ff",               // Label text color
