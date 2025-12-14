@@ -1,0 +1,83 @@
+// EBS Language Reference - Console Command Example
+// Example: /package command - Package scripts to protect source code
+// Syntax: /package <input.ebs> [output.ebsp]
+
+// This example demonstrates script packaging from the console.
+// The /package command is a console command (not an EBS statement).
+
+// ============================================
+// CONSOLE COMMAND USAGE (not EBS code):
+// ============================================
+
+// Basic usage - package a script
+// /package myapp.ebs
+// Creates: myapp.ebsp
+
+// Custom output name
+// /package myapp.ebs myapp-v1.0.ebsp
+
+// Package a library
+// /package lib/utils.ebs lib/utils.ebsp
+
+// ============================================
+// EXAMPLE SCRIPT TO PACKAGE:
+// ============================================
+
+// This is a simple calculator app that can be packaged
+calculator(operation: string, a: int, b: int) return int {
+    if operation == "add" then {
+        return a + b;
+    } else if operation == "subtract" then {
+        return a - b;
+    } else if operation == "multiply" then {
+        return a * b;
+    } else if operation == "divide" then {
+        if b == 0 then {
+            print "Error: Division by zero";
+            return 0;
+        }
+        return a / b;
+    } else {
+        print "Unknown operation: " + operation;
+        return 0;
+    }
+}
+
+// Use the calculator
+var result1: int = call calculator("add", 10, 5);
+print "10 + 5 = " + result1;
+
+var result2: int = call calculator("multiply", 7, 6);
+print "7 * 6 = " + result2;
+
+// ============================================
+// PACKAGING WORKFLOW:
+// ============================================
+
+// 1. Save this script as calculator.ebs
+// 2. From the console, run: /package calculator.ebs
+// 3. Output shows:
+//    - Original size: XXX bytes
+//    - Packaged size: YYY bytes
+//    - Size increase/reduction percentage
+// 4. Result: calculator.ebsp file created
+// 5. Run packaged version: java -cp target/classes com.eb.script.Run calculator.ebsp
+// 6. Source code is not visible in .ebsp file
+
+// ============================================
+// KEY BENEFITS:
+// ============================================
+// • Source code protection (not visible in .ebsp)
+// • Faster loading (pre-parsed AST)
+// • GZIP compression
+// • Works with imports
+// • Identical execution to .ebs files
+
+// ============================================
+// SECURITY NOTE:
+// ============================================
+// Packaging provides obfuscation, not encryption.
+// Suitable for commercial distribution and IP protection.
+// Not suitable for high-security applications.
+
+print "Calculator example completed.";

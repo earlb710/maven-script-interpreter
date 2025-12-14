@@ -380,6 +380,19 @@ public class EbsConsoleHandler extends EbsHandler {
                 }
             }
             
+            // Search in console commands
+            ArrayDynamic consoleCommands = (ArrayDynamic) lookup.get("console_commands");
+            if (consoleCommands != null) {
+                for (Object cmdObj : consoleCommands) {
+                    Map<String, Object> command = (Map<String, Object>) cmdObj;
+                    String cmdName = (String) command.get("command");
+                    if (cmdName != null && cmdName.equalsIgnoreCase(itemName)) {
+                        displayHelpEntry(output, cmdName, command, "Console Command");
+                        return;
+                    }
+                }
+            }
+            
             // Not found
             output.printlnWarn("No help found for: " + itemName);
             output.println("Use <b>/help keywords</b> to see all available keywords and builtins.");
@@ -458,6 +471,13 @@ public class EbsConsoleHandler extends EbsHandler {
         if (example != null && !example.isEmpty()) {
             output.println("<b>Example:</b>");
             output.println("<i>" + example + "</i>");
+            output.println("");
+        }
+        
+        String documentation = (String) entry.get("documentation");
+        if (documentation != null && !documentation.isEmpty()) {
+            output.println("<b>Additional Documentation:</b>");
+            output.println(documentation);
         }
         
         output.println("<b>═══════════════════════════════════════════════════════════</b>");
