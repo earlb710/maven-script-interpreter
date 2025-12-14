@@ -1043,6 +1043,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             environment().popEnvironmentValues();
             
             // Pop function context if we pushed it
+            // Using poll() instead of pop() to safely handle empty stack without exception
             if (isFunction) {
                 functionStack.poll();
             }
@@ -1124,6 +1125,7 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         // If value is null (return;), return null
         Object returnValue = (stmt.value != null) ? evaluate(stmt.value) : null;
         // Get the current function name from the function stack (top of stack)
+        // Will be null if return is at top level (not inside a function), which is valid
         String currentFunction = functionStack.peek();
         throw new ReturnSignal(returnValue, currentFunction);
     }
