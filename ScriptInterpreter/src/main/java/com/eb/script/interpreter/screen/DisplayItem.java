@@ -99,7 +99,6 @@ public class DisplayItem {
         public String iconOpen;        // Optional icon path for expanded/open state
         public String iconClosed;      // Optional icon path for collapsed/closed state
         public Boolean expanded;       // Whether this node is expanded by default
-        public Boolean expandable;     // Whether this node can be expanded by user interaction (default: true)
         public List<TreeItemDef> children;  // Child tree items (for hierarchy)
         
         public TreeItemDef() {}
