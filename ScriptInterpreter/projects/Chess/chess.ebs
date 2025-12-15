@@ -515,9 +515,89 @@ setPieceImage(x: int, y: int, pieceImage: imagedata) {
     }
 }
 
-// Handle cell click - select piece and show valid moves
+// Move a piece from source to destination
+movePiece(fromX: int, fromY: int, toX: int, toY: int) {
+    print "Moving piece from (" + fromX + ", " + fromY + ") to (" + toX + ", " + toY + ")";
+    
+    // Get the piece being moved
+    var fromIdx: int = call boardIndex(fromY, fromX);
+    var fromCellValue: int = board[fromIdx];
+    var fromCell = ChessCell(fromCellValue);
+    
+    // Get the destination cell info
+    var toIdx: int = call boardIndex(toY, toX);
+    var toCellValue: int = board[toIdx];
+    var toCell = ChessCell(toCellValue);
+    
+    // Update the board array
+    // Set destination to the moved piece (preserve cell color from destination)
+    board[toIdx] = call encodeCellValue(toCell.cellColor, fromCell.pieceType, fromCell.pieceColor);
+    
+    // Clear the source cell (keep cell color, set piece to EMPTY)
+    board[fromIdx] = call encodeCellValue(fromCell.cellColor, EMPTY, WHITE);
+    
+    // Update the screen images
+    // Get the normal piece image (not yellow) for the destination
+    var pieceImage: imagedata = call getNormalPiece(fromCell.pieceType, fromCell.pieceColor);
+    if pieceImage != null then {
+        call setPieceImage(toX, toY, pieceImage);
+    }
+    
+    // Clear the source cell image on screen
+    call setPieceImage(fromX, fromY, null);
+    
+    print "Piece moved successfully";
+}
+
+// Handle cell click - select piece and show valid moves, or move piece if valid destination
 handleCellClick(x: int, y: int) {
     print "Cell clicked: (" + x + ", " + y + ")";
+    
+    // Check if a piece is already selected
+    if selectedX >= 0 && selectedY >= 0 then {
+        // A piece is selected - check if clicked position is a valid move destination
+        print "Checking if (" + x + ", " + y + ") is a valid move from (" + selectedX + ", " + selectedY + ")";
+        
+        var moves = call validMoves(selectedX, selectedY);
+        var isValidMove: bool = false;
+        var len: int = moves.length;
+        var i: int = 0;
+        
+        // Check if the clicked position is in the valid moves list
+        for (i = 0; i < len; i = i + 1) {
+            var move = moves[i];
+            if move.x == x && move.y == y then {
+                isValidMove = true;
+                print "Valid move found!";
+            }
+        }
+        
+        if isValidMove then {
+            // Move the piece
+            call movePiece(selectedX, selectedY, x, y);
+            
+            // Clear indicators and selection
+            call clearIndicators();
+            selectedX = -1;
+            selectedY = -1;
+            
+            // Switch to next player
+            if currentPlayer == WHITE then {
+                currentPlayer = BLACK;
+                chessScreen.statusMessage = "Black to move";
+            } else {
+                currentPlayer = WHITE;
+                chessScreen.statusMessage = "White to move";
+            }
+            call updateTimerColors();
+            print "Switched to next player: " + currentPlayer;
+            
+            return;
+        } else {
+            print "Not a valid move destination";
+            // Fall through to handle as a new selection
+        }
+    }
     
     // Clear previous indicators
     call clearIndicators();
