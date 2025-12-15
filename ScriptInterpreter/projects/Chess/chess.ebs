@@ -529,7 +529,7 @@ getPieceSymbol(pieceType: int) return string {
 // Convert board coordinates to algebraic notation (e.g., 0,0 -> a8, 7,7 -> h1)
 coordsToAlgebraic(x: int, y: int) return string {
     var files: string = "abcdefgh";
-    var file: string = call string.charAt(files, x);
+    var file: string = call str.charAt(files, x);
     var rank: int = 8 - y;  // y=0 is rank 8, y=7 is rank 1
     return file + rank;
 }
@@ -546,7 +546,7 @@ formatMove(fromX: int, fromY: int, toX: int, toY: int, pieceType: int, isCapture
         // For pawn captures, include the starting file
         if pieceType == PAWN then {
             var files: string = "abcdefgh";
-            pieceSymbol = call string.charAt(files, fromX);
+            pieceSymbol = call str.charAt(files, fromX);
         }
     }
     
