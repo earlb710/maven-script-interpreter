@@ -628,18 +628,7 @@ handleCellClick(x: int, y: int) {
             var movingPieceType: int = sourceCell.pieceType;
             var movingPieceColor: int = sourceCell.pieceColor;
             
-            // Restore the selected piece to normal color before moving
-            if sourceCellValue != -1 then {
-                if sourceCell.pieceType != EMPTY then {
-                    var normalSourcePiece: imagedata = call getNormalPiece(sourceCell.pieceType, sourceCell.pieceColor);
-                    if normalSourcePiece != null then {
-                        call setPieceImage(selectedX, selectedY, normalSourcePiece);
-                        print "Restored source piece to normal before move";
-                    }
-                }
-            }
-            
-            // Move the piece
+            // Move the piece (this will clear the yellow piece at source and place normal piece at destination)
             call movePiece(selectedX, selectedY, x, y);
             
             // Format and add move to history
