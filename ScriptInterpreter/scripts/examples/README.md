@@ -222,6 +222,7 @@ This directory contains short, precise example scripts for each EBS language key
 | [scr_revert.ebs](scr_revert.ebs) | `scr.revert` | Revert screen fields to original values |
 | [scr_clear.ebs](scr_clear.ebs) | `scr.clear` | Clear all field values in a screen |
 | [scr_setvarstateful.ebs](scr_setvarstateful.ebs) | `scr.setVarStateful` | Control dirty tracking for screen variables |
+| [scr_var_lifecycle.ebs](scr_var_lifecycle.ebs) | **Complete Variable Lifecycle API** | Full lifecycle management: init, clear, submit, reset |
 | [scr_getitemstatus.ebs](scr_getitemstatus.ebs) | `scr.getItemStatus` | Get the status of a screen item |
 | [scr_resetitemoriginalvalue.ebs](scr_resetitemoriginalvalue.ebs) | `scr.resetItemOriginalValue` | Reset an item's original value |
 | [scr_getvarreference.ebs](scr_getvarreference.ebs) | `scr.getVarReference` | Get the variable reference for an item |

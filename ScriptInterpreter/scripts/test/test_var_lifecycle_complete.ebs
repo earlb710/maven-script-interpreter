@@ -1,0 +1,248 @@
+// Comprehensive Test Script for Variable Lifecycle Management API
+// Tests all variable state and lifecycle functions:
+//   - scr.setVarStateful, scr.getVarStateful, scr.getVarOriginalValue
+//   - scr.initVarItem, scr.clearVarItem, scr.submitVarItem, scr.resetVarItem
+//   - scr.setProperty restrictions for stateful items
+
+print "=== Variable Lifecycle Management API - Comprehensive Test Suite ===";
+print "";
+
+// Test counters
+var testsPassed = 0;
+var testsFailed = 0;
+
+// Helper function to assert conditions
+assertTest(testName: string, condition: bool, errorMsg: string) {
+    if (condition) {
+        print "✓ PASS: " + testName;
+        testsPassed = testsPassed + 1;
+    } else {
+        print "✗ FAIL: " + testName + " - " + errorMsg;
+        testsFailed = testsFailed + 1;
+    }
+}
+
+// Define test screen
+screen testLifecycleScreen = {
+    "title": "Lifecycle Test Screen",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "field1",
+            "type": "string",
+            "default": "default1",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 1:"
+            }
+        },
+        {
+            "name": "field2",
+            "type": "string",
+            "default": "default2",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 2:"
+            }
+        },
+        {
+            "name": "counter",
+            "type": "int",
+            "default": 0,
+            "display": {
+                "type": "label",
+                "labelText": "Counter:"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "items": [
+                {
+                    "name": "field1Item",
+                    "varRef": "field1"
+                },
+                {
+                    "name": "field2Item",
+                    "varRef": "field2"
+                },
+                {
+                    "name": "counterItem",
+                    "varRef": "counter"
+                }
+            ]
+        }
+    ]
+};
+
+show screen testLifecycleScreen;
+
+// Test 1: Default stateful behavior
+print "";
+print "--- Test 1: Default stateful behavior ---";
+var isStateful1 = call scr.getVarStateful("testLifecycleScreen", "field1");
+var isStateful2 = call scr.getVarStateful("testLifecycleScreen", "field2");
+assertTest("field1 is stateful by default", isStateful1 == true, "Expected true, got " + isStateful1);
+assertTest("field2 is stateful by default", isStateful2 == true, "Expected true, got " + isStateful2);
+
+// Test 2: initVarItem - initialize to default in CLEAN state
+print "";
+print "--- Test 2: initVarItem - Initialize to default (CLEAN) ---";
+testLifecycleScreen.field1 = "changed1";
+testLifecycleScreen.field2 = "changed2";
+var statusBefore = call scr.getStatus("testLifecycleScreen");
+call scr.initVarItem("testLifecycleScreen", "field1");
+call scr.initVarItem("testLifecycleScreen", "field2");
+var statusAfter = call scr.getStatus("testLifecycleScreen");
+var val1 = testLifecycleScreen.field1;
+var val2 = testLifecycleScreen.field2;
+var orig1 = call scr.getVarOriginalValue("testLifecycleScreen", "field1");
+var orig2 = call scr.getVarOriginalValue("testLifecycleScreen", "field2");
+assertTest("field1 reset to default", val1 == "default1", "Expected 'default1', got '" + val1 + "'");
+assertTest("field2 reset to default", val2 == "default2", "Expected 'default2', got '" + val2 + "'");
+assertTest("field1 original matches current", orig1 == val1, "Expected '" + val1 + "', got '" + orig1 + "'");
+assertTest("field2 original matches current", orig2 == val2, "Expected '" + val2 + "', got '" + orig2 + "'");
+assertTest("Screen status is CLEAN", statusAfter == "clean", "Expected 'clean', got '" + statusAfter + "'");
+
+// Test 3: clearVarItem - clear to default but mark CHANGED
+print "";
+print "--- Test 3: clearVarItem - Clear to default (CHANGED) ---";
+testLifecycleScreen.field1 = "data1";
+call scr.submitVarItem("testLifecycleScreen", "field1");  // Submit so we have a baseline
+var statusClean = call scr.getStatus("testLifecycleScreen");
+call scr.clearVarItem("testLifecycleScreen", "field1");
+var statusAfterClear = call scr.getStatus("testLifecycleScreen");
+var clearedVal = testLifecycleScreen.field1;
+var clearedOrig = call scr.getVarOriginalValue("testLifecycleScreen", "field1");
+assertTest("field1 cleared to default", clearedVal == "default1", "Expected 'default1', got '" + clearedVal + "'");
+assertTest("field1 original unchanged", clearedOrig == "data1", "Expected 'data1', got '" + clearedOrig + "'");
+assertTest("Screen status is CHANGED", statusAfterClear == "changed", "Expected 'changed', got '" + statusAfterClear + "'");
+
+// Test 4: submitVarItem - commit changes (current→original)
+print "";
+print "--- Test 4: submitVarItem - Submit changes ---";
+call scr.revert("testLifecycleScreen");
+testLifecycleScreen.field1 = "newdata1";
+testLifecycleScreen.field2 = "newdata2";
+call scr.submitVarItem("testLifecycleScreen", "field1");
+var origAfterSubmit1 = call scr.getVarOriginalValue("testLifecycleScreen", "field1");
+var origAfterSubmit2 = call scr.getVarOriginalValue("testLifecycleScreen", "field2");
+var statusAfterPartialSubmit = call scr.getStatus("testLifecycleScreen");
+assertTest("field1 original updated after submit", origAfterSubmit1 == "newdata1", "Expected 'newdata1', got '" + origAfterSubmit1 + "'");
+assertTest("field2 original unchanged", origAfterSubmit2 == "default2", "Expected 'default2', got '" + origAfterSubmit2 + "'");
+assertTest("Screen still CHANGED (field2 pending)", statusAfterPartialSubmit == "changed", "Expected 'changed', got '" + statusAfterPartialSubmit + "'");
+
+call scr.submitVarItem("testLifecycleScreen", "field2");
+var statusAfterFullSubmit = call scr.getStatus("testLifecycleScreen");
+assertTest("Screen CLEAN after all submitted", statusAfterFullSubmit == "clean", "Expected 'clean', got '" + statusAfterFullSubmit + "'");
+
+// Test 5: resetVarItem - revert changes (original→current)
+print "";
+print "--- Test 5: resetVarItem - Reset to original ---";
+var origBeforeChange = call scr.getVarOriginalValue("testLifecycleScreen", "field1");
+testLifecycleScreen.field1 = "temp_change";
+var changedVal = testLifecycleScreen.field1;
+call scr.resetVarItem("testLifecycleScreen", "field1");
+var resetVal = testLifecycleScreen.field1;
+var statusAfterReset = call scr.getStatus("testLifecycleScreen");
+assertTest("field1 value before reset", changedVal == "temp_change", "Expected 'temp_change', got '" + changedVal + "'");
+assertTest("field1 reset to original", resetVal == origBeforeChange, "Expected '" + origBeforeChange + "', got '" + resetVal + "'");
+assertTest("Screen CLEAN after reset", statusAfterReset == "clean", "Expected 'clean', got '" + statusAfterReset + "'");
+
+// Test 6: Non-stateful variables (setVarStateful)
+print "";
+print "--- Test 6: Non-stateful variables (display-only) ---";
+call scr.setVarStateful("testLifecycleScreen", "counter", false);
+var counterStateful = call scr.getVarStateful("testLifecycleScreen", "counter");
+testLifecycleScreen.counter = 999;
+var statusAfterNonStateful = call scr.getStatus("testLifecycleScreen");
+assertTest("counter is non-stateful", counterStateful == false, "Expected false, got " + counterStateful);
+assertTest("Non-stateful change doesn't mark dirty", statusAfterNonStateful == "clean", "Expected 'clean', got '" + statusAfterNonStateful + "'");
+
+// Test 7: Mixed stateful and non-stateful changes
+print "";
+print "--- Test 7: Mixed stateful and non-stateful changes ---";
+testLifecycleScreen.field1 = "mixed_test";
+testLifecycleScreen.counter = 1000;
+var statusMixed = call scr.getStatus("testLifecycleScreen");
+assertTest("Screen CHANGED (stateful field changed)", statusMixed == "changed", "Expected 'changed', got '" + statusMixed + "'");
+
+// Test 8: scr.setProperty restrictions for stateful items
+print "";
+print "--- Test 8: scr.setProperty restrictions ---";
+call scr.revert("testLifecycleScreen");
+call scr.setProperty("testLifecycleScreen.field1Item", "stateful", false);
+var hasError = "N";
+try {
+    call scr.setProperty("testLifecycleScreen.field2Item", "value", "blocked");
+} catch (ex) {
+    hasError = "Y";
+}
+assertTest("scr.setProperty blocked for stateful item", hasError == "Y", "Expected error to be thrown");
+
+hasError = "N";
+try {
+    call scr.setProperty("testLifecycleScreen.field1Item", "value", "allowed");
+    hasError = "N";
+} catch (ex) {
+    hasError = "Y";
+}
+assertTest("scr.setProperty allowed for non-stateful item", hasError == "N", "Expected no error");
+
+// Test 9: initVarItem with non-default value already set
+print "";
+print "--- Test 9: initVarItem sets both current and original ---";
+testLifecycleScreen.field1 = "before_init";
+call scr.initVarItem("testLifecycleScreen", "field1");
+var valAfterInit = testLifecycleScreen.field1;
+var origAfterInit = call scr.getVarOriginalValue("testLifecycleScreen", "field1");
+assertTest("Current value after init", valAfterInit == "default1", "Expected 'default1', got '" + valAfterInit + "'");
+assertTest("Original value after init", origAfterInit == "default1", "Expected 'default1', got '" + origAfterInit + "'");
+
+// Test 10: clearVarItem keeps original unchanged
+print "";
+print "--- Test 10: clearVarItem keeps original unchanged ---";
+call scr.revert("testLifecycleScreen");
+testLifecycleScreen.field2 = "saved_value";
+call scr.submitVarItem("testLifecycleScreen", "field2");
+var origBeforeClear = call scr.getVarOriginalValue("testLifecycleScreen", "field2");
+call scr.clearVarItem("testLifecycleScreen", "field2");
+var origAfterClear = call scr.getVarOriginalValue("testLifecycleScreen", "field2");
+var valAfterClear = testLifecycleScreen.field2;
+assertTest("Original preserved after clear", origAfterClear == origBeforeClear, "Expected '" + origBeforeClear + "', got '" + origAfterClear + "'");
+assertTest("Current cleared to default", valAfterClear == "default2", "Expected 'default2', got '" + valAfterClear + "'");
+
+// Test 11: Error handling
+print "";
+print "--- Test 11: Error handling for non-existent items ---";
+var error1 = "N";
+try {
+    call scr.getVarStateful("nonexistent", "field1");
+} catch (ex) {
+    error1 = "Y";
+}
+assertTest("Error on non-existent screen", error1 == "Y", "Expected error to be thrown");
+
+var error2 = "N";
+try {
+    call scr.initVarItem("testLifecycleScreen", "nonexistent");
+} catch (ex) {
+    error2 = "Y";
+}
+assertTest("Error on non-existent variable", error2 == "Y", "Expected error to be thrown");
+
+// Final summary
+print "";
+print "=== Test Summary ===";
+print "Tests Passed: " + testsPassed;
+print "Tests Failed: " + testsFailed;
+print "";
+
+if (testsFailed == 0) {
+    print "✓ All tests PASSED!";
+} else {
+    print "✗ Some tests FAILED!";
+}

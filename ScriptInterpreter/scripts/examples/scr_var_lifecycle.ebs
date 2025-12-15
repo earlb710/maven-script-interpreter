@@ -1,0 +1,196 @@
+// EBS Language Reference - See EBS_SCRIPT_SYNTAX.md
+// Example: Complete Variable Lifecycle Management API
+// Demonstrates all variable state and lifecycle management functions
+//
+// API Functions:
+//   State Query:
+//     call scr.getVarStateful("screenName", "varName") -> Boolean
+//     call scr.getVarOriginalValue("screenName", "varName") -> ANY
+//   State Control:
+//     call scr.setVarStateful("screenName", "varName", statefulFlag) -> void
+//   Lifecycle Management:
+//     call scr.initVarItem("screenName", "varName") -> void    // Init to default, CLEAN
+//     call scr.clearVarItem("screenName", "varName") -> void   // Clear to default, CHANGED
+//     call scr.submitVarItem("screenName", "varName") -> void  // Submit (current→original)
+//     call scr.resetVarItem("screenName", "varName") -> void   // Reset (original→current)
+
+print "=== Variable Lifecycle Management Demo ===";
+print "";
+
+// Define a test screen with multiple variables
+screen lifecycleDemo = {
+    "title": "Variable Lifecycle Demo",
+    "width": 600,
+    "height": 500,
+    "vars": [
+        {
+            "name": "username",
+            "type": "string",
+            "default": "guest",
+            "display": {
+                "type": "textfield",
+                "labelText": "Username:"
+            }
+        },
+        {
+            "name": "email",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "textfield",
+                "labelText": "Email:"
+            }
+        },
+        {
+            "name": "status",
+            "type": "string",
+            "default": "Ready",
+            "display": {
+                "type": "label",
+                "labelText": "Status:"
+            }
+        },
+        {
+            "name": "processCount",
+            "type": "int",
+            "default": 0,
+            "display": {
+                "type": "label",
+                "labelText": "Processed:"
+            }
+        }
+    ]
+};
+
+show screen lifecycleDemo;
+
+// Part 1: Initialization with initVarItem
+print "=== Part 1: Variable Initialization ===";
+print "Use scr.initVarItem() to initialize variables to defaults in CLEAN state";
+print "";
+
+lifecycleDemo.username = "john_doe";
+lifecycleDemo.email = "john@example.com";
+print "Set username='" + lifecycleDemo.username + "', email='" + lifecycleDemo.email + "'";
+print "Screen status: " + call scr.getStatus("lifecycleDemo") + " (CHANGED)";
+print "";
+
+print "Calling scr.initVarItem() on both fields...";
+call scr.initVarItem("lifecycleDemo", "username");
+call scr.initVarItem("lifecycleDemo", "email");
+print "username: '" + lifecycleDemo.username + "' (reset to default 'guest')";
+print "email: '" + lifecycleDemo.email + "' (reset to default '')";
+print "Screen status: " + call scr.getStatus("lifecycleDemo") + " (CLEAN)";
+print "Original values match current values - no changes to save";
+print "";
+
+// Part 2: Clear fields with clearVarItem
+print "=== Part 2: Clearing Fields ===";
+print "Use scr.clearVarItem() to clear fields while marking as CHANGED (requires save)";
+print "";
+
+lifecycleDemo.username = "alice";
+lifecycleDemo.email = "alice@example.com";
+print "Set username='" + lifecycleDemo.username + "', email='" + lifecycleDemo.email + "'";
+print "Screen status: " + call scr.getStatus("lifecycleDemo");
+print "";
+
+print "User clicks 'Clear' button - calling scr.clearVarItem() on email...";
+call scr.clearVarItem("lifecycleDemo", "email");
+print "email cleared to default: '" + lifecycleDemo.email + "'";
+print "Screen status: " + call scr.getStatus("lifecycleDemo") + " (still CHANGED)";
+print "Clearing a field marks it dirty - requires save to commit";
+print "";
+
+// Part 3: Submit changes with submitVarItem
+print "=== Part 3: Submitting Changes ===";
+print "Use scr.submitVarItem() to save individual field changes (current → original)";
+print "";
+
+print "Current state:";
+print "  username: '" + lifecycleDemo.username + "' (changed)";
+print "  email: '" + lifecycleDemo.email + "' (cleared)";
+print "  Original username: '" + call scr.getVarOriginalValue("lifecycleDemo", "username") + "'";
+print "";
+
+print "Submitting username change (e.g., after database save)...";
+call scr.submitVarItem("lifecycleDemo", "username");
+print "username original value now: '" + call scr.getVarOriginalValue("lifecycleDemo", "username") + "'";
+print "Screen status: " + call scr.getStatus("lifecycleDemo") + " (still changed - email pending)";
+print "";
+
+print "Submitting email change...";
+call scr.submitVarItem("lifecycleDemo", "email");
+print "Screen status: " + call scr.getStatus("lifecycleDemo") + " (CLEAN - all changes submitted)";
+print "";
+
+// Part 4: Reset changes with resetVarItem
+print "=== Part 4: Reverting Individual Fields ===";
+print "Use scr.resetVarItem() to undo changes to specific fields (original → current)";
+print "";
+
+lifecycleDemo.username = "bob";
+lifecycleDemo.email = "bob@example.com";
+print "Made changes: username='" + lifecycleDemo.username + "', email='" + lifecycleDemo.email + "'";
+print "Original values: username='" + call scr.getVarOriginalValue("lifecycleDemo", "username") + "', email='" + call scr.getVarOriginalValue("lifecycleDemo", "email") + "'";
+print "Screen status: " + call scr.getStatus("lifecycleDemo");
+print "";
+
+print "User clicks 'Undo' for email field only...";
+call scr.resetVarItem("lifecycleDemo", "email");
+print "email reverted to: '" + lifecycleDemo.email + "'";
+print "username still changed: '" + lifecycleDemo.username + "'";
+print "Screen status: " + call scr.getStatus("lifecycleDemo") + " (still changed - username modified)";
+print "";
+
+print "Reverting username too...";
+call scr.resetVarItem("lifecycleDemo", "username");
+print "username reverted to: '" + lifecycleDemo.username + "'";
+print "Screen status: " + call scr.getStatus("lifecycleDemo") + " (CLEAN - all reverted)";
+print "";
+
+// Part 5: Non-stateful variables (display-only)
+print "=== Part 5: Non-Stateful Variables (Display-Only) ===";
+print "Use scr.setVarStateful(false) for status/counter fields";
+print "";
+
+print "Setting status and processCount as non-stateful (display-only)...";
+call scr.setVarStateful("lifecycleDemo", "status", false);
+call scr.setVarStateful("lifecycleDemo", "processCount", false);
+print "status stateful? " + call scr.getVarStateful("lifecycleDemo", "status");
+print "processCount stateful? " + call scr.getVarStateful("lifecycleDemo", "processCount");
+print "";
+
+lifecycleDemo.status = "Processing...";
+lifecycleDemo.processCount = 10;
+print "Updated display fields: status='" + lifecycleDemo.status + "', count=" + lifecycleDemo.processCount;
+print "Screen status: " + call scr.getStatus("lifecycleDemo") + " (CLEAN - display changes don't mark dirty)";
+print "";
+
+lifecycleDemo.username = "charlie";
+lifecycleDemo.status = "Done";
+lifecycleDemo.processCount = 100;
+print "Changed username (stateful) and display fields (non-stateful)";
+print "Screen status: " + call scr.getStatus("lifecycleDemo") + " (CHANGED - only stateful change tracked)";
+print "";
+
+// Summary
+print "=== Lifecycle Summary ===";
+print "";
+print "Function Usage Guide:";
+print "  1. scr.initVarItem() - Initialize/reset to default in CLEAN state";
+print "     Use: App startup, after save completion, reset to defaults";
+print "";
+print "  2. scr.clearVarItem() - Clear to default but mark CHANGED";
+print "     Use: User-initiated clear button, field needs to be saved";
+print "";
+print "  3. scr.submitVarItem() - Commit changes (current → original)";
+print "     Use: After successful database save, mark field as saved";
+print "";
+print "  4. scr.resetVarItem() - Revert changes (original → current)";
+print "     Use: User undo, cancel changes to specific field";
+print "";
+print "  5. scr.setVarStateful(false) - Disable dirty tracking";
+print "     Use: Status messages, counters, calculated fields";
+print "";
+print "Complete variable lifecycle from init → edit → submit/reset";
