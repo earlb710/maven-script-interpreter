@@ -573,6 +573,19 @@ handleCellClick(x: int, y: int) {
         }
         
         if isValidMove then {
+            // Restore the selected piece to normal color before moving
+            var sourceCellValue: int = call getPieceAt(selectedX, selectedY);
+            if sourceCellValue != -1 then {
+                var sourceCell = ChessCell(sourceCellValue);
+                if sourceCell.pieceType != EMPTY then {
+                    var normalSourcePiece: imagedata = call getNormalPiece(sourceCell.pieceType, sourceCell.pieceColor);
+                    if normalSourcePiece != null then {
+                        call setPieceImage(selectedX, selectedY, normalSourcePiece);
+                        print "Restored source piece to normal before move";
+                    }
+                }
+            }
+            
             // Move the piece
             call movePiece(selectedX, selectedY, x, y);
             
