@@ -860,11 +860,11 @@ screen chessScreen = {
                     "padding": "10",
                     "style": "-fx-background-color: $COLOR_BG_TIMER; -fx-background-radius: 5; -fx-alignment: center;",
                     "items": [
-                        {"name": "whiteLabelTimer", "varRef": "whiteLabelText", "display": {"type": "label", "labelFontSize": "18px", "style": "-fx-text-fill: $whiteLabelColor;"}},
-                        {"name": "whiteTimerField", "varRef": "whiteTimer", "display": {"type": "label", "labelFontSize": "24px", "labelBold": true, "style": "-fx-text-fill: $whiteTimerColor;"}},
-                        {"name": "spacerLabel", "display": {"type": "label", "labelText": "     |     ", "labelFontSize": "24px", "style": "-fx-text-fill: $COLOR_TEXT_SEPARATOR;"}},
-                        {"name": "blackLabelTimer", "varRef": "blackLabelText", "display": {"type": "label", "labelFontSize": "18px", "style": "-fx-text-fill: $blackLabelColor;"}},
-                        {"name": "blackTimerField", "varRef": "blackTimer", "display": {"type": "label", "labelFontSize": "24px", "labelBold": true, "style": "-fx-text-fill: $blackTimerColor;"}}
+                        {"name": "whiteLabelTimer", "varRef": "whiteLabelText", "display": {"type": "label", "labelFontSize": "18px", "labelColor": "whiteLabelColor"}},
+                        {"name": "whiteTimerField", "varRef": "whiteTimer", "display": {"type": "label", "labelFontSize": "24px", "labelBold": true, "labelColor": "whiteTimerColor"}},
+                        {"name": "spacerLabel", "display": {"type": "label", "labelText": "     |     ", "labelFontSize": "24px", "labelColor": "$COLOR_TEXT_SEPARATOR"}},
+                        {"name": "blackLabelTimer", "varRef": "blackLabelText", "display": {"type": "label", "labelFontSize": "18px", "labelColor": "blackLabelColor"}},
+                        {"name": "blackTimerField", "varRef": "blackTimer", "display": {"type": "label", "labelFontSize": "24px", "labelBold": true, "labelColor": "blackTimerColor"}}
                     ]
                 },
                 {
