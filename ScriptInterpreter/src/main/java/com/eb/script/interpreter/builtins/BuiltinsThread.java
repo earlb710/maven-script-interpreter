@@ -32,6 +32,7 @@ public class BuiltinsThread {
     /**
      * Single shared executor for all periodic timers.
      * Using a scheduled thread pool allows multiple timers to run concurrently.
+     * Pool size is set to 4 to handle typical workloads; could be made configurable via system property if needed.
      */
     private static final ScheduledExecutorService SCHEDULER = Executors.newScheduledThreadPool(4);
 
@@ -169,9 +170,9 @@ public class BuiltinsThread {
                 } catch (Exception e) {
                     // Log error to output if available
                     if (context.getOutput() != null) {
-                        context.getOutput().printlnError("Error executing timer callback '" + finalCallbackName + "': " + e.getMessage());
+                        context.getOutput().printlnError("Error executing timer callback '" + finalCallbackName + "' for timer '" + timerName + "': " + e.getMessage());
                     } else {
-                        System.err.println("Error executing timer callback '" + finalCallbackName + "': " + e.getMessage());
+                        System.err.println("Error executing timer callback '" + finalCallbackName + "' for timer '" + timerName + "': " + e.getMessage());
                     }
                 }
             });
