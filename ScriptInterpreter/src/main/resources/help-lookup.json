@@ -5218,6 +5218,40 @@
       "example": "<b>call</b> <b>thread.sleep</b>(millis=1000);<br>// Pauses for 1 second<br><b>print</b> \"Resumed after 1 second delay\";"
     },
     {
+      "function": "thread.timerStart",
+      "short_description": "Starts a repeating timer with callback",
+      "long_help": "Starts a repeating timer that invokes a callback function at fixed intervals. The timer runs asynchronously in the background<br>and continues until explicitly stopped with thread.timerStop. The callback function receives the timer name as a parameter.<br>Multiple timers can run concurrently with unique names. Returns the timer name for convenience.",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "period",
+          "type": "long"
+        },
+        {
+          "name": "callback",
+          "type": "string"
+        }
+      ],
+      "return_type": "string",
+      "example": "<b>myCallback</b>(timerName: <b>string</b>) {<br>&nbsp;&nbsp;<b>print</b> \"Timer fired: \" + timerName;<br>}<br><br><b>var</b> name = <b>call</b> <b>thread.timerStart</b>(name=\"myTimer\", period=1000, callback=\"myCallback\");<br>// Timer will fire every 1000ms (1 second)"
+    },
+    {
+      "function": "thread.timerStop",
+      "short_description": "Stops a repeating timer",
+      "long_help": "Stops a repeating timer that was started with thread.timerStart. The timer is cancelled gracefully and removed from the<br>registry. Returns true if the timer was stopped, false if the timer was not found (already stopped or never started).",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>var</b> stopped = <b>call</b> <b>thread.timerStop</b>(name=\"myTimer\");<br><b>if</b> stopped <b>then</b> {<br>&nbsp;&nbsp;<b>print</b> \"Timer stopped successfully\";<br>} <b>else</b> {<br>&nbsp;&nbsp;<b>print</b> \"Timer not found\";<br>}"
+    },
+    {
       "function": "timer.clear",
       "format": "html",
       "short_description": "Remove all timers from registry",
