@@ -856,11 +856,11 @@ screen chessScreen = {
                     "padding": "10",
                     "style": "-fx-background-color: $COLOR_BG_TIMER; -fx-background-radius: 5; -fx-alignment: center;",
                     "items": [
-                        {"name": "whiteLabelTimer", "varRef": "whiteLabelText", "display": {"type": "label", "labelFontSize": "18px", "textColor": "$COLOR_LABEL_ACTIVE"}},
-                        {"name": "whiteTimerField", "varRef": "whiteTimer", "display": {"type": "label", "labelFontSize": "24px", "labelBold": true, "textColor": "$COLOR_TIMER_ACTIVE"}},
-                        {"name": "spacerLabel", "display": {"type": "label", "labelText": "     |     ", "labelFontSize": "24px", "textColor": "$COLOR_TEXT_SEPARATOR"}},
-                        {"name": "blackLabelTimer", "varRef": "blackLabelText", "display": {"type": "label", "labelFontSize": "18px", "textColor": "$COLOR_LABEL_INACTIVE"}},
-                        {"name": "blackTimerField", "varRef": "blackTimer", "display": {"type": "label", "labelFontSize": "24px", "labelBold": true, "textColor": "$COLOR_TIMER_INACTIVE"}}
+                        {"name": "whiteLabelTimer", "varRef": "whiteLabelText", "textColor": "$COLOR_LABEL_ACTIVE", "display": {"type": "label", "labelFontSize": "18px"}},
+                        {"name": "whiteTimerField", "varRef": "whiteTimer", "textColor": "$COLOR_TIMER_ACTIVE", "display": {"type": "label", "labelFontSize": "24px", "labelBold": true}},
+                        {"name": "spacerLabel", "textColor": "$COLOR_TEXT_SEPARATOR", "display": {"type": "label", "labelText": "     |     ", "labelFontSize": "24px"}},
+                        {"name": "blackLabelTimer", "varRef": "blackLabelText", "textColor": "$COLOR_LABEL_INACTIVE", "display": {"type": "label", "labelFontSize": "18px"}},
+                        {"name": "blackTimerField", "varRef": "blackTimer", "textColor": "$COLOR_TIMER_INACTIVE", "display": {"type": "label", "labelFontSize": "24px", "labelBold": true}}
                     ]
                 },
                 {
