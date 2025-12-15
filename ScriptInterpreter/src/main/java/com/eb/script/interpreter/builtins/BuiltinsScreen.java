@@ -2,6 +2,7 @@ package com.eb.script.interpreter.builtins;
 
 import com.eb.script.interpreter.InterpreterContext;
 import com.eb.script.interpreter.InterpreterError;
+import com.eb.script.interpreter.InterpreterArray;
 
 import com.eb.script.arrays.ArrayDynamic;
 import com.eb.script.interpreter.screen.AreaDefinition;
@@ -721,6 +722,164 @@ public class BuiltinsScreen {
 
         // Get the original value
         return var.getOriginalValue();
+    }
+
+    /**
+     * scr.submitVarItem(screenName, varName) -> BOOL
+     * Submits a variable by setting the current value as the original value
+     * and marks the screen as clean (if no other changed variables exist).
+     * This is typically used after successfully saving data.
+     */
+    public static Object screenSubmitVarItem(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (String) args[0];
+        String varName = (String) args[1];
+
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("scr.submitVarItem: screenName parameter cannot be null or empty");
+        }
+        if (varName == null || varName.isEmpty()) {
+            throw new InterpreterError("scr.submitVarItem: varName parameter cannot be null or empty");
+        }
+
+        // Verify screen exists
+        if (!context.getScreens().containsKey(screenName.toLowerCase())) {
+            throw new InterpreterError("scr.submitVarItem: screen '" + screenName + "' not found");
+        }
+
+        // Get the var item
+        Map<String, Var> varItems = context.getScreenVarItems(screenName);
+        if (varItems == null) {
+            throw new InterpreterError("scr.submitVarItem: no variables defined for screen '" + screenName + "'");
+        }
+
+        // Find the variable - try with various key formats
+        Var var = null;
+        String lowerVarName = varName.toLowerCase();
+
+        for (Map.Entry<String, Var> entry : varItems.entrySet()) {
+            String key = entry.getKey();
+            Var v = entry.getValue();
+            if (key.equals(lowerVarName) || key.endsWith("." + lowerVarName)
+                    || (v.getName() != null && v.getName().equalsIgnoreCase(varName))) {
+                var = v;
+                break;
+            }
+        }
+
+        if (var == null) {
+            throw new InterpreterError("scr.submitVarItem: variable '" + varName + "' not found in screen '" + screenName + "'");
+        }
+
+        // Set current value as the original value
+        Object currentValue = var.getValue();
+        var.setOriginalValue(currentValue);
+
+        // Check if any other variables are still changed
+        boolean anyChanged = false;
+        for (Var v : varItems.values()) {
+            // Only check stateful variables
+            if (v.getStateful() != null && v.getStateful()) {
+                Object origVal = v.getOriginalValue();
+                Object currVal = v.getValue();
+                if (!java.util.Objects.equals(origVal, currVal)) {
+                    anyChanged = true;
+                    break;
+                }
+            }
+        }
+
+        // If no variables are changed, mark screen as clean
+        if (!anyChanged && context.getScreenStatus(screenName) != com.eb.script.interpreter.screen.ScreenStatus.ERROR) {
+            context.setScreenStatus(screenName, com.eb.script.interpreter.screen.ScreenStatus.CLEAN);
+        }
+
+        return true;
+    }
+
+    /**
+     * scr.resetVarItem(screenName, varName) -> BOOL
+     * Resets a variable by setting the original value as the current value
+     * and marks the screen as clean (if no other changed variables exist).
+     * This reverts the variable to its last submitted/original state.
+     */
+    public static Object screenResetVarItem(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (String) args[0];
+        String varName = (String) args[1];
+
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("scr.resetVarItem: screenName parameter cannot be null or empty");
+        }
+        if (varName == null || varName.isEmpty()) {
+            throw new InterpreterError("scr.resetVarItem: varName parameter cannot be null or empty");
+        }
+
+        // Verify screen exists
+        if (!context.getScreens().containsKey(screenName.toLowerCase())) {
+            throw new InterpreterError("scr.resetVarItem: screen '" + screenName + "' not found");
+        }
+
+        // Get the var item
+        Map<String, Var> varItems = context.getScreenVarItems(screenName);
+        ConcurrentHashMap<String, Object> screenVars = context.getScreenVars(screenName);
+        
+        if (varItems == null) {
+            throw new InterpreterError("scr.resetVarItem: no variables defined for screen '" + screenName + "'");
+        }
+
+        // Find the variable - try with various key formats
+        Var var = null;
+        String lowerVarName = varName.toLowerCase();
+
+        for (Map.Entry<String, Var> entry : varItems.entrySet()) {
+            String key = entry.getKey();
+            Var v = entry.getValue();
+            if (key.equals(lowerVarName) || key.endsWith("." + lowerVarName)
+                    || (v.getName() != null && v.getName().equalsIgnoreCase(varName))) {
+                var = v;
+                break;
+            }
+        }
+
+        if (var == null) {
+            throw new InterpreterError("scr.resetVarItem: variable '" + varName + "' not found in screen '" + screenName + "'");
+        }
+
+        // Set original value as the current value
+        Object originalValue = var.getOriginalValue();
+        var.setValue(originalValue);
+
+        // Update the screen vars map as well
+        if (screenVars != null && var.getName() != null) {
+            if (originalValue != null) {
+                screenVars.put(var.getName().toLowerCase(), originalValue);
+            } else {
+                screenVars.put(var.getName().toLowerCase(), InterpreterArray.NULL_SENTINEL);
+            }
+        }
+
+        // Trigger screen refresh to update UI controls
+        context.triggerScreenRefresh(screenName);
+
+        // Check if any other variables are still changed
+        boolean anyChanged = false;
+        for (Var v : varItems.values()) {
+            // Only check stateful variables
+            if (v.getStateful() != null && v.getStateful()) {
+                Object origVal = v.getOriginalValue();
+                Object currVal = v.getValue();
+                if (!java.util.Objects.equals(origVal, currVal)) {
+                    anyChanged = true;
+                    break;
+                }
+            }
+        }
+
+        // If no variables are changed, mark screen as clean
+        if (!anyChanged && context.getScreenStatus(screenName) != com.eb.script.interpreter.screen.ScreenStatus.ERROR) {
+            context.setScreenStatus(screenName, com.eb.script.interpreter.screen.ScreenStatus.CLEAN);
+        }
+
+        return true;
     }
 
     /**

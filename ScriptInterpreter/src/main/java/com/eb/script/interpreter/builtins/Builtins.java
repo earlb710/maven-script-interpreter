@@ -1002,6 +1002,16 @@ public final class Builtins {
                 newParam("varName", DataType.STRING, true) // required; variable name
         ));
         addBuiltin(info(
+                "scr.submitVarItem", DataType.BOOL,
+                newParam("screenName", DataType.STRING, true), // required; screen name
+                newParam("varName", DataType.STRING, true) // required; variable name
+        ));
+        addBuiltin(info(
+                "scr.resetVarItem", DataType.BOOL,
+                newParam("screenName", DataType.STRING, true), // required; screen name
+                newParam("varName", DataType.STRING, true) // required; variable name
+        ));
+        addBuiltin(info(
                 "scr.getItemStatus", DataType.STRING,
                 newParam("screenName", DataType.STRING, true), // required; screen name
                 newParam("itemName", DataType.STRING, true) // required; item name (varRef)
@@ -2151,6 +2161,8 @@ public final class Builtins {
             case "scr.setvarstateful" -> BuiltinsScreen.screenSetVarStateful(context, args);
             case "scr.getvarstateful" -> BuiltinsScreen.screenGetVarStateful(context, args);
             case "scr.getvaroriginalvalue" -> BuiltinsScreen.screenGetVarOriginalValue(context, args);
+            case "scr.submitvaritem" -> BuiltinsScreen.screenSubmitVarItem(context, args);
+            case "scr.resetvaritem" -> BuiltinsScreen.screenResetVarItem(context, args);
             case "scr.getitemstatus" -> BuiltinsScreen.screenGetItemStatus(context, args);
             case "scr.resetitemoriginalvalue" -> BuiltinsScreen.screenResetItemOriginalValue(context, args);
             case "scr.checkchanged" -> BuiltinsScreen.screenCheckChanged(context, args);
