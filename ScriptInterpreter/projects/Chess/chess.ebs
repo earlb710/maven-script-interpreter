@@ -656,6 +656,136 @@ handleStartGame() {
     hide screen startupDialog;
     
     print "Starting chess game with timer: " + selectedTimeLimit;
+    print "";
+    print "Initializing chess board...";
+    
+    call initializeBoard();
+    call printBoard();
+    
+    // Create board layer and indicator images
+    print "Creating board layer images...";
+    call createBoardLayer();
+    
+    print "Creating move indicator images...";
+    call createIndicators();
+    
+    print "";
+    print "Board Encoding Information:";
+    print "===========================";
+    print "Each cell uses a bitmap byte:";
+    print "  Bit 0: Cell color (0=light, 1=dark)";
+    print "  Bits 1-6: Piece type (0=empty, 1-6=piece)";
+    print "  Bit 7: Piece color (0=white, 1=black)";
+    print "";
+    
+    print "Sample cell values:";
+    var idx00: int = call boardIndex(0, 0);
+    var sampleCell = ChessCell(board[idx00]);
+    print "  [0,0] Black Rook: raw=" + board[idx00] + ", cellColor=" + sampleCell.cellColor + ", pieceType=" + sampleCell.pieceType + ", pieceColor=" + sampleCell.pieceColor;
+    
+    var idx74: int = call boardIndex(7, 4);
+    sampleCell = ChessCell(board[idx74]);
+    print "  [7,4] White King: raw=" + board[idx74] + ", cellColor=" + sampleCell.cellColor + ", pieceType=" + sampleCell.pieceType + ", pieceColor=" + sampleCell.pieceColor;
+    
+    print "";
+    print "Loading chess piece SVG images...";
+    
+    // Load SVG images for pieces - Row 0 (black back row)
+    chessScreen.c00 = call image.load(imgPath + "black_rook.svg");
+    chessScreen.c01 = call image.load(imgPath + "black_knight.svg");
+    chessScreen.c02 = call image.load(imgPath + "black_bishop.svg");
+    chessScreen.c03 = call image.load(imgPath + "black_queen.svg");
+    chessScreen.c04 = call image.load(imgPath + "black_king.svg");
+    chessScreen.c05 = call image.load(imgPath + "black_bishop.svg");
+    chessScreen.c06 = call image.load(imgPath + "black_knight.svg");
+    chessScreen.c07 = call image.load(imgPath + "black_rook.svg");
+    
+    // Load SVG images for pieces - Row 1 (black pawns)
+    chessScreen.c10 = call image.load(imgPath + "black_pawn.svg");
+    chessScreen.c11 = call image.load(imgPath + "black_pawn.svg");
+    chessScreen.c12 = call image.load(imgPath + "black_pawn.svg");
+    chessScreen.c13 = call image.load(imgPath + "black_pawn.svg");
+    chessScreen.c14 = call image.load(imgPath + "black_pawn.svg");
+    chessScreen.c15 = call image.load(imgPath + "black_pawn.svg");
+    chessScreen.c16 = call image.load(imgPath + "black_pawn.svg");
+    chessScreen.c17 = call image.load(imgPath + "black_pawn.svg");
+    
+    // Load SVG images for pieces - Row 6 (white pawns)
+    chessScreen.c60 = call image.load(imgPath + "white_pawn.svg");
+    chessScreen.c61 = call image.load(imgPath + "white_pawn.svg");
+    chessScreen.c62 = call image.load(imgPath + "white_pawn.svg");
+    chessScreen.c63 = call image.load(imgPath + "white_pawn.svg");
+    chessScreen.c64 = call image.load(imgPath + "white_pawn.svg");
+    chessScreen.c65 = call image.load(imgPath + "white_pawn.svg");
+    chessScreen.c66 = call image.load(imgPath + "white_pawn.svg");
+    chessScreen.c67 = call image.load(imgPath + "white_pawn.svg");
+    
+    // Load SVG images for pieces - Row 7 (white back row)
+    chessScreen.c70 = call image.load(imgPath + "white_rook.svg");
+    chessScreen.c71 = call image.load(imgPath + "white_knight.svg");
+    chessScreen.c72 = call image.load(imgPath + "white_bishop.svg");
+    chessScreen.c73 = call image.load(imgPath + "white_queen.svg");
+    chessScreen.c74 = call image.load(imgPath + "white_king.svg");
+    chessScreen.c75 = call image.load(imgPath + "white_bishop.svg");
+    chessScreen.c76 = call image.load(imgPath + "white_knight.svg");
+    chessScreen.c77 = call image.load(imgPath + "white_rook.svg");
+    
+    print "Chess piece images loaded!";
+    print "";
+    print "Initializing board layer (checkerboard pattern)...";
+    
+    // Initialize all 64 board squares with the correct checkerboard pattern
+    // Note: Manual assignment is used because EBS screen variables (chessScreen.b##)
+    // cannot be accessed dynamically via computed names. While verbose, this approach
+    // ensures correct checkerboard pattern: light on (row+col)%2==0, dark on (row+col)%2==1
+    // Row 0 (board row 8)
+    chessScreen.b00 = lightSquare; chessScreen.b01 = darkSquare; chessScreen.b02 = lightSquare; chessScreen.b03 = darkSquare;
+    chessScreen.b04 = lightSquare; chessScreen.b05 = darkSquare; chessScreen.b06 = lightSquare; chessScreen.b07 = darkSquare;
+    
+    // Row 1 (board row 7)
+    chessScreen.b10 = darkSquare; chessScreen.b11 = lightSquare; chessScreen.b12 = darkSquare; chessScreen.b13 = lightSquare;
+    chessScreen.b14 = darkSquare; chessScreen.b15 = lightSquare; chessScreen.b16 = darkSquare; chessScreen.b17 = lightSquare;
+    
+    // Row 2 (board row 6)
+    chessScreen.b20 = lightSquare; chessScreen.b21 = darkSquare; chessScreen.b22 = lightSquare; chessScreen.b23 = darkSquare;
+    chessScreen.b24 = lightSquare; chessScreen.b25 = darkSquare; chessScreen.b26 = lightSquare; chessScreen.b27 = darkSquare;
+    
+    // Row 3 (board row 5)
+    chessScreen.b30 = darkSquare; chessScreen.b31 = lightSquare; chessScreen.b32 = darkSquare; chessScreen.b33 = lightSquare;
+    chessScreen.b34 = darkSquare; chessScreen.b35 = lightSquare; chessScreen.b36 = darkSquare; chessScreen.b37 = lightSquare;
+    
+    // Row 4 (board row 4)
+    chessScreen.b40 = lightSquare; chessScreen.b41 = darkSquare; chessScreen.b42 = lightSquare; chessScreen.b43 = darkSquare;
+    chessScreen.b44 = lightSquare; chessScreen.b45 = darkSquare; chessScreen.b46 = lightSquare; chessScreen.b47 = darkSquare;
+    
+    // Row 5 (board row 3)
+    chessScreen.b50 = darkSquare; chessScreen.b51 = lightSquare; chessScreen.b52 = darkSquare; chessScreen.b53 = lightSquare;
+    chessScreen.b54 = darkSquare; chessScreen.b55 = lightSquare; chessScreen.b56 = darkSquare; chessScreen.b57 = lightSquare;
+    
+    // Row 6 (board row 2)
+    chessScreen.b60 = lightSquare; chessScreen.b61 = darkSquare; chessScreen.b62 = lightSquare; chessScreen.b63 = darkSquare;
+    chessScreen.b64 = lightSquare; chessScreen.b65 = darkSquare; chessScreen.b66 = lightSquare; chessScreen.b67 = darkSquare;
+    
+    // Row 7 (board row 1)
+    chessScreen.b70 = darkSquare; chessScreen.b71 = lightSquare; chessScreen.b72 = darkSquare; chessScreen.b73 = lightSquare;
+    chessScreen.b74 = darkSquare; chessScreen.b75 = lightSquare; chessScreen.b76 = darkSquare; chessScreen.b77 = lightSquare;
+    
+    print "Board layer initialized!";
+    print "";
+    print "Opening chess screen with graphical grid display...";
+    
+    // Update screen variables before showing
+    chessScreen.whiteTimer = call formatTimer(timerWhite);
+    chessScreen.blackTimer = call formatTimer(timerBlack);
+    chessScreen.statusMessage = "White to move";
+    call updateTimerColors();
+    
+    // Show the chess screen
+    show screen chessScreen;
+    
+    print "";
+    print "Chess screen is now displayed!";
+    print "Use the New Game button to reset the board.";
 }
 
 // Handle Exit button click from startup dialog
@@ -1297,146 +1427,6 @@ print "==============================================";
 print "";
 
 // Show startup dialog first
+// All game initialization happens in handleStartGame() when user clicks Start
 print "Showing startup dialog...";
 show screen startupDialog;
-
-// Wait for user to either start the game or exit
-// The screen will be hidden by the button handlers
-print "Waiting for user to select time and click Start or Exit...";
-
-// After the startup dialog is closed, check if game was started
-if gameStarted then {
-    print "Game starting with time limit: " + selectedTimeLimit;
-    print "";
-    print "Initializing chess board...";
-    
-    call initializeBoard();
-    call printBoard();
-    
-    // Create board layer and indicator images
-    print "Creating board layer images...";
-    call createBoardLayer();
-    
-    print "Creating move indicator images...";
-    call createIndicators();
-    
-    print "";
-    print "Board Encoding Information:";
-    print "===========================";
-    print "Each cell uses a bitmap byte:";
-    print "  Bit 0: Cell color (0=light, 1=dark)";
-    print "  Bits 1-6: Piece type (0=empty, 1-6=piece)";
-    print "  Bit 7: Piece color (0=white, 1=black)";
-    print "";
-    
-    print "Sample cell values:";
-    var idx00: int = call boardIndex(0, 0);
-    var sampleCell = ChessCell(board[idx00]);
-    print "  [0,0] Black Rook: raw=" + board[idx00] + ", cellColor=" + sampleCell.cellColor + ", pieceType=" + sampleCell.pieceType + ", pieceColor=" + sampleCell.pieceColor;
-    
-    var idx74: int = call boardIndex(7, 4);
-    sampleCell = ChessCell(board[idx74]);
-    print "  [7,4] White King: raw=" + board[idx74] + ", cellColor=" + sampleCell.cellColor + ", pieceType=" + sampleCell.pieceType + ", pieceColor=" + sampleCell.pieceColor;
-    
-    print "";
-    print "Loading chess piece SVG images...";
-    
-    // Load SVG images for pieces - Row 0 (black back row)
-    chessScreen.c00 = call image.load(imgPath + "black_rook.svg");
-    chessScreen.c01 = call image.load(imgPath + "black_knight.svg");
-    chessScreen.c02 = call image.load(imgPath + "black_bishop.svg");
-    chessScreen.c03 = call image.load(imgPath + "black_queen.svg");
-    chessScreen.c04 = call image.load(imgPath + "black_king.svg");
-    chessScreen.c05 = call image.load(imgPath + "black_bishop.svg");
-    chessScreen.c06 = call image.load(imgPath + "black_knight.svg");
-    chessScreen.c07 = call image.load(imgPath + "black_rook.svg");
-    
-    // Load SVG images for pieces - Row 1 (black pawns)
-    chessScreen.c10 = call image.load(imgPath + "black_pawn.svg");
-    chessScreen.c11 = call image.load(imgPath + "black_pawn.svg");
-    chessScreen.c12 = call image.load(imgPath + "black_pawn.svg");
-    chessScreen.c13 = call image.load(imgPath + "black_pawn.svg");
-    chessScreen.c14 = call image.load(imgPath + "black_pawn.svg");
-    chessScreen.c15 = call image.load(imgPath + "black_pawn.svg");
-    chessScreen.c16 = call image.load(imgPath + "black_pawn.svg");
-    chessScreen.c17 = call image.load(imgPath + "black_pawn.svg");
-    
-    // Load SVG images for pieces - Row 6 (white pawns)
-    chessScreen.c60 = call image.load(imgPath + "white_pawn.svg");
-    chessScreen.c61 = call image.load(imgPath + "white_pawn.svg");
-    chessScreen.c62 = call image.load(imgPath + "white_pawn.svg");
-    chessScreen.c63 = call image.load(imgPath + "white_pawn.svg");
-    chessScreen.c64 = call image.load(imgPath + "white_pawn.svg");
-    chessScreen.c65 = call image.load(imgPath + "white_pawn.svg");
-    chessScreen.c66 = call image.load(imgPath + "white_pawn.svg");
-    chessScreen.c67 = call image.load(imgPath + "white_pawn.svg");
-    
-    // Load SVG images for pieces - Row 7 (white back row)
-    chessScreen.c70 = call image.load(imgPath + "white_rook.svg");
-    chessScreen.c71 = call image.load(imgPath + "white_knight.svg");
-    chessScreen.c72 = call image.load(imgPath + "white_bishop.svg");
-    chessScreen.c73 = call image.load(imgPath + "white_queen.svg");
-    chessScreen.c74 = call image.load(imgPath + "white_king.svg");
-    chessScreen.c75 = call image.load(imgPath + "white_bishop.svg");
-    chessScreen.c76 = call image.load(imgPath + "white_knight.svg");
-    chessScreen.c77 = call image.load(imgPath + "white_rook.svg");
-    
-    print "Chess piece images loaded!";
-    print "";
-    print "Initializing board layer (checkerboard pattern)...";
-    
-    // Initialize all 64 board squares with the correct checkerboard pattern
-    // Note: Manual assignment is used because EBS screen variables (chessScreen.b##)
-    // cannot be accessed dynamically via computed names. While verbose, this approach
-    // ensures correct checkerboard pattern: light on (row+col)%2==0, dark on (row+col)%2==1
-    // Row 0 (board row 8)
-    chessScreen.b00 = lightSquare; chessScreen.b01 = darkSquare; chessScreen.b02 = lightSquare; chessScreen.b03 = darkSquare;
-    chessScreen.b04 = lightSquare; chessScreen.b05 = darkSquare; chessScreen.b06 = lightSquare; chessScreen.b07 = darkSquare;
-    
-    // Row 1 (board row 7)
-    chessScreen.b10 = darkSquare; chessScreen.b11 = lightSquare; chessScreen.b12 = darkSquare; chessScreen.b13 = lightSquare;
-    chessScreen.b14 = darkSquare; chessScreen.b15 = lightSquare; chessScreen.b16 = darkSquare; chessScreen.b17 = lightSquare;
-    
-    // Row 2 (board row 6)
-    chessScreen.b20 = lightSquare; chessScreen.b21 = darkSquare; chessScreen.b22 = lightSquare; chessScreen.b23 = darkSquare;
-    chessScreen.b24 = lightSquare; chessScreen.b25 = darkSquare; chessScreen.b26 = lightSquare; chessScreen.b27 = darkSquare;
-    
-    // Row 3 (board row 5)
-    chessScreen.b30 = darkSquare; chessScreen.b31 = lightSquare; chessScreen.b32 = darkSquare; chessScreen.b33 = lightSquare;
-    chessScreen.b34 = darkSquare; chessScreen.b35 = lightSquare; chessScreen.b36 = darkSquare; chessScreen.b37 = lightSquare;
-    
-    // Row 4 (board row 4)
-    chessScreen.b40 = lightSquare; chessScreen.b41 = darkSquare; chessScreen.b42 = lightSquare; chessScreen.b43 = darkSquare;
-    chessScreen.b44 = lightSquare; chessScreen.b45 = darkSquare; chessScreen.b46 = lightSquare; chessScreen.b47 = darkSquare;
-    
-    // Row 5 (board row 3)
-    chessScreen.b50 = darkSquare; chessScreen.b51 = lightSquare; chessScreen.b52 = darkSquare; chessScreen.b53 = lightSquare;
-    chessScreen.b54 = darkSquare; chessScreen.b55 = lightSquare; chessScreen.b56 = darkSquare; chessScreen.b57 = lightSquare;
-    
-    // Row 6 (board row 2)
-    chessScreen.b60 = lightSquare; chessScreen.b61 = darkSquare; chessScreen.b62 = lightSquare; chessScreen.b63 = darkSquare;
-    chessScreen.b64 = lightSquare; chessScreen.b65 = darkSquare; chessScreen.b66 = lightSquare; chessScreen.b67 = darkSquare;
-    
-    // Row 7 (board row 1)
-    chessScreen.b70 = darkSquare; chessScreen.b71 = lightSquare; chessScreen.b72 = darkSquare; chessScreen.b73 = lightSquare;
-    chessScreen.b74 = darkSquare; chessScreen.b75 = lightSquare; chessScreen.b76 = darkSquare; chessScreen.b77 = lightSquare;
-
-    print "Board layer initialized!";
-    print "";
-    print "Opening chess screen with graphical grid display...";
-    
-    // Update screen variables before showing
-    chessScreen.whiteTimer = call formatTimer(timerWhite);
-    chessScreen.blackTimer = call formatTimer(timerBlack);
-    chessScreen.statusMessage = "White to move";
-    call updateTimerColors();
-    
-    // Show the chess screen
-    show screen chessScreen;
-    
-    print "";
-    print "Chess screen is now displayed!";
-    print "Use the New Game button to reset the board.";
-} else {
-    print "Game cancelled. Exiting...";
-}
