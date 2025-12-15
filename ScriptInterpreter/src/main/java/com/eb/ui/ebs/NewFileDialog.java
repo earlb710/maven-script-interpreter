@@ -7,6 +7,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Window;
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -30,6 +31,7 @@ public class NewFileDialog extends Dialog<NewFileDialog.FileInfo> {
         EBS_SCRIPT("EBS Script", ".ebs"),
         JSON("JSON", ".json"),
         CSS("CSS", ".css"),
+        HTML("HTML", ".html"),
         MARKDOWN("Markdown", ".md");
         
         private final String displayName;
@@ -107,6 +109,38 @@ public class NewFileDialog extends Dialog<NewFileDialog.FileInfo> {
     }
     
     /**
+     * Generate a unique default filename based on the file type.
+     * Format: newXXX (or newXXX_count if file exists) where XXX is based on the extension
+     * 
+     * @param type The file type
+     * @param path The directory path where the file will be created
+     * @return A unique filename without extension
+     */
+    private String generateDefaultFilename(FileType type, String path) {
+        try {
+            // Base name without extension (e.g., "newebs", "newjson")
+            String baseName = "new" + type.getExtension().substring(1); // Remove the dot from extension
+            String filename = baseName;
+            int count = 1;
+            
+            // Check if file exists and increment count if needed
+            Path dirPath = Paths.get(path);
+            Path filePath = dirPath.resolve(filename + type.getExtension());
+            
+            while (Files.exists(filePath)) {
+                filename = baseName + "_" + count;
+                filePath = dirPath.resolve(filename + type.getExtension());
+                count++;
+            }
+            
+            return filename;
+        } catch (Exception e) {
+            // If any error occurs (invalid path, I/O error, etc.), return a simple default
+            return "new" + type.getExtension().substring(1);
+        }
+    }
+    
+    /**
      * Create a new file dialog.
      * 
      * @param owner The owner window
@@ -122,30 +156,63 @@ public class NewFileDialog extends Dialog<NewFileDialog.FileInfo> {
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
-        grid.setPadding(new Insets(20, 150, 10, 10));
+        grid.setPadding(new Insets(20, 20, 10, 10));
+        
+        // Set column constraints to make items use full width
+        javafx.scene.layout.ColumnConstraints col1 = new javafx.scene.layout.ColumnConstraints();
+        col1.setMinWidth(80);
+        col1.setPrefWidth(80);
+        
+        javafx.scene.layout.ColumnConstraints col2 = new javafx.scene.layout.ColumnConstraints();
+        col2.setMinWidth(400); // Make path field longer
+        col2.setPrefWidth(500); // Preferred width for better path visibility
+        col2.setHgrow(javafx.scene.layout.Priority.ALWAYS);
+        col2.setFillWidth(true);
+        
+        javafx.scene.layout.ColumnConstraints col3 = new javafx.scene.layout.ColumnConstraints();
+        col3.setMinWidth(100);
+        col3.setPrefWidth(100);
+        
+        grid.getColumnConstraints().addAll(col1, col2, col3);
+        
+        // Set preferred width for the dialog to make it wider
+        grid.setPrefWidth(650);
         
         // File type combo box
         fileTypeCombo = new ComboBox<>();
         fileTypeCombo.getItems().addAll(FileType.values());
         fileTypeCombo.setValue(FileType.EBS_SCRIPT); // Default to EBS script
-        fileTypeCombo.setPrefWidth(300);
+        fileTypeCombo.setMaxWidth(Double.MAX_VALUE);
         
         // File name field
         fileNameField = new TextField();
         fileNameField.setPromptText("Enter file name");
-        fileNameField.setPrefWidth(300);
-        
-        // Update extension hint when file type changes
-        fileTypeCombo.valueProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                fileNameField.setPromptText("Enter file name (extension " + newValue.getExtension() + " will be added)");
-            }
-        });
+        fileNameField.setMaxWidth(Double.MAX_VALUE);
         
         // File path field (populated with project path)
         filePathField = new TextField();
         filePathField.setText(defaultPath != null ? defaultPath : System.getProperty("user.dir"));
-        filePathField.setPrefWidth(300);
+        filePathField.setMaxWidth(Double.MAX_VALUE);
+        
+        // Set initial default filename based on the default file type
+        fileNameField.setText(generateDefaultFilename(FileType.EBS_SCRIPT, filePathField.getText()));
+        
+        // Update extension hint and default filename when file type changes
+        fileTypeCombo.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                fileNameField.setPromptText("Enter file name (extension " + newValue.getExtension() + " will be added)");
+                // Update default filename based on new type
+                fileNameField.setText(generateDefaultFilename(newValue, filePathField.getText()));
+            }
+        });
+        
+        // Update default filename when path changes
+        filePathField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null && fileTypeCombo.getValue() != null) {
+                // Update default filename based on new path
+                fileNameField.setText(generateDefaultFilename(fileTypeCombo.getValue(), newValue));
+            }
+        });
         
         // Browse button to select directory
         browseButton = new Button("Browse...");

@@ -741,30 +741,73 @@ public class EbsConsoleHandler extends EbsHandler {
     }
 
     /**
-     * Create a new empty script file with a default name "newScript_x.ebs"
-     * where x is an incrementing sequence number.
+     * Create a new file using the NewFileDialog.
+     * Shows a dialog to select file type and name, with smart defaults.
      * The file is NOT created on disk - it exists only in the tab until saved.
      */
     public void createNewScriptFile() {
         try {
-            String filename = getNextNewScriptFilename();
-            Path path = Util.SANDBOX_ROOT.resolve(filename);
+            // Determine the default path based on the currently selected tab
+            String defaultPath = getDefaultPathForNewFile();
+            
+            // Show new file dialog with the determined default path
+            NewFileDialog dialog = new NewFileDialog(stage, defaultPath);
+            var result = dialog.showAndWait();
+            
+            if (result.isEmpty()) {
+                return; // User cancelled
+            }
+            
+            NewFileDialog.FileInfo fileInfo = result.get();
+            String fullPath = fileInfo.getFullPath();
+            Path path = Path.of(fullPath);
             
             // DO NOT create the physical file - just create the tab
             // Create a TabContext with a null fileContext since the file doesn't exist yet
-            TabContext tabContext = new TabContext(filename, path, null);
+            TabContext tabContext = new TabContext(path.getFileName().toString(), path, null);
             
             // Create the tab using the tab handler
             EbsTab newTab = tabHandler.createNewTab(tabContext, true);
             
             if (newTab != null) {
-                // Initialize with default content and mark as dirty (unsaved)
-                String defaultContent = "// New EBS Script\n\n";
+                // Initialize with default content based on file type
+                String defaultContent = getDefaultContentForFileType(fileInfo.getType());
                 newTab.initializeAsNewFile(defaultContent);
             }
         } catch (Exception ex) {
-            submitErrors("Failed to create new script file: " + ex.getMessage());
+            submitErrors("Failed to create new file: " + ex.getMessage());
         }
+    }
+    
+    /**
+     * Determine the default path for creating a new file based on the currently selected tab.
+     * If a file is selected, returns its parent directory.
+     * If a directory is selected, returns that directory.
+     * Otherwise, returns SANDBOX_ROOT.
+     * 
+     * @return The default path as a string
+     */
+    private String getDefaultPathForNewFile() {
+        String defaultPath = Util.SANDBOX_ROOT.toString();
+        
+        TabContext selectedTabContext = getSelectedTabContext();
+        if (selectedTabContext != null && selectedTabContext.path != null) {
+            Path selectedPath = selectedTabContext.path;
+            boolean pathExists = Files.exists(selectedPath);
+            
+            // If the path exists and is a directory, use it directly
+            if (pathExists && Files.isDirectory(selectedPath)) {
+                defaultPath = selectedPath.toString();
+            } else {
+                // If the path is a file (existing or not), use its parent directory
+                Path parentDir = selectedPath.getParent();
+                if (parentDir != null) {
+                    defaultPath = parentDir.toString();
+                }
+            }
+        }
+        
+        return defaultPath;
     }
 
     /**
@@ -1673,6 +1716,7 @@ public class EbsConsoleHandler extends EbsHandler {
             case EBS_SCRIPT -> "// EBS Script\n// Type your code here\n\n";
             case JSON -> "{\n  \n}\n";
             case CSS -> "/* CSS Styles */\n\n";
+            case HTML -> "<!DOCTYPE html>\n<html>\n<head>\n    <title>Document</title>\n</head>\n<body>\n    \n</body>\n</html>\n";
             case MARKDOWN -> "# Markdown Document\n\n";
         };
     }

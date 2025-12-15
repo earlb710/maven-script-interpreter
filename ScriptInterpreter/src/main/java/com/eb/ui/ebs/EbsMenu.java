@@ -33,8 +33,8 @@ public class EbsMenu extends MenuBar {
         
         Menu fileMenu = new Menu("File");
 
-        // --- New Script File ---
-        MenuItem newItem = new MenuItem("New Script File");
+        // --- New File ---
+        MenuItem newItem = new MenuItem("New File");
         newItem.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.CONTROL_DOWN));
         newItem.setOnAction(event -> {
             handler.createNewScriptFile();
