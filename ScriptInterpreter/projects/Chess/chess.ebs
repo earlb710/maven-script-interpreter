@@ -89,8 +89,8 @@ blackPieces[5] = "\u265B";  // Black Queen
 blackPieces[6] = "\u265A";  // Black King
 
 // Image path base for SVG chess pieces
-// Path relative to ScriptInterpreter directory (../../ goes up from scripts/app/)
-var imgPath: string = "../../src/main/resources/images/chess/";
+// Path relative to ScriptInterpreter directory (working directory when script runs)
+var imgPath: string = "src/main/resources/images/chess/";
 
 // Create the chess board using array.bitmap for bitmap-encoded cell data (8x8 = 64 elements)
 var board: array.bitmap[64];
