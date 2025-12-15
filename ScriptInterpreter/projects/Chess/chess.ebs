@@ -603,6 +603,9 @@ var gameStarted: bool = false;
 // Variable to store selected time limit
 var selectedTimeLimit: string = "10 minutes";
 
+// Constant for unlimited time (in seconds)
+var UNLIMITED_TIME: int = 99999;
+
 // Update timer colors based on current player
 updateTimerColors() {
     if currentPlayer == 0 then {
@@ -633,7 +636,7 @@ getTimeLimitInSeconds(timeLimit: string) return int {
     } else if timeLimit == "60 minutes" then {
         return 3600;
     } else if timeLimit == "Unlimited" then {
-        return 99999;  // Very large number for unlimited
+        return UNLIMITED_TIME;
     } else {
         return 600;  // Default to 10 minutes
     }
@@ -804,9 +807,6 @@ screen startupDialog = {
     "title": "Chess Game - Start",
     "width": 400,
     "height": 250,
-    "vars": [
-        {"name": "timeLimit", "type": "string", "default": "10 minutes"}
-    ],
     "area": [
         {
             "name": "mainArea",
