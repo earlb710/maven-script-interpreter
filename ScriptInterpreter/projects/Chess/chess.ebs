@@ -515,6 +515,44 @@ setPieceImage(x: int, y: int, pieceImage: imagedata) {
     }
 }
 
+// Get chess piece symbol for move notation
+getPieceSymbol(pieceType: int) return string {
+    if pieceType == KING then { return "K"; }
+    if pieceType == QUEEN then { return "Q"; }
+    if pieceType == ROOK then { return "R"; }
+    if pieceType == BISHOP then { return "B"; }
+    if pieceType == KNIGHT then { return "N"; }
+    if pieceType == PAWN then { return ""; }  // Pawns don't have a symbol in algebraic notation
+    return "";
+}
+
+// Convert board coordinates to algebraic notation (e.g., 0,0 -> a8, 7,7 -> h1)
+coordsToAlgebraic(x: int, y: int) return string {
+    var files: string = "abcdefgh";
+    var file: string = call string.charAt(files, x);
+    var rank: int = 8 - y;  // y=0 is rank 8, y=7 is rank 1
+    return file + rank;
+}
+
+// Format a move for the move history
+formatMove(fromX: int, fromY: int, toX: int, toY: int, pieceType: int, isCapture: bool) return string {
+    var pieceSymbol: string = call getPieceSymbol(pieceType);
+    var fromSquare: string = call coordsToAlgebraic(fromX, fromY);
+    var toSquare: string = call coordsToAlgebraic(toX, toY);
+    var captureSymbol: string = "";
+    
+    if isCapture then {
+        captureSymbol = "x";
+        // For pawn captures, include the starting file
+        if pieceType == PAWN then {
+            var files: string = "abcdefgh";
+            pieceSymbol = call string.charAt(files, fromX);
+        }
+    }
+    
+    return pieceSymbol + captureSymbol + toSquare;
+}
+
 // Move a piece from source to destination
 movePiece(fromX: int, fromY: int, toX: int, toY: int) {
     print "Moving piece from (" + fromX + ", " + fromY + ") to (" + toX + ", " + toY + ")";
@@ -573,10 +611,25 @@ handleCellClick(x: int, y: int) {
         }
         
         if isValidMove then {
-            // Restore the selected piece to normal color before moving
+            // Get information about the move before executing it
             var sourceCellValue: int = call getPieceAt(selectedX, selectedY);
+            var destCellValue: int = call getPieceAt(x, y);
+            var isCapture: bool = false;
+            
+            // Check if this is a capture move
+            if destCellValue != -1 then {
+                var destCell = ChessCell(destCellValue);
+                if destCell.pieceType != EMPTY then {
+                    isCapture = true;
+                }
+            }
+            
+            var sourceCell = ChessCell(sourceCellValue);
+            var movingPieceType: int = sourceCell.pieceType;
+            var movingPieceColor: int = sourceCell.pieceColor;
+            
+            // Restore the selected piece to normal color before moving
             if sourceCellValue != -1 then {
-                var sourceCell = ChessCell(sourceCellValue);
                 if sourceCell.pieceType != EMPTY then {
                     var normalSourcePiece: imagedata = call getNormalPiece(sourceCell.pieceType, sourceCell.pieceColor);
                     if normalSourcePiece != null then {
@@ -588,6 +641,18 @@ handleCellClick(x: int, y: int) {
             
             // Move the piece
             call movePiece(selectedX, selectedY, x, y);
+            
+            // Format and add move to history
+            var moveNotation: string = call formatMove(selectedX, selectedY, x, y, movingPieceType, isCapture);
+            var playerName: string;
+            if currentPlayer == WHITE then {
+                playerName = "White";
+            } else {
+                playerName = "Black";
+            }
+            var moveEntry: string = playerName + ": " + moveNotation + "\n";
+            chessScreen.moveHistory = chessScreen.moveHistory + moveEntry;
+            print "Move added to history: " + moveEntry;
             
             // Clear indicators and selection
             call clearIndicators();
