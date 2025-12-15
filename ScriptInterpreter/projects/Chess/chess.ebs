@@ -601,7 +601,7 @@ printBoard() {
 var gameStarted: bool = false;
 
 // Variable to store selected time limit
-var selectedTimeLimit: string = "10 minutes";
+var selectedTimeLimit: string = "Unlimited";
 
 // Constant for unlimited time (in seconds)
 var UNLIMITED_TIME: int = 99999;
@@ -806,12 +806,12 @@ handleExitGame() {
 screen startupDialog = {
     "title": "Chess Game - Start",
     "width": 400,
-    "height": 250,
+    "height": 300,
     "vars": [
         {
             "name": "timeLimit",
             "type": "string",
-            "default": "10 minutes",
+            "default": "Unlimited",
             "display": {
                 "type": "choicebox",
                 "labelText": "Time Limit:",
