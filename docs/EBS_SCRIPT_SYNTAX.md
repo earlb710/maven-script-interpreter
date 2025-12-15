@@ -3962,6 +3962,13 @@ call scr.resetVarItem("screenName", "varName");   // Revert to original value (u
 // resetVarItem: Restores originalValue to current value (undo unsaved changes)
 // Both functions check if any other stateful variables are changed and mark screen CLEAN if none remain
 
+// Variable clear and init (for resetting to default values)
+call scr.clearVarItem("screenName", "varName");   // Set to defaultValue, mark as CHANGED
+call scr.initVarItem("screenName", "varName");    // Set to defaultValue, set as original, mark as CLEAN
+// clearVarItem: Sets variable to defaultValue (or null), marks screen as CHANGED (needs save)
+// initVarItem: Sets variable to defaultValue (or null), sets originalValue too, marks screen as CLEAN
+// Use clearVarItem for user-initiated clear operations, initVarItem for initialization/reset
+
 // Item status
 var itemStatus = call scr.getItemStatus("screenName", "itemName");
 call scr.resetItemOriginalValue("screenName", "itemName");
