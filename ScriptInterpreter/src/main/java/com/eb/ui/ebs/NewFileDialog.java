@@ -164,6 +164,8 @@ public class NewFileDialog extends Dialog<NewFileDialog.FileInfo> {
         col1.setPrefWidth(80);
         
         javafx.scene.layout.ColumnConstraints col2 = new javafx.scene.layout.ColumnConstraints();
+        col2.setMinWidth(400); // Make path field longer
+        col2.setPrefWidth(500); // Preferred width for better path visibility
         col2.setHgrow(javafx.scene.layout.Priority.ALWAYS);
         col2.setFillWidth(true);
         
@@ -172,6 +174,9 @@ public class NewFileDialog extends Dialog<NewFileDialog.FileInfo> {
         col3.setPrefWidth(100);
         
         grid.getColumnConstraints().addAll(col1, col2, col3);
+        
+        // Set preferred width for the dialog to make it wider
+        grid.setPrefWidth(650);
         
         // File type combo box
         fileTypeCombo = new ComboBox<>();
