@@ -860,11 +860,11 @@ screen chessScreen = {
                     "padding": "10",
                     "style": "-fx-background-color: $COLOR_BG_TIMER; -fx-background-radius: 5; -fx-alignment: center;",
                     "items": [
-                        {"name": "whiteLabelTimer", "varRef": "whiteLabelText", "display": {"type": "label", "labelColor": "$whiteLabelColor", "labelFontSize": "18px"}},
-                        {"name": "whiteTimerField", "varRef": "whiteTimer", "display": {"type": "label", "labelColor": "$whiteTimerColor", "labelFontSize": "24px", "labelBold": true}},
+                        {"name": "whiteLabelTimer", "varRef": "whiteLabelText", "display": {"type": "label", "labelColor": "whiteLabelColor", "labelFontSize": "18px"}},
+                        {"name": "whiteTimerField", "varRef": "whiteTimer", "display": {"type": "label", "labelColor": "whiteTimerColor", "labelFontSize": "24px", "labelBold": true}},
                         {"name": "spacerLabel", "display": {"type": "label", "labelText": "     |     ", "labelColor": "$COLOR_TEXT_SEPARATOR", "labelFontSize": "24px"}},
-                        {"name": "blackLabelTimer", "varRef": "blackLabelText", "display": {"type": "label", "labelColor": "$blackLabelColor", "labelFontSize": "18px"}},
-                        {"name": "blackTimerField", "varRef": "blackTimer", "display": {"type": "label", "labelColor": "$blackTimerColor", "labelFontSize": "24px", "labelBold": true}}
+                        {"name": "blackLabelTimer", "varRef": "blackLabelText", "display": {"type": "label", "labelColor": "blackLabelColor", "labelFontSize": "18px"}},
+                        {"name": "blackTimerField", "varRef": "blackTimer", "display": {"type": "label", "labelColor": "blackTimerColor", "labelFontSize": "24px", "labelBold": true}}
                     ]
                 },
                 {
