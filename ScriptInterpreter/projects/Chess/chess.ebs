@@ -110,6 +110,20 @@ var redIndicator: imagedata;    // Red circle for capture moves
 var lightSquare: imagedata;     // Light square for board
 var darkSquare: imagedata;      // Dark square for board
 
+// Yellow piece images - used when a piece is selected/clicked
+var yellowWhitePawn: imagedata;
+var yellowWhiteRook: imagedata;
+var yellowWhiteKnight: imagedata;
+var yellowWhiteBishop: imagedata;
+var yellowWhiteQueen: imagedata;
+var yellowWhiteKing: imagedata;
+var yellowBlackPawn: imagedata;
+var yellowBlackRook: imagedata;
+var yellowBlackKnight: imagedata;
+var yellowBlackBishop: imagedata;
+var yellowBlackQueen: imagedata;
+var yellowBlackKing: imagedata;
+
 // Helper functions
 boardIndex(row: int, col: int) return int {
     return row * 8 + col;
@@ -144,6 +158,26 @@ function isOccupiedByColor(x: int, y: int, color: int) return bool {
     }
     var cell = ChessCell(cellValue);
     return cell.pieceType != EMPTY && cell.pieceColor == color;
+}
+
+// Get the yellow version of a piece image based on piece type and color
+function getYellowPiece(pieceType: int, pieceColor: int) return imagedata {
+    if pieceColor == WHITE then {
+        if pieceType == PAWN then { return yellowWhitePawn; }
+        if pieceType == ROOK then { return yellowWhiteRook; }
+        if pieceType == KNIGHT then { return yellowWhiteKnight; }
+        if pieceType == BISHOP then { return yellowWhiteBishop; }
+        if pieceType == QUEEN then { return yellowWhiteQueen; }
+        if pieceType == KING then { return yellowWhiteKing; }
+    } else {
+        if pieceType == PAWN then { return yellowBlackPawn; }
+        if pieceType == ROOK then { return yellowBlackRook; }
+        if pieceType == KNIGHT then { return yellowBlackKnight; }
+        if pieceType == BISHOP then { return yellowBlackBishop; }
+        if pieceType == QUEEN then { return yellowBlackQueen; }
+        if pieceType == KING then { return yellowBlackKing; }
+    }
+    return null;
 }
 
 // Create board layer images (bottom layer - checkerboard)
@@ -182,6 +216,22 @@ createIndicators() {
     call style.setStroke(redCanvas, "#AA0000", 2.0);
     call draw.circle(redCanvas, 30, 30, 20, false);
     redIndicator = call canvas.toImage(redCanvas);
+}
+
+// Load yellow piece images (for highlighting selected pieces)
+loadYellowPieces() {
+    yellowWhitePawn = call image.load(imgPath + "yellow_white_pawn.svg");
+    yellowWhiteRook = call image.load(imgPath + "yellow_white_rook.svg");
+    yellowWhiteKnight = call image.load(imgPath + "yellow_white_knight.svg");
+    yellowWhiteBishop = call image.load(imgPath + "yellow_white_bishop.svg");
+    yellowWhiteQueen = call image.load(imgPath + "yellow_white_queen.svg");
+    yellowWhiteKing = call image.load(imgPath + "yellow_white_king.svg");
+    yellowBlackPawn = call image.load(imgPath + "yellow_black_pawn.svg");
+    yellowBlackRook = call image.load(imgPath + "yellow_black_rook.svg");
+    yellowBlackKnight = call image.load(imgPath + "yellow_black_knight.svg");
+    yellowBlackBishop = call image.load(imgPath + "yellow_black_bishop.svg");
+    yellowBlackQueen = call image.load(imgPath + "yellow_black_queen.svg");
+    yellowBlackKing = call image.load(imgPath + "yellow_black_king.svg");
 }
 
 // Clear all move indicators on the board
@@ -338,6 +388,84 @@ setIndicator(x: int, y: int, isCapture: bool) {
     }
 }
 
+// Set a yellow piece at a specific cell
+setYellowPiece(x: int, y: int, yellowPiece: imagedata) {
+    // Set the yellow piece based on position
+    if y == 0 then {
+        if x == 0 then { chessScreen.c00 = yellowPiece; }
+        if x == 1 then { chessScreen.c01 = yellowPiece; }
+        if x == 2 then { chessScreen.c02 = yellowPiece; }
+        if x == 3 then { chessScreen.c03 = yellowPiece; }
+        if x == 4 then { chessScreen.c04 = yellowPiece; }
+        if x == 5 then { chessScreen.c05 = yellowPiece; }
+        if x == 6 then { chessScreen.c06 = yellowPiece; }
+        if x == 7 then { chessScreen.c07 = yellowPiece; }
+    } else if y == 1 then {
+        if x == 0 then { chessScreen.c10 = yellowPiece; }
+        if x == 1 then { chessScreen.c11 = yellowPiece; }
+        if x == 2 then { chessScreen.c12 = yellowPiece; }
+        if x == 3 then { chessScreen.c13 = yellowPiece; }
+        if x == 4 then { chessScreen.c14 = yellowPiece; }
+        if x == 5 then { chessScreen.c15 = yellowPiece; }
+        if x == 6 then { chessScreen.c16 = yellowPiece; }
+        if x == 7 then { chessScreen.c17 = yellowPiece; }
+    } else if y == 2 then {
+        if x == 0 then { chessScreen.c20 = yellowPiece; }
+        if x == 1 then { chessScreen.c21 = yellowPiece; }
+        if x == 2 then { chessScreen.c22 = yellowPiece; }
+        if x == 3 then { chessScreen.c23 = yellowPiece; }
+        if x == 4 then { chessScreen.c24 = yellowPiece; }
+        if x == 5 then { chessScreen.c25 = yellowPiece; }
+        if x == 6 then { chessScreen.c26 = yellowPiece; }
+        if x == 7 then { chessScreen.c27 = yellowPiece; }
+    } else if y == 3 then {
+        if x == 0 then { chessScreen.c30 = yellowPiece; }
+        if x == 1 then { chessScreen.c31 = yellowPiece; }
+        if x == 2 then { chessScreen.c32 = yellowPiece; }
+        if x == 3 then { chessScreen.c33 = yellowPiece; }
+        if x == 4 then { chessScreen.c34 = yellowPiece; }
+        if x == 5 then { chessScreen.c35 = yellowPiece; }
+        if x == 6 then { chessScreen.c36 = yellowPiece; }
+        if x == 7 then { chessScreen.c37 = yellowPiece; }
+    } else if y == 4 then {
+        if x == 0 then { chessScreen.c40 = yellowPiece; }
+        if x == 1 then { chessScreen.c41 = yellowPiece; }
+        if x == 2 then { chessScreen.c42 = yellowPiece; }
+        if x == 3 then { chessScreen.c43 = yellowPiece; }
+        if x == 4 then { chessScreen.c44 = yellowPiece; }
+        if x == 5 then { chessScreen.c45 = yellowPiece; }
+        if x == 6 then { chessScreen.c46 = yellowPiece; }
+        if x == 7 then { chessScreen.c47 = yellowPiece; }
+    } else if y == 5 then {
+        if x == 0 then { chessScreen.c50 = yellowPiece; }
+        if x == 1 then { chessScreen.c51 = yellowPiece; }
+        if x == 2 then { chessScreen.c52 = yellowPiece; }
+        if x == 3 then { chessScreen.c53 = yellowPiece; }
+        if x == 4 then { chessScreen.c54 = yellowPiece; }
+        if x == 5 then { chessScreen.c55 = yellowPiece; }
+        if x == 6 then { chessScreen.c56 = yellowPiece; }
+        if x == 7 then { chessScreen.c57 = yellowPiece; }
+    } else if y == 6 then {
+        if x == 0 then { chessScreen.c60 = yellowPiece; }
+        if x == 1 then { chessScreen.c61 = yellowPiece; }
+        if x == 2 then { chessScreen.c62 = yellowPiece; }
+        if x == 3 then { chessScreen.c63 = yellowPiece; }
+        if x == 4 then { chessScreen.c64 = yellowPiece; }
+        if x == 5 then { chessScreen.c65 = yellowPiece; }
+        if x == 6 then { chessScreen.c66 = yellowPiece; }
+        if x == 7 then { chessScreen.c67 = yellowPiece; }
+    } else if y == 7 then {
+        if x == 0 then { chessScreen.c70 = yellowPiece; }
+        if x == 1 then { chessScreen.c71 = yellowPiece; }
+        if x == 2 then { chessScreen.c72 = yellowPiece; }
+        if x == 3 then { chessScreen.c73 = yellowPiece; }
+        if x == 4 then { chessScreen.c74 = yellowPiece; }
+        if x == 5 then { chessScreen.c75 = yellowPiece; }
+        if x == 6 then { chessScreen.c76 = yellowPiece; }
+        if x == 7 then { chessScreen.c77 = yellowPiece; }
+    }
+}
+
 // Handle cell click - select piece and show valid moves
 handleCellClick(x: int, y: int) {
     print "Cell clicked: (" + x + ", " + y + ")";
@@ -379,6 +507,13 @@ handleCellClick(x: int, y: int) {
     selectedX = x;
     selectedY = y;
     print "Piece selected at (" + x + ", " + y + ")";
+    
+    // Change the selected piece to yellow
+    var yellowPiece: imagedata = call getYellowPiece(cell.pieceType, cell.pieceColor);
+    if yellowPiece != null then {
+        call setYellowPiece(x, y, yellowPiece);
+        print "Changed piece to yellow";
+    }
     
     // Get valid moves for this piece
     print "Getting valid moves...";
@@ -1198,6 +1333,9 @@ call createBoardLayer();
 
 print "Creating move indicator images...";
 call createIndicators();
+
+print "Loading yellow piece images...";
+call loadYellowPieces();
 
 print "";
 print "Board Encoding Information:";
