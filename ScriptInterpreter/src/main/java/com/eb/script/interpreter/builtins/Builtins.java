@@ -879,6 +879,18 @@ public final class Builtins {
                 newParam("millis", DataType.LONG) // required: milliseconds to sleep
         ));
 
+        addBuiltin(info(
+                "thread.timerStart", DataType.STRING,
+                newParam("name", DataType.STRING, true), // required: timer name
+                newParam("period", DataType.LONG, true), // required: period in milliseconds
+                newParam("callback", DataType.STRING, true) // required: callback function name
+        ));
+
+        addBuiltin(info(
+                "thread.timerStop", DataType.BOOL,
+                newParam("name", DataType.STRING, true) // required: timer name
+        ));
+
 // ==========================
 // AI builtins
 // ==========================
@@ -1971,6 +1983,9 @@ public final class Builtins {
         }
         if (BuiltinsHelp.handles(name)) {
             return BuiltinsHelp.dispatch(env, name, args);
+        }
+        if (BuiltinsThread.handles(name)) {
+            return BuiltinsThread.dispatch(context, name, args);
         }
         if (BuiltinsSystem.handles(name)) {
             return BuiltinsSystem.dispatch(env, name, args);
