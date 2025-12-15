@@ -2894,6 +2894,7 @@ public class InterpreterScreen {
                 // Create Var object
                 Var var = new Var(varName, varType, defaultValue);
                 var.setValue(value);
+                var.setOriginalValue(value);  // Set original value to match the processed initial value
                 var.setSetName(setName);
                 var.setMinChar(minChar);
                 var.setMaxChar(maxChar);
