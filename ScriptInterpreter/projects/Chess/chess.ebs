@@ -641,6 +641,8 @@ screen chessScreen = {
     "vars": [
         {"name": "whiteTimer", "type": "string", "default": "10:00"},
         {"name": "blackTimer", "type": "string", "default": "10:00"},
+        {"name": "whiteLabelText", "type": "string", "default": "\u2654 White:"},
+        {"name": "blackLabelText", "type": "string", "default": "\u265A Black:"},
         {"name": "whiteLabelColor", "type": "string", "default": "$COLOR_LABEL_ACTIVE"},
         {"name": "blackLabelColor", "type": "string", "default": "$COLOR_LABEL_INACTIVE"},
         {"name": "whiteTimerColor", "type": "string", "default": "$COLOR_TIMER_ACTIVE"},
@@ -858,10 +860,10 @@ screen chessScreen = {
                     "padding": "10",
                     "style": "-fx-background-color: $COLOR_BG_TIMER; -fx-background-radius: 5; -fx-alignment: center;",
                     "items": [
-                        {"name": "whiteLabelTimer", "varRef": "whiteLabelColor", "display": {"type": "label", "labelText": "\u2654 White:", "labelFontSize": "18px"}},
+                        {"name": "whiteLabelTimer", "varRef": "whiteLabelText", "varRefColor": "whiteLabelColor", "display": {"type": "label", "labelFontSize": "18px"}},
                         {"name": "whiteTimerField", "varRef": "whiteTimer", "varRefColor": "whiteTimerColor", "display": {"type": "label", "labelFontSize": "24px", "labelBold": true}},
                         {"name": "spacerLabel", "display": {"type": "label", "labelText": "     |     ", "labelColor": "$COLOR_TEXT_SEPARATOR", "labelFontSize": "24px"}},
-                        {"name": "blackLabelTimer", "varRef": "blackLabelColor", "display": {"type": "label", "labelText": "\u265A Black:", "labelFontSize": "18px"}},
+                        {"name": "blackLabelTimer", "varRef": "blackLabelText", "varRefColor": "blackLabelColor", "display": {"type": "label", "labelFontSize": "18px"}},
                         {"name": "blackTimerField", "varRef": "blackTimer", "varRefColor": "blackTimerColor", "display": {"type": "label", "labelFontSize": "24px", "labelBold": true}}
                     ]
                 },
