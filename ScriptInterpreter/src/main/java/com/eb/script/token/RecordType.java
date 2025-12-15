@@ -1,5 +1,6 @@
 package com.eb.script.token;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -12,7 +13,7 @@ import java.util.Set;
  * 
  * @author Earl Bosch
  */
-public class RecordType {
+public class RecordType implements Serializable {
     
     // Field definitions: field name -> field type (for primitive types)
     private final Map<String, DataType> fields;

@@ -1,5 +1,6 @@
 package com.eb.script.token;
 
+import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -17,12 +18,12 @@ import java.util.Map;
  * 
  * @author Earl Bosch
  */
-public class IntmapType {
+public class IntmapType implements Serializable {
     
     /**
      * Represents a field within an intmap, defined by its bit range.
      */
-    public static class IntField {
+    public static class IntField implements Serializable {
         private final String name;
         private final int startBit;  // Inclusive, 0-31
         private final int endBit;    // Inclusive, 0-31
