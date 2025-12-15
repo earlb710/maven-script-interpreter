@@ -58,6 +58,7 @@ var COLOR_CELL_DARK: string = "#b58863";         // Dark chess squares - dark wo
 var COLOR_TEXT_WHITE: string = "#ffffff";        // White text - for labels on dark backgrounds
 var COLOR_TEXT_RULER: string = "#ffcc00";        // Ruler text (a-h, 1-8) - bright gold for high contrast
 var COLOR_TEXT_SEPARATOR: string = "#cccccc";    // Separator text - light gray (improved from #666666)
+var COLOR_TEXT_TIMER_LABEL: string = "#ffff00";  // Timer label text - bright yellow
 var COLOR_TIMER_WHITE: string = "#00ff00";       // White player timer - bright green
 var COLOR_TIMER_BLACK: string = "#ff6600";       // Black player timer - orange
 var COLOR_BUTTON_NEW_GAME: string = "#ffff00";   // New Game button - yellow
@@ -362,6 +363,14 @@ handleCellClick(x: int, y: int) {
         return;
     }
     
+    // Only show valid moves for the current player's pieces
+    if cell.pieceColor != currentPlayer then {
+        print "Not current player's piece, ignoring";
+        selectedX = -1;
+        selectedY = -1;
+        return;
+    }
+    
     // Select the piece
     selectedX = x;
     selectedY = y;
@@ -594,6 +603,7 @@ resetGame() {
     chessScreen.whiteTimer = call formatTimer(timerWhite);
     chessScreen.blackTimer = call formatTimer(timerBlack);
     chessScreen.statusMessage = "White to move - Game Reset!";
+    chessScreen.moveHistory = "Game started.\nWhite's turn.\n";
 }
 
 // Close the chess screen
@@ -610,7 +620,7 @@ screen chessScreen = {
         {"name": "whiteTimer", "type": "string", "default": "10:00"},
         {"name": "blackTimer", "type": "string", "default": "10:00"},
         {"name": "statusMessage", "type": "string", "default": "White to move"},
-        {"name": "moveHistory", "type": "string", "default": "Game started...\n"},
+        {"name": "moveHistory", "type": "string", "default": "Game started.\nWhite's turn.\n"},
         {"name": "b00", "type": "imagedata"},
         {"name": "b01", "type": "imagedata"},
         {"name": "b02", "type": "imagedata"},
@@ -822,10 +832,10 @@ screen chessScreen = {
                     "padding": "10",
                     "style": "-fx-background-color: $COLOR_BG_TIMER; -fx-background-radius: 5; -fx-alignment: center;",
                     "items": [
-                        {"name": "whiteLabelTimer", "display": {"type": "label", "labelText": "\u2654 White:", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "18px"}},
+                        {"name": "whiteLabelTimer", "display": {"type": "label", "labelText": "\u2654 White:", "labelColor": "$COLOR_TEXT_TIMER_LABEL", "labelFontSize": "18px"}},
                         {"name": "whiteTimerField", "varRef": "whiteTimer", "display": {"type": "label", "labelColor": "$COLOR_TIMER_WHITE", "labelFontSize": "24px", "labelBold": true}},
                         {"name": "spacerLabel", "display": {"type": "label", "labelText": "     |     ", "labelColor": "$COLOR_TEXT_SEPARATOR", "labelFontSize": "24px"}},
-                        {"name": "blackLabelTimer", "display": {"type": "label", "labelText": "\u265A Black:", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "18px"}},
+                        {"name": "blackLabelTimer", "display": {"type": "label", "labelText": "\u265A Black:", "labelColor": "$COLOR_TEXT_TIMER_LABEL", "labelFontSize": "18px"}},
                         {"name": "blackTimerField", "varRef": "blackTimer", "display": {"type": "label", "labelColor": "$COLOR_TIMER_BLACK", "labelFontSize": "24px", "labelBold": true}}
                     ]
                 },
