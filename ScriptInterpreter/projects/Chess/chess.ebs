@@ -807,6 +807,22 @@ screen startupDialog = {
     "title": "Chess Game - Start",
     "width": 400,
     "height": 250,
+    "vars": [
+        {
+            "name": "timeLimit",
+            "type": "string",
+            "default": "10 minutes",
+            "display": {
+                "type": "choicebox",
+                "labelText": "Time Limit:",
+                "labelColor": "#ffcc00",
+                "labelFontSize": "14px",
+                "labelBold": true,
+                "options": ["10 minutes", "15 minutes", "20 minutes", "30 minutes", "60 minutes", "Unlimited"],
+                "itemFontSize": "14px"
+            }
+        }
+    ],
     "area": [
         {
             "name": "mainArea",
@@ -817,20 +833,7 @@ screen startupDialog = {
             "items": [
                 {"name": "titleLabel", "display": {"type": "label", "labelText": "\u265A Welcome to Chess! \u2654", "labelColor": "#ffcc00", "labelFontSize": "20px", "labelBold": true}},
                 {"name": "instructionLabel", "display": {"type": "label", "labelText": "Select the time limit for each player:", "labelColor": "#ffffff", "labelFontSize": "14px"}},
-                {
-                    "name": "timeLimit",
-                    "type": "string",
-                    "default": "10 minutes",
-                    "display": {
-                        "type": "choicebox",
-                        "labelText": "Time Limit:",
-                        "labelColor": "#ffcc00",
-                        "labelFontSize": "14px",
-                        "labelBold": true,
-                        "options": ["10 minutes", "15 minutes", "20 minutes", "30 minutes", "60 minutes", "Unlimited"],
-                        "itemFontSize": "14px"
-                    }
-                }
+                {"name": "timeLimitField", "varRef": "timeLimit"}
             ],
             "areas": [
                 {
