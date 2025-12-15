@@ -1706,6 +1706,13 @@ public class BuiltinsScreen {
                 item.maxHeight = value != null ? String.valueOf(value) : null;
             case "alignment" ->
                 item.alignment = value != null ? String.valueOf(value).toLowerCase() : null;
+            case "stateful" -> {
+                if (value instanceof Boolean) {
+                    item.stateful = (Boolean) value;
+                } else {
+                    throw new InterpreterError("scr.setProperty: 'stateful' property must be a boolean");
+                }
+            }
             default ->
                 throw new InterpreterError("scr.setProperty: unknown property '" + propertyName + "'");
         }
@@ -1757,6 +1764,8 @@ public class BuiltinsScreen {
                 item.maxHeight;
             case "alignment" ->
                 item.alignment;
+            case "stateful" ->
+                item.stateful;
             default ->
                 throw new InterpreterError("scr.getProperty: unknown property '" + propertyName + "'");
         };
