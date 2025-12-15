@@ -456,8 +456,10 @@ public class EbsCanvas {
         if (Platform.isFxApplicationThread()) {
             // We're on FX thread - run snapshot directly to avoid deadlock
             try {
-                snapshot = new WritableImage((int) canvas.getWidth(), (int) canvas.getHeight());
-                canvas.snapshot(null, snapshot);
+                // Use SnapshotParameters with transparent fill to preserve alpha channel
+                javafx.scene.SnapshotParameters params = new javafx.scene.SnapshotParameters();
+                params.setFill(Color.TRANSPARENT);
+                snapshot = canvas.snapshot(params, null);
             } catch (Exception e) {
                 throw new InterpreterError("Failed to take canvas snapshot: " + e.getMessage());
             }
@@ -470,8 +472,10 @@ public class EbsCanvas {
             // Run snapshot on FX thread
             Platform.runLater(() -> {
                 try {
-                    WritableImage snap = new WritableImage((int) canvas.getWidth(), (int) canvas.getHeight());
-                    canvas.snapshot(null, snap);
+                    // Use SnapshotParameters with transparent fill to preserve alpha channel
+                    javafx.scene.SnapshotParameters params = new javafx.scene.SnapshotParameters();
+                    params.setFill(Color.TRANSPARENT);
+                    WritableImage snap = canvas.snapshot(params, null);
                     snapshotRef.set(snap);
                 } catch (Exception e) {
                     errorRef.set(e);
@@ -495,7 +499,13 @@ public class EbsCanvas {
             snapshot = snapshotRef.get();
         }
         try {
-            BufferedImage buffered = SwingFXUtils.fromFXImage(snapshot, null);
+            // Create BufferedImage with alpha channel for transparency support
+            BufferedImage buffered = new BufferedImage(
+                (int) snapshot.getWidth(), 
+                (int) snapshot.getHeight(), 
+                BufferedImage.TYPE_INT_ARGB
+            );
+            SwingFXUtils.fromFXImage(snapshot, buffered);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ImageIO.write(buffered, "png", baos);
             byte[] bytes = baos.toByteArray();
@@ -517,10 +527,11 @@ public class EbsCanvas {
         if (Platform.isFxApplicationThread()) {
             // We're on FX thread - run snapshot directly to avoid deadlock
             try {
-                snapshot = new WritableImage((int) width, (int) height);
+                // Use SnapshotParameters with transparent fill to preserve alpha channel
                 javafx.scene.SnapshotParameters params = new javafx.scene.SnapshotParameters();
+                params.setFill(Color.TRANSPARENT);
                 params.setViewport(new javafx.geometry.Rectangle2D(x, y, width, height));
-                canvas.snapshot(params, snapshot);
+                snapshot = canvas.snapshot(params, null);
             } catch (Exception e) {
                 throw new InterpreterError("Failed to take canvas snapshot: " + e.getMessage());
             }
@@ -533,10 +544,11 @@ public class EbsCanvas {
             // Run snapshot on FX thread
             Platform.runLater(() -> {
                 try {
-                    WritableImage snap = new WritableImage((int) width, (int) height);
+                    // Use SnapshotParameters with transparent fill to preserve alpha channel
                     javafx.scene.SnapshotParameters params = new javafx.scene.SnapshotParameters();
+                    params.setFill(Color.TRANSPARENT);
                     params.setViewport(new javafx.geometry.Rectangle2D(x, y, width, height));
-                    canvas.snapshot(params, snap);
+                    WritableImage snap = canvas.snapshot(params, null);
                     snapshotRef.set(snap);
                 } catch (Exception e) {
                     errorRef.set(e);
@@ -560,7 +572,13 @@ public class EbsCanvas {
             snapshot = snapshotRef.get();
         }
         try {
-            BufferedImage buffered = SwingFXUtils.fromFXImage(snapshot, null);
+            // Create BufferedImage with alpha channel for transparency support
+            BufferedImage buffered = new BufferedImage(
+                (int) snapshot.getWidth(), 
+                (int) snapshot.getHeight(), 
+                BufferedImage.TYPE_INT_ARGB
+            );
+            SwingFXUtils.fromFXImage(snapshot, buffered);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ImageIO.write(buffered, "png", baos);
             byte[] bytes = baos.toByteArray();
@@ -587,8 +605,10 @@ public class EbsCanvas {
         if (Platform.isFxApplicationThread()) {
             // We're on FX thread - run snapshot directly to avoid deadlock
             try {
-                snapshot = new WritableImage((int) canvas.getWidth(), (int) canvas.getHeight());
-                canvas.snapshot(null, snapshot);
+                // Use SnapshotParameters with transparent fill to preserve alpha channel
+                javafx.scene.SnapshotParameters params = new javafx.scene.SnapshotParameters();
+                params.setFill(Color.TRANSPARENT);
+                snapshot = canvas.snapshot(params, null);
             } catch (Exception e) {
                 throw new InterpreterError("Failed to take canvas snapshot: " + e.getMessage());
             }
@@ -601,8 +621,10 @@ public class EbsCanvas {
             // Run snapshot on FX thread
             Platform.runLater(() -> {
                 try {
-                    WritableImage snap = new WritableImage((int) canvas.getWidth(), (int) canvas.getHeight());
-                    canvas.snapshot(null, snap);
+                    // Use SnapshotParameters with transparent fill to preserve alpha channel
+                    javafx.scene.SnapshotParameters params = new javafx.scene.SnapshotParameters();
+                    params.setFill(Color.TRANSPARENT);
+                    WritableImage snap = canvas.snapshot(params, null);
                     snapshotRef.set(snap);
                 } catch (Exception e) {
                     errorRef.set(e);
@@ -626,7 +648,13 @@ public class EbsCanvas {
             snapshot = snapshotRef.get();
         }
         try {
-            BufferedImage buffered = SwingFXUtils.fromFXImage(snapshot, null);
+            // Create BufferedImage with alpha channel for transparency support
+            BufferedImage buffered = new BufferedImage(
+                (int) snapshot.getWidth(), 
+                (int) snapshot.getHeight(), 
+                BufferedImage.TYPE_INT_ARGB
+            );
+            SwingFXUtils.fromFXImage(snapshot, buffered);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ImageIO.write(buffered, finalFormat.toLowerCase(), baos);
             return new ArrayFixedByte(baos.toByteArray());

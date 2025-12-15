@@ -4167,7 +4167,53 @@ public class ScreenFactory {
                 }
             }
 
-            gridPane.add(control, col, row);
+            // Check if there's already a node at this position
+            Node existingNode = null;
+            for (Node node : gridPane.getChildren()) {
+                Integer nodeCol = GridPane.getColumnIndex(node);
+                Integer nodeRow = GridPane.getRowIndex(node);
+                if (nodeCol == null) nodeCol = 0;
+                if (nodeRow == null) nodeRow = 0;
+                
+                if (nodeCol == col && nodeRow == row) {
+                    existingNode = node;
+                    break;
+                }
+            }
+            
+            // If there's already a node at this position, wrap both in a StackPane
+            if (existingNode != null) {
+                // Check if existing node is already a StackPane wrapper
+                if (existingNode instanceof StackPane) {
+                    // Just add to existing StackPane
+                    StackPane stackPane = (StackPane) existingNode;
+                    stackPane.getChildren().add(control);
+                } else {
+                    // Create a new StackPane to hold both nodes
+                    StackPane stackPane = new StackPane();
+                    stackPane.setPickOnBounds(false); // Allow clicks to pass through
+                    
+                    // Remove the existing node and add both to StackPane
+                    gridPane.getChildren().remove(existingNode);
+                    stackPane.getChildren().addAll(existingNode, control);
+                    
+                    // Add the StackPane to the grid
+                    gridPane.add(stackPane, col, row);
+                    
+                    // Transfer any grid constraints from the existing node to the StackPane
+                    Integer colSpan = GridPane.getColumnSpan(existingNode);
+                    Integer rowSpan = GridPane.getRowSpan(existingNode);
+                    if (colSpan != null && colSpan > 1) {
+                        GridPane.setColumnSpan(stackPane, colSpan);
+                    }
+                    if (rowSpan != null && rowSpan > 1) {
+                        GridPane.setRowSpan(stackPane, rowSpan);
+                    }
+                }
+            } else {
+                // No existing node, just add normally
+                gridPane.add(control, col, row);
+            }
 
             // Apply column and row span
             if (item.colSpan != null && item.colSpan > 1) {
