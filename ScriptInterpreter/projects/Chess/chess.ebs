@@ -433,6 +433,11 @@ getPieceSymbol(cellValue: int) return string {
 }
 
 formatTimer(seconds: int) return string {
+    // Check if unlimited time
+    if seconds >= UNLIMITED_TIME then {
+        return "Unlimited";
+    }
+    
     var mins: int = seconds / 60;
     var secs: int = call modulo(seconds, 60);
     var minsStr: string = call str.lpad(string(mins), 2, "0");
@@ -806,7 +811,7 @@ handleExitGame() {
 screen startupDialog = {
     "title": "Chess Game - Start",
     "width": 400,
-    "height": 300,
+    "height": 330,
     "vars": [
         {
             "name": "timeLimit",
