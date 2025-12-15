@@ -601,16 +601,16 @@ printBoard() {
 updateTimerColors() {
     if currentPlayer == 0 then {
         // White's turn - white is active, black is inactive
-        chessScreen.whiteLabelColor = COLOR_LABEL_ACTIVE;
-        chessScreen.whiteTimerColor = COLOR_TIMER_ACTIVE;
-        chessScreen.blackLabelColor = COLOR_LABEL_INACTIVE;
-        chessScreen.blackTimerColor = COLOR_TIMER_INACTIVE;
+        call scr.setproperty("chessScreen.whiteLabelTimer", "textColor", COLOR_LABEL_ACTIVE);
+        call scr.setproperty("chessScreen.whiteTimerField", "textColor", COLOR_TIMER_ACTIVE);
+        call scr.setproperty("chessScreen.blackLabelTimer", "textColor", COLOR_LABEL_INACTIVE);
+        call scr.setproperty("chessScreen.blackTimerField", "textColor", COLOR_TIMER_INACTIVE);
     } else {
         // Black's turn - black is active, white is inactive
-        chessScreen.whiteLabelColor = COLOR_LABEL_INACTIVE;
-        chessScreen.whiteTimerColor = COLOR_TIMER_INACTIVE;
-        chessScreen.blackLabelColor = COLOR_LABEL_ACTIVE;
-        chessScreen.blackTimerColor = COLOR_TIMER_ACTIVE;
+        call scr.setproperty("chessScreen.whiteLabelTimer", "textColor", COLOR_LABEL_INACTIVE);
+        call scr.setproperty("chessScreen.whiteTimerField", "textColor", COLOR_TIMER_INACTIVE);
+        call scr.setproperty("chessScreen.blackLabelTimer", "textColor", COLOR_LABEL_ACTIVE);
+        call scr.setproperty("chessScreen.blackTimerField", "textColor", COLOR_TIMER_ACTIVE);
     }
 }
 
@@ -643,10 +643,6 @@ screen chessScreen = {
         {"name": "blackTimer", "type": "string", "default": "10:00"},
         {"name": "whiteLabelText", "type": "string", "default": "\u2654 White:"},
         {"name": "blackLabelText", "type": "string", "default": "\u265A Black:"},
-        {"name": "whiteLabelColor", "type": "string", "default": "$COLOR_LABEL_ACTIVE"},
-        {"name": "blackLabelColor", "type": "string", "default": "$COLOR_LABEL_INACTIVE"},
-        {"name": "whiteTimerColor", "type": "string", "default": "$COLOR_TIMER_ACTIVE"},
-        {"name": "blackTimerColor", "type": "string", "default": "$COLOR_TIMER_INACTIVE"},
         {"name": "statusMessage", "type": "string", "default": "White to move"},
         {"name": "moveHistory", "type": "string", "default": "Game started.\nWhite's turn.\n"},
         {"name": "b00", "type": "imagedata"},
@@ -860,11 +856,11 @@ screen chessScreen = {
                     "padding": "10",
                     "style": "-fx-background-color: $COLOR_BG_TIMER; -fx-background-radius: 5; -fx-alignment: center;",
                     "items": [
-                        {"name": "whiteLabelTimer", "varRef": "whiteLabelText", "display": {"type": "label", "labelFontSize": "18px", "labelColor": "whiteLabelColor"}},
-                        {"name": "whiteTimerField", "varRef": "whiteTimer", "display": {"type": "label", "labelFontSize": "24px", "labelBold": true, "labelColor": "whiteTimerColor"}},
-                        {"name": "spacerLabel", "display": {"type": "label", "labelText": "     |     ", "labelFontSize": "24px", "labelColor": "$COLOR_TEXT_SEPARATOR"}},
-                        {"name": "blackLabelTimer", "varRef": "blackLabelText", "display": {"type": "label", "labelFontSize": "18px", "labelColor": "blackLabelColor"}},
-                        {"name": "blackTimerField", "varRef": "blackTimer", "display": {"type": "label", "labelFontSize": "24px", "labelBold": true, "labelColor": "blackTimerColor"}}
+                        {"name": "whiteLabelTimer", "varRef": "whiteLabelText", "display": {"type": "label", "labelFontSize": "18px", "textColor": "$COLOR_LABEL_ACTIVE"}},
+                        {"name": "whiteTimerField", "varRef": "whiteTimer", "display": {"type": "label", "labelFontSize": "24px", "labelBold": true, "textColor": "$COLOR_TIMER_ACTIVE"}},
+                        {"name": "spacerLabel", "display": {"type": "label", "labelText": "     |     ", "labelFontSize": "24px", "textColor": "$COLOR_TEXT_SEPARATOR"}},
+                        {"name": "blackLabelTimer", "varRef": "blackLabelText", "display": {"type": "label", "labelFontSize": "18px", "textColor": "$COLOR_LABEL_INACTIVE"}},
+                        {"name": "blackTimerField", "varRef": "blackTimer", "display": {"type": "label", "labelFontSize": "24px", "labelBold": true, "textColor": "$COLOR_TIMER_INACTIVE"}}
                     ]
                 },
                 {
