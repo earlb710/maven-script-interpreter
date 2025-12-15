@@ -3955,12 +3955,19 @@ var originalValue = call scr.getVarOriginalValue("screenName", "varName");  // G
 // When stateful=true, changes to the variable mark screen as dirty
 // When stateful=false, changes don't affect dirty tracking (for display-only fields)
 
+// Variable submit and reset (for individual variables)
+call scr.submitVarItem("screenName", "varName");  // Mark current value as saved (sets as original)
+call scr.resetVarItem("screenName", "varName");   // Revert to original value (undo changes)
+// submitVarItem: Sets current value as the new originalValue (typically after successful save)
+// resetVarItem: Restores originalValue to current value (undo unsaved changes)
+// Both functions check if any other stateful variables are changed and mark screen CLEAN if none remain
+
 // Item status
 var itemStatus = call scr.getItemStatus("screenName", "itemName");
 call scr.resetItemOriginalValue("screenName", "itemName");
 
 // Revert and clear
-call scr.revert("screenName");  // Revert to original values
+call scr.revert("screenName");  // Revert ALL variables to original values
 call scr.clear("screenName");   // Clear all values
 
 // Get variable reference
