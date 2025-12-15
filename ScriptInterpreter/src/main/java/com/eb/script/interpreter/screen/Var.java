@@ -135,6 +135,16 @@ public class Var {
         this.originalValue = originalValue;
     }
     
+    /**
+     * Set both value and originalValue at once (keeps item clean).
+     * This is useful for initialization or after saving to reset the variable to a clean state.
+     * @param value The value to set for both current and original
+     */
+    public void setInitValue(Object value) {
+        this.value = value;
+        this.originalValue = value;
+    }
+    
     public DisplayItem getDisplayItem() {
         return displayItem;
     }
