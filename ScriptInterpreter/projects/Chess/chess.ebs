@@ -61,6 +61,10 @@ var COLOR_TEXT_SEPARATOR: string = "#cccccc";    // Separator text - light gray 
 var COLOR_TEXT_TIMER_LABEL: string = "#ffff00";  // Timer label text - bright yellow
 var COLOR_TIMER_WHITE: string = "#00ff00";       // White player timer - bright green
 var COLOR_TIMER_BLACK: string = "#ff6600";       // Black player timer - orange
+var COLOR_TIMER_ACTIVE: string = "#ffff00";      // Active player timer - bright yellow
+var COLOR_TIMER_INACTIVE: string = "#888888";    // Inactive player timer - light gray
+var COLOR_LABEL_ACTIVE: string = "#ffff00";      // Active player label - bright yellow
+var COLOR_LABEL_INACTIVE: string = "#888888";    // Inactive player label - light gray
 var COLOR_BUTTON_NEW_GAME: string = "#ffff00";   // New Game button - yellow
 var COLOR_MOVE_HISTORY_BG: string = "#2c2c2c";   // Move history background
 var COLOR_MOVE_HISTORY_TEXT: string = "#ffffff"; // Move history text color
@@ -593,6 +597,23 @@ printBoard() {
     print "";
 }
 
+// Update timer colors based on current player
+updateTimerColors() {
+    if currentPlayer == 0 then {
+        // White's turn - white is active, black is inactive
+        chessScreen.whiteLabelColor = COLOR_LABEL_ACTIVE;
+        chessScreen.whiteTimerColor = COLOR_TIMER_ACTIVE;
+        chessScreen.blackLabelColor = COLOR_LABEL_INACTIVE;
+        chessScreen.blackTimerColor = COLOR_TIMER_INACTIVE;
+    } else {
+        // Black's turn - black is active, white is inactive
+        chessScreen.whiteLabelColor = COLOR_LABEL_INACTIVE;
+        chessScreen.whiteTimerColor = COLOR_TIMER_INACTIVE;
+        chessScreen.blackLabelColor = COLOR_LABEL_ACTIVE;
+        chessScreen.blackTimerColor = COLOR_TIMER_ACTIVE;
+    }
+}
+
 // Reset game function - must be defined before screen that references it
 resetGame() {
     call initializeBoard();
@@ -604,6 +625,7 @@ resetGame() {
     chessScreen.blackTimer = call formatTimer(timerBlack);
     chessScreen.statusMessage = "White to move - Game Reset!";
     chessScreen.moveHistory = "Game started.\nWhite's turn.\n";
+    call updateTimerColors();
 }
 
 // Close the chess screen
@@ -619,6 +641,10 @@ screen chessScreen = {
     "vars": [
         {"name": "whiteTimer", "type": "string", "default": "10:00"},
         {"name": "blackTimer", "type": "string", "default": "10:00"},
+        {"name": "whiteLabelColor", "type": "string", "default": "$COLOR_LABEL_ACTIVE"},
+        {"name": "blackLabelColor", "type": "string", "default": "$COLOR_LABEL_INACTIVE"},
+        {"name": "whiteTimerColor", "type": "string", "default": "$COLOR_TIMER_ACTIVE"},
+        {"name": "blackTimerColor", "type": "string", "default": "$COLOR_TIMER_INACTIVE"},
         {"name": "statusMessage", "type": "string", "default": "White to move"},
         {"name": "moveHistory", "type": "string", "default": "Game started.\nWhite's turn.\n"},
         {"name": "b00", "type": "imagedata"},
@@ -832,11 +858,11 @@ screen chessScreen = {
                     "padding": "10",
                     "style": "-fx-background-color: $COLOR_BG_TIMER; -fx-background-radius: 5; -fx-alignment: center;",
                     "items": [
-                        {"name": "whiteLabelTimer", "display": {"type": "label", "labelText": "\u2654 White:", "labelColor": "$COLOR_TEXT_TIMER_LABEL", "labelFontSize": "18px"}},
-                        {"name": "whiteTimerField", "varRef": "whiteTimer", "display": {"type": "label", "labelColor": "$COLOR_TIMER_WHITE", "labelFontSize": "24px", "labelBold": true}},
+                        {"name": "whiteLabelTimer", "varRef": "whiteLabelColor", "display": {"type": "label", "labelText": "\u2654 White:", "labelFontSize": "18px"}},
+                        {"name": "whiteTimerField", "varRef": "whiteTimer", "varRefColor": "whiteTimerColor", "display": {"type": "label", "labelFontSize": "24px", "labelBold": true}},
                         {"name": "spacerLabel", "display": {"type": "label", "labelText": "     |     ", "labelColor": "$COLOR_TEXT_SEPARATOR", "labelFontSize": "24px"}},
-                        {"name": "blackLabelTimer", "display": {"type": "label", "labelText": "\u265A Black:", "labelColor": "$COLOR_TEXT_TIMER_LABEL", "labelFontSize": "18px"}},
-                        {"name": "blackTimerField", "varRef": "blackTimer", "display": {"type": "label", "labelColor": "$COLOR_TIMER_BLACK", "labelFontSize": "24px", "labelBold": true}}
+                        {"name": "blackLabelTimer", "varRef": "blackLabelColor", "display": {"type": "label", "labelText": "\u265A Black:", "labelFontSize": "18px"}},
+                        {"name": "blackTimerField", "varRef": "blackTimer", "varRefColor": "blackTimerColor", "display": {"type": "label", "labelFontSize": "24px", "labelBold": true}}
                     ]
                 },
                 {
@@ -1284,6 +1310,7 @@ print "Opening chess screen with graphical grid display...";
 chessScreen.whiteTimer = call formatTimer(timerWhite);
 chessScreen.blackTimer = call formatTimer(timerBlack);
 chessScreen.statusMessage = "White to move";
+call updateTimerColors();
 
 // Show the chess screen
 show screen chessScreen;
