@@ -806,6 +806,18 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 boolean varExists = screenVarMap.containsKey(varName) || 
                                    (screenVarTypes != null && screenVarTypes.containsKey(varName));
                 if (varExists) {
+                    // Check if this variable is stateful and mark screen as changed if so
+                    Map<String, com.eb.script.interpreter.screen.Var> varItems = context.getScreenVarItems(screenName);
+                    if (varItems != null) {
+                        com.eb.script.interpreter.screen.Var varItem = varItems.get(varName);
+                        if (varItem != null && varItem.getStateful() != null && varItem.getStateful()) {
+                            // This is a stateful variable - mark screen as changed if status is CLEAN
+                            if (context.getScreenStatus(screenName) == com.eb.script.interpreter.screen.ScreenStatus.CLEAN) {
+                                context.setScreenStatus(screenName, com.eb.script.interpreter.screen.ScreenStatus.CHANGED);
+                            }
+                        }
+                    }
+                    
                     // Variable exists with simple name (legacy format)
                     // ConcurrentHashMap doesn't allow null values, so use NULL_SENTINEL for nulls
                     if (value != null) {
@@ -834,6 +846,18 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 boolean varExists = screenVarMap.containsKey(secondPart) || 
                                    (screenVarTypes != null && screenVarTypes.containsKey(secondPart));
                 if (varExists) {
+                    // Check if this variable is stateful and mark screen as changed if so
+                    Map<String, com.eb.script.interpreter.screen.Var> varItems = context.getScreenVarItems(firstPart);
+                    if (varItems != null) {
+                        com.eb.script.interpreter.screen.Var varItem = varItems.get(secondPart);
+                        if (varItem != null && varItem.getStateful() != null && varItem.getStateful()) {
+                            // This is a stateful variable - mark screen as changed if status is CLEAN
+                            if (context.getScreenStatus(firstPart) == com.eb.script.interpreter.screen.ScreenStatus.CLEAN) {
+                                context.setScreenStatus(firstPart, com.eb.script.interpreter.screen.ScreenStatus.CHANGED);
+                            }
+                        }
+                    }
+                    
                     // ConcurrentHashMap doesn't allow null values, so use NULL_SENTINEL for nulls
                     if (value != null) {
                         screenVarMap.put(secondPart, value);
