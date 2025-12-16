@@ -541,23 +541,30 @@ coordsToAlgebraic(x: int, y: int) return string {
     return file + rank;
 }
 
-// Format a move for the move history
+// Format a move for the move history with piece icon, from position, and to position
 formatMove(fromX: int, fromY: int, toX: int, toY: int, pieceType: int, isCapture: bool) return string {
     var pieceSymbol: string = call getPieceSymbol(pieceType);
     var fromSquare: string = call coordsToAlgebraic(fromX, fromY);
     var toSquare: string = call coordsToAlgebraic(toX, toY);
-    var captureSymbol: string = "";
     
-    if isCapture then {
-        captureSymbol = "x";
-        // For pawn captures, include the starting file
-        if pieceType == PAWN then {
+    // For pawns, use the piece symbol (empty string) or file letter for captures
+    if pieceType == PAWN then {
+        if isCapture then {
             var files: string = "abcdefgh";
             pieceSymbol = call str.charAt(files, fromX);
+            return pieceSymbol + "x" + toSquare;
+        } else {
+            // For pawn moves without capture, just show the move
+            return fromSquare + "-" + toSquare;
         }
     }
     
-    return pieceSymbol + captureSymbol + toSquare;
+    // For other pieces, show piece symbol with from-to notation
+    if isCapture then {
+        return pieceSymbol + " " + fromSquare + "x" + toSquare;
+    } else {
+        return pieceSymbol + " " + fromSquare + "-" + toSquare;
+    }
 }
 
 // Select a piece (change to yellow)
