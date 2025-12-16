@@ -524,6 +524,11 @@ show screen myWindow;
 - Assign to variables via `screen_name.var_name = value` (e.g., `myWindow.counter = 10`)
 - Variable assignments do not trigger screen display
 - Multiple screens can be created and managed independently
+- **Container Alignment**: Control positioning of child elements within areas using the `alignment` property
+  - Supports 17 alignment values: `left`, `right`, `center`, `top-left`, `top-center`, etc.
+  - Works with HBox, VBox, StackPane, FlowPane, and TilePane containers
+  - Runtime access via `scr.getAreaProperty()` and `scr.setAreaProperty()`
+  - See [AREA_ALIGNMENT_HELP.md](docs/AREA_ALIGNMENT_HELP.md) for examples and complete reference
 - **Supported Variable Types**: `int`, `long`, `float`, `double`, `string`, `bool`, `byte`, `date`, `json`, `record`, and `array.record`
   - Record types allow storing structured data with multiple fields
   - Access record fields: `screenName.varName.fieldName`
