@@ -1,0 +1,31 @@
+// EBS Language Reference v1.0.8.12 - thread.timerStart and thread.timerStop
+// Example: Basic repeating timer with callback
+
+var counter: int = 0;
+
+// Callback function invoked by the timer
+// Receives the timer name as a parameter
+timerCallback(timerName: string) {
+    counter = counter + 1;
+    print "Timer '" + timerName + "' fired! Count: " + call str.toString(counter);
+    
+    // Stop the timer after 5 iterations
+    if counter >= 5 then
+        print "Stopping timer...";
+        var stopped: bool = call thread.timerStop(timerName);
+        if stopped then
+            print "Timer stopped successfully!";
+        else
+            print "Timer not found.";
+        end
+    end
+}
+
+// Start a repeating timer
+// Parameters: name (string), period in milliseconds (long), callback function name (string)
+print "Starting timer 'myTimer' with 1000ms period...";
+var timerName: string = call thread.timerStart("myTimer", 1000, "timerCallback");
+print "Timer started: " + timerName;
+print "The timer will fire 5 times and then stop itself.";
+print "";
+print "Note: The script continues running while the timer executes in the background.";
