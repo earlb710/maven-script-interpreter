@@ -2705,6 +2705,175 @@ screen layoutScreen = {
 };
 ```
 
+#### Container Alignment
+
+Containers (areas) support an `alignment` property to control how child elements are positioned within the container. This property works with HBox, VBox, StackPane, FlowPane, and TilePane containers.
+
+**Available Alignment Values:**
+
+```javascript
+// Shorthand values (5)
+"left"      // Left edge, vertically centered
+"right"     // Right edge, vertically centered  
+"top"       // Top edge, horizontally centered
+"bottom"    // Bottom edge, horizontally centered
+"center"    // Center both horizontally and vertically
+
+// Full position values (9)
+"top-left", "top-center", "top-right"
+"center-left", "center", "center-right"
+"bottom-left", "bottom-center", "bottom-right"
+
+// Baseline values (3) - for text-based layouts
+"baseline-left", "baseline-center", "baseline-right"
+```
+
+**Example: Centered Form Layout**
+```javascript
+screen centeredForm = {
+    "title": "Centered Form",
+    "width": 600,
+    "height": 400,
+    "vars": [
+        {"name": "username", "type": "string", "default": ""},
+        {"name": "password", "type": "string", "default": ""},
+        {"name": "loginBtn", "type": "string", "default": ""}
+    ],
+    "area": [
+        {
+            "name": "loginArea",
+            "type": "vbox",
+            "alignment": "center",        // Center children horizontally
+            "spacing": "15",
+            "padding": "30",
+            "items": [
+                {"varRef": "username", "sequence": 1, 
+                 "display": {"type": "textfield", "labelText": "Username:"}},
+                {"varRef": "password", "sequence": 2,
+                 "display": {"type": "passwordfield", "labelText": "Password:"}},
+                {"varRef": "loginBtn", "sequence": 3,
+                 "display": {"type": "button", "labelText": "Login"}}
+            ]
+        }
+    ]
+};
+```
+
+**Example: Right-Aligned Button Bar**
+```javascript
+screen buttonBarExample = {
+    "title": "Button Bar",
+    "width": 500,
+    "height": 300,
+    "vars": [
+        {"name": "okBtn", "type": "string", "default": ""},
+        {"name": "cancelBtn", "type": "string", "default": ""}
+    ],
+    "area": [
+        {
+            "name": "mainContent",
+            "type": "vbox",
+            "spacing": "10",
+            "items": [],
+            "areas": [
+                {
+                    "name": "buttonBar",
+                    "type": "hbox",
+                    "alignment": "right",     // Right-align buttons
+                    "spacing": "10",
+                    "padding": "10",
+                    "items": [
+                        {"varRef": "cancelBtn", "sequence": 1,
+                         "display": {"type": "button", "labelText": "Cancel"}},
+                        {"varRef": "okBtn", "sequence": 2,
+                         "display": {"type": "button", "labelText": "OK"}}
+                    ]
+                }
+            ]
+        }
+    ]
+};
+```
+
+**Example: Complex Layout with Multiple Alignments**
+```javascript
+screen complexLayout = {
+    "title": "Complex Alignment Demo",
+    "width": 800,
+    "height": 600,
+    "vars": [
+        {"name": "header", "type": "string", "default": "Application Header"},
+        {"name": "content", "type": "string", "default": "Main content area"},
+        {"name": "footer", "type": "string", "default": "Version 1.0"}
+    ],
+    "area": [
+        {
+            "name": "mainLayout",
+            "type": "vbox",
+            "spacing": "0",
+            "items": [],
+            "areas": [
+                {
+                    "name": "headerArea",
+                    "type": "hbox",
+                    "alignment": "center",           // Centered header
+                    "padding": "20",
+                    "areaBackground": "#2c3e50",
+                    "items": [
+                        {"varRef": "header", "sequence": 1,
+                         "display": {"type": "label", 
+                                   "style": "-fx-text-fill: white; -fx-font-size: 18px;"}}
+                    ]
+                },
+                {
+                    "name": "contentArea",
+                    "type": "vbox",
+                    "alignment": "top-left",         // Content at top-left
+                    "padding": "30",
+                    "items": [
+                        {"varRef": "content", "sequence": 1,
+                         "display": {"type": "textarea"}}
+                    ]
+                },
+                {
+                    "name": "footerArea",
+                    "type": "hbox",
+                    "alignment": "bottom-right",     // Footer at bottom-right
+                    "padding": "10",
+                    "areaBackground": "#ecf0f1",
+                    "items": [
+                        {"varRef": "footer", "sequence": 1,
+                         "display": {"type": "label",
+                                   "style": "-fx-font-size: 10px; -fx-text-fill: #7f8c8d;"}}
+                    ]
+                }
+            ]
+        }
+    ]
+};
+```
+
+**Container-Specific Behavior:**
+- **HBox**: Alignment affects vertical positioning of children (children flow left-to-right)
+- **VBox**: Alignment affects horizontal positioning of children (children flow top-to-bottom)
+- **StackPane**: Alignment applies to all stacked children as default
+- **FlowPane/TilePane**: Alignment determines starting position for wrapping/tiling
+
+**Default Alignments:**
+- HBox: `center-left`
+- VBox: `top-center`
+- StackPane: `center`
+- FlowPane/TilePane: `top-left`
+
+**Runtime Access:**
+```javascript
+// Get current alignment
+var align = call scr.getAreaProperty("myScreen.myArea", "alignment");
+
+// Change alignment dynamically
+call scr.setAreaProperty("myScreen.myArea", "alignment", "center-right");
+```
+
 ### Screen Control Commands
 
 #### Show Screen
@@ -4215,6 +4384,23 @@ var varRef = call scr.getVarReference("screenName", "itemName");
 // Area properties
 var prop = call scr.getAreaProperty("screenName.areaName", "propertyName");
 call scr.setAreaProperty("screenName.areaName", "propertyName", value);
+
+// Available area properties:
+// - "alignment": Container alignment (left, right, center, top-left, etc.)
+// - "spacing": Spacing between children
+// - "padding": Internal padding
+// - "style": CSS style string
+// - "areaBackground": Background color
+// - "groupBorder": Border style
+// - "groupLabelText": Label text for group borders
+// - "groupLabelAlignment": Label alignment (left, center, right)
+// - Other layout properties (see AREA_DEFINITION.md for complete list)
+
+// Examples:
+var currentAlign = call scr.getAreaProperty("myScreen.buttonBar", "alignment");
+call scr.setAreaProperty("myScreen.buttonBar", "alignment", "center-right");
+call scr.setAreaProperty("myScreen.formArea", "spacing", "20");
+call scr.setAreaProperty("myScreen.header", "areaBackground", "#2c3e50");
 
 // Choice/dropdown options
 var options = call scr.getItemChoiceOptions("screenName", "itemName");

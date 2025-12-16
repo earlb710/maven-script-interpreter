@@ -1,0 +1,355 @@
+// Area Alignment Examples
+// Demonstrates all alignment options for container areas
+// Run with: /open scripts/examples/area_alignment_examples.ebs
+
+print "=== Area Alignment Examples ===";
+print "";
+print "This script demonstrates container alignment options.";
+print "Available values: left, right, top, bottom, center,";
+print "  top-left, top-center, top-right, center-left, center-right,";
+print "  bottom-left, bottom-center, bottom-right,";
+print "  baseline-left, baseline-center, baseline-right";
+print "";
+
+// Example 1: Centered Login Form
+screen loginExample = {
+    "title": "Example 1: Centered Login Form",
+    "width": 450,
+    "height": 350,
+    "vars": [
+        {"name": "username", "type": "string", "default": ""},
+        {"name": "password", "type": "string", "default": ""},
+        {"name": "rememberMe", "type": "bool", "default": false},
+        {"name": "loginBtn", "type": "string", "default": ""}
+    ],
+    "area": [
+        {
+            "name": "loginForm",
+            "type": "vbox",
+            "alignment": "center",          // Center all fields horizontally
+            "spacing": "15",
+            "padding": "30",
+            "areaBackground": "#f8f9fa",
+            "items": [
+                {
+                    "varRef": "username",
+                    "sequence": 1,
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Username:",
+                        "promptHelp": "Enter your username"
+                    },
+                    "prefWidth": "300"
+                },
+                {
+                    "varRef": "password",
+                    "sequence": 2,
+                    "display": {
+                        "type": "passwordfield",
+                        "labelText": "Password:",
+                        "promptHelp": "Enter your password"
+                    },
+                    "prefWidth": "300"
+                },
+                {
+                    "varRef": "rememberMe",
+                    "sequence": 3,
+                    "display": {
+                        "type": "checkbox",
+                        "labelText": "Remember me"
+                    }
+                },
+                {
+                    "varRef": "loginBtn",
+                    "sequence": 4,
+                    "display": {
+                        "type": "button",
+                        "labelText": "Login",
+                        "onClick": "print 'Login clicked';"
+                    },
+                    "prefWidth": "150"
+                }
+            ]
+        }
+    ]
+};
+
+// Example 2: Button Bar with Different Alignments
+screen buttonBarExample = {
+    "title": "Example 2: Button Bar Alignments",
+    "width": 700,
+    "height": 400,
+    "vars": [
+        {"name": "leftBtn1", "type": "string", "default": ""},
+        {"name": "leftBtn2", "type": "string", "default": ""},
+        {"name": "centerBtn1", "type": "string", "default": ""},
+        {"name": "centerBtn2", "type": "string", "default": ""},
+        {"name": "rightBtn1", "type": "string", "default": ""},
+        {"name": "rightBtn2", "type": "string", "default": ""}
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "20",
+            "padding": "20",
+            "items": [],
+            "areas": [
+                {
+                    "name": "leftButtons",
+                    "type": "hbox",
+                    "alignment": "left",            // Left-aligned
+                    "spacing": "10",
+                    "padding": "15",
+                    "areaBackground": "#e3f2fd",
+                    "style": "-fx-border-color: #1976d2; -fx-border-width: 2;",
+                    "items": [
+                        {
+                            "varRef": "leftBtn1",
+                            "sequence": 1,
+                            "display": {"type": "button", "labelText": "Left 1"}
+                        },
+                        {
+                            "varRef": "leftBtn2",
+                            "sequence": 2,
+                            "display": {"type": "button", "labelText": "Left 2"}
+                        }
+                    ]
+                },
+                {
+                    "name": "centerButtons",
+                    "type": "hbox",
+                    "alignment": "center",          // Center-aligned
+                    "spacing": "10",
+                    "padding": "15",
+                    "areaBackground": "#fff3e0",
+                    "style": "-fx-border-color: #f57c00; -fx-border-width: 2;",
+                    "items": [
+                        {
+                            "varRef": "centerBtn1",
+                            "sequence": 1,
+                            "display": {"type": "button", "labelText": "Center 1"}
+                        },
+                        {
+                            "varRef": "centerBtn2",
+                            "sequence": 2,
+                            "display": {"type": "button", "labelText": "Center 2"}
+                        }
+                    ]
+                },
+                {
+                    "name": "rightButtons",
+                    "type": "hbox",
+                    "alignment": "right",           // Right-aligned
+                    "spacing": "10",
+                    "padding": "15",
+                    "areaBackground": "#e8f5e9",
+                    "style": "-fx-border-color: #388e3c; -fx-border-width: 2;",
+                    "items": [
+                        {
+                            "varRef": "rightBtn1",
+                            "sequence": 1,
+                            "display": {"type": "button", "labelText": "Right 1"}
+                        },
+                        {
+                            "varRef": "rightBtn2",
+                            "sequence": 2,
+                            "display": {"type": "button", "labelText": "Right 2"}
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+};
+
+// Example 3: Application Layout (Header/Content/Footer)
+screen appLayoutExample = {
+    "title": "Example 3: Application Layout",
+    "width": 800,
+    "height": 600,
+    "vars": [
+        {"name": "appTitle", "type": "string", "default": "My Application"},
+        {"name": "content", "type": "string", "default": "Main content area"},
+        {"name": "statusText", "type": "string", "default": "Ready"},
+        {"name": "versionText", "type": "string", "default": "Version 1.0.0"}
+    ],
+    "area": [
+        {
+            "name": "mainLayout",
+            "type": "vbox",
+            "spacing": "0",
+            "items": [],
+            "areas": [
+                {
+                    "name": "header",
+                    "type": "hbox",
+                    "alignment": "center",              // Centered header
+                    "padding": "20",
+                    "areaBackground": "#2c3e50",
+                    "items": [
+                        {
+                            "varRef": "appTitle",
+                            "sequence": 1,
+                            "display": {
+                                "type": "label",
+                                "style": "-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "content",
+                    "type": "vbox",
+                    "alignment": "top-left",            // Content at top-left
+                    "padding": "30",
+                    "items": [
+                        {
+                            "varRef": "content",
+                            "sequence": 1,
+                            "display": {
+                                "type": "textarea",
+                                "promptHelp": "Enter content here..."
+                            },
+                            "prefHeight": "400"
+                        }
+                    ]
+                },
+                {
+                    "name": "footer",
+                    "type": "hbox",
+                    "spacing": "0",
+                    "padding": "0",
+                    "items": [],
+                    "areas": [
+                        {
+                            "name": "footerLeft",
+                            "type": "hbox",
+                            "alignment": "left",        // Status at left
+                            "padding": "10",
+                            "areaBackground": "#ecf0f1",
+                            "prefWidth": "400",
+                            "items": [
+                                {
+                                    "varRef": "statusText",
+                                    "sequence": 1,
+                                    "display": {
+                                        "type": "label",
+                                        "style": "-fx-font-size: 11px;"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "footerRight",
+                            "type": "hbox",
+                            "alignment": "right",       // Version at right
+                            "padding": "10",
+                            "areaBackground": "#ecf0f1",
+                            "prefWidth": "400",
+                            "items": [
+                                {
+                                    "varRef": "versionText",
+                                    "sequence": 1,
+                                    "display": {
+                                        "type": "label",
+                                        "style": "-fx-font-size: 11px; -fx-text-fill: #7f8c8d;"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+};
+
+// Example 4: Dynamic Alignment Control
+screen dynamicAlignmentExample = {
+    "title": "Example 4: Dynamic Alignment",
+    "width": 600,
+    "height": 400,
+    "vars": [
+        {"name": "alignChoice", "type": "string", "default": "center"},
+        {"name": "applyBtn", "type": "string", "default": ""},
+        {"name": "demoLabel", "type": "string", "default": "This text will be aligned"}
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "20",
+            "padding": "20",
+            "items": [],
+            "areas": [
+                {
+                    "name": "controls",
+                    "type": "hbox",
+                    "alignment": "center",
+                    "spacing": "10",
+                    "padding": "15",
+                    "items": [
+                        {
+                            "varRef": "alignChoice",
+                            "sequence": 1,
+                            "display": {
+                                "type": "combobox",
+                                "labelText": "Alignment:",
+                                "options": ["left", "center", "right", "top-left", "top-center", 
+                                          "top-right", "center-left", "center-right", 
+                                          "bottom-left", "bottom-center", "bottom-right"]
+                            },
+                            "prefWidth": "200"
+                        },
+                        {
+                            "varRef": "applyBtn",
+                            "sequence": 2,
+                            "display": {
+                                "type": "button",
+                                "labelText": "Apply",
+                                "onClick": "call applyAlignment();"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "demoArea",
+                    "type": "vbox",
+                    "alignment": "center",
+                    "padding": "30",
+                    "prefHeight": "200",
+                    "areaBackground": "#f0f0f0",
+                    "style": "-fx-border-color: #ccc; -fx-border-width: 1;",
+                    "items": [
+                        {
+                            "varRef": "demoLabel",
+                            "sequence": 1,
+                            "display": {
+                                "type": "label",
+                                "style": "-fx-font-size: 16px; -fx-font-weight: bold;"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+};
+
+// Function to apply selected alignment
+applyAlignment() {
+    var newAlign = alignChoice;
+    call scr.setAreaProperty("dynamicalignmentexample.demoArea", "alignment", newAlign);
+    print "Applied alignment: " + newAlign;
+}
+
+print "Example screens defined. Use these commands to view them:";
+print "  show screen loginExample;";
+print "  show screen buttonBarExample;";
+print "  show screen appLayoutExample;";
+print "  show screen dynamicAlignmentExample;";
+print "";
+print "For more information, see:";
+print "  docs/AREA_ALIGNMENT_HELP.md";
+print "  docs/AREA_DEFINITION.md";

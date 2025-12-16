@@ -1625,6 +1625,7 @@ public class BuiltinsScreen {
             case "grouplabeloffset" -> area.groupLabelOffset;
             case "spacing" -> area.spacing;
             case "padding" -> area.padding;
+            case "alignment" -> area.alignment;
             case "gainfocus" -> area.gainFocus;
             case "lostfocus" -> area.lostFocus;
             case "numberofrecords" -> area.numberOfRecords;
@@ -1662,6 +1663,7 @@ public class BuiltinsScreen {
             case "grouplabeloffset" -> area.groupLabelOffset = value != null ? String.valueOf(value) : null;
             case "spacing" -> area.spacing = value != null ? String.valueOf(value) : null;
             case "padding" -> area.padding = value != null ? String.valueOf(value) : null;
+            case "alignment" -> area.alignment = value != null ? String.valueOf(value) : null;
             case "hgrow" -> area.hgrow = value != null ? String.valueOf(value) : null;
             case "vgrow" -> area.vgrow = value != null ? String.valueOf(value) : null;
             case "gainfocus" -> area.gainFocus = value != null ? String.valueOf(value) : null;

@@ -41,6 +41,7 @@ The `AreaDefinition` class represents a container area within a screen, defining
 |----------|------|-------------|
 | `spacing` | String | Spacing between child elements (e.g., "10", "15") |
 | `padding` | String | Internal padding around children (e.g., "10", "10 5", "10 5 10 5") |
+| `alignment` | String | Alignment of child elements within the container (see [Alignment Options](#alignment-options)) |
 | `areaBackground` | String | Area background color in hex format (e.g., "#f0f0f0") |
 
 #### Group Border Properties
@@ -270,6 +271,179 @@ The `spacing` and `padding` properties are applied **before** the `style` proper
     style: "-fx-spacing: 15; -fx-padding: 20; -fx-background-color: #f0f0f0;"
 }
 ```
+
+### Alignment Options
+
+The `alignment` property controls how child elements are positioned within the container. This property is supported by the following container types:
+
+- **HBox**: Horizontal box layout
+- **VBox**: Vertical box layout
+- **StackPane**: Stacked layout (children overlay each other)
+- **FlowPane**: Wrapping flow layout
+- **TilePane**: Uniform tile grid layout
+
+#### Valid Alignment Values
+
+The `alignment` property accepts the following JavaFX Pos enum values:
+
+**Horizontal Alignment (3 columns)**:
+- **LEFT**: Alias for `center-left`
+- **CENTER**: Center horizontally and vertically
+- **RIGHT**: Alias for `center-right`
+
+**Vertical Alignment (3 rows)**:
+- **TOP**: Alias for `top-center`
+- **BOTTOM**: Alias for `bottom-center`
+
+**Combined Position Values (9 positions)**:
+- **top-left**: Top-left corner
+- **top-center**: Top edge, horizontally centered
+- **top-right**: Top-right corner
+- **center-left**: Left edge, vertically centered
+- **center**: Center both horizontally and vertically
+- **center-right**: Right edge, vertically centered
+- **bottom-left**: Bottom-left corner
+- **bottom-center**: Bottom edge, horizontally centered
+- **bottom-right**: Bottom-right corner
+
+**Baseline Alignment (for text-based layouts)**:
+- **baseline-left**: Aligned to text baseline, left
+- **baseline-center**: Aligned to text baseline, center
+- **baseline-right**: Aligned to text baseline, right
+
+#### Alignment Visual Guide
+
+```
+┌─────────────────────────────┐
+│ top-left   top-center  top-right │
+│                                 │
+│ center-left  center  center-right│
+│                                 │
+│ bottom-left bottom-center bottom-right │
+└─────────────────────────────┘
+```
+
+#### Alignment Examples
+
+**Example 1: Center content in VBox**
+```javascript
+{
+    name: "centeredArea",
+    type: "vbox",
+    alignment: "center",
+    spacing: "10",
+    padding: "20",
+    items: [
+        { varRef: "title", sequence: 1 },
+        { varRef: "submitButton", sequence: 2 }
+    ]
+}
+```
+
+**Example 2: Right-align buttons in HBox**
+```javascript
+{
+    name: "buttonBar",
+    type: "hbox",
+    alignment: "center-right",
+    spacing: "10",
+    padding: "10",
+    items: [
+        { varRef: "cancelButton", sequence: 1 },
+        { varRef: "okButton", sequence: 2 }
+    ]
+}
+```
+
+**Example 3: Top-left alignment in StackPane**
+```javascript
+{
+    name: "overlayContainer",
+    type: "stackpane",
+    alignment: "top-left",
+    padding: "15",
+    items: [
+        { varRef: "backgroundImage", sequence: 1 },
+        { varRef: "overlayText", sequence: 2 }
+    ]
+}
+```
+
+**Example 4: Using shorthand alignment values**
+```javascript
+{
+    name: "headerArea",
+    type: "hbox",
+    alignment: "left",  // Equivalent to "center-left"
+    spacing: "10",
+    items: [
+        { varRef: "logo", sequence: 1 },
+        { varRef: "appTitle", sequence: 2 }
+    ]
+}
+```
+
+#### Default Alignments by Container Type
+
+When no `alignment` property is specified, containers use the following defaults:
+
+| Container | Default Alignment | Description |
+|-----------|------------------|-------------|
+| **HBox** | `center-left` | Children aligned to left edge, centered vertically |
+| **VBox** | `top-center` | Children aligned to top edge, centered horizontally |
+| **StackPane** | `center` | Children centered both horizontally and vertically |
+| **FlowPane** | `top-left` | Children start at top-left, wrap as needed |
+| **TilePane** | `top-left` | Tiles start at top-left in uniform grid |
+
+#### Container-Specific Alignment Behavior
+
+**HBox Alignment**:
+- Affects vertical positioning of children (top, center, bottom)
+- Horizontal positioning is determined by layout order
+- Best used with mixed-height children
+
+**VBox Alignment**:
+- Affects horizontal positioning of children (left, center, right)
+- Vertical positioning is determined by layout order
+- Best used with mixed-width children
+
+**StackPane Alignment**:
+- Applies to all stacked children as a default
+- Individual children can override using StackPane.setAlignment()
+- Commonly used for overlays and layered layouts
+
+**FlowPane/TilePane Alignment**:
+- Determines starting position for the flow/grid
+- Children wrap or tile from the alignment point
+- Useful for responsive layouts
+
+#### Combining Alignment with Other Properties
+
+The `alignment` property works seamlessly with other layout properties:
+
+```javascript
+{
+    name: "formArea",
+    type: "vbox",
+    alignment: "center",      // Center children horizontally
+    spacing: "15",            // 15px gap between children
+    padding: "30 20 30 20",   // 30px top/bottom, 20px left/right margins
+    areaBackground: "#f8f9fa",
+    items: [
+        { varRef: "username", sequence: 1, prefWidth: "300" },
+        { varRef: "password", sequence: 2, prefWidth: "300" },
+        { varRef: "loginButton", sequence: 3 }
+    ]
+}
+```
+
+#### Notes and Best Practices
+
+1. **Explicit is Better**: While defaults exist, explicitly setting `alignment` makes intent clear
+2. **Visual Consistency**: Use consistent alignment patterns across related areas
+3. **Responsive Design**: Consider how alignment affects layouts at different sizes
+4. **Override vs Inherit**: Area alignment sets a default; individual items can override using their `alignment` property
+5. **CSS Override**: The `alignment` property can be overridden via the `style` property if needed
 
 ---
 

@@ -69,6 +69,11 @@ public class AreaDefinition {
     // Disable label alignment - when true, controls without labels won't be wrapped in HBox for alignment
     // Useful for grid layouts (like chess boards) where label alignment creates unwanted spacing
     public Boolean disableLabelAlignment;
+    // Alignment for child elements within the container (for HBox, VBox, StackPane, FlowPane, TilePane)
+    // Valid values: top-left, top-center, top-right, center-left, center, center-right, 
+    // bottom-left, bottom-center, bottom-right, baseline-left, baseline-center, baseline-right
+    // Shorthand values: left (center-left), right (center-right), top (top-center), bottom (bottom-center)
+    public String alignment;
     // Horizontal grow priority for this area when added to HBox or GridPane (ALWAYS, SOMETIMES, NEVER)
     public String hgrow;
     // Vertical grow priority for this area when added to VBox or GridPane (ALWAYS, SOMETIMES, NEVER)
@@ -101,6 +106,7 @@ public class AreaDefinition {
                ", groupLabelColor='" + groupLabelColor + '\'' +
                ", groupLabelBackground='" + groupLabelBackground + '\'' +
                ", areaBackground='" + areaBackground + '\'' +
+               ", alignment='" + alignment + '\'' +
                ", spacing='" + spacing + '\'' +
                ", padding='" + padding + '\'' +
                ", numberOfRecords=" + numberOfRecords +
