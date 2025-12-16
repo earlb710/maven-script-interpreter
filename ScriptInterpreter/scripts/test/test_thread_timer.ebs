@@ -1,0 +1,134 @@
+// Test script for thread.timerStart and thread.timerStop builtins
+// Tests basic functionality, error handling, and edge cases
+
+print "=== Thread Timer Tests ===";
+print "";
+
+// Test 1: Basic timer start and stop
+print "Test 1: Basic timer start and stop";
+var test1Called: bool = false;
+
+test1Callback(name: string) {
+    test1Called = true;
+    print "  ✓ Timer callback executed";
+    call thread.timerStop(name);
+}
+
+var t1: string = call thread.timerStart("test1", 100, "test1Callback");
+print "  Started timer: " + t1;
+call thread.sleep(200);  // Wait for callback to fire
+
+if test1Called then {
+    print "  ✓ Test 1 PASSED";
+} else {
+    print "  ✗ Test 1 FAILED - callback not invoked";
+}
+print "";
+
+// Test 2: Stop non-existent timer
+print "Test 2: Stop non-existent timer";
+var stopped: bool = call thread.timerStop("nonexistent");
+if stopped then {
+    print "  ✗ Test 2 FAILED - should return false for non-existent timer";
+} else {
+    print "  ✓ Test 2 PASSED - correctly returned false";
+}
+print "";
+
+// Test 3: Replace existing timer
+print "Test 3: Replace existing timer";
+var test3Count: int = 0;
+
+test3CallbackOld(name: string) {
+    print "  ✗ Old callback should not be called";
+    call thread.timerStop(name);
+}
+
+test3CallbackNew(name: string) {
+    test3Count = test3Count + 1;
+    print "  ✓ New callback executed";
+    call thread.timerStop(name);
+}
+
+call thread.timerStart("test3", 500, "test3CallbackOld");
+call thread.timerStart("test3", 100, "test3CallbackNew");  // Replace with new callback
+call thread.sleep(200);
+
+if test3Count > 0 then {
+    print "  ✓ Test 3 PASSED - timer was replaced";
+} else {
+    print "  ✗ Test 3 FAILED - new timer did not execute";
+}
+print "";
+
+// Test 4: Multiple concurrent timers
+print "Test 4: Multiple concurrent timers";
+var timer4a: int = 0;
+var timer4b: int = 0;
+
+timer4aCallback(name: string) {
+    timer4a = timer4a + 1;
+    if timer4a >= 2 then {
+        call thread.timerStop(name);
+    }
+}
+
+timer4bCallback(name: string) {
+    timer4b = timer4b + 1;
+    if timer4b >= 2 then {
+        call thread.timerStop(name);
+    }
+}
+
+call thread.timerStart("timer4a", 100, "timer4aCallback");
+call thread.timerStart("timer4b", 150, "timer4bCallback");
+call thread.sleep(400);  // Wait for both to fire twice
+
+if timer4a >= 2 and timer4b >= 2 then {
+    print "  ✓ Test 4 PASSED - both timers executed";
+} else {
+    print "  ✗ Test 4 FAILED - timer4a: " + call str.toString(timer4a) + ", timer4b: " + call str.toString(timer4b);
+}
+print "";
+
+// Test 5: Timer with very short period
+print "Test 5: Timer with short period (50ms)";
+var timer5Count: int = 0;
+
+timer5Callback(name: string) {
+    timer5Count = timer5Count + 1;
+    if timer5Count >= 5 then {
+        call thread.timerStop(name);
+    }
+}
+
+call thread.timerStart("timer5", 50, "timer5Callback");
+call thread.sleep(300);
+
+if timer5Count >= 5 then {
+    print "  ✓ Test 5 PASSED - fast timer executed " + call str.toString(timer5Count) + " times";
+} else {
+    print "  ✗ Test 5 FAILED - only " + call str.toString(timer5Count) + " executions";
+}
+print "";
+
+// Test 6: Stop timer immediately after start
+print "Test 6: Stop timer immediately after start";
+var timer6Called: bool = false;
+
+timer6Callback(name: string) {
+    timer6Called = true;
+    call thread.timerStop(name);
+}
+
+call thread.timerStart("timer6", 1000, "timer6Callback");
+var stopped6: bool = call thread.timerStop("timer6");
+
+if stopped6 and not timer6Called then {
+    print "  ✓ Test 6 PASSED - timer stopped before firing";
+} else {
+    print "  ✗ Test 6 FAILED - stopped: " + call str.toString(stopped6) + ", called: " + call str.toString(timer6Called);
+}
+print "";
+
+print "=== All Tests Complete ===";

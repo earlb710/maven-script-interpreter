@@ -205,6 +205,9 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         // Clear all loaded plugins
         com.eb.script.interpreter.builtins.BuiltinsPlugin.clearAllPlugins();
 
+        // Shutdown thread timers
+        com.eb.script.interpreter.builtins.BuiltinsThread.shutdown();
+
         // Clear all maps
         
         context.clear();
