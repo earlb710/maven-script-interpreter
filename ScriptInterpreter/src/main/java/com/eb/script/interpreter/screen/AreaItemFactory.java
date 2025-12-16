@@ -494,11 +494,21 @@ public class AreaItemFactory {
             
             if (!alignmentStyle.isEmpty()) {
                 if (control instanceof TextField || control instanceof TextArea || control instanceof ComboBox) {
-                    control.setStyle(control.getStyle() + " " + alignmentStyle);
+                    String currentStyle = control.getStyle();
+                    if (currentStyle == null || currentStyle.isEmpty()) {
+                        control.setStyle(alignmentStyle);
+                    } else {
+                        control.setStyle(currentStyle + " " + alignmentStyle);
+                    }
                 } else if (control instanceof Spinner) {
                     // For Spinner, we need to access the internal TextField
                     Spinner<?> spinner = (Spinner<?>) control;
-                    spinner.setStyle(control.getStyle() + " " + alignmentStyle);
+                    String currentStyle = spinner.getStyle();
+                    if (currentStyle == null || currentStyle.isEmpty()) {
+                        spinner.setStyle(alignmentStyle);
+                    } else {
+                        spinner.setStyle(currentStyle + " " + alignmentStyle);
+                    }
                     // Also try to set on the editor if accessible
                     if (spinner.getEditor() != null) {
                         spinner.getEditor().setStyle(alignmentStyle);
