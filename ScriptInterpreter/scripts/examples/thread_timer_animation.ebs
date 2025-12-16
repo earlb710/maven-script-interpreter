@@ -20,11 +20,11 @@ animationFrame(timerName: string) {
     print "Loading " + animChar + " " + progressStr + "%";
     
     // Stop after maxFrames
-    if frame >= maxFrames then
+    if frame >= maxFrames then {
         call thread.timerStop(timerName);
         print "";
         print "Animation complete!";
-    end if;
+    }
 }
 
 // Start animation timer

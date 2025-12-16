@@ -23,14 +23,14 @@ slowTimer(name: string) {
     print "    SLOW (" + name + "): " + call str.toString(count3);
     
     // Stop all timers after slow timer fires 3 times
-    if count3 >= 3 then
+    if count3 >= 3 then {
         print "";
         print "Stopping all timers...";
         call thread.timerStop("fast");
         call thread.timerStop("medium");
         call thread.timerStop("slow");
         print "All timers stopped.";
-    end if;
+    }
 }
 
 // Start multiple timers with different intervals

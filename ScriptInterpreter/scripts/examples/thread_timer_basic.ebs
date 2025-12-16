@@ -10,15 +10,15 @@ timerCallback(timerName: string) {
     print "Timer '" + timerName + "' fired! Count: " + call str.toString(counter);
     
     // Stop the timer after 5 iterations
-    if counter >= 5 then
+    if counter >= 5 then {
         print "Stopping timer...";
         var stopped: bool = call thread.timerStop(timerName);
-        if stopped then
+        if stopped then {
             print "Timer stopped successfully!";
-        else
+        } else {
             print "Timer not found.";
-        end if;
-    end if;
+        }
+    }
 }
 
 // Start a repeating timer
