@@ -5299,17 +5299,17 @@ public class ScreenFactory {
 
     // Helper methods for safe value extraction from Maps
     private static String getStringValue(Map<String, Object> map, String key, String defaultValue) {
-        // Try exact key first
-        if (map.containsKey(key)) {
-            Object value = map.get(key);
-            return value != null ? String.valueOf(value) : defaultValue;
-        }
-        // Try lowercase key for case-insensitive match
+        // Try lowercase key first (standard behavior)
         if (map.containsKey(key.toLowerCase())) {
             Object value = map.get(key.toLowerCase());
             return value != null ? String.valueOf(value) : defaultValue;
         }
-        // Try case-insensitive search through all keys
+        // Try exact key as fallback
+        if (map.containsKey(key)) {
+            Object value = map.get(key);
+            return value != null ? String.valueOf(value) : defaultValue;
+        }
+        // Try case-insensitive search through all keys as last resort
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             if (entry.getKey().equalsIgnoreCase(key)) {
                 Object value = entry.getValue();
@@ -5320,19 +5320,7 @@ public class ScreenFactory {
     }
 
     private static double getNumberValue(Map<String, Object> map, String key, double defaultValue) {
-        // Try exact key first
-        if (map.containsKey(key)) {
-            Object value = map.get(key);
-            if (value instanceof Number) {
-                return ((Number) value).doubleValue();
-            }
-            try {
-                return Double.parseDouble(String.valueOf(value));
-            } catch (NumberFormatException e) {
-                return defaultValue;
-            }
-        }
-        // Try lowercase key
+        // Try lowercase key first (standard behavior)
         if (map.containsKey(key.toLowerCase())) {
             Object value = map.get(key.toLowerCase());
             if (value instanceof Number) {
@@ -5344,7 +5332,19 @@ public class ScreenFactory {
                 return defaultValue;
             }
         }
-        // Try case-insensitive search
+        // Try exact key as fallback
+        if (map.containsKey(key)) {
+            Object value = map.get(key);
+            if (value instanceof Number) {
+                return ((Number) value).doubleValue();
+            }
+            try {
+                return Double.parseDouble(String.valueOf(value));
+            } catch (NumberFormatException e) {
+                return defaultValue;
+            }
+        }
+        // Try case-insensitive search as last resort
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             if (entry.getKey().equalsIgnoreCase(key)) {
                 Object value = entry.getValue();
@@ -5362,19 +5362,7 @@ public class ScreenFactory {
     }
 
     private static Integer getIntValue(Map<String, Object> map, String key, Integer defaultValue) {
-        // Try exact key first
-        if (map.containsKey(key)) {
-            Object value = map.get(key);
-            if (value instanceof Number) {
-                return ((Number) value).intValue();
-            }
-            try {
-                return Integer.parseInt(String.valueOf(value));
-            } catch (NumberFormatException e) {
-                return defaultValue;
-            }
-        }
-        // Try lowercase key
+        // Try lowercase key first (standard behavior)
         if (map.containsKey(key.toLowerCase())) {
             Object value = map.get(key.toLowerCase());
             if (value instanceof Number) {
@@ -5386,7 +5374,19 @@ public class ScreenFactory {
                 return defaultValue;
             }
         }
-        // Try case-insensitive search
+        // Try exact key as fallback
+        if (map.containsKey(key)) {
+            Object value = map.get(key);
+            if (value instanceof Number) {
+                return ((Number) value).intValue();
+            }
+            try {
+                return Integer.parseInt(String.valueOf(value));
+            } catch (NumberFormatException e) {
+                return defaultValue;
+            }
+        }
+        // Try case-insensitive search as last resort
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             if (entry.getKey().equalsIgnoreCase(key)) {
                 Object value = entry.getValue();
