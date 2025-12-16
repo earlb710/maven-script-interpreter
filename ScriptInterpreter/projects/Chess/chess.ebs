@@ -873,12 +873,11 @@ timerCallback(timerName: string) {
             timerWhite = timerWhite - 1;
             var timerText: string = call formatTimerDecimal(timerWhite);
             
-            // Update screen variable first
+            // Update screen variable (no longer used with varRef removed)
             chessScreen.whiteTimer = timerText;
             
-            // Force UI update using scr.setproperty (also uses Platform.runLater internally)
-            // Try updating the label text property directly
-            call scr.setproperty("chessScreen.whiteTimerField", "text", timerText);
+            // Update UI using labelText property instead of text
+            call scr.setproperty("chessScreen.whiteTimerField", "labelText", timerText);
             
             // Debug: Print every 10 deciseconds (1 second)
             if call modulo(timerWhite, 10) == 0 then {
@@ -891,12 +890,11 @@ timerCallback(timerName: string) {
             timerBlack = timerBlack - 1;
             var timerText: string = call formatTimerDecimal(timerBlack);
             
-            // Update screen variable first
+            // Update screen variable (no longer used with varRef removed)
             chessScreen.blackTimer = timerText;
             
-            // Force UI update using scr.setproperty (also uses Platform.runLater internally)
-            // Try updating the label text property directly
-            call scr.setproperty("chessScreen.blackTimerField", "text", timerText);
+            // Update UI using labelText property instead of text
+            call scr.setproperty("chessScreen.blackTimerField", "labelText", timerText);
             
             // Debug: Print every 10 deciseconds (1 second)
             if call modulo(timerBlack, 10) == 0 then {
@@ -1253,8 +1251,12 @@ handleStartGame() {
     // Show the chess screen
     show screen chessScreen;
     
+    // Update timer display after screen is shown (since varRef removed)
+    call scr.setproperty("chessScreen.whiteTimerField", "labelText", call formatTimerDecimal(timerWhite));
+    call scr.setproperty("chessScreen.blackTimerField", "labelText", call formatTimerDecimal(timerBlack));
+    
     // Start the game timer (updates every 100ms = 0.1 seconds)
-    call thread.timerStart("chessTimer", 100, "timerCallback");
+    call thread.timerStart("chessScreen", 100, "timerCallback");
     
     print "";
     print "Chess screen is now displayed!";
@@ -1346,6 +1348,9 @@ resetGame() {
     chessScreen.statusMessage = "White to move - Game Reset!";
     chessScreen.moveHistory = "Game started.\nWhite's turn.\n";
     call updateTimerColors();
+    // Update timer display (since varRef removed)
+    call scr.setproperty("chessScreen.whiteTimerField", "labelText", call formatTimerDecimal(timerWhite));
+    call scr.setproperty("chessScreen.blackTimerField", "labelText", call formatTimerDecimal(timerBlack));
 }
 
 // Cleanup function for chess screen (called by cleanup handler)
@@ -1594,10 +1599,10 @@ screen chessScreen = {
                     "style": "-fx-background-color: $COLOR_BG_TIMER; -fx-background-radius: 5; -fx-alignment: center; -fx-border-style: solid inside, solid inside; -fx-border-width: 1, 1; -fx-border-insets: 0, 1; -fx-border-color: #ffffff #b6b6b6 #7f7f7f #e6e6e6, #f4f4f4 #cccccc #6a6a6a #f0f0f0; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 4, 0.0, 0, 1);",
                     "items": [
                         {"name": "whiteLabelTimer", "varRef": "whiteLabelText", "textColor": "$COLOR_LABEL_ACTIVE", "display": {"type": "label", "labelFontSize": "18px"}},
-                        {"name": "whiteTimerField", "varRef": "whiteTimer", "textColor": "$COLOR_TIMER_ACTIVE", "display": {"type": "label", "labelFontSize": "24px", "labelBold": true}},
+                        {"name": "whiteTimerField", "textColor": "$COLOR_TIMER_ACTIVE", "display": {"type": "label", "labelText": "10:00.0", "labelFontSize": "24px", "labelBold": true}},
                         {"name": "spacerLabel", "textColor": "$COLOR_TEXT_SEPARATOR", "display": {"type": "label", "labelText": "     |     ", "labelFontSize": "24px"}},
                         {"name": "blackLabelTimer", "varRef": "blackLabelText", "textColor": "$COLOR_LABEL_INACTIVE", "display": {"type": "label", "labelFontSize": "18px"}},
-                        {"name": "blackTimerField", "varRef": "blackTimer", "textColor": "$COLOR_TIMER_INACTIVE", "display": {"type": "label", "labelFontSize": "24px", "labelBold": true}}
+                        {"name": "blackTimerField", "textColor": "$COLOR_TIMER_INACTIVE", "display": {"type": "label", "labelText": "10:00.0", "labelFontSize": "24px", "labelBold": true}}
                     ]
                 },
                 {
