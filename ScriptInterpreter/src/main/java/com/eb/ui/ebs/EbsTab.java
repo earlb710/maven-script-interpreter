@@ -1769,7 +1769,7 @@ public class EbsTab extends Tab {
         selectCurrent(cur);
         updateCountLabel();
         dispArea.addStyleToRange(cur[0], cur[1], "find-current");
-        // Update search origin to the new match position so typing continues from here
+        // Update search origin to current match start so subsequent typing searches from this position
         searchOriginPosition = cur[0];
     }
 
@@ -1783,7 +1783,7 @@ public class EbsTab extends Tab {
         selectCurrent(cur);
         updateCountLabel();
         dispArea.addStyleToRange(cur[0], cur[1], "find-current");
-        // Update search origin to the new match position so typing continues from here
+        // Update search origin to current match start so subsequent typing searches from this position
         searchOriginPosition = cur[0];
     }
 
