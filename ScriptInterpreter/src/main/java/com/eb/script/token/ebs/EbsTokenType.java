@@ -68,7 +68,7 @@ public enum EbsTokenType implements LexerToken {
     BOOL_AND(Category.OPERATOR, "and", "&&"),
     BOOL_OR(Category.OPERATOR, "or", "||"),
     // Operators
-    PLUS(Category.OPERATOR, "+"), MINUS(Category.OPERATOR, "-"), STAR(Category.OPERATOR, "*"), SLASH(Category.OPERATOR, "/"), EQUAL(Category.OPERATOR, "="), CARET(Category.OPERATOR, "^"),
+    PLUS(Category.OPERATOR, "+"), MINUS(Category.OPERATOR, "-"), STAR(Category.OPERATOR, "*"), SLASH(Category.OPERATOR, "/"), PERCENT(Category.OPERATOR, "%"), EQUAL(Category.OPERATOR, "="), CARET(Category.OPERATOR, "^"),
     PLUS_PLUS(Category.OPERATOR, "++"), MINUS_MINUS(Category.OPERATOR, "--"),
     PLUS_EQUAL(Category.OPERATOR, "+="), MINUS_EQUAL(Category.OPERATOR, "-="), STAR_EQUAL(Category.OPERATOR, "*="), SLASH_EQUAL(Category.OPERATOR, "/="),
     // --- SQL keywords ---

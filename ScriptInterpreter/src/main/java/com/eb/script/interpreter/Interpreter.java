@@ -1613,6 +1613,31 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 throw error(line, "Operands must be numbers for '" + operator + "'");
             }
 
+            case PERCENT -> {
+                if (left instanceof Double v1 && right instanceof Double v2) {
+                    if (v2 == 0) {
+                        throw error(line, "Modulo by zero");
+                    }
+                    return v1 % v2;
+                } else if (left instanceof Float v1 && right instanceof Float v2) {
+                    if (v2 == 0) {
+                        throw error(line, "Modulo by zero");
+                    }
+                    return v1 % v2;
+                } else if (left instanceof Long v1 && right instanceof Long v2) {
+                    if (v2 == 0) {
+                        throw error(line, "Modulo by zero");
+                    }
+                    return v1 % v2;
+                } else if (left instanceof Integer v1 && right instanceof Integer v2) {
+                    if (v2 == 0) {
+                        throw error(line, "Modulo by zero");
+                    }
+                    return v1 % v2;
+                }
+                throw error(line, "Operands must be numbers for '" + operator + "'");
+            }
+
             case CARET -> {
                 if (left instanceof Double v1 && right instanceof Double v2) {
                     return Math.pow(v1, v2);

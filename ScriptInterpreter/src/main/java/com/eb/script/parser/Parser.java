@@ -2641,7 +2641,7 @@ public class Parser {
     private Expression multiplication() throws ParseError {
         Expression expr = unary();
 
-        while (match(EbsTokenType.STAR, EbsTokenType.SLASH)) {
+        while (match(EbsTokenType.STAR, EbsTokenType.SLASH, EbsTokenType.PERCENT)) {
             EbsToken operator = previous();
             Expression right = unary();
             expr = new BinaryExpression(currToken.line, expr, operator, right);
