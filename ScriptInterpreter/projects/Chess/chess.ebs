@@ -522,14 +522,36 @@ setPieceImage(x: int, y: int, pieceImage: imagedata) {
     }
 }
 
-// Get chess piece symbol for move notation
+// Get chess piece symbol for move notation (letter)
 getPieceSymbol(pieceType: int) return string {
     if pieceType == KING then { return "K"; }
     if pieceType == QUEEN then { return "Q"; }
     if pieceType == ROOK then { return "R"; }
     if pieceType == BISHOP then { return "B"; }
     if pieceType == KNIGHT then { return "N"; }
-    if pieceType == PAWN then { return ""; }  // Pawns don't have a symbol in algebraic notation
+    if pieceType == PAWN then { return "P"; }
+    return "";
+}
+
+// Get chess piece Unicode icon for move history display
+getPieceIcon(pieceType: int, pieceColor: int) return string {
+    // Unicode chess symbols
+    if pieceColor == WHITE then {
+        if pieceType == KING then { return "♔"; }
+        if pieceType == QUEEN then { return "♕"; }
+        if pieceType == ROOK then { return "♖"; }
+        if pieceType == BISHOP then { return "♗"; }
+        if pieceType == KNIGHT then { return "♘"; }
+        if pieceType == PAWN then { return "♙"; }
+    } else {
+        // BLACK pieces
+        if pieceType == KING then { return "♚"; }
+        if pieceType == QUEEN then { return "♛"; }
+        if pieceType == ROOK then { return "♜"; }
+        if pieceType == BISHOP then { return "♝"; }
+        if pieceType == KNIGHT then { return "♞"; }
+        if pieceType == PAWN then { return "♟"; }
+    }
     return "";
 }
 
@@ -542,29 +564,22 @@ coordsToAlgebraic(x: int, y: int) return string {
 }
 
 // Format a move for the move history with piece icon, from position, and to position
-formatMove(fromX: int, fromY: int, toX: int, toY: int, pieceType: int, isCapture: bool) return string {
+formatMove(fromX: int, fromY: int, toX: int, toY: int, pieceType: int, pieceColor: int, isCapture: bool) return string {
+    var pieceIcon: string = call getPieceIcon(pieceType, pieceColor);
     var pieceSymbol: string = call getPieceSymbol(pieceType);
     var fromSquare: string = call coordsToAlgebraic(fromX, fromY);
     var toSquare: string = call coordsToAlgebraic(toX, toY);
     
-    // For pawns, use the piece symbol (empty string) or file letter for captures
-    if pieceType == PAWN then {
-        if isCapture then {
-            var files: string = "abcdefgh";
-            pieceSymbol = call str.charAt(files, fromX);
-            return pieceSymbol + "x" + toSquare;
-        } else {
-            // For pawn moves without capture, just show the move
-            return fromSquare + "-" + toSquare;
-        }
+    // Format: [Icon][Letter] [from]-[to] or [from]x[to] for captures
+    var moveText: string;
+    
+    if isCapture then {
+        moveText = pieceIcon + pieceSymbol + " " + fromSquare + "x" + toSquare;
+    } else {
+        moveText = pieceIcon + pieceSymbol + " " + fromSquare + "-" + toSquare;
     }
     
-    // For other pieces, show piece symbol with from-to notation
-    if isCapture then {
-        return pieceSymbol + " " + fromSquare + "x" + toSquare;
-    } else {
-        return pieceSymbol + " " + fromSquare + "-" + toSquare;
-    }
+    return moveText;
 }
 
 // Select a piece (change to yellow)
@@ -681,7 +696,7 @@ handleCellClick(x: int, y: int) {
             call movePiece(selectedX, selectedY, x, y);
             
             // Format and add move to history
-            var moveNotation: string = call formatMove(selectedX, selectedY, x, y, movingPieceType, isCapture);
+            var moveNotation: string = call formatMove(selectedX, selectedY, x, y, movingPieceType, movingPieceColor, isCapture);
             var playerName: string;
             if currentPlayer == WHITE then {
                 playerName = "White";
