@@ -66,8 +66,8 @@ var COLOR_TIMER_INACTIVE: string = "#888888";    // Inactive player timer - ligh
 var COLOR_LABEL_ACTIVE: string = "#ffff00";      // Active player label - bright yellow
 var COLOR_LABEL_INACTIVE: string = "#888888";    // Inactive player label - light gray
 var COLOR_BUTTON_NEW_GAME: string = "#ffff00";   // New Game button - yellow
-var COLOR_MOVE_HISTORY_BG: string = "#2c2c2c";   // Move history background
-var COLOR_MOVE_HISTORY_TEXT: string = "#ffffff"; // Move history text color
+var COLOR_MOVE_HISTORY_BG: string = "#ffffff";   // Move history background - white
+var COLOR_MOVE_HISTORY_TEXT: string = "#000000"; // Move history text color - black
 
 // Chess piece Unicode symbols (for console display)
 var whitePieces: string[7];
