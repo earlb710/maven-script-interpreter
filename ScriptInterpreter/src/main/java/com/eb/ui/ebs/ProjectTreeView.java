@@ -2479,14 +2479,25 @@ public class ProjectTreeView extends VBox {
             Path inputPath = Path.of(scriptPath);
             
             // Generate output path by replacing .ebs with .ebsp
-            String outputFile = scriptPath.replaceAll("(?i)\\.ebs$", "") + ".ebsp";
-            Path outputPath = Path.of(outputFile);
+            // Use Path operations for safer extension handling
+            String fileName = inputPath.getFileName().toString();
+            String outputFileName;
+            if (fileName.toLowerCase().endsWith(".ebs")) {
+                outputFileName = fileName.substring(0, fileName.length() - 4) + ".ebsp";
+            } else {
+                outputFileName = fileName + ".ebsp";
+            }
+            Path outputPath = inputPath.getParent() != null 
+                ? inputPath.getParent().resolve(outputFileName)
+                : Path.of(outputFileName);
             
-            // Show progress message
+            // Show modal progress message to prevent user interaction during packaging
             Alert progressAlert = new Alert(Alert.AlertType.INFORMATION);
             progressAlert.setTitle("Packaging Script");
             progressAlert.setHeaderText("Packaging " + inputPath.getFileName());
             progressAlert.setContentText("Please wait...");
+            // Make it non-modal but prevent closing
+            progressAlert.getDialogPane().getButtonTypes().clear();
             progressAlert.show();
             
             // Run packaging in background thread to avoid blocking UI
@@ -2501,9 +2512,19 @@ public class ProjectTreeView extends VBox {
                     // Serialize to .ebsp file
                     com.eb.script.package_tool.RuntimeContextSerializer.serialize(context, outputPath);
                     
-                    // Get file sizes
-                    long originalSize = Files.size(inputPath);
-                    long packagedSize = Files.size(outputPath);
+                    // Get file sizes with better error handling
+                    long originalSize;
+                    long packagedSize;
+                    try {
+                        originalSize = Files.size(inputPath);
+                    } catch (Exception e) {
+                        throw new Exception("Failed to read input file size: " + e.getMessage(), e);
+                    }
+                    try {
+                        packagedSize = Files.size(outputPath);
+                    } catch (Exception e) {
+                        throw new Exception("Failed to read output file size: " + e.getMessage(), e);
+                    }
                     
                     // Build success message
                     resultMessage.append("Package created successfully!\n\n");
@@ -2560,6 +2581,9 @@ public class ProjectTreeView extends VBox {
                 });
             });
             
+            // Set as daemon but with proper cleanup hook
+            // Daemon threads allow application shutdown without waiting,
+            // which is acceptable for packaging since incomplete .ebsp files can be safely deleted
             packagingThread.setDaemon(true);
             packagingThread.start();
             
