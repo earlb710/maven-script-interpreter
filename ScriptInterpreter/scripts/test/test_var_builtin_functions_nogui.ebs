@@ -1,0 +1,86 @@
+// Simple test for new var-level builtin functions (no GUI)
+// Tests the new stateful property and var management builtins
+
+// Create a simple screen
+screen testVars = {
+    "title": "Test Variables",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "field1",
+            "type": "string",
+            "default": "initial value",
+            "stateful": true
+        },
+        {
+            "name": "field2",
+            "type": "string",
+            "default": "another value",
+            "stateful": false
+        }
+    ]
+};
+
+println("Testing new var-level builtin functions");
+println("");
+
+// Test scr.getVarStateful
+println("Test 1: scr.getVarStateful");
+var field1Stateful = call scr.getVarStateful("testVars", "field1");
+var field2Stateful = call scr.getVarStateful("testVars", "field2");
+println("field1 stateful: " + field1Stateful);
+println("field2 stateful: " + field2Stateful);
+println("");
+
+// Test scr.setVarStateful
+println("Test 2: scr.setVarStateful");
+call scr.setVarStateful("testVars", "field1", false);
+var field1StatefulNew = call scr.getVarStateful("testVars", "field1");
+println("field1 stateful after setting to false: " + field1StatefulNew);
+println("");
+
+// Test scr.getVarOriginalValue
+println("Test 3: scr.getVarOriginalValue");
+var field1Original = call scr.getVarOriginalValue("testVars", "field1");
+println("field1 original value: " + field1Original);
+println("");
+
+// Test scr.submitVarItem
+println("Test 4: scr.submitVarItem");
+testVars.field1 = "modified value";
+println("field1 current value: " + testVars.field1);
+var originalBefore = call scr.getVarOriginalValue("testVars", "field1");
+println("field1 original before submit: " + originalBefore);
+call scr.submitVarItem("testVars", "field1");
+var originalAfter = call scr.getVarOriginalValue("testVars", "field1");
+println("field1 original after submit: " + originalAfter);
+println("");
+
+// Test scr.resetVarItem
+println("Test 5: scr.resetVarItem");
+testVars.field1 = "changed again";
+println("field1 before reset: " + testVars.field1);
+call scr.resetVarItem("testVars", "field1");
+println("field1 after reset: " + testVars.field1);
+println("");
+
+// Test scr.clearVarItem
+println("Test 6: scr.clearVarItem");
+testVars.field1 = "some text";
+println("field1 before clear: " + testVars.field1);
+call scr.clearVarItem("testVars", "field1");
+println("field1 after clear: " + testVars.field1);
+println("");
+
+// Test scr.initVarItem
+println("Test 7: scr.initVarItem");
+testVars.field1 = "temporary";
+println("field1 before init: " + testVars.field1);
+call scr.initVarItem("testVars", "field1");
+println("field1 after init: " + testVars.field1);
+var originalFinal = call scr.getVarOriginalValue("testVars", "field1");
+println("field1 original after init: " + originalFinal);
+println("");
+
+println("All tests completed successfully!");
