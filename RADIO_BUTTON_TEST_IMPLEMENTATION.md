@@ -15,6 +15,19 @@ The implementation includes:
 2. **Comprehensive test coverage** - six distinct test scenarios
 3. **Complete documentation** - detailed README with usage examples
 4. **Multiple radio button groups** - demonstrating different use cases
+5. **Core fix for radio button behavior** - ensures mutual exclusivity within groups
+
+### Radio Button Grouping Fix
+
+**Issue:** Radio buttons were not properly grouped, allowing multiple buttons to be selected simultaneously within the same set.
+
+**Solution:** Modified `ScreenFactory.java` to automatically create and assign `ToggleGroup` instances to radio buttons based on their setname. Radio buttons in the same "setname" now share a ToggleGroup, ensuring only one can be selected at a time.
+
+**Technical Details:**
+- Added `radioButtonToggleGroups` ConcurrentHashMap to store ToggleGroups per screen and setname
+- Key format: `"screenName.setname"` 
+- Radio buttons are assigned to their group during control creation
+- The setname is extracted from the varRef (format: `"setname.varname"`)
 
 ## Files Created
 
