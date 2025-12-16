@@ -468,31 +468,31 @@ call array.add(screenChildren, tempNode);
 // Build Screen items with control type sub-nodes
 var screenItemsChildren: array[*];
 
-// Add control type nodes
+// Add control type nodes in alphabetical order
 var controlTypes: array[*] = [];
-call array.add(controlTypes, "textfield");
-call array.add(controlTypes, "textarea");
-call array.add(controlTypes, "passwordfield");
-call array.add(controlTypes, "checkbox");
-call array.add(controlTypes, "radiobutton");
-call array.add(controlTypes, "togglebutton");
-call array.add(controlTypes, "combobox");
-call array.add(controlTypes, "choicebox");
-call array.add(controlTypes, "listview");
-call array.add(controlTypes, "spinner");
-call array.add(controlTypes, "slider");
-call array.add(controlTypes, "datepicker");
-call array.add(controlTypes, "colorpicker");
 call array.add(controlTypes, "button");
-call array.add(controlTypes, "label");
-call array.add(controlTypes, "text");
-call array.add(controlTypes, "hyperlink");
-call array.add(controlTypes, "separator");
-call array.add(controlTypes, "imageview");
-call array.add(controlTypes, "webview");
-call array.add(controlTypes, "treeview");
-call array.add(controlTypes, "progressbar");
 call array.add(controlTypes, "chart");
+call array.add(controlTypes, "checkbox");
+call array.add(controlTypes, "choicebox");
+call array.add(controlTypes, "colorpicker");
+call array.add(controlTypes, "combobox");
+call array.add(controlTypes, "datepicker");
+call array.add(controlTypes, "hyperlink");
+call array.add(controlTypes, "imageview");
+call array.add(controlTypes, "label");
+call array.add(controlTypes, "listview");
+call array.add(controlTypes, "passwordfield");
+call array.add(controlTypes, "progressbar");
+call array.add(controlTypes, "radiobutton");
+call array.add(controlTypes, "separator");
+call array.add(controlTypes, "slider");
+call array.add(controlTypes, "spinner");
+call array.add(controlTypes, "text");
+call array.add(controlTypes, "textarea");
+call array.add(controlTypes, "textfield");
+call array.add(controlTypes, "togglebutton");
+call array.add(controlTypes, "treeview");
+call array.add(controlTypes, "webview");
 
 foreach controlType in controlTypes {
     var ctNode: json = call json.jsonFromString("{}");
