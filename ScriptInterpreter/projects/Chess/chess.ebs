@@ -1338,17 +1338,24 @@ resetGame() {
     call updateTimerColors();
 }
 
-// Close the chess screen
-closeChessScreen() {
-    print "=== closeChessScreen() EXECUTED ===";
+// Cleanup function for chess screen (called by cleanup handler)
+cleanupChessScreen() {
+    print "=== cleanupChessScreen() EXECUTED (via cleanup handler) ===";
     print "Stopping game and timer...";
     gameStarted = false;
     // Stop the timer
     call thread.timerStop("chessTimer");
     print "Timer stopped.";
+    print "=== cleanupChessScreen() COMPLETE ===";
+    print "";
+}
+
+// Close the chess screen (called by Close button)
+closeChessScreen() {
+    print "=== closeChessScreen() EXECUTED (via Close button) ===";
+    // Cleanup will be called automatically by screen close
     hide screen chessScreen;
     print "Chess screen hidden.";
-    print "=== closeChessScreen() COMPLETE ===";
     print "";
 }
 
@@ -1357,7 +1364,7 @@ screen chessScreen = {
     "title": "Chess Game",
     "width": 980,
     "height": 780,
-    "cleanup": "print '=== SCREEN CLEANUP HANDLER EXECUTED ==='; print 'Stopping game and timer via cleanup handler...'; gameStarted = false; call thread.timerStop('chessTimer'); print 'Timer stopped by cleanup handler.'; print '=== CLEANUP HANDLER COMPLETE ==='; print '';",
+    "cleanup": "call cleanupChessScreen();",
     "vars": [
         {"name": "whiteTimer", "type": "string", "default": "10:00"},
         {"name": "blackTimer", "type": "string", "default": "10:00"},
