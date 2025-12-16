@@ -101,9 +101,23 @@ public class AreaItemFactory {
                         radioGroup.getProperties().put("optionsMap", metadata.optionsMap);
                     } else {
                         for (String option : metadata.options) {
-                            RadioButton rb = new RadioButton(option);
+                            // Check if option contains colon separator for "value:displayText" format
+                            String displayText;
+                            String dataValue;
+                            int colonIndex = option.indexOf(':');
+                            if (colonIndex > 0 && colonIndex < option.length() - 1) {
+                                // Format: "value:displayText"
+                                dataValue = option.substring(0, colonIndex);
+                                displayText = option.substring(colonIndex + 1);
+                            } else {
+                                // No colon or invalid format - use the whole string for both
+                                dataValue = option;
+                                displayText = option;
+                            }
+                            
+                            RadioButton rb = new RadioButton(displayText);
                             rb.setToggleGroup(toggleGroup);
-                            rb.setUserData(option); // Both display and data value are the same
+                            rb.setUserData(dataValue);
                             radioGroup.getChildren().add(rb);
                         }
                     }

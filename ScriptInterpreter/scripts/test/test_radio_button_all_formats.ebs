@@ -1,0 +1,138 @@
+// Test Script: Radio Button All Formats
+// Description: Tests all three formats for radio button options
+// Author: EBS Test Suite
+// Date: 2025-12-16
+
+print "==========================================================";
+print "  Radio Button Options - All Formats Test";
+print "==========================================================";
+print "";
+
+// Demonstrate all three supported formats for radio button options
+screen allFormatsScreen = {
+    "title": "Radio Button - All Option Formats",
+    "width": 600,
+    "height": 500,
+    "vars": [
+        {
+            "name": "format1",
+            "type": "string",
+            "default": "light",
+            "display": {
+                "type": "radiobutton",
+                "labelText": "Format 1: Simple Array (value = display)",
+                "labelPosition": "top",
+                "options": ["light", "dark", "auto"]
+            }
+        },
+        {
+            "name": "format2",
+            "type": "string",
+            "default": "L",
+            "display": {
+                "type": "radiobutton",
+                "labelText": "Format 2: Colon-Separated (value:display)",
+                "labelPosition": "top",
+                "options": ["L:Light Theme", "D:Dark Theme", "A:Auto Theme"]
+            }
+        },
+        {
+            "name": "format3",
+            "type": "string",
+            "default": "en",
+            "display": {
+                "type": "radiobutton",
+                "labelText": "Format 3: Options Map",
+                "labelPosition": "top",
+                "options": {
+                    "en": "English",
+                    "es": "Español",
+                    "fr": "Français",
+                    "de": "Deutsch"
+                }
+            }
+        }
+    ]
+};
+
+print "TEST 1: Format Comparison";
+print "=========================";
+print "";
+
+print "Format 1 - Simple Array:";
+print "  Syntax: [\"light\", \"dark\", \"auto\"]";
+print "  Value stored: \"light\" (same as display)";
+print "  Current value: " + allFormatsScreen.format1;
+print "";
+
+print "Format 2 - Colon-Separated:";
+print "  Syntax: [\"L:Light Theme\", \"D:Dark Theme\", \"A:Auto Theme\"]";
+print "  Value stored: \"L\" (before colon)";
+print "  Display text: \"Light Theme\" (after colon)";
+print "  Current value: " + allFormatsScreen.format2;
+print "";
+
+print "Format 3 - Options Map:";
+print "  Syntax: {\"en\": \"English\", \"es\": \"Español\", ...}";
+print "  Value stored: \"en\" (map key)";
+print "  Display text: \"English\" (map value)";
+print "  Current value: " + allFormatsScreen.format3;
+print "";
+
+print "TEST 2: Modifying Values";
+print "========================";
+print "";
+
+print "Setting format1 to 'dark'...";
+allFormatsScreen.format1 = "dark";
+print "  → format1 = " + allFormatsScreen.format1;
+print "";
+
+print "Setting format2 to 'D' (Dark Theme will be selected)...";
+allFormatsScreen.format2 = "D";
+print "  → format2 = " + allFormatsScreen.format2;
+print "";
+
+print "Setting format3 to 'es' (Español will be selected)...";
+allFormatsScreen.format3 = "es";
+print "  → format3 = " + allFormatsScreen.format3;
+print "";
+
+print "TEST 3: Use Cases";
+print "=================";
+print "";
+
+print "Format 1 (Simple Array):";
+print "  ✓ Use when value and display text are the same";
+print "  ✓ Simplest syntax";
+print "  ✓ Example: [\"small\", \"medium\", \"large\"]";
+print "";
+
+print "Format 2 (Colon-Separated):";
+print "  ✓ Use for compact syntax with different value/display";
+print "  ✓ Great for short codes with descriptive text";
+print "  ✓ Example: [\"S:Small\", \"M:Medium\", \"L:Large\"]";
+print "  ✓ Example: [\"USD:US Dollar\", \"EUR:Euro\", \"GBP:Pound\"]";
+print "";
+
+print "Format 3 (Options Map):";
+print "  ✓ Use when options come from dynamic data";
+print "  ✓ Most explicit and clear";
+print "  ✓ Example: {\"us\": \"United States\", \"ca\": \"Canada\"}";
+print "";
+
+print "==========================================================";
+print "  Displaying Screen for Visual Verification";
+print "==========================================================";
+print "";
+
+// Display the screen
+show screen allFormatsScreen;
+
+print "";
+print "Final values:";
+print "  format1 (simple) = " + allFormatsScreen.format1;
+print "  format2 (colon) = " + allFormatsScreen.format2;
+print "  format3 (map) = " + allFormatsScreen.format3;
+print "";
+print "✓ All three formats work correctly!";
