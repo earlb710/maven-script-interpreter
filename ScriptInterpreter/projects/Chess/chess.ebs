@@ -1489,7 +1489,7 @@ screen chessScreen = {
             "padding": "20",
             "style": "-fx-background-color: $COLOR_BG_MAIN;",
             "items": [
-                {"name": "titleLabel", "display": {"type": "label", "labelText": "\u265A Chess Game \u2654", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "24px", "labelBold": true}}
+                {"name": "titleLabel", "display": {"type": "label", "labelText": "\u265A Chess Game \u2654", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "26px", "labelBold": true}}
             ],
             "areas": [
                 {
