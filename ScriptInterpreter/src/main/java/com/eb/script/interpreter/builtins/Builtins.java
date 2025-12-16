@@ -2202,7 +2202,7 @@ public final class Builtins {
             case "scr.setitemchoiceoptions" -> BuiltinsScreen.screenSetItemChoiceOptions(context, args);
             case "scr.getitemchoiceoptions" -> BuiltinsScreen.screenGetItemChoiceOptions(context, args);
             case "scr.snapshot" -> BuiltinsScreen.screenSnapshot(context, args);
-            case "scr.settreeitemicon" -> BuiltinsScreen.screenSetTreeItemIcon(context, args);
+            case "scr.settreeitemicon" -> BuiltinsScreen.screenSetTreeItemIcon(context, args); 
             case "scr.settreeitemicons" -> BuiltinsScreen.screenSetTreeItemIcons(context, args);
             case "scr.gettreeitemicon" -> BuiltinsScreen.screenGetTreeItemIcon(context, args);
             case "scr.settreeitembold" -> BuiltinsScreen.screenSetTreeItemBold(context, args);
