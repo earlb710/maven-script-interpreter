@@ -24,7 +24,7 @@ animationFrame(timerName: string) {
         call thread.timerStop(timerName);
         print "";
         print "Animation complete!";
-    end
+    end if;
 }
 
 // Start animation timer

@@ -22,7 +22,7 @@ if test1Called then
     print "  ✓ Test 1 PASSED";
 else
     print "  ✗ Test 1 FAILED - callback not invoked";
-end
+end if;
 print "";
 
 // Test 2: Stop non-existent timer
@@ -32,7 +32,7 @@ if stopped then
     print "  ✗ Test 2 FAILED - should return false for non-existent timer";
 else
     print "  ✓ Test 2 PASSED - correctly returned false";
-end
+end if;
 print "";
 
 // Test 3: Replace existing timer
@@ -58,7 +58,7 @@ if test3Count > 0 then
     print "  ✓ Test 3 PASSED - timer was replaced";
 else
     print "  ✗ Test 3 FAILED - new timer did not execute";
-end
+end if;
 print "";
 
 // Test 4: Multiple concurrent timers
@@ -70,14 +70,14 @@ timer4aCallback(name: string) {
     timer4a = timer4a + 1;
     if timer4a >= 2 then
         call thread.timerStop(name);
-    end
+    end if;
 }
 
 timer4bCallback(name: string) {
     timer4b = timer4b + 1;
     if timer4b >= 2 then
         call thread.timerStop(name);
-    end
+    end if;
 }
 
 call thread.timerStart("timer4a", 100, "timer4aCallback");
@@ -88,7 +88,7 @@ if timer4a >= 2 and timer4b >= 2 then
     print "  ✓ Test 4 PASSED - both timers executed";
 else
     print "  ✗ Test 4 FAILED - timer4a: " + call str.toString(timer4a) + ", timer4b: " + call str.toString(timer4b);
-end
+end if;
 print "";
 
 // Test 5: Timer with very short period
@@ -99,7 +99,7 @@ timer5Callback(name: string) {
     timer5Count = timer5Count + 1;
     if timer5Count >= 5 then
         call thread.timerStop(name);
-    end
+    end if;
 }
 
 call thread.timerStart("timer5", 50, "timer5Callback");
@@ -109,7 +109,7 @@ if timer5Count >= 5 then
     print "  ✓ Test 5 PASSED - fast timer executed " + call str.toString(timer5Count) + " times";
 else
     print "  ✗ Test 5 FAILED - only " + call str.toString(timer5Count) + " executions";
-end
+end if;
 print "";
 
 // Test 6: Stop timer immediately after start
@@ -128,7 +128,7 @@ if stopped6 and not timer6Called then
     print "  ✓ Test 6 PASSED - timer stopped before firing";
 else
     print "  ✗ Test 6 FAILED - stopped: " + call str.toString(stopped6) + ", called: " + call str.toString(timer6Called);
-end
+end if;
 print "";
 
 print "=== All Tests Complete ===";

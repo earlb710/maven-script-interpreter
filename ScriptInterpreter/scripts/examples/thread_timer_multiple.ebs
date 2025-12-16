@@ -30,7 +30,7 @@ slowTimer(name: string) {
         call thread.timerStop("medium");
         call thread.timerStop("slow");
         print "All timers stopped.";
-    end
+    end if;
 }
 
 // Start multiple timers with different intervals

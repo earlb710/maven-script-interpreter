@@ -17,8 +17,8 @@ timerCallback(timerName: string) {
             print "Timer stopped successfully!";
         else
             print "Timer not found.";
-        end
-    end
+        end if;
+    end if;
 }
 
 // Start a repeating timer
