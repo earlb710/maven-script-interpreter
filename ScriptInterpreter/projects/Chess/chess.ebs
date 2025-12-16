@@ -95,9 +95,9 @@ var imgPath: string = "src/main/resources/images/chess/";
 // Create the chess board using array.bitmap for bitmap-encoded cell data (8x8 = 64 elements)
 var board: array.bitmap[64];
 
-// Timer variables
-var timerWhite: int = 600;
-var timerBlack: int = 600;
+// Timer variables (now in deciseconds - 10ths of a second)
+var timerWhite: int = 6000;  // 600 seconds = 6000 deciseconds
+var timerBlack: int = 6000;  // 600 seconds = 6000 deciseconds
 var currentPlayer: int = 0;
 
 // Selection and move indication variables
@@ -842,6 +842,45 @@ formatTimer(seconds: int) return string {
     return minsStr + ":" + secsStr;
 }
 
+// Format timer with decimal places (for display with tenths of seconds)
+formatTimerDecimal(deciseconds: int) return string {
+    // Check if unlimited time (deciseconds would be >= UNLIMITED_TIME * 10)
+    if deciseconds >= UNLIMITED_TIME * 10 then {
+        return "Unlimited";
+    }
+    
+    var totalSeconds: int = deciseconds / 10;
+    var tenths: int = call modulo(deciseconds, 10);
+    var mins: int = totalSeconds / 60;
+    var secs: int = call modulo(totalSeconds, 60);
+    var minsStr: string = call str.lpad(string(mins), 2, "0");
+    var secsStr: string = call str.lpad(string(secs), 2, "0");
+    return minsStr + ":" + secsStr + "." + tenths;
+}
+
+// Timer callback function - called every 100ms (0.1 seconds)
+timerCallback(timerName: string) {
+    // Only update if game has started
+    if !gameStarted then {
+        return;
+    }
+    
+    // Decrement the active player's timer by 1 decisecond (0.1 seconds)
+    if currentPlayer == 0 then {
+        // White's turn
+        if timerWhite > 0 then {
+            timerWhite = timerWhite - 1;
+            chessScreen.whiteTimer = call formatTimerDecimal(timerWhite);
+        }
+    } else {
+        // Black's turn
+        if timerBlack > 0 then {
+            timerBlack = timerBlack - 1;
+            chessScreen.blackTimer = call formatTimerDecimal(timerBlack);
+        }
+    }
+}
+
 initializeBoard() {
     var row: int = 0;
     var col: int = 0;
@@ -971,8 +1010,8 @@ printBoard() {
     print "   ===========";
     print "";
     
-    var whiteTimerStr: string = call formatTimer(timerWhite);
-    var blackTimerStr: string = call formatTimer(timerBlack);
+    var whiteTimerStr: string = call formatTimerDecimal(timerWhite);
+    var blackTimerStr: string = call formatTimerDecimal(timerBlack);
     var currentPlayerStr: string;
     if currentPlayer == 0 then {
         currentPlayerStr = "White";
@@ -1026,21 +1065,22 @@ updateTimerColors() {
 }
 
 // Convert time limit string to seconds
-getTimeLimitInSeconds(timeLimit: string) return int {
+getTimeLimitInDeciseconds(timeLimit: string) return int {
+    // Return time in deciseconds (10ths of a second)
     if timeLimit == "10 minutes" then {
-        return 600;
+        return 6000;  // 600 seconds * 10
     } else if timeLimit == "15 minutes" then {
-        return 900;
+        return 9000;  // 900 seconds * 10
     } else if timeLimit == "20 minutes" then {
-        return 1200;
+        return 12000;  // 1200 seconds * 10
     } else if timeLimit == "30 minutes" then {
-        return 1800;
+        return 18000;  // 1800 seconds * 10
     } else if timeLimit == "60 minutes" then {
-        return 3600;
+        return 36000;  // 3600 seconds * 10
     } else if timeLimit == "Unlimited" then {
-        return UNLIMITED_TIME;
+        return UNLIMITED_TIME * 10;
     } else {
-        return 600;  // Default to 10 minutes
+        return 6000;  // Default to 10 minutes
     }
 }
 
@@ -1050,10 +1090,10 @@ handleStartGame() {
     selectedTimeLimit = startupDialog.timeLimit;
     print "Selected time limit: " + selectedTimeLimit;
     
-    // Set the timer values based on selection
-    var timeInSeconds: int = call getTimeLimitInSeconds(selectedTimeLimit);
-    timerWhite = timeInSeconds;
-    timerBlack = timeInSeconds;
+    // Set the timer values based on selection (in deciseconds)
+    var timeInDeciseconds: int = call getTimeLimitInDeciseconds(selectedTimeLimit);
+    timerWhite = timeInDeciseconds;
+    timerBlack = timeInDeciseconds;
     
     gameStarted = true;
     
@@ -1180,13 +1220,16 @@ handleStartGame() {
     print "Opening chess screen with graphical grid display...";
     
     // Update screen variables before showing
-    chessScreen.whiteTimer = call formatTimer(timerWhite);
-    chessScreen.blackTimer = call formatTimer(timerBlack);
+    chessScreen.whiteTimer = call formatTimerDecimal(timerWhite);
+    chessScreen.blackTimer = call formatTimerDecimal(timerBlack);
     chessScreen.statusMessage = "White to move";
     call updateTimerColors();
     
     // Show the chess screen
     show screen chessScreen;
+    
+    // Start the game timer (updates every 100ms = 0.1 seconds)
+    call thread.timerStart("chessTimer", 100, "timerCallback");
     
     print "";
     print "Chess screen is now displayed!";
@@ -1258,14 +1301,14 @@ screen startupDialog = {
 resetGame() {
     call initializeBoard();
     
-    // Use the selected time limit from startup dialog
-    var timeInSeconds: int = call getTimeLimitInSeconds(selectedTimeLimit);
-    timerWhite = timeInSeconds;
-    timerBlack = timeInSeconds;
+    // Use the selected time limit from startup dialog (in deciseconds)
+    var timeInDeciseconds: int = call getTimeLimitInDeciseconds(selectedTimeLimit);
+    timerWhite = timeInDeciseconds;
+    timerBlack = timeInDeciseconds;
     currentPlayer = 0;
     
-    chessScreen.whiteTimer = call formatTimer(timerWhite);
-    chessScreen.blackTimer = call formatTimer(timerBlack);
+    chessScreen.whiteTimer = call formatTimerDecimal(timerWhite);
+    chessScreen.blackTimer = call formatTimerDecimal(timerBlack);
     chessScreen.statusMessage = "White to move - Game Reset!";
     chessScreen.moveHistory = "Game started.\nWhite's turn.\n";
     call updateTimerColors();
@@ -1273,6 +1316,8 @@ resetGame() {
 
 // Close the chess screen
 closeChessScreen() {
+    // Stop the timer
+    call thread.timerStop("chessTimer");
     hide screen chessScreen;
 }
 
@@ -1489,7 +1534,7 @@ screen chessScreen = {
             "padding": "20",
             "style": "-fx-background-color: $COLOR_BG_MAIN;",
             "items": [
-                {"name": "titleLabel", "display": {"type": "label", "labelText": "\u265A Chess Game \u2654", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "26px", "labelBold": true}}
+                {"name": "titleLabel", "display": {"type": "label", "labelText": "\u265A Chess Game \u2654", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "28px", "labelBold": true}}
             ],
             "areas": [
                 {
@@ -1498,6 +1543,7 @@ screen chessScreen = {
                     "spacing": "40",
                     "padding": "10",
                     "style": "-fx-background-color: $COLOR_BG_TIMER; -fx-background-radius: 5; -fx-alignment: center;",
+                    "styleClass": "bevel-raised",
                     "items": [
                         {"name": "whiteLabelTimer", "varRef": "whiteLabelText", "textColor": "$COLOR_LABEL_ACTIVE", "display": {"type": "label", "labelFontSize": "18px"}},
                         {"name": "whiteTimerField", "varRef": "whiteTimer", "textColor": "$COLOR_TIMER_ACTIVE", "display": {"type": "label", "labelFontSize": "24px", "labelBold": true}},
