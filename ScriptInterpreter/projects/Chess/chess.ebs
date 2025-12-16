@@ -870,13 +870,19 @@ timerCallback(timerName: string) {
         // White's turn
         if timerWhite > 0 then {
             timerWhite = timerWhite - 1;
-            chessScreen.whiteTimer = call formatTimerDecimal(timerWhite);
+            var timerText: string = call formatTimerDecimal(timerWhite);
+            chessScreen.whiteTimer = timerText;
+            // Force UI update using scr.setproperty
+            call scr.setproperty("chessScreen.whiteTimerField", "text", timerText);
         }
     } else {
         // Black's turn
         if timerBlack > 0 then {
             timerBlack = timerBlack - 1;
-            chessScreen.blackTimer = call formatTimerDecimal(timerBlack);
+            var timerText: string = call formatTimerDecimal(timerBlack);
+            chessScreen.blackTimer = timerText;
+            // Force UI update using scr.setproperty
+            call scr.setproperty("chessScreen.blackTimerField", "text", timerText);
         }
     }
 }
@@ -1240,6 +1246,9 @@ handleStartGame() {
 handleExitGame() {
     print "Exit button clicked!";
     gameStarted = false;
+    
+    // Stop the timer if it's running
+    call thread.timerStop("chessTimer");
     
     // Close the startup dialog
     hide screen startupDialog;
