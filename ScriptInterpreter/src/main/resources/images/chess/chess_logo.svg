@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200" viewBox="0 0 400 200">
+  <defs>
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFA500;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFD700;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="silverGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#E8E8E8;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#C0C0C0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#E8E8E8;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Shadow filter - using compatible SVG 1.1 elements -->
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="2" dy="2" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.5"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background chessboard pattern -->
+  <rect x="0" y="0" width="400" height="200" fill="#2c2c2c"/>
+  
+  <!-- Decorative squares in background -->
+  <rect x="20" y="40" width="40" height="40" fill="#f0d9b5" opacity="0.3"/>
+  <rect x="60" y="40" width="40" height="40" fill="#b58863" opacity="0.3"/>
+  <rect x="340" y="40" width="40" height="40" fill="#f0d9b5" opacity="0.3"/>
+  <rect x="300" y="40" width="40" height="40" fill="#b58863" opacity="0.3"/>
+  <rect x="20" y="120" width="40" height="40" fill="#b58863" opacity="0.3"/>
+  <rect x="60" y="120" width="40" height="40" fill="#f0d9b5" opacity="0.3"/>
+  <rect x="340" y="120" width="40" height="40" fill="#b58863" opacity="0.3"/>
+  <rect x="300" y="120" width="40" height="40" fill="#f0d9b5" opacity="0.3"/>
+  
+  <!-- White King (left side) -->
+  <g transform="translate(80, 80)" filter="url(#shadow)">
+    <!-- Base -->
+    <rect x="10" y="75" width="50" height="8" fill="url(#silverGradient)"/>
+    <!-- Stem -->
+    <path d="M 25,75 L 28,35 L 42,35 L 45,75 Z" fill="url(#silverGradient)"/>
+    <!-- Crown base -->
+    <circle cx="35" cy="30" r="12" fill="url(#silverGradient)"/>
+    <!-- Crown points -->
+    <path d="M 30,20 L 32,28 L 35,22 L 38,28 L 40,20 L 38,30 L 32,30 Z" fill="url(#silverGradient)"/>
+    <!-- Cross on top -->
+    <rect x="33" y="12" width="4" height="10" fill="url(#silverGradient)"/>
+    <rect x="30" y="15" width="10" height="4" fill="url(#silverGradient)"/>
+  </g>
+  
+  <!-- "CHESS" Text in center -->
+  <text x="200" y="110" font-family="'Playfair Display', 'Georgia', 'Times New Roman', serif" font-size="72" font-weight="bold" 
+        fill="url(#goldGradient)" text-anchor="middle" filter="url(#shadow)" style="letter-spacing: 4px;">
+    CHESS
+  </text>
+  
+  <!-- Decorative line under text -->
+  <rect x="120" y="120" width="160" height="3" fill="url(#goldGradient)" opacity="0.8"/>
+  
+  <!-- Subtitle -->
+  <text x="200" y="145" font-family="'Playfair Display', 'Georgia', 'Times New Roman', serif" font-size="18" font-weight="normal" 
+        fill="#ffcc00" text-anchor="middle" style="letter-spacing: 1px;">
+    Strategy &amp; Mastery
+  </text>
+  
+  <!-- Black Queen (right side) -->
+  <g transform="translate(250, 80)" filter="url(#shadow)">
+    <!-- Base -->
+    <rect x="10" y="75" width="50" height="8" fill="#333333"/>
+    <rect x="12" y="77" width="46" height="4" fill="#1a1a1a"/>
+    <!-- Stem -->
+    <path d="M 25,75 L 27,40 L 43,40 L 45,75 Z" fill="#333333"/>
+    <!-- Body highlights -->
+    <path d="M 27,40 L 28,38 L 42,38 L 43,40 Z" fill="#1a1a1a"/>
+    <!-- Crown -->
+    <ellipse cx="35" cy="35" rx="14" ry="10" fill="#333333"/>
+    <!-- Crown points -->
+    <circle cx="25" cy="32" r="4" fill="#333333"/>
+    <circle cx="30" cy="28" r="4" fill="#333333"/>
+    <circle cx="35" cy="26" r="5" fill="#333333"/>
+    <circle cx="40" cy="28" r="4" fill="#333333"/>
+    <circle cx="45" cy="32" r="4" fill="#333333"/>
+    <!-- Highlights on crown -->
+    <circle cx="35" cy="26" r="2" fill="#555555"/>
+  </g>
+  
+  <!-- Corner decorations - detailed chess piece icons (scaled up 1.5x) -->
+  <!-- Top left - Knight -->
+  <g transform="translate(8, 8) scale(1.5)" opacity="0.6">
+    <!-- Knight head -->
+    <path d="M 5,3 L 8,1 L 12,2 L 14,5 L 14,8 L 12,10 L 10,11 L 8,11 L 6,10 L 5,8 Z" fill="#ffcc00"/>
+    <!-- Knight neck -->
+    <path d="M 8,11 L 9,15 L 11,15 L 12,11 Z" fill="#ffcc00"/>
+    <!-- Knight base -->
+    <rect x="6" y="15" width="8" height="3" rx="1" fill="#ffcc00"/>
+    <!-- Eye -->
+    <circle cx="11" cy="5" r="1" fill="#2c2c2c"/>
+    <!-- Ear -->
+    <path d="M 12,2 L 13,1 L 13,3 Z" fill="#ffcc00"/>
+  </g>
+  
+  <!-- Top right - Queen -->
+  <g transform="translate(360, 8) scale(1.5)" opacity="0.6">
+    <!-- Base -->
+    <rect x="8" y="16" width="12" height="3" rx="1" fill="#ffcc00"/>
+    <!-- Body -->
+    <path d="M 10,16 L 11,10 L 17,10 L 18,16 Z" fill="#ffcc00"/>
+    <!-- Crown base -->
+    <ellipse cx="14" cy="8" rx="5" ry="3" fill="#ffcc00"/>
+    <!-- Crown points -->
+    <circle cx="10" cy="6" r="1.5" fill="#ffcc00"/>
+    <circle cx="12.5" cy="4" r="1.5" fill="#ffcc00"/>
+    <circle cx="14" cy="3" r="2" fill="#ffcc00"/>
+    <circle cx="15.5" cy="4" r="1.5" fill="#ffcc00"/>
+    <circle cx="18" cy="6" r="1.5" fill="#ffcc00"/>
+  </g>
+  
+  <!-- Bottom left - Rook -->
+  <g transform="translate(8, 168) scale(1.5)" opacity="0.6">
+    <!-- Base -->
+    <rect x="7" y="16" width="10" height="3" rx="1" fill="#ffcc00"/>
+    <!-- Body -->
+    <path d="M 8,16 L 9,8 L 16,8 L 17,16 Z" fill="#ffcc00"/>
+    <!-- Battlements -->
+    <rect x="9" y="5" width="2" height="3" fill="#ffcc00"/>
+    <rect x="12" y="5" width="2" height="3" fill="#ffcc00"/>
+    <rect x="15" y="5" width="2" height="3" fill="#ffcc00"/>
+    <!-- Top -->
+    <rect x="8" y="5" width="9" height="1" fill="#ffcc00"/>
+  </g>
+  
+  <!-- Bottom right - Bishop -->
+  <g transform="translate(360, 168) scale(1.5)" opacity="0.6">
+    <!-- Base -->
+    <rect x="8" y="16" width="10" height="3" rx="1" fill="#ffcc00"/>
+    <!-- Body -->
+    <path d="M 10,16 L 11,8 L 15,8 L 16,16 Z" fill="#ffcc00"/>
+    <!-- Head -->
+    <circle cx="13" cy="6" r="3" fill="#ffcc00"/>
+    <!-- Top ornament -->
+    <circle cx="13" cy="3" r="1.5" fill="#ffcc00"/>
+    <!-- Slot -->
+    <rect x="12" y="5" width="2" height="3" fill="#2c2c2c"/>
+  </g>
+</svg>
