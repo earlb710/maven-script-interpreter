@@ -1,0 +1,212 @@
+// Comprehensive test script for contentAlignment and itemAlignment properties
+print("Testing alignment properties");
+print("============================");
+
+// Test 1: Content alignment in various controls
+screen contentAlignmentTest = {
+    "sets": [{
+        "setname": "main",
+        "vars": [
+            {"name": "leftField", "datatype": "string", "value": "Left aligned text"},
+            {"name": "centerField", "datatype": "string", "value": "Center aligned text"},
+            {"name": "rightField", "datatype": "string", "value": "Right aligned text"}
+        ]
+    }],
+    "areas": [{
+        "name": "mainArea",
+        "type": "vbox",
+        "spacing": "10",
+        "padding": "20",
+        "items": [
+            {
+                "varRef": "leftField",
+                "display": {
+                    "type": "textfield",
+                    "labelText": "Left Content:",
+                    "maxLength": 30
+                },
+                "contentAlignment": "left",
+                "prefWidth": "300"
+            },
+            {
+                "varRef": "centerField",
+                "display": {
+                    "type": "textfield",
+                    "labelText": "Center Content:",
+                    "maxLength": 30
+                },
+                "contentAlignment": "center",
+                "prefWidth": "300"
+            },
+            {
+                "varRef": "rightField",
+                "display": {
+                    "type": "textfield",
+                    "labelText": "Right Content:",
+                    "maxLength": 30
+                },
+                "contentAlignment": "right",
+                "prefWidth": "300"
+            }
+        ]
+    }]
+};
+
+print("Test 1: Content alignment test screen created");
+
+// Test 2: Item alignment in GridPane
+screen gridAlignmentTest = {
+    "sets": [{
+        "setname": "main",
+        "vars": [
+            {"name": "topLeft", "datatype": "string", "value": "TL"},
+            {"name": "topCenter", "datatype": "string", "value": "TC"},
+            {"name": "topRight", "datatype": "string", "value": "TR"},
+            {"name": "centerLeft", "datatype": "string", "value": "CL"},
+            {"name": "center", "datatype": "string", "value": "C"},
+            {"name": "centerRight", "datatype": "string", "value": "CR"},
+            {"name": "bottomLeft", "datatype": "string", "value": "BL"},
+            {"name": "bottomCenter", "datatype": "string", "value": "BC"},
+            {"name": "bottomRight", "datatype": "string", "value": "BR"}
+        ]
+    }],
+    "areas": [{
+        "name": "gridArea",
+        "type": "gridpane",
+        "spacing": "10",
+        "padding": "20",
+        "items": [
+            {
+                "varRef": "topLeft",
+                "layoutPos": "0,0",
+                "display": {"type": "textfield", "maxLength": 10},
+                "itemAlignment": "top-left"
+            },
+            {
+                "varRef": "topCenter",
+                "layoutPos": "0,1",
+                "display": {"type": "textfield", "maxLength": 10},
+                "itemAlignment": "top-center"
+            },
+            {
+                "varRef": "topRight",
+                "layoutPos": "0,2",
+                "display": {"type": "textfield", "maxLength": 10},
+                "itemAlignment": "top-right"
+            },
+            {
+                "varRef": "centerLeft",
+                "layoutPos": "1,0",
+                "display": {"type": "textfield", "maxLength": 10},
+                "itemAlignment": "center-left"
+            },
+            {
+                "varRef": "center",
+                "layoutPos": "1,1",
+                "display": {"type": "textfield", "maxLength": 10},
+                "itemAlignment": "center"
+            },
+            {
+                "varRef": "centerRight",
+                "layoutPos": "1,2",
+                "display": {"type": "textfield", "maxLength": 10},
+                "itemAlignment": "center-right"
+            },
+            {
+                "varRef": "bottomLeft",
+                "layoutPos": "2,0",
+                "display": {"type": "textfield", "maxLength": 10},
+                "itemAlignment": "bottom-left"
+            },
+            {
+                "varRef": "bottomCenter",
+                "layoutPos": "2,1",
+                "display": {"type": "textfield", "maxLength": 10},
+                "itemAlignment": "bottom-center"
+            },
+            {
+                "varRef": "bottomRight",
+                "layoutPos": "2,2",
+                "display": {"type": "textfield", "maxLength": 10},
+                "itemAlignment": "bottom-right"
+            }
+        ]
+    }]
+};
+
+print("Test 2: GridPane item alignment test screen created");
+
+// Test 3: Item alignment in VBox
+screen vboxAlignmentTest = {
+    "sets": [{
+        "setname": "main",
+        "vars": [
+            {"name": "leftItem", "datatype": "string", "value": "Left aligned item"},
+            {"name": "centerItem", "datatype": "string", "value": "Center aligned item"},
+            {"name": "rightItem", "datatype": "string", "value": "Right aligned item"}
+        ]
+    }],
+    "areas": [{
+        "name": "vboxArea",
+        "type": "vbox",
+        "spacing": "10",
+        "padding": "20",
+        "items": [
+            {
+                "varRef": "leftItem",
+                "display": {
+                    "type": "textfield",
+                    "labelText": "Left aligned:",
+                    "maxLength": 20
+                },
+                "itemAlignment": "center-left",
+                "prefWidth": "200"
+            },
+            {
+                "varRef": "centerItem",
+                "display": {
+                    "type": "textfield",
+                    "labelText": "Center aligned:",
+                    "maxLength": 20
+                },
+                "itemAlignment": "center",
+                "prefWidth": "200"
+            },
+            {
+                "varRef": "rightItem",
+                "display": {
+                    "type": "textfield",
+                    "labelText": "Right aligned:",
+                    "maxLength": 20
+                },
+                "itemAlignment": "center-right",
+                "prefWidth": "200"
+            }
+        ]
+    }]
+};
+
+print("Test 3: VBox item alignment test screen created");
+
+// Test 4: Testing property get/set
+print("");
+print("Testing property get/set...");
+call scr.setProperty("contentAlignmentTest.leftField", "contentAlignment", "center");
+print("Changed leftField contentAlignment to center");
+
+var align1: string = scr.getProperty("contentAlignmentTest.centerField", "contentAlignment");
+print("centerField contentAlignment: " + align1);
+
+call scr.setProperty("vboxAlignmentTest.leftItem", "itemAlignment", "center");
+print("Changed leftItem itemAlignment to center");
+
+var align2: string = scr.getProperty("vboxAlignmentTest.centerItem", "itemAlignment");
+print("centerItem itemAlignment: " + align2);
+
+print("");
+print("All tests completed successfully!");
+print("");
+print("To see the visual results:");
+print("1. Open the contentAlignmentTest screen to see text alignment within controls");
+print("2. Open the gridAlignmentTest screen to see item positioning in grid cells");
+print("3. Open the vboxAlignmentTest screen to see item positioning in VBox");
