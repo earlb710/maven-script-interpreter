@@ -103,6 +103,10 @@ public class Parser {
         Parser parser = new Parser(script, tokens);
         parser.parse();
         RuntimeContext ret = new RuntimeContext(file.getFileName().toString(), file, parser.blocks, statementsToArray(parser.statements));
+        
+        // Validate all imports before returning
+        validateImports(ret, new java.util.HashSet<>());
+        
         return ret;
     }
 
@@ -3455,6 +3459,103 @@ public class Parser {
             return list.toArray(Statement[]::new);
         }
         return null;
+    }
+
+    /**
+     * Validates all imports in the given RuntimeContext by parsing them.
+     * This method is called after parsing the main file to ensure all imports
+     * are syntactically valid before execution begins.
+     * 
+     * @param context The RuntimeContext containing the statements to validate
+     * @param visitedFiles A set of already visited files to prevent circular imports
+     * @throws IOException if an import file cannot be read
+     * @throws ParseError if an import file has syntax errors
+     */
+    private static void validateImports(RuntimeContext context, java.util.Set<String> visitedFiles) throws IOException, ParseError {
+        if (context.statements == null || context.sourcePath == null) {
+            return;
+        }
+        
+        // Get the directory of the current script for resolving relative imports
+        Path scriptDir = context.sourcePath.getParent();
+        
+        for (Statement stmt : context.statements) {
+            if (stmt instanceof ImportStatement importStmt) {
+                String filename = importStmt.filename;
+                
+                // Resolve the import path relative to the current script's directory
+                Path importPath = resolveImportPath(scriptDir, filename);
+                
+                if (!Files.exists(importPath)) {
+                    throw new ParseError("[line " + importStmt.getLine() + "] Import file not found: " + filename);
+                }
+                
+                // Normalize the absolute resolved path for deduplication
+                Path normalizedPath = importPath.toAbsolutePath().normalize();
+                String importKey = normalizedPath.toString();
+                
+                // Check if we've already validated this file (prevents circular imports)
+                if (visitedFiles.contains(importKey)) {
+                    continue; // Skip already validated imports
+                }
+                
+                // Mark this file as visited
+                visitedFiles.add(importKey);
+                
+                try {
+                    // Parse the imported file to validate its syntax
+                    RuntimeContext importContext = Parser.parse(importPath);
+                    
+                    // Recursively validate imports in the imported file
+                    validateImports(importContext, visitedFiles);
+                } catch (ParseError e) {
+                    // Re-throw with context about which import failed
+                    throw new ParseError("[line " + importStmt.getLine() + "] Failed to parse import '" + filename + "': " + e.getMessage());
+                }
+            }
+        }
+    }
+    
+    /**
+     * Resolves an import file path relative to a script directory.
+     * This is a static version of the Interpreter's resolveImportPath method
+     * that can be used during the parse phase.
+     * 
+     * @param scriptDir The directory containing the importing script
+     * @param filename The import filename
+     * @return The resolved path
+     */
+    private static Path resolveImportPath(Path scriptDir, String filename) {
+        // First try relative to the script directory
+        if (scriptDir != null) {
+            Path resolvedPath = scriptDir.resolve(filename);
+            if (Files.exists(resolvedPath)) {
+                return resolvedPath;
+            }
+            // If not found and filename ends with .ebs, try .ebsp
+            if (filename.toLowerCase().endsWith(".ebs")) {
+                Path packagedPath = scriptDir.resolve(filename.replaceAll("(?i)\\.ebs$", ".ebsp"));
+                if (Files.exists(packagedPath)) {
+                    return packagedPath;
+                }
+            }
+        }
+        
+        // Fall back to current working directory
+        Path cwdPath = Path.of(filename);
+        if (Files.exists(cwdPath)) {
+            return cwdPath;
+        }
+        
+        // Try .ebsp in current working directory if .ebs not found
+        if (filename.toLowerCase().endsWith(".ebs")) {
+            Path packagedPath = Path.of(filename.replaceAll("(?i)\\.ebs$", ".ebsp"));
+            if (Files.exists(packagedPath)) {
+                return packagedPath;
+            }
+        }
+        
+        return Path.of(filename);
     }
 
     private ParseError error(EbsToken token, String message) {
