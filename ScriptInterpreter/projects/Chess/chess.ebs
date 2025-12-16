@@ -876,8 +876,8 @@ timerCallback(timerName: string) {
             // Update screen variable (no longer used with varRef removed)
             chessScreen.whiteTimer = timerText;
             
-            // Update UI using labelText property instead of text
-            call scr.setproperty("chessScreen.whiteTimerField", "labelText", timerText);
+            // Update UI using text property (labelText not supported)
+            call scr.setproperty("chessScreen.whiteTimerField", "text", timerText);
             
             // Debug: Print every 10 deciseconds (1 second)
             if call modulo(timerWhite, 10) == 0 then {
@@ -893,8 +893,8 @@ timerCallback(timerName: string) {
             // Update screen variable (no longer used with varRef removed)
             chessScreen.blackTimer = timerText;
             
-            // Update UI using labelText property instead of text
-            call scr.setproperty("chessScreen.blackTimerField", "labelText", timerText);
+            // Update UI using text property (labelText not supported)
+            call scr.setproperty("chessScreen.blackTimerField", "text", timerText);
             
             // Debug: Print every 10 deciseconds (1 second)
             if call modulo(timerBlack, 10) == 0 then {
@@ -1252,8 +1252,8 @@ handleStartGame() {
     show screen chessScreen;
     
     // Update timer display after screen is shown (since varRef removed)
-    call scr.setproperty("chessScreen.whiteTimerField", "labelText", call formatTimerDecimal(timerWhite));
-    call scr.setproperty("chessScreen.blackTimerField", "labelText", call formatTimerDecimal(timerBlack));
+    call scr.setproperty("chessScreen.whiteTimerField", "text", call formatTimerDecimal(timerWhite));
+    call scr.setproperty("chessScreen.blackTimerField", "text", call formatTimerDecimal(timerBlack));
     
     // Start the game timer (updates every 100ms = 0.1 seconds)
     call thread.timerStart("chessScreen", 100, "timerCallback");
@@ -1349,8 +1349,8 @@ resetGame() {
     chessScreen.moveHistory = "Game started.\nWhite's turn.\n";
     call updateTimerColors();
     // Update timer display (since varRef removed)
-    call scr.setproperty("chessScreen.whiteTimerField", "labelText", call formatTimerDecimal(timerWhite));
-    call scr.setproperty("chessScreen.blackTimerField", "labelText", call formatTimerDecimal(timerBlack));
+    call scr.setproperty("chessScreen.whiteTimerField", "text", call formatTimerDecimal(timerWhite));
+    call scr.setproperty("chessScreen.blackTimerField", "text", call formatTimerDecimal(timerBlack));
 }
 
 // Cleanup function for chess screen (called by cleanup handler)
