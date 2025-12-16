@@ -5306,15 +5306,15 @@
     {
       "function": "thread.timerList",
       "short_description": "Lists all active timers",
-      "long_help": "Returns a JSON string containing an array of all active timers with their details including name, period, callback,<br>paused status, fire count, and creation time. Useful for monitoring and debugging timer activity.",
+      "long_help": "Returns a JSON string containing an array of all active timers with their details including name, period, callback, source,<br>paused status, fire count, and creation time. The source field indicates where the timer was created (screen name or 'script').<br>Useful for monitoring and debugging timer activity.",
       "parameters": [],
       "return_type": "string",
-      "example": "<b>var</b> list = <b>call</b> <b>thread.timerList</b>();<br><b>print</b> list;<br>// Output: [{\"name\":\"timer1\",\"period\":1000,\"callback\":\"myCallback\",\"paused\":false,\"fireCount\":5,\"createdAt\":1234567890}]"
+      "example": "<b>var</b> list = <b>call</b> <b>thread.timerList</b>();<br><b>print</b> list;<br>// Output: [{\"name\":\"timer1\",\"period\":1000,\"callback\":\"myCallback\",\"source\":\"script\",\"paused\":false,\"fireCount\":5,\"createdAt\":1234567890}]"
     },
     {
       "function": "thread.timerGetInfo",
       "short_description": "Gets detailed information about a timer",
-      "long_help": "Returns a JSON string with detailed information about a specific timer including name, period, callback, paused status,<br>fire count, creation time, and uptime. Returns null if the timer is not found.",
+      "long_help": "Returns a JSON string with detailed information about a specific timer including name, period, callback, source (screen name or 'script'),<br>paused status, fire count, creation time, and uptime. Returns null if the timer is not found. Timers created from a screen are automatically<br>stopped when that screen is closed.",
       "parameters": [
         {
           "name": "name",

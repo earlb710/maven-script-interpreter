@@ -41,6 +41,7 @@ private static class TimerInfo {
 - `paused`: Marked `volatile` for visibility across threads
 - `future`: Marked `volatile` to safely update during resume operations
 - `createdAt`: Timestamp for calculating timer uptime
+- `source`: Tracks the origin of the timer (screen name or "script")
 
 ### Helper Method
 
@@ -101,6 +102,7 @@ This method:
     "name": "timer1",
     "period": 1000,
     "callback": "myCallback",
+    "source": "myScreen",
     "paused": false,
     "fireCount": 5,
     "createdAt": 1234567890
@@ -117,6 +119,7 @@ This method:
   "name": "timer1",
   "period": 1000,
   "callback": "myCallback",
+  "source": "script",
   "paused": false,
   "fireCount": 5,
   "createdAt": 1234567890,
@@ -142,6 +145,30 @@ This method:
 **Signature:** `long thread.getCount()`
 
 **Returns:** Total count of active timers (both running and paused)
+
+## Timer Source Tracking and Automatic Cleanup
+
+### Source Field
+Each timer tracks its source:
+- **Screen timers:** Source is set to the screen name when created from a screen context
+- **Script timers:** Source is set to "script" when created from outside a screen context
+
+### Automatic Cleanup on Screen Close
+When a screen is closed (not just hidden):
+1. `BuiltinsThread.stopTimersForSource(screenName)` is called automatically
+2. All timers with matching source are cancelled and removed
+3. User is notified about how many timers were stopped
+
+This prevents timer leaks and ensures that screen-specific timers don't continue running after their screen is closed.
+
+### stopTimersForSource() Method
+**Signature:** `int stopTimersForSource(String source)`
+
+**Purpose:** Stop all timers associated with a specific source (screen name or "script")
+
+**Returns:** The number of timers stopped
+
+**Usage:** Called automatically by the screen close handler in `InterpreterScreen.visitScreenCloseStatement()`
 
 ## Thread Safety
 

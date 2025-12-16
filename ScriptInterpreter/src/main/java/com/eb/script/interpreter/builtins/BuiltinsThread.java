@@ -55,8 +55,9 @@ public class BuiltinsThread {
         final long createdAt;
         final AtomicLong fireCount;  // Thread-safe counter
         volatile boolean paused;  // Volatile for thread-safe reads
+        final String source;  // Source of the timer (screen name or "script")
 
-        TimerInfo(ScheduledFuture<?> future, long periodMs, String callbackName, InterpreterContext context) {
+        TimerInfo(ScheduledFuture<?> future, long periodMs, String callbackName, InterpreterContext context, String source) {
             this.future = future;
             this.periodMs = periodMs;
             this.callbackName = callbackName;
@@ -64,6 +65,7 @@ public class BuiltinsThread {
             this.createdAt = System.currentTimeMillis();
             this.fireCount = new AtomicLong(0);
             this.paused = false;
+            this.source = source;
         }
     }
 
@@ -224,8 +226,11 @@ public class BuiltinsThread {
             TimeUnit.MILLISECONDS
         );
 
+        // Determine the source: screen name if in a screen context, otherwise "script"
+        String source = (currentScreen != null && !currentScreen.isEmpty()) ? currentScreen : "script";
+
         // Store the timer info
-        THREAD_TIMERS.put(timerName, new TimerInfo(future, periodMs, finalCallbackName, context));
+        THREAD_TIMERS.put(timerName, new TimerInfo(future, periodMs, finalCallbackName, context, source));
 
         return timerName;
     }
@@ -404,6 +409,7 @@ public class BuiltinsThread {
             json.append("\"name\":\"").append(entry.getKey()).append("\",");
             json.append("\"period\":").append(info.periodMs).append(",");
             json.append("\"callback\":\"").append(info.callbackName).append("\",");
+            json.append("\"source\":\"").append(info.source).append("\",");
             json.append("\"paused\":").append(info.paused).append(",");
             json.append("\"fireCount\":").append(info.fireCount.get()).append(",");
             json.append("\"createdAt\":").append(info.createdAt);
@@ -440,6 +446,7 @@ public class BuiltinsThread {
         json.append("\"name\":\"").append(timerName).append("\",");
         json.append("\"period\":").append(timerInfo.periodMs).append(",");
         json.append("\"callback\":\"").append(timerInfo.callbackName).append("\",");
+        json.append("\"source\":\"").append(timerInfo.source).append("\",");
         json.append("\"paused\":").append(timerInfo.paused).append(",");
         json.append("\"fireCount\":").append(timerInfo.fireCount.get()).append(",");
         json.append("\"createdAt\":").append(timerInfo.createdAt).append(",");
@@ -498,6 +505,36 @@ public class BuiltinsThread {
      */
     private static Object getTimerCount() {
         return (long) THREAD_TIMERS.size();
+    }
+
+    /**
+     * Stop all timers associated with a specific source (e.g., a screen name).
+     * This is called when a screen is closed to clean up all timers created by that screen.
+     * 
+     * @param source The source to stop timers for (screen name or "script")
+     * @return The number of timers stopped
+     */
+    public static int stopTimersForSource(String source) {
+        if (source == null || source.isEmpty()) {
+            return 0;
+        }
+
+        int stoppedCount = 0;
+        // Iterate and remove timers with matching source
+        java.util.Iterator<Map.Entry<String, TimerInfo>> iterator = THREAD_TIMERS.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, TimerInfo> entry = iterator.next();
+            TimerInfo timerInfo = entry.getValue();
+            if (source.equals(timerInfo.source)) {
+                // Cancel the scheduled task
+                timerInfo.future.cancel(false);
+                // Remove from registry
+                iterator.remove();
+                stoppedCount++;
+            }
+        }
+        
+        return stoppedCount;
     }
 
     /**
