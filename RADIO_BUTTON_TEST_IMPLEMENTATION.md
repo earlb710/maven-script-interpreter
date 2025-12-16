@@ -17,17 +17,22 @@ The implementation includes:
 4. **Multiple radio button groups** - demonstrating different use cases
 5. **Core fix for radio button behavior** - ensures mutual exclusivity within groups
 
-### Radio Button Grouping Fix
+### Radio Button Redesign
 
-**Issue:** Radio buttons were not properly grouped, allowing multiple buttons to be selected simultaneously within the same set.
+**Issue:** Radio buttons were not properly grouped, allowing multiple buttons to be selected simultaneously. The original approach used multiple boolean variables (one per radio button) which was cumbersome.
 
-**Solution:** Modified `ScreenFactory.java` to automatically create and assign `ToggleGroup` instances to radio buttons based on their setname. Radio buttons in the same "setname" now share a ToggleGroup, ensuring only one can be selected at a time.
+**Solution:** Redesigned radio buttons to use the `options` property, similar to ComboBox/ChoiceBox:
+- A single variable holds the selected value
+- The `options` property defines the available choices
+- Each option becomes a radio button in a VBox container
+- All radio buttons automatically share a ToggleGroup
 
 **Technical Details:**
-- Added `radioButtonToggleGroups` ConcurrentHashMap to store ToggleGroups per screen and setname
-- Key format: `"screenName.setname"` 
-- Radio buttons are assigned to their group during control creation
-- The setname is extracted from the varRef (format: `"setname.varname"`)
+- Modified `AreaItemFactory.java` to create a VBox with RadioButtons when options are provided
+- Each RadioButton stores its value in userData
+- ToggleGroup automatically ensures mutual exclusivity
+- `ControlListenerFactory` and `ControlUpdater` updated to handle the radio button group
+- Supports both simple options arrays and options maps (data value → display text)
 
 ## Files Created
 
@@ -112,9 +117,56 @@ The implementation includes:
 - Validates full programmatic control
 - Ensures proper state management
 
-## Radio Button Groups Demonstrated
+## Radio Button Usage - New Approach
 
-### 1. Theme Preferences (String-based)
+### Modern Syntax with Options
+
+Radio buttons now use the `options` property to define choices, similar to ComboBox/ChoiceBox:
+
+```javascript
+{
+    "name": "theme",
+    "type": "string",
+    "default": "light",
+    "display": {
+        "type": "radiobutton",
+        "labelText": "Theme Selection:",
+        "options": ["light", "dark", "auto"]
+    }
+}
+```
+
+This creates three radio buttons (Light, Dark, Auto) that all update the single `theme` variable.
+
+### Options with Display Text Mapping
+
+Use an options map to separate data values from display text:
+
+```javascript
+{
+    "name": "language",
+    "type": "string",
+    "default": "en",
+    "display": {
+        "type": "radiobutton",
+        "labelText": "Language:",
+        "options": {
+            "en": "English",
+            "es": "Español",
+            "fr": "Français",
+            "de": "Deutsch"
+        }
+    }
+}
+```
+
+The variable stores `"en"` but displays `"English"` to the user.
+
+## Radio Button Groups Demonstrated (Legacy Approach)
+
+**Note:** The test files with multiple boolean variables represent the legacy approach. The new approach using `options` is preferred.
+
+### 1. Theme Preferences (String-based) - Legacy
 ```javascript
 {
     "name": "theme",
@@ -128,10 +180,9 @@ The implementation includes:
 }
 ```
 
-**Options:** Light, Dark, Auto  
-**Use Case:** Single variable holding the selected theme value
+**Modern equivalent:** Use a single variable with `options: ["light", "dark", "auto"]`
 
-### 2. Language Selection (Boolean-based)
+### 2. Language Selection (Boolean-based) - Legacy
 ```javascript
 {
     "name": "langEnglish",

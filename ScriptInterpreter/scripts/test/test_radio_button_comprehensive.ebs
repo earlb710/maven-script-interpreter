@@ -1,0 +1,132 @@
+// Test Script: Comprehensive Radio Button Test
+// Description: Complete test showing radio button functionality with options
+// Author: EBS Test Suite
+// Date: 2025-12-16
+
+print "======================================================";
+print "  Comprehensive Radio Button Test";
+print "======================================================";
+print "";
+
+// Modern approach: Use options to define radio button choices
+// Each radio button group updates a single variable
+screen modernRadioScreen = {
+    "title": "Radio Button Demo - Modern Approach",
+    "width": 600,
+    "height": 500,
+    "vars": [
+        {
+            "name": "theme",
+            "type": "string",
+            "default": "light",
+            "display": {
+                "type": "radiobutton",
+                "labelText": "Theme Selection:",
+                "labelPosition": "top",
+                "options": ["light", "dark", "auto"]
+            }
+        },
+        {
+            "name": "language",
+            "type": "string",
+            "default": "en",
+            "display": {
+                "type": "radiobutton",
+                "labelText": "Language:",
+                "labelPosition": "top",
+                "options": {
+                    "en": "English",
+                    "es": "Español",
+                    "fr": "Français",
+                    "de": "Deutsch"
+                }
+            }
+        },
+        {
+            "name": "notificationLevel",
+            "type": "string",
+            "default": "all",
+            "display": {
+                "type": "radiobutton",
+                "labelText": "Notifications:",
+                "labelPosition": "top",
+                "options": ["all", "important", "none"]
+            }
+        },
+        {
+            "name": "submitButton",
+            "type": "string",
+            "default": "Apply Settings",
+            "display": {
+                "type": "button"
+            }
+        }
+    ]
+};
+
+print "PART 1: Initial State";
+print "=====================";
+print "theme = " + modernRadioScreen.theme;
+print "language = " + modernRadioScreen.language;
+print "notificationLevel = " + modernRadioScreen.notificationLevel;
+print "";
+
+print "PART 2: Component Type Verification";
+print "====================================";
+print "typeof theme = " + typeof modernRadioScreen.theme;
+print "typeof language = " + typeof modernRadioScreen.language;
+print "typeof notificationLevel = " + typeof modernRadioScreen.notificationLevel;
+print "";
+
+print "PART 3: Programmatic Value Changes";
+print "===================================";
+print "Setting theme to 'dark'...";
+modernRadioScreen.theme = "dark";
+print "  → theme = " + modernRadioScreen.theme;
+print "";
+
+print "Setting language to 'es' (Spanish)...";
+modernRadioScreen.language = "es";
+print "  → language = " + modernRadioScreen.language;
+print "";
+
+print "Setting notificationLevel to 'important'...";
+modernRadioScreen.notificationLevel = "important";
+print "  → notificationLevel = " + modernRadioScreen.notificationLevel;
+print "";
+
+print "PART 4: Key Benefits";
+print "====================";
+print "✓ Single variable per radio button group";
+print "✓ Options define the choices";
+print "✓ Cleaner, more maintainable code";
+print "✓ Works like ComboBox/ChoiceBox";
+print "✓ Automatic mutual exclusivity";
+print "";
+
+print "PART 5: Options Map Support";
+print "============================";
+print "The language field uses an options map:";
+print "  - Keys are data values (stored in variable)";
+print "  - Values are display text (shown to user)";
+print "  - language = 'es' displays as 'Español'";
+print "";
+
+print "======================================================";
+print "  Displaying Screen for Interactive Testing";
+print "======================================================";
+print "";
+print "Try clicking different radio buttons!";
+print "Only one option can be selected per group.";
+print "";
+
+// Display the screen
+show screen modernRadioScreen;
+
+print "";
+print "Final Values After User Interaction:";
+print "theme = " + modernRadioScreen.theme;
+print "language = " + modernRadioScreen.language;
+print "notificationLevel = " + modernRadioScreen.notificationLevel;
+print "";
+print "✓ Test Complete!";
