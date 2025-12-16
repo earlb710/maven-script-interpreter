@@ -891,6 +891,49 @@ public final class Builtins {
                 newParam("name", DataType.STRING, true) // required: timer name
         ));
 
+        addBuiltin(info(
+                "thread.timerPause", DataType.BOOL,
+                newParam("name", DataType.STRING, true) // required: timer name
+        ));
+
+        addBuiltin(info(
+                "thread.timerResume", DataType.BOOL,
+                newParam("name", DataType.STRING, true) // required: timer name
+        ));
+
+        addBuiltin(info(
+                "thread.timerIsRunning", DataType.BOOL,
+                newParam("name", DataType.STRING, true) // required: timer name
+        ));
+
+        addBuiltin(info(
+                "thread.timerIsPaused", DataType.BOOL,
+                newParam("name", DataType.STRING, true) // required: timer name
+        ));
+
+        addBuiltin(info(
+                "thread.timerList", DataType.STRING // returns: JSON array of timer info
+        ));
+
+        addBuiltin(info(
+                "thread.timerGetInfo", DataType.STRING,
+                newParam("name", DataType.STRING, true) // required: timer name
+        ));
+
+        addBuiltin(info(
+                "thread.timerGetPeriod", DataType.LONG,
+                newParam("name", DataType.STRING, true) // required: timer name
+        ));
+
+        addBuiltin(info(
+                "thread.timerGetFireCount", DataType.LONG,
+                newParam("name", DataType.STRING, true) // required: timer name
+        ));
+
+        addBuiltin(info(
+                "thread.getCount", DataType.LONG // returns: count of active timers
+        ));
+
 // ==========================
 // AI builtins
 // ==========================
