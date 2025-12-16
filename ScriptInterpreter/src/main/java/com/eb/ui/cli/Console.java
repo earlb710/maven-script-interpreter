@@ -438,15 +438,58 @@ public final class Console {
      * and clearing all global variables.
      */
     private void resetConsole() {
+        // Ensure we're on the JavaFX thread
+        if (!Platform.isFxApplicationThread()) {
+            Platform.runLater(this::resetConsole);
+            return;
+        }
+        
         try {
             // Get the handler as EbsHandler to access interpreter and context
             if (handler instanceof com.eb.ui.ebs.EbsHandler) {
                 com.eb.ui.ebs.EbsHandler ebsHandler = (com.eb.ui.ebs.EbsHandler) handler;
                 
-                // Get the interpreter and call cleanup to close screens and stop threads
+                // Get the interpreter and context
                 com.eb.script.interpreter.Interpreter interpreter = ebsHandler.getInterpreter();
                 if (interpreter != null) {
-                    interpreter.cleanup();
+                    com.eb.script.interpreter.InterpreterContext context = interpreter.getContext();
+                    
+                    // Close all screens synchronously (we're already on JavaFX thread)
+                    if (context != null) {
+                        java.util.concurrent.ConcurrentHashMap<String, javafx.stage.Stage> screens = context.getScreens();
+                        for (java.util.Map.Entry<String, javafx.stage.Stage> entry : screens.entrySet()) {
+                            try {
+                                javafx.stage.Stage stage = entry.getValue();
+                                if (stage != null) {
+                                    stage.close();
+                                }
+                            } catch (Exception e) {
+                                // Ignore errors during cleanup
+                            }
+                        }
+                        
+                        // Interrupt all screen threads
+                        java.util.concurrent.ConcurrentHashMap<String, Thread> threads = context.getScreenThreads();
+                        for (java.util.Map.Entry<String, Thread> entry : threads.entrySet()) {
+                            try {
+                                Thread thread = entry.getValue();
+                                if (thread != null && thread.isAlive()) {
+                                    thread.interrupt();
+                                }
+                            } catch (Exception e) {
+                                // Ignore errors during cleanup
+                            }
+                        }
+                        
+                        // Clear all loaded plugins
+                        com.eb.script.interpreter.builtins.BuiltinsPlugin.clearAllPlugins();
+                        
+                        // Shutdown thread timers
+                        com.eb.script.interpreter.builtins.BuiltinsThread.shutdown();
+                        
+                        // Clear the context (screens, threads, etc.)
+                        context.clear();
+                    }
                     
                     // Clear all global variables from the environment
                     com.eb.script.interpreter.Environment env = interpreter.environment();
@@ -455,22 +498,18 @@ public final class Console {
                     }
                 }
                 
-                // Clear console output and input (on JavaFX thread)
-                Platform.runLater(() -> {
-                    outputArea.clear();
-                    inputArea.clear();
-                    // Print confirmation message
-                    outputArea.printlnOk("Console reset: output cleared, screens closed, threads stopped, globals cleared.");
-                });
+                // Clear console output and input
+                outputArea.clear();
+                inputArea.clear();
+                
+                // Print confirmation message
+                outputArea.printlnOk("Console reset: output cleared, screens closed, threads stopped, globals cleared.");
             } else {
-                Platform.runLater(() -> {
-                    outputArea.printlnWarn("Cannot perform full reset: handler type not supported.");
-                });
+                outputArea.printlnWarn("Cannot perform full reset: handler type not supported.");
             }
         } catch (Exception ex) {
-            Platform.runLater(() -> {
-                outputArea.printlnError("Error during reset: " + ex.getMessage());
-            });
+            outputArea.printlnError("Error during reset: " + ex.getMessage());
+            ex.printStackTrace();
         }
     }
 
