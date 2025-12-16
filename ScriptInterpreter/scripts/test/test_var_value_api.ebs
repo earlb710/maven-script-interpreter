@@ -1,7 +1,7 @@
 // Test script for new scr.getVar*/scr.setVar* API functions
 // Tests the exposed Var methods as builtin functions
 
-println("=== Variable Value API Test Suite ===\n");
+print "=== Variable Value API Test Suite ===";
 
 // Define a test screen with variables
 screen testVarValueScreen = {
@@ -14,6 +14,8 @@ screen testVarValueScreen = {
         {"name": "field3", "type": "string", "defaultValue": "initial"}
     ],
     "area": [{
+        "name": "mainArea",
+        "type": "vbox",
         "items": [{
             "name": "field1Input",
             "varRef": "field1",
@@ -42,115 +44,119 @@ var testsFailed: int = 0;
 
 // Helper function to assert test conditions
 assertTest(testName: string, condition: bool, errorMsg: string) {
-    if (condition) {
-        println("✓ PASS: " + testName);
+    if condition then {
+        print "✓ PASS: " + testName;
         testsPassed = testsPassed + 1;
     } else {
-        println("✗ FAIL: " + testName + " - " + errorMsg);
+        print "✗ FAIL: " + testName + " - " + errorMsg;
         testsFailed = testsFailed + 1;
     }
 }
 
 // --- Test 1: Get and Set Variable Values ---
-println("--- Test 1: Get and Set Variable Values ---");
+print "--- Test 1: Get and Set Variable Values ---";
 var val1 = call scr.getVarValue("testVarValueScreen", "field1");
-assertTest("Get field1 initial value", val1 == "default1", "Expected 'default1', got '" + val1 + "'");
+call assertTest("Get field1 initial value", val1 == "default1", "Expected 'default1', got '" + val1 + "'");
 
 call scr.setVarValue("testVarValueScreen", "field1", "newValue1");
 val1 = call scr.getVarValue("testVarValueScreen", "field1");
-assertTest("Set field1 value", val1 == "newValue1", "Expected 'newValue1', got '" + val1 + "'");
+call assertTest("Set field1 value", val1 == "newValue1", "Expected 'newValue1', got '" + val1 + "'");
 
 var val2 = call scr.getVarValue("testVarValueScreen", "field2");
-assertTest("Get field2 initial value", val2 == 42, "Expected 42, got " + val2);
+call assertTest("Get field2 initial value", val2 == 42, "Expected 42, got " + val2);
 
 call scr.setVarValue("testVarValueScreen", "field2", 100);
 val2 = call scr.getVarValue("testVarValueScreen", "field2");
-assertTest("Set field2 value", val2 == 100, "Expected 100, got " + val2);
+call assertTest("Set field2 value", val2 == 100, "Expected 100, got " + val2);
 
 // --- Test 2: Get and Set Default Values ---
-println("\n--- Test 2: Get and Set Default Values ---");
+print "\n--- Test 2: Get and Set Default Values ---";
 var def1 = call scr.getVarDefaultValue("testVarValueScreen", "field1");
-assertTest("Get field1 default value", def1 == "default1", "Expected 'default1', got '" + def1 + "'");
+call assertTest("Get field1 default value", def1 == "default1", "Expected 'default1', got '" + def1 + "'");
 
 call scr.setVarDefaultValue("testVarValueScreen", "field1", "newDefault1");
 def1 = call scr.getVarDefaultValue("testVarValueScreen", "field1");
-assertTest("Set field1 default value", def1 == "newDefault1", "Expected 'newDefault1', got '" + def1 + "'");
+call assertTest("Set field1 default value", def1 == "newDefault1", "Expected 'newDefault1', got '" + def1 + "'");
 
 var def2 = call scr.getVarDefaultValue("testVarValueScreen", "field2");
-assertTest("Get field2 default value", def2 == 42, "Expected 42, got " + def2);
+call assertTest("Get field2 default value", def2 == 42, "Expected 42, got " + def2);
 
 call scr.setVarDefaultValue("testVarValueScreen", "field2", 99);
 def2 = call scr.getVarDefaultValue("testVarValueScreen", "field2");
-assertTest("Set field2 default value", def2 == 99, "Expected 99, got " + def2);
+call assertTest("Set field2 default value", def2 == 99, "Expected 99, got " + def2);
 
 // --- Test 3: SetInitValue keeps variable clean ---
-println("\n--- Test 3: SetInitValue keeps variable clean ---");
+print "\n--- Test 3: SetInitValue keeps variable clean ---";
 // First change field3 normally to make it dirty
 testVarValueScreen.field3 = "changed";
 var status1 = call scr.getItemStatus("testVarValueScreen", "field3Input");
-assertTest("Field3 marked changed after assignment", status1 == "changed", "Expected 'changed', got '" + status1 + "'");
+call assertTest("Field3 marked changed after assignment", status1 == "changed", "Expected 'changed', got '" + status1 + "'");
 
 // Now use setInitValue to reset it cleanly
 call scr.setVarInitValue("testVarValueScreen", "field3", "cleanValue");
 var val3 = call scr.getVarValue("testVarValueScreen", "field3");
-assertTest("Field3 value set via setInitValue", val3 == "cleanValue", "Expected 'cleanValue', got '" + val3 + "'");
+call assertTest("Field3 value set via setInitValue", val3 == "cleanValue", "Expected 'cleanValue', got '" + val3 + "'");
 
 var orig3 = call scr.getVarOriginalValue("testVarValueScreen", "field3");
-assertTest("Field3 originalValue also set via setInitValue", orig3 == "cleanValue", "Expected 'cleanValue', got '" + orig3 + "'");
+call assertTest("Field3 originalValue also set via setInitValue", orig3 == "cleanValue", "Expected 'cleanValue', got '" + orig3 + "'");
 
 var status2 = call scr.getItemStatus("testVarValueScreen", "field3Input");
-assertTest("Field3 marked clean after setInitValue", status2 == "clean", "Expected 'clean', got '" + status2 + "'");
+call assertTest("Field3 marked clean after setInitValue", status2 == "clean", "Expected 'clean', got '" + status2 + "'");
 
 // --- Test 4: Verify setVarValue updates screen vars ---
-println("\n--- Test 4: Verify setVarValue updates screen vars ---");
+print "\n--- Test 4: Verify setVarValue updates screen vars ---";
 call scr.setVarValue("testVarValueScreen", "field1", "viaSetter");
 // Access via screen notation to verify sync
 var screenVal = testVarValueScreen.field1;
-assertTest("Screen var synced with setVarValue", screenVal == "viaSetter", "Expected 'viaSetter', got '" + screenVal + "'");
+call assertTest("Screen var synced with setVarValue", screenVal == "viaSetter", "Expected 'viaSetter', got '" + screenVal + "'");
 
 // --- Test 5: Error handling for non-existent screen/var ---
-println("\n--- Test 5: Error handling for non-existent screen/var ---");
+print "\n--- Test 5: Error handling for non-existent screen/var ---";
 var errorCaught: bool = false;
 try {
     call scr.getVarValue("nonExistentScreen", "field1");
-} catch (e) {
-    errorCaught = true;
+} exceptions {
+    when ANY_ERROR {
+        errorCaught = true;
+    }
 }
-assertTest("Error on non-existent screen", errorCaught == true, "Expected error, got none");
+call assertTest("Error on non-existent screen", errorCaught == true, "Expected error, got none");
 
 errorCaught = false;
 try {
     call scr.getVarValue("testVarValueScreen", "nonExistentVar");
-} catch (e) {
-    errorCaught = true;
+} exceptions {
+    when ANY_ERROR {
+        errorCaught = true;
+    }
 }
-assertTest("Error on non-existent variable", errorCaught == true, "Expected error, got none");
+call assertTest("Error on non-existent variable", errorCaught == true, "Expected error, got none");
 
 // --- Test 6: Integration with existing stateful API ---
-println("\n--- Test 6: Integration with existing stateful API ---");
+print "\n--- Test 6: Integration with existing stateful API ---";
 // Set field2 to non-stateful
 call scr.setVarStateful("testVarValueScreen", "field2", false);
 var field2Stateful = call scr.getVarStateful("testVarValueScreen", "field2");
-assertTest("Field2 set to non-stateful", field2Stateful == false, "Expected false, got " + field2Stateful);
+call assertTest("Field2 set to non-stateful", field2Stateful == false, "Expected false, got " + field2Stateful);
 
 // Change via setVarValue - should not mark dirty since non-stateful
 call scr.setVarValue("testVarValueScreen", "field2", 200);
 var val2b = call scr.getVarValue("testVarValueScreen", "field2");
-assertTest("Field2 value changed via setVarValue", val2b == 200, "Expected 200, got " + val2b);
+call assertTest("Field2 value changed via setVarValue", val2b == 200, "Expected 200, got " + val2b);
 
 // Screen should still be clean (field2 is non-stateful)
 var screenStatus = call scr.getScreenStatus("testVarValueScreen");
-assertTest("Screen still clean after non-stateful change", screenStatus == "clean", "Expected 'clean', got '" + screenStatus + "'");
+call assertTest("Screen still clean after non-stateful change", screenStatus == "clean", "Expected 'clean', got '" + screenStatus + "'");
 
 // --- Summary ---
-println("\n=== Test Summary ===");
-println("Tests Passed: " + testsPassed);
-println("Tests Failed: " + testsFailed);
+print "\n=== Test Summary ===";
+print "Tests Passed: " + testsPassed;
+print "Tests Failed: " + testsFailed;
 
-if (testsFailed == 0) {
-    println("\n✓ All tests PASSED!");
+if testsFailed == 0 then {
+    print "\n✓ All tests PASSED!";
 } else {
-    println("\n✗ Some tests FAILED!");
+    print "\n✗ Some tests FAILED!";
 }
 
 // Clean up
