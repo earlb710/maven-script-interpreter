@@ -862,6 +862,7 @@ formatTimerDecimal(deciseconds: int) return string {
 timerCallback(timerName: string) {
     // Only update if game has started
     if !gameStarted then {
+        print "Timer callback: gameStarted = false, returning";
         return;
     }
     
@@ -873,10 +874,10 @@ timerCallback(timerName: string) {
             var timerText: string = call formatTimerDecimal(timerWhite);
             chessScreen.whiteTimer = timerText;
             // Force UI update using scr.setproperty
-            call scr.setproperty("chessScreen.whiteTimerField", "text", timerText);
+            var result: bool = call scr.setproperty("chessScreen.whiteTimerField", "text", timerText);
             // Debug: Print every 10 deciseconds (1 second)
             if call modulo(timerWhite, 10) == 0 then {
-                print "Timer update: White " + timerText;
+                print "Timer update: White " + timerText + " (scr.setproperty result: " + result + ")";
             }
         }
     } else {
@@ -886,10 +887,10 @@ timerCallback(timerName: string) {
             var timerText: string = call formatTimerDecimal(timerBlack);
             chessScreen.blackTimer = timerText;
             // Force UI update using scr.setproperty
-            call scr.setproperty("chessScreen.blackTimerField", "text", timerText);
+            var result: bool = call scr.setproperty("chessScreen.blackTimerField", "text", timerText);
             // Debug: Print every 10 deciseconds (1 second)
             if call modulo(timerBlack, 10) == 0 then {
-                print "Timer update: Black " + timerText;
+                print "Timer update: Black " + timerText + " (scr.setproperty result: " + result + ")";
             }
         }
     }
@@ -1339,9 +1340,16 @@ resetGame() {
 
 // Close the chess screen
 closeChessScreen() {
+    print "=== closeChessScreen() EXECUTED ===";
+    print "Stopping game and timer...";
+    gameStarted = false;
     // Stop the timer
     call thread.timerStop("chessTimer");
+    print "Timer stopped.";
     hide screen chessScreen;
+    print "Chess screen hidden.";
+    print "=== closeChessScreen() COMPLETE ===";
+    print "";
 }
 
 // Define the chess screen with timer and 10x10 grid board (8x8 + labels)
