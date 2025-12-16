@@ -1,0 +1,50 @@
+// Test script for scr.getVarStateful builtin function
+// Gets whether changes to a variable mark the screen as changed
+//
+// USAGE: Run in EBS interactive console
+//        import "scripts/test/test_scr_getVarStateful.ebs";
+
+print "\n";
+print "Test: scr.getVarStateful\n";
+print "========================\n";
+print "\n";
+
+// Create screen with mixed stateful variables
+screen testScreen = {
+    "title": "Get Var Stateful Test",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "dataField",
+            "type": "string",
+            "default": "data",
+            "stateful": true
+        },
+        {
+            "name": "filterField",
+            "type": "string",
+            "default": "",
+            "stateful": false
+        }
+    ]
+};
+
+show screen testScreen;
+
+// Test getVarStateful
+print "Testing scr.getVarStateful...\n\n";
+
+var dataStateful: bool = call scr.getVarStateful("testScreen", "dataField");
+print "dataField stateful: ";
+print dataStateful;
+print " (expected: true)\n";
+
+var filterStateful: bool = call scr.getVarStateful("testScreen", "filterField");
+print "filterField stateful: ";
+print filterStateful;
+print " (expected: false)\n";
+
+print "\n";
+print "Test completed successfully!\n";
+print "\n";

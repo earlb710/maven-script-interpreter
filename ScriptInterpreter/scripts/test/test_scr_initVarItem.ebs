@@ -1,0 +1,68 @@
+// Test script for scr.initVarItem builtin function
+// Initializes the variable to its default value and sets it as the original value
+// This resets the variable to a clean state with its default value
+//
+// USAGE: Run in EBS interactive console
+//        import "scripts/test/test_scr_initVarItem.ebs";
+
+print "\n";
+print "Test: scr.initVarItem\n";
+print "=====================\n";
+print "\n";
+
+// Create screen
+screen testScreen = {
+    "title": "Init Var Item Test",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "count",
+            "type": "int",
+            "default": 0
+        }
+    ]
+};
+
+show screen testScreen;
+
+// Test initVarItem
+print "Testing scr.initVarItem...\n\n";
+
+print "Setting count to 42...\n";
+testScreen.count = 42;
+
+// Submit it to make 42 the original
+print "Submitting to make 42 the original value...\n";
+call scr.submitVarItem("testScreen", "count");
+
+var original1: int = call scr.getVarOriginalValue("testScreen", "count");
+print "Current original value: ";
+print original1;
+print " (expected: 42)\n\n";
+
+print "Setting count to 100...\n";
+testScreen.count = 100;
+
+print "Current value: ";
+print testScreen.count;
+print " (expected: 100)\n\n";
+
+print "Calling scr.initVarItem (resetting to default as new original)...\n";
+call scr.initVarItem("testScreen", "count");
+
+print "Current value after init: ";
+print testScreen.count;
+print " (expected: 0 - the default)\n";
+
+var original2: int = call scr.getVarOriginalValue("testScreen", "count");
+print "Original value after init: ";
+print original2;
+print " (expected: 0 - now the new original)\n";
+
+print "\n";
+print "Test completed successfully!\n";
+print "Use Case: Call this to completely reset a variable to its\n";
+print "          default value AND mark that as the new baseline.\n";
+print "          Combines clear + submit in one operation.\n";
+print "\n";

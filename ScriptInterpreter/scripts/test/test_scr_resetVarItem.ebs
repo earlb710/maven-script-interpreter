@@ -1,0 +1,59 @@
+// Test script for scr.resetVarItem builtin function
+// Resets the variable to its original value (undoes changes)
+// Typically called when user clicks Cancel button
+//
+// USAGE: Run in EBS interactive console
+//        import "scripts/test/test_scr_resetVarItem.ebs";
+
+print "\n";
+print "Test: scr.resetVarItem\n";
+print "======================\n";
+print "\n";
+
+// Create screen
+screen testScreen = {
+    "title": "Reset Var Item Test",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "email",
+            "type": "string",
+            "default": "john@example.com"
+        }
+    ]
+};
+
+show screen testScreen;
+
+// Test resetVarItem
+print "Testing scr.resetVarItem...\n\n";
+
+var original: string = call scr.getVarOriginalValue("testScreen", "email");
+print "Original value: ";
+print original;
+print " (expected: john@example.com)\n\n";
+
+print "Modifying email to 'jane@example.com'...\n";
+testScreen.email = "jane@example.com";
+
+print "Current value: ";
+print testScreen.email;
+print " (expected: jane@example.com)\n\n";
+
+print "Calling scr.resetVarItem (simulating Cancel button)...\n";
+call scr.resetVarItem("testScreen", "email");
+
+print "Current value after reset: ";
+print testScreen.email;
+print " (expected: john@example.com - reverted)\n";
+
+var originalAfter: string = call scr.getVarOriginalValue("testScreen", "email");
+print "Original value (unchanged): ";
+print originalAfter;
+print " (expected: john@example.com)\n";
+
+print "\n";
+print "Test completed successfully!\n";
+print "Use Case: Call this when user clicks Cancel to revert changes.\n";
+print "\n";

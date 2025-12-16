@@ -1,0 +1,55 @@
+// Test script for scr.setVarStateful builtin function
+// Sets whether changes to a variable mark the screen as changed
+//
+// USAGE: Run in EBS interactive console
+//        import "scripts/test/test_scr_setVarStateful.ebs";
+
+print "\n";
+print "Test: scr.setVarStateful\n";
+print "========================\n";
+print "\n";
+
+// Create screen
+screen testScreen = {
+    "title": "Set Var Stateful Test",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "myField",
+            "type": "string",
+            "default": "test",
+            "stateful": true
+        }
+    ]
+};
+
+show screen testScreen;
+
+// Test setVarStateful
+print "Testing scr.setVarStateful...\n\n";
+
+var initialStateful: bool = call scr.getVarStateful("testScreen", "myField");
+print "Initial stateful: ";
+print initialStateful;
+print " (expected: true)\n\n";
+
+print "Setting stateful to false...\n";
+call scr.setVarStateful("testScreen", "myField", false);
+
+var afterStateful: bool = call scr.getVarStateful("testScreen", "myField");
+print "After change: ";
+print afterStateful;
+print " (expected: false)\n\n";
+
+print "Setting stateful back to true...\n";
+call scr.setVarStateful("testScreen", "myField", true);
+
+var finalStateful: bool = call scr.getVarStateful("testScreen", "myField");
+print "Final stateful: ";
+print finalStateful;
+print " (expected: true)\n";
+
+print "\n";
+print "Test completed successfully!\n";
+print "\n";

@@ -1,0 +1,61 @@
+// Test script for scr.submitVarItem builtin function
+// Marks the variable as submitted (sets original value to current value)
+// Typically called after saving data to database
+//
+// USAGE: Run in EBS interactive console
+//        import "scripts/test/test_scr_submitVarItem.ebs";
+
+print "\n";
+print "Test: scr.submitVarItem\n";
+print "=======================\n";
+print "\n";
+
+// Create screen
+screen testScreen = {
+    "title": "Submit Var Item Test",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "customerName",
+            "type": "string",
+            "default": "John Doe"
+        }
+    ]
+};
+
+show screen testScreen;
+
+// Test submitVarItem
+print "Testing scr.submitVarItem...\n\n";
+
+var original1: string = call scr.getVarOriginalValue("testScreen", "customerName");
+print "Initial original value: ";
+print original1;
+print " (expected: John Doe)\n\n";
+
+print "Modifying customer name to 'Jane Smith'...\n";
+testScreen.customerName = "Jane Smith";
+
+print "Current value: ";
+print testScreen.customerName;
+print "\n";
+
+var original2: string = call scr.getVarOriginalValue("testScreen", "customerName");
+print "Original value (before submit): ";
+print original2;
+print " (expected: still John Doe)\n\n";
+
+print "Calling scr.submitVarItem (simulating database save)...\n";
+call scr.submitVarItem("testScreen", "customerName");
+
+var original3: string = call scr.getVarOriginalValue("testScreen", "customerName");
+print "Original value (after submit): ";
+print original3;
+print " (expected: now Jane Smith)\n";
+
+print "\n";
+print "Test completed successfully!\n";
+print "Use Case: Call this after successfully saving to database\n";
+print "          to mark the new value as the baseline.\n";
+print "\n";
