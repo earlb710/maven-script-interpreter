@@ -553,6 +553,38 @@ formatMove(fromX: int, fromY: int, toX: int, toY: int, pieceType: int, isCapture
     return pieceSymbol + captureSymbol + toSquare;
 }
 
+// Select a piece (change to yellow)
+selectPiece(x: int, y: int) {
+    print "Selecting piece at (" + x + ", " + y + ")";
+    var cellValue: int = call getPieceAt(x, y);
+    if cellValue != -1 then {
+        var cell = ChessCell(cellValue);
+        if cell.pieceType != EMPTY then {
+            var yellowPiece: imagedata = call getYellowPiece(cell.pieceType, cell.pieceColor);
+            if yellowPiece != null then {
+                call setPieceImage(x, y, yellowPiece);
+                print "Piece turned yellow at (" + x + ", " + y + ")";
+            }
+        }
+    }
+}
+
+// Deselect a piece (change back to normal)
+deselectPiece(x: int, y: int) {
+    print "Deselecting piece at (" + x + ", " + y + ")";
+    var cellValue: int = call getPieceAt(x, y);
+    if cellValue != -1 then {
+        var cell = ChessCell(cellValue);
+        if cell.pieceType != EMPTY then {
+            var normalPiece: imagedata = call getNormalPiece(cell.pieceType, cell.pieceColor);
+            if normalPiece != null then {
+                call setPieceImage(x, y, normalPiece);
+                print "Piece returned to normal at (" + x + ", " + y + ")";
+            }
+        }
+    }
+}
+
 // Move a piece from source to destination
 movePiece(fromX: int, fromY: int, toX: int, toY: int) {
     print "Moving piece from (" + fromX + ", " + fromY + ") to (" + toX + ", " + toY + ")";
@@ -628,7 +660,10 @@ handleCellClick(x: int, y: int) {
             var movingPieceType: int = sourceCell.pieceType;
             var movingPieceColor: int = sourceCell.pieceColor;
             
-            // Move the piece (this will clear the yellow piece at source and place normal piece at destination)
+            // Deselect the piece (turn yellow back to normal) before moving
+            call deselectPiece(selectedX, selectedY);
+            
+            // Move the piece
             call movePiece(selectedX, selectedY, x, y);
             
             // Format and add move to history
@@ -661,28 +696,14 @@ handleCellClick(x: int, y: int) {
             
             return;
         } else {
-            print "Not a valid move destination";
-            // Fall through to handle as a new selection
+            print "Not a valid move destination - will handle as new selection";
+            // Deselect the currently selected piece before processing new selection
+            call deselectPiece(selectedX, selectedY);
         }
     }
     
     // Clear previous indicators
     call clearIndicators();
-    
-    // Restore previously selected piece to normal color (if any)
-    if selectedX >= 0 && selectedY >= 0 then {
-        var prevCellValue: int = call getPieceAt(selectedX, selectedY);
-        if prevCellValue != -1 then {
-            var prevCell = ChessCell(prevCellValue);
-            if prevCell.pieceType != EMPTY then {
-                var normalPiece: imagedata = call getNormalPiece(prevCell.pieceType, prevCell.pieceColor);
-                if normalPiece != null then {
-                    call setPieceImage(selectedX, selectedY, normalPiece);
-                    print "Restored previous piece to normal color at (" + selectedX + ", " + selectedY + ")";
-                }
-            }
-        }
-    }
     
     // Get piece at clicked position
     var cellValue: int = call getPieceAt(x, y);
@@ -714,17 +735,11 @@ handleCellClick(x: int, y: int) {
         return;
     }
     
-    // Select the piece
+    // Select the piece - update state and change to yellow
     selectedX = x;
     selectedY = y;
+    call selectPiece(x, y);
     print "Piece selected at (" + x + ", " + y + ")";
-    
-    // Change the selected piece to yellow
-    var yellowPiece: imagedata = call getYellowPiece(cell.pieceType, cell.pieceColor);
-    if yellowPiece != null then {
-        call setPieceImage(x, y, yellowPiece);
-        print "Changed piece to yellow";
-    }
     
     // Get valid moves for this piece
     print "Getting valid moves...";
