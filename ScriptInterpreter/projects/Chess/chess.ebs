@@ -1050,7 +1050,14 @@ getTimeLimitInSeconds(timeLimit: string) return int {
 // Handle Start button click from startup dialog
 handleStartGame() {
     print "Start button clicked!";
-    selectedGameMode = startupDialog.gameMode;
+    
+    // Determine game mode from radio buttons
+    if startupDialog.gameMode1Player then {
+        selectedGameMode = "1 player";
+    } else {
+        selectedGameMode = "2 player";
+    }
+    
     selectedTimeLimit = startupDialog.timeLimit;
     print "Selected game mode: " + selectedGameMode;
     print "Selected time limit: " + selectedTimeLimit;
@@ -1220,18 +1227,14 @@ screen startupDialog = {
             "type": "imagedata"
         },
         {
-            "name": "gameMode",
-            "type": "string",
-            "default": "2 player",
-            "display": {
-                "type": "radiobuttons",
-                "labelText": "Game Mode:",
-                "labelColor": "#ffcc00",
-                "labelFontSize": "14px",
-                "labelBold": true,
-                "options": ["1 player", "2 player"],
-                "itemFontSize": "14px"
-            }
+            "name": "gameMode1Player",
+            "type": "bool",
+            "default": false
+        },
+        {
+            "name": "gameMode2Player",
+            "type": "bool",
+            "default": true
         },
         {
             "name": "timeLimit",
@@ -1258,11 +1261,31 @@ screen startupDialog = {
             "items": [
                 {"name": "logoImage", "varRef": "logo", "display": {"type": "image", "fitWidth": 400, "fitHeight": 200, "preserveRatio": true}},
                 {"name": "titleLabel", "display": {"type": "label", "labelText": "\u265A Welcome to Chess! \u2654", "labelColor": "#ffcc00", "labelFontSize": "20px", "labelBold": true}},
-                {"name": "gameModeField", "varRef": "gameMode"},
-                {"name": "instructionLabel", "display": {"type": "label", "labelText": "Select the time limit for each player:", "labelColor": "#ffffff", "labelFontSize": "14px"}},
-                {"name": "timeLimitField", "varRef": "timeLimit"}
+                {"name": "gameModeLabel", "display": {"type": "label", "labelText": "Game Mode:", "labelColor": "#ffcc00", "labelFontSize": "14px", "labelBold": true}}
             ],
             "areas": [
+                {
+                    "name": "gameModeArea",
+                    "type": "hbox",
+                    "spacing": "30",
+                    "padding": "5",
+                    "style": "-fx-alignment: center;",
+                    "items": [
+                        {"name": "radio1Player", "varRef": "gameMode1Player", "display": {"type": "radiobutton", "labelText": "1 player", "labelColor": "#ffffff", "labelFontSize": "14px"}},
+                        {"name": "radio2Player", "varRef": "gameMode2Player", "display": {"type": "radiobutton", "labelText": "2 player", "labelColor": "#ffffff", "labelFontSize": "14px"}}
+                    ]
+                },
+                {
+                    "name": "timeLimitArea",
+                    "type": "vbox",
+                    "spacing": "10",
+                    "padding": "10",
+                    "style": "-fx-alignment: center;",
+                    "items": [
+                        {"name": "instructionLabel", "display": {"type": "label", "labelText": "Select the time limit for each player:", "labelColor": "#ffffff", "labelFontSize": "14px"}},
+                        {"name": "timeLimitField", "varRef": "timeLimit"}
+                    ]
+                },
                 {
                     "name": "buttonArea",
                     "type": "hbox",
