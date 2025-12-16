@@ -1,0 +1,68 @@
+// Example: Radio Button - Multiple Groups
+// Demonstrates multiple independent radio button groups on one screen
+// Each group updates its own variable
+
+screen settingsScreen = {
+    "title": "Application Settings",
+    "width": 500,
+    "height": 400,
+    "vars": [
+        {
+            "name": "theme",
+            "type": "string",
+            "default": "L",
+            "display": {
+                "type": "radiobutton",
+                "labelText": "Theme:",
+                "options": ["L:Light", "D:Dark", "A:Auto"]
+            }
+        },
+        {
+            "name": "fontSize",
+            "type": "string",
+            "default": "medium",
+            "display": {
+                "type": "radiobutton",
+                "labelText": "Font Size:",
+                "options": ["small", "medium", "large"]
+            }
+        },
+        {
+            "name": "notifications",
+            "type": "string",
+            "default": "all",
+            "display": {
+                "type": "radiobutton",
+                "labelText": "Notifications:",
+                "options": {
+                    "all": "All Notifications",
+                    "important": "Important Only",
+                    "none": "Disabled"
+                }
+            }
+        },
+        {
+            "name": "applyButton",
+            "type": "string",
+            "default": "Apply Settings",
+            "display": {
+                "type": "button"
+            }
+        }
+    ]
+};
+
+print "Initial settings:";
+print "  Theme: " + settingsScreen.theme;
+print "  Font Size: " + settingsScreen.fontSize;
+print "  Notifications: " + settingsScreen.notifications;
+print "";
+
+// Show the screen
+show screen settingsScreen;
+
+print "";
+print "Final settings:";
+print "  Theme: " + settingsScreen.theme;
+print "  Font Size: " + settingsScreen.fontSize;
+print "  Notifications: " + settingsScreen.notifications;

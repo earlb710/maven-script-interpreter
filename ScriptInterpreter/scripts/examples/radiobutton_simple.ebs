@@ -1,0 +1,36 @@
+// Example: Radio Button - Simple Array Format
+// Demonstrates radio buttons with simple array options
+// where value and display text are the same
+
+screen themeScreen = {
+    "title": "Theme Selection",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "theme",
+            "type": "string",
+            "default": "light",
+            "display": {
+                "type": "radiobutton",
+                "labelText": "Select Theme:",
+                "options": ["light", "dark", "auto"]
+            }
+        },
+        {
+            "name": "applyButton",
+            "type": "string",
+            "default": "Apply",
+            "display": {
+                "type": "button"
+            }
+        }
+    ]
+};
+
+print "Selected theme: " + themeScreen.theme;
+
+// Show the screen
+show screen themeScreen;
+
+print "Final theme selection: " + themeScreen.theme;

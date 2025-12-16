@@ -82,7 +82,53 @@ public class AreaItemFactory {
             case CHECKBOX:
                 return new CheckBox();
             case RADIOBUTTON:
-                return new RadioButton();
+                // If options are provided, create a group of radio buttons
+                if (metadata != null && (metadata.options != null && !metadata.options.isEmpty() || 
+                                        metadata.optionsMap != null && !metadata.optionsMap.isEmpty())) {
+                    javafx.scene.layout.VBox radioGroup = new javafx.scene.layout.VBox();
+                    radioGroup.setSpacing(5); // Space between radio buttons
+                    ToggleGroup toggleGroup = new ToggleGroup();
+                    
+                    // Use optionsMap if available, otherwise use options list
+                    if (metadata.optionsMap != null && !metadata.optionsMap.isEmpty()) {
+                        for (java.util.Map.Entry<String, String> entry : metadata.optionsMap.entrySet()) {
+                            RadioButton rb = new RadioButton(entry.getValue()); // Display text
+                            rb.setToggleGroup(toggleGroup);
+                            rb.setUserData(entry.getKey()); // Store data value
+                            radioGroup.getChildren().add(rb);
+                        }
+                        // Store the optionsMap in the container's properties for value binding
+                        radioGroup.getProperties().put("optionsMap", metadata.optionsMap);
+                    } else {
+                        for (String option : metadata.options) {
+                            // Check if option contains colon separator for "value:displayText" format
+                            String displayText;
+                            String dataValue;
+                            int colonIndex = option.indexOf(':');
+                            if (colonIndex > 0 && colonIndex < option.length() - 1) {
+                                // Format: "value:displayText"
+                                dataValue = option.substring(0, colonIndex);
+                                displayText = option.substring(colonIndex + 1);
+                            } else {
+                                // No colon or invalid format - use the whole string for both
+                                dataValue = option;
+                                displayText = option;
+                            }
+                            
+                            RadioButton rb = new RadioButton(displayText);
+                            rb.setToggleGroup(toggleGroup);
+                            rb.setUserData(dataValue);
+                            radioGroup.getChildren().add(rb);
+                        }
+                    }
+                    
+                    // Store the ToggleGroup in the container's properties for value binding
+                    radioGroup.getProperties().put("toggleGroup", toggleGroup);
+                    return radioGroup;
+                } else {
+                    // No options provided - create a single radio button (legacy behavior)
+                    return new RadioButton();
+                }
             case TOGGLEBUTTON:
                 return new ToggleButton();
             case COMBOBOX:

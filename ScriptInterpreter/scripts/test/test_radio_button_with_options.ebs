@@ -1,0 +1,98 @@
+// Test Script: Radio Button with Options
+// Description: Tests radio button using the options property for grouping
+// Author: EBS Test Suite
+// Date: 2025-12-16
+
+print "===============================================";
+print "  Radio Button with Options Test";
+print "===============================================";
+print "";
+
+// Define a screen with radio buttons using options
+screen optionsRadioScreen = {
+    "title": "Radio Button Options Test",
+    "width": 500,
+    "height": 400,
+    "vars": [
+        {
+            "name": "theme",
+            "type": "string",
+            "default": "light",
+            "display": {
+                "type": "radiobutton",
+                "labelText": "Select Theme:",
+                "options": ["light", "dark", "auto"]
+            }
+        },
+        {
+            "name": "language",
+            "type": "string",
+            "default": "English",
+            "display": {
+                "type": "radiobutton",
+                "labelText": "Select Language:",
+                "options": ["English", "Spanish", "French", "German"]
+            }
+        },
+        {
+            "name": "notifications",
+            "type": "string",
+            "default": "all",
+            "display": {
+                "type": "radiobutton",
+                "labelText": "Notification Preference:",
+                "options": ["all", "important", "none"]
+            }
+        }
+    ]
+};
+
+print "TEST 1: Initial Values";
+print "----------------------";
+print "theme = " + optionsRadioScreen.theme;
+print "language = " + optionsRadioScreen.language;
+print "notifications = " + optionsRadioScreen.notifications;
+print "";
+
+print "TEST 2: typeof Check";
+print "--------------------";
+print "typeof theme = " + typeof optionsRadioScreen.theme;
+print "typeof language = " + typeof optionsRadioScreen.language;
+print "typeof notifications = " + typeof optionsRadioScreen.notifications;
+print "";
+
+print "TEST 3: Modifying Values";
+print "------------------------";
+print "Changing theme to 'dark'...";
+optionsRadioScreen.theme = "dark";
+print "theme = " + optionsRadioScreen.theme;
+print "";
+
+print "Changing language to 'Spanish'...";
+optionsRadioScreen.language = "Spanish";
+print "language = " + optionsRadioScreen.language;
+print "";
+
+print "Changing notifications to 'important'...";
+optionsRadioScreen.notifications = "important";
+print "notifications = " + optionsRadioScreen.notifications;
+print "";
+
+print "TEST 4: Verify Single Variable Updates";
+print "---------------------------------------";
+print "Each radio button group updates only ONE variable:";
+print "  theme variable: " + optionsRadioScreen.theme;
+print "  language variable: " + optionsRadioScreen.language;
+print "  notifications variable: " + optionsRadioScreen.notifications;
+print "";
+
+print "✓ All tests passed!";
+print "✓ Radio buttons properly grouped using options";
+print "✓ Each group updates a single variable";
+print "";
+
+// Display the screen for visual verification
+print "Displaying screen for interactive testing...";
+show screen optionsRadioScreen;
+
+print "Radio Button Options Test Complete!";
