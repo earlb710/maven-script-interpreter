@@ -1002,6 +1002,9 @@ printBoard() {
 // Variable to store game start status
 var gameStarted: bool = false;
 
+// Variable to store selected game mode
+var selectedGameMode: string = "2 player";
+
 // Variable to store selected time limit
 var selectedTimeLimit: string = "Unlimited";
 
@@ -1047,7 +1050,9 @@ getTimeLimitInSeconds(timeLimit: string) return int {
 // Handle Start button click from startup dialog
 handleStartGame() {
     print "Start button clicked!";
+    selectedGameMode = startupDialog.gameMode;
     selectedTimeLimit = startupDialog.timeLimit;
+    print "Selected game mode: " + selectedGameMode;
     print "Selected time limit: " + selectedTimeLimit;
     
     // Set the timer values based on selection
@@ -1060,7 +1065,7 @@ handleStartGame() {
     // Close the startup dialog
     hide screen startupDialog;
     
-    print "Starting chess game with timer: " + selectedTimeLimit;
+    print "Starting chess game - Mode: " + selectedGameMode + ", Timer: " + selectedTimeLimit;
     print "";
     print "Initializing chess board...";
     
@@ -1208,11 +1213,25 @@ handleExitGame() {
 screen startupDialog = {
     "title": "Chess Game - Start",
     "width": 450,
-    "height": 500,
+    "height": 570,
     "vars": [
         {
             "name": "logo",
             "type": "imagedata"
+        },
+        {
+            "name": "gameMode",
+            "type": "string",
+            "default": "2 player",
+            "display": {
+                "type": "radiobuttons",
+                "labelText": "Game Mode:",
+                "labelColor": "#ffcc00",
+                "labelFontSize": "14px",
+                "labelBold": true,
+                "options": ["1 player", "2 player"],
+                "itemFontSize": "14px"
+            }
         },
         {
             "name": "timeLimit",
@@ -1239,6 +1258,7 @@ screen startupDialog = {
             "items": [
                 {"name": "logoImage", "varRef": "logo", "display": {"type": "image", "fitWidth": 400, "fitHeight": 200, "preserveRatio": true}},
                 {"name": "titleLabel", "display": {"type": "label", "labelText": "\u265A Welcome to Chess! \u2654", "labelColor": "#ffcc00", "labelFontSize": "20px", "labelBold": true}},
+                {"name": "gameModeField", "varRef": "gameMode"},
                 {"name": "instructionLabel", "display": {"type": "label", "labelText": "Select the time limit for each player:", "labelColor": "#ffffff", "labelFontSize": "14px"}},
                 {"name": "timeLimitField", "varRef": "timeLimit"}
             ],
