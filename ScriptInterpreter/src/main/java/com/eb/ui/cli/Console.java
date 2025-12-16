@@ -447,12 +447,12 @@ public final class Console {
                 com.eb.script.interpreter.Interpreter interpreter = ebsHandler.getInterpreter();
                 if (interpreter != null) {
                     interpreter.cleanup();
-                }
-                
-                // Clear all global variables from the environment
-                com.eb.script.interpreter.Environment env = interpreter.environment();
-                if (env != null) {
-                    env.clear();
+                    
+                    // Clear all global variables from the environment
+                    com.eb.script.interpreter.Environment env = interpreter.environment();
+                    if (env != null) {
+                        env.clear();
+                    }
                 }
                 
                 // Clear console output and input (on JavaFX thread)
