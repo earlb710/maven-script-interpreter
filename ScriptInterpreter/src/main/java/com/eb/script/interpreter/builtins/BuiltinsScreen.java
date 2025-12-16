@@ -567,126 +567,236 @@ public class BuiltinsScreen {
     }
 
     /**
-     * scr.getItemSource(screenName, itemName) -> String Gets the source
-     * property of a screen item: "data" or "display"
+     * scr.setVarStateful(screenName, varName, stateful) -> Boolean
+     * Sets whether changes to a variable should mark the screen as changed
      */
-    public static Object screenGetItemSource(InterpreterContext context, Object[] args) throws InterpreterError {
+    public static Object screenSetVarStateful(InterpreterContext context, Object[] args) throws InterpreterError {
         String screenName = (String) args[0];
-        String itemName = (String) args[1];
+        String varName = (String) args[1];
+        Boolean stateful = (Boolean) args[2];
 
         if (screenName == null || screenName.isEmpty()) {
-            throw new InterpreterError("scr.getItemSource: screenName parameter cannot be null or empty");
+            throw new InterpreterError("scr.setVarStateful: screenName parameter cannot be null or empty");
         }
-        if (itemName == null || itemName.isEmpty()) {
-            throw new InterpreterError("scr.getItemSource: itemName parameter cannot be null or empty");
+        if (varName == null || varName.isEmpty()) {
+            throw new InterpreterError("scr.setVarStateful: varName parameter cannot be null or empty");
+        }
+        if (stateful == null) {
+            throw new InterpreterError("scr.setVarStateful: stateful parameter cannot be null");
         }
 
+        // Find the variable
+        Var var = findVar(context, screenName, varName);
+        if (var == null) {
+            throw new InterpreterError("scr.setVarStateful: variable '" + varName + "' not found in screen '" + screenName + "'");
+        }
+
+        var.setStateful(stateful);
+        return true;
+    }
+
+    /**
+     * scr.getVarStateful(screenName, varName) -> Boolean
+     * Gets whether changes to a variable mark the screen as changed
+     */
+    public static Object screenGetVarStateful(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (String) args[0];
+        String varName = (String) args[1];
+
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("scr.getVarStateful: screenName parameter cannot be null or empty");
+        }
+        if (varName == null || varName.isEmpty()) {
+            throw new InterpreterError("scr.getVarStateful: varName parameter cannot be null or empty");
+        }
+
+        // Find the variable
+        Var var = findVar(context, screenName, varName);
+        if (var == null) {
+            throw new InterpreterError("scr.getVarStateful: variable '" + varName + "' not found in screen '" + screenName + "'");
+        }
+
+        return var.getStateful();
+    }
+
+    /**
+     * scr.getVarOriginalValue(screenName, varName) -> Any
+     * Gets the original value of a variable (before any modifications)
+     */
+    public static Object screenGetVarOriginalValue(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (String) args[0];
+        String varName = (String) args[1];
+
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("scr.getVarOriginalValue: screenName parameter cannot be null or empty");
+        }
+        if (varName == null || varName.isEmpty()) {
+            throw new InterpreterError("scr.getVarOriginalValue: varName parameter cannot be null or empty");
+        }
+
+        // Find the variable
+        Var var = findVar(context, screenName, varName);
+        if (var == null) {
+            throw new InterpreterError("scr.getVarOriginalValue: variable '" + varName + "' not found in screen '" + screenName + "'");
+        }
+
+        return var.getOriginalValue();
+    }
+
+    /**
+     * scr.submitVarItem(screenName, varName) -> Boolean
+     * Marks the variable as submitted (sets original value to current value)
+     */
+    public static Object screenSubmitVarItem(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (String) args[0];
+        String varName = (String) args[1];
+
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("scr.submitVarItem: screenName parameter cannot be null or empty");
+        }
+        if (varName == null || varName.isEmpty()) {
+            throw new InterpreterError("scr.submitVarItem: varName parameter cannot be null or empty");
+        }
+
+        // Find the variable
+        Var var = findVar(context, screenName, varName);
+        if (var == null) {
+            throw new InterpreterError("scr.submitVarItem: variable '" + varName + "' not found in screen '" + screenName + "'");
+        }
+
+        var.resetOriginalValue();
+        return true;
+    }
+
+    /**
+     * scr.resetVarItem(screenName, varName) -> Boolean
+     * Resets the variable to its original value
+     */
+    public static Object screenResetVarItem(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (String) args[0];
+        String varName = (String) args[1];
+
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("scr.resetVarItem: screenName parameter cannot be null or empty");
+        }
+        if (varName == null || varName.isEmpty()) {
+            throw new InterpreterError("scr.resetVarItem: varName parameter cannot be null or empty");
+        }
+
+        // Find the variable
+        Var var = findVar(context, screenName, varName);
+        if (var == null) {
+            throw new InterpreterError("scr.resetVarItem: variable '" + varName + "' not found in screen '" + screenName + "'");
+        }
+
+        // Reset to original value
+        var.setValue(var.getOriginalValue());
+        
+        // Also update the screen variable map
+        java.util.concurrent.ConcurrentHashMap<String, Object> screenVars = context.getScreenVars(screenName);
+        if (screenVars != null) {
+            screenVars.put(varName.toLowerCase(), var.getOriginalValue());
+        }
+        
+        return true;
+    }
+
+    /**
+     * scr.clearVarItem(screenName, varName) -> Boolean
+     * Clears the variable to its default/empty value
+     */
+    public static Object screenClearVarItem(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (String) args[0];
+        String varName = (String) args[1];
+
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("scr.clearVarItem: screenName parameter cannot be null or empty");
+        }
+        if (varName == null || varName.isEmpty()) {
+            throw new InterpreterError("scr.clearVarItem: varName parameter cannot be null or empty");
+        }
+
+        // Find the variable
+        Var var = findVar(context, screenName, varName);
+        if (var == null) {
+            throw new InterpreterError("scr.clearVarItem: variable '" + varName + "' not found in screen '" + screenName + "'");
+        }
+
+        // Clear to default value
+        var.setValue(var.getDefaultValue());
+        
+        // Also update the screen variable map
+        java.util.concurrent.ConcurrentHashMap<String, Object> screenVars = context.getScreenVars(screenName);
+        if (screenVars != null) {
+            screenVars.put(varName.toLowerCase(), var.getDefaultValue());
+        }
+        
+        return true;
+    }
+
+    /**
+     * scr.initVarItem(screenName, varName) -> Boolean
+     * Initializes the variable to its default value and sets it as the original value
+     */
+    public static Object screenInitVarItem(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (String) args[0];
+        String varName = (String) args[1];
+
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("scr.initVarItem: screenName parameter cannot be null or empty");
+        }
+        if (varName == null || varName.isEmpty()) {
+            throw new InterpreterError("scr.initVarItem: varName parameter cannot be null or empty");
+        }
+
+        // Find the variable
+        Var var = findVar(context, screenName, varName);
+        if (var == null) {
+            throw new InterpreterError("scr.initVarItem: variable '" + varName + "' not found in screen '" + screenName + "'");
+        }
+
+        // Set to default value
+        var.setValue(var.getDefaultValue());
+        var.setOriginalValue(var.getDefaultValue());
+        
+        // Also update the screen variable map
+        java.util.concurrent.ConcurrentHashMap<String, Object> screenVars = context.getScreenVars(screenName);
+        if (screenVars != null) {
+            screenVars.put(varName.toLowerCase(), var.getDefaultValue());
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Helper method to find a Var by screen name and variable name
+     */
+    private static Var findVar(InterpreterContext context, String screenName, String varName) throws InterpreterError {
         // Verify screen exists
         if (!context.getScreens().containsKey(screenName.toLowerCase())) {
-            throw new InterpreterError("scr.getItemSource: screen '" + screenName + "' not found");
+            throw new InterpreterError("Screen '" + screenName + "' not found");
         }
 
-        // Get the var item
+        // Get the var items
         Map<String, Var> varItems = context.getScreenVarItems(screenName);
         if (varItems == null) {
-            throw new InterpreterError("scr.getItemSource: no variables defined for screen '" + screenName + "'");
+            throw new InterpreterError("No variables defined for screen '" + screenName + "'");
         }
 
         // Find the variable - try with various key formats
-        Var var = null;
-        String lowerItemName = itemName.toLowerCase();
+        String lowerVarName = varName.toLowerCase();
 
-        // Try direct lookup
         for (Map.Entry<String, Var> entry : varItems.entrySet()) {
             String key = entry.getKey();
             Var v = entry.getValue();
             // Match by key or by variable name
-            if (key.equals(lowerItemName) || key.endsWith("." + lowerItemName)
-                    || (v.getName() != null && v.getName().equalsIgnoreCase(itemName))) {
-                var = v;
-                break;
+            if (key.equals(lowerVarName) || key.endsWith("." + lowerVarName)
+                    || (v.getName() != null && v.getName().equalsIgnoreCase(varName))) {
+                return v;
             }
         }
 
-        if (var == null) {
-            throw new InterpreterError("scr.getItemSource: item '" + itemName + "' not found in screen '" + screenName + "'");
-        }
-
-        // Get the display item
-        DisplayItem displayItem = var.getDisplayItem();
-        if (displayItem == null) {
-            return "data"; // Default if no display item
-        }
-
-        return displayItem.source != null ? displayItem.source : "data";
-    }
-
-    /**
-     * scr.setItemSource(screenName, itemName, source) -> Boolean Sets the
-     * source property of a screen item: "data" or "display"
-     */
-    public static Object screenSetItemSource(InterpreterContext context, Object[] args) throws InterpreterError {
-        String screenName = (String) args[0];
-        String itemName = (String) args[1];
-        String source = (String) args[2];
-
-        if (screenName == null || screenName.isEmpty()) {
-            throw new InterpreterError("scr.setItemSource: screenName parameter cannot be null or empty");
-        }
-        if (itemName == null || itemName.isEmpty()) {
-            throw new InterpreterError("scr.setItemSource: itemName parameter cannot be null or empty");
-        }
-        if (source == null || source.isEmpty()) {
-            throw new InterpreterError("scr.setItemSource: source parameter cannot be null or empty");
-        }
-
-        // Validate source value
-        String lowerSource = source.toLowerCase();
-        if (!lowerSource.equals("data") && !lowerSource.equals("display")) {
-            throw new InterpreterError("scr.setItemSource: source must be 'data' or 'display', got: " + source);
-        }
-
-        // Verify screen exists
-        if (!context.getScreens().containsKey(screenName.toLowerCase())) {
-            throw new InterpreterError("scr.setItemSource: screen '" + screenName + "' not found");
-        }
-
-        // Get the var item
-        Map<String, Var> varItems = context.getScreenVarItems(screenName);
-        if (varItems == null) {
-            throw new InterpreterError("scr.setItemSource: no variables defined for screen '" + screenName + "'");
-        }
-
-        // Find the variable - try with various key formats
-        Var var = null;
-        String lowerItemName = itemName.toLowerCase();
-
-        for (Map.Entry<String, Var> entry : varItems.entrySet()) {
-            String key = entry.getKey();
-            Var v = entry.getValue();
-            if (key.equals(lowerItemName) || key.endsWith("." + lowerItemName)
-                    || (v.getName() != null && v.getName().equalsIgnoreCase(itemName))) {
-                var = v;
-                break;
-            }
-        }
-
-        if (var == null) {
-            throw new InterpreterError("scr.setItemSource: item '" + itemName + "' not found in screen '" + screenName + "'");
-        }
-
-        // Get or create the display item
-        DisplayItem displayItem = var.getDisplayItem();
-        if (displayItem == null) {
-            // Create a basic display item if it doesn't exist
-            displayItem = new DisplayItem();
-            var.setDisplayItem(displayItem);
-        }
-
-        // Set the source
-        displayItem.source = lowerSource;
-
-        return true;
+        return null;
     }
 
     /**

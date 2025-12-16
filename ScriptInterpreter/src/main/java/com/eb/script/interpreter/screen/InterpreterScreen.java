@@ -2851,6 +2851,15 @@ public class InterpreterScreen {
                         }
                     }
                 }
+                
+                // Extract stateful property if present (default: true)
+                Boolean stateful = true;
+                if (varDef.containsKey("stateful")) {
+                    Object statefulObj = varDef.get("stateful");
+                    if (statefulObj instanceof Boolean) {
+                        stateful = (Boolean) statefulObj;
+                    }
+                }
 
                 if (varName == null || varName.isEmpty()) {
                     throw interpreter.error(line, "Variable definition in screen '" + screenName + "' must have a 'name' property.");
@@ -2900,6 +2909,7 @@ public class InterpreterScreen {
                 var.setMinChar(minChar);
                 var.setMaxChar(maxChar);
                 var.setTextCase(textCase);
+                var.setStateful(stateful);
                 
                 // Set array-specific properties
                 if (isArrayType) {

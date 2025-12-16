@@ -79,8 +79,6 @@ public class DisplayItem {
     String onCollapse;
     // Whether to show the current value label for sliders
     Boolean showSliderValue;
-    // Source of the value: "data" (original data value) or "display" (formatted display value)
-    public String source = "data";
     // Status of the item: "clean" (unchanged) or "changed" (modified from original)
     public String status = "clean";
     // Column definitions for TableView - List of column metadata
