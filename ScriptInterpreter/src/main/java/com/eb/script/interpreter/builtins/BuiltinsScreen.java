@@ -725,6 +725,277 @@ public class BuiltinsScreen {
     }
 
     /**
+     * scr.getVarValue(screenName, varName) -> ANY
+     * Gets the current value of a screen variable.
+     */
+    public static Object screenGetVarValue(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (String) args[0];
+        String varName = (String) args[1];
+
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("scr.getVarValue: screenName parameter cannot be null or empty");
+        }
+        if (varName == null || varName.isEmpty()) {
+            throw new InterpreterError("scr.getVarValue: varName parameter cannot be null or empty");
+        }
+
+        // Verify screen exists
+        if (!context.getScreens().containsKey(screenName.toLowerCase())) {
+            throw new InterpreterError("scr.getVarValue: screen '" + screenName + "' not found");
+        }
+
+        // Get the var item
+        Map<String, Var> varItems = context.getScreenVarItems(screenName);
+        if (varItems == null) {
+            throw new InterpreterError("scr.getVarValue: no variables defined for screen '" + screenName + "'");
+        }
+
+        // Find the variable - try with various key formats
+        Var var = null;
+        String lowerVarName = varName.toLowerCase();
+
+        for (Map.Entry<String, Var> entry : varItems.entrySet()) {
+            String key = entry.getKey();
+            Var v = entry.getValue();
+            if (key.equals(lowerVarName) || key.endsWith("." + lowerVarName)
+                    || (v.getName() != null && v.getName().equalsIgnoreCase(varName))) {
+                var = v;
+                break;
+            }
+        }
+
+        if (var == null) {
+            throw new InterpreterError("scr.getVarValue: variable '" + varName + "' not found in screen '" + screenName + "'");
+        }
+
+        // Get the current value
+        return var.getValue();
+    }
+
+    /**
+     * scr.setVarValue(screenName, varName, value) -> BOOL
+     * Sets the current value of a screen variable.
+     * Also updates the screen variables map.
+     */
+    public static Object screenSetVarValue(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (String) args[0];
+        String varName = (String) args[1];
+        Object value = args[2];
+
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("scr.setVarValue: screenName parameter cannot be null or empty");
+        }
+        if (varName == null || varName.isEmpty()) {
+            throw new InterpreterError("scr.setVarValue: varName parameter cannot be null or empty");
+        }
+
+        // Verify screen exists
+        if (!context.getScreens().containsKey(screenName.toLowerCase())) {
+            throw new InterpreterError("scr.setVarValue: screen '" + screenName + "' not found");
+        }
+
+        // Get the var item
+        Map<String, Var> varItems = context.getScreenVarItems(screenName);
+        ConcurrentHashMap<String, Object> screenVars = context.getScreenVars(screenName);
+        
+        if (varItems == null) {
+            throw new InterpreterError("scr.setVarValue: no variables defined for screen '" + screenName + "'");
+        }
+
+        // Find the variable - try with various key formats
+        Var var = null;
+        String lowerVarName = varName.toLowerCase();
+        String matchedKey = null;
+
+        for (Map.Entry<String, Var> entry : varItems.entrySet()) {
+            String key = entry.getKey();
+            Var v = entry.getValue();
+            if (key.equals(lowerVarName) || key.endsWith("." + lowerVarName)
+                    || (v.getName() != null && v.getName().equalsIgnoreCase(varName))) {
+                var = v;
+                matchedKey = key;
+                break;
+            }
+        }
+
+        if (var == null) {
+            throw new InterpreterError("scr.setVarValue: variable '" + varName + "' not found in screen '" + screenName + "'");
+        }
+
+        // Set the new value
+        var.setValue(value);
+        
+        // Also update the screen variables map
+        if (screenVars != null && matchedKey != null) {
+            screenVars.put(matchedKey, value);
+        }
+
+        return true;
+    }
+
+    /**
+     * scr.getVarDefaultValue(screenName, varName) -> ANY
+     * Gets the default value of a screen variable.
+     */
+    public static Object screenGetVarDefaultValue(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (String) args[0];
+        String varName = (String) args[1];
+
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("scr.getVarDefaultValue: screenName parameter cannot be null or empty");
+        }
+        if (varName == null || varName.isEmpty()) {
+            throw new InterpreterError("scr.getVarDefaultValue: varName parameter cannot be null or empty");
+        }
+
+        // Verify screen exists
+        if (!context.getScreens().containsKey(screenName.toLowerCase())) {
+            throw new InterpreterError("scr.getVarDefaultValue: screen '" + screenName + "' not found");
+        }
+
+        // Get the var item
+        Map<String, Var> varItems = context.getScreenVarItems(screenName);
+        if (varItems == null) {
+            throw new InterpreterError("scr.getVarDefaultValue: no variables defined for screen '" + screenName + "'");
+        }
+
+        // Find the variable - try with various key formats
+        Var var = null;
+        String lowerVarName = varName.toLowerCase();
+
+        for (Map.Entry<String, Var> entry : varItems.entrySet()) {
+            String key = entry.getKey();
+            Var v = entry.getValue();
+            if (key.equals(lowerVarName) || key.endsWith("." + lowerVarName)
+                    || (v.getName() != null && v.getName().equalsIgnoreCase(varName))) {
+                var = v;
+                break;
+            }
+        }
+
+        if (var == null) {
+            throw new InterpreterError("scr.getVarDefaultValue: variable '" + varName + "' not found in screen '" + screenName + "'");
+        }
+
+        // Get the default value
+        return var.getDefaultValue();
+    }
+
+    /**
+     * scr.setVarDefaultValue(screenName, varName, value) -> BOOL
+     * Sets the default value of a screen variable.
+     */
+    public static Object screenSetVarDefaultValue(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (String) args[0];
+        String varName = (String) args[1];
+        Object value = args[2];
+
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("scr.setVarDefaultValue: screenName parameter cannot be null or empty");
+        }
+        if (varName == null || varName.isEmpty()) {
+            throw new InterpreterError("scr.setVarDefaultValue: varName parameter cannot be null or empty");
+        }
+
+        // Verify screen exists
+        if (!context.getScreens().containsKey(screenName.toLowerCase())) {
+            throw new InterpreterError("scr.setVarDefaultValue: screen '" + screenName + "' not found");
+        }
+
+        // Get the var item
+        Map<String, Var> varItems = context.getScreenVarItems(screenName);
+        if (varItems == null) {
+            throw new InterpreterError("scr.setVarDefaultValue: no variables defined for screen '" + screenName + "'");
+        }
+
+        // Find the variable - try with various key formats
+        Var var = null;
+        String lowerVarName = varName.toLowerCase();
+
+        for (Map.Entry<String, Var> entry : varItems.entrySet()) {
+            String key = entry.getKey();
+            Var v = entry.getValue();
+            if (key.equals(lowerVarName) || key.endsWith("." + lowerVarName)
+                    || (v.getName() != null && v.getName().equalsIgnoreCase(varName))) {
+                var = v;
+                break;
+            }
+        }
+
+        if (var == null) {
+            throw new InterpreterError("scr.setVarDefaultValue: variable '" + varName + "' not found in screen '" + screenName + "'");
+        }
+
+        // Set the default value
+        var.setDefaultValue(value);
+
+        return true;
+    }
+
+    /**
+     * scr.setVarInitValue(screenName, varName, value) -> BOOL
+     * Sets both the current value and original value of a screen variable atomically,
+     * keeping the item clean. This is useful for initialization or resetting variables
+     * to a clean state without marking the screen as dirty.
+     * Also updates the screen variables map.
+     */
+    public static Object screenSetVarInitValue(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (String) args[0];
+        String varName = (String) args[1];
+        Object value = args[2];
+
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("scr.setVarInitValue: screenName parameter cannot be null or empty");
+        }
+        if (varName == null || varName.isEmpty()) {
+            throw new InterpreterError("scr.setVarInitValue: varName parameter cannot be null or empty");
+        }
+
+        // Verify screen exists
+        if (!context.getScreens().containsKey(screenName.toLowerCase())) {
+            throw new InterpreterError("scr.setVarInitValue: screen '" + screenName + "' not found");
+        }
+
+        // Get the var item
+        Map<String, Var> varItems = context.getScreenVarItems(screenName);
+        ConcurrentHashMap<String, Object> screenVars = context.getScreenVars(screenName);
+        
+        if (varItems == null) {
+            throw new InterpreterError("scr.setVarInitValue: no variables defined for screen '" + screenName + "'");
+        }
+
+        // Find the variable - try with various key formats
+        Var var = null;
+        String lowerVarName = varName.toLowerCase();
+        String matchedKey = null;
+
+        for (Map.Entry<String, Var> entry : varItems.entrySet()) {
+            String key = entry.getKey();
+            Var v = entry.getValue();
+            if (key.equals(lowerVarName) || key.endsWith("." + lowerVarName)
+                    || (v.getName() != null && v.getName().equalsIgnoreCase(varName))) {
+                var = v;
+                matchedKey = key;
+                break;
+            }
+        }
+
+        if (var == null) {
+            throw new InterpreterError("scr.setVarInitValue: variable '" + varName + "' not found in screen '" + screenName + "'");
+        }
+
+        // Set both value and originalValue atomically (keeps item clean)
+        var.setInitValue(value);
+        
+        // Also update the screen variables map
+        if (screenVars != null && matchedKey != null) {
+            screenVars.put(matchedKey, value);
+        }
+
+        return true;
+    }
+
+    /**
      * scr.submitVarItem(screenName, varName) -> BOOL
      * Submits a variable by setting the current value as the original value
      * and marks the screen as clean (if no other changed variables exist).

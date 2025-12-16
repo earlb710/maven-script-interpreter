@@ -1002,6 +1002,34 @@ public final class Builtins {
                 newParam("varName", DataType.STRING, true) // required; variable name
         ));
         addBuiltin(info(
+                "scr.getVarValue", DataType.ANY,
+                newParam("screenName", DataType.STRING, true), // required; screen name
+                newParam("varName", DataType.STRING, true) // required; variable name
+        ));
+        addBuiltin(info(
+                "scr.setVarValue", DataType.BOOL,
+                newParam("screenName", DataType.STRING, true), // required; screen name
+                newParam("varName", DataType.STRING, true), // required; variable name
+                newParam("value", DataType.ANY, true) // required; new value
+        ));
+        addBuiltin(info(
+                "scr.getVarDefaultValue", DataType.ANY,
+                newParam("screenName", DataType.STRING, true), // required; screen name
+                newParam("varName", DataType.STRING, true) // required; variable name
+        ));
+        addBuiltin(info(
+                "scr.setVarDefaultValue", DataType.BOOL,
+                newParam("screenName", DataType.STRING, true), // required; screen name
+                newParam("varName", DataType.STRING, true), // required; variable name
+                newParam("value", DataType.ANY, true) // required; new default value
+        ));
+        addBuiltin(info(
+                "scr.setVarInitValue", DataType.BOOL,
+                newParam("screenName", DataType.STRING, true), // required; screen name
+                newParam("varName", DataType.STRING, true), // required; variable name
+                newParam("value", DataType.ANY, true) // required; init value (sets both current and original)
+        ));
+        addBuiltin(info(
                 "scr.submitVarItem", DataType.BOOL,
                 newParam("screenName", DataType.STRING, true), // required; screen name
                 newParam("varName", DataType.STRING, true) // required; variable name

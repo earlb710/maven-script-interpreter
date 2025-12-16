@@ -1,0 +1,147 @@
+// Example: Variable Value API - Direct access to Var methods
+// Demonstrates scr.getVarValue, scr.setVarValue, scr.getVarDefaultValue, 
+// scr.setVarDefaultValue, and scr.setVarInitValue functions
+
+println("=== Variable Value API Example ===\n");
+
+// Define a simple form screen
+screen userForm = {
+    "title": "User Form - Variable API Demo",
+    "width": 500,
+    "height": 350,
+    "vars": [
+        {"name": "username", "type": "string", "defaultValue": ""},
+        {"name": "email", "type": "string", "defaultValue": ""},
+        {"name": "age", "type": "int", "defaultValue": 0},
+        {"name": "status", "type": "string", "defaultValue": "Active"}
+    ],
+    "area": [{
+        "items": [{
+            "name": "usernameField",
+            "varRef": "username",
+            "label": "Username:",
+            "type": "textField"
+        }, {
+            "name": "emailField",
+            "varRef": "email",
+            "label": "Email:",
+            "type": "textField"
+        }, {
+            "name": "ageField",
+            "varRef": "age",
+            "label": "Age:",
+            "type": "textField"
+        }, {
+            "name": "statusField",
+            "varRef": "status",
+            "label": "Status:",
+            "type": "textField",
+            "stateful": false  // Display-only field
+        }]
+    }]
+};
+
+show screen userForm;
+
+println("--- Scenario 1: Getting and Setting Values ---");
+println("Initial values:");
+println("  Username: " + call scr.getVarValue("userForm", "username"));
+println("  Email: " + call scr.getVarValue("userForm", "email"));
+println("  Age: " + call scr.getVarValue("userForm", "age"));
+
+println("\nSetting values via API:");
+call scr.setVarValue("userForm", "username", "john_doe");
+call scr.setVarValue("userForm", "email", "john@example.com");
+call scr.setVarValue("userForm", "age", 25);
+
+println("After setting:");
+println("  Username: " + call scr.getVarValue("userForm", "username"));
+println("  Email: " + call scr.getVarValue("userForm", "email"));
+println("  Age: " + call scr.getVarValue("userForm", "age"));
+
+println("\n--- Scenario 2: Working with Default Values ---");
+println("Current default values:");
+println("  Username default: '" + call scr.getVarDefaultValue("userForm", "username") + "'");
+println("  Age default: " + call scr.getVarDefaultValue("userForm", "age"));
+
+println("\nChanging default values:");
+call scr.setVarDefaultValue("userForm", "username", "guest");
+call scr.setVarDefaultValue("userForm", "age", 18);
+
+println("New default values:");
+println("  Username default: '" + call scr.getVarDefaultValue("userForm", "username") + "'");
+println("  Age default: " + call scr.getVarDefaultValue("userForm", "age"));
+
+println("\n--- Scenario 3: Using setVarInitValue for Clean Initialization ---");
+println("Current username: " + call scr.getVarValue("userForm", "username"));
+println("Original username: " + call scr.getVarOriginalValue("userForm", "username"));
+println("Status: " + call scr.getItemStatus("userForm", "usernameField"));
+
+println("\nUsing setVarInitValue to reset cleanly:");
+call scr.setVarInitValue("userForm", "username", "admin");
+
+println("After setVarInitValue:");
+println("  Current username: " + call scr.getVarValue("userForm", "username"));
+println("  Original username: " + call scr.getVarOriginalValue("userForm", "username"));
+println("  Status: " + call scr.getItemStatus("userForm", "usernameField"));
+println("  (Note: Both current and original are set to 'admin', status is 'clean')");
+
+println("\n--- Scenario 4: Status Field (Non-Stateful) Updates ---");
+println("Updating non-stateful status field doesn't affect dirty tracking:");
+call scr.setVarValue("userForm", "status", "Processing...");
+println("  Status: " + call scr.getVarValue("userForm", "status"));
+println("  Screen status: " + call scr.getScreenStatus("userForm"));
+println("  (Screen remains clean despite status update)");
+
+call scr.setVarValue("userForm", "status", "Saving...");
+println("  Status: " + call scr.getVarValue("userForm", "status"));
+
+println("\n--- Scenario 5: Comparison with Screen Variable Syntax ---");
+println("Traditional syntax vs API:");
+
+// Traditional syntax
+userForm.email = "jane@example.com";
+println("  Via userForm.email: " + userForm.email);
+
+// API syntax
+call scr.setVarValue("userForm", "email", "alice@example.com");
+var emailVal = call scr.getVarValue("userForm", "email");
+println("  Via scr.setVarValue: " + emailVal);
+
+println("\nBoth approaches work, but API provides:");
+println("  - Programmatic access when screen name is in a variable");
+println("  - Ability to manipulate values from external functions");
+println("  - Access to default values and init values");
+
+println("\n--- Scenario 6: Practical Use Case - Form Reset ---");
+println("Resetting form to defaults with clean state:");
+
+// Get default values
+var defaultUsername = call scr.getVarDefaultValue("userForm", "username");
+var defaultEmail = call scr.getVarDefaultValue("userForm", "email");
+var defaultAge = call scr.getVarDefaultValue("userForm", "age");
+
+// Set all fields to defaults using setVarInitValue (keeps clean)
+call scr.setVarInitValue("userForm", "username", defaultUsername);
+call scr.setVarInitValue("userForm", "email", defaultEmail);
+call scr.setVarInitValue("userForm", "age", defaultAge);
+
+println("  All fields reset to defaults");
+println("  Screen status: " + call scr.getScreenStatus("userForm"));
+println("  (Screen is clean, no save needed)");
+
+println("\n=== API Summary ===");
+println("Variable Value Functions:");
+println("  scr.getVarValue(screen, var) - Get current value");
+println("  scr.setVarValue(screen, var, value) - Set current value");
+println("  scr.getVarDefaultValue(screen, var) - Get default value");
+println("  scr.setVarDefaultValue(screen, var, value) - Set default value");
+println("  scr.setVarInitValue(screen, var, value) - Set both current & original (clean)");
+println("\nUse Cases:");
+println("  - Programmatic form manipulation");
+println("  - Dynamic default value management");
+println("  - Clean initialization without triggering dirty tracking");
+println("  - Building reusable screen utility functions");
+
+call scr.closeScreen("userForm");
+println("\n✓ Done.");

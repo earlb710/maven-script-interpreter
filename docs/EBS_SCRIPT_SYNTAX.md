@@ -3947,6 +3947,18 @@ var error = call scr.getError("screenName");
 var hasChanges = call scr.checkChanged("screenName");
 var hasErrors = call scr.checkError("screenName");
 
+// Variable value getters and setters
+var currentValue = call scr.getVarValue("screenName", "varName");      // Get current value
+call scr.setVarValue("screenName", "varName", newValue);               // Set current value
+var defaultVal = call scr.getVarDefaultValue("screenName", "varName"); // Get default value
+call scr.setVarDefaultValue("screenName", "varName", newDefault);      // Set default value
+call scr.setVarInitValue("screenName", "varName", initValue);          // Set both current and original (keeps clean)
+// getVarValue: Returns the current value of a variable
+// setVarValue: Sets the current value of a variable (may mark screen dirty if stateful=true)
+// getVarDefaultValue: Returns the default value of a variable
+// setVarDefaultValue: Sets the default value of a variable
+// setVarInitValue: Atomically sets both value and originalValue (keeps variable clean, doesn't mark screen dirty)
+
 // Variable stateful property (controls dirty tracking)
 call scr.setVarStateful("screenName", "varName", true);  // Enable dirty tracking
 call scr.setVarStateful("screenName", "varName", false); // Disable dirty tracking
