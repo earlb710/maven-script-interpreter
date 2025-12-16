@@ -474,20 +474,15 @@ public class BuiltinsScreen {
                             // Dispatch event to screen thread (asynchronous)
                             dispatcher.dispatchAsync(finalCallback);
                         } else {
-                            // Fallback: execute directly on JavaFX thread
-                            // This is used if the screen doesn't have a dedicated thread
+                            // Log error if no dispatcher available
                             if (context.getOutput() != null) {
-                                context.getOutput().printlnWarn("Screen '" + finalScreenName + "' has no running dispatcher, executing callback directly");
+                                context.getOutput().printlnError("Cannot execute menu callback for '" + finalName + "': screen '" + finalScreenName + "' has no running dispatcher");
                             }
-                            // We need an interpreter to execute the code
-                            // This is a simplified approach - ideally we'd have access to the screen's interpreter
-                            System.err.println("Warning: Cannot execute menu callback without dispatcher for screen: " + finalScreenName);
                         }
                     } catch (Exception e) {
                         if (context.getOutput() != null) {
                             context.getOutput().printlnError("Error executing menu callback for '" + finalName + "': " + e.getMessage());
                         }
-                        e.printStackTrace();
                     }
                 });
                 
