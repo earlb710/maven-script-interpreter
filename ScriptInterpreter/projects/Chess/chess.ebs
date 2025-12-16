@@ -564,17 +564,18 @@ coordsToAlgebraic(x: int, y: int) return string {
 }
 
 // Format a move for the move history with piece icon, from position, and to position
-formatMove(fromX: int, fromY: int, toX: int, toY: int, pieceType: int, pieceColor: int, isCapture: bool) return string {
+formatMove(fromX: int, fromY: int, toX: int, toY: int, pieceType: int, pieceColor: int, isCapture: bool, capturedPieceType: int, capturedPieceColor: int) return string {
     var pieceIcon: string = call getPieceIcon(pieceType, pieceColor);
     var pieceSymbol: string = call getPieceSymbol(pieceType);
     var fromSquare: string = call coordsToAlgebraic(fromX, fromY);
     var toSquare: string = call coordsToAlgebraic(toX, toY);
     
-    // Format: [Icon][Letter] [from]-[to] or [from]x[to] for captures
+    // Format: [Icon][Letter] [from]-[to] or [from]x[to][CapturedIcon] for captures
     var moveText: string;
     
     if isCapture then {
-        moveText = pieceIcon + pieceSymbol + " " + fromSquare + "x" + toSquare;
+        var capturedIcon: string = call getPieceIcon(capturedPieceType, capturedPieceColor);
+        moveText = pieceIcon + pieceSymbol + " " + fromSquare + "x" + toSquare + capturedIcon;
     } else {
         moveText = pieceIcon + pieceSymbol + " " + fromSquare + "-" + toSquare;
     }
@@ -676,12 +677,16 @@ handleCellClick(x: int, y: int) {
             var sourceCellValue: int = call getPieceAt(selectedX, selectedY);
             var destCellValue: int = call getPieceAt(x, y);
             var isCapture: bool = false;
+            var capturedPieceType: int = EMPTY;
+            var capturedPieceColor: int = WHITE;
             
-            // Check if this is a capture move
+            // Check if this is a capture move and store captured piece info
             if destCellValue != -1 then {
                 var destCell = ChessCell(destCellValue);
                 if destCell.pieceType != EMPTY then {
                     isCapture = true;
+                    capturedPieceType = destCell.pieceType;
+                    capturedPieceColor = destCell.pieceColor;
                 }
             }
             
@@ -696,7 +701,7 @@ handleCellClick(x: int, y: int) {
             call movePiece(selectedX, selectedY, x, y);
             
             // Format and add move to history
-            var moveNotation: string = call formatMove(selectedX, selectedY, x, y, movingPieceType, movingPieceColor, isCapture);
+            var moveNotation: string = call formatMove(selectedX, selectedY, x, y, movingPieceType, movingPieceColor, isCapture, capturedPieceType, capturedPieceColor);
             var playerName: string;
             if currentPlayer == WHITE then {
                 playerName = "White";
