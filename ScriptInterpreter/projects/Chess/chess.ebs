@@ -105,6 +105,7 @@ var selectedX: int = -1;  // -1 means no selection
 var selectedY: int = -1;
 var greenIndicator: imagedata;  // Green circle for valid moves
 var redIndicator: imagedata;    // Red circle for capture moves
+var transparentClear: imagedata; // Transparent rectangle for clearing piece positions
 
 // Board layer images (bottom layer - checkerboard)
 var lightSquare: imagedata;     // Light square for board
@@ -250,6 +251,12 @@ createIndicators() {
     call style.setStroke(redCanvas, "#AA0000", 2.0);
     call draw.circle(redCanvas, 30, 30, 20, false);
     redIndicator = call canvas.toImage(redCanvas);
+    
+    // Create transparent rectangle for clearing piece positions
+    // Canvas size matches cell size (60x60)
+    var clearCanvas: canvas = call canvas.create(60, 60, "transparent_clear");
+    call canvas.clear(clearCanvas);  // Make canvas completely transparent
+    transparentClear = call canvas.toImage(clearCanvas);
 }
 
 // Load normal and yellow piece images
@@ -613,8 +620,8 @@ movePiece(fromX: int, fromY: int, toX: int, toY: int) {
         call setPieceImage(toX, toY, pieceImage);
     }
     
-    // Clear the source cell image on screen
-    call setPieceImage(fromX, fromY, null);
+    // Clear the source cell image on screen with transparent rectangle
+    call setPieceImage(fromX, fromY, transparentClear);
     
     print "Piece moved successfully";
 }
