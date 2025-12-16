@@ -51,8 +51,17 @@ The implementation includes:
   - Headless environment compatible
   - Quick validation of logic
 
-### 3. TEST_RADIO_BUTTON_README.md
-- **Location:** `ScriptInterpreter/scripts/test/TEST_RADIO_BUTTON_README.md`
+### 3. test_radio_button_grouping_simple.ebs
+- **Location:** `ScriptInterpreter/scripts/test/test_radio_button_grouping_simple.ebs`
+- **Purpose:** Simple demonstration of radio button grouping
+- **Lines:** 79 lines
+- **Features:**
+  - Single radio button group (color selection)
+  - Demonstrates mutual exclusivity
+  - Minimal example for testing
+
+### 5. RADIO_BUTTON_TEST_IMPLEMENTATION.md
+- **Location:** `RADIO_BUTTON_TEST_IMPLEMENTATION.md`
 - **Purpose:** Comprehensive documentation
 - **Content:**
   - Usage instructions
