@@ -8,9 +8,9 @@ screen alignmentTest = {
         {
             "setname": "main",
             "vars": [
-                {"name": "label1", "type": "string"},
-                {"name": "label2", "type": "string"},
-                {"name": "label3", "type": "string"}
+                {"name": "label1", "type": "string", "default": "HBox with LEFT alignment"},
+                {"name": "label2", "type": "string", "default": "HBox with CENTER alignment"},
+                {"name": "label3", "type": "string", "default": "HBox with RIGHT alignment"}
             ]
         }
     ],
@@ -87,11 +87,6 @@ screen alignmentTest = {
         }
     ]
 };
-
-// Set initial values
-label1 = "HBox with LEFT alignment";
-label2 = "HBox with CENTER alignment";
-label3 = "HBox with RIGHT alignment";
 
 print "Area Alignment Test Screen Loaded";
 print "";
