@@ -47,6 +47,8 @@ public class DisplayItem {
     Map<String, String> optionsMap;
     // Label text color
     String labelColor;
+    // Label background color
+    String labelBackgroundColor;
     // Label text bold flag
     Boolean labelBold;
     // Label text italic flag
@@ -174,6 +176,7 @@ public class DisplayItem {
                ", options=" + options +
                ", optionsMap=" + optionsMap +
                ", labelColor='" + labelColor + '\'' +
+               ", labelBackgroundColor='" + labelBackgroundColor + '\'' +
                ", labelBold=" + labelBold +
                ", labelItalic=" + labelItalic +
                ", itemColor='" + itemColor + '\'' +

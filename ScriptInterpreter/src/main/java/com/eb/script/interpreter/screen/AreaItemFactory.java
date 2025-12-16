@@ -902,6 +902,11 @@ public class AreaItemFactory {
             styleBuilder.append("-fx-text-fill: ").append(metadata.labelColor).append("; ");
         }
         
+        // Apply background color
+        if (metadata.labelBackgroundColor != null && !metadata.labelBackgroundColor.isEmpty()) {
+            styleBuilder.append("-fx-background-color: ").append(metadata.labelBackgroundColor).append("; ");
+        }
+        
         // Apply bold
         if (Boolean.TRUE.equals(metadata.labelBold)) {
             styleBuilder.append("-fx-font-weight: bold; ");
