@@ -2164,8 +2164,8 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                     throw error(expr.getLine(), "No container found for " + screenName + "." + varName);
                 }
                 
-                // Check if this is .nodes property access to list all areas
-                if ("nodes".equals(property)) {
+                // Check if this is .nodes property access to list all areas (screenName.area.nodes)
+                if ("nodes".equals(property) && "area".equals(varName)) {
                     ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenContainerType> containerTypes = 
                         context.getScreenContainerTypes(screenName);
                     
