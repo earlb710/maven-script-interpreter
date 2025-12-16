@@ -105,10 +105,39 @@ var selectedX: int = -1;  // -1 means no selection
 var selectedY: int = -1;
 var greenIndicator: imagedata;  // Green circle for valid moves
 var redIndicator: imagedata;    // Red circle for capture moves
+var transparentClear: imagedata; // Transparent rectangle for clearing piece positions
 
 // Board layer images (bottom layer - checkerboard)
 var lightSquare: imagedata;     // Light square for board
 var darkSquare: imagedata;      // Dark square for board
+
+// Normal (original) piece images - stored for restoring after deselection
+var normalWhitePawn: imagedata;
+var normalWhiteRook: imagedata;
+var normalWhiteKnight: imagedata;
+var normalWhiteBishop: imagedata;
+var normalWhiteQueen: imagedata;
+var normalWhiteKing: imagedata;
+var normalBlackPawn: imagedata;
+var normalBlackRook: imagedata;
+var normalBlackKnight: imagedata;
+var normalBlackBishop: imagedata;
+var normalBlackQueen: imagedata;
+var normalBlackKing: imagedata;
+
+// Yellow piece images - used when a piece is selected/clicked
+var yellowWhitePawn: imagedata;
+var yellowWhiteRook: imagedata;
+var yellowWhiteKnight: imagedata;
+var yellowWhiteBishop: imagedata;
+var yellowWhiteQueen: imagedata;
+var yellowWhiteKing: imagedata;
+var yellowBlackPawn: imagedata;
+var yellowBlackRook: imagedata;
+var yellowBlackKnight: imagedata;
+var yellowBlackBishop: imagedata;
+var yellowBlackQueen: imagedata;
+var yellowBlackKing: imagedata;
 
 // Helper functions
 boardIndex(row: int, col: int) return int {
@@ -144,6 +173,46 @@ function isOccupiedByColor(x: int, y: int, color: int) return bool {
     }
     var cell = ChessCell(cellValue);
     return cell.pieceType != EMPTY && cell.pieceColor == color;
+}
+
+// Get the normal (original) version of a piece image based on piece type and color
+function getNormalPiece(pieceType: int, pieceColor: int) return imagedata {
+    if pieceColor == WHITE then {
+        if pieceType == PAWN then { return normalWhitePawn; }
+        if pieceType == ROOK then { return normalWhiteRook; }
+        if pieceType == KNIGHT then { return normalWhiteKnight; }
+        if pieceType == BISHOP then { return normalWhiteBishop; }
+        if pieceType == QUEEN then { return normalWhiteQueen; }
+        if pieceType == KING then { return normalWhiteKing; }
+    } else {
+        if pieceType == PAWN then { return normalBlackPawn; }
+        if pieceType == ROOK then { return normalBlackRook; }
+        if pieceType == KNIGHT then { return normalBlackKnight; }
+        if pieceType == BISHOP then { return normalBlackBishop; }
+        if pieceType == QUEEN then { return normalBlackQueen; }
+        if pieceType == KING then { return normalBlackKing; }
+    }
+    return null;
+}
+
+// Get the yellow version of a piece image based on piece type and color
+function getYellowPiece(pieceType: int, pieceColor: int) return imagedata {
+    if pieceColor == WHITE then {
+        if pieceType == PAWN then { return yellowWhitePawn; }
+        if pieceType == ROOK then { return yellowWhiteRook; }
+        if pieceType == KNIGHT then { return yellowWhiteKnight; }
+        if pieceType == BISHOP then { return yellowWhiteBishop; }
+        if pieceType == QUEEN then { return yellowWhiteQueen; }
+        if pieceType == KING then { return yellowWhiteKing; }
+    } else {
+        if pieceType == PAWN then { return yellowBlackPawn; }
+        if pieceType == ROOK then { return yellowBlackRook; }
+        if pieceType == KNIGHT then { return yellowBlackKnight; }
+        if pieceType == BISHOP then { return yellowBlackBishop; }
+        if pieceType == QUEEN then { return yellowBlackQueen; }
+        if pieceType == KING then { return yellowBlackKing; }
+    }
+    return null;
 }
 
 // Create board layer images (bottom layer - checkerboard)
@@ -182,6 +251,43 @@ createIndicators() {
     call style.setStroke(redCanvas, "#AA0000", 2.0);
     call draw.circle(redCanvas, 30, 30, 20, false);
     redIndicator = call canvas.toImage(redCanvas);
+    
+    // Create transparent rectangle for clearing piece positions
+    // Canvas size matches cell size (60x60)
+    var clearCanvas: canvas = call canvas.create(60, 60, "transparent_clear");
+    call canvas.clear(clearCanvas);  // Make canvas completely transparent
+    transparentClear = call canvas.toImage(clearCanvas);
+}
+
+// Load normal and yellow piece images
+loadPieceImages() {
+    // Load normal (original) piece images
+    normalWhitePawn = call image.load(imgPath + "white_pawn.svg");
+    normalWhiteRook = call image.load(imgPath + "white_rook.svg");
+    normalWhiteKnight = call image.load(imgPath + "white_knight.svg");
+    normalWhiteBishop = call image.load(imgPath + "white_bishop.svg");
+    normalWhiteQueen = call image.load(imgPath + "white_queen.svg");
+    normalWhiteKing = call image.load(imgPath + "white_king.svg");
+    normalBlackPawn = call image.load(imgPath + "black_pawn.svg");
+    normalBlackRook = call image.load(imgPath + "black_rook.svg");
+    normalBlackKnight = call image.load(imgPath + "black_knight.svg");
+    normalBlackBishop = call image.load(imgPath + "black_bishop.svg");
+    normalBlackQueen = call image.load(imgPath + "black_queen.svg");
+    normalBlackKing = call image.load(imgPath + "black_king.svg");
+    
+    // Load yellow piece images (for highlighting selected pieces)
+    yellowWhitePawn = call image.load(imgPath + "yellow_white_pawn.svg");
+    yellowWhiteRook = call image.load(imgPath + "yellow_white_rook.svg");
+    yellowWhiteKnight = call image.load(imgPath + "yellow_white_knight.svg");
+    yellowWhiteBishop = call image.load(imgPath + "yellow_white_bishop.svg");
+    yellowWhiteQueen = call image.load(imgPath + "yellow_white_queen.svg");
+    yellowWhiteKing = call image.load(imgPath + "yellow_white_king.svg");
+    yellowBlackPawn = call image.load(imgPath + "yellow_black_pawn.svg");
+    yellowBlackRook = call image.load(imgPath + "yellow_black_rook.svg");
+    yellowBlackKnight = call image.load(imgPath + "yellow_black_knight.svg");
+    yellowBlackBishop = call image.load(imgPath + "yellow_black_bishop.svg");
+    yellowBlackQueen = call image.load(imgPath + "yellow_black_queen.svg");
+    yellowBlackKing = call image.load(imgPath + "yellow_black_king.svg");
 }
 
 // Clear all move indicators on the board
@@ -338,9 +444,299 @@ setIndicator(x: int, y: int, isCapture: bool) {
     }
 }
 
-// Handle cell click - select piece and show valid moves
+// Set a piece image at a specific cell (used for both yellow and normal pieces)
+setPieceImage(x: int, y: int, pieceImage: imagedata) {
+    // Set the piece image based on position
+    if y == 0 then {
+        if x == 0 then { chessScreen.c00 = pieceImage; }
+        if x == 1 then { chessScreen.c01 = pieceImage; }
+        if x == 2 then { chessScreen.c02 = pieceImage; }
+        if x == 3 then { chessScreen.c03 = pieceImage; }
+        if x == 4 then { chessScreen.c04 = pieceImage; }
+        if x == 5 then { chessScreen.c05 = pieceImage; }
+        if x == 6 then { chessScreen.c06 = pieceImage; }
+        if x == 7 then { chessScreen.c07 = pieceImage; }
+    } else if y == 1 then {
+        if x == 0 then { chessScreen.c10 = pieceImage; }
+        if x == 1 then { chessScreen.c11 = pieceImage; }
+        if x == 2 then { chessScreen.c12 = pieceImage; }
+        if x == 3 then { chessScreen.c13 = pieceImage; }
+        if x == 4 then { chessScreen.c14 = pieceImage; }
+        if x == 5 then { chessScreen.c15 = pieceImage; }
+        if x == 6 then { chessScreen.c16 = pieceImage; }
+        if x == 7 then { chessScreen.c17 = pieceImage; }
+    } else if y == 2 then {
+        if x == 0 then { chessScreen.c20 = pieceImage; }
+        if x == 1 then { chessScreen.c21 = pieceImage; }
+        if x == 2 then { chessScreen.c22 = pieceImage; }
+        if x == 3 then { chessScreen.c23 = pieceImage; }
+        if x == 4 then { chessScreen.c24 = pieceImage; }
+        if x == 5 then { chessScreen.c25 = pieceImage; }
+        if x == 6 then { chessScreen.c26 = pieceImage; }
+        if x == 7 then { chessScreen.c27 = pieceImage; }
+    } else if y == 3 then {
+        if x == 0 then { chessScreen.c30 = pieceImage; }
+        if x == 1 then { chessScreen.c31 = pieceImage; }
+        if x == 2 then { chessScreen.c32 = pieceImage; }
+        if x == 3 then { chessScreen.c33 = pieceImage; }
+        if x == 4 then { chessScreen.c34 = pieceImage; }
+        if x == 5 then { chessScreen.c35 = pieceImage; }
+        if x == 6 then { chessScreen.c36 = pieceImage; }
+        if x == 7 then { chessScreen.c37 = pieceImage; }
+    } else if y == 4 then {
+        if x == 0 then { chessScreen.c40 = pieceImage; }
+        if x == 1 then { chessScreen.c41 = pieceImage; }
+        if x == 2 then { chessScreen.c42 = pieceImage; }
+        if x == 3 then { chessScreen.c43 = pieceImage; }
+        if x == 4 then { chessScreen.c44 = pieceImage; }
+        if x == 5 then { chessScreen.c45 = pieceImage; }
+        if x == 6 then { chessScreen.c46 = pieceImage; }
+        if x == 7 then { chessScreen.c47 = pieceImage; }
+    } else if y == 5 then {
+        if x == 0 then { chessScreen.c50 = pieceImage; }
+        if x == 1 then { chessScreen.c51 = pieceImage; }
+        if x == 2 then { chessScreen.c52 = pieceImage; }
+        if x == 3 then { chessScreen.c53 = pieceImage; }
+        if x == 4 then { chessScreen.c54 = pieceImage; }
+        if x == 5 then { chessScreen.c55 = pieceImage; }
+        if x == 6 then { chessScreen.c56 = pieceImage; }
+        if x == 7 then { chessScreen.c57 = pieceImage; }
+    } else if y == 6 then {
+        if x == 0 then { chessScreen.c60 = pieceImage; }
+        if x == 1 then { chessScreen.c61 = pieceImage; }
+        if x == 2 then { chessScreen.c62 = pieceImage; }
+        if x == 3 then { chessScreen.c63 = pieceImage; }
+        if x == 4 then { chessScreen.c64 = pieceImage; }
+        if x == 5 then { chessScreen.c65 = pieceImage; }
+        if x == 6 then { chessScreen.c66 = pieceImage; }
+        if x == 7 then { chessScreen.c67 = pieceImage; }
+    } else if y == 7 then {
+        if x == 0 then { chessScreen.c70 = pieceImage; }
+        if x == 1 then { chessScreen.c71 = pieceImage; }
+        if x == 2 then { chessScreen.c72 = pieceImage; }
+        if x == 3 then { chessScreen.c73 = pieceImage; }
+        if x == 4 then { chessScreen.c74 = pieceImage; }
+        if x == 5 then { chessScreen.c75 = pieceImage; }
+        if x == 6 then { chessScreen.c76 = pieceImage; }
+        if x == 7 then { chessScreen.c77 = pieceImage; }
+    }
+}
+
+// Get chess piece letter for move notation (K, Q, R, B, N, p)
+getPieceLetter(pieceType: int) return string {
+    if pieceType == KING then { return "K"; }
+    if pieceType == QUEEN then { return "Q"; }
+    if pieceType == ROOK then { return "R"; }
+    if pieceType == BISHOP then { return "B"; }
+    if pieceType == KNIGHT then { return "N"; }
+    if pieceType == PAWN then { return "p"; }
+    return "";
+}
+
+// Get chess piece Unicode icon for move history display
+getPieceIcon(pieceType: int, pieceColor: int) return string {
+    // Unicode chess symbols
+    // Note: In Unicode chess symbols, ♔-♙ (U+2654-2659) represent WHITE pieces
+    // and ♚-♟ (U+265A-265F) represent BLACK pieces
+    if pieceColor == WHITE then {
+        if pieceType == KING then { return "♔"; }
+        if pieceType == QUEEN then { return "♕"; }
+        if pieceType == ROOK then { return "♖"; }
+        if pieceType == BISHOP then { return "♗"; }
+        if pieceType == KNIGHT then { return "♘"; }
+        if pieceType == PAWN then { return "♙"; }
+    } else {
+        // BLACK pieces
+        if pieceType == KING then { return "♚"; }
+        if pieceType == QUEEN then { return "♛"; }
+        if pieceType == ROOK then { return "♜"; }
+        if pieceType == BISHOP then { return "♝"; }
+        if pieceType == KNIGHT then { return "♞"; }
+        if pieceType == PAWN then { return "♟"; }
+    }
+    return "";
+}
+
+// Convert board coordinates to algebraic notation (e.g., 0,0 -> a8, 7,7 -> h1)
+coordsToAlgebraic(x: int, y: int) return string {
+    var files: string = "abcdefgh";
+    var file: string = call str.charAt(files, x);
+    var rank: int = 8 - y;  // y=0 is rank 8, y=7 is rank 1
+    return file + rank;
+}
+
+// Format a move for the move history with piece icon, from position, and to position
+formatMove(fromX: int, fromY: int, toX: int, toY: int, pieceType: int, pieceColor: int, isCapture: bool, capturedPieceType: int, capturedPieceColor: int) return string {
+    var pieceIcon: string = call getPieceIcon(pieceType, pieceColor);
+    var pieceLetter: string = call getPieceLetter(pieceType);
+    var fromSquare: string = call coordsToAlgebraic(fromX, fromY);
+    var toSquare: string = call coordsToAlgebraic(toX, toY);
+    
+    // Format: [Icon][Letter] [from]-[to] or [from]x[to][CapturedIcon] for captures
+    var moveText: string;
+    
+    if isCapture then {
+        var capturedIcon: string = call getPieceIcon(capturedPieceType, capturedPieceColor);
+        moveText = pieceIcon + pieceLetter + " " + fromSquare + "x" + toSquare + capturedIcon;
+    } else {
+        moveText = pieceIcon + pieceLetter + " " + fromSquare + "-" + toSquare;
+    }
+    
+    return moveText;
+}
+
+// Select a piece (change to yellow)
+selectPiece(x: int, y: int) {
+    print "Selecting piece at (" + x + ", " + y + ")";
+    var cellValue: int = call getPieceAt(x, y);
+    if cellValue != -1 then {
+        var cell = ChessCell(cellValue);
+        if cell.pieceType != EMPTY then {
+            var yellowPiece: imagedata = call getYellowPiece(cell.pieceType, cell.pieceColor);
+            if yellowPiece != null then {
+                call setPieceImage(x, y, yellowPiece);
+                print "Piece turned yellow at (" + x + ", " + y + ")";
+            }
+        }
+    }
+}
+
+// Deselect a piece (change back to normal)
+deselectPiece(x: int, y: int) {
+    print "Deselecting piece at (" + x + ", " + y + ")";
+    var cellValue: int = call getPieceAt(x, y);
+    if cellValue != -1 then {
+        var cell = ChessCell(cellValue);
+        if cell.pieceType != EMPTY then {
+            var normalPiece: imagedata = call getNormalPiece(cell.pieceType, cell.pieceColor);
+            if normalPiece != null then {
+                call setPieceImage(x, y, normalPiece);
+                print "Piece returned to normal at (" + x + ", " + y + ")";
+            }
+        }
+    }
+}
+
+// Move a piece from source to destination
+movePiece(fromX: int, fromY: int, toX: int, toY: int) {
+    print "Moving piece from (" + fromX + ", " + fromY + ") to (" + toX + ", " + toY + ")";
+    
+    // Get the piece being moved
+    var fromIdx: int = call boardIndex(fromY, fromX);
+    var fromCellValue: int = board[fromIdx];
+    var fromCell = ChessCell(fromCellValue);
+    
+    // Get the destination cell info
+    var toIdx: int = call boardIndex(toY, toX);
+    var toCellValue: int = board[toIdx];
+    var toCell = ChessCell(toCellValue);
+    
+    // Update the board array
+    // Set destination to the moved piece (preserve cell color from destination)
+    board[toIdx] = call encodeCellValue(toCell.cellColor, fromCell.pieceType, fromCell.pieceColor);
+    
+    // Clear the source cell (keep cell color, set piece to EMPTY)
+    board[fromIdx] = call encodeCellValue(fromCell.cellColor, EMPTY, WHITE);
+    
+    // Update the screen images
+    // Get the normal piece image (not yellow) for the destination
+    var pieceImage: imagedata = call getNormalPiece(fromCell.pieceType, fromCell.pieceColor);
+    if pieceImage != null then {
+        call setPieceImage(toX, toY, pieceImage);
+    }
+    
+    // Clear the source cell image on screen with transparent rectangle
+    call setPieceImage(fromX, fromY, transparentClear);
+    
+    print "Piece moved successfully";
+}
+
+// Handle cell click - select piece and show valid moves, or move piece if valid destination
 handleCellClick(x: int, y: int) {
     print "Cell clicked: (" + x + ", " + y + ")";
+    
+    // Check if a piece is already selected
+    if selectedX >= 0 && selectedY >= 0 then {
+        // A piece is selected - check if clicked position is a valid move destination
+        print "Checking if (" + x + ", " + y + ") is a valid move from (" + selectedX + ", " + selectedY + ")";
+        
+        var moves = call validMoves(selectedX, selectedY);
+        var isValidMove: bool = false;
+        var len: int = moves.length;
+        var i: int = 0;
+        
+        // Check if the clicked position is in the valid moves list
+        for (i = 0; i < len; i = i + 1) {
+            var move = moves[i];
+            if move.x == x && move.y == y then {
+                isValidMove = true;
+                print "Valid move found!";
+            }
+        }
+        
+        if isValidMove then {
+            // Get information about the move before executing it
+            var sourceCellValue: int = call getPieceAt(selectedX, selectedY);
+            var destCellValue: int = call getPieceAt(x, y);
+            var isCapture: bool = false;
+            var capturedPieceType: int = EMPTY;
+            var capturedPieceColor: int = WHITE;
+            
+            // Check if this is a capture move and store captured piece info
+            if destCellValue != -1 then {
+                var destCell = ChessCell(destCellValue);
+                if destCell.pieceType != EMPTY then {
+                    isCapture = true;
+                    capturedPieceType = destCell.pieceType;
+                    capturedPieceColor = destCell.pieceColor;
+                }
+            }
+            
+            var sourceCell = ChessCell(sourceCellValue);
+            var movingPieceType: int = sourceCell.pieceType;
+            var movingPieceColor: int = sourceCell.pieceColor;
+            
+            // Deselect the piece (turn yellow back to normal) before moving
+            call deselectPiece(selectedX, selectedY);
+            
+            // Move the piece
+            call movePiece(selectedX, selectedY, x, y);
+            
+            // Format and add move to history
+            var moveNotation: string = call formatMove(selectedX, selectedY, x, y, movingPieceType, movingPieceColor, isCapture, capturedPieceType, capturedPieceColor);
+            var playerName: string;
+            if currentPlayer == WHITE then {
+                playerName = "White";
+            } else {
+                playerName = "Black";
+            }
+            var moveEntry: string = playerName + ": " + moveNotation + "\n";
+            chessScreen.moveHistory = chessScreen.moveHistory + moveEntry;
+            print "Move added to history: " + moveEntry;
+            
+            // Clear indicators and selection
+            call clearIndicators();
+            selectedX = -1;
+            selectedY = -1;
+            
+            // Switch to next player
+            if currentPlayer == WHITE then {
+                currentPlayer = BLACK;
+                chessScreen.statusMessage = "Black to move";
+            } else {
+                currentPlayer = WHITE;
+                chessScreen.statusMessage = "White to move";
+            }
+            call updateTimerColors();
+            print "Switched to next player: " + currentPlayer;
+            
+            return;
+        } else {
+            print "Not a valid move destination - will handle as new selection";
+            // Deselect the currently selected piece before processing new selection
+            call deselectPiece(selectedX, selectedY);
+        }
+    }
     
     // Clear previous indicators
     call clearIndicators();
@@ -375,9 +771,10 @@ handleCellClick(x: int, y: int) {
         return;
     }
     
-    // Select the piece
+    // Select the piece - update state and change to yellow
     selectedX = x;
     selectedY = y;
+    call selectPiece(x, y);
     print "Piece selected at (" + x + ", " + y + ")";
     
     // Get valid moves for this piece
@@ -1396,7 +1793,7 @@ screen chessScreen = {
                             "padding": "0",
                             "disableLabelAlignment": true,
                             "items": [
-                                {"name": "moveHistoryText", "varRef": "moveHistory", "editable": false, "display": {"type": "textarea", "wrapText": true, "height": 30, "style": "-fx-control-inner-background: $COLOR_MOVE_HISTORY_BG; -fx-text-fill: $COLOR_MOVE_HISTORY_TEXT; -fx-font-family: 'Courier New'; -fx-font-size: 12px; -fx-border-color: #555555; -fx-border-width: 1;"}, "labelPos": "top"}
+                                {"name": "moveHistoryText", "varRef": "moveHistory", "editable": false, "display": {"type": "textarea", "wrapText": true, "height": 30, "style": "-fx-control-inner-background: $COLOR_MOVE_HISTORY_BG; -fx-text-fill: $COLOR_MOVE_HISTORY_TEXT; -fx-font-family: 'Courier New'; -fx-font-size: 14px; -fx-border-color: #555555; -fx-border-width: 1;"}, "labelPos": "top"}
                             ]
                         }
                     ]
@@ -1433,6 +1830,85 @@ print "==============================================";
 print "           Chess Game Application";
 print "==============================================";
 print "";
+print "Initializing chess board...";
+
+call initializeBoard();
+call printBoard();
+
+// Create board layer and indicator images
+print "Creating board layer images...";
+call createBoardLayer();
+
+print "Creating move indicator images...";
+call createIndicators();
+
+print "Loading normal and yellow piece images...";
+call loadPieceImages();
+
+print "";
+print "Board Encoding Information:";
+print "===========================";
+print "Each cell uses a bitmap byte:";
+print "  Bit 0: Cell color (0=light, 1=dark)";
+print "  Bits 1-6: Piece type (0=empty, 1-6=piece)";
+print "  Bit 7: Piece color (0=white, 1=black)";
+print "";
+
+print "Sample cell values:";
+var idx00: int = call boardIndex(0, 0);
+var sampleCell = ChessCell(board[idx00]);
+print "  [0,0] Black Rook: raw=" + board[idx00] + ", cellColor=" + sampleCell.cellColor + ", pieceType=" + sampleCell.pieceType + ", pieceColor=" + sampleCell.pieceColor;
+
+var idx74: int = call boardIndex(7, 4);
+sampleCell = ChessCell(board[idx74]);
+print "  [7,4] White King: raw=" + board[idx74] + ", cellColor=" + sampleCell.cellColor + ", pieceType=" + sampleCell.pieceType + ", pieceColor=" + sampleCell.pieceColor;
+
+print "";
+print "Loading chess piece SVG images...";
+
+// Load SVG images for pieces - Row 0 (black back row)
+chessScreen.c00 = call image.load(imgPath + "black_rook.svg");
+chessScreen.c01 = call image.load(imgPath + "black_knight.svg");
+chessScreen.c02 = call image.load(imgPath + "black_bishop.svg");
+chessScreen.c03 = call image.load(imgPath + "black_queen.svg");
+chessScreen.c04 = call image.load(imgPath + "black_king.svg");
+chessScreen.c05 = call image.load(imgPath + "black_bishop.svg");
+chessScreen.c06 = call image.load(imgPath + "black_knight.svg");
+chessScreen.c07 = call image.load(imgPath + "black_rook.svg");
+
+// Load SVG images for pieces - Row 1 (black pawns)
+chessScreen.c10 = call image.load(imgPath + "black_pawn.svg");
+chessScreen.c11 = call image.load(imgPath + "black_pawn.svg");
+chessScreen.c12 = call image.load(imgPath + "black_pawn.svg");
+chessScreen.c13 = call image.load(imgPath + "black_pawn.svg");
+chessScreen.c14 = call image.load(imgPath + "black_pawn.svg");
+chessScreen.c15 = call image.load(imgPath + "black_pawn.svg");
+chessScreen.c16 = call image.load(imgPath + "black_pawn.svg");
+chessScreen.c17 = call image.load(imgPath + "black_pawn.svg");
+
+// Load SVG images for pieces - Row 6 (white pawns)
+chessScreen.c60 = call image.load(imgPath + "white_pawn.svg");
+chessScreen.c61 = call image.load(imgPath + "white_pawn.svg");
+chessScreen.c62 = call image.load(imgPath + "white_pawn.svg");
+chessScreen.c63 = call image.load(imgPath + "white_pawn.svg");
+chessScreen.c64 = call image.load(imgPath + "white_pawn.svg");
+chessScreen.c65 = call image.load(imgPath + "white_pawn.svg");
+chessScreen.c66 = call image.load(imgPath + "white_pawn.svg");
+chessScreen.c67 = call image.load(imgPath + "white_pawn.svg");
+
+// Load SVG images for pieces - Row 7 (white back row)
+chessScreen.c70 = call image.load(imgPath + "white_rook.svg");
+chessScreen.c71 = call image.load(imgPath + "white_knight.svg");
+chessScreen.c72 = call image.load(imgPath + "white_bishop.svg");
+chessScreen.c73 = call image.load(imgPath + "white_queen.svg");
+chessScreen.c74 = call image.load(imgPath + "white_king.svg");
+chessScreen.c75 = call image.load(imgPath + "white_bishop.svg");
+chessScreen.c76 = call image.load(imgPath + "white_knight.svg");
+chessScreen.c77 = call image.load(imgPath + "white_rook.svg");
+
+print "Chess piece images loaded!";
+print "";
+print "Initializing board layer (checkerboard pattern)...";
 
 // Show startup dialog first
 // All game initialization happens in handleStartGame() when user clicks Start
