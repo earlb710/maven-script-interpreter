@@ -63,6 +63,7 @@ screen testScreen = {
         }
     ]
 };
+show screen testScreen;
 
 print("Screen defined with contentAlignment properties");
 print("To see the alignment effects, use the interactive console:");
