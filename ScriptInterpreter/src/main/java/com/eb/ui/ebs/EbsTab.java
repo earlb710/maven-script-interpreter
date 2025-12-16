@@ -92,6 +92,7 @@ public class EbsTab extends Tab {
     private int currentIndex = -1;
     private boolean suppressFindSearch = false; // avoid automatic search when programmatically setting find field
     private boolean dropdownOpen = false; // tracks if dropdown is currently open
+    private int searchOriginPosition = -1; // position where the search was initiated (before any matches selected)
     
     // Minimum character count for find highlighting (more than 2 means at least 3)
     private static final int MIN_FIND_CHARS = 3;
@@ -525,9 +526,13 @@ public class EbsTab extends Tab {
         btnClose = new Button("Close");
         lblCount = new Label("");
 
+        // Group find field with next/prev buttons in a bordered container
+        HBox findGroup = new HBox(0, findField, btnNext, btnPrev);
+        findGroup.setAlignment(Pos.CENTER_LEFT);
+        findGroup.setStyle("-fx-border-color: #999999; -fx-border-width: 1px; -fx-padding: 1px;");
+
         findBar = new HBox(8, new Label("Find:"),
-                findField, chkCase, chkWord, chkRegex,
-                btnPrev, btnNext,
+                findGroup, chkCase, chkWord, chkRegex,
                 new Label("Replace:"), replaceField, btnReplace, btnReplaceAll,
                 lblCount, btnClose);
         findBar.getStyleClass().add("find-bar");
@@ -1543,6 +1548,14 @@ public class EbsTab extends Tab {
         btnReplace.setDisable(!withReplace);
         btnReplaceAll.setDisable(!withReplace);
         
+        // Capture the search origin position before any search is performed
+        // Use selection start if there's a selection, otherwise use caret position
+        if (dispArea.getSelection().getLength() > 0) {
+            searchOriginPosition = dispArea.getSelection().getStart();
+        } else {
+            searchOriginPosition = dispArea.getCaretPosition();
+        }
+        
         // Clear find field and populate with current selection if any
         String selectedText = dispArea.getSelectedText();
         suppressFindSearch = true;
@@ -1572,6 +1585,7 @@ public class EbsTab extends Tab {
         lastMatches = java.util.Collections.emptyList();
         stalePendingClear = java.util.Collections.emptyList();
         currentIndex = -1;
+        searchOriginPosition = -1; // Reset search origin when closing find bar
         // Stop any pending timer and reset stale flag
         if (editorChangeTimer != null) {
             editorChangeTimer.stop();
@@ -1642,14 +1656,10 @@ public class EbsTab extends Tab {
             return;
         }
 
-        // Find the first match at or after the current position
-        // Use selection start if there's a selection, otherwise use caret position
-        int searchStartPos;
-        if (dispArea.getSelection().getLength() > 0) {
-            searchStartPos = dispArea.getSelection().getStart();
-        } else {
-            searchStartPos = dispArea.getCaretPosition();
-        }
+        // Find the first match at or after the search origin position
+        // This ensures that as the user types more characters, the search stays
+        // at the original location instead of jumping to the next match
+        int searchStartPos = searchOriginPosition >= 0 ? searchOriginPosition : dispArea.getCaretPosition();
         
         currentIndex = 0;
         for (int i = 0; i < hits.size(); i++) {
@@ -1763,6 +1773,8 @@ public class EbsTab extends Tab {
         selectCurrent(cur);
         updateCountLabel();
         dispArea.addStyleToRange(cur[0], cur[1], "find-current");
+        // Update search origin to current match start so subsequent typing searches from this position
+        searchOriginPosition = cur[0];
     }
 
     private void gotoPrev() {
@@ -1775,6 +1787,8 @@ public class EbsTab extends Tab {
         selectCurrent(cur);
         updateCountLabel();
         dispArea.addStyleToRange(cur[0], cur[1], "find-current");
+        // Update search origin to current match start so subsequent typing searches from this position
+        searchOriginPosition = cur[0];
     }
 
     // Clear only the 'find-current' class on the previous current match
