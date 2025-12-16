@@ -463,6 +463,8 @@ public class AreaItemFactory {
         // Apply control text alignment (for the content inside the control)
         // Use contentAlignment from item if available, otherwise fall back to alignment from metadata for backwards compatibility
         String contentAlignmentValue = null;
+        System.err.println("[ALIGNMENT DEBUG] Checking alignment for control type: " + control.getClass().getSimpleName());
+        System.err.println("[ALIGNMENT DEBUG] item.contentAlignment: " + (item != null ? item.contentAlignment : "null"));
         if (item != null && item.contentAlignment != null && !item.contentAlignment.isEmpty()) {
             contentAlignmentValue = item.contentAlignment;
         } else if (item != null && item.alignment != null && !item.alignment.isEmpty()) {
@@ -472,6 +474,7 @@ public class AreaItemFactory {
             // Fall back to metadata alignment
             contentAlignmentValue = metadata.alignment;
         }
+        System.err.println("[ALIGNMENT DEBUG] Final contentAlignmentValue: " + contentAlignmentValue);
         
         if (contentAlignmentValue != null && !contentAlignmentValue.isEmpty()) {
             String alignment = contentAlignmentValue.toLowerCase();
@@ -512,7 +515,9 @@ public class AreaItemFactory {
                 
                 if (control instanceof TextField) {
                     // Use programmatic API for TextField (more reliable than CSS)
-                    ((TextField) control).setAlignment(pos);
+                    TextField textField = (TextField) control;
+                    textField.setAlignment(pos);
+                    System.err.println("[ALIGNMENT DEBUG] TextField alignment set to: " + pos + " for value: " + contentAlignmentValue);
                 } else if (control instanceof TextArea || control instanceof ComboBox) {
                     // TextArea and ComboBox don't have setAlignment, use CSS
                     String currentStyle = control.getStyle();
