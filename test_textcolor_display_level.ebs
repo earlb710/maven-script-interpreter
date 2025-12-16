@@ -1,0 +1,38 @@
+// Quick test to verify textColor can be used at display level
+print "Testing textColor at display level...";
+
+screen testScreen = {
+    "title": "textColor Display Level Test",
+    "width": 400,
+    "height": 200,
+    "sets": [
+        {
+            "setname": "main",
+            "vars": [
+                {
+                    "name": "testField",
+                    "type": "string",
+                    "default": "Test value",
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Test:",
+                        "textColor": "#FF0000",
+                        "labelPosition": "left"
+                    }
+                }
+            ]
+        }
+    ],
+    "areas": [
+        {
+            "areaname": "main",
+            "containerType": "vbox",
+            "items": [
+                {"name": "field1", "varRef": "testField"}
+            ]
+        }
+    ]
+};
+
+print "✓ Screen created successfully with textColor at display level";
+print "Test passed!";

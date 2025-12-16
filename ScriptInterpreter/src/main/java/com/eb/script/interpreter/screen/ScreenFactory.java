@@ -4749,6 +4749,7 @@ public class ScreenFactory {
             "labelbold", "label_bold", "labelitalic", "label_italic", 
             "labelfontsize", "label_font_size",
             "itemfontsize", "item_font_size", "itemcolor", "item_color",
+            "textcolor", "text_color",
             "itembold", "item_bold", "itemitalic", "item_italic",
             "maxlength", "max_length", "height",
             // Image properties
@@ -4771,7 +4772,7 @@ public class ScreenFactory {
             "colspan", "col_span", "rowspan", "row_span",
             "layoutpos", "layout_pos", "relativepos", "relative_pos",
             "varref", "var_ref", "name", "editable", "disabled", "visible", "tooltip",
-            "textcolor", "text_color", "backgroundcolor", "background_color"
+            "backgroundcolor", "background_color"
         ));
         
         // Check for invalid properties
@@ -4830,6 +4831,7 @@ public class ScreenFactory {
             "labelbold", "label_bold", "labelitalic", "label_italic", 
             "labelfontsize", "label_font_size",
             "itemfontsize", "item_font_size", "itemcolor", "item_color",
+            "textcolor", "text_color",
             "itembold", "item_bold", "itemitalic", "item_italic"
         ));
         
