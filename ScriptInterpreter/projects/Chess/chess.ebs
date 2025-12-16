@@ -861,7 +861,7 @@ formatTimerDecimal(deciseconds: int) return string {
 // Timer callback function - called every 100ms (0.1 seconds)
 // Note: This callback is already executed on JavaFX Platform.runLater by thread.timerStart
 timerCallback(timerName: string) {
-    // Only update if game has started
+    // Only update if game has started - exit early if not
     if !gameStarted then {
         return;
     }
