@@ -1691,7 +1691,7 @@ public class InterpreterScreen {
             "prefwidth", "pref_width", "prefheight", "pref_height",
             "minwidth", "min_width", "minheight", "min_height",
             "maxwidth", "max_width", "maxheight", "max_height",
-            "alignment",
+            "contentalignment", "content_alignment", "itemalignment", "item_alignment", "alignment",
             // Styling
             "style",
             // Event handlers (should be at item level, not in display object)

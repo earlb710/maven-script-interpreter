@@ -11,52 +11,66 @@ print("Example 1: Content Alignment");
 print("-----------------------------");
 
 screen contentAlignmentDemo = {
-    "sets": [{
-        "setname": "main",
-        "vars": [
-            {"name": "leftField", "datatype": "string", "value": "Left aligned text"},
-            {"name": "centerField", "datatype": "string", "value": "Center aligned text"},
-            {"name": "rightField", "datatype": "string", "value": "Right aligned text"}
-        ]
-    }],
-    "areas": [{
-        "name": "mainArea",
-        "type": "vbox",
-        "spacing": "10",
-        "padding": "20",
-        "items": [
-            {
-                "varRef": "leftField",
-                "display": {
-                    "type": "textfield",
-                    "labelText": "Left Content:",
-                    "maxLength": 30
-                },
-                "contentAlignment": "left",
-                "prefWidth": "300"
-            },
-            {
-                "varRef": "centerField",
-                "display": {
-                    "type": "textfield",
-                    "labelText": "Center Content:",
-                    "maxLength": 30
-                },
-                "contentAlignment": "center",
-                "prefWidth": "300"
-            },
-            {
-                "varRef": "rightField",
-                "display": {
-                    "type": "textfield",
-                    "labelText": "Right Content:",
-                    "maxLength": 30
-                },
-                "contentAlignment": "right",
-                "prefWidth": "300"
+    "title": "Content Alignment Demo",
+    "width": 500,
+    "height": 300,
+    "vars": [
+        {
+            "name": "leftField",
+            "type": "string",
+            "default": "Left aligned text",
+            "display": {
+                "type": "textfield",
+                "labelText": "Left Content:"
             }
-        ]
-    }]
+        },
+        {
+            "name": "centerField",
+            "type": "string",
+            "default": "Center aligned text",
+            "display": {
+                "type": "textfield",
+                "labelText": "Center Content:"
+            }
+        },
+        {
+            "name": "rightField",
+            "type": "string",
+            "default": "Right aligned text",
+            "display": {
+                "type": "textfield",
+                "labelText": "Right Content:"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "10",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "leftItem",
+                    "varRef": "leftField",
+                    "contentAlignment": "left",
+                    "prefWidth": "300"
+                },
+                {
+                    "name": "centerItem",
+                    "varRef": "centerField",
+                    "contentAlignment": "center",
+                    "prefWidth": "300"
+                },
+                {
+                    "name": "rightItem",
+                    "varRef": "rightField",
+                    "contentAlignment": "right",
+                    "prefWidth": "300"
+                }
+            ]
+        }
+    ]
 };
 
 print("Screen 'contentAlignmentDemo' created");
@@ -68,82 +82,39 @@ print("Example 2: Item Alignment in GridPane");
 print("--------------------------------------");
 
 screen gridAlignmentDemo = {
-    "sets": [{
-        "setname": "main",
-        "vars": [
-            {"name": "topLeft", "datatype": "string", "value": "TL"},
-            {"name": "topCenter", "datatype": "string", "value": "TC"},
-            {"name": "topRight", "datatype": "string", "value": "TR"},
-            {"name": "centerLeft", "datatype": "string", "value": "CL"},
-            {"name": "center", "datatype": "string", "value": "C"},
-            {"name": "centerRight", "datatype": "string", "value": "CR"},
-            {"name": "bottomLeft", "datatype": "string", "value": "BL"},
-            {"name": "bottomCenter", "datatype": "string", "value": "BC"},
-            {"name": "bottomRight", "datatype": "string", "value": "BR"}
-        ]
-    }],
-    "areas": [{
-        "name": "gridArea",
-        "type": "gridpane",
-        "spacing": "10",
-        "padding": "20",
-        "items": [
-            {
-                "varRef": "topLeft",
-                "layoutPos": "0,0",
-                "display": {"type": "textfield", "maxLength": 10},
-                "itemAlignment": "top-left"
-            },
-            {
-                "varRef": "topCenter",
-                "layoutPos": "0,1",
-                "display": {"type": "textfield", "maxLength": 10},
-                "itemAlignment": "top-center"
-            },
-            {
-                "varRef": "topRight",
-                "layoutPos": "0,2",
-                "display": {"type": "textfield", "maxLength": 10},
-                "itemAlignment": "top-right"
-            },
-            {
-                "varRef": "centerLeft",
-                "layoutPos": "1,0",
-                "display": {"type": "textfield", "maxLength": 10},
-                "itemAlignment": "center-left"
-            },
-            {
-                "varRef": "center",
-                "layoutPos": "1,1",
-                "display": {"type": "textfield", "maxLength": 10},
-                "itemAlignment": "center"
-            },
-            {
-                "varRef": "centerRight",
-                "layoutPos": "1,2",
-                "display": {"type": "textfield", "maxLength": 10},
-                "itemAlignment": "center-right"
-            },
-            {
-                "varRef": "bottomLeft",
-                "layoutPos": "2,0",
-                "display": {"type": "textfield", "maxLength": 10},
-                "itemAlignment": "bottom-left"
-            },
-            {
-                "varRef": "bottomCenter",
-                "layoutPos": "2,1",
-                "display": {"type": "textfield", "maxLength": 10},
-                "itemAlignment": "bottom-center"
-            },
-            {
-                "varRef": "bottomRight",
-                "layoutPos": "2,2",
-                "display": {"type": "textfield", "maxLength": 10},
-                "itemAlignment": "bottom-right"
-            }
-        ]
-    }]
+    "title": "Grid Alignment Demo",
+    "width": 500,
+    "height": 400,
+    "vars": [
+        {"name": "topLeft", "type": "string", "default": "TL", "display": {"type": "textfield"}},
+        {"name": "topCenter", "type": "string", "default": "TC", "display": {"type": "textfield"}},
+        {"name": "topRight", "type": "string", "default": "TR", "display": {"type": "textfield"}},
+        {"name": "centerLeft", "type": "string", "default": "CL", "display": {"type": "textfield"}},
+        {"name": "center", "type": "string", "default": "C", "display": {"type": "textfield"}},
+        {"name": "centerRight", "type": "string", "default": "CR", "display": {"type": "textfield"}},
+        {"name": "bottomLeft", "type": "string", "default": "BL", "display": {"type": "textfield"}},
+        {"name": "bottomCenter", "type": "string", "default": "BC", "display": {"type": "textfield"}},
+        {"name": "bottomRight", "type": "string", "default": "BR", "display": {"type": "textfield"}}
+    ],
+    "area": [
+        {
+            "name": "gridArea",
+            "type": "gridpane",
+            "spacing": "10",
+            "padding": "20",
+            "items": [
+                {"name": "tlField", "varRef": "topLeft", "layoutPos": "0,0", "itemAlignment": "top-left"},
+                {"name": "tcField", "varRef": "topCenter", "layoutPos": "0,1", "itemAlignment": "top-center"},
+                {"name": "trField", "varRef": "topRight", "layoutPos": "0,2", "itemAlignment": "top-right"},
+                {"name": "clField", "varRef": "centerLeft", "layoutPos": "1,0", "itemAlignment": "center-left"},
+                {"name": "cField", "varRef": "center", "layoutPos": "1,1", "itemAlignment": "center"},
+                {"name": "crField", "varRef": "centerRight", "layoutPos": "1,2", "itemAlignment": "center-right"},
+                {"name": "blField", "varRef": "bottomLeft", "layoutPos": "2,0", "itemAlignment": "bottom-left"},
+                {"name": "bcField", "varRef": "bottomCenter", "layoutPos": "2,1", "itemAlignment": "bottom-center"},
+                {"name": "brField", "varRef": "bottomRight", "layoutPos": "2,2", "itemAlignment": "bottom-right"}
+            ]
+        }
+    ]
 };
 
 print("Screen 'gridAlignmentDemo' created");
@@ -155,52 +126,66 @@ print("Example 3: Item Alignment in VBox");
 print("----------------------------------");
 
 screen vboxAlignmentDemo = {
-    "sets": [{
-        "setname": "main",
-        "vars": [
-            {"name": "leftItem", "datatype": "string", "value": "Left aligned item"},
-            {"name": "centerItem", "datatype": "string", "value": "Center aligned item"},
-            {"name": "rightItem", "datatype": "string", "value": "Right aligned item"}
-        ]
-    }],
-    "areas": [{
-        "name": "vboxArea",
-        "type": "vbox",
-        "spacing": "10",
-        "padding": "20",
-        "items": [
-            {
-                "varRef": "leftItem",
-                "display": {
-                    "type": "textfield",
-                    "labelText": "Left aligned:",
-                    "maxLength": 20
-                },
-                "itemAlignment": "center-left",
-                "prefWidth": "200"
-            },
-            {
-                "varRef": "centerItem",
-                "display": {
-                    "type": "textfield",
-                    "labelText": "Center aligned:",
-                    "maxLength": 20
-                },
-                "itemAlignment": "center",
-                "prefWidth": "200"
-            },
-            {
-                "varRef": "rightItem",
-                "display": {
-                    "type": "textfield",
-                    "labelText": "Right aligned:",
-                    "maxLength": 20
-                },
-                "itemAlignment": "center-right",
-                "prefWidth": "200"
+    "title": "VBox Alignment Demo",
+    "width": 500,
+    "height": 300,
+    "vars": [
+        {
+            "name": "leftItem",
+            "type": "string",
+            "default": "Left aligned item",
+            "display": {
+                "type": "textfield",
+                "labelText": "Left aligned:"
             }
-        ]
-    }]
+        },
+        {
+            "name": "centerItem",
+            "type": "string",
+            "default": "Center aligned item",
+            "display": {
+                "type": "textfield",
+                "labelText": "Center aligned:"
+            }
+        },
+        {
+            "name": "rightItem",
+            "type": "string",
+            "default": "Right aligned item",
+            "display": {
+                "type": "textfield",
+                "labelText": "Right aligned:"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "vboxArea",
+            "type": "vbox",
+            "spacing": "10",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "leftField",
+                    "varRef": "leftItem",
+                    "itemAlignment": "center-left",
+                    "prefWidth": "200"
+                },
+                {
+                    "name": "centerField",
+                    "varRef": "centerItem",
+                    "itemAlignment": "center",
+                    "prefWidth": "200"
+                },
+                {
+                    "name": "rightField",
+                    "varRef": "rightItem",
+                    "itemAlignment": "center-right",
+                    "prefWidth": "200"
+                }
+            ]
+        }
+    ]
 };
 
 print("Screen 'vboxAlignmentDemo' created");

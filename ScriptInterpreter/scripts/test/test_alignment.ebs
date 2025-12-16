@@ -5,49 +5,63 @@ print("============================");
 
 // Create a simple screen to test alignment properties
 screen testScreen = {
-    "sets": [{
-        "setname": "main",
-        "vars": [
-            {"name": "leftText", "datatype": "string", "value": "Left"},
-            {"name": "centerText", "datatype": "string", "value": "Center"},
-            {"name": "rightText", "datatype": "string", "value": "Right"}
-        ]
-    }],
-    "areas": [{
-        "name": "mainArea",
-        "type": "vbox",
-        "spacing": "10",
-        "padding": "20",
-        "items": [
-            {
-                "varRef": "leftText",
-                "display": {
-                    "type": "textfield",
-                    "labelText": "Content Left Aligned:",
-                    "maxLength": 20
-                },
-                "contentAlignment": "left"
-            },
-            {
-                "varRef": "centerText",
-                "display": {
-                    "type": "textfield",
-                    "labelText": "Content Center Aligned:",
-                    "maxLength": 20
-                },
-                "contentAlignment": "center"
-            },
-            {
-                "varRef": "rightText",
-                "display": {
-                    "type": "textfield",
-                    "labelText": "Content Right Aligned:",
-                    "maxLength": 20
-                },
-                "contentAlignment": "right"
+    "title": "Alignment Test",
+    "width": 500,
+    "height": 300,
+    "vars": [
+        {
+            "name": "leftText",
+            "type": "string",
+            "default": "Left aligned text",
+            "display": {
+                "type": "textfield",
+                "labelText": "Content Left Aligned:"
             }
-        ]
-    }]
+        },
+        {
+            "name": "centerText",
+            "type": "string",
+            "default": "Center aligned text",
+            "display": {
+                "type": "textfield",
+                "labelText": "Content Center Aligned:"
+            }
+        },
+        {
+            "name": "rightText",
+            "type": "string",
+            "default": "Right aligned text",
+            "display": {
+                "type": "textfield",
+                "labelText": "Content Right Aligned:"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "10",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "leftField",
+                    "varRef": "leftText",
+                    "contentAlignment": "left"
+                },
+                {
+                    "name": "centerField",
+                    "varRef": "centerText",
+                    "contentAlignment": "center"
+                },
+                {
+                    "name": "rightField",
+                    "varRef": "rightText",
+                    "contentAlignment": "right"
+                }
+            ]
+        }
+    ]
 };
 
 print("Screen defined with contentAlignment properties");
