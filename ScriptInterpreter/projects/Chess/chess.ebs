@@ -536,21 +536,23 @@ getPieceLetter(pieceType: int) return string {
 // Get chess piece Unicode icon for move history display
 getPieceIcon(pieceType: int, pieceColor: int) return string {
     // Unicode chess symbols
+    // Note: In Unicode chess symbols, ♚-♟ (U+265A-265F) represent WHITE pieces
+    // and ♔-♙ (U+2654-2659) represent BLACK pieces
     if pieceColor == WHITE then {
-        if pieceType == KING then { return "♔"; }
-        if pieceType == QUEEN then { return "♕"; }
-        if pieceType == ROOK then { return "♖"; }
-        if pieceType == BISHOP then { return "♗"; }
-        if pieceType == KNIGHT then { return "♘"; }
-        if pieceType == PAWN then { return "♙"; }
-    } else {
-        // BLACK pieces
         if pieceType == KING then { return "♚"; }
         if pieceType == QUEEN then { return "♛"; }
         if pieceType == ROOK then { return "♜"; }
         if pieceType == BISHOP then { return "♝"; }
         if pieceType == KNIGHT then { return "♞"; }
         if pieceType == PAWN then { return "♟"; }
+    } else {
+        // BLACK pieces
+        if pieceType == KING then { return "♔"; }
+        if pieceType == QUEEN then { return "♕"; }
+        if pieceType == ROOK then { return "♖"; }
+        if pieceType == BISHOP then { return "♗"; }
+        if pieceType == KNIGHT then { return "♘"; }
+        if pieceType == PAWN then { return "♙"; }
     }
     return "";
 }
