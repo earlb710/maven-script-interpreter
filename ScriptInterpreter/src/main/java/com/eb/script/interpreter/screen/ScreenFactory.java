@@ -124,6 +124,9 @@ public class ScreenFactory {
     // Map to store the root BorderPane for each screen (screenName -> BorderPane) for debug panel toggling
     private static final java.util.concurrent.ConcurrentHashMap<String, BorderPane> screenRootPanes = new java.util.concurrent.ConcurrentHashMap<>();
     
+    // Map to store the MenuBar for each screen (screenName -> MenuBar) for dynamic menu manipulation
+    private static final java.util.concurrent.ConcurrentHashMap<String, javafx.scene.control.MenuBar> screenMenuBars = new java.util.concurrent.ConcurrentHashMap<>();
+    
     // Map to store original window widths before debug panel expansion (screenName -> originalWidth)
     private static final java.util.concurrent.ConcurrentHashMap<String, Double> screenOriginalWidths = new java.util.concurrent.ConcurrentHashMap<>();
     
@@ -3208,6 +3211,8 @@ public class ScreenFactory {
         if (showMenu) {
             javafx.scene.control.MenuBar menuBar = createScreenMenuBar(stage);
             screenRoot.setTop(menuBar);
+            // Store the MenuBar reference for dynamic menu manipulation
+            screenMenuBars.put(screenName.toLowerCase(), menuBar);
         }
         
         screenRoot.setCenter(scrollPane);
@@ -3436,6 +3441,20 @@ public class ScreenFactory {
             return null;
         }
         return screenRootPanes.get(screenName.toLowerCase());
+    }
+
+    /**
+     * Gets the MenuBar for a screen by name.
+     * This allows external code to manipulate the menu dynamically, such as adding custom menu items.
+     * 
+     * @param screenName The name of the screen (case-insensitive)
+     * @return The MenuBar of the screen, or null if not found or if menu is not shown
+     */
+    public static javafx.scene.control.MenuBar getScreenMenuBar(String screenName) {
+        if (screenName == null) {
+            return null;
+        }
+        return screenMenuBars.get(screenName.toLowerCase());
     }
 
     /**

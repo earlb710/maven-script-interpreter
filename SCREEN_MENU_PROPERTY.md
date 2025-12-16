@@ -91,7 +91,7 @@ This creates a screen without the menu bar, providing a cleaner interface.
 
 ## Dynamic Menu Control with Builtin Functions
 
-In addition to the `showMenu` property, you can control menu visibility at runtime using builtin functions:
+In addition to the `showMenu` property, you can control menu visibility and add custom menu items at runtime using builtin functions:
 
 ### scr.showMenu(screenName?)
 
@@ -115,6 +115,31 @@ call scr.hideMenu("myScreen");
 
 // Or from within a screen event handler
 call scr.hideMenu();
+```
+
+### scr.addMenu(screenName, parentPath, name, displayName, callback)
+
+Adds a custom menu item to a screen's menu bar dynamically. The parent path uses dot notation to specify the menu hierarchy.
+
+**Parameters:**
+- `screenName` - The name of the screen
+- `parentPath` - Parent menu path (e.g., "Edit" or "Edit.Format")
+- `name` - Internal identifier for the menu item
+- `displayName` - Text displayed to the user
+- `callback` - EBS code to execute when clicked
+
+```ebs
+// Add to existing Edit menu
+call scr.addMenu("myScreen", "Edit", "customAction", "Custom Action", 
+    "println('Custom action executed');");
+
+// Create new top-level menu with item
+call scr.addMenu("myScreen", "Tools", "myTool", "My Tool", 
+    "call myToolFunction();");
+
+// Add to nested submenu (creates if needed)
+call scr.addMenu("myScreen", "Edit.Format", "uppercase", "Convert to Uppercase", 
+    "call convertToUpper();");
 ```
 
 ### Example: Toggle Menu with Buttons

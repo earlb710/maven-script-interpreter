@@ -1022,6 +1022,14 @@ public final class Builtins {
                 newParam("screenName", DataType.STRING, false) // optional; screen name (if null, uses current screen)
         ));
         addBuiltin(info(
+                "scr.addMenu", DataType.BOOL,
+                newParam("screenName", DataType.STRING, true), // required; screen name
+                newParam("parentPath", DataType.STRING, true), // required; parent menu path (e.g., "Edit" or "Edit.Format")
+                newParam("name", DataType.STRING, true), // required; menu item identifier
+                newParam("displayName", DataType.STRING, true), // required; text displayed to user
+                newParam("callback", DataType.STRING, true) // required; EBS code to execute when clicked
+        ));
+        addBuiltin(info(
                 "scr.setStatus", DataType.BOOL,
                 newParam("screenName", DataType.STRING, true), // required; screen name
                 newParam("status", DataType.STRING, true) // required; status: "clean", "changed", or "error"
@@ -2230,6 +2238,7 @@ public final class Builtins {
             case "scr.closescreen" -> BuiltinsScreen.screenClose(context, args);
             case "scr.showmenu" -> BuiltinsScreen.screenShowMenu(context, args);
             case "scr.hidemenu" -> BuiltinsScreen.screenHideMenu(context, args);
+            case "scr.addmenu" -> BuiltinsScreen.screenAddMenu(context, args);
             case "scr.setstatus" -> BuiltinsScreen.screenSetStatus(context, args);
             case "scr.getstatus" -> BuiltinsScreen.screenGetStatus(context, args);
             case "scr.seterror" -> BuiltinsScreen.screenSetError(context, args);

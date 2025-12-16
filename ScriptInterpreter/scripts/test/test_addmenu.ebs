@@ -1,0 +1,55 @@
+// Test script for scr.addMenu builtin function
+
+// Create a simple screen with menu
+screen testAddMenu = {
+    "name": "testAddMenu",
+    "title": "Test Custom Menu Items",
+    "width": 600,
+    "height": 400,
+    "area": [
+        {
+            "name": "main",
+            "type": "vbox",
+            "items": [
+                {
+                    "type": "label",
+                    "text": "This screen demonstrates dynamic menu item creation."
+                },
+                {
+                    "type": "label",
+                    "text": "Check the menu bar for custom items added programmatically."
+                },
+                {
+                    "type": "button",
+                    "text": "Add Menu Item to Edit",
+                    "onClick": "call scr.addMenu(\"testaddmenu\", \"Edit\", \"customAction\", \"Custom Action\", \"println('Custom action executed!');\");"
+                },
+                {
+                    "type": "button",
+                    "text": "Add Tools Menu",
+                    "onClick": "call scr.addMenu(\"testaddmenu\", \"Tools\", \"myTool\", \"My Tool\", \"println('My tool executed!');\");"
+                },
+                {
+                    "type": "button",
+                    "text": "Add Nested Format Menu",
+                    "onClick": "call scr.addMenu(\"testaddmenu\", \"Edit.Format\", \"uppercase\", \"Convert to Uppercase\", \"println('Convert to uppercase!');\");"
+                }
+            ]
+        }
+    ]
+};
+
+show screen testAddMenu;
+
+println("Test screen created.");
+println("Click the buttons to dynamically add menu items:");
+println("  1. 'Add Menu Item to Edit' - adds item to existing Edit menu");
+println("  2. 'Add Tools Menu' - creates new top-level Tools menu");
+println("  3. 'Add Nested Format Menu' - creates Edit > Format > Convert to Uppercase");
+println("");
+println("You can also add menu items directly:");
+
+// Example: Add a custom menu item to a new Help menu
+call scr.addMenu("testaddmenu", "Help", "about", "About", "println('About dialog would go here')");
+
+println("Added 'About' item to Help menu");

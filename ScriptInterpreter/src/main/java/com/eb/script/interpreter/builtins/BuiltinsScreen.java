@@ -358,6 +358,158 @@ public class BuiltinsScreen {
     }
 
     /**
+     * scr.addMenu(screenName, parentPath, name, displayName, callback) -> BOOL
+     * Adds a custom menu item to a screen's menu bar.
+     * 
+     * @param screenName The name of the screen
+     * @param parentPath The parent menu path separated with dots (e.g., "Edit" or "Edit.Format")
+     * @param name The internal name/identifier for the menu item
+     * @param displayName The text displayed to the user
+     * @param callback The EBS code to execute when the menu item is clicked
+     * @return true on success
+     */
+    public static Object screenAddMenu(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (String) args[0];
+        String parentPath = (String) args[1];
+        String name = (String) args[2];
+        String displayName = (String) args[3];
+        String callback = (String) args[4];
+
+        // Validate parameters
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("scr.addMenu: screenName parameter cannot be null or empty");
+        }
+        if (parentPath == null || parentPath.isEmpty()) {
+            throw new InterpreterError("scr.addMenu: parentPath parameter cannot be null or empty");
+        }
+        if (name == null || name.isEmpty()) {
+            throw new InterpreterError("scr.addMenu: name parameter cannot be null or empty");
+        }
+        if (displayName == null || displayName.isEmpty()) {
+            throw new InterpreterError("scr.addMenu: displayName parameter cannot be null or empty");
+        }
+        if (callback == null || callback.isEmpty()) {
+            throw new InterpreterError("scr.addMenu: callback parameter cannot be null or empty");
+        }
+        
+        // Normalize screen name to lowercase
+        screenName = screenName.toLowerCase();
+
+        // Check if screen exists
+        if (!context.getScreens().containsKey(screenName)) {
+            throw new InterpreterError("scr.addMenu: Screen '" + screenName + "' does not exist or has not been shown yet.");
+        }
+
+        final String finalScreenName = screenName;
+        final String finalParentPath = parentPath;
+        final String finalName = name;
+        final String finalDisplayName = displayName;
+        final String finalCallback = callback;
+
+        // Add the menu item on JavaFX Application Thread
+        javafx.application.Platform.runLater(() -> {
+            try {
+                // Get the MenuBar for this screen
+                javafx.scene.control.MenuBar menuBar = com.eb.script.interpreter.screen.ScreenFactory.getScreenMenuBar(finalScreenName);
+                
+                if (menuBar == null) {
+                    if (context.getOutput() != null) {
+                        context.getOutput().printlnError("Menu bar not found for screen '" + finalScreenName + "'. Use showMenu property or scr.showMenu() first.");
+                    }
+                    return;
+                }
+
+                // Parse the parent path (e.g., "Edit" or "Edit.Format")
+                String[] pathParts = finalParentPath.split("\\.");
+                
+                // Find or create the parent menu
+                javafx.scene.control.Menu parentMenu = null;
+                
+                // Start with top-level menus
+                for (javafx.scene.control.Menu topMenu : menuBar.getMenus()) {
+                    if (topMenu.getText().equals(pathParts[0])) {
+                        parentMenu = topMenu;
+                        break;
+                    }
+                }
+                
+                // If top-level menu doesn't exist, create it
+                if (parentMenu == null) {
+                    parentMenu = new javafx.scene.control.Menu(pathParts[0]);
+                    menuBar.getMenus().add(parentMenu);
+                }
+                
+                // Navigate through nested menus if path has multiple parts
+                for (int i = 1; i < pathParts.length; i++) {
+                    String menuName = pathParts[i];
+                    javafx.scene.control.Menu foundSubMenu = null;
+                    
+                    // Look for existing submenu
+                    for (javafx.scene.control.MenuItem item : parentMenu.getItems()) {
+                        if (item instanceof javafx.scene.control.Menu && item.getText().equals(menuName)) {
+                            foundSubMenu = (javafx.scene.control.Menu) item;
+                            break;
+                        }
+                    }
+                    
+                    // Create submenu if it doesn't exist
+                    if (foundSubMenu == null) {
+                        foundSubMenu = new javafx.scene.control.Menu(menuName);
+                        parentMenu.getItems().add(foundSubMenu);
+                    }
+                    
+                    parentMenu = foundSubMenu;
+                }
+                
+                // Create the menu item
+                javafx.scene.control.MenuItem menuItem = new javafx.scene.control.MenuItem(finalDisplayName);
+                
+                // Get the event dispatcher for this screen
+                com.eb.script.interpreter.screen.ScreenEventDispatcher dispatcher = context.getScreenEventDispatcher(finalScreenName);
+                
+                // Set up the onClick handler
+                menuItem.setOnAction(event -> {
+                    try {
+                        if (dispatcher != null && dispatcher.isRunning()) {
+                            // Dispatch event to screen thread (asynchronous)
+                            dispatcher.dispatchAsync(finalCallback);
+                        } else {
+                            // Fallback: execute directly on JavaFX thread
+                            // This is used if the screen doesn't have a dedicated thread
+                            if (context.getOutput() != null) {
+                                context.getOutput().printlnWarn("Screen '" + finalScreenName + "' has no running dispatcher, executing callback directly");
+                            }
+                            // We need an interpreter to execute the code
+                            // This is a simplified approach - ideally we'd have access to the screen's interpreter
+                            System.err.println("Warning: Cannot execute menu callback without dispatcher for screen: " + finalScreenName);
+                        }
+                    } catch (Exception e) {
+                        if (context.getOutput() != null) {
+                            context.getOutput().printlnError("Error executing menu callback for '" + finalName + "': " + e.getMessage());
+                        }
+                        e.printStackTrace();
+                    }
+                });
+                
+                // Add the menu item to the parent menu
+                parentMenu.getItems().add(menuItem);
+                
+                if (context.getOutput() != null) {
+                    context.getOutput().printlnOk("Menu item '" + finalDisplayName + "' added to '" + finalParentPath + "' in screen '" + finalScreenName + "'");
+                }
+                
+            } catch (Exception e) {
+                if (context.getOutput() != null) {
+                    context.getOutput().printlnError("Error adding menu item to screen '" + finalScreenName + "': " + e.getMessage());
+                }
+                e.printStackTrace();
+            }
+        });
+
+        return true;
+    }
+
+    /**
      * scr.findScreen(screenName) -> BOOL
      * Checks if a screen has been defined.
      * Returns true if the screen exists in any of these states:

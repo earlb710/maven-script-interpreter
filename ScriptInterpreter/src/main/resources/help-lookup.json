@@ -4275,6 +4275,35 @@
       "example": "<b>call</b> <b>scr.hideMenu</b>(screenName=\"myScreen\");<br><br>// Or from within a screen event handler:<br><b>call</b> <b>scr.hideMenu</b>();<br><br>// Toggle menu visibility<br><b>call</b> <b>scr.hideMenu</b>();<br>// ... do work ...<br><b>call</b> <b>scr.showMenu</b>();"
     },
     {
+      "function": "scr.addMenu",
+      "short_description": "Adds a custom menu item to a screen",
+      "long_help": "Dynamically adds a menu item to a screen's menu bar. The parent path uses dot notation to specify the menu hierarchy (e.g., \"Edit\" for top-level menu, or \"Edit.Format\" for a submenu under Edit). If parent menus don't exist, they will be created automatically. The callback is executed when the menu item is clicked. Returns true on success.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        },
+        {
+          "name": "parentPath",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "displayName",
+          "type": "string"
+        },
+        {
+          "name": "callback",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>// Add to existing Edit menu</b><br><b>call</b> <b>scr.addMenu</b>(screenName=\"myScreen\", parentPath=\"Edit\", name=\"customAction\", displayName=\"Custom Action\", callback=\"println('Custom action executed');\");<br><br><b>// Create new top-level menu with item</b><br><b>call</b> <b>scr.addMenu</b>(screenName=\"myScreen\", parentPath=\"Tools\", name=\"myTool\", displayName=\"My Tool\", callback=\"call myToolFunction();\");<br><br><b>// Add to nested submenu (creates if needed)</b><br><b>call</b> <b>scr.addMenu</b>(screenName=\"myScreen\", parentPath=\"Edit.Format\", name=\"uppercase\", displayName=\"Convert to Uppercase\", callback=\"call convertToUpper();\");"
+    },
+    {
       "function": "scr.snapshot",
       "short_description": "Takes screenshot of screen",
       "long_help": "Captures a screenshot of the specified screen (or current screen if not specified) and returns it as an image.",
