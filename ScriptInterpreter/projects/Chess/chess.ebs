@@ -1212,8 +1212,8 @@ handleExitGame() {
 // Startup dialog screen definition
 screen startupDialog = {
     "title": "Chess Game - Start",
-    "width": 450,
-    "height": 570,
+    "width": 660,
+    "height": 580,
     "vars": [
         {
             "name": "logo",
