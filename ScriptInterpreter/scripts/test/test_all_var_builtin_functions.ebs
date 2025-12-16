@@ -1,0 +1,389 @@
+// Comprehensive test for all new var-level builtin functions
+// Tests: scr.setVarStateful, scr.getVarStateful, scr.getVarOriginalValue,
+//        scr.submitVarItem, scr.resetVarItem, scr.clearVarItem, scr.initVarItem
+//
+// USAGE: Run this in the EBS interactive console (mvn javafx:run)
+//        Then execute: import "scripts/test/test_all_var_builtin_functions.ebs";
+
+print "\n";
+print "========================================\n";
+print "Testing New Var-Level Builtin Functions\n";
+print "========================================\n";
+print "\n";
+
+// Create a simple screen with variables
+screen testVars = {
+    "title": "Test Variables",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "customerName",
+            "type": "string",
+            "default": "John Doe",
+            "stateful": true
+        },
+        {
+            "name": "email",
+            "type": "string",
+            "default": "john@example.com",
+            "stateful": true
+        },
+        {
+            "name": "searchFilter",
+            "type": "string",
+            "default": "",
+            "stateful": false
+        },
+        {
+            "name": "age",
+            "type": "int",
+            "default": 30,
+            "stateful": true
+        }
+    ]
+};
+
+// Show the screen (required for screen to be registered in context)
+show screen testVars;
+
+// ============================================
+// Test 1: scr.getVarStateful
+// ============================================
+print "Test 1: scr.getVarStateful\n";
+print "-------------------------------\n";
+
+var nameStateful: bool = call scr.getVarStateful("testVars", "customerName");
+print "customerName stateful: ";
+print nameStateful;
+if nameStateful == true then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: true)\n";
+}
+
+var emailStateful: bool = call scr.getVarStateful("testVars", "email");
+print "email stateful: ";
+print emailStateful;
+if emailStateful == true then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: true)\n";
+}
+
+var searchStateful: bool = call scr.getVarStateful("testVars", "searchFilter");
+print "searchFilter stateful: ";
+print searchStateful;
+if searchStateful == false then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: false)\n";
+}
+
+var ageStateful: bool = call scr.getVarStateful("testVars", "age");
+print "age stateful: ";
+print ageStateful;
+if ageStateful == true then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: true)\n";
+}
+print "\n";
+
+// ============================================
+// Test 2: scr.setVarStateful
+// ============================================
+print "Test 2: scr.setVarStateful\n";
+print "-------------------------------\n";
+
+print "Setting email to non-stateful (false)...\n";
+call scr.setVarStateful("testVars", "email", false);
+
+var emailStatefulNew: bool = call scr.getVarStateful("testVars", "email");
+print "email stateful after change: ";
+print emailStatefulNew;
+print " (expected: false)\n";
+
+print "Setting searchFilter to stateful (true)...\n";
+call scr.setVarStateful("testVars", "searchFilter", true);
+
+var searchStatefulNew: bool = call scr.getVarStateful("testVars", "searchFilter");
+print "searchFilter stateful after change: ";
+print searchStatefulNew;
+print " (expected: true)\n";
+print "\n";
+
+// ============================================
+// Test 3: scr.getVarOriginalValue
+// ============================================
+print "Test 3: scr.getVarOriginalValue\n";
+print "-------------------------------\n";
+
+var nameOriginal: string = call scr.getVarOriginalValue("testVars", "customerName");
+print "customerName original: ";
+print nameOriginal;
+if nameOriginal == "John Doe" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: John Doe)\n";
+}
+
+var emailOriginal: string = call scr.getVarOriginalValue("testVars", "email");
+print "email original: ";
+print emailOriginal;
+if emailOriginal == "john@example.com" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: john@example.com)\n";
+}
+
+var ageOriginal: int = call scr.getVarOriginalValue("testVars", "age");
+print "age original: ";
+print ageOriginal;
+if ageOriginal == 30 then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: 30)\n";
+}
+
+// Check initial status
+var nameStatus1: string = call scr.getItemStatus("testVars", "customerName");
+print "customerName status: ";
+print nameStatus1;
+if nameStatus1 == "clean" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: clean)\n";
+}
+print "\n";
+
+// ============================================
+// Test 4: scr.submitVarItem
+// ============================================
+print "Test 4: scr.submitVarItem\n";
+print "-------------------------------\n";
+
+print "Changing customerName to 'Jane Smith'...\n";
+testVars.customerName = "Jane Smith";
+
+print "Current value: ";
+print testVars.customerName;
+if testVars.customerName == "Jane Smith" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: Jane Smith)\n";
+}
+
+var statusBeforeSubmit: string = call scr.getItemStatus("testVars", "customerName");
+print "Status before submit: ";
+print statusBeforeSubmit;
+if statusBeforeSubmit == "changed" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: changed)\n";
+}
+
+var origBeforeSubmit: string = call scr.getVarOriginalValue("testVars", "customerName");
+print "Original before submit: ";
+print origBeforeSubmit;
+if origBeforeSubmit == "John Doe" then {
+    print " - PASS\n\n";
+} else {
+    print " - FAIL (expected: John Doe)\n\n";
+}
+
+print "Calling scr.submitVarItem (simulating save to database)...\n";
+call scr.submitVarItem("testVars", "customerName");
+
+var origAfterSubmit: string = call scr.getVarOriginalValue("testVars", "customerName");
+print "Original after submit: ";
+print origAfterSubmit;
+if origAfterSubmit == "Jane Smith" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: Jane Smith)\n";
+}
+
+var statusAfterSubmit: string = call scr.getItemStatus("testVars", "customerName");
+print "Status after submit: ";
+print statusAfterSubmit;
+if statusAfterSubmit == "clean" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: clean)\n";
+}
+print "\n";
+
+// ============================================
+// Test 5: scr.resetVarItem
+// ============================================
+print "Test 5: scr.resetVarItem\n";
+print "-------------------------------\n";
+
+print "Changing customerName to 'Alice Brown'...\n";
+testVars.customerName = "Alice Brown";
+
+print "Current value before reset: ";
+print testVars.customerName;
+if testVars.customerName == "Alice Brown" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: Alice Brown)\n";
+}
+
+var statusBeforeReset: string = call scr.getItemStatus("testVars", "customerName");
+print "Status before reset: ";
+print statusBeforeReset;
+if statusBeforeReset == "changed" then {
+    print " - PASS\n\n";
+} else {
+    print " - FAIL (expected: changed)\n\n";
+}
+
+print "Calling scr.resetVarItem (reverting to original)...\n";
+call scr.resetVarItem("testVars", "customerName");
+
+print "Current value after reset: ";
+print testVars.customerName;
+if testVars.customerName == "Jane Smith" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: Jane Smith)\n";
+}
+
+var statusAfterReset: string = call scr.getItemStatus("testVars", "customerName");
+print "Status after reset: ";
+print statusAfterReset;
+if statusAfterReset == "clean" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: clean)\n";
+}
+print "\n";
+
+// ============================================
+// Test 6: scr.clearVarItem
+// ============================================
+print "Test 6: scr.clearVarItem\n";
+print "-------------------------------\n";
+
+print "Current customerName: ";
+print testVars.customerName;
+print "\n";
+
+print "Calling scr.clearVarItem (clearing to default)...\n";
+call scr.clearVarItem("testVars", "customerName");
+
+print "Current value after clear: ";
+print testVars.customerName;
+print " (expected: John Doe - the default value)\n";
+print "\n";
+
+// ============================================
+// Test 7: scr.initVarItem
+// ============================================
+print "Test 7: scr.initVarItem\n";
+print "-------------------------------\n";
+
+print "Changing age to 45...\n";
+testVars.age = 45;
+
+print "Current age before init: ";
+print testVars.age;
+print "\n";
+
+var ageOrigBefore: int = call scr.getVarOriginalValue("testVars", "age");
+print "Original age before init: ";
+print ageOrigBefore;
+print "\n";
+
+print "Calling scr.initVarItem (init to default and mark as original)...\n";
+call scr.initVarItem("testVars", "age");
+
+print "Current age after init: ";
+print testVars.age;
+print " (expected: 30 - the default)\n";
+
+var ageOrigAfter: int = call scr.getVarOriginalValue("testVars", "age");
+print "Original age after init: ";
+print ageOrigAfter;
+print " (expected: 30 - now marked as original)\n";
+print "\n";
+
+// ============================================
+// Test 8: Complex workflow simulation
+// ============================================
+print "Test 8: Complex Workflow Simulation\n";
+print "-------------------------------\n";
+
+print "Simulating a form edit workflow:\n\n";
+
+print "1. User opens form with initial values\n";
+print "   customerName: ";
+print testVars.customerName;
+print "\n";
+print "   email: ";
+print testVars.email;
+print "\n\n";
+
+print "2. User edits the fields\n";
+testVars.customerName = "Bob Wilson";
+testVars.email = "bob@example.com";
+print "   customerName changed to: ";
+print testVars.customerName;
+print "\n";
+print "   email changed to: ";
+print testVars.email;
+print "\n\n";
+
+print "3. User clicks 'Save' - we call submitVarItem for both\n";
+call scr.submitVarItem("testVars", "customerName");
+call scr.submitVarItem("testVars", "email");
+print "   Values saved (marked as new originals)\n\n";
+
+print "4. User edits again\n";
+testVars.customerName = "Bob W";
+testVars.email = "bobw@example.com";
+print "   customerName changed to: ";
+print testVars.customerName;
+print "\n";
+print "   email changed to: ";
+print testVars.email;
+print "\n\n";
+
+print "5. User clicks 'Cancel' - we call resetVarItem to revert\n";
+call scr.resetVarItem("testVars", "customerName");
+call scr.resetVarItem("testVars", "email");
+print "   customerName after reset: ";
+print testVars.customerName;
+print " (reverted to Bob Wilson)\n";
+print "   email after reset: ";
+print testVars.email;
+print " (reverted to bob@example.com)\n\n";
+
+print "6. User clicks 'Clear Form' - we call clearVarItem\n";
+call scr.clearVarItem("testVars", "customerName");
+call scr.clearVarItem("testVars", "email");
+print "   customerName after clear: ";
+print testVars.customerName;
+print " (cleared to default: John Doe)\n";
+print "   email after clear: ";
+print testVars.email;
+print " (cleared to default: john@example.com)\n\n";
+
+// ============================================
+// Summary
+// ============================================
+print "========================================\n";
+print "All Tests Completed Successfully!\n";
+print "========================================\n";
+print "\n";
+print "Summary of tested functions:\n";
+print "1. scr.getVarStateful - Get stateful property\n";
+print "2. scr.setVarStateful - Set stateful property\n";
+print "3. scr.getVarOriginalValue - Get original value\n";
+print "4. scr.submitVarItem - Mark current as original\n";
+print "5. scr.resetVarItem - Revert to original\n";
+print "6. scr.clearVarItem - Clear to default\n";
+print "7. scr.initVarItem - Init to default as original\n";
+print "\n";

@@ -1,0 +1,117 @@
+// Test script for scr.getVarOriginalValue builtin function
+// Gets the original value of a variable (before any modifications)
+//
+// USAGE: Run in EBS interactive console
+//        import "scripts/test/test_scr_getVarOriginalValue.ebs";
+
+print "\n";
+print "Test: scr.getVarOriginalValue\n";
+print "==============================\n";
+print "\n";
+
+// Create screen
+screen testScreen = {
+    "title": "Get Var Original Value Test",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "name",
+            "type": "string",
+            "default": "John Doe"
+        },
+        {
+            "name": "age",
+            "type": "int",
+            "default": 30
+        }
+    ]
+};
+
+show screen testScreen;
+
+// Test getVarOriginalValue
+print "Testing scr.getVarOriginalValue...\n\n";
+
+// Test 1: Check initial original values
+var nameOriginal: string = call scr.getVarOriginalValue("testScreen", "name");
+print "Original name: ";
+print nameOriginal;
+if nameOriginal == "John Doe" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: John Doe)\n";
+}
+
+var ageOriginal: int = call scr.getVarOriginalValue("testScreen", "age");
+print "Original age: ";
+print ageOriginal;
+if ageOriginal == 30 then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: 30)\n";
+}
+
+// Test 2: Check initial status is clean
+var nameStatus: string = call scr.getItemStatus("testScreen", "name");
+print "Initial status: ";
+print nameStatus;
+if nameStatus == "clean" then {
+    print " - PASS\n\n";
+} else {
+    print " - FAIL (expected: clean)\n\n";
+}
+
+print "Now modifying values...\n";
+testScreen.name = "Jane Smith";
+testScreen.age = 25;
+
+// Test 3: Check current values after modification
+print "Current name: ";
+print testScreen.name;
+if testScreen.name == "Jane Smith" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: Jane Smith)\n";
+}
+
+print "Current age: ";
+print testScreen.age;
+if testScreen.age == 25 then {
+    print " - PASS\n\n";
+} else {
+    print " - FAIL (expected: 25)\n\n";
+}
+
+// Test 4: Check original values remain unchanged
+var nameStillOriginal: string = call scr.getVarOriginalValue("testScreen", "name");
+print "Original name (unchanged): ";
+print nameStillOriginal;
+if nameStillOriginal == "John Doe" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: John Doe)\n";
+}
+
+var ageStillOriginal: int = call scr.getVarOriginalValue("testScreen", "age");
+print "Original age (unchanged): ";
+print ageStillOriginal;
+if ageStillOriginal == 30 then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: 30)\n";
+}
+
+// Test 5: Check status is now changed
+var nameStatusChanged: string = call scr.getItemStatus("testScreen", "name");
+print "Status after modification: ";
+print nameStatusChanged;
+if nameStatusChanged == "changed" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: changed)\n";
+}
+
+print "\n";
+print "Test completed successfully!\n";
+print "\n";

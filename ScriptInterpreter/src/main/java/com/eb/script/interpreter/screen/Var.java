@@ -48,6 +48,9 @@ public class Var {
     // For array.record, this holds the template record used to initialize new elements
     private Object recordTemplate;
     
+    // Whether changes to this variable should mark the screen as changed (default: true)
+    private Boolean stateful = true;
+    
     /**
      * Default constructor
      */
@@ -257,6 +260,22 @@ public class Var {
      */
     public void setRecordTemplate(Object recordTemplate) {
         this.recordTemplate = recordTemplate;
+    }
+    
+    /**
+     * Get whether changes to this variable should mark the screen as changed
+     * @return true if changes mark screen as changed, false otherwise
+     */
+    public Boolean getStateful() {
+        return stateful;
+    }
+    
+    /**
+     * Set whether changes to this variable should mark the screen as changed
+     * @param stateful true if changes should mark screen as changed
+     */
+    public void setStateful(Boolean stateful) {
+        this.stateful = stateful;
     }
     
     @Override

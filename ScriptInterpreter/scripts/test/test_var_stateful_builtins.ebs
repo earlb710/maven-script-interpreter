@@ -1,0 +1,186 @@
+// EBS Script: Test new var-level stateful property and related builtins
+// This demonstrates the updated stateful property which is now set at the
+// variable level (in vars section) rather than at the item level
+//
+// Testing:
+// 1. scr.setVarStateful() / scr.getVarStateful() - control stateful property
+// 2. scr.getVarOriginalValue() - get original value of a variable
+// 3. scr.submitVarItem() - mark variable as submitted (current becomes original)
+// 4. scr.resetVarItem() - reset variable to original value
+// 5. scr.clearVarItem() - clear variable to default value
+// 6. scr.initVarItem() - initialize variable to default and mark as original
+
+// Create a screen with variables that have different stateful settings
+screen testVarStateful = {
+    "title": "Variable Stateful Property Test",
+    "width": 600,
+    "height": 500,
+    "vars": [
+        {
+            "name": "customerName",
+            "type": "string",
+            "default": "John Doe",
+            "stateful": true,  // Changes will mark screen as changed (default)
+            "display": {
+                "type": "textfield",
+                "labelText": "Customer Name (stateful):"
+            }
+        },
+        {
+            "name": "email",
+            "type": "string",
+            "default": "john@example.com",
+            "stateful": true,
+            "display": {
+                "type": "textfield",
+                "labelText": "Email (stateful):"
+            }
+        },
+        {
+            "name": "searchText",
+            "type": "string",
+            "default": "",
+            "stateful": false,  // Changes will NOT mark screen as changed
+            "display": {
+                "type": "textfield",
+                "labelText": "Search Filter (non-stateful):"
+            }
+        },
+        {
+            "name": "notes",
+            "type": "string",
+            "default": "Enter notes here",
+            "stateful": true,
+            "display": {
+                "type": "textarea",
+                "labelText": "Notes (stateful):",
+                "height": 3
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "items": [
+                {
+                    "name": "customerNameItem",
+                    "varref": "customerName",
+                    "sequence": 1
+                },
+                {
+                    "name": "emailItem",
+                    "varref": "email",
+                    "sequence": 2
+                },
+                {
+                    "name": "searchTextItem",
+                    "varref": "searchText",
+                    "sequence": 3
+                },
+                {
+                    "name": "notesItem",
+                    "varref": "notes",
+                    "sequence": 4
+                }
+            ]
+        }
+    ]
+};
+
+// Show the screen
+show screen testVarStateful;
+
+println("Variable Stateful Property Test");
+println("");
+var initialStatus = call scr.getStatus("testVarStateful");
+println("Initial screen status: " + initialStatus);
+println("");
+
+// Test 1: Check stateful property for each variable
+println("Test 1: Check initial stateful property");
+var nameStateful = call scr.getVarStateful("testVarStateful", "customerName");
+var emailStateful = call scr.getVarStateful("testVarStateful", "email");
+var searchStateful = call scr.getVarStateful("testVarStateful", "searchText");
+var notesStateful = call scr.getVarStateful("testVarStateful", "notes");
+
+println("customerName stateful: " + nameStateful + " (expected: true)");
+println("email stateful: " + emailStateful + " (expected: true)");
+println("searchText stateful: " + searchStateful + " (expected: false)");
+println("notes stateful: " + notesStateful + " (expected: true)");
+println("");
+
+// Test 2: Get original values
+println(" Test 2: Check original values ");
+var nameOriginal = call scr.getVarOriginalValue("testVarStateful", "customerName");
+var emailOriginal = call scr.getVarOriginalValue("testVarStateful", "email");
+var searchOriginal = call scr.getVarOriginalValue("testVarStateful", "searchText");
+var notesOriginal = call scr.getVarOriginalValue("testVarStateful", "notes");
+
+println("customerName original: " + nameOriginal);
+println("email original: " + emailOriginal);
+println("searchText original: " + searchOriginal);
+println("notes original: " + notesOriginal);
+println("");
+
+// Test 3: Change stateful property dynamically
+println(" Test 3: Change stateful property dynamically ");
+println("Making 'email' non-stateful...");
+call scr.setVarStateful("testVarStateful", "email", false);
+var emailStatefulNew = call scr.getVarStateful("testVarStateful", "email");
+println("email stateful now: " + emailStatefulNew + " (expected: false)");
+println("");
+
+// Test 4: Test resetVarItem
+println(" Test 4: Test resetVarItem ");
+println("Manually change customerName to 'Jane Smith'...");
+testVarStateful.customerName = "Jane Smith";
+println("Current value: " + testVarStateful.customerName);
+println("Resetting to original value...");
+call scr.resetVarItem("testVarStateful", "customerName");
+println("After reset: " + testVarStateful.customerName + " (expected: John Doe)");
+println("");
+
+// Test 5: Test clearVarItem
+println(" Test 5: Test clearVarItem ");
+println("Current notes value: " + testVarStateful.notes);
+println("Clearing notes to default...");
+call scr.clearVarItem("testVarStateful", "notes");
+println("After clear: " + testVarStateful.notes + " (expected: Enter notes here)");
+println("");
+
+// Test 6: Test submitVarItem
+println(" Test 6: Test submitVarItem ");
+println("Setting customerName to 'Alice Brown'...");
+testVarStateful.customerName = "Alice Brown";
+println("Current value: " + testVarStateful.customerName);
+var originalBefore = call scr.getVarOriginalValue("testVarStateful", "customerName");
+println("Original value before submit: " + originalBefore);
+println("Submitting (marking current as original)...");
+call scr.submitVarItem("testVarStateful", "customerName");
+var originalAfter = call scr.getVarOriginalValue("testVarStateful", "customerName");
+println("Original value after submit: " + originalAfter + " (expected: Alice Brown)");
+println("");
+
+// Test 7: Test initVarItem
+println(" Test 7: Test initVarItem ");
+println("Setting email to 'test@test.com'...");
+testVarStateful.email = "test@test.com";
+println("Current value: " + testVarStateful.email);
+println("Initializing to default...");
+call scr.initVarItem("testVarStateful", "email");
+println("After init: " + testVarStateful.email + " (expected: john@example.com)");
+var emailOriginalAfterInit = call scr.getVarOriginalValue("testVarStateful", "email");
+println("Original value after init: " + emailOriginalAfterInit + " (expected: john@example.com)");
+println("");
+
+println(" All Tests Complete ");
+println("");
+println("Interactive Testing Instructions:");
+println("1. Type in 'Customer Name' - screen should become CHANGED (stateful=true)");
+println("2. Type in 'Search Filter' - screen should stay CLEAN (stateful=false)");
+println("3. Type in 'Email' - screen should stay CLEAN (changed to non-stateful in Test 3)");
+println("4. Type in 'Notes' - screen should become CHANGED (stateful=true)");
+println("");
+println("You can check status with: call scr.getStatus(\"testVarStateful\")");
+println("Press Ctrl+D to toggle debug panel");

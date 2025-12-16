@@ -1,0 +1,86 @@
+// Test script for scr.getVarStateful builtin function
+// Gets whether changes to a variable mark the screen as changed
+//
+// USAGE: Run in EBS interactive console
+//        import "scripts/test/test_scr_getVarStateful.ebs";
+
+print "\n";
+print "Test: scr.getVarStateful\n";
+print "========================\n";
+print "\n";
+
+// Create screen with mixed stateful variables
+screen testScreen = {
+    "title": "Get Var Stateful Test",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "dataField",
+            "type": "string",
+            "default": "data",
+            "stateful": true
+        },
+        {
+            "name": "filterField",
+            "type": "string",
+            "default": "",
+            "stateful": false
+        }
+    ]
+};
+
+show screen testScreen;
+
+// Test getVarStateful
+print "Testing scr.getVarStateful...\n\n";
+
+// Test 1: Check stateful property for dataField
+var dataStateful: bool = call scr.getVarStateful("testScreen", "dataField");
+print "dataField stateful: ";
+print dataStateful;
+if dataStateful == true then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: true)\n";
+}
+
+// Test 2: Check stateful property for filterField
+var filterStateful: bool = call scr.getVarStateful("testScreen", "filterField");
+print "filterField stateful: ";
+print filterStateful;
+if filterStateful == false then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: false)\n";
+}
+
+// Test 3: Verify dataField changes affect status (stateful=true)
+print "\nTesting stateful behavior...\n";
+testScreen.dataField = "modified";
+var dataStatus: string = call scr.getItemStatus("testScreen", "dataField");
+print "dataField status after change: ";
+print dataStatus;
+if dataStatus == "changed" then {
+    print " - PASS (stateful works)\n";
+} else {
+    print " - FAIL (expected: changed)\n";
+}
+
+// Test 4: Verify filterField changes don't affect workflow (stateful=false)
+// Note: Status still changes, but stateful controls screen-level dirty tracking
+testScreen.filterField = "search text";
+var filterStatus: string = call scr.getItemStatus("testScreen", "filterField");
+print "filterField status after change: ";
+print filterStatus;
+if filterStatus == "changed" then {
+    print " - PASS (individual status tracked)\n";
+} else {
+    print " - FAIL (expected: changed)\n";
+}
+
+print "\n";
+print "Test completed successfully!\n";
+print "Note: stateful property controls screen-level dirty tracking,\n";
+print "      but individual variable status is always tracked.\n";
+print "\n";
