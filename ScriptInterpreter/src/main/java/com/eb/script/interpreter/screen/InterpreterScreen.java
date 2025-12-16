@@ -1291,7 +1291,8 @@ public class InterpreterScreen {
                 // Stop all timers associated with this screen
                 int stoppedTimers = BuiltinsThread.stopTimersForSource(finalScreenName);
                 if (stoppedTimers > 0 && context.getOutput() != null) {
-                    context.getOutput().printlnInfo("Stopped " + stoppedTimers + " timer(s) associated with screen '" + finalScreenName + "'");
+                    String message = String.format("Stopped %d timer(s) associated with screen '%s'", stoppedTimers, finalScreenName);
+                    context.getOutput().printlnInfo(message);
                 }
                 
                 // Close screen (remove runtime state but preserve configuration for re-use)

@@ -10,6 +10,7 @@ import com.eb.script.token.DataType;
 import javafx.application.Platform;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
@@ -521,7 +522,7 @@ public class BuiltinsThread {
 
         int stoppedCount = 0;
         // Iterate and remove timers with matching source
-        java.util.Iterator<Map.Entry<String, TimerInfo>> iterator = THREAD_TIMERS.entrySet().iterator();
+        Iterator<Map.Entry<String, TimerInfo>> iterator = THREAD_TIMERS.entrySet().iterator();
         while (iterator.hasNext()) {
             Map.Entry<String, TimerInfo> entry = iterator.next();
             TimerInfo timerInfo = entry.getValue();
