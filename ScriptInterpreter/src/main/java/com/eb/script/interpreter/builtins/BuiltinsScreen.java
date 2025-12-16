@@ -844,8 +844,25 @@ public class BuiltinsScreen {
             throw new InterpreterError("scr.getItemStatus: item '" + itemName + "' not found in screen '" + screenName + "'");
         }
 
-        // Return the status based on comparison of current value to original value
-        return var.getStatus();
+        // Get the current value from screenVars (the actual live value)
+        java.util.concurrent.ConcurrentHashMap<String, Object> screenVars = context.getScreenVars(screenName);
+        Object currentValue = null;
+        if (screenVars != null) {
+            currentValue = screenVars.get(itemName.toLowerCase());
+        }
+        
+        // Get the original value from the Var object
+        Object originalValue = var.getOriginalValue();
+        
+        // Compare current value with original value
+        if (originalValue == null && currentValue == null) {
+            return "clean";
+        }
+        if (originalValue == null || currentValue == null) {
+            return "changed";
+        }
+        
+        return originalValue.equals(currentValue) ? "clean" : "changed";
     }
 
     /**
