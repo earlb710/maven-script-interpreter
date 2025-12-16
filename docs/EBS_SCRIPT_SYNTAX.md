@@ -2252,6 +2252,8 @@ screen formScreen = {
 | `progressbar` | Progress bar | - |
 | `progressindicator` | Progress indicator | - |
 
+**Note:** For comprehensive documentation on alignment properties (item alignment, content alignment, and label text alignment), see the [Alignment Properties](#alignment-properties) section below.
+
 ### Display Properties
 
 #### Common Properties
@@ -2263,7 +2265,7 @@ screen formScreen = {
     "promptHelp": "Enter value",            // Placeholder text
     "maxLength": 50,                        // Maximum length/width
     "mandatory": true,                      // Field is required
-    "alignment": "left",                    // Content alignment
+    "alignment": "left",                    // Content alignment (see Alignment Properties section)
     "itemFontSize": "14px",                // Control font size
     "itemColor": "#000000",                // Control text color
     "textColor": "#000000",                // Control text color (alternative to itemColor for consistency with labelColor; takes precedence when both are specified)
@@ -2416,6 +2418,174 @@ Both handlers can be used on the same control. When both are present, `onValidat
     }
 }
 ```
+
+### Alignment Properties
+
+EBS supports three types of alignment for screen controls, each serving a different purpose:
+
+#### 1. Item Alignment (Item-Level Property)
+
+Controls how the **control itself** is positioned within its parent container cell. This is set directly on the item object, **not** inside the `display` object.
+
+```javascript
+{
+    "name": "submitBtn",
+    "varRef": "submitValue",
+    "alignment": "center",  // Item-level: positions the control in its container
+    "display": {
+        "type": "button",
+        "labelText": "Submit"
+    }
+}
+```
+
+**Item Alignment Values:**
+- `center` - Center alignment
+- `top_left`, `top_center`, `top_right` - Top alignments
+- `center_left`, `center_right` - Middle alignments  
+- `bottom_left`, `bottom_center`, `bottom_right` - Bottom alignments
+- `baseline_left`, `baseline_center`, `baseline_right` - Baseline alignments
+
+**Usage:** Use item alignment with GridPane, HBox, VBox layouts to position controls within their layout cells.
+
+**Example - Centering a button in a GridPane cell:**
+```javascript
+"items": [
+    {
+        "name": "cancelBtn",
+        "varRef": "cancelValue",
+        "sequence": 1,
+        "layoutPos": "1,0",
+        "alignment": "center",  // Centers button in grid cell
+        "display": {
+            "type": "button",
+            "labelText": "Cancel"
+        }
+    }
+]
+```
+
+#### 2. Content Alignment (Display Property)
+
+Controls how **text/content is aligned** within the control itself. This is set inside the `display` object.
+
+```javascript
+{
+    "name": "priceField",
+    "varRef": "price",
+    "display": {
+        "type": "textfield",
+        "labelText": "Price:",
+        "alignment": "right"  // Display-level: right-aligns text within textfield
+    }
+}
+```
+
+**Content Alignment Values:**
+- `left` - Left-align text within control
+- `center` - Center text within control
+- `right` - Right-align text within control
+- `justify` - Justify text within control (for multi-line controls)
+
+**Usage:** Use content alignment for textfield, textarea, label, and other text-based controls to control internal text positioning.
+
+**Example - Right-aligned numeric field:**
+```javascript
+{
+    "name": "amount",
+    "type": "double",
+    "default": 0.0,
+    "display": {
+        "type": "textfield",
+        "labelText": "Amount:",
+        "alignment": "right",  // Numbers right-aligned within field
+        "maxLength": 15
+    }
+}
+```
+
+#### 3. Label Text Alignment (Display Property)
+
+Controls how the **label text** is aligned. This is set inside the `display` object using the `labelTextAlignment` property.
+
+```javascript
+{
+    "name": "titleField",
+    "varRef": "title",
+    "display": {
+        "type": "textfield",
+        "labelText": "Title:",
+        "labelTextAlignment": "right",  // Right-aligns label text
+        "alignment": "left"  // Left-aligns content within field
+    }
+}
+```
+
+**Label Text Alignment Values:**
+- `left` or `l` - Left-align label
+- `center` or `c` - Center label
+- `right` or `r` - Right-align label
+
+**Usage:** Use label text alignment to position labels relative to their controls, especially useful in forms with consistent label positioning.
+
+#### Complete Alignment Example
+
+```javascript
+{
+    "name": "formArea",
+    "type": "gridpane",
+    "style": "-fx-hgap: 10; -fx-vgap: 10; -fx-padding: 20;",
+    "items": [
+        {
+            "name": "nameField",
+            "varRef": "fullName",
+            "sequence": 1,
+            "layoutPos": "0,0",
+            "alignment": "center_left",  // Item positioned center-left in cell
+            "display": {
+                "type": "textfield",
+                "labelText": "Full Name:",
+                "labelTextAlignment": "right",  // Label right-aligned
+                "alignment": "left",  // Text left-aligned within field
+                "maxLength": 40
+            }
+        },
+        {
+            "name": "amountField",
+            "varRef": "totalAmount",
+            "sequence": 2,
+            "layoutPos": "1,0",
+            "alignment": "center_left",  // Item positioned center-left in cell
+            "display": {
+                "type": "textfield",
+                "labelText": "Amount:",
+                "labelTextAlignment": "right",  // Label right-aligned
+                "alignment": "right",  // Numbers right-aligned within field
+                "maxLength": 15
+            }
+        }
+    ]
+}
+```
+
+#### Setting Alignment at Runtime
+
+Use `scr.setProperty` to modify alignment dynamically:
+
+```javascript
+// Change item alignment (how control is positioned in container)
+call scr.setProperty("myScreen.submitBtn", "alignment", "center");
+
+// Note: Content alignment and label text alignment are set at design time
+// in the display object and cannot be changed at runtime via scr.setProperty
+```
+
+**Important Notes:**
+- **Item alignment** is set at the item level and can be changed at runtime
+- **Content alignment** is set in the display object and defines how content is aligned within the control
+- **Label text alignment** is set in the display object and defines how label text is aligned
+- Not all alignment types apply to all controls (e.g., content alignment mainly applies to text-based controls)
+- Item alignment is most useful with GridPane, HBox, and VBox layouts
 
 ### Automatic Width Calculation
 

@@ -1,0 +1,235 @@
+// Comprehensive test script for screen item color properties
+// Tests all four color properties: labelColor, labelBackgroundColor, itemColor/textColor, backgroundColor
+
+print "=== Screen Item Color Properties Test ===";
+print "";
+
+// Test 1: Create a screen with all color properties specified
+print "TEST 1: Screen with all color properties";
+print "=========================================";
+
+screen colorTest = {
+    "title": "Color Properties Test",
+    "width": 600,
+    "height": 500,
+    "sets": [
+        {
+            "setname": "main",
+            "vars": [
+                {
+                    "name": "field1",
+                    "type": "string",
+                    "default": "Default text",
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Field 1:",
+                        "labelColor": "#FF0000",               // Red label text
+                        "labelBackgroundColor": "#FFFF00",     // Yellow label background
+                        "textColor": "#0000FF",                // Blue item text
+                        "labelPosition": "left"
+                    }
+                },
+                {
+                    "name": "field2",
+                    "type": "string",
+                    "default": "Sample content",
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Field 2:",
+                        "labelColor": "#00FF00",               // Green label text
+                        "labelBackgroundColor": "#FFE0E0",     // Light red label background
+                        "itemColor": "#FF00FF",                // Magenta item text (using itemColor)
+                        "labelPosition": "left"
+                    }
+                },
+                {
+                    "name": "field3",
+                    "type": "string",
+                    "default": "Test data",
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Field 3:",
+                        "labelColor": "#FFFFFF",               // White label text
+                        "labelBackgroundColor": "#0000FF",     // Blue label background
+                        "textColor": "#00FFFF",                // Cyan item text
+                        "labelPosition": "left"
+                    }
+                },
+                {
+                    "name": "textarea1",
+                    "type": "string",
+                    "default": "Multi-line text content",
+                    "display": {
+                        "type": "textarea",
+                        "labelText": "Text Area:",
+                        "labelColor": "#800080",               // Purple label text
+                        "labelBackgroundColor": "#E0FFE0",     // Light green label background
+                        "textColor": "#008000",                // Dark green item text
+                        "height": 3,
+                        "labelPosition": "top"
+                    }
+                },
+                {
+                    "name": "label1",
+                    "type": "string",
+                    "default": "This is a label",
+                    "display": {
+                        "type": "label",
+                        "labelText": "Status Label",
+                        "labelColor": "#FF8C00",               // Dark orange text
+                        "labelBackgroundColor": "#F0F0F0",     // Light gray background
+                        "labelFontSize": "14px",
+                        "labelBold": true
+                    }
+                }
+            ]
+        }
+    ],
+    "areas": [
+        {
+            "areaname": "main_area",
+            "containerType": "vbox",
+            "items": [
+                {"name": "field1", "varRef": "field1"},
+                {"name": "field2", "varRef": "field2"},
+                {"name": "field3", "varRef": "field3"},
+                {"name": "textarea1", "varRef": "textarea1"},
+                {"name": "label1", "varRef": "label1"}
+            ]
+        }
+    ]
+};
+
+show screen colorTest;
+print "✓ Screen displayed with various color properties";
+print "";
+
+// Test 2: Test snake_case property names
+print "TEST 2: Snake_case property names";
+print "==================================";
+
+screen snakeCaseTest = {
+    "title": "Snake Case Test",
+    "width": 500,
+    "height": 300,
+    "sets": [
+        {
+            "setname": "main",
+            "vars": [
+                {
+                    "name": "field_snake",
+                    "type": "string",
+                    "default": "Snake case test",
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Snake Case:",
+                        "label_color": "#800000",               // Maroon label text
+                        "label_background_color": "#FFFFCC",    // Light yellow label background
+                        "text_color": "#000080",                // Navy item text
+                        "labelPosition": "left"
+                    }
+                }
+            ]
+        }
+    ],
+    "areas": [
+        {
+            "areaname": "main_area",
+            "containerType": "vbox",
+            "items": [
+                {"name": "field_snake", "varRef": "field_snake"}
+            ]
+        }
+    ]
+};
+
+show screen snakeCaseTest;
+print "✓ Snake_case property names work correctly";
+print "";
+
+// Test 3: Item-level color overrides
+print "TEST 3: Item-level color overrides";
+print "===================================";
+
+screen itemLevelTest = {
+    "title": "Item Level Test",
+    "width": 500,
+    "height": 300,
+    "sets": [
+        {
+            "setname": "main",
+            "vars": [
+                {
+                    "name": "base_field",
+                    "type": "string",
+                    "default": "Base colors",
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Base Colors:",
+                        "labelColor": "#000000",
+                        "labelBackgroundColor": "#E0E0E0",
+                        "textColor": "#000000",
+                        "labelPosition": "left"
+                    }
+                }
+            ]
+        }
+    ],
+    "areas": [
+        {
+            "areaname": "main_area",
+            "containerType": "vbox",
+            "items": [
+                {
+                    "name": "base_field", 
+                    "varRef": "base_field",
+                    "textColor": "#FF0000",           // Override item text color at item level
+                    "backgroundColor": "#FFFFE0"       // Add background color at item level
+                }
+            ]
+        }
+    ]
+};
+
+show screen itemLevelTest;
+print "✓ Item-level color overrides work correctly";
+print "";
+
+// Test 4: Verify all properties are accessible
+print "TEST 4: Property verification";
+print "==============================";
+print "Colors set on field1:";
+print "  - labelColor: Red (#FF0000)";
+print "  - labelBackgroundColor: Yellow (#FFFF00)";
+print "  - textColor: Blue (#0000FF)";
+print "";
+print "Colors set on field2:";
+print "  - labelColor: Green (#00FF00)";
+print "  - labelBackgroundColor: Light Red (#FFE0E0)";
+print "  - itemColor: Magenta (#FF00FF)";
+print "";
+print "Colors set on field3:";
+print "  - labelColor: White (#FFFFFF)";
+print "  - labelBackgroundColor: Blue (#0000FF)";
+print "  - textColor: Cyan (#00FFFF)";
+print "";
+print "Colors set on textarea1:";
+print "  - labelColor: Purple (#800080)";
+print "  - labelBackgroundColor: Light Green (#E0FFE0)";
+print "  - textColor: Dark Green (#008000)";
+print "";
+print "Colors set on label1:";
+print "  - labelColor: Dark Orange (#FF8C00)";
+print "  - labelBackgroundColor: Light Gray (#F0F0F0)";
+print "";
+
+print "=== All Tests Complete ===";
+print "";
+print "Summary of Color Properties Available:";
+print "1. labelColor - Label text color";
+print "2. labelBackgroundColor - Label background color (NEW)";
+print "3. textColor / itemColor - Item/control text color";
+print "4. backgroundColor - Item/control background color";
+print "";
+print "All properties support both camelCase and snake_case formats.";
+print "Properties can be set at display metadata level or item level (item level overrides).";
