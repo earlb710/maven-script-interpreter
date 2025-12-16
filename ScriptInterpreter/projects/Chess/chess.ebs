@@ -1259,8 +1259,8 @@ screen startupDialog = {
         {
             "name": "mainArea",
             "type": "vbox",
-            "spacing": "20",
-            "padding": "30",
+            "spacing": "10",
+            "padding": "10",
             "style": "-fx-background-color: #2c2c2c; -fx-alignment: center;",
             "items": [
                 {"name": "logoImage", "varRef": "logo", "display": {"type": "image", "fitWidth": 400, "fitHeight": 200, "preserveRatio": true}},
@@ -1271,7 +1271,7 @@ screen startupDialog = {
                 {
                     "name": "gameModeArea",
                     "type": "hbox",
-                    "spacing": "30",
+                    "spacing": "20",
                     "padding": "5",
                     "style": "-fx-alignment: center;",
                     "items": [
@@ -1293,7 +1293,7 @@ screen startupDialog = {
                 {
                     "name": "buttonArea",
                     "type": "hbox",
-                    "spacing": "20",
+                    "spacing": "10",
                     "padding": "10",
                     "style": "-fx-alignment: center;",
                     "items": [
