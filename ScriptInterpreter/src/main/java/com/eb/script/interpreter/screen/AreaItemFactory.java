@@ -493,13 +493,36 @@ public class AreaItemFactory {
             }
             
             if (!alignmentStyle.isEmpty()) {
-                if (control instanceof TextField || control instanceof TextArea || control instanceof ComboBox) {
+                // Convert alignment string to JavaFX Pos enum
+                javafx.geometry.Pos pos = null;
+                switch (alignment) {
+                    case "l":
+                    case "left":
+                        pos = javafx.geometry.Pos.CENTER_LEFT;
+                        break;
+                    case "c":
+                    case "center":
+                        pos = javafx.geometry.Pos.CENTER;
+                        break;
+                    case "r":
+                    case "right":
+                        pos = javafx.geometry.Pos.CENTER_RIGHT;
+                        break;
+                }
+                
+                if (control instanceof TextField) {
+                    // Use programmatic API for TextField (more reliable than CSS)
+                    ((TextField) control).setAlignment(pos);
+                } else if (control instanceof TextArea || control instanceof ComboBox) {
+                    // TextArea and ComboBox don't have setAlignment, use CSS
                     String currentStyle = control.getStyle();
+                    String newStyle;
                     if (currentStyle == null || currentStyle.isEmpty()) {
-                        control.setStyle(alignmentStyle);
+                        newStyle = alignmentStyle;
                     } else {
-                        control.setStyle(currentStyle + " " + alignmentStyle);
+                        newStyle = currentStyle + " " + alignmentStyle;
                     }
+                    control.setStyle(newStyle);
                 } else if (control instanceof Spinner) {
                     // For Spinner, we need to access the internal TextField
                     Spinner<?> spinner = (Spinner<?>) control;
