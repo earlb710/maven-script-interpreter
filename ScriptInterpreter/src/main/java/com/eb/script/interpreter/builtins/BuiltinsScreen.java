@@ -318,7 +318,8 @@ public class BuiltinsScreen {
         // Get the current screen context to determine the qualified name for bound controls
         final String currentScreenContext = context.getCurrentScreen();
 
-        javafx.application.Platform.runLater(() -> {
+        // Define the UI update task
+        Runnable uiUpdateTask = () -> {
             try {
                 // Bound controls are stored under qualified names (e.g., "regexscreen.askaiscreen")
                 // Try to find controls using:
@@ -354,7 +355,15 @@ public class BuiltinsScreen {
                 System.err.println("Error applying property to control: " + e.getMessage());
                 e.printStackTrace();
             }
-        });
+        };
+
+        // Execute immediately if already on JavaFX thread, otherwise queue it
+        // This prevents nested Platform.runLater() calls when called from timer callbacks
+        if (javafx.application.Platform.isFxApplicationThread()) {
+            uiUpdateTask.run();
+        } else {
+            javafx.application.Platform.runLater(uiUpdateTask);
+        }
 
         return Boolean.TRUE;
     }
