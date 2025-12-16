@@ -1,21 +1,28 @@
 // Test script for area alignment property
 // This script demonstrates all available alignment options for containers (areas)
 
-screen "AlignmentTest" {
-    title: "Area Alignment Options Demo",
-    width: 1000,
-    height: 800,
-    
-    vars: [
+screen alignmentTestScreen = {
+    "title": "Area Alignment Options Demo",
+    "width": 1000,
+    "height": 800,
+    "sets": [
         {
-            name: "title1",
-            type: "string",
-            default: "HBox - Left Aligned",
-            display: {
-                type: "label",
-                style: "-fx-font-size: 14px; -fx-font-weight: bold;"
-            }
-        },
+            "setname": "main",
+            "vars": [
+                {"name": "title1", "type": "string"},
+                {"name": "title2", "type": "string"},
+                {"name": "title3", "type": "string"},
+                {"name": "vboxTitle1", "type": "string"},
+                {"name": "vboxTitle2", "type": "string"},
+                {"name": "vboxTitle3", "type": "string"},
+                {"name": "stackTitle1", "type": "string"},
+                {"name": "stackTitle2", "type": "string"},
+                {"name": "button1", "type": "string"},
+                {"name": "button2", "type": "string"},
+                {"name": "button3", "type": "string"}
+            ]
+        }
+    ],
         {
             name: "title2",
             type: "string",

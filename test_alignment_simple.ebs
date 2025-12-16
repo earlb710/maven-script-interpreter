@@ -1,0 +1,105 @@
+// Simple test script for area alignment property
+
+screen alignmentTest = {
+    "title": "Area Alignment Test",
+    "width": 800,
+    "height": 600,
+    "sets": [
+        {
+            "setname": "main",
+            "vars": [
+                {"name": "label1", "type": "string"},
+                {"name": "label2", "type": "string"},
+                {"name": "label3", "type": "string"}
+            ]
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "20",
+            "padding": "20",
+            "areaBackground": "#f5f5f5",
+            "items": [],
+            "areas": [
+                {
+                    "name": "hboxLeft",
+                    "type": "hbox",
+                    "alignment": "left",
+                    "spacing": "10",
+                    "padding": "15",
+                    "areaBackground": "#e3f2fd",
+                    "style": "-fx-border-color: #1976d2; -fx-border-width: 2;",
+                    "items": [
+                        {
+                            "name": "label1Display",
+                            "varRef": "label1",
+                            "sequence": 1,
+                            "display": {
+                                "type": "label",
+                                "labelText": "Left Aligned"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "hboxCenter",
+                    "type": "hbox",
+                    "alignment": "center",
+                    "spacing": "10",
+                    "padding": "15",
+                    "areaBackground": "#fff3e0",
+                    "style": "-fx-border-color: #f57c00; -fx-border-width: 2;",
+                    "items": [
+                        {
+                            "name": "label2Display",
+                            "varRef": "label2",
+                            "sequence": 1,
+                            "display": {
+                                "type": "label",
+                                "labelText": "Center Aligned"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "hboxRight",
+                    "type": "hbox",
+                    "alignment": "right",
+                    "spacing": "10",
+                    "padding": "15",
+                    "areaBackground": "#e8f5e9",
+                    "style": "-fx-border-color: #388e3c; -fx-border-width: 2;",
+                    "items": [
+                        {
+                            "name": "label3Display",
+                            "varRef": "label3",
+                            "sequence": 1,
+                            "display": {
+                                "type": "label",
+                                "labelText": "Right Aligned"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+};
+
+// Set initial values
+label1 = "HBox with LEFT alignment";
+label2 = "HBox with CENTER alignment";
+label3 = "HBox with RIGHT alignment";
+
+print "Area Alignment Test Screen Loaded";
+print "";
+print "Available alignment options:";
+print "  - Shorthand: left, right, top, bottom, center";
+print "  - Combined: top-left, top-center, top-right";
+print "             center-left, center, center-right";
+print "             bottom-left, bottom-center, bottom-right";
+print "  - Baseline: baseline-left, baseline-center, baseline-right";
+print "";
+print "Supported containers: HBox, VBox, StackPane, FlowPane, TilePane";
