@@ -2475,6 +2475,7 @@ public class ProjectTreeView extends VBox {
      * @param scriptPath The path to the .ebs script file
      */
     private void packageScript(String scriptPath) {
+        Alert progressAlert = null;
         try {
             Path inputPath = Path.of(scriptPath);
             
@@ -2492,13 +2493,16 @@ public class ProjectTreeView extends VBox {
                 : Path.of(outputFileName);
             
             // Show modal progress message to prevent user interaction during packaging
-            Alert progressAlert = new Alert(Alert.AlertType.INFORMATION);
+            progressAlert = new Alert(Alert.AlertType.INFORMATION);
             progressAlert.setTitle("Packaging Script");
             progressAlert.setHeaderText("Packaging " + inputPath.getFileName());
             progressAlert.setContentText("Please wait...");
             // Make it non-modal but prevent closing
             progressAlert.getDialogPane().getButtonTypes().clear();
             progressAlert.show();
+            
+            // Make progressAlert effectively final for lambda
+            final Alert finalProgressAlert = progressAlert;
             
             // Run packaging in background thread to avoid blocking UI
             Thread packagingThread = new Thread(() -> {
@@ -2556,37 +2560,50 @@ public class ProjectTreeView extends VBox {
                 
                 // Update UI on JavaFX thread
                 javafx.application.Platform.runLater(() -> {
-                    progressAlert.close();
-                    
-                    Alert resultAlert = new Alert(
-                        finalSuccess ? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR
-                    );
-                    resultAlert.setTitle(finalSuccess ? "Packaging Complete" : "Packaging Failed");
-                    resultAlert.setHeaderText(finalSuccess ? "Successfully packaged script" : "Failed to package script");
-                    
-                    // Use TextArea instead of setContentText to allow copying
-                    TextArea textArea = new TextArea(finalMessage);
-                    textArea.setEditable(false);
-                    textArea.setWrapText(true);
-                    textArea.setPrefRowCount(10);
-                    textArea.setMaxWidth(Double.MAX_VALUE);
-                    textArea.setMaxHeight(Double.MAX_VALUE);
-                    
-                    // Set the TextArea as the content
-                    resultAlert.getDialogPane().setContent(textArea);
-                    resultAlert.getDialogPane().setMinWidth(500);
-                    resultAlert.showAndWait();
-                    
-                    // Refresh the tree view to show the new .ebsp file
-                    if (finalSuccess) {
-                        // Find the parent directory in the tree and refresh it
-                        Path parentDir = inputPath.getParent();
-                        if (parentDir != null) {
-                            TreeItem<String> dirItem = findTreeItemForPath(rootItem, parentDir.toString());
-                            if (dirItem != null) {
-                                refreshDirectoryNode(dirItem, parentDir.toString());
+                    try {
+                        // Always close progress dialog first, even if showing result fails
+                        finalProgressAlert.close();
+                        
+                        Alert resultAlert = new Alert(
+                            finalSuccess ? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR
+                        );
+                        resultAlert.setTitle(finalSuccess ? "Packaging Complete" : "Packaging Failed");
+                        resultAlert.setHeaderText(finalSuccess ? "Successfully packaged script" : "Failed to package script");
+                        
+                        // Use TextArea instead of setContentText to allow copying
+                        TextArea textArea = new TextArea(finalMessage);
+                        textArea.setEditable(false);
+                        textArea.setWrapText(true);
+                        textArea.setPrefRowCount(10);
+                        textArea.setMaxWidth(Double.MAX_VALUE);
+                        textArea.setMaxHeight(Double.MAX_VALUE);
+                        
+                        // Set the TextArea as the content
+                        resultAlert.getDialogPane().setContent(textArea);
+                        resultAlert.getDialogPane().setMinWidth(500);
+                        resultAlert.showAndWait();
+                        
+                        // Refresh the tree view to show the new .ebsp file
+                        if (finalSuccess) {
+                            // Find the parent directory in the tree and refresh it
+                            Path parentDir = inputPath.getParent();
+                            if (parentDir != null) {
+                                TreeItem<String> dirItem = findTreeItemForPath(rootItem, parentDir.toString());
+                                if (dirItem != null) {
+                                    refreshDirectoryNode(dirItem, parentDir.toString());
+                                }
                             }
                         }
+                    } catch (Exception uiException) {
+                        // If showing the result dialog fails, make absolutely sure progress dialog is closed
+                        try {
+                            finalProgressAlert.close();
+                        } catch (Exception closeException) {
+                            // Ignore - dialog might already be closed
+                        }
+                        // Log the UI exception but don't show another dialog
+                        System.err.println("Error showing packaging result dialog: " + uiException.getMessage());
+                        uiException.printStackTrace();
                     }
                 });
             });
@@ -2598,6 +2615,13 @@ public class ProjectTreeView extends VBox {
             packagingThread.start();
             
         } catch (Exception e) {
+            // If thread creation or starting fails, close the progress dialog
+            try {
+                progressAlert.close();
+            } catch (Exception closeException) {
+                // Ignore - dialog might not have been shown yet
+            }
+            
             Alert errorAlert = new Alert(Alert.AlertType.ERROR);
             errorAlert.setTitle("Packaging Error");
             errorAlert.setHeaderText("Failed to start packaging");
