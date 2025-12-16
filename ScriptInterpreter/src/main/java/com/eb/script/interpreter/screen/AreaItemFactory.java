@@ -475,6 +475,7 @@ public class AreaItemFactory {
             contentAlignmentValue = metadata.alignment;
         }
         System.err.println("[ALIGNMENT DEBUG] Final contentAlignmentValue: " + contentAlignmentValue);
+        System.err.println("[ALIGNMENT DEBUG] Will apply alignment: " + (contentAlignmentValue != null && !contentAlignmentValue.isEmpty()));
         
         if (contentAlignmentValue != null && !contentAlignmentValue.isEmpty()) {
             String alignment = contentAlignmentValue.toLowerCase();
