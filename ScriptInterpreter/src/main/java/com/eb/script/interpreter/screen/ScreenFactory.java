@@ -5299,22 +5299,40 @@ public class ScreenFactory {
 
     // Helper methods for safe value extraction from Maps
     private static String getStringValue(Map<String, Object> map, String key, String defaultValue) {
+        // Debug: Print map keys when looking for contentAlignment or itemAlignment
+        if (key.equalsIgnoreCase("contentAlignment") || key.equalsIgnoreCase("itemAlignment")) {
+            System.err.println("[KEY LOOKUP DEBUG] Looking for key: '" + key + "'");
+            System.err.println("[KEY LOOKUP DEBUG] Map keys: " + map.keySet());
+        }
+        
         // Try lowercase key first (standard behavior)
         if (map.containsKey(key.toLowerCase())) {
             Object value = map.get(key.toLowerCase());
+            if (key.equalsIgnoreCase("contentAlignment") || key.equalsIgnoreCase("itemAlignment")) {
+                System.err.println("[KEY LOOKUP DEBUG] Found via lowercase: '" + key.toLowerCase() + "' = " + value);
+            }
             return value != null ? String.valueOf(value) : defaultValue;
         }
         // Try exact key as fallback
         if (map.containsKey(key)) {
             Object value = map.get(key);
+            if (key.equalsIgnoreCase("contentAlignment") || key.equalsIgnoreCase("itemAlignment")) {
+                System.err.println("[KEY LOOKUP DEBUG] Found via exact match: '" + key + "' = " + value);
+            }
             return value != null ? String.valueOf(value) : defaultValue;
         }
         // Try case-insensitive search through all keys as last resort
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             if (entry.getKey().equalsIgnoreCase(key)) {
                 Object value = entry.getValue();
+                if (key.equalsIgnoreCase("contentAlignment") || key.equalsIgnoreCase("itemAlignment")) {
+                    System.err.println("[KEY LOOKUP DEBUG] Found via case-insensitive: '" + entry.getKey() + "' = " + value);
+                }
                 return value != null ? String.valueOf(value) : defaultValue;
             }
+        }
+        if (key.equalsIgnoreCase("contentAlignment") || key.equalsIgnoreCase("itemAlignment")) {
+            System.err.println("[KEY LOOKUP DEBUG] NOT FOUND! Returning default: " + defaultValue);
         }
         return defaultValue;
     }
