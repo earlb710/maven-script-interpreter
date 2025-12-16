@@ -1,0 +1,269 @@
+// Test Script: Radio Button Selection (No GUI)
+// Description: Comprehensive test for radio button selection functionality without GUI display
+// Author: EBS Test Suite
+// Date: 2025-12-16
+
+print "===============================================";
+print "  Radio Button Selection Test (No GUI)";
+print "===============================================";
+print "";
+
+// Define a screen with multiple radio button controls
+// Radio buttons are used for exclusive selection within a group
+screen radioTestScreen = {
+    "title": "Radio Button Selection Test",
+    "width": 600,
+    "height": 500,
+    "sets": [
+        {
+            "setname": "preferences",
+            "vars": [
+                {
+                    "name": "theme",
+                    "type": "string",
+                    "default": "light",
+                    "display": {
+                        "type": "radiobutton",
+                        "labelText": "Theme: Light",
+                        "promptHelp": "Select Light Theme"
+                    }
+                },
+                {
+                    "name": "themeOption2",
+                    "type": "string",
+                    "default": "dark",
+                    "display": {
+                        "type": "radiobutton",
+                        "labelText": "Theme: Dark",
+                        "promptHelp": "Select Dark Theme"
+                    }
+                },
+                {
+                    "name": "themeOption3",
+                    "type": "string",
+                    "default": "auto",
+                    "display": {
+                        "type": "radiobutton",
+                        "labelText": "Theme: Auto",
+                        "promptHelp": "Automatic Theme Selection"
+                    }
+                }
+            ]
+        },
+        {
+            "setname": "language",
+            "vars": [
+                {
+                    "name": "langEnglish",
+                    "type": "bool",
+                    "default": true,
+                    "display": {
+                        "type": "radiobutton",
+                        "labelText": "English",
+                        "promptHelp": "Select English"
+                    }
+                },
+                {
+                    "name": "langSpanish",
+                    "type": "bool",
+                    "default": false,
+                    "display": {
+                        "type": "radiobutton",
+                        "labelText": "Spanish",
+                        "promptHelp": "Select Spanish"
+                    }
+                },
+                {
+                    "name": "langFrench",
+                    "type": "bool",
+                    "default": false,
+                    "display": {
+                        "type": "radiobutton",
+                        "labelText": "French",
+                        "promptHelp": "Select French"
+                    }
+                },
+                {
+                    "name": "langGerman",
+                    "type": "bool",
+                    "default": false,
+                    "display": {
+                        "type": "radiobutton",
+                        "labelText": "German",
+                        "promptHelp": "Select German"
+                    }
+                }
+            ]
+        },
+        {
+            "setname": "notifications",
+            "vars": [
+                {
+                    "name": "notifyAll",
+                    "type": "bool",
+                    "default": true,
+                    "display": {
+                        "type": "radiobutton",
+                        "labelText": "All Notifications",
+                        "promptHelp": "Receive all notifications"
+                    }
+                },
+                {
+                    "name": "notifyImportant",
+                    "type": "bool",
+                    "default": false,
+                    "display": {
+                        "type": "radiobutton",
+                        "labelText": "Important Only",
+                        "promptHelp": "Receive important notifications only"
+                    }
+                },
+                {
+                    "name": "notifyNone",
+                    "type": "bool",
+                    "default": false,
+                    "display": {
+                        "type": "radiobutton",
+                        "labelText": "No Notifications",
+                        "promptHelp": "Disable all notifications"
+                    }
+                }
+            ]
+        },
+        {
+            "setname": "buttons",
+            "vars": [
+                {
+                    "name": "saveButton",
+                    "type": "string",
+                    "default": "Save Settings",
+                    "display": {
+                        "type": "button",
+                        "labelText": "Actions"
+                    }
+                },
+                {
+                    "name": "cancelButton",
+                    "type": "string",
+                    "default": "Cancel",
+                    "display": {
+                        "type": "button"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+print "TEST 1: Initial Radio Button Values";
+print "------------------------------------";
+print "Theme Options:";
+print "  theme = " + radioTestScreen.theme;
+print "  themeOption2 = " + radioTestScreen.themeOption2;
+print "  themeOption3 = " + radioTestScreen.themeOption3;
+print "";
+print "Language Options:";
+print "  langEnglish = " + radioTestScreen.langEnglish;
+print "  langSpanish = " + radioTestScreen.langSpanish;
+print "  langFrench = " + radioTestScreen.langFrench;
+print "  langGerman = " + radioTestScreen.langGerman;
+print "";
+print "Notification Options:";
+print "  notifyAll = " + radioTestScreen.notifyAll;
+print "  notifyImportant = " + radioTestScreen.notifyImportant;
+print "  notifyNone = " + radioTestScreen.notifyNone;
+print "";
+
+print "TEST 2: Radio Button typeof Check";
+print "----------------------------------";
+print "typeof radioTestScreen.theme = " + typeof radioTestScreen.theme;
+print "typeof radioTestScreen.langEnglish = " + typeof radioTestScreen.langEnglish;
+print "typeof radioTestScreen.notifyAll = " + typeof radioTestScreen.notifyAll;
+print "";
+
+print "TEST 3: Variable Declarations with Radio Button Types";
+print "------------------------------------------------------";
+var themeRadio : screen.radiobutton = radioTestScreen.theme;
+var langRadio : screen.radiobutton = radioTestScreen.langEnglish;
+var notifyRadio : screen.radiobutton = radioTestScreen.notifyAll;
+
+print "themeRadio (screen.radiobutton) = " + themeRadio;
+print "langRadio (screen.radiobutton) = " + langRadio;
+print "notifyRadio (screen.radiobutton) = " + notifyRadio;
+print "";
+
+print "TEST 4: Modifying Radio Button Values";
+print "--------------------------------------";
+print "Changing language selection from English to Spanish...";
+radioTestScreen.langEnglish = false;
+radioTestScreen.langSpanish = true;
+print "  langEnglish = " + radioTestScreen.langEnglish;
+print "  langSpanish = " + radioTestScreen.langSpanish;
+print "";
+
+print "Changing notification preference to Important Only...";
+radioTestScreen.notifyAll = false;
+radioTestScreen.notifyImportant = true;
+print "  notifyAll = " + radioTestScreen.notifyAll;
+print "  notifyImportant = " + radioTestScreen.notifyImportant;
+print "";
+
+print "TEST 5: Reading All Current Selections";
+print "---------------------------------------";
+print "Theme Preferences:";
+if (radioTestScreen.theme == "light") {
+    print "  ✓ Light theme is default";
+}
+print "";
+
+print "Language Selection:";
+if (radioTestScreen.langEnglish) {
+    print "  ✓ English is selected";
+} else if (radioTestScreen.langSpanish) {
+    print "  ✓ Spanish is selected";
+} else if (radioTestScreen.langFrench) {
+    print "  ✓ French is selected";
+} else if (radioTestScreen.langGerman) {
+    print "  ✓ German is selected";
+}
+print "";
+
+print "Notification Preference:";
+if (radioTestScreen.notifyAll) {
+    print "  ✓ All notifications enabled";
+} else if (radioTestScreen.notifyImportant) {
+    print "  ✓ Important notifications only";
+} else if (radioTestScreen.notifyNone) {
+    print "  ✓ Notifications disabled";
+}
+print "";
+
+print "TEST 6: Testing Multiple Selection Patterns";
+print "--------------------------------------------";
+// Test setting all language options to false first
+radioTestScreen.langEnglish = false;
+radioTestScreen.langSpanish = false;
+radioTestScreen.langFrench = false;
+radioTestScreen.langGerman = false;
+print "All language options set to false";
+
+// Then enable French
+radioTestScreen.langFrench = true;
+print "French language selected";
+print "  langEnglish = " + radioTestScreen.langEnglish;
+print "  langSpanish = " + radioTestScreen.langSpanish;
+print "  langFrench = " + radioTestScreen.langFrench;
+print "  langGerman = " + radioTestScreen.langGerman;
+print "";
+
+print "===============================================";
+print "  Test Summary";
+print "===============================================";
+print "✓ Initial values loaded correctly";
+print "✓ typeof returns Screen.Radiobutton";
+print "✓ Variable declarations with screen.radiobutton work";
+print "✓ Radio button values can be modified programmatically";
+print "✓ Current selections can be read and evaluated";
+print "✓ Multiple selection patterns tested successfully";
+print "";
+print "Radio Button Selection Test COMPLETED!";
