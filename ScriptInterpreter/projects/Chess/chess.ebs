@@ -1256,7 +1256,7 @@ handleStartGame() {
     call scr.setproperty("chessScreen.blackTimerField", "text", call formatTimerDecimal(timerBlack));
     
     // Start the game timer (updates every 100ms = 0.1 seconds)
-    call thread.timerStart("chessScreen", 100, "timerCallback");
+    call thread.timerStart("chessTimer", 100, "timerCallback");
     
     print "";
     print "Chess screen is now displayed!";
