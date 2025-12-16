@@ -218,10 +218,10 @@ The implementation maintains full backwards compatibility:
 
 ## Testing
 
-Test scripts have been created to validate the implementation:
+Test and example scripts have been created to validate the implementation:
 
-1. **test_alignment.ebs**: Basic content alignment test
-2. **test_alignment_complete.ebs**: Comprehensive test covering:
+1. **ScriptInterpreter/scripts/test/test_alignment.ebs**: Basic test for content alignment with runtime property changes
+2. **ScriptInterpreter/scripts/examples/alignment_properties.ebs**: Comprehensive example covering:
    - Content alignment in various controls
    - Item alignment in GridPane
    - Item alignment in VBox

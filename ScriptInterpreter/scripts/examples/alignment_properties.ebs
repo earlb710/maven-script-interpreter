@@ -1,9 +1,16 @@
-// Comprehensive test script for contentAlignment and itemAlignment properties
-print("Testing alignment properties");
-print("============================");
+// Example: Comprehensive demonstration of contentAlignment and itemAlignment properties
+// This example shows how to use the new alignment properties for precise control
+// over content alignment within controls and item positioning in parent containers.
 
-// Test 1: Content alignment in various controls
-screen contentAlignmentTest = {
+print("Alignment Properties Example");
+print("===========================");
+
+// Example 1: Content alignment in various controls
+print("");
+print("Example 1: Content Alignment");
+print("-----------------------------");
+
+screen contentAlignmentDemo = {
     "sets": [{
         "setname": "main",
         "vars": [
@@ -52,10 +59,15 @@ screen contentAlignmentTest = {
     }]
 };
 
-print("Test 1: Content alignment test screen created");
+print("Screen 'contentAlignmentDemo' created");
+print("Use: show screen contentAlignmentDemo; (in interactive console)");
 
-// Test 2: Item alignment in GridPane
-screen gridAlignmentTest = {
+// Example 2: Item alignment in GridPane
+print("");
+print("Example 2: Item Alignment in GridPane");
+print("--------------------------------------");
+
+screen gridAlignmentDemo = {
     "sets": [{
         "setname": "main",
         "vars": [
@@ -134,10 +146,15 @@ screen gridAlignmentTest = {
     }]
 };
 
-print("Test 2: GridPane item alignment test screen created");
+print("Screen 'gridAlignmentDemo' created");
+print("Use: show screen gridAlignmentDemo; (in interactive console)");
 
-// Test 3: Item alignment in VBox
-screen vboxAlignmentTest = {
+// Example 3: Item alignment in VBox
+print("");
+print("Example 3: Item Alignment in VBox");
+print("----------------------------------");
+
+screen vboxAlignmentDemo = {
     "sets": [{
         "setname": "main",
         "vars": [
@@ -186,27 +203,20 @@ screen vboxAlignmentTest = {
     }]
 };
 
-print("Test 3: VBox item alignment test screen created");
+print("Screen 'vboxAlignmentDemo' created");
+print("Use: show screen vboxAlignmentDemo; (in interactive console)");
 
-// Test 4: Testing property get/set
+// Example 4: Runtime property changes
 print("");
-print("Testing property get/set...");
-call scr.setProperty("contentAlignmentTest.leftField", "contentAlignment", "center");
-print("Changed leftField contentAlignment to center");
-
-var align1: string = scr.getProperty("contentAlignmentTest.centerField", "contentAlignment");
-print("centerField contentAlignment: " + align1);
-
-call scr.setProperty("vboxAlignmentTest.leftItem", "itemAlignment", "center");
-print("Changed leftItem itemAlignment to center");
-
-var align2: string = scr.getProperty("vboxAlignmentTest.centerItem", "itemAlignment");
-print("centerItem itemAlignment: " + align2);
-
+print("All examples completed!");
 print("");
-print("All tests completed successfully!");
+print("To view the demonstrations in the interactive console:");
+print("1. call scr.showScreen('contentAlignmentDemo', 'Content Alignment Demo', 500, 300);");
+print("2. call scr.showScreen('gridAlignmentDemo', 'Grid Alignment Demo', 500, 400);");
+print("3. call scr.showScreen('vboxAlignmentDemo', 'VBox Alignment Demo', 500, 300);");
 print("");
-print("To see the visual results:");
-print("1. Open the contentAlignmentTest screen to see text alignment within controls");
-print("2. Open the gridAlignmentTest screen to see item positioning in grid cells");
-print("3. Open the vboxAlignmentTest screen to see item positioning in VBox");
+print("Example 4: Runtime Property Changes (use in interactive console after showing screens):");
+print("  call scr.setProperty(\"contentalignmentdemo.leftField\", \"contentAlignment\", \"center\");");
+print("  var align1: string = scr.getProperty(\"contentalignmentdemo.centerField\", \"contentAlignment\");");
+print("  call scr.setProperty(\"vboxalignmentdemo.leftItem\", \"itemAlignment\", \"center\");");
+print("  var align2: string = scr.getProperty(\"vboxalignmentdemo.centerItem\", \"itemAlignment\");");
