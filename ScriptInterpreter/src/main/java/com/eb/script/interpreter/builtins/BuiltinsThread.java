@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Built-in functions for thread-based timer operations.
@@ -52,7 +53,7 @@ public class BuiltinsThread {
         final String callbackName;
         final InterpreterContext context;
         final long createdAt;
-        final java.util.concurrent.atomic.AtomicLong fireCount;  // Thread-safe counter
+        final AtomicLong fireCount;  // Thread-safe counter
         volatile boolean paused;  // Volatile for thread-safe reads
 
         TimerInfo(ScheduledFuture<?> future, long periodMs, String callbackName, InterpreterContext context) {
@@ -61,7 +62,7 @@ public class BuiltinsThread {
             this.callbackName = callbackName;
             this.context = context;
             this.createdAt = System.currentTimeMillis();
-            this.fireCount = new java.util.concurrent.atomic.AtomicLong(0);
+            this.fireCount = new AtomicLong(0);
             this.paused = false;
         }
     }
@@ -97,6 +98,68 @@ public class BuiltinsThread {
      */
     public static boolean handles(String name) {
         return name.startsWith("thread.timer") || name.equals("thread.getcount");
+    }
+
+    // --- Helper methods ---
+
+    /**
+     * Creates a timer task that increments fire count and executes a callback.
+     * This helper reduces code duplication between timerStart and timerResume.
+     * 
+     * @param timerName The name of the timer
+     * @param callbackName The name of the callback function (lowercase)
+     * @param currentScreen The current screen context (may be null)
+     * @param context The interpreter context
+     * @return A Runnable that can be scheduled
+     */
+    private static Runnable createTimerTask(String timerName, String callbackName, String currentScreen, InterpreterContext context) {
+        return () -> {
+            // Get the timer info to increment fire count (thread-safe)
+            TimerInfo info = THREAD_TIMERS.get(timerName);
+            if (info != null && !info.paused) {
+                info.fireCount.incrementAndGet();
+            }
+            
+            // Execute callback on JavaFX Application Thread for UI safety
+            Platform.runLater(() -> {
+                try {
+                    // Set screen context if we were in a screen
+                    if (currentScreen != null) {
+                        context.setCurrentScreen(currentScreen);
+                    }
+
+                    try {
+                        // Get the main interpreter that has access to the script's functions
+                        Interpreter mainInterpreter = context.getMainInterpreter();
+                        if (mainInterpreter == null) {
+                            throw new InterpreterError("No main interpreter available for callback execution");
+                        }
+
+                        // Create a CallStatement to invoke the callback function
+                        // The callback receives the timer name as a parameter
+                        List<Parameter> paramsList = new ArrayList<>();
+                        paramsList.add(new Parameter("timerName", DataType.STRING, 
+                            new LiteralExpression(DataType.STRING, timerName)));
+
+                        CallStatement callStmt = new CallStatement(0, callbackName, paramsList);
+
+                        // Execute the call statement using the main interpreter
+                        mainInterpreter.visitCallStatement(callStmt);
+                    } finally {
+                        if (currentScreen != null) {
+                            context.clearCurrentScreen();
+                        }
+                    }
+                } catch (Exception e) {
+                    // Log error to output if available
+                    if (context.getOutput() != null) {
+                        context.getOutput().printlnError("Error executing timer callback '" + callbackName + "' for timer '" + timerName + "': " + e.getMessage());
+                    } else {
+                        System.err.println("Error executing timer callback '" + callbackName + "' for timer '" + timerName + "': " + e.getMessage());
+                    }
+                }
+            });
+        };
     }
 
     // --- Individual builtin implementations ---
@@ -150,54 +213,8 @@ public class BuiltinsThread {
             THREAD_TIMERS.remove(timerName);
         }
 
-        // Create the repeating task
-        Runnable timerTask = () -> {
-            // Get the timer info to increment fire count (thread-safe)
-            TimerInfo info = THREAD_TIMERS.get(timerName);
-            if (info != null && !info.paused) {
-                info.fireCount.incrementAndGet();
-            }
-            
-            // Execute callback on JavaFX Application Thread for UI safety
-            Platform.runLater(() -> {
-                try {
-                    // Set screen context if we were in a screen
-                    if (currentScreen != null) {
-                        context.setCurrentScreen(currentScreen);
-                    }
-
-                    try {
-                        // Get the main interpreter that has access to the script's functions
-                        Interpreter mainInterpreter = context.getMainInterpreter();
-                        if (mainInterpreter == null) {
-                            throw new InterpreterError("No main interpreter available for callback execution");
-                        }
-
-                        // Create a CallStatement to invoke the callback function
-                        // The callback receives the timer name as a parameter
-                        List<Parameter> paramsList = new ArrayList<>();
-                        paramsList.add(new Parameter("timerName", DataType.STRING, 
-                            new LiteralExpression(DataType.STRING, timerName)));
-
-                        CallStatement callStmt = new CallStatement(0, finalCallbackName, paramsList);
-
-                        // Execute the call statement using the main interpreter
-                        mainInterpreter.visitCallStatement(callStmt);
-                    } finally {
-                        if (currentScreen != null) {
-                            context.clearCurrentScreen();
-                        }
-                    }
-                } catch (Exception e) {
-                    // Log error to output if available
-                    if (context.getOutput() != null) {
-                        context.getOutput().printlnError("Error executing timer callback '" + finalCallbackName + "' for timer '" + timerName + "': " + e.getMessage());
-                    } else {
-                        System.err.println("Error executing timer callback '" + finalCallbackName + "' for timer '" + timerName + "': " + e.getMessage());
-                    }
-                }
-            });
-        };
+        // Create the repeating task using the helper method
+        Runnable timerTask = createTimerTask(timerName, finalCallbackName, currentScreen, context);
 
         // Schedule the task to run repeatedly
         ScheduledFuture<?> future = SCHEDULER.scheduleAtFixedRate(
@@ -305,49 +322,10 @@ public class BuiltinsThread {
             return false; // Not paused
         }
 
-        // Recreate the timer task
+        // Recreate the timer task using the helper method
         final String finalCallbackName = timerInfo.callbackName.toLowerCase();
         final String currentScreen = context.getCurrentScreen();
-
-        Runnable timerTask = () -> {
-            // Get the timer info to increment fire count (thread-safe)
-            TimerInfo info = THREAD_TIMERS.get(timerName);
-            if (info != null && !info.paused) {
-                info.fireCount.incrementAndGet();
-            }
-            
-            Platform.runLater(() -> {
-                try {
-                    if (currentScreen != null) {
-                        context.setCurrentScreen(currentScreen);
-                    }
-
-                    try {
-                        Interpreter mainInterpreter = context.getMainInterpreter();
-                        if (mainInterpreter == null) {
-                            throw new InterpreterError("No main interpreter available for callback execution");
-                        }
-
-                        List<Parameter> paramsList = new ArrayList<>();
-                        paramsList.add(new Parameter("timerName", DataType.STRING, 
-                            new LiteralExpression(DataType.STRING, timerName)));
-
-                        CallStatement callStmt = new CallStatement(0, finalCallbackName, paramsList);
-                        mainInterpreter.visitCallStatement(callStmt);
-                    } finally {
-                        if (currentScreen != null) {
-                            context.clearCurrentScreen();
-                        }
-                    }
-                } catch (Exception e) {
-                    if (context.getOutput() != null) {
-                        context.getOutput().printlnError("Error executing timer callback '" + finalCallbackName + "' for timer '" + timerName + "': " + e.getMessage());
-                    } else {
-                        System.err.println("Error executing timer callback '" + finalCallbackName + "' for timer '" + timerName + "': " + e.getMessage());
-                    }
-                }
-            });
-        };
+        Runnable timerTask = createTimerTask(timerName, finalCallbackName, currentScreen, context);
 
         // Reschedule the task
         ScheduledFuture<?> newFuture = SCHEDULER.scheduleAtFixedRate(
