@@ -119,28 +119,54 @@ The implementation includes:
 
 ## Radio Button Usage - New Approach
 
-### Modern Syntax with Options
+Radio buttons now use the `options` property to define choices. Three formats are supported:
 
-Radio buttons now use the `options` property to define choices, similar to ComboBox/ChoiceBox:
+### Format 1: Simple Array
+
+Use when the value and display text are the same:
+
+```javascript
+{
+    "name": "size",
+    "type": "string",
+    "default": "medium",
+    "display": {
+        "type": "radiobutton",
+        "labelText": "Size:",
+        "options": ["small", "medium", "large"]
+    }
+}
+```
+
+Creates three radio buttons with both value and display text as "small", "medium", "large".
+
+### Format 2: Colon-Separated (value:displayText)
+
+Compact syntax for separating data values from display text:
 
 ```javascript
 {
     "name": "theme",
     "type": "string",
-    "default": "light",
+    "default": "L",
     "display": {
         "type": "radiobutton",
-        "labelText": "Theme Selection:",
-        "options": ["light", "dark", "auto"]
+        "labelText": "Theme:",
+        "options": ["L:Light Theme", "D:Dark Theme", "A:Auto Theme"]
     }
 }
 ```
 
-This creates three radio buttons (Light, Dark, Auto) that all update the single `theme` variable.
+The text before the colon is the stored value (`"L"`, `"D"`, `"A"`), and the text after is the display text shown to users.
 
-### Options with Display Text Mapping
+**Use cases:**
+- Short codes with descriptive labels: `["USD:US Dollar", "EUR:Euro", "GBP:Pound"]`
+- Abbreviations with full names: `["NY:New York", "CA:California", "TX:Texas"]`
+- Compact representation: `["1:Priority 1", "2:Priority 2", "3:Priority 3"]`
 
-Use an options map to separate data values from display text:
+### Format 3: Options Map
+
+Most explicit format using key-value pairs:
 
 ```javascript
 {
@@ -160,7 +186,7 @@ Use an options map to separate data values from display text:
 }
 ```
 
-The variable stores `"en"` but displays `"English"` to the user.
+The map key is the stored value, the map value is the display text. Best for dynamic data or when clarity is paramount.
 
 ## Radio Button Groups Demonstrated (Legacy Approach)
 
