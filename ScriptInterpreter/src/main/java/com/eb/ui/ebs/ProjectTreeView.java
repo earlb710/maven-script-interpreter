@@ -2563,7 +2563,17 @@ public class ProjectTreeView extends VBox {
                     );
                     resultAlert.setTitle(finalSuccess ? "Packaging Complete" : "Packaging Failed");
                     resultAlert.setHeaderText(finalSuccess ? "Successfully packaged script" : "Failed to package script");
-                    resultAlert.setContentText(finalMessage);
+                    
+                    // Use TextArea instead of setContentText to allow copying
+                    TextArea textArea = new TextArea(finalMessage);
+                    textArea.setEditable(false);
+                    textArea.setWrapText(true);
+                    textArea.setPrefRowCount(10);
+                    textArea.setMaxWidth(Double.MAX_VALUE);
+                    textArea.setMaxHeight(Double.MAX_VALUE);
+                    
+                    // Set the TextArea as the content
+                    resultAlert.getDialogPane().setContent(textArea);
                     resultAlert.getDialogPane().setMinWidth(500);
                     resultAlert.showAndWait();
                     
