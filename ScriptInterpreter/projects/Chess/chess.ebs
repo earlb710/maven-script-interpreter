@@ -1052,9 +1052,13 @@ handleStartGame() {
     print "Start button clicked!";
     
     // Determine game mode from radio buttons
+    // Check both radio buttons to determine selection
     if startupDialog.gameMode1Player then {
         selectedGameMode = "1 player";
+    } else if startupDialog.gameMode2Player then {
+        selectedGameMode = "2 player";
     } else {
+        // Default to 2 player if neither is selected
         selectedGameMode = "2 player";
     }
     
