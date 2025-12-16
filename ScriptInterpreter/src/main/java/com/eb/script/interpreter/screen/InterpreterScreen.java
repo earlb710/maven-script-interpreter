@@ -2689,14 +2689,6 @@ public class InterpreterScreen {
                             Object val = itemDef.get("onchange");
                             if (val != null) item.onChange = String.valueOf(val);
                         }
-                        
-                        // stateful property (default: true)
-                        if (itemDef.containsKey("stateful")) {
-                            Object statefulObj = itemDef.get("stateful");
-                            if (statefulObj instanceof Boolean) {
-                                item.stateful = (Boolean) statefulObj;
-                            }
-                        }
 
                         // Store in screenAreaItems map by item name (for screen.getProperty/setProperty)
                         if (item.name != null && !item.name.isEmpty()) {

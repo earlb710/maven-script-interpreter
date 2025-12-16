@@ -3718,8 +3718,28 @@ public class ScreenFactory {
                     // Store context and screenName for screen status updates when control values change
                     control.getProperties().put(ControlListenerFactory.PROP_INTERPRETER_CONTEXT, context);
                     control.getProperties().put(ControlListenerFactory.PROP_SCREEN_NAME, screenName);
-                    // Store stateful property for change tracking control
-                    control.getProperties().put(ControlListenerFactory.PROP_STATEFUL, item.stateful != null ? item.stateful : true);
+                    // Store stateful property for change tracking control - get from Var
+                    boolean stateful = true; // default
+                    if (context != null) {
+                        java.util.Map<String, Var> varItems = context.getScreenVarItems(screenName);
+                        if (varItems != null) {
+                            // Try to find the variable with the varRef
+                            String lowerVarRef = item.varRef.toLowerCase();
+                            for (java.util.Map.Entry<String, Var> entry : varItems.entrySet()) {
+                                String key = entry.getKey();
+                                Var v = entry.getValue();
+                                if (key.equals(lowerVarRef) || key.endsWith("." + lowerVarRef)
+                                        || (v.getName() != null && v.getName().equalsIgnoreCase(item.varRef))) {
+                                    Boolean varStateful = v.getStateful();
+                                    if (varStateful != null) {
+                                        stateful = varStateful;
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    control.getProperties().put(ControlListenerFactory.PROP_STATEFUL, stateful);
                     // Track this control so we can refresh it when variables change
                     boundControls.add(control);
                     

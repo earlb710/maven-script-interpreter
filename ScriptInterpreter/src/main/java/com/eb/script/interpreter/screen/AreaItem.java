@@ -70,8 +70,6 @@ public class AreaItem {
     public String onExpand;
     // onCollapse event handler - EBS code to execute when a tree node is collapsed
     public String onCollapse;
-    // Whether changes to this item should mark the screen/item as changed (default: true)
-    public Boolean stateful = true;
 
     @Override
     public String toString() {
