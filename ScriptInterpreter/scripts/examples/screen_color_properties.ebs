@@ -1,0 +1,387 @@
+// EBS Language Reference - Screen Color Properties Example
+// Example: Complete demonstration of all screen item color properties
+// Shows how to use labelColor, labelBackgroundColor, textColor/itemColor, and backgroundColor
+
+// ============================================================================
+// EXAMPLE 1: Basic Color Properties
+// ============================================================================
+print "Example 1: Basic Color Properties";
+print "==================================";
+
+screen basicColorExample = {
+    "title": "Basic Color Properties",
+    "width": 600,
+    "height": 400,
+    "sets": [
+        {
+            "setname": "main",
+            "vars": [
+                {
+                    "name": "username",
+                    "type": "string",
+                    "default": "JohnDoe",
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Username:",
+                        "labelColor": "#FF0000",               // Red label text
+                        "labelBackgroundColor": "#FFFF00",     // Yellow label background
+                        "textColor": "#0000FF",                // Blue item text
+                        "labelPosition": "left"
+                    }
+                }
+            ]
+        }
+    ],
+    "areas": [
+        {
+            "areaname": "form",
+            "containerType": "vbox",
+            "items": [
+                {
+                    "name": "username_item",
+                    "varRef": "username",
+                    "backgroundColor": "#F0F0F0"            // Light gray item background
+                }
+            ]
+        }
+    ]
+};
+
+show screen basicColorExample;
+
+print "Screen shows username field with:";
+print "  - Red label text (labelColor)";
+print "  - Yellow label background (labelBackgroundColor)";
+print "  - Blue item text (textColor)";
+print "  - Light gray item background (backgroundColor)";
+print "";
+
+// ============================================================================
+// EXAMPLE 2: Snake_case Property Names
+// ============================================================================
+print "Example 2: Snake_case Property Names";
+print "====================================";
+
+screen snakeCaseExample = {
+    "title": "Snake Case Colors",
+    "width": 600,
+    "height": 400,
+    "sets": [
+        {
+            "setname": "main",
+            "vars": [
+                {
+                    "name": "email",
+                    "type": "string",
+                    "default": "user@example.com",
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Email:",
+                        "label_color": "#008000",               // Green label text
+                        "label_background_color": "#E0FFE0",    // Light green label background
+                        "text_color": "#000080",                // Navy item text
+                        "labelPosition": "left"
+                    }
+                }
+            ]
+        }
+    ],
+    "areas": [
+        {
+            "areaname": "form",
+            "containerType": "vbox",
+            "items": [
+                {
+                    "name": "email_item",
+                    "varRef": "email",
+                    "background_color": "#FFFACD"           // Lemon chiffon background
+                }
+            ]
+        }
+    ]
+};
+
+show screen snakeCaseExample;
+
+print "Both camelCase and snake_case naming work:";
+print "  - labelColor / label_color";
+print "  - labelBackgroundColor / label_background_color";
+print "  - textColor / text_color";
+print "  - backgroundColor / background_color";
+print "";
+
+// ============================================================================
+// EXAMPLE 3: All Four Color Aspects on Multiple Controls
+// ============================================================================
+print "Example 3: Multiple Controls with Different Colors";
+print "==================================================";
+
+screen multiControlExample = {
+    "title": "Multiple Control Colors",
+    "width": 700,
+    "height": 600,
+    "sets": [
+        {
+            "setname": "form",
+            "vars": [
+                {
+                    "name": "firstname",
+                    "type": "string",
+                    "default": "John",
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "First Name:",
+                        "labelColor": "#FFFFFF",
+                        "labelBackgroundColor": "#4A90E2",
+                        "textColor": "#000000",
+                        "labelPosition": "left"
+                    }
+                },
+                {
+                    "name": "lastname",
+                    "type": "string",
+                    "default": "Doe",
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Last Name:",
+                        "labelColor": "#FFFFFF",
+                        "labelBackgroundColor": "#E24A4A",
+                        "textColor": "#8B0000",
+                        "labelPosition": "left"
+                    }
+                },
+                {
+                    "name": "bio",
+                    "type": "string",
+                    "default": "Enter your bio here...",
+                    "display": {
+                        "type": "textarea",
+                        "labelText": "Biography:",
+                        "labelColor": "#FFFFFF",
+                        "labelBackgroundColor": "#50C878",
+                        "textColor": "#004D00",
+                        "height": 5,
+                        "labelPosition": "top"
+                    }
+                },
+                {
+                    "name": "status",
+                    "type": "string",
+                    "default": "Active",
+                    "display": {
+                        "type": "label",
+                        "labelText": "Status:",
+                        "labelColor": "#800080",
+                        "labelBackgroundColor": "#E6E6FA",
+                        "labelFontSize": "14px",
+                        "labelBold": true
+                    }
+                }
+            ]
+        }
+    ],
+    "areas": [
+        {
+            "areaname": "form",
+            "containerType": "vbox",
+            "items": [
+                {
+                    "name": "firstname_item",
+                    "varRef": "firstname",
+                    "backgroundColor": "#E3F2FD"
+                },
+                {
+                    "name": "lastname_item",
+                    "varRef": "lastname",
+                    "backgroundColor": "#FFEBEE"
+                },
+                {
+                    "name": "bio_item",
+                    "varRef": "bio",
+                    "backgroundColor": "#F1F8E9"
+                },
+                {
+                    "name": "status_item",
+                    "varRef": "status"
+                }
+            ]
+        }
+    ]
+};
+
+show screen multiControlExample;
+
+print "Shows multiple controls each with unique colors:";
+print "  - First Name: Blue theme";
+print "  - Last Name: Red theme";
+print "  - Biography: Green theme (textarea)";
+print "  - Status: Purple theme (label)";
+print "";
+
+// ============================================================================
+// EXAMPLE 4: Item-Level Color Overrides
+// ============================================================================
+print "Example 4: Item-Level Color Overrides";
+print "=====================================";
+
+screen overrideExample = {
+    "title": "Item Override Colors",
+    "width": 600,
+    "height": 400,
+    "sets": [
+        {
+            "setname": "main",
+            "vars": [
+                {
+                    "name": "baseField",
+                    "type": "string",
+                    "default": "Default styling",
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Base Field:",
+                        "labelColor": "#000000",
+                        "labelBackgroundColor": "#CCCCCC",
+                        "textColor": "#333333",
+                        "labelPosition": "left"
+                    }
+                }
+            ]
+        }
+    ],
+    "areas": [
+        {
+            "areaname": "form",
+            "containerType": "vbox",
+            "items": [
+                {
+                    "name": "field1",
+                    "varRef": "baseField",
+                    // Override colors at item level
+                    "textColor": "#FF0000",
+                    "backgroundColor": "#FFFFE0"
+                }
+            ]
+        }
+    ]
+};
+
+show screen overrideExample;
+
+print "Item-level properties override display metadata:";
+print "  - Display metadata defines base colors";
+print "  - Item properties override for specific instances";
+print "  - Allows same var to have different colors in different areas";
+print "";
+
+// ============================================================================
+// EXAMPLE 5: Using itemColor (Legacy) vs textColor (Preferred)
+// ============================================================================
+print "Example 5: itemColor vs textColor";
+print "=================================";
+
+screen legacyVsNewExample = {
+    "title": "itemColor vs textColor",
+    "width": 600,
+    "height": 400,
+    "sets": [
+        {
+            "setname": "main",
+            "vars": [
+                {
+                    "name": "field1",
+                    "type": "string",
+                    "default": "Using itemColor (legacy)",
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Legacy itemColor:",
+                        "labelColor": "#000000",
+                        "itemColor": "#FF00FF",  // Using itemColor (still works)
+                        "labelPosition": "left"
+                    }
+                },
+                {
+                    "name": "field2",
+                    "type": "string",
+                    "default": "Using textColor (preferred)",
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "New textColor:",
+                        "labelColor": "#000000",
+                        "textColor": "#00FFFF",  // Using textColor (preferred)
+                        "labelPosition": "left"
+                    }
+                },
+                {
+                    "name": "field3",
+                    "type": "string",
+                    "default": "textColor takes precedence",
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Both specified:",
+                        "labelColor": "#000000",
+                        "itemColor": "#00FF00",  // Green - will be ignored
+                        "textColor": "#0000FF",  // Blue - takes precedence
+                        "labelPosition": "left"
+                    }
+                }
+            ]
+        }
+    ],
+    "areas": [
+        {
+            "areaname": "form",
+            "containerType": "vbox",
+            "items": [
+                {"name": "field1", "varRef": "field1"},
+                {"name": "field2", "varRef": "field2"},
+                {"name": "field3", "varRef": "field3"}
+            ]
+        }
+    ]
+};
+
+show screen legacyVsNewExample;
+
+print "itemColor vs textColor behavior:";
+print "  - Both itemColor and textColor work";
+print "  - textColor is preferred for consistency with labelColor";
+print "  - When both are specified, textColor takes precedence";
+print "  - Field 3 should show blue (textColor), not green (itemColor)";
+print "";
+
+// ============================================================================
+// Color Property Summary
+// ============================================================================
+print "========================================";
+print "Complete Color Property Reference:";
+print "========================================";
+print "";
+print "1. labelColor / label_color";
+print "   - Controls label text color";
+print "   - Location: DisplayItem (display metadata)";
+print "";
+print "2. labelBackgroundColor / label_background_color";
+print "   - Controls label background color";
+print "   - Location: DisplayItem (display metadata)";
+print "";
+print "3. textColor / text_color (preferred)";
+print "   - Controls item/control text color";
+print "   - Location: DisplayItem (display metadata)";
+print "   - Takes precedence over itemColor";
+print "";
+print "4. itemColor / item_color (legacy)";
+print "   - Controls item/control text color";
+print "   - Location: DisplayItem (display metadata)";
+print "   - Use textColor instead for consistency";
+print "";
+print "5. backgroundColor / background_color";
+print "   - Controls item/control background color";
+print "   - Location: AreaItem (item definition)";
+print "";
+print "Color Formats Supported:";
+print "  - Hex: #FF0000, #00FF00, #0000FF";
+print "  - Named: red, blue, green, white, black, etc.";
+print "  - RGB: rgb(255, 0, 0)";
+print "  - RGBA: rgba(255, 0, 0, 0.5)";
+print "";
+print "All examples completed successfully!";
