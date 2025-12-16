@@ -90,29 +90,62 @@
     <circle cx="35" cy="26" r="2" fill="#555555"/>
   </g>
   
-  <!-- Corner decorations - chess piece silhouettes -->
-  <!-- Top left pawn -->
-  <g transform="translate(15, 15)" opacity="0.4">
-    <circle cx="5" cy="5" r="3" fill="#ffcc00"/>
-    <rect x="3" y="8" width="4" height="6" fill="#ffcc00"/>
-    <rect x="1" y="14" width="8" height="2" fill="#ffcc00"/>
+  <!-- Corner decorations - detailed chess piece icons -->
+  <!-- Top left - Knight -->
+  <g transform="translate(10, 10)" opacity="0.5">
+    <!-- Knight head -->
+    <path d="M 5,3 L 8,1 L 12,2 L 14,5 L 14,8 L 12,10 L 10,11 L 8,11 L 6,10 L 5,8 Z" fill="#ffcc00"/>
+    <!-- Knight neck -->
+    <path d="M 8,11 L 9,15 L 11,15 L 12,11 Z" fill="#ffcc00"/>
+    <!-- Knight base -->
+    <rect x="6" y="15" width="8" height="3" rx="1" fill="#ffcc00"/>
+    <!-- Eye -->
+    <circle cx="11" cy="5" r="1" fill="#2c2c2c"/>
+    <!-- Ear -->
+    <path d="M 12,2 L 13,1 L 13,3 Z" fill="#ffcc00"/>
   </g>
   
-  <!-- Top right knight -->
-  <g transform="translate(375, 15)" opacity="0.4">
-    <path d="M 5,15 L 8,5 L 12,8 L 10,15 Z" fill="#ffcc00"/>
+  <!-- Top right - Queen -->
+  <g transform="translate(365, 10)" opacity="0.5">
+    <!-- Base -->
+    <rect x="8" y="16" width="12" height="3" rx="1" fill="#ffcc00"/>
+    <!-- Body -->
+    <path d="M 10,16 L 11,10 L 17,10 L 18,16 Z" fill="#ffcc00"/>
+    <!-- Crown base -->
+    <ellipse cx="14" cy="8" rx="5" ry="3" fill="#ffcc00"/>
+    <!-- Crown points -->
+    <circle cx="10" cy="6" r="1.5" fill="#ffcc00"/>
+    <circle cx="12.5" cy="4" r="1.5" fill="#ffcc00"/>
+    <circle cx="14" cy="3" r="2" fill="#ffcc00"/>
+    <circle cx="15.5" cy="4" r="1.5" fill="#ffcc00"/>
+    <circle cx="18" cy="6" r="1.5" fill="#ffcc00"/>
   </g>
   
-  <!-- Bottom left rook -->
-  <g transform="translate(15, 175)" opacity="0.4">
-    <rect x="3" y="10" width="8" height="8" fill="#ffcc00"/>
-    <path d="M 2,10 L 3,8 L 5,8 L 5,6 L 7,6 L 7,8 L 9,8 L 9,6 L 11,6 L 11,8 L 12,10 Z" fill="#ffcc00"/>
+  <!-- Bottom left - Rook -->
+  <g transform="translate(10, 170)" opacity="0.5">
+    <!-- Base -->
+    <rect x="7" y="16" width="10" height="3" rx="1" fill="#ffcc00"/>
+    <!-- Body -->
+    <path d="M 8,16 L 9,8 L 16,8 L 17,16 Z" fill="#ffcc00"/>
+    <!-- Battlements -->
+    <rect x="9" y="5" width="2" height="3" fill="#ffcc00"/>
+    <rect x="12" y="5" width="2" height="3" fill="#ffcc00"/>
+    <rect x="15" y="5" width="2" height="3" fill="#ffcc00"/>
+    <!-- Top -->
+    <rect x="8" y="5" width="9" height="1" fill="#ffcc00"/>
   </g>
   
-  <!-- Bottom right bishop -->
-  <g transform="translate(375, 175)" opacity="0.4">
-    <circle cx="7" cy="5" r="2" fill="#ffcc00"/>
-    <path d="M 5,7 L 7,14 L 9,14 L 11,7 Z" fill="#ffcc00"/>
-    <rect x="4" y="14" width="8" height="2" fill="#ffcc00"/>
+  <!-- Bottom right - Bishop -->
+  <g transform="translate(365, 170)" opacity="0.5">
+    <!-- Base -->
+    <rect x="8" y="16" width="10" height="3" rx="1" fill="#ffcc00"/>
+    <!-- Body -->
+    <path d="M 10,16 L 11,8 L 15,8 L 16,16 Z" fill="#ffcc00"/>
+    <!-- Head -->
+    <circle cx="13" cy="6" r="3" fill="#ffcc00"/>
+    <!-- Top ornament -->
+    <circle cx="13" cy="3" r="1.5" fill="#ffcc00"/>
+    <!-- Slot -->
+    <rect x="12" y="5" width="2" height="3" fill="#2c2c2c"/>
   </g>
 </svg>
