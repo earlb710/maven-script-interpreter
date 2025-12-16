@@ -37,7 +37,7 @@ print "Testing scr.getVarOriginalValue...\n\n";
 var nameOriginal: string = call scr.getVarOriginalValue("testScreen", "name");
 print "Original name: ";
 print nameOriginal;
-if nameOriginal = "John Doe" then {
+if nameOriginal == "John Doe" then {
     print " - PASS\n";
 } else {
     print " - FAIL (expected: John Doe)\n";
@@ -46,7 +46,7 @@ if nameOriginal = "John Doe" then {
 var ageOriginal: int = call scr.getVarOriginalValue("testScreen", "age");
 print "Original age: ";
 print ageOriginal;
-if ageOriginal = 30 then {
+if ageOriginal == 30 then {
     print " - PASS\n";
 } else {
     print " - FAIL (expected: 30)\n";
@@ -56,7 +56,7 @@ if ageOriginal = 30 then {
 var nameStatus: string = call scr.getItemStatus("testScreen", "name");
 print "Initial status: ";
 print nameStatus;
-if nameStatus = "clean" then {
+if nameStatus == "clean" then {
     print " - PASS\n\n";
 } else {
     print " - FAIL (expected: clean)\n\n";
@@ -69,7 +69,7 @@ testScreen.age = 25;
 // Test 3: Check current values after modification
 print "Current name: ";
 print testScreen.name;
-if testScreen.name = "Jane Smith" then {
+if testScreen.name == "Jane Smith" then {
     print " - PASS\n";
 } else {
     print " - FAIL (expected: Jane Smith)\n";
@@ -77,7 +77,7 @@ if testScreen.name = "Jane Smith" then {
 
 print "Current age: ";
 print testScreen.age;
-if testScreen.age = 25 then {
+if testScreen.age == 25 then {
     print " - PASS\n\n";
 } else {
     print " - FAIL (expected: 25)\n\n";
@@ -87,7 +87,7 @@ if testScreen.age = 25 then {
 var nameStillOriginal: string = call scr.getVarOriginalValue("testScreen", "name");
 print "Original name (unchanged): ";
 print nameStillOriginal;
-if nameStillOriginal = "John Doe" then {
+if nameStillOriginal == "John Doe" then {
     print " - PASS\n";
 } else {
     print " - FAIL (expected: John Doe)\n";
@@ -96,7 +96,7 @@ if nameStillOriginal = "John Doe" then {
 var ageStillOriginal: int = call scr.getVarOriginalValue("testScreen", "age");
 print "Original age (unchanged): ";
 print ageStillOriginal;
-if ageStillOriginal = 30 then {
+if ageStillOriginal == 30 then {
     print " - PASS\n";
 } else {
     print " - FAIL (expected: 30)\n";
@@ -106,7 +106,7 @@ if ageStillOriginal = 30 then {
 var nameStatusChanged: string = call scr.getItemStatus("testScreen", "name");
 print "Status after modification: ";
 print nameStatusChanged;
-if nameStatusChanged = "changed" then {
+if nameStatusChanged == "changed" then {
     print " - PASS\n";
 } else {
     print " - FAIL (expected: changed)\n";

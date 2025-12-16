@@ -33,7 +33,7 @@ print "Testing scr.resetVarItem...\n\n";
 var original: string = call scr.getVarOriginalValue("testScreen", "email");
 print "Original value: ";
 print original;
-if original = "john@example.com" then {
+if original == "john@example.com" then {
     print " - PASS\n";
 } else {
     print " - FAIL (expected: john@example.com)\n";
@@ -43,7 +43,7 @@ if original = "john@example.com" then {
 var status1: string = call scr.getItemStatus("testScreen", "email");
 print "Initial status: ";
 print status1;
-if status1 = "clean" then {
+if status1 == "clean" then {
     print " - PASS\n\n";
 } else {
     print " - FAIL (expected: clean)\n\n";
@@ -55,7 +55,7 @@ testScreen.email = "jane@example.com";
 // Test 3: Check current value after modification
 print "Current value: ";
 print testScreen.email;
-if testScreen.email = "jane@example.com" then {
+if testScreen.email == "jane@example.com" then {
     print " - PASS\n";
 } else {
     print " - FAIL (expected: jane@example.com)\n";
@@ -65,7 +65,7 @@ if testScreen.email = "jane@example.com" then {
 var status2: string = call scr.getItemStatus("testScreen", "email");
 print "Status after modification: ";
 print status2;
-if status2 = "changed" then {
+if status2 == "changed" then {
     print " - PASS\n\n";
 } else {
     print " - FAIL (expected: changed)\n\n";
@@ -77,7 +77,7 @@ call scr.resetVarItem("testScreen", "email");
 // Test 5: Check current value reverted
 print "Current value after reset: ";
 print testScreen.email;
-if testScreen.email = "john@example.com" then {
+if testScreen.email == "john@example.com" then {
     print " - PASS\n";
 } else {
     print " - FAIL (expected: john@example.com)\n";
@@ -87,7 +87,7 @@ if testScreen.email = "john@example.com" then {
 var originalAfter: string = call scr.getVarOriginalValue("testScreen", "email");
 print "Original value (unchanged): ";
 print originalAfter;
-if originalAfter = "john@example.com" then {
+if originalAfter == "john@example.com" then {
     print " - PASS\n";
 } else {
     print " - FAIL (expected: john@example.com)\n";
@@ -97,7 +97,7 @@ if originalAfter = "john@example.com" then {
 var status3: string = call scr.getItemStatus("testScreen", "email");
 print "Status after reset: ";
 print status3;
-if status3 = "clean" then {
+if status3 == "clean" then {
     print " - PASS\n";
 } else {
     print " - FAIL (expected: clean)\n";

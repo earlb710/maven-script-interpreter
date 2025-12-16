@@ -33,7 +33,7 @@ print "Testing scr.clearVarItem...\n\n";
 var status1: string = call scr.getItemStatus("testScreen", "notes");
 print "Initial status: ";
 print status1;
-if status1 = "clean" then {
+if status1 == "clean" then {
     print " - PASS\n\n";
 } else {
     print " - FAIL (expected: clean)\n\n";
@@ -45,7 +45,7 @@ testScreen.notes = "User typed something";
 // Test 2: Check current value after modification
 print "Current value: ";
 print testScreen.notes;
-if testScreen.notes = "User typed something" then {
+if testScreen.notes == "User typed something" then {
     print " - PASS\n";
 } else {
     print " - FAIL (expected: User typed something)\n";
@@ -55,7 +55,7 @@ if testScreen.notes = "User typed something" then {
 var status2: string = call scr.getItemStatus("testScreen", "notes");
 print "Status after modification: ";
 print status2;
-if status2 = "changed" then {
+if status2 == "changed" then {
     print " - PASS\n\n";
 } else {
     print " - FAIL (expected: changed)\n\n";
@@ -67,7 +67,7 @@ call scr.clearVarItem("testScreen", "notes");
 // Test 4: Check current value cleared to default
 print "Current value after clear: ";
 print testScreen.notes;
-if testScreen.notes = "Enter notes here" then {
+if testScreen.notes == "Enter notes here" then {
     print " - PASS\n";
 } else {
     print " - FAIL (expected: Enter notes here)\n";
@@ -77,7 +77,7 @@ if testScreen.notes = "Enter notes here" then {
 var original: string = call scr.getVarOriginalValue("testScreen", "notes");
 print "Original value (unchanged): ";
 print original;
-if original = "Enter notes here" then {
+if original == "Enter notes here" then {
     print " - PASS\n";
 } else {
     print " - FAIL (expected: Enter notes here)\n";
@@ -87,7 +87,7 @@ if original = "Enter notes here" then {
 var status3: string = call scr.getItemStatus("testScreen", "notes");
 print "Status after clear: ";
 print status3;
-if status3 = "clean" then {
+if status3 == "clean" then {
     print " - PASS\n";
 } else {
     print " - FAIL (expected: clean)\n";

@@ -56,7 +56,7 @@ print "-------------------------------\n";
 var nameStateful: bool = call scr.getVarStateful("testVars", "customerName");
 print "customerName stateful: ";
 print nameStateful;
-if nameStateful = true then {
+if nameStateful == true then {
     print " - PASS\n";
 } else {
     print " - FAIL (expected: true)\n";
@@ -65,7 +65,7 @@ if nameStateful = true then {
 var emailStateful: bool = call scr.getVarStateful("testVars", "email");
 print "email stateful: ";
 print emailStateful;
-if emailStateful = true then {
+if emailStateful == true then {
     print " - PASS\n";
 } else {
     print " - FAIL (expected: true)\n";
@@ -74,7 +74,7 @@ if emailStateful = true then {
 var searchStateful: bool = call scr.getVarStateful("testVars", "searchFilter");
 print "searchFilter stateful: ";
 print searchStateful;
-if searchStateful = false then {
+if searchStateful == false then {
     print " - PASS\n";
 } else {
     print " - FAIL (expected: false)\n";
@@ -83,7 +83,7 @@ if searchStateful = false then {
 var ageStateful: bool = call scr.getVarStateful("testVars", "age");
 print "age stateful: ";
 print ageStateful;
-if ageStateful = true then {
+if ageStateful == true then {
     print " - PASS\n";
 } else {
     print " - FAIL (expected: true)\n";
@@ -122,7 +122,7 @@ print "-------------------------------\n";
 var nameOriginal: string = call scr.getVarOriginalValue("testVars", "customerName");
 print "customerName original: ";
 print nameOriginal;
-if nameOriginal = "John Doe" then {
+if nameOriginal == "John Doe" then {
     print " - PASS\n";
 } else {
     print " - FAIL (expected: John Doe)\n";
@@ -131,7 +131,7 @@ if nameOriginal = "John Doe" then {
 var emailOriginal: string = call scr.getVarOriginalValue("testVars", "email");
 print "email original: ";
 print emailOriginal;
-if emailOriginal = "john@example.com" then {
+if emailOriginal == "john@example.com" then {
     print " - PASS\n";
 } else {
     print " - FAIL (expected: john@example.com)\n";
@@ -140,7 +140,7 @@ if emailOriginal = "john@example.com" then {
 var ageOriginal: int = call scr.getVarOriginalValue("testVars", "age");
 print "age original: ";
 print ageOriginal;
-if ageOriginal = 30 then {
+if ageOriginal == 30 then {
     print " - PASS\n";
 } else {
     print " - FAIL (expected: 30)\n";
@@ -150,7 +150,7 @@ if ageOriginal = 30 then {
 var nameStatus1: string = call scr.getItemStatus("testVars", "customerName");
 print "customerName status: ";
 print nameStatus1;
-if nameStatus1 = "clean" then {
+if nameStatus1 == "clean" then {
     print " - PASS\n";
 } else {
     print " - FAIL (expected: clean)\n";
@@ -168,7 +168,7 @@ testVars.customerName = "Jane Smith";
 
 print "Current value: ";
 print testVars.customerName;
-if testVars.customerName = "Jane Smith" then {
+if testVars.customerName == "Jane Smith" then {
     print " - PASS\n";
 } else {
     print " - FAIL (expected: Jane Smith)\n";
@@ -177,7 +177,7 @@ if testVars.customerName = "Jane Smith" then {
 var statusBeforeSubmit: string = call scr.getItemStatus("testVars", "customerName");
 print "Status before submit: ";
 print statusBeforeSubmit;
-if statusBeforeSubmit = "changed" then {
+if statusBeforeSubmit == "changed" then {
     print " - PASS\n";
 } else {
     print " - FAIL (expected: changed)\n";
@@ -186,7 +186,7 @@ if statusBeforeSubmit = "changed" then {
 var origBeforeSubmit: string = call scr.getVarOriginalValue("testVars", "customerName");
 print "Original before submit: ";
 print origBeforeSubmit;
-if origBeforeSubmit = "John Doe" then {
+if origBeforeSubmit == "John Doe" then {
     print " - PASS\n\n";
 } else {
     print " - FAIL (expected: John Doe)\n\n";
@@ -198,7 +198,7 @@ call scr.submitVarItem("testVars", "customerName");
 var origAfterSubmit: string = call scr.getVarOriginalValue("testVars", "customerName");
 print "Original after submit: ";
 print origAfterSubmit;
-if origAfterSubmit = "Jane Smith" then {
+if origAfterSubmit == "Jane Smith" then {
     print " - PASS\n";
 } else {
     print " - FAIL (expected: Jane Smith)\n";
@@ -207,7 +207,7 @@ if origAfterSubmit = "Jane Smith" then {
 var statusAfterSubmit: string = call scr.getItemStatus("testVars", "customerName");
 print "Status after submit: ";
 print statusAfterSubmit;
-if statusAfterSubmit = "clean" then {
+if statusAfterSubmit == "clean" then {
     print " - PASS\n";
 } else {
     print " - FAIL (expected: clean)\n";
@@ -225,7 +225,7 @@ testVars.customerName = "Alice Brown";
 
 print "Current value before reset: ";
 print testVars.customerName;
-if testVars.customerName = "Alice Brown" then {
+if testVars.customerName == "Alice Brown" then {
     print " - PASS\n";
 } else {
     print " - FAIL (expected: Alice Brown)\n";
@@ -234,7 +234,7 @@ if testVars.customerName = "Alice Brown" then {
 var statusBeforeReset: string = call scr.getItemStatus("testVars", "customerName");
 print "Status before reset: ";
 print statusBeforeReset;
-if statusBeforeReset = "changed" then {
+if statusBeforeReset == "changed" then {
     print " - PASS\n\n";
 } else {
     print " - FAIL (expected: changed)\n\n";
@@ -245,7 +245,7 @@ call scr.resetVarItem("testVars", "customerName");
 
 print "Current value after reset: ";
 print testVars.customerName;
-if testVars.customerName = "Jane Smith" then {
+if testVars.customerName == "Jane Smith" then {
     print " - PASS\n";
 } else {
     print " - FAIL (expected: Jane Smith)\n";
@@ -254,7 +254,7 @@ if testVars.customerName = "Jane Smith" then {
 var statusAfterReset: string = call scr.getItemStatus("testVars", "customerName");
 print "Status after reset: ";
 print statusAfterReset;
-if statusAfterReset = "clean" then {
+if statusAfterReset == "clean" then {
     print " - PASS\n";
 } else {
     print " - FAIL (expected: clean)\n";

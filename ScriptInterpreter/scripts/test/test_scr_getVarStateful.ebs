@@ -39,7 +39,7 @@ print "Testing scr.getVarStateful...\n\n";
 var dataStateful: bool = call scr.getVarStateful("testScreen", "dataField");
 print "dataField stateful: ";
 print dataStateful;
-if dataStateful = true then {
+if dataStateful == true then {
     print " - PASS\n";
 } else {
     print " - FAIL (expected: true)\n";
@@ -49,7 +49,7 @@ if dataStateful = true then {
 var filterStateful: bool = call scr.getVarStateful("testScreen", "filterField");
 print "filterField stateful: ";
 print filterStateful;
-if filterStateful = false then {
+if filterStateful == false then {
     print " - PASS\n";
 } else {
     print " - FAIL (expected: false)\n";
@@ -61,7 +61,7 @@ testScreen.dataField = "modified";
 var dataStatus: string = call scr.getItemStatus("testScreen", "dataField");
 print "dataField status after change: ";
 print dataStatus;
-if dataStatus = "changed" then {
+if dataStatus == "changed" then {
     print " - PASS (stateful works)\n";
 } else {
     print " - FAIL (expected: changed)\n";
@@ -73,7 +73,7 @@ testScreen.filterField = "search text";
 var filterStatus: string = call scr.getItemStatus("testScreen", "filterField");
 print "filterField status after change: ";
 print filterStatus;
-if filterStatus = "changed" then {
+if filterStatus == "changed" then {
     print " - PASS (individual status tracked)\n";
 } else {
     print " - FAIL (expected: changed)\n";
