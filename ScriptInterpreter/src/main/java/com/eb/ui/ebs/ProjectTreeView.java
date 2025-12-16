@@ -2475,7 +2475,6 @@ public class ProjectTreeView extends VBox {
      * @param scriptPath The path to the .ebs script file
      */
     private void packageScript(String scriptPath) {
-        Alert progressAlert = null;
         try {
             Path inputPath = Path.of(scriptPath);
             
@@ -2491,18 +2490,6 @@ public class ProjectTreeView extends VBox {
             Path outputPath = inputPath.getParent() != null 
                 ? inputPath.getParent().resolve(outputFileName)
                 : Path.of(outputFileName);
-            
-            // Show modal progress message to prevent user interaction during packaging
-            progressAlert = new Alert(Alert.AlertType.INFORMATION);
-            progressAlert.setTitle("Packaging Script");
-            progressAlert.setHeaderText("Packaging " + inputPath.getFileName());
-            progressAlert.setContentText("Please wait...");
-            // Make it non-modal but prevent closing
-            progressAlert.getDialogPane().getButtonTypes().clear();
-            progressAlert.show();
-            
-            // Make progressAlert effectively final for lambda
-            final Alert finalProgressAlert = progressAlert;
             
             // Run packaging in background thread to avoid blocking UI
             Thread packagingThread = new Thread(() -> {
@@ -2594,9 +2581,6 @@ public class ProjectTreeView extends VBox {
                 // Update UI on JavaFX thread
                 javafx.application.Platform.runLater(() -> {
                     try {
-                        // Always close progress dialog first, even if showing result fails
-                        finalProgressAlert.close();
-                        
                         Alert resultAlert = new Alert(
                             finalSuccess ? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR
                         );
@@ -2628,13 +2612,7 @@ public class ProjectTreeView extends VBox {
                             }
                         }
                     } catch (Exception uiException) {
-                        // If showing the result dialog fails, make absolutely sure progress dialog is closed
-                        try {
-                            finalProgressAlert.close();
-                        } catch (Exception closeException) {
-                            // Ignore - dialog might already be closed
-                        }
-                        // Log the UI exception but don't show another dialog
+                        // Log the UI exception
                         System.err.println("Error showing packaging result dialog: " + uiException.getMessage());
                         uiException.printStackTrace();
                     }
@@ -2648,13 +2626,7 @@ public class ProjectTreeView extends VBox {
             packagingThread.start();
             
         } catch (Exception e) {
-            // If thread creation or starting fails, close the progress dialog
-            try {
-                progressAlert.close();
-            } catch (Exception closeException) {
-                // Ignore - dialog might not have been shown yet
-            }
-            
+            // If thread creation or starting fails, show error
             Alert errorAlert = new Alert(Alert.AlertType.ERROR);
             errorAlert.setTitle("Packaging Error");
             errorAlert.setHeaderText("Failed to start packaging");
