@@ -125,8 +125,8 @@ public class BuiltinsSystem {
      */
     public static final int LANGUAGE_VER = 1;  // Major language compatibility version
     public static final int KEYWORD_VER = 0;   // Keyword version
-    public static final int BUILTIN_VER = 8;   // Builtin version - Added thread.timerStart and thread.timerStop
-    public static final int BUILD_VER = 12;    // Build number
+    public static final int BUILTIN_VER = 9;   // Builtin version - Added thread timer management functions
+    public static final int BUILD_VER = 13;    // Build number
     
     public static final String EBS_LANGUAGE_VERSION = LANGUAGE_VER + "." + KEYWORD_VER + "." + BUILTIN_VER + "." + BUILD_VER;
 

@@ -5252,6 +5252,113 @@
       "example": "<b>var</b> stopped = <b>call</b> <b>thread.timerStop</b>(name=\"myTimer\");<br><b>if</b> stopped <b>then</b> {<br>&nbsp;&nbsp;<b>print</b> \"Timer stopped successfully\";<br>} <b>else</b> {<br>&nbsp;&nbsp;<b>print</b> \"Timer not found\";<br>}"
     },
     {
+      "function": "thread.timerPause",
+      "short_description": "Pauses a running timer",
+      "long_help": "Pauses a repeating timer without removing it from the registry. The timer can be resumed later with thread.timerResume.<br>Returns true if the timer was paused, false if the timer was not found or already paused.",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>var</b> paused = <b>call</b> <b>thread.timerPause</b>(name=\"myTimer\");<br><b>if</b> paused <b>then</b> {<br>&nbsp;&nbsp;<b>print</b> \"Timer paused\";<br>}"
+    },
+    {
+      "function": "thread.timerResume",
+      "short_description": "Resumes a paused timer",
+      "long_help": "Resumes a timer that was previously paused with thread.timerPause. The timer will continue firing at its original period.<br>Returns true if the timer was resumed, false if the timer was not found or not paused.",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>var</b> resumed = <b>call</b> <b>thread.timerResume</b>(name=\"myTimer\");<br><b>if</b> resumed <b>then</b> {<br>&nbsp;&nbsp;<b>print</b> \"Timer resumed\";<br>}"
+    },
+    {
+      "function": "thread.timerIsRunning",
+      "short_description": "Checks if a timer is running",
+      "long_help": "Checks whether a timer exists and is currently running (not paused). Returns true if the timer is active and running,<br>false if the timer doesn't exist, was stopped, or is paused.",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>var</b> running = <b>call</b> <b>thread.timerIsRunning</b>(name=\"myTimer\");<br><b>if</b> running <b>then</b> {<br>&nbsp;&nbsp;<b>print</b> \"Timer is active\";<br>}"
+    },
+    {
+      "function": "thread.timerIsPaused",
+      "short_description": "Checks if a timer is paused",
+      "long_help": "Checks whether a timer exists and is currently paused. Returns true if the timer exists and is paused,<br>false if the timer doesn't exist, was stopped, or is running.",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>var</b> paused = <b>call</b> <b>thread.timerIsPaused</b>(name=\"myTimer\");<br><b>if</b> paused <b>then</b> {<br>&nbsp;&nbsp;<b>print</b> \"Timer is paused\";<br>}"
+    },
+    {
+      "function": "thread.timerList",
+      "short_description": "Lists all active timers",
+      "long_help": "Returns a JSON string containing an array of all active timers with their details including name, period, callback, source,<br>paused status, fire count, and creation time. The source field indicates where the timer was created (screen name or 'script').<br>Useful for monitoring and debugging timer activity.",
+      "parameters": [],
+      "return_type": "string",
+      "example": "<b>var</b> list = <b>call</b> <b>thread.timerList</b>();<br><b>print</b> list;<br>// Output: [{\"name\":\"timer1\",\"period\":1000,\"callback\":\"myCallback\",\"source\":\"script\",\"paused\":false,\"fireCount\":5,\"createdAt\":1234567890}]"
+    },
+    {
+      "function": "thread.timerGetInfo",
+      "short_description": "Gets detailed information about a timer",
+      "long_help": "Returns a JSON string with detailed information about a specific timer including name, period, callback, source (screen name or 'script'),<br>paused status, fire count, creation time, and uptime. Returns null if the timer is not found. Timers created from a screen are automatically<br>stopped when that screen is closed.",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "return_type": "string",
+      "example": "<b>var</b> info = <b>call</b> <b>thread.timerGetInfo</b>(name=\"myTimer\");<br><b>if</b> info != null <b>then</b> {<br>&nbsp;&nbsp;<b>print</b> info;<br>}"
+    },
+    {
+      "function": "thread.timerGetPeriod",
+      "short_description": "Gets the period of a timer",
+      "long_help": "Returns the period (interval) of a timer in milliseconds. Returns -1 if the timer is not found.<br>The period is the time between consecutive timer fires.",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "return_type": "long",
+      "example": "<b>var</b> period = <b>call</b> <b>thread.timerGetPeriod</b>(name=\"myTimer\");<br><b>print</b> \"Timer period: \" + <b>call</b> <b>str.toString</b>(period) + \"ms\";"
+    },
+    {
+      "function": "thread.timerGetFireCount",
+      "short_description": "Gets the fire count of a timer",
+      "long_help": "Returns the number of times a timer has fired (executed its callback) since it was started. Returns -1 if the timer<br>is not found. The fire count is incremented each time the timer callback executes.",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "return_type": "long",
+      "example": "<b>var</b> count = <b>call</b> <b>thread.timerGetFireCount</b>(name=\"myTimer\");<br><b>print</b> \"Timer has fired \" + <b>call</b> <b>str.toString</b>(count) + \" times\";"
+    },
+    {
+      "function": "thread.getCount",
+      "short_description": "Gets the count of active timers",
+      "long_help": "Returns the total number of active timers currently in the registry. This includes both running and paused timers.<br>Useful for monitoring resource usage and debugging timer leaks.",
+      "parameters": [],
+      "return_type": "long",
+      "example": "<b>var</b> count = <b>call</b> <b>thread.getCount</b>();<br><b>print</b> \"Active timers: \" + <b>call</b> <b>str.toString</b>(count);"
+    },
+    {
       "function": "timer.clear",
       "format": "html",
       "short_description": "Remove all timers from registry",

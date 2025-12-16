@@ -1,0 +1,38 @@
+// Test script to verify timer source tracking
+
+print "=== Testing Timer Source Tracking ===";
+print "";
+
+// Create a test callback
+testCallback(timerName: string) {
+    print "Timer fired: " + timerName;
+}
+
+// Start a timer from script context (source should be "script")
+print "Starting timer1 from script context...";
+call thread.timerStart("timer1", 2000, "testCallback");
+
+// Get info to verify source
+var info1: string = call thread.timerGetInfo("timer1");
+print "Timer1 info: " + info1;
+
+// Verify it shows source: "script"
+if call str.contains(info1, "\"source\":\"script\"") then {
+    print "✓ Timer1 correctly has source 'script'";
+} else {
+    print "✗ Timer1 does not have source 'script'";
+}
+
+print "";
+
+// List all timers
+var list: string = call thread.timerList();
+print "All timers: " + list;
+
+// Stop the timer
+print "";
+print "Stopping timer1...";
+call thread.timerStop("timer1");
+
+print "";
+print "=== Test Complete ===";

@@ -1,0 +1,91 @@
+// EBS Language Reference v1.0.9.13 - Advanced Thread Timer Functions
+// Example: Demonstrates new thread timer management functions
+
+var timerCount: int = 0;
+var maxCount: int = 10;
+
+// Callback function for first timer
+timerCallback1(timerName: string) {
+    timerCount = timerCount + 1;
+    print "Timer 1 fired! Count: " + call str.toString(timerCount);
+    
+    // Pause after 3 fires
+    if timerCount == 3 then {
+        print "Pausing timer1...";
+        var paused: bool = call thread.timerPause("timer1");
+        print "Timer paused: " + call str.toString(paused);
+        
+        // Schedule resume after 3 seconds
+        print "Will resume in 3 seconds...";
+    }
+    
+    // Resume if count is 4 (this happens 3s after pause)
+    if timerCount == 4 then {
+        print "Resuming timer1...";
+        var resumed: bool = call thread.timerResume("timer1");
+        print "Timer resumed: " + call str.toString(resumed);
+    }
+    
+    // Stop after reaching max count
+    if timerCount >= maxCount then {
+        print "Stopping timer1...";
+        call thread.timerStop(timerName);
+    }
+}
+
+// Callback function for second timer
+timerCallback2(timerName: string) {
+    print "Timer 2 tick...";
+    
+    // Get fire count
+    var fireCount: long = call thread.timerGetFireCount(timerName);
+    print "  Fire count: " + call str.toString(fireCount);
+    
+    // Stop after 5 fires
+    if fireCount >= 5 then {
+        print "Stopping timer2...";
+        call thread.timerStop(timerName);
+    }
+}
+
+// Start two timers
+print "Starting timer1 with 1000ms period...";
+call thread.timerStart("timer1", 1000, "timerCallback1");
+
+print "Starting timer2 with 1500ms period...";
+call thread.timerStart("timer2", 1500, "timerCallback2");
+
+// Display initial timer information
+print "";
+print "=== Initial Timer Status ===";
+var count: long = call thread.getCount();
+print "Active timer count: " + call str.toString(count);
+
+var running1: bool = call thread.timerIsRunning("timer1");
+print "Timer1 is running: " + call str.toString(running1);
+
+var running2: bool = call thread.timerIsRunning("timer2");
+print "Timer2 is running: " + call str.toString(running2);
+
+var period1: long = call thread.timerGetPeriod("timer1");
+print "Timer1 period: " + call str.toString(period1) + "ms";
+
+var period2: long = call thread.timerGetPeriod("timer2");
+print "Timer2 period: " + call str.toString(period2) + "ms";
+
+// Get detailed info for timer1
+print "";
+print "=== Timer1 Detailed Info ===";
+var info1: string = call thread.timerGetInfo("timer1");
+print info1;
+
+// List all timers
+print "";
+print "=== All Active Timers ===";
+var timerList: string = call thread.timerList();
+print timerList;
+
+print "";
+print "Timers are now running in the background...";
+print "Timer1 will pause after 3 fires, then resume, then stop after 10 fires.";
+print "Timer2 will stop after 5 fires.";

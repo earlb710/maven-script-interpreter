@@ -14,6 +14,7 @@ import com.eb.script.RuntimeContext;
 import com.eb.script.interpreter.Interpreter;
 import com.eb.script.interpreter.InterpreterContext;
 import com.eb.script.interpreter.InterpreterError;
+import com.eb.script.interpreter.builtins.BuiltinsThread;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
@@ -1286,6 +1287,13 @@ public class InterpreterScreen {
                 
                 // Clean up the screen thread (only top-level screens have their threads interrupted)
                 cleanupScreenThread(finalScreenName);
+                
+                // Stop all timers associated with this screen
+                int stoppedTimers = BuiltinsThread.stopTimersForSource(finalScreenName);
+                if (stoppedTimers > 0 && context.getOutput() != null) {
+                    String message = String.format("Stopped %d timer(s) associated with screen '%s'", stoppedTimers, finalScreenName);
+                    context.getOutput().printlnInfo(message);
+                }
                 
                 // Close screen (remove runtime state but preserve configuration for re-use)
                 context.closeScreen(finalScreenName);
