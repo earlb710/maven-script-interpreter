@@ -1,10 +1,13 @@
-# Implementation Summary: Screen Menu Visibility Property
+# Implementation Summary: Screen Menu Visibility Property and Builtins
 
 ## Problem Statement
-Add a screen property to switch off the menu at the top of screen windows.
+1. Add a screen property to switch off the menu at the top of screen windows.
+2. Add builtin functions to toggle menu visibility dynamically.
+3. Update help documentation with new property and builtins.
+4. Move test scripts to test directory.
 
 ## Solution
-Implemented a `showMenu` boolean property in screen definitions that controls whether the menu bar is displayed at the top of screen windows.
+Implemented a `showMenu` boolean property in screen definitions that controls whether the menu bar is displayed at the top of screen windows. Also added `scr.showMenu()` and `scr.hideMenu()` builtin functions to toggle menu visibility at runtime.
 
 ## Changes Made
 
@@ -29,17 +32,35 @@ Implemented a `showMenu` boolean property in screen definitions that controls wh
   }
   ```
 
-### 3. Test Script
-Created `test_menu_visibility.ebs` with two example screens:
-- Screen WITH menu (default behavior)
-- Screen WITHOUT menu (using `showMenu: false`)
+### 3. BuiltinsScreen.java
+- **Added method**: `screenShowMenu()` - shows menu bar on a screen
+- **Added method**: `screenHideMenu()` - hides menu bar on a screen
+- Both methods:
+  - Accept optional screenName parameter (uses current screen context if not provided)
+  - Access BorderPane root via ScreenFactory.getScreenRootPane()
+  - Manipulate menu bar visibility on JavaFX Application Thread
+  - Return true on success
 
-### 4. Documentation
-Created `SCREEN_MENU_PROPERTY.md` with:
-- Feature overview
-- Usage examples
-- Technical implementation details
-- Use cases
+### 4. Builtins.java
+- **Registered**: `scr.showMenu` builtin with optional screenName parameter
+- **Registered**: `scr.hideMenu` builtin with optional screenName parameter
+- **Mapped**: Both builtins to their implementation methods in BuiltinsScreen
+
+### 5. Test Script
+Moved `test_menu_visibility.ebs` to `ScriptInterpreter/scripts/test/` directory with:
+- Two example screens (with/without menu)
+- Interactive buttons to toggle menu visibility
+- Demonstration of both property-based and builtin-based control
+
+### 6. Documentation
+- Updated `help-lookup.json`:
+  - Added `showMenu` property to screen keyword documentation
+  - Added `scr.showMenu` builtin documentation
+  - Added `scr.hideMenu` builtin documentation
+- Updated `SCREEN_MENU_PROPERTY.md`:
+  - Added builtin functions section
+  - Added interactive examples
+  - Added dynamic menu control examples
 
 ## Code Flow
 

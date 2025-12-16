@@ -89,6 +89,65 @@ show screen screenWithoutMenu;
 
 This creates a screen without the menu bar, providing a cleaner interface.
 
+## Dynamic Menu Control with Builtin Functions
+
+In addition to the `showMenu` property, you can control menu visibility at runtime using builtin functions:
+
+### scr.showMenu(screenName?)
+
+Shows the menu bar on a screen. If no screen name is provided, operates on the current screen context.
+
+```ebs
+// Show menu for a specific screen
+call scr.showMenu("myScreen");
+
+// Or from within a screen event handler
+call scr.showMenu();
+```
+
+### scr.hideMenu(screenName?)
+
+Hides the menu bar on a screen. If no screen name is provided, operates on the current screen context.
+
+```ebs
+// Hide menu for a specific screen
+call scr.hideMenu("myScreen");
+
+// Or from within a screen event handler
+call scr.hideMenu();
+```
+
+### Example: Toggle Menu with Buttons
+
+```ebs
+screen interactiveScreen = {
+    "name": "interactiveScreen",
+    "title": "Interactive Menu Demo",
+    "width": 600,
+    "height": 400,
+    "area": [
+        {
+            "name": "main",
+            "type": "vbox",
+            "items": [
+                {
+                    "type": "button",
+                    "text": "Hide Menu",
+                    "onClick": "call scr.hideMenu();"
+                },
+                {
+                    "type": "button",
+                    "text": "Show Menu",
+                    "onClick": "call scr.showMenu();"
+                }
+            ]
+        }
+    ]
+};
+
+show screen interactiveScreen;
+```
+
 ## Technical Implementation
 
 ### Modified Classes

@@ -228,6 +228,136 @@ public class BuiltinsScreen {
     }
 
     /**
+     * scr.showMenu(screenName?) -> BOOL
+     * Shows the menu bar at the top of a screen.
+     * If screenName is null or empty, uses the current screen from context.
+     * Returns true on success.
+     */
+    public static Object screenShowMenu(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (args.length > 0 && args[0] != null) ? (String) args[0] : null;
+
+        // If no screen name provided, determine from thread context
+        if (screenName == null || screenName.isEmpty()) {
+            screenName = context.getCurrentScreen();
+            if (screenName == null) {
+                throw new InterpreterError(
+                        "scr.showMenu: No screen name specified and not executing in a screen context. "
+                        + "Provide a screen name or call from within screen event handlers.");
+            }
+        }
+        
+        // Normalize screen name to lowercase to match how screens are stored
+        screenName = screenName.toLowerCase();
+
+        // Check if screen exists
+        if (!context.getScreens().containsKey(screenName)) {
+            throw new InterpreterError("scr.showMenu: Screen '" + screenName + "' does not exist or has not been shown yet.");
+        }
+
+        javafx.stage.Stage stage = context.getScreens().get(screenName);
+        if (stage == null) {
+            throw new InterpreterError("scr.showMenu: Screen '" + screenName + "' is still being initialized.");
+        }
+
+        final String finalScreenName = screenName;
+
+        // Show the menu on JavaFX Application Thread
+        javafx.application.Platform.runLater(() -> {
+            try {
+                // Get the root BorderPane from ScreenFactory
+                javafx.scene.layout.BorderPane screenRoot = com.eb.script.interpreter.screen.ScreenFactory.getScreenRootPane(finalScreenName);
+                
+                if (screenRoot != null) {
+                    // Check if menu bar already exists
+                    if (screenRoot.getTop() == null) {
+                        // Create and add menu bar
+                        javafx.scene.control.MenuBar menuBar = com.eb.script.interpreter.screen.ScreenFactory.createScreenMenuBar(stage);
+                        screenRoot.setTop(menuBar);
+                        
+                        if (context.getOutput() != null) {
+                            context.getOutput().printlnOk("Menu bar shown for screen '" + finalScreenName + "'");
+                        }
+                    } else if (context.getOutput() != null) {
+                        context.getOutput().printlnInfo("Menu bar is already visible for screen '" + finalScreenName + "'");
+                    }
+                } else if (context.getOutput() != null) {
+                    context.getOutput().printlnError("Could not access screen root for '" + finalScreenName + "'");
+                }
+            } catch (Exception e) {
+                if (context.getOutput() != null) {
+                    context.getOutput().printlnError("Error showing menu for screen '" + finalScreenName + "': " + e.getMessage());
+                }
+            }
+        });
+
+        return true;
+    }
+
+    /**
+     * scr.hideMenu(screenName?) -> BOOL
+     * Hides the menu bar at the top of a screen.
+     * If screenName is null or empty, uses the current screen from context.
+     * Returns true on success.
+     */
+    public static Object screenHideMenu(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (args.length > 0 && args[0] != null) ? (String) args[0] : null;
+
+        // If no screen name provided, determine from thread context
+        if (screenName == null || screenName.isEmpty()) {
+            screenName = context.getCurrentScreen();
+            if (screenName == null) {
+                throw new InterpreterError(
+                        "scr.hideMenu: No screen name specified and not executing in a screen context. "
+                        + "Provide a screen name or call from within screen event handlers.");
+            }
+        }
+        
+        // Normalize screen name to lowercase to match how screens are stored
+        screenName = screenName.toLowerCase();
+
+        // Check if screen exists
+        if (!context.getScreens().containsKey(screenName)) {
+            throw new InterpreterError("scr.hideMenu: Screen '" + screenName + "' does not exist or has not been shown yet.");
+        }
+
+        javafx.stage.Stage stage = context.getScreens().get(screenName);
+        if (stage == null) {
+            throw new InterpreterError("scr.hideMenu: Screen '" + screenName + "' is still being initialized.");
+        }
+
+        final String finalScreenName = screenName;
+
+        // Hide the menu on JavaFX Application Thread
+        javafx.application.Platform.runLater(() -> {
+            try {
+                // Get the root BorderPane from ScreenFactory
+                javafx.scene.layout.BorderPane screenRoot = com.eb.script.interpreter.screen.ScreenFactory.getScreenRootPane(finalScreenName);
+                
+                if (screenRoot != null) {
+                    // Remove menu bar
+                    if (screenRoot.getTop() != null) {
+                        screenRoot.setTop(null);
+                        
+                        if (context.getOutput() != null) {
+                            context.getOutput().printlnOk("Menu bar hidden for screen '" + finalScreenName + "'");
+                        }
+                    } else if (context.getOutput() != null) {
+                        context.getOutput().printlnInfo("Menu bar is already hidden for screen '" + finalScreenName + "'");
+                    }
+                } else if (context.getOutput() != null) {
+                    context.getOutput().printlnError("Could not access screen root for '" + finalScreenName + "'");
+                }
+            } catch (Exception e) {
+                if (context.getOutput() != null) {
+                    context.getOutput().printlnError("Error hiding menu for screen '" + finalScreenName + "': " + e.getMessage());
+                }
+            }
+        });
+
+        return true;
+    }
+
+    /**
      * scr.findScreen(screenName) -> BOOL
      * Checks if a screen has been defined.
      * Returns true if the screen exists in any of these states:

@@ -3317,7 +3317,7 @@ public class ScreenFactory {
     /**
      * Create a menu bar for screen windows with Edit menu containing Copy/Cut/Paste/Undo/Redo/Close items
      */
-    private static javafx.scene.control.MenuBar createScreenMenuBar(Stage stage) {
+    public static javafx.scene.control.MenuBar createScreenMenuBar(Stage stage) {
         javafx.scene.control.MenuBar menuBar = new javafx.scene.control.MenuBar();
         
         // Create Edit menu
@@ -3422,6 +3422,20 @@ public class ScreenFactory {
         menuBar.getMenus().add(editMenu);
         
         return menuBar;
+    }
+
+    /**
+     * Gets the root BorderPane for a screen by name.
+     * This allows external code to manipulate the screen layout, such as adding/removing the menu bar.
+     * 
+     * @param screenName The name of the screen (case-insensitive)
+     * @return The BorderPane root of the screen, or null if not found
+     */
+    public static BorderPane getScreenRootPane(String screenName) {
+        if (screenName == null) {
+            return null;
+        }
+        return screenRootPanes.get(screenName.toLowerCase());
     }
 
     /**
