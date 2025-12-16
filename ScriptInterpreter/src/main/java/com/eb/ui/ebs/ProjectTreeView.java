@@ -598,6 +598,7 @@ public class ProjectTreeView extends VBox {
                     boolean isScriptFile = path.toLowerCase().endsWith(".ebs");
                     
                     MenuItem runScriptItem = null;
+                    MenuItem packageScriptItem = null;
                     if (isScriptFile) {
                         runScriptItem = new MenuItem("Run Script");
                         runScriptItem.setOnAction(e -> {
@@ -605,6 +606,9 @@ public class ProjectTreeView extends VBox {
                             Path projectJsonPath = findProjectJsonForFile(Path.of(path));
                             handler.runScriptFile(Path.of(path), projectJsonPath);
                         });
+                        
+                        packageScriptItem = new MenuItem("Package to .ebsp");
+                        packageScriptItem.setOnAction(e -> packageScript(path));
                     }
                     
                     MenuItem renameFileItem = new MenuItem("Rename File...");
@@ -622,6 +626,7 @@ public class ProjectTreeView extends VBox {
                     if (runScriptItem != null) {
                         contextMenu.getItems().addAll(
                             runScriptItem,
+                            packageScriptItem,
                             new SeparatorMenuItem(),
                             renameFileItem,
                             copyFileItem,
@@ -2460,6 +2465,190 @@ public class ProjectTreeView extends VBox {
         
         // Update combo box items
         searchComboBox.getItems().setAll(recentSearches);
+    }
+    
+    /**
+     * Package a script file to .ebsp format.
+     * Creates a packaged binary file in the same directory as the source.
+     * Shows a dialog with packaging results including file sizes and any errors.
+     * 
+     * @param scriptPath The path to the .ebs script file
+     */
+    private void packageScript(String scriptPath) {
+        try {
+            Path inputPath = Path.of(scriptPath);
+            
+            // Generate output path by replacing .ebs with .ebsp
+            // Use Path operations for safer extension handling
+            String fileName = inputPath.getFileName().toString();
+            String outputFileName;
+            if (fileName.toLowerCase().endsWith(".ebs")) {
+                outputFileName = fileName.substring(0, fileName.length() - 4) + ".ebsp";
+            } else {
+                outputFileName = fileName + ".ebsp";
+            }
+            Path outputPath = inputPath.getParent() != null 
+                ? inputPath.getParent().resolve(outputFileName)
+                : Path.of(outputFileName);
+            
+            // Run packaging in background thread to avoid blocking UI
+            Thread packagingThread = new Thread(() -> {
+                StringBuilder resultMessage = new StringBuilder();
+                boolean success = false;
+                
+                try {
+                    try {
+                        // Parse the script
+                        com.eb.script.RuntimeContext context = com.eb.script.parser.Parser.parse(inputPath);
+                        
+                        // Serialize to .ebsp file
+                        com.eb.script.package_tool.RuntimeContextSerializer.serialize(context, outputPath);
+                        
+                        // Get file sizes with better error handling
+                        long originalSize;
+                        long packagedSize;
+                        try {
+                            originalSize = Files.size(inputPath);
+                        } catch (Exception e) {
+                            throw new Exception("Failed to read input file size: " + e.getMessage(), e);
+                        }
+                        try {
+                            packagedSize = Files.size(outputPath);
+                        } catch (Exception e) {
+                            throw new Exception("Failed to read output file size: " + e.getMessage(), e);
+                        }
+                        
+                        // Build success message
+                        resultMessage.append("Package created successfully!\n\n");
+                        resultMessage.append("Input file:  ").append(inputPath.getFileName()).append("\n");
+                        resultMessage.append("Output file: ").append(outputPath.getFileName()).append("\n\n");
+                        resultMessage.append("Original size:  ").append(formatFileSize(originalSize)).append("\n");
+                        resultMessage.append("Packaged size: ").append(formatFileSize(packagedSize)).append("\n\n");
+                        
+                        if (packagedSize < originalSize) {
+                            double reduction = (1.0 - (double)packagedSize / originalSize) * 100;
+                            resultMessage.append("Size reduction: ").append(String.format("%.1f%%", reduction));
+                        } else {
+                            double increase = ((double)packagedSize / originalSize - 1.0) * 100;
+                            resultMessage.append("Size increase: ").append(String.format("%.1f%%", increase));
+                        }
+                        
+                        success = true;
+                        
+                    } catch (Exception e) {
+                        resultMessage.append("Error packaging script:\n\n");
+                        
+                        // Get error message, handling null or empty cases
+                        String errorMsg = e.getMessage();
+                        if (errorMsg == null || errorMsg.trim().isEmpty()) {
+                            errorMsg = e.getClass().getName();
+                        }
+                        resultMessage.append(errorMsg);
+                        
+                        // Add cause if available
+                        if (e.getCause() != null) {
+                            String causeMsg = e.getCause().getMessage();
+                            if (causeMsg == null || causeMsg.trim().isEmpty()) {
+                                causeMsg = e.getCause().getClass().getName();
+                            }
+                            resultMessage.append("\n\nCause: ").append(causeMsg);
+                        }
+                        
+                        // Add stack trace for debugging (first few lines)
+                        resultMessage.append("\n\nStack trace (first 5 lines):");
+                        StackTraceElement[] stackTrace = e.getStackTrace();
+                        int limit = Math.min(5, stackTrace.length);
+                        for (int i = 0; i < limit; i++) {
+                            resultMessage.append("\n  at ").append(stackTrace[i].toString());
+                        }
+                    }
+                } catch (Throwable t) {
+                    // Catch any throwable (including errors) to ensure we always close the dialog
+                    success = false;
+                    resultMessage = new StringBuilder();
+                    resultMessage.append("Critical error during packaging:\n\n");
+                    resultMessage.append(t.getClass().getName());
+                    if (t.getMessage() != null) {
+                        resultMessage.append(": ").append(t.getMessage());
+                    }
+                    System.err.println("Critical error in packaging thread:");
+                    t.printStackTrace();
+                }
+                
+                final boolean finalSuccess = success;
+                final String finalMessage = resultMessage.toString();
+                
+                // Update UI on JavaFX thread
+                javafx.application.Platform.runLater(() -> {
+                    try {
+                        Alert resultAlert = new Alert(
+                            finalSuccess ? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR
+                        );
+                        resultAlert.setTitle(finalSuccess ? "Packaging Complete" : "Packaging Failed");
+                        resultAlert.setHeaderText(finalSuccess ? "Successfully packaged script" : "Failed to package script");
+                        
+                        // Use TextArea instead of setContentText to allow copying
+                        TextArea textArea = new TextArea(finalMessage);
+                        textArea.setEditable(false);
+                        textArea.setWrapText(true);
+                        textArea.setPrefRowCount(10);
+                        textArea.setMaxWidth(Double.MAX_VALUE);
+                        textArea.setMaxHeight(Double.MAX_VALUE);
+                        
+                        // Set the TextArea as the content
+                        resultAlert.getDialogPane().setContent(textArea);
+                        resultAlert.getDialogPane().setMinWidth(500);
+                        resultAlert.showAndWait();
+                        
+                        // Refresh the tree view to show the new .ebsp file
+                        if (finalSuccess) {
+                            // Find the parent directory in the tree and refresh it
+                            Path parentDir = inputPath.getParent();
+                            if (parentDir != null) {
+                                TreeItem<String> dirItem = findTreeItemForPath(rootItem, parentDir.toString());
+                                if (dirItem != null) {
+                                    refreshDirectoryNode(dirItem, parentDir.toString());
+                                }
+                            }
+                        }
+                    } catch (Exception uiException) {
+                        // Log the UI exception
+                        System.err.println("Error showing packaging result dialog: " + uiException.getMessage());
+                        uiException.printStackTrace();
+                    }
+                });
+            });
+            
+            // Set as daemon but with proper cleanup hook
+            // Daemon threads allow application shutdown without waiting,
+            // which is acceptable for packaging since incomplete .ebsp files can be safely deleted
+            packagingThread.setDaemon(true);
+            packagingThread.start();
+            
+        } catch (Exception e) {
+            // If thread creation or starting fails, show error
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Packaging Error");
+            errorAlert.setHeaderText("Failed to start packaging");
+            errorAlert.setContentText("Error: " + e.getMessage());
+            errorAlert.showAndWait();
+        }
+    }
+    
+    /**
+     * Format file size in human-readable format (bytes, KB, MB).
+     * 
+     * @param size File size in bytes
+     * @return Formatted string with size and unit
+     */
+    private String formatFileSize(long size) {
+        if (size < 1024) {
+            return size + " bytes";
+        } else if (size < 1024 * 1024) {
+            return String.format("%.2f KB (%d bytes)", size / 1024.0, size);
+        } else {
+            return String.format("%.2f MB (%d bytes)", size / (1024.0 * 1024.0), size);
+        }
     }
     
     /**
