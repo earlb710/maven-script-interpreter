@@ -1286,7 +1286,7 @@ screen startupDialog = {
                     "padding": "10",
                     "style": "-fx-alignment: center;",
                     "items": [
-                        {"name": "instructionLabel", "display": {"type": "label", "labelText": "Select the time limit for each player:", "labelColor": "#ffffff", "labelFontSize": "14px"}},
+                        {"name": "instructionLabel", "display": {"type": "label", "labelText": "Select the time limit for each player:", "labelColor": "#ffffff", "labelFontSize": "14px", "style": "-fx-text-alignment: center;"}},
                         {"name": "timeLimitField", "varRef": "timeLimit"}
                     ]
                 },
