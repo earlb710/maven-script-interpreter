@@ -2460,6 +2460,12 @@ public class InterpreterScreen {
             }
         }
 
+        // Extract alignment property
+        Object alignmentObj = getCaseInsensitive(areaDef, "alignment");
+        if (alignmentObj != null) {
+            area.alignment = String.valueOf(alignmentObj);
+        }
+
         area.screenName = screenName;
 
         // Process items in the area

@@ -168,6 +168,12 @@ public class AreaContainerFactory {
             applyPadding(container, areaDef.padding);
         }
 
+        // Apply alignment property for containers that support it (HBox, VBox, StackPane, FlowPane, TilePane)
+        // This must come after other style applications to ensure it takes precedence
+        if (areaDef.alignment != null && !areaDef.alignment.isEmpty()) {
+            applyAlignment(container, areaDef.alignment);
+        }
+
         // Apply layout configuration if provided
         if (areaDef.layout != null && !areaDef.layout.isEmpty()) {
             applyLayoutConfiguration(container, areaDef.layout);
@@ -613,6 +619,58 @@ public class AreaContainerFactory {
         }
         
         return null;
+    }
+
+    /**
+     * Applies alignment property to containers that support it.
+     * Alignment controls how child elements are positioned within the container.
+     * Supported containers: HBox, VBox, StackPane, FlowPane, TilePane.
+     * Also updates the CSS style to ensure the alignment value takes precedence.
+     */
+    private static void applyAlignment(Region container, String alignmentStr) {
+        if (alignmentStr == null || alignmentStr.isEmpty()) {
+            return;
+        }
+        
+        Pos alignment = parseAlignment(alignmentStr);
+        if (alignment == null) {
+            return;
+        }
+        
+        // Apply alignment based on container type
+        if (container instanceof HBox) {
+            ((HBox) container).setAlignment(alignment);
+            // Update CSS to override any default -fx-alignment in the style
+            updateStyleProperty(container, "-fx-alignment", toCssAlignment(alignment));
+        } else if (container instanceof VBox) {
+            ((VBox) container).setAlignment(alignment);
+            // Update CSS to override any default -fx-alignment in the style
+            updateStyleProperty(container, "-fx-alignment", toCssAlignment(alignment));
+        } else if (container instanceof StackPane) {
+            ((StackPane) container).setAlignment(alignment);
+            // Update CSS to override any default -fx-alignment in the style
+            updateStyleProperty(container, "-fx-alignment", toCssAlignment(alignment));
+        } else if (container instanceof FlowPane) {
+            ((FlowPane) container).setAlignment(alignment);
+            // Update CSS to override any default -fx-alignment in the style
+            updateStyleProperty(container, "-fx-alignment", toCssAlignment(alignment));
+        } else if (container instanceof TilePane) {
+            ((TilePane) container).setAlignment(alignment);
+            // Update CSS to override any default -fx-alignment in the style
+            updateStyleProperty(container, "-fx-alignment", toCssAlignment(alignment));
+        }
+        // Other container types don't have a direct alignment property
+    }
+
+    /**
+     * Converts a JavaFX Pos enum value to CSS alignment string.
+     * Example: Pos.CENTER_LEFT -> "center-left"
+     */
+    private static String toCssAlignment(Pos pos) {
+        if (pos == null) {
+            return "center";
+        }
+        return pos.name().toLowerCase().replace("_", "-");
     }
 
     /**

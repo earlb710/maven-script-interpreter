@@ -1,0 +1,265 @@
+// Test script for area alignment property
+// This script demonstrates all available alignment options for containers (areas)
+
+screen "AlignmentTest" {
+    title: "Area Alignment Options Demo",
+    width: 1000,
+    height: 800,
+    
+    vars: [
+        {
+            name: "title1",
+            type: "string",
+            default: "HBox - Left Aligned",
+            display: {
+                type: "label",
+                style: "-fx-font-size: 14px; -fx-font-weight: bold;"
+            }
+        },
+        {
+            name: "title2",
+            type: "string",
+            default: "HBox - Center Aligned",
+            display: {
+                type: "label",
+                style: "-fx-font-size: 14px; -fx-font-weight: bold;"
+            }
+        },
+        {
+            name: "title3",
+            type: "string",
+            default: "HBox - Right Aligned",
+            display: {
+                type: "label",
+                style: "-fx-font-size: 14px; -fx-font-weight: bold;"
+            }
+        },
+        {
+            name: "vboxTitle1",
+            type: "string",
+            default: "VBox - Top-Left",
+            display: {
+                type: "label",
+                style: "-fx-font-size: 14px; -fx-font-weight: bold;"
+            }
+        },
+        {
+            name: "vboxTitle2",
+            type: "string",
+            default: "VBox - Top-Center",
+            display: {
+                type: "label",
+                style: "-fx-font-size: 14px; -fx-font-weight: bold;"
+            }
+        },
+        {
+            name: "vboxTitle3",
+            type: "string",
+            default: "VBox - Top-Right",
+            display: {
+                type: "label",
+                style: "-fx-font-size: 14px; -fx-font-weight: bold;"
+            }
+        },
+        {
+            name: "stackTitle1",
+            type: "string",
+            default: "StackPane - Center",
+            display: {
+                type: "label",
+                style: "-fx-font-size: 14px; -fx-font-weight: bold;"
+            }
+        },
+        {
+            name: "stackTitle2",
+            type: "string",
+            default: "StackPane - Bottom-Right",
+            display: {
+                type: "label",
+                style: "-fx-font-size: 14px; -fx-font-weight: bold;"
+            }
+        },
+        {
+            name: "button1",
+            type: "string",
+            default: "Button 1",
+            display: {
+                type: "button",
+                labelText: "Button 1"
+            }
+        },
+        {
+            name: "button2",
+            type: "string",
+            default: "Button 2",
+            display: {
+                type: "button",
+                labelText: "Button 2"
+            }
+        },
+        {
+            name: "button3",
+            type: "string",
+            default: "Button 3",
+            display: {
+                type: "button",
+                labelText: "Button 3"
+            }
+        }
+    ],
+    
+    area: [
+        {
+            name: "mainArea",
+            type: "vbox",
+            spacing: "20",
+            padding: "20",
+            areaBackground: "#f5f5f5",
+            items: [],
+            areas: [
+                // HBox alignment examples
+                {
+                    name: "hboxLeftArea",
+                    type: "hbox",
+                    alignment: "left",
+                    spacing: "10",
+                    padding: "15",
+                    areaBackground: "#e3f2fd",
+                    style: "-fx-border-color: #1976d2; -fx-border-width: 2;",
+                    items: [
+                        { varRef: "title1", sequence: 1 },
+                        { varRef: "button1", sequence: 2 }
+                    ]
+                },
+                {
+                    name: "hboxCenterArea",
+                    type: "hbox",
+                    alignment: "center",
+                    spacing: "10",
+                    padding: "15",
+                    areaBackground: "#fff3e0",
+                    style: "-fx-border-color: #f57c00; -fx-border-width: 2;",
+                    items: [
+                        { varRef: "title2", sequence: 1 },
+                        { varRef: "button2", sequence: 2 }
+                    ]
+                },
+                {
+                    name: "hboxRightArea",
+                    type: "hbox",
+                    alignment: "right",
+                    spacing: "10",
+                    padding: "15",
+                    areaBackground: "#e8f5e9",
+                    style: "-fx-border-color: #388e3c; -fx-border-width: 2;",
+                    items: [
+                        { varRef: "title3", sequence: 1 },
+                        { varRef: "button3", sequence: 2 }
+                    ]
+                },
+                // Container for VBox examples
+                {
+                    name: "vboxContainer",
+                    type: "hbox",
+                    spacing: "15",
+                    padding: "0",
+                    items: [],
+                    areas: [
+                        {
+                            name: "vboxTopLeft",
+                            type: "vbox",
+                            alignment: "top-left",
+                            spacing: "10",
+                            padding: "15",
+                            prefWidth: "300",
+                            prefHeight: "150",
+                            areaBackground: "#fce4ec",
+                            style: "-fx-border-color: #c2185b; -fx-border-width: 2;",
+                            items: [
+                                { varRef: "vboxTitle1", sequence: 1 },
+                                { varRef: "button1", sequence: 2 }
+                            ]
+                        },
+                        {
+                            name: "vboxTopCenter",
+                            type: "vbox",
+                            alignment: "top-center",
+                            spacing: "10",
+                            padding: "15",
+                            prefWidth: "300",
+                            prefHeight: "150",
+                            areaBackground: "#f3e5f5",
+                            style: "-fx-border-color: #7b1fa2; -fx-border-width: 2;",
+                            items: [
+                                { varRef: "vboxTitle2", sequence: 1 },
+                                { varRef: "button2", sequence: 2 }
+                            ]
+                        },
+                        {
+                            name: "vboxTopRight",
+                            type: "vbox",
+                            alignment: "top-right",
+                            spacing: "10",
+                            padding: "15",
+                            prefWidth: "300",
+                            prefHeight: "150",
+                            areaBackground: "#e0f2f1",
+                            style: "-fx-border-color: #00796b; -fx-border-width: 2;",
+                            items: [
+                                { varRef: "vboxTitle3", sequence: 1 },
+                                { varRef: "button3", sequence: 2 }
+                            ]
+                        }
+                    ]
+                },
+                // StackPane examples
+                {
+                    name: "stackContainer",
+                    type: "hbox",
+                    spacing: "15",
+                    padding: "0",
+                    items: [],
+                    areas: [
+                        {
+                            name: "stackCenter",
+                            type: "stackpane",
+                            alignment: "center",
+                            padding: "15",
+                            prefWidth: "450",
+                            prefHeight: "150",
+                            areaBackground: "#fff9c4",
+                            style: "-fx-border-color: #f9a825; -fx-border-width: 2;",
+                            items: [
+                                { varRef: "stackTitle1", sequence: 1 }
+                            ]
+                        },
+                        {
+                            name: "stackBottomRight",
+                            type: "stackpane",
+                            alignment: "bottom-right",
+                            padding: "15",
+                            prefWidth: "450",
+                            prefHeight: "150",
+                            areaBackground: "#ffebee",
+                            style: "-fx-border-color: #d32f2f; -fx-border-width: 2;",
+                            items: [
+                                { varRef: "stackTitle2", sequence: 1 }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
+
+println "Area Alignment Test Screen Loaded";
+println "";
+println "Available alignment options:";
+println "  - Shorthand: left, right, top, bottom, center";
+println "  - Combined: top-left, top-center, top-right";
+println "             center-left, center, center-right";
+println "             bottom-left, bottom-center, bottom-right";
+println "  - Baseline: baseline-left, baseline-center, baseline-right";
+println "";
+println "Supported containers: HBox, VBox, StackPane, FlowPane, TilePane";
