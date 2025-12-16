@@ -1,0 +1,47 @@
+// Simple test script for area property access without actually showing the screen
+
+screen testScreen = {
+    "title": "Test Screen",
+    "width": 600,
+    "height": 400,
+    "sets": [
+        {
+            "setname": "main",
+            "vars": [
+                {"name": "message", "type": "string", "default": "Hello"}
+            ]
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "10",
+            "items": [],
+            "areas": [
+                {
+                    "name": "headerArea",
+                    "type": "hbox",
+                    "spacing": "10",
+                    "items": []
+                },
+                {
+                    "name": "contentArea",
+                    "type": "vbox",
+                    "spacing": "15",
+                    "items": []
+                }
+            ]
+        }
+    ]
+};
+
+print "Screen definition created successfully";
+print "Testing area property access will require running with JavaFX support";
+print "";
+print "To test manually in the UI:";
+print "  1. Run: mvn javafx:run";
+print "  2. Use console to type: show screen testScreen;";
+print "  3. Then type: testScreen.area.nodes";
+print "  4. Or type: testScreen.headerArea.help";
+print "";

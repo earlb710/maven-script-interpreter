@@ -168,6 +168,180 @@ public class ScreenContainerType {
         return desc.toString();
     }
     
+    /**
+     * Get detailed help information about this container type.
+     * Includes description, supported properties, and usage examples.
+     * @return Help text for this container type
+     */
+    public String getHelp() {
+        if (containerType == null) {
+            return "Unknown container type";
+        }
+        
+        StringBuilder help = new StringBuilder();
+        help.append("═══════════════════════════════════════════════════════════\n");
+        help.append("Container Type: ").append(getFullTypeName()).append("\n");
+        help.append("═══════════════════════════════════════════════════════════\n\n");
+        
+        // Add description based on container type
+        String description = getContainerDescription(containerType);
+        if (description != null && !description.isEmpty()) {
+            help.append("Description:\n");
+            help.append(description).append("\n\n");
+        }
+        
+        // Add supported properties
+        help.append("Supported Properties:\n");
+        help.append(getSupportedProperties(containerType));
+        help.append("\n");
+        
+        // Add usage example
+        String example = getUsageExample(containerType);
+        if (example != null && !example.isEmpty()) {
+            help.append("Example:\n");
+            help.append(example).append("\n");
+        }
+        
+        help.append("═══════════════════════════════════════════════════════════\n");
+        return help.toString();
+    }
+    
+    /**
+     * Get a description for a specific container type.
+     */
+    private String getContainerDescription(String type) {
+        return switch (type.toLowerCase()) {
+            case "hbox" -> "Horizontal box layout that arranges children in a single row from left to right.\n" +
+                          "Ideal for buttons, toolbars, and horizontal layouts.";
+            case "vbox" -> "Vertical box layout that arranges children in a single column from top to bottom.\n" +
+                          "Ideal for forms, menus, and vertical layouts.";
+            case "gridpane" -> "Grid layout that arranges children in rows and columns.\n" +
+                              "Ideal for forms, tables, and structured layouts with precise positioning.";
+            case "stackpane" -> "Stacked layout where children overlay each other.\n" +
+                               "Ideal for layered content, overlays, and centered content.";
+            case "borderpane" -> "Layout with five regions: top, bottom, left, right, and center.\n" +
+                                "Ideal for application layouts with headers, footers, and sidebars.";
+            case "flowpane" -> "Flow layout that wraps children horizontally or vertically.\n" +
+                              "Ideal for tags, chips, and dynamic content that needs to wrap.";
+            case "tilepane" -> "Tile layout that arranges children in uniform-sized tiles.\n" +
+                              "Ideal for image galleries, icon grids, and uniform content.";
+            case "anchorpane" -> "Flexible layout where children are positioned using anchors.\n" +
+                                "Ideal for custom layouts with precise control over positioning.";
+            case "pane" -> "Basic layout pane with no automatic positioning.\n" +
+                          "Ideal for custom layouts where you control all positioning.";
+            case "scrollpane" -> "Container that adds scrollbars for content larger than the view.\n" +
+                                "Ideal for large forms, documents, and scrollable content.";
+            case "splitpane" -> "Container with resizable dividers between children.\n" +
+                               "Ideal for resizable panels, editors, and multi-view layouts.";
+            case "tabpane" -> "Container with tabs for switching between different content panels.\n" +
+                             "Ideal for multi-page forms, settings panels, and tabbed interfaces.";
+            case "accordion" -> "Container with collapsible titled panels (only one open at a time).\n" +
+                               "Ideal for settings, navigation menus, and grouped content.";
+            case "titledpane" -> "Container with a collapsible title bar.\n" +
+                                "Ideal for collapsible sections, groups, and expandable content.";
+            case "group" -> "Logical grouping of controls, typically rendered as a VBox with spacing.\n" +
+                           "Ideal for grouping related form fields and controls.";
+            case "region" -> "Base layout class for custom containers.\n" +
+                            "Ideal for extending with custom layout logic.";
+            case "canvas" -> "Drawing surface for custom graphics and rendering.\n" +
+                            "Ideal for charts, diagrams, and custom visualizations.";
+            default -> "Container for organizing and laying out UI components.";
+        };
+    }
+    
+    /**
+     * Get supported properties for a specific container type.
+     */
+    private String getSupportedProperties(String type) {
+        StringBuilder props = new StringBuilder();
+        
+        // Common properties for all containers
+        props.append("  • type (string) - Container type name\n");
+        props.append("  • spacing (number) - Gap between children (HBox, VBox, FlowPane, GridPane, TilePane)\n");
+        props.append("  • padding (string) - Internal spacing around children (all containers)\n");
+        props.append("  • alignment (string) - Child alignment position (HBox, VBox, StackPane, FlowPane, TilePane)\n");
+        props.append("  • style (string) - Custom CSS styling\n");
+        props.append("  • areaBackground (string) - Background color in hex format\n");
+        props.append("  • minWidth, prefWidth, maxWidth (string) - Width constraints\n");
+        props.append("  • minHeight, prefHeight, maxHeight (string) - Height constraints\n");
+        props.append("  • hgrow, vgrow (string) - Growth priority (ALWAYS, SOMETIMES, NEVER)\n");
+        
+        // Container-specific properties
+        switch (type.toLowerCase()) {
+            case "gridpane":
+                props.append("  • hgap (number) - Horizontal gap between columns\n");
+                props.append("  • vgap (number) - Vertical gap between rows\n");
+                break;
+            case "flowpane", "tilepane":
+                props.append("  • hgap (number) - Horizontal gap between items\n");
+                props.append("  • vgap (number) - Vertical gap between items\n");
+                props.append("  • orientation (string) - HORIZONTAL or VERTICAL\n");
+                break;
+            case "titledpane":
+                props.append("  • title (string) - Title text for the pane\n");
+                break;
+            case "group":
+                props.append("  • groupBorder (string) - Border style (none, line, raised, lowered, inset, outset)\n");
+                props.append("  • groupBorderColor (string) - Border color in hex format\n");
+                props.append("  • groupBorderWidth (string) - Border width in pixels\n");
+                props.append("  • groupBorderRadius (string) - Border corner radius in pixels\n");
+                props.append("  • groupLabelText (string) - Label text on the border\n");
+                props.append("  • groupLabelAlignment (string) - Label alignment (left, center, right)\n");
+                break;
+        }
+        
+        return props.toString();
+    }
+    
+    /**
+     * Get a usage example for a specific container type.
+     */
+    private String getUsageExample(String type) {
+        return switch (type.toLowerCase()) {
+            case "hbox" -> """
+                {
+                    "name": "buttonBar",
+                    "type": "hbox",
+                    "alignment": "right",
+                    "spacing": "10",
+                    "padding": "10 20",
+                    "items": [...]
+                }
+                """;
+            case "vbox" -> """
+                {
+                    "name": "formPanel",
+                    "type": "vbox",
+                    "alignment": "top-center",
+                    "spacing": "15",
+                    "padding": "20",
+                    "items": [...]
+                }
+                """;
+            case "gridpane" -> """
+                {
+                    "name": "dataGrid",
+                    "type": "gridpane",
+                    "spacing": "10",
+                    "padding": "15",
+                    "items": [...]
+                }
+                """;
+            case "group" -> """
+                {
+                    "name": "settings",
+                    "type": "group",
+                    "groupBorder": "line",
+                    "groupBorderColor": "#4a9eff",
+                    "groupLabelText": "Settings",
+                    "spacing": "8",
+                    "items": [...]
+                }
+                """;
+            default -> "See documentation for " + type + " container usage examples.";
+        };
+    }
+    
     @Override
     public String toString() {
         return getFullTypeName() + " [" + (containerType != null ? containerType : "unknown") + "]";
