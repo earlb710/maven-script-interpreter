@@ -4146,6 +4146,55 @@ public class ScreenFactory {
             if (vgrowPriority != null) {
                 VBox.setVgrow(control, vgrowPriority);
             }
+            
+            // Apply itemAlignment if specified (controls positioning within parent container)
+            // Use itemAlignment if available, otherwise fall back to alignment for backwards compatibility
+            String alignmentValue = item.itemAlignment != null && !item.itemAlignment.isEmpty() 
+                ? item.itemAlignment 
+                : item.alignment;
+            
+            if (alignmentValue != null && !alignmentValue.isEmpty()) {
+                // For items in VBox, we need to wrap them in an HBox to support horizontal alignment
+                // Only do this if the item isn't already a wrapper with alignment
+                if (control.getProperties().get("alignmentApplied") == null) {
+                    try {
+                        Pos pos = parseAlignment(alignmentValue);
+                        // Extract just the horizontal part of the alignment for VBox items
+                        // VBox items align horizontally: LEFT, CENTER, RIGHT
+                        Pos hAlignment;
+                        if (pos.toString().contains("LEFT")) {
+                            hAlignment = Pos.CENTER_LEFT;
+                        } else if (pos.toString().contains("RIGHT")) {
+                            hAlignment = Pos.CENTER_RIGHT;
+                        } else {
+                            hAlignment = Pos.CENTER;
+                        }
+                        
+                        // Remove the control we just added
+                        vbox.getChildren().remove(control);
+                        
+                        // Wrap in HBox with alignment
+                        HBox alignmentWrapper = new HBox(control);
+                        alignmentWrapper.setAlignment(hAlignment);
+                        alignmentWrapper.setPickOnBounds(false);
+                        alignmentWrapper.getProperties().put("alignmentApplied", true);
+                        
+                        // Transfer growth properties to wrapper
+                        if (vgrowPriority != null) {
+                            VBox.setVgrow(alignmentWrapper, vgrowPriority);
+                        }
+                        if (control.getProperties().containsKey("hgrowPriority")) {
+                            Priority hgrowPriority = (Priority) control.getProperties().get("hgrowPriority");
+                            HBox.setHgrow(control, hgrowPriority);
+                        }
+                        
+                        // Add the wrapper instead
+                        vbox.getChildren().add(alignmentWrapper);
+                    } catch (IllegalArgumentException e) {
+                        // Ignore invalid alignment values
+                    }
+                }
+            }
 
         } else if (container instanceof HBox) {
             HBox hbox = (HBox) container;
@@ -4167,6 +4216,55 @@ public class ScreenFactory {
             // Apply hgrow priority to the control in the HBox
             if (hgrowPriority != null) {
                 HBox.setHgrow(control, hgrowPriority);
+            }
+            
+            // Apply itemAlignment if specified (controls positioning within parent container)
+            // Use itemAlignment if available, otherwise fall back to alignment for backwards compatibility
+            String alignmentValue = item.itemAlignment != null && !item.itemAlignment.isEmpty() 
+                ? item.itemAlignment 
+                : item.alignment;
+            
+            if (alignmentValue != null && !alignmentValue.isEmpty()) {
+                // For items in HBox, we need to wrap them in a VBox to support vertical alignment
+                // Only do this if the item isn't already a wrapper with alignment
+                if (control.getProperties().get("alignmentApplied") == null) {
+                    try {
+                        Pos pos = parseAlignment(alignmentValue);
+                        // Extract just the vertical part of the alignment for HBox items
+                        // HBox items align vertically: TOP, CENTER, BOTTOM
+                        Pos vAlignment;
+                        if (pos.toString().contains("TOP")) {
+                            vAlignment = Pos.TOP_CENTER;
+                        } else if (pos.toString().contains("BOTTOM")) {
+                            vAlignment = Pos.BOTTOM_CENTER;
+                        } else {
+                            vAlignment = Pos.CENTER;
+                        }
+                        
+                        // Remove the control we just added
+                        hbox.getChildren().remove(control);
+                        
+                        // Wrap in VBox with alignment
+                        VBox alignmentWrapper = new VBox(control);
+                        alignmentWrapper.setAlignment(vAlignment);
+                        alignmentWrapper.setPickOnBounds(false);
+                        alignmentWrapper.getProperties().put("alignmentApplied", true);
+                        
+                        // Transfer growth properties to wrapper
+                        if (hgrowPriority != null) {
+                            HBox.setHgrow(alignmentWrapper, hgrowPriority);
+                        }
+                        if (control.getProperties().containsKey("vgrowPriority")) {
+                            Priority vgrowPriority = (Priority) control.getProperties().get("vgrowPriority");
+                            VBox.setVgrow(control, vgrowPriority);
+                        }
+                        
+                        // Add the wrapper instead
+                        hbox.getChildren().add(alignmentWrapper);
+                    } catch (IllegalArgumentException e) {
+                        // Ignore invalid alignment values
+                    }
+                }
             }
 
         } else if (container instanceof GridPane) {
@@ -4275,6 +4373,22 @@ public class ScreenFactory {
             if (vgrowPriority != null) {
                 GridPane.setVgrow(control, vgrowPriority);
             }
+            
+            // Apply itemAlignment if specified (controls positioning within grid cell)
+            // Use itemAlignment if available, otherwise fall back to alignment for backwards compatibility
+            String alignmentValue = item.itemAlignment != null && !item.itemAlignment.isEmpty() 
+                ? item.itemAlignment 
+                : item.alignment;
+            
+            if (alignmentValue != null && !alignmentValue.isEmpty()) {
+                try {
+                    Pos pos = parseAlignment(alignmentValue);
+                    GridPane.setHalignment(control, pos.getHpos());
+                    GridPane.setValignment(control, pos.getVpos());
+                } catch (IllegalArgumentException e) {
+                    // Ignore invalid values
+                }
+            }
 
         } else if (container instanceof BorderPane) {
             BorderPane borderPane = (BorderPane) container;
@@ -4305,10 +4419,15 @@ public class ScreenFactory {
             StackPane stackPane = (StackPane) container;
             stackPane.getChildren().add(control);
 
-            // Apply alignment if specified
-            if (item.alignment != null && !item.alignment.isEmpty()) {
+            // Apply itemAlignment if specified (controls positioning within parent container)
+            // Use itemAlignment if available, otherwise fall back to alignment for backwards compatibility
+            String alignmentValue = item.itemAlignment != null && !item.itemAlignment.isEmpty() 
+                ? item.itemAlignment 
+                : item.alignment;
+            
+            if (alignmentValue != null && !alignmentValue.isEmpty()) {
                 try {
-                    Pos pos = parseAlignment(item.alignment);
+                    Pos pos = parseAlignment(alignmentValue);
                     StackPane.setAlignment(control, pos);
                 } catch (IllegalArgumentException e) {
                     // Ignore invalid values
@@ -4814,7 +4933,7 @@ public class ScreenFactory {
             "prefwidth", "pref_width", "prefheight", "pref_height",
             "minwidth", "min_width", "minheight", "min_height",
             "maxwidth", "max_width", "maxheight", "max_height",
-            "alignment",
+            "contentalignment", "content_alignment", "itemalignment", "item_alignment", "alignment",
             // Event handlers (can be at item or display level)
             "onvalidate", "on_validate", "onchange", "on_change",
             // Data source
@@ -4936,6 +5055,8 @@ public class ScreenFactory {
         item.minHeight = getStringValue(itemDef, "minHeight", getStringValue(itemDef, "min_height", null));
         item.maxWidth = getStringValue(itemDef, "maxWidth", getStringValue(itemDef, "max_width", null));
         item.maxHeight = getStringValue(itemDef, "maxHeight", getStringValue(itemDef, "max_height", null));
+        item.contentAlignment = getStringValue(itemDef, "contentAlignment", getStringValue(itemDef, "content_alignment", null));
+        item.itemAlignment = getStringValue(itemDef, "itemAlignment", getStringValue(itemDef, "item_alignment", null));
         item.alignment = getStringValue(itemDef, "alignment", null);
         
         // Event handlers
@@ -5927,6 +6048,8 @@ public class ScreenFactory {
         item.minHeight = template.minHeight;
         item.maxWidth = template.maxWidth;
         item.maxHeight = template.maxHeight;
+        item.contentAlignment = template.contentAlignment;
+        item.itemAlignment = template.itemAlignment;
         item.alignment = template.alignment;
         item.onValidate = template.onValidate;
         item.onChange = template.onChange;

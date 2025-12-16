@@ -461,8 +461,20 @@ public class AreaItemFactory {
         }
 
         // Apply control text alignment (for the content inside the control)
-        if (metadata != null && metadata.alignment != null && !metadata.alignment.isEmpty()) {
-            String alignment = metadata.alignment.toLowerCase();
+        // Use contentAlignment from item if available, otherwise fall back to alignment from metadata for backwards compatibility
+        String contentAlignmentValue = null;
+        if (item != null && item.contentAlignment != null && !item.contentAlignment.isEmpty()) {
+            contentAlignmentValue = item.contentAlignment;
+        } else if (item != null && item.alignment != null && !item.alignment.isEmpty()) {
+            // Backwards compatibility: use alignment if contentAlignment is not set
+            contentAlignmentValue = item.alignment;
+        } else if (metadata != null && metadata.alignment != null && !metadata.alignment.isEmpty()) {
+            // Fall back to metadata alignment
+            contentAlignmentValue = metadata.alignment;
+        }
+        
+        if (contentAlignmentValue != null && !contentAlignmentValue.isEmpty()) {
+            String alignment = contentAlignmentValue.toLowerCase();
             String alignmentStyle = "";
             
             switch (alignment) {

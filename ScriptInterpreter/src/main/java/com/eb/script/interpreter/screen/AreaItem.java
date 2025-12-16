@@ -60,7 +60,14 @@ public class AreaItem {
     public String maxWidth;
     // Maximum height
     public String maxHeight;
-    // Alignment within parent (e.g., "center", "top-left")
+    // Content alignment - controls text/content alignment within the control itself (e.g., "left", "center", "right")
+    // This is for the content inside the control (text alignment in TextField, etc.)
+    public String contentAlignment;
+    // Item alignment - controls alignment of the item (and its HBox/VBox wrapper) in the parent container
+    // This affects how the item is positioned within its parent layout (e.g., "center", "top-left", "center-right")
+    public String itemAlignment;
+    // Deprecated: Use contentAlignment instead. Kept for backwards compatibility.
+    // If set, will be used as contentAlignment if contentAlignment is not set.
     public String alignment;
     // onValidate event handler - EBS code to validate item value, expects return true/false
     public String onValidate;
@@ -93,6 +100,8 @@ public class AreaItem {
                 + ", padding='" + padding + '\''
                 + ", prefWidth='" + prefWidth + '\''
                 + ", prefHeight='" + prefHeight + '\''
+                + ", contentAlignment='" + contentAlignment + '\''
+                + ", itemAlignment='" + itemAlignment + '\''
                 + ", alignment='" + alignment + '\''
                 + '}';
     }

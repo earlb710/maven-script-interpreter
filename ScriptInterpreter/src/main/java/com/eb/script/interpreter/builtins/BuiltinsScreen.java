@@ -1786,6 +1786,10 @@ public class BuiltinsScreen {
                 item.maxWidth = value != null ? String.valueOf(value) : null;
             case "maxheight" ->
                 item.maxHeight = value != null ? String.valueOf(value) : null;
+            case "contentalignment" ->
+                item.contentAlignment = value != null ? String.valueOf(value).toLowerCase() : null;
+            case "itemalignment" ->
+                item.itemAlignment = value != null ? String.valueOf(value).toLowerCase() : null;
             case "alignment" ->
                 item.alignment = value != null ? String.valueOf(value).toLowerCase() : null;
             default ->
@@ -1837,6 +1841,10 @@ public class BuiltinsScreen {
                 item.maxWidth;
             case "maxheight" ->
                 item.maxHeight;
+            case "contentalignment" ->
+                item.contentAlignment;
+            case "itemalignment" ->
+                item.itemAlignment;
             case "alignment" ->
                 item.alignment;
             default ->
