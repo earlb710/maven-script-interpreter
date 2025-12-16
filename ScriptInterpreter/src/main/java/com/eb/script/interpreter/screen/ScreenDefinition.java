@@ -19,6 +19,7 @@ public class ScreenDefinition {
     private double width;
     private double height;
     private boolean singleton;
+    private boolean showMenu; // Controls whether menu bar is shown at the top
     
     // Complex screen creation parameters
     private List<AreaDefinition> areas;
@@ -37,10 +38,11 @@ public class ScreenDefinition {
     private static final ConcurrentHashMap<String, ScreenDefinition> definitions = new ConcurrentHashMap<>();
     
     /**
-     * Default constructor with singleton set to true
+     * Default constructor with singleton set to true and showMenu set to true
      */
     public ScreenDefinition() {
         this.singleton = true;
+        this.showMenu = true; // Default to showing menu
         this.instanceCounter = new AtomicInteger(0);
     }
     
@@ -117,7 +119,8 @@ public class ScreenDefinition {
                 screenVars,
                 varTypes,
                 onClickHandler,
-                context
+                context,
+                showMenu
             );
         } else {
             // Create simple stage without areas
@@ -180,6 +183,15 @@ public class ScreenDefinition {
      */
     public void setSingleton(boolean singleton) {
         this.singleton = singleton;
+    }
+    
+    /**
+     * Sets whether the menu bar should be shown at the top of the screen
+     * 
+     * @param showMenu If true, menu bar is shown; if false, menu bar is hidden
+     */
+    public void setShowMenu(boolean showMenu) {
+        this.showMenu = showMenu;
     }
     
     /**
@@ -275,6 +287,15 @@ public class ScreenDefinition {
     }
     
     /**
+     * Gets whether the menu bar should be shown at the top of the screen
+     * 
+     * @return true if menu bar is shown, false otherwise
+     */
+    public boolean isShowMenu() {
+        return showMenu;
+    }
+    
+    /**
      * Gets the current instance counter value
      * 
      * @return The number of instances created (for non-singleton mode)
@@ -336,6 +357,7 @@ public class ScreenDefinition {
                 ", width=" + width +
                 ", height=" + height +
                 ", singleton=" + singleton +
+                ", showMenu=" + showMenu +
                 ", instances=" + instanceCounter.get() +
                 ", hasAreas=" + (areas != null && !areas.isEmpty()) +
                 ", hasScreenVars=" + (screenVars != null) +

@@ -3051,7 +3051,7 @@ public class ScreenFactory {
     public static Stage createScreen(String screenName, String title, double width, double height,
             List<AreaDefinition> areas,
             InterpreterContext context) {
-        return createScreen(screenName, title, width, height, areas, null, null, null, context);
+        return createScreen(screenName, title, width, height, areas, null, null, null, context, true);
     }
 
     /**
@@ -3073,7 +3073,7 @@ public class ScreenFactory {
             List<AreaDefinition> areas,
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
             InterpreterContext context) {
-        return createScreen(screenName, title, width, height, areas, screenVars, null, null, context);
+        return createScreen(screenName, title, width, height, areas, screenVars, null, null, context, true);
     }
 
     /**
@@ -3101,6 +3101,36 @@ public class ScreenFactory {
             java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
             OnClickHandler onClickHandler,
             InterpreterContext context) {
+        return createScreen(screenName, title, width, height, areas, screenVars, varTypes, onClickHandler, context, true);
+    }
+
+    /**
+     * Creates a complete JavaFX window/screen from area definitions with
+     * variable binding, onClick handlers, and optional menu bar. This method creates containers,
+     * adds items, applies layout properties, sets up two-way data binding, and
+     * configures button onClick handlers.
+     *
+     * @param screenName The name of the screen
+     * @param title The window title
+     * @param width The window width
+     * @param height The window height
+     * @param areas List of AreaDefinitions containing containers and items
+     * @param screenVars The ConcurrentHashMap containing screen variables for
+     * two-way binding (can be null)
+     * @param varTypes The ConcurrentHashMap containing screen variable types
+     * for proper type conversion (can be null)
+     * @param onClickHandler Handler for button onClick events (can be null)
+     * @param context InterpreterContext for accessing display metadata
+     * @param showMenu If true, adds a menu bar at the top; if false, omits the menu bar
+     * @return A Stage representing the complete window
+     */
+    public static Stage createScreen(String screenName, String title, double width, double height,
+            List<AreaDefinition> areas,
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+            java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
+            OnClickHandler onClickHandler,
+            InterpreterContext context,
+            boolean showMenu) {
         // Log debug mode state at the start of createScreen for troubleshooting
         if (isDebugMode()) {
             System.out.println("\n[DEBUG] createScreen() called with debug mode ENABLED");
@@ -3171,12 +3201,15 @@ public class ScreenFactory {
         // Add focus listeners to all bound controls to update status bar
         setupStatusBarUpdates(allBoundControls, statusBar, context, screenName);
         
-        // Create menu bar for the screen
-        javafx.scene.control.MenuBar menuBar = createScreenMenuBar(stage);
-        
-        // Wrap in BorderPane to add menu bar at top and status bar at bottom
+        // Wrap in BorderPane to add optional menu bar at top and status bar at bottom
         BorderPane screenRoot = new BorderPane();
-        screenRoot.setTop(menuBar);
+        
+        // Only add menu bar if showMenu is true
+        if (showMenu) {
+            javafx.scene.control.MenuBar menuBar = createScreenMenuBar(stage);
+            screenRoot.setTop(menuBar);
+        }
+        
         screenRoot.setCenter(scrollPane);
         screenRoot.setBottom(statusBar);
         
@@ -4585,6 +4618,7 @@ public class ScreenFactory {
         String title = getStringValue(screenDef, "title", screenName);
         double width = getNumberValue(screenDef, "width", 800.0);
         double height = getNumberValue(screenDef, "height", 600.0);
+        boolean showMenu = getBooleanValue(screenDef, "showMenu", true); // Default to true
 
         // Parse variables and build metadata map
         Map<String, DisplayItem> metadataMap = new HashMap<>();
@@ -4636,7 +4670,7 @@ public class ScreenFactory {
             tempContext.getDisplayItem().put(screenName + "." + entry.getKey(), entry.getValue());
         }
 
-        return createScreen(screenName, title, width, height, areas, tempContext);
+        return createScreen(screenName, title, width, height, areas, null, null, null, tempContext, showMenu);
     }
 
     /**
