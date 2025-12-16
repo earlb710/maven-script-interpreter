@@ -2510,49 +2510,82 @@ public class ProjectTreeView extends VBox {
                 boolean success = false;
                 
                 try {
-                    // Parse the script
-                    com.eb.script.RuntimeContext context = com.eb.script.parser.Parser.parse(inputPath);
-                    
-                    // Serialize to .ebsp file
-                    com.eb.script.package_tool.RuntimeContextSerializer.serialize(context, outputPath);
-                    
-                    // Get file sizes with better error handling
-                    long originalSize;
-                    long packagedSize;
                     try {
-                        originalSize = Files.size(inputPath);
+                        // Parse the script
+                        com.eb.script.RuntimeContext context = com.eb.script.parser.Parser.parse(inputPath);
+                        
+                        // Serialize to .ebsp file
+                        com.eb.script.package_tool.RuntimeContextSerializer.serialize(context, outputPath);
+                        
+                        // Get file sizes with better error handling
+                        long originalSize;
+                        long packagedSize;
+                        try {
+                            originalSize = Files.size(inputPath);
+                        } catch (Exception e) {
+                            throw new Exception("Failed to read input file size: " + e.getMessage(), e);
+                        }
+                        try {
+                            packagedSize = Files.size(outputPath);
+                        } catch (Exception e) {
+                            throw new Exception("Failed to read output file size: " + e.getMessage(), e);
+                        }
+                        
+                        // Build success message
+                        resultMessage.append("Package created successfully!\n\n");
+                        resultMessage.append("Input file:  ").append(inputPath.getFileName()).append("\n");
+                        resultMessage.append("Output file: ").append(outputPath.getFileName()).append("\n\n");
+                        resultMessage.append("Original size:  ").append(formatFileSize(originalSize)).append("\n");
+                        resultMessage.append("Packaged size: ").append(formatFileSize(packagedSize)).append("\n\n");
+                        
+                        if (packagedSize < originalSize) {
+                            double reduction = (1.0 - (double)packagedSize / originalSize) * 100;
+                            resultMessage.append("Size reduction: ").append(String.format("%.1f%%", reduction));
+                        } else {
+                            double increase = ((double)packagedSize / originalSize - 1.0) * 100;
+                            resultMessage.append("Size increase: ").append(String.format("%.1f%%", increase));
+                        }
+                        
+                        success = true;
+                        
                     } catch (Exception e) {
-                        throw new Exception("Failed to read input file size: " + e.getMessage(), e);
+                        resultMessage.append("Error packaging script:\n\n");
+                        
+                        // Get error message, handling null or empty cases
+                        String errorMsg = e.getMessage();
+                        if (errorMsg == null || errorMsg.trim().isEmpty()) {
+                            errorMsg = e.getClass().getName();
+                        }
+                        resultMessage.append(errorMsg);
+                        
+                        // Add cause if available
+                        if (e.getCause() != null) {
+                            String causeMsg = e.getCause().getMessage();
+                            if (causeMsg == null || causeMsg.trim().isEmpty()) {
+                                causeMsg = e.getCause().getClass().getName();
+                            }
+                            resultMessage.append("\n\nCause: ").append(causeMsg);
+                        }
+                        
+                        // Add stack trace for debugging (first few lines)
+                        resultMessage.append("\n\nStack trace (first 5 lines):");
+                        StackTraceElement[] stackTrace = e.getStackTrace();
+                        int limit = Math.min(5, stackTrace.length);
+                        for (int i = 0; i < limit; i++) {
+                            resultMessage.append("\n  at ").append(stackTrace[i].toString());
+                        }
                     }
-                    try {
-                        packagedSize = Files.size(outputPath);
-                    } catch (Exception e) {
-                        throw new Exception("Failed to read output file size: " + e.getMessage(), e);
+                } catch (Throwable t) {
+                    // Catch any throwable (including errors) to ensure we always close the dialog
+                    success = false;
+                    resultMessage = new StringBuilder();
+                    resultMessage.append("Critical error during packaging:\n\n");
+                    resultMessage.append(t.getClass().getName());
+                    if (t.getMessage() != null) {
+                        resultMessage.append(": ").append(t.getMessage());
                     }
-                    
-                    // Build success message
-                    resultMessage.append("Package created successfully!\n\n");
-                    resultMessage.append("Input file:  ").append(inputPath.getFileName()).append("\n");
-                    resultMessage.append("Output file: ").append(outputPath.getFileName()).append("\n\n");
-                    resultMessage.append("Original size:  ").append(formatFileSize(originalSize)).append("\n");
-                    resultMessage.append("Packaged size: ").append(formatFileSize(packagedSize)).append("\n\n");
-                    
-                    if (packagedSize < originalSize) {
-                        double reduction = (1.0 - (double)packagedSize / originalSize) * 100;
-                        resultMessage.append("Size reduction: ").append(String.format("%.1f%%", reduction));
-                    } else {
-                        double increase = ((double)packagedSize / originalSize - 1.0) * 100;
-                        resultMessage.append("Size increase: ").append(String.format("%.1f%%", increase));
-                    }
-                    
-                    success = true;
-                    
-                } catch (Exception e) {
-                    resultMessage.append("Error packaging script:\n\n");
-                    resultMessage.append(e.getMessage());
-                    if (e.getCause() != null) {
-                        resultMessage.append("\n\nCause: ").append(e.getCause().getMessage());
-                    }
+                    System.err.println("Critical error in packaging thread:");
+                    t.printStackTrace();
                 }
                 
                 final boolean finalSuccess = success;
