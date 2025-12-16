@@ -1,0 +1,44 @@
+// Example: Radio Button - Options Map Format
+// Demonstrates explicit key-value pairs for options
+// Most clear and explicit format
+
+screen countryScreen = {
+    "title": "Country Selection",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "country",
+            "type": "string",
+            "default": "us",
+            "display": {
+                "type": "radiobutton",
+                "labelText": "Select Country:",
+                "options": {
+                    "us": "United States",
+                    "ca": "Canada",
+                    "uk": "United Kingdom",
+                    "au": "Australia"
+                }
+            }
+        },
+        {
+            "name": "saveButton",
+            "type": "string",
+            "default": "Save",
+            "display": {
+                "type": "button"
+            }
+        }
+    ]
+};
+
+print "Selected country code: " + countryScreen.country;
+
+// Show the screen
+show screen countryScreen;
+
+print "Final country code: " + countryScreen.country;
+
+// Use the country code for further processing
+print "Country code '" + countryScreen.country + "' selected for account setup.";

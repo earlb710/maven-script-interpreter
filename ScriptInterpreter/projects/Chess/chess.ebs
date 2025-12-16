@@ -1109,14 +1109,11 @@ getTimeLimitInDeciseconds(timeLimit: string) return int {
 handleStartGame() {
     print "Start button clicked!";
     
-    // Determine game mode from radio buttons
-    // Check both radio buttons to determine selection
-    if startupDialog.gameMode1Player then {
+    // Determine game mode from radio button
+    // The gameMode variable stores "1" or "2"
+    if startupDialog.gameMode == "1" then {
         selectedGameMode = "1 player";
-    } else if startupDialog.gameMode2Player then {
-        selectedGameMode = "2 player";
     } else {
-        // Default to 2 player if neither is selected
         selectedGameMode = "2 player";
     }
     
@@ -1305,14 +1302,17 @@ screen startupDialog = {
             "type": "imagedata"
         },
         {
-            "name": "gameMode1Player",
-            "type": "bool",
-            "default": false
-        },
-        {
-            "name": "gameMode2Player",
-            "type": "bool",
-            "default": true
+            "name": "gameMode",
+            "type": "string",
+            "default": "2",
+            "display": {
+                "type": "radiobutton",
+                "labelText": "Game Mode:",
+                "labelColor": "#ffcc00",
+                "labelFontSize": "14px",
+                "labelBold": true,
+                "options": ["1:1 Player", "2:2 Player"]
+            }
         },
         {
             "name": "timeLimit",
@@ -1339,20 +1339,9 @@ screen startupDialog = {
             "items": [
                 {"name": "logoImage", "varRef": "logo", "display": {"type": "image", "fitWidth": 400, "fitHeight": 200, "preserveRatio": true}},
                 {"name": "titleLabel", "display": {"type": "label", "labelText": "\u265A Welcome to Chess! \u2654", "labelColor": "#ffcc00", "labelFontSize": "20px", "labelBold": true}},
-                {"name": "gameModeLabel", "display": {"type": "label", "labelText": "Game Mode:", "labelColor": "#ffcc00", "labelFontSize": "14px", "labelBold": true}}
+                {"name": "gameModeRadio", "varRef": "gameMode"}
             ],
             "areas": [
-                {
-                    "name": "gameModeArea",
-                    "type": "hbox",
-                    "spacing": "20",
-                    "padding": "5",
-                    "style": "-fx-alignment: center;",
-                    "items": [
-                        {"name": "radio1Player", "varRef": "gameMode1Player", "display": {"type": "radiobutton", "labelText": "1 player", "labelColor": "#ffffff", "labelFontSize": "14px"}},
-                        {"name": "radio2Player", "varRef": "gameMode2Player", "display": {"type": "radiobutton", "labelText": "2 player", "labelColor": "#ffffff", "labelFontSize": "14px"}}
-                    ]
-                },
                 {
                     "name": "timeLimitArea",
                     "type": "vbox",

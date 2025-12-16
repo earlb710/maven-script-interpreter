@@ -123,6 +123,19 @@ This directory contains short, precise example scripts for each EBS language key
 |------|----------|
 | [screen.ebs](screen.ebs) | `screen`, `show`, `hide` |
 
+### Radio Button Examples
+| File | Description |
+|------|-------------|
+| [radiobutton_simple.ebs](radiobutton_simple.ebs) | Simple array format - value and display are the same |
+| [radiobutton_colon.ebs](radiobutton_colon.ebs) | Colon-separated format: `"value:displayText"` |
+| [radiobutton_map.ebs](radiobutton_map.ebs) | Options map format with explicit key-value pairs |
+| [radiobutton_multiple_groups.ebs](radiobutton_multiple_groups.ebs) | Multiple independent radio button groups on one screen |
+
+Radio buttons support three flexible option formats:
+1. **Simple Array**: `["light", "dark", "auto"]` - when value and display text are identical
+2. **Colon-Separated**: `["L:Light", "D:Dark", "A:Auto"]` - compact syntax for different value/display
+3. **Options Map**: `{"L": "Light", "D": "Dark"}` - explicit key-value pairs
+
 ## Database
 | File | Keywords |
 |------|----------|

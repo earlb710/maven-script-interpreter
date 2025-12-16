@@ -1,0 +1,47 @@
+// Example: Radio Button - Colon-Separated Format
+// Demonstrates compact "value:displayText" format
+// Use when you need different storage value and display text
+
+screen languageScreen = {
+    "title": "Language Selection",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "language",
+            "type": "string",
+            "default": "en",
+            "display": {
+                "type": "radiobutton",
+                "labelText": "Select Language:",
+                "options": ["en:English", "es:Español", "fr:Français", "de:Deutsch"]
+            }
+        },
+        {
+            "name": "confirmButton",
+            "type": "string",
+            "default": "Confirm",
+            "display": {
+                "type": "button"
+            }
+        }
+    ]
+};
+
+print "Selected language code: " + languageScreen.language;
+
+// Show the screen
+show screen languageScreen;
+
+print "Final language code: " + languageScreen.language;
+
+// You can use the language code in your logic
+if (languageScreen.language == "en") {
+    print "Welcome!";
+} else if (languageScreen.language == "es") {
+    print "¡Bienvenido!";
+} else if (languageScreen.language == "fr") {
+    print "Bienvenue!";
+} else if (languageScreen.language == "de") {
+    print "Willkommen!";
+}
