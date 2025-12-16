@@ -1,14 +1,16 @@
-# Screen Item Source and Status Properties
+# Screen Item Status Properties
 
 ## Overview
 
-This feature adds **source** and **status** properties to screen items in the EBS interpreter. These properties enable tracking of data sources (data vs display values) and automatic change detection for screen variables.
+**DEPRECATED NOTICE**: The `source` property has been removed from this feature. Only the **status** property remains for tracking automatic change detection for screen variables.
 
-## Problem Statement
+The `stateful` property (which controls whether changes mark the screen as changed) has been **moved from the item level to the variable level**. See `STATEFUL_PROPERTY.md` for details on the updated stateful property.
+
+## Problem Statement (Updated)
 
 For screen items, we need to:
-1. Add a `source` property with values "data" or "display"
-2. When `source=="data"`, keep the original data values
+1. ~~Add a `source` property with values "data" or "display"~~ **REMOVED**
+2. ~~When `source=="data"`, keep the original data values~~ **REMOVED**
 3. Track current values for variables alongside their original values
 4. Add a `status` property that is "changed" if current value != original value, else "clean"
 
@@ -17,29 +19,33 @@ For screen items, we need to:
 ### Core Classes Modified
 
 #### 1. DisplayItem.java
-Added two new public properties:
+Added status property:
 ```java
-// Source of the value: "data" (original data value) or "display" (formatted display value)
-public String source = "data";
-
 // Status of the item: "clean" (unchanged) or "changed" (modified from original)
 public String status = "clean";
 ```
 
-#### 2. AreaItem.java
-Added source property:
+**Removed:**
 ```java
-// Source of the value: "data" (original data value) or "display" (formatted display value)
-public String source = "data";
+// Source property has been removed as of version 1.0.2.3
+```
+
+#### 2. AreaItem.java
+**Removed:**
+```java
+// Source property has been removed as of version 1.0.2.3
 ```
 
 #### 3. Var.java
-Enhanced to track original values and compute status:
+Enhanced to track original values, compute status, and control stateful behavior:
 
-**New Field:**
+**New Fields:**
 ```java
 // Original value (captured when screen is created or explicitly set)
 private Object originalValue;
+
+// Whether changes to this variable should mark the screen as changed (default: true)
+private Boolean stateful = true;
 ```
 
 **New Methods:**
@@ -52,6 +58,10 @@ public String getStatus()
 
 // Reset the original value to the current value (marking as clean)
 public void resetOriginalValue()
+
+// Get/set whether changes to this variable mark screen as changed
+public Boolean getStateful()
+public void setStateful(Boolean stateful)
 ```
 
 **Constructor Update:**
@@ -62,30 +72,15 @@ public Var(String name, DataType type, Object defaultValue) {
 }
 ```
 
-### New Builtin Functions
+### Builtin Functions
 
-Four new builtin functions added to `Builtins.java`:
+The following builtin functions are **DEPRECATED and REMOVED**:
 
-#### 1. screen.getItemSource(screenName, itemName)
-**Returns:** String - "data" or "display"
+#### ~~1. screen.getItemSource(screenName, itemName)~~ **REMOVED**
+**Removed in version 1.0.2.3** - Use stateful property instead
 
-Gets the source property of a screen item.
-
-**Example:**
-```ebs
-var source = call screen.getItemSource("myScreen", "firstName");
-print "Source: " + source;  // Outputs: "Source: data"
-```
-
-#### 2. screen.setItemSource(screenName, itemName, source)
-**Returns:** Boolean - true on success
-
-Sets the source property of a screen item. Source must be "data" or "display".
-
-**Example:**
-```ebs
-call screen.setItemSource("myScreen", "firstName", "display");
-```
+#### ~~2. screen.setItemSource(screenName, itemName, source)~~ **REMOVED**
+**Removed in version 1.0.2.3** - Use `scr.setVarStateful()` instead
 
 #### 3. screen.getItemStatus(screenName, itemName)
 **Returns:** String - "clean" or "changed"
