@@ -1,4 +1,4 @@
-// EBS Language Reference v1.0.8.12 - Advanced Thread Timer Functions
+// EBS Language Reference v1.0.9.13 - Advanced Thread Timer Functions
 // Example: Demonstrates new thread timer management functions
 
 var timerCount: int = 0;

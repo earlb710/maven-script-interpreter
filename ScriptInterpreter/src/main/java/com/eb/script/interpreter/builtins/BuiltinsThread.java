@@ -47,14 +47,13 @@ public class BuiltinsThread {
      * Information about a running thread timer.
      */
     private static class TimerInfo {
-        final ScheduledFuture<?> future;
+        volatile ScheduledFuture<?> future;  // Volatile for thread-safe updates
         final long periodMs;
         final String callbackName;
         final InterpreterContext context;
         final long createdAt;
-        long fireCount;
-        boolean paused;
-        ScheduledFuture<?> pausedFuture; // Holds the future when paused
+        final java.util.concurrent.atomic.AtomicLong fireCount;  // Thread-safe counter
+        volatile boolean paused;  // Volatile for thread-safe reads
 
         TimerInfo(ScheduledFuture<?> future, long periodMs, String callbackName, InterpreterContext context) {
             this.future = future;
@@ -62,9 +61,8 @@ public class BuiltinsThread {
             this.callbackName = callbackName;
             this.context = context;
             this.createdAt = System.currentTimeMillis();
-            this.fireCount = 0;
+            this.fireCount = new java.util.concurrent.atomic.AtomicLong(0);
             this.paused = false;
-            this.pausedFuture = null;
         }
     }
 
@@ -154,10 +152,10 @@ public class BuiltinsThread {
 
         // Create the repeating task
         Runnable timerTask = () -> {
-            // Get the timer info to increment fire count
+            // Get the timer info to increment fire count (thread-safe)
             TimerInfo info = THREAD_TIMERS.get(timerName);
             if (info != null && !info.paused) {
-                info.fireCount++;
+                info.fireCount.incrementAndGet();
             }
             
             // Execute callback on JavaFX Application Thread for UI safety
@@ -312,10 +310,10 @@ public class BuiltinsThread {
         final String currentScreen = context.getCurrentScreen();
 
         Runnable timerTask = () -> {
-            // Get the timer info to increment fire count
+            // Get the timer info to increment fire count (thread-safe)
             TimerInfo info = THREAD_TIMERS.get(timerName);
             if (info != null && !info.paused) {
-                info.fireCount++;
+                info.fireCount.incrementAndGet();
             }
             
             Platform.runLater(() -> {
@@ -359,8 +357,8 @@ public class BuiltinsThread {
             TimeUnit.MILLISECONDS
         );
 
-        // Update the timer info
-        timerInfo.pausedFuture = newFuture;
+        // Update the timer info - replace the main future reference
+        timerInfo.future = newFuture;
         timerInfo.paused = false;
 
         return true;
@@ -429,7 +427,7 @@ public class BuiltinsThread {
             json.append("\"period\":").append(info.periodMs).append(",");
             json.append("\"callback\":\"").append(info.callbackName).append("\",");
             json.append("\"paused\":").append(info.paused).append(",");
-            json.append("\"fireCount\":").append(info.fireCount).append(",");
+            json.append("\"fireCount\":").append(info.fireCount.get()).append(",");
             json.append("\"createdAt\":").append(info.createdAt);
             json.append("}");
         }
@@ -465,7 +463,7 @@ public class BuiltinsThread {
         json.append("\"period\":").append(timerInfo.periodMs).append(",");
         json.append("\"callback\":\"").append(timerInfo.callbackName).append("\",");
         json.append("\"paused\":").append(timerInfo.paused).append(",");
-        json.append("\"fireCount\":").append(timerInfo.fireCount).append(",");
+        json.append("\"fireCount\":").append(timerInfo.fireCount.get()).append(",");
         json.append("\"createdAt\":").append(timerInfo.createdAt).append(",");
         json.append("\"uptime\":").append(System.currentTimeMillis() - timerInfo.createdAt);
         json.append("}");
@@ -512,7 +510,7 @@ public class BuiltinsThread {
         }
 
         TimerInfo timerInfo = THREAD_TIMERS.get(timerName);
-        return timerInfo != null ? timerInfo.fireCount : -1L;
+        return timerInfo != null ? timerInfo.fireCount.get() : -1L;
     }
 
     /**
