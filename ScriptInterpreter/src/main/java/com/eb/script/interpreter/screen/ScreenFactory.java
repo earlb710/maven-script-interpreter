@@ -27,7 +27,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
@@ -151,11 +150,6 @@ public class ScreenFactory {
     
     // Map to store debug panel items TableView for each screen (screenName -> TableView)
     private static final java.util.concurrent.ConcurrentHashMap<String, javafx.scene.control.TableView<String[]>> debugItemsTables = new java.util.concurrent.ConcurrentHashMap<>();
-    
-    // Map to store ToggleGroups for radio buttons by screen and setname
-    // Key format: "screenName.setname" -> ToggleGroup
-    // This ensures radio buttons in the same set are mutually exclusive
-    private static final java.util.concurrent.ConcurrentHashMap<String, javafx.scene.control.ToggleGroup> radioButtonToggleGroups = new java.util.concurrent.ConcurrentHashMap<>();
     
     /**
      * Increment and return the event count for a specific item.eventType combination.
@@ -3562,30 +3556,6 @@ public class ScreenFactory {
 
                 // Create the item using AreaItemFactory
                 Node control = AreaItemFactory.createItem(item, metadata);
-                
-                // Handle RadioButton ToggleGroup assignment
-                // Radio buttons in the same set (setname) should be mutually exclusive
-                if (control instanceof javafx.scene.control.RadioButton && item.varRef != null) {
-                    javafx.scene.control.RadioButton radioButton = (javafx.scene.control.RadioButton) control;
-                    // Extract setname from varRef (format: "setname.varname")
-                    String varRef = item.varRef.toLowerCase();
-                    int dotIndex = varRef.indexOf('.');
-                    if (dotIndex > 0) {
-                        String setName = varRef.substring(0, dotIndex);
-                        // Create or get the ToggleGroup for this screen and setname
-                        // Note: setName is already lowercase from varRef.toLowerCase() above
-                        String toggleGroupKey = screenName.toLowerCase() + "." + setName;
-                        ToggleGroup toggleGroup = radioButtonToggleGroups.computeIfAbsent(toggleGroupKey, 
-                            k -> new ToggleGroup());
-                        // Assign the radio button to the toggle group
-                        radioButton.setToggleGroup(toggleGroup);
-                        
-                        if (isDebugMode()) {
-                            System.out.println("[DEBUG] Assigned RadioButton '" + item.varRef + 
-                                "' to ToggleGroup '" + toggleGroupKey + "'");
-                        }
-                    }
-                }
                 
                 // Log debug information for this item if debug mode is enabled
                 if (isDebugMode()) {

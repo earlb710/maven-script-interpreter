@@ -150,6 +150,28 @@ public class ControlListenerFactory {
             }
         }
         
+        // Handle VBox containing radio buttons (when options are provided for radiobutton type)
+        if (control instanceof javafx.scene.layout.VBox) {
+            javafx.scene.layout.VBox vbox = (javafx.scene.layout.VBox) control;
+            Object toggleGroupObj = vbox.getProperties().get("toggleGroup");
+            if (toggleGroupObj instanceof ToggleGroup) {
+                ToggleGroup toggleGroup = (ToggleGroup) toggleGroupObj;
+                Object optionsMapObj = vbox.getProperties().get("optionsMap");
+                
+                // Add listener to the ToggleGroup
+                toggleGroup.selectedToggleProperty().addListener((obs, oldToggle, newToggle) -> {
+                    if (newToggle != null) {
+                        Object userData = newToggle.getUserData();
+                        if (userData != null) {
+                            VarRefResolver.setVarRefValue(varName, userData, screenVars);
+                            markScreenChanged(control);
+                        }
+                    }
+                });
+                return;
+            }
+        }
+        
         if (control instanceof TextField) {
             addTextFieldListener((TextField) control, varName, screenVars, varTypes, metadata);
         } else if (control instanceof TextArea) {

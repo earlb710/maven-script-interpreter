@@ -60,6 +60,29 @@ public class ControlUpdater {
             }
         }
         
+        // Handle VBox containing radio buttons (when options are provided for radiobutton type)
+        if (control instanceof javafx.scene.layout.VBox) {
+            javafx.scene.layout.VBox vbox = (javafx.scene.layout.VBox) control;
+            Object toggleGroupObj = vbox.getProperties().get("toggleGroup");
+            if (toggleGroupObj instanceof ToggleGroup) {
+                ToggleGroup toggleGroup = (ToggleGroup) toggleGroupObj;
+                String valueStr = value != null ? String.valueOf(value) : null;
+                
+                // Find and select the radio button that matches the value
+                for (javafx.scene.Node child : vbox.getChildren()) {
+                    if (child instanceof RadioButton) {
+                        RadioButton rb = (RadioButton) child;
+                        Object userData = rb.getUserData();
+                        if (userData != null && userData.equals(valueStr)) {
+                            rb.setSelected(true);
+                            return;
+                        }
+                    }
+                }
+                return;
+            }
+        }
+        
         if (control instanceof TextField) {
             ((TextField) control).setText(value != null ? String.valueOf(value) : "");
         } else if (control instanceof TextArea) {
