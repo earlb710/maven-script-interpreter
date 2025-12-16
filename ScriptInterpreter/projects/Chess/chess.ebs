@@ -859,10 +859,10 @@ formatTimerDecimal(deciseconds: int) return string {
 }
 
 // Timer callback function - called every 100ms (0.1 seconds)
+// Note: This callback is already executed on JavaFX Platform.runLater by thread.timerStart
 timerCallback(timerName: string) {
     // Only update if game has started
     if !gameStarted then {
-        print "Timer callback: gameStarted = false, returning";
         return;
     }
     
@@ -872,12 +872,17 @@ timerCallback(timerName: string) {
         if timerWhite > 0 then {
             timerWhite = timerWhite - 1;
             var timerText: string = call formatTimerDecimal(timerWhite);
+            
+            // Update screen variable first
             chessScreen.whiteTimer = timerText;
-            // Force UI update using scr.setproperty
-            var result: bool = call scr.setproperty("chessScreen.whiteTimerField", "text", timerText);
+            
+            // Force UI update using scr.setproperty (also uses Platform.runLater internally)
+            // Try updating the label text property directly
+            call scr.setproperty("chessScreen.whiteTimerField", "text", timerText);
+            
             // Debug: Print every 10 deciseconds (1 second)
             if call modulo(timerWhite, 10) == 0 then {
-                print "Timer update: White " + timerText + " (scr.setproperty result: " + result + ")";
+                print "Timer: White " + timerText + " | Screen updated via scr.setproperty";
             }
         }
     } else {
@@ -885,12 +890,17 @@ timerCallback(timerName: string) {
         if timerBlack > 0 then {
             timerBlack = timerBlack - 1;
             var timerText: string = call formatTimerDecimal(timerBlack);
+            
+            // Update screen variable first
             chessScreen.blackTimer = timerText;
-            // Force UI update using scr.setproperty
-            var result: bool = call scr.setproperty("chessScreen.blackTimerField", "text", timerText);
+            
+            // Force UI update using scr.setproperty (also uses Platform.runLater internally)
+            // Try updating the label text property directly
+            call scr.setproperty("chessScreen.blackTimerField", "text", timerText);
+            
             // Debug: Print every 10 deciseconds (1 second)
             if call modulo(timerBlack, 10) == 0 then {
-                print "Timer update: Black " + timerText + " (scr.setproperty result: " + result + ")";
+                print "Timer: Black " + timerText + " | Screen updated via scr.setproperty";
             }
         }
     }
